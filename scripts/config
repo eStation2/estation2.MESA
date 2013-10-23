@@ -3,7 +3,7 @@
 # to update the repository
 
 #this is the base dir of the entire stack
-BASEDIR=..
+BASEDIR=/home/esuser/eStation2
 
 CD_ISO_IMAGE=$BASEDIR/ISO/e-Station-2.iso
 CD_BUILD_DIR=$BASEDIR/CD_IMAGE
@@ -17,3 +17,5 @@ UPDATE_PACKAGE_LISTS=$BASEDIR/Package-Repository/update-lists
 
 
 SCRIPTS_DIR=$BASEDIR/scripts
+
+CODE_DIR=$BASEDIR/git-code
