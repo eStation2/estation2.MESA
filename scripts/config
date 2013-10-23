@@ -1,0 +1,19 @@
+#!/bin/sh
+# this file contains all the variables needed to build and update the iso image and
+# to update the repository
+
+#this is the base dir of the entire stack
+BASEDIR=..
+
+CD_ISO_IMAGE=$BASEDIR/ISO/e-Station-2.iso
+CD_BUILD_DIR=$BASEDIR/CD_IMAGE
+
+# package repository
+PACKAGE_REPO=$BASEDIR/Package-Repository
+ALL_PACKAGE_REPO=$BASEDIR/Package-Repository/all-packages
+UPDATE_PACKAGE_REPO=$BASEDIR/Package-Repository/update-packages
+
+UPDATE_PACKAGE_LISTS=$BASEDIR/Package-Repository/update-lists
+
+
+SCRIPTS_DIR=$BASEDIR/scripts
