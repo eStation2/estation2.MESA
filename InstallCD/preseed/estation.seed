@@ -1,0 +1,80 @@
+# The values can also be preseeded individually for greater flexibility.
+d-i debian-installer/language string en
+d-i debian-installer/country string GB
+d-i debian-installer/locale string en_GB.UTF-8
+
+# Keyboard selection.
+d-i keyboard-configuration/layoutcode string it
+
+#### Machine Configuration
+d-i netcfg/get_hostname string eStation-PS
+d-i netcfg/get_domain string eStation
+
+# Static network configuration.
+#d-i netcfg/get_nameservers string 192.168.1.1
+#d-i netcfg/get_ipaddress string 192.168.1.42
+#d-i netcfg/get_netmask string 255.255.255.0
+#d-i netcfg/get_gateway string 192.168.1.1
+#d-i netcfg/confirm_static boolean true
+
+
+# Suggest LVM by default.
+d-i	partman-auto/init_automatically_partition	string some_device_lvm
+d-i	partman-auto/init_automatically_partition	seen false
+
+# Set to true if you want to encrypt the first user's home directory.
+d-i user-setup/encrypt-home boolean false
+
+#### User Creation
+d-i passwd/user-fullname string e-Station Admin User
+d-i passwd/username string adminuser
+#d-i passwd/user-password-crypted password $1$5j4neeJ/$oxzUhoqC/jxnCYEq/ulxR/
+# Normal user's password, either in clear text
+d-i passwd/user-password password amesdadmin
+d-i passwd/user-password-again password amesdadmin
+
+d-i user-setup/allow-password-weak boolean true
+
+
+# By default the installer requires that repositories be authenticated
+# using a known gpg key. This setting can be used to disable that
+# authentication. Warning: Insecure, not recommended.
+d-i debian-installer/allow_unauthenticated boolean true
+
+
+#d-i preseed/early_command string in-target apt-get update;
+
+# Additional repositories, local[0-9] available
+#d-i apt-setup/local0/repository string  file:/cdrom/extra-packages/ precise main precise-updates precise-backports restricted universe multiverse
+d-i apt-setup/local0/repository string file:/media/cdrom/eStation/repository amd64/
+d-i apt-setup/local0/comment string e-station install repository
+
+
+# Install the Ubuntu Server seed.
+#tasksel tasksel/force-tasks	string ubuntu-desktop  
+#tasksel tasksel/first   multiselect ubuntu-desktop, lamp-server
+tasksel tasksel/first   multiselect ubuntu-desktop
+
+d-i pkgsel/include string ubuntu-desktop apt-offline openssh-server postgresql 
+
+# Only install basic language packs. Let tasksel ask about tasks.
+#d-i	pkgsel/language-pack-patterns	string
+
+# No language support packages.
+#d-i	pkgsel/install-language-support	boolean false
+
+# Language pack selection
+d-i pkgsel/language-packs multiselect en, fr
+
+
+# Only ask the UTC question if there are other operating systems installed.
+d-i	clock-setup/utc-auto	boolean true
+
+# Verbose output and no boot splash screen.
+d-i	debian-installer/quiet	boolean false
+d-i	debian-installer/splash	boolean false
+
+d-i preseed/late_command string in-target /media/cdrom/eStation/setup/late-command.sh
+ 
+
+
