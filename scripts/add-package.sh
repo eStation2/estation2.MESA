@@ -12,9 +12,10 @@
 . ./config
 
 PACKAGES=$*
-UPDATE_NAME=$(date +%Y%m%d%H%M)
+PACKAGES_STR=$(echo ${PACKAGES[@]} | sed 's/\ /-/g')
+UPDATE_NAME="$(date +%Y-%m-%d-%H:%M)_${PACKAGES_STR}"
 
-echo $UPDATE_NAME
+##echo $UPDATE_NAME
 
 UPDATE_DIR=$UPDATE_PACKAGE_REPO/$UPDATE_NAME
 SIG_FILE=$UPDATE_PACKAGE_LISTS/${UPDATE_NAME}.sig
@@ -25,12 +26,13 @@ sudo apt-offline set $SIG_FILE --install-packages $PACKAGES
 
 if [ ! -s $SIG_FILE ]; then
 	rm $SIG_FILE
-	echo "No packages added. Please check that the package name is corret and if it is not already installed on this system"
+	echo "No packages added. Please check that the package name is corret and if it is not already installed on this system. Exit"
+	exit
 fi
 
 #download to UPDATE_DIR, sync to ALL_PACKAGE_REPO and update the repo index
 sudo apt-offline get $UPDATE_PACKAGE_LISTS/${UPDATE_NAME}.sig -s /var/cache/apt/archives -d $UPDATE_DIR && rsync -av $UPDATE_DIR/ $ALL_PACKAGE_REPO/amd64/ && ./update-repository.sh
 
-#create a zipfile with the updates
-sudo apt-offline get $UPDATE_PACKAGE_LISTS/${UPDATE_NAME}.sig -s /var/cache/apt/archives --bundle ${UPDATE_DIR}.zip
+#create a zipfile with the updates -> TO BE MOVED for add-list-packages.sh ????? MC-09-01-2014
+#sudo apt-offline get $UPDATE_PACKAGE_LISTS/${UPDATE_NAME}.sig -s /var/cache/apt/archives --bundle ${UPDATE_DIR}.zip
 
