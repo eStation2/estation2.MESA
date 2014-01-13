@@ -1,3 +1,0 @@
-usb-creator-gtk
-postgresql
-
