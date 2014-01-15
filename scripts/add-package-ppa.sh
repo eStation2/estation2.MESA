@@ -1,8 +1,7 @@
 #!/bin/bash
-# this script should be run to add a package to the repository
-# For example to add the postgis and php5-pgsql package to the repository type
+# this script should be run to add a package from a PPA to the repository
 
-# > add-package.sh  postgis php5-pgsql
+# > add-package-ppa.sh  apache2 ondrej/php5
 
 # the packages and all his dependency will be added to the
 # repository $ALL_PACKAGE_REPO an update directory will be created
@@ -11,18 +10,23 @@
  
 . ./config
 
-PACKAGES=$*
-PACKAGES_STR=$(echo ${PACKAGES[@]} | sed 's/\ /-/g')
+PACKAGE=$1
+PPA=$2
+PACKAGES_STR=$(echo ${PACKAGE[@]} | sed 's/\ /-/g')
 UPDATE_NAME="$(date +%Y-%m-%d-%H:%M)_${PACKAGES_STR}"
 
 ##echo $UPDATE_NAME
 
-UPDATE_DIR=$UPDATE_PACKAGE_REPO/$UPDATE_NAME
+UPDATE_DIR="$UPDATE_PACKAGE_REPO/$UPDATE_NAME<<<$PPA"
 SIG_FILE=$UPDATE_PACKAGE_LISTS/${UPDATE_NAME}.sig
 
 mkdir -p $UPDATE_DIR
 
-sudo apt-offline set $SIG_FILE --install-packages $PACKAGES
+# Add PPA to apt
+sudo add-apt-repository "ppa:${PPA}"
+sudo apt-get update
+
+sudo apt-offline set $SIG_FILE --install-packages $PACKAGE
 
 if [ ! -s $SIG_FILE ]; then
 	rm $SIG_FILE
