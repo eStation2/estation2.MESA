@@ -4,7 +4,7 @@
 #
 
 # This is for having add-apt-repository
-#apt-get install python-software-properties
+apt-get install python-software-properties
 
 # Add the source (and key) for postgresql 9.3
 if [ ! -e "/etc/apt/sources.list.d/pgdg.list" ]; then
@@ -13,5 +13,5 @@ fi
 wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc |   sudo apt-key add -
 
 # Update apt-get
-#apt-get update
+apt-get update
 

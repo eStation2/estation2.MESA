@@ -1,15 +1,15 @@
 #!/bin/bash
-# this script should be run to add a complete list of packages to a repository
+# This script should be run to add a complete list of packages to a repository
 # The name of the list is passed as argument
-# Script can also add a specific PPA, in which case in the list the syntax below should be used:
 
+# Usage: add-list-packages.sh  list_filename.txt
+
+# Script can also add a specific PPA, in which case in the list the syntax below should be used:
 # package_std1
 # package_std2
 # package_ppa1<<<ppa_definition
 
-# Usage: add-list-packages.sh  list_filename.txt
-
-# the packages and all his dependency will be added to the
+# The packages and all his dependency will be added to the repo
 # NOTE that: 1. a subdirectory is created/used under PACKAGE_REPO
 # 	     2. eventhough add-package.sh can be called with several args, a loop is preferred
 #	
