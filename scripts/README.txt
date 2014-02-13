@@ -30,3 +30,7 @@ sync-cd.sh:		update whole contents of $CD_BUILD_DIR (incl. command above)
 
 create-cd-iso.sh: 	create the ISO file (mkisoft)
 
+
+# postgres 9.3 install
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+echo "deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main" >> /etc/apt/sources.list.d/postgresql.list
