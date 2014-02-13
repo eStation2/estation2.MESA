@@ -77,7 +77,6 @@ if [ "$ANS" == "y" ]; then
 	
 
 fi
-exit;
 
 # Load file into a variable
 LIST_PCKGS=($(cat $LIST_FILE))

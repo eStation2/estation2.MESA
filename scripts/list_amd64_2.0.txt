@@ -17,4 +17,4 @@ python-gdal
 cgi-mapserver
 php5-mapscript
 python-mapscript
-
+python-nose
