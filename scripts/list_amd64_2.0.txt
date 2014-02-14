@@ -14,4 +14,4 @@ apache2<<<ondrej/php5
 #cgi-mapserver
 #php5-mapscript
 #python-mapscript
-
+#python-nose
