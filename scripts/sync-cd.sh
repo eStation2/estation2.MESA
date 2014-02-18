@@ -6,6 +6,6 @@
 . ./config
 
 #update repository package inxed
-./update-repository.sh
+#./update-repository.sh
 
-rsync -av $ALL_PACKAGE_REPO/ $CD_BUILD_DIR/eStation/repository/
+rsync -av $GITDIR/InstallCD/ $CD_BUILD_DIR/
