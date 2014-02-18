@@ -3,7 +3,7 @@
 # to update the repository
 
 #this is the base dir of the entire stack
-BASEDIR=/media/sf_eStation2
+BASEDIR=/home/esuser/eStation2
 
 #GIT code
 GITDIR=$BASEDIR/12.04-2.0
