@@ -29,34 +29,55 @@ if [ ! -s $LIST_FILE ]; then
 	exit
 fi
 
-# Empty /var/cache/apt/archives/ - but lock file
-mkdir -p /var/cache/apt/archives_backup/
-mv /var/cache/apt/archives/*deb /var/cache/apt/archives_backup/
-echo "INFO - /var/cache/apt/archive_backup/ dir cleaned."
 
 # Manage repo-subdir
-LABEL=$(echo $LIST_FILE | sed 's/.txt//')
-REPO_SUBDIR="$(date +%Y-%m-%d-%H:%M)_${LABEL}"
+LABEL=$(echo $LIST_FILE | sed 's/.txt//' | sed 's/\.//' | sed 's/\///')
+
+REPO_SUBDIR="$(date +%Y-%m-%d-%H-%M)_${LABEL}"
 THIS_PACKAGE_REPO="${PACKAGE_REPO}_${REPO_SUBDIR}"
 
-# Create a new base dir
-mkdir -p ${THIS_PACKAGE_REPO}
+#echo $LABEL
+#echo $REPO_SUBDIR
+#echo $THIS_PACKAGE_REPO
 
-echo "INFO - New package repo base-dir and subdirs created as ${THIS_PACKAGE_REPO}"
-
-# Check the ${PACKAGE_REPO} is a symlink, and delete it. If it is a dir, exit.
-if [ -h ${PACKAGE_REPO} ]; then
-	rm ${PACKAGE_REPO}
-else if [ -d ${PACKAGE_REPO} ]; then
-	echo "ERROR - ${PACKAGE_REPO} is a dir. Exit"
-	exit
-     fi	
+read -p "Clean package cache in /var/cache/apt/archives/ (Y/n)? " ANS
+if [ "$ANS" != "n" ]; then
+	# Empty /var/cache/apt/archives/ - but lock file
+	sudo mkdir -p /var/cache/apt/archives_backup/
+	sudo mv /var/cache/apt/archives/*.deb /var/cache/apt/archives_backup/
+	sudo apt-get clean
+	sudo apt-get update
+	echo "INFO - /var/cache/apt/archive_backup/ dir cleaned."
 fi
-ln -fs ${THIS_PACKAGE_REPO} ${PACKAGE_REPO}
-# Make subdirs
-mkdir ${UPDATE_PACKAGE_REPO}
-mkdir ${UPDATE_PACKAGE_LISTS}
-mkdir ${ALL_PACKAGE_REPO}
+
+
+read -p "Do you want to create a new package repository ${THIS_PACKAGE_REPO} and link to it (y/N)? " ANS
+if [ "$ANS" == "y" ]; then
+	# Create a new base dir
+	mkdir -p ${THIS_PACKAGE_REPO}
+
+	echo "INFO - New package repo base-dir and subdirs created as ${THIS_PACKAGE_REPO}"
+
+	# Make subdirs	
+	#mkdir ${UPDATE_PACKAGE_REPO}
+	#mkdir ${UPDATE_PACKAGE_LISTS}
+	#mkdir ${ALL_PACKAGE_REPO}
+
+	# Check the ${PACKAGE_REPO} is a symlink, and delete it. If it is a dir, exit.
+	if [ -h ${PACKAGE_REPO} ]; then
+		rm ${PACKAGE_REPO}
+		else if [ -d ${PACKAGE_REPO} ]; then
+			echo "ERROR - ${PACKAGE_REPO} is a dir. Exit"
+			exit
+   		fi	
+	fi
+	echo "INFO - Switching to new repo"
+	echo "ln -fs ${THIS_PACKAGE_REPO} ${PACKAGE_REPO}"
+	ln -fs ${THIS_PACKAGE_REPO} ${PACKAGE_REPO} && mkdir -p ${ALL_PACKAGE_REPO}/amd64
+	
+	
+
+fi
 
 # Load file into a variable
 LIST_PCKGS=($(cat $LIST_FILE))
@@ -65,6 +86,7 @@ LIST_PCKGS=($(cat $LIST_FILE))
 
 for package in ${LIST_PCKGS[@]}
 do
+	echo "Package: " ${package}
 	# Check if is commented
 	if [[ ! ${package} =~ '#' ]];
 	then 
@@ -73,11 +95,20 @@ do
 	  then 
 		name=${package%%<<<*}
 		ppa=${package##*<<<}
+		echo "INFO - Adding package: " ${name} " using ppa: "  ${ppa}
 		./add-package-ppa.sh ${name} ${ppa}
 	  else
-		./add-package.sh ${package}
+	  	echo "INFO - Adding package: " ${package} 
+		sudo apt-get install --reinstall -y -d ${package}
 	  fi
 	fi
 done
+
+read -p "Sync /var/cache/apt/archives/ to $ALL_PACKAGE_REPO/amd64/ and update repository index (Y/n)? " ANS
+if [ "$ANS" != "n" ]; then
+  echo "INFO - sync  /var/cache/apt/archives/";
+  rsync -av  --include="*.deb" --exclude="*" /var/cache/apt/archives/ $ALL_PACKAGE_REPO/amd64/ 
+  ./update-repository.sh
+fi
 
 

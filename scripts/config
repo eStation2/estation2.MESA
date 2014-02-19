@@ -5,6 +5,9 @@
 #this is the base dir of the entire stack
 BASEDIR=/home/esuser/eStation2
 
+#GIT code
+GITDIR=$BASEDIR/12.04-2.0
+
 CD_ISO_IMAGE=$BASEDIR/ISO/e-Station-2.iso
 CD_BUILD_DIR=$BASEDIR/CD_IMAGE
 

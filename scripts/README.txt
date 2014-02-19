@@ -4,7 +4,7 @@
 
 #	Definitions
 
-set_env.sh: 		for configuring a BUILD machine (adds to /etc/var/sources.list.d)
+set_env.sh: 		for configuring a BUILD machine (adds to /etc/var/sources.list.d), for example adding postgresql 9.3 repository and Ubuntu image to sources.list
 config:			REPO dir definitions
 list_amd64_2.0.txt	list for eStation 2.0
 
@@ -29,4 +29,5 @@ sync-cd-repository.sh:	update repository package inxed and rsync .deb to target 
 sync-cd.sh:		update whole contents of $CD_BUILD_DIR (incl. command above)
 
 create-cd-iso.sh: 	create the ISO file (mkisoft)
+
 
