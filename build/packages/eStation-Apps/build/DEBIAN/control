@@ -1,0 +1,8 @@
+Package: amesd-system
+Version: <VERSION>-<RELEASE>
+Section: config
+Priority: extra
+Architecture: i386
+Maintainer: Cedric Talazac <cedric.talazac@thalesaleniaspace.com>
+Description: The e-Station System configuration for the AMESD Project. 
+ The e-Station System configuration for the AMESD Project.

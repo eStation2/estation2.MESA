@@ -1,0 +1,35 @@
+# definition of variable done in config file
+
+# definition of function
+
+# clean the build directories
+clean()
+{
+rm -rf ${builddir}/${Name}-${Version}
+rm -rf ${builddir}/${Name}-${Version}_SVN
+}
+
+# Make the debian package
+make_deb()
+{
+cd ${builddir}
+dpkg-deb -b ${Name}-${Version} ${debiandir}/${Name}-${Version}-${Release}.deb
+cd -
+}
+
+# Make the build environnement
+build_section()
+{
+mkdir -p ${BUILDdir}
+# BUILD section
+cp -r ${localdir}/DEBIAN ${BUILDdir}
+cp -r ${localdir}/../src/* ${BUILDdir}
+}
+
+
+change_debname()
+{
+mv ${debiandir}/${Name}-${Version}-${Release}.deb ${debiandir}/${Project}${Name}-${Version}-${Release}.deb
+echo "Moving ${debiandir}/${Name}-${Version}-${Release}.deb ${debiandir}/${Project}${Name}-${Version}-${Release}.deb ."
+}
+

@@ -22,3 +22,10 @@ UPDATE_PACKAGE_LISTS=$BASEDIR/Package-Repository/update-lists
 SCRIPTS_DIR=$BASEDIR/build/scripts
 
 CODE_DIR=$BASEDIR/git-code
+
+# variables needed for the build script, now under refactoring
+PACKAGE_BUILD_DIR=$BASEDIR/PACKAGE_BUILD
+#builddir=$PACKAGE_BUILD_DIR
+#tarballdir=$PACKAGE_BUILD_DIR/tarballdir
+#debiandir=$PACKAGE_BUILD_DIR/debiandir
+#localbuild=/home/amesd/AMESD/
