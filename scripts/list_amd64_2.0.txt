@@ -1,4 +1,4 @@
-#ubuntu-desktop
+ubuntu-desktop
 openssh-server
 gnome
 apache2<<<ondrej/php5
