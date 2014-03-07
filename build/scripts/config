@@ -6,7 +6,7 @@
 BASEDIR=/home/esuser/eStation2
 
 #GIT code
-GITDIR=$BASEDIR/12.04-2.0
+GITDIR=$BASEDIR/git-code
 
 CD_ISO_IMAGE=$BASEDIR/ISO/e-Station-2.iso
 CD_BUILD_DIR=$BASEDIR/CD_IMAGE
@@ -19,6 +19,6 @@ UPDATE_PACKAGE_REPO=$BASEDIR/Package-Repository/update-packages
 UPDATE_PACKAGE_LISTS=$BASEDIR/Package-Repository/update-lists
 
 
-SCRIPTS_DIR=$BASEDIR/scripts
+SCRIPTS_DIR=$BASEDIR/build/scripts
 
 CODE_DIR=$BASEDIR/git-code
