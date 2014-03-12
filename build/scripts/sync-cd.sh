@@ -8,4 +8,4 @@
 #update repository package inxed
 #./update-repository.sh
 
-rsync -av $GITDIR/CD_IMAGE/ $CD_BUILD_DIR/
+rsync -av $GITDIR/build/CD_IMAGE/ $CD_BUILD_DIR/
