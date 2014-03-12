@@ -1,8 +1,5 @@
 #!/bin/bash
 
-#echo "Script not yet finished! Exiting.."
-#exit
-
 # Package description
 Project=eStation-
 Name=eStation-Apps
@@ -11,6 +8,11 @@ Release=1
 
 # this is the destination folder for app sorces, this is specific for this package
 APP_SOURCE_DESTINATION=/srv/www/eStation
+
+#package destination dir usually ${PACKAGE_BUILD_DIR_DEB} but it can be a subdirectory with timestamp
+PACKAGE_DESTINATION_DIR=${PACKAGE_BUILD_DIR_DEB}
+#this is the deb package name
+PACKAGE_DEB_NAME=${Name}-${Version}-${Release}.deb
 
 ## Tests before 'local-build'
 #status=($(git status | grep modified))
@@ -28,14 +30,15 @@ APP_SOURCE_DESTINATION=/srv/www/eStation
 set -e
 
 localdir=$(pwd)
+# where the package is assembled
 BUILDdir=${PACKAGE_BUILD_DIR}/${Name}-${Version}
 
-# Clean build directories
-#deb_clean
+# Cleaning
+deb_clean ${BUILDdir}
 
 mkdir -p ${BUILDdir}/${APP_SOURCE_DESTINATION}
 cp -r ./src/* ${BUILDdir}
-#cp -r ${ESTATION_SRC_DIR}/* ${BUILDROOTDIR}/${APP_SOURCE_DESTINATION}
+cp -r ${ESTATION_SRC_DIR}/* ${BUILDROOTDIR}/${APP_SOURCE_DESTINATION}
 cp -r ./DEBIAN ${BUILDdir}
 
 
@@ -56,14 +59,17 @@ cd ${localdir}
 ##########################
 # Making DEB file
 ##########################
-make_deb
+# $1 package source dir
+# $2 package dest dir
+# $3 package filename
+make_deb ${BUILDdir} ${PACKAGE_DESTINATION_DIR} ${PACKAGE_DEB_NAME}
 #change_debname
-# Cleaning
-#clean
 
-read -p "Sync ${PACKAGE_BUILD_DIR_DEB} to $ALL_PACKAGE_REPO/amd64/ and update repository index (y/N)? " ANS
+
+
+read -p "Sync ${PACKAGE_DESTINATION_DIR} to $ALL_PACKAGE_REPO/amd64/ and update repository index (y/N)? " ANS
 if [ "$ANS" == "y" ]; then
-  echo "INFO - sync  ${PACKAGE_BUILD_DIR_DEB}";
-  rsync -av  --include="*.deb" --exclude="*" ${PACKAGE_BUILD_DIR_DEB} $ALL_PACKAGE_REPO/amd64/ 
+  echo "INFO - sync  ${PACKAGE_DESTINATION_DIR}";
+  rsync -av  --include="*.deb" --exclude="*" ${PACKAGE_DESTINATION_DIR}/ $ALL_PACKAGE_REPO/amd64/ 
   $SCRIPTS_DIR/update-repository.sh
 fi

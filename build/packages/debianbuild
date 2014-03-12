@@ -5,11 +5,34 @@
 # clean the build directories
 deb_clean()
 {
+	if [ -d "$1" ]; then
+		read -p "Delete $1 folder (y/N)? " ANS
+		if [ "$ANS" == "y" ]; then
+  			echo "INFO - deleting  $1";
+			rm -rf $1
+		fi
+	fi
+}
+
+deb_clean_old()
+{
 	rm -rf ${PACKAGE_BUILD_DIR}/${Name}-${Version}
 }
 
 # Make the debian package
+# $1 package source dir
+# $2 package dest dir
+# $3 package filename
 make_deb()
+{
+	mkdir -p $2
+	dpkg-deb -b $1 $2/$3
+	if [ -f "$2/$3" ]; then
+		echo "INFO - package ready in $2/$3"
+	fi
+}
+
+make_deb_old()
 {
 	mkdir -p ${PACKAGE_BUILD_DIR_DEB}
 	cd ${PACKAGE_BUILD_DIR}
