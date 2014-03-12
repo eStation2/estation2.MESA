@@ -31,7 +31,7 @@ set -e
 
 localdir=$(pwd)
 # where the package is assembled
-BUILDdir=${PACKAGE_BUILD_DIR}/${Name}-${Version}
+BUILDdir=${PACKAGE_BUILD_DIR_TMP}/tmp/${Name}-${Version}
 
 # Cleaning
 deb_clean ${BUILDdir}

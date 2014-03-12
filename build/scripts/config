@@ -26,5 +26,7 @@ SCRIPTS_DIR=$GITDIR/build/scripts
 ESTATION_SRC_DIR=$GITDIR/src
 # variables needed for the build script, now under refactoring
 PACKAGE_BUILD_DIR=$BASEDIR/PACKAGE_BUILD
-builddir=$PACKAGE_BUILD_DIR
+#default .deb storage folder
 PACKAGE_BUILD_DIR_DEB=$PACKAGE_BUILD_DIR/deb
+#temporary folder used to hold package files during build
+PACKAGE_BUILD_DIR_TMP=$PACKAGE_BUILD_DIR/tmp
