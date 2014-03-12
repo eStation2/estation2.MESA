@@ -1,8 +1,8 @@
-Package: amesd-system
+Package: eStation-Apps
 Version: <VERSION>-<RELEASE>
 Section: config
 Priority: extra
-Architecture: i386
-Maintainer: Cedric Talazac <cedric.talazac@thalesaleniaspace.com>
-Description: The e-Station System configuration for the AMESD Project. 
- The e-Station System configuration for the AMESD Project.
+Architecture: amd64
+Maintainer: Marco Clerici marco.CLERICI@jrc.ec.europa.eu
+Description: The e-Station Apps 
+ The e-Station Apps.

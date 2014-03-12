@@ -3,33 +3,36 @@
 # definition of function
 
 # clean the build directories
-clean()
+deb_clean()
 {
-rm -rf ${builddir}/${Name}-${Version}
-rm -rf ${builddir}/${Name}-${Version}_SVN
+	rm -rf ${PACKAGE_BUILD_DIR}/${Name}-${Version}
 }
 
 # Make the debian package
 make_deb()
 {
-cd ${builddir}
-dpkg-deb -b ${Name}-${Version} ${debiandir}/${Name}-${Version}-${Release}.deb
-cd -
+	mkdir -p ${PACKAGE_BUILD_DIR_DEB}
+	cd ${PACKAGE_BUILD_DIR}
+	dpkg-deb -b ${Name}-${Version} ${PACKAGE_BUILD_DIR_DEB}/${Name}-${Version}-${Release}.deb
+	cd -
+	if [ -f "${PACKAGE_BUILD_DIR_DEB}/${Name}-${Version}-${Release}.deb" ]; then
+		echo "INFO - package ready in ${PACKAGE_BUILD_DIR_DEB}/${Name}-${Version}-${Release}.deb"
+	fi
 }
 
 # Make the build environnement
-build_section()
-{
-mkdir -p ${BUILDdir}
-# BUILD section
-cp -r ${localdir}/DEBIAN ${BUILDdir}
-cp -r ${localdir}/../src/* ${BUILDdir}
-}
+#build_section()
+#{
+#	mkdir -p ${BUILDdir}
+#	# BUILD section
+#	cp -r ${localdir}/DEBIAN ${BUILDdir}
+#	cp -r ${localdir}/../src/* ${BUILDdir}
+#}
 
 
-change_debname()
-{
-mv ${debiandir}/${Name}-${Version}-${Release}.deb ${debiandir}/${Project}${Name}-${Version}-${Release}.deb
-echo "Moving ${debiandir}/${Name}-${Version}-${Release}.deb ${debiandir}/${Project}${Name}-${Version}-${Release}.deb ."
-}
+#change_debname()
+#{
+#	mv ${debiandir}/${Name}-${Version}-${Release}.deb ${debiandir}/${Project}${Name}-${Version}-${Release}.deb
+#	echo "Moving ${debiandir}/${Name}-${Version}-${Release}.deb ${debiandir}/${Project}${Name}-${Version}-${Release}.deb ."
+#}
 

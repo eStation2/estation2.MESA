@@ -4,9 +4,11 @@
 
 #this is the base dir of the entire stack
 BASEDIR=/home/esuser/eStation2
+#BASEDIR=/media/sf_eStation2
 
 #GIT code
 GITDIR=$BASEDIR/git-code
+#CODE_DIR=$BASEDIR/git-code
 
 CD_ISO_IMAGE=$BASEDIR/ISO/e-Station-2.iso
 CD_BUILD_DIR=$BASEDIR/CD_IMAGE
@@ -19,13 +21,10 @@ UPDATE_PACKAGE_REPO=$BASEDIR/Package-Repository/update-packages
 UPDATE_PACKAGE_LISTS=$BASEDIR/Package-Repository/update-lists
 
 
-SCRIPTS_DIR=$BASEDIR/build/scripts
+SCRIPTS_DIR=$GITDIR/build/scripts
 
-CODE_DIR=$BASEDIR/git-code
-
+ESTATION_SRC_DIR=$GITDIR/src
 # variables needed for the build script, now under refactoring
 PACKAGE_BUILD_DIR=$BASEDIR/PACKAGE_BUILD
-#builddir=$PACKAGE_BUILD_DIR
-#tarballdir=$PACKAGE_BUILD_DIR/tarballdir
-#debiandir=$PACKAGE_BUILD_DIR/debiandir
-#localbuild=/home/amesd/AMESD/
+builddir=$PACKAGE_BUILD_DIR
+PACKAGE_BUILD_DIR_DEB=$PACKAGE_BUILD_DIR/deb

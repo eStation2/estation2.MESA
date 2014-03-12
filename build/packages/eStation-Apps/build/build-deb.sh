@@ -1,50 +1,43 @@
 #!/bin/bash
 
-echo "Script not yet finished! Exiting.."
-exit
+#echo "Script not yet finished! Exiting.."
+#exit
 
 # Package description
 Project=eStation-
-Name=Apps
+Name=eStation-Apps
 Version=2.0.0
 Release=1
 
-# Tests before 'local-build'
-status=($(git status | grep modified))
-if [ ! -z ${status[0]} ]; then
-    echo "ERROR - Local modifications exist: commit/pull/push first"
-    git status
-    exit
-fi
+# this is the destination folder for app sorces, this is specific for this package
+APP_SOURCE_DESTINATION=/srv/www/eStation
+
+## Tests before 'local-build'
+#status=($(git status | grep modified))
+#if [ ! -z ${status[0]} ]; then
+#    echo "ERROR - Local modifications exist: commit/pull/push first"
+#    git status
+#    exit
+#fi
 
 # Source config file and debian build functions
-. ~/home/esuser/eStation2/build/scripts/config
-. ~/home/esuser/eStation2/build/packages/debianbuild
+# using relative path by now
+. ../../../scripts/config
+. ../../debianbuild
 
 set -e
 
 localdir=$(pwd)
-installdir=/
-vinstalldir=/
-BUILDdir=${builddir}/${Name}-${Version}
-BUILDROOTDIR=${BUILDdir}/${installdir}
+BUILDdir=${PACKAGE_BUILD_DIR}/${Name}-${Version}
 
 # Clean build directories
-clean
+#deb_clean
 
-#############################
-# Make the build directories
-#############################
-#exportSVN http://e-station.glab.fr.cr
-mkdir -p ${BUILDROOTDIR}
-#cp -r ${BUILDdir}_SVN/src/* ${BUILDROOTDIR}
-#cp -r ${BUILDdir}_SVN/build/DEBIAN ${BUILDdir}
-# DEBUG
-cp -r ${localbuild}/trunk/InstallCD/Add-on/amesd-systems/src/* ${BUILDROOTDIR}
-cp -r ${localbuild}/trunk/InstallCD/Add-on/amesd-systems/build/DEBIAN ${BUILDdir}
-find ${BUILDdir} -name ".svn" | while read rep; do
-        rm -rf $rep
-done
+mkdir -p ${BUILDdir}/${APP_SOURCE_DESTINATION}
+cp -r ./src/* ${BUILDdir}
+#cp -r ${ESTATION_SRC_DIR}/* ${BUILDROOTDIR}/${APP_SOURCE_DESTINATION}
+cp -r ./DEBIAN ${BUILDdir}
+
 
 ############################
 # Parsing for build
@@ -64,7 +57,13 @@ cd ${localdir}
 # Making DEB file
 ##########################
 make_deb
-change_debname
+#change_debname
 # Cleaning
 #clean
 
+read -p "Sync ${PACKAGE_BUILD_DIR_DEB} to $ALL_PACKAGE_REPO/amd64/ and update repository index (y/N)? " ANS
+if [ "$ANS" == "y" ]; then
+  echo "INFO - sync  ${PACKAGE_BUILD_DIR_DEB}";
+  rsync -av  --include="*.deb" --exclude="*" ${PACKAGE_BUILD_DIR_DEB} $ALL_PACKAGE_REPO/amd64/ 
+  $SCRIPTS_DIR/update-repository.sh
+fi

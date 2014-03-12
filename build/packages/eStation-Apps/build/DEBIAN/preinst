@@ -1,14 +1,14 @@
 #!/bin/sh
 
 # fix for new version of amesd-system web access
-rm -f /var/www/*_index.php
-rm -rf /var/www/lib/ext/build
-rm -rf /var/www/lib/ext/resources/images/vista
-rm -rf /var/www/lib/ext/resources/images/slate
-rm -rf /var/www/lib/ext/adapter/prototype
-rm -rf /var/www/lib/ext/adapter/jquery
-rm -rf /var/www/lib/ext/adapter/yui
-rm -rf /var/www/lib/ext/package
+#rm -f /var/www/*_index.php
+#rm -rf /var/www/lib/ext/build
+#rm -rf /var/www/lib/ext/resources/images/vista
+#rm -rf /var/www/lib/ext/resources/images/slate
+#rm -rf /var/www/lib/ext/adapter/prototype
+#rm -rf /var/www/lib/ext/adapter/jquery
+#rm -rf /var/www/lib/ext/adapter/yui
+#rm -rf /var/www/lib/ext/package
 
 # touch the index.php file, if it does not exist - see #1141)
 #if [ ! -f /var/www/index.php ]; then
