@@ -9,10 +9,14 @@ Release=1
 # this is the destination folder for app sorces, this is specific for this package
 APP_SOURCE_DESTINATION=/srv/www/eStation2.0
 
-#package destination dir usually ${PACKAGE_BUILD_DIR_DEB} but it can be a subdirectory with timestamp
-PACKAGE_DESTINATION_DIR=${PACKAGE_BUILD_DIR_DEB}
 #this is the deb package name
 PACKAGE_DEB_NAME=${Name}-${Version}-${Release}.deb
+
+# Source config file and debian build functions
+# using relative path by now
+. ../../../scripts/config
+. ../../debianbuild
+
 
 ## Tests before 'local-build'
 #status=($(git status | grep modified))
@@ -22,23 +26,23 @@ PACKAGE_DEB_NAME=${Name}-${Version}-${Release}.deb
 #    exit
 #fi
 
-# Source config file and debian build functions
-# using relative path by now
-. ../../../scripts/config
-. ../../debianbuild
+
+#package destination dir usually ${PACKAGE_BUILD_DIR_DEB} but it can be a subdirectory with timestamp
+PACKAGE_DESTINATION_DIR=${PACKAGE_BUILD_DIR_DEB}
 
 set -e
 
 localdir=$(pwd)
 # where the package is assembled
-BUILDdir=${PACKAGE_BUILD_DIR_TMP}/tmp/${Name}-${Version}
+BUILDdir=${PACKAGE_BUILD_DIR_TMP}/${Name}-${Version}
 
 # Cleaning
 deb_clean ${BUILDdir}
 
 mkdir -p ${BUILDdir}/${APP_SOURCE_DESTINATION}
-cp -r ./src/* ${BUILDdir}
-cp -r ${ESTATION_SRC_DIR}/* ${BUILDROOTDIR}/${APP_SOURCE_DESTINATION}
+
+cp -r ../src/* ${BUILDdir}/
+cp -r ${ESTATION_SRC_DIR}/* ${BUILDdir}/${APP_SOURCE_DESTINATION}
 cp -r ./DEBIAN ${BUILDdir}
 
 
@@ -64,7 +68,6 @@ cd ${localdir}
 # $3 package filename
 make_deb ${BUILDdir} ${PACKAGE_DESTINATION_DIR} ${PACKAGE_DEB_NAME}
 #change_debname
-
 
 
 read -p "Sync ${PACKAGE_DESTINATION_DIR} to $ALL_PACKAGE_REPO/amd64/ and update repository index (y/N)? " ANS

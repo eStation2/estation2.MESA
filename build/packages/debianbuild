@@ -25,10 +25,15 @@ deb_clean_old()
 # $3 package filename
 make_deb()
 {
+	#local packagename=$3
+	#local destinationdir=$2
+	
 	mkdir -p $2
 	dpkg-deb -b $1 $2/$3
 	if [ -f "$2/$3" ]; then
 		echo "INFO - package ready in $2/$3"
+	else
+		echo "ERROR - unable to build package  $2/$3"
 	fi
 }
 
