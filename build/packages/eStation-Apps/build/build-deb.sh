@@ -7,7 +7,7 @@ Version=2.0.0
 Release=1
 
 # this is the destination folder for app sorces, this is specific for this package
-APP_SOURCE_DESTINATION=/srv/www/eStation
+APP_SOURCE_DESTINATION=/srv/www/eStation2.0
 
 #package destination dir usually ${PACKAGE_BUILD_DIR_DEB} but it can be a subdirectory with timestamp
 PACKAGE_DESTINATION_DIR=${PACKAGE_BUILD_DIR_DEB}
