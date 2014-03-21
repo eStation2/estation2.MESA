@@ -74,5 +74,6 @@ read -p "Sync ${PACKAGE_DESTINATION_DIR} to $ALL_PACKAGE_REPO/amd64/ and update 
 if [ "$ANS" == "y" ]; then
   echo "INFO - sync  ${PACKAGE_DESTINATION_DIR}";
   rsync -av  --include="*.deb" --exclude="*" ${PACKAGE_DESTINATION_DIR}/ $ALL_PACKAGE_REPO/amd64/ 
-  $SCRIPTS_DIR/update-repository.sh
+  cd $SCRIPTS_DIR
+  ./update-repository.sh
 fi
