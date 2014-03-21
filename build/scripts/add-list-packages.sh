@@ -47,6 +47,7 @@ if [ "$ANS" != "n" ]; then
 	sudo mv /var/cache/apt/archives/*.deb /var/cache/apt/archives_backup/
 	sudo apt-get clean
 	sudo apt-get update
+	sudo apt-get upgrade -d -y
 	echo "INFO - /var/cache/apt/archive_backup/ dir cleaned."
 fi
 

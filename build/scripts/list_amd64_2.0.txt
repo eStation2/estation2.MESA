@@ -1,4 +1,6 @@
 ubuntu-desktop
+language-pack-en
+language-pack-fr
 openssh-server
 gnome
 apache2<<<ondrej/php5
