@@ -79,9 +79,8 @@ if [ "$ANS" == "y" ]; then
 	echo "INFO - Switching to new repo"
 	echo "ln -fs ${THIS_PACKAGE_REPO} ${PACKAGE_REPO}"
 	ln -fs ${THIS_PACKAGE_REPO} ${PACKAGE_REPO} && mkdir -p ${ALL_PACKAGE_REPO}/amd64
-	
-	
-
+	$SCRIPTS_DIR/update-repository.sh
+	sudo apt-get update
 fi
 
 # Load file into a variable
@@ -101,7 +100,7 @@ do
 		name=${package%%<<<*}
 		ppa=${package##*<<<}
 		echo "INFO - Adding package: " ${name} " using ppa: "  ${ppa}
-		./add-package-ppa.sh ${name} ${ppa}
+		$SCRIPTS_DIR/add-package-ppa.sh ${name} ${ppa}
 	  else
 	  	echo "INFO - Adding package: " ${package} 
 		sudo apt-get install --reinstall -y -d ${package}
@@ -113,7 +112,7 @@ read -p "Sync /var/cache/apt/archives/ to $ALL_PACKAGE_REPO/amd64/ and update re
 if [ "$ANS" != "n" ]; then
   echo "INFO - sync  /var/cache/apt/archives/";
   rsync -av  --include="*.deb" --exclude="*" /var/cache/apt/archives/ $ALL_PACKAGE_REPO/amd64/ 
-  ./update-repository.sh
+  $SCRIPTS_DIR/update-repository.sh
 fi
 #restore package status
 sudo cp /var/lib/dpkg/status.orig /var/lib/dpkg/status
