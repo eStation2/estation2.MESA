@@ -40,6 +40,10 @@ THIS_PACKAGE_REPO="${PACKAGE_REPO}_${REPO_SUBDIR}"
 #echo $REPO_SUBDIR
 #echo $THIS_PACKAGE_REPO
 
+# reset package status in order to re-download all packages
+sudo mv /var/lib/dpkg/status /var/lib/dpkg/status.orig
+sudo touch /var/lib/dpkg/status
+
 read -p "Clean package cache in /var/cache/apt/archives/ (Y/n)? " ANS
 if [ "$ANS" != "n" ]; then
 	# Empty /var/cache/apt/archives/ - but lock file
@@ -47,7 +51,7 @@ if [ "$ANS" != "n" ]; then
 	sudo mv /var/cache/apt/archives/*.deb /var/cache/apt/archives_backup/
 	sudo apt-get clean
 	sudo apt-get update
-	sudo apt-get upgrade -d -y
+	#sudo apt-get upgrade -d -y
 	echo "INFO - /var/cache/apt/archive_backup/ dir cleaned."
 fi
 
@@ -111,5 +115,6 @@ if [ "$ANS" != "n" ]; then
   rsync -av  --include="*.deb" --exclude="*" /var/cache/apt/archives/ $ALL_PACKAGE_REPO/amd64/ 
   ./update-repository.sh
 fi
-
+#restore package status
+sudo cp /var/lib/dpkg/status.orig /var/lib/dpkg/status
 
