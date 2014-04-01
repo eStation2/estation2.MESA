@@ -4,18 +4,33 @@
 #
 . ./config
 
-CDIMAGE=$(grep  $CD_BUILD_DIR /etc/apt/sources.list)
+#CDIMAGE=$(grep  $CD_BUILD_DIR /etc/apt/sources.list)
 
-echo "INFO - looking for $CD_BUILD_DIR in sources.list"
+#echo "INFO - looking for $CD_BUILD_DIR in sources.list"
 
-if [ "$CDIMAGE" = "" ]; then
+#if [ "$CDIMAGE" = "" ]; then
+#echo "INFO - adding cd image to sources.list, this should be the first entry"
+#echo "deb file:$CD_BUILD_DIR/ precise main restricted\n$(cat /etc/apt/sources.list)" > /etc/apt/sources.list
+#else
+# echo ".. ok"
+#fi
 
-echo "INFO - adding cd image to sources.list, this should be the first entry"
-echo "deb file:$CD_BUILD_DIR/ precise main restricted\n$(cat /etc/apt/sources.list)" > /etc/apt/sources.list
+# Add the  for ubuntu install cd image
+echo "INFO - adding cd image to sources.list"
+if [ ! -e "/etc/apt/sources.list.d/ubuntu-cdimage.list" ]; then
+	echo "deb file:$CD_BUILD_DIR/ precise main restricted\n" > /etc/apt/sources.list.d/ubuntu-cdimage.list
 else
  echo ".. ok"
 fi
 
+
+# Add the  for ubuntu install cd image
+echo "INFO - adding eStation repository to sources.list"
+if [ ! -e "/etc/apt/sources.list.d/eStation-repository.list" ]; then
+	echo "deb file:$ALL_PACKAGE_REPO/ amd64/\n" > /etc/apt/sources.list.d/eStation-repository.list
+else
+ echo ".. ok"
+fi
 
 # This is for having add-apt-repository
 apt-get install python-software-properties
