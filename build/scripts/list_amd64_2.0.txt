@@ -18,6 +18,7 @@ libgdal1
 python-gdal
 cgi-mapserver
 php5-mapscript
+python-pyproj
 python-mapscript
 python-nose
 python-dev
