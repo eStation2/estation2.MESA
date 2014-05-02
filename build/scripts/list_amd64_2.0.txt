@@ -23,5 +23,5 @@ python-mapscript
 python-nose
 python-dev
 python-pycurl
-python-proj
+python-pyproj
 python-pip
