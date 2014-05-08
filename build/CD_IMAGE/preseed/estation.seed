@@ -75,7 +75,7 @@ d-i	clock-setup/utc-auto	boolean true
 d-i	debian-installer/quiet	boolean false
 d-i	debian-installer/splash	boolean false
 
-#d-i preseed/late_command string in-target /media/cdrom/eStation/setup/late-command.sh
- 
+d-i preseed/late_command string in-target /media/cdrom/eStation/setup/late-command.sh
+
 
 

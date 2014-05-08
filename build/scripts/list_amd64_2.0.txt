@@ -15,6 +15,7 @@ pgadmin3
 libproj0<<<ubuntugis/ppa
 libgeos-3.3.8
 libgdal1
+libgrib-api-dev
 python-gdal
 cgi-mapserver
 php5-mapscript
@@ -23,3 +24,5 @@ python-mapscript
 python-nose
 python-dev
 python-pycurl
+python-pyproj
+python-pip
