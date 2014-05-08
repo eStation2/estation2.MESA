@@ -3,4 +3,5 @@
 
 # install pygrib python module 
 pip install /media/cdrom/eStation/Python-Modules/pygrib.tar.gz
+pip install /media/cdrom/eStation/Python-Modules/sqlsoup.tar.gz
 
