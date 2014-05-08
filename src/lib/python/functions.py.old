@@ -1,0 +1,103 @@
+#
+#	purpose: Define a library of functions for general purpose operations
+#	author:  M.Clerici
+#	date:	 28.02.2014
+#   descr:	 It correspond to the file 'Functions' in rel. 1.X, for bash functions.
+#            It contains the following sets of functions:
+#            Time:      convert date/time between formats
+#            Naming:    manage file naming
+#            General:   general purpose functions
+#
+#	history: 1.0
+#
+import os, math, sys
+sys.path.append('/srv/www/eStation2/config/')
+
+try:
+    import es2
+except ImportError:
+    print 'Error - Error in importing es2 module'
+    exit(1)
+
+try:
+    base_dir = os.environ['ESTATION2PATH']
+except ImportError:
+    print 'Error - ESTATION2PATH variable not defined ! Exit'
+    exit(1)
+
+logger = es2.log.myLogger(__name__)
+
+
+######################################################################################
+#   modis_latlon_to_hv_tile
+#   Given a lat/lon coordinate, converts it to hv tile
+#   author: Simona Oancea, JRC, European Commission
+#   date: 2013/01/23
+#
+def modis_latlon_to_hv_tile(latitude, longitude):
+
+    # Check args valid range
+    if latitude > 90.0 or latitude < -90.0:
+        logger.error('Latitude invalid %s' % latitude)
+        return 1
+    if longitude > 180.0 or longitude < -180.0:
+        logger.error('Longitude invalid %s' % longitude)
+        return 1
+
+    #convert the data to tiles
+    rad_sphere = 6371007.181
+    t_size = 1111950
+    pi_val = math.pi
+    x_val = rad_sphere * math.cos(latitude * pi_val / 180.0) * longitude * pi_val / 180.0
+    y_val = rad_sphere * latitude * pi_val / 180.0
+    # We subtract -0.5 to have to 'round' below working as a 'integer_part' (as in original algo)
+    h1 = round(x_val / t_size - 0.5) + 18
+    # We subtract -0.5 to have to 'round' below working as a 'integer_part' (as in original algo)
+    v1 = 8 - round(y_val / t_size - 0.5)
+
+    return h1, v1
+
+
+######################################################################################
+#   get_modis_tiles_list TBD
+#   Given a mapset, returns list of MODIS tiles it overlaps
+#   author: Marco Clerici, JRC, European Commission
+#   date: 2013/03/11
+#   Output: list of tiles.
+#
+#
+def get_modis_tiles_list(mapset):	
+    tiles_list = ['h01v01', 'h02v02']
+    return tiles_list
+
+######################################################################################
+#   conv_date_2_dekad
+#   Given a date,YYYYMMDD returns the dekad.
+#   The dekads are counted having as reference January 1, 1980. 
+#   author: Bruno Combal, JRC, European Commission
+#   date: 2008/10/15
+#   Output: dekad number in the range starting on Jan 1980
+
+def conv_date_2_dekad (yyyymmdd):
+    tiles_list = ['h01v01', 'h02v02']
+    return tiles_list
+#function date2dekad(){
+#    if [ $# -ne 1 ]; then
+#	echo '0'
+#    else
+#	if [ -z "$(isYYYYMMDD $1)" ]; then
+#	    echo "0"
+#	else
+#	    local year=${1:0:4}
+#	    local month=${1:4:2}
+#	    local day=${1:6:2}
+#        # Specific test for #2314
+#        if [ $day -eq 31 ]; then 
+#  	      echo "(${year}-1980)*36 + (${month}-1)*3 + 3 " | bc
+#        else
+#  	      echo "(${year}-1980)*36 + (${month}-1)*3 + (${day}-1)/10+1 " | bc
+#        fi
+#	fi
+#    fi
+#}
+

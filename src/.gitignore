@@ -1,0 +1,7 @@
+.idea
+TestFiles
+ImportedPyModules
+*.pyc
+*.*~
+log
+
