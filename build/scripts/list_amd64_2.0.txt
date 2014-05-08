@@ -25,3 +25,5 @@ python-dev
 python-pycurl
 python-pyproj
 python-pip
+python-psycopg2
+python-sqlalchemy
