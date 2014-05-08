@@ -7,45 +7,49 @@
 #			 Maximum length of the file/backup files are also managed. 
 #	history: 1.0 
 #
-#   TODO-M.C.: what is the difference between try/except, Logger and Exception Raising ?
-#
-try: 
-	import os, glob, logging, logging.handlers
-except ImportError: 
-	pass
-
 try:
-    baseDir=os.environ['ESTATION2PATH']
-except:
+    import os, glob, logging, logging.handlers
+except ImportError: 
+    print 'Error in importing module ! Exit'
+    exit(1)
+
+# Get base dir
+try:
+    base_dir = os.environ['ESTATION2PATH']
+except EnvironmentError:
     print 'Error - ESTATION2PATH variable not defined ! Exit'
-    exit
+    exit(1)
 
-logDir=baseDir+'log/'
+log_dir = base_dir+'log/'
 
-def myLogger(name):
-	logger=logging.getLogger('eStation2.'+name)
-	logger.setLevel(logging.DEBUG)
 
-	# Remove existing handlers
-	while len(logger.handlers) > 0:
-		h=logger.handlers[0]
-		logger.removeHandler(h)
+def my_logger(name):
+    logger = logging.getLogger('eStation2.'+name)
+    logger.setLevel(logging.DEBUG)
 
-	# Create handlers
-	consoleHandler = logging.StreamHandler()
-	consoleHandler.setLevel(logging.DEBUG)
-	fileHandler = logging.handlers.RotatingFileHandler(logDir+name+'.log',maxBytes=10000,backupCount=5)
-	fileHandler.setLevel(logging.WARNING)
+    # Remove existing handlers
+    while len(logger.handlers) > 0:
+        h = logger.handlers[0]
+        logger.removeHandler(h)
 
-	# Create formatter
-	plainformatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%d %H:%M:%S")
+    # Create handlers
+    console_handler = logging.StreamHandler()
+    file_handler = logging.handlers.RotatingFileHandler(log_dir+name+'.log', maxBytes=10000, backupCount=5)
 
-	# Add formatter to handlers
-	consoleHandler.setFormatter(plainformatter)
-	fileHandler.setFormatter(plainformatter)
+    # Create formatter
+    plain_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%d %H:%M:%S")
+
+    # Add formatter to handlers
+    console_handler.setFormatter(plain_formatter)
+    file_handler.setFormatter(plain_formatter)
 
     #handler=logging.FileHandler(os.path.join('/some/path/',name+'.log'),'w')
-	logger.addHandler(fileHandler)
-	logger.addHandler(consoleHandler)
-	return logger
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+
+    # Define log handlers
+    console_handler.setLevel(logging.INFO)
+    file_handler.setLevel(logging.DEBUG)
+
+    return logger
 

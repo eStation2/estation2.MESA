@@ -5,20 +5,42 @@
 #   descr:	 Functions to access DB
 #
 
-from time import time
-from datetime import datetime
-import os, sys, psycopg2, psycopg2.extras
-import json
+import sys
 
-sys.path.append('/srv/www/eStation2/config/')
+import psycopg2
+import psycopg2.extras
+#from lib.python import es_logging as log
+#from lib.python.es_constants import *
 
-import es2
+myglobals = {
+    'host': 'h05-dev-vm19',
+    'port': '5432',
+    'dbUser': 'estation',
+    'dbPass': 'mesadmin',
+    'dbName': 'estationdb',
+    'schema': 'products',
+    'basedir': '/srv/www/eStation2/',
+    'data_path': '',
+    'static_data_path': ''
+}
 
-def connectDB(useDSN):
+psycopg2_dns = "dbname='%s' user='%s' host='%s' password='%s'" % (myglobals['dbName'],
+                                                                 myglobals['dbUser'],
+                                                                 myglobals['host'],
+                                                                 myglobals['dbPass'])
+
+
+#psycopg2_dns = "dbname='%s' user='%s' host='%s' password='%s'" % (DB_DATABASE, Testing git........
+#                                                             DB_USER,
+#                                                             DB_HOST,
+#                                                             DB_PASS)
+
+
+def connect_db(use_dns):
 
     # DNS="dbname = '%s' user = '%s' host = '%s'" % (nameDB,userDB,hostDB)
     try:
-        conn = psycopg2.connect(useDSN)
+        conn = psycopg2.connect(use_dns)
         conn.set_isolation_level(0)
         # cur = conn.cursor()
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -26,17 +48,39 @@ def connectDB(useDSN):
     except:
         exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
-        raise Exceptions.NoApplicableCode("Database connection failed!\n ->%s" % exceptionValue)
+        raise Exception("Database connection failed!\n ->%s" % exceptionValue)
 
 
-def getListSubProducts():
+def get_list_sub_products():
 
-    psycopg2DSN = "dbname='%s' user='%s' host='%s' password='%s'" % (es2.DB_DATABASE,
-                                                                 es2.DB_USER,
-                                                                 es2.DB_HOST,
-                                                                 es2.DB_PASS)
-    cursor = connectDB(psycopg2DSN)
-    sql="select DISTINCT sub_prod_descr_name from ps.products_data"
+    cursor = connect_db(psycopg2_dns)
+    sql = "select DISTINCT sub_prod_descr_name from ps.products_data"
     cursor.execute(sql)
     res = cursor.fetchall()
     return res
+
+
+def get_list_ingest_active_trigger():
+
+    cursor = connect_db(psycopg2_dns)
+    sql = "select DISTINCT sub_prod_descr_name from ps.products_data"
+    cursor.execute(sql)
+
+    res = cursor.fetchall()
+    return res
+
+
+def get_list_eumetcast():
+
+    cursor = connect_db(psycopg2_dns)
+    #" date_revision, date_publication, entry_date" \
+    #      " COALESCE(date_creation,'01/01/2000')   " \
+    sql = " select eumetcast_id from products.eumetcast "
+    cursor.execute(sql)
+    rows = cursor.fetchall()
+
+    print sql
+    for row in rows:
+        print row
+
+    return rows
