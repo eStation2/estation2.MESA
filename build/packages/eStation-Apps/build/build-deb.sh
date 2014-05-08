@@ -3,11 +3,11 @@
 # Package description
 Project=eStation-
 Name=eStation-Apps
-Version=2.0.0
+Version=2.0.1
 Release=1
 
 # this is the destination folder for app sorces, this is specific for this package
-APP_SOURCE_DESTINATION=/srv/www/eStation2.0
+APP_SOURCE_DESTINATION=/srv/www/eStation2
 
 #this is the deb package name
 PACKAGE_DEB_NAME=${Name}-${Version}-${Release}.deb

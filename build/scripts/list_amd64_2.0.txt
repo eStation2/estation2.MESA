@@ -19,11 +19,12 @@ libgrib-api-dev
 python-gdal
 cgi-mapserver
 php5-mapscript
-python-pyproj
 python-mapscript
 python-nose
 python-dev
 python-pycurl
-python-psycopg2
+python-pyproj
 python-pip
+python-psycopg2
 python-sqlalchemy
+
