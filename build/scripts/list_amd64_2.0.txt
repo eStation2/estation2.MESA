@@ -24,5 +24,6 @@ python-mapscript
 python-nose
 python-dev
 python-pycurl
-python-pyproj
+python-psycopg2
 python-pip
+python-sqlalchemy
