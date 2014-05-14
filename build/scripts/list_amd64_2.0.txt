@@ -19,6 +19,7 @@ libgrib-api-dev
 python-gdal
 cgi-mapserver
 php5-mapscript
+cifs-utils
 python-mapscript
 python-nose
 python-dev
