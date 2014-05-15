@@ -1,16 +1,55 @@
 #!/bin/sh
 
-# fix for new version of amesd-system web access
-#rm -f /var/www/*_index.php
-#rm -rf /var/www/lib/ext/build
-#rm -rf /var/www/lib/ext/resources/images/vista
-#rm -rf /var/www/lib/ext/resources/images/slate
-#rm -rf /var/www/lib/ext/adapter/prototype
-#rm -rf /var/www/lib/ext/adapter/jquery
-#rm -rf /var/www/lib/ext/adapter/yui
-#rm -rf /var/www/lib/ext/package
-
 # touch the index.php file, if it does not exist - see #1141)
-#if [ ! -f /var/www/index.php ]; then
-#    touch /var/www/index.php
+#if [ ! -f /srv/www/eStation2/index.php ]; then
+#    touch /srv/www/eStation2/index.php
 #fi
+
+
+# Define a logfile
+logfile=/var/log/eStation2/upgrade_ps-database_<VERSION>.log
+uname=$(uname -n)
+
+# Stop postgresql if it is running
+if [ "$(nc -v -z localhost 5432 2> /dev/null;echo $?)" = 0 ]; then
+	/etc/init.d/postgresql stop
+fi
+
+# Operate only on PC2 - do nothing on PC3
+if [ $uname == 'eStation-PS' ]; then
+
+mkdir -p /data/pgsql/data
+chown -R postgres:postgres /data/pgsql
+# first database connection
+if [ "$(ls /data/pgsql/data|wc -l)" = 0 ];then
+	su postgres -c "/usr/lib/postgresql/9.3/bin/initdb -D /data/pgsql/data"
+fi
+
+#End of Modification of the Configuration
+
+ln -sf /etc/postgresql-common/root.crt /data/pgsql/data/root.crt
+ln -sf /etc/ssl/certs/ssl-cert-snakeoil.pem /data/pgsql/data/server.crt
+ln -sf /etc/ssl/private/ssl-cert-snakeoil.key /data/pgsql/data/server.key
+
+#Make temp file for actual version of package
+old_package=$(dpkg -l|grep eStation-Apps|awk '{print $3}'|cut -d '-' -f1)
+if [ "${old_package}" ];then
+	mkdir -p -m 755 /etc/eStation2/database
+	touch /etc/eStation2/database/version_${old_package}
+fi
+
+# Restart the database
+/etc/init.d/postgresql start
+
+# Do a dump of DB structure - ONLY if it is an update (not for installation from scratch) and not the same version (re-install)
+if [ "${old_package}" != <VERSION> ] && [ "$(su postgres -c "psql -d estationdb -c 'select * from products.mapset'" 2> /dev/null)" ];then
+  mkdir -p /data/dbdump/
+  pg_dump -i -h localhost -p 5432 -U estation -c -s -F p -v -f "/data/dbdump/full_dump_structure_${old_package}.sql" -n \"products\" -n \"data\" -n \"analysis\" estationdb
+  # Do a dump of data (except timeseries_data: -T "ps.timeseries_data")
+  pg_dump -i -h localhost -p 5432 -U estation -a -b -F t -v -f "/data/dbdump/full_dump_data_${old_package}.sql" -n \"products\" -n \"data\" -n \"analysis\" estationdb
+fi
+# Operate only on PC2 - do nothing on PC3
+else
+  echo "eStation-EMMA machine: Do nothing in preinst" >> ${logfile}
+fi
+

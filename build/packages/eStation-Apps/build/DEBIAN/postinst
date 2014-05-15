@@ -1,2 +1,72 @@
 #!/bin/sh
 
+# Define a logfile
+logfile=/var/log/eStation2/upgrade_database_<VERSION>.log
+uname=$(uname -n)
+echo "Machine Name = ${uname}" >> ${logfile}
+
+# Operate only on PC2 - do nothing on PC3
+if [ $uname == 'eStation-PS' ]; then
+    actual_version=$(ls /etc/eStation2/database/version_*|awk -F'_' '{print $2}')
+    echo "Actual Version = ${actual_version}" >> ${logfile}
+
+    # localhost reachable
+    if [ "$(nc -v -z localhost 5432 2> /dev/null;echo $?)" = 0 ]; then
+        echo "Postgresql is running" > ${logfile}
+        # estationdb exists ?
+        if [ ! "$(su postgres -c "psql -c 'select usename from pg_user'"|grep estation)" ];then
+            echo "Create User and Database" >> ${logfile}
+            su postgres -c psql << EOF
+CREATE USER estation;
+ALTER ROLE estation WITH CREATEDB;
+CREATE DATABASE estationdb WITH OWNER estation;
+ALTER USER estation WITH ENCRYPTED PASSWORD 'mesadmin';
+EOF
+        fi
+
+        #actual_version=$(ls /etc/eStation2/database/version_*|awk -F'_' '{print $2}')
+        #echo "Actual Version = ${actual_version}" >> ${logfile}
+
+        #Update for migrating database to new version
+        if [ "${actual_version}" != "<VERSION>" ] &&  [ "$(su postgres -c "psql -d estationdb -c 'select * from products.mapset'" 2> /dev/null)" ];then
+            psql -h localhost -U estation -d estationdb -f /srv/www/eStation2/database/update_${actual_version}_to_<VERSION>.sql >> ${logfile} 2>&1  << EOF
+mesadmin
+EOF
+        elif [ ! "$(su postgres -c "psql -d estationdb -c 'select * from products.mapset'" 2> /dev/null)" ];then
+            #First install from scratch data
+            echo "Populate Database" >> ${logfile}
+            # End automatically added section
+            #createlang -h localhost -U estation plpgsql estationdb
+            psql -h localhost -U estation -d estationdb -f /srv/www/eStation2/database/dump_database_structure.sql >> ${logfile} 2>&1 << EOF
+mesadmin
+EOF
+
+            #echo "Extended Features" >> ${logfile}
+            #su postgres -c "psql -h localhost -U postgres -d estationdb < /etc/eStation/database/admin.sql"
+            #su postgres -c "psql -h localhost -U postgres -d estationdb < /etc/eStation/data/etc/eStation/database/admin.sqlbase/adminpack.sql"
+        fi
+
+        # Update Tables (both for upgrade and installation from scratch)
+        echo "Tables contents" >> ${logfile}
+        psql -h localhost -U estation -d estationdb -f /srv/www/eStation2/database/dump_database_data.sql >> ${logfile} 2>&1 << EOF
+mesadmin
+EOF
+
+        rm -f /etc/eStation2/database/version_*
+        # End automatically added section
+
+        # Automatically added by dh_installinit
+        if [ -x "/etc/init.d/postgresql" ]; then
+                echo "Restart postgresql" >> ${logfile}
+                if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
+                        invoke-rc.d postgresql restart || exit $?
+                else
+                        /etc/init.d/postgresql restart || exit $?
+                fi
+        fi
+        # End automatically added section
+    fi # localhost reachable
+# Operate only on PC2 - do nothing on PC3
+else
+  echo "eStation-EMMA machine: Do nothing in postinst" >> ${logfile}
+fi
