@@ -1,7 +1,6 @@
 .idea
-TestFiles
 ImportedPyModules
 *.pyc
 *.*~
 log
-
+clean.sh
