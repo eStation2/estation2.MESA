@@ -31,6 +31,11 @@ test_data_dir_ref = base_dir+'/TestFiles/RefsOutput/'
 base_tmp_dir = os.path.sep+'tmp'+os.path.sep+'eStation2'+os.path.sep
 
 eumetcast_files_dir = '/home/esuser/my_eumetcast_dir/'
+ingest_server_in_dir = '/home/esuser/my_data_ingest_dir/'
+processed_list_dir = base_tmp_dir + 'processed' +os.path.sep
+get_eumetcast_processed_list = processed_list_dir + 'get_eum_processed_list'
+poll_frequency = 2
+
 
 #mpeEnviHeader = ${staticData_dir}/processing/MPE_ENVI_Header.hdr
 #MRT_HOME = /opt/extern/mrt

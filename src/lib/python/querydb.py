@@ -11,15 +11,14 @@ import sys
 import traceback
 import sqlsoup
 #from sqlsoup import Session
-from sqlalchemy import or_, and_, desc, asc
+from sqlalchemy.sql import or_, and_, desc, asc
 from sqlalchemy.orm import aliased
-from sqlalchemy import func
+from sqlalchemy.sql import func
 #from lib.python.es_constants import *
 
 logger = log.my_logger(__name__)
 
 # TODO: Working with SQLAlchemy Sessions?
-# TODO Jurvtk: log error handling.
 
 
 def connect_db():
@@ -308,5 +307,33 @@ def get_datasource_descr(echo=False, source_type='', source_id=''):
         if echo:
             print traceback.format_exc()
         # Exit the script and print an error telling what happened.
-        raise logger.error("get_ingestion: Database query error!\n -> {}".format(exceptionvalue))
+        raise logger.error("get_datasource_descr: Database query error!\n -> {}".format(exceptionvalue))
         #raise Exception("get_ingestion: Database query error!\n ->%s" % exceptionvalue)
+
+
+def get_eumetcast_sources(echo=False):
+    try:
+        session = db.session
+
+        es = session.query(db.eumetcast_source.eumetcast_id, db.eumetcast_source.filter_expression_jrc).subquery()
+        pads = aliased(db.product_acquisition_data_source)
+
+        # The columns on the subquery "es" are accessible through an attribute called c , es.c.filter_expression_jrc
+        eumetcast_sources = session.query(pads, es.c.eumetcast_id, es.c.filter_expression_jrc).\
+            outerjoin(es, pads.data_source_id == es.c.eumetcast_id).\
+            filter(and_(pads.type == 'EUMETCAST', pads.activated)).all()
+
+        if echo:
+            for row in eumetcast_sources:
+                print row
+
+        return eumetcast_sources
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        raise logger.error("get_eumetcast_sources: Database query error!\n -> {}".format(exceptionvalue))
+        #raise Exception("get_ingestion: Database query error!\n ->%s" % exceptionvalue)
+

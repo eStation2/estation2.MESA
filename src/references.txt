@@ -1,0 +1,52 @@
+#
+#   References to python docs and online sources (examples, ...)
+#
+
+Python Modules
+--------------
+Installing Python modules:
+http://docs.python.org/2/install/ e.g. :
+
+std. Installation:
+python setup.py install -> goes to <prefix>/lib/pythonX.Y/site-packages
+(sys.prefix='/Library/Frameworks/Python.framework/Versions/2.7' on my Mac)
+
+User Installation:
+python setup.py install --user -> goes to <userbase>/lib/pythonX.Y/site-packages
+(site.USER_BASE='/Users/clerima/Library/Python/2.7' on my Mac)
+
+How to check if a module has been in imported:
+http://stackoverflow.com/questions/5027352/how-to-test-if-one-python-module-has-been-imported
+
+Easy_install:
+http://pythonhosted.org/setuptools/easy_install.html#downloading-and-installing-a-package
+Pip:
+http://www.pip-installer.org/en/latest/
+And namely for GDAL:
+http://trac.osgeo.org/gdal/wiki/GdalOgrInPython
+http://stackoverflow.com/questions/11091623/python-packages-offline-installation
+
+Virtualenv and virtualenvwrapper
+----------------------------------
+Tutorial: https://code.tutsplus.com/articles/python-power-tools-virtualenv--net-31560
+Tutorial: https://code.tutsplus.com/articles/python-power-tools-virtualenvwrapper--net-31569
+http://www.virtualenv.org/en/latest/virtualenv.html#making-environments-relocatable
+http://virtualenvwrapper.readthedocs.org/en/latest/command_ref.html
+
+GDAL-python reference:
+----------------------
+Reading 'grib' files (as MPE): http://www.gdal.org/frmt_grib.html
+Dataset Class: http://gdal.org/python/osgeo.gdal.Dataset-class.html
+GDAL Tutorial: http://www.gdal.org/gdal_tutorial.html
+GDAL OGRSpatialReference Class def:  http://www.gdal.org/ogr/classOGRSpatialReference.html
+
+Miscellaneous:
+--------------
+List of built-in Error Types:
+http://docs.python.org/2/library/exceptions.html#bltin-exceptions
+
+Definition of geoTransform:
+http://geoexamples.blogspot.it/2012/01/creating-files-in-ogr-and-gdal-with.html
+
+GDAL Metadata for GTiff
+http://gis-lab.info/docs/gdal/gdal_ogr_user_docs.html#42_4
