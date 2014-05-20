@@ -26,13 +26,14 @@ fi
 LIST_PCKGS=($(cat $LIST_FILE))
 
 # Loop over list and call pip
-
 for package in ${LIST_PCKGS[@]}
 do
 echo "Package: " ${package}
 	# Check if is commented
 	if [[ ! ${package} =~ '#' ]];
 	then 
+        # Make sure target dir exists
+        mkdir -p $PYTHON_PACKAGE_REPO 
         # Download to target dir
         pip install --download="$PYTHON_PACKAGE_REPO" ${package}
         # Create symbolic link version independent
