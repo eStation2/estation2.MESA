@@ -39,7 +39,8 @@ echo "Package: " ${package}
         # Create symbolic link version independent
         pack_fullname=$(ls $PYTHON_PACKAGE_REPO/${package}*)
         pack_no_release=$(echo ${package_fullname} | sed 's/[-\.][0-9]//g')
-		ln -fs "${package_fullname}" "${pack_no_release}"
+
+		echo "ln -fs "${package_fullname}" "${pack_no_release}""
 	fi
 done
 
