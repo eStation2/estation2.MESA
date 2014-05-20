@@ -42,6 +42,7 @@ fi
 
 #Create the .pgpass file
 echo 'localhost:5432:estationdb:estation:mesadmin' >> /home/adminuser/.pgpass
+chmod 600 /home/adminuser/.pgpass
 
 #End of Modification of the Configuration
 ln -sf /etc/postgresql-common/root.crt "$base_dir_db_data/root.crt"
