@@ -25,6 +25,13 @@ fi
 # Load file into a variable
 LIST_PCKGS=($(cat $LIST_FILE))
 
+this_dir=$(pwd)
+
+# Make sure target dir exists
+mkdir -p $PYTHON_PACKAGE_REPO 
+# Move to target dir
+cd $PYTHON_PACKAGE_REPO
+
 # Loop over list and call pip
 for package in ${LIST_PCKGS[@]}
 do
@@ -32,15 +39,14 @@ echo "Package: " ${package}
 	# Check if is commented
 	if [[ ! ${package} =~ '#' ]];
 	then 
-        # Make sure target dir exists
-        mkdir -p $PYTHON_PACKAGE_REPO 
         # Download to target dir
-        pip install --download="$PYTHON_PACKAGE_REPO" ${package}
+        pip install --download="./" ${package}
         # Create symbolic link version independent
-        pack_fullname=$(ls $PYTHON_PACKAGE_REPO/${package}*)
+        pack_fullname=$(ls /${package}*)
         pack_no_release=$(echo ${pack_fullname} | sed 's/[-\.][0-9]//g')
 
 		echo "ln -fs "${pack_fullname}" "${pack_no_release}""
 	fi
 done
 
+cd ${this_dir}
