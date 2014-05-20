@@ -3,6 +3,7 @@
 # TODO: 
 #   -> Define the base_dir for DB creation in a config file and source it (or set the env var PGDATA)
 #   -> Improve the mechanism to create the DB ? Test "$(ls $base_dir_db_data |wc -l)" = 0 NOT very safe ..
+#   -> Source user credentials from a config file ?
 #
 
 # Define a logfile
@@ -38,6 +39,9 @@ fi
 if [ "$(ls $base_dir_db_data|wc -l)" = 0 ];then
 	su postgres -c "/usr/lib/postgresql/9.3/bin/initdb -D $base_dir_db_data"
 fi
+
+#Create the .pgpass file
+echo 'localhost:5432:estationdb:estation:mesadmin' >> /home/adminuser/.pgpass
 
 #End of Modification of the Configuration
 ln -sf /etc/postgresql-common/root.crt "$base_dir_db_data/root.crt"
