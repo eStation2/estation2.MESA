@@ -45,7 +45,7 @@ echo "Package: " ${package}
         pack_fullname=$(ls ${package}*)
         pack_no_release=$(echo ${pack_fullname} | sed 's/[-\.][0-9]//g')
 
-		echo "ln -fs "${pack_fullname}" "${pack_no_release}""
+		ln -fs "${pack_fullname}" "${pack_no_release}"
 	fi
 done
 
