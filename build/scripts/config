@@ -17,6 +17,8 @@ CD_BUILD_DIR=$BASEDIR/CD_IMAGE
 PACKAGE_REPO=$BASEDIR/Package-Repository
 
 ALL_PACKAGE_REPO=$BASEDIR/Package-Repository/all-packages
+PYTHON_PACKAGE_REPO=$BASEDIR/Python-Modules
+
 UPDATE_PACKAGE_REPO=$BASEDIR/Package-Repository/update-packages
 UPDATE_PACKAGE_LISTS=$BASEDIR/Package-Repository/update-lists
 
