@@ -38,9 +38,9 @@ echo "Package: " ${package}
         pip install --download="$PYTHON_PACKAGE_REPO" ${package}
         # Create symbolic link version independent
         pack_fullname=$(ls $PYTHON_PACKAGE_REPO/${package}*)
-        pack_no_release=$(echo ${package_fullname} | sed 's/[-\.][0-9]//g')
+        pack_no_release=$(echo ${pack_fullname} | sed 's/[-\.][0-9]//g')
 
-		echo "ln -fs "${package_fullname}" "${pack_no_release}""
+		echo "ln -fs "${pack_fullname}" "${pack_no_release}""
 	fi
 done
 
