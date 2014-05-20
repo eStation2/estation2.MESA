@@ -4,9 +4,9 @@
 
 . ./config
 
-#update repository package inxed
-#./update-repository.sh
+#update repository package index (just to be sure)
+./update-repository.sh
 
-#rsync -av $ALL_PACKAGE_REPO/ $CD_BUILD_DIR/eStation/repository/
+rsync -av $ALL_PACKAGE_REPO/ $CD_BUILD_DIR/eStation/repository/
 rsync -av $PYTHON_PACKAGE_REPO/ $CD_BUILD_DIR/eStation/Python-Modules
 
