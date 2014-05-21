@@ -3,7 +3,7 @@
 # TODO: 
 #   -> get the new version automatically
 #   -> Source user credentials from a config file ?
-#
+#   -> Change the pg_hba.conf management (weak - char dependent)
 
 new_version="2.0.1"
 
@@ -81,6 +81,10 @@ fi
 # Update Tables (both for upgrade and installation from scratch)
 echo "Populate database tables" #>> ${logfile}
 psql -w -h localhost -U estation -d estationdb -f "$base_dir_system/database/dump_database_data.sql" >> ${logfile} 2>&1 
+
+# Change the configuration file to grant access
+perl -pi -e "s#host    all             all             127.0.0.1/32            md5#host    all         all         127.0.0.1/32          trust#" /etc/postgresql/9.3/main/pg_hba.conf
+perl -pi -e "s#host    all             all             ::1/128                 md5#host    all         all         ::1/128               trust\nhost    all         all         192.168.0.0/24               trust#" /etc/postgresql/9.3/main/pg_hba.conf host    
 
 # Automatically added by dh_installinit
 if [ -x "/etc/init.d/postgresql" ]; then
