@@ -7,11 +7,11 @@
 #
 
 # Define a logfile
-mkdir -p /var/log/eStation2/  
+#mkdir -p /var/log/eStation2/  
 logfile=/var/log/eStation2/upgrade_ps-database_2.0.1.log
 
 uname=$(uname -n)
-echo "Machine Name = ${uname}" >> ${logfile}
+#echo "Machine Name = ${uname}" >> ${logfile}
 
 # --------------------------------------------------------------------------------------
 #	Common Definitions
@@ -20,6 +20,18 @@ echo "Machine Name = ${uname}" >> ${logfile}
 base_dir_db_data="/eStation2/dbdata/"	# it is to be on Disk1 (system)
 base_dir_system="/srv/www/eStation2/"	# it is to be on Disk2 (system)
 base_dir_data="/data/"			# it is to be on Disk2 (data)
+
+# --------------------------------------------------------------------------------------
+#	Directory management / rights settings
+# --------------------------------------------------------------------------------------
+
+mkdir /srv/www/eStation2/log
+sudo chown -R adminuser /srv/www/eStation2/log
+sudo chgrp -R adminuser /srv/www/eStation2/log
+
+mkdir /tmp/eStation2/
+sudo chown -R adminuser /tmp/eStation2/
+sudo chgrp -R adminuser /tmp/eStation2/
 
 # --------------------------------------------------------------------------------------
 #	Postgresql DB management
