@@ -40,21 +40,21 @@ if [ "$(ls $base_dir_db_data|wc -l)" = 0 ];then
 	su postgres -c "/usr/lib/postgresql/9.3/bin/initdb -D $base_dir_db_data"
 fi
 
-#Create the .pgpass file
-echo 'localhost:5432:estationdb:estation:mesadmin' >> /home/adminuser/.pgpass
-chmod 600 /home/adminuser/.pgpass
-
-#End of Modification of the Configuration
+# End of Modification of the Configuration
 ln -sf /etc/postgresql-common/root.crt "$base_dir_db_data/root.crt"
 ln -sf /etc/ssl/certs/ssl-cert-snakeoil.pem "$base_dir_db_data/server.crt"
 ln -sf /etc/ssl/private/ssl-cert-snakeoil.key "$base_dir_db_data/server.key"
 
-#Write to tmpfile the actual version of package (if is an upgrade). This is for postinst.
+# Write to tmpfile the actual version of package (if is an upgrade). This is for postinst.
 old_package=$(dpkg -l|grep eStation-Apps|awk '{print $3}'|cut -d '-' -f1)
 if [ "${old_package}" ];then
 	mkdir -p -m 755 "$base_dir_system/database"
 	touch "$base_dir_system/database/version_${old_package}"
 fi
+
+# Change the configuration file to grant access
+perl -pi -e "s#host    all             all             127.0.0.1/32            md5#host    all         all         127.0.0.1/32          trust#" /etc/postgresql/9.3/main/pg_hba.conf
+perl -pi -e "s#host    all             all             ::1/128                 md5#host    all         all         ::1/128               trust\nhost    all         all         192.168.0.0/24               trust#" /etc/postgresql/9.3/main/pg_hba.conf host    
 
 # Restart the database
 /etc/init.d/postgresql start
