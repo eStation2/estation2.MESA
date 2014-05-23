@@ -16,6 +16,7 @@ libproj0<<<ubuntugis/ppa
 libgeos-3.3.8
 libgdal1
 libgrib-api-dev
+gdal-bin
 python-gdal
 cgi-mapserver
 php5-mapscript
