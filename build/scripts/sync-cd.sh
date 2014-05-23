@@ -5,7 +5,9 @@
 
 . ./config
 
-#update repository package inxed
-#./update-repository.sh
-
+#update cd image dirs
 rsync -av $GITDIR/build/CD_IMAGE/ $CD_BUILD_DIR/
+
+#update Python Packages dir
+rsync -av $PYTHON_PACKAGE_REPO $CD_BUILD_DIR/eStation
+

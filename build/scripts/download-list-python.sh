@@ -44,7 +44,7 @@ echo "Package: " ${package}
         # Create symbolic link version independent
         pack_fullname=$(ls ${package}*gz)
         pack_no_release=$(echo ${pack_fullname} | sed 's/[-\.][0-9]//g')
-		ln -fs "${pack_fullname}" "${pack_no_release}"
+		cp "${pack_fullname}" "${pack_no_release}"
 	fi
     # Remove locally create build dir
     rm -fr "./build"
