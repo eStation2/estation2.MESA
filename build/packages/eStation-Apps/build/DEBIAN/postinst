@@ -28,12 +28,19 @@ base_dir_data="/data"			# it is to be on Disk2 (data)
 #	- run the upgrade script     	(in case of upgrade)
 # --------------------------------------------------------------------------------------
 
+# check localhost reachable - or start postgresql
+if [ ! "$(nc -v -z localhost 5432 2> /dev/null;echo $?)" = 0 ]; then
+    echo "Postgresql is not running. Try and restart it." >> ${logfile}
+    /etc/init.d/postgresql start
+else
+    echo "Postgresql is running." >> ${logfile}
+fi
+
 # check localhost reachable - or abort
 if [ ! "$(nc -v -z localhost 5432 2> /dev/null;echo $?)" = 0 ]; then
-    echo "Postgresql is not running. Exit the install pstinst." > ${logfile}
+    echo "Postgresql is not running. Exit the install postinst." >> ${logfile}
     exit 1
 fi
-echo "Postgresql is running." > ${logfile}
 
 #  user exists ? otherwise create it.
 if [ ! "$(su postgres -c "psql -c 'select usename from pg_user'"|grep estation)" ];then
