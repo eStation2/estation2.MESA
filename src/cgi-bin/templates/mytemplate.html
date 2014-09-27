@@ -1,0 +1,15 @@
+$def with (title,name)
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>$title</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    </head>
+    <h3>Hello $name</h3>
+    <p>
+    $if len(name) > 6:
+        What a long name
+    $else:
+        What a short name
+    </p>
+</html>

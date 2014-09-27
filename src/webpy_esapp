@@ -1,0 +1,229 @@
+#!/usr/bin/python
+
+#if __name__ == '__main__' and __package__ is None:
+#    from os import sys, path
+#    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import sys, os
+cur_dir = os.path.dirname(__file__)
+if not cur_dir in sys.path:
+    sys.path.append(cur_dir)
+
+import web
+
+import locals
+import datetime
+import json
+#from locals import *
+
+#import database.querydb as querydb
+from database import querydb
+from apps.acquisition import get_eumetcast
+from apps.productmanagement.datasets import Dataset
+
+
+WEBPY_COOKIE_NAME = "webpy_session_id"
+
+urls = (
+    "/ingestion", "Ingestion",
+    "/dataacquisition", "DataAcquisition",
+    "/pa(.*)", "ProductAcquisition",
+    "/template", "TemplatePage",
+    #"/(.+)/(.+)", "EsApp",
+    #"/(.+)/", "EsApp",
+    "/", "EsApp")
+
+app = web.application(urls, globals(), autoreload=True)
+application = app.wsgifunc()
+#session = web.session.Session(app, web.session.DiskStore('../logs/mstmp/webpySessions'))
+
+
+def row2dict(row):
+    d = {}
+    for column in row.c._all_cols:
+        d[column.name] = str(getattr(row, column.name))
+
+    return d
+
+
+def toJson(queryResult):
+    tojson = ''
+    for row in queryResult:
+        da = row2dict(row)
+        tojson = tojson + json.dumps(da, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': ')) + ', '
+    tojson = tojson[:-2]
+    return tojson
+
+
+# Return True if the date is in the correct format
+def checkDateFormat(myString):
+    isDate = re.match('[0-1][0-9]\/[0-3][0-9]\/[1-2][0-9]{3}', myString)
+    return isDate
+
+
+
+class EsApp:
+    def __init__(self):
+        self.lang = "en"
+
+    def GET(self):
+        #return sys.path
+        #return web.ctx
+        render = web.template.render(locals.es2globals['base_dir']+'/apps/gui/esapp')
+        return render.index()
+        #getparam = web.input(lang=self.lang)
+        #return render.index(getparam.lang)
+
+
+class Ingestion:
+    def __init__(self):
+        self.lang = "en"
+
+    def GET(self):
+        #return web.ctx
+        ingestions = querydb.get_ingestions(echo=False)
+
+        #completeness = {
+        #    'completeness': {
+        #        'firstdate': '2010-01-01',
+        #        'lastdate': '2014-12-21',
+        #        'totfiles': 312,
+        #        'missingfiles': 4,
+        #        'intervals': [{
+        #            'fromdate': '2010-01-01',
+        #            'todate': '2013-05-21',
+        #            'intervaltype': 'present',
+        #            'intervalpercentage': 20
+        #        }, {
+        #            'fromdate': '2013-06-01',
+        #            'todate': '2013-06-21',
+        #            'intervaltype': 'missing',
+        #            'intervalpercentage': 1
+        #        }, {
+        #            'fromdate': '2014-07-01',
+        #            'todate': '2014-07-21',
+        #            'intervaltype': 'present',
+        #            'intervalpercentage': 35
+        #        }, {
+        #            'fromdate': '2014-08-01',
+        #            'todate': '2014-08-21',
+        #            'intervaltype': 'permanent-missing',
+        #            'intervalpercentage': 2
+        #        }, {
+        #            'fromdate': '2014-09-01',
+        #            'todate': '2014-12-21',
+        #            'intervaltype': 'present',
+        #            'intervalpercentage': 32
+        #        }, {
+        #            'fromdate': '2014-09-01',
+        #            'todate': '2014-12-21',
+        #            'intervaltype': 'missing',
+        #            'intervalpercentage': 1
+        #        }, {
+        #            'fromdate': '2014-09-01',
+        #            'todate': '2014-12-21',
+        #            'intervaltype': 'present',
+        #            'intervalpercentage': 9
+        #        }]
+        #    }
+        #}
+
+        if ingestions.__len__() > 0:
+            ingest_dict_all = []
+            for row in ingestions:
+                kwargs = {'product_code': row.productcode, 'sub_product_code': row.subproductcode, 'version': row.version, 'mapset': row.mapsetcode}
+                print kwargs
+                #kwargs.update({'to_date': datetime.date(2013, 12, 31)})
+                dataset = Dataset(**kwargs)
+                intervals = dataset.get_dataset_normalized_info()
+                print intervals
+
+                ingest_dict = row2dict(row)
+                #ingest_dict.update(completeness)
+                ingest_dict_all.append(ingest_dict)
+
+            #ingestions_json = toJson(ingestions)
+            ingestions_json = json.dumps(ingest_dict_all, ensure_ascii=False, sort_keys=True, indent=4, separators=(', ', ': '))
+
+            # ingestions_json = json.dumps(ingestions,  ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': '))
+            ingestions_json = '{"success":true, "total":'+str(ingestions.__len__())+',"ingestions":'+ingestions_json+'}'
+            # ingestions_json = '{"success":true, "total":1,"ingestions":'+ingestions_json+'}'
+
+        else:
+            ingestions_json = '{"success":false, "error":"No data acquisitions defined!"}'
+
+        return ingestions_json
+
+
+class DataAcquisition:
+    def __init__(self):
+        self.lang = "en"
+
+    def GET(self):
+        #return web.ctx
+
+        dataacquisitions = querydb.get_dataacquisitions(echo=False)
+
+        if dataacquisitions.__len__() > 0:
+            #dataacquisitions_json = toJson(dataacquisitions)
+
+            acq_dict_all = []
+            for row in dataacquisitions:
+                acq_dict = row2dict(row)
+                # Retrieve datetime of latest acquired file and lastest datetime
+                # the acquisition was active of a specific eumetcast id
+                acq_dates = get_eumetcast.get_eumetcast_info(row.data_source_id)
+                if acq_dates:
+                    for key in acq_dates.keys():
+                        #acq_info += '"%s": "%s", ' % (key, acq_dates[key])
+                        if isinstance(acq_dates[key], datetime.date):
+                            datetostring = acq_dates[key].strftime("%y-%m-%d %H:%M")
+                            acq_dict[key] = datetostring
+                        else:
+                            acq_dict[key] = acq_dates[key]
+                else:
+                    acq_dict['time_latest_copy'] = datetime.datetime.now().strftime("%y-%m-%d %H:%M")
+                    acq_dict['time_latest_exec'] = datetime.datetime.now().strftime("%y-%m-%d %H:%M")
+                    acq_dict['lenght_proc_list'] = datetime.datetime.now().strftime("%y-%m-%d %H:%M")
+
+                acq_dict_all.append(acq_dict)
+
+                acq_json = json.dumps(acq_dict_all, ensure_ascii=False, sort_keys=True, indent=4, separators=(', ', ': '))
+
+                logger.error("Just to log something in this log file to see if the rotatingfilehandler works!\n")
+
+                # dataacquisitions_json = json.dumps(dataacquisitions, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': '))
+                dataacquisitions_json = '{"success":true, "total":'+str(dataacquisitions.__len__())+',"dataacquisitions":'+acq_json+'}'
+                # dataacquisitions_json = '{"success":true, "total":1,"dataacquisitions":['+dataacquisitions_json+']}'
+
+        else:
+            dataacquisitions_json = '{"success":false, "error":"No data acquisitions defined!"}'
+
+        return dataacquisitions_json
+
+
+class ProductAcquisition:
+    def __init__(self):
+        self.lang = "en"
+
+    def GET(self, params):
+        #return web.ctx
+        getparams = web.input()
+        #activated = True
+        if getparams.activated:
+            activated = getparams.activated
+        products = querydb.get_products(echo=False, activated=getparams.activated)
+        #products = querydb.get_products(echo=False)
+        return products
+
+
+class TemplatePage:
+    def __init__(self):
+        self.render = web.template.render(locals.es2globals['base_dir']+'/templates/')
+
+    def GET(self):
+        getInput=web.input(name="World")
+        return self.render.mytemplate("mytitle", getInput.name)
+
+if __name__ == "__main__":
+    app.run()

@@ -1,0 +1,8 @@
+.old
+.idea
+*.pyc
+*.*~
+*.tar
+tmp
+clean.sh
+MyApp

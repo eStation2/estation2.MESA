@@ -1,0 +1,9 @@
+.old
+.idea
+*.pyc
+*.*~
+*.tar
+tmp
+clean.sh
+node-v0.10.26
+node_modules
