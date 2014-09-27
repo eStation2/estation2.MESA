@@ -50,3 +50,10 @@ http://geoexamples.blogspot.it/2012/01/creating-files-in-ogr-and-gdal-with.html
 
 GDAL Metadata for GTiff
 http://gis-lab.info/docs/gdal/gdal_ogr_user_docs.html#42_4
+
+http://www.ruffus.org.uk/
+
+Git:
+----
+a. take a deleted file from HEAD: git checkout HEAD^ <file_name>
+   (HEAD is the latest-current commit)

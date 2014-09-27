@@ -1,6 +1,13 @@
+.DS_STORE
+.old
 .idea
-ImportedPyModules
 *.pyc
+*.swp
 *.*~
 log
 clean.sh
+ImportedPyModules
+TestFiles
+tmp
+log
+my_locals.py

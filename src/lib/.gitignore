@@ -1,3 +1,7 @@
+.old
+.idea
 *.pyc
 *.*~
-template-ec
+*.tar
+tmp
+clean.sh

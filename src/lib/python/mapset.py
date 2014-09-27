@@ -7,8 +7,18 @@
 #   TODO-M.C.: Define methods to assess relationships between mapsets (e.g. included)
 #
 
-#from osgeo import osr
-from config.es2 import *
+# source eStation2 base definitions
+import locals
+
+# Import eStation lib modules
+from database import querydb
+
+# Import third-party modules
+from osgeo import gdalconst
+from osgeo import gdal
+from osgeo import osr
+import pygrib
+import numpy as N
 
 
 class MapSet:
