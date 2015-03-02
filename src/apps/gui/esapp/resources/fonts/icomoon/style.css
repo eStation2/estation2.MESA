@@ -1,0 +1,61 @@
+@font-face {
+	font-family: 'icomoon';
+	src:url('fonts/icomoon.eot?hqjfp3');
+	src:url('fonts/icomoon.eot?#iefixhqjfp3') format('embedded-opentype'),
+		url('fonts/icomoon.woff?hqjfp3') format('woff'),
+		url('fonts/icomoon.ttf?hqjfp3') format('truetype'),
+		url('fonts/icomoon.svg?hqjfp3#icomoon') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+	font-family: 'icomoon';
+	speak: none;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+
+	/* Better Font Rendering =========== */
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.icon-cancel-circle:before {
+	content: "\e607";
+}
+.icon-checkmark-circle:before {
+	content: "\e608";
+}
+.icon-close:before {
+	content: "\e609";
+}
+.icon-checkmark:before {
+	content: "\e60a";
+}
+.icon-checkmark2:before {
+	content: "\e60b";
+}
+.icon-play:before {
+	content: "\e600";
+}
+.icon-pause:before {
+	content: "\e601";
+}
+.icon-stop:before {
+	content: "\e602";
+}
+.icon-play2:before {
+	content: "\e603";
+}
+.icon-pause2:before {
+	content: "\e604";
+}
+.icon-stop2:before {
+	content: "\e605";
+}
+.icon-loop:before {
+	content: "\e606";
+}

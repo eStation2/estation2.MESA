@@ -1,0 +1,300 @@
+.x-grid3-body .x-grid3-radio-col-td .x-grid3-cell-inner {
+	padding: 1px 0 0 0!important;
+}
+.x-grid3-radio-col {
+	width: 100%;
+	height: 16px;
+	background: transparent url(../img/icons/radiooff.gif) no-repeat center center;
+}
+.x-grid3-radio-col-on {
+	width: 100%;
+	height: 16px;
+	background: transparent url(../img/icons/radioon.gif) no-repeat center center;
+}
+
+.not-dirty .x-grid3-dirty-cell {background: transparent;}
+
+
+p {
+    margin:5px;
+}
+
+.layers {
+    background-image:url(../img/layers.png);
+}
+
+.legends {
+    background-image:url(../img/legends.png);
+}
+
+.chart-curve {
+    background-image:url(../img/chart_curve.png);
+}
+
+.chart-line {
+    background-image:url(../img/line_chart.png);
+}
+
+.africa {
+    background-image:url(../img/africa.png);
+}
+
+.system-settings {
+    background-image:url(../img/system_settings.png);
+}
+
+.map-search {
+    background-image:url(../img/map_magnify.png);
+}
+
+.map_add  {
+    background-image:url(../img/map_add.png);
+}
+
+.link {
+    background-image:url(../img/link.png);
+}
+
+.unlink {
+    background-image:url(../img/link_break.png);
+}
+
+.estation {
+    background-image:url(../img/icon_eStation.png);
+}
+
+.activated {
+    background-image:url(../img/icons/check.png);
+}
+.deactivated {
+    background-image:url(../img/icons/times.png);
+}
+.settings {
+    background-image:url(../img/icons/folder_wrench.png);
+}
+.nav {
+    background-image:url(../img/icons/folder_go.png);
+}
+.info {
+    background-image:url(../img/icons/information.png);
+}
+.add {
+    background-image: url(../img/icons/add.png ) !important;
+}
+.edit {
+    background-image: url(../img/icons/edit.png ) !important;
+}
+.dashboard-panel-body {
+    background-image: url(../img/square.gif);
+}
+
+.x-tool-okay {
+    background-image: url(../img/icons/check-square.png ) !important;
+    background-color: #FFF;
+}
+
+.icon-disk {
+	background-image:url(../img/icons/disk.png) ! important;
+}
+
+.apply_globals-icon {
+    background-image:url(../img/icons/world_go.png) !important;
+}
+
+.magnifier-left-icon { background: url('../img/icons/magnifier-left.png') no-repeat 0 0 !important; }
+
+
+@font-face {
+    font-family: ECSquareSansPro-Regular;
+    src: url('../fonts/ECSquareSansPro-Regular.ttf');
+}
+
+.highlight { background-color: yellow }
+
+
+/*#header{position:relative;z-index:10;min-height:0px;background-color:#fff;line-height:1.4;}*/
+/*#header{height:40px;padding:0;margin:0 0 10px 0;overflow:hidden;float:left;clear:both;width:100%;position:relative;}*/
+/*#header #banner-title-text{font-family: ECSquareSansPro-Regular;margin:0;border:0;font-size:28px;line-height:1.2;padding-left:240px;position:absolute;top:65px;color:#0065a2;z-index:9;}*/
+/*#header #banner-title-text span{font-family: ECSquareSansPro-Regular;display:block;font-size:21px;color:#fff;}*/
+/*#header #banner-title-text{position:absolute;left:210px;top:0;font-size:24px;height:auto;margin:0;padding:0px 0 0 0;color:#fff;overflow:hidden;}*/
+/*#header #banner-title-text span{font-weight:bold;display:block;font-size:18px;position:relative;top:-10px;}*/
+
+.boxrounded {
+    background: #e9eaee;
+    border: 2px solid #ffffff;
+    padding: 5px 5px 5px 5px;
+    /*width: 700px;*/
+    margin: 0 auto;
+    /*text-align: center;*/
+    box-shadow: 1px 2px 6px rgba(0,0,0, 0.5);
+    -moz-box-shadow: 1px 2px 6px rgba(0,0,0, 0.5);
+    -webkit-box-shadow: 1px 2px 6px rgba(0,0,0, 0.5);
+
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+
+    /*-webkit-border-radius: 5px;*/
+    /*-moz-border-radius: 5px;*/
+    /*border-radius: 5px;*/
+}
+
+#header{position:absolute;left:200px;top:0;z-index:10;min-height:64px;min-width:100%;line-height:1.4;background-color:#0065a2;}
+#header #banner-title-text{position:absolute;left:210px;top:10px;font-size:30px;height:auto;margin:0;padding:0;color:#fff;overflow:hidden;}
+#header #banner-title-text-small{position:absolute;left:370px;top:18px;font-size:22px;height:auto;margin:0;padding:0;color:#fff;overflow:hidden;}
+
+
+#logo{position:relative;z-index:10;min-height:0;max-width:200px;padding:2px;background-color:#fff;}
+
+.smalltext {font-size:10px;}
+/*.smalltext {display:block;font-size:10px;}*/
+
+.menu-glyph-color-green .x-menu-item-glyph {
+    color: green;
+}
+.menu-glyph-color-red .x-menu-item-glyph {
+    color: red;
+}
+.menu-glyph-color-orange .x-menu-item-glyph {
+    color: orange;
+}
+.glyph-color-green {
+    color: green;
+}
+.glyph-color-red {
+    color: red;
+}
+
+.active-panel-body-style {
+    background-color: #dedede;
+}
+
+.dashboard-header-style {
+    background-color: #fff;
+}
+
+.dashboard-header-title-style {
+    color: #0d284e;
+    font-size:18px;
+}
+
+.panel-textheader-style {
+    font-weight:bold;
+    color:#000;
+    font-size:18px;
+}
+
+.panel-text-style {
+    font-weight:bold;
+    color:#000;
+    font-size:14px;
+}
+
+.panel-title-style {
+    color: #fff;
+    font-size:18px;
+}
+
+.panel-title-style-16 {
+    color: #fff;
+    font-size:16px;
+}
+
+.grid-header-style {
+    font-weight:bold;
+    color:#0065A2;
+    font-size:18px;
+}
+
+.group-header-style {
+    font-weight:bold;
+    /*color:#3892D3;*/
+    color:#fff;
+    font-size:18px;
+}
+
+.x-column-header-last {
+    border-right-width: 1px;
+}
+
+.x-action-col-cell img {
+  height: 24px;
+  width: 24px;
+}
+
+.myclass .x-grid-cell-inner div {
+    padding: 0px;
+    /*overflow:visible;  *//*visible|hidden|scroll|auto|initial|inherit;*/
+}
+
+.x-grid-with-row-lines .x-grid-item:last-child {
+    border-bottom-width: 0px;
+}
+
+/*.x-hide-display{display:none !important}*/
+
+
+.custom-slider {
+    width: 214px;
+    height: 29px;
+    padding-top: 13px;
+    background-image: url(../img/ticks.gif);
+}
+
+
+
+/* CSS for the mapsets dataview in the productnavigator */
+.mapsets {
+    background-color: #fff;
+    text-shadow: #fff 0 1px 0;
+    position: relative;
+    display: block;
+    height: auto;
+}
+
+.mapsets div.mapset img {
+    margin-bottom: 1px;
+}
+
+.mapsets div.mapset {
+    float: left;
+    padding: 8px 10px 8px 10px;
+    margin: 5px;
+/*    margin: 10px 0 0 25px;*/
+    text-align: center;
+    line-height: 18px;
+    color: #333;
+    font-size: 12px;
+    font-family: "Helvetica Neue",sans-serif;
+    height: 170px;
+    /*width: 140px;*/
+    overflow: hidden;
+    border-top: 1px solid transparent;
+    cursor: pointer;
+}
+
+.x-ie6 .mapsets div.mapset,
+.x-ie7 .mapsets div.mapset,
+.x-ie8 .mapsets div.mapset {
+    border-top: none;
+    padding: 3px 2px;
+    margin: 2px;
+}
+
+.mapsets div.mapset-hover {
+    background-color: #eee;
+}
+
+.mapsets .x-item-selected {
+    background-color: #D3E1F1 !important;
+}
+
+.mapsets div.mapset strong {
+    color: #000;
+    display: block;
+}
+
+.mapsets div.mapset span {
+    color: #999;
+}

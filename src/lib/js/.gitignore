@@ -1,0 +1,9 @@
+.old
+.idea
+*.pyc
+*.*~
+*.tar
+tmp
+clean.sh
+ext-4.2.2
+ext-5.0.0
