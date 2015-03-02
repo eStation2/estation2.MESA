@@ -120,7 +120,7 @@ class SdsMetadata:
              logger.error('Output file does not exist %s' % filepath)
         else:
             # Open output file
-            sds = gdal.Open(filepath, GA_Update)
+            sds = gdal.Open(filepath, gdalconst.GA_Update)
             self.write_to_ds(sds)
 
     def read_from_ds(self, dataset):
@@ -163,7 +163,7 @@ class SdsMetadata:
     def assign_es2_version(self):
     #
     #   Assign the es2_version
-        sds_metadata['eStation2_es2_version'] = config.es_constants.ES2_SW_VERSION
+        sds_metadata['eStation2_es2_version'] = es_constants.es2_sw_version
 
     def assign_comput_time_now(self):
     #
@@ -176,6 +176,7 @@ class SdsMetadata:
     def assign_from_product(self, product, subproduct, version):
     #
         product_out_info = querydb.get_product_out_info(productcode=product,subproductcode=subproduct,version=version, echo=False)
+        product_out_info = functions.list_to_element(product_out_info)
 
     #   Assign prod/subprod/version
         sds_metadata['eStation2_product'] = str(product)

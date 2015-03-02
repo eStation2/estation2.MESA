@@ -4,7 +4,6 @@ import sys
 from lib.python import es_logging as log
 
 # Import eStation lib modules
-import locals
 from config import es_constants
 
 import sqlalchemy
@@ -23,22 +22,24 @@ logger = log.my_logger(__name__)
 #   Output: Return connection handler to the database
 class ConnectDB(object):
 
-    @staticmethod
-    def is_testing():
-        # Force connecting to sqlite db
-        if getattr(ConnectDB, "_testing", None) is None:
-            setattr(ConnectDB, "_testing", sys.argv[0].lower().endswith('nosetests'))
-        # Force through a global variable
-        if locals.es2globals['db_test_mode'] is not None:
-            if locals.es2globals['db_test_mode'] is True:
-                setattr(ConnectDB, "_testing", 1)
+    # @staticmethod
+    # def is_testing():
+    #     # Define _testing from a global variable
+    #     # if _testing == True -> connect to sqlite
+    #     #                else -> connect to postgresql
+    #
+    #     if getattr(ConnectDB, "_testing", None) is None:
+    #         setattr(ConnectDB, "_testing", es_constants.es2globals.get('db_test_mode' == 1)
+    #                 or "nosetests" in sys.argv[0].lower())
+    #     # Force through a global variable
+    #     #if es_constants.es2globals.get('db_test_mode'):
+    #     #    setattr(ConnectDB, "_testing", 1)
+    #     return ConnectDB._testing
 
-        return ConnectDB._testing
-
     @staticmethod
-    def get_db_url():
-        if ConnectDB.is_testing():
-            if getattr(ConnectDB, '_db_url', None) is None:
+    def get_db_url(use_sqlite=False):
+        if use_sqlite:
+            if not getattr(ConnectDB, "_use_sqlite"):
                 import sqlite3, os
                 # SQL Alchemy cound not execute full sql scripts
                 # so we use a regular file to import fixtures
@@ -53,13 +54,17 @@ class ConnectDB(object):
                 con.executescript(file(os.path.join(os.path.dirname(__file__), "fixtures", "sqlite.sql")).read())
                 con.close()
                 # Used in querydb
-                es_constants.dbglobals['schema_products'] = None
-            db_url = ConnectDB._db_url
+                #es_constants.es2globals['schema_products'] = None
+                setattr(ConnectDB, "_use_sqlite", ConnectDB._db_url)
+            db_url = ConnectDB._use_sqlite
         else:
-            db_url = "postgresql://%s:%s@%s/%s" % (es_constants.dbglobals['dbUser'],
-                                                   es_constants.dbglobals['dbPass'],
-                                                   es_constants.dbglobals['host'],
-                                                   es_constants.dbglobals['dbName'])
+            setattr(ConnectDB, "_use_sqlite", None)
+            db_url = "postgresql://%s:%s@%s/%s" % (es_constants.es2globals['dbuser'],
+                                                   es_constants.es2globals['dbpass'],
+                                                   es_constants.es2globals['host'],
+                                                   es_constants.es2globals['dbname'])
+            logger.debug("Connect string: %s " % db_url)
+
         return db_url
 
     @staticmethod
@@ -67,18 +72,22 @@ class ConnectDB(object):
         return sqlalchemy.create_engine(ConnectDB.get_db_url())
 
     # Initialize the DB
-    def __init__(self, schema='products', usesqlsoup=True):
+    def __init__(self, schema='products', usesqlsoup=True, use_sqlite=False):
 
         try:
-            self.schema = schema or es_constants.dbglobals['schema_products']
-
+            self.schema = schema or es_constants.es2globals['schema_products']
+            # logger.debug("Usesqlsoup is: %s " % usesqlsoup)
             if usesqlsoup:
-                dburl = ConnectDB.get_db_url()
-                self.db = sqlsoup.SQLSoup(ConnectDB.get_db_url())
+                dburl = ConnectDB.get_db_url(use_sqlite)
+                self.db = sqlsoup.SQLSoup(dburl)
+                self.session = self.db.session
             else:
                 self.db = self.get_db_engine()
+                Mysession = sessionmaker(bind=self.db, autoflush=True)
+                self.session = Mysession()
 
-            if self.is_testing():
+            # logger.debug("is_testing is: %s " % self.is_testing())
+            if use_sqlite:
                 self.schema = None
             else:
                 self.db.schema = self.schema

@@ -13,9 +13,6 @@
 #   TODO-M.C.: replace, where needed/applicable,  datetime()
 #
 
-# source eStation2 base definitions
-import locals
-
 # Import standard modules
 import os
 import math
@@ -26,6 +23,7 @@ import resource
 from datetime import date
 import uuid
 import pickle
+import json
 
 # Import eStation2 modules
 from lib.python import es_logging as log
@@ -34,6 +32,94 @@ from config.es_constants import *
 logger = log.my_logger(__name__)
 
 dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'derived'}
+
+
+# Second function, rgb2html converts its arguments (r, g, b) to hexadecimal html-color string #RRGGBB
+# Arguments are converted to integers and trimmed to 0..255 range. It is possible to call it with array argument
+# rgb2html(array_of_three_ints) or specifying each component value separetly rgb2html(r, g, b).
+
+def rgb2html(rgb):
+    # if is_array(rgb) && sizeof(r) == 3:
+    #     list(r, g, b) = r
+
+    r = int(rgb[0])
+    g = int(rgb[1])
+    b = int(rgb[2])
+
+    r = 0 if r < 0 else 255 if r > 255 else r
+    r = "%x" % r
+
+    g = 0 if g < 0 else 255 if g > 255 else g
+    g = "%x" % g
+
+    b = 0 if b < 0 else 255 if b > 255 else b
+    b = "%x" % b
+
+    color = '0' if len(r) < 2 else '' + r
+    color += '0' if len(g) < 2 else '' + g
+    color += '0' if len(b) < 2 else '' + b
+
+    # r = dechex(r<0?0:(r>255?255:r))
+    # g = dechex(g<0?0:(g>255?255:g))
+    # b = dechex(b<0?0:(b>255?255:b))
+
+    # color = len(r) < 2 ? '0' : '' + r
+    # color += len(g) < 2 ? '0' : '' + g
+    # color += len(b) < 2 ? '0' : '' + b
+    return '#'+color
+
+
+def row2dict(row):
+    d = {}
+    for column in row.c._all_cols:
+        d[column.name] = str(getattr(row, column.name))
+
+    return d
+
+
+def tojson(queryresult):
+    jsonresult = ''
+    for row in queryresult:
+        da = row2dict(row)
+        jsonresult = jsonresult + json.dumps(da,
+                                             ensure_ascii=False,
+                                             sort_keys=True,
+                                             indent=4,
+                                             separators=(',', ': ')) + ', '
+    jsonresult = jsonresult[:-2]
+    return jsonresult
+
+
+# Return True if the date is in the correct format
+def checkDateFormat(myString):
+    isDate = re.match('[0-1][0-9]\/[0-3][0-9]\/[1-2][0-9]{3}', myString)
+    return isDate
+
+
+import urllib2
+def internet_on():
+    try:
+        response = urllib2.urlopen('http://74.125.228.100', timeout=1)
+        return True
+    except urllib2.URLError as err: pass
+    return False
+
+
+import socket
+REMOTE_SERVER = "www.google.com"
+def is_connected():
+  try:
+    # see if we can resolve the host name -- tells us if there is
+    # a DNS listening
+    host = socket.gethostbyname(REMOTE_SERVER)
+    # connect to the host -- tells us if the host is actually
+    # reachable
+    s = socket.create_connection((host, 80), 2)
+    return True
+  except:
+     pass
+  return False
+
 
 ######################################################################################
 #                            DATE FUNCTIONS
@@ -370,7 +456,6 @@ def conv_yyyy_mm_dkx_2_yyyymmdd(yyyy_mm_dkx):
         date_yyyymmdd = year+month+day
     return date_yyyymmdd
 
-
 ######################################################################################
 #   conv_yymmk_2_yyyymmdd
 #   Purpose: Function returns a date (YYYYMMDD) with yymmk as input.
@@ -398,6 +483,34 @@ def conv_yymmk_2_yyyymmdd(yymmk):
         day = '11'
     if dekad == 3:
         day = '21'
+    #date_tmp = datetime.datetime(year=year, month=month, day=day)
+    date_yyyymmdd = str(year)+month+day
+    return date_yyyymmdd
+
+######################################################################################
+#   conv_yyyydmmdk_2_yyyymmdd
+#   Purpose: Function returns a date (YYYYMMDD) with YYYYdMMdK as input.
+#            K = 1 is day 1
+#            K = 2 is day 11
+#            K = 3 is day 21
+#   Author: M. Clerici
+#   Date: 2015/02/25
+#   Input: string of numbers in the format YYYYdMMdK
+#   Output: date (YYYYMMDD), otherwise -1
+def conv_yyyydmmdk_2_yyyymmdd(yymmk):
+
+    year = int(str(yymmk)[0:4])
+    month = str(yymmk)[5:7]
+    dekad = int(str(yymmk)[8:9])
+    if dekad == 1:
+        day = '01'
+    elif dekad == 2:
+        day = '11'
+    elif dekad == 3:
+        day = '21'
+    else:
+        date_yyyymmdd = -1
+
     #date_tmp = datetime.datetime(year=year, month=month, day=day)
     date_yyyymmdd = str(year)+month+day
     return date_yyyymmdd
@@ -442,14 +555,13 @@ def extract_from_date(str_date):
 #   General rules:
 #       dir is always
 #                       ['data_dir']+<product_code>+<mapset>+[derived/tif]+<sub_product_code>
-#       e.g.            /data/processing/FEWSNET_RFE/FEWSNET_Africa_8km/derived/10davg
+#       e.g.            /data/processing/vgt-ndvi/spot-v1/vgt/derived/10davg
 #
 #       filename is always
-#                       <datefield>'_'<product_code>['_'<version>]'_'<sub_product_code>'_'<mapset>'_'<ext>
-#       e.g.            0611_FEWSNET_RFE_10davg_FEWSNET_Africa_8km.tif
+#                       <product-code>_'<sub-product-code>'_'<datefield>'_'<mapset>'_'<version>'.'<ext>
+#       e.g.            vgt-ndvi_ndv_20150101_WGS84-Africa-1km_spot-v1.tif
 #
-#   Conventions: product_code :  1+ '_" separators
-#                sub_product_code : 0+ '_" separators
+#   Conventions: product_code and sub_product_code should not contains '_' !!!
 #
 ######################################################################################
 #   set_path_filename_nodate
@@ -461,11 +573,12 @@ def extract_from_date(str_date):
 #   Description: creates filename WITHOUT date field (for ruffus formatters)
 #
 #
-def set_path_filename_no_date(product_code, sub_product_code, mapset_id, extension):
+def set_path_filename_no_date(product_code, sub_product_code, mapset_id, version, extension):
 
     filename_nodate =     "_" + str(product_code) + '_' \
                               + str(sub_product_code) + "_" \
-                              + mapset_id + extension
+                              + mapset_id +  "_" \
+                              + version + extension
 
     return filename_nodate
 
@@ -479,9 +592,9 @@ def set_path_filename_no_date(product_code, sub_product_code, mapset_id, extensi
 #   Description: creates filename
 #
 #
-def set_path_filename(date_str, product_code, sub_product_code, mapset_id, extension):
+def set_path_filename(date_str, product_code, sub_product_code, mapset_id, version,  extension):
 
-    filename = date_str + set_path_filename_no_date(product_code, sub_product_code, mapset_id, extension)
+    filename = date_str + set_path_filename_no_date(product_code, sub_product_code, mapset_id, version, extension)
     return filename
 
 ######################################################################################
@@ -490,7 +603,7 @@ def set_path_filename(date_str, product_code, sub_product_code, mapset_id, exten
 #   Author: Marco Clerici, JRC, European Commission
 #   Date: 2014/06/22
 #   Inputs: product_code, sub_product_code, product_type, version
-#   Output: subdir, e.g. FEWSNET_RFE/FEWSNET_Africa_8km/tif/RFE/
+#   Output: subdir, e.g. vgt-ndvi/spot-v1/vgt/derived/10davg/
 #   Description: creates filename
 #
 #
@@ -499,6 +612,7 @@ def set_path_sub_directory(product_code, sub_product_code, product_type, version
     type_subdir = dict_subprod_type_2_dir[product_type]
 
     sub_directory = str(product_code) + os.path.sep + \
+                    str(version) + os.path.sep + \
                     mapset + os.path.sep +\
                     type_subdir + os.path.sep +\
                     str(sub_product_code) + os.path.sep
@@ -516,21 +630,18 @@ def set_path_sub_directory(product_code, sub_product_code, product_type, version
 #   Description: returns information form the directory
 #
 #
-#   NOTE:
 
 def get_from_path_dir(dir_name):
 
     # Make sure there is a leading separator at the end of 'dir'
     mydir=dir_name+os.path.sep
 
-    [head, sub_product_code] = os.path.split(os.path.split(mydir)[0])
+    tokens = [token for token in mydir.split(os.sep) if token]
+    sub_product_code = tokens[-1]
+    mapset = tokens[-3]
+    version =  tokens[-4]
+    product_code =  tokens[-5]
 
-    [head1, mapset] = os.path.split(os.path.split(head)[0])
-
-    [head, product_code] = os.path.split(head1)
-
-    # TODO-M.C.: implement version management
-    version = 'undefined'
 
     return [product_code, sub_product_code, version, mapset]
 
@@ -545,13 +656,8 @@ def get_from_path_dir(dir_name):
 #
 #
 
-def get_date_from_path_filename(filename, extension=None):
+def get_date_from_path_filename(filename):
 
-    if extension is None:
-        extension = '.tif'
-
-
-    # Get the date string
     str_date = filename.split('_')[0]
 
     return str_date
@@ -573,7 +679,7 @@ def get_date_from_path_full(full_path):
     dir, filename = os.path.split(full_path)
 
     # Get the date string
-    str_date = filename.split('_')[0]
+    str_date = get_date_from_path_filename(filename)
 
     return str_date
 
@@ -592,7 +698,7 @@ def get_subdir_from_path_full(full_path):
 
     # Remove the directory
     subdirs =  full_path.split(os.path.sep)
-    str_subdir = subdirs[-5]+os.path.sep+subdirs[-4]+os.path.sep+subdirs[-3]+os.path.sep+subdirs[-2]+os.path.sep
+    str_subdir = subdirs[-6]+os.path.sep+subdirs[-5]+os.path.sep+subdirs[-4]+os.path.sep+subdirs[-3]+os.path.sep+subdirs[-2]+os.path.sep
 
     return str_subdir
 
@@ -648,6 +754,39 @@ def check_output_dir(output_dir):
     else:
 
         logger.debug("Output directory %s already exists" % my_dir)
+
+######################################################################################
+#   create_sym_link
+#   Purpose: Create a (new) symbolic link from src_file -> trg_file
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: output_dir, or list of dirs
+#   Output: none
+#
+
+def create_sym_link(src_file, trg_file, force=False):
+
+    # Does the source file already exist ?
+    if not os.path.isfile(src_file):
+        logger.warning('Source file does not exist. Exit')
+        return 1
+    # Does the target file already exist ?
+    if os.path.exists(trg_file):
+        if os.path.islink(trg_file):
+            if force:
+                logger.warning('Target file exists and FORCE=1. Overwrite')
+                os.remove(trg_file)
+            else:
+                logger.info('Target file exists and FORCE=0. Exit')
+                return 1
+        else:
+            logger.info('Target file exists as regular file. Exit')
+            return 1
+    # Create the symbolic link
+    try:
+        os.symlink(src_file,trg_file)
+    except:
+        logger.error('Error in creating symlink %s' % trg_file)
 
 ######################################################################################
 #   ensure_sep_present
@@ -729,7 +868,6 @@ def load_obj_from_pickle(filename):
         logger.warning("Dump file %s does not exist.", filename)
 
     return object
-
 
 ######################################################################################
 #   modis_latlon_to_hv_tile
@@ -846,7 +984,7 @@ def files_temp_ajacent(file_t0, step='dekad', extension='.tif'):
         # Compute/Check file before
         dekad_m = dekad_t0-1
         date_m = conv_dekad_2_date(dekad_m)
-        file_m = dir+os.path.sep+set_path_filename(str(date_m), product_code, sub_product_code, mapset, extension)
+        file_m = dir+os.path.sep+set_path_filename(str(date_m), product_code, sub_product_code, mapset, version, extension)
 
         if os.path.isfile(file_m):
             file_list.append(file_m)
@@ -857,7 +995,7 @@ def files_temp_ajacent(file_t0, step='dekad', extension='.tif'):
         dekad = conv_date_2_dekad(date_t0)
         dekad_p = dekad_t0+1
         date_p = conv_dekad_2_date(dekad_p)
-        file_p = dir+os.path.sep+set_path_filename(str(date_p), product_code, sub_product_code, mapset, extension)
+        file_p = dir+os.path.sep+set_path_filename(str(date_p), product_code, sub_product_code, mapset, version, extension)
 
         if os.path.isfile(file_p):
             file_list.append(file_p)
@@ -888,3 +1026,41 @@ def get_eumetcast_info(eumetcast_id):
     filename = get_eumetcast_processed_list_prefix+str(eumetcast_id)+'.info'
     info = load_obj_from_pickle(filename)
     return info
+
+######################################################################################
+#                            PROCESSING CHAINS
+######################################################################################
+
+class ProcLists:
+
+    def __init__(self):
+        self.list_subprods = []
+        self.list_subprod_groups = []
+
+    def proc_add_subprod(self, sprod, group, final=False, active_default=True):
+        self.list_subprods.append(ProcSubprod(sprod, group, final, active_default=True))
+        return sprod
+
+    def proc_add_subprod(self, sprod, group, final=False, active_default=True):
+        self.list_subprods.append(ProcSubprod(sprod, group, final, active_default=True))
+        return sprod
+
+    def proc_add_subprod_group(self, sprod_group, active_default=True):
+        self.list_subprod_groups.append(ProcSubprodGroup(sprod_group, active_default=True))
+        return sprod_group
+
+
+class ProcSubprod:
+    def __init__(self, sprod, group, final=False, active_default=True, active_depend=False):
+        self.sprod = sprod
+        self.group = group
+        self.final = final
+        self.active_default=active_default
+        self.active_user = True
+        self.active_depend = active_depend
+
+class ProcSubprodGroup:
+    def __init__(self, group, active_default=True):
+        self.group = group
+        self.active_default=active_default
+        self.active_user = True

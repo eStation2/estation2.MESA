@@ -2,6 +2,13 @@
 #   References to python docs and online sources (examples, ...)
 #
 
+Linux packages (incl. apt-get, apt-cache)
+-----------------------------------------
+
+General description of apt-get: https://help.ubuntu.com/community/AptGet/Howto
+All dependencies of a package: http://stackoverflow.com/questions/4627158/howto-list-all-dependencies-of-a-package-on-linux
+OS installation Process: https://help.ubuntu.com/12.04/installation-guide/amd64/
+
 Python Modules
 --------------
 Installing Python modules:
@@ -57,3 +64,20 @@ Git:
 ----
 a. take a deleted file from HEAD: git checkout HEAD^ <file_name>
    (HEAD is the latest-current commit)
+---- 
+
+G EarthEngine python API (on VM22) - https://sites.google.com/site/earthengineapidocs/python-api
+------------------------------------------------------------------------------------------------
+
+1. Install the Python packages:
+sudo pip install google-api-python-client
+sudo pip install earthengine-api
+
+2. Create the authorization:
+a. Install and open firefox -> log to my private gmail account
+b. Run: /usr/bin/python /usr/local/lib/python2.7/dist-packages/ee/authenticate.py
+c. Get the code in the browser an copy to command line
+d. Get -> Successfully saved authorization to /home/esuser/.config/earthengine/credentials
+
+
+

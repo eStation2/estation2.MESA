@@ -1,4 +1,4 @@
-activate_vgt_ndvi_comput=0
+activate_vgt_ndvi_comput=1
 activate_fewsnet_rfe_comput=1
 
 #   If == 0, no run

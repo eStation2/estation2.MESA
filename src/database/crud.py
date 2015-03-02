@@ -1,6 +1,7 @@
 __author__ = "Jurriaan van 't Klooster"
 
 import sys
+
 # Import eStation lib modules
 from lib.python import es_logging as log
 from config import es_constants
@@ -16,8 +17,8 @@ class CrudDB(object):
 
     # Initialize the DB
     def __init__(self, schema='products', echo=False):
-        self.schema = schema or es_constants.dbglobals['schema_products']
-        self.connect_db = connectdb.ConnectDB(schema=schema, usesqlsoup=False)
+        self.schema = schema or es_constants.es2globals['schema_products']
+        self.connect_db = connectdb.ConnectDB(schema=self.schema, usesqlsoup=False)
         db = self.connect_db.db
         db.echo = echo
 
@@ -34,6 +35,7 @@ class CrudDB(object):
         #retrieve database table information dynamically
         metadata.reflect()
         metadata.schema = None
+        #metadata.schema = self.schema
         for table_name in metadata.tables:
             #create a class that inherits basetable class and maps the class to table
             table_class = type(str(table_name), (BaseTable,), {})
@@ -47,7 +49,7 @@ class CrudDB(object):
                 logger.error("CrudDB: could not map table %s!" % table_name)
 
         #create a Session template that requires commit to be called explicit
-        self.session = sessionmaker(bind=db, autoflush=True)
+        #self.session = sessionmaker(bind=db, autoflush=True)
         metadata.schema = self.schema
 
     #create a record
@@ -56,9 +58,10 @@ class CrudDB(object):
         status = False
         try:
             #lookup the corresponding table class and create an instance
+            table_name = self.schema + "." + table_name
             table_instance = self.table_map[table_name]()
             table_instance.pack(record)
-            session = self.connect_db.session()
+            session = self.connect_db.session
             session.add(table_instance)
             session.commit()
             status = True
@@ -77,8 +80,10 @@ class CrudDB(object):
         session = None
         records = []
         try:
+            table_name = self.schema + "." + table_name
             table_class = self.table_map[table_name]
-            session = self.connect_db.session()
+            session = self.connect_db.session
+            #session.schema=self.schema
             query = session.query(table_class)
             resultset = query.filter_by(**keywords).all()
             for record in resultset:
@@ -100,9 +105,10 @@ class CrudDB(object):
         status = False
         try:
             #lookup the corresponding table class and create an instance
+            table_name = self.schema + "." + table_name
             table_instance = self.table_map[table_name]()
             table_instance.pack(record)
-            session = self.connect_db.session()
+            session = self.connect_db.session
             session.merge(table_instance)
             session.commit()
             status = True
@@ -123,8 +129,9 @@ class CrudDB(object):
         status = False
         try:
             #lookup the corresponding table class and create an instance
+            table_name = self.schema + "." + table_name
             table_class = self.table_map[table_name]
-            session = self.connect_db.session()
+            session = self.connect_db.session
             session.query(table_class).filter_by(**keywords).delete()
 
             session.commit()

@@ -39,6 +39,11 @@ class WrongSequence(Exception):
                 % (filename, filename_expected))
 
 
+class BadDate(Exception):
+    def __init__(self, date):
+        super(BadDate, self).__init__(u"Bad date: %s" % unicode(date))
+
+
 class WrongDateType(Exception):
     def __init__(self, date, date_type_expected):
         super(WrongDateType, self).__init__(u"Wrong date type for %s: found=%s expected=%s"
@@ -61,3 +66,15 @@ class NoFrequencyFound(Exception):
     def __init__(self, product):
         super(NoFrequencyFound, self).__init__(u"No Frequency Found for Product %s: %s"
                 % (unicode(product), unicode(product.frequency_id)))
+
+
+class MissingMapset(Exception):
+    def __init__(self, subproduct):
+        super(MissingMapset, self).__init__(u"Missing mapset for subproduct %s"
+                % (unicode(subproduct)))
+
+
+class NoMapsetFound(Exception):
+    def __init__(self, mapset_code):
+        super(NoMapsetFound, self).__init__(u"No Mapset Found for mapset code %s"
+                % (unicode(mapset_code)))

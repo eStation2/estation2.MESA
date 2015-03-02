@@ -9,9 +9,22 @@ from __future__ import absolute_import
 
 import os
 import datetime
+import operator
+import collections
 
-from .exceptions import WrongSequence, WrongDateParameter
+from .exceptions import WrongSequence, WrongDateParameter, BadDate
 
+MISSING_FILE_EXTENSION = ".missing"
+
+def str_to_date(value):
+    parts = value.split("-")
+    if len(parts) == 2:
+        return datetime.date(*([datetime.date.today().year] + [int(x) for x in parts]))
+    elif len(parts) == 3:
+        return datetime.date(*[int(x) for x in parts])
+    elif len(parts) == 5:
+        return datetime.datetime(*[int(x) for x in parts])
+    raise BadDate(value)
 
 def cast_to_int(value):
     if isinstance(value, int):
@@ -100,7 +113,19 @@ class INTERVAL_TYPE:
 
 
 def find_gaps(unsorted_filenames, frequency, only_intervals=False, from_date=None, to_date=None):
-    filenames = sorted(no_ext(f) for f in unsorted_filenames if not f is None)
+    # Find most common filename extension
+    exts = collections.defaultdict(int)
+    for filename in unsorted_filenames:
+        exts[get_ext(filename)] += 1
+    original_ext, most_common_ext_count = "", 0
+    for ext, count in exts.items():
+        if count > most_common_ext_count and ext != MISSING_FILE_EXTENSION:
+            original_ext = ext
+            most_common_ext_count = count
+    # Keep only filenames with that extenions
+    filenames = sorted(no_ext(f) for f in unsorted_filenames
+            if not f is None and get_ext(f) in (original_ext, MISSING_FILE_EXTENSION))
+    original_filenames = dict((no_ext(f), f) for f in unsorted_filenames if not f is None and get_ext(f) in (original_ext, MISSING_FILE_EXTENSION))
     if not filenames:
         if not (from_date or to_date):
             return []
@@ -116,8 +141,6 @@ def find_gaps(unsorted_filenames, frequency, only_intervals=False, from_date=Non
     for date_parameter in (from_date, to_date):
         if date_parameter and not frequency.check_date(date_parameter):
             raise WrongDateParameter(date_parameter, frequency.dateformat)
-    original_filenames = dict((no_ext(f), f) for f in unsorted_filenames if not f is None)
-    original_ext = get_ext(unsorted_filenames[0]) if unsorted_filenames else ""
     gaps = []
     intervals = []
     current_interval = None
@@ -128,23 +151,34 @@ def find_gaps(unsorted_filenames, frequency, only_intervals=False, from_date=Non
         if not filenames or current_filename < filenames[0]:
             gaps.append(current_filename + original_ext)
             if not current_interval or current_interval[2] != INTERVAL_TYPE.MISSING:
-                current_interval = [date, date, INTERVAL_TYPE.MISSING]
+                current_interval = [date, date, INTERVAL_TYPE.MISSING, 1, 0.0]
                 intervals.append(current_interval)
             else:
                 current_interval[1] = date
+                current_interval[3] += 1
         else:
             filename = filenames.pop(0)
             original = original_filenames[filename]
             if filename < current_filename:
                 raise WrongSequence(original, current_filename + original_ext)
             else:
-                interval_type = INTERVAL_TYPE.PERMANENT_MISSING if original.lower().endswith(".missing") else INTERVAL_TYPE.PRESENT
+                interval_type = INTERVAL_TYPE.PERMANENT_MISSING if original.lower().endswith(MISSING_FILE_EXTENSION) else INTERVAL_TYPE.PRESENT
                 if not current_interval or current_interval[2] != interval_type:
-                    current_interval = [date, date, interval_type]
+                    current_interval = [date, date, interval_type, 1, 0.0]
                     intervals.append(current_interval)
                 else:
                     current_interval[1] = date
+                    current_interval[3] += 1
         date = frequency.next_date(date)
     if only_intervals:
+        total = sum(interval[3] for interval in intervals)
+        remainder = 0.0
+        for interval in intervals:
+            interval[4] = float(interval[3]*100.0/float(total))
+            if interval[4] < 1.0:
+                remainder += 1.0 - interval[4]
+                interval[4] = 1.0
+        index, value = max(enumerate(intervals), key=operator.itemgetter(1))
+        intervals[index][4] -= remainder
         return intervals
     return gaps

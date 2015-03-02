@@ -9,6 +9,7 @@
 from __future__ import absolute_import
 
 import unittest
+import datetime
 
 from ..datasets import Frequency
 from ..exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
@@ -38,3 +39,50 @@ class TestFrequency(unittest.TestCase):
 
     def test_wrong_dataformat(self):
         self.assertRaises(WrongFrequencyDateFormat, Frequency, *(4, Frequency.UNIT.HOUR, Frequency.TYPE.PER, '-' + Frequency.DATEFORMAT.DATETIME))
+
+    def test_today_datetime(self):
+        frequency =  Frequency(4, Frequency.UNIT.HOUR, Frequency.TYPE.PER, dateformat=Frequency.DATEFORMAT.DATETIME)
+        self.assertEqual(type(frequency.today()), type(datetime.datetime.today()))
+
+    def test_today_date(self):
+        frequency =  Frequency(4, Frequency.UNIT.HOUR, Frequency.TYPE.PER, dateformat=Frequency.DATEFORMAT.DATE)
+        self.assertEqual(type(frequency.today()), type(datetime.date.today()))
+
+    def test_today_monthday(self):
+        frequency =  Frequency(4, Frequency.UNIT.HOUR, Frequency.TYPE.PER, dateformat=Frequency.DATEFORMAT.MONTHDAY)
+        self.assertEqual(type(frequency.today()), type(datetime.date.today()))
+
+    def test_wrong_date(self):
+        frequency =  Frequency(4, Frequency.UNIT.HOUR, Frequency.TYPE.PER, dateformat=Frequency.DATEFORMAT.MONTHDAY)
+        from_date = datetime.date(2014, 1, 1)
+        to_date = datetime.date(2014, 12, 31)
+        self.assertRaises(Exception, frequency.get_dates, *(to_date, from_date))
+
+    def test_count_dates(self):
+        frequency =  Frequency(1, Frequency.UNIT.MONTH, Frequency.TYPE.PER, dateformat=Frequency.DATEFORMAT.MONTHDAY)
+        from_date = datetime.date(2014, 1, 1)
+        to_date = datetime.date(2014, 12, 31)
+        self.assertEqual(frequency.count_dates(from_date, to_date), 12)
+
+    def test_get_dates(self):
+        frequency =  Frequency(1, Frequency.UNIT.MONTH, Frequency.TYPE.PER, dateformat=Frequency.DATEFORMAT.MONTHDAY)
+        from_date = datetime.date(2014, 1, 1)
+        to_date = datetime.date(2014, 12, 31)
+        self.assertEqual(len(frequency.get_dates(from_date, to_date)), 12)
+
+    def test_get_internet_dates(self):
+        frequency =  Frequency(1, Frequency.UNIT.MONTH, Frequency.TYPE.PER, dateformat=Frequency.DATEFORMAT.MONTHDAY)
+        from_date = datetime.date(2014, 1, 1)
+        to_date = datetime.date(2014, 12, 31)
+        dates = frequency.get_dates(from_date, to_date)
+        templates = frequency.get_internet_dates(dates, "/Modis_%Y%m/mcd14dl.%Y-%m-%d.tif")
+        self.assertEqual(templates[0], '/Modis_201401/mcd14dl.2014-01-01.tif')
+
+    # def test_get_internet_dates_list(self, list):
+    #
+    #     frequency =  Frequency(1, Frequency.UNIT.MONTH, Frequency.TYPE.PER, dateformat=Frequency.DATEFORMAT.MONTHDAY)
+    #     from_date = datetime.date(2014, 1, 1)
+    #     to_date = datetime.date(2014, 12, 31)
+    #     dates = frequency.get_dates(from_date, to_date)
+    #     templates = frequency.get_internet_dates(dates, "/Modis_%Y%m/mcd14dl.%Y-%m-%d.tif")
+    #     self.assertEqual(templates[0], '/Modis_201401/mcd14dl.2014-01-01.tif')

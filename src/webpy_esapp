@@ -4,31 +4,68 @@
 #    from os import sys, path
 #    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
-import sys, os
+import sys
+import os
+
+os.umask(0000)
+
 cur_dir = os.path.dirname(__file__)
 if not cur_dir in sys.path:
     sys.path.append(cur_dir)
 
 import web
-
-import locals
 import datetime
 import json
-#from locals import *
+import re
 
-#import database.querydb as querydb
+import config
+from config import es_constants
+#import locals
 from database import querydb
+from database import crud
+
 from apps.acquisition import get_eumetcast
+from apps.acquisition import acquisition
 from apps.productmanagement.datasets import Dataset
+from apps.productmanagement.products import Product
+from apps.analysis import mapserver
+
+from lib.python import functions
+from lib.python import es_logging as log
+
+logger = log.my_logger(__name__)
 
 
 WEBPY_COOKIE_NAME = "webpy_session_id"
 
 urls = (
-    "/ingestion", "Ingestion",
-    "/dataacquisition", "DataAcquisition",
     "/pa(.*)", "ProductAcquisition",
-    "/template", "TemplatePage",
+    "/product/update", "UpdateProduct",
+
+    "/services/checkstatusall", "CheckStatusAllServices",
+    "/services/execservicetask", "ExecuteServiceTask",
+
+    "/ingestion", "Ingestion",
+    "/ingestion/update", "UpdateIngestion",
+
+    "/getlogfile", "GetLogFile",
+
+    "/dataacquisition", "DataAcquisition",
+    "/dataacquisition/update", "UpdateDataAcquisition",
+
+    "/systemsettings", "SystemSettings",
+    "/systemsettings/update", "UpdateSystemSettings",
+    "/systemsettings/reset", "ResetSystemSettings",
+
+    "/processing", "Processing",
+    "/processing/update", "UpdateProcessing",
+
+    "/datasets", "DataSets",
+
+    "/analysis/getproductlayer", "GetProductLayer",
+    "/analysis/productnavigator", "ProductNavigatorDataSets",
+    "/analysis/getcolorschemes", "GetColorSchemes",
+
     #"/(.+)/(.+)", "EsApp",
     #"/(.+)/", "EsApp",
     "/", "EsApp")
@@ -38,41 +75,830 @@ application = app.wsgifunc()
 #session = web.session.Session(app, web.session.DiskStore('../logs/mstmp/webpySessions'))
 
 
-def row2dict(row):
-    d = {}
-    for column in row.c._all_cols:
-        d[column.name] = str(getattr(row, column.name))
-
-    return d
-
-
-def toJson(queryResult):
-    tojson = ''
-    for row in queryResult:
-        da = row2dict(row)
-        tojson = tojson + json.dumps(da, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': ')) + ', '
-    tojson = tojson[:-2]
-    return tojson
-
-
-# Return True if the date is in the correct format
-def checkDateFormat(myString):
-    isDate = re.match('[0-1][0-9]\/[0-3][0-9]\/[1-2][0-9]{3}', myString)
-    return isDate
-
-
-
 class EsApp:
     def __init__(self):
         self.lang = "en"
 
     def GET(self):
-        #return sys.path
         #return web.ctx
-        render = web.template.render(locals.es2globals['base_dir']+'/apps/gui/esapp')
+        render = web.template.render(es_constants.es2globals['base_dir']+'/apps/gui/esapp')
         return render.index()
-        #getparam = web.input(lang=self.lang)
-        #return render.index(getparam.lang)
+
+
+class GetColorSchemes:
+    def __init__(self):
+        self.lang = "en"
+
+    def GET(self):
+        getparams = web.input()
+
+        product_legends = querydb.get_product_legends(productcode=getparams['productcode'],
+                                                      subproductcode=getparams['subproductcode'],
+                                                      version=getparams['version'])
+
+        if hasattr(product_legends, "__len__") and product_legends.__len__() > 0:
+            legends_dict_all = []
+            for legend in product_legends:
+                legend_dict = functions.row2dict(legend)
+                legend_id = legend_dict['legend_id']
+                legend_name = legend_dict['legend_name']
+                default_legend = legend_dict['default_legend']
+
+                if default_legend == 't':
+                    default_legend = 'true'
+                else:
+                    default_legend = 'false'
+
+                # if there is only 1 legend defined, this is the default legend (even if not defined as default legend).
+                if product_legends.__len__() == 1:
+                    default_legend = 'true'
+
+                if default_legend == 'true':
+                    defaulticon = 'x-grid3-radio-col-on'
+                else:
+                    defaulticon = 'x-grid3-radio-col'
+
+                # $legendHTML = generateLegendHTML($db, $legend_id, $Language);
+                # $legendHTML = str_replace('"', "'", $legendHTML);
+
+                legend_steps = querydb.get_legend_steps(legendid=legend_id)
+
+                colorschemeHTML = '<table cellspacing=0 cellpadding=0 width=100%><tr>'
+                for step in legend_steps:
+                    # convert step['color_rgb'] from RGB to html color
+                    color_rgb = step['color_rgb'].split(' ')
+                    color_html = functions.rgb2html(color_rgb)
+                    colorschemeHTML = colorschemeHTML + \
+                                      "<td height=10 style='padding:0; margin:0; background-color: " + \
+                                      color_html + ";'>&nbsp</td>"
+                colorschemeHTML = colorschemeHTML + '</tr></table>'
+
+                legend_dict['default_legend'] = default_legend
+                legend_dict['defaulticon'] = defaulticon
+                legend_dict['colorschemeHTML'] = colorschemeHTML
+                # legend_dict['legendHTML'] = legendHTML
+
+                legends_dict_all.append(legend_dict)
+
+            legends_json = json.dumps(legends_dict_all,
+                                      ensure_ascii=False,
+                                      sort_keys=True,
+                                      indent=4,
+                                      separators=(', ', ': '))
+
+            colorschemes = '{"success":true, "total":' + str(product_legends.__len__()) + ',"legends":'+legends_json+'}'
+        else:
+            colorschemes = '{"success":false, "message":"No legends defined for this product!"}'
+
+        return colorschemes
+
+
+class ProductNavigatorDataSets:
+    def __init__(self):
+        self.lang = "en"
+
+    def GET(self):
+        db_products = querydb.get_products(echo=False, activated=None, masked=False)
+
+        if db_products.__len__() > 0:
+            products_dict_all = []
+            # loop the products list
+            for row in db_products:
+                prod_dict = functions.row2dict(row)
+                productcode = prod_dict['productcode']
+                version = prod_dict['version']
+
+                p = Product(product_code=productcode, version=version)
+
+                # does the product have mapsets AND subproducts?
+                all_prod_mapsets = p.mapsets
+                all_prod_subproducts = p.subproducts
+                if all_prod_mapsets.__len__() > 0 and all_prod_subproducts.__len__() > 0:
+                    prod_dict['productmapsets'] = []
+                    for mapset in all_prod_mapsets:
+                        mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
+                        mapset_dict = functions.row2dict(mapset_info)
+                        mapset_dict['mapsetdatasets'] = []
+                        all_mapset_datasets = p.get_subproducts(mapset=mapset)
+                        for subproductcode in all_mapset_datasets:
+                            dataset_info = querydb.get_subproduct(productcode=productcode,
+                                                                  version=version,
+                                                                  subproductcode=subproductcode,
+                                                                  echo=False)
+
+                            dataset_dict = functions.row2dict(dataset_info)
+                            dataset_dict['mapsetcode'] = mapset
+
+                            # dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+                            # completeness = dataset.get_dataset_normalized_info()
+                            # dataset_dict['datasetcompleteness'] = completeness
+
+                            mapset_dict['mapsetdatasets'].append(dataset_dict)
+                        prod_dict['productmapsets'].append(mapset_dict)
+                    products_dict_all.append(prod_dict)
+
+            prod_json = json.dumps(products_dict_all,
+                                   ensure_ascii=False,
+                                   sort_keys=True,
+                                   indent=4,
+                                   separators=(', ', ': '))
+
+            datamanagement_json = '{"success":true, "total":'\
+                                  + str(db_products.__len__())\
+                                  + ',"products":'+prod_json+'}'
+
+        else:
+            datamanagement_json = '{"success":false, "error":"No data sets defined!"}'
+
+        return datamanagement_json
+
+
+class GetLogFile:
+    def __init__(self):
+        self.lang = "en"
+
+    def GET(self):
+        getparams = web.input()
+        if getparams['logtype'] == 'get':
+            if getparams['gettype'] == 'EUMETCAST':
+                logfilepath = es_constants.es2globals['log_dir']+'apps.acquisition.get_eumetcast.log'
+            else:
+                logfilepath = es_constants.es2globals['log_dir']+'apps.acquisition.get_internet.log'
+        else:
+            logfilepath = es_constants.es2globals['log_dir']+'apps.acquisition.ingestion.log'
+
+        logfile = open(logfilepath, 'r')
+        logfilecontent = logfile.read()
+        logfilecontent = logfilecontent.replace(chr(10), '<br />')
+        logfilecontent = logfilecontent.replace(' TRACE ', '<b style="color:gray"> TRACE </b>')
+        logfilecontent = logfilecontent.replace(' DEBUG ', '<b style="color:gray"> DEBUG </b>')
+        logfilecontent = logfilecontent.replace(' INFO ', '<b style="color:green"> INFO </b>')
+        logfilecontent = logfilecontent.replace(' WARNING ', '<b style="color:orange"> WARN </b>')
+        logfilecontent = logfilecontent.replace(' WARN ', '<b style="color:orange"> WARN </b>')
+        logfilecontent = logfilecontent.replace(' ERROR ', '<b style="color:red"> ERROR </b>')
+        logfilecontent = logfilecontent.replace(' CRITICAL ', '<b style="color:red"> FATAL </b>')
+        logfilecontent = logfilecontent.replace(' FATAL ', '<b style="color:red"> FATAL </b>')
+        logfilecontent = logfilecontent.replace(' CLOSED ', '<b style="color:brown"> CLOSED </b>')
+
+        return logfilecontent
+
+
+class ResetSystemSettings:
+    def __init__(self):
+        self.lang = "en"
+
+    def GET(self):
+        import ConfigParser
+        usersettingsinifile = es_constants.es2globals['settings_dir']+'/user_settings.ini'
+        # usersettingsinifile = '/eStation2/settings/user_settings.ini'
+
+        config_usersettings = ConfigParser.ConfigParser()
+        config_usersettings.read(['user_settings.ini', usersettingsinifile])
+
+        for option in config_usersettings.options('USER_SETTINGS'):
+            config_usersettings.set('USER_SETTINGS', option, '')
+
+        # Writing our configuration file to 'example.cfg' - COMMENTS ARE NOT PRESERVED!
+        with open(usersettingsinifile, 'wb') as configfile:
+            config_usersettings.write(configfile)
+            configfile.close()
+
+        # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
+        from lib.python import reloadmodules
+        reloadmodules.reloadallmodules()
+
+        # from config import es_constants as constantsreloaded
+        updatestatus = '{"success":true, "message":"System settings reset to factory settings!"}'
+
+        return updatestatus
+
+
+class UpdateSystemSettings:
+    def __init__(self):
+        self.lang = "en"
+
+    def PUT(self):
+        import ConfigParser
+        config_factorysettings = ConfigParser.ConfigParser()
+        config_factorysettings.read(['factory_settings.ini',
+                                     es_constants.es2globals['config_dir'] + '/factory_settings.ini'])
+
+        usersettingsfilepath = es_constants.es2globals['settings_dir']+'/user_settings.ini'
+        # usersettingsfilepath = '/eStation2/settings/user_settings.ini'
+        config_usersettings = ConfigParser.ConfigParser()
+        config_usersettings.read(['user_settings.ini', usersettingsfilepath])
+
+        getparams = json.loads(web.data())
+        for setting in getparams['systemsettings']:
+            if config_factorysettings.has_option('FACTORY_SETTINGS', setting) \
+               and config_factorysettings.get('FACTORY_SETTINGS', setting, 0) == getparams['systemsettings'][setting]:
+                config_usersettings.set('USER_SETTINGS', setting, '')
+            elif config_usersettings.has_option('USER_SETTINGS', setting):
+                config_usersettings.set('USER_SETTINGS', setting, getparams['systemsettings'][setting])
+
+        # Writing our configuration file to 'example.cfg' - COMMENTS ARE NOT PRESERVED!
+        with open(usersettingsfilepath, 'wb') as configfile:
+            config_usersettings.write(configfile)
+            configfile.close()
+
+        # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
+        from lib.python import reloadmodules
+        reloadmodules.reloadallmodules()
+
+        updatestatus = '{"success":true, "message":"System settings updated!"}'
+
+        return updatestatus
+
+
+class SystemSettings:
+    def __init__(self):
+        self.lang = "en"
+
+    def GET(self):
+        import ConfigParser
+        config_usersettings = ConfigParser.ConfigParser()
+        config_usersettings.read(['user_settings.ini',
+                                  es_constants.es2globals['settings_dir']+'/user_settings.ini'])
+
+        config_factorysettings = ConfigParser.ConfigParser()
+        config_factorysettings.read(['factory_settings.ini',
+                                     es_constants.es2globals['config_dir'] + '/factory_settings.ini'])
+
+        systemsettings = {}
+        usersettings = config_usersettings.items('USER_SETTINGS')
+        for setting, value in usersettings:
+            if value is not None and value != "":
+                systemsettings[setting] = value
+            else:
+                systemsettings[setting] = config_factorysettings.get('FACTORY_SETTINGS', setting, 0)
+
+        #systemsettings = {'base_dir': '',
+        #                  'base_tmp_dir': '',
+        #                  'data_dir': '',
+        #                  'static_data_dir': '',
+        #                  'archive_dir': '',
+        #                  'ingest_dir': '',
+        #                  'eumetcast_files_dir': '',
+        #                  'ingest_server_in_dir': '',
+        #                  'host': '',
+        #                  'port': '',
+        #                  'dbuser': '',
+        #                  'dbpass': '',
+        #                  'dbname': ''}
+        systemsettings['id'] = 0
+        systemsettings_json = json.dumps(systemsettings,
+                                         ensure_ascii=False,
+                                         sort_keys=True,
+                                         indent=4,
+                                         separators=(', ', ': '))
+
+        systemsettings_json = '{"success":true, "systemsettings":'+systemsettings_json+'}'
+
+        #systemsettings_json = '{"success":false, "error":"No ingestions defined!"}'
+
+        return systemsettings_json
+
+
+class GetProductLayer:
+    def __init__(self):
+        self.lang = "en"
+
+    def GET(self):
+        #import StringIO
+        import mapscript
+
+        #web.header('Content-type', 'image/png')
+        #web.header('Content-transfer-encoding', 'binary')
+        #buf = StringIO.StringIO()
+        #mapscript.msIO_installStdoutToBuffer()
+        #map = mapserver.getmap()
+        ##map.save to a file fname.png
+        ##web.header('Content-Disposition', 'attachment; filename="fname.png"')
+        #contents = buf.getvalue()
+        #return contents
+
+        #logger.debug("MapServer: Installing stdout to buffer.")
+        mapscript.msIO_installStdoutToBuffer()
+
+        projlib = "/usr/share/proj/"
+        errorfile = es_constants.apps_dir+"/analysis/ms_tmp/ms_errors.log"
+        imagepath = es_constants.apps_dir+"/analysis/ms_tmp/"
+        productfile = '/data/processing/vgt_ndvi/WGS84_Africa_1km/tif/ndv/20130701_vgt_ndvi_ndv_WGS84_Africa_1km.tif'
+
+        owsrequest = mapscript.OWSRequest()
+
+        inputparams = web.input()
+        for k, v in inputparams.iteritems():
+            #print k + ':' + v
+            owsrequest.setParameter(k.upper(), v)
+
+        owsrequest.setParameter("LAYERS", "vgt_ndvi_ndv_WGS84_Africa_1km")
+
+        productmap = mapscript.mapObj(es_constants.template_mapfile)
+        productmap.setConfigOption("PROJ_LIB", projlib)
+        productmap.setConfigOption("MS_ERRORFILE", errorfile)
+
+        outputformat_png = mapscript.outputFormatObj('GD/PNG', 'png')
+        outputformat_png.setOption("INTERLACE", "OFF")
+        productmap.appendOutputFormat(outputformat_png)
+        #outputformat_gd = mapscript.outputFormatObj('GD/GIF', 'gif')
+        #productmap.appendOutputFormat(outputformat_gd)
+        productmap.selectOutputFormat('png')
+        productmap.debug = mapscript.MS_TRUE
+        productmap.status = mapscript.MS_ON
+        productmap.units = mapscript.MS_DD
+
+        coords = map(float, inputparams.BBOX.split(","))
+        llx = coords[0]
+        lly = coords[1]
+        urx = coords[2]
+        ury = coords[3]
+        productmap.setExtent(llx, lly, urx, ury)   # -26, -35, 60, 38
+
+        # epsg must be in lowercase because in unix/linux systems the proj filenames are lowercase!
+        #epsg = "+init=epsg:3857"
+        epsg = "+init=" + inputparams.CRS.lower()   # CRS = "EPSG:4326"
+        productmap.setProjection(epsg)
+
+        w = int(inputparams.WIDTH)
+        h = int(inputparams.HEIGHT)
+        productmap.setSize(w, h)
+
+        #General web service information
+        productmap.setMetaData("WMS_TITLE", "Product description")
+        productmap.setMetaData("WMS_SRS", inputparams.CRS.lower())
+        #productmap.setMetaData("WMS_SRS", "epsg:3857")
+        productmap.setMetaData("WMS_ABSTRACT", "A Web Map Service returning EMMA raster layers.")
+        productmap.setMetaData("WMS_ENABLE_REQUEST", "*")   # necessary!!
+
+
+        legend_info = querydb.get_legend_info(legendid=6)
+        if legend_info.__len__() > 0:
+            for row in legend_info:
+                minstep = row.minstep
+                maxstep = row.maxstep
+                minstepwidth = row.minstepwidth
+                maxstepwidth = row.maxstepwidth
+                totwidth = row.totwidth
+                totsteps = row.totsteps
+
+            processing_scale = 'SCALE='+str(minstep)+','+str(maxstep)  # min(legend_step.from_step) max(legend_step.to_step) example: 'SCALE=-7000,10000'
+
+            minbuckets = 256
+            maxbuckets = 10000
+            num_buckets = maxbuckets
+            if minstepwidth > 0:
+                num_buckets = round(totwidth / minstepwidth, 0)
+
+            if num_buckets < minbuckets:
+                num_buckets = minbuckets
+            elif num_buckets > maxbuckets:
+                num_buckets = 0
+
+            if num_buckets > 0:
+                processing_buckets = 'SCALE_BUCKETS='+str(num_buckets)
+
+            nodata = -32768     # get this value from the table products.product
+            processing_novalue = ''
+            if nodata is not None and minstep <= nodata < maxstep:
+                processing_novalue = 'NODATA='+str(nodata)
+
+            layer = mapscript.layerObj(productmap)
+            layer.name = 'vgt_ndvi_ndv_WGS84_Africa_1km'
+            layer.type = mapscript.MS_LAYER_RASTER
+            layer.status = mapscript.MS_ON     # MS_DEFAULT
+            layer.data = productfile
+            layer.setProjection("+init=epsg:4326")
+            layer.dump = mapscript.MS_TRUE
+
+            # scale & buckets
+            if num_buckets > 0:
+                layer.setProcessing(processing_scale)
+                layer.setProcessing(processing_buckets)
+
+            if processing_novalue != '':
+                layer.setProcessing(processing_novalue)
+
+            legend_steps = querydb.get_legend_steps(legendid=6)
+            if legend_steps.__len__() > 0:
+                stepcount = 0
+                for step in legend_steps:
+                    min_step = step.from_step
+                    max_step = step.to_step
+                    colors = map(int, (color.strip() for color in step.color_rgb.split(" ") if color.strip()))
+
+                    expression_string = '([pixel] >= '+str(min_step)+' and [pixel] < '+str(max_step)+')'
+
+                    # define class object and style
+                    layerclass = mapscript.classObj(layer)
+                    layerclass.name = layer.name+'_'+str(stepcount)
+                    layerclass.setExpression(expression_string)
+                    style = mapscript.styleObj(layerclass)
+                    style.color.setRGB(colors[0], colors[1], colors[2])
+                    stepcount += 1
+
+        result_map_file = es_constants.apps_dir+'/analysis/MAP_result.map'
+        if os.path.isfile(result_map_file):
+            os.remove(result_map_file)
+        productmap.save(result_map_file)
+        image = productmap.draw()
+        image.save(es_constants.apps_dir+'/analysis/20130701_vgt_ndvi_ndv_WGS84_Africa_1km.png')
+
+
+        contents = productmap.OWSDispatch(owsrequest)
+        content_type = mapscript.msIO_stripStdoutBufferContentType()
+        content = mapscript.msIO_getStdoutBufferBytes()
+        #web.header = "Content-Type","%s; charset=utf-8"%content_type
+        web.header('Content-type', 'image/png')
+        #web.header('Content-transfer-encoding', 'binary')
+        return content
+
+
+class Processing:
+    def __init__(self):
+        self.lang = "en"
+
+    def GET(self):
+        db_proc_products = querydb.get_processingchains_input_products()
+
+        #   Todo JURVTK: on each call of a processing chain for a product, get the list of output (sub)products from the
+        #   Todo JURVTK: processing chain algorithm using processing_std_precip . get_subprods_std_precip () and loop
+        #   Todo JURVTK: this list to check the existance of the output product in the table product.process_product
+        #   Todo JURVTK: Insert the output product in the table product.process_product if no record exists.
+        #   Todo JURVTK:  Use: from apps . processing import processing_std_precip
+        #   Todo JURVTK:       brachet l1, l2 brachet = processing_std_precip . get_subprods_std_precip ()
+
+        if db_proc_products.__len__() > 0:
+            products_dict_all = []
+
+            # loop the products list
+            for input_product in db_proc_products:
+                process_id = input_product.process_id
+                output_mapsetcode = input_product.output_mapsetcode
+                prod_dict = input_product.__dict__
+                del prod_dict['_labels']
+
+                prod_dict['productmapsets'] = []
+                mapset_info = querydb.get_mapset(mapsetcode=output_mapsetcode)
+
+                mapset_dict = functions.row2dict(mapset_info)
+                mapset_dict['mapsetoutputproducts'] = []
+                output_products = querydb.get_processingchain_output_products(process_id)
+                for outputproduct in output_products:
+                    # outputproduct_dict = functions.row2dict(outputproduct)
+                    outputproduct_dict = outputproduct.__dict__
+                    del outputproduct_dict['_labels']
+                    mapset_dict['mapsetoutputproducts'].append(outputproduct_dict)
+                prod_dict['productmapsets'].append(mapset_dict)
+                products_dict_all.append(prod_dict)
+
+            prod_json = json.dumps(products_dict_all,
+                                   ensure_ascii=False,
+                                   sort_keys=True,
+                                   indent=4,
+                                   separators=(', ', ': '))
+
+            datamanagement_json = '{"success":true, "total":'\
+                                  + str(db_proc_products.__len__())\
+                                  + ',"products":'+prod_json+'}'
+
+        else:
+            datamanagement_json = '{"success":false, "error":"No data sets defined!"}'
+
+        return datamanagement_json
+
+
+class UpdateProcessing:
+    def __init__(self):
+        self.lang = "en"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    def PUT(self):
+        getparams = json.loads(web.data())
+        processinfo = {'process_id': getparams['products']['process_id'],
+                       'process_defined_by': getparams['products']['process_defined_by'],
+                       'activated': getparams['products']['activated']}
+
+        if self.crud_db.update('processing', processinfo):
+            updatestatus = '{"success":true, "message":"Process updated!"}'
+        else:
+            updatestatus = '{"success":false, "message":"An error occured while updating the process!"}'
+
+        return updatestatus
+
+
+class DataSets:
+    def __init__(self):
+        self.lang = "en"
+
+    def GET(self):
+        # return web.ctx
+        db_products = querydb.get_products(echo=False)
+
+        if db_products.__len__() > 0:
+            products_dict_all = []
+            # loop the products list
+            for row in db_products:
+                prod_dict = functions.row2dict(row)
+                productcode = prod_dict['productcode']
+                version = prod_dict['version']
+
+                p = Product(product_code=productcode, version=version)
+
+                # does the product have mapsets AND subproducts?
+                all_prod_mapsets = p.mapsets
+                all_prod_subproducts = p.subproducts
+                if all_prod_mapsets.__len__() > 0 and all_prod_subproducts.__len__() > 0:
+                    prod_dict['productmapsets'] = []
+                    for mapset in all_prod_mapsets:
+                        mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
+                        mapset_dict = functions.row2dict(mapset_info)
+                        mapset_dict['mapsetdatasets'] = []
+                        all_mapset_datasets = p.get_subproducts(mapset=mapset)
+                        for subproductcode in all_mapset_datasets:
+                            dataset_info = querydb.get_subproduct(productcode=productcode,
+                                                                  version=version,
+                                                                  subproductcode=subproductcode,
+                                                                  echo=False)
+                            # dataset_info = querydb.db.product.get(productcode, version, subproductcode)
+                            # dataset_dict = {}
+                            # if dataset_info:
+                            dataset_dict = functions.row2dict(dataset_info)
+                            # dataset_dict = dataset_info.__dict__
+                            # del dataset_dict['_labels']
+                            dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+                            completeness = dataset.get_dataset_normalized_info()
+                            dataset_dict['datasetcompleteness'] = completeness
+
+                            mapset_dict['mapsetdatasets'].append(dataset_dict)
+                        prod_dict['productmapsets'].append(mapset_dict)
+                products_dict_all.append(prod_dict)
+
+            prod_json = json.dumps(products_dict_all,
+                                   ensure_ascii=False,
+                                   sort_keys=True,
+                                   indent=4,
+                                   separators=(', ', ': '))
+
+            datamanagement_json = '{"success":true, "total":'\
+                                  + str(db_products.__len__())\
+                                  + ',"products":'+prod_json+'}'
+
+        else:
+            datamanagement_json = '{"success":false, "error":"No data sets defined!"}'
+
+        return datamanagement_json
+
+
+class CheckStatusAllServices:
+    def __init__(self):
+        self.lang = "en"
+
+    def POST(self):
+        #return web.ctx
+        dry_run = False
+
+        ingest = "false"
+        pid_file = es_constants.ingestion_pid_filename
+        ingest_daemon = acquisition.IngestionDaemon(pid_file, dry_run=dry_run)
+        if ingest_daemon.status():
+            ingest = "true"
+
+        internet = "false"
+        pid_file = es_constants.get_internet_pid_filename
+        getinternet_daemon = acquisition.GetInternetDaemon(pid_file, dry_run=dry_run)
+        if getinternet_daemon.status():
+            internet = "true"
+
+        eumetcast = "false"
+        pid_file = es_constants.get_eumetcast_pid_filename
+        geteumetcast_daemon = acquisition.GetEumetcastDaemon(pid_file, dry_run=dry_run)
+        if geteumetcast_daemon.status():
+            eumetcast = "true"
+
+        processing = "false"
+
+        servicesstatus_json = '{"success": true, "eumetcast": ' + eumetcast + \
+                              ', "internet": ' + internet + \
+                              ', "ingest": ' + ingest + \
+                              ', "processing": ' + processing + '}'
+
+        return servicesstatus_json
+
+
+class ExecuteServiceTask:
+    def __init__(self):
+        self.lang = "en"
+
+    def POST(self):
+        # return web.ctx
+        # from apps.acquisition import acquisition
+        message = ''
+        dryrun = False
+        getparams = web.input()
+
+        if getparams.service == 'eumetcast':
+            # Define pid file and create daemon
+            pid_file = es_constants.get_eumetcast_pid_filename
+            eumetcast_daemon = acquisition.GetEumetcastDaemon(pid_file, dry_run=dryrun)
+            status = eumetcast_daemon.status()
+
+            logger.info(getparams.service)
+            logger.info('status: ' + str(status))
+
+            if getparams.task == 'run':
+                if not status:
+                    eumetcast_daemon.start()
+                    if eumetcast_daemon.status():
+                        message = 'eumetcast service started'
+                    else:
+                        logger.error("failure starting eumetcast service")
+                else:
+                    message = 'eumetcast service allready started'
+
+            if getparams.task == 'stop':
+                logger.info(getparams.task)
+                if status:
+                    logger.info("stopping eumetcast deamon")
+                    eumetcast_daemon.stop()
+                    logger.info("eumetcast deamon stopped")
+                    if not eumetcast_daemon.status():
+                        message = 'eumetcast service stopped'
+                    else:
+                        logger.error("failure stopping eumetcast service")
+                else:
+                    message = 'eumetcast service allready stopped'
+            logger.info(message)
+
+            if getparams.task == 'restart':
+                if status:
+                    eumetcast_daemon.restart()
+                    if eumetcast_daemon.status():
+                        message = 'eumetcast service restarted'
+                    else:
+                        logger.error("failure restarting eumetcast service")
+                else:
+                    eumetcast_daemon.start()
+                    message = 'eumetcast service started'
+
+        if getparams.service == 'internet':
+            # Define pid file and create daemon
+            pid_file = es_constants.get_internet_pid_filename
+            internet_daemon = acquisition.GetInternetDaemon(pid_file, dry_run=dryrun)
+            status = internet_daemon.status()
+
+            if getparams.task == 'run':
+                if not status:
+                    internet_daemon.start()
+                    if internet_daemon.status():
+                        message = 'internet service started'
+                    else:
+                        logger.error("failure starting internet service")
+                else:
+                    message = 'internet service allready started'
+
+            if getparams.task == 'stop':
+                if status:
+                    internet_daemon.stop()
+                    if not internet_daemon.status():
+                        message = 'internet service stopped'
+                    else:
+                        logger.error("failure stopping internet service")
+                else:
+                    message = 'internet service allready stopped'
+
+            if getparams.task == 'restart':
+                if status:
+                    internet_daemon.restart()
+                    if internet_daemon.status():
+                        message = 'internet service restarted'
+                    else:
+                        logger.error("failure restarting internet service")
+                else:
+                    internet_daemon.start()
+                    message = 'internet service started'
+
+        if getparams.service == 'ingest':
+            # Define pid file and create daemon
+            pid_file = es_constants.ingestion_pid_filename
+            ingest_daemon = acquisition.IngestionDaemon(pid_file, dry_run=dryrun)
+            status = ingest_daemon.status()
+
+            if getparams.task == 'run':
+                if not status:
+                    ingest_daemon.start()
+                    if ingest_daemon.status():
+                        message = 'ingest service started'
+                    else:
+                        logger.error("failure starting ingest service")
+                else:
+                    message = 'ingest service allready started'
+
+            if getparams.task == 'stop':
+                if status:
+                    ingest_daemon.stop()
+                    if not ingest_daemon.status():
+                        message = 'ingest service stopped'
+                    else:
+                        logger.error("failure stopping ingest service")
+                else:
+                    message = 'ingest service allready stopped'
+
+            if getparams.task == 'restart':
+                if status:
+                    ingest_daemon.restart()
+                    if ingest_daemon.status():
+                        message = 'ingest service restarted'
+                    else:
+                        logger.error("failure restarting ingest service")
+                else:
+                    ingest_daemon.start()
+                    message = 'ingest service started'
+
+        logger.info(message)
+        servicesstatus_json = '{"success": true, "message": "' + message + '"}'
+        return servicesstatus_json
+
+
+class UpdateProduct:
+    def __init__(self):
+        self.lang = "en"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    def PUT(self):
+        getparams = json.loads(web.data())
+        productinfo = {'productcode': getparams['products']['productcode'],
+                       'subproductcode': getparams['products']['subproductcode'],
+                       'version': getparams['products']['version'],
+                       'product_type': getparams['products']['product_type'],
+                       'defined_by': getparams['products']['defined_by'],
+                       'activated': getparams['products']['activated']}
+
+        if self.crud_db.update('product', productinfo):
+            updatestatus = '{"success":true, "message":"Product updated!"}'
+        else:
+            updatestatus = '{"success":false, "message":"An error occured while updating the product!"}'
+
+        return updatestatus
+
+
+class UpdateDataAcquisition:
+    def __init__(self):
+        self.lang = "en"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    def PUT(self):
+        getparams = json.loads(web.data())
+        dataacquisitioninfo = {'productcode': getparams['dataacquisitions']['productcode'],
+                               'subproductcode': getparams['dataacquisitions']['subproductcode'],
+                               'version': getparams['dataacquisitions']['version'],
+                               'data_source_id': getparams['dataacquisitions']['data_source_id'],
+                               'defined_by': getparams['dataacquisitions']['defined_by'],
+                               'activated': getparams['dataacquisitions']['activated']}
+
+        if self.crud_db.update('product_acquisition_data_source', dataacquisitioninfo):
+            if getparams['dataacquisitions']['activated']:
+                message = '<b>Activated</b> Get for productcode: </br><b>' + \
+                          getparams['dataacquisitions']['productcode'] + '</b>'
+            else:
+                message = '<b>Deactivated</b> Get for productcode: </br><b>' + \
+                          getparams['dataacquisitions']['productcode'] + '</b>'
+            updatestatus = '{"success":true, "message":"' + message + '"}'
+        else:
+            updatestatus = '{"success":false, "message":"An error occured while updating the Get!"}'
+
+        return updatestatus
+
+
+class UpdateIngestion:
+    def __init__(self):
+        self.lang = "en"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    def PUT(self):
+        # return web.ctx
+        getparams = json.loads(web.data())
+        ingestioninfo = {'productcode': getparams['ingestions']['productcode'],
+                         'subproductcode': getparams['ingestions']['subproductcode'],
+                         'version': getparams['ingestions']['version'],
+                         'mapsetcode': getparams['ingestions']['mapsetcode'],
+                         'defined_by': getparams['ingestions']['defined_by'],
+                         'activated': getparams['ingestions']['activated']}
+
+        if self.crud_db.update('ingestion', ingestioninfo):
+            message = 'Ingestion for: </br>' + \
+                      'Productcode: <b>' + getparams['ingestions']['productcode'] + '</b></br>'\
+                      'Mapsetcode: <b>' + getparams['ingestions']['mapsetcode'] + '</b></br>'\
+                      'Subproductcode: <b>' + getparams['ingestions']['subproductcode'] + '</b>'
+            if getparams['ingestions']['activated']:
+                message = '<b>Activated</b> ' + message
+            else:
+                message = '<b>Deactivated</b> '  + message
+            updatestatus = '{"success":true, "message":"' + message + '"}'
+        else:
+            updatestatus = '{"success":false, "message":"An error occured while updating the Ingestion!"}'
+
+        return updatestatus
 
 
 class Ingestion:
@@ -80,77 +906,32 @@ class Ingestion:
         self.lang = "en"
 
     def GET(self):
-        #return web.ctx
+        # return web.ctx
         ingestions = querydb.get_ingestions(echo=False)
-
-        #completeness = {
-        #    'completeness': {
-        #        'firstdate': '2010-01-01',
-        #        'lastdate': '2014-12-21',
-        #        'totfiles': 312,
-        #        'missingfiles': 4,
-        #        'intervals': [{
-        #            'fromdate': '2010-01-01',
-        #            'todate': '2013-05-21',
-        #            'intervaltype': 'present',
-        #            'intervalpercentage': 20
-        #        }, {
-        #            'fromdate': '2013-06-01',
-        #            'todate': '2013-06-21',
-        #            'intervaltype': 'missing',
-        #            'intervalpercentage': 1
-        #        }, {
-        #            'fromdate': '2014-07-01',
-        #            'todate': '2014-07-21',
-        #            'intervaltype': 'present',
-        #            'intervalpercentage': 35
-        #        }, {
-        #            'fromdate': '2014-08-01',
-        #            'todate': '2014-08-21',
-        #            'intervaltype': 'permanent-missing',
-        #            'intervalpercentage': 2
-        #        }, {
-        #            'fromdate': '2014-09-01',
-        #            'todate': '2014-12-21',
-        #            'intervaltype': 'present',
-        #            'intervalpercentage': 32
-        #        }, {
-        #            'fromdate': '2014-09-01',
-        #            'todate': '2014-12-21',
-        #            'intervaltype': 'missing',
-        #            'intervalpercentage': 1
-        #        }, {
-        #            'fromdate': '2014-09-01',
-        #            'todate': '2014-12-21',
-        #            'intervaltype': 'present',
-        #            'intervalpercentage': 9
-        #        }]
-        #    }
-        #}
 
         if ingestions.__len__() > 0:
             ingest_dict_all = []
             for row in ingestions:
-                kwargs = {'product_code': row.productcode, 'sub_product_code': row.subproductcode, 'version': row.version, 'mapset': row.mapsetcode}
-                print kwargs
-                #kwargs.update({'to_date': datetime.date(2013, 12, 31)})
+                kwargs = {'product_code': row.productcode,
+                          'sub_product_code': row.subproductcode,
+                          'version': row.version,
+                          'mapset': row.mapsetcode}
+                # kwargs.update({'to_date': datetime.date(2013, 12, 31)})
                 dataset = Dataset(**kwargs)
-                intervals = dataset.get_dataset_normalized_info()
-                print intervals
-
-                ingest_dict = row2dict(row)
-                #ingest_dict.update(completeness)
+                completeness = dataset.get_dataset_normalized_info()
+                ingest_dict = functions.row2dict(row)
+                ingest_dict['completeness'] = completeness
                 ingest_dict_all.append(ingest_dict)
 
-            #ingestions_json = toJson(ingestions)
-            ingestions_json = json.dumps(ingest_dict_all, ensure_ascii=False, sort_keys=True, indent=4, separators=(', ', ': '))
-
-            # ingestions_json = json.dumps(ingestions,  ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': '))
+            # ingestions_json = tojson(ingestions)
+            ingestions_json = json.dumps(ingest_dict_all,
+                                         ensure_ascii=False,
+                                         sort_keys=True,
+                                         indent=4,
+                                         separators=(', ', ': '))
             ingestions_json = '{"success":true, "total":'+str(ingestions.__len__())+',"ingestions":'+ingestions_json+'}'
-            # ingestions_json = '{"success":true, "total":1,"ingestions":'+ingestions_json+'}'
-
         else:
-            ingestions_json = '{"success":false, "error":"No data acquisitions defined!"}'
+            ingestions_json = '{"success":false, "error":"No ingestions defined!"}'
 
         return ingestions_json
 
@@ -160,22 +941,22 @@ class DataAcquisition:
         self.lang = "en"
 
     def GET(self):
-        #return web.ctx
+        # return web.ctx
 
         dataacquisitions = querydb.get_dataacquisitions(echo=False)
 
         if dataacquisitions.__len__() > 0:
-            #dataacquisitions_json = toJson(dataacquisitions)
+            # dataacquisitions_json = tojson(dataacquisitions)
 
             acq_dict_all = []
             for row in dataacquisitions:
-                acq_dict = row2dict(row)
+                acq_dict = functions.row2dict(row)
                 # Retrieve datetime of latest acquired file and lastest datetime
                 # the acquisition was active of a specific eumetcast id
                 acq_dates = get_eumetcast.get_eumetcast_info(row.data_source_id)
                 if acq_dates:
                     for key in acq_dates.keys():
-                        #acq_info += '"%s": "%s", ' % (key, acq_dates[key])
+                        # acq_info += '"%s": "%s", ' % (key, acq_dates[key])
                         if isinstance(acq_dates[key], datetime.date):
                             datetostring = acq_dates[key].strftime("%y-%m-%d %H:%M")
                             acq_dict[key] = datetostring
@@ -187,15 +968,14 @@ class DataAcquisition:
                     acq_dict['lenght_proc_list'] = datetime.datetime.now().strftime("%y-%m-%d %H:%M")
 
                 acq_dict_all.append(acq_dict)
-
-                acq_json = json.dumps(acq_dict_all, ensure_ascii=False, sort_keys=True, indent=4, separators=(', ', ': '))
-
-                logger.error("Just to log something in this log file to see if the rotatingfilehandler works!\n")
-
-                # dataacquisitions_json = json.dumps(dataacquisitions, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': '))
-                dataacquisitions_json = '{"success":true, "total":'+str(dataacquisitions.__len__())+',"dataacquisitions":'+acq_json+'}'
-                # dataacquisitions_json = '{"success":true, "total":1,"dataacquisitions":['+dataacquisitions_json+']}'
-
+                acq_json = json.dumps(acq_dict_all,
+                                      ensure_ascii=False,
+                                      sort_keys=True,
+                                      indent=4,
+                                      separators=(', ', ': '))
+                dataacquisitions_json = '{"success":true, "total":'\
+                                        + str(dataacquisitions.__len__())\
+                                        + ',"dataacquisitions":'+acq_json+'}'
         else:
             dataacquisitions_json = '{"success":false, "error":"No data acquisitions defined!"}'
 
@@ -207,23 +987,13 @@ class ProductAcquisition:
         self.lang = "en"
 
     def GET(self, params):
-        #return web.ctx
+        # return web.ctx
         getparams = web.input()
-        #activated = True
-        if getparams.activated:
-            activated = getparams.activated
         products = querydb.get_products(echo=False, activated=getparams.activated)
-        #products = querydb.get_products(echo=False)
-        return products
+        products_json = functions.tojson(products)
+        products_json = '{"success":true, "total":'+str(products.__len__())+',"products":['+products_json+']}'
+        return products_json
 
-
-class TemplatePage:
-    def __init__(self):
-        self.render = web.template.render(locals.es2globals['base_dir']+'/templates/')
-
-    def GET(self):
-        getInput=web.input(name="World")
-        return self.render.mytemplate("mytitle", getInput.name)
 
 if __name__ == "__main__":
     app.run()

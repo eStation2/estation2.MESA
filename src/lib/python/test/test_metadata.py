@@ -6,15 +6,17 @@ from unittest import TestCase
 
 __author__ = 'clerima'
 
-import locals
 from osgeo import gdal
 from osgeo.gdalconst import *
 from lib.python.metadata import *
 import tempfile
 import shutil
+from config import es_constants
 
-input_dir = locals.es2globals['test_data_refs_dir']+'Metadata/'
-file=input_dir+'20140601_FEWSNET_RFE_RFE_FEWSNET_Africa_8km.tif'
+#input_dir = es_constants.es2globals['test_data_refs_dir']+'Metadata/'
+# Put here an existing 2.0 file with correct metadata
+input_dir = es_constants.es2globals['data_dir']+'/data/processing/vgt_ndvi/WGS84_Africa_1km/tif/ndv/'
+file=input_dir+'20130701_vgt_ndvi_ndv_WGS84_Africa_1km.tif'
 
 class TestMapSet(TestCase):
 
@@ -33,7 +35,7 @@ class TestMapSet(TestCase):
         #try:
         #    tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_test_writing_an_item', dir=locals.es2globals['temp_dir'])
         #except IOError:
-        #    logger.error('Cannot create temporary dir ' + locals.es2globals['temp_dir'] + '. Exit')
+        #    logger.error('Cannot create temporary dir ' + es_constants.es2globals['temp_dir'] + '. Exit')
         #    return 1
         #filename = tmpdir+'/temp_target.tif'
 

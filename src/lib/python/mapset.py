@@ -7,9 +7,6 @@
 #   TODO-M.C.: Define methods to assess relationships between mapsets (e.g. included)
 #
 
-# source eStation2 base definitions
-import locals
-
 # Import eStation lib modules
 from database import querydb
 
