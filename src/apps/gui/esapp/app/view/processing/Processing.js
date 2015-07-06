@@ -12,8 +12,8 @@ Ext.define("esapp.view.processing.Processing",{
     requires: [
         'esapp.view.processing.ProcessingModel',
         'esapp.view.processing.ProcessingController',
-        'esapp.view.processing.ProductMapSet',
-        'esapp.view.processing.MapSetFinalOutputSubProduct',
+        'esapp.view.processing.ProcessInputProducts',
+        'esapp.view.processing.ProcessFinalOutputSubProducts',
 
         'Ext.grid.column.Widget',
         'Ext.grid.column.Template',
@@ -109,9 +109,59 @@ Ext.define("esapp.view.processing.Processing",{
             hideable: true
         };
 
-        me.columns = [
-        {
-            header: '<div class="grid-header-style">Product categories</div>',
+        me.columns = [{
+            header: '<div class="grid-header-style">Processing inputs</div>',
+            menuDisabled: true,
+            variableRowHeight: true,
+            defaults: {
+                menuDisabled: true,
+                variableRowHeight: true,
+                sortable: false,
+                groupable: true,
+                draggable: false,
+                hideable: true
+            },
+            columns: [{
+                xtype: 'widgetcolumn',
+                width: 625,
+                bodyPadding: 0,
+
+                header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 260px; left: 0px; tabindex="-1">' +
+                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                '               <span data-ref="textEl" class="x-column-header-text">Product</span>' +
+                '           </div>' +
+                '       </div>' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 150px; right: auto; left: 260px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                '               <span data-ref="textEl" class="x-column-header-text">Sub Product</span>' +
+                '           </div>' +
+                '       </div>' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 200px;  left: 410px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                '               <span data-ref="textEl" class="x-column-header-text">Mapset</span>' +
+                '           </div>' +
+                '       </div>',
+                listeners: {
+                    render: function (column) {
+                        column.titleEl.removeCls('x-column-header-inner');
+                    }
+                },
+                onWidgetAttach: function (widget, record) {
+                    Ext.suspendLayouts();
+                    var inputproducts = record.getData().inputproducts;
+                    var newstore = Ext.create('Ext.data.JsonStore', {
+                        model: 'InputProducts',
+                        data: inputproducts
+                    });
+                    widget.setStore(newstore);
+                    Ext.resumeLayouts(true);
+                },
+                widget: {
+                    xtype: 'process-inputproductgrid'
+                }
+            }]
+        },{
+            header: '<div class="grid-header-style">Algorithm</div>',
             menuDisabled: true,
             variableRowHeight : true,
             defaults: {
@@ -123,19 +173,13 @@ Ext.define("esapp.view.processing.Processing",{
                 hideable: true
             },
             columns: [{
-                xtype:'templatecolumn',
-                header: 'Product',
-                tpl: new Ext.XTemplate(
-                        '<b>{prod_descriptive_name}</b>' +
-                        '<tpl if="version != \'undefined\'">',
-                            '<b class="smalltext"> - {version}</b>',
-                        '</tpl>',
-                        '</br><span class="smalltext">' +
-                        '<b style="color:darkgrey">{productcode}</b>' +
-                        '<p>{description}</p>' +
-                        '</span></br>'
-                    ),
-                width: 450,
+                header: 'Type',
+                width: 150,
+                dataIndex: 'algorithm',
+                cellWrap:true
+            },{
+                header: 'Options',
+                width: 150,
                 cellWrap:true
             },{
                 xtype: 'actioncolumn',
@@ -149,14 +193,14 @@ Ext.define("esapp.view.processing.Processing",{
                     // scope: me,
                     // handler: me.onToggleActivation
                     getClass: function(v, meta, rec) {
-                        if (rec.get('activated')) {
+                        if (rec.get('process_activated')) {
                             return 'activated';
                         } else {
                             return 'deactivated';
                         }
                     },
                     getTip: function(v, meta, rec) {
-                        if (rec.get('activated')) {
+                        if (rec.get('process_activated')) {
                             return 'Deactivate Product';
                         } else {
                             return 'Activate Product';
@@ -164,28 +208,11 @@ Ext.define("esapp.view.processing.Processing",{
                     },
                     handler: function(grid, rowIndex, colIndex) {
                         var rec = grid.getStore().getAt(rowIndex),
-                            action = (rec.get('activated') ? 'deactivated' : 'activated');
+                            action = (rec.get('process_activated') ? 'deactivated' : 'activated');
                         //Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
-                        rec.get('activated') ? rec.set('activated', false) : rec.set('activated', true);
+                        rec.get('process_activated') ? rec.set('process_activated', false) : rec.set('process_activated', true);
                     }
                 }]
-//            },{
-//                xtype: 'checkcolumn',
-//                header: 'Active',
-//                width: 65,
-//                dataIndex: 'activated',
-//                stopSelection: false,
-//                hideable: true,
-//                hidden:false,
-//                disabled: false,
-//                listeners: {
-//                  checkchange: function(chkBox, rowIndex, checked, eOpts){
-//                      var myTitle = ""
-//                      if (checked)  myTitle = "Activate Processing Chain";
-//                      else myTitle = "De-activate Processing Chain";
-//                      Ext.toast({ html: 'Checkbox clicked!', title: myTitle, width: 200, align: 't' });
-//                  }
-//                }
             }]
         }, {
             header:  '<div class="grid-header-style">Processing outputs</div>',
@@ -201,20 +228,25 @@ Ext.define("esapp.view.processing.Processing",{
             }
             ,columns: [{
                 xtype: 'widgetcolumn',
-                width: 500,
+                width: 700,
                 bodyPadding:0,
 
-                header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 210px; left: 0px; tabindex="-1">' +
+                header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 250px; left: 0px; tabindex="-1">' +
+                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                '               <span data-ref="textEl" class="x-column-header-text">Product</span>' +
+                '           </div>' +
+                '       </div>' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; right: auto; left: 250px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">Mapset</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 190px; right: auto; left: 210px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 150px; right: auto; left: 450px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">Sub Product</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 400px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 600px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">Active</span>' +
                 '           </div>' +
@@ -226,16 +258,63 @@ Ext.define("esapp.view.processing.Processing",{
                 },
                 onWidgetAttach: function(widget, record) {
                     Ext.suspendLayouts();
-                    var productmapsets = record.getData().productmapsets;
+                    var processrec = record.getData();
+                    var outputproducts = processrec.outputproducts;
+
                     var newstore = Ext.create('Ext.data.JsonStore', {
-                        model: 'ProcessingProductMapSet',
-                        data: productmapsets
+                        model: 'OutputProducts',
+                        data: outputproducts
+                        ,storeId : 'OutputProductsStore' + processrec.process_id
+                        ,autoSync: true
+                        ,requires : [
+                            'esapp.model.OutputProducts'
+                            //'Ext.data.proxy.Rest'
+                        ]
+                        ,proxy: {
+                            type: 'ajax',
+                            url:'processing/update',
+                            appendId: false,
+                            //api: {
+                            //    read: 'processing'
+                            //    ,create: 'processing/create'
+                            //    ,update: 'processing/update'
+                            //    ,destroy: 'processing/delete'
+                            //},
+                            //reader: {
+                            //     type: 'json'
+                            //    ,successProperty: 'success'
+                            //    ,rootProperty: 'process'
+                            //    ,messageProperty: 'message'
+                            //},
+                            writer: {
+                                type: 'json',
+                                writeAllFields: false,
+                                allowSingle : true,
+                                encode: false,
+                                rootProperty: 'processoutputproduct',
+                                allDataOptions: {
+                                    associated: false,
+                                    changes: true,
+                                    critical: true
+                                }
+                            },
+                            listeners: {
+                                exception: function(proxy, response, operation){
+                                    Ext.MessageBox.show({
+                                        title: 'PROCESSING OUTPUT PRODUCTS STORE - REMOTE EXCEPTION',
+                                        msg: operation.getError(),
+                                        icon: Ext.MessageBox.ERROR,
+                                        buttons: Ext.Msg.OK
+                                    });
+                                }
+                            }
+                        }
                     });
                     widget.setStore(newstore);
                     Ext.resumeLayouts(true);
                 },
                 widget: {
-                    xtype: 'process-productmapsetgrid'
+                    xtype: 'process-finaloutputsubproducts-grid'
                 }
             }]
         }];

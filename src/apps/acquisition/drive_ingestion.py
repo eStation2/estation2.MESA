@@ -21,8 +21,8 @@ if service:
             logger.error("Cannot create pid directory")
 
     # Define pid file and create daemon
-    pid_file = es_constants.ingest_pid_filename
-    daemon = acquisition.IngestDaemon(pid_file, dry_run=dry_run)
+    pid_file = es_constants.ingestion_pid_filename
+    daemon = acquisition.IngestionDaemon(pid_file, dry_run=dry_run)
 
     if do_start:
         if daemon.status():

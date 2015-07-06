@@ -243,6 +243,33 @@ class SdsMetadata:
 
         return value
 
+    def get_target_filepath(self, input_file):
+
+    # Given a .GTiff file, reads its metadata and build-up the target fullpath
+    # Input filename does not need to be in the eStation2 format, everything read from metadata
+
+    # Check the file exists
+        if os.path.isfile(input_file):
+            try:
+                self.read_from_file(input_file)
+            except:
+                logger.warning('Error in loading from file %s . Exit' % input_file)
+
+            target_subdir = sds_metadata['eStation2_subdir']
+            target_dir=es_constants.es2globals['processing_dir']+target_subdir
+            target_name=functions.set_path_filename(sds_metadata['eStation2_date'],
+                                                    sds_metadata['eStation2_product'],
+                                                    sds_metadata['eStation2_subProduct'],
+                                                    sds_metadata['eStation2_mapset'],
+                                                    sds_metadata['eStation2_product_version'],
+                                                    '.tif')
+            fullpath = target_dir+target_name
+            return fullpath
+        else:
+            logger.warning('File %s does not exist. Exit' % input_file)
+            return None
+
+
     def print_out(self):
     #
     #   Writes to std output

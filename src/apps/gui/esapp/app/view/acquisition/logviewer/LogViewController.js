@@ -4,17 +4,27 @@ Ext.define('esapp.view.acquisition.logviewer.LogViewController', {
 
     // {{{
     ,getFile: function(win) {
-        //console.info(win);
+        var me = this.getView();
 
         //var params = Ext.JSON.encode(win.params);
-        var params = {
-               logtype: win.params.logtype,
-               gettype: win.params.record.get('type'),
-               productcode:win.params.record.get('productcode'),
-               mapsetcode:win.params.record.get('mapsetcode'),
-               version:win.params.record.get('version'),
-               subproductcode:win.params.record.get('subproductcode')
-        };
+        var params = {}
+        if (me.params.logtype == 'service') {
+            params = {
+                logtype: me.params.logtype,
+                service: me.params.record
+            };
+        }
+        else {
+            params = {
+                logtype: me.params.logtype,
+                gettype: me.params.record.get('type'),
+                productcode: me.params.record.get('productcode'),
+                mapsetcode: me.params.record.get('mapsetcode'),
+                version: me.params.record.get('version'),
+                subproductcode: me.params.record.get('subproductcode'),
+                data_source_id: me.params.record.get('data_source_id')
+            };
+        }
 
         Ext.Ajax.request({
             method: 'GET',
@@ -22,9 +32,11 @@ Ext.define('esapp.view.acquisition.logviewer.LogViewController', {
             params: params,
             loadMask:'Loading data...',
             callback:function(callinfo,responseOK,response ){
-
-                var response_Text = response.responseText.trim();
-                Ext.getCmp('logfilecontent').setValue(response_Text);
+                var logfile = Ext.JSON.decode(response.responseText.trim());
+                Ext.getCmp('logfilecontent').setValue(logfile.logfilecontent);
+                me.setTitle(esapp.Utils.getTranslation('logfile') + ': ' + logfile.filename);
+                //var response_Text = response.responseText.trim();
+                //Ext.getCmp('logfilecontent').setValue(response_Text);
                 //eStation.myGlobals.OriginalContent = Ext.getCmp('logfilecontent').getRawValue();
                 //eStation.LogfileShowPanel.setTitle('File: ' + record.data.filename);
             },

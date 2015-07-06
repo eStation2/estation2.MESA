@@ -24,7 +24,7 @@ Ext.define("esapp.view.acquisition.logviewer.LogView",{
         titlePosition: 0,
         titleAlign: 'center'
     },
-    modal: false,
+    modal: true,
     closable: true,
     closeAction: 'destroy', // 'hide',
     maximizable: false,
@@ -82,6 +82,14 @@ Ext.define("esapp.view.acquisition.logviewer.LogView",{
                 text: '',
                 iconCls: 'magnifier-left-icon',
                 handler: 'highlightSearchString'
+            },'->', // same as { xtype: 'tbfill' }
+            {
+                xtype: 'button',
+                iconCls: 'fa fa-refresh fa-2x',
+                style: { color: 'gray' },
+                enableToggle: false,
+                scale: 'medium',
+                handler: 'getFile'
             }
         ];
 

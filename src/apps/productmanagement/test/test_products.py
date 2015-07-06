@@ -20,6 +20,9 @@ from config import es_constants
 from lib.python import functions
 from database import connectdb
 from database import querydb
+from lib.python import es_logging as log
+from lib.python import metadata
+logger = log.my_logger(__name__)
 
 
 def glob_monkey(path):
@@ -199,3 +202,114 @@ class TestProducts(unittest.TestCase):
         missing = product.get_missing_datasets(mapset=mapsets[0])
         filetar = Product.create_tar(missing)
         #TODO check for file size
+
+#   Additional test to mimic/replicate what happens in webpy_esapp (M.C.)
+class TestProducts4UI(unittest.TestCase):
+
+    def hide_some_files(self, productcode, version, subproductcode, type, mapset, dates):
+    # Move to /tmp/eStation2/test/ some products - for generating a product request
+
+        source_dir = es_constants.es2globals['processing_dir'] + \
+                     functions.set_path_sub_directory(productcode, subproductcode, type, version, mapset)
+        target_dir = es_constants.es2globals['base_tmp_dir']
+
+        for date in dates:
+            filename = date + functions.set_path_filename_no_date(productcode,subproductcode, mapset, version,'.tif')
+
+            fullpath=source_dir+os.path.sep+filename
+            fullpath_dest=target_dir+os.path.sep+filename
+
+            try:
+                os.rename(source_dir+filename, fullpath_dest)
+            except:
+                logger.error('Error in moving file %s' % fullpath)
+
+    def move_back_files(self, tmp_dir):
+
+        # Create Metadata class to get target fullpath
+        meta = metadata.SdsMetadata()
+
+        # Get list of files in tmp dir
+        files = glob.glob(tmp_dir+'*.tif')
+
+        for my_file in files:
+            fullpath_dest=meta.get_target_filepath(my_file)
+            try:
+                os.rename(my_file, fullpath_dest)
+            except:
+                logger.error('Error in moving file %s' % fullpath)
+
+
+    # This is to test the data completeness for a single product/version
+    def test_product_data_management(self):
+        def row2dict(row):
+            d = {}
+            for column_name in row.c.keys():  # all_cols:
+                d[column_name] = str(getattr(row, column_name))
+            return d
+
+        # Select prod/vers
+        productcode = 'vgt-ndvi'
+        version = 'proba-v2.1'
+        product = Product(product_code=productcode, version=version)
+        # does the product have mapsets AND subproducts?
+        all_prod_mapsets = product.mapsets
+        all_prod_subproducts = product.subproducts
+        if all_prod_mapsets.__len__() > 0 and all_prod_subproducts.__len__() > 0:
+                for mapset in all_prod_mapsets:
+                    mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
+                    mapset_dict = row2dict(mapset_info)
+                    mapset_dict['mapsetdatasets'] = []
+                    all_mapset_datasets = product.get_subproducts(mapset=mapset)
+                    for subproductcode in all_mapset_datasets:
+                        dataset_info = querydb.get_subproduct(productcode=productcode,
+                                                              version=version,
+                                                              subproductcode=subproductcode,
+                                                              echo=False)
+
+                        dataset_dict = row2dict(dataset_info)
+                        dataset = product.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+                        completeness = dataset.get_dataset_normalized_info()
+                        dataset_dict['datasetcompleteness'] = completeness
+
+                        mapset_dict['mapsetdatasets'].append(dataset_dict)
+
+    def test_missing_product_request_product_1(self):
+
+        # Test the mechanism of creating 'missing' reports on a specific 'product'
+        productcode = 'fewsnet-rfe'
+        version='2.0'
+        product = Product(product_code=productcode, version=version)
+        mapsets = product.mapsets
+        subproductcode = '10d'
+        type = 'Ingest'
+        to_date=datetime.date(2015,4,30)
+
+        # Create an initial list
+        # missing = product.get_missing_datasets(mapset=mapsets[0],sub_product_code=subproductcode, from_date=None, to_date=to_date)
+
+        # Move away some files
+        dates = []
+        dates.append('20150101')
+        dates.append('20150111')
+        dates.append('20150121')
+        self.hide_some_files(productcode, version, subproductcode, type, mapsets[0], dates)
+
+        # Create the 'missing' list
+        missing = product.get_missing_datasets(mapset=mapsets[0],sub_product_code=subproductcode, from_date=None, to_date=to_date)
+
+        # Move back the files (to create .tar)
+        self.move_back_files('/tmp/eStation2/')
+        # Create the tar file with files 'missing'
+        [file_tar, result] = product.create_tar(missing, filetar=None, tgz=True)
+
+        # Move away the files again files
+        self.hide_some_files(productcode, version, subproductcode, type, mapsets[0], dates)
+
+        # Import the files from archive
+        result = product.import_tar(file_tar, tgz=True)
+
+        # Re-create the 'missing' list
+        missing = product.get_missing_datasets(mapset=mapsets[0],sub_product_code=subproductcode, from_date=None, to_date=to_date)
+
+        a=1

@@ -43,21 +43,22 @@ Ext.define("esapp.view.acquisition.Acquisition",{
 
     // title: 'Product Acquisition Dashboard',
     viewConfig: {
-        stripeRows: false,
+        stripeRows: true,
         enableTextSelection: true,
         draggable:false,
         markDirty: false,
         resizable:false,
-        disableSelection: true,
         trackOver:true
     },
+    //cls: 'extra-alt',
 
     // selModel : {
     //    allowDeselect : false
     // },
 
     collapsible: false,
-    // suspendLayout:true,
+    suspendLayout:false,
+    disableSelection: true,
     enableColumnMove:false,
     enableColumnResize:false,
     multiColumnSort: false,
@@ -108,8 +109,9 @@ Ext.define("esapp.view.acquisition.Acquisition",{
 
                     if (btn.pressed){
                         // ToDo: check if logged in!
+                        console.info(acq_main[0]);
 
-                        acq_main[0].columns[3].setWidth(475);
+                        acq_main[0].columns[3].setWidth(575);
                         acq_main[0].columns[3].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 111px; left: 0px; tabindex="-1">' +
                         '           <div data-ref="titleEl" class="x-column-header-inner">' +
                         '               <span data-ref="textEl" class="x-column-header-text">Type</span>' +
@@ -125,34 +127,41 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                         '               <span data-ref="textEl" class="x-column-header-text">Last executed</span>' +
                         '           </div>' +
                         '       </div>' +
-                        '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 60px; right: auto; left: 332px; margin: 0px; top: 0px;" tabindex="-1">' +
+                        '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 100px; left: 332px; margin: 0px; top: 0px;" tabindex="-1">' +
+                        '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                        '               <span data-ref="textEl" class="x-column-header-text">Store Native</span>' +
+                        '           </div>' +
+                        '       </div>' +
+                        '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 60px; right: auto; left: 432px; margin: 0px; top: 0px;" tabindex="-1">' +
                         '           <div data-ref="titleEl" class="x-column-header-inner">' +
                         '               <span data-ref="textEl" class="x-column-header-text">Active</span>' +
                         '           </div>' +
                         '       </div>' +
-                        '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 55px; left: 392px; margin: 0px; top: 0px;" tabindex="-1">' +
+                        '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 55px; left: 492px; margin: 0px; top: 0px;" tabindex="-1">' +
                         '           <div data-ref="titleEl" class="x-column-header-inner">' +
                         '               <span data-ref="textEl" class="x-column-header-text">Log</span>' +
                         '           </div>' +
                         '       </div>');
 
                         addproductbtn[0].show();
-                        acq_main[0].columns[0].show();  // Last copied
-                        acq_main[0].columns[2].show();  // Last executed
+                        acq_main[0].columns[0].show();  // Edit product action column
+                        //acq_main[0].columns[2].show();
+                        //acq_main[0].columns[3].show();
                         Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
                             dataacquisitiongrid.columns[1].show();
-                            dataacquisitiongrid.columns[2].show();
+                            dataacquisitiongrid.columns[2].show();   // Last executed
+                            dataacquisitiongrid.columns[3].show();   // Store Native
                         });
-//                        Ext.Object.each(checkColumns, function(id, chkCol, myself) {
-//                            chkCol.enable();
-//                        });
+                        //Ext.Object.each(checkColumns, function(id, chkCol, myself) {
+                        //    chkCol.enable();
+                        //});
                         // TODO: Enable action columns
-//                        Ext.Object.each(actionColumns, function(id, actionCol, myself) {
-//                            actionCol.enable();
-//                            actionCol.items[0].disabled = false;
-//                            actionCol.enableAction(0);
-//                            actionCol.updateLayout();
-//                        })
+                        //Ext.Object.each(actionColumns, function(id, actionCol, myself) {
+                        //    actionCol.enable();
+                        //    actionCol.items[0].disabled = false;
+                        //    actionCol.enableAction(0);
+                        //    actionCol.updateLayout();
+                        //})
                         btn.setIconCls('fa fa-unlock fa-2x');
 
                     }
@@ -168,6 +177,11 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                                 '               <span data-ref="textEl" class="x-column-header-text">Active</span>' +
                                 '           </div>' +
                                 '       </div>' +
+                                //'       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 100px; left: 171px; margin: 0px; top: 0px;" tabindex="-1">' +
+                                //'           <div data-ref="titleEl" class="x-column-header-inner">' +
+                                //'               <span data-ref="textEl" class="x-column-header-text">Store Native</span>' +
+                                //'           </div>' +
+                                //'       </div>' +
                                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 55px; left: 171px; margin: 0px; top: 0px;" tabindex="-1">' +
                                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                                 '               <span data-ref="textEl" class="x-column-header-text">Log</span>' +
@@ -177,9 +191,11 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                         addproductbtn[0].hide();
                         acq_main[0].columns[0].hide();
                         acq_main[0].columns[2].hide();
+                        //acq_main[0].columns[3].hide();
                         Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
                             dataacquisitiongrid.columns[1].hide();
                             dataacquisitiongrid.columns[2].hide();
+                            dataacquisitiongrid.columns[3].hide();
                         });
 //                        Ext.Object.each(checkColumns, function(id, chkCol, myself) {
 //                            chkCol.disable();
@@ -433,6 +449,11 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                 '               <span data-ref="textEl" class="x-column-header-text">Active</span>' +
                 '           </div>' +
                 '       </div>' +
+                //'       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 100px; left: 171px; margin: 0px; top: 0px;" tabindex="-1">' +
+                //'           <div data-ref="titleEl" class="x-column-header-inner">' +
+                //'               <span data-ref="textEl" class="x-column-header-text">Store Native</span>' +
+                //'           </div>' +
+                //'       </div>' +
                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 55px; left: 171px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">Log</span>' +
@@ -474,7 +495,7 @@ Ext.define("esapp.view.acquisition.Acquisition",{
             }
             ,columns: [{
                 xtype: 'widgetcolumn',
-                width: 780,
+                width: 695,
                 bodyPadding:0,
 
                 header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 170px; left: 0px; tabindex="-1">' +
@@ -496,11 +517,11 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">Active</span>' +
                 '           </div>' +
-                '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 695px; margin: 0px; top: 0px;" tabindex="-1">' +
-                '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Log</span>' +
-                '           </div>' +
+                //'       </div>' +
+                //'       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 695px; margin: 0px; top: 0px;" tabindex="-1">' +
+                //'           <div data-ref="titleEl" class="x-column-header-inner">' +
+                //'               <span data-ref="textEl" class="x-column-header-text">Log</span>' +
+                //'           </div>' +
                 '       </div>',
                 listeners: {
                   render: function(column){
@@ -519,6 +540,34 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                 },
                 widget: {
                     xtype: 'ingestiongrid'
+                }
+            }]
+        },{
+            xtype: 'actioncolumn',
+            text: 'Log',
+            id: 'ingestionlogcolumn',
+            width: 65,
+            height:40,
+            align:'center',
+            cls:'x-grid3-td-ingestionlogcolumn',
+            items: [{
+                //icon: 'resources/img/icons/file-extension-log-icon-32x32.png',
+                iconCls:'log-icon',
+                width:32,
+                height:32,
+                tooltip: 'Show log of this Ingestion',
+                scope: me,
+                // handler: me.onRemoveClick
+                handler: function (grid, rowIndex, colIndex, icon) {
+                    //console.info(grid.up());
+                    var rec = grid.getStore().getAt(rowIndex);
+                    var logViewWin = new esapp.view.acquisition.logviewer.LogView({
+                        params: {
+                            logtype: 'ingest',
+                            record: rec
+                        }
+                    });
+                    logViewWin.show();
                 }
             }]
         }];

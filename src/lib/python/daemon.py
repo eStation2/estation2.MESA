@@ -2,7 +2,7 @@
 
 import sys, os, time, atexit
 import psutil
-from signal import SIGTERM
+from signal import SIGKILL, SIGTERM
 from lib.python import es_logging as log
 logger = log.my_logger(__name__)
 from config import es_constants
@@ -130,7 +130,8 @@ class Daemon(object):
         # Try killing the daemon process
         try:
             while 1:
-                os.kill(pid, SIGTERM)
+                #os.kill(pid, SIGTERM)
+                os.kill(pid, SIGKILL)
                 time.sleep(0.1)
         except OSError, err:
             err = str(err)

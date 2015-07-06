@@ -5,3 +5,8 @@
 *.tar
 tmp
 clean.sh
+AFR_G2014_2013_00.geojson
+AFR_G2014_2013_0.geojson
+AFR_G2014_2013_1.geojson
+AFR_G2014_2013_2.geojson
+./build/development

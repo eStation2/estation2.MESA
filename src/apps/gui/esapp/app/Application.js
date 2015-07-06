@@ -9,42 +9,28 @@ Ext.define('esapp.Application', {
     name: 'esapp',
 
     requires: [
-        // 'Ext.app.bindinspector.*',
+         //'Ext.app.bindinspector.*',
         'Ext.app.*',
         'Ext.window.Toast',
         'Ext.state.CookieProvider',
         'Ext.window.MessageBox',
         'Ext.tip.QuickTipManager',
-        'esapp.*'
+
+        'esapp.Utils'
+        //,'esapp.view.main.Main'
+        //'esapp.*'
     ],
 
     views: [
         'header.Header',
-
         'dashboard.Dashboard',
-
         'acquisition.Acquisition',
-        //'acquisition.DataAcquisition',
-        //'acquisition.Ingestion',
-        //'acquisition.product.editProduct',
-        //'acquisition.product.selectProduct',
-
         'processing.Processing',
-        //'processing.ProductMapSet',
-        //'processing.MapSetFinalOutputSubProduct',
-
         'datamanagement.DataManagement',
-        //'datamanagement.ProductMapSet',
-        //'datamanagement.MapSetDataSet',
-
         'analysis.analysisMain',
-
         'system.systemsettings',
-
         'widgets.datasetCompletenessChart',
         'widgets.ServiceMenuButton'
-
-
     ],
 
     controllers: [
@@ -53,6 +39,8 @@ Ext.define('esapp.Application', {
 
     stores: [
          'LogoImages'
+        ,'LanguagesStore'
+        ,'i18nStore'
         ,'ProductsActiveStore'
         ,'ProductsInactiveStore'
         ,'DataAcquisitionsStore'
@@ -60,24 +48,144 @@ Ext.define('esapp.Application', {
         ,'DataSetsStore'
         ,'ProcessingStore'
         ,'SystemSettingsStore'
+        //,'VersionsStore'
         //,'ProductNavigatorStore'
     ],
 
-    models: ['ProductNavigator', 'ProductNavigatorMapSet', 'ProductNavigatorMapSetDataSet'],
+    models: [
+        'ProductNavigator',
+        'ProductNavigatorMapSet',
+        'ProductNavigatorMapSetDataSet',
+        'TimeseriesProduct',
+        'esapp.model.Dashboard',
+        'esapp.model.Versions',
+        'esapp.model.Themas'
+        //,'TimeserieProductMapSet'
+        //,'TimeserieProductMapSetDataSet'
+    ],
 
-//    onBeforeLaunch: function () {
-//
-//        this.callParent();
-//    },
+    // create a reference in Ext.application so we can access it from multiple functions
+    splashscreen: {},
+
+    init: function () {
+        //console.info('Application Init()');
+
+        // start the mask on the body and get a reference to the mask
+        splashscreen = Ext.getBody().mask('Loading eStation2, please stand by ...', 'splashscreen');
+
+        this.callParent();
+    },
+
+    onBeforeLaunch: function () {
+        //console.info("onbeforelaunch!!!");
+
+        this.callParent();
+    },
 
     launch: function () {
-        // TODO - Launch the application
+        //console.info("launch!!!");
+        //SenchaInspector.init();
+
         // Ext.getBody().addCls('graybgcolor');
         Ext.setGlyphFontFamily('FontAwesome');
         // Ext.setGlyphFontFamily('Pictos');
         Ext.tip.QuickTipManager.init();
         Ext.state.Manager.setProvider(Ext.create('Ext.state.CookieProvider'));
 
+        var link = document.createElement('icolink');
+        link.type = 'image/ico';
+        link.rel = 'icon';
+        link.href = 'resources/img/africa.ico';
+        console.info(link);
+        document.getElementsByTagName('head')[0].appendChild(link);
+
+
+        // quick and dirty override to have the language combo work
+        Ext.tab.Bar.prototype.beforeFocusableChildFocus = function(child, e) {
+            var me = this,
+                mixin = me.mixins.focusablecontainer;
+
+            mixin.beforeFocusableChildFocus.call(me, child, e);
+
+            if (!child.active && Ext.isFunction(child.activate)) {
+                child.activate();
+            }
+
+            me.doActivateTab(child);
+        };
+
+
+        esapp.globals = [];
+        esapp.globals['selectedLanguage'] = 'eng';
+        Ext.data.StoreManager.lookup('LanguagesStore').load({
+            callback: function(records, options, success){
+                records.forEach(function(language) {
+                    if (language.get('selected') == true){
+                        esapp.globals['selectedLanguage'] = language.get('langcode')
+                    }
+                });
+
+                //Ext.getCmp("languageCombo").setValue(esapp.globals['selectedLanguage']);
+                //console.info(esapp.globals['selectedLanguage']);
+
+                Ext.data.StoreManager.lookup('i18nStore').load({
+                    params:{lang:esapp.globals['selectedLanguage']},
+                    callback: function(records, options, success){
+                        Ext.create('esapp.view.main.Main');
+                    }
+                });
+            }
+        });
+
+        var task = new Ext.util.DelayedTask(function() {
+            // fade out the body mask
+            splashscreen.fadeOut({
+                duration: 500,
+                remove: true
+            });
+
+            // fade out the message
+            splashscreen.next().fadeOut({
+                duration: 500,
+                remove: true
+            });
+
+        });
+
+        task.delay(2000);
+
+
+
+        //Ext.create('esapp.view.main.Main',{renderTo: Ext.getBody()});
+        //mainview = Ext.create('esapp.view.main.Main',{});
+        //mainview.show();
+        //Ext.getCmp("languageCombo").setValue(esapp.globals['selectedLanguage']);
+
+        this.callParent();
+
+
+
+
+        //esapp.globals = [];
+        //esapp.globals['selectedLanguage'] = 'eng';
+        //Ext.data.StoreManager.lookup('LanguagesStore').load({
+        //    callback: function(records, options, success){
+        //        records.forEach(function(language) {
+        //            if (language.get('selected') == true){
+        //                esapp.globals['selectedLanguage'] = language.get('langcode')
+        //            }
+        //        });
+        //
+        //        Ext.getCmp("languageCombo").setValue(esapp.globals['selectedLanguage']);
+        //
+        //        Ext.data.StoreManager.lookup('i18nStore').load({
+        //            params:{lang:esapp.globals['selectedLanguage']},
+        //            callback: function(records, options, success){
+        //                //Ext.create('esapp.view.main.Main');
+        //            }
+        //        });
+        //    }
+        //});
 
 //        Ext.define('Ext.LazyItems', {
 //            extend: 'Ext.AbstractPlugin',

@@ -1,4 +1,3 @@
-
 from apps.acquisition.get_internet import *
 from apps.acquisition.get_eumetcast import *
 
@@ -17,7 +16,6 @@ class TestGetInternet(unittest.TestCase):
     def TestRemoteFtp_MCD45A1_TIF(self):
         remote_url='ftp://ba1.geog.umd.edu/Collection51/TIFF/'
         usr_pwd='user:burnt_data'
-        #full_regex   ='Win.*/20../MCD45monthly.*.burndate.tif.gz'
         full_regex   ='Win11/2011/MCD45monthly.*.burndate.tif.gz'
         file_to_check='Win11/2011/MCD45monthly.A2011001.Win11.051.burndate.tif.gz'
 
@@ -68,7 +66,7 @@ class TestGetInternet(unittest.TestCase):
         self.assertTrue(file_to_check in list)
 
     #   ---------------------------------------------------------------------------
-    #   Test iteration on ftp CHIRPS (id to )
+    #   Test iteration on ftp CHIRPS preliminary (id to be assigned)
     #   ---------------------------------------------------------------------------
     def TestRemoteFtp_CHIRPS(self):
         # Retrieve a list of CHIRP
@@ -79,19 +77,19 @@ class TestGetInternet(unittest.TestCase):
 
         list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
         self.assertTrue(file_to_check in list)
-   #   ---------------------------------------------------------------------------
-    #   Test iteration on ftp CHIRPS (id to )
+    #   ---------------------------------------------------------------------------
+    #   Test iteration on ftp CHIRPS (id:  UCSB:CHIRPS:DEKAD:2.0)
     #   ---------------------------------------------------------------------------
     def TestRemoteFtp_CHIRPS_2_0(self):
         # Retrieve a list of CHIRP
-        remote_url='//chg-ftpout.geog.ucsb.edu/pub/org/chg/products/CHIRPS-2.0/'
+        remote_url='ftp://chg-ftpout.geog.ucsb.edu/pub/org/chg/products/CHIRPS-2.0/global_dekad/tifs/'
         usr_pwd='anonymous:anonymous'
-        full_regex   ='chirps-v1.8.*.tif'
-        file_to_check='chirps-v1.8.2014.09.4.tif'
+        full_regex   ='chirps-v2.0.*.tif'
+        file_to_check='chirps-v2.0.2015.02.1.tif.gz'
 
         list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
+        print(list)
         self.assertTrue(file_to_check in list)
-
 
      #   ---------------------------------------------------------------------------
     #   Test remote ftp NOAA GSOD (id: NOAA:GSOD)
@@ -103,6 +101,21 @@ class TestGetInternet(unittest.TestCase):
         usr_pwd='anonymous:'
         full_regex   ='2011/997...-99999-2011.op.gz'
         file_to_check='2011/997286-99999-2011.op.gz'
+
+        list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
+        print(list)
+        self.assertTrue(file_to_check in list)
+
+    #   ---------------------------------------------------------------------------
+    #   Test remote ftp JRC
+    #   ---------------------------------------------------------------------------
+    def TestRemoteFtp_JRC(self):
+
+        # Retrieve a list of MODIS burndate file .. check only one present
+        remote_url='ftp://h05-ftp.jrc.it/'
+        usr_pwd='narmauser:narma11'
+        full_regex   ='eumetcast/'
+        file_to_check='prod_descr_restore.txt'
 
         list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
 
@@ -138,7 +151,6 @@ class TestGetInternet(unittest.TestCase):
     #
     #     self.assertTrue(file_to_check in list)
 
-
     #   ---------------------------------------------------------------------------
     #   Test iteration on remote ftp (e.g. VITO GL-GIO products): Obsolete ?
     #   ---------------------------------------------------------------------------
@@ -159,75 +171,69 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def TestRemoteHttp_MODIS_SST_1DAY(self):
 
-        #remote_url='http://oceandata.sci.gsfc.nasa.gov/'
+        remote_url='http://oceandata.sci.gsfc.nasa.gov/'
         from_date= datetime.date(2015,1,1)
         to_date= datetime.date(2015,2,1)
         template='%Y/%j/A%Y%j.L3m_DAY_SST_4.bz2'
         usr_pwd='anonymous:anonymous'
-        frequency='day'
+        frequency='e1day'
 
-        files_list = build_list_matching_for_http(template, from_date, to_date, frequency)
+        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        print(files_list)
         file_to_check='2015/001/A2015001.L3m_DAY_SST_4.bz2'
 
-        print files_list
         self.assertTrue(file_to_check in files_list)
 
     #   ---------------------------------------------------------------------------
-    #   Get a file from HTTP (list_from_template=TRUE, No User/psw) -> FEWSNET
+    #   Get list of files from FEWSNET HTTP (id: USGS:EARLWRN:FEWSNET)
     #   ---------------------------------------------------------------------------
 
     def TestRemoteHttp_FEWSNET(self):
-        #template='a%y%m1rb.zip'           # it works forcing 1 as dekad of month
-        template='a%y%m%{dkm}rb.zip'       # introduce non-standard placeholder
-        file_to_check='a14081rb.zip'
-        from_date = datetime.date(2014, 1, 1)
-        to_date = datetime.date(2014, 12, 31)
-        frequency = 'dekad'
-        files_list = build_list_matching_for_http(template, from_date, to_date, frequency)
-        print files_list
 
+        remote_url='http://earlywarning.usgs.gov/ftp2/raster/rf/a/'
+        from_date = datetime.date(2014,1,1)
+        to_date = datetime.date(2014,12,31)
+        template='%Y/a%y%m%{dkm}rb.zip'         # Where are data for 2015 ??
+        frequency = 'e1dekad'
+
+        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+
+        file_to_check='2014/a14121rb.zip'
         self.assertTrue(file_to_check in files_list)
 
     #   ---------------------------------------------------------------------------
-    #   Get contents of a directory (HTTP)  -> MODIS_SST_8D
-    #   An html document is returned
+    #   Test download of 8DAY data from GSFC oceandata http site (id:GSFC:OCEAN:MODIS:SST:1D)
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttp_MODIS_SST_8D(self):
+    def TestRemoteHttp_MODIS_SST_1DAY(self):
 
-        #remote_url='http://oceandata.sci.gsfc.nasa.gov/'
-        from_date= datetime.date(2015,1,1)
-        to_date= datetime.date(2015,2,1)
-        template='A%Y%j%{Yj+8}.L3m_8D_SST_4.bz2'
+        remote_url='http://oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Daily/4km/SST/'
+        from_date = datetime.date(2014,1,1)
+        to_date = datetime.date(2014,12,31)
+        template='%Y/A%Y%j.L3m_DAY_SST_4.bz2'       # introduce non-standard placeholder
         usr_pwd='anonymous:anonymous'
-        frequency='day'
+        frequency = 'e1dekad'
 
-        files_list = build_list_matching_for_http(template, from_date, to_date, frequency)
+        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
         print files_list
-        self.assertEqual(1,1)
+        file_to_check='2014/A2014001.L3m_DAY_SST_4.bz2'
+        self.assertTrue(file_to_check in files_list)
 
     #   ---------------------------------------------------------------------------
-    #   Test download of 8DAY data from GSFC oceandata http site (id:GSFC:OCEAN:MODIS:SST:8D)
+    #   Test download of Kd daily data from GSFC oceandata http site (id:GSFC:OCEAN:MODIS:KD:1D)
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttp_MODIS_SST_8DAY(self):
+    def TestRemoteHttp_MODIS_KD_1DAY(self):
 
-        remote_url='http://oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/8Day/4km/SST/2010/A2010193*.bz2'
+        remote_url='http://oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Daily/4km/Kd/'
+        from_date = datetime.date(2014,1,1)
+        to_date = datetime.date(2014,12,31)
+        template='%Y/A%Y%j.L3m_DAY_KD490_Kd_490_4km.bz2'       # introduce non-standard placeholder
         usr_pwd='anonymous:anonymous'
-        c=pycurl.Curl()
-        import StringIO
-        import cStringIO
-        buffer = StringIO.StringIO()
+        frequency = 'e1dekad'
 
-        c.setopt(c.URL, remote_url)
-        c.setopt(c.WRITEFUNCTION, buffer.write)
-        c.perform()
-        html = buffer.getvalue()
-
-        file_to_check='2015/001/A2015001.L3m_DAY_SST_4.bz2'
-        #results = re.search(r'(type="hidden" name="([0-9a-f]{32})")', html).group(2)
-
-
-        #print results
-        #self.assertTrue(file_to_check in results)
+        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        print files_list
+        file_to_check='2014/A2014001.L3m_DAY_KD490_Kd_490_4km.bz2'
+        self.assertTrue(file_to_check in files_list)
 
     #   ---------------------------------------------------------------------------
     #   Test download of MOD09 files from USGS http site (id:MOD09GA_Africa)
@@ -245,6 +251,7 @@ class TestGetInternet(unittest.TestCase):
         c.setopt(c.URL, remote_url)
         c.setopt(c.WRITEFUNCTION, buffer.write)
         c.perform()
+        print c.getinfo(pycurl.HTTP_CODE)
         html = buffer.getvalue()
 
         file_to_check='2015/001/A2015001.L3m_DAY_SST_4.bz2'

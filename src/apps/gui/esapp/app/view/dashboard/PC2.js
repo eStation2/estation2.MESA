@@ -8,6 +8,8 @@ Ext.define("esapp.view.dashboard.PC2",{
     xtype  : 'dashboard-pc2',
 
     requires: [
+        'esapp.view.dashboard.PC2Controller',
+        'esapp.view.dashboard.PC2Model',
         'esapp.view.widgets.ServiceMenuButton',
 
         'Ext.layout.container.Border',
@@ -20,12 +22,17 @@ Ext.define("esapp.view.dashboard.PC2",{
         'Ext.menu.Menu'
     ],
 
-    name:'dashboardpc2',
-    id: 'dashboardpc2',
+    name:'dashboardpc',
+    id: 'dashboardpc',
 
     title: '<span class="panel-title-style">Processing (PC2)</span>',
-    disabled:false,
+    paneltitle:'',
+    setdisabled:false,
     activePC:false,
+    activeversion: '',
+    currentmode: '',
+    dbstatus:false,
+    internetconnection:false,
 
     layout: 'border',
     bodyBorder: true,
@@ -35,12 +42,28 @@ Ext.define("esapp.view.dashboard.PC2",{
 
     initComponent: function () {
         var me = this;
+        me.setTitle('<span class="panel-title-style">' + me.paneltitle + '</span>');
 
         me.bodyPadding = 0;
 
-//        if (me.activePC) {
-//            me.bodyCls = 'active-panel-body-style';
-//        }
+        if (me.activePC) {
+            me.toolbarCls = 'active-panel-body-style';
+            me.textCls = 'panel-text-style';
+        }
+        else {
+            me.toolbarCls = '';
+            me.textCls = 'panel-text-style-gray';
+        }
+
+        if (me.dbstatus)
+            me.dbstatusCls = 'running';
+        else
+            me.dbstatusCls = 'notrunning';
+
+        if (me.internetconnection)
+            me.internetCls = 'connected';
+        else
+            me.internetCls = 'notconnected';
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             layout: {
@@ -49,19 +72,17 @@ Ext.define("esapp.view.dashboard.PC2",{
                 align: 'middle'
             },
             padding: '5 5 10 5',
-            cls:'active-panel-body-style',
+            cls: me.toolbarCls,
             defaults: {
                 width: 160,
-                textAlign: 'left'
+                textAlign: 'left',
+                disabled: me.setdisabled
             },
             items: [
                 {
                     xtype: 'servicemenubutton',
                     service: 'eumetcast',
                     text: 'Eumetcast',
-                    listeners : {
-                        beforerender: 'checkStatusServices'
-                    },
                     handler: 'checkStatusServices'
                 }, ' ',
                 {
@@ -83,13 +104,19 @@ Ext.define("esapp.view.dashboard.PC2",{
                     handler: 'checkStatusServices'
                 }, '-',
                 {
+                    xtype: 'servicemenubutton',
+                    service: 'system',
+                    text: 'System',
+                    handler: 'checkStatusServices'
+                }, ' ',
+                {
                 xtype: 'splitbutton',
                 name: 'datasyncbtn',
-                text: 'Data Syncronization',
-                iconCls: 'fa fa-cog fa-2x fa-spin',  //  fa-spin 'icon-loop', // icomoon fonts
-                style: { color: 'green' },
+                text: 'Data Synchronization',
+                iconCls: 'data-sync',       // 'fa fa-exchange fa-2x',  //  fa-spin 'icon-loop', // icomoon fonts
+                //style: { color: 'blue' },
                 scale: 'medium',
-                width: 215,
+                width: 225,
                 handler: 'checkStatusServices',
                 menu: Ext.create('Ext.menu.Menu', {
                     width: 200,
@@ -113,11 +140,11 @@ Ext.define("esapp.view.dashboard.PC2",{
             },{
                 xtype: 'splitbutton',
                 name: 'dbsyncbtn',
-                text: 'DB Syncronization',
-                iconCls: 'fa fa-cog fa-2x fa-spin',  //  fa-spin 'icon-loop', // icomoon fonts
-                style: { color: 'green' },
+                text: 'DB Synchronization',
+                iconCls: 'db-sync',       // 'fa fa-database fa-2x',  //  fa-spin 'icon-loop', // icomoon fonts
+                //style: { color: 'blue' },
                 scale: 'medium',
-                width: 215,
+                width: 225,
                 handler: 'checkStatusServices',
                 menu: Ext.create('Ext.menu.Menu', {
                     width: 200,
@@ -157,48 +184,44 @@ Ext.define("esapp.view.dashboard.PC2",{
                 }
             },
             bodyPadding:10,
+            defaults: {
+                margin:'0 0 10 0'
+            },
             items: [{
-                xtype: 'container',
-                html: 'Active version',
-                cls: 'panel-text-style'
+                xtype: 'box',
+                html: 'Active version:',
+                cls: me.textCls
             },{
-                xtype: 'container',
-                html: '<b>2.0.1</b>'
+                xtype: 'box',
+                html: '<b>'+me.activeversion+'</b>'
             },{
-                xtype: 'container',
+                xtype: 'box',
                 html: 'Mode:',
-                cls: 'panel-text-style',
+                cls: me.textCls,
                 width: 140
             },{
-                xtype: 'container',
-                html: '<b>Nominal mode</b>'
+                xtype: 'box',
+                html: '<b>'+me.currentmode+'</b>'
             },{
-                xtype: 'container',
+                xtype: 'box',
                 html: 'PostgreSQL Status:',
-                cls: 'panel-text-style',
+                cls: me.textCls,
                 width: 140
             },{
-                xtype: 'image',
-                src: 'resources/img/icons/check-square-o.png'
+                xtype: 'box',
+                height:26,
+                cls: me.dbstatusCls
+                //src: 'resources/img/icons/check-square-o.png'
             },{
-                xtype: 'container',
+                xtype: 'box',
                 html: 'Internet connection:',
-                cls: 'panel-text-style',
+                cls: me.textCls,
                 width: 140
             },{
-                xtype: 'image',
-                src: 'resources/img/icons/check-square-o.png'
-//            },{
-//                xtype: 'container',
-//                html: '<br>Disk status:',
-//                cls: 'panel-text-style',
-//                colspan: 2
-//            },{
-//                xtype: 'image',
-//                src: 'resources/img/RAID_Monitor.png',
-//                colspan: 2,
-//                width: 265,
-//                height: 158
+                xtype: 'box',
+                height:26,
+                cls: me.internetCls
+                //src: 'resources/img/icons/check-square-o.png'
             }]
         },{
             region: 'south',
@@ -226,7 +249,14 @@ Ext.define("esapp.view.dashboard.PC2",{
 
         if (me.activePC) {
             me.items[0].bodyCls = 'active-panel-body-style';
+            //me.bodyCls = 'active-panel-body-style';
+            me.controller.checkStatusServices();
         }
+        else {
+            me.items[0].bodyCls = '';
+            //me.bodyCls = '';
+        }
+
 
         me.callParent();
     }

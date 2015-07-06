@@ -26,7 +26,13 @@ ext=es_constants.ES2_OUTFILE_EXTENSION
 def processing_merge(pipeline_run_level=0, pipeline_printout_level=0,
                      input_products='', output_product='', mapset=''):
 
-    es2_data_dir = es_constants.es2globals['processing_dir']+os.path.sep
+
+    # Dummy return arguments
+    proc_lists = functions.ProcLists()
+    list_subprods = proc_lists.list_subprods
+    list_subprod_groups = proc_lists.list_subprod_groups
+
+    es2_data_dir = es_constants.processing_dir+os.path.sep
 
     # Do some checks on the integrity of the inputs
 
@@ -73,6 +79,6 @@ def processing_merge(pipeline_run_level=0, pipeline_printout_level=0,
                 out_file_path = out_dir+my_date+out_prod_ident
 
                 # Create the link
-                print in_file_path
-                print out_file_path
                 functions.create_sym_link(in_file_path, out_file_path, force=False)
+
+    return list_subprods, list_subprod_groups

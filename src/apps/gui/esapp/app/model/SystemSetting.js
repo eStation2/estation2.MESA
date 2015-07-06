@@ -6,22 +6,31 @@ Ext.define('esapp.model.SystemSetting', {
     ],
 
     fields: [
-       {name: 'base_dir'},
-       {name: 'base_tmp_dir'},
-       {name: 'data_dir'},
-       {name: 'static_data_dir'},
-       {name: 'archive_dir'},
-       {name: 'ingest_dir'},
-       {name: 'eumetcast_files_dir'},
-       {name: 'ingest_server_in_dir'},
-       {name: 'host'},
-       {name: 'port'},
-       {name: 'dbuser'},
-       {name: 'dbpass'},
-       {name: 'dbname'}
+        {name: 'base_dir'},
+        {name: 'base_tmp_dir'},
+        {name: 'data_dir'},
+        {name: 'static_data_dir'},
+        {name: 'archive_dir'},
+        {name: 'ingest_dir'},
+        {name: 'eumetcast_files_dir'},
+        {name: 'ingest_server_in_dir'},
+        {name: 'host'},
+        {name: 'port'},
+        {name: 'dbuser'},
+        {name: 'dbpass'},
+        {name: 'dbname'},
+        {name: 'ip_pc1'},
+        {name: 'ip_pc2'},
+        {name: 'ip_pc3'},
+        {name: 'type_installation'},
+        {name: 'role'},
+        {name: 'current_mode'},
+        {name: 'active_version'},
+        {name: 'thema'},
+        {name: 'loglevel'}
     ]
 
-    ,autoLoad: true
+    ,autoLoad: false
     ,autoSync: true
     ,remoteSort: false
     ,remoteGroup: false

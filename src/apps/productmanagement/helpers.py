@@ -8,6 +8,7 @@
 from __future__ import absolute_import
 
 import os
+import re
 import datetime
 import operator
 import collections
@@ -104,6 +105,42 @@ def add_years(date, years=1):
         # 29 of february return 28 of february
         return date + (datetime.date(date.year + years, 1, 1)
                 - datetime.date(date.year, 1, 1)) - datetime.timedelta(days=1)
+
+
+SPECIAL_DKM = "%{dkm}"
+SPECIAL_ADD = re.compile("(%{)([+-])(\d)([dh])(.+)(})")
+
+def manage_date(date, template):
+    #%{dkm}
+    while True:
+        pos = template.find(SPECIAL_DKM)
+        if pos == -1:
+            break
+        template = template[:pos] + ("3" if date.day > 20
+                else "2" if date.day > 10 else "1") + template[pos+len(SPECIAL_DKM):]
+    #%{+/-<Nt><strftime>} = +/- N delta days/hours/
+    def manage_add_factory(date):
+        def manage_add(matchobj):
+            groups = matchobj.groups()
+            obj = "".join(groups)
+            # '%{', '+', '8', 'd', 'Y-m-d', '}'
+            n = int(groups[2])
+            if groups[3] == 'd':
+                delta = datetime.timedelta(days=n)
+            elif groups[3] == 'h':
+                delta = datetime.timedelta(hours=n)
+            else:
+                raise Exception("Wrong format in %s" % obj)
+            if groups[1] == '-':
+                delta = -delta
+            elif groups[1] != '+':
+                raise Exception("Wrong format in %s" % obj)
+            date_new = date + delta
+            strf = "".join(("%" + c) if c.isalpha() else c for c in groups[4])
+            return date_new.strftime(strf)
+        return manage_add
+    template = re.sub(SPECIAL_ADD, manage_add_factory(date), template)
+    return date.strftime(template)
 
 
 class INTERVAL_TYPE:

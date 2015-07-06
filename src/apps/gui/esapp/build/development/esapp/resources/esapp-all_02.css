@@ -1,3 +1,396 @@
+/* line 396, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/frame.scss */
+.x-panel-header-light-framed-collapsed-left-tl,
+.x-panel-header-light-framed-collapsed-left-bl,
+.x-panel-header-light-framed-collapsed-left-ml {
+  padding-left: 4px;
+}
+
+/* line 400, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/frame.scss */
+.x-panel-header-light-framed-collapsed-left-tc {
+  height: 4px;
+}
+
+/* line 403, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/frame.scss */
+.x-panel-header-light-framed-collapsed-left-bc {
+  height: 4px;
+}
+
+/* line 414, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/frame.scss */
+.x-panel-header-light-framed-collapsed-left-tl,
+.x-panel-header-light-framed-collapsed-left-bl,
+.x-panel-header-light-framed-collapsed-left-tr,
+.x-panel-header-light-framed-collapsed-left-br,
+.x-panel-header-light-framed-collapsed-left-tc,
+.x-panel-header-light-framed-collapsed-left-bc,
+.x-panel-header-light-framed-collapsed-left-ml,
+.x-panel-header-light-framed-collapsed-left-mr {
+  background-image: url(images/panel-header/panel-header-light-framed-collapsed-left-corners.gif);
+}
+
+/* line 454, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/frame.scss */
+.x-panel-header-light-framed-collapsed-left-ml,
+.x-panel-header-light-framed-collapsed-left-mr {
+  background-image: url(images/panel-header/panel-header-light-framed-collapsed-left-sides.gif);
+  background-repeat: repeat-y;
+}
+
+/* line 464, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/frame.scss */
+.x-panel-header-light-framed-collapsed-left-mc {
+  padding: 7px 3px 7px 0px;
+}
+
+/* */
+/* line 583, ../../../../ext/packages/ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel .x-panel-header-light-framed-top {
+  border-bottom-width: 2px !important;
+}
+/* line 587, ../../../../ext/packages/ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel .x-panel-header-light-framed-right {
+  border-left-width: 2px !important;
+}
+/* line 591, ../../../../ext/packages/ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel .x-panel-header-light-framed-bottom {
+  border-top-width: 2px !important;
+}
+/* line 595, ../../../../ext/packages/ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel .x-panel-header-light-framed-left {
+  border-right-width: 2px !important;
+}
+
+/* line 601, ../../../../ext/packages/ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-nbr .x-panel-header-light-framed-collapsed-top {
+  border-bottom-width: 0 !important;
+}
+/* line 605, ../../../../ext/packages/ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-nbr .x-panel-header-light-framed-collapsed-right {
+  border-left-width: 0 !important;
+}
+/* line 609, ../../../../ext/packages/ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-nbr .x-panel-header-light-framed-collapsed-bottom {
+  border-top-width: 0 !important;
+}
+/* line 613, ../../../../ext/packages/ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-nbr .x-panel-header-light-framed-collapsed-left {
+  border-right-width: 0 !important;
+}
+
+/* line 731, ../../../../ext/packages/ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel-header-light-framed-horizontal .x-tool-after-title {
+  margin: 0 0 0 6px;
+}
+/* line 741, ../../../../ext/packages/ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel-header-light-framed-horizontal .x-tool-before-title {
+  margin: 0 6px 0 0;
+}
+
+/* line 753, ../../../../ext/packages/ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel-header-light-framed-vertical .x-tool-after-title {
+  margin: 6px 0 0 0;
+}
+/* line 763, ../../../../ext/packages/ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel-header-light-framed-vertical .x-tool-before-title {
+  margin: 0 0 6px 0;
+}
+
+/* line 793, ../../../../ext/packages/ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel-light-framed-resizable .x-panel-handle {
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
+  opacity: 0;
+}
+
+/* line 2, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/border-management.scss */
+.x-panel-light-framed-outer-border-l {
+  border-left-color: #dfeaf2 !important;
+  border-left-width: 2px !important;
+}
+
+/* line 6, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/border-management.scss */
+.x-panel-light-framed-outer-border-b {
+  border-bottom-color: #dfeaf2 !important;
+  border-bottom-width: 2px !important;
+}
+
+/* line 10, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/border-management.scss */
+.x-panel-light-framed-outer-border-bl {
+  border-bottom-color: #dfeaf2 !important;
+  border-bottom-width: 2px !important;
+  border-left-color: #dfeaf2 !important;
+  border-left-width: 2px !important;
+}
+
+/* line 16, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/border-management.scss */
+.x-panel-light-framed-outer-border-r {
+  border-right-color: #dfeaf2 !important;
+  border-right-width: 2px !important;
+}
+
+/* line 20, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/border-management.scss */
+.x-panel-light-framed-outer-border-rl {
+  border-right-color: #dfeaf2 !important;
+  border-right-width: 2px !important;
+  border-left-color: #dfeaf2 !important;
+  border-left-width: 2px !important;
+}
+
+/* line 26, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/border-management.scss */
+.x-panel-light-framed-outer-border-rb {
+  border-right-color: #dfeaf2 !important;
+  border-right-width: 2px !important;
+  border-bottom-color: #dfeaf2 !important;
+  border-bottom-width: 2px !important;
+}
+
+/* line 32, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/border-management.scss */
+.x-panel-light-framed-outer-border-rbl {
+  border-right-color: #dfeaf2 !important;
+  border-right-width: 2px !important;
+  border-bottom-color: #dfeaf2 !important;
+  border-bottom-width: 2px !important;
+  border-left-color: #dfeaf2 !important;
+  border-left-width: 2px !important;
+}
+
+/* line 40, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/border-management.scss */
+.x-panel-light-framed-outer-border-t {
+  border-top-color: #dfeaf2 !important;
+  border-top-width: 2px !important;
+}
+
+/* line 44, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/border-management.scss */
+.x-panel-light-framed-outer-border-tl {
+  border-top-color: #dfeaf2 !important;
+  border-top-width: 2px !important;
+  border-left-color: #dfeaf2 !important;
+  border-left-width: 2px !important;
+}
+
+/* line 50, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/border-management.scss */
+.x-panel-light-framed-outer-border-tb {
+  border-top-color: #dfeaf2 !important;
+  border-top-width: 2px !important;
+  border-bottom-color: #dfeaf2 !important;
+  border-bottom-width: 2px !important;
+}
+
+/* line 56, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/border-management.scss */
+.x-panel-light-framed-outer-border-tbl {
+  border-top-color: #dfeaf2 !important;
+  border-top-width: 2px !important;
+  border-bottom-color: #dfeaf2 !important;
+  border-bottom-width: 2px !important;
+  border-left-color: #dfeaf2 !important;
+  border-left-width: 2px !important;
+}
+
+/* line 64, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/border-management.scss */
+.x-panel-light-framed-outer-border-tr {
+  border-top-color: #dfeaf2 !important;
+  border-top-width: 2px !important;
+  border-right-color: #dfeaf2 !important;
+  border-right-width: 2px !important;
+}
+
+/* line 70, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/border-management.scss */
+.x-panel-light-framed-outer-border-trl {
+  border-top-color: #dfeaf2 !important;
+  border-top-width: 2px !important;
+  border-right-color: #dfeaf2 !important;
+  border-right-width: 2px !important;
+  border-left-color: #dfeaf2 !important;
+  border-left-width: 2px !important;
+}
+
+/* line 78, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/border-management.scss */
+.x-panel-light-framed-outer-border-trb {
+  border-top-color: #dfeaf2 !important;
+  border-top-width: 2px !important;
+  border-right-color: #dfeaf2 !important;
+  border-right-width: 2px !important;
+  border-bottom-color: #dfeaf2 !important;
+  border-bottom-width: 2px !important;
+}
+
+/* line 86, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/border-management.scss */
+.x-panel-light-framed-outer-border-trbl {
+  border-color: #dfeaf2 !important;
+  border-width: 2px !important;
+}
+
+/* line 1, ../../../../ext/packages/ext-theme-neptune/sass/src/form/field/HtmlEditor.scss */
+.x-html-editor-container {
+  border: 1px solid;
+  border-color: #c1c1c1 #d9d9d9 #d9d9d9;
+}
+
+/* line 1, ../../../../ext/packages/ext-theme-neptune/sass/src/grid/header/Container.scss */
+.x-grid-header-ct {
+  border: 1px solid #c1c1c1;
+}
+
+/* line 6, ../../../../ext/packages/ext-theme-neptune/sass/src/grid/column/Column.scss */
+.x-column-header-trigger {
+  background: #eef6fb url(images/grid/hd-pop.png) no-repeat center center;
+  border-left: 1px solid #c1c1c1;
+}
+
+/* line 18, ../../../../ext/packages/ext-theme-neptune/sass/src/grid/column/Column.scss */
+.x-column-header-last {
+  border-right-width: 0;
+}
+/* line 20, ../../../../ext/packages/ext-theme-neptune/sass/src/grid/column/Column.scss */
+.x-column-header-last .x-column-header-over .x-column-header-trigger {
+  border-right: 1px solid #c1c1c1;
+}
+
+/* line 1, ../../../../ext/packages/ext-theme-neptune/sass/src/resizer/Resizer.scss */
+.x-resizable-handle {
+  background-color: #c1c1c1;
+  background-repeat: no-repeat;
+}
+
+/* line 8, ../../../../ext/packages/ext-theme-neptune/sass/src/resizer/Resizer.scss */
+.x-resizable-handle-east-over,
+.x-resizable-handle-west-over {
+  background-position: center;
+}
+
+/* line 13, ../../../../ext/packages/ext-theme-neptune/sass/src/resizer/Resizer.scss */
+.x-resizable-handle-south-over,
+.x-resizable-handle-north-over {
+  background-position: center;
+}
+
+/* line 17, ../../../../ext/packages/ext-theme-neptune/sass/src/resizer/Resizer.scss */
+.x-resizable-handle-southeast-over {
+  background-position: -2px -2px;
+}
+
+/* line 21, ../../../../ext/packages/ext-theme-neptune/sass/src/resizer/Resizer.scss */
+.x-resizable-handle-northwest-over {
+  background-position: 2px 2px;
+}
+
+/* line 25, ../../../../ext/packages/ext-theme-neptune/sass/src/resizer/Resizer.scss */
+.x-resizable-handle-northeast-over {
+  background-position: -2px 2px;
+}
+
+/* line 29, ../../../../ext/packages/ext-theme-neptune/sass/src/resizer/Resizer.scss */
+.x-resizable-handle-southwest-over {
+  background-position: 2px -2px;
+}
+
+/* line 35, ../../../../ext/packages/ext-theme-neptune/sass/src/resizer/Resizer.scss */
+.x-resizable-pinned .x-resizable-handle-east,
+.x-resizable-pinned .x-resizable-handle-west {
+  background-position: center;
+}
+/* line 40, ../../../../ext/packages/ext-theme-neptune/sass/src/resizer/Resizer.scss */
+.x-resizable-pinned .x-resizable-handle-south,
+.x-resizable-pinned .x-resizable-handle-north {
+  background-position: center;
+}
+/* line 44, ../../../../ext/packages/ext-theme-neptune/sass/src/resizer/Resizer.scss */
+.x-resizable-pinned .x-resizable-handle-southeast {
+  background-position: -2px -2px;
+}
+/* line 48, ../../../../ext/packages/ext-theme-neptune/sass/src/resizer/Resizer.scss */
+.x-resizable-pinned .x-resizable-handle-northwest {
+  background-position: 2px 2px;
+}
+/* line 52, ../../../../ext/packages/ext-theme-neptune/sass/src/resizer/Resizer.scss */
+.x-resizable-pinned .x-resizable-handle-northeast {
+  background-position: -2px 2px;
+}
+/* line 56, ../../../../ext/packages/ext-theme-neptune/sass/src/resizer/Resizer.scss */
+.x-resizable-pinned .x-resizable-handle-southwest {
+  background-position: 2px -2px;
+}
+
+/* including package sencha-charts */
+/*
+  Copied from touch/resources/themes/stylesheets/sencha-touch/base/src/chart/_AbstractChart.scss
+*/
+/* line 8, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
+.x-android-3 .x-surface-wrap, .x-android-3 .x-surface-wrap > * {
+  -webkit-perspective: 1;
+}
+
+/* line 12, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
+.x-draw-container {
+  position: relative;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  -ms-user-select: none;
+  cursor: default;
+}
+/* line 17, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
+.x-draw-container .x-inner {
+  overflow: hidden;
+}
+
+/* line 22, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
+.x-surface-canvas {
+  position: absolute;
+}
+
+/* line 26, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
+.x-chart-watermark {
+  opacity: 0.5;
+  z-index: 9;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 4px 6px;
+  font-family: "Helvetica";
+  font-size: 12px;
+  position: absolute;
+  white-space: nowrap;
+  border-top-left-radius: 4px;
+  -webkit-border-top-left-radius: 4px;
+}
+
+/* line 42, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
+.x-chart-image {
+  width: 100%;
+  height: auto;
+}
+
+/* line 47, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
+.x-legend-container {
+  display: inline-block;
+  line-height: 0;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  border-radius: 5px;
+  border: 1px solid #cccccc;
+  background: white;
+  -webkit-box-shadow: rgba(255, 255, 255, 0.6) 0 1px 1px;
+  -moz-box-shadow: rgba(255, 255, 255, 0.6) 0 1px 1px;
+  box-shadow: rgba(255, 255, 255, 0.6) 0 1px 1px;
+}
+
+/* line 61, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
+.x-legend-item {
+  padding: 0.8em 1em 0.8em 1.8em;
+  color: #333333;
+  background: rgba(255, 255, 255, 0);
+  max-width: 16em;
+  min-width: 0;
+  font-size: 13px;
+  font-family: helvetica, arial, verdana, sans-serif;
+  line-height: 13px;
+  font-weight: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+}
+
 /* line 77, ../../../../ext/packages/sencha-charts/sass/src/chart/AbstractChart.scss */
 .x-legend-inactive {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=30);

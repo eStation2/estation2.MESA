@@ -8,6 +8,8 @@ Ext.define("esapp.view.dashboard.PC3",{
     xtype  : 'dashboard-pc3',
 
     requires: [
+        'esapp.view.dashboard.PC3Controller',
+        'esapp.view.dashboard.PC3Model',
         'esapp.view.widgets.ServiceMenuButton',
 
         'Ext.layout.container.Border',
@@ -19,7 +21,7 @@ Ext.define("esapp.view.dashboard.PC3",{
 
     title: '<span class="panel-title-style">Analysis (PC3)</span>',
 
-    disabled:false,
+    setdisabled:false,
     activePC:false,
 
     layout: 'border',
@@ -32,23 +34,33 @@ Ext.define("esapp.view.dashboard.PC3",{
 
         me.bodyPadding = 0;
 
+        if (me.activePC) {
+            me.toolbarCls = 'active-panel-body-style';
+            me.textCls = 'panel-text-style';
+        }
+        else {
+            me.toolbarCls = '';
+            me.textCls = 'panel-text-style-gray';
+        }
+
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             layout: {
-                    type: 'vbox',
-                    align: 'middle'
+                type: 'vbox',
+                align: 'middle'
             },
             padding: '5 5 10 5',
-            // cls:'active-panel-body-style',
+            cls: me.toolbarCls,
             defaults: {
                 width: 160,
                 textAlign: 'left',
-                disabled: true
+                disabled: me.setdisabled
             },
             items: [
             {
                 xtype: 'servicemenubutton',
                 service: 'eumetcast',
                 text: 'Eumetcast',
+                //disabled: me.setdisabled,
                 //listeners : {
                 //    beforerender: 'checkStatusServices'
                 //},
@@ -58,28 +70,38 @@ Ext.define("esapp.view.dashboard.PC3",{
                 xtype: 'servicemenubutton',
                 service: 'internet',
                 text: 'Internet',
+                //disabled: me.setdisabled,
                 handler: 'checkStatusServices'
             }, ' ',
             {
                 xtype: 'servicemenubutton',
                 service: 'ingest',
                 text: 'Ingest',
+                //disabled: me.setdisabled,
                 handler: 'checkStatusServices'
             }, ' ',
             {
                 xtype: 'servicemenubutton',
                 service: 'processing',
                 text: 'Processing',
+                //disabled: me.setdisabled,
                 handler: 'checkStatusServices'
             }, '-',
             {
+                xtype: 'servicemenubutton',
+                service: 'system',
+                text: 'System',
+                handler: 'checkStatusServices'
+            }, ' ',
+            {
                 xtype: 'splitbutton',
                 name: 'datasyncbtn',
-                text: 'Data Syncronization',
-                iconCls: 'fa fa-cog fa-2x',  //  fa-spin 'icon-loop', // icomoon fonts
-                style: { color: 'gray' },
+                text: 'Data Synchronization',
+                iconCls: 'data-sync',   // 'fa fa-exchange fa-2x',  //  fa-spin 'icon-loop', // icomoon fonts
+                //style: { color: 'blue' },
                 scale: 'medium',
-                width: 215,
+                width: 225,
+                //disabled: me.disabled,
                 handler: 'checkStatusServices',
                 menu: Ext.create('Ext.menu.Menu', {
                     width: 200,
@@ -89,8 +111,7 @@ Ext.define("esapp.view.dashboard.PC3",{
                         {   xtype: 'checkbox',
                             boxLabel: 'Disable Auto Sync',
                             name: 'enabledisableautosync',
-//                            glyph: 'xf04b@FontAwesome',
-//                            cls:'menu-glyph-color-green',
+                            checked   : true,
                             handler: 'execEnableDisableAutoSync'
                         },
                         {   text: 'Execute Now',
@@ -104,11 +125,12 @@ Ext.define("esapp.view.dashboard.PC3",{
             },{
                 xtype: 'splitbutton',
                 name: 'dbsyncbtn',
-                text: 'DB Syncronization',
-                iconCls: 'fa fa-cog fa-2x',  //  fa-spin 'icon-loop', // icomoon fonts
-                style: { color: 'grey' },
+                text: 'DB Synchronization',
+                iconCls: 'db-sync',       // 'fa fa-database fa-2x',  //  fa-spin 'icon-loop', // icomoon fonts
+                //style: { color: 'blue' },
                 scale: 'medium',
-                width: 215,
+                width: 225,
+                //disabled: me.disabled,
                 handler: 'checkStatusServices',
                 menu: Ext.create('Ext.menu.Menu', {
                     width: 200,
@@ -118,6 +140,7 @@ Ext.define("esapp.view.dashboard.PC3",{
                         {   xtype: 'checkbox',
                             boxLabel: 'Disable Auto Sync',
                             name: 'enabledisableautodbsync',
+                            checked   : true,
 //                            glyph: 'xf04b@FontAwesome',
 //                            cls:'menu-glyph-color-green',
                             handler: 'execEnableDisableAutoDBSync'
@@ -150,34 +173,36 @@ Ext.define("esapp.view.dashboard.PC3",{
             items: [{
                 xtype: 'container',
                 html: 'Active version',
-                cls: 'panel-text-style'
+                cls: me.textCls
             },{
                 xtype: 'container',
-                html: '<b>2.0.1</b>'
+                html: '<b></b>'
+                //html: '<b>2.0.1</b>'
             },{
                 xtype: 'container',
                 html: 'Mode:',
-                cls: 'panel-text-style',
+                cls: me.textCls,
                 width: 140
             },{
                 xtype: 'container',
-                html: '<b>Nominal mode</b>'
+                html: ''
+                //html: '<b>Nominal mode</b>'
             },{
                 xtype: 'container',
                 html: 'PostgreSQL Status:',
-                cls: 'panel-text-style',
+                cls: me.textCls,
                 width: 140
             },{
-                xtype: 'image',
-                src: 'resources/img/icons/check-square-o.png'
+                xtype: 'image'
+                //,src: 'resources/img/icons/check-square-o.png'
             },{
                 xtype: 'container',
                 html: 'Internet connection:',
-                cls: 'panel-text-style',
+                cls: me.textCls,
                 width: 140
             },{
-                xtype: 'image',
-                src: 'resources/img/icons/check-square-o.png'
+                xtype: 'image'
+                //,src: 'resources/img/icons/check-square-o.png'
             }]
         },{
             region: 'south',
@@ -186,7 +211,7 @@ Ext.define("esapp.view.dashboard.PC3",{
             collapsible:true,
             collapsed: true,
             // flex:1,
-            iconCls: 'x-tool-okay', // 'fa fa-check-circle-o fa-2x', // fa-check-square fa-chevron-circle-down fa-check-circle fa-check
+            iconCls: 'x-tool-unknown',  // 'x-tool-notokay', // 'x-tool-okay', //
             iconAlign : 'left',
             height: 240,
             minHeight: 200,
@@ -206,6 +231,12 @@ Ext.define("esapp.view.dashboard.PC3",{
 
         if (me.activePC) {
             me.items[0].bodyCls = 'active-panel-body-style';
+            //me.bodyCls = 'active-panel-body-style';
+            me.controller.checkStatusServices();
+        }
+        else {
+            me.items[0].bodyCls = '';
+            //me.bodyCls = '';
         }
 
         me.callParent();

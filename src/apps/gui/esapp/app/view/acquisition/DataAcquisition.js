@@ -38,7 +38,11 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
         resizable: false,
         disableSelection: true,
         trackOver: false
+        //style: {
+        //    background: 'lightgray'
+        //}
     },
+    cls: 'grid-color-yellow',
     plugins:[{
         ptype:'cellediting'
     }],
@@ -57,6 +61,8 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
 
     initComponent: function () {
         var me = this;
+
+        //me.cls = 'grid-color-yellow';
 
         me.defaults = {
             menuDisabled: true,
@@ -86,6 +92,38 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
             hidden: true
             //bind: '{products.dataacquisitions.latest}'
             //bind: '{dataacquisitions.latest}'
+        }, {
+            xtype: 'actioncolumn',
+            // header: 'Store Native',
+            hideable: true,
+            hidden:true,
+            // disabled: true,
+            width: 100,
+            align: 'center',
+            items: [{
+                // scope: me,
+                disabled: false,
+                getClass: function(v, meta, rec) {
+                    if (rec.get('store_original_data')) {
+                        return 'activated';
+                    } else {
+                        return 'deactivated';
+                    }
+                },
+                getTip: function(v, meta, rec) {
+                    if (rec.get('store_original_data')) {
+                        return 'Deactivate Get';
+                    } else {
+                        return 'Activate Get';
+                    }
+                },
+                handler: function(grid, rowIndex, colIndex) {
+                    var rec = grid.getStore().getAt(rowIndex),
+                        action = (rec.get('store_original_data') ? 'deactivated' : 'activated');
+                    // Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
+                    rec.get('store_original_data') ? rec.set('store_original_data', false) : rec.set('store_original_data', true);
+                }
+            }]
         }, {
             xtype: 'actioncolumn',
             // header: 'Active',
@@ -121,9 +159,13 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
         },{
             xtype: 'actioncolumn',
             width: 55,
+            height:40,
             align:'center',
             items: [{
-                icon: 'resources/img/icons/file-extension-log-icon-32x32.png',
+                //icon: 'resources/img/icons/file-extension-log-icon-32x32.png',
+                iconCls:'log-icon',
+                width:32,
+                height:32,
                 tooltip: 'Show log of this Get',
                 scope: me,
                 handler: function (grid, rowIndex, colIndex, icon) {

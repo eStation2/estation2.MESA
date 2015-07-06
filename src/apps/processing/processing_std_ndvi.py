@@ -8,14 +8,11 @@
 
 # Import std modules
 import glob
-import os, sys
+import os
 
 # Import eStation2 modules
-#from database import querydb
 from lib.python import functions
-from lib.python import metadata
 from lib.python.image_proc import raster_image_math
-from database import crud
 from lib.python import es_logging as log
 from config import es_constants
 
@@ -39,15 +36,13 @@ multiprocess = 0
 #   A list of 'final' (i.e. User selected) output products are defined (now hard-coded)
 #   According to the dependencies, if set, they force the various groups
 
-def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, list_subprods=None,
+def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, proc_lists=None,
                     update_stats=False, nrt_products=True):
 
     #   ---------------------------------------------------------------------
     #   Create lists
-    proc_lists = functions.ProcLists()
-    if list_subprods is not None:
-        list_subprods = proc_lists.list_subprods
-        list_subprod_groups = proc_lists.list_subprod_groups
+    if proc_lists is None:
+        proc_lists = functions.ProcLists()
 
 
 # # switch for 'final' products (e.g. products to be controlled by the User)
@@ -80,14 +75,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         group_filtered_prods = 1                   # 2.a
         group_filtered_masks = 1                   # 2.c
         group_filtered_anomalies = 1               # 2.d
-        group_monthly_prods = 0                    # 3.a
-        group_monthly_masks = 0                    # 3.c
+        group_monthly_prods = 1                    # 3.a
+        group_monthly_masks = 1                    # 3.c
         group_monthly_anomalies = 0                # 3.d    # To be done
 
     if update_stats:
         group_no_filter_stats = 0                  # 1.a    -> no relevant - FTTB
         group_filtered_stats = 1                   # 2.b
-        group_monthly_stats = 0                    # 3.b
+        group_monthly_stats = 1                    # 3.b
 
     #   switch wrt single products: not to be changed !!
     #   for Group 1.a (ndvi_no_filter_stats)
@@ -129,10 +124,10 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     activate_vci_linearx2 = 1
 
     #   for Group 3.a (monthly_prods)
-    activate_monndvi = 0
+    activate_monndvi = 1
 
     #   for Group 3.b (monthly_masks)
-    activate_monthly_baresoil = 0
+    activate_monthly_baresoil = 1
 
     #   for Group 3.c  (monthly_stats)
     activate_1monavg = 1
@@ -165,11 +160,19 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   ---------------------------------------------------------------------
     #   NDV avg x dekad (i.e. avg_dekad)
     output_sprod_group=proc_lists.proc_add_subprod_group("10dstats")
-    output_sprod = proc_lists.proc_add_subprod("10davg", "10dstats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10davg", "10dstats", final=False,
+                                             descriptive_name='10d Average',
+                                             description='Average NDVI for dekad',
+                                             frequency_id='e1dekad',
+                                             date_format='MMDD',
+                                             masked=False,
+                                             timeseries_role='10d',
+                                             active_default=True)
+
     prod_ident_10davg = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_10davg = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
-    formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
+    formatter_in = "[0-9]{4}(?P<MMDD>Entering routine processing_std_ndvi[0-9]{4})"+in_prod_ident
     formatter_out = ["{subpath[0][5]}"+os.path.sep+subdir_10davg+"{MMDD[0]}"+prod_ident_10davg]
 
     @active_if(group_no_filter_stats, activate_10davg_no_filter)
@@ -183,7 +186,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     #   ---------------------------------------------------------------------
     #   NDV min x dekad (i.e. min_dekad)
-    output_sprod=proc_lists.proc_add_subprod("10dmin", "10dstats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10dmin", "10dstats", final=False,
+                                             descriptive_name='10d Minimum',
+                                             description='Minimum NDVI for dekad',
+                                             frequency_id='e1dekad',
+                                             date_format='MMDD',
+                                             masked=False,
+                                             timeseries_role='10d',
+                                             active_default=True)
+
     prod_ident_10dmin = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_10dmin = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -202,7 +213,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     #   ---------------------------------------------------------------------
     #   NDV max x dekad (i.e. max_dekad)
-    output_sprod=proc_lists.proc_add_subprod("10dmax", "10dstats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10dmax", "10dstats", final=False,
+                                             descriptive_name='10d Maximum',
+                                             description='Maximum NDVI for dekad',
+                                             frequency_id='e1dekad',
+                                             date_format='MMDD',
+                                             masked=False,
+                                             timeseries_role='10d',
+                                             active_default=True)
+    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     prod_ident_10dmax = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_10dmax = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -227,7 +246,16 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #  ---------------------------------------------------------------------
     #   NDV med x dekad (i.e. med_dekad)
 
-    output_sprod=proc_lists.proc_add_subprod("10dmed", "10dstats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10dmed", "10dstats", final=False,
+                                             descriptive_name='10d Median',
+                                             description='Median NDVI for dekad',
+                                             frequency_id='e1dekad',
+                                             date_format='MMDD',
+                                             masked=False,
+                                             timeseries_role='10d',
+                                             active_default=True)
+    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
+
     prod_ident_10dmed = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_10dmed = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -253,7 +281,17 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   ---------------------------------------------------------------------
 
     output_sprod_group=proc_lists.proc_add_subprod_group("filtered_prods")
-    output_sprod=proc_lists.proc_add_subprod("ndvi_linearx1", "filtered_prods", False, True)
+    output_sprod=proc_lists.proc_add_subprod("ndvi_linearx1", "filtered_prods", final=False,
+                                             descriptive_name='Filtered NDVI linearx1',
+                                             description='Filtered NDVI linearx1',
+                                             frequency_id='e1dekad',
+                                             date_format='YYYYMMDD',
+                                             masked=True,
+                                             timeseries_role='',
+                                             active_default=True)
+
+    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
+
     prod_ident_linearx1 = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_linearx1 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -286,10 +324,18 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_files[1], "before_file":input_files[0], "after_file": input_files[2], "output_file": output_file,
                  "output_format": 'GTIFF', "options": "compress = lzw", 'threshold': 0.1}
-        print args
+        #print args
         raster_image_math.do_ts_linear_filter(**args)
 
-    output_sprod=proc_lists.proc_add_subprod("ndvi_linearx2", "filtered_prods", False, True)
+    output_sprod=proc_lists.proc_add_subprod("ndvi_linearx2", "filtered_prods", final=False,
+                                             descriptive_name='Filtered NDVI linearx2',
+                                             description='Filtered NDVI linearx2',
+                                             frequency_id='e1dekad',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='',
+                                             active_default=True)
+
     prod_ident_linearx2 = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -343,7 +389,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   ---------------------------------------------------------------------
     #   Linearx2 avg x dekad
     output_sprod_group=proc_lists.proc_add_subprod_group("filtered_stats")
-    output_sprod=proc_lists.proc_add_subprod("10davg_linearx2", "filtered_stats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10davg_linearx2", "filtered_stats", final=False,
+                                             descriptive_name='10d lineax2 Average',
+                                             description='Average NDVI linearx2 for dekad',
+                                             frequency_id='e1dekad',
+                                             date_format='MMDD',
+                                             masked=False,
+                                             timeseries_role='ndvi_linearx2',
+                                             active_default=True)
+
     prod_ident_10davg_linearx2 = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_10davg_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -361,7 +415,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     #   ---------------------------------------------------------------------
     #   Linearx2 min x dekad
-    output_sprod=proc_lists.proc_add_subprod("10dmin_linearx2", "filtered_stats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10dmin_linearx2", "filtered_stats", final=False,
+                                             descriptive_name='10d lineax2 Minimum',
+                                             description='Minimum NDVI linearx2 for dekad',
+                                             frequency_id='e1dekad',
+                                             date_format='MMDD',
+                                             masked=False,
+                                             timeseries_role='ndvi_linearx2',
+                                             active_default=True)
     prod_ident_10dmin_linearx2 = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_10dmin_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -380,7 +441,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     #   ---------------------------------------------------------------------
     #   Linearx2 max x dekad
-    output_sprod=proc_lists.proc_add_subprod("10dmax_linearx2", "filtered_stats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10dmax_linearx2", "filtered_stats", final=False,
+                                             descriptive_name='10d lineax2 Maximum',
+                                             description='Maximum NDVI linearx2 for dekad',
+                                             frequency_id='e1dekad',
+                                             date_format='MMDD',
+                                             masked=False,
+                                             timeseries_role='ndvi_linearx2',
+                                             active_default=True)
     prod_ident_10dmax_linearx2 = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_10dmax_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -405,7 +473,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #  ---------------------------------------------------------------------
     #   Linearx2 med x dekad
 
-    output_sprod=proc_lists.proc_add_subprod("10dmed_linearx2", "filtered_stats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10dmed_linearx2", "filtered_stats", final=False,
+                                             descriptive_name='10d lineax2 Median',
+                                             description='Median NDVI linearx2 for dekad',
+                                             frequency_id='e1dekad',
+                                             date_format='MMDD',
+                                             masked=False,
+                                             timeseries_role='ndvi_linearx2',
+                                             active_default=True)
+
     prod_ident_10dmed_linearx2 = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_10dmed_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -425,7 +501,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #  ---------------------------------------------------------------------
     #   Linearx2 min x year
 
-    output_sprod=proc_lists.proc_add_subprod("year_min_linearx2", "filtered_stats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("year_min_linearx2", "filtered_stats", final=False,
+                                             descriptive_name='10d yearly Minimum',
+                                             description='Minimum NDVI for year',
+                                             frequency_id='e1year',
+                                             date_format='YYYY',
+                                             masked=False,
+                                             timeseries_role='',
+                                             active_default=True)
     prod_ident_year_min_linearx2 = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_year_min_linearx2   = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -445,7 +528,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #  ---------------------------------------------------------------------
     #   Linearx2 max x year
 
-    output_sprod=proc_lists.proc_add_subprod("year_max_linearx2", "filtered_stats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("year_max_linearx2", "filtered_stats", final=False,
+                                             descriptive_name='10d yearly Maximum',
+                                             description='Maximum NDVI for year',
+                                             frequency_id='e1year',
+                                             date_format='YYYY',
+                                             masked=False,
+                                             timeseries_role='',
+                                             active_default=True)
+
     prod_ident_year_max_linearx2 = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_year_max_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -475,7 +566,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     starting_files_year_min_linearx2 = input_dir_year_min_linearx2+"*"+in_prod_ident_year_min_linearx2
 
     #  ---------------------------------------------------------------------
-    output_sprod=proc_lists.proc_add_subprod("absol_min_linearx2", "filtered_stats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("absol_min_linearx2", "filtered_stats", final=False,
+                                             descriptive_name='Absolute Minimum',
+                                             description='Absolute Minimum NDVI',
+                                             frequency_id='undefined',
+                                             date_format='YYYY',
+                                             masked=False,
+                                             timeseries_role='',
+                                             active_default=True)
+
     prod_ident_absol_min_linearx2 = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_absol_min_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -504,7 +603,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     starting_files_year_max_linearx2 = input_dir_year_max_linearx2+"*"+in_prod_ident_year_max_linearx2
 
     #  ---------------------------------------------------------------------
-    output_sprod=proc_lists.proc_add_subprod("absol_max_linearx2", "filtered_stats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("absol_max_linearx2", "filtered_stats", final=False,
+                                             descriptive_name='Absolute Maximum',
+                                             description='Absolute Maximum NDVI',
+                                             frequency_id='undefined',
+                                             date_format='YYYY',
+                                             masked=False,
+                                             timeseries_role='',
+                                             active_default=True)
+
     prod_ident_absol_max_linearx2 = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_absol_max_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -527,7 +634,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   ---------------------------------------------------------------------
     #
     output_sprod_group=proc_lists.proc_add_subprod_group("filtered_masks")
-    output_sprod = proc_lists.proc_add_subprod("baresoil_linearx2", "filtered_masks", False, True)
+    output_sprod=proc_lists.proc_add_subprod("baresoil_linearx2", "filtered_stats", final=False,
+                                             descriptive_name='Baresoil Mask',
+                                             description='Baresoil Mask NDVI linearx2',
+                                             frequency_id='e1dekad',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='',
+                                             active_default=True)
+
     prod_ident_baresoil_linearx2 = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_baresoil_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -552,7 +667,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   'diff' vs. avg_filtered (NDV - avg_dekad_filtered)
 
     output_sprod_group=proc_lists.proc_add_subprod_group("filtered_anomalies")
-    output_sprod = proc_lists.proc_add_subprod("diff_linearx2", "filtered_anomalies", False, True)
+    output_sprod=proc_lists.proc_add_subprod("diff_linearx2", "filtered_anomalies", final=False,
+                                             descriptive_name='NDVI difference',
+                                             description='NDVI difference vs. filtered average',
+                                             frequency_id='e1dekad',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='',
+                                             active_default=True)
+
     prod_ident_diff_linearx2 = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_diff_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -578,7 +701,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #  ---------------------------------------------------------------------
     #   Linearx2 'diff' (Linearx2 - avg_dekad_filtered)
 
-    output_sprod = proc_lists.proc_add_subprod("linearx2diff_linearx2", "filtered_anomalies", False, True)
+    output_sprod=proc_lists.proc_add_subprod("linearx2diff_linearx2", "filtered_anomalies", final=False,
+                                             descriptive_name='NDVI filter_x2 difference',
+                                             description='NDVI filter_x2 difference vs. filtered average',
+                                             frequency_id='e1dekad',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='',
+                                             active_default=True)
+
     prod_ident_linearx2_diff_linearx2 = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_linearx2_diff_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -632,9 +763,17 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #     raster_image_math.do_oper_subtraction(**args)
 
     #  ---------------------------------------------------------------------
-    #   vci (NDV - min)/(max - min)  -> min/max per dekad
+    #   vci (NDV - min)/(max - min)  -> min/max per dekad - filtered
 
-    output_sprod = proc_lists.proc_add_subprod("vci", "filtered_anomalies", False, True)
+    output_sprod=proc_lists.proc_add_subprod("vci", "filtered_anomalies", final=False,
+                                             descriptive_name='VCI',
+                                             description='Vegetation Condition Index',
+                                             frequency_id='e1dekad',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='',
+                                             active_default=True)
+
     prod_ident_vci = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_vci = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -664,7 +803,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #  ---------------------------------------------------------------------
     #   icn (NDV - min)/(max - min)  -> min/max absolute
 
-    output_sprod = proc_lists.proc_add_subprod("icn", "filtered_anomalies", False, True)
+    output_sprod=proc_lists.proc_add_subprod("icn", "filtered_anomalies", final=False,
+                                             descriptive_name='ICN',
+                                             description='ICN',
+                                             frequency_id='e1dekad',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='',
+                                             active_default=True)
+
     prod_ident_icn = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_icn = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -693,8 +840,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     #  ---------------------------------------------------------------------
     #   vci_linearx2 (linearx2 - min)/(max - min)  -> min/max per dekad
-    output_sprod = proc_lists.proc_add_subprod("icn", "filtered_anomalies", False, True)
-    output_sprod = proc_lists.proc_add_subprod("vci_linearx2", "filtered_anomalies", False, True)
+    output_sprod=proc_lists.proc_add_subprod("vci_linearx2", "filtered_anomalies", final=False,
+                                             descriptive_name='VCI linearx2',
+                                             description='Vegetation Condition Index',
+                                             frequency_id='e1dekad',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='',
+                                             active_default=True)
+
     prod_ident_vci_linearx2 = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_vci_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -723,7 +877,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     #  ---------------------------------------------------------------------
     #   icn_linearx2 (linearx2 - min)/(max - min)  -> min/max absolute
-    output_sprod = proc_lists.proc_add_subprod("icn_linearx2", "filtered_anomalies", False, True)
+    output_sprod=proc_lists.proc_add_subprod("icn_linearx2", "filtered_anomalies", final=False,
+                                             descriptive_name='ICN linearx2',
+                                             description='Vegetation Condition Index',
+                                             frequency_id='e1dekad',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='',
+                                             active_default=True)
+
     prod_ident_icn_linearx2 = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_icn_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -755,7 +917,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   ---------------------------------------------------------------------
 
     output_sprod_group=proc_lists.proc_add_subprod_group("monthly_prod")
-    output_sprod = proc_lists.proc_add_subprod("monndvi", "monthly_prod", False, True)
+    output_sprod=proc_lists.proc_add_subprod("monndvi", "monthly_prod", final=False,
+                                             descriptive_name='Monthly NDVI',
+                                             description='Monthly NDVI',
+                                             frequency_id='e1month',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='',
+                                             active_default=True)
+
     prod_ident_mon_ndvi = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_mon_ndvi = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -776,7 +946,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   3.b NDVI monthly masks
     #   ---------------------------------------------------------------------
     input_subprod_monndvi = "monndvi"
-    output_sprod = proc_lists.proc_add_subprod("monndvi", "monthly_prod", False, True)
+    #output_sprod = proc_lists.proc_add_subprod("monndvi", "monthly_prod", False, True)
+
     in_prod_ident_monndvi = functions.set_path_filename_no_date(prod, input_subprod_monndvi,mapset, version, ext)
 
     input_dir_monndvi =es2_data_dir+ \
@@ -792,7 +963,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   NDV  avg x month
 
     output_sprod_group=proc_lists.proc_add_subprod_group("monthly_stats")
-    output_sprod = proc_lists.proc_add_subprod("1monavg", "monthly_stats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("1monavg", "monthly_stats", final=False,
+                                             descriptive_name='Monthly Average NDVI',
+                                             description='Monthly Average NDVI',
+                                             frequency_id='e1month',
+                                             date_format='MMDD',
+                                             masked=False,
+                                             timeseries_role='',
+                                             active_default=True)
+
     prod_ident_1monavg = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_1monavg = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -811,7 +990,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     #   ---------------------------------------------------------------------
     #   NDV  min x month
-    output_sprod = proc_lists.proc_add_subprod("1monmin", "monthly_stats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("1monmin", "monthly_stats", final=False,
+                                             descriptive_name='Monthly Minimum NDVI',
+                                             description='Monthly Minimum NDVI',
+                                             frequency_id='e1month',
+                                             date_format='MMDD',
+                                             masked=False,
+                                             timeseries_role='',
+                                             active_default=True)
+
     prod_ident_1monmin = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_1monmin = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -830,7 +1017,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     #   ---------------------------------------------------------------------
     #   NDV  max x month
-    output_sprod = proc_lists.proc_add_subprod("1monmax", "monthly_stats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("1monmax", "monthly_stats", final=False,
+                                             descriptive_name='Monthly Maximum NDVI',
+                                             description='Monthly Maximum NDVI',
+                                             frequency_id='e1month',
+                                             date_format='MMDD',
+                                             masked=False,
+                                             timeseries_role='',
+                                             active_default=True)
+
     prod_ident_1monmax = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_1monmax = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
@@ -852,18 +1047,16 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 #   3.d NDVI monthly anomalies
 #   ---------------------------------------------------------------------
 
+    return proc_lists
 #   ---------------------------------------------------------------------
 #   Run the pipeline
 def processing_std_ndvi(pipeline_run_level=0, pipeline_run_touch_only=0, pipeline_printout_level=0,
                         pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                         starting_dates=None, update_stats=False, nrt_products=True):
 
-    global list_subprods, list_subprod_groups
-
-    list_subprods = []
-    list_subprod_groups = []
-    create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
-                    starting_dates=starting_dates, update_stats=update_stats)
+    proc_lists = None
+    proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
+                                 starting_dates=starting_dates, update_stats=update_stats, nrt_products=nrt_products)
 
     logger.info("Entering routine %s" % 'processing_std_ndvi')
     logger.info("pipeline_run_level %i" % pipeline_run_level)
@@ -877,14 +1070,14 @@ def processing_std_ndvi(pipeline_run_level=0, pipeline_run_touch_only=0, pipelin
     if pipeline_printout_graph_level > 0:
         pipeline_printout_graph('flowchart.jpg')
 
-    return list_subprods, list_subprod_groups
+    return proc_lists
 
 
 def processing_std_ndvi_stats_only(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None):
 
-    [list_subprods, list_subprod_groups] = processing_std_ndvi(pipeline_run_level=pipeline_run_level,
+    proc_lists = processing_std_ndvi(pipeline_run_level=pipeline_run_level,
                                                                pipeline_run_touch_only=pipeline_run_touch_only,
                                                                pipeline_printout_level=pipeline_printout_level,
                                                                pipeline_printout_graph_level=pipeline_printout_graph_level,
@@ -896,13 +1089,13 @@ def processing_std_ndvi_stats_only(pipeline_run_level=0,pipeline_run_touch_only=
                                                                nrt_products=False,
                                                                update_stats=True)
 
-    return list_subprods, list_subprod_groups
+    return proc_lists
 
 def processing_std_ndvi_prods_only(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None):
 
-    [list_subprods, list_subprod_groups] = processing_std_ndvi(pipeline_run_level=pipeline_run_level,
+    proc_lists = processing_std_ndvi(pipeline_run_level=pipeline_run_level,
                                                                pipeline_run_touch_only=pipeline_run_touch_only,
                                                                pipeline_printout_level=pipeline_printout_level,
                                                                pipeline_printout_graph_level=pipeline_printout_graph_level,
@@ -914,13 +1107,13 @@ def processing_std_ndvi_prods_only(pipeline_run_level=0,pipeline_run_touch_only=
                                                                nrt_products=True,
                                                                update_stats=False)
 
-    return list_subprods, list_subprod_groups
+    return proc_lists
 
 def processing_std_ndvi_all(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None):
 
-    [list_subprods, list_subprod_groups] = processing_std_ndvi(pipeline_run_level=pipeline_run_level,
+    proc_lists = processing_std_ndvi(pipeline_run_level=pipeline_run_level,
                                                                pipeline_run_touch_only=pipeline_run_touch_only,
                                                                pipeline_printout_level=pipeline_printout_level,
                                                                pipeline_printout_graph_level=pipeline_printout_graph_level,
@@ -932,4 +1125,4 @@ def processing_std_ndvi_all(pipeline_run_level=0,pipeline_run_touch_only=0, pipe
                                                                nrt_products=True,
                                                                update_stats=True)
 
-    return list_subprods, list_subprod_groups
+    return proc_lists

@@ -4,7 +4,6 @@ Ext.define('esapp.view.analysis.ProductNavigatorModel', {
 
     stores: {
         products: {
-            //source: 'ProductNavigatorStore'
             model: 'esapp.model.ProductNavigator'
             ,session: true
             ,autoLoad:false
@@ -39,13 +38,4 @@ Ext.define('esapp.view.analysis.ProductNavigatorModel', {
             ,session: true
         }
     }
-
-    //,links: {
-    //    products: {
-    //        reference: 'esapp.model.ProductNavigator'
-    //        ,create: true
-    //        //,id: 1
-    //    }
-    //}
-
 });

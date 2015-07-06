@@ -7,9 +7,9 @@
 Ext.application({
     name: 'esapp',
 
-    extend: 'esapp.Application',
+    extend: 'esapp.Application'
     
-    autoCreateViewport: 'esapp.view.main.Main'
+    //,autoCreateViewport:  'esapp.view.main.Main'
 	
     //-------------------------------------------------------------------------
     // Most customizations should be made to esapp.Application. If you need to

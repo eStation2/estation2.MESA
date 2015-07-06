@@ -4,6 +4,7 @@ import sys
 from lib.python import es_logging as log
 
 # Import eStation lib modules
+# import locals
 from config import es_constants
 
 import sqlalchemy
@@ -81,9 +82,17 @@ class ConnectDB(object):
                 dburl = ConnectDB.get_db_url(use_sqlite)
                 self.db = sqlsoup.SQLSoup(dburl)
                 self.session = self.db.session
+
+                import logging
+                self.db.engine.logger.setLevel(logging.WARN)
+                self.db.engine.logger.disabled = 1
+                self.db.engine.logger.level = logging.WARN
+                logging.basicConfig(level=logging.WARN)
+                sqllogger = logging.getLogger('sqlalchemy.engine')
+                logging.getLogger('sqlalchemy.engine').setLevel(logging.WARN)   # NOTSET
             else:
-                self.db = self.get_db_engine()
-                Mysession = sessionmaker(bind=self.db, autoflush=True)
+                self.db = self.get_db_engine(echo=False)
+                Mysession = sessionmaker(bind=self.db, autoflush=False)
                 self.session = Mysession()
 
             # logger.debug("is_testing is: %s " % self.is_testing())

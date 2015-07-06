@@ -16,7 +16,7 @@ Ext.define('esapp.model.DataAcquisition', {
        {name: 'activated', type: 'boolean'},
        {name: 'store_original_data', type: 'boolean'},
        {name: 'latest'},
-       {name: 'lenght_proc_list'},
+       {name: 'length_proc_list'},
        {name: 'time_latest_copy'},
        {name: 'time_latest_exec'}
     ]

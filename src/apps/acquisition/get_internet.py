@@ -15,6 +15,7 @@ import sys
 import os
 import re
 import datetime
+import shutil
 
 from time import sleep
 
@@ -32,7 +33,8 @@ c = pycurl.Curl()
 buffer = StringIO.StringIO()
 if not os.path.isdir(es_constants.base_tmp_dir):
     os.makedirs(es_constants.base_tmp_dir)
-tmpdir = tempfile.mkdtemp(prefix=__name__, dir=es_constants.base_tmp_dir)
+
+#tmpdir = tempfile.mkdtemp(prefix=__name__, dir=es_constants.base_tmp_dir)
 echo_query = False
 user_def_sleep = es_constants.es2globals['poll_frequency']
 
@@ -223,15 +225,28 @@ def get_list_matching_files_subdir_local(list, local_dir, regex, level, max_leve
 #           to_date: end date for the dataset (datetime.datetime object)
 #           frequency: dataset 'frequency' (see DB 'frequency' table)
 #
-def build_list_matching_for_http(template, from_date, to_date, frequency_id):
+def build_list_matching_for_http(base_url, template, from_date, to_date, frequency_id):
 
     # Add a check on frequency
-    frequency = datasets.Dataset.get_frequency(frequency_id, datasets.Frequency.DATEFORMAT.DATETIME)
+    try:
+        frequency = datasets.Dataset.get_frequency(frequency_id, datasets.Frequency.DATEFORMAT.DATETIME)
+    except Exception as inst:
+        logger.debug("Error in datasets.Dataset.get_frequency: %s" %inst.args[0])
+        raise
 
-    dates = frequency.get_dates(from_date, to_date)
-    list_files = frequency.get_internet_dates(dates, template)
+    try:
+        dates = frequency.get_dates(from_date, to_date)
+    except Exception as inst:
+        logger.debug("Error in frequency.get_dates: %s" %inst.args[0])
+        raise
 
-    return list_files
+    try:
+        list_filenames = frequency.get_internet_dates(dates, template)
+    except Exception as inst:
+        logger.debug("Error in frequency.get_internet_dates: %s" %inst.args[0])
+        raise
+
+    return list_filenames
 
 
 ######################################################################################
@@ -243,58 +258,43 @@ def build_list_matching_for_http(template, from_date, to_date, frequency_id):
 #           target_file: target file name (by default 'test_output_file')
 #           target_dir: target directory (by default a tmp dir is created)
 #   Output: full pathname is returned (or positive number for error)
-def get_file_from_url(remote_url_file, target_file=None, target_dir=None, userpwd=''):
+def get_file_from_url(remote_url_file,  target_dir, target_file=None,userpwd=''):
 
-    if target_dir is None:
-        tmpdir = tempfile.mkdtemp(prefix=__name__, dir=es_constants.es2globals['base_tmp_dir'])
-    else:
-        tmpdir = target_dir
+    # Create a tmp directory for download
+    tmpdir = tempfile.mkdtemp(prefix=__name__, dir=es_constants.es2globals['base_tmp_dir'])
 
     if target_file is None:
         target_file='test_output_file'
 
     target_fullpath=tmpdir+os.sep+target_file
+    target_final=target_dir+os.sep+target_file
 
-    outputfile=open(target_fullpath, 'wb')
-    logger.debug('Output File: '+target_fullpath)
+    c = pycurl.Curl()
 
-    c.setopt(c.URL,remote_url_file)
-    c.setopt(c.WRITEFUNCTION,outputfile.write)
-    if userpwd is not '':
-        c.setopt(c.USERPWD,userpwd)
-    c.perform()
-    outputfile.close()
+    try:
+        outputfile=open(target_fullpath, 'wb')
+        logger.debug('Output File: '+target_fullpath)
 
-    return target_fullpath
-
-
-# #   Target dir is created as 'tmpdir' if not passed
-# #   Full pathname is returned (or positive number for error)
-# Obsolete ?? To be removed ??
-# def get_dir_contents_from_url(remote_url_dir, target_file=None, target_dir=None, userpwd=''):
-#
-#     if target_dir is None:
-#         tmpdir = tempfile.mkdtemp(prefix=__name__, dir=es_constants.es2globals['base_tmp_dir'])
-#     else:
-#         tmpdir = target_dir
-#
-#     if target_file is None:
-#         target_file = 'test_output_file'
-#
-#     target_fullpath=tmpdir+os.sep+target_file
-#
-#     outputfile = open(target_fullpath, 'wb')
-#     logger.debug('Output File: '+target_fullpath)
-#
-#     c.setopt(c.URL, remote_url_dir)
-#     c.setopt(c.WRITEFUNCTION, outputfile.write)
-#     if userpwd is not '':
-#         c.setopt(c.USERPWD, userpwd)
-#     c.perform()
-#     outputfile.close()
-#
-#     return target_fullpath
-
+        c.setopt(c.URL,remote_url_file)
+        c.setopt(c.WRITEFUNCTION,outputfile.write)
+        if userpwd is not '':
+            c.setopt(c.USERPWD,userpwd)
+        c.perform()
+        # Check the result (filter server/client errors http://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
+        if c.getinfo(pycurl.HTTP_CODE) >= 400:
+            outputfile.close()
+            os.remove(target_fullpath)
+            raise Exception('HTTP Error in downloading the file: %i' % c.getinfo(pycurl.HTTP_CODE))
+        else:
+            outputfile.close()
+            shutil.move(target_fullpath, target_final)
+            return 0
+    except:
+        logger.warning('Output NOT downloaded: %s - error : %i' %(remote_url_file,c.getinfo(pycurl.HTTP_CODE)))
+        return 1
+    finally:
+        c = None
+        shutil.rmtree(tmpdir)
 
 ######################################################################################
 #   loop_get_internet
@@ -333,93 +333,137 @@ def loop_get_internet(dry_run=False):
                 logger.warning("Sleep time not defined. Setting to default=1min. Continue.")
                 time_sleep = 60
 
-    #        try:
             logger.debug("Reading active INTERNET data sources from database")
             internet_sources_list = querydb.get_active_internet_sources(echo=echo_query)
 
             # Loop over active triggers
-            for internet_source in internet_sources_list:
+            try:
+              for internet_source in internet_sources_list:
+
+                execute_trigger = True
+                # Get this from the pads database table (move from internet_source 'pull_frequency' to the pads table,
+                # so that it can be exploited by eumetcast triggers as well). It is in minute
+                delay_time_source_minutes = internet_source.pull_frequency
+
+                logger_spec = log.my_logger('apps.get_internet.'+internet_source.internet_id)
                 logger.debug("Processing internet source  %s.", internet_source.descriptive_name)
 
-                processed_list_filename = es_constants.get_internet_processed_list_prefix+str(internet_source.internet_id)+'.list'
+                # Create objects for list and info
                 processed_info_filename = es_constants.get_internet_processed_list_prefix+str(internet_source.internet_id)+'.info'
 
-                # Create objects for list and info
-                processed_list = []
-                processed_info = {'lenght_proc_list': 0,
-                                  'time_latest_exec': datetime.datetime.now(),
-                                  'time_latest_copy': datetime.datetime.now()}
-                # Restore/Create List
-                processed_list=functions.restore_obj_from_pickle(processed_list, processed_list_filename)
                 # Restore/Create Info
+                processed_info = None
                 processed_info=functions.restore_obj_from_pickle(processed_info, processed_info_filename)
-                # Update processing time (in case it is restored)
-                processed_info['time_latest_exec']=datetime.datetime.now()
-
-                logger.debug("Create current list of file to process for source %s.", internet_source.internet_id)
-                if internet_source.user_name is None:
-                    user_name = "anonymous"
+                if processed_info is not None:
+                    # Check the delay
+                    current_delta=datetime.datetime.now()-processed_info['time_latest_exec']
+                    current_delta_minutes=int(current_delta.seconds/60)
+                    if current_delta_minutes < delay_time_source_minutes:
+                        logger.debug("Still waiting up to %i minute - since latest execution.", delay_time_source_minutes)
+                        execute_trigger = False
                 else:
-                    user_name = internet_source.user_name
-                
-                if internet_source.password is None:
-                    password = "anonymous"
-                else:
-                    password = internet_source.password
-                    
-                usr_pwd = str(user_name)+':'+str(password)
-                
-                logger.debug("              Url is %s.", internet_source.url)
-                logger.debug("              usr/pwd is %s.", usr_pwd)
-                logger.debug("              regex   is %s.", internet_source.include_files_expression)
+                    # Create processed_info object
+                    processed_info = {'lenght_proc_list': 0,
+                                      'time_latest_exec': datetime.datetime.now(),
+                                      'time_latest_copy': datetime.datetime.now()}
+                    execute_trigger = True
 
-                internet_type = 'ftp'
+                if execute_trigger:
+                    # Restore/Create List
+                    processed_list = []
+                    processed_list_filename = es_constants.get_internet_processed_list_prefix+str(internet_source.internet_id)+'.list'
+                    processed_list=functions.restore_obj_from_pickle(processed_list, processed_list_filename)
 
-                if internet_type == 'ftp':
-                    # Note that the following list might contain sub-dirs (it reflects full_regex)
-                    current_list = get_list_matching_files_dir_ftp(str(internet_source.url), str(usr_pwd), str(internet_source.include_files_expression))
+                    processed_info['time_latest_exec']=datetime.datetime.now()
 
-                elif internet_type == 'http':
-                    # Note that the following list might contain sub-dirs (it reflects template)
-                    current_list = get_list_matching_files_dir_ftp(str(internet_source.url), str(usr_pwd), str(internet_source.include_files_expression))
+                    logger.debug("Create current list of file to process for source %s.", internet_source.internet_id)
+                    if internet_source.user_name is None:
+                        user_name = "anonymous"
+                    else:
+                        user_name = internet_source.user_name
 
-                logger.debug("Number of files currently available for source %s is %i", internet_source.internet_id, len(current_list))
-                if len(current_list) > 0:
-                    logger.debug("Number of files already copied for trigger %s is %i", internet_source.internet_id, len(processed_list))
-                    listtoprocess = []
-                    for current_file in current_list:
-                        if len(processed_list) == 0:
-                            listtoprocess.append(current_file)
-                        else:
-                            #if os.path.basename(current_file) not in processed_list: -> save in .list subdirs as well !!
-                            if current_file not in processed_list:
+                    if internet_source.password is None:
+                        password = "anonymous"
+                    else:
+                        password = internet_source.password
+
+                    usr_pwd = str(user_name)+':'+str(password)
+
+                    logger_spec.debug("              Url is %s.", internet_source.url)
+                    logger_spec.debug("              usr/pwd is %s.", usr_pwd)
+                    logger_spec.debug("              regex   is %s.", internet_source.include_files_expression)
+
+                    internet_type = internet_source.type
+
+                    if internet_type == 'ftp':
+                        # Note that the following list might contain sub-dirs (it reflects full_regex)
+                        current_list = get_list_matching_files_dir_ftp(str(internet_source.url), str(usr_pwd), str(internet_source.include_files_expression))
+
+                    elif internet_type == 'http_tmpl':
+                        # Manage the dates:start_date is mandatory .. end_date replaced by 'today' if missing/wrong
+                        try:
+                          if functions.is_date_yyyymmdd(str(internet_source.start_date), silent=True):
+                            datetime_start=datetime.datetime.strptime(str(internet_source.start_date),'%Y%m%d')
+                          else:
+                            raise Exception("Start Date not valid")
+                        except:
+                            raise Exception("Start Date not valid")
+                        try:
+                          if functions.is_date_yyyymmdd(str(internet_source.end_date), silent=True):
+                            datetime_end=datetime.datetime.strptime(str(internet_source.end_date),'%Y%m%d')
+                          else:
+                            datetime_end=datetime.datetime.today()
+                        except:
+                            pass
+                        # Create the full filename from a 'template' which contains
+                        try:
+                            current_list = build_list_matching_for_http(str(internet_source.url),
+                                                                        str(internet_source.include_files_expression),
+                                                                        datetime_start,
+                                                                        datetime_end,
+                                                                        str(internet_source.frequency_id))
+                        except:
+                             logger.error("Error in creating date lists. Continue")
+
+                    logger_spec.debug("Number of files currently available for source %s is %i", internet_source.internet_id, len(current_list))
+                    if len(current_list) > 0:
+                        logger_spec.debug("Number of files already copied for trigger %s is %i", internet_source.internet_id, len(processed_list))
+                        listtoprocess = []
+                        for current_file in current_list:
+                            if len(processed_list) == 0:
                                 listtoprocess.append(current_file)
+                            else:
+                                #if os.path.basename(current_file) not in processed_list: -> save in .list subdirs as well !!
+                                if current_file not in processed_list:
+                                    listtoprocess.append(current_file)
 
-                    logger.debug("Number of files to be copied for trigger %s is %i", internet_source.internet_id, len(listtoprocess))
-                    if listtoprocess != set([]):
-                         logger.debug("Loop on the found files.")
-                         if not dry_run:
-                             for filename in list(listtoprocess):
-                                 logger.debug("Processing file: "+os.path.basename(filename))
-                                 #try:
-                                 target_file=filename
-                                 get_file_from_url(str(internet_source.url)+'/'+target_file, target_file=os.path.basename(target_file), target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
-                                 logger.info("File %s copied.", filename)
-                                 # processed_list.append(os.path.basename(filename))  -> save in .list subdirs as well !!
-                                 processed_list.append(filename)
-                                #except:
-                                #   logger.warning("Problem while copying file: %s.", filename)
-                         else:
-                             logger.info('Dry_run is set: do not get files')
+                        logger_spec.debug("Number of files to be copied for trigger %s is %i", internet_source.internet_id, len(listtoprocess))
+                        if listtoprocess != set([]):
+                             logger_spec.debug("Loop on the found files.")
+                             if not dry_run:
+                                 for filename in list(listtoprocess):
+                                     logger_spec.debug("Processing file: "+str(internet_source.url)+os.path.sep+filename)
+                                     try:
+                                        result = get_file_from_url(str(internet_source.url)+os.path.sep+filename, target_file=os.path.basename(filename), target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
+                                        if not result:
+                                            logger_spec.info("File %s copied.", filename)
+                                            processed_list.append(filename)
+                                        else:
+                                            logger_spec.warning("File %s not copied: ", filename)
+                                     except:
+                                       logger_spec.warning("Problem while copying file: %s.", filename)
+                             else:
+                                 logger_spec.info('Dry_run is set: do not get files')
 
-                if not dry_run:
-                    functions.dump_obj_to_pickle(processed_list, processed_list_filename)
-                    functions.dump_obj_to_pickle(processed_info, processed_info_filename)
+                    if not dry_run:
+                        functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+                        functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
-            sleep(float(user_def_sleep))
+              sleep(float(user_def_sleep))
+            # Loop over sources
+            except Exception as inst:
+              logger.error("Error while processing source %s. Continue" % internet_source.descriptive_name)
+              sleep(float(user_def_sleep))
 
-#        except Exception, e:
-#            logger.fatal(str(e))
-#            exit(1)
     exit(0)
 

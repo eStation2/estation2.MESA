@@ -1,5 +1,215 @@
 Ext.define('esapp.view.dashboard.DashboardController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.dashboard-dashboard'
-    
+    alias: 'controller.dashboard-dashboard',
+
+    setupDashboard: function() {
+        var me = this.getView();
+
+        var pcs_container = Ext.getCmp('pcs_container');
+        pcs_container.removeAll();
+
+        var PC1 = {},
+            PC2 = {},
+            PC3 = {},
+            PC1_connection = {},
+            PC3_connection = {};
+
+        var pc1Active = false,
+            pc2Active = false,
+            pc3Active = false,
+            pc1Disabled = true,
+            pc2Disabled = false,
+            pc3Disabled = true;
+
+        this.getStore('dashboard').load({
+            callback: function(records, options, success){
+                records.forEach(function(dashboard) {
+                    me.PC2_internet_status = dashboard.get('PC2_internet_status');
+                    me.PC2_mode = dashboard.get('PC2_mode');
+                    me.PC2_postgresql_status = dashboard.get('PC2_postgresql_status');
+                    me.PC2_version = dashboard.get('PC2_version');
+                    me.PC3_internet_status = dashboard.get('PC3_internet_status');
+                    me.PC3_mode = dashboard.get('PC3_mode');
+                    me.PC3_postgresql_status = dashboard.get('PC3_postgresql_status');
+                    me.PC3_version = dashboard.get('PC3_version');
+                    me.activePC = dashboard.get('activePC');
+                    me.pc1_connection = dashboard.get('pc1_connection');
+                    me.pc3_connection = dashboard.get('pc3_connection');
+                    me.type_installation = dashboard.get('type_installation');
+                });
+
+                if (me.type_installation == 'full'){
+                    me.setTitle('<span class="dashboard-header-title-style">' + esapp.Utils.getTranslation('mesa_full_estation') + '</span>');  // 'MESA Full eStation',
+
+                    var acquisitiontab = Ext.getCmp('acquisitionmaintab');
+                    var processingtab = Ext.getCmp('processingmaintab');
+                    var datamanagementtab = Ext.getCmp('datamanagementmaintab');
+                    var analysistab = Ext.getCmp('analysistab');
+                    var maintabpanel = Ext.getCmp('maintabpanel');
+
+                    var indexAcquisitionTab = 1;
+                    var indexProcessingTab = 2;
+                    var indexDataManagementTab = 3;
+                    var indexAnalysisTab = 4; // maintabpanel.getTabBar().items.indexOf(analysistab);
+
+                    if (me.activePC == 'pc1') {
+                        pc1Active = true;
+                    }
+                    if (me.activePC == 'pc2') {
+                        pc2Active = true;
+
+                        if (me.PC2_mode == 'nominal') {
+                            maintabpanel.getTabBar().items.getAt(indexAnalysisTab).hide();
+                            analysistab.disable();
+                        }
+                    }
+                    if (me.activePC == 'pc3') {
+                        pc3Active = true;
+
+                        maintabpanel.getTabBar().items.getAt(indexAcquisitionTab).hide();
+                        acquisitiontab.disable();
+
+                        maintabpanel.getTabBar().items.getAt(indexProcessingTab).hide();
+                        processingtab.disable();
+
+                        maintabpanel.getTabBar().items.getAt(indexDataManagementTab).hide();
+                        datamanagementtab.disable();
+
+                        maintabpanel.getTabBar().items.getAt(indexAnalysisTab).show();
+                        analysistab.enable();
+                    }
+
+                    if (me.PC2_mode == 'nominal'){
+                        pc2Disabled = false
+                        me.PC2_modeText = esapp.Utils.getTranslation('nominalmode')
+                    }
+                    else {
+                        me.PC2_modeText = esapp.Utils.getTranslation('recoverymode')
+                    }
+
+                    if (me.PC3_mode == 'nominal'){
+                        //pc3Disabled = false
+                        me.PC3_modeText = esapp.Utils.getTranslation('nominalmode')
+                    }
+                    else {
+                        me.PC3_modeText = esapp.Utils.getTranslation('recoverymode')
+                    }
+
+                    PC1 = {
+                        xtype: 'dashboard-pc1',
+                        setdisabled:pc1Disabled,
+                        activePC:pc1Active
+                    };
+
+                    PC2 = {
+                        xtype: 'dashboard-pc2',
+                        name:'dashboardpc2',
+                        id: 'dashboardpc2',
+                        paneltitle: esapp.Utils.getTranslation('processing_pc2'),
+                        setdisabled:pc2Disabled,
+                        activePC:pc2Active,
+                        activeversion: me.PC2_version,
+                        currentmode: me.PC2_modeText,
+                        dbstatus: me.PC2_postgresql_status,
+                        internetconnection: me.PC2_internet_status
+                    };
+
+                    PC3 = {
+                        xtype: 'dashboard-pc2',
+                        name:'dashboardpc3',
+                        id: 'dashboardpc3',
+                        paneltitle: esapp.Utils.getTranslation('processing_pc3'),
+                        setdisabled: pc3Disabled,
+                        activePC: pc3Active,
+                        activeversion: me.PC3_version,
+                        currentmode: me.PC3_modeText,
+                        dbstatus: me.PC3_postgresql_status,
+                        internetconnection: me.PC3_internet_status
+                    };
+
+                    PC1_connection = {
+                        xtype: 'dashboard-connection',
+                        id: 'pc1_connection',
+                        connected: me.pc1_connection,
+                        direction: 'left'
+                    };
+
+                    PC3_connection = {
+                        xtype: 'dashboard-connection',
+                        id: 'pc3_connection',
+                        connected: me.pc3_connection,
+                        direction: 'right'
+                    };
+
+                    pcs_container.add(PC1);
+                    pcs_container.add(PC1_connection);
+                    pcs_container.add(PC2);
+                    pcs_container.add(PC3_connection);
+                    pcs_container.add(PC3);
+                }
+                else {
+                    me.setTitle('<span class="dashboard-header-title-style">' + esapp.Utils.getTranslation('mesa_light_estation') + '</span>');  // 'MESA Light eStation',
+
+                    if (me.activePC == 'pc1') pc1Active = true;
+                    if (me.activePC == 'pc2') pc2Active = true;
+
+                    PC1 = {
+                        xtype: 'dashboard-pc1',
+                        setdisabled:pc1Disabled,
+                        activePC:pc1Active
+                    };
+
+                    PC2 = {
+                        xtype: 'dashboard-pc2',
+                        setdisabled:pc2Disabled,
+                        activePC:pc2Active
+                    };
+
+                    PC1_connection = {
+                        xtype: 'dashboard-connection',
+                        id: 'pc1_connection',
+                        connected: me.pc1_connection,
+                        direction: 'right'
+                    };
+
+                    pcs_container.add(PC1);
+                    pcs_container.add(PC1_connection);
+                    pcs_container.add(PC2);
+                }
+            }
+        });
+
+        //this.getStore('dashboard').load();
+        //console.info(this.getStore('dashboard').getData());
+        //this.getStore('dashboard').getData().each(function(dashboard) {
+        //            me.PC2_internet_status = dashboard.get('PC2_internet_status');
+        //            me.PC2_mode = dashboard.get('PC2_mode');
+        //            me.PC2_postgresql_status = dashboard.get('PC2_postgresql_status');
+        //            me.PC2_version = dashboard.get('PC2_version');
+        //            me.PC3_internet_status = dashboard.get('PC3_internet_status');
+        //            me.PC3_mode = dashboard.get('PC3_mode');
+        //            me.PC3_postgresql_status = dashboard.get('PC3_postgresql_status');
+        //            me.PC3_version = dashboard.get('PC3_version');
+        //            me.activePC = dashboard.get('activePC');
+        //            me.pc1_connection = dashboard.get('pc1_connection');
+        //            me.pc3_connection = dashboard.get('pc3_connection');
+        //            me.type_installation = dashboard.get('type_installation');
+        //        });
+        //me.PC2_internet_status = true;
+        //me.PC2_mode = 'nominal';
+        //me.PC2_postgresql_status = true;
+        //me.PC2_version = '2.0.1';
+        //me.PC3_internet_status = false;
+        //me.PC3_mode = 'degradation';
+        //me.PC3_postgresql_status = false;
+        //me.PC3_version = '2.0.4';
+        //me.activePC = 'pc2';
+        //me.pc1_connection = true;
+        //me.pc3_connection = true;
+        //me.type_installation = 'full';
+
+        //var pcs_container = me.getReferences();
+        //var pcs_container = me.down('container[name=pcs_container]');
+
+    }
 });

@@ -1,16 +1,19 @@
+from __future__ import absolute_import
 __author__ = "Marco Clerici"
 
-# General definitions/switches
-args = {'pipeline_run_level':0, \
-        'pipeline_run_touch_only':0, \
-        'pipeline_printout_level':1, \
-        'pipeline_printout_graph_level': 0}
 
-#from apps.processing.processing_ndvi import *
-from apps.processing.processing_fewsnet import *
+from unittest import TestCase
+from lib.python import es_logging as log
 
-#   ---------------------------------------------------------------------
-#   Run the pipeline
+# Trivial change
+logger = log.my_logger(__name__)
 
-processing_fewsnet_rfe(**args)
-#processing_ndvi(**args)
+from apps.processing import proc_functions
+
+class TestProcessing(TestCase):
+
+    def Test_create_permanent_missing_files(self):
+        args = {"product_code":"tamsat-rfe", "version":"2.0", "sub_product_code":"10d", "mapset_code":"TAMSAT-Africa-8km"}
+
+        # proc_functions.create_permanently_missing_for_dataset(**args)
+        self.assertEqual(1, 1)

@@ -30,6 +30,7 @@ Ext.define("esapp.view.acquisition.Ingestion",{
     //    store: 'IngestionsStore',
     //    bind: '{ProductAcquisitionsGrid.selection.Ingestions}',
     //    bind: '{ingestions}',
+
     bind:{
         store:'{productingestions}'
     },
@@ -43,6 +44,7 @@ Ext.define("esapp.view.acquisition.Ingestion",{
         disableSelection: true,
         trackOver: false
     },
+    cls: 'grid-color-gray',
     plugins:[{
         ptype:'cellediting'
     }],
@@ -119,7 +121,10 @@ Ext.define("esapp.view.acquisition.Ingestion",{
                 }
                 else {
                     completeness.intervals.forEach(function (interval) {
-                        dataObj["data" + i] = interval.intervalpercentage;
+                        if (interval.intervalpercentage<1.5)
+                            dataObj["data" + i] = 2;
+                        else
+                            dataObj["data" + i] = interval.intervalpercentage;
                         ++i;
 
                         var color = '';
@@ -138,7 +143,10 @@ Ext.define("esapp.view.acquisition.Ingestion",{
 
                     // Update the 4 sprites (these are not reachable through getSprites() on the chart)
                     widgetchart.surfaceMap.chart[0].getItems()[0].setText('Files: '+completeness.totfiles);
-                    widgetchart.surfaceMap.chart[0].getItems()[1].setText('Missing: '+completeness.missingfiles);
+                    var missingFilesText = '';
+                    if(completeness.missingfiles>0)
+                       missingFilesText = 'Missing: ' + completeness.missingfiles;
+                    widgetchart.surfaceMap.chart[0].getItems()[1].setText(missingFilesText);
                     widgetchart.surfaceMap.chart[0].getItems()[2].setText(completeness.firstdate);
                     widgetchart.surfaceMap.chart[0].getItems()[3].setText(completeness.lastdate);
                 }
@@ -208,26 +216,31 @@ Ext.define("esapp.view.acquisition.Ingestion",{
 //            width: 65,
 //            disabled: true,
 //            stopSelection: false
-        },{
-            xtype: 'actioncolumn',
-            width: 65,
-            align:'center',
-            items: [{
-                icon: 'resources/img/icons/file-extension-log-icon-32x32.png',
-                tooltip: 'Show log of this Ingestion',
-                scope: me,
-                // handler: me.onRemoveClick
-                handler: function (grid, rowIndex, colIndex, icon) {
-                    var rec = grid.getStore().getAt(rowIndex);
-                    var logViewWin = new esapp.view.acquisition.logviewer.LogView({
-                        params: {
-                            logtype: 'ingest',
-                            record: rec
-                        }
-                    });
-                    logViewWin.show();
-                }
-            }]
+//        },{
+//            xtype: 'actioncolumn',
+//            width: 65,
+//            height:40,
+//            align:'center',
+//            items: [{
+//                //icon: 'resources/img/icons/file-extension-log-icon-32x32.png',
+//                iconCls:'log-icon',
+//                width:32,
+//                height:32,
+//                tooltip: 'Show log of this Ingestion',
+//                scope: me,
+//                // handler: me.onRemoveClick
+//                handler: function (grid, rowIndex, colIndex, icon) {
+//                    //console.info(grid.up());
+//                    var rec = grid.getStore().getAt(rowIndex);
+//                    var logViewWin = new esapp.view.acquisition.logviewer.LogView({
+//                        params: {
+//                            logtype: 'ingest',
+//                            record: rec
+//                        }
+//                    });
+//                    logViewWin.show();
+//                }
+//            }]
         }];
 
         me.callParent();

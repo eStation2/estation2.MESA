@@ -98,7 +98,6 @@ Ext.define('esapp.model.ProductNavigatorMapSetDataSet', {
        {name: 'subproductcode'},
        {name: 'version'},
        {name: 'defined_by'},
-       {name: 'mapsetcode'},
        {name: 'activated', type: 'boolean'},
        {name: 'product_type'},
        {name: 'prod_descriptive_name'},
@@ -168,7 +167,7 @@ Ext.define('esapp.model.ColorScheme', {
         //},
         reader: {
             type: 'json',
-            rootProperty: 'colorscheme',
+            rootProperty: 'legends',
             successProperty: 'success',
             messageProperty: 'message'
         },

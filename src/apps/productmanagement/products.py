@@ -9,10 +9,13 @@ from __future__ import absolute_import
 import os
 import glob
 import tarfile
+import shutil
+import tempfile
 
 from config import es_constants
 from lib.python import es_logging as log
 from lib.python import functions
+from lib.python import metadata
 from database import querydb
 
 from .exceptions import (NoProductFound, MissingMapset)
@@ -22,24 +25,36 @@ from .helpers import str_to_date
 
 logger = log.my_logger(__name__)
 
+#
+#   Class to define all datasets belonging to the same product/version, i.e., possible more sub-product and mapsets
+#   It includes:    type ('every' or 'per')
+#                   unit (minute, hour, day, ...)
+#                   value (integer)
+#                   and dateformat (date/datetime)
+#
 
 class Product(object):
     def __init__(self, product_code, version=None):
         self.product_code = product_code
         kwargs = {'productcode': self.product_code}
         self.version = version
-        if not version is None:
+        if self.version:
             kwargs['version'] = version
         self._db_product = querydb.get_product_native(**kwargs)
         if self._db_product is None:
             raise NoProductFound(kwargs)
         self._fullpath = os.path.join(es_constants.es2globals['processing_dir'], product_code)
+        if version:
+            self._fullpath = os.path.join(self._fullpath, version)
 
     @property
     def mapsets(self):
         _mapsets = getattr(self, "_mapsets", None)
         if _mapsets is None:
-            _mapsets = [os.path.basename(mapset) for mapset in self._get_full_mapsets()]
+            _mapsets = []
+            for mapset in self._get_full_mapsets():
+                if os.path.basename(mapset) != 'archive':
+                    _mapsets.append(os.path.basename(mapset))
             setattr(self, "_mapsets", _mapsets)
         return _mapsets
 
@@ -95,7 +110,9 @@ class Product(object):
 
     def get_missing_filenames(self, missing):
         product = Product(missing['product'], version=missing['version'])
+        version = missing['version']
         mapset = missing['mapset']
+        subproduct = missing['subproduct']
         dataset = product.get_dataset(mapset=mapset, sub_product_code=missing['subproduct'])
         dates = dataset.get_dates()
         missing_dates = []
@@ -120,12 +137,24 @@ class Product(object):
                 if last_date < dataset.get_last_date():
                     missing_dates.extend(dataset.get_interval_dates(last_date,
                         dataset.get_last_date(), first_included=False))
-        return [dataset.format_filename(date) for date in sorted(set(dates).intersection(set(missing_dates)))]
+
+        missing_filenames=[]
+        for date in sorted(set(dates).intersection(set(missing_dates))):
+            date_str = dataset._frequency.format_date(date)
+            filename=dataset.fullpath+functions.set_path_filename(date_str, missing['product'], subproduct, mapset, version,'.tif')
+            missing_filenames.append(filename)
+        return missing_filenames
 
     @staticmethod
     def create_tar(missing_info, filetar=None, tgz=False):
+    # Given a 'missing_info' object, creates a tar-file containing all required files
+
+        result = {'status':0,            # 0 -> ok, all files copied, 1-> at least 1 file missing
+                  'n_file_copied':0,
+                  'n_file_missing':0,
+                  }
+
         if filetar is None:
-            import tempfile
             file_temp = tempfile.NamedTemporaryFile()
             filetar = file_temp.name
             file_temp.close()
@@ -139,6 +168,56 @@ class Product(object):
         # creare il tar contenente files
         tar = tarfile.open(filetar, "w|gz" if tgz else "w|")
         for filename in filenames:
-            tar.add(filename)
+            if os.path.isfile(filename):
+                tar.add(filename)
+                result['n_file_copied']+=1
+            else:
+                result['n_file_missing']+=1
+                result['status']=1
         tar.close()
-        return filetar
+        return [filetar, result]
+
+    @staticmethod
+    def import_tar(filetar, tgz=False):
+
+        result = {'status':0,            # 0 -> ok, 1-> no tmpdir created
+                  'n_file_copied':0,
+                  'n_file_error':0,
+                  }
+        # Create tmp dir
+        try:
+            tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(filetar),
+                                  dir=es_constants.base_tmp_dir)
+        except IOError:
+            logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
+            result['status']=1
+
+        # Extract from tar
+        if os.path.isfile(filetar):
+            # Untar the file to a temp dir
+            tar = tarfile.open(filetar, "r|gz" if tgz else "r|")
+            names=tar.getnames()
+            # Extract with subdirs
+            tar.extractall(path=tmpdir)
+            # Move files to basedir
+            for name in names:
+                os.rename(tmpdir+name,tmpdir+os.path.basename(name))
+        else:
+            result['status']=1
+
+        # Copy from tmpdir to target directory
+        meta = metadata.SdsMetadata()
+        # Get list of files in tmp dir
+        extracted_files = glob.glob(tmpdir+'*.tif')
+
+        for my_file in extracted_files:
+            fullpath_dest=meta.get_target_filepath(my_file)
+            try:
+                shutil.copyfile(my_file, fullpath_dest)
+            except:
+                logger.error('Error in copying file %s' % fullpath)
+
+        # Clean and exit
+        shutil.rmtree(tmpdir)
+
+        return result

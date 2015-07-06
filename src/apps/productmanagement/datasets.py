@@ -24,7 +24,8 @@ from .exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
                          WrongFrequencyType, WrongFrequencyDateFormat,
                          NoProductFound, NoFrequencyFound,
                          WrongDateType)
-from .helpers import add_years, add_months, add_dekads, add_pentads, add_days, find_gaps, cast_to_int, INTERVAL_TYPE
+from .helpers import (add_years, add_months, add_dekads, add_pentads, add_days, manage_date,
+                     find_gaps, cast_to_int, INTERVAL_TYPE)
 
 
 def _check_constant(class_, constant_name, value):
@@ -34,6 +35,13 @@ def _check_constant(class_, constant_name, value):
             return True
     return False
 
+#
+#   Class to define a dataset frequency, i.e. the repeat-time of a dataset
+#   It includes:    type ('every' or 'per')
+#                   unit (minute, hour, day, ...)
+#                   value (integer)
+#                   and dateformat (date/datetime)
+#
 class Frequency(object):
     class UNIT:
         YEAR = 'year'
@@ -127,6 +135,7 @@ class Frequency(object):
             return False
         return True
 
+    # In case of date_format='mmdd', it adds the current year
     def extract_date(self, filename):
         if self.dateformat == self.DATEFORMAT.MONTHDAY:
             date_parts = (datetime.date.today().year, int(filename[:2]), int(filename[2:4]))
@@ -139,6 +148,15 @@ class Frequency(object):
                 date_parts += (int(filename[8:10]), int(filename[10:12]))
                 date = datetime.datetime(*date_parts)
         return date
+
+    # It is done for the case of date_format='mmdd': it returns list of existing 'mmdd'
+    def extract_mmdd(self, filename):
+        if self.dateformat == self.DATEFORMAT.MONTHDAY:
+            mmdd = (str(filename[:4]))
+        else:
+            logger.error('Extract_mmdd() to be used only for MMDD format')
+            mmdd = None
+        return mmdd
 
     def next_date(self, date):
         if self.frequency_type == self.TYPE.EVERY or self.value == 1:
@@ -173,7 +191,9 @@ class Frequency(object):
         return dates[:-1]
 
     def get_internet_dates(self, dates, template):
-        return [date.strftime(template) for date in dates]
+        #%{dkm}
+        #%{+/-<Nt><strftime>} = +/- N delta days/hours/
+        return [manage_date(date, template) for date in dates]
 
     def next_filename(self, filename):
         date = self.next_date(self.extract_date(filename))
@@ -199,6 +219,13 @@ class Frequency(object):
         self.dateformat = dateformat or self.dateformat_default(unit)
 
 
+
+#   Class to define a temporal interval and logically refers to a fraction of a dataset
+#   It includes:    from_date -> to_date
+#                   Length
+#                   percentage      (wrt to dataset extension)
+#                   interval_type   (present/missing/permanently missing)
+#
 class Interval(object):
     def __init__(self, interval_type, from_date, to_date, length, percentage):
         self.interval_type = interval_type
@@ -211,6 +238,11 @@ class Interval(object):
     def missing(self):
         return self.interval_type == INTERVAL_TYPE.MISSING
 
+
+#   Class to define a dataset, i.e. a collection of EO images, identified by the 4 key:
+#                              product/version/subproduct/mapset
+#   It also includes:    from_date -> to_date
+#
 
 class Dataset(object):
     def _check_date(self, date):
@@ -316,6 +348,9 @@ class Dataset(object):
 
     def get_dates(self):
         return sorted(self._frequency.extract_date(filename) for filename in self.get_basenames())
+
+    def get_mmdd(self):
+        return sorted(self._frequency.extract_mmdd(filename) for filename in self.get_basenames())
 
     def _extract_kwargs(self, interval):
         return {

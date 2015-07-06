@@ -41,7 +41,7 @@ from lib.python import functions
 from osgeo.gdalconst import *
 from osgeo import gdal
 import numpy as N
-
+import os
 logger = log.my_logger(__name__)
 
 # _____________________________
@@ -534,9 +534,16 @@ def do_oper_subtraction(input_file='', output_file='', input_nodata=None, output
     if output_nodata is None and input_nodata is not None:
         output_nodata = input_nodata
 
-    # manage out_type (take the input one as default)
+    # manage out_type (take the input one as default, but ensure a SIGNED type is used)
     if output_type is None:
-        outType=dataType
+	if dataType == GDT_Byte:
+	  outType = GDT_Int16
+	elif dataType == GDT_UInt16:
+	  outType = GDT_Int16
+	elif dataType == GDT_UInt32:
+	  outType = GDT_Int32
+	else:  
+	  outType = dataType
     else:
         outType=ParseType(output_type)
 
@@ -603,7 +610,7 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
     geoTransform = fid0.GetGeoTransform()
     projection = fid0.GetProjection()
     driver_type=fid0.GetDriver().ShortName
-
+    
     # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
     if output_nodata is None and input_nodata is not None:
         output_nodata = input_nodata
@@ -623,7 +630,7 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
     # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
     # TODO-M.C. Replace by calling ReturnNoData
     if input_nodata is None:
-        input_nodata = -32768
+        input_nodata = -32768.0
 
     if output_nodata is None and input_nodata is not None:
         output_nodata = input_nodata
@@ -642,16 +649,19 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
             if input_nodata is None:
                 wtc = (N.abs(data1) > epsilon)
             else:
-                wtc = (data0 != input_nodata) * (data1 != input_nodata) * (N.abs(data1) > epsilon)
+	      		wtc = (data0 != input_nodata) * (data1 != input_nodata) * (N.abs(data1) > epsilon)
 
+	       
             # TODO-M.C.: check this assignment is done for the other functions as well
-            dataout=N.zeros(ns,GDT_Float32)
+            dataout=N.zeros(ns).astype(float)
             if output_nodata is None:
-                dataout=N.zeros(ns,GDT_Float32) + output_nodata
+		print('we are here')
+		dataout=N.zeros(ns).astype(float) + output_nodata
 
-            if wtc.any():
-                dataout[wtc] = data0[wtc] / data1[wtc]
-            
+	    if wtc.any():	      
+	      dataout[wtc] = data0[wtc]/data1[wtc]
+	      
+            dataout = dataout*100.00
             dataout = dataout.round()
             dataout.shape=(1,-1)
             outDS.GetRasterBand(ib+1).WriteArray(N.array(dataout), 0, il)
@@ -1053,7 +1063,7 @@ def do_cumulate(input_file='', output_file='', input_nodata=None, output_nodata=
 
     # instantiate outputs
     outDrv=gdal.GetDriverByName(outFormat)
-    outDS=outDrv.Create(output_file, ns, nl, nb, ParseType(outType), options_list)
+    outDS=outDrv.Create(output_file, ns, nl, nb, outType, options_list)
     outDS.SetProjection(projection)
     outDS.SetGeoTransform(geoTransform)
 
@@ -1224,6 +1234,117 @@ def do_compute_perc_diff_vs_avg(input_file='', avg_file='', output_file='', inpu
     outDrv = None
     outDS = None
     assign_metadata_processing(input_list, output_file)
+
+# _____________________________
+def do_compute_primary_production(chla_file='', sst_file='', kd_file='', par_file='',
+                                  chla_nodata=None, sst_nodata=None, kd_nodata=None, par_nodata=None,
+                                  output_file='', output_nodata=None, output_format=None, output_type=None,
+                                  options=''):
+
+    # Manage options
+    options_list = []
+    options_list.append(options)
+
+    # open files
+    chla_fileID = gdal.Open(chla_file, GA_ReadOnly)
+    sst_fileID = gdal.Open(sst_file, GA_ReadOnly)
+    kd_fileID = gdal.Open(kd_file, GA_ReadOnly)
+    par_fileID = gdal.Open(par_file, GA_ReadOnly)
+
+    functions.check_output_dir(os.path.dirname(output_file))
+
+    # Read info from file, size are equal for all input files eg. sst, par
+    nb = chla_fileID.RasterCount
+    ns = chla_fileID.RasterXSize
+    nl = chla_fileID.RasterYSize
+
+    dataType = chla_fileID.GetRasterBand(1).DataType
+    dataTypesst = sst_fileID.GetRasterBand(1).DataType
+
+    geoTransform = chla_fileID.GetGeoTransform()
+    projection = chla_fileID.GetProjection()
+    driver_type=chla_fileID.GetDriver().ShortName
+
+    # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
+    if output_nodata is None and chla_nodata is not None:
+        output_nodata = chla_nodata
+
+    # Manage out_type (take the input one as default)
+    if output_type is None:
+        outType=dataType
+    else:
+        outType=ParseType(output_type)
+
+    # manage out_format (take the input one as default)
+    if output_format is None:
+        outFormat=driver_type
+    else:
+        outFormat=output_format
+
+    # instantiate output
+    outDrv = gdal.GetDriverByName(outFormat)
+    outDS = outDrv.Create(output_file, ns, nl, 1, outType, options_list)
+    outDS.SetGeoTransform(geoTransform)
+    outDS.SetProjection(projection)
+    #
+    # assume only 1 band
+    outband = outDS.GetRasterBand(1)
+    chl_band = chla_fileID.GetRasterBand(1)
+    sst_band = sst_fileID.GetRasterBand(1)
+    kd_band = kd_fileID.GetRasterBand(1)
+    par_band = par_fileID.GetRasterBand(1)
+
+    # day length, dl = 12hrs
+
+    dl = 12
+    XSize = chla_fileID.RasterXSize
+    #
+    for il in range(chla_fileID.RasterYSize):
+        F_ratio=N.zeros(XSize).astype(float)
+        Pb_opt=N.zeros(XSize).astype(float)
+
+        data_pp=N.zeros(XSize).astype(float) + output_nodata
+
+        data_chl = N.ravel(chla_fileID.ReadAsArray(0, il, XSize, 1))
+        data_sst = N.ravel(sst_fileID.ReadAsArray(0, il, XSize, 1))
+        data_par   = N.ravel(par_fileID.ReadAsArray(0, il, XSize, 1))
+        data_kd   = N.ravel(kd_fileID.ReadAsArray(0, il, XSize, 1))
+        data_sst = data_sst*0.01
+
+
+        valid = (data_chl !=  chla_nodata) * (data_sst != sst_nodata) * (data_par != par_nodata) *(data_kd != kd_nodata)
+
+        if valid.any():
+
+            # calculating f ratio  F using (0.66125 * Eo)/(Eo + 4.1)
+            F_ratio[valid] = (0.66125*data_par[valid])/(data_par[valid] + 4.1)
+
+            # Calculate Pb_opt from SST
+            Pb_opt[valid] = -3.27e-8*data_sst[valid]**7 + 3.4132e-6*data_sst[valid]**6 - 1.348e-4*data_sst[valid]**5 + \
+                      2.462e-3*data_sst[valid]**4 - 0.0205*data_sst[valid]**3 + 0.0617*data_sst[valid]**2 + \
+                      0.2749*data_sst[valid] + 1.2956
+
+            data_pp[valid] = data_chl[valid]*(4.6/data_kd[valid])*F_ratio[valid]*Pb_opt[valid]*dl
+
+        data_pp.shape = (1,-1)
+
+
+        outband.WriteArray(data_pp, 0, il)
+
+    # #   ----------------------------------------------------------------------------------------------------
+    # #   Writes metadata to output
+
+    input_list = []
+    input_list.append(chla_file)
+    input_list.append(sst_file)
+    input_list.append(kd_file)
+    input_list.append(par_file)
+
+    # #   Close outputs
+    outDrv = None
+    outDS = None
+    assign_metadata_processing(input_list, output_file)
+
 
 # _____________________________
 def do_ts_linear_filter(input_file='', before_file='', after_file='', output_file='', input_nodata=None, output_format=None,

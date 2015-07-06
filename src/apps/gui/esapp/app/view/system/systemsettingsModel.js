@@ -9,7 +9,7 @@ Ext.define('esapp.view.system.systemsettingsModel', {
             id: 0
             ,listeners: {
                 update: function () {
-                    Ext.Msg.alert('Message', 'System settings updated!');
+                    Ext.Msg.alert('Message', 'Path settings updated!');
                 }
             }
         }

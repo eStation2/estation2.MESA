@@ -4,6 +4,7 @@
 #	date:	 28.02.2014
 #   descr:	 It correspond to the file 'Functions' in rel. 1.X, for bash functions.
 #            It contains the following sets of functions:
+#            System:    manage the 'system' tab
 #            Time:      convert date/time between formats
 #            Naming:    manage file naming
 #            General:   general purpose functions
@@ -24,24 +25,117 @@ from datetime import date
 import uuid
 import pickle
 import json
+import glob
 
 # Import eStation2 modules
 from lib.python import es_logging as log
-from config.es_constants import *
+from config import es_constants
+# from config.es_constants import *
 
 logger = log.my_logger(__name__)
 
 dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'derived'}
 
 
+def getListVersions():
+    # Return the list of installed versions as a dictionary, by looking at versioned dirs
+    base=es_constants.es2globals['base_dir']+"-"
+    versions = []
+    vers_dirs=glob.glob(base+'*')
+    for ver in vers_dirs:
+        if os.path.isdir(ver):
+            v=ver.replace(base,'')
+            versions.append(v)
+
+    # Create empty dict
+    versions_dict = []
+    for v in versions:
+        versions_dict.append({'version': v})
+
+
+    return versions_dict
+
+def setSystemSetting(setting=None, value=None):
+    import ConfigParser
+    if setting is not None:
+        systemsettingsfilepath = es_constants.es2globals['settings_dir']+'/system_settings.ini'
+        config_systemsettings = ConfigParser.ConfigParser()
+        config_systemsettings.read(['system_settings.ini', systemsettingsfilepath])
+
+        if config_systemsettings.has_option('SYSTEM_SETTINGS', setting):
+            config_systemsettings.set('SYSTEM_SETTINGS', setting, value)
+
+        # Writing our configuration file to 'system_settings.ini' - COMMENTS ARE NOT PRESERVED!
+        with open(systemsettingsfilepath, 'wb') as configfile:
+            config_systemsettings.write(configfile)
+            configfile.close()
+        return True
+    else:
+        return False
+
+
+def setUserSetting(setting=None, value=None):
+    import ConfigParser
+    if setting is not None:
+        usersettingsfilepath = es_constants.es2globals['settings_dir']+'/user_settings.ini'
+        config_usersettings = ConfigParser.ConfigParser()
+        config_usersettings.read(['user_settings.ini', usersettingsfilepath])
+
+        if config_usersettings.has_option('USER_SETTINGS', setting):
+            config_usersettings.set('USER_SETTINGS', setting, value)
+
+        # Writing our configuration file to 'user_settings.ini' - COMMENTS ARE NOT PRESERVED!
+        with open(usersettingsfilepath, 'wb') as configfile:
+            config_usersettings.write(configfile)
+            configfile.close()
+
+        # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
+        from lib.python import reloadmodules
+        reloadmodules.reloadallmodules()
+        # Reloading the settings does not work well so set manually
+        es_constants.es2globals[setting] = value
+
+        return True
+    else:
+        return False
+
+
+def getSystemSettings():
+    import ConfigParser
+
+    thisfiledir = os.path.dirname(os.path.abspath(__file__))
+
+    systemsettingsfile = es_constants.es2globals['settings_dir']+'/system_settings.ini'
+    if not os.path.isfile(systemsettingsfile):
+        systemsettingsfile = os.path.join(thisfiledir, 'config/install/', 'user_settings.ini')
+
+    config_systemsettings = ConfigParser.ConfigParser()
+    config_systemsettings.read([systemsettingsfile])
+
+    systemsettings = config_systemsettings.items('SYSTEM_SETTINGS')  # returns a list of tuples
+    # for setting, value in systemsettings:
+    #      print setting + ': ' + value
+    systemsettings = dict(systemsettings)   # convert list of tuples to dict
+    # print systemsettings
+    return systemsettings
+
+
+def unix_time(dt):
+    epoch = datetime.datetime.utcfromtimestamp(0)
+    delta = dt - epoch
+    return delta.total_seconds()
+
+
+def unix_time_millis(d):
+    dt = datetime.datetime.combine(d, datetime.time.min)
+    return unix_time(dt) * 1000.0
+
+######################################################################################
 # Second function, rgb2html converts its arguments (r, g, b) to hexadecimal html-color string #RRGGBB
 # Arguments are converted to integers and trimmed to 0..255 range. It is possible to call it with array argument
 # rgb2html(array_of_three_ints) or specifying each component value separetly rgb2html(r, g, b).
-
+#
 def rgb2html(rgb):
-    # if is_array(rgb) && sizeof(r) == 3:
-    #     list(r, g, b) = r
-
     r = int(rgb[0])
     g = int(rgb[1])
     b = int(rgb[2])
@@ -59,19 +153,13 @@ def rgb2html(rgb):
     color += '0' if len(g) < 2 else '' + g
     color += '0' if len(b) < 2 else '' + b
 
-    # r = dechex(r<0?0:(r>255?255:r))
-    # g = dechex(g<0?0:(g>255?255:g))
-    # b = dechex(b<0?0:(b>255?255:b))
-
-    # color = len(r) < 2 ? '0' : '' + r
-    # color += len(g) < 2 ? '0' : '' + g
-    # color += len(b) < 2 ? '0' : '' + b
     return '#'+color
 
 
 def row2dict(row):
     d = {}
-    for column in row.c._all_cols:
+    for column in row.c._all_col_set:
+        print row
         d[column.name] = str(getattr(row, column.name))
 
     return d
@@ -96,8 +184,8 @@ def checkDateFormat(myString):
     return isDate
 
 
-import urllib2
 def internet_on():
+    import urllib2
     try:
         response = urllib2.urlopen('http://74.125.228.100', timeout=1)
         return True
@@ -105,20 +193,20 @@ def internet_on():
     return False
 
 
-import socket
-REMOTE_SERVER = "www.google.com"
 def is_connected():
-  try:
-    # see if we can resolve the host name -- tells us if there is
-    # a DNS listening
-    host = socket.gethostbyname(REMOTE_SERVER)
-    # connect to the host -- tells us if the host is actually
-    # reachable
-    s = socket.create_connection((host, 80), 2)
-    return True
-  except:
-     pass
-  return False
+    import socket
+    REMOTE_SERVER = "www.google.com"
+    try:
+        # see if we can resolve the host name -- tells us if there is
+        # a DNS listening
+        host = socket.gethostbyname(REMOTE_SERVER)
+        # connect to the host -- tells us if the host is actually
+        # reachable
+        s = socket.create_connection((host, 80), 2)
+        return True
+    except:
+        pass
+    return False
 
 
 ######################################################################################
@@ -133,12 +221,13 @@ def is_connected():
 #   Date: 2014/05/06
 #   Input: string of numbers
 #   Output: return True if the input has the format YYYYMMDD, otherwise return False
+#
 def is_date_yyyymmdd(string_date, silent=False):
     isdate_yyyymmdd = False
     # check the length of string_date
     if len(str(string_date)) != 8:
         if not silent:
-            logger.error('Invalid Date Format %s' % string_date)
+            logger.warning('Invalid Date Format %s' % string_date)
         return isdate_yyyymmdd
 
     # check the yyyymmdd format
@@ -157,7 +246,7 @@ def is_date_yyyymmdd(string_date, silent=False):
                     isdate_yyyymmdd = True
 
     if (not isdate_yyyymmdd) and (not silent):
-        logger.error('Invalid Date Format   %s' % string_date)
+        logger.warning('Invalid Date Format   %s' % string_date)
 
     return isdate_yyyymmdd
 
@@ -170,12 +259,13 @@ def is_date_yyyymmdd(string_date, silent=False):
 #   Date: 2014/05/06
 #   Input: string of numbers
 #   Output: return True if the input has the format MMDD, otherwise return False
+#
 def is_date_mmdd(string_date, silent=False):
     isdate_mmdd = False
     # check the length of string_date
     if len(str(string_date)) != 4:
         if not silent:
-            logger.error('Invalid Date Format %s' % string_date)
+            logger.warning('Invalid Date Format %s' % string_date)
         return isdate_mmdd
 
     # check the mmdd format
@@ -190,7 +280,7 @@ def is_date_mmdd(string_date, silent=False):
                 isdate_mmdd = True
 
     if (not isdate_mmdd) and (not silent):
-        logger.error('Invalid Date Format   %s' % string_date)
+        logger.warning('Invalid Date Format   %s' % string_date)
 
     return isdate_mmdd
 
@@ -202,12 +292,13 @@ def is_date_mmdd(string_date, silent=False):
 #   Date: 2014/05/06
 #   Input: string of numbers
 #   Output: return True if the input has the format YYYYMMDDHHMM, otherwise return False
+#
 def is_date_yyyymmddhhmm(string_date, silent=False):
     isdate_yyyymmddhhmm = False
     # check the length of string_date
     if len(str(string_date)) != 12:
         if not silent:
-            logger.error('Invalid Date Format %s' % string_date)
+            logger.warning('Invalid Date Format %s' % string_date)
         return isdate_yyyymmddhhmm
 
     # check the yyyymmdd format
@@ -232,7 +323,7 @@ def is_date_yyyymmddhhmm(string_date, silent=False):
                             isdate_yyyymmddhhmm = True
 
     if (not isdate_yyyymmddhhmm) and (not silent):
-        logger.error('Invalid Date Format %s' % string_date)
+        logger.warning('Invalid Date Format %s' % string_date)
 
     return isdate_yyyymmddhhmm
 
@@ -244,12 +335,13 @@ def is_date_yyyymmddhhmm(string_date, silent=False):
 #   Date: 2014/05/06
 #   Input: string of numbers
 #   Output: return True if the input has the format YYYYDOY, otherwise return False
+#
 def is_date_yyyydoy(string_date, silent=False):
     isdate_yyyydoy = False
     # check the length of string_date
     if 5 >= len(str(string_date)) <= 7:
         if not silent:
-            logger.error('Invalid Date Format %s' % string_date)
+            logger.warning('Invalid Date Format %s' % string_date)
         return isdate_yyyydoy
 
     # check the yyyymmdd format
@@ -265,7 +357,7 @@ def is_date_yyyydoy(string_date, silent=False):
                 isdate_yyyydoy = True
 
     if (not isdate_yyyydoy) and (not silent):
-        logger.error('Invalid Date Format   %s' % string_date)
+        logger.warning('Invalid Date Format   %s' % string_date)
 
     return isdate_yyyydoy
 
@@ -278,6 +370,7 @@ def is_date_yyyydoy(string_date, silent=False):
 #   Date: 2014/05/06
 #   Input: string of numbers in the format YYYYMMDD
 #   Output: dekad number in the range starting on Jan 1980, otherwise -1
+#
 def conv_date_2_dekad(year_month_day):
     dekad_no = -1
     # check the format of year_month_day. It must be a valid YYYYMMDD format.
@@ -306,6 +399,7 @@ def conv_date_2_dekad(year_month_day):
 #   Date: 2014/05/06
 #   Input: YYYYMMDD
 #   Output: month number in the range starting on Jan 1980, otherwise -1
+#
 def conv_date_2_month(year_month_day):
     month_no = -1
     # check the format of year_month_day. It must be a valid YYYYMMDD format.
@@ -330,6 +424,7 @@ def conv_date_2_month(year_month_day):
 #   Date: 2014/05/06
 #   Input: dekad 
 #   Output: YYYYMMDD, otherwise 0
+#
 def conv_dekad_2_date(dekad):
     dekad_date = -1
     if int(str(dekad)) <= 0:
@@ -353,6 +448,7 @@ def conv_dekad_2_date(dekad):
 #   Date: 2014/05/06
 #   Input: the no of month
 #   Output: YYYYMMDD, otherwise 0
+#
 def conv_month_2_date(month):
     month_date = -1
     if not 1 <= int(str(month)):
@@ -375,6 +471,7 @@ def conv_month_2_date(month):
 #   Date: 2014/05/06
 #   Inputs: YYYY, DayofYear
 #   Output: YYYYMMDD, otherwise 0
+#
 def conv_date_yyyydoy_2_yyyymmdd(yeardoy):
     # Convert Year and Day of Year to date
     # 1) datetime.datetime(year, 1, 1) + datetime.timedelta(doy - 1)
@@ -412,6 +509,7 @@ def conv_date_yyyydoy_2_yyyymmdd(yeardoy):
 #   Date: 2014/05/06
 #   Inputs: YYYYMMDD
 #   Output: DayofYear, otherwise 0
+#
 def conv_date_yyyymmdd_2_doy(year_month_day):
     day_of_year = -1
     if is_date_yyyymmdd(year_month_day):
@@ -435,6 +533,7 @@ def conv_date_yyyymmdd_2_doy(year_month_day):
 #   Date: 2014/05/06
 #   Input: string of numbers in the format YYYYMMDD
 #   Output: date (YYYYMMDD), otherwise -1
+#
 def conv_yyyy_mm_dkx_2_yyyymmdd(yyyy_mm_dkx):
     date_yyyymmdd = -1
     # if is_yyyy_mm_dkx(yyyy_mm_dkx):
@@ -456,6 +555,7 @@ def conv_yyyy_mm_dkx_2_yyyymmdd(yyyy_mm_dkx):
         date_yyyymmdd = year+month+day
     return date_yyyymmdd
 
+
 ######################################################################################
 #   conv_yymmk_2_yyyymmdd
 #   Purpose: Function returns a date (YYYYMMDD) with yymmk as input.
@@ -466,6 +566,7 @@ def conv_yyyy_mm_dkx_2_yyyymmdd(yyyy_mm_dkx):
 #   Date: 2014/05/06
 #   Input: string of numbers in the format YYYYMMDD
 #   Output: date (YYYYMMDD), otherwise -1
+#
 def conv_yymmk_2_yyyymmdd(yymmk):
     #date_yyyymmdd = -1
     # if is_yymmk(yymmk):
@@ -487,6 +588,7 @@ def conv_yymmk_2_yyyymmdd(yymmk):
     date_yyyymmdd = str(year)+month+day
     return date_yyyymmdd
 
+
 ######################################################################################
 #   conv_yyyydmmdk_2_yyyymmdd
 #   Purpose: Function returns a date (YYYYMMDD) with YYYYdMMdK as input.
@@ -497,6 +599,7 @@ def conv_yymmk_2_yyyymmdd(yymmk):
 #   Date: 2015/02/25
 #   Input: string of numbers in the format YYYYdMMdK
 #   Output: date (YYYYMMDD), otherwise -1
+#
 def conv_yyyydmmdk_2_yyyymmdd(yymmk):
 
     year = int(str(yymmk)[0:4])
@@ -515,6 +618,7 @@ def conv_yyyydmmdk_2_yyyymmdd(yymmk):
     date_yyyymmdd = str(year)+month+day
     return date_yyyymmdd
 
+
 ######################################################################################
 #   extract_from_date
 #   Purpose: extract year, month, day, hour and min from string date
@@ -525,7 +629,7 @@ def conv_yyyydmmdk_2_yyyymmdd(yymmk):
 #   Date: 2014/06/22
 #   Input: string in the format YYYYMMDDHHMM/YYYYMMDD
 #   Output: year, month, day,
-
+#
 def extract_from_date(str_date):
 
     str_hour = '0000'
@@ -547,6 +651,7 @@ def extract_from_date(str_date):
         str_hour=str_date[8:12]
 
     return [str_year, str_month, str_day, str_hour]
+
 
 ######################################################################################
 #                            FILE/DIRECTORY  NAMING and MANAGEMENT
@@ -572,7 +677,6 @@ def extract_from_date(str_date):
 #   Output: process_id, subdir
 #   Description: creates filename WITHOUT date field (for ruffus formatters)
 #
-#
 def set_path_filename_no_date(product_code, sub_product_code, mapset_id, version, extension):
 
     filename_nodate =     "_" + str(product_code) + '_' \
@@ -581,6 +685,7 @@ def set_path_filename_no_date(product_code, sub_product_code, mapset_id, version
                               + version + extension
 
     return filename_nodate
+
 
 ######################################################################################
 #   set_path_filename
@@ -591,11 +696,11 @@ def set_path_filename_no_date(product_code, sub_product_code, mapset_id, version
 #   Output: process_id, subdir
 #   Description: creates filename
 #
-#
 def set_path_filename(date_str, product_code, sub_product_code, mapset_id, version,  extension):
 
     filename = date_str + set_path_filename_no_date(product_code, sub_product_code, mapset_id, version, extension)
     return filename
+
 
 ######################################################################################
 #   set_path_sub_directory
@@ -606,16 +711,22 @@ def set_path_filename(date_str, product_code, sub_product_code, mapset_id, versi
 #   Output: subdir, e.g. vgt-ndvi/spot-v1/vgt/derived/10davg/
 #   Description: creates filename
 #
-#
 def set_path_sub_directory(product_code, sub_product_code, product_type, version, mapset):
 
     type_subdir = dict_subprod_type_2_dir[product_type]
 
-    sub_directory = str(product_code) + os.path.sep + \
-                    str(version) + os.path.sep + \
-                    mapset + os.path.sep +\
-                    type_subdir + os.path.sep +\
-                    str(sub_product_code) + os.path.sep
+    if product_type == 'Native':
+        # In case of 'Native product' do not add final 'subproductcode' and do not use 'mapset'
+        sub_directory = str(product_code) + os.path.sep + \
+                        str(version) + os.path.sep + \
+                        type_subdir + os.path.sep
+
+    else:
+        sub_directory = str(product_code) + os.path.sep + \
+                        str(version) + os.path.sep + \
+                        mapset + os.path.sep +\
+                        type_subdir + os.path.sep +\
+                        str(sub_product_code) + os.path.sep
 
     return sub_directory
 
@@ -629,8 +740,6 @@ def set_path_sub_directory(product_code, sub_product_code, product_type, version
 #   Output: none
 #   Description: returns information form the directory
 #
-#
-
 def get_from_path_dir(dir_name):
 
     # Make sure there is a leading separator at the end of 'dir'
@@ -642,8 +751,8 @@ def get_from_path_dir(dir_name):
     version =  tokens[-4]
     product_code =  tokens[-5]
 
-
     return [product_code, sub_product_code, version, mapset]
+
 
 ######################################################################################
 #   get_from_path_filename
@@ -654,13 +763,12 @@ def get_from_path_dir(dir_name):
 #   Output: date, mapset and version
 #   Description: returns information form the filename
 #
-#
-
 def get_date_from_path_filename(filename):
 
     str_date = filename.split('_')[0]
 
     return str_date
+
 
 ######################################################################################
 #   get_date_from_path_full
@@ -671,8 +779,6 @@ def get_date_from_path_filename(filename):
 #   Output: date
 #   Description: returns information form the fullpath
 #
-#
-
 def get_date_from_path_full(full_path):
 
     # Remove the directory
@@ -683,6 +789,7 @@ def get_date_from_path_full(full_path):
 
     return str_date
 
+
 ######################################################################################
 #   get_subdir_from_path_full
 #   Purpose: From full_path -> subdir
@@ -692,15 +799,14 @@ def get_date_from_path_full(full_path):
 #   Output: date
 #   Description: returns subdir from the fullpath
 #
-#
-
 def get_subdir_from_path_full(full_path):
 
     # Remove the directory
-    subdirs =  full_path.split(os.path.sep)
+    subdirs = full_path.split(os.path.sep)
     str_subdir = subdirs[-6]+os.path.sep+subdirs[-5]+os.path.sep+subdirs[-4]+os.path.sep+subdirs[-3]+os.path.sep+subdirs[-2]+os.path.sep
 
     return str_subdir
+
 
 ######################################################################################
 #   get_all_from_path_full
@@ -711,8 +817,6 @@ def get_subdir_from_path_full(full_path):
 #   Output: date
 #   Description: returns information form the fullpath
 #
-#
-
 def get_all_from_path_full(full_path):
 
     # Split directory and filename
@@ -726,6 +830,7 @@ def get_all_from_path_full(full_path):
 
     return [product_code, sub_product_code, version, str_date, mapset]
 
+
 ######################################################################################
 #   check_output_dir
 #   Purpose: Check output directory exists, otherwise create it.
@@ -734,7 +839,6 @@ def get_all_from_path_full(full_path):
 #   Inputs: output_dir, or list of dirs
 #   Output: none
 #
-
 def check_output_dir(output_dir):
 
     # Is it a list ?
@@ -752,8 +856,8 @@ def check_output_dir(output_dir):
         logger.info("Output directory %s created" % my_dir)
 
     else:
-
         logger.debug("Output directory %s already exists" % my_dir)
+
 
 ######################################################################################
 #   create_sym_link
@@ -763,30 +867,30 @@ def check_output_dir(output_dir):
 #   Inputs: output_dir, or list of dirs
 #   Output: none
 #
-
 def create_sym_link(src_file, trg_file, force=False):
 
     # Does the source file already exist ?
     if not os.path.isfile(src_file):
-        logger.warning('Source file does not exist. Exit')
+        logger.info('Source file does not exist. Exit')
         return 1
     # Does the target file already exist ?
     if os.path.exists(trg_file):
         if os.path.islink(trg_file):
             if force:
-                logger.warning('Target file exists and FORCE=1. Overwrite')
+                logger.info('Target file exists and FORCE=1. Overwrite')
                 os.remove(trg_file)
             else:
-                logger.info('Target file exists and FORCE=0. Exit')
+                logger.debug('Target file exists and FORCE=0. Exit')
                 return 1
         else:
-            logger.info('Target file exists as regular file. Exit')
+            logger.debug('Target file exists as regular file. Exit')
             return 1
     # Create the symbolic link
     try:
-        os.symlink(src_file,trg_file)
+        os.symlink(src_file, trg_file)
     except:
         logger.error('Error in creating symlink %s' % trg_file)
+
 
 ######################################################################################
 #   ensure_sep_present
@@ -796,7 +900,6 @@ def create_sym_link(src_file, trg_file, force=False):
 #   Inputs: output_dir, or list of dirs
 #   Output: none
 #
-
 def ensure_sep_present(path, position):
 
     if position=='begin':
@@ -808,28 +911,36 @@ def ensure_sep_present(path, position):
 
     return path
 
+
 ######################################################################################
 #                            MISCELLANEOUS
 ######################################################################################
 
+######################################################################################
 #  Simple function to show the memory Usage
 # (see http://stackoverflow.com/questions/552744/how-do-i-profile-memory-usage-in-python)
+#
 def mem_usage(point=""):
     usage = resource.getrusage(resource.RUSAGE_SELF)
     return '''%s: usertime=%s systime=%s mem=%s mb
            ''' % (point, usage[0], usage[1], (usage[2]*resource.getpagesize())/1000000.0)
 
+
+######################################################################################
 #  Dump an object info a file (pickle serialization)
+#
 def dump_obj_to_pickle(object, filename):
 
     dump_file = open(filename, 'wb')
     pickle.dump(object, dump_file)
     dump_file.close()
 
-#  Restore an object from a file (pickle serialization), if the file exist
-#  If file does not exist, create it empty
-#  If file cannot be loaded, delete it
 
+######################################################################################
+#  Restore an object from a file (pickle serialization), if the file exist
+#  If file does not exist, do not alter the passed object
+#  If file cannot be loaded (corrupted), delete it (and return the passed object)
+#
 def restore_obj_from_pickle(object, filename):
 
     # Restore/Create Info
@@ -844,13 +955,15 @@ def restore_obj_from_pickle(object, filename):
             os.remove(filename)
     else:
         # Create an empty file in the tmp dir
-        open(filename, 'a').close()
+        logger.info("Dump file %s does not exist", filename)
+        #open(filename, 'a').close()
 
     return object
 
+
+######################################################################################
 #  Load an object from a file (pickle serialization), if the file exist
-
-
+#
 def load_obj_from_pickle(filename):
 
     object = None
@@ -868,6 +981,7 @@ def load_obj_from_pickle(filename):
         logger.warning("Dump file %s does not exist.", filename)
 
     return object
+
 
 ######################################################################################
 #   modis_latlon_to_hv_tile
@@ -923,7 +1037,6 @@ def get_modis_tiles_list(mapset):
 #   Inputs:
 #   Output: none
 #
-
 def element_to_list(input_arg):
 
     # Is it a list or a tuple ?
@@ -934,6 +1047,7 @@ def element_to_list(input_arg):
         my_list.append(input_arg)
     return my_list
 
+
 ######################################################################################
 #
 #   Purpose: converts from list/tuple to element (the first one)
@@ -943,7 +1057,6 @@ def element_to_list(input_arg):
 #   Inputs:
 #   Output: none
 #
-
 def list_to_element(input_arg):
 
     # Is it a list or a tuple
@@ -954,6 +1067,7 @@ def list_to_element(input_arg):
         return input_arg[0]
     else:
         return input_arg
+
 
 ######################################################################################
 #
@@ -973,7 +1087,7 @@ def files_temp_ajacent(file_t0, step='dekad', extension='.tif'):
     file_list = []
 
     # Extract dir input file
-    dir, filename  = os.path.split(file_t0)
+    dir, filename = os.path.split(file_t0)
 
     # Extract all info from full path
     product_code, sub_product_code, version, date_t0, mapset = get_all_from_path_full(file_t0)
@@ -1016,16 +1130,17 @@ def files_temp_ajacent(file_t0, step='dekad', extension='.tif'):
 #   Inputs:
 #   Output: none
 #
-
 def get_machine_mac_address():
 
     return ':'.join(re.findall('..', '%012x' % uuid.getnode()))
 
+
 def get_eumetcast_info(eumetcast_id):
 
-    filename = get_eumetcast_processed_list_prefix+str(eumetcast_id)+'.info'
+    filename = es_constants.es2globals.get_eumetcast_processed_list_prefix+str(eumetcast_id)+'.info'
     info = load_obj_from_pickle(filename)
     return info
+
 
 ######################################################################################
 #                            PROCESSING CHAINS
@@ -1037,12 +1152,24 @@ class ProcLists:
         self.list_subprods = []
         self.list_subprod_groups = []
 
-    def proc_add_subprod(self, sprod, group, final=False, active_default=True):
-        self.list_subprods.append(ProcSubprod(sprod, group, final, active_default=True))
-        return sprod
+    def proc_add_subprod(self, sprod, group,
+                         final=False,
+                         descriptive_name='',
+                         description = '',
+                         frequency_id = '',
+                         date_format = '',
+                         masked = '',
+                         timeseries_role = '10d',
+                         active_default=True):
 
-    def proc_add_subprod(self, sprod, group, final=False, active_default=True):
-        self.list_subprods.append(ProcSubprod(sprod, group, final, active_default=True))
+        self.list_subprods.append(ProcSubprod(sprod, group, final,
+                                              descriptive_name=descriptive_name,
+                                              description = description,
+                                              frequency_id = frequency_id,
+                                              date_format = date_format,
+                                              masked = masked,
+                                              timeseries_role = timeseries_role,
+                                              active_default=True))
         return sprod
 
     def proc_add_subprod_group(self, sprod_group, active_default=True):
@@ -1051,13 +1178,30 @@ class ProcLists:
 
 
 class ProcSubprod:
-    def __init__(self, sprod, group, final=False, active_default=True, active_depend=False):
+    def __init__(self, sprod, group,
+                 final=False,
+                 descriptive_name='',
+                 description = '',
+                 frequency_id = '',
+                 date_format = '',
+                 masked = '',
+                 timeseries_role = '',
+                 active_default=True,
+                 active_depend=False):
+
         self.sprod = sprod
         self.group = group
+        self.descriptive_name = descriptive_name
+        self.description = description
+        self.frequency_id = frequency_id
+        self.date_format = date_format
+        self.masked = masked
+        self.timeseries_role = timeseries_role
         self.final = final
         self.active_default=active_default
         self.active_user = True
         self.active_depend = active_depend
+
 
 class ProcSubprodGroup:
     def __init__(self, group, active_default=True):

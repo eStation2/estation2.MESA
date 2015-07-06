@@ -30,18 +30,18 @@ Ext.define('esapp.store.ProcessingStore', {
         reader: {
              type: 'json'
             ,successProperty: 'success'
-            ,rootProperty: 'products'
+            ,rootProperty: 'processes'
             ,messageProperty: 'message'
         },
         writer: {
             type: 'json',
             allDataOptions: {
                 associated: true
-                //,changes: true
+                ,changes: true
             },
-            writeAllFields: true,
-            //appendId: false,
-            rootProperty: 'products'
+            writeAllFields: false,
+            appendId: true,
+            rootProperty: 'processes'
         },
         listeners: {
             exception: function(proxy, response, operation){
@@ -58,7 +58,6 @@ Ext.define('esapp.store.ProcessingStore', {
              // property: 'cat_descr_name',
              groupFn : function (item) {
                  return "<span style='display: none;'>" + item.get('order_index') + "</span>" + item.get('cat_descr_name')
-//                                "</span><span class='group-header-style'>" + item.get('cat_descr_name') + "</span>"
              },
              sortProperty: 'order_index'
     }

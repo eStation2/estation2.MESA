@@ -35,7 +35,32 @@ from apps.processing import processing_merge
 
 from lib.python.daemon import DaemonDryRunnable
 
-def loop_processing(dry_run=False):
+class ProcessingDaemon(DaemonDryRunnable):
+    def run(self):
+        loop_processing(dry_run=self.dry_run)
+
+def upsert_database(process_id, productcode, version, mapset, proc_lists, input_product_info):
+
+#    Ensure all derived output product are in the 'product' and 'process_product' table
+#    Arguments: process_id
+#               productcode, version, mapset
+#               proc_lists: as returned by the pipeline
+#               input_product_info: metadata from the input products
+
+    out_sprods = proc_lists.list_subprods
+    for proc_sub_product in out_sprods:
+        try:
+            querydb.update_processing_chain_products(process_id,
+                                                     productcode,
+                                                     version,
+                                                     mapset,
+                                                     proc_sub_product,
+                                                     input_product_info)
+        except:
+            logger.error("Error in upsert_database")
+
+
+def loop_processing(dry_run=False, serialize=False):
 
 #    Driver of the process service
 #    Reads configuration from the database
@@ -43,6 +68,8 @@ def loop_processing(dry_run=False):
 #    Calls the active pipelines with the relevant argument
 #    Arguments: dry_run -> if > 0, it triggers pipeline_printout() rather than pipeline_run()
 #                       -> if < 0, it triggers pipeline_printout_graph() rather than pipeline_run()
+#               serialize -> False (default): detach the process and work in parallel
+#                         -> True: do NOT detach processes and work in series (mainly for debugging)
 
     # Clean dir with locks
     if os.path.isdir(es_constants.processing_tasks_dir):
@@ -50,7 +77,7 @@ def loop_processing(dry_run=False):
     logger.info("Entering routine %s" % 'loop_processing')
     echo_query = False
     functions.check_output_dir(es_constants.processing_tasks_dir)
-    while True :
+    while True:
 
         logger.debug("Entering infinite loop")
         # Get all active processing chains from the database.
@@ -75,13 +102,18 @@ def loop_processing(dry_run=False):
 
             # Get input products
             input_products = querydb.get_processing_chain_products(chain.process_id,type='input')
+            product_code = input_products[0].productcode
+            sub_product_code = input_products[0].subproductcode
+            version = input_products[0].version
 
-            # Case of a 'std_' (i.e. ruffus) processing -> get all info from 1st INPUT and manage dates
+            # Get product metadata for output products (from first input)
+            input_product_info = querydb.get_product_out_info(productcode=product_code,
+                                                              subproductcode=sub_product_code,
+                                                              version=version)
+
+            # Case of a 'std_' (i.e. ruffus with 1 input) processing -> get all info from 1st INPUT and manage dates
             if re.search('^std_.*',algorithm):
 
-                product_code = input_products[0].productcode
-                sub_product_code = input_products[0].subproductcode
-                version = input_products[0].version
                 start_date = input_products[0].start_date
                 end_date = input_products[0].end_date
 
@@ -97,7 +129,7 @@ def loop_processing(dry_run=False):
                         'starting_dates': list_dates,\
                         'version':version}
 
-            # Case of no 'std' (i.e. ruffus processing) -> get output products and pass everything to function
+            # Case of no 'std' (e.g. merge processing) -> get output products and pass everything to function
             else:
                 output_products = querydb.get_processing_chain_products(chain.process_id,type='output')
                 # Prepare arguments
@@ -123,23 +155,35 @@ def loop_processing(dry_run=False):
                 proc_mod = getattr(proc_pck, module_name)
                 proc_func= getattr(proc_mod, function_name)
 
-                # fork and call the std_precip 'generic' processing
-                pid = os.fork()
-                if pid == 0:
-                    # Call to the processing pipeline
-                    [list_subprods, list_subprod_groups] = proc_func(**args)
-                    # Simulate longer processing (TEMP)
-                    logger.info("Going to sleep for a while - to be removed")
-                    time.sleep(50)
-                    os.remove(processing_unique_lock)
-                    sys.exit(0)
+                #  Fork and call the std_precip 'generic' processing
+                if serialize==False:
+                    pid = os.fork()
+                    if pid == 0:
+                        # Here I'm the child process ->  call to the processing pipeline
+                        proc_lists = proc_func(**args)
+                        # Upsert database
+                        upsert_database(process_id, product_code, version, mapset, proc_lists, input_product_info)
+                        # Simulate longer processing (TEMP)
+                        logger.info("Going to sleep for a while - to be removed")
+                        time.sleep(2)
+                        logger.info("Waking-up now, and removing the .lock")
+                        os.remove(processing_unique_lock)
+                        sys.exit(0)
+                    else:
+                        # Here I'm the parent process -> just go on ..
+                        pass
+                # Do NOT detach process (work in series)
                 else:
-                    # Qui sono il padre
-                    pass
-                    #os.wait()
+                    proc_lists = proc_func(**args)
+                    logger.info("Going to sleep for a while - to be removed")
+                    # Upsert database
+                    upsert_database(process_id, product_code, version, mapset, proc_lists, input_product_info)
+                    time.sleep(2)
+                    logger.info("Waking-up now, and removing the .lock")
+                    os.remove(processing_unique_lock)
             else:
                 logger.debug("Processing already running for ID: %s " % processing_unique_id)
-
+        #
         logger.info("End of the loop ... wait a while")
         time.sleep(5)
 

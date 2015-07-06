@@ -61,9 +61,11 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
             //this.suspendEvents(true);
             var groupFeature = this.getView().getFeature('prodcat');
             var me = this;
+            //console.info('me.firstGroupKey defined in afterrender In viewready: ' + me.firstGroupKey);
+
             if ( !this.getStore().isLoaded() ){
                 var task = new Ext.util.DelayedTask(function(){
-                    if (this.firstGroupKey != 'undefined') {
+                    if (me.firstGroupKey != 'undefined') {
                         groupFeature.expand(me.firstGroupKey, true);
                     } else {
                         groupFeature.expand("<span style='display: none;'>1</span>Vegetation", true);  // rainfall
@@ -72,7 +74,7 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                 task.delay(5000);
 
             } else {
-                if (this.firstGroupKey != 'undefined') {
+                if (me.firstGroupKey != 'undefined') {
                     groupFeature.expand(me.firstGroupKey, true);
                 } else {
                     groupFeature.expand("<span style='display: none;'>1</span>Vegetation", true);  // rainfall
@@ -265,7 +267,8 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         me.getStore().load({
             callback:function(){
                 me.firstGroupKey = me.getStore().getGroups().items[0].getGroupKey();
-                //me.view.getFeature('prodcat').expand(firstGroupKey, true);
+                //console.info(me.firstGroupKey);
+                //me.view.getFeature('prodcat').expand(me.firstGroupKey, true);
             }
         });
     }

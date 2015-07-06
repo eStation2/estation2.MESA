@@ -8,6 +8,9 @@ Ext.define("esapp.view.dashboard.PC1",{
     xtype  : 'dashboard-pc1',
 
     requires: [
+        'esapp.view.dashboard.PC1Controller',
+        'esapp.view.dashboard.PC1Model',
+
         'Ext.layout.container.Border',
         'Ext.layout.container.HBox',
         'Ext.layout.container.Column',
@@ -19,7 +22,7 @@ Ext.define("esapp.view.dashboard.PC1",{
     name:'dashboardpc1',
     id: 'dashboardpc1',
 
-    title: '<span class="panel-title-style">Acquisition (PC1)</span>',
+    title: '<span class="panel-title-style">Receiving station (PC1)</span>',
     disabled:false,
 
     layout: 'border',

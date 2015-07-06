@@ -29,10 +29,13 @@ Ext.define("esapp.view.widgets.ServiceMenuButton",{
         //me.handler = 'checkStatusServices';
 
         me.menu = Ext.create('Ext.menu.Menu', {
-            width: 100,
+            width: 145,
             margin: '0 0 10 0',
             floating: true,  // usually you want this set to True (default)
-            collapseDirection: 'left',
+            collapseDirection: 'right',
+            defaults: {
+              align: 'right'
+            },
             items: [
                 // these will render as dropdown menu items when the arrow is clicked:
                 {   text: 'Run',
@@ -55,7 +58,7 @@ Ext.define("esapp.view.widgets.ServiceMenuButton",{
                     // style: { color: 'red' },
                     handler: 'execServiceTask'
                 },
-                {   text: 'Restart',
+                {   text: 'Restart          ',
                     name: 'restart'+ me.service,
                     service: me.service,
                     task: 'restart',
@@ -64,6 +67,14 @@ Ext.define("esapp.view.widgets.ServiceMenuButton",{
                     cls:'menu-glyph-color-orange',
                     // style: { color: 'orange' },
                     handler: 'execServiceTask'
+                },
+                {
+                    text: 'View log file',
+                    name: 'view_logfile_' + me.service,
+                    service: me.service,
+                    task: 'logfile',
+                    iconCls:'log-icon-small',
+                    handler: 'viewLogFile'
                 }
             ]
         });

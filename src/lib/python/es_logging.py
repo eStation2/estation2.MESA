@@ -32,9 +32,34 @@ except EnvironmentError:
 #        return rtv
 
 
+def parse_user_setting(user_def):
+
+    if user_def == "info" or user_def == "INFO":
+        log_level=logging.INFO
+    if user_def == "debug" or user_def == "DEBUG":
+        log_level=logging.DEBUG
+    if user_def == "warning" or user_def == "WARNING":
+        log_level=logging.WARNING
+    if user_def == "error" or user_def == "ERROR":
+        log_level=logging.ERROR
+    if user_def == "fatal" or user_def == "FATAL":
+        log_level=logging.FATAL
+
+    return log_level
+
 def my_logger(name):
+
+    # Convert user_settings to logging variable
+    user_logging_level=parse_user_setting(es_constants.log_general_level)
+
+    # logging.getLogger('sqlalchemy.engine').setLevel(logging.WARN)
+
     logger = logging.getLogger('eStation2.'+name)
-    logger.setLevel(logging.DEBUG)
+    # Try setting from user config .. in case of error set a default level
+    try:
+        logger.setLevel(user_logging_level)
+    except:
+        logger.setLevel(logging.INFO)
 
     # Remove existing handlers
     while len(logger.handlers) > 0:
@@ -59,8 +84,13 @@ def my_logger(name):
     logger.addHandler(console_handler)
 
     # Define log handlers
-    console_handler.setLevel(logging.DEBUG)
-    file_handler.setLevel(logging.DEBUG)
+    # Try setting from user config .. in case of error set a default level
+    try:
+        console_handler.setLevel(user_logging_level)
+        file_handler.setLevel(user_logging_level)
+    except:
+        console_handler.setLevel(logging.INFO)
+        file_handler.setLevel(logging.INFO)
 
     return logger
 

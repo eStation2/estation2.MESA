@@ -4,7 +4,9 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
     alias: 'controller.acquisition',
 
 
-    checkStatusServices: function(splitbtn, ev){
+    checkStatusServices: function(){
+        var me = this;
+
         // AJAX call to check the status of all 3 services
         Ext.Ajax.request({
             method: 'POST',
@@ -12,37 +14,37 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
             success: function(response, opts){
                 var services = Ext.JSON.decode(response.responseText);
                 if (services.eumetcast){
-                    splitbtn.up().down('button[name=eumetcastbtn]').setStyle('color','green');
-                    splitbtn.up().down('button[name=eumetcastbtn]').down('menuitem[name=runeumetcast]').setDisabled(true);
-                    splitbtn.up().down('button[name=eumetcastbtn]').down('menuitem[name=stopeumetcast]').setDisabled(false);
-                    splitbtn.up().down('button[name=eumetcastbtn]').down('menuitem[name=restarteumetcast]').setDisabled(false);
+                    me.getView().down('button[name=eumetcastbtn]').setStyle('color','green');
+                    me.getView().down('button[name=eumetcastbtn]').down('menuitem[name=runeumetcast]').setDisabled(true);
+                    me.getView().down('button[name=eumetcastbtn]').down('menuitem[name=stopeumetcast]').setDisabled(false);
+                    me.getView().down('button[name=eumetcastbtn]').down('menuitem[name=restarteumetcast]').setDisabled(false);
                 } else {
-                    splitbtn.up().down('button[name=eumetcastbtn]').setStyle('color','red');
-                    splitbtn.up().down('button[name=eumetcastbtn]').down('menuitem[name=runeumetcast]').setDisabled(false);
-                    splitbtn.up().down('button[name=eumetcastbtn]').down('menuitem[name=stopeumetcast]').setDisabled(true);
-                    splitbtn.up().down('button[name=eumetcastbtn]').down('menuitem[name=restarteumetcast]').setDisabled(true);
+                    me.getView().down('button[name=eumetcastbtn]').setStyle('color','red');
+                    me.getView().down('button[name=eumetcastbtn]').down('menuitem[name=runeumetcast]').setDisabled(false);
+                    me.getView().down('button[name=eumetcastbtn]').down('menuitem[name=stopeumetcast]').setDisabled(true);
+                    me.getView().down('button[name=eumetcastbtn]').down('menuitem[name=restarteumetcast]').setDisabled(true);
                 }
                 if (services.internet){
-                    splitbtn.up().down('button[name=internetbtn]').setStyle('color','green');
-                    splitbtn.up().down('button[name=internetbtn]').down('menuitem[name=runinternet]').setDisabled(true);
-                    splitbtn.up().down('button[name=internetbtn]').down('menuitem[name=stopinternet]').setDisabled(false);
-                    splitbtn.up().down('button[name=internetbtn]').down('menuitem[name=restartinternet]').setDisabled(false);
+                    me.getView().down('button[name=internetbtn]').setStyle('color','green');
+                    me.getView().down('button[name=internetbtn]').down('menuitem[name=runinternet]').setDisabled(true);
+                    me.getView().down('button[name=internetbtn]').down('menuitem[name=stopinternet]').setDisabled(false);
+                    me.getView().down('button[name=internetbtn]').down('menuitem[name=restartinternet]').setDisabled(false);
                 } else {
-                    splitbtn.up().down('button[name=internetbtn]').setStyle('color','red');
-                    splitbtn.up().down('button[name=internetbtn]').down('menuitem[name=runinternet]').setDisabled(false);
-                    splitbtn.up().down('button[name=internetbtn]').down('menuitem[name=stopinternet]').setDisabled(true);
-                    splitbtn.up().down('button[name=internetbtn]').down('menuitem[name=restartinternet]').setDisabled(true);
+                    me.getView().down('button[name=internetbtn]').setStyle('color','red');
+                    me.getView().down('button[name=internetbtn]').down('menuitem[name=runinternet]').setDisabled(false);
+                    me.getView().down('button[name=internetbtn]').down('menuitem[name=stopinternet]').setDisabled(true);
+                    me.getView().down('button[name=internetbtn]').down('menuitem[name=restartinternet]').setDisabled(true);
                 }
                 if (services.ingest){
-                    splitbtn.up().down('button[name=ingestbtn]').setStyle('color','green');
-                    splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=runingest]').setDisabled(true);
-                    splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=stopingest]').setDisabled(false);
-                    splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=restartingest]').setDisabled(false);
+                    me.getView().down('button[name=ingestbtn]').setStyle('color','green');
+                    me.getView().down('button[name=ingestbtn]').down('menuitem[name=runingest]').setDisabled(true);
+                    me.getView().down('button[name=ingestbtn]').down('menuitem[name=stopingest]').setDisabled(false);
+                    me.getView().down('button[name=ingestbtn]').down('menuitem[name=restartingest]').setDisabled(false);
                 } else {
-                    splitbtn.up().down('button[name=ingestbtn]').setStyle('color','red');
-                    splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=runingest]').setDisabled(false);
-                    splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=stopingest]').setDisabled(true);
-                    splitbtn.up().down('button[name=ingestbtn]').down('menuitem[name=restartingest]').setDisabled(true);
+                    me.getView().down('button[name=ingestbtn]').setStyle('color','red');
+                    me.getView().down('button[name=ingestbtn]').down('menuitem[name=runingest]').setDisabled(false);
+                    me.getView().down('button[name=ingestbtn]').down('menuitem[name=stopingest]').setDisabled(true);
+                    me.getView().down('button[name=ingestbtn]').down('menuitem[name=restartingest]').setDisabled(true);
                 }
             },
             failure: function(response, opts) {
@@ -53,7 +55,7 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
 
 
     //execServiceTask: function(menuitem, ev){
-    //    var me = this;
+    //    var me = me;
     //
     //    // AJAX call to run/start a specified service (specified through the menuitem name).
     //    Ext.Ajax.request({
@@ -67,7 +69,7 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
     //            var runresult = Ext.JSON.decode(response.responseText);
     //            if (runresult.success){
     //                Ext.toast({ html: 'Execute Service Task' + menuitem.name, title: 'Execute Service Task', width: 200, align: 't' });
-    //                // menuitem.up().up().fireEvent('click', this);
+    //                // menuitem.up().up().fireEvent('click', me);
     //                me.getView().getController('acquisition').checkStatusServices(menuitem.up().up());
     //            }
     //        },
@@ -104,11 +106,11 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
 //        }
 //
 //        if (win.isVisible()) {
-//            win.hide(this, function() {
+//            win.hide(me, function() {
 //
 //            });
 //        } else {
-//            win.show(this, function() {
+//            win.show(me, function() {
 //
 //            });
 //        }
@@ -125,8 +127,8 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
         //    order_index:1
         //});
         //
-        //this.getStore().insert(0, rec);
-        //this.cellEditing.startEditByPosition({
+        //me.getStore().insert(0, rec);
+        //me.cellEditing.startEditByPosition({
         //    row: 0,
         //    column: 0
         //});

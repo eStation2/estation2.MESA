@@ -80,6 +80,8 @@ def loop_ingestion(dry_run=False):
 
             for source in sources_list:
 
+                # logger_spec = log.my_logger('apps.ingestion.'+source.data_source_id)
+                logger_spec = log.my_logger('apps.ingestion.'+productcode+'.'+productversion)
                 logger.debug("Processing Source type [%s] with id [%s]" % (source.type, source.data_source_id))
                 # Get the 'filenaming' info (incl. 'area-type') from the acquisition source
                 if source.type == 'EUMETCAST':
@@ -87,8 +89,8 @@ def loop_ingestion(dry_run=False):
                                                                                            source_type=source.type,
                                                                                            source_id=source.data_source_id):
                         # TODO-M.C.: check the most performing options in real-cases
-                       #files = [f for f in os.listdir(ingest_dir_in) if re.match(str(eumetcast_filter), f)]
                         files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(eumetcast_filter, os.path.basename(f))]
+                        my_filter_expr = eumetcast_filter
                         logger.info("Eumetcast Source: looking for files in %s - named like: %s" % (ingest_dir_in, eumetcast_filter))
 
                 if source.type == 'INTERNET':
@@ -97,10 +99,11 @@ def loop_ingestion(dry_run=False):
                                                                                           source_type=source.type,
                                                                                           source_id=source.data_source_id):
                     # TODO-Jurvtk: complete/verified
-                        temp_internet_filter = internet_filter.include_files_expression
+                        temp_internet_filter = internet_filter.files_filter_expression
                         # TODO-M.C.: check the most performing options in real-cases
                         #files = [f for f in os.listdir(ingest_dir_in) if re.match(temp_internet_filter, f)]
                         files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(temp_internet_filter, os.path.basename(f))]
+                        my_filter_expr = temp_internet_filter
                         logger.info("Internet Source: looking for files in %s - named like: %s" % (ingest_dir_in, temp_internet_filter))
 
                 logger.info("Number of files found for product [%s] is: %s" % (active_product_ingest[0], len(files)))
@@ -135,7 +138,10 @@ def loop_ingestion(dry_run=False):
                     if datasource_descr.format_type == 'delimited':
                         # splitted_fn = re.split(r'[datasource_descr.delimiter\s]\s*', filename) ???? What is that for ?
                         splitted_fn = re.split(datasource_descr.delimiter, filename)
-                        dates_list.append(splitted_fn[date_position])
+                        date_string = splitted_fn[date_position]
+                        if len(date_string) > len(datasource_descr.date_type):
+                            date_string=date_string[0:len(datasource_descr.date_type)]
+                        dates_list.append(date_string)
                     else:
                         dates_list.append(filename[date_position:date_position + len(datasource_descr.date_type)])
 
@@ -144,19 +150,32 @@ def loop_ingestion(dry_run=False):
 
                 # Loop over dates and get list of files (considering mapset ?)
                 for in_date in dates_list:
-                    logger.debug("     --> processing date, in native format: %s" % in_date)
+                    # Refresh the files list (some files have been deleted)
+                    files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(my_filter_expr, os.path.basename(f))]
+                    logger_spec.debug("     --> processing date, in native format: %s" % in_date)
                     # Get the list of existing files for that date
                     regex = re.compile(".*(" + in_date + ").*")
                     date_fileslist = [ingest_dir_in + m.group(0) for l in files for m in [regex.search(l)] if m]
-
                     # Pass list of files to ingestion routine
                     if (not dry_run):
-                        ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, echo_query=echo_query)
-                        # TODO-M.C.: add a switch in db.ingestion table to enable file deletion ?
-                        #            also add the management of temporary file and dirs
-                        for file_to_remove in date_fileslist:
-                            logger.debug("     --> now deleting input files: %s" % file_to_remove)
-                            os.remove(file_to_remove)
+                        result = ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, echo_query=echo_query)
+                        if not result:
+                            if source.store_original_data:
+                            # Copy to 'Archive' directory
+                                output_directory = data_dir_out + functions.set_path_sub_directory(product['productcode'],
+                                                                                               sprod['subproduct'],
+                                                                                               'Native',
+                                                                                               product['version'],
+                                                                                               'dummy_mapset_arg' )
+                                functions.check_output_dir(output_directory)
+                                for file_to_move in date_fileslist:
+                                    logger_spec.debug("     --> now archiving input files: %s" % file_to_move)
+                                    new_location=output_directory+os.path.basename(file_to_move)
+                                    os.rename(file_to_move, new_location)
+                            else:
+                                for file_to_remove in date_fileslist:
+                                    logger_spec.debug("     --> now deleting input files: %s" % file_to_remove)
+                                    os.remove(file_to_remove)
                     else:
                         time.sleep(10)
 
@@ -200,6 +219,9 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, echo
     if do_preprocess == 1:
         logger.debug("Calling routine %s" % 'preprocess_files')
         composed_file_list = pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files, tmpdir)
+        if str(composed_file_list)=='1':
+            logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
+            return 1
     else:
         composed_file_list = input_files
 
@@ -213,6 +235,8 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, echo
         shutil.rmtree(tmpdir)
     except:
         logger.error('Error in removing temporary directory. Continue')
+
+    return 0
 
 def pre_process_msg_mpe (subproducts, tmpdir , input_files):
 # -------------------------------------------------------------------------------------------------------
@@ -304,7 +328,7 @@ def pre_process_modis_hdf4_tile (subproducts, tmpdir , input_files):
 
             file_to_merge = glob.glob(tmpdir + os.path.sep + id_subproduct + '*.tif')
             # Take gdal_merge.py from es2globals
-            command = es_constants.GDAL_merge + ' -init 9999 -co \"compress=lzw\" -o '
+            command = es_constants.gdal_merge + ' -init 9999 -co \"compress=lzw\" -o '
             command += out_tmp_file_gtiff
             for file_add in file_to_merge:
                 command += ' '
@@ -444,21 +468,27 @@ def pre_process_pml_netcdf(subproducts, tmpdir , input_files):
         netcdf = gdal.Open(input_file)
         sdslist = netcdf.GetSubDatasets()
 
-        # Loop over datasets and extract the one from each unzipped
-        for subdataset in sdslist:
-            netcdf_subdataset = subdataset[0]
-            id_subdataset = netcdf_subdataset.split(':')[-1]
+        if len(sdslist) >= 1:
+            # Loop over datasets and extract the one from each unzipped
+            for subdataset in sdslist:
+                netcdf_subdataset = subdataset[0]
+                id_subdataset = netcdf_subdataset.split(':')[-1]
 
-            if id_subdataset in list_to_extr:
-                selected_sds = 'NETCDF:' + input_file + ':' + id_subdataset
-                sds_tmp = gdal.Open(selected_sds)
-                filename = os.path.basename(input_file) + '.geotiff'
-                myfile_path = os.path.join(tmpdir, filename)
-                write_ds_to_geotiff(sds_tmp, myfile_path)
-                sds_tmp = None
-                geotiff_files.append(myfile_path)
-
-        # Merge temporary geotiff to a single one
+                if id_subdataset in list_to_extr:
+                    selected_sds = 'NETCDF:' + input_file + ':' + id_subdataset
+                    sds_tmp = gdal.Open(selected_sds)
+                    filename = os.path.basename(input_file) + '.geotiff'
+                    myfile_path = os.path.join(tmpdir, filename)
+                    write_ds_to_geotiff(sds_tmp, myfile_path)
+                    sds_tmp = None
+                    geotiff_files.append(myfile_path)
+        else:
+          # No subdatasets: e.g. SST -> read directly the .nc
+            filename = os.path.basename(input_file) + '.geotiff'
+            myfile_path = os.path.join(tmpdir, filename)
+            write_ds_to_geotiff(netcdf, myfile_path)
+            geotiff_files.append(myfile_path)
+        netcdf = None
 
     # Loop over the subproducts extracted and do the merging.
     for sprod in subproducts:
@@ -468,7 +498,7 @@ def pre_process_pml_netcdf(subproducts, tmpdir , input_files):
             out_tmp_file_gtiff = tmpdir + os.path.sep + id_subproduct + '_' + id_mapset + '.tif.merged'
 
             # Take gdal_merge.py from es2globals
-            command = es_constants.GDAL_merge + ' -init 9999 -co \"compress=lzw\" -o '
+            command = es_constants.gdal_merge + ' -init 9999 -co \"compress=lzw\" -ot Float32 -o '
             command += out_tmp_file_gtiff
             for file_add in geotiff_files:
                 command += ' '
@@ -631,15 +661,22 @@ def pre_process_bz2_hdf4(subproducts, tmpdir, input_files):
         sdslist = [sdsdict[k] for k in sdsdict.keys() if '_NAME' in k]
 
         # Loop over datasets and extract the one in the list
-        for output_to_extr in list_to_extr:
-            for subdataset in sdslist:
-                id_subdataset = subdataset.split(':')[-1]
-                if id_subdataset==output_to_extr:
-                    outputfile = tmpdir + os.path.sep + filename + "_" + id_subdataset + '_' + '.tif'
-                    sds_tmp = gdal.Open(subdataset)
-                    write_ds_to_geotiff(sds_tmp, outputfile)
-                    sds_tmp = None
-                    interm_files_list.append(outputfile)
+        if len(sdslist) >= 1:
+            for output_to_extr in list_to_extr:
+                for subdataset in sdslist:
+                    id_subdataset = subdataset.split(':')[-1]
+                    if id_subdataset==output_to_extr:
+                        outputfile = tmpdir + os.path.sep + filename + "_" + id_subdataset + '_' + '.tif'
+                        sds_tmp = gdal.Open(subdataset)
+                        write_ds_to_geotiff(sds_tmp, outputfile)
+                        sds_tmp = None
+                        interm_files_list.append(outputfile)
+        else:
+            # Manage case of 1 SDS only
+            filename_gtif = os.path.basename(input_file) + '.geotiff'
+            myfile_path = os.path.join(tmpdir, filename_gtif)
+            write_ds_to_geotiff(hdf, myfile_path)
+            interm_files_list.append(myfile_path)
 
     return interm_files_list
 
@@ -1011,6 +1048,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         in_mask_min = product_in_info.mask_min
         in_mask_max = product_in_info.mask_max
         in_data_type = product_in_info.data_type_id
+        in_data_type_gdal = conv_data_type_to_gdal(in_data_type)
 
         # Get information from 'product' table
         args = {"productcode": product['productcode'], "subproductcode": subproducts[ii]['subproduct'], "version":product['version']}
@@ -1021,6 +1059,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         out_scale_factor = product_info.scale_factor
         out_offset = product_info.scale_offset
         out_nodata = product_info.nodata
+        out_date_format = product_info.date_format
 
         # Translate data type for gdal and numpy
         out_data_type_gdal = conv_data_type_to_gdal(out_data_type)
@@ -1062,18 +1101,17 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         if output_date_str == -1:
             output_date_str = in_date+'_DATE_ERROR_'
-            year = None
-            month = None
-            day = None
-            hour = None
         else:
-            year = int(output_date_str[0:4])
-            month = int(output_date_str[4:6])
-            day = int(output_date_str[6:8])
-            if datasource_descr.date_type == 'YYYYMMDDHHMM':
-                hour = int(output_date_str[8:12])
-            else:
-                hour = None
+            if out_date_format == 'YYYYMMDDHHMM':
+                if functions.is_date_yyyymmddhhmm(output_date_str):
+                    out_date_str_final = output_date_str
+                elif  functions.is_date_yyyymmdd(output_date_str):
+                    out_date_str_final = output_date_str+'0000'
+            elif out_date_format == 'YYYYMMDD':
+                if functions.is_date_yyyymmdd(output_date_str):
+                    out_date_str_final = output_date_str
+                elif  functions.is_date_yyyymmddhhmm(output_date_str):
+                    out_date_str_final = output_date_str[0:8]
 
         # Get only the short_name for output file naming
         mapset_id = subproducts[ii]['mapsetcode']
@@ -1093,7 +1131,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             return 1
 
         # Define output filename
-        output_filename = output_directory + functions.set_path_filename(output_date_str,
+        output_filename = output_directory + functions.set_path_filename(out_date_str_final,
                                                                          product['productcode'],
                                                                          subproducts[ii]['subproduct'],
                                                                          mapset_id,
@@ -1105,7 +1143,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # -------------------------------------------------------------------------
 
         native_mapset_code = datasource_descr.native_mapset
-        orig_ds = gdal.Open(intermFile, gdal.GA_ReadOnly)
+        orig_ds = gdal.Open(intermFile, gdal.GA_ReadOnly)           # Why in ROnly !??? it generates an error below
         
         if native_mapset_code != 'default':
             native_mapset = mapset.MapSet()
@@ -1162,9 +1200,16 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             mem_driver = gdal.GetDriverByName('MEM')
 
             # Assign mapset to dataset in memory
+            #mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, in_data_type_gdal)
             mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, out_data_type_gdal)
+
             mem_ds.SetGeoTransform(trg_mapset.geo_transform)
             mem_ds.SetProjection(out_cs.ExportToWkt())
+
+            in_data = orig_ds.ReadAsArray()
+            my_idx = (in_data != 0)
+            if my_idx.any():
+                print '1'
 
             # Apply Reproject-Image to the memory-driver
             orig_wkt = orig_cs.ExportToWkt()
@@ -1175,6 +1220,9 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
             # Read from the dataset in memory
             out_data = mem_ds.ReadAsArray()
+            my_idx = (out_data != 0)
+            if my_idx.any():
+                print '1'
 
             # Apply rescale to data
             scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
@@ -1213,7 +1261,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         sds_meta.assign_es2_version()
         sds_meta.assign_mapset(mapset_id)
         sds_meta.assign_from_product(product['productcode'], subproducts[ii]['subproduct'], product['version'])
-        sds_meta.assign_date(output_date_str)
+        sds_meta.assign_date(out_date_str_final)
         sds_meta.assign_subdir_from_fullpath(output_directory)
         sds_meta.assign_comput_time_now()
         sds_meta.assign_input_files(in_files)
@@ -1305,6 +1353,8 @@ def mosaic_lsasaf_msg(in_files, output_file, format):
 #       in_files: input filenames
 #       output_file: target output file
 #
+   # Note: noData==-1 for LSASAF Products (both ET and LST)
+    NO_DATA_LSASAF_PRODS = -1
 
     # definitions: Euro, NAfr, SAfr, Same -> MUST match with filenaming
     # as defined in SAF/LAND/MF/PUM_AL/1.4, version 1.4, date 15/12/2006
@@ -1345,7 +1395,7 @@ def mosaic_lsasaf_msg(in_files, output_file, format):
                 return 1
 
     # output matrix dimensions
-    dataOut = N.ones((out_ns, out_nl))          #TODO-M.C.: * nodata TO BE MANAGED
+    dataOut = N.zeros((out_ns, out_nl)) + NO_DATA_LSASAF_PRODS
 
     # total lines
     totallines = 0
@@ -1414,7 +1464,6 @@ def rescale_data(in_data,
         logger.error('Input argument must be a numpy array. Exit')
         return 1
 
-    #print mem_usage('Entering rescale')
     # Create output array
     trg_data = N.zeros(in_data.shape, dtype=out_data_type)
 

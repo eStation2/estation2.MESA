@@ -5,21 +5,13 @@
 #   descr:	 Generate additional derived products/implements processing chains
 #	history: 1.0
 #
-#   Still to be done
-#   TODO-M.C.: more checks on the IN/OUT
-#   TODO-M.C.test: Add a mechanism to extract/visualize the 'status' -> pipeline_printout(verbose=3)+grep-like function ?
-#   TODO-M.C.test: find a robust method to solve the tuple/string issue in filename (fttb: return_as_element_of_list() ?)
-#
 
 # Source generic modules
-import os, sys
+import os
 
 # Import eStation2 modules
 from lib.python import functions
-#from lib.python import metadata
 from lib.python.image_proc import raster_image_math
-#from lib.python.image_proc import recode
-#from database import crud
 from lib.python import es_logging as log
 from config import es_constants
 
@@ -31,30 +23,30 @@ logger = log.my_logger(__name__)
 #   General definitions for this processing chain
 ext=es_constants.ES2_OUTFILE_EXTENSION
 
-def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, list_subprods=None, update_stats=False):
+def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, proc_lists=None,
+                    update_stats=False, nrt_products=True):
 
     #   ---------------------------------------------------------------------
     #   Create lists
+    if proc_lists is None:
+        proc_lists = functions.ProcLists()
 
-    proc_lists = functions.ProcLists()
+    # Set DEFAULTS: all off
+    activate_10danomalies_comput=0      # 10d anomalies
+    activate_monthly_comput=0           # monthly cumulation
+    activate_monanomalies_comput=0      # monthly anomalies
+    activate_10dstats_comput=0          # 10d stats
+    activate_monstats_comput=0          # 1mon stats
 
-    if list_subprods is not None:
-        list_subprods = proc_lists.list_subprods
-        list_subprod_groups = proc_lists.list_subprod_groups
-    
     #   switch wrt groups - according to options
-    if not update_stats:
+    if nrt_products:
         activate_10danomalies_comput=1      # 10d anomalies
         activate_monthly_comput=1           # monthly cumulation
         activate_monanomalies_comput=1      # monthly anomalies
-        activate_10dstats_comput=0          # 10d stats
-        activate_monstats_comput=0          # 1mon stats
-    else:
-        activate_10danomalies_comput=0      # 10d anomalies
-        activate_monthly_comput=0           # monthly cumulation
-        activate_monanomalies_comput=0      # monthly anomalies
-        activate_10dstats_comput=1          # 1.
-        activate_monstats_comput=1          # 3.b
+
+    if update_stats:
+        activate_10dstats_comput= 1         # 10d stats
+        activate_monstats_comput=1          # 1mon stats
 
     #   switch wrt single products: not to be changed !!
     activate_10davg_comput=1
@@ -96,7 +88,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   ---------------------------------------------------------------------
     #   Average
     output_sprod_group=proc_lists.proc_add_subprod_group("10dstats")
-    output_sprod=proc_lists.proc_add_subprod("10davg", "10dstats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10davg", "10dstats", final=False,
+                                             descriptive_name='10d Average',
+                                             description='Average rainfall for dekad',
+                                             frequency_id='e1dekad',
+                                             date_format='MMDD',
+                                             masked=False,
+                                             timeseries_role='10d',
+                                             active_default=True)
+
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -114,7 +114,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     #   ---------------------------------------------------------------------
     #   Minimum
-    output_sprod=proc_lists.proc_add_subprod("10dmin", "10dstats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10dmin", "10dstats", final=False,
+                                             descriptive_name='10d Minimum',
+                                             description='Minimum rainfall for dekad',
+                                             frequency_id='e1dekad',
+                                             date_format='MMDD',
+                                             masked=False,
+                                             timeseries_role='10d',
+                                             active_default=True)
+
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -132,7 +140,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     #   ---------------------------------------------------------------------
     #   Maximum
-    output_sprod=proc_lists.proc_add_subprod("10dmax", "10dstats", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10dmax", "10dstats", final=False,
+                                             descriptive_name='10d Maximum',
+                                             description='Maximum rainfall for dekad',
+                                             frequency_id='e1dekad',
+                                             date_format='MMDD',
+                                             masked=False,
+                                             timeseries_role='10d',
+                                             active_default=True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -151,7 +166,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   ---------------------------------------------------------------------
     #   10dDiff
     output_sprod_group=proc_lists.proc_add_subprod_group("10anomalies")
-    output_sprod=proc_lists.proc_add_subprod("10ddiff", "10anomalies", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10ddiff", "10anomalies", final=False,
+                                             descriptive_name='10d Absolute Difference',
+                                             description='10d Absolute Difference vs. LTA',
+                                             frequency_id='e1dekad',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='10d',
+                                             active_default=True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -176,7 +198,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     #   ---------------------------------------------------------------------
     #   10dperc
-    output_sprod=proc_lists.proc_add_subprod("10dperc", "10anomalies", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10dperc", "10anomalies",  final=False,
+                                             descriptive_name='10d Percent Difference',
+                                             description='10d Percent Difference vs. LTA',
+                                             frequency_id='e1dekad',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='10d',
+                                             active_default=True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -201,7 +230,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     #   ---------------------------------------------------------------------
     #   10dnp
-    output_sprod=proc_lists.proc_add_subprod("10dnp", "10anomalies", False, True)
+    output_sprod=proc_lists.proc_add_subprod("10dnp", "10anomalies",  final=False,
+                                             descriptive_name='10d Normalized Anomaly',
+                                             description='10d Normalized Anomaly',
+                                             frequency_id='e1dekad',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='10d',
+                                             active_default=True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -232,7 +268,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   ---------------------------------------------------------------------
     #   1moncum
     output_sprod_group=proc_lists.proc_add_subprod_group("monthly")
-    output_sprod=proc_lists.proc_add_subprod("1moncum", "monthly", False, True)
+    output_sprod=proc_lists.proc_add_subprod("1moncum", "monthly", final=False,
+                                             descriptive_name='Monthly Cumulate',
+                                             description='Monthly Cumulate Precipitation',
+                                             frequency_id='e1month',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='1mon',
+                                             active_default=True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -255,7 +298,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     new_input_subprod='1moncum'
     in_prod_ident= functions.set_path_filename_no_date(prod, new_input_subprod, mapset, version, ext)
     output_sprod_group=proc_lists.proc_add_subprod_group("monstat")
-    output_sprod=proc_lists.proc_add_subprod("1monavg", "monstat", False, True)
+    output_sprod=proc_lists.proc_add_subprod("1monavg", "monstat", final=False,
+                                             descriptive_name='Monthly Average',
+                                             description='Monthly Average Precipitation',
+                                             frequency_id='e1month',
+                                             date_format='MMDD',
+                                             masked=False,
+                                             timeseries_role='1mon',
+                                             active_default=True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -274,7 +324,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     #   ---------------------------------------------------------------------
     #   Monthly Minimum
-    output_sprod=proc_lists.proc_add_subprod("1monmin", "monstat", False, True)
+    output_sprod=proc_lists.proc_add_subprod("1monmin", "monstat",final=False,
+                                             descriptive_name='Monthly Minimum',
+                                             description='Monthly Minimum Precipitation',
+                                             frequency_id='e1month',
+                                             date_format='MMDD',
+                                             masked=False,
+                                             timeseries_role='1mon',
+                                             active_default=True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -293,7 +350,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     #   ---------------------------------------------------------------------
     #   Monthly Maximum
-    output_sprod=proc_lists.proc_add_subprod("1monmax", "monstat", False, True)
+    output_sprod=proc_lists.proc_add_subprod("1monmax", "monstat",final=False,
+                                             descriptive_name='Monthly Maximum',
+                                             description='Monthly Maximum Precipitation',
+                                             frequency_id='e1month',
+                                             date_format='MMDD',
+                                             masked=False,
+                                             timeseries_role='1mon',
+                                             active_default=True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -315,7 +379,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   ---------------------------------------------------------------------
     #   1monDiff
     output_sprod_group=proc_lists.proc_add_subprod_group("monanomalies")
-    output_sprod=proc_lists.proc_add_subprod("1mondiff", "monanomalies", False, True)
+    output_sprod=proc_lists.proc_add_subprod("1mondiff", "monanomalies", final=False,
+                                             descriptive_name='Monthly Absolute Difference',
+                                             description='Monthly Absolute Difference Precipitation',
+                                             frequency_id='e1month',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='1mon',
+                                             active_default=True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -341,7 +412,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     #   ---------------------------------------------------------------------
     #   1monperc
-    output_sprod=proc_lists.proc_add_subprod("1monperc", "monanomalies", False, True)
+    output_sprod=proc_lists.proc_add_subprod("1monperc", "monanomalies", final=False,
+                                             descriptive_name='Monthly Percent Difference',
+                                             description='Monthly Percent Difference Precipitation',
+                                             frequency_id='e1month',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='1mon',
+                                             active_default=True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -367,7 +445,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     #   ---------------------------------------------------------------------
     #   1monnp
-    output_sprod=proc_lists.proc_add_subprod("1monnp", "monanomalies", False, True)
+    output_sprod=proc_lists.proc_add_subprod("1monnp", "monanomalies", final=False,
+                                             descriptive_name='Monthly Normalized Anomaly',
+                                             description='Monthly Normalized Anomaly Precipitation',
+                                             frequency_id='e1month',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='1mon',
+                                             active_default=True)
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -395,68 +480,18 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         args = {"input_file": input_file[0], "min_file": input_file[1],"max_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_make_vci(**args)
 
-    #   ---------------------------------------------------------------------
-        #   Upsert in the DB table a product generated by ruffus
-
-    # def upsert_processed_ruffus(file_fullpath):
-    #
-    #         # -------------------------------------------------------------------------
-    #         # Upsert into DB table 'products_data'
-    #         # -------------------------------------------------------------------------
-    #
-    #         filename = os.path.basename(file_fullpath)
-    #         dirname = os.path.dirname(file_fullpath)
-    #
-    #         # TODO-M.C.: add tests, try/except
-    #         [productcode, subproductcode, version, mapsetcode] = functions.get_from_path_dir(dirname)
-    #         str_date = functions.get_date_from_path_filename(filename)
-    #         [str_year, str_month, str_day, str_hour] = functions.extract_from_date(str_date)
-    #
-    #         if str_year == '':
-    #             str_year='0'
-    #         cruddb = crud.CrudDB()
-    #         recordkey = {'productcode': productcode.lower(),
-    #                      'subproductcode': subproductcode.lower(),
-    #                      'version': 'undefined',
-    #                      'mapsetcode': mapsetcode,
-    #                      'product_datetime': str_date}
-    #
-    #
-    #         record = {'productcode': productcode.lower(),
-    #                   'subproductcode': subproductcode.lower(),
-    #                   'version': 'undefined',
-    #                   'mapsetcode': mapsetcode,
-    #                   'product_datetime': str_date,
-    #                   'directory': dirname,
-    #                   'filename': filename,
-    #                   'year': int(str_year),
-    #                   'month': int(str_month),
-    #                   'day': int(str_day),
-    #                   'hour': int(str_hour),
-    #                   'file_role': 'active',
-    #                   'file_type': 'GTiff'}
-    #
-    #         if len(cruddb.read('products.products_data', **recordkey)) > 0:
-    #             logger.debug('Updating products_data record: ' + str(recordkey))
-    #             cruddb.update('products.products_data', record)
-    #         else:
-    #             logger.debug('Creating products_data record: ' + str(recordkey))
-    #             cruddb.create('products.products_data', record)
-
+    return proc_lists
 #   ---------------------------------------------------------------------
 #   Run the pipeline
 
 
 def processing_std_precip(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None, update_stats=False):
+                          starting_dates=None, update_stats=False, nrt_products=True):
 
-    global list_subprods, list_subprod_groups
-
-    list_subprods = []
-    list_subprod_groups = []
-    create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
-                    starting_dates=starting_dates, update_stats=update_stats)
+    proc_lists = None
+    proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
+                                 starting_dates=starting_dates, proc_lists=proc_lists, update_stats=update_stats, nrt_products=nrt_products)
 
     logger.info("Entering routine %s" % 'processing_std_precip')
     logger.info("pipeline_run_level %i" % pipeline_run_level)
@@ -469,13 +504,13 @@ def processing_std_precip(pipeline_run_level=0,pipeline_run_touch_only=0, pipeli
     if pipeline_printout_graph_level > 0:
         pipeline_printout_graph('flowchart.jpg')
 
-    return list_subprods, list_subprod_groups
+    return proc_lists
 
-def processing_std_precip_stats(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
+def processing_std_precip_stats_only(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None):
 
-    processing_std_precip(pipeline_run_level=pipeline_run_level,
+    proc_lists = processing_std_precip(pipeline_run_level=pipeline_run_level,
                           pipeline_run_touch_only=pipeline_run_touch_only,
                           pipeline_printout_level=pipeline_printout_level,
                           pipeline_printout_graph_level=pipeline_printout_graph_level,
@@ -484,20 +519,43 @@ def processing_std_precip_stats(pipeline_run_level=0,pipeline_run_touch_only=0, 
                           mapset=mapset,
                           version=version,
                           starting_dates=starting_dates,
+                          nrt_products=False,
                           update_stats=True)
 
-def get_subprods_std_precip():
+    return proc_lists
 
-    pid = os.fork()
-    if pid == 0:
-        # Qui sono il figlio
-        [list_subprods, list_subprod_groups]  = processing_std_precip(pipeline_run_level=0,pipeline_run_touch_only=0,
-                          pipeline_printout_level=0, pipeline_printout_graph_level=0,
-                          prod='', starting_sprod='', mapset='', version='')
+def processing_std_precip_prods_only(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
+                          pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
+                          starting_dates=None):
 
-        return list_subprods, list_subprod_groups
-        sys.exit(0)
-    else:
-        # Qui sono il padre
-        os.wait()
+    proc_lists = processing_std_precip(pipeline_run_level=pipeline_run_level,
+                          pipeline_run_touch_only=pipeline_run_touch_only,
+                          pipeline_printout_level=pipeline_printout_level,
+                          pipeline_printout_graph_level=pipeline_printout_graph_level,
+                          prod=prod,
+                          starting_sprod=starting_sprod,
+                          mapset=mapset,
+                          version=version,
+                          starting_dates=starting_dates,
+                          nrt_products=True,
+                          update_stats=False)
 
+    return proc_lists
+
+def processing_std_precip_all(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
+                          pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
+                          starting_dates=None):
+
+    proc_lists = processing_std_precip(pipeline_run_level=pipeline_run_level,
+                          pipeline_run_touch_only=pipeline_run_touch_only,
+                          pipeline_printout_level=pipeline_printout_level,
+                          pipeline_printout_graph_level=pipeline_printout_graph_level,
+                          prod=prod,
+                          starting_sprod=starting_sprod,
+                          mapset=mapset,
+                          version=version,
+                          starting_dates=starting_dates,
+                          nrt_products=True,
+                          update_stats=True)
+
+    return proc_lists

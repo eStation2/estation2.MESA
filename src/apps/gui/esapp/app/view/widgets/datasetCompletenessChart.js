@@ -33,13 +33,17 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
 
     initComponent: function() {
         var me = this,
-            spriteY = 7,
+            spriteY = 8,
             fontsize = 10;
+
+        var missingFilesText = '';
+        if(me.missingfiles>0)
+           missingFilesText = 'Missing: ' + me.missingfiles;
 
         me.items = [{
             xtype: 'cartesian',
             width: '100%',
-            height: 30,
+            height: 33,
 
             colors: [
                 '#81AF34', // green
@@ -65,8 +69,10 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
                 y: spriteY
             },{
                 type: 'text',
-                text: 'Missing: ' + me.missingfiles,
-                fontSize: fontsize,
+                text: missingFilesText,
+                fontSize: fontsize+1,
+                fontWeight: 'bold',
+                fillStyle: '#FF0000',
                 x: 190,
                 y: spriteY
             },{
@@ -117,7 +123,7 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
                 //},
                 tooltip: {
                     trackMouse: false,
-                    dismissDelay:2000,
+                    dismissDelay:60000,
                     style: 'background: #fff',
                     renderer: function (storeItem, item) {
                         var allperiods = '';

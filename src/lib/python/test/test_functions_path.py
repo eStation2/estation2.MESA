@@ -104,3 +104,6 @@ class TestFunctionsPath(TestCase):
 
         self.assertEqual(self.sub_dir,my_sub_directory)
 
+    def test_get_versions(self):
+        versions=getListVersions()
+        print versions

@@ -8,7 +8,7 @@
 Ext.define('esapp.view.main.MainController', {
     extend: 'Ext.app.ViewController',
 
-    alias: 'controller.main',
+    alias: 'controller.app-main',
 
     requires: [
         'Ext.MessageBox'

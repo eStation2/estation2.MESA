@@ -13,3 +13,4 @@ log
 my_locals.py
 resource.py
 x.py
+settings/*

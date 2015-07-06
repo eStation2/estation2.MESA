@@ -134,7 +134,7 @@ def loop_eumetcast(dry_run=False):
 
                 # Create objects for list and info
                 processed_list = []
-                processed_info = {'lenght_proc_list': 0,
+                processed_info = {'length_proc_list': 0,
                                   'time_latest_exec': datetime.datetime.now(),
                                   'time_latest_copy': datetime.datetime.now()}
 
@@ -171,7 +171,7 @@ def loop_eumetcast(dry_run=False):
                                             processed_list.append(filename)
                                             # Update processing info
                                             processed_info['time_latest_copy']=datetime.datetime.now()
-                                            processed_info['lenght_proc_list']=len(processed_list)
+                                            processed_info['length_proc_list']=len(processed_list)
                                         else:
                                             logger_spec.warning("Problem while copying file: %s.", filename)
                                     else:
