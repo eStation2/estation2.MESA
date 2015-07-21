@@ -1,37 +1,70 @@
 #!/bin/sh
-
-# TODO: 
-#   -> Define the base_dir for DB creation in a config file and source it (or set the env var PGDATA)
-#   -> Improve the mechanism to create the DB ? Test "$(ls $base_dir_db_data |wc -l)" = 0 NOT very safe ..
-#   -> Source user credentials from a config file ?
+# 
+# 	Role of preinst: 	- Determine if it is an upgrade, or installation from scratch
+#                    	- Create directory structure (see also postinst)
+#			            - Manage postgresql DB (create, change permissions, start)	 
+# 
 #
 
+# Definitions (To be moved somewhere else or updated in package creation)
+# Version
+ESTATION2_VERSION=2.0.4
+ESTATION2_RELEASE=11
+ESTATION2_UBUNTU=12.04
+
+# Users definition
+ESTATION2_MAIN_USER=adminuser
+ESTATION2_THEM_USER=analyst
+ESTATION2_MAIN_GROUP=estation
+
+# Directory Definitions
+ESTATION2_BASE_DIR_SYSTEM=/srv/www/eStation2/
+
+ESTATION2_LOCAL_DIR=/eStation2/
+ESTATION2_DIR_LOG=${ESTATION2_LOCAL_DIR}log/
+ESTATION2_DIR_LISTS=${ESTATION2_LOCAL_DIR}get_lists/
+ESTATION2_DIR_SETTINGS=${ESTATION2_LOCAL_DIR}settings/
+ESTATION2_DIR_LIST_EUM=${ESTATION2_DIR_LISTS}get_eumetcast/
+ESTATION2_DIR_LIST_INT=${ESTATION2_DIR_LISTS}get_internet/
+ESTATION2_DIR_DATABASE=${ESTATION2_LOCAL_DIR}dbdata/
+
+ESTATION2_TEMP_DIR=/tmp/eStation2/
+ESTATION2_DIR_SERVICES=${ESTATION2_TEMP_DIR}services/
+ESTATION2_DIR_PROCESS=${ESTATION2_TEMP_DIR}processing/
+
+ESTATION2_BASE_DIR_DATA=/data/
+ESTATION2_INST_LOG_DIR=/var/log/eStation2/
+ESTATION2_PYTHON_DIST_DIR=/usr/local/lib/python2.7/dist-packages/
+
+current_version=${ESTATION2_VERSION}
+base_dir_db_data=${ESTATION2_DIR_DATABASE}
+
 # Define a logfile
-#mkdir -p /var/log/eStation2/  
-logfile=/var/log/eStation2/upgrade_ps-database_2.0.1.log
+mkdir -p ${ESTATION2_INST_LOG_DIR}  
+logfile="${ESTATION2_INST_LOG_DIR}/eStation-Apps_${current_version}_preinst.log"
 
 uname=$(uname -n)
-#echo "Machine Name = ${uname}" >> ${logfile}
-
-# --------------------------------------------------------------------------------------
-#	Common Definitions
-# --------------------------------------------------------------------------------------
-# Define base dirs (to be moved somewhere else and sourced)
-base_dir_db_data="/eStation2/dbdata/"	# it is to be on Disk1 (system)
-base_dir_system="/srv/www/eStation2/"	# it is to be on Disk2 (system)
-base_dir_data="/data/"			# it is to be on Disk2 (data)
+echo "`date +'%Y-%m-%d %H:%M:%S'` Machine Name = ${uname}" #>> ${logfile}
 
 # --------------------------------------------------------------------------------------
 #	Directory management / rights settings
 # --------------------------------------------------------------------------------------
 
-mkdir /srv/www/eStation2/log
-sudo chown -R adminuser /srv/www/eStation2/log
-sudo chgrp -R adminuser /srv/www/eStation2/log
+for dir in ${ESTATION2_BASE_DIR_SYSTEM} ${ESTATION2_DIR_LOG}
+do
+    mkdir -p ${dir}
+    sudo chown -R adminuser ${dir}
+    sudo chgrp -R adminuser ${dir}
+    echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory: ${dir}" >> ${logfile}
+done 
 
-mkdir /tmp/eStation2/
-sudo chown -R adminuser /tmp/eStation2/
-sudo chgrp -R adminuser /tmp/eStation2/
+for dir in ${ESTATION2_BASE_DIR_DATA}
+do
+    mkdir -p ${dir}
+    sudo chown -R adminuser ${dir}
+    sudo chgrp -R adminuser ${dir}
+    echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory: ${dir}" >> ${logfile}
+done
 
 # --------------------------------------------------------------------------------------
 #	Postgresql DB management
@@ -39,43 +72,53 @@ sudo chgrp -R adminuser /tmp/eStation2/
 #	- do a (partial) dump 	      (in case of upgrade)
 # --------------------------------------------------------------------------------------
 
-mkdir -p $base_dir_db_data
-chown -R postgres:postgres $base_dir_db_data
+mkdir -p ${base_dir_db_data}
+chown -R postgres:postgres ${base_dir_db_data}
+echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory: ${base_dir_db_data}" >> ${logfile}
  
 # Stop postgresql if it is running
 if [ "$(nc -v -z localhost 5432 2> /dev/null;echo $?)" = 0 ]; then
 	/etc/init.d/postgresql stop
+    echo "`date +'%Y-%m-%d %H:%M:%S'` Executed command: /etc/init.d/postgresql stop" >> ${logfile}
 fi
 
-# first database connection
+# First database connection
 if [ "$(ls $base_dir_db_data|wc -l)" = 0 ];then
 	su postgres -c "/usr/lib/postgresql/9.3/bin/initdb -D $base_dir_db_data"
+    	echo "`date +'%Y-%m-%d %H:%M:%S'` Executed command: su postgres -c /usr/lib/postgresql/9.3/bin/initdb -D " >> ${logfile}
 fi
 
-# End of Modification of the Configuration
+# Modification of the Configuration files
 ln -sf /etc/postgresql-common/root.crt "$base_dir_db_data/root.crt"
 ln -sf /etc/ssl/certs/ssl-cert-snakeoil.pem "$base_dir_db_data/server.crt"
 ln -sf /etc/ssl/private/ssl-cert-snakeoil.key "$base_dir_db_data/server.key"
+echo "`date +'%Y-%m-%d %H:%M:%S'` Done with postgresql configuration definition" >> ${logfile}
 
 # Write to tmpfile the actual version of package (if is an upgrade). This is for postinst.
-old_package=$(dpkg -l|grep eStation-Apps|awk '{print $3}'|cut -d '-' -f1)
-if [ "${old_package}" ];then
-	mkdir -p -m 755 "$base_dir_system/database"
-	touch "$base_dir_system/database/version_${old_package}"
+old_package=$(dpkg -l|grep eStation-Apps)
+if [ ! -z ${old_package} ]; then
+	old_package_version=$(echo ${old_package} |awk '{print $3}'|cut -d '-' -f1)
+else
+	old_package_version='None'
 fi
+mkdir -p -m 755 "$base_dir_system/database"
+touch "$base_dir_system/database/version_${old_package_version}"
+echo "`date +'%Y-%m-%d %H:%M:%S'` Old package existing is written as: $base_dir_system/database/version_${old_package_version}" >> ${logfile}
 
-# Change the configuration file to grant access
+# Change the configuration file to grant access (to be verified)
 perl -pi -e "s#host    all             all             127.0.0.1/32            md5#host    all         all         127.0.0.1/32          trust#" /etc/postgresql/9.3/main/pg_hba.conf
-perl -pi -e "s#host    all             all             ::1/128                 md5#host    all         all         ::1/128               trust\nhost    all         all         192.168.0.0/24               trust#" /etc/postgresql/9.3/main/pg_hba.conf host    
+perl -pi -e "s#host    all             all             ::1/128                 md5#host    all         all         ::1/128               trust \nhost    all         all         192.168.0.0/24               trust#" /etc/postgresql/9.3/main/pg_hba.conf    
 
+echo "`date +'%Y-%m-%d %H:%M:%S'` pg_hba configuration file changed" >> ${logfile}
 # Restart the database
 /etc/init.d/postgresql start
+echo "`date +'%Y-%m-%d %H:%M:%S'` Database re-started" >> ${logfile}
 
 # Do a dump of DB structure - ONLY if it is an update (not for installation from scratch) 
-if [ ! -z "${old_package}" ];then
-  mkdir -p "$base_dir_data/dbbackup"
-  pg_dump -i -h localhost -p 5432 -U estation -c -s -F p -v -f "$base_dir_data/dbbackup/full_dump_structure_${old_package}.sql" -n \"products\" -n \"data\" -n \"analysis\" estationdb
+# if [ ! -z "${old_package}" ];then
+#   mkdir -p "$base_dir_data/dbbackup"
+#   pg_dump -i -h localhost -p 5432 -U estation -c -s -F p -v -f "$base_dir_data/dbbackup/full_dump_structure_${old_package}.sql" -n \"products\" -n \"data\" -n \"analysis\" estationdb
   # Do a dump of data (except timeseries_data: -T "ps.timeseries_data")
-  pg_dump -i -h localhost -p 5432 -U estation -a -b -F t -v -f "$base_dir_data/dbbackup/full_dump_data_${old_package}.sql" -n \"products\" -n \"data\" -n \"analysis\" estationdb
-fi
+#   pg_dump -i -h localhost -p 5432 -U estation -a -b -F t -v -f "$base_dir_data/dbbackup/full_dump_data_${old_package}.sql" -n \"products\" -n \"data\" -n \"analysis\" estationdb
+# fi
 

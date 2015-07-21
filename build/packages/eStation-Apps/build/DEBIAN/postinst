@@ -1,26 +1,126 @@
 #!/bin/sh
 
-# TODO: 
-#   -> get the new version automatically
-#   -> Source user credentials from a config file ?
-#   -> Change the pg_hba.conf management (weak - char dependent)
+# 
+# 	Role of postinst:   - Add eStation2 path to python 
+#                     	- Ensure correct permissions for dirs, and create tmp dirs
+#		 	            - Populate (or upgrade) eStation DB 
+#			            - Customize/configure additional packages: apache2	 
+# 
+# 
 
-new_version="2.0.1"
+# Function to change own/grp/permission
+dir_own_grp_mod_default () {
+    directory=$1
+    mode=$2
+    logfile=$3
+    chown -R ${ESTATION2_MAIN_USER} ${directory} 2> ${logfile} 
+    chgrp -R ${ESTATION2_MAIN_GROUP} ${directory} 2> ${logfile} 
+    chmod -R ${mode} ${directory} 2> ${logfile} 
+    echo "`date +'%Y-%m-%d %H:%M:%S'` Permissions changed for: ${ESTATION2_BASE_DIR_SYSTEM}" >> ${logfile}
+}
+# Version
+ESTATION2_VERSION=2.0.4
+ESTATION2_RELEASE=13
+ESTATION2_UBUNTU=12.04
+
+# Users definition
+ESTATION2_MAIN_USER=adminuser
+ESTATION2_THEM_USER=analyst
+ESTATION2_MAIN_GROUP=adminuser              # to be changed to estation
+
+# Directory Definitions
+ESTATION2_BASE_DIR_SYSTEM=/srv/www/eStation2/
+
+ESTATION2_LOCAL_DIR=/eStation2/
+ESTATION2_DIR_LOG=${ESTATION2_LOCAL_DIR}log/
+ESTATION2_DIR_LISTS=${ESTATION2_LOCAL_DIR}get_lists/
+ESTATION2_DIR_SETTINGS=${ESTATION2_LOCAL_DIR}settings/
+ESTATION2_DIR_LIST_EUM=${ESTATION2_DIR_LISTS}get_eumetcast/
+ESTATION2_DIR_LIST_INT=${ESTATION2_DIR_LISTS}get_internet/
+ESTATION2_DIR_DATABASE=${ESTATION2_LOCAL_DIR}dbdata/
+
+ESTATION2_TEMP_DIR=/tmp/eStation2/
+ESTATION2_DIR_SERVICES=${ESTATION2_TEMP_DIR}services/
+ESTATION2_DIR_PROCESS=${ESTATION2_TEMP_DIR}processing/
+
+ESTATION2_BASE_DIR_DATA=/data/
+ESTATION2_INST_LOG_DIR=/var/log/eStation2/
+ESTATION2_PYTHON_DIST_DIR=/usr/local/lib/python2.7/dist-packages/
+
+current_version=${ESTATION2_VERSION}
 
 # Define a logfile
-mkdir -p /var/log/eStation2/  
-logfile="/var/log/eStation2/upgrade_ps-database_${new_version}.log"
+mkdir -p ${ESTATION2_INST_LOG_DIR}  
+logfile="${ESTATION2_INST_LOG_DIR}/eStation-Apps_${current_version}_postinst.log"
 
 uname=$(uname -n)
-echo "Machine Name = ${uname}" >> ${logfile}
+echo "`date +'%Y-%m-%d %H:%M:%S'`  Machine Name = ${uname}" >> ${logfile}
 
 # --------------------------------------------------------------------------------------
-#	Common Definitions
+#	Add the path of the eStation2 to python 
 # --------------------------------------------------------------------------------------
-# Define base dirs (to be moved somewhere else and sourced)
-base_dir_db_data="/eStation2/dbdata"	# it is to be on Disk1 (system)
-base_dir_system="/srv/www/eStation2"	# it is to be on Disk2 (system)
-base_dir_data="/data"			# it is to be on Disk2 (data)
+
+echo ${ESTATION2_BASE_DIR_SYSTEM} > ${ESTATION2_PYTHON_DIST_DIR}/eStation2.pth
+echo "`date +'%Y-%m-%d %H:%M:%S'` Created file ${ESTATION2_PYTHON_DIST_DIR}/eStation2.pth." >> ${logfile}
+
+# --------------------------------------------------------------------------------------
+#	Change owner/group/permiss of relevant dirs (see GitHub ticket #35)
+#		Base Dir for Installation (/srv/www/eStation2)
+#		Local Dirs - not updated  (/eStation2/)
+#		Temp Dirs - recreated at boot (/tmp/eStation2)
+# --------------------------------------------------------------------------------------
+
+# base dir (/srv/www/eStation2/)
+if [ -d ${ESTATION2_BASE_DIR_SYSTEM} ]; then
+    dir_own_grp_mod_default ${ESTATION2_BASE_DIR_SYSTEM} 755 ${logfile}
+    echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory ${ESTATION2_BASE_DIR_SYSTEM}" 	>> ${logfile}
+else
+    echo "`date +'%Y-%m-%d %H:%M:%S'` Directory ${ESTATION2_BASE_DIR_SYSTEM} NOT existing !!" >> ${logfile}
+fi
+
+# local dirs (/eStation2/log/)
+mkdir -p ${ESTATION2_DIR_LOG}
+if [ -d ${ESTATION2_DIR_LOG} ]; then
+    dir_own_grp_mod_default ${ESTATION2_DIR_LOG} 777 ${logfile}
+    echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory ${ESTATION2_DIR_LOG}" 	>> ${logfile}
+
+else
+    echo "`date +'%Y-%m-%d %H:%M:%S'` Directory ${ESTATION2_DIR_LOG} NOT existing !!" 	>> ${logfile}
+fi
+# local dirs (/eStation2/get_lists/get_eumetcast)
+mkdir -p ${ESTATION2_DIR_LIST_EUM}				2> ${logfile}
+if [ -d ${ESTATION2_DIR_LIST_EUM} ]; then
+    dir_own_grp_mod_default ${ESTATION2_DIR_LIST_EUM} 777 ${logfile}
+    echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory ${ESTATION2_DIR_LIST_EUM}" 	>> ${logfile}
+else
+    echo "`date +'%Y-%m-%d %H:%M:%S'` Directory ${ESTATION2_DIR_LIST_EUM} NOT existing !!" 	>> ${logfile}
+fi
+
+# local dirs (/eStation2/get_lists/get_internet)
+mkdir -p ${ESTATION2_DIR_LIST_INT}				2>> ${logfile}
+if [ -d ${ESTATION2_DIR_LIST_INT} ]; then
+    dir_own_grp_mod_default ${ESTATION2_DIR_LIST_INT} 777 ${logfile}
+    echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory ${ESTATION2_DIR_LIST_INT}" 	>> ${logfile}
+else
+    echo "`date +'%Y-%m-%d %H:%M:%S'` Directory ${ESTATION2_DIR_LIST_INT} NOT existing !!" 	>> ${logfile}
+fi
+
+# Temp dir (/tmp/eStation2/)
+mkdir -p ${ESTATION2_TEMP_DIR}					2>> ${logfile}
+dir_own_grp_mod_default ${ESTATION2_TEMP_DIR} 777 ${logfile}
+echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory ${ESTATION2_TEMP_DIR}" 	>> ${logfile}
+
+# settings dir (/eStation2/settings)
+mkdir -p ${ESTATION2_DIR_SETTINGS}				2>> ${logfile}
+dir_own_grp_mod_default ${ESTATION2_DIR_SETTINGS} 777 ${logfile}
+echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory ${ESTATION2_DIR_SETTINGS}" 	>> ${logfile}
+
+# Replace the /etc/rc.local file with the one from eStation
+echo "Copy file rc.local to /etc " 	>> ${logfile}
+cp $ESTATION2_BASE_DIR_SYSTEM/config/install/rc.local /etc/rc.local		2>> ${logfile}
+echo "`date +'%Y-%m-%d %H:%M:%S'` Execute /etc/rc.local"				 	>> ${logfile}
+/etc/rc.local							2>> ${logfile}
+echo "`date +'%Y-%m-%d %H:%M:%S'` Done /etc/rc.local"				 	>> ${logfile}
 
 # --------------------------------------------------------------------------------------
 #	Postgresql DB management
@@ -28,72 +128,83 @@ base_dir_data="/data"			# it is to be on Disk2 (data)
 #	- run the upgrade script     	(in case of upgrade)
 # --------------------------------------------------------------------------------------
 
-# check localhost reachable - or start postgresql
-if [ ! "$(nc -v -z localhost 5432 2> /dev/null;echo $?)" = 0 ]; then
-    echo "Postgresql is not running. Try and restart it." >> ${logfile}
-    /etc/init.d/postgresql start
-else
-    echo "Postgresql is running." >> ${logfile}
-fi
-
-# check localhost reachable - or abort
-if [ ! "$(nc -v -z localhost 5432 2> /dev/null;echo $?)" = 0 ]; then
-    echo "Postgresql is not running. Exit the install postinst." >> ${logfile}
-    exit 1
-fi
-
-#  user exists ? otherwise create it.
-if [ ! "$(su postgres -c "psql -c 'select usename from pg_user'"|grep estation)" ];then
-        echo "Create User and Database" >> ${logfile}
+# Restart postgresql 
+/etc/init.d/postgresql restart
+sleep 3
+echo "`date +'%Y-%m-%d %H:%M:%S'` Postgresql restarted"				 	>> ${logfile}
+# localhost reachable
+if [ "$(nc -v -z localhost 5432 2> /dev/null;echo $?)" = 0 ]; then
+    echo "`date +'%Y-%m-%d %H:%M:%S'` Postgresql is running" >> ${logfile}
+    # estation user exists ?
+    if [ ! "$(su postgres -c "psql -c 'select usename from pg_user'"|grep estation)" ];then
+	
+        echo "`date +'%Y-%m-%d %H:%M:%S'` Create User and Database" >> ${logfile}
         su postgres -c psql << EOF
 CREATE USER estation;
-EOF
-fi
-
-# estationdb exists ? otherwise create it.
-if [ ! "$(su postgres -c "psql -c 'select datname from pg_database'"|grep estation)" ];then
-        echo "Create User and Database" >> ${logfile}
-        su postgres -c psql << EOF
-CREATE DATABASE estationdb WITH OWNER estation;
 ALTER ROLE estation WITH CREATEDB;
+CREATE DATABASE estationdb WITH OWNER estation;
 ALTER USER estation WITH ENCRYPTED PASSWORD 'mesadmin';
 EOF
+    else
+        echo "`date +'%Y-%m-%d %H:%M:%S'` User estation already exist. Continue" >> ${logfile}
+    fi
+
+    if [ ! "$(su postgres -c "psql -d estationdb -c 'select * from products.mapset'" 2> /dev/null)" ];then
+        #First install from scratch data
+        echo "`date +'%Y-%m-%d %H:%M:%S'` Create database structure" >> ${logfile}
+        # End automatically added section
+        psql -h localhost -U estation -d estationdb -f /srv/www/eStation2/database/dbInstall/products_dump_structure_only.sql >> ${logfile} 2>&1 
+    else
+        echo "`date +'%Y-%m-%d %H:%M:%S'` Database structure already exists. Continue" >> ${logfile}
+    fi
+
+    # Update Tables (both for upgrade and installation from scratch)
+    echo "`date +'%Y-%m-%d %H:%M:%S'` Populate tables" >> ${logfile}
+    psql -h localhost -U estation -d estationdb -f /srv/www/eStation2/database/dbInstall/products_dump_data_only.sql >> ${logfile} 2>&1 
+
+else
+    echo "`date +'%Y-%m-%d %H:%M:%S'` Postgresql is NOT running: DB not created !" >> ${logfile}
+fi # localhost reachable
+
+# --------------------------------------------------------------------------------------
+#	Customize apache configuration
+# --------------------------------------------------------------------------------------
+# Disable/enale modules
+a2dismod php5 mpm_event mpm_prefork
+a2enmod wsgi actions cgi fastcgi alias mpm_worker rewrite
+
+# Copy configuration file
+src_file="$ESTATION2_BASE_DIR_SYSTEM/config/install/apache-config-file.txt"
+trg_file='/etc/apache2/sites-available/000-default.conf'
+#if [ ! -f ${trg_file} ]; then
+echo "`date +'%Y-%m-%d %H:%M:%S'`Target file ${trg_file} created by copying from ${src_file}." >> ${logfile} 2>&1 
+cp ${src_file} ${trg_file}
+#else
+#    echo " Target file ${trg_file} already exists. Do not overwrite" >> ${logfile} 2>&1 
+#fi
+# Restart apache
+service apache2 restart
+echo "`date +'%Y-%m-%d %H:%M:%S'` Apache2 restarted"				 	>> ${logfile}
+
+# --------------------------------------------------------------------------------------
+#	Copy the User Settings file (if does not exist !)
+# --------------------------------------------------------------------------------------
+src_file='/srv/www/eStation2/config/user_settings.ini'
+trg_file='/eStation2/settings/user_settings.ini'
+
+if [ -f  ${trg_file} ]; then
+    echo "`date +'%Y-%m-%d %H:%M:%S'` User Setting file already exist $trg_file" >> ${logfile} 2>&1 
+else
+    cp $src_file $trg_file
+    echo "`date +'%Y-%m-%d %H:%M:%S'` User Setting file $trg_file created" >> ${logfile} 2>&1 
 fi
-
-# Read actual version (if any - for upgrade only)
-file_vers=$(find "$base_dir_system/database/" -name "version_*")
-if [ ! -z "$file_vers" ]; then
-	actual_version=$(echo ${file_vers} | awk -F'_' '{print $2}')
-	echo "Existing Version = ${actual_version}" >> ${logfile}
-fi
-rm -f "$base_dir_system/version_*"
-
-#Update for migrating database to new version
-if [ ! -z "${actual_version}" ];then
-    echo "Upgrade database structure with script: "$base_dir_system/database/update_${actual_version}_to_${new_version}.sql"" >> ${logfile}
-    psql -w -h localhost -U estation -d estationdb -f "$base_dir_system/database/update_${actual_version}_to_${new_version}.sql" >> ${logfile} 2>&1  
-
-elif [ ! "$(su postgres -c "psql -d estationdb -c 'select * from products.mapset'" 2> /dev/null)" ];then
-    #First install from scratch data
-    echo "Create database structure" >> ${logfile}
-    #createlang -h localhost -U estation plpgsql estationdb
-
-    psql -w -h localhost -U estation -d estationdb -f "$base_dir_system//database/dump_database_structure.sql" >> ${logfile} 2>&1 
-    #echo "Extended Features" >> ${logfile}
-    #su postgres -c "psql -h localhost -U postgres -d estationdb < /etc/eStation/database/admin.sql"
-    #su postgres -c "psql -h localhost -U postgres -d estationdb < /etc/eStation/data/etc/eStation/database/admin.sqlbase/adminpack.sql"
-fi
-
-# Update Tables (both for upgrade and installation from scratch)
-echo "Populate database tables" #>> ${logfile}
-psql -w -h localhost -U estation -d estationdb -f "$base_dir_system/database/dump_database_data.sql" >> ${logfile} 2>&1 
 
 # Automatically added by dh_installinit
-if [ -x "/etc/init.d/postgresql" ]; then
-    echo "Restart postgresql" >> ${logfile}
-    if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
-        invoke-rc.d postgresql restart || exit $?
-    else
-        /etc/init.d/postgresql restart || exit $?
-    fi
-fi
+#if [ -x "/etc/init.d/postgresql" ]; then
+#    echo "Restart postgresql" >> ${logfile}
+#    if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
+#        invoke-rc.d postgresql restart || exit $?
+#    else
+#        /etc/init.d/postgresql restart || exit $?
+#    fi
+#fi
