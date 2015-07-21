@@ -1,5 +1,5 @@
 Package: eStation-Apps
-Version: <VERSION>-<RELEASE>
+Version: <ESTATION2_VERSION>-<ESTATION2_RELEASE>
 Section: config
 Priority: extra
 Architecture: amd64
