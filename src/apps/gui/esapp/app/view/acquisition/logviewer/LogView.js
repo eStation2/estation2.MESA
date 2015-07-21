@@ -50,12 +50,12 @@ Ext.define("esapp.view.acquisition.logviewer.LogView",{
     initComponent: function () {
         var me = this;
 
-        //me.id = 'logviewer' + me.params.logtype + me.params.record.get('productID');
+        //me.id = 'logviewer' + me.params.logtype + me.params.record.get('productid');
 
         me.tbar = ['  ',
             {
                 xtype: 'textfield',
-                id:'highlightfindstring', // + me.logtype + me.params.record.get('productID'),
+                id:'highlightfindstring', // + me.logtype + me.params.record.get('productid'),
                 fieldLabel: 'Search',
                 labelWidth: 60,
                 labelAlign: 'left',
@@ -95,7 +95,7 @@ Ext.define("esapp.view.acquisition.logviewer.LogView",{
 
         me.items = [{
             xtype: 'htmleditor',
-            id: 'logfilecontent', // + me.logtype + me.params.record.get('productID'),
+            id: 'logfilecontent', // + me.logtype + me.params.record.get('productid'),
             autoScroll: true,
             border: true,
             frame: true,

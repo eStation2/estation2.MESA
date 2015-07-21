@@ -44,7 +44,7 @@ Ext.define("esapp.view.acquisition.Ingestion",{
         disableSelection: true,
         trackOver: false
     },
-    cls: 'grid-color-gray',
+    cls: 'grid-color-azur',
     plugins:[{
         ptype:'cellediting'
     }],

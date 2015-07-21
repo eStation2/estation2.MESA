@@ -1,9 +1,9 @@
 Ext.define('esapp.model.Ingestion', {
     extend : 'esapp.model.Base',
 
-    // idProperty : 'productID',
+    // idProperty : 'productid',
     fields: [
-       {name: 'productID'}, // , reference: { parent: 'ProductAcquisition' }},
+       {name: 'productid'}, // , reference: { parent: 'ProductAcquisition' }},
        {name: 'productcode'},
        {name: 'subproductcode'},
        {name: 'version'},
@@ -11,7 +11,7 @@ Ext.define('esapp.model.Ingestion', {
        {name: 'defined_by'},
        {name: 'activated', type: 'boolean'},
        {name: 'mapsetname'},
-       {name: 'completeness_id', mapping:'productID'}
+       {name: 'completeness_id', mapping:'productid'}
     ]
     ,associations:[
         {
@@ -26,7 +26,7 @@ Ext.define('esapp.model.Completeness', {
     extend : 'esapp.model.Base',
 
     fields: [
-       {name: 'id', mapping:'productID'},
+       {name: 'id', mapping:'productid'},
        {name: 'firstdate'},
        {name: 'lastdate'},
        {name: 'totfiles'},

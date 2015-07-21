@@ -11,6 +11,7 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
     requires: [
         'esapp.view.acquisition.product.selectProductModel',
         'esapp.view.acquisition.product.selectProductController',
+        'esapp.view.acquisition.product.editProduct',
 
         'Ext.layout.container.Center',
         'Ext.grid.plugin.CellEditing',
@@ -27,37 +28,44 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
     modal: true,
     closable: true,
     closeAction: 'destroy', // 'hide',
+    resizable: false,
     maximizable: false,
-    width: 685,
+    width: 650,
     height: 800,
     layout: {
-        type  : 'border',
-        padding: 5
+        type  : 'fit'
+        //,padding: 5
     },
     autoScroll: false,
+
+    bbar : {
+        items : ['->',{
+            text: 'New product',
+            name: 'newproduct',
+            iconCls: 'fa fa-plus-circle fa-2x',
+            style: { color: 'green' },
+            hidden: false,
+            scale: 'medium',
+            handler: function () {
+                var newProductWin = new esapp.view.acquisition.product.editProduct({
+                    params: {
+                        edit: false
+                    }
+                });
+                newProductWin.show();
+            }
+        }]
+    },
+
     changesmade:false,
 
-//    tbar: Ext.create('Ext.toolbar.Toolbar', {
-//            items: [
-//                {
-//                    xtype: 'button',
-//                    text: 'Select Product',
-//                    name: 'selectroduct',
-//                    iconCls: 'fa fa-plus-circle',
-//                    style: { color: 'gray' },
-//                    hidden: true,
-//                    // glyph: 'xf055@FontAwesome',
-//                    scale: 'small',
-//                    handler: ''
-//                }
-//            ]
-//        }),
 
     initComponent: function () {
         var me = this
             ,cfg = {changesmade:false}
         ;
         Ext.apply(cfg, {
+
             listeners: {
                 close:me.onClose
             },
@@ -65,7 +73,7 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
             items : [{
                 xtype : 'grid',
                 region: 'center',
-                width: 650,
+                width: 630,
                 store: 'ProductsInactiveStore',
                 session:true,
 
@@ -93,7 +101,7 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                 multiColumnSort: false,
                 columnLines: false,
                 rowLines: true,
-                frame: false,
+                frame: true,
                 border: false,
 
                 features: [{
@@ -106,30 +114,27 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                     groupByText: 'Product category'
                 }],
 
-                listeners: {
-                    rowclick: function(gridview, record){
-                        //console.info(this);
-                        //console.info(record);
-                        //var productinfo = Ext.ComponentQuery.query('panel[id=productinfo]')[0];
-                        //productinfo.expand(true);
-                    }
-                },
+                //listeners: {
+                //    rowclick: function(gridview, record){
+                //        console.info(this);
+                //        console.info(record);
+                //        Ext.getCmp('productinfo').expand();
+                //    }
+                //},
 
                 columns : [{
                     text: '<div class="grid-header-style">Product categories</div>',
                     menuDisabled: true,
                     columns: [{
                         xtype: 'actioncolumn',
-                        hidden:true,
-                        width: 30,
+                        hidden:false,
+                        width: 35,
                         align: 'center',
                         sortable: false,
                         menuDisabled: true,
                         shrinkWrap: 0,
                         items: [{
                             icon: 'resources/img/icons/edit.png',
-                            // iconCls: 'fa fa-edit fa-2x', // xf044
-                            // cls: 'fa fa-edit fa-2x', // xf044
                             tooltip: 'Edit Product',
                             handler: 'editProduct'
                         }]
@@ -137,26 +142,19 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                         xtype:'templatecolumn',
                         header: 'Product',
                         tpl: new Ext.XTemplate(
-                                //'<b>{prod_descriptive_name}</b> <br> ' +
-                                //'<span class="smalltext">' +
-                                //'<b style="color:darkgrey">{productcode}' +
-                                //    '<tpl if="version != \'undefined\'">',
-                                //        ' - {version}',
-                                //    '</tpl>',
-                                //'</b>' +
-                                //'<p>{description}</p>' +
-                                //'</span>' +
-                                //
                                 '<b>{prod_descriptive_name}</b>' +
                                 '<tpl if="version != \'undefined\'">',
                                     '<b class="smalltext"> - {version}</b>',
                                 '</tpl>',
-                                '</br><span class="smalltext">' +
-                                '<b style="color:darkgrey">{productcode}</b>' +
+                                '<span class="smalltext">' +
+                                '<b style="color:darkgrey"> - {productcode}</b>' +
+                                '<tpl if="provider != \'undefined\'">',
+                                    '</br><b style="color:darkgrey">{provider}</b>',
+                                '</tpl>',
                                 '<p>{description}</p>' +
-                                '</span></br>'
+                                '</span>'
                             ),
-                        width: 500,
+                        width: 515,
                         cellWrap:true,
                         sortable: false,
                         hideable: false,
@@ -195,51 +193,38 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                                 // Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
                                 rec.get('activated') ? rec.set('activated', false) : rec.set('activated', true);
                                 grid.up().up().changesmade = true;
+                                //Ext.getCmp('productinfo').collapse();
                             }
                         }]
-        //                xtype: 'checkcolumn',
-        //                header: 'Active',
-        //                width: 80,
-        //                sortable: false,
-        //                dataIndex: 'activated',
-        //                stopSelection: false,
-        //                disabled: false,
-        //                menuDisabled:true,
-        //                listeners: {
-        //                  checkchange: function(chkBox, rowIndex, checked, eOpts){
-        ////                      console.info(chkBox);
-        ////                      console.info(rowIndex);
-        ////                      console.info(checked);
-        ////                      console.info(eOpts);
-        //                  }
-        //                }
                     }]
                 }]
-            }, {
-                region: 'east',
-                id: 'productinfo',
-                title: 'Product info',
-                autoWidth:true,
-                split: true,
-                collapsible: true,
-                collapsed: true,
-                floatable: false,
-                html: "TEST",
-                listeners: {
-                    expand: function(){
-                        this.setWidth(600);
-                        this.up().setWidth(1285);
-                    },
-                    collapse: function(){
-                        this.setWidth(5);
-                        this.up().setWidth(685);
-                    }
-                },
-                items: [
-                    {
-                        xtype:''
-                    }
-                ]
+            //}, {
+            //    region: 'east',
+            //    id: 'productinfo',
+            //    title: 'Product info',
+            //    autoWidth:true,
+            //    split: true,
+            //    collapsible: true,
+            //    collapsed: true,
+            //    floatable: false,
+            //    html: "TEST",
+            //    listeners: {
+            //        expand: function(){
+            //            this.setWidth(600);
+            //            this.up().setWidth(1240);
+            //            me.center();
+            //        },
+            //        collapse: function(){
+            //            this.setWidth(0);
+            //            this.up().setWidth(668);
+            //            me.center();
+            //        }
+            //    },
+            //    items: [
+            //        {
+            //            xtype:''
+            //        }
+            //    ]
             }]
         });
 

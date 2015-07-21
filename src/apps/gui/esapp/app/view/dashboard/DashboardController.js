@@ -2,6 +2,12 @@ Ext.define('esapp.view.dashboard.DashboardController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.dashboard-dashboard',
 
+    selectProduct: function(btn, event) {
+        var selectProductWin = new esapp.view.acquisition.product.selectProduct();
+        selectProductWin.down('grid').getStore().load();
+        selectProductWin.show();
+    },
+
     setupDashboard: function() {
         var me = this.getView();
 
@@ -18,8 +24,10 @@ Ext.define('esapp.view.dashboard.DashboardController', {
             pc2Active = false,
             pc3Active = false,
             pc1Disabled = true,
-            pc2Disabled = false,
-            pc3Disabled = true;
+            pc2DisabledPartial = true,
+            pc3DisabledPartial = true,
+            pc2DisabledAll = true,
+            pc3DisabledAll = true;
 
         this.getStore('dashboard').load({
             callback: function(records, options, success){
@@ -28,10 +36,12 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                     me.PC2_mode = dashboard.get('PC2_mode');
                     me.PC2_postgresql_status = dashboard.get('PC2_postgresql_status');
                     me.PC2_version = dashboard.get('PC2_version');
+
                     me.PC3_internet_status = dashboard.get('PC3_internet_status');
                     me.PC3_mode = dashboard.get('PC3_mode');
                     me.PC3_postgresql_status = dashboard.get('PC3_postgresql_status');
                     me.PC3_version = dashboard.get('PC3_version');
+
                     me.activePC = dashboard.get('activePC');
                     me.pc1_connection = dashboard.get('pc1_connection');
                     me.pc3_connection = dashboard.get('pc3_connection');
@@ -57,43 +67,65 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                     }
                     if (me.activePC == 'pc2') {
                         pc2Active = true;
+                        pc2DisabledAll = false;
+                        pc2DisabledPartial = false;
+                        pc3DisabledAll = true;
+
+                        maintabpanel.getTabBar().items.getAt(indexAcquisitionTab).show();
+                        acquisitiontab.enable();
+
+                        maintabpanel.getTabBar().items.getAt(indexProcessingTab).show();
+                        processingtab.enable();
+
+                        maintabpanel.getTabBar().items.getAt(indexDataManagementTab).show();
+                        datamanagementtab.enable();
 
                         if (me.PC2_mode == 'nominal') {
                             maintabpanel.getTabBar().items.getAt(indexAnalysisTab).hide();
                             analysistab.disable();
                         }
+                        else if (me.PC2_mode == 'recovery'){
+                            maintabpanel.getTabBar().items.getAt(indexAnalysisTab).show();
+                            analysistab.enable();
+                        }
                     }
                     if (me.activePC == 'pc3') {
                         pc3Active = true;
+                        pc3DisabledAll = false;
+                        pc2DisabledAll = true;
 
-                        maintabpanel.getTabBar().items.getAt(indexAcquisitionTab).hide();
-                        acquisitiontab.disable();
+                        if (me.PC3_mode == 'nominal') {
+                            maintabpanel.getTabBar().items.getAt(indexAcquisitionTab).hide();
+                            acquisitiontab.disable();
 
-                        maintabpanel.getTabBar().items.getAt(indexProcessingTab).hide();
-                        processingtab.disable();
+                            maintabpanel.getTabBar().items.getAt(indexProcessingTab).hide();
+                            processingtab.disable();
 
-                        maintabpanel.getTabBar().items.getAt(indexDataManagementTab).hide();
-                        datamanagementtab.disable();
+                            maintabpanel.getTabBar().items.getAt(indexDataManagementTab).hide();
+                            datamanagementtab.disable();
 
-                        maintabpanel.getTabBar().items.getAt(indexAnalysisTab).show();
-                        analysistab.enable();
+                            maintabpanel.getTabBar().items.getAt(indexAnalysisTab).show();
+                            analysistab.enable();
+                        }
+                        else if (me.PC3_mode == 'recovery') {
+                            pc3DisabledPartial = false;
+
+                            maintabpanel.getTabBar().items.getAt(indexAcquisitionTab).show();
+                            acquisitiontab.enable();
+
+                            maintabpanel.getTabBar().items.getAt(indexProcessingTab).show();
+                            processingtab.enable();
+
+                            maintabpanel.getTabBar().items.getAt(indexDataManagementTab).show();
+                            datamanagementtab.enable();
+
+                            maintabpanel.getTabBar().items.getAt(indexAnalysisTab).show();
+                            analysistab.enable();
+                        }
                     }
 
-                    if (me.PC2_mode == 'nominal'){
-                        pc2Disabled = false
-                        me.PC2_modeText = esapp.Utils.getTranslation('nominalmode')
-                    }
-                    else {
-                        me.PC2_modeText = esapp.Utils.getTranslation('recoverymode')
-                    }
-
-                    if (me.PC3_mode == 'nominal'){
-                        //pc3Disabled = false
-                        me.PC3_modeText = esapp.Utils.getTranslation('nominalmode')
-                    }
-                    else {
-                        me.PC3_modeText = esapp.Utils.getTranslation('recoverymode')
-                    }
+                    me.PC2_modeText = esapp.Utils.getTranslation(me.PC2_mode);
+                    me.PC3_modeText = esapp.Utils.getTranslation(me.PC3_mode);
 
                     PC1 = {
                         xtype: 'dashboard-pc1',
@@ -106,7 +138,8 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                         name:'dashboardpc2',
                         id: 'dashboardpc2',
                         paneltitle: esapp.Utils.getTranslation('processing_pc2'),
-                        setdisabled:pc2Disabled,
+                        setdisabledPartial:pc2DisabledPartial,
+                        setdisabledAll:pc2DisabledAll,
                         activePC:pc2Active,
                         activeversion: me.PC2_version,
                         currentmode: me.PC2_modeText,
@@ -119,7 +152,8 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                         name:'dashboardpc3',
                         id: 'dashboardpc3',
                         paneltitle: esapp.Utils.getTranslation('processing_pc3'),
-                        setdisabled: pc3Disabled,
+                        setdisabledPartial:pc3DisabledPartial,
+                        setdisabledAll:pc3DisabledAll,
                         activePC: pc3Active,
                         activeversion: me.PC3_version,
                         currentmode: me.PC3_modeText,
@@ -161,7 +195,8 @@ Ext.define('esapp.view.dashboard.DashboardController', {
 
                     PC2 = {
                         xtype: 'dashboard-pc2',
-                        setdisabled:pc2Disabled,
+                        setdisabledPartial:pc2DisabledPartial,
+                        setdisabledAll:pc2DisabledAll,
                         activePC:pc2Active
                     };
 

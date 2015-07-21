@@ -1,9 +1,9 @@
 Ext.define('esapp.model.DataSet', {
     extend : 'esapp.model.Base',
 
-//    idProperty : 'productID',
+//    idProperty : 'productid',
     fields: [
-       {name: 'productID', type: 'string', mapping: 'productID'},
+       {name: 'productid', type: 'string', mapping: 'productid'},
        {name: 'productcode', mapping: 'productcode'},
        {name: 'subproductcode', mapping: 'subproductcode'},
        {name: 'version', mapping: 'version'},
@@ -31,7 +31,7 @@ Ext.define('esapp.model.ProductMapSet', {
     extend : 'esapp.model.Base',
 
     fields: [
-        {name: 'productID', reference:'DataSet', type: 'string'},
+        {name: 'productid', reference:'DataSet', type: 'string'},
         {name: 'mapsetcode'},
         {name: 'defined_by'},
         {name: 'descriptive_name'},

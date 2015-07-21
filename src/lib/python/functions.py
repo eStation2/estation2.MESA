@@ -39,12 +39,12 @@ dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'der
 
 def getListVersions():
     # Return the list of installed versions as a dictionary, by looking at versioned dirs
-    base=es_constants.es2globals['base_dir']+"-"
+    base = es_constants.es2globals['base_dir']+"-"
     versions = []
-    vers_dirs=glob.glob(base+'*')
+    vers_dirs = glob.glob(base+'*')
     for ver in vers_dirs:
         if os.path.isdir(ver):
-            v=ver.replace(base,'')
+            v = ver.replace(base, '')
             versions.append(v)
 
     # Create empty dict
@@ -52,8 +52,8 @@ def getListVersions():
     for v in versions:
         versions_dict.append({'version': v})
 
-
     return versions_dict
+
 
 def setSystemSetting(setting=None, value=None):
     import ConfigParser
@@ -158,9 +158,14 @@ def rgb2html(rgb):
 
 def row2dict(row):
     d = {}
-    for column in row.c._all_col_set:
-        print row
-        d[column.name] = str(getattr(row, column.name))
+    if hasattr(row, "c"):
+        for column in row.c._all_col_set:
+            value = '' if str(getattr(row, column.name)) == 'None' else str(getattr(row, column.name))
+            d[column.name] = value
+    if hasattr(row, "_parent"):
+        for column in row._parent.keys:
+            value = '' if str(getattr(row, column)) == 'None' else str(getattr(row, column))
+            d[column] = value
 
     return d
 

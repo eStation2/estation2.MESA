@@ -4,7 +4,7 @@ Ext.define('esapp.view.system.PCVersionAdminModel', {
 
     stores: {
         versions: {
-            model: 'esapp.model.Versions',
+            model: 'esapp.model.Version',
             session: true
         }
     }

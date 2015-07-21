@@ -17,6 +17,8 @@ Ext.define("esapp.view.processing.ProcessInputProducts",{
 
     store : null,
 
+    cls: 'grid-color-yellow',
+
     viewConfig: {
         stripeRows: false,
         enableTextSelection: true,

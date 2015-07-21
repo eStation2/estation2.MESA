@@ -44,6 +44,11 @@ WEBPY_COOKIE_NAME = "webpy_session_id"
 urls = (
     "/pa(.*)", "ProductAcquisition",
     "/product/update", "UpdateProduct",
+    "/product/createproduct", "CreateProduct",
+    "/product/updateproductinfo", "UpdateProductInfo",
+    "/product/unassigndatasource", "UnassignProductDataSource",
+
+    "/categories", "GetCategories",
 
     "/dashboard/getdashboard", "GetDashboard",
 
@@ -58,9 +63,21 @@ urls = (
     "/dataacquisition", "DataAcquisition",
     "/dataacquisition/update", "UpdateDataAcquisition",
 
-    "/systemsettings", "SystemSettings",
-    "/systemsettings/update", "UpdateSystemSettings",
-    "/systemsettings/reset", "ResetSystemSettings",
+    "/eumetcastsource", "GetEumetcastSources",
+    "/eumetcastsource/create", "CreateEumetcastSource",
+    "/eumetcastsource/update", "UpdateEumetcastSource",
+    "/eumetcastsource/delete", "DeleteEumetcastSource",
+    "/eumetcastsource/assigntoproduct", "AssignEumetcastSource",
+
+    "/internetsource", "GetInternetSources",
+    "/internetsource/create", "CreateInternetSource",
+    "/internetsource/update", "UpdateInternetSource",
+    "/internetsource/delete", "DeleteInternetSource",
+    "/internetsource/assigntoproduct", "AssignInternetSource",
+
+    "/systemsettings", "UserSettings",
+    "/systemsettings/update", "UpdateUserSettings",
+    "/systemsettings/reset", "ResetUserSettings",
     "/systemsettings/systemreport", "SystemReport",
     "/systemsettings/installreport", "InstallReport",
     "/systemsettings/changemode", "ChangeMode",
@@ -69,6 +86,8 @@ urls = (
     "/systemsettings/getthemas", "GetThemas",
     "/systemsettings/changethema", "ChangeThema",
     "/systemsettings/changeloglevel", "ChangeLogLevel",
+    "/systemsettings/ipsettings", "IPSettings",
+    "/systemsettings/ipsettings/update", "UpdateIPSettings",
 
     "/processing", "Processing",
     "/processing/update", "UpdateProcessing",
@@ -105,7 +124,304 @@ class EsApp:
             functions.setUserSetting('default_language', getparams['lang'])
 
         render = web.template.render(es_constants.es2globals['base_dir']+'/apps/gui/esapp')
-        return render.index()
+        # print es_constants.es2globals['default_language']
+        if es_constants.es2globals['default_language'] == 'eng':
+            return render.index()
+        elif es_constants.es2globals['default_language'] == 'fra':
+            return render.index_fr()
+        else:
+            return render.index()
+
+
+class GetCategories:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        categories_dict_all = []
+        categories = querydb.get_categories()
+
+        if categories.__len__() > 0:
+            for row in categories:
+                row_dict = functions.row2dict(row)
+                internetsource = {'category_id': row_dict['category_id'],
+                                  'descriptive_name': row_dict['descriptive_name']}
+
+                categories_dict_all.append(internetsource)
+
+            categories_json = json.dumps(categories_dict_all,
+                                         ensure_ascii=False,
+                                         encoding='utf-8',
+                                         sort_keys=True,
+                                         indent=4,
+                                         separators=(', ', ': '))
+
+            categories_json = '{"success":"true", "total":'\
+                                   + str(categories.__len__())\
+                                   + ',"categories":'+categories_json+'}'
+
+        else:
+            categories_json = '{"success":false, "error":"No Categories defined!"}'
+
+        return categories_json
+
+
+class AssignInternetSource:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    def POST(self):
+        # getparams = json.loads(web.data())
+        getparams = web.input()
+
+        productinfo = {
+            'productcode': getparams['productcode'],
+            'subproductcode': getparams['subproductcode'],
+            'version': getparams['version'],
+            'data_source_id': getparams['data_source_id'],
+            'defined_by': 'JRC',
+            'type': 'INTERNET'
+        }
+
+        # datasourceinserted = querydb.insert_product_acquisition_datasource(productinfo, echo=False)
+
+        if self.crud_db.create('product_acquisition_data_source', productinfo):
+            insertstatus = '{"success":"true", "message":"Internet source assigned!"}'
+        else:
+            insertstatus = '{"success":false, "message":"An error occured while assigning the internet source!"}'
+
+        return insertstatus
+
+
+class AssignEumetcastSource:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    def POST(self):
+        # getparams = json.loads(web.data())
+        getparams = web.input()
+
+        productinfo = {
+            'productcode': getparams['productcode'],
+            'subproductcode': getparams['subproductcode'],
+            'version': getparams['version'],
+            'data_source_id': getparams['data_source_id'],
+            'defined_by': 'JRC',
+            'type': 'EUMETCAST'
+        }
+
+        if self.crud_db.create('product_acquisition_data_source', productinfo):
+            insertstatus = '{"success":"true", "message":"Internet source assigned!"}'
+        else:
+            insertstatus = '{"success":false, "message":"An error occured while assigning the internet source!"}'
+
+        return insertstatus
+
+
+class UnassignProductDataSource:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    def POST(self):
+        # getparams = json.loads(web.data())
+        getparams = web.input()
+
+        productinfo = {
+            'productcode': getparams['productcode'],
+            'subproductcode': getparams['subproductcode'],
+            'version': getparams['version'],
+            'data_source_id': getparams['data_source_id']
+        }
+
+        if self.crud_db.delete('product_acquisition_data_source', **productinfo):
+            unassignstatus = '{"success":"true", "message":"Data source unassigned!"}'
+        else:
+            unassignstatus = '{"success":false, "message":"An error occured while assigning the internet source!"}'
+
+        return unassignstatus
+
+
+class GetEumetcastSources:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        eumetcastsources_dict_all = []
+        eumetcastsources = querydb.get_eumetcastsources()
+
+        if eumetcastsources.__len__() > 0:
+            for row in eumetcastsources:
+                row_dict = functions.row2dict(row)
+                eumetcastsource = {'eumetcast_id': row_dict['eumetcast_id'],
+                                   'collection_name': row_dict['collection_name'],
+                                   'filter_expression_jrc': row_dict['filter_expression_jrc'],
+                                   'description': row_dict['description'],
+                                   'typical_file_name': row_dict['typical_file_name'],
+                                   'keywords_theme': row_dict['keywords_theme'],
+                                   'keywords_societal_benefit_area': row_dict['keywords_societal_benefit_area'],
+                                   'datasource_descr_id': row_dict['datasource_descr_id'],
+                                   'format_type': row_dict['format_type'],
+                                   'file_extension': row_dict['file_extension'],
+                                   'delimiter': row_dict['delimiter'],
+                                   'date_type': row_dict['date_type'],
+                                   'date_position': row_dict['date_position'],
+                                   'product_identifier': row_dict['product_identifier'],
+                                   'prod_id_position': row_dict['prod_id_position'],
+                                   'prod_id_length': row_dict['prod_id_length'],
+                                   'area_type': row_dict['area_type'],
+                                   'area_position': row_dict['area_position'],
+                                   'area_length': row_dict['area_length'],
+                                   'preproc_type': row_dict['preproc_type'],
+                                   'product_release': row_dict['product_release'],
+                                   'release_position': row_dict['release_position'],
+                                   'release_length': row_dict['release_length'],
+                                   'native_mapset': row_dict['native_mapset']}
+
+                eumetcastsources_dict_all.append(eumetcastsource)
+
+            eumetcastsources_json = json.dumps(eumetcastsources_dict_all,
+                                              ensure_ascii=False,
+                                              encoding='utf-8',
+                                              sort_keys=True,
+                                              indent=4,
+                                              separators=(', ', ': '))
+
+            eumetcastsources_json = '{"success":"true", "total":'\
+                                   + str(eumetcastsources.__len__())\
+                                   + ',"eumetcastsources":'+eumetcastsources_json+'}'
+
+        else:
+            eumetcastsources_json = '{"success":false, "error":"No Internet Sources defined!"}'
+
+        return eumetcastsources_json
+
+
+class GetInternetSources:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        internetsources_dict_all = []
+        internetsources = querydb.get_internetsources()
+
+        if internetsources.__len__() > 0:
+            for row in internetsources:
+                row_dict = functions.row2dict(row)
+                internetsource = {'internet_id': row_dict['internet_id'],
+                                  'defined_by': row_dict['defined_by'],
+                                  'descriptive_name': row_dict['descriptive_name'],
+                                  'description': row_dict['description'],
+                                  'modified_by': row_dict['modified_by'],
+                                  'update_datetime': row_dict['update_datetime'],
+                                  'url': row_dict['url'],
+                                  'user_name': row_dict['user_name'],
+                                  'password': row_dict['password'],
+                                  'type': row_dict['type'],
+                                  'include_files_expression': row_dict['include_files_expression'],
+                                  'files_filter_expression': row_dict['files_filter_expression'],
+                                  'status': row_dict['status'],
+                                  'pull_frequency': row_dict['pull_frequency'],
+                                  'frequency_id': row_dict['frequency_id'],
+                                  'start_date': row_dict['start_date'],
+                                  'end_date': row_dict['end_date'],
+                                  'datasource_descr_id': row_dict['datasource_descr_id'],
+                                  'format_type': row_dict['format_type'],
+                                  'file_extension': row_dict['file_extension'],
+                                  'delimiter': row_dict['delimiter'],
+                                  'date_type': row_dict['date_type'],
+                                  'date_position': row_dict['date_position'],
+                                  'product_identifier': row_dict['product_identifier'],
+                                  'prod_id_position': row_dict['prod_id_position'],
+                                  'prod_id_length': row_dict['prod_id_length'],
+                                  'area_type': row_dict['area_type'],
+                                  'area_position': row_dict['area_position'],
+                                  'area_length': row_dict['area_length'],
+                                  'preproc_type': row_dict['preproc_type'],
+                                  'product_release': row_dict['product_release'],
+                                  'release_position': row_dict['release_position'],
+                                  'release_length': row_dict['release_length'],
+                                  'native_mapset': row_dict['native_mapset']}
+
+                internetsources_dict_all.append(internetsource)
+
+            internetsources_json = json.dumps(internetsources_dict_all,
+                                              ensure_ascii=False,
+                                              encoding='utf-8',
+                                              sort_keys=True,
+                                              indent=4,
+                                              separators=(', ', ': '))
+
+            internetsources_json = '{"success":"true", "total":'\
+                                   + str(internetsources.__len__())\
+                                   + ',"internetsources":'+internetsources_json+'}'
+
+        else:
+            internetsources_json = '{"success":false, "error":"No Internet Sources defined!"}'
+
+        return internetsources_json
+
+
+class UpdateInternetSource:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    def PUT(self):
+        getparams = json.loads(web.data())  # get PUT data
+        if 'internetsources' in getparams:
+            internetsourceinfo = {'internet_id': getparams['internetsources']['internet_id'],
+                                  'defined_by': getparams['internetsources']['defined_by'],
+                                  'descriptive_name': getparams['internetsources']['descriptive_name'],
+                                  'description': getparams['internetsources']['description'],
+                                  'modified_by': getparams['internetsources']['modified_by'],
+                                  # 'update_datetime': getparams['internetsources']['update_datetime'],
+                                  'url': getparams['internetsources']['url'],
+                                  'user_name': getparams['internetsources']['user_name'],
+                                  'password': getparams['internetsources']['password'],
+                                  'type': getparams['internetsources']['type'],
+                                  'include_files_expression': getparams['internetsources']['include_files_expression'],
+                                  'files_filter_expression': getparams['internetsources']['files_filter_expression'],
+                                  'status': getparams['internetsources']['status'],
+                                  'pull_frequency': getparams['internetsources']['pull_frequency'],
+                                  'frequency_id': getparams['internetsources']['frequency_id'],
+                                  'start_date': int(getparams['internetsources']['start_date']),
+                                  'end_date': int(getparams['internetsources']['end_date']),
+                                  'datasource_descr_id': getparams['internetsources']['internet_id']}
+
+            datasourcedescrinfo = {'datasource_descr_id': getparams['internetsources']['internet_id'],
+                                  'format_type': getparams['internetsources']['format_type'],
+                                  'file_extension': getparams['internetsources']['file_extension'],
+                                  'delimiter': getparams['internetsources']['delimiter'],
+                                  'date_type': getparams['internetsources']['date_type'],
+                                  'date_position': getparams['internetsources']['date_position'],
+                                  'product_identifier': getparams['internetsources']['product_identifier'],
+                                  'prod_id_position': int(getparams['internetsources']['prod_id_position']),
+                                  'prod_id_length': int(getparams['internetsources']['prod_id_length']),
+                                  'area_type': getparams['internetsources']['area_type'],
+                                  'area_position': getparams['internetsources']['area_position'],
+                                  'area_length': int(getparams['internetsources']['area_length']),
+                                  'preproc_type': getparams['internetsources']['preproc_type'],
+                                  'product_release': getparams['internetsources']['product_release'],
+                                  'release_position': getparams['internetsources']['release_position'],
+                                  'release_length': int(getparams['internetsources']['release_length']),
+                                  'native_mapset': getparams['internetsources']['native_mapset']}
+
+            if self.crud_db.update('internet_source', internetsourceinfo):
+                if self.crud_db.update('datasource_description', datasourcedescrinfo):
+                    updatestatus = '{"success":"true", "message":"Internet data source and description updated!"}'
+                else:
+                    updatestatus = '{"success":"true", "message":"Internet data source updated!"}'
+            else:
+                updatestatus = '{"success":false, "message":"An error occured while updating the internet data source!"}'
+
+        else:
+            updatestatus = '{"success":false, "message":"No internet data source passed!"}'
+
+        return updatestatus
+
 
 class GetDashboard:
     def __init__(self):
@@ -121,7 +437,7 @@ class GetDashboard:
         getparams = web.input()
         systemsettings = functions.getSystemSettings()
         PC1_mode = ''
-        PC2_mode = ''
+        PC2_mode = 'nominal'
         PC3_mode = 'nominal'
         if systemsettings['role'].lower() == 'pc1':
             PC1_mode = systemsettings['mode'].lower()
@@ -142,7 +458,7 @@ class GetDashboard:
 
         dashboard_dict = {'type_installation': systemsettings['type_installation'].lower(),
                           'activePC': systemsettings['role'].lower(),
-                          'pc1_connection': 'false',
+                          'pc1_connection': 'true',
                           'pc3_connection': 'true',
                           'PC2_version': systemsettings['active_version'],
                           'PC2_mode': PC2_mode,
@@ -150,8 +466,8 @@ class GetDashboard:
                           'PC2_internet_status': 'true',
                           'PC3_version': '2.0.4',
                           'PC3_mode': PC3_mode,
-                          'PC3_postgresql_status': 'false',
-                          'PC3_internet_status': 'false'}
+                          'PC3_postgresql_status': 'true',
+                          'PC3_internet_status': 'true'}
 
         dashboard_json = json.dumps(dashboard_dict,
                                     ensure_ascii=False,
@@ -160,7 +476,7 @@ class GetDashboard:
                                     indent=4,
                                     separators=(', ', ': '))
 
-        dashboard_json = '{"success":true, "dashboard":'+dashboard_json + '}'
+        dashboard_json = '{"success":"true", "dashboard":'+dashboard_json + '}'
 
         return dashboard_json
 
@@ -192,7 +508,7 @@ class GetI18n:
                                            indent=4,
                                            separators=(', ', ': '))
 
-            translations_json = '{"success":true, "total":'\
+            translations_json = '{"success":"true", "total":'\
                                 + str(i18n.__len__())\
                                 + ',"translations":'+translations_json+'}'
 
@@ -230,7 +546,7 @@ class GetLanguages:
                                    indent=4,
                                    separators=(', ', ': '))
 
-            languages_json = '{"success":true, "total":'\
+            languages_json = '{"success":"true", "total":'\
                                   + str(languages.__len__())\
                                   + ',"languages":'+lang_json+'}'
 
@@ -252,7 +568,7 @@ class GetTimeseries:
         requestedtimeseries = json.loads(getparams.selectedTimeseries)
         tsFromPeriod = getparams.tsFromPeriod
         tsToPeriod = getparams.tsToPeriod
-        print tsFromPeriod
+        # print tsFromPeriod
 
         if getparams.yearTS != '':
             from_date = datetime.date(int(yearts), 01, 01)
@@ -389,8 +705,8 @@ class GetTimeseries:
                              indent=4,
                              separators=(', ', ': '))
         #
-        # timeseries_json = '{"success":true, "total":' + str(timeline.__len__()) + ',"timeline":'+timeline_json+'}'
-        # timeline_json = '{"success":true}'
+        # timeseries_json = '{"success":"true", "total":' + str(timeline.__len__()) + ',"timeline":'+timeline_json+'}'
+        # timeline_json = '{"success":"true"}'
         return ts_json
 
 
@@ -440,7 +756,7 @@ class TimeseriesProducts:
                                    indent=4,
                                    separators=(', ', ': '))
 
-            datamanagement_json = '{"success":true, "total":'\
+            datamanagement_json = '{"success":"true", "total":'\
                                   + str(db_products.__len__())\
                                   + ',"products":'+prod_json+'}'
 
@@ -496,7 +812,7 @@ class GetTimeLine:
                                    indent=4,
                                    separators=(', ', ': '))
 
-        timeline_json = '{"success":true, "total":' + str(timeline.__len__()) + ',"timeline":'+timeline_json+'}'
+        timeline_json = '{"success":"true", "total":' + str(timeline.__len__()) + ',"timeline":'+timeline_json+'}'
 
         # print timeline_json
         return timeline_json
@@ -568,9 +884,9 @@ class GetColorSchemes:
                                       indent=4,
                                       separators=(', ', ': '))
 
-            colorschemes = '{"success":true, "total":' + str(product_legends.__len__()) + ',"legends":'+legends_json+'}'
+            colorschemes = '{"success":"true", "total":' + str(product_legends.__len__()) + ',"legends":'+legends_json+'}'
         else:
-            colorschemes = '{"success":true, "message":"No legends defined for this product!"}'
+            colorschemes = '{"success":"true", "message":"No legends defined for this product!"}'
 
         return colorschemes
 
@@ -603,7 +919,7 @@ class ProductNavigatorDataSets:
                         mapset_dict['mapsetdatasets'] = []
                         all_mapset_datasets = p.get_subproducts(mapset=mapset)
                         for subproductcode in all_mapset_datasets:
-                            print productcode + ' - ' + subproductcode
+                            # print productcode + ' - ' + subproductcode
                             dataset_info = querydb.get_subproduct(productcode=productcode,
                                                                   version=version,
                                                                   subproductcode=subproductcode,
@@ -627,7 +943,7 @@ class ProductNavigatorDataSets:
                                    indent=4,
                                    separators=(', ', ': '))
 
-            datamanagement_json = '{"success":true, "total":'\
+            datamanagement_json = '{"success":"true", "total":'\
                                   + str(db_products.__len__())\
                                   + ',"products":'+prod_json+'}'
 
@@ -695,7 +1011,7 @@ class GetLogFile:
                                          indent=4,
                                          separators=(', ', ': '))
 
-        logfile_json = '{"success":true, "filename":\'' + logfilename + '\',"logfilecontent":\''+logfilecontent+'\'}'
+        logfile_json = '{"success":"true", "filename":\'' + logfilename + '\',"logfilecontent":\''+logfilecontent+'\'}'
 
         return logfile_json
 
@@ -717,7 +1033,7 @@ class ChangeMode:
             reloadmodules.reloadallmodules()
             # Reloading the settings does not work well so set manually
 
-            changemode_json = '{"success":true, "message":"Mode changed!"}'
+            changemode_json = '{"success":"true", "message":"Mode changed!"}'
         else:
             changemode_json = '{"success":false, "error":"No mode given!"}'
 
@@ -739,7 +1055,7 @@ class GetAvailableVersions:
                                    indent=4,
                                    separators=(', ', ': '))
 
-        versions_json = '{"success":true, "versions":'+versions_json+'}'
+        versions_json = '{"success":"true", "versions":'+versions_json+'}'
 
         # versions_json = '{"success":false, "error":"No versions available!"}'
 
@@ -758,7 +1074,7 @@ class ChangeVersion:
 
             # Todo: call system service to change the version! PROBLEMS: answer back to browser!
 
-            changeversion_json = '{"success":true, "message":"Version changed!"}'
+            changeversion_json = '{"success":"true", "message":"Version changed!"}'
         else:
             changeversion_json = '{"success":false, "error":"No version given!"}'
 
@@ -786,7 +1102,7 @@ class GetThemas:
                                      indent=4,
                                      separators=(', ', ': '))
 
-            themas_json = '{"success":true, "total":' + str(themas.__len__()) + ',"themas":' + themas_json + '}'
+            themas_json = '{"success":"true", "total":' + str(themas.__len__()) + ',"themas":' + themas_json + '}'
 
         else:
             themas_json = '{"success":false, "error":"No themas defined!"}'
@@ -806,7 +1122,7 @@ class ChangeThema:
 
             # ToDo: Query thema products and activate them.
 
-            changethema_json = '{"success":true, "message":"Thema changed!"}'
+            changethema_json = '{"success":"true", "message":"Thema changed!"}'
         else:
             changethema_json = '{"success":false, "error":"No thema given!"}'
 
@@ -829,7 +1145,7 @@ class ChangeLogLevel:
 
             # ToDo: Query thema products and activate them.
 
-            changethema_json = '{"success":true, "message":"Thema changed!"}'
+            changethema_json = '{"success":"true", "message":"Thema changed!"}'
         else:
             changethema_json = '{"success":false, "error":"No log level given!"}'
 
@@ -876,7 +1192,7 @@ class InstallReport:
         #return contents
 
 
-class ResetSystemSettings:
+class ResetUserSettings:
     def __init__(self):
         self.lang = "eng"
 
@@ -901,12 +1217,12 @@ class ResetSystemSettings:
         reloadmodules.reloadallmodules()
 
         # from config import es_constants as constantsreloaded
-        updatestatus = '{"success":true, "message":"System settings reset to factory settings!"}'
+        updatestatus = '{"success":"true", "message":"System settings reset to factory settings!"}'
 
         return updatestatus
 
 
-class UpdateSystemSettings:
+class UpdateUserSettings:
     def __init__(self):
         self.lang = "eng"
 
@@ -938,12 +1254,12 @@ class UpdateSystemSettings:
         from lib.python import reloadmodules
         reloadmodules.reloadallmodules()
 
-        updatestatus = '{"success":true, "message":"System settings updated!"}'
+        updatestatus = '{"success":"true", "message":"System settings updated!"}'
 
         return updatestatus
 
 
-class SystemSettings:
+class UserSettings:
     def __init__(self):
         self.lang = "eng"
 
@@ -966,11 +1282,13 @@ class SystemSettings:
                 settings[setting] = config_factorysettings.get('FACTORY_SETTINGS', setting, 0)
 
         systemsettings = functions.getSystemSettings()
-
         settings['id'] = 0
         settings['ip_pc1'] = systemsettings['ip_pc1']
         settings['ip_pc2'] = systemsettings['ip_pc2']
         settings['ip_pc3'] = systemsettings['ip_pc3']
+        settings['dns_ip'] = systemsettings['dns_ip']
+        settings['gateway_ip'] = systemsettings['gateway_ip']
+        settings['lan_access_ip'] = systemsettings['lan_access_ip']
         settings['type_installation'] = systemsettings['type_installation'].title()
         settings['role'] = systemsettings['role'].upper()
         settings['current_mode'] = systemsettings['mode'].title()
@@ -984,11 +1302,82 @@ class SystemSettings:
                                    indent=4,
                                    separators=(', ', ': '))
 
-        settings_json = '{"success":true, "systemsettings":'+settings_json+'}'
+        settings_json = '{"success":"true", "systemsettings":'+settings_json+'}'
 
         #systemsettings_json = '{"success":false, "error":"No ingestions defined!"}'
 
         return settings_json
+
+
+class IPSettings:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+
+        settings = {}
+        systemsettings = functions.getSystemSettings()
+        settings['id'] = 0
+        settings['ip_pc1'] = systemsettings['ip_pc1']
+        settings['ip_pc2'] = systemsettings['ip_pc2']
+        settings['ip_pc3'] = systemsettings['ip_pc3']
+        settings['dns_ip'] = systemsettings['dns_ip']
+        settings['gateway_ip'] = systemsettings['gateway_ip']
+        settings['lan_access_ip'] = systemsettings['lan_access_ip']
+        settings['type_installation'] = systemsettings['type_installation'].title()
+        settings['role'] = systemsettings['role'].upper()
+
+        settings_json = json.dumps(settings,
+                                   ensure_ascii=False,
+                                   sort_keys=True,
+                                   indent=4,
+                                   separators=(', ', ': '))
+
+        settings_json = '{"success":"true", "ipsettings":'+settings_json+'}'
+
+        #systemsettings_json = '{"success":false, "error":"No ingestions defined!"}'
+
+        return settings_json
+
+
+class UpdateIPSettings:
+    def __init__(self):
+        self.lang = "eng"
+
+    def PUT(self):
+        import ConfigParser
+
+        systemsettingsfilepath = es_constants.es2globals['settings_dir']+'/system_settings.ini'
+        # usersettingsfilepath = '/eStation2/settings/system_settings.ini'
+        config_systemsettings = ConfigParser.ConfigParser()
+        config_systemsettings.read(['system_settings.ini', systemsettingsfilepath])
+
+        getparams = json.loads(web.data())
+        for setting in getparams['ipsettings']:
+            if config_systemsettings.has_option('SYSTEM_SETTINGS', setting):
+                config_systemsettings.set('SYSTEM_SETTINGS', setting, getparams['ipsettings'][setting])
+
+        with open(systemsettingsfilepath, 'wb') as configfile:
+            config_systemsettings.write(configfile)
+            configfile.close()
+
+        # Call bash script to set IP address of local machine!
+        sudo_psw = 'mesadmin'
+        command = es_constants.es2globals['base_dir']+'/apps/es2system/network_config_1.0.sh ' + \
+                  getparams['ipsettings']['ip_pc1'] + ' ' + \
+                  getparams['ipsettings']['ip_pc2'] + ' ' + \
+                  getparams['ipsettings']['ip_pc3'] + ' ' + \
+                  getparams['ipsettings']['dns_ip'] + ' ' + \
+                  getparams['ipsettings']['gateway_ip'] + ' ' + \
+                  getparams['ipsettings']['lan_access_ip']
+
+        # print command
+        # ToDO: uncomment below line!
+        status = os.system('echo %s | sudo -S %s' % (sudo_psw, command))
+
+        updatestatus = '{"success":"true", "message":"IP settings updated!"}'
+
+        return updatestatus
 
 
 class GetProductLayer:
@@ -1258,7 +1647,7 @@ class Processing:
                                             indent=4,
                                             separators=(', ', ': '))
 
-                processing_chains_json = '{"success":true, "total":'\
+                processing_chains_json = '{"success":"true", "total":'\
                                          + str(processing_chains.__len__())\
                                          + ',"processes":'+processes_json+'}'
 
@@ -1277,7 +1666,7 @@ class UpdateProcessing:
                            'activated': getparams['processes']['process_activated']}
 
             if self.crud_db.update('processing', processinfo):
-                updatestatus = '{"success":true, "message":"Process updated!"}'
+                updatestatus = '{"success":"true", "message":"Process updated!"}'
             else:
                 updatestatus = '{"success":false, "message":"An error occured while updating the process!"}'
 
@@ -1299,7 +1688,7 @@ class UpdateProcessing:
                                           'activated': outputproduct['subactivated']}
 
                     if self.crud_db.update('process_product', processproductinfo):
-                        updatestatus = '{"success":true, "message":"Process output product updated!"}'
+                        updatestatus = '{"success":"true", "message":"Process output product updated!"}'
                     else:
                         updatestatus = '{"success":false, "message":"An error occured while updating the process output product!"}'
 
@@ -1371,7 +1760,7 @@ class DataSets:
                                    indent=4,
                                    separators=(', ', ': '))
 
-            datamanagement_json = '{"success":true, "total":'\
+            datamanagement_json = '{"success":"true", "total":'\
                                   + str(db_products.__len__())\
                                   + ',"products":'+prod_json+'}'
 
@@ -1576,6 +1965,71 @@ class ExecuteServiceTask:
         return servicesstatus_json
 
 
+class UpdateProductInfo:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        # getparams = json.loads(web.data())
+        getparams = web.input()
+
+        productinfo = {
+            'orig_productcode': getparams['orig_productcode'],
+            'orig_version': getparams['orig_version'],
+            'productcode': getparams['productcode'],
+            'subproductcode': getparams['productcode']+'_native',
+            'version': getparams['version'],
+            'provider': getparams['provider'],
+            'descriptive_name': getparams['prod_descriptive_name'],
+            'description': getparams['description'],
+            'category_id': getparams['category_id']}
+
+        productupdated = querydb.update_product_info(productinfo, echo=False)
+
+        if productupdated:
+            updatestatus = '{"success":"true", "message":"Product updated!"}'
+        else:
+            updatestatus = '{"success":false, "message":"An error occured while updating the product!"}'
+
+        return updatestatus
+
+
+class CreateProduct:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    def POST(self):
+        getparams = web.input()
+        if getparams['version'] == '':
+            version = 'undefined'
+        else:
+            version = getparams['version']
+
+        productinfo = {'productcode': getparams['productcode'],
+                       'subproductcode': getparams['productcode']+'_native',
+                       'version': version,
+                       'product_type': 'Native',
+                       'defined_by': 'JRC',
+                       'activated': 'false',
+                       'provider': getparams['provider'],
+                       'descriptive_name': getparams['prod_descriptive_name'],
+                       'description': getparams['description'],
+                       'category_id': getparams['category_id'],
+                       'frequency_id': 'undefined',
+                       'date_format': 'undefined',
+                       'data_type_id': 'undefined',
+                       'masked':'true'
+                       }
+
+        if self.crud_db.create('product', productinfo):
+            createstatus = '{"success":"true", "message":"Product created!"}'
+        else:
+            createstatus = '{"success":"false", "message":"An error occured while creating the product!"}'
+
+        return createstatus
+
+
 class UpdateProduct:
     def __init__(self):
         self.lang = "eng"
@@ -1591,7 +2045,7 @@ class UpdateProduct:
                        'activated': getparams['products']['activated']}
 
         if self.crud_db.update('product', productinfo):
-            updatestatus = '{"success":true, "message":"Product updated!"}'
+            updatestatus = '{"success":"true", "message":"Product updated!"}'
         else:
             updatestatus = '{"success":false, "message":"An error occured while updating the product!"}'
 
@@ -1613,22 +2067,23 @@ class UpdateDataAcquisition:
                                'activated': getparams['dataacquisitions']['activated'],
                                'store_original_data': getparams['dataacquisitions']['store_original_data']}
 
+        # ToDO: distinguish upodate of activated and store_original_data! Different queries?
         if self.crud_db.update('product_acquisition_data_source', dataacquisitioninfo):
-            if getparams['dataacquisitions']['activated']:
-                message = '<b>Activated</b> Get for productcode: </br><b>' + \
-                          getparams['dataacquisitions']['productcode'] + '</b>'
-            elif not getparams['dataacquisitions']['activated']:
-                message = '<b>Deactivated</b> Get for productcode: </br><b>' + \
-                          getparams['dataacquisitions']['productcode'] + '</b>'
-
             if getparams['dataacquisitions']['store_original_data']:
-                message = '<b>Activated</b> the Get Store Native for productcode: </br><b>' + \
-                          getparams['dataacquisitions']['productcode'] + '</b>'
+                message = '<b>Activated</b> Store Native for data source <b>' + getparams['dataacquisitions']['data_source_id'] + '</b></br>' + \
+                          ' for productcode: <b>' + getparams['dataacquisitions']['productcode'] + '</b>'
             elif not getparams['dataacquisitions']['store_original_data']:
-                message = '<b>Deactivated</b> the Get Store Native for productcode: </br><b>' + \
-                          getparams['dataacquisitions']['productcode'] + '</b>'
+                message = '<b>Deactivated</b> Store Native for data source <b>' + getparams['dataacquisitions']['data_source_id'] + '</b></br>' + \
+                          ' for productcode: <b>' + getparams['dataacquisitions']['productcode'] + '</b>'
 
-            updatestatus = '{"success":true, "message":"' + message + '"}'
+            if getparams['dataacquisitions']['activated']:
+                message = '<b>Activated</b> data source <b>' + getparams['dataacquisitions']['data_source_id'] + '</b></br>' + \
+                          ' for productcode: <b>' + getparams['dataacquisitions']['productcode'] + '</b>'
+            elif not getparams['dataacquisitions']['activated']:
+                message = '<b>Deactivated</b> data source <b>' + getparams['dataacquisitions']['data_source_id'] + '</b></br>' + \
+                          ' for productcode: <b>' + getparams['dataacquisitions']['productcode'] + '</b>'
+
+            updatestatus = '{"success":"true", "message":"' + message + '"}'
         else:
             updatestatus = '{"success":false, "message":"An error occured while updating the Get!"}'
 
@@ -1659,7 +2114,7 @@ class UpdateIngestion:
                 message = '<b>Activated</b> ' + message
             else:
                 message = '<b>Deactivated</b> '  + message
-            updatestatus = '{"success":true, "message":"' + message + '"}'
+            updatestatus = '{"success":"true", "message":"' + message + '"}'
         else:
             updatestatus = '{"success":false, "message":"An error occured while updating the Ingestion!"}'
 
@@ -1694,7 +2149,7 @@ class Ingestion:
                                          sort_keys=True,
                                          indent=4,
                                          separators=(', ', ': '))
-            ingestions_json = '{"success":true, "total":'+str(ingestions.__len__())+',"ingestions":'+ingestions_json+'}'
+            ingestions_json = '{"success":"true", "total":'+str(ingestions.__len__())+',"ingestions":'+ingestions_json+'}'
         else:
             ingestions_json = '{"success":false, "error":"No ingestions defined!"}'
 
@@ -1738,7 +2193,7 @@ class DataAcquisition:
                                       sort_keys=True,
                                       indent=4,
                                       separators=(', ', ': '))
-                dataacquisitions_json = '{"success":true, "total":'\
+                dataacquisitions_json = '{"success":"true", "total":'\
                                         + str(dataacquisitions.__len__())\
                                         + ',"dataacquisitions":'+acq_json+'}'
         else:
@@ -1756,7 +2211,7 @@ class ProductAcquisition:
         getparams = web.input()
         products = querydb.get_products_acquisition(echo=False, activated=getparams.activated)
         products_json = functions.tojson(products)
-        products_json = '{"success":true, "total":'+str(products.__len__())+',"products":['+products_json+']}'
+        products_json = '{"success":"true", "total":'+str(products.__len__())+',"products":['+products_json+']}'
         return products_json
 
 

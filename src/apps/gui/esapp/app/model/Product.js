@@ -2,20 +2,21 @@ Ext.define('esapp.model.Product', {
     extend : 'esapp.model.Base',
 //    extend: 'Ext.data.Model',
 
-    idProperty : 'productID',
+    idProperty : 'productid',
     fields: [
-       {name: 'productID'},
-       {name: 'productcode'},
-       {name: 'subproductcode'},
-       {name: 'version'},
-       {name: 'defined_by'},
-       {name: 'product_type'},
-       {name: 'activated', type: 'boolean'},
-       {name: 'prod_descriptive_name'},
-       {name: 'description'},
-       {name: 'category_id'},
-       {name: 'cat_descr_name'},
-       {name: 'order_index'}
+        {name: 'productid'},
+        {name: 'productcode'},
+        {name: 'subproductcode'},
+        {name: 'version'},
+        {name: 'defined_by'},
+        {name: 'product_type'},
+        {name: 'activated', type: 'boolean'},
+        {name: 'prod_descriptive_name'},
+        {name: 'description'},
+        {name: 'provider'},
+        {name: 'category_id'},
+        {name: 'cat_descr_name'},
+        {name: 'order_index'}
     ]
 
 //    ,grouper:{
@@ -54,7 +55,7 @@ Ext.define('esapp.model.Product', {
 //
 //    hasMany:[
 //        {
-//            foreignKey: 'productID',
+//            foreignKey: 'productid',
 //            associationKey: 'dataacquisitions',
 //            name: 'dataacquisitions',
 //            model: 'esapp.model.DataAcquisition'

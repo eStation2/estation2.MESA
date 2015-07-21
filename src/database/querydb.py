@@ -22,8 +22,110 @@ db = connectdb.ConnectDB().db
 dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
 
 
-def get_themas(echo=False):
+def update_product_info(productinfo, echo=False):
+    global db
+    status = False
+    try:
+        query = "UPDATE products.product SET " + \
+                "  subproductcode = '" + productinfo['productcode'] + "_native', " + \
+                "  descriptive_name = '" + productinfo['descriptive_name'] + "', " + \
+                "  description = '" + productinfo['description'] + "' " + \
+                "WHERE productcode = '" + productinfo['orig_productcode'] + "' " + \
+                "  AND subproductcode = '" + productinfo['orig_productcode'] + "_native' " + \
+                "  AND version = '" + productinfo['orig_version'] + "' "
 
+        result = db.execute(query)
+        db.commit()
+
+        query = "UPDATE products.product SET " + \
+                "  productcode = '" + productinfo['productcode'] + "', " + \
+                "  version = '" + productinfo['version'] + "', " + \
+                "  provider = '" + productinfo['provider'] + "', " + \
+                "  category_id = '" + productinfo['category_id'] + "' " + \
+                " WHERE productcode = '" + productinfo['orig_productcode'] + "' " + \
+                "  AND version = '" + productinfo['orig_version'] + "' "
+
+        result = db.execute(query)
+        db.commit()
+
+        status = True
+
+        return status
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("update_product_info: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+        return status
+
+
+
+def get_categories(echo=False):
+    global db
+    try:
+        query = "SELECT * FROM products.product_category ORDER BY category_id"
+        categories = db.execute(query)
+        categories = categories.fetchall()
+
+        return categories
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_themas: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
+def get_eumetcastsources(echo=False):
+    global db
+    try:
+        query = "SELECT * FROM products.eumetcast_source e LEFT OUTER JOIN products.datasource_description dsd " + \
+                " ON e.datasource_descr_id = dsd.datasource_descr_id " + \
+                "ORDER BY eumetcast_id ASC "
+        eumetcastsources = db.execute(query)
+        eumetcastsources = eumetcastsources.fetchall()
+
+        return eumetcastsources
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_themas: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
+def get_internetsources(echo=False):
+    global db
+    try:
+        query = "SELECT * FROM products.internet_source i LEFT OUTER JOIN products.datasource_description dsd " + \
+                " ON i.datasource_descr_id = dsd.datasource_descr_id " + \
+                "ORDER BY descriptive_name ASC "
+        internetsources = db.execute(query)
+        internetsources = internetsources.fetchall()
+
+        return internetsources
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_themas: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
+def get_themas(echo=False):
     global db
     try:
         query = "SELECT thema_id, description FROM products.thema ORDER BY thema_id ASC"
@@ -217,7 +319,7 @@ def get_timeseries_subproducts(echo=False,  productcode=None, version='undefined
     try:
         p = db.product._table
 
-        s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productID'),
+        s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productid'),
                     p.c.productcode,
                     p.c.subproductcode,
                     p.c.version,
@@ -295,7 +397,7 @@ def get_timeseries_products(echo=False,  masked=None):
         pc = db.product_category._table
         p = db.product._table
 
-        s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productID'),
+        s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productid'),
                     p.c.productcode,
                     p.c.subproductcode,
                     p.c.version,
@@ -311,7 +413,7 @@ def get_timeseries_products(echo=False,  masked=None):
                     pc.c.order_index]).select_from(p.outerjoin(pc, p.c.category_id == pc.c.category_id))
 
         s = s.alias('pl')
-        pl = db.map(s, primary_key=[s.c.productID])
+        pl = db.map(s, primary_key=[s.c.productid])
 
         if masked is None:
             where = and_(pl.c.timeseries_role == 'Initial')
@@ -570,7 +672,7 @@ def get_ingestions(echo=False):
     try:
         i = db.ingestion._table
         m = db.mapset._table
-        s = select([func.CONCAT(i.c.productcode, '_', i.c.version).label('productID'),
+        s = select([func.CONCAT(i.c.productcode, '_', i.c.version).label('productid'),
                     i.c.productcode,
                     i.c.subproductcode,
                     i.c.version,
@@ -580,7 +682,7 @@ def get_ingestions(echo=False):
                     m.c.descriptive_name.label('mapsetname')]).select_from(i.outerjoin(m, i.c.mapsetcode == m.c.mapsetcode))
 
         s = s.alias('ingest')
-        i = db.map(s, primary_key=[s.c.productID, i.c.subproductcode, i.c.mapsetcode])
+        i = db.map(s, primary_key=[s.c.productid, i.c.subproductcode, i.c.mapsetcode])
 
         where = and_(i.c.defined_by != 'Test_JRC')
         ingestions = i.filter(where).order_by(desc(i.productcode)).all()
@@ -620,25 +722,39 @@ def get_ingestions(echo=False):
 def get_dataacquisitions(echo=False):
     global db
     try:
-        pa = db.product_acquisition_data_source._table
-        s = select([ func.CONCAT(pa.c.productcode, '_', pa.c.version).label('productID'),
-                     pa.c.productcode,
-                     pa.c.subproductcode,
-                     pa.c.version,
-                     pa.c.data_source_id,
-                     pa.c.defined_by,
-                     pa.c.type,
-                     pa.c.activated,
-                     pa.c.store_original_data,
-                     expression.literal("05/06/2014").label('latest')], from_obj=[pa])
+        # pa = db.product_acquisition_data_source._table
+        # s = select([ func.CONCAT(pa.c.productcode, '_', pa.c.version).label('productid'),
+        #              pa.c.productcode,
+        #              pa.c.subproductcode,
+        #              pa.c.version,
+        #              pa.c.data_source_id,
+        #              pa.c.defined_by,
+        #              pa.c.type,
+        #              pa.c.activated,
+        #              pa.c.store_original_data,
+        #              expression.literal("05/06/2014").label('latest')], from_obj=[pa])
+        #
+        # s = s.alias('mypa')
+        # pa = db.map(s, primary_key=[s.c.productid])
+        # dataacquisitions = pa.order_by(desc(pa.productcode)).all()
 
-        s = s.alias('mypa')
-        pa = db.map(s, primary_key=[s.c.productID])
-        dataacquisitions = pa.order_by(desc(pa.productcode)).all()
+        query = " SELECT CONCAT(products.product_acquisition_data_source.productcode, '_', products.product_acquisition_data_source.version) AS productid, " + \
+                "        productcode, " + \
+                "        subproductcode, " + \
+                "        version, " + \
+                "        data_source_id, " + \
+                "        defined_by, " + \
+                "        type, " + \
+                "        activated, " + \
+                "        store_original_data, " + \
+                "        '05/06/2014' AS latest " + \
+                " FROM products.product_acquisition_data_source ORDER BY productcode DESC"
+        dataacquisitions = db.execute(query)
+        dataacquisitions = dataacquisitions.fetchall()
 
-        # if echo:
-        #     for row in dataacquisitions:
-        #         print row
+        if echo:
+            for row in dataacquisitions:
+                print row
 
         return dataacquisitions
 
@@ -675,22 +791,23 @@ def get_products_acquisition(echo=False, activated=None):
                                        pads.c.subproductcode,
                                        pads.c.version])
 
-        s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productID'),
+        s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productid'),
                     p.c.productcode,
                     p.c.subproductcode,
                     p.c.version,
                     p.c.defined_by,
                     p.c.activated,
                     p.c.product_type,
-                    p.c.descriptive_name.label('prod_descriptive_name'),
-                    p.c.description,
+                    func.coalesce(p.c.descriptive_name, '').label('prod_descriptive_name'),
+                    func.coalesce(p.c.description, '').label('description'),
+                    func.coalesce(p.c.provider, '').label('provider'),
                     p.c.masked,
                     pc.c.category_id,
                     pc.c.descriptive_name.label('cat_descr_name'),
                     pc.c.order_index]).select_from(p.outerjoin(pc, p.c.category_id == pc.c.category_id))
 
         s = s.alias('pl')
-        db.pl = db.map(s, primary_key=[s.c.productID])
+        db.pl = db.map(s, primary_key=[s.c.productid])
 
         if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
             where = and_(db.pl.c.product_type == 'Native',
@@ -753,7 +870,7 @@ def get_products(echo=False, activated=None, masked=None):
         pc = db.product_category._table
         p = db.product._table
 
-        s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productID'),
+        s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productid'),
                     p.c.productcode,
                     p.c.subproductcode,
                     p.c.version,
@@ -768,7 +885,7 @@ def get_products(echo=False, activated=None, masked=None):
                     pc.c.order_index]).select_from(p.outerjoin(pc, p.c.category_id == pc.c.category_id))
 
         s = s.alias('pl')
-        pl = db.map(s, primary_key=[s.c.productID])
+        pl = db.map(s, primary_key=[s.c.productid])
 
         if masked is None:
             if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
@@ -1552,7 +1669,7 @@ def get_processingchains_input_products(process_id=None):
         pi = db.map(s, primary_key=[s.c.process_id])
         db.pi = pi
 
-        s = select([func.CONCAT(product.c.productcode, '_', product.c.version).label('productID'),
+        s = select([func.CONCAT(product.c.productcode, '_', product.c.version).label('productid'),
                     product.c.productcode.label('prod_productcode'),
                     product.c.subproductcode.label('prod_subproductcode'),
                     product.c.version.label('prod_version'),
@@ -1567,7 +1684,7 @@ def get_processingchains_input_products(process_id=None):
             select_from(product.outerjoin(pc, product.c.category_id == pc.c.category_id))
 
         s = s.alias('p')
-        p = db.map(s, primary_key=[s.c.productID])
+        p = db.map(s, primary_key=[s.c.productid])
         db.p = p
 
         processing_chains = db.join(db.pi, db.p, and_(db.pi.productcode == db.p.prod_productcode,
@@ -1631,7 +1748,7 @@ def get_processingchain_output_products(process_id=None):
 
             s = select([func.CONCAT(product.c.productcode, '_',
                                     product.c.subproductcode, '_',
-                                    product.c.version).label('productID'),
+                                    product.c.version).label('productid'),
                         product.c.productcode.label('prod_productcode'),
                         product.c.subproductcode.label('prod_subproductcode'),
                         product.c.version.label('prod_version'),
@@ -1645,7 +1762,7 @@ def get_processingchain_output_products(process_id=None):
                 select_from(product.outerjoin(pc, product.c.category_id == pc.c.category_id))
 
             s = s.alias('p')
-            p = db.map(s, primary_key=[s.c.productID])
+            p = db.map(s, primary_key=[s.c.productid])
             db.p = p
 
             where = and_(db.pfo.c.process_id == myprocess_id,

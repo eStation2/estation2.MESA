@@ -20,7 +20,7 @@ Ext.define('esapp.model.InputProducts', {
 
     fields: [
         {name: 'process_id', reference:'Processing', type: 'string'},
-        {name: 'productID', type: 'string', mapping: 'productID'},
+        {name: 'productid', type: 'string', mapping: 'productid'},
         {name: 'productcode'},
         {name: 'subproductcode'},
         {name: 'version'},
@@ -48,7 +48,7 @@ Ext.define('esapp.model.OutputProducts', {
     //idProperty: 'process_id',
     fields: [
         {name: 'process_id', reference:'Processing', type: 'string', critical: true},
-        {name: 'productID', type: 'string', mapping: 'productID'},
+        {name: 'productid', type: 'string', mapping: 'productid'},
         {name: 'productcode', critical: true},
         {name: 'subproductcode', critical: true},
         {name: 'version', critical: true},
@@ -77,7 +77,7 @@ Ext.define('esapp.model.ProcessingProductMapSet', {
     extend : 'esapp.model.Base',
 
     fields: [
-        {name: 'productID', reference:'InputProducts', type: 'string'},
+        {name: 'productid', reference:'InputProducts', type: 'string'},
         {name: 'mapsetcode'},
         {name: 'defined_by'},
         {name: 'descriptive_name'},

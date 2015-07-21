@@ -3,9 +3,9 @@ Ext.define('esapp.model.DataAcquisition', {
 //    extend: 'Ext.data.Model',
 //    alias: 'model.dataacquisitions',
 
-//    idProperty : 'productID',
+//    idProperty : 'productid',
     fields: [
-       {name: 'productID'}, //, reference: { parent: 'ProductAcquisition' }},
+       {name: 'productid'}, //, reference: { parent: 'ProductAcquisition' }},
        {name: 'productcode'},
        {name: 'subproductcode'},
        {name: 'version'},

@@ -1,9 +1,9 @@
 Ext.define('esapp.model.ProductNavigator', {
     extend : 'esapp.model.Base',
 
-//    idProperty : 'productID',
+//    idProperty : 'productid',
     fields: [
-       {name: 'productID', type: 'string', mapping: 'productID'},
+       {name: 'productid', type: 'string', mapping: 'productid'},
        {name: 'productcode', mapping: 'productcode'},
        {name: 'subproductcode', mapping: 'subproductcode'},
        {name: 'version', mapping: 'version'},
@@ -69,7 +69,7 @@ Ext.define('esapp.model.ProductNavigatorMapSet', {
     extend : 'esapp.model.Base',
 
     fields: [
-        {name: 'productID', reference:'ProductNavigator', type: 'string'},
+        {name: 'productid', reference:'ProductNavigator', type: 'string'},
         {name: 'mapsetcode'},
         {name: 'defined_by'},
         {name: 'descriptive_name'},

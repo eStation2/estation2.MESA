@@ -82,13 +82,21 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
 
     ,selectProduct: function(btn, event) {
         var selectProductWin = new esapp.view.acquisition.product.selectProduct();
-        selectProductWin.down().getStore().load();
+        selectProductWin.down('grid').getStore().load();
         selectProductWin.show();
     }
 
 
     ,editProduct: function(grid, rowIndex, row){
-        var editProductWin = new esapp.view.acquisition.product.editProduct();
+        var record = grid.getStore().getAt(rowIndex);
+        var editProductWin = new esapp.view.acquisition.product.editProduct({
+            params: {
+                edit: true,
+                product: record,
+                orig_productcode: record.get('productcode'),
+                orig_version : record.get('version')
+            }
+        });
         editProductWin.show();
 
 //        win = Ext.create('esapp.view.acquisition.product.editProduct', {

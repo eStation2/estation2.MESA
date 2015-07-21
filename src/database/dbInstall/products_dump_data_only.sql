@@ -15,21 +15,27 @@ SET search_path = analysis, pg_catalog;
 -- Data for Name: i18n; Type: TABLE DATA; Schema: analysis; Owner: estation
 --
 
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('help', 'Help', 'Aidez', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('dashboard', 'Dashboard', 'Tableau de borde', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('acquisition', 'Acquisition', 'Acquisition', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('processing', 'Processing', 'Traitement', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('logfile', 'Log file', 'Fichier journal', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('systemsettings', 'System settings', 'System settings', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('nominalmode', 'Nominal mode', 'Nominal mode', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('processing_pc3', 'Analysis (PC3)', 'Analysis (PC3)', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('mesa_full_estation', 'MESA Full eStation', 'MESA Plein eStation', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('recoverymode', 'Recovery mode', 'Recovery mode', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('dashboard', 'Dashboard', 'Tableau de borde', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('processing_pc2', 'Processing (PC2)', 'Processing (PC2)', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('system', 'System', 'Système', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('datamanagement', 'Data Management', 'Gestion des données', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('mesa_light_estation', 'MESA Light eStation', 'MESA eStation Legere', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('analysis', 'Analysis', 'Analyse', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('system', 'System', 'Système', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('help', 'Help', 'Aidez', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('mesa_full_estation', 'MESA Full eStation', 'MESA Plein eStation', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('logfile', 'Log file', 'Fichier journal', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('mesa_light_estation', 'MESA Light eStation', 'MESA eStation Legere', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('processing_pc2', 'Processing (PC2)', 'Processing (PC2)', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('processing_pc3', 'Analysis (PC3)', 'Analysis (PC3)', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('systemsettings', 'System settings', 'System settings', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('nominal', 'Nominal mode', 'Nominal mode', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('recovery', 'Recovery mode', 'Recovery mode', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('editproduct', 'Edit product', NULL, NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('newproduct', 'New product', NULL, NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('assigninternetsource', 'Assign Internet Source to product', NULL, NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('internetsources', 'Internet Sources', NULL, NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('assigneumetcastsource', 'Assign Eumetcast Source to product', NULL, NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('eumetcastsources', 'Eumetcast Sources', NULL, NULL, NULL, NULL, NULL);
 
 
 --
@@ -1749,6 +1755,7 @@ INSERT INTO date_format (date_format, definition) VALUES ('HHMM', 'Hourly or min
 INSERT INTO date_format (date_format, definition) VALUES ('YYMMK', 'Two digit Year, two digit month and dekad indicator (1..3). Applies to FEWSNET products');
 INSERT INTO date_format (date_format, definition) VALUES ('YYYY_MM_DKX', 'Four digit Year. Two digit Month. Dekad indicator (values dk1, dk2 or dk3). Applies to TAMSAT products');
 INSERT INTO date_format (date_format, definition) VALUES ('YYYYdMMdK', 'Two digit Year. A dot. Two digit month. A dot.  Dekad indicator (1..3). Applies to CHIRP products');
+INSERT INTO date_format (date_format, definition) VALUES ('undefined', 'undefined');
 
 
 --
@@ -2573,6 +2580,7 @@ INSERT INTO process_product (process_id, productcode, subproductcode, version, m
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (5, 'vgt-ndvi', 'ndv', 'sv2-pv2.1', 'SPOTV-Africa-1km', 'INPUT', true, false, 'YYYYMMDD', 20030101, 20121231);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (5, 'vgt-ndvi', 'diff_linearx2', 'sv2-pv2.1', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'YYYYMMDD', NULL, NULL);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (5, 'vgt-ndvi', 'linearx2diff_linearx2', 'sv2-pv2.1', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'YYYYMMDD', NULL, NULL);
+INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (4, 'vgt-ndvi', 'ndv', 'spot-v1', 'SPOTV-Africa-1km', 'INPUT', true, false, 'YYYYMMDD', 19980401, 20030121);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (1, 'fewsnet-rfe', '10d', '2.0', 'FEWSNET-Africa-8km', 'INPUT', true, false, 'YYYYMMDD', NULL, NULL);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (2, 'vgt-ndvi', 'ndv', 'spot-v2', 'SPOTV-Africa-1km', 'INPUT', true, false, 'YYYYMMDD', NULL, NULL);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (3, 'chirps-dekad', '10d', '2.0', 'CHIRP-Africa-5km', 'INPUT', true, false, 'YYYYMMDD', NULL, NULL);
@@ -2582,7 +2590,6 @@ INSERT INTO process_product (process_id, productcode, subproductcode, version, m
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (5, 'vgt-ndvi', '10dmax', 'sv2-pv2.1', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'MMDD', NULL, NULL);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (5, 'vgt-ndvi', '10dmed', 'sv2-pv2.1', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'MMDD', NULL, NULL);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (5, 'vgt-ndvi', 'ndvi_linearx1', 'sv2-pv2.1', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'YYYYMMDD', NULL, NULL);
-INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (4, 'vgt-ndvi', 'ndv', 'spot-v1', 'SPOTV-Africa-1km', 'INPUT', true, false, 'YYYYMMDD', 19880401, 20030121);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (5, 'vgt-ndvi', 'ndvi_linearx2', 'sv2-pv2.1', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'YYYYMMDD', NULL, NULL);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (5, 'vgt-ndvi', '10davg_linearx2', 'sv2-pv2.1', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'MMDD', NULL, NULL);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (5, 'vgt-ndvi', '10dmin_linearx2', 'sv2-pv2.1', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'MMDD', NULL, NULL);
@@ -2648,6 +2655,7 @@ INSERT INTO sub_datasource_description (productcode, subproductcode, version, da
 INSERT INTO sub_datasource_description (productcode, subproductcode, version, datasource_descr_id, scale_factor, scale_offset, no_data, data_type_id, mask_min, mask_max, re_process, re_extract) VALUES ('lsasaf-lst', 'lst', 'undefined', 'EO:EUM:DAT:MSG:LST-SEVIRI', 0.0100000000000000002, 0, -8000, 'Int16', 1, NULL, 'lst', 'LST');
 INSERT INTO sub_datasource_description (productcode, subproductcode, version, datasource_descr_id, scale_factor, scale_offset, no_data, data_type_id, mask_min, mask_max, re_process, re_extract) VALUES ('modis-ba', 'firedate', 'undefined', 'UMD:MCD45A1:HDF:51', 1, 0, 9999, 'Int16', 0, 367, 'burndate_glb', 'burndate');
 INSERT INTO sub_datasource_description (productcode, subproductcode, version, datasource_descr_id, scale_factor, scale_offset, no_data, data_type_id, mask_min, mask_max, re_process, re_extract) VALUES ('tamsat-rfe', '10d', '2.0', 'EO:EUM:DAT:MSG:RFE', 1, 0, -99, 'Int16', NULL, NULL, NULL, NULL);
+INSERT INTO sub_datasource_description (productcode, subproductcode, version, datasource_descr_id, scale_factor, scale_offset, no_data, data_type_id, mask_min, mask_max, re_process, re_extract) VALUES ('modis-chla', 'chla-day', 'v2013.1', 'GSFC:CGI:MODIS:CHLA:1D', 1, 0, -32767, 'Float32', NULL, NULL, NULL, NULL);
 INSERT INTO sub_datasource_description (productcode, subproductcode, version, datasource_descr_id, scale_factor, scale_offset, no_data, data_type_id, mask_min, mask_max, re_process, re_extract) VALUES ('msg-mpe', 'mpe', 'undefined', 'EO:EUM:DAT:MSG:MPE-GRIB', 900, 0, 9999, 'Float32', NULL, NULL, NULL, NULL);
 INSERT INTO sub_datasource_description (productcode, subproductcode, version, datasource_descr_id, scale_factor, scale_offset, no_data, data_type_id, mask_min, mask_max, re_process, re_extract) VALUES ('vgt-fapar', 'fapar', 'V1.3', 'EO:EUM:DAT:PROBA-V:FAPAR', 0.00400000000000000008, 0, 255, 'Byte', NULL, NULL, 'FAPAR', '.h5');
 INSERT INTO sub_datasource_description (productcode, subproductcode, version, datasource_descr_id, scale_factor, scale_offset, no_data, data_type_id, mask_min, mask_max, re_process, re_extract) VALUES ('modis-firms', '1day', 'v5.0', 'FIRMS:NASA', 1, 0, 0, 'Byte', NULL, NULL, NULL, NULL);

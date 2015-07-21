@@ -46,8 +46,8 @@ Ext.define('esapp.view.main.Main', {
                 stateId: 'navigation-panel',
                 id: 'west-panel', // see Ext.getCmp() below
                 title: '<span class="panel-title-style">eStation 2.0</span>',
-                split: true,
-                width: 0,
+                split: false,
+                width: 2,
                 collapsible: false,
                 collapsed: true
                 //animCollapse: true,

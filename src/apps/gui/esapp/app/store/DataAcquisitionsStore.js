@@ -65,7 +65,7 @@ Ext.define('esapp.store.DataAcquisitionsStore', {
 //var data = {
 //    "success": true,
 //    "DataAcquisition": [{
-//         "productID": "vgt_ndvi_vgt_ndvi_native_undefined",
+//         "productid": "vgt_ndvi_vgt_ndvi_native_undefined",
 //         "productcode": "vgt_ndvi",
 //         "subproductcode": "vgt_ndvi_native",
 //         "version": "undefined",

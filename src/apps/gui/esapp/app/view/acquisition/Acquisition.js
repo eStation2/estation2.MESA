@@ -18,6 +18,8 @@ Ext.define("esapp.view.acquisition.Acquisition",{
         'esapp.view.acquisition.product.selectProduct',
         'esapp.view.acquisition.product.editProduct',
 
+        'esapp.view.acquisition.product.InternetSourceAdmin',
+
         'Ext.layout.container.Center',
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.column.Widget',
@@ -33,15 +35,19 @@ Ext.define("esapp.view.acquisition.Acquisition",{
     name:'acquisitionmain',
 
     store: 'ProductsActiveStore',
-//    referenceHolder: true,
-//    reference: 'ProductAcquisitionsGrid',
-//    bind: {
-//        store:'{products}'
-//    },
-//    bind:'{products}',
-//    session:true,
 
-    // title: 'Product Acquisition Dashboard',
+    //referenceHolder: true,
+    //reference: 'ProductAcquisitionsGrid',
+    //bind: {
+    //    store:'{products}'
+    //},
+    //bind:'{products}',
+    //session:true,
+    //title: 'Product Acquisition Dashboard',
+    //cls: 'extra-alt',
+    //selModel : {allowDeselect : false
+    //},
+
     viewConfig: {
         stripeRows: true,
         enableTextSelection: true,
@@ -50,11 +56,6 @@ Ext.define("esapp.view.acquisition.Acquisition",{
         resizable:false,
         trackOver:true
     },
-    //cls: 'extra-alt',
-
-    // selModel : {
-    //    allowDeselect : false
-    // },
 
     collapsible: false,
     suspendLayout:false,
@@ -78,8 +79,8 @@ Ext.define("esapp.view.acquisition.Acquisition",{
     }],
 
     plugins:[{
-//        ptype:'lazyitems'
-//    },{
+    //    ptype:'lazyitems'
+    //},{
         ptype:'cellediting'
     }],
 
@@ -109,7 +110,7 @@ Ext.define("esapp.view.acquisition.Acquisition",{
 
                     if (btn.pressed){
                         // ToDo: check if logged in!
-                        console.info(acq_main[0]);
+                        //console.info(acq_main[0]);
 
                         acq_main[0].columns[3].setWidth(575);
                         acq_main[0].columns[3].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 111px; left: 0px; tabindex="-1">' +
@@ -145,7 +146,7 @@ Ext.define("esapp.view.acquisition.Acquisition",{
 
                         addproductbtn[0].show();
                         acq_main[0].columns[0].show();  // Edit product action column
-                        //acq_main[0].columns[2].show();
+                        acq_main[0].columns[2].show();
                         //acq_main[0].columns[3].show();
                         Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
                             dataacquisitiongrid.columns[1].show();
@@ -197,33 +198,32 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                             dataacquisitiongrid.columns[2].hide();
                             dataacquisitiongrid.columns[3].hide();
                         });
-//                        Ext.Object.each(checkColumns, function(id, chkCol, myself) {
-//                            chkCol.disable();
-//                        });
+                        //Ext.Object.each(checkColumns, function(id, chkCol, myself) {
+                        //    chkCol.disable();
+                        //});
                         // TODO: Disable action columns - problem icon not visible!
-//                        Ext.Object.each(actionColumns, function(id, actionCol, myself) {
-//                            actionCol.disable();
-//                            actionCol.items[0].disabled = true;
-//                            actionCol.disableAction(0);
-//                            actionCol.updateLayout();
-//                        })
+                        //Ext.Object.each(actionColumns, function(id, actionCol, myself) {
+                        //    actionCol.disable();
+                        //    actionCol.items[0].disabled = true;
+                        //    actionCol.disableAction(0);
+                        //    actionCol.updateLayout();
+                        //})
                         btn.setIconCls('fa fa-lock fa-2x');
                     }
 
                     Ext.resumeLayouts(true);
                     // acq_main.updateLayout();
-
-        //                var toggleFn = newValue ? 'disable' : 'enable';
-        //                Ext.each(this.query('button'), function(item) {
-        //                    item[toggleFn]();
-        //                });
+                    //var toggleFn = newValue ? 'disable' : 'enable';
+                    //Ext.each(this.query('button'), function(item) {
+                    //    item[toggleFn]();
+                    //});
                 }
             }, {
                 xtype: 'button',
                 text: 'Add Product',
                 name: 'addproduct',
                 iconCls: 'fa fa-plus-circle fa-2x',
-                style: { color: 'gray' },
+                style: { color: 'green' },
                 hidden: true,
                 // glyph: 'xf055@FontAwesome',
                 scale: 'medium',
@@ -355,8 +355,6 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                         '<b class="smalltext" style="color:darkgrey">{productcode}</b>' +
                         // '<p>{description}</p>' +
                         '</br>'
-
-
                     ),
                 width: 375,
                 cellWrap:true
@@ -470,7 +468,7 @@ Ext.define("esapp.view.acquisition.Acquisition",{
 
                     var daStore = widget.getViewModel().get('productdatasources');
                     daStore.setFilters({
-                         property:'productID'
+                         property:'productid'
                         ,value:record.id
                         ,anyMatch:true
                     });
@@ -532,7 +530,7 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                     Ext.suspendLayouts();
                     var daStore = widget.getViewModel().get('productingestions');
                     daStore.setFilters({
-                         property:'productID'
+                         property:'productid'
                         ,value:record.id
                         ,anyMatch:true
                     });

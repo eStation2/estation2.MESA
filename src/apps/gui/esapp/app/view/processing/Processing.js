@@ -180,6 +180,7 @@ Ext.define("esapp.view.processing.Processing",{
             },{
                 header: 'Options',
                 width: 150,
+                dataIndex: 'derivation_method',
                 cellWrap:true
             },{
                 xtype: 'actioncolumn',

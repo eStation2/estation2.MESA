@@ -41,7 +41,7 @@
         "ext-locale"
     ],
 
-    "locale": "fr",
+//    "locale": "fr",
 
     /**
      * Sass configuration properties.

@@ -1,4 +1,4 @@
-Ext.define('esapp.model.Versions', {
+Ext.define('esapp.model.Version', {
     extend : 'esapp.model.Base',
 
     fields: [
@@ -14,7 +14,7 @@ Ext.define('esapp.model.Versions', {
              type: 'json'
             ,successProperty: 'success'
             ,rootProperty: 'versions'
-            ,messageProperty: 'message'
+            //,messageProperty: 'message'
         },
         listeners: {
             exception: function(proxy, response, operation){
@@ -27,5 +27,4 @@ Ext.define('esapp.model.Versions', {
             }
         }
     }
-
 });

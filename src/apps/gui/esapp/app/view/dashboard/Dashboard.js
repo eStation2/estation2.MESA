@@ -55,6 +55,37 @@ Ext.define("esapp.view.dashboard.Dashboard",{
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             items: [
+            // {
+            //    xtype: 'button',
+            //    text: 'Add Product',
+            //    name: 'addproduct',
+            //    iconCls: 'fa fa-plus-circle fa-2x',
+            //    style: { color: 'green' },
+            //    hidden: false,
+            //    // glyph: 'xf055@FontAwesome',
+            //    scale: 'medium',
+            //    handler: 'selectProduct'
+            //}, {
+            //    text: 'Eumetcast Sources',
+            //    handler: function (btn) {
+            //        var EumetcastSourceAdminWin = new esapp.view.acquisition.product.EumetcastSourceAdmin({
+            //            params: {
+            //                assigntoproduct: false
+            //            }
+            //        });
+            //        EumetcastSourceAdminWin.show();
+            //    },
+            //}, {
+            //    text: 'Internet Sources',
+            //    handler: function (btn) {
+            //        var InternetSourceAdminWin = new esapp.view.acquisition.product.InternetSourceAdmin({
+            //            params: {
+            //                assigntoproduct: false
+            //            }
+            //        });
+            //        InternetSourceAdminWin.show();
+            //    },
+            //},
             '->', // same as { xtype: 'tbfill' }
             {
                 xtype: 'button',
@@ -116,7 +147,7 @@ Ext.define("esapp.view.dashboard.Dashboard",{
                         }
                     }
                 },
-                height: 130,
+                height: 120,
                 defaults: {
                     cls: 'panel-text-style'
                 },

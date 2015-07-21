@@ -48,7 +48,8 @@ Ext.define('esapp.Application', {
         ,'DataSetsStore'
         ,'ProcessingStore'
         ,'SystemSettingsStore'
-        //,'VersionsStore'
+        ,'IPSettingsStore'
+        ,'CategoriesStore'
         //,'ProductNavigatorStore'
     ],
 
@@ -58,8 +59,10 @@ Ext.define('esapp.Application', {
         'ProductNavigatorMapSetDataSet',
         'TimeseriesProduct',
         'esapp.model.Dashboard',
-        'esapp.model.Versions',
-        'esapp.model.Themas'
+        'esapp.model.Version',
+        'esapp.model.Themas',
+        'esapp.model.InternetSource',
+        'esapp.model.EumetcastSource'
         //,'TimeserieProductMapSet'
         //,'TimeserieProductMapSetDataSet'
     ],
@@ -92,11 +95,12 @@ Ext.define('esapp.Application', {
         Ext.tip.QuickTipManager.init();
         Ext.state.Manager.setProvider(Ext.create('Ext.state.CookieProvider'));
 
-        var link = document.createElement('icolink');
-        link.type = 'image/ico';
+        //var link = '<link rel="icon" href="resources/img/africa.ico" type="image/gif" sizes="16x16">'
+        var link = document.createElement('link');
+        link.type = 'image/gif';  // 'image/ico';
         link.rel = 'icon';
         link.href = 'resources/img/africa.ico';
-        console.info(link);
+        link.sizes = '16x16';
         document.getElementsByTagName('head')[0].appendChild(link);
 
 
@@ -114,6 +118,7 @@ Ext.define('esapp.Application', {
             me.doActivateTab(child);
         };
 
+        Ext.data.StoreManager.lookup('CategoriesStore').load();
 
         esapp.globals = [];
         esapp.globals['selectedLanguage'] = 'eng';
@@ -124,6 +129,9 @@ Ext.define('esapp.Application', {
                         esapp.globals['selectedLanguage'] = language.get('langcode')
                     }
                 });
+                //if (esapp.globals['selectedLanguage'] == 'fra')
+                //    Ext.require('Ext.locale.fr');
+                //else Ext.require('Ext.locale.en');
 
                 //Ext.getCmp("languageCombo").setValue(esapp.globals['selectedLanguage']);
                 //console.info(esapp.globals['selectedLanguage']);
@@ -131,7 +139,29 @@ Ext.define('esapp.Application', {
                 Ext.data.StoreManager.lookup('i18nStore').load({
                     params:{lang:esapp.globals['selectedLanguage']},
                     callback: function(records, options, success){
+
                         Ext.create('esapp.view.main.Main');
+
+                        if (esapp.globals['selectedLanguage'] == 'fra') {
+                            Highcharts.setOptions({
+                                lang: {
+                                    contextButtonTitle: 'Graphique menu contextuel',  // 'Chart context menu',
+                                    downloadJPEG: 'Télécharger image JPEG',  // 'Download JPEG image',
+                                    downloadPDF: 'Télécharger le document PDF',  // 'Download PDF document',
+                                    downloadPNG: 'Télécharger l\'image PNG',  // 'Download PNG image',
+                                    downloadSVG: 'Télécharger image vectorielle SVG',  // 'Download SVG vector image',
+                                    drillUpText: 'Retour à {series.name}',  // 'Back to {series.name}',
+                                    loading: 'Chargement...',  // 'Loading...',
+                                    noData: 'Aucune donnée à afficher',  // 'No data to display',
+                                    printChart: 'Imprimer tableau',  // 'Print chart',
+                                    resetZoom: 'Réinitialiser zoom',  // 'Reset zoom',
+                                    resetZoomTitle: 'Niveau de zoom réinitialiser 1:1',  // 'Reset zoom level 1:1',
+                                    shortMonths: [ "Janv." , "Févr." , "Mars" , "Avril" , "Mai" , "Juin" , "Juil." , "Août" , "Sept." , "Oct." , "Nov." , "Déc."],
+                                    months: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
+                                    weekdays: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
+                                }
+                            });
+                        }
                     }
                 });
             }

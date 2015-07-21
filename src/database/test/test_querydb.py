@@ -12,6 +12,31 @@ from database import querydb
 from lib.python import functions
 
 class TestQuerydb(TestCase):
+
+    def Test_update_product_info(self):
+        productinfo = {'productcode': 'chirp',
+                       'version': 'undefined',
+                       'orig_productcode': 'chirpchanged',
+                       'orig_version': 'undefined'}
+
+        update_product = querydb.update_product_info(productinfo)
+
+        print update_product
+
+    def Test_get_eumetcastsources(self):
+        eumetcastsources = querydb.get_eumetcastsources()
+
+        if eumetcastsources.__len__() > 0:
+            for row in eumetcastsources:
+                row_dict = functions.row2dict(row)
+
+    def Test_get_internetsources(self):
+        internetsources = querydb.get_internetsources()
+
+        if internetsources.__len__() > 0:
+            for row in internetsources:
+                row_dict = functions.row2dict(row)
+
     def Test_get_i18n(self):
 
         i18n = querydb.get_i18n(lang='fra')

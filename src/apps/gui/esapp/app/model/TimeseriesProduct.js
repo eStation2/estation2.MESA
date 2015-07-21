@@ -1,9 +1,9 @@
 Ext.define('esapp.model.TimeseriesProduct', {
     extend : 'esapp.model.Base',
 
-//    idProperty : 'productID',
+//    idProperty : 'productid',
     fields: [
-       {name: 'productID', type: 'string', mapping: 'productID'},
+       {name: 'productid', type: 'string', mapping: 'productid'},
        {name: 'productcode', mapping: 'productcode'},
        {name: 'subproductcode', mapping: 'subproductcode'},
        {name: 'version', mapping: 'version'},
@@ -69,7 +69,7 @@ Ext.define('esapp.model.TimeserieProductMapSet', {
     extend : 'esapp.model.Base',
 
     fields: [
-        {name: 'productID', reference:'TimeseriesProduct', type: 'string'},
+        {name: 'productid', reference:'TimeseriesProduct', type: 'string'},
         {name: 'mapsetcode'},
         {name: 'defined_by'},
         {name: 'descriptive_name'},
@@ -93,7 +93,7 @@ Ext.define('esapp.model.TimeserieProductMapSetDataSet', {
 
     fields: [
        {name: 'mapsetcode', reference:'TimeserieProductMapSet'},
-       {name: 'productID'},
+       {name: 'productid'},
        {name: 'productcode'},
        {name: 'subproductcode'},
        {name: 'version'},

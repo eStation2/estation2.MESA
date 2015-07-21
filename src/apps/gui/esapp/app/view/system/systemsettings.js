@@ -17,6 +17,7 @@ Ext.define("esapp.view.system.systemsettings",{
         'esapp.view.system.PCVersionAdmin',
         'esapp.view.system.ThemaAdmin',
         'esapp.view.system.PCLogLevelAdmin',
+        'esapp.view.system.IPAddressAdmin',
 
         'Ext.form.FieldSet',
         'Ext.form.field.Number'
@@ -146,7 +147,10 @@ Ext.define("esapp.view.system.systemsettings",{
             //scale: 'medium',
             scope:me,
             handler: function(){
-
+                var IPAdminWin = new esapp.view.system.IPAddressAdmin({
+                    params: {}
+                });
+                IPAdminWin.show();
             }
         };
 
@@ -179,8 +183,11 @@ Ext.define("esapp.view.system.systemsettings",{
             xtype: 'toolbar',
             items : [{
                 text: 'Create System Report',
-                iconCls: 'icon-disk',
                 scope: me,
+                iconCls: 'fa fa-download fa-2x',
+                style: { color: 'blue' },
+                scale: 'medium',
+                disabled: false,
                 handler: function () {
                     if (!Ext.fly('frmExportDummy')) {
                         var frm = document.createElement('form');
@@ -208,8 +215,11 @@ Ext.define("esapp.view.system.systemsettings",{
                 }
             },{
                 text: 'Create Install Report',
-                iconCls: 'icon-disk',
                 scope:me,
+                iconCls: 'fa fa-download fa-2x',
+                style: { color: 'blue' },
+                scale: 'medium',
+                disabled: false,
                 handler: function(){
                     if (!Ext.fly('frmExportDummy')) {
                         var frm = document.createElement('form');
@@ -236,8 +246,11 @@ Ext.define("esapp.view.system.systemsettings",{
                 }
             },'->',{
                 text: 'Reset to factory settings',
-                iconCls: 'apply_globals-icon',
                 scope:me,
+                iconCls: 'fa fa-undo fa-2x',    // 'apply_globals-icon',
+                style: { color: 'orange' },
+                scale: 'medium',
+                disabled: false,
                 handler: function(){
                     // me.onHandleAction('Reset','reset');
                    Ext.Ajax.request({
@@ -267,8 +280,11 @@ Ext.define("esapp.view.system.systemsettings",{
                 }
             },{
                 text: 'Save',
-                iconCls: 'icon-disk',
                 scope:me,
+                iconCls: 'fa fa-save fa-2x',    // 'icon-disk',
+                style: { color: 'lightblue' },
+                scale: 'medium',
+                disabled: false,
                 handler: function(){
                     // me.onHandleAction('Save','save');
                     if (me.getSession().getChanges() != null){
@@ -425,7 +441,6 @@ Ext.define("esapp.view.system.systemsettings",{
                                     }
                                 });
                                 LogLevelAdminWin.show();
-
                             }
                         }]
                     }]
@@ -439,18 +454,7 @@ Ext.define("esapp.view.system.systemsettings",{
                     defaults: {
                         labelWidth: 100,
                         layout: 'hbox'
-                    },
-                    bbar :  [ '->', {
-                            xtype: 'button',
-                            text: 'Modify',
-                            iconCls: 'fa fa-pencil-square-o',
-                            style: {color: 'white'},
-                            scope: me,
-                            handler: function () {
-
-                            }
-                        }
-                    ]
+                    }
                 }]
             }]
         },{

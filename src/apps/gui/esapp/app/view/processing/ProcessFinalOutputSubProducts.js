@@ -18,6 +18,8 @@ Ext.define("esapp.view.processing.ProcessFinalOutputSubProducts",{
 
     store: null,
 
+    cls: 'grid-color-azur',
+
     viewConfig: {
         stripeRows: false,
         enableTextSelection: true,

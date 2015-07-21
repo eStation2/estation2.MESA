@@ -27,7 +27,8 @@ Ext.define("esapp.view.dashboard.PC2",{
 
     title: '<span class="panel-title-style">Processing (PC2)</span>',
     paneltitle:'',
-    setdisabled:false,
+    setdisabledPartial:false,
+    setdisabledAll:false,
     activePC:false,
     activeversion: '',
     currentmode: '',
@@ -75,40 +76,44 @@ Ext.define("esapp.view.dashboard.PC2",{
             cls: me.toolbarCls,
             defaults: {
                 width: 160,
-                textAlign: 'left',
-                disabled: me.setdisabled
+                textAlign: 'left'
+                ,disabled: me.setdisabledAll
             },
             items: [
                 {
                     xtype: 'servicemenubutton',
                     service: 'eumetcast',
                     text: 'Eumetcast',
-                    handler: 'checkStatusServices'
+                    handler: 'checkStatusServices',
+                    disabled: me.setdisabledPartial
                 }, ' ',
                 {
                     xtype: 'servicemenubutton',
                     service: 'internet',
                     text: 'Internet',
-                    handler: 'checkStatusServices'
+                    handler: 'checkStatusServices',
+                    disabled: me.setdisabledPartial
                 }, ' ',
                 {
                     xtype: 'servicemenubutton',
                     service: 'ingest',
                     text: 'Ingest',
-                    handler: 'checkStatusServices'
+                    handler: 'checkStatusServices',
+                    disabled: me.setdisabledPartial
                 }, ' ',
                 {
                     xtype: 'servicemenubutton',
                     service: 'processing',
                     text: 'Processing',
-                    handler: 'checkStatusServices'
-                }, '-',
+                    handler: 'checkStatusServices',
+                    disabled: me.setdisabledPartial
+                }, ' ',
                 {
                     xtype: 'servicemenubutton',
                     service: 'system',
                     text: 'System',
                     handler: 'checkStatusServices'
-                }, ' ',
+                }, '-',
                 {
                 xtype: 'splitbutton',
                 name: 'datasyncbtn',
@@ -232,9 +237,9 @@ Ext.define("esapp.view.dashboard.PC2",{
             // flex:1.5,
             iconCls: 'x-tool-okay', // 'fa fa-check-circle-o fa-2x', // fa-check-square fa-chevron-circle-down fa-check-circle fa-check
             iconAlign : 'left',
-            height: 240,
+            height: 210,
             minHeight: 200,
-            maxHeight: 240,
+            maxHeight: 210,
             layout: 'fit',
             style: {
                 color: 'white'
