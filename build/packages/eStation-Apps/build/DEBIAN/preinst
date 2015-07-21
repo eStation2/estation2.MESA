@@ -1,7 +1,7 @@
 #!/bin/sh
 # 
 # 	Role of preinst: 	- Determine if it is an upgrade, or installation from scratch
-#                    	- Create directory structure (see also postinst)
+#                    	- Create some difrectories (most of them in postinst)
 #			            - Manage postgresql DB (create DB, change permissions, start)	 
 # 
 #
@@ -10,31 +10,14 @@
 # Version
 ESTATION2_VERSION=<ESTATION2_VERSION>
 ESTATION2_RELEASE=<ESTATION2_RELEASE>
-ESTATION2_UBUNTU=<ESTATION2_UBUNTU>
-
-# Users definition
-ESTATION2_MAIN_USER=<ESTATION2_MAIN_USER>
-ESTATION2_THEM_USER=<ESTATION2_THEM_USER>
-ESTATION2_MAIN_GROUP=<ESTATION2_MAIN_GROUP>
 
 # Directory Definitions
-ESTATION2_BASE_DIR_SYSTEM=<ESTATION2_BASE_DIR_SYSTEM>
 
-ESTATION2_LOCAL_DIR=<ESTATION2_LOCAL_DIR>
 ESTATION2_DIR_LOG=<ESTATION2_DIR_LOG>
-ESTATION2_DIR_LISTS=<ESTATION2_DIR_LISTS>
-ESTATION2_DIR_SETTINGS=<ESTATION2_DIR_SETTINGS>
-ESTATION2_DIR_LIST_EUM=<ESTATION2_DIR_LIST_EUM>
-ESTATION2_DIR_LIST_INT=<ESTATION2_DIR_LIST_INT>
 ESTATION2_DIR_DATABASE=<ESTATION2_DIR_DATABASE>
-
-ESTATION2_TEMP_DIR=<ESTATION2_TEMP_DIR>
-ESTATION2_DIR_SERVICES=<ESTATION2_DIR_SERVICES>
-ESTATION2_DIR_PROCESS=<ESTATION2_DIR_PROCESS>
 
 ESTATION2_BASE_DIR_DATA=<ESTATION2_BASE_DIR_DATA>
 ESTATION2_INST_LOG_DIR=<ESTATION2_INST_LOG_DIR>
-ESTATION2_PYTHON_DIST_DIR=<ESTATION2_PYTHON_DIST_DIR>
 
 current_version=${ESTATION2_VERSION}
 base_dir_db_data=${ESTATION2_DIR_DATABASE}
@@ -50,21 +33,23 @@ echo "`date +'%Y-%m-%d %H:%M:%S'` Machine Name = ${uname}" >> ${logfile}
 #	Directory management / rights settings
 # --------------------------------------------------------------------------------------
 
-for dir in ${ESTATION2_BASE_DIR_SYSTEM} ${ESTATION2_DIR_LOG}
-do
-    mkdir -p ${dir}
-    sudo chown -R adminuser ${dir}
-    sudo chgrp -R adminuser ${dir}
-    echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory: ${dir}" >> ${logfile}
-done 
+#for dir in ${ESTATION2_BASE_DIR_SYSTEM} ${ESTATION2_DIR_LOG}
+#do
+#    mkdir -p ${dir}
+#    dir_own_grp_mod_default ${ESTATION2_BASE_DIR_SYSTEM} 755 ${logfile}
 
-for dir in ${ESTATION2_BASE_DIR_DATA}
-do
-    mkdir -p ${dir}
-    sudo chown -R adminuser ${dir}
-    sudo chgrp -R adminuser ${dir}
-    echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory: ${dir}" >> ${logfile}
-done
+#    sudo chown -R adminuser ${dir}
+#    sudo chgrp -R adminuser ${dir}
+#    echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory: ${dir}" >> ${logfile}
+#done 
+
+#for dir in ${ESTATION2_BASE_DIR_DATA}
+#do
+#    mkdir -p ${dir}
+#    sudo chown -R adminuser ${dir}
+#    sudo chgrp -R adminuser ${dir}
+#    echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory: ${dir}" >> ${logfile}
+#done
 
 # --------------------------------------------------------------------------------------
 #	Postgresql DB management
@@ -72,9 +57,9 @@ done
 #	- do a (partial) dump 	      (in case of upgrade)
 # --------------------------------------------------------------------------------------
 
-mkdir -p ${base_dir_db_data}
-chown -R postgres:postgres ${base_dir_db_data}
-echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory: ${base_dir_db_data}" >> ${logfile}
+mkdir -p ${ESTATION2_DIR_DATABASE}
+chown -R postgres:postgres ${ESTATION2_DIR_DATABASE}
+echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory: ${ESTATION2_DIR_DATABASE}" >> ${logfile}
  
 # Stop postgresql if it is running
 if [ "$(nc -v -z localhost 5432 2> /dev/null;echo $?)" = 0 ]; then
@@ -84,14 +69,14 @@ fi
 
 # First database connection
 if [ "$(ls $base_dir_db_data|wc -l)" = 0 ];then
-	su postgres -c "/usr/lib/postgresql/9.3/bin/initdb -D $base_dir_db_data"
+	su postgres -c "/usr/lib/postgresql/9.3/bin/initdb -D $ESTATION2_DIR_DATABASE"
     	echo "`date +'%Y-%m-%d %H:%M:%S'` Executed command: su postgres -c /usr/lib/postgresql/9.3/bin/initdb -D " >> ${logfile}
 fi
 
 # Modification of the Configuration files
-ln -sf /etc/postgresql-common/root.crt "$base_dir_db_data/root.crt"
-ln -sf /etc/ssl/certs/ssl-cert-snakeoil.pem "$base_dir_db_data/server.crt"
-ln -sf /etc/ssl/private/ssl-cert-snakeoil.key "$base_dir_db_data/server.key"
+ln -sf /etc/postgresql-common/root.crt "$ESTATION2_DIR_DATABASE/root.crt"
+ln -sf /etc/ssl/certs/ssl-cert-snakeoil.pem "$ESTATION2_DIR_DATABASE/server.crt"
+ln -sf /etc/ssl/private/ssl-cert-snakeoil.key "$ESTATION2_DIR_DATABASE/server.key"
 echo "`date +'%Y-%m-%d %H:%M:%S'` Done with postgresql configuration definition" >> ${logfile}
 
 # Write to tmpfile the actual version of package (if is an upgrade). This is for postinst.

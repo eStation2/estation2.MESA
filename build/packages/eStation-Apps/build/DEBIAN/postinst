@@ -117,7 +117,9 @@ mkdir -p ${ESTATION2_DIR_SETTINGS}				2>> ${logfile}
 dir_own_grp_mod_default ${ESTATION2_DIR_SETTINGS} 777 ${logfile}
 echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory ${ESTATION2_DIR_SETTINGS}" 	>> ${logfile}
 
+# --------------------------------------------------------------------------------------
 # Replace the /etc/rc.local file with the one from eStation
+# --------------------------------------------------------------------------------------
 echo "Copy file rc.local to /etc " 	>> ${logfile}
 cp $ESTATION2_BASE_DIR_SYSTEM/config/install/rc.local /etc/rc.local		2>> ${logfile}
 echo "`date +'%Y-%m-%d %H:%M:%S'` Execute /etc/rc.local"				 	>> ${logfile}
@@ -175,18 +177,27 @@ fi # localhost reachable
 a2dismod php5 mpm_event mpm_prefork
 a2enmod wsgi actions cgi fastcgi alias mpm_worker rewrite
 
+# --------------------------------------------------------------------------------------
 # Copy configuration file
+# --------------------------------------------------------------------------------------
 src_file="$ESTATION2_BASE_DIR_SYSTEM/config/install/apache-config-file.txt"
 trg_file='/etc/apache2/sites-available/000-default.conf'
-#if [ ! -f ${trg_file} ]; then
 echo "`date +'%Y-%m-%d %H:%M:%S'`Target file ${trg_file} created by copying from ${src_file}." >> ${logfile} 2>&1 
 cp ${src_file} ${trg_file}
-#else
-#    echo " Target file ${trg_file} already exists. Do not overwrite" >> ${logfile} 2>&1 
-#fi
+
 # Restart apache
 service apache2 restart
 echo "`date +'%Y-%m-%d %H:%M:%S'` Apache2 restarted"				 	>> ${logfile}
+
+# --------------------------------------------------------------------------------------
+#	Copy rsync configuration files
+# --------------------------------------------------------------------------------------
+
+cp "$ESTATION2_BASE_DIR_SYSTEM/config/install/rsync" /etc/default/rsync
+echo "`date +'%Y-%m-%d %H:%M:%S'`Rsync configuration file copied as /etc/default/rsync." >> ${logfile} 2>&1 
+
+cp "$ESTATION2_BASE_DIR_SYSTEM/config/install/rsyncd.conf" /etc/rsyncd.conf
+echo "`date +'%Y-%m-%d %H:%M:%S'`Rsync configuration file copied as /etc/rsyncd.conf." >> ${logfile} 2>&1 
 
 # --------------------------------------------------------------------------------------
 #	Copy the User Settings file (if does not exist !)

@@ -25,11 +25,6 @@ do
 	mkdir -p ${mydir} 2> ${logfile}	
 	echo " Change permissions of $mydir " >> ${logfile}	
 	chmod 777 ${mydir} 2> ${logfile}		
-done
-
-for i in $(seq 0 2)
-do
-	mydir=$(eval echo "\${dirs${i}}") 2> ${logfile}	
 	echo " Change owner of $mydir to adminuser " >> ${logfile}	
 	chown adminuser ${mydir} 2> ${logfile}
 	echo " Change group of $mydir to estation " >> ${logfile}	
