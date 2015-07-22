@@ -14,9 +14,9 @@ dir_own_grp_mod_default () {
     if [ -d $directory ]; then 
         mode=$2
         logfile=$3
-        chown -R ${ESTATION2_MAIN_USER} ${directory} 2> ${logfile} 
-        chgrp -R ${ESTATION2_MAIN_GROUP} ${directory} 2> ${logfile} 
-        chmod -R ${mode} ${directory} 2> ${logfile} 
+        chown -R ${ESTATION2_MAIN_USER} ${directory} 2>> ${logfile} 
+        chgrp -R ${ESTATION2_MAIN_GROUP} ${directory} 2>> ${logfile} 
+        chmod -R ${mode} ${directory} 2>> ${logfile} 
         echo "`date +'%Y-%m-%d %H:%M:%S'` Permissions changed for: ${directory}" >> ${logfile}
     else
         echo "`date +'%Y-%m-%d %H:%M:%S'` Directory ${directory} NOT existing !!" >> ${logfile}
@@ -36,6 +36,7 @@ ESTATION2_MAIN_GROUP=<ESTATION2_MAIN_GROUP>
 
 # Directory Definitions
 ESTATION2_BASE_DIR_SYSTEM=<ESTATION2_BASE_DIR_SYSTEM>
+ESTATION2_VBASE_DIR_SYSTEM=<ESTATION2_VBASE_DIR_SYSTEM>
 
 ESTATION2_LOCAL_DIR=<ESTATION2_LOCAL_DIR>
 ESTATION2_DIR_LOG=<ESTATION2_DIR_LOG>
@@ -102,7 +103,7 @@ dir_own_grp_mod_default ${ESTATION2_DIR_LISTS} 775 ${logfile}
 mkdir -p ${ESTATION2_DIR_PROCESS} 			2>> ${logfile}
 dir_own_grp_mod_default ${ESTATION2_DIR_PROCESS} 775 ${logfile}
 
-mkdir -p ${ESTATION2_DIR_LOG} 
+mkdir -p ${ESTATION2_DIR_LOG} 2>> ${logfile}
 dir_own_grp_mod_default ${ESTATION2_DIR_LOG} 777 ${logfile}
 
 # --------------------------------------------------------------------------------------
@@ -158,14 +159,14 @@ EOF
         #First install from scratch data
         echo "`date +'%Y-%m-%d %H:%M:%S'` Create database structure" >> ${logfile}
         # End automatically added section
-        psql -h localhost -U estation -d estationdb -f /srv/www/eStation2/database/dbInstall/products_dump_structure_only.sql > /dev/null 2> ${logfile}
+        psql -h localhost -U estation -d estationdb -f /srv/www/eStation2/database/dbInstall/products_dump_structure_only.sql > /dev/null 2>> ${logfile}
     else
         echo "`date +'%Y-%m-%d %H:%M:%S'` Database structure already exists. Continue" >> ${logfile}
     fi
 
     # Update Tables (both for upgrade and installation from scratch)
     echo "`date +'%Y-%m-%d %H:%M:%S'` Populate tables" >> ${logfile}
-    psql -h localhost -U estation -d estationdb -f /srv/www/eStation2/database/dbInstall/products_dump_data_only.sql > /dev/null 2> ${logfile}
+    psql -h localhost -U estation -d estationdb -f /srv/www/eStation2/database/dbInstall/products_dump_data_only.sql > /dev/null 2>> ${logfile}
 
 else
     echo "`date +'%Y-%m-%d %H:%M:%S'` Postgresql is NOT running: DB not created !" >> ${logfile}
@@ -175,8 +176,8 @@ fi # localhost reachable
 #	Customize apache configuration
 # --------------------------------------------------------------------------------------
 # Disable/enale modules
-a2dismod php5 mpm_event mpm_prefork
-a2enmod wsgi actions cgi fastcgi alias mpm_worker rewrite
+a2dismod php5 mpm_event mpm_prefork 2>> ${logfile}
+a2enmod wsgi actions cgi fastcgi alias mpm_worker rewrite 2>> ${logfile}
 
 # --------------------------------------------------------------------------------------
 # Copy configuration file
@@ -216,8 +217,29 @@ else
         echo "`date +'%Y-%m-%d %H:%M:%S'` ERROR in creating User Setting file $trg_file" >> ${logfile} 2>&1 
     fi
 fi
+# --------------------------------------------------------------------------------------
+#	Copy the System Settings file (if does not exist)
+# --------------------------------------------------------------------------------------
+src_file='/srv/www/eStation2/config/install/system_settings.ini'
+trg_file='/eStation2/settings/system_settings.ini'
 
-# Automatically added by dh_installinit
+if [ -f  ${trg_file} ]; then
+    echo "`date +'%Y-%m-%d %H:%M:%S'` System Setting file already exist $trg_file" >> ${logfile} 2>&1 
+else
+    cp $src_file $trg_file
+    if [ $? -eq 0 ]; then 
+        echo "`date +'%Y-%m-%d %H:%M:%S'` System Setting file $trg_file created" >> ${logfile} 2>&1 
+    else
+        echo "`date +'%Y-%m-%d %H:%M:%S'` ERROR in creating System Setting file $trg_file" >> ${logfile} 2>&1 
+    fi
+fi
+# --------------------------------------------------------------------------------------
+#	Create sym-link from the <versioned> install and /srv/www/eStation2
+# --------------------------------------------------------------------------------------
+ln -fs ${ESTATION2_BASE_DIR_SYSTEM} ${ESTATION2_VBASE_DIR_SYSTEM}
+echo "`date +'%Y-%m-%d %H:%M:%S'` Link to ${ESTATION2_BASE_DIR_SYSTEM} done." >> ${logfile} 2>&1 
+
+# Automatically added by dh_installinit (??)
 #if [ -x "/etc/init.d/postgresql" ]; then
 #    echo "Restart postgresql" >> ${logfile}
 #    if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then

@@ -1,6 +1,6 @@
 # Variables to be updated !!
 ESTATION2_VERSION=2.0.4
-ESTATION2_RELEASE=23
+ESTATION2_RELEASE=25
 ESTATION2_UBUNTU=12.04
 
 # Users definition
@@ -10,6 +10,7 @@ ESTATION2_MAIN_GROUP=adminuser      # To be modified to estation !!!!
 
 # Directory Definitions
 ESTATION2_BASE_DIR_SYSTEM=/srv/www/eStation2/
+ESTATION2_VBASE_DIR_SYSTEM="/srv/www/eStation2-${ESTATION2_VERSION}"
 
 ESTATION2_LOCAL_DIR=/eStation2/
 ESTATION2_DIR_LOG=${ESTATION2_LOCAL_DIR}log/

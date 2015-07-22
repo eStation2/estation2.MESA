@@ -1,8 +1,8 @@
 #!/bin/sh
 # 
 # 	Role of preinst: 	- Determine if it is an upgrade, or installation from scratch
-#                    	- Create some difrectories (most of them in postinst)
-#			            - Manage postgresql DB (create DB, change permissions, start)	 
+#                    		- Create some directories (most of them in postinst)
+#			        - Manage postgresql DB (create DB, change permissions, start)	 
 # 
 #
 
@@ -19,12 +19,9 @@ ESTATION2_DIR_DATABASE=<ESTATION2_DIR_DATABASE>
 ESTATION2_BASE_DIR_DATA=<ESTATION2_BASE_DIR_DATA>
 ESTATION2_INST_LOG_DIR=<ESTATION2_INST_LOG_DIR>
 
-current_version=${ESTATION2_VERSION}
-base_dir_db_data=${ESTATION2_DIR_DATABASE}
-
 # Define a logfile
-mkdir -p ${ESTATION2_INST_LOG_DIR}  
-logfile="${ESTATION2_INST_LOG_DIR}/eStation-Apps_${current_version}_preinst.log"
+mkdir -p ${ESTATION2_INST_LOG_DIR} 
+logfile="${ESTATION2_INST_LOG_DIR}/eStation-Apps_${ESTATION2_VERSION}_preinst.log"
 
 uname=$(uname -n)
 echo "`date +'%Y-%m-%d %H:%M:%S'` Machine Name = ${uname}" >> ${logfile}
@@ -37,6 +34,7 @@ echo "`date +'%Y-%m-%d %H:%M:%S'` Machine Name = ${uname}" >> ${logfile}
 
 mkdir -p ${ESTATION2_DIR_DATABASE}
 chown -R postgres:postgres ${ESTATION2_DIR_DATABASE}
+chmod 755 ${ESTATION2_DIR_DATABASE}
 echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory: ${ESTATION2_DIR_DATABASE}" >> ${logfile}
  
 # Stop postgresql if it is running
@@ -46,7 +44,7 @@ if [ "$(nc -v -z localhost 5432 2> /dev/null;echo $?)" = 0 ]; then
 fi
 
 # First database connection
-if [ "$(ls $base_dir_db_data|wc -l)" = 0 ];then
+if [ "$(ls ${ESTATION2_DIR_DATABASE}|wc -l)" = 0 ];then
 	su postgres -c "/usr/lib/postgresql/9.3/bin/initdb -D $ESTATION2_DIR_DATABASE"
     	echo "`date +'%Y-%m-%d %H:%M:%S'` Executed command: su postgres -c /usr/lib/postgresql/9.3/bin/initdb -D " >> ${logfile}
 fi
@@ -64,9 +62,10 @@ if [ ! -z ${old_package} ]; then
 else
 	old_package_version='None'
 fi
-mkdir -p -m 755 "$base_dir_system/database"
-touch "$base_dir_system/database/version_${old_package_version}"
-echo "`date +'%Y-%m-%d %H:%M:%S'` Old package existing is written as: $base_dir_system/database/version_${old_package_version}" >> ${logfile}
+# NOTE: to be done for upgrades !!!
+#mkdir -p -m 755 "$base_dir_system/database"
+#touch "$base_dir_system/database/version_${old_package_version}"
+#echo "`date +'%Y-%m-%d %H:%M:%S'` Old package existing is written as: $base_dir_system/database/version_${old_package_version}" >> ${logfile}
 
 # Change the configuration file to grant access (to be verified)
 perl -pi -e "s#host    all             all             127.0.0.1/32            md5#host    all         all         127.0.0.1/32          trust#" /etc/postgresql/9.3/main/pg_hba.conf

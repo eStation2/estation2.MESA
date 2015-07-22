@@ -32,11 +32,13 @@ BUILDdir=${PACKAGE_BUILD_DIR_TMP}/${Name}-${ESTATION2_VERSION}
 # Cleaning
 deb_clean ${BUILDdir}
 
-mkdir -p ${BUILDdir}/${ESTATION2_BASE_DIR_SYSTEM}
+# Make the target dir (versioned) for sources
+mkdir -p ${BUILDdir}${ESTATION2_VBASE_DIR_SYSTEM}
 
 cp -r ../src/* ${BUILDdir}/
-cp -r ${ESTATION_SRC_DIR}/* ${BUILDdir}/${ESTATION2_BASE_DIR_SYSTEM}
+cp -r ${ESTATION_SRC_DIR}/* ${BUILDdir}${ESTATION2_VBASE_DIR_SYSTEM}
 cp -r ./DEBIAN ${BUILDdir}
+
 
 ############################
 # Parsing preinst/postinst
