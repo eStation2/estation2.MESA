@@ -30,28 +30,6 @@ uname=$(uname -n)
 echo "`date +'%Y-%m-%d %H:%M:%S'` Machine Name = ${uname}" >> ${logfile}
 
 # --------------------------------------------------------------------------------------
-#	Directory management / rights settings
-# --------------------------------------------------------------------------------------
-
-#for dir in ${ESTATION2_BASE_DIR_SYSTEM} ${ESTATION2_DIR_LOG}
-#do
-#    mkdir -p ${dir}
-#    dir_own_grp_mod_default ${ESTATION2_BASE_DIR_SYSTEM} 755 ${logfile}
-
-#    sudo chown -R adminuser ${dir}
-#    sudo chgrp -R adminuser ${dir}
-#    echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory: ${dir}" >> ${logfile}
-#done 
-
-#for dir in ${ESTATION2_BASE_DIR_DATA}
-#do
-#    mkdir -p ${dir}
-#    sudo chown -R adminuser ${dir}
-#    sudo chgrp -R adminuser ${dir}
-#    echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory: ${dir}" >> ${logfile}
-#done
-
-# --------------------------------------------------------------------------------------
 #	Postgresql DB management
 #	- initialize postgres datadir (in installation from scratch)
 #	- do a (partial) dump 	      (in case of upgrade)

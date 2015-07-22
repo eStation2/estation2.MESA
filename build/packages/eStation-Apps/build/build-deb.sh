@@ -10,11 +10,9 @@
 
 Project=eStation-
 Name=eStation-Apps
-Version=2.0.4
-Release=20
 
 #this is the deb package name
-PACKAGE_DEB_NAME=${Name}-${Version}-${Release}.deb
+PACKAGE_DEB_NAME=${Name}-${ESTATION2_VERSION}-${ESTATION2_RELEASE}.deb
 
 # Source config file and debian build functions
 # using relative path by now
@@ -55,7 +53,7 @@ done
 done
 for file in ${BUILDdir}/DEBIAN/preinst ${BUILDdir}/DEBIAN/postinst ${BUILDdir}/DEBIAN/control
 do
-for var in 'ESTATION2_DIR_LISTS' 'ESTATION2_DIR_SETTINGS' 'ESTATION2_DIR_LIST_EUM' 'ESTATION2_DIR_LIST_INT' 'ESTATION2_DIR_DATABASE' 
+for var in 'ESTATION2_DIR_LISTS' 'ESTATION2_DIR_SETTINGS' 'ESTATION2_DIR_LIST_EUM' 'ESTATION2_DIR_LIST_INT' 'ESTATION2_DIR_DATABASE' 'ESTATION2_DIR_INGEST' 'ESTATION2_DIR_PROCESSING'
 do
     placeholder="<${var}>"
     value=$(eval "echo \$${var}")
@@ -76,12 +74,7 @@ done
 ############################
 # Parsing for build
 ############################
-ver=$(echo ${Version}|sed 's/\./_/g')
-#perl -p -i -e "s#<INSTALLDIR>#${installdir}#g" ${BUILDdir}/DEBIAN/*
-#perl -p -i -e "s#<VINSTALLDIR>#${vinstalldir}#g" ${BUILDdir}/DEBIAN/*
-#perl -p -i -e "s/<VERSION>/${Version}/g" ${BUILDdir}/DEBIAN/*
-#perl -p -i -e "s/<RELEASE>/${Release}/g" ${BUILDdir}/DEBIAN/*
-#perl -p -i -e "s/<NAME>/${Name}/g" ${BUILDdir}/DEBIAN/*
+ver=$(echo ${ESTATION2_VERSION}|sed 's/\./_/g')
 cd ${BUILDdir}
 find . -type f|grep -v svn |grep -v DEBIAN > ${BUILDdir}/DEBIAN/conffiles
 cd -
@@ -90,15 +83,29 @@ cd ${localdir}
 ##########################
 # Making DEB file
 ##########################
+# Move to ../old existing files 
+mv ${PACKAGE_DESTINATION_DIR}/${Name}-*.deb ${PACKAGE_DESTINATION_DIR}/../old/
 # $1 package source dir
 # $2 package dest dir
 # $3 package filename
 make_deb ${BUILDdir} ${PACKAGE_DESTINATION_DIR} ${PACKAGE_DEB_NAME}
 #change_debname
 
-
 read -p "Sync ${PACKAGE_DESTINATION_DIR} to $ALL_PACKAGE_REPO/amd64/ and update repository index (y/N)? " ANS
 if [ "$ANS" == "y" ]; then
+  # Check if there are files on the target already
+  files=($(ls $ALL_PACKAGE_REPO/amd64/${Name}-*.deb))
+  if [ ${#files[@]} -gt 0 ]; then 
+    echo ${files[@]}
+    for file in ${files[@]}
+    do 
+        read -p "Delete file ${file} (y/N)? " ANS
+        if [ "$ANS" == "y" ]; then
+            rm ${file}
+            echo "File ${file} removed"
+        fi
+    done
+  fi  
   echo "INFO - sync  ${PACKAGE_DESTINATION_DIR}";
   rsync -av  --include="*.deb" --exclude="*" ${PACKAGE_DESTINATION_DIR}/ $ALL_PACKAGE_REPO/amd64/ 
   cd $SCRIPTS_DIR

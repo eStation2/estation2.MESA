@@ -11,12 +11,16 @@
 # Function to change own/grp/permission
 dir_own_grp_mod_default () {
     directory=$1
-    mode=$2
-    logfile=$3
-    chown -R ${ESTATION2_MAIN_USER} ${directory} 2> ${logfile} 
-    chgrp -R ${ESTATION2_MAIN_GROUP} ${directory} 2> ${logfile} 
-    chmod -R ${mode} ${directory} 2> ${logfile} 
-    echo "`date +'%Y-%m-%d %H:%M:%S'` Permissions changed for: ${ESTATION2_BASE_DIR_SYSTEM}" >> ${logfile}
+    if [ -d $directory ]; then 
+        mode=$2
+        logfile=$3
+        chown -R ${ESTATION2_MAIN_USER} ${directory} 2> ${logfile} 
+        chgrp -R ${ESTATION2_MAIN_GROUP} ${directory} 2> ${logfile} 
+        chmod -R ${mode} ${directory} 2> ${logfile} 
+        echo "`date +'%Y-%m-%d %H:%M:%S'` Permissions changed for: ${directory}" >> ${logfile}
+    else
+        echo "`date +'%Y-%m-%d %H:%M:%S'` Directory ${directory} NOT existing !!" >> ${logfile}
+    fi
 }
 
 # These definitions are in git-code/build/packages/eStation2_config, and replaced by build-dev.sh before creating the package
@@ -46,6 +50,9 @@ ESTATION2_DIR_SERVICES=<ESTATION2_DIR_SERVICES>
 ESTATION2_DIR_PROCESS=<ESTATION2_DIR_PROCESS>
 
 ESTATION2_BASE_DIR_DATA=<ESTATION2_BASE_DIR_DATA>
+ESTATION2_DIR_INGEST=<ESTATION2_DIR_INGEST>
+ESTATION2_DIR_PROCESSING=<ESTATION2_DIR_PROCESSING>
+
 ESTATION2_INST_LOG_DIR=<ESTATION2_INST_LOG_DIR>
 ESTATION2_PYTHON_DIST_DIR=<ESTATION2_PYTHON_DIST_DIR>
 
@@ -73,49 +80,43 @@ echo "`date +'%Y-%m-%d %H:%M:%S'` Created file ${ESTATION2_PYTHON_DIST_DIR}/eSta
 # --------------------------------------------------------------------------------------
 
 # base dir (/srv/www/eStation2/)
-if [ -d ${ESTATION2_BASE_DIR_SYSTEM} ]; then
-    dir_own_grp_mod_default ${ESTATION2_BASE_DIR_SYSTEM} 755 ${logfile}
-    echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory ${ESTATION2_BASE_DIR_SYSTEM}" 	>> ${logfile}
-else
-    echo "`date +'%Y-%m-%d %H:%M:%S'` Directory ${ESTATION2_BASE_DIR_SYSTEM} NOT existing !!" >> ${logfile}
-fi
+dir_own_grp_mod_default ${ESTATION2_BASE_DIR_SYSTEM} 755 ${logfile}
 
-# local dirs (/eStation2/log/)
-mkdir -p ${ESTATION2_DIR_LOG}
-if [ -d ${ESTATION2_DIR_LOG} ]; then
-    dir_own_grp_mod_default ${ESTATION2_DIR_LOG} 777 ${logfile}
-    echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory ${ESTATION2_DIR_LOG}" 	>> ${logfile}
+# --------------------------------------------------------------------------------------
+# Local dirs (/eStation2/ and subdirs)
+# --------------------------------------------------------------------------------------
 
-else
-    echo "`date +'%Y-%m-%d %H:%M:%S'` Directory ${ESTATION2_DIR_LOG} NOT existing !!" 	>> ${logfile}
-fi
-# local dirs (/eStation2/get_lists/get_eumetcast)
-mkdir -p ${ESTATION2_DIR_LIST_EUM}				2> ${logfile}
-if [ -d ${ESTATION2_DIR_LIST_EUM} ]; then
-    dir_own_grp_mod_default ${ESTATION2_DIR_LIST_EUM} 777 ${logfile}
-    echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory ${ESTATION2_DIR_LIST_EUM}" 	>> ${logfile}
-else
-    echo "`date +'%Y-%m-%d %H:%M:%S'` Directory ${ESTATION2_DIR_LIST_EUM} NOT existing !!" 	>> ${logfile}
-fi
+# Don't change recursively - not to touch /eStation/dbdata
+mkdir -p ${ESTATION2_LOCAL_DIR}
+chown ${ESTATION2_MAIN_USER}:${ESTATION2_MAIN_GROUP} ${ESTATION2_LOCAL_DIR} 2>> ${logfile}
+chmod 777 ${ESTATION2_LOCAL_DIR} 2>> ${logfile}
 
-# local dirs (/eStation2/get_lists/get_internet)
-mkdir -p ${ESTATION2_DIR_LIST_INT}				2>> ${logfile}
-if [ -d ${ESTATION2_DIR_LIST_INT} ]; then
-    dir_own_grp_mod_default ${ESTATION2_DIR_LIST_INT} 777 ${logfile}
-    echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory ${ESTATION2_DIR_LIST_INT}" 	>> ${logfile}
-else
-    echo "`date +'%Y-%m-%d %H:%M:%S'` Directory ${ESTATION2_DIR_LIST_INT} NOT existing !!" 	>> ${logfile}
-fi
-
-# Temp dir (/tmp/eStation2/)
-mkdir -p ${ESTATION2_TEMP_DIR}					2>> ${logfile}
-dir_own_grp_mod_default ${ESTATION2_TEMP_DIR} 777 ${logfile}
-echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory ${ESTATION2_TEMP_DIR}" 	>> ${logfile}
-
-# settings dir (/eStation2/settings)
 mkdir -p ${ESTATION2_DIR_SETTINGS}				2>> ${logfile}
-dir_own_grp_mod_default ${ESTATION2_DIR_SETTINGS} 777 ${logfile}
-echo "`date +'%Y-%m-%d %H:%M:%S'` Done with directory ${ESTATION2_DIR_SETTINGS}" 	>> ${logfile}
+dir_own_grp_mod_default ${ESTATION2_DIR_SETTINGS} 775 ${logfile}
+
+mkdir -p ${ESTATION2_DIR_LISTS}
+mkdir -p ${ESTATION2_DIR_LIST_EUM}				2>> ${logfile}
+mkdir -p ${ESTATION2_DIR_LIST_INT}				2>> ${logfile}
+dir_own_grp_mod_default ${ESTATION2_DIR_LISTS} 775 ${logfile}
+
+mkdir -p ${ESTATION2_DIR_PROCESS} 			2>> ${logfile}
+dir_own_grp_mod_default ${ESTATION2_DIR_PROCESS} 775 ${logfile}
+
+mkdir -p ${ESTATION2_DIR_LOG} 
+dir_own_grp_mod_default ${ESTATION2_DIR_LOG} 777 ${logfile}
+
+# --------------------------------------------------------------------------------------
+# Data dirs (/data/ and subdirs)
+# --------------------------------------------------------------------------------------
+
+mkdir -p ${ESTATION2_BASE_DIR_DATA}
+dir_own_grp_mod_default ${ESTATION2_BASE_DIR_DATA} 755 ${logfile}
+
+mkdir -p ${ESTATION2_DIR_PROCESSING}
+dir_own_grp_mod_default ${ESTATION2_DIR_PROCESSING} 775 ${logfile}
+
+mkdir -p ${ESTATION2_DIR_INGEST}
+dir_own_grp_mod_default ${ESTATION2_DIR_INGEST} 775 ${logfile}
 
 # --------------------------------------------------------------------------------------
 # Replace the /etc/rc.local file with the one from eStation
@@ -157,14 +158,14 @@ EOF
         #First install from scratch data
         echo "`date +'%Y-%m-%d %H:%M:%S'` Create database structure" >> ${logfile}
         # End automatically added section
-        psql -h localhost -U estation -d estationdb -f /srv/www/eStation2/database/dbInstall/products_dump_structure_only.sql >> ${logfile} 2>&1 
+        psql -h localhost -U estation -d estationdb -f /srv/www/eStation2/database/dbInstall/products_dump_structure_only.sql > /dev/null 2> ${logfile}
     else
         echo "`date +'%Y-%m-%d %H:%M:%S'` Database structure already exists. Continue" >> ${logfile}
     fi
 
     # Update Tables (both for upgrade and installation from scratch)
     echo "`date +'%Y-%m-%d %H:%M:%S'` Populate tables" >> ${logfile}
-    psql -h localhost -U estation -d estationdb -f /srv/www/eStation2/database/dbInstall/products_dump_data_only.sql >> ${logfile} 2>&1 
+    psql -h localhost -U estation -d estationdb -f /srv/www/eStation2/database/dbInstall/products_dump_data_only.sql > /dev/null 2> ${logfile}
 
 else
     echo "`date +'%Y-%m-%d %H:%M:%S'` Postgresql is NOT running: DB not created !" >> ${logfile}
@@ -200,16 +201,20 @@ cp "$ESTATION2_BASE_DIR_SYSTEM/config/install/rsyncd.conf" /etc/rsyncd.conf
 echo "`date +'%Y-%m-%d %H:%M:%S'`Rsync configuration file copied as /etc/rsyncd.conf." >> ${logfile} 2>&1 
 
 # --------------------------------------------------------------------------------------
-#	Copy the User Settings file (if does not exist !)
+#	Copy the User Settings file (if does not exist)
 # --------------------------------------------------------------------------------------
-src_file='/srv/www/eStation2/config/user_settings.ini'
+src_file='/srv/www/eStation2/config/install/user_settings.ini'
 trg_file='/eStation2/settings/user_settings.ini'
 
 if [ -f  ${trg_file} ]; then
     echo "`date +'%Y-%m-%d %H:%M:%S'` User Setting file already exist $trg_file" >> ${logfile} 2>&1 
 else
     cp $src_file $trg_file
-    echo "`date +'%Y-%m-%d %H:%M:%S'` User Setting file $trg_file created" >> ${logfile} 2>&1 
+    if [ $? -eq 0 ]; then 
+        echo "`date +'%Y-%m-%d %H:%M:%S'` User Setting file $trg_file created" >> ${logfile} 2>&1 
+    else
+        echo "`date +'%Y-%m-%d %H:%M:%S'` ERROR in creating User Setting file $trg_file" >> ${logfile} 2>&1 
+    fi
 fi
 
 # Automatically added by dh_installinit
