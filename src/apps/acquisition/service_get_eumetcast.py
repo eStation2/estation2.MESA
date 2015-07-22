@@ -15,7 +15,7 @@ except:
 
 # Define pid file and create daemon
 pid_file = es_constants.get_eumetcast_pid_filename
-daemon = acquisition.GetEumetcastDaemon(pid_file, dry_run=1)
+daemon = acquisition.GetEumetcastDaemon(pid_file, dry_run=False)
 
 if command == "status":
         status = daemon.status()

@@ -29,8 +29,7 @@ import glob
 
 # Import eStation2 modules
 from lib.python import es_logging as log
-from config import es_constants
-# from config.es_constants import *
+from config.es_constants import *
 
 logger = log.my_logger(__name__)
 
@@ -940,6 +939,9 @@ def dump_obj_to_pickle(object, filename):
     pickle.dump(object, dump_file)
     dump_file.close()
 
+#  Restore an object from a file (pickle serialization), if the file exist
+#  If file does not exist, do not alter the passed object
+#  If file cannot be loaded (corrupted), delete it (and return the passed object)
 
 ######################################################################################
 #  Restore an object from a file (pickle serialization), if the file exist
@@ -1142,7 +1144,7 @@ def get_machine_mac_address():
 
 def get_eumetcast_info(eumetcast_id):
 
-    filename = es_constants.es2globals.get_eumetcast_processed_list_prefix+str(eumetcast_id)+'.info'
+    filename = es2globals.get_eumetcast_processed_list_prefix+str(eumetcast_id)+'.info'
     info = load_obj_from_pickle(filename)
     return info
 

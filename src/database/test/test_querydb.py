@@ -12,6 +12,49 @@ from database import querydb
 from lib.python import functions
 
 class TestQuerydb(TestCase):
+    def Test_get_i18n(self):
+
+        i18n = querydb.get_i18n(lang='fra')
+        len = i18n.__len__()
+        print len
+        for label, langtranslation in i18n:
+            print label + ' ' + langtranslation
+
+        self.assertEqual(1, 1)
+
+    def Test_get_languages(self):
+
+        languages = querydb.get_languages()
+        logger.info("Languages active are: %s", languages)
+        for language in languages:
+            print language.langcode + ' ' + language.langdescription
+
+        self.assertEqual(1, 1)
+
+    def Test_get_timeseries_yaxes(self):
+        products = [{"productcode":"fewsnet-rfe", "version":"2.0", "subproductcode":"10d", "mapsetcode":"FEWSNET-Africa-8km"},
+                    {"productcode":"fewsnet-rfe", "version":"2.0", "subproductcode":"10davg", "mapsetcode":"FEWSNET-Africa-8km"},
+                    {"productcode":"fewsnet-rfe", "version":"2.0", "subproductcode":"10dmax", "mapsetcode":"FEWSNET-Africa-8km"},
+                    {"productcode":"fewsnet-rfe", "version":"2.0", "subproductcode":"10dmin", "mapsetcode":"FEWSNET-Africa-8km"},
+                    {"productcode":"vgt-ndvi", "version":"spot-v1", "subproductcode":"ndv", "mapsetcode":"SPOTV-Africa-1km"}]
+
+        timeseries_yaxes = querydb.get_timeseries_yaxes(products)
+        logger.info("Time series draw properties are: %s", timeseries_yaxes)
+        axes = len(timeseries_yaxes)
+        for timeseries_product in timeseries_yaxes:
+            print timeseries_product.title
+
+        self.assertEqual(1, 1)
+
+    def Test_get_timeseries_drawproperties(self):
+
+        product = {"productcode":"fewsnet-rfe", "version":"2.0", "subproductcode":"10d"}
+        timeseries_drawproperties = querydb.get_timeseries_drawproperties(product)
+        logger.info("Time series draw properties are: %s", timeseries_drawproperties)
+        for timeseries_product in timeseries_drawproperties:
+            print timeseries_product.productcode
+
+        self.assertEqual(1, 1)
 
     def Test_update_product_info(self):
         productinfo = {'productcode': 'chirp',
@@ -231,6 +274,17 @@ class TestQuerydb(TestCase):
         logger.info("Product IN info: %s", product_in)
 
         self.assertEqual(1, 1)
+
+    def Test_get_product_in_info3(self):
+
+        product_in = querydb.get_product_in_info(productcode='modis-chla',
+                                                 subproductcode='chla-day',
+                                                 version='v2013.1',
+                                                 datasource_descr_id='GSFC:CGI:MODIS:CHLA:1D')
+        logger.info("Product IN info: %s", product_in)
+
+        self.assertEqual(1, 1)
+
 
     def Test_get_product_out_info(self):
 

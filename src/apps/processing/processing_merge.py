@@ -58,7 +58,7 @@ def processing_merge(pipeline_run_level=0, pipeline_printout_level=0,
         version = input.version
         start_date = input.start_date
         end_date = input.end_date
-        product_info = querydb.get_product_out_info(productcode=product_code,
+        product_info = querydb.get_product_out_info_connect(productcode=product_code,
                                                    subproductcode=sub_product_code,
                                                    version=version)
         prod_type = product_info[0].product_type

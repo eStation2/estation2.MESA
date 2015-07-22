@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
+import unittest
 from lib.python import functions
 import unittest
 import os
@@ -8,6 +9,7 @@ from config import es_constants
 __author__ = "Jurriaan van 't Klooster"
 
 from apps.es2system import es2system
+
 
 
 class TestSystem(unittest.TestCase):

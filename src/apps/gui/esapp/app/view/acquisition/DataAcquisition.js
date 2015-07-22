@@ -75,7 +75,7 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
         me.columns = [{
             // text: '', // 'Type',
             width: 105,
-            dataIndex: 'type'
+            dataIndex: 'type',
             //bind: '{products.dataacquisitions.type}'
             //bind: '{dataacquisitions.type}'
         }, {

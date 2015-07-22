@@ -10,20 +10,20 @@ start = time.clock()
 
 # Manual Switch for START/STOP
 do_start = True
-dry_run = True
+dry_run = False
 service = False
 serialize = False    # for debug
 
 if service:
     # Make sure the pid dir exists
-    if not os.path.isdir(es_constants.pid_file_dir):
+    if not os.path.isdir(es_constants.es2globals['pid_file_dir']):
         try:
-            os.makedirs(es_constants.pid_file_dir)
+            os.makedirs(es_constants.es2globals['pid_file_dir'])
         except os.error:
             logger.error("Cannot create pid directory")
 
     # Define pid file and create daemon
-    pid_file = es_constants.processing_pid_filename
+    pid_file = es_constants.es2globals['get_eumetcast_pid_filename']
     daemon = processing.ProcessingDaemon(pid_file, dry_run=dry_run)
 
     if do_start:
