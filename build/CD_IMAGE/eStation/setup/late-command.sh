@@ -11,18 +11,6 @@ pip install /media/cdrom/eStation/Python-Modules/psutil.tar.gz
 pip install /media/cdrom/eStation/Python-Modules/reloader.tar.gz
 pip install /media/cdrom/eStation/Python-Modules/greenwich.tar.gz
 
-# Create Thematic User
-
-username=analyst
-password=mesa2015
-fullname='eStation Thematic User'
-pass=$(perl -e 'print crypt($ARGV[0], "password")' $password)
-useradd -c "$fullname" -s /bin/bash -m -p $pass $username
-
-# Create eStation group and add Users
-addgroup estation
-adduser adminuser estation
-adduser analyst estation
 
 
 

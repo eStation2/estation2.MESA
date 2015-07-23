@@ -67,12 +67,26 @@ uname=$(uname -n)
 echo "`date +'%Y-%m-%d %H:%M:%S'`  Machine Name = ${uname}" >> ${logfile}
 
 # --------------------------------------------------------------------------------------
+#	Create sym-link from the <versioned> install and /srv/www/eStation2
+# --------------------------------------------------------------------------------------
+ln -fs ${ESTATION2_VBASE_DIR_SYSTEM} ${ESTATION2_BASE_DIR_SYSTEM}
+if [ $? -eq 0 ]; then
+	echo "`date +'%Y-%m-%d %H:%M:%S'` Link to ${ESTATION2_BASE_DIR_SYSTEM} done." >> ${logfile} 2>&1 
+else
+        echo "`date +'%Y-%m-%d %H:%M:%S'` ERROR in creating Link ${ESTATION2_BASE_DIR_SYSTEM}" >> ${logfile} 2>&1 
+fi
+
+# --------------------------------------------------------------------------------------
 #	Add the path of the eStation2 to python 
 # --------------------------------------------------------------------------------------
 
 echo ${ESTATION2_BASE_DIR_SYSTEM} > ${ESTATION2_PYTHON_DIST_DIR}/eStation2.pth
-echo "`date +'%Y-%m-%d %H:%M:%S'` Created file ${ESTATION2_PYTHON_DIST_DIR}/eStation2.pth." >> ${logfile}
+if [ $? -eq 0 ]; then
+    echo "`date +'%Y-%m-%d %H:%M:%S'` Created file ${ESTATION2_PYTHON_DIST_DIR}/eStation2.pth" >> ${logfile}
+else
+        echo "`date +'%Y-%m-%d %H:%M:%S'` ERROR in creating file ${ESTATION2_PYTHON_DIST_DIR}/eStation2.pth" >> ${logfile} 2>&1 
 
+fi
 # --------------------------------------------------------------------------------------
 #	Change owner/group/permiss of relevant dirs (see GitHub ticket #35)
 #		Base Dir for Installation (/srv/www/eStation2)
@@ -80,8 +94,8 @@ echo "`date +'%Y-%m-%d %H:%M:%S'` Created file ${ESTATION2_PYTHON_DIST_DIR}/eSta
 #		Temp Dirs - recreated at boot (/tmp/eStation2)
 # --------------------------------------------------------------------------------------
 
-# base dir (/srv/www/eStation2/)
-dir_own_grp_mod_default ${ESTATION2_BASE_DIR_SYSTEM} 755 ${logfile}
+# base dir (/srv/www/eStation2-X.X.X/)
+dir_own_grp_mod_default ${ESTATION2_VBASE_DIR_SYSTEM} 755 ${logfile}
 
 # --------------------------------------------------------------------------------------
 # Local dirs (/eStation2/ and subdirs)
@@ -122,11 +136,19 @@ dir_own_grp_mod_default ${ESTATION2_DIR_INGEST} 775 ${logfile}
 # --------------------------------------------------------------------------------------
 # Replace the /etc/rc.local file with the one from eStation
 # --------------------------------------------------------------------------------------
-echo "Copy file rc.local to /etc " 	>> ${logfile}
-cp $ESTATION2_BASE_DIR_SYSTEM/config/install/rc.local /etc/rc.local		2>> ${logfile}
-echo "`date +'%Y-%m-%d %H:%M:%S'` Execute /etc/rc.local"				 	>> ${logfile}
+
+cp $ESTATION2_VBASE_DIR_SYSTEM/config/install/rc.local /etc/rc.local		2>> ${logfile}
+if [ $? -eq 0 ]; then
+    echo "`date +'%Y-%m-%d %H:%M:%S'` File /etc/rc.local copied"				 	>> ${logfile}
+else
+    echo "`date +'%Y-%m-%d %H:%M:%S'` ERROR in copying /etc/rc.local" >> ${logfile} 2>&1 
+fi
 /etc/rc.local							2>> ${logfile}
-echo "`date +'%Y-%m-%d %H:%M:%S'` Done /etc/rc.local"				 	>> ${logfile}
+if [ $? -eq 0 ]; then
+    echo "`date +'%Y-%m-%d %H:%M:%S'` Done /etc/rc.local"				 	>> ${logfile}
+else
+    echo "`date +'%Y-%m-%d %H:%M:%S'` ERROR in executing /etc/rc.local" >> ${logfile} 2>&1 
+fi
 
 # --------------------------------------------------------------------------------------
 #	Postgresql DB management
@@ -136,8 +158,12 @@ echo "`date +'%Y-%m-%d %H:%M:%S'` Done /etc/rc.local"				 	>> ${logfile}
 
 # Restart postgresql 
 /etc/init.d/postgresql restart
+if [ $? -eq 0 ]; then
+    echo "`date +'%Y-%m-%d %H:%M:%S'` Postgresql restarted"				 	>> ${logfile}
+else
+    echo "`date +'%Y-%m-%d %H:%M:%S'` ERROR in restarting Postgresql" >> ${logfile} 2>&1 
+fi
 sleep 3
-echo "`date +'%Y-%m-%d %H:%M:%S'` Postgresql restarted"				 	>> ${logfile}
 # localhost reachable
 if [ "$(nc -v -z localhost 5432 2> /dev/null;echo $?)" = 0 ]; then
     echo "`date +'%Y-%m-%d %H:%M:%S'` Postgresql is running" >> ${logfile}
@@ -182,11 +208,15 @@ a2enmod wsgi actions cgi fastcgi alias mpm_worker rewrite 2>> ${logfile}
 # --------------------------------------------------------------------------------------
 # Copy configuration file
 # --------------------------------------------------------------------------------------
-src_file="$ESTATION2_BASE_DIR_SYSTEM/config/install/apache-config-file.txt"
+src_file="$ESTATION2_VBASE_DIR_SYSTEM/config/install/apache-config-file.txt"
 trg_file='/etc/apache2/sites-available/000-default.conf'
-echo "`date +'%Y-%m-%d %H:%M:%S'`Target file ${trg_file} created by copying from ${src_file}." >> ${logfile} 2>&1 
-cp ${src_file} ${trg_file}
 
+cp ${src_file} ${trg_file}
+if [ $? -eq 0 ]; then
+    echo "`date +'%Y-%m-%d %H:%M:%S'`Target file ${trg_file} created by copying from ${src_file}." >> ${logfile} 2>&1 
+else
+    echo "`date +'%Y-%m-%d %H:%M:%S'` ERROR in copying ${src_file}" >> ${logfile} 2>&1 
+fi
 # Restart apache
 service apache2 restart
 echo "`date +'%Y-%m-%d %H:%M:%S'` Apache2 restarted"				 	>> ${logfile}
@@ -195,10 +225,10 @@ echo "`date +'%Y-%m-%d %H:%M:%S'` Apache2 restarted"				 	>> ${logfile}
 #	Copy rsync configuration files
 # --------------------------------------------------------------------------------------
 
-cp "$ESTATION2_BASE_DIR_SYSTEM/config/install/rsync" /etc/default/rsync
+cp "$ESTATION2_VBASE_DIR_SYSTEM/config/install/rsync" /etc/default/rsync
 echo "`date +'%Y-%m-%d %H:%M:%S'`Rsync configuration file copied as /etc/default/rsync." >> ${logfile} 2>&1 
 
-cp "$ESTATION2_BASE_DIR_SYSTEM/config/install/rsyncd.conf" /etc/rsyncd.conf
+cp "$ESTATION2_VBASE_DIR_SYSTEM/config/install/rsyncd.conf" /etc/rsyncd.conf
 echo "`date +'%Y-%m-%d %H:%M:%S'`Rsync configuration file copied as /etc/rsyncd.conf." >> ${logfile} 2>&1 
 
 # --------------------------------------------------------------------------------------
@@ -233,12 +263,6 @@ else
         echo "`date +'%Y-%m-%d %H:%M:%S'` ERROR in creating System Setting file $trg_file" >> ${logfile} 2>&1 
     fi
 fi
-# --------------------------------------------------------------------------------------
-#	Create sym-link from the <versioned> install and /srv/www/eStation2
-# --------------------------------------------------------------------------------------
-ln -fs ${ESTATION2_BASE_DIR_SYSTEM} ${ESTATION2_VBASE_DIR_SYSTEM}
-echo "`date +'%Y-%m-%d %H:%M:%S'` Link to ${ESTATION2_BASE_DIR_SYSTEM} done." >> ${logfile} 2>&1 
-
 # Automatically added by dh_installinit (??)
 #if [ -x "/etc/init.d/postgresql" ]; then
 #    echo "Restart postgresql" >> ${logfile}

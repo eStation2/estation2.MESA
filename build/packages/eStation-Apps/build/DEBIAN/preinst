@@ -27,6 +27,22 @@ uname=$(uname -n)
 echo "`date +'%Y-%m-%d %H:%M:%S'` Machine Name = ${uname}" >> ${logfile}
 
 # --------------------------------------------------------------------------------------
+#	Create Users
+# --------------------------------------------------------------------------------------
+
+# Create Thematic User
+username=analyst
+password=mesa2015
+fullname='eStation Thematic User'
+pass=$(perl -e 'print crypt($ARGV[0], "password")' $password)
+useradd -c "$fullname" -s /bin/bash -m -p $pass $username
+
+# Create eStation group and add Users
+addgroup estation
+adduser adminuser estation
+adduser analyst estation
+
+# --------------------------------------------------------------------------------------
 #	Postgresql DB management
 #	- initialize postgres datadir (in installation from scratch)
 #	- do a (partial) dump 	      (in case of upgrade)
