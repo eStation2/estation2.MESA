@@ -5,7 +5,7 @@
 #   descr:	 It correspond to the file 'Functions' in rel. 1.X, for bash functions.
 #            It contains the following sets of functions:
 #            System:    manage the 'system' tab
-#            Time:      convert date/time between formats
+#            Date/Time: convert date/time between formats
 #            Naming:    manage file naming
 #            General:   general purpose functions
 #
@@ -29,7 +29,7 @@ import glob
 
 # Import eStation2 modules
 from lib.python import es_logging as log
-from config.es_constants import *
+from config import es_constants
 
 logger = log.my_logger(__name__)
 
@@ -182,11 +182,6 @@ def tojson(queryresult):
     return jsonresult
 
 
-# Return True if the date is in the correct format
-def checkDateFormat(myString):
-    isDate = re.match('[0-1][0-9]\/[0-3][0-9]\/[1-2][0-9]{3}', myString)
-    return isDate
-
 
 def internet_on():
     import urllib2
@@ -216,6 +211,11 @@ def is_connected():
 ######################################################################################
 #                            DATE FUNCTIONS
 ######################################################################################
+
+# Return True if the date is in the correct format
+def checkDateFormat(myString):
+    isDate = re.match('[0-1][0-9]\/[0-3][0-9]\/[1-2][0-9]{3}', myString)
+    return isDate
 
 ######################################################################################
 #   is_date_yyyymmdd
@@ -690,7 +690,6 @@ def set_path_filename_no_date(product_code, sub_product_code, mapset_id, version
 
     return filename_nodate
 
-
 ######################################################################################
 #   set_path_filename
 #   Purpose: From date, product_code, sub_product_code, mapset, extension -> filename
@@ -734,6 +733,27 @@ def set_path_sub_directory(product_code, sub_product_code, product_type, version
 
     return sub_directory
 
+######################################################################################
+#   set_path_filename_eumetcast
+#   Purpose: From date, product_code, sub_product_code, mapset, extension -> filename
+#            for the EUMETCast dissemination
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2015/06/22
+#   Inputs: ...
+#   Output: filename
+#   Description: creates filename
+#
+def set_path_filename_eumetcast(date_str, product_code, sub_product_code, mapset_id, version,  extension):
+
+    filename = es_constants.es2globals['prefix_eumetcast_files'] +\
+               product_code + '_' + \
+               sub_product_code + '_' +\
+               date_str + '_'+\
+               mapset_id + '_' +\
+               version +\
+               extension
+
+    return filename
 
 ######################################################################################
 #   get_from_path_dir
@@ -811,7 +831,6 @@ def get_subdir_from_path_full(full_path):
 
     return str_subdir
 
-
 ######################################################################################
 #   get_all_from_path_full
 #   Purpose: From full_path -> product_code, sub_product_code, date, mapset, (version)
@@ -834,6 +853,131 @@ def get_all_from_path_full(full_path):
 
     return [product_code, sub_product_code, version, str_date, mapset]
 
+
+######################################################################################
+#   get_all_from_filename
+#   Purpose: Extract all components from filename (no full_path)
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: filename
+#   Output: product_code, sub_product_code, date, mapset, version
+#   Description: returns information form the fullpath
+#
+def get_all_from_path_full(full_path):
+
+    # Split directory and filename
+    dir, filename = os.path.split(full_path)
+
+    # Get info from directory
+    product_code, sub_product_code, version, mapset = get_from_path_dir(dir)
+
+    # Get info from filename
+    str_date = get_date_from_path_filename(filename)
+
+    return [product_code, sub_product_code, version, str_date, mapset]
+
+######################################################################################
+#   get_all_from_filename
+#   Purpose: Extract all components from filename (no full_path)
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: filename
+#   Output: product_code, sub_product_code, date, mapset, version
+#   Description: returns information form the fullpath
+#
+def get_all_from_filename(filename):
+
+    # Get info from directory
+    tokens = [token for token in filename.split('_') if token]
+    str_date = tokens[0]
+    product_code = tokens[1]
+    sub_product_code = tokens[2]
+    mapset = tokens[3]
+    [version, extension] =  tokens[4].split('.')
+
+    return [str_date, product_code, sub_product_code, mapset, version]
+
+######################################################################################
+#   get_all_from_filename_eumetcast
+#   Purpose: Extract all components from filename_eumetcast (no full_path)
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: filename
+#   Output: product_code, sub_product_code, date, mapset, version
+#   Description: returns information form the fullpath
+#
+def get_all_from_filename_eumetcast(filename):
+
+    # Get info from directory
+    tokens = [token for token in filename.split('_') if token]
+    product_code = tokens[2]
+    sub_product_code = tokens[3]
+    str_date = tokens[4]
+    mapset = tokens[5]
+    [version, extension] =  tokens[6].split('.')
+
+    return [str_date, product_code, sub_product_code, mapset, version]
+######################################################################################
+#   get_product_type_from_subdir
+#   Purpose: get the product type (Ingest/Derived) from subdir
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: sub_dir (like vgt-ndvi/spot-v1/WGS84-Africa-1km/tif/ndv/)
+#   Output: product_type
+#
+def get_product_type_from_subdir(subdir):
+
+    # Get info from directory
+    tokens = [token for token in subdir.split(os.path.sep) if token]
+    product_subdir = tokens[-2]
+    for type, name in dict_subprod_type_2_dir.iteritems():
+        if name == product_subdir:
+            product_type = type
+    return product_type
+
+######################################################################################
+#   convert_name_to_eumetcast
+#   Purpose: Convert filename from the internal eStation to the EUMETCast transmission format
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: filename
+#   Output: filename_eumetccast
+#   Description: returns information form the fullpath
+#
+def convert_name_to_eumetcast(filename):
+
+    extension = '.tif'
+    [dir, name] = os.path.split(filename)
+
+    [str_date, product_code, sub_product_code, mapset, version] = get_all_from_filename(name)
+
+    filename_eumetcast = set_path_filename_eumetcast(str_date, product_code, sub_product_code, mapset, version, extension)
+
+    return filename_eumetcast
+
+######################################################################################
+#   convert_name_from_eumetcast
+#   Purpose: Convert filename from the EUMETCast transmission format to the internal eStation
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: filename_eumetcast (might contain a dirpath, which is cut)
+#           product_type: Ingest or Derived
+#           with_dir -> if set, it adds sub_dir
+#   Output: filename           (only filename, no dir)
+#   Description: returns information form the fullpath
+#
+def convert_name_from_eumetcast(filename, product_type, with_dir=False, new_mapset=False):
+
+    extension = '.tif'
+    [dir, name] = os.path.split(filename)
+    [str_date, product_code, sub_product_code, mapset, version] = get_all_from_filename_eumetcast(name)
+    if new_mapset:
+        mapset = new_mapset
+    filename = set_path_filename(str_date, product_code, sub_product_code, mapset, version, extension)
+    if with_dir:
+        subdir=set_path_sub_directory(product_code, sub_product_code, product_type, version, mapset)
+        filename = subdir+filename
+    return filename
 
 ######################################################################################
 #   check_output_dir

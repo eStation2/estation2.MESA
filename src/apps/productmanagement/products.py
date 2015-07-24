@@ -215,7 +215,7 @@ class Product(object):
             try:
                 shutil.copyfile(my_file, fullpath_dest)
             except:
-                logger.error('Error in copying file %s' % fullpath)
+                logger.error('Error in copying file %s' % fullpath_dest)
 
         # Clean and exit
         shutil.rmtree(tmpdir)

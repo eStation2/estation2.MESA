@@ -29,8 +29,11 @@ class TestFunctionsPath(TestCase):
     dir_name=sep+'base'+sep+'dir'+sep+'some'+sep+'where' + sep + sub_dir
 
 
-    # Rule for filename is: <datetime>_<prod_code>_<sprod_code>_<mapset>.<ext>
+    # Rule for filename is: <datetime>_<prod_code>_<sprod_code>_<mapset>_<version>.<ext>
     filename=str_date+'_'+str_prod+'_'+str_sprod+'_'+str_mapset+'_'+str_version+str_extension
+
+    # Rule for filename_eumetcast is: MESA_JRC_<prod_code>_<sprod_code>_<datetime>_<mapset>_<version>.<ext>
+    filename_eumetcast='MESA_JRC_'+str_prod+'_'+str_sprod+'_'+str_date+'_'+str_mapset+'_'+str_version+str_extension
 
     fullpath = dir_name+filename
 
@@ -96,6 +99,15 @@ class TestFunctionsPath(TestCase):
         logger.info('Filename is: %s' % my_filename)
         self.assertEqual(self.filename,my_filename)
 
+
+    def test_set_path_filename_eumetcast(self):
+
+        my_filename = set_path_filename_eumetcast(self.str_date, self.str_prod, self.str_sprod,
+                                        self.str_mapset, self.str_version, self.str_extension)
+
+        logger.info('Filename is: %s' % my_filename)
+        self.assertEqual(self.filename_eumetcast,my_filename)
+
     def test_set_path_sub_directory(self):
 
         my_sub_directory = set_path_sub_directory(self.str_prod, self.str_sprod, self.product_type,
@@ -107,3 +119,40 @@ class TestFunctionsPath(TestCase):
     def test_get_versions(self):
         versions=getListVersions()
         print versions
+
+    def test_get_all_from_filename(self):
+
+        [str_date, product_code, sub_product_code, mapset, version] = get_all_from_filename(self.filename)
+
+        self.assertEqual(str_date,self.str_date)
+        self.assertEqual(product_code,self.str_prod)
+        self.assertEqual(sub_product_code,self.str_sprod)
+        self.assertEqual(mapset,self.str_mapset)
+        self.assertEqual(version,self.str_version)
+
+    def test_get_all_from_filename_eumetcast(self):
+
+        [str_date, product_code, sub_product_code, mapset, version] = get_all_from_filename_eumetcast(self.filename_eumetcast)
+
+        self.assertEqual(str_date,self.str_date)
+        self.assertEqual(product_code,self.str_prod)
+        self.assertEqual(sub_product_code,self.str_sprod)
+        self.assertEqual(mapset,self.str_mapset)
+        self.assertEqual(version,self.str_version)
+
+    def test_convert_filename_to_eumetcast(self):
+
+        filename_eumetcast = convert_name_to_eumetcast(self.filename)
+
+        self.assertEqual(self.filename_eumetcast,filename_eumetcast)
+
+    def test_convert_filename_from_eumetcast(self):
+
+        filename = convert_name_from_eumetcast(self.filename_eumetcast, self.product_type)
+
+        self.assertEqual(self.filename,filename)
+
+        fullpath = convert_name_from_eumetcast(self.filename_eumetcast, self.product_type, with_dir=True)
+
+        self.assertEqual(self.filename,filename)
+

@@ -52,6 +52,9 @@ def loop_ingestion(dry_run=False):
 
     while True:
 
+        # Manage the ingestion of Historical Archives (e.g. eStation prods disseminated via EUMETCast)
+        # Call a routine ...
+
         # Get all active product ingestion records with a subproduct count.
         active_product_ingestions = querydb.get_ingestion_product(allrecs=True, echo=echo_query)
 
@@ -108,7 +111,9 @@ def loop_ingestion(dry_run=False):
 
                 logger.info("Number of files found for product [%s] is: %s" % (active_product_ingest[0], len(files)))
 
+                # Get list of ingestions triggers [prod/subprod/mapset]
                 ingestions = querydb.get_ingestion_subproduct(allrecs=False, echo=echo_query, **product)
+
                 # Loop over ingestion triggers
                 subproducts = list()
                 for ingest in ingestions:
@@ -183,6 +188,57 @@ def loop_ingestion(dry_run=False):
         logger.info("Entering sleep time of  %s seconds" % str(10))
         time.sleep(10)
 
+
+def ingest_archives_eumetcast(dry_run=False):
+
+#    Ingest the files in format MESA_JRC_<prod>_<sprod>_<date>_<mapset>_<version>
+#    disseminated by JRC through EUMETCast.
+#    Gets the list of products active for ingestion and active for processing
+#    Arguments: dry_run -> if 1, read tables and report activity ONLY
+
+    logger.info("Entering routine %s" % 'drive_ingestion')
+    echo_query = False
+
+    # Get all active product ingestion records with a subproduct count.
+    active_product_ingestions = querydb.get_ingestion_product(allrecs=True, echo=echo_query)
+    for active_product_ingest in active_product_ingestions:
+
+        productcode = active_product_ingest[0]
+        productversion = active_product_ingest[1]
+
+        # For the current active product ingestion: get all
+        product = {"productcode": productcode,
+                   "version": productversion}
+
+        # Get the list of acquisition sources that are defined for this ingestion 'trigger'
+        # (i.e. prod/version)
+        # NOTE: the following implies there is 1 and only 1 '_native' subproduct associated to a 'subproduct';
+        native_product = {"productcode": productcode,
+                              "subproductcode": productcode + "_native",
+                              "version": productversion}
+        sources_list = querydb.get_product_sources(echo=echo_query, **native_product)
+
+        logger.debug("For product [%s] N. %s  source is/are found" % (productcode,len(sources_list)))
+
+        ingestions = querydb.get_ingestion_subproduct(allrecs=False, echo=echo_query, **product)
+        for ingest in ingestions:
+            print ingest
+
+    # Get all active processing chains [product/version/algo/mapset].
+        active_processing_chains = querydb.get_active_processing_chains()
+        for chain in active_processing_chains:
+            logger.debug("Processing Chain N.:%s" % str(chain.process_id))
+
+
+# def ingest_archives_eumetcast_product(product, subproduct, mapset, version, dry_run=False):
+
+#    Ingest all files of type MESA_JRC_ for a give prod/version/subprod/mapset
+#    Note that mapset is the 'target' mapset
+
+    # Get the list of matching files in /data/ingest
+
+
+    # Call the ingestion routine
 
 def ingestion(input_files, in_date, product, subproducts, datasource_descr, echo_query=False):
 #   Manages ingestion of 1/more file/files for a given date
@@ -1277,6 +1333,127 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         filename = os.path.basename(output_filename)
         # Loop on interm_files
         ii += 1
+
+def ingest_file_archive(input_file, target_mapsetid, echo_query=False):
+# -------------------------------------------------------------------------------------------------------
+#   Ingest a file of type MESA_JRC_
+#   Arguments:
+#       input_file: input file full name
+#       target_mapset: target mapset
+#
+
+    logger.info("Entering routine %s for file %s" % ('ingest_file_archive', input_file))
+
+    # Test the file/files exists
+    if not os.path.isfile(input_file):
+        logger.error('Input file: %s does not exist' % input_file)
+        return 1
+
+    # Instance metadata object (for output_file)
+    sds_meta_out = metadata.SdsMetadata()
+
+    # Read metadata from input_file
+    sds_meta_in = metadata.SdsMetadata()
+    sds_meta_in.read_from_file(input_file)
+    sds_meta_in.print_out()
+
+    # Extract info from input file
+    [str_date, product_code, sub_product_code, mapsetid, version] = functions.get_all_from_filename_eumetcast(input_file)
+
+    # Define output filename
+    sub_dir = sds_meta_in.get_item('eStation2_subdir')
+    product_type = functions.get_product_type_from_subdir(sub_dir)
+
+    output_file = es_constants.es2globals['processing_dir']+\
+                      functions.convert_name_from_eumetcast(input_file, product_type, with_dir=True, new_mapset=target_mapsetid)
+
+    # make sure output dir exists
+    output_dir = os.path.split(output_file)[0]
+    functions.check_output_dir(output_dir)
+
+    # Compare input-target mapset
+    if target_mapsetid==mapsetid:
+
+        # Copy file to output
+        shutil.copyfile(input_file,output_file)
+        # Open output dataset for writing metadata
+        trg_ds = gdal.Open(output_file)
+
+    else:
+
+        # -------------------------------------------------------------------------
+        # Manage the geo-referencing associated to input file
+        # -------------------------------------------------------------------------
+        orig_ds = gdal.Open(input_file, gdal.GA_ReadOnly)
+
+        # Read the data type
+        band = orig_ds.GetRasterBand(1)
+        out_data_type_gdal = band.DataType
+        try:
+            # Read geo-reference from input file
+            orig_cs = osr.SpatialReference()
+            orig_cs.ImportFromWkt(orig_ds.GetProjectionRef())
+            orig_geo_transform = orig_ds.GetGeoTransform()
+            orig_size_x = orig_ds.RasterXSize
+            orig_size_y = orig_ds.RasterYSize
+        except:
+            logger.debug('Cannot read geo-reference from file .. Continue')
+
+        # TODO-M.C.: add a test on the mapset-id in DB table !
+        trg_mapset = mapset.MapSet()
+        trg_mapset.assigndb(target_mapsetid)
+        logger.debug('Target Mapset is: %s' % target_mapsetid)
+
+        # -------------------------------------------------------------------------
+        # Generate the output file
+        # -------------------------------------------------------------------------
+        # Prepare output driver
+        out_driver = gdal.GetDriverByName(es_constants.ES2_OUTFILE_FORMAT)
+
+        logger.debug('Doing re-projection to target mapset: %s' % trg_mapset.short_name)
+        # Get target SRS from mapset
+        out_cs = trg_mapset.spatial_ref
+        out_size_x = trg_mapset.size_x
+        out_size_y = trg_mapset.size_y
+
+        # Create target in memory
+        mem_driver = gdal.GetDriverByName('MEM')
+
+        # Assign mapset to dataset in memory
+        mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, out_data_type_gdal)
+
+        mem_ds.SetGeoTransform(trg_mapset.geo_transform)
+        mem_ds.SetProjection(out_cs.ExportToWkt())
+
+        # Apply Reproject-Image to the memory-driver
+        orig_wkt = orig_cs.ExportToWkt()
+        res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
+                                      es_constants.ES2_OUTFILE_INTERP_METHOD)
+
+        logger.debug('Re-projection to target done.')
+
+        # Read from the dataset in memory
+        out_data = mem_ds.ReadAsArray()
+
+        # Write to output_file
+        trg_ds = out_driver.CreateCopy(output_file, mem_ds, 0, [es_constants.ES2_OUTFILE_OPTIONS])
+        trg_ds.GetRasterBand(1).WriteArray(out_data)
+
+    # -------------------------------------------------------------------------
+    # Assign Metadata to the ingested file
+    # -------------------------------------------------------------------------
+
+    sds_meta_out.assign_es2_version()
+    sds_meta_out.assign_mapset(target_mapsetid)
+    sds_meta_out.assign_from_product(product_code, sub_product_code, version)
+    sds_meta_out.assign_date(str_date)
+    sds_meta_out.assign_subdir_from_fullpath(output_dir)
+    sds_meta_out.assign_comput_time_now()
+    sds_meta_out.assign_input_files(input_file)
+    # Write metadata
+    sds_meta_out.write_to_ds(trg_ds)
+    # Close dataset
+    trg_ds = None
 
 
 def write_ds_to_geotiff(dataset, output_file):

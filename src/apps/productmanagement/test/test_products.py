@@ -12,6 +12,7 @@ import unittest
 import os
 import datetime
 import glob
+import shutil
 from ..products import Product
 from ..datasets import Dataset
 from ..exceptions import (NoProductFound, MissingMapset)
@@ -313,3 +314,11 @@ class TestProducts4UI(unittest.TestCase):
         missing = product.get_missing_datasets(mapset=mapsets[0],sub_product_code=subproductcode, from_date=None, to_date=to_date)
 
         a=1
+
+    def test_rename_file_eumetcast(self):
+
+        input_file='/data/processing//vgt-ndvi/spot-v1/SPOTV-Africa-1km/tif/ndv/20020421_vgt-ndvi_ndv_SPOTV-Africa-1km_spot-v1.tif'
+        new_name=functions.convert_name_to_eumetcast(input_file)
+        output_dir='/data/archives/'
+        shutil.copyfile(input_file,output_dir+new_name)
+        print(output_dir+new_name)

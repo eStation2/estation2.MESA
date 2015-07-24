@@ -3,7 +3,7 @@ _author__ = "Marco Clerici"
 
 from config import es_constants
 from apps.acquisition import ingestion
-
+from database import querydb
 import unittest
 import os
 # Overwrite Dirs
@@ -92,3 +92,12 @@ class TestIngestion(unittest.TestCase):
 
         #print('['+command+']')
         os.system(command)
+
+    def test_ingest_eumetcast(self):
+
+        input_file='/data/archives/MESA_JRC_vgt-ndvi_ndv_20020421_SPOTV-Africa-1km_spot-v1.tif'
+        # target_mapset='SPOTV-Africa-1km'
+        target_mapset='SPOTV-ECOWAS-1km'
+
+#        ingestion.ingest_archives_eumetcast()
+        ingestion.ingest_file_archive(input_file, target_mapset, echo_query=False)()
