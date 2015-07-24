@@ -32,11 +32,13 @@ BUILDdir=${PACKAGE_BUILD_DIR_TMP}/${Name}-${ESTATION2_VERSION}
 # Cleaning
 deb_clean ${BUILDdir}
 
-mkdir -p ${BUILDdir}/${ESTATION2_BASE_DIR_SYSTEM}
+# Make the target dir (versioned) for sources
+mkdir -p ${BUILDdir}${ESTATION2_VBASE_DIR_SYSTEM}
 
 cp -r ../src/* ${BUILDdir}/
-cp -r ${ESTATION_SRC_DIR}/* ${BUILDdir}/${ESTATION2_BASE_DIR_SYSTEM}
+cp -r ${ESTATION_SRC_DIR}/* ${BUILDdir}${ESTATION2_VBASE_DIR_SYSTEM}
 cp -r ./DEBIAN ${BUILDdir}
+
 
 ############################
 # Parsing preinst/postinst
@@ -44,7 +46,7 @@ cp -r ./DEBIAN ${BUILDdir}
 # Replace variables in preinst and postinst
 for file in ${BUILDdir}/DEBIAN/preinst ${BUILDdir}/DEBIAN/postinst ${BUILDdir}/DEBIAN/control
 do
-for var in 'ESTATION2_VERSION' 'ESTATION2_RELEASE' 'ESTATION2_UBUNTU' 'ESTATION2_MAIN_USER' 'ESTATION2_THEM_USER' 'ESTATION2_MAIN_GROUP' 'ESTATION2_BASE_DIR_SYSTEM' 'ESTATION2_LOCAL_DIR' 'ESTATION2_DIR_LOG' 
+for var in 'ESTATION2_VERSION' 'ESTATION2_RELEASE' 'ESTATION2_UBUNTU' 'ESTATION2_MAIN_USER' 'ESTATION2_THEM_USER' 'ESTATION2_MAIN_GROUP' 'ESTATION2_BASE_DIR_SYSTEM' 'ESTATION2_VBASE_DIR_SYSTEM' 'ESTATION2_LOCAL_DIR' 'ESTATION2_DIR_LOG' 
 do
     placeholder="<${var}>"
     value=$(eval "echo \$${var}")
