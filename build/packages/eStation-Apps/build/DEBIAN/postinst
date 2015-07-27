@@ -203,7 +203,10 @@ fi # localhost reachable
 # --------------------------------------------------------------------------------------
 # Disable/enale modules
 a2dismod php5 mpm_event mpm_prefork 2>> ${logfile}
-a2enmod wsgi actions cgi fastcgi alias mpm_worker rewrite 2>> ${logfile}
+a2enmod wsgi actions mpm_worker cgi fastcgi alias rewrite 2>> ${logfile}
+
+# Define hostname 
+sed -i "s|#ServerRoot.*\"/etc/apache2\"|#ServerRoot \"/etc/apache2\"\nServerName localhost|g" /etc/apache2/apache2.conf
 
 # --------------------------------------------------------------------------------------
 # Copy configuration file
@@ -243,6 +246,7 @@ else
     cp $src_file $trg_file
     if [ $? -eq 0 ]; then 
         echo "`date +'%Y-%m-%d %H:%M:%S'` User Setting file $trg_file created" >> ${logfile} 2>&1 
+        chown ${ESTATION2_MAIN_USER}:${ESTATION2_MAIN_GROUP} $trg_file 2>> ${logfile}
     else
         echo "`date +'%Y-%m-%d %H:%M:%S'` ERROR in creating User Setting file $trg_file" >> ${logfile} 2>&1 
     fi
@@ -259,6 +263,7 @@ else
     cp $src_file $trg_file
     if [ $? -eq 0 ]; then 
         echo "`date +'%Y-%m-%d %H:%M:%S'` System Setting file $trg_file created" >> ${logfile} 2>&1 
+        chown ${ESTATION2_MAIN_USER}:${ESTATION2_MAIN_GROUP} $trg_file 2>> ${logfile}
     else
         echo "`date +'%Y-%m-%d %H:%M:%S'` ERROR in creating System Setting file $trg_file" >> ${logfile} 2>&1 
     fi
