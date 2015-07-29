@@ -193,10 +193,10 @@ def ingest_archives_eumetcast(dry_run=False):
 
 #    Ingest the files in format MESA_JRC_<prod>_<sprod>_<date>_<mapset>_<version>
 #    disseminated by JRC through EUMETCast.
-#    Gets the list of products active for ingestion and active for processing
+#    Gets the list of products/version/subproducts active for ingestion and active for processing
 #    Arguments: dry_run -> if 1, read tables and report activity ONLY
 
-    logger.info("Entering routine %s" % 'drive_ingestion')
+    logger.info("Entering routine %s" % 'ingest_archives_eumetcast')
     echo_query = False
 
     # Get all active product ingestion records with a subproduct count.
@@ -222,23 +222,41 @@ def ingest_archives_eumetcast(dry_run=False):
 
         ingestions = querydb.get_ingestion_subproduct(allrecs=False, echo=echo_query, **product)
         for ingest in ingestions:
-            print ingest
+            logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (productcode, productversion,ingest.subproductcode,ingest.mapsetcode))
+            ingest_archives_eumetcast_product(productcode, productversion,ingest.subproductcode,ingest.mapsetcode)
 
     # Get all active processing chains [product/version/algo/mapset].
-        active_processing_chains = querydb.get_active_processing_chains()
-        for chain in active_processing_chains:
-            logger.debug("Processing Chain N.:%s" % str(chain.process_id))
+    active_processing_chains = querydb.get_active_processing_chains()
+    for chain in active_processing_chains:
+        a = chain.process_id
+        logger.debug("Processing Chain N.:%s" % str(chain.process_id))
+        processed_products = querydb.get_processing_chain_products(chain.process_id, type='output')
+        for processed_product in processed_products:
+            productcode = processed_product.productcode
+            version = processed_product.version
+            subproductcode = processed_product.subproductcode
+            mapset = processed_product.mapsetcode
+            logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (productcode, version,subproductcode,mapset))
+            ingest_archives_eumetcast_product(productcode, productversion,ingest.subproductcode,mapset)
 
 
-# def ingest_archives_eumetcast_product(product, subproduct, mapset, version, dry_run=False):
+def ingest_archives_eumetcast_product(product_code, version, subproduct_code, mapset_id, dry_run=False):
 
 #    Ingest all files of type MESA_JRC_ for a give prod/version/subprod/mapset
 #    Note that mapset is the 'target' mapset
 
+    logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (product_code, version, subproduct_code, mapset_id))
     # Get the list of matching files in /data/ingest
-
+    available_files=glob.glob(es_constants.es2globals['ingest_dir']+
+                              es_constants.es2globals['prefix_eumetcast_files']+\
+                              product_code + '_' + \
+                              subproduct_code + '_*_' +\
+                              version +'*')
 
     # Call the ingestion routine
+    for in_file in available_files:
+        ingestion.ingest_file_archive(in_file, mapset_id, echo_query=False)()
+
 
 def ingestion(input_files, in_date, product, subproducts, datasource_descr, echo_query=False):
 #   Manages ingestion of 1/more file/files for a given date

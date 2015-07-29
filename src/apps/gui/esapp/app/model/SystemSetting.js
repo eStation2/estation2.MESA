@@ -11,6 +11,8 @@ Ext.define('esapp.model.SystemSetting', {
         {name: 'data_dir'},
         {name: 'static_data_dir'},
         {name: 'archive_dir'},
+        {name: 'get_eumetcast_output_dir'},
+        {name: 'get_internet_output_dir'},
         {name: 'ingest_dir'},
         {name: 'eumetcast_files_dir'},
         {name: 'ingest_server_in_dir'},

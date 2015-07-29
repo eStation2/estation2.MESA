@@ -1734,6 +1734,7 @@ INSERT INTO date_format (date_format, definition) VALUES ('HHMM', 'Hourly or min
 INSERT INTO date_format (date_format, definition) VALUES ('YYMMK', 'Two digit Year, two digit month and dekad indicator (1..3). Applies to FEWSNET products');
 INSERT INTO date_format (date_format, definition) VALUES ('YYYY_MM_DKX', 'Four digit Year. Two digit Month. Dekad indicator (values dk1, dk2 or dk3). Applies to TAMSAT products');
 INSERT INTO date_format (date_format, definition) VALUES ('YYYYdMMdK', 'Two digit Year. A dot. Two digit month. A dot.  Dekad indicator (1..3). Applies to CHIRP products');
+INSERT INTO date_format (date_format, definition) VALUES ('undefined', 'undefined');
 
 
 --

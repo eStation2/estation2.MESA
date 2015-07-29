@@ -315,7 +315,7 @@ def loop_get_internet(dry_run=False):
     logger.info("Starting retrieving data from INTERNET.")
 
     while True:
-        output_dir = es_constants.ingest_dir
+        output_dir = es_constants.get_internet_output_dir
         logger.debug("Check if the Ingest Server input directory : %s exists.", output_dir)
         if not os.path.exists(output_dir):
             logger.fatal("The Ingest Server input directory : %s doesn't exists.", output_dir)

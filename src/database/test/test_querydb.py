@@ -12,6 +12,13 @@ from database import querydb
 from lib.python import functions
 
 class TestQuerydb(TestCase):
+    def Test_set_thema(self):
+        themaid = 'AGRYHMET'
+        themaset = querydb.set_thema(themaid)
+        print themaset
+
+        self.assertEqual(True, themaset[0])
+
     def Test_get_i18n(self):
 
         i18n = querydb.get_i18n(lang='fra')

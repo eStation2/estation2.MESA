@@ -144,6 +144,25 @@ def get_themas(echo=False):
             db.session.close()
 
 
+def set_thema(themaid='', echo=False):
+    global db
+    try:
+        query = "select * from products.set_thema('" + themaid + "'); COMMIT;"
+        setthema = db.execute(query)
+        # setthemaresult = setthema.fetchall()
+
+        return True     # setthemaresult[0]
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("set_thema: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
 def get_i18n(lang='eng', echo=False):
 
     global dbschema_analysis

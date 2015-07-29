@@ -57,6 +57,8 @@ Ext.define("esapp.view.system.systemsettings",{
     form_fieldlabel_archive_dir                 : 'Archive directory',
     form_fieldlabel_eumetcast_files_dir         : 'Eumetcast files directory',
     //form_fieldlabel_ingest_server_in_dir        : 'Ingest server in directory',
+    form_fieldlabel_get_internet_output_dir     : 'Get Eumetcast output directory',
+    form_fieldlabel_get_eumetcast_output_dir    : 'Get Internet output directory',
 
     fieldset_title_system_settings              : '<b>System settings</b>',
     form_fieldlabel_ip_pc1                      : 'PC1',
@@ -522,14 +524,22 @@ Ext.define("esapp.view.system.systemsettings",{
                    fieldLabel: me.form_fieldlabel_eumetcast_files_dir,
                    style:'font-weight: bold;',
                    allowBlank: false
-                //},{
-                //   id: 'ingest_server_in_dir',
-                //   name: 'ingest_server_in_dir',
-                //   bind: '{system_setting.ingest_server_in_dir}',
-                //   xtype: 'textfield',
-                //   fieldLabel: me.form_fieldlabel_ingest_server_in_dir,
-                //   style:'font-weight: bold;',
-                //   allowBlank: false
+                },{
+                   id: 'get_eumetcast_output_dir',
+                   name: 'get_eumetcast_output_dir',
+                   bind: '{system_setting.get_eumetcast_output_dir}',
+                   xtype: 'textfield',
+                   fieldLabel: me.form_fieldlabel_get_eumetcast_output_dir,
+                   style:'font-weight: bold;',
+                   allowBlank: false
+                },{
+                   id: 'get_internet_output_dir',
+                   name: 'get_internet_output_dir',
+                   bind: '{system_setting.get_internet_output_dir}',
+                   xtype: 'textfield',
+                   fieldLabel: me.form_fieldlabel_get_internet_output_dir,
+                   style:'font-weight: bold;',
+                   allowBlank: false
                 }]
             },{
                 xtype: 'fieldset',

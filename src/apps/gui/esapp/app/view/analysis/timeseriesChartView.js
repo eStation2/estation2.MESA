@@ -95,8 +95,10 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
             });
             myLoadMask.show();
 
+
             Ext.Ajax.request({
                 url:"analysis/gettimeseries",
+                timeout : 300000,
                 params:{
                     selectedTimeseries: me.selectedTimeseries,
                     yearTS: me.yearTS,

@@ -112,7 +112,7 @@ def getFilesList(productcode, subproductcode, version, mapsetcode, date_format, 
                     list_files.append(productfilepath)
                     dates_list.append(datetime.date(end_date.year, int(mmdd[:2]), int(mmdd[2:4])))
 
-            logger.info(list_files)
+            # logger.info(list_files)
 
     return [list_files, dates_list]
 

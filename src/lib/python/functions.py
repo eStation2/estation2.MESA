@@ -893,7 +893,9 @@ def get_all_from_filename(filename):
     product_code = tokens[1]
     sub_product_code = tokens[2]
     mapset = tokens[3]
-    [version, extension] =  tokens[4].split('.')
+    # Remove extension from tokens[4] -> version
+    parts = tokens[4].split('.')
+    version = tokens[4].replace('.'+parts[-1],'')
 
     return [str_date, product_code, sub_product_code, mapset, version]
 

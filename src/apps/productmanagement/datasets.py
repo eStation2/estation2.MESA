@@ -303,6 +303,16 @@ class Dataset(object):
     def get_filenames(self):
         return glob.glob(os.path.join(self.fullpath, "*"))
 
+    def get_filenames_range(self):
+        all_files = glob.glob(os.path.join(self.fullpath, "*"))
+        filenames = []
+        for file in all_files:
+            str_date = functions.get_date_from_path_full(file)
+            my_date=datetime.date(int(str_date[0:4]),int(str_date[4:6]), int(str_date[6:8]))
+            if my_date >= self.from_date and my_date <= self.to_date:
+                filenames.append((file))
+        return filenames
+
     def get_number_files(self):
         return len(self.get_filenames())
 
