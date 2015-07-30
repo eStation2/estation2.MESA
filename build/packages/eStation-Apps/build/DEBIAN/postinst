@@ -104,7 +104,7 @@ dir_own_grp_mod_default ${ESTATION2_VBASE_DIR_SYSTEM} 755 ${logfile}
 # Don't change recursively - not to touch /eStation/dbdata
 mkdir -p ${ESTATION2_LOCAL_DIR}
 chown ${ESTATION2_MAIN_USER}:${ESTATION2_MAIN_GROUP} ${ESTATION2_LOCAL_DIR} 2>> ${logfile}
-chmod 777 ${ESTATION2_LOCAL_DIR} 2>> ${logfile}
+chmod 775 ${ESTATION2_LOCAL_DIR} 2>> ${logfile}
 
 mkdir -p ${ESTATION2_DIR_SETTINGS}				2>> ${logfile}
 dir_own_grp_mod_default ${ESTATION2_DIR_SETTINGS} 775 ${logfile}
@@ -205,9 +205,10 @@ fi # localhost reachable
 a2dismod php5 mpm_event mpm_prefork 2>> ${logfile}
 a2enmod wsgi actions mpm_worker cgi fastcgi alias rewrite 2>> ${logfile}
 
-# Define hostname 
-sed -i "s|#ServerRoot.*\"/etc/apache2\"|#ServerRoot \"/etc/apache2\"\nServerName localhost|g" /etc/apache2/apache2.conf
-
+# Define hostname
+if [ "$(grep ServerName /etc/apache2/apache2.conf | wc -l)" -eq 0 ]; then 
+    sed -i "s|#ServerRoot.*\"/etc/apache2\"|#ServerRoot \"/etc/apache2\"\nServerName localhost|g" /etc/apache2/apache2.conf
+fi
 # --------------------------------------------------------------------------------------
 # Copy configuration file
 # --------------------------------------------------------------------------------------
@@ -247,6 +248,7 @@ else
     if [ $? -eq 0 ]; then 
         echo "`date +'%Y-%m-%d %H:%M:%S'` User Setting file $trg_file created" >> ${logfile} 2>&1 
         chown ${ESTATION2_MAIN_USER}:${ESTATION2_MAIN_GROUP} $trg_file 2>> ${logfile}
+        chmod 775 $trg_file 2>> ${logfile}
     else
         echo "`date +'%Y-%m-%d %H:%M:%S'` ERROR in creating User Setting file $trg_file" >> ${logfile} 2>&1 
     fi
@@ -264,6 +266,7 @@ else
     if [ $? -eq 0 ]; then 
         echo "`date +'%Y-%m-%d %H:%M:%S'` System Setting file $trg_file created" >> ${logfile} 2>&1 
         chown ${ESTATION2_MAIN_USER}:${ESTATION2_MAIN_GROUP} $trg_file 2>> ${logfile}
+        chmod 775 $trg_file 2>> ${logfile}
     else
         echo "`date +'%Y-%m-%d %H:%M:%S'` ERROR in creating System Setting file $trg_file" >> ${logfile} 2>&1 
     fi

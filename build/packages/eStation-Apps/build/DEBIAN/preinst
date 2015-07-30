@@ -41,6 +41,7 @@ useradd -c "$fullname" -s /bin/bash -m -p $pass $username
 addgroup estation
 adduser adminuser estation
 adduser analyst estation
+adduser www-data estation
 
 # --------------------------------------------------------------------------------------
 #	Postgresql DB management
