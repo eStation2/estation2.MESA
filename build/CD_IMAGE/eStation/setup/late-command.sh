@@ -9,6 +9,7 @@ pip install /media/cdrom/eStation/Python-Modules/sqlsoup.tar.gz
 pip install /media/cdrom/eStation/Python-Modules/web.py.tar.gz
 pip install /media/cdrom/eStation/Python-Modules/psutil.tar.gz
 pip install /media/cdrom/eStation/Python-Modules/reloader.tar.gz
+pip install /media/cdrom/eStation/Python-Modules/Pillow.tar.gz
 pip install /media/cdrom/eStation/Python-Modules/greenwich.tar.gz
 
 
