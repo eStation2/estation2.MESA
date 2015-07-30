@@ -632,6 +632,18 @@ class GetTimeseries:
                    "yaxes": yaxes,
                    "timeseries": timeseries}
 
+        ts_json = json.dumps(ts_json,
+                             ensure_ascii=False,
+                             sort_keys=True,
+                             # indent=4,
+                             separators=(', ', ': '))
+
+        # print ts_json
+        # timeseries_json = '{"success":"true", "total":' + str(timeline.__len__()) + ',"timeline":'+timeline_json+'}'
+        # timeline_json = '{"success":"true"}'
+        return ts_json
+
+
         # categories = ["20140101","20140111","20140121","20140201","20140211","20140221","20140301","20140311","20140321","20140401","20140411","20140421","20140501","20140511","20140521","20140601","20140611","20140621","20140701","20140711","20140721","20140801","20140811","20140821","20140901","20140911","20140921","20141001","20141011","20141021","20141101","20141111","20141121","20141201","20141211","20141221"]
         # categories_dict = []
         # for category in categories:
@@ -698,16 +710,6 @@ class GetTimeseries:
         #                          '} ' \
         #             '}'
         #            # '"dates":["20140101","20140111","20140121","20140201","20140211","20140221","20140301","20140311","20140321","20140401","20140411","20140421","20140501","20140511","20140521","20140601","20140611","20140621","20140701","20140711","20140721","20140801","20140811","20140821","20140901","20140911","20140921","20141001","20141011","20141021","20141101","20141111","20141121","20141201","20141211","20141221"]' \
-
-        ts_json = json.dumps(ts_json,
-                             ensure_ascii=False,
-                             sort_keys=True,
-                             indent=4,
-                             separators=(', ', ': '))
-        #
-        # timeseries_json = '{"success":"true", "total":' + str(timeline.__len__()) + ',"timeline":'+timeline_json+'}'
-        # timeline_json = '{"success":"true"}'
-        return ts_json
 
 
 class TimeseriesProducts:
@@ -1120,9 +1122,14 @@ class ChangeThema:
 
             functions.setSystemSetting('thema', getparams['thema'])
 
-            # ToDo: Query thema products and activate them.
-
-            changethema_json = '{"success":"true", "message":"Thema changed!"}'
+            # Set thema in database by activating the thema products, ingestion and processes.
+            themaset = querydb.set_thema(getparams['thema'])
+            # print themaset
+            if themaset:
+                # print "thema changed"
+                changethema_json = '{"success":"true", "message":"Thema changed!"}'
+            else:
+                changethema_json = '{"success":false, "error":"Changing thema in database error!"}'
         else:
             changethema_json = '{"success":false, "error":"No thema given!"}'
 
