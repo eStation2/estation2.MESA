@@ -28,7 +28,7 @@ do
 	echo " Change owner of $mydir to adminuser " >> ${logfile}	
 	chown adminuser ${mydir} 2> ${logfile}
 	echo " Change group of $mydir to estation " >> ${logfile}	
-	chgrp adminuser ${mydir} 2> ${logfile}	
+	chgrp estation ${mydir} 2> ${logfile}	
 done
 
 exit 0

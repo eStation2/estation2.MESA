@@ -12,7 +12,8 @@ pip install /media/cdrom/eStation/Python-Modules/reloader.tar.gz
 pip install /media/cdrom/eStation/Python-Modules/Pillow.tar.gz
 pip install /media/cdrom/eStation/Python-Modules/greenwich.tar.gz
 
-
+# install bucardo package and configure it
+/media/cdrom/eStation/setup/bucardo_config.sh
 
 
 
