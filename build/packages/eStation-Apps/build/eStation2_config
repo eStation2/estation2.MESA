@@ -1,6 +1,6 @@
 # Variables to be updated !!
 ESTATION2_VERSION=2.0.4
-ESTATION2_RELEASE=30
+ESTATION2_RELEASE=31
 ESTATION2_UBUNTU=12.04
 
 # Users definition
