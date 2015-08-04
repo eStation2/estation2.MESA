@@ -20,7 +20,7 @@ ip_pc3=10.191.231.90
 echo "$(date +'%Y-%m-%d %H:%M:%S') Install bucardo from /media/cdrom"
 
 file_tgz='Bucardo-5.3.1.tar.gz'
-bucardo_tgz="/media/cdrom/eStation/Tarball/${file_tgz}"
+bucardo_tgz="/home/adminuser/${file_tgz}"
 target_dir="/usr/lib/bucardo/"
 run_dir="/var/run/bucardo/"
 if [ -f ${bucardo_tgz} ]; then
@@ -48,7 +48,6 @@ if [ -f ${bucardo_tgz} ]; then
 	echo  "host    all         all         ${ip_base}/24               trust" >> /etc/postgresql/9.3/main/pg_hba.conf
 
 	sed -i "s/\#listen_addresses = 'localhost'.*/listen_addresses = '*'\# what IP address(es) to listen on;/" /etc/postgresql/9.3/main/postgresql.conf
-	/etc/init.d/postgresql restart
 else
 	echo "$(date +'%Y-%m-%d %H:%M:%S') Error: bucardo .tgz ${bucardo_tgz} not found. Exit"
 	exit 1
@@ -94,10 +93,14 @@ echo "$(date +'%Y-%m-%d %H:%M:%S') Relgroups created."
 
 bucardo add sync sync_pc2_analysis relgroup=rel_analysis dbs=group_pc2
 bucardo add sync sync_pc3_analysis relgroup=rel_analysis dbs=group_pc3
-bucardo add sync sync_pc2_products relgroup=rel_products_config dbs=group_pc2
+bucardo add sync sync_pc2_products relgroup=rel_products_config dbs=group_pc2 type=pushdelta
 bucardo add sync sync_pc3_products relgroup=rel_products_config dbs=group_pc3
 
 echo "$(date +'%Y-%m-%d %H:%M:%S') Rsyncs created."
+
+# Start bucardo
+bucardo start
+echo "$(date +'%Y-%m-%d %H:%M:%S') Bucardo started."
 
 # De-activate every rsync
 bucardo deactivate sync_pc2_analysis
@@ -106,8 +109,4 @@ bucardo deactivate sync_pc2_products
 bucardo deactivate sync_pc3_products
 
 echo "$(date +'%Y-%m-%d %H:%M:%S') Rsyncs de-activated."
-
-# Start bucardo
-bucardo start
-echo "$(date +'%Y-%m-%d %H:%M:%S') Bucardo started."
 
