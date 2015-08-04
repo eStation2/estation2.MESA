@@ -39,12 +39,15 @@
 
 	Alias /static /srv/www/eStation2/apps/gui/esapp
 
+	Alias /esapp/bootstrap.json /srv/www/eStation2/apps/gui/esapp/bootstrap.json
+	Alias /esapp/bootstrap.css /srv/www/eStation2/apps/gui/esapp/bootstrap.css
+	Alias /esapp/.sencha/app /srv/www/eStation2/apps/gui/esapp/.sencha/app
 	Alias /esapp/ext /srv/www/eStation2/apps/gui/esapp/ext
 	Alias /esapp/resources /srv/www/eStation2/apps/gui/esapp/resources
 	Alias /esapp/app /srv/www/eStation2/apps/gui/esapp/app
-	Alias /esapp/bootstrap.css /srv/www/eStation2/apps/gui/esapp/bootstrap.css
 	Alias /esapp/app.js /srv/www/eStation2/apps/gui/esapp/app.js
 	Alias /esapp/build /srv/www/eStation2/apps/gui/esapp/build
+	Alias /esapp/overrides /srv/www/eStation2/apps/gui/esapp/overrides
 
 	# Alias /eStation2/lib/js /srv/www/eStation2/lib/js
 
