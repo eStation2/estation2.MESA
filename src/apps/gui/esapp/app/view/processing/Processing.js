@@ -146,7 +146,7 @@ Ext.define("esapp.view.processing.Processing",{
                         column.titleEl.removeCls('x-column-header-inner');
                     }
                 },
-                onWidgetAttach: function (widget, record) {
+                onWidgetAttach: function (column, widget, record) {
                     Ext.suspendLayouts();
                     var inputproducts = record.getData().inputproducts;
                     var newstore = Ext.create('Ext.data.JsonStore', {
@@ -257,7 +257,7 @@ Ext.define("esapp.view.processing.Processing",{
                       column.titleEl.removeCls('x-column-header-inner');
                   }
                 },
-                onWidgetAttach: function(widget, record) {
+                onWidgetAttach: function(column, widget, record) {
                     Ext.suspendLayouts();
                     var processrec = record.getData();
                     var outputproducts = processrec.outputproducts;
@@ -301,10 +301,10 @@ Ext.define("esapp.view.processing.Processing",{
                             },
                             listeners: {
                                 exception: function(proxy, response, operation){
-                                    Ext.MessageBox.show({
+                                     Ext.Msg.show({
                                         title: 'PROCESSING OUTPUT PRODUCTS STORE - REMOTE EXCEPTION',
                                         msg: operation.getError(),
-                                        icon: Ext.MessageBox.ERROR,
+                                        icon: Ext.Msg.ERROR,
                                         buttons: Ext.Msg.OK
                                     });
                                 }
@@ -312,6 +312,7 @@ Ext.define("esapp.view.processing.Processing",{
                         }
                     });
                     widget.setStore(newstore);
+
                     Ext.resumeLayouts(true);
                 },
                 widget: {

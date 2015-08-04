@@ -20,7 +20,8 @@ Ext.define("esapp.view.system.systemsettings",{
         'esapp.view.system.IPAddressAdmin',
 
         'Ext.form.FieldSet',
-        'Ext.form.field.Number'
+        'Ext.form.field.Number',
+        'Ext.tip.ToolTip'
     ],
 
 //    store: 'SystemSettingsStore',

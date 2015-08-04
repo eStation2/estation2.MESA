@@ -43,10 +43,10 @@ Ext.define('esapp.model.IPSetting', {
         },
         listeners: {
             exception: function(proxy, response, operation){
-                Ext.MessageBox.show({
+                Ext.Msg.show({
                     title: 'IP SETTINGS MODEL - REMOTE EXCEPTION',
                     msg: operation.getError(),
-                    icon: Ext.MessageBox.ERROR,
+                    icon: Ext.Msg.ERROR,
                     buttons: Ext.Msg.OK
                 });
             }

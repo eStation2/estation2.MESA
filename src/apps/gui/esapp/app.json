@@ -37,8 +37,8 @@
      *      ]
      */
     "requires": [
-        "sencha-charts",
-        "ext-locale"
+//        "sencha-charts"
+//        "ext-locale"
     ],
 
 //    "locale": "fr",

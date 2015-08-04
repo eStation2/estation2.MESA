@@ -1,3 +1,21 @@
+/**
+ * A sprite that represents a cross.
+ *
+ *     @example
+ *     Ext.create({
+ *        xtype: 'draw', 
+ *        renderTo: document.body,
+ *        width: 600,
+ *        height: 400,
+ *        sprites: [{
+ *            type: 'cross',
+ *            translationX: 100,
+ *            translationY: 100,
+ *            size: 40,
+ *            fillStyle: '#1F6D91'
+ *        }]
+ *     });
+ */
 Ext.define('Ext.draw.sprite.Cross', {
     extend: 'Ext.draw.sprite.Path',
     alias: 'sprite.cross',
@@ -18,7 +36,7 @@ Ext.define('Ext.draw.sprite.Cross', {
                 y: 0,
                 size: 4
             },
-            dirtyTriggers: {
+            triggers: {
                 x: 'path',
                 y: 'path',
                 size: 'path'

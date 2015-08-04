@@ -52,10 +52,10 @@ Ext.define('esapp.model.ProductNavigator', {
         },
         listeners: {
             exception: function(proxy, response, operation){
-                Ext.MessageBox.show({
+                Ext.Msg.show({
                     title: 'PRODUCT NAVIGATOR STORE - REMOTE EXCEPTION',
                     msg: operation.getError(),
-                    icon: Ext.MessageBox.ERROR,
+                    icon: Ext.Msg.ERROR,
                     buttons: Ext.Msg.OK
                 });
             }
@@ -174,10 +174,10 @@ Ext.define('esapp.model.ColorScheme', {
 
         listeners: {
             exception: function(proxy, response, operation){
-                Ext.MessageBox.show({
+                Ext.Msg.show({
                     title: 'COLOR SCHEMES - REMOTE EXCEPTION',
                     msg: operation.getError(),
-                    icon: Ext.MessageBox.ERROR,
+                    icon: Ext.Msg.ERROR,
                     buttons: Ext.Msg.OK
                 });
             }

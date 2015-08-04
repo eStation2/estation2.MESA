@@ -15,6 +15,7 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
         'esapp.view.datamanagement.ProductMapSetController'
 
         ,'Ext.grid.column.Widget'
+        ,'Ext.grid.column.Action'
     ],
 
     store : null,
@@ -31,6 +32,25 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
     hideHeaders: true,
     columnLines: false,
     rowLines:false,
+    bufferedRenderer: true,
+
+    listeners: {
+        beforerender:  function () {
+            //console.info('ProductMapSet: beforerender event called');
+            var me = this,
+                record = me.getWidgetRecord();
+            Ext.suspendLayouts();
+            if (record.getData() != null && record.getData().hasOwnProperty('productmapsets')) {
+                var productmapsets = record.getData().productmapsets;
+                var newstore = Ext.create('Ext.data.JsonStore', {
+                    model: 'ProductMapSet',
+                    data: productmapsets
+                });
+                me.setStore(newstore);
+            }
+            Ext.resumeLayouts(true);
+        }
+    },
 
     initComponent: function () {
         var me = this;
@@ -54,7 +74,7 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
             items: [{
                 icon: 'resources/img/icons/download.png',
                 tooltip: 'Complete all data sets for this product\'s mapset',
-                scope: me,
+                //scope: me,
                 handler: function (grid, rowIndex) {
                     Ext.toast({
                         html: 'Show window which proposes places to send a request to complete all data sets for this product\'s mapset',
@@ -72,16 +92,17 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
                 xtype: 'mapsetdatasetgrid'
                 // ,height:80
             },
-            onWidgetAttach: function(widget, record) {
-                Ext.suspendLayouts();
-                var mapsetdatasets = record.getData().mapsetdatasets;
-                // console.info(mapsetdatasets);
-                var newstore = Ext.create('Ext.data.JsonStore', {
-                    model: 'MapSetDataSet',
-                    data: mapsetdatasets
-                });
-                widget.setStore(newstore);
-                Ext.resumeLayouts(true);
+            onWidgetAttach: function(column, widget, record) {
+                //Ext.suspendLayouts();
+                //if (record.getData() != null && record.getData().hasOwnProperty('mapsetdatasets')) {
+                //    var mapsetdatasets = record.getData().mapsetdatasets;
+                //    var newstore = Ext.create('Ext.data.JsonStore', {
+                //        model: 'MapSetDataSet',
+                //        data: mapsetdatasets
+                //    });
+                //    widget.setStore(newstore);
+                //}
+                //Ext.resumeLayouts(true);
             }
         }];
 

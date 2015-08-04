@@ -40,21 +40,21 @@ Ext.define('esapp.store.ProductsInactiveStore', {
         },
         listeners: {
             exception: function(proxy, response, operation){
-                Ext.MessageBox.show({
+                Ext.Msg.show({
                     title: 'PRODUCTS INACTIVE STORE - REMOTE EXCEPTION',
                     msg: operation.getError(),
-                    icon: Ext.MessageBox.ERROR,
+                    icon: Ext.Msg.ERROR,
                     buttons: Ext.Msg.OK
                 });
             }
         }
     }
     ,grouper:{
-             // property: 'cat_descr_name',
-             groupFn : function (item) {
-                 return "<span style='display: none;'>" + item.get('order_index') + "</span>" + item.get('cat_descr_name')
-//                                "</span><span class='group-header-style'>" + item.get('cat_descr_name') + "</span>"
-             },
+              property: 'cat_descr_name',
+//             groupFn : function (item) {
+//                 return "<span style='display: none;'>" + item.get('order_index') + "</span>" + item.get('cat_descr_name')
+////                                "</span><span class='group-header-style'>" + item.get('cat_descr_name') + "</span>"
+//             },
              sortProperty: 'order_index'
     }
 

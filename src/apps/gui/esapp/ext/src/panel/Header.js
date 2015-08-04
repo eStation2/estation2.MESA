@@ -72,7 +72,7 @@ Ext.define('Ext.panel.Header', {
                 flex: 1
             },
             merge: function(newValue, oldValue) {
-                if (typeof newValue == 'string') {
+                if (typeof newValue === 'string') {
                     newValue = {
                         text: newValue
                     };
@@ -135,6 +135,34 @@ Ext.define('Ext.panel.Header', {
      * be fired if the click was on a {@link Ext.panel.Tool}
      * @param {Ext.panel.Header} this
      * @param {Ext.event.Event} e
+     */
+
+    /**
+     * @cfg {Number} [itemPosition]
+     * The index at which the any {@link #cfg-items} will be inserted into the Header's
+     * items collection.  By default this will effectively be the `1` position
+     * placing the items following the panel {@link Ext.panel.Panel#title title}.
+     *
+     * Set to `0` to have the items {@link #insert inserted} before the panel title.
+     *
+     *     Ext.create('Ext.panel.Panel', {
+     *         title: 'Hello',
+     *         width: 200,
+     *         html: '<p>World!</p>',
+     *         renderTo: Ext.getBody(),
+     *         tools: [{
+     *             type: 'pin'
+     *         }],
+     *         header: {
+     *             //itemPosition: 0,	// before panel title
+     *             //itemPosition: 1, // after panel title
+     *             //itemPosition: 2, // after pin tool
+     *             items: [{
+     *                 xtype: 'button',
+     *                 text: 'Header Button'
+     *             }]
+     *         }
+     *     });
      */
 
     initComponent: function() {
@@ -212,7 +240,8 @@ Ext.define('Ext.panel.Header', {
 
         title = title || '';
 
-        if (typeof title === 'string') {
+        isString = typeof title === 'string';
+        if (isString) {
             title = {
                 text: title
             };
@@ -226,6 +255,9 @@ Ext.define('Ext.panel.Header', {
             Ext.resumeLayouts(true);
             title = oldTitle;
         } else {
+            if (isString) {
+                title.xtype = 'title';
+            }
             title.ui = me.ui;
             title.headerRole = me.headerRole;
             configHasRotation = ('rotation' in title);

@@ -39,7 +39,7 @@
  *
  * @singleton
  */
-var Ext = Ext || {};
+var Ext = Ext || {}; // jshint ignore:line
 // @define Ext
 Ext._startTime = Date.now ? Date.now() : (+ new Date());
 (function() {
@@ -71,7 +71,7 @@ Ext._startTime = Date.now ? Date.now() : (+ new Date());
 
     // These are emptyFn's in core and are redefined only in Ext JS (we use this syntax
     // so Cmd does not detect them):
-    Ext['suspendLayouts'] = Ext['resumeLayouts'] = emptyFn;
+    Ext['suspendLayouts'] = Ext['resumeLayouts'] = emptyFn; // jshint ignore:line
 
     for (i in { toString: 1 }) {
         enumerables = null;
@@ -146,7 +146,7 @@ Ext._startTime = Date.now ? Date.now() : (+ new Date());
 
         /**
          * `true` to automatically uncache orphaned Ext.Elements periodically. If set to
-         * `false`, the application will be required to clean up orpaned Ext.Elements and
+         * `false`, the application will be required to clean up orphaned Ext.Elements and
          * it's listeners as to not cause memory leakage.
          */
         enableGarbageCollector: false,
@@ -291,6 +291,13 @@ Ext._startTime = Date.now ? Date.now() : (+ new Date());
         validIdRe: /^[a-z_][a-z0-9\-_]*$/i,
 
         /**
+         * @property {String} BLANK_IMAGE_URL
+         * URL to a 1x1 transparent gif image used by Ext to create inline icons with
+         * CSS background images.
+         */
+        BLANK_IMAGE_URL: 'data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
+
+        /**
          * Converts an id (`'foo'`) into an id selector (`'#foo'`).  This method is used
          * internally by the framework whenever an id needs to be converted into a selector
          * and is provided as a hook for those that need to escape IDs selectors since,
@@ -347,7 +354,7 @@ Ext._startTime = Date.now ? Date.now() : (+ new Date());
          * A zero length string which will pass a truth test. Useful for passing to methods
          * which use a truth test to reject <i>falsy</i> values where a string value must be cleared.
          */
-        emptyString: new String(),
+        emptyString: new String(), // jshint ignore:line
 
         /**
          * @property {String} [baseCSSPrefix='x-']
@@ -369,11 +376,23 @@ Ext._startTime = Date.now ? Date.now() : (+ new Date());
 
         /**
          * @property {Object} $eventNameMap
-         * A map of event names which contained the lower-cased verions of any mixed
+         * A map of event names which contained the lower-cased versions of any mixed
          * case event names.
          * @private
          */
         $eventNameMap: {},
+
+        // Vendor-specific events do not work if lower-cased.  This regex specifies event
+        // prefixes for names that should NOT be lower-cased by Ext.canonicalEventName()
+        $vendorEventRe: /^(Moz.+|MS.+|webkit.+)/,
+
+        // TODO: inlinable function - SDKTOOLS-686
+        // @inline
+        // @private
+        canonicalEventName: function(name) {
+            return Ext.$eventNameMap[name] || (Ext.$eventNameMap[name] =
+                (Ext.$vendorEventRe.test(name) ? name : name.toLowerCase()));
+        },
 
         /**
          * Copies all the properties of config to object if they don't already exist.
@@ -401,14 +420,14 @@ Ext._startTime = Date.now ? Date.now() : (+ new Date());
          * @method
          */
         now: (global.performance && global.performance.now) ? function() {
-            return performance.now();
+            return performance.now(); // jshint ignore:line
         } : (Date.now || (Date.now = function() {
             return +new Date();
         })),
 
         /**
          * Destroys all of the given objects. If arrays are passed, the elements of these
-         * are destroyed recusrively.
+         * are destroyed recursively.
          *
          * What it means to "destroy" an object depends on the type of object.
          *
@@ -488,7 +507,7 @@ Ext._startTime = Date.now ? Date.now() : (+ new Date());
         override: function (target, overrides) {
             if (target.$isClass) {
                 target.override(overrides);
-            } else if (typeof target == 'function') {
+            } else if (typeof target === 'function') {
                 Ext.apply(target.prototype, overrides);
             } else {
                 var owner = target.self,
@@ -502,14 +521,15 @@ Ext._startTime = Date.now ? Date.now() : (+ new Date());
                             if (typeof value === 'function') {
                                 //<debug>
                                 if (owner.$className) {
-                                    value.displayName = owner.$className + '#' + name;
+                                    value.name = owner.$className + '#' + name;
                                 }
                                 //</debug>
 
                                 value.$name = name;
                                 value.$owner = owner;
-                                value.$previous = target.hasOwnProperty(name)
-                                    ? target[name] // already hooked, so call previous hook
+
+                                value.$previous = target.hasOwnProperty(name) ?
+                                    target[name] // already hooked, so call previous hook
                                     : callOverrideParent; // calls by name on prototype
                             }
 
@@ -779,7 +799,7 @@ Ext._startTime = Date.now ? Date.now() : (+ new Date());
 
         /**
          * Clone simple variables including array, {}-like objects, DOM nodes and Date without keeping the old reference.
-         * A reference for the object itself is returned if it's not a direct decendant of Object. For model cloning,
+         * A reference for the object itself is returned if it's not a direct descendant of Object. For model cloning,
          * see {@link Ext.data.Model#copy Model.copy}.
          *
          * @param {Object} item The variable to clone
@@ -982,7 +1002,7 @@ Ext._startTime = Date.now ? Date.now() : (+ new Date());
                 }
     
                 return result;
-            }
+            };
         })()
     }); // Ext.apply(Ext
 

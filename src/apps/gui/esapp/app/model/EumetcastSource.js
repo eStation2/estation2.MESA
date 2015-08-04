@@ -59,10 +59,10 @@ Ext.define('esapp.model.EumetcastSource', {
         },
         listeners: {
             exception: function(proxy, response, operation){
-                Ext.MessageBox.show({
+                Ext.Msg.show({
                     title: 'EUMETCAST SOURCE MODEL - REMOTE EXCEPTION',
                     msg: operation.getError(),
-                    icon: Ext.MessageBox.ERROR,
+                    icon: Ext.Msg.ERROR,
                     buttons: Ext.Msg.OK
                 });
             }

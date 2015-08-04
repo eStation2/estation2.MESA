@@ -87,9 +87,9 @@ Ext.define('esapp.view.analysis.analysisMainController', {
                title: 'Select a polygon!',
                msg: 'Please select or draw a polygon in a MapView!',
                width: 300,
-               buttons: Ext.MessageBox.OK,
+               buttons: Ext.Msg.OK,
                animEl: '',
-               icon: Ext.MessageBox.WARNING
+               icon: Ext.Msg.WARNING
             });
             return;
         }
@@ -102,9 +102,9 @@ Ext.define('esapp.view.analysis.analysisMainController', {
                        title: 'Mandatory field',
                        msg: 'Please select a year!',
                        width: 300,
-                       buttons: Ext.MessageBox.OK,
+                       buttons: Ext.Msg.OK,
                        animEl: '',
-                       icon: Ext.MessageBox.WARNING
+                       icon: Ext.Msg.WARNING
                     });
                     return;
                 }
@@ -119,9 +119,9 @@ Ext.define('esapp.view.analysis.analysisMainController', {
                        title: 'Mandatory field',
                        msg: 'Please select a "From date"!',
                        width: 300,
-                       buttons: Ext.MessageBox.OK,
+                       buttons: Ext.Msg.OK,
                        animEl: '',
-                       icon: Ext.MessageBox.WARNING
+                       icon: Ext.Msg.WARNING
                     });
                     return;
                 }
@@ -131,9 +131,9 @@ Ext.define('esapp.view.analysis.analysisMainController', {
                        title: 'Mandatory field',
                        msg: 'Please select a "To date"!',
                        width: 300,
-                       buttons: Ext.MessageBox.OK,
+                       buttons: Ext.Msg.OK,
                        animEl: '',
-                       icon: Ext.MessageBox.WARNING
+                       icon: Ext.Msg.WARNING
                     });
                     return;
                 }
@@ -161,9 +161,9 @@ Ext.define('esapp.view.analysis.analysisMainController', {
                title: 'Mandatory field',
                msg: 'Please select one or more times series!',
                width: 300,
-               buttons: Ext.MessageBox.OK,
+               buttons: Ext.Msg.OK,
                animEl: '',
-               icon: Ext.MessageBox.WARNING
+               icon: Ext.Msg.WARNING
             });
             return;
         }

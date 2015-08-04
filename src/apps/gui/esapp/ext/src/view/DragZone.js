@@ -40,8 +40,8 @@ Ext.define('Ext.view.DragZone', {
         }
         me.callParent([el]);
 
-        me.ddel = Ext.get(document.createElement('div'));
-        me.ddel.addCls(Ext.baseCSSPrefix + 'grid-dd-wrap');
+        me.ddel = document.createElement('div');
+        me.ddel.className = Ext.baseCSSPrefix + 'grid-dd-wrap';
     },
 
     init: function(id, sGroup, config) {
@@ -58,7 +58,7 @@ Ext.define('Ext.view.DragZone', {
     },
 
     onValidDrop: function(target, e, id) {
-        this.callParent();
+        this.callParent([target, e, id]);
         // focus the view that the node was dropped onto so that keynav will be enabled.
         target.el.focus();
     },
@@ -121,8 +121,8 @@ Ext.define('Ext.view.DragZone', {
         }
         data.records = selectionModel.getSelection();
 
-        me.ddel.setHtml(me.getDragText());
-        me.proxy.update(me.ddel.dom);
+        Ext.fly(me.ddel).setHtml(me.getDragText());
+        me.proxy.update(me.ddel);
         me.onStartDrag(x, y);
         return true;
     },

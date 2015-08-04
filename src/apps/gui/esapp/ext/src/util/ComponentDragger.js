@@ -32,6 +32,16 @@ Ext.define('Ext.util.ComponentDragger', {
      * @cfg {Boolean} constrainDelegate
      * Specify as `true` to constrain the drag handles within the {@link #constrainTo} region.
      */
+    
+    /**
+     * @cfg {Boolean} [liveDrag=false]
+     * @member Ext.Component
+     * True to drag the component itself.  Else a lightweight version of the component
+     * will be shown (_using the component's ghost() method_).
+     * 
+     * **Note:** This config is only relevant when used with dragging implemented via
+     * {@link Ext.util.ComponentDragger}.
+     */
 
     autoStart: 500,
 
@@ -79,15 +89,15 @@ Ext.define('Ext.util.ComponentDragger', {
             delegateRegion,
             elRegion,
             dragEl = me.proxy ? me.proxy.el : comp.el,
-            shadowSize = (!me.constrainDelegate && dragEl.shadow && comp.constrainShadow && !dragEl.shadowDisabled) ? dragEl.shadow.getShadowSize() : 0;
+            shadow = dragEl.shadow,
+            shadowSize = (shadow && !me.constrainDelegate && comp.constrainShadow && !shadow.disabled) ? shadow.getShadowSize() : 0;
 
         // The configured constrainTo might be a Region or an element
         if (!(constrainTo instanceof Ext.util.Region)) {
             constrainEl = Ext.fly(constrainTo);
-            constrainTo =  constrainEl.getViewRegion();
-
-            // Do not allow to move into vertical scrollbar
-            constrainTo.right = constrainTo.left + constrainEl.dom.clientWidth;
+            // draggable components are constrained to the area inside the borders of
+            // their floatParent, but not inside the padding
+            constrainTo = constrainEl.getConstrainRegion();
         } else {
             // Create a clone so we don't modify the original
             constrainTo = constrainTo.copy();

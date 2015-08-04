@@ -144,7 +144,12 @@ Ext.define('esapp.view.main.Main', {
                        activate: function (acquisitiontab) {
                            var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
                            headerlogos.setHidden(false);
-                           acquisitiontab.down('panel[name=acquisitionmain]').getController().checkStatusServices();
+
+                           var acquisitionmain = acquisitiontab.down('panel[name=acquisitionmain]');
+                           acquisitionmain.getController().checkStatusServices();
+
+                           acquisitionmain.getView().getFeature('productcategories').expandAll();
+                           acquisitionmain.getView().refresh();
                        }
                     }
                 }, {
@@ -176,8 +181,13 @@ Ext.define('esapp.view.main.Main', {
                     }],
                     listeners: {
                        activate: function (datamanagementtab) {
-                            var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
-                            headerlogos.setHidden(false);
+                           var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
+                           headerlogos.setHidden(false);
+
+                           var datamanagementmain = datamanagementtab.down('panel[name=datamanagementmain]');
+
+                           //datamanagementmain.getView().getFeature('prodcat').expandAll();
+                           datamanagementmain.getView().refresh();
                        }
                     }
                 }, {

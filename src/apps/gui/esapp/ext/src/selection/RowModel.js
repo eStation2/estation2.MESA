@@ -1,36 +1,41 @@
 /**
- * A selection model for {@link Ext.grid.Panel grid panels} which allows selection grid rows..
+ * RowModel Selection Model implements row based navigation for
+ * {@link Ext.grid.Panel grid panels} via user input. RowModel is the default grid selection
+ * model and, generally, will not need to be specified.
  *
- * Implements row based navigation via keyboard.
+ * By utilizing the selModel config as an object, you may also set configurations for:
+ *
+ * + {@link #mode} - Specifies whether user may select multiple rows or single rows
+ * + {@link #allowDeselect} - Specifies whether user may deselect records when in SINGLE mode
+ * + {@link #ignoreRightMouseSelection} - Specifies whether user may ignore right clicks
+ * for selection purposes
+ *
+ * In the example below, we've enabled MULTI mode. This means that multiple rows can be selected.
  *
  *     @example
  *     var store = Ext.create('Ext.data.Store', {
- *         fields  : ['name', 'email', 'phone'],
- *         data    : {
- *             items : [
- *                 { name : 'Lisa',  email : 'lisa@simpsons.com',  phone : '555-111-1224' },
- *                 { name : 'Bart',  email : 'bart@simpsons.com',  phone : '555-222-1234' },
- *                 { name : 'Homer', email : 'homer@simpsons.com', phone : '555-222-1244' },
- *                 { name : 'Marge', email : 'marge@simpsons.com', phone : '555-222-1254' }
- *             ]
- *         },
- *         proxy   : {
- *             type   : 'memory',
- *             reader : {
- *                 type : 'json',
- *                 root : 'items'
- *             }
- *         }
+ *         fields: ['name', 'email', 'phone'],
+ *         data: [
+ *             { name: 'Lisa', email: 'lisa@simpsons.com', phone: '555-111-1224' },
+ *             { name: 'Bart', email: 'bart@simpsons.com', phone: '555-222-1234' },
+ *             { name: 'Homer', email: 'homer@simpsons.com', phone: '555-222-1244' },
+ *             { name: 'Marge', email: 'marge@simpsons.com', phone: '555-222-1254' }
+ *         ]
  *     });
+ *
  *     Ext.create('Ext.grid.Panel', {
- *         title    : 'Simpsons',
- *         store    : store,
- *         width    : 400,
- *         renderTo : Ext.getBody(),
- *         columns  : [
- *             { text : 'Name',  dataIndex : 'name'  },
- *             { text : 'Email', dataIndex : 'email', flex : 1 },
- *             { text : 'Phone', dataIndex : 'phone' }
+ *         title: 'Simpsons',
+ *         store: store,
+ *         width: 400,
+ *         renderTo: Ext.getBody(),
+ *         selModel: {
+ *            selType: 'rowmodel', // rowmodel is the default selection model
+ *            mode: 'MULTI' // Allows selection of multiple rows
+ *         },
+ *         columns: [
+ *             { text: 'Name',  dataIndex: 'name'  },
+ *             { text: 'Email', dataIndex: 'email', flex: 1 },
+ *             { text: 'Phone', dataIndex: 'phone' }
  *         ]
  *     });
  */
@@ -85,6 +90,11 @@ Ext.define('Ext.selection.RowModel', {
 
     isRowModel: true,
 
+    /**
+     * @inheritdoc
+     */
+    deselectOnContainerClick: false,
+
     onUpdate: function(record) {
         var me = this,
             view = me.view,
@@ -99,81 +109,37 @@ Ext.define('Ext.selection.RowModel', {
         }
     },
 
-    // Returns the number of rows currently visible on the screen or
-    // false if there were no rows. This assumes that all rows are
-    // of the same height and the first view is accurate.
-    getRowsVisible: function() {
-        var rowsVisible = false,
-            view = this.view,
-            firstRow = view.all.first(),
-            rowHeight, gridViewHeight;
-
-        if (firstRow) {
-            rowHeight = firstRow.getHeight();
-            gridViewHeight = view.el.getHeight();
-            rowsVisible = Math.floor(gridViewHeight / rowHeight);
-        }
-
-        return rowsVisible;
-    },
-
     // Allow the GridView to update the UI by
     // adding/removing a CSS class from the row.
     onSelectChange: function(record, isSelected, suppressEvent, commitFn) {
         var me      = this,
             views   = me.views || [me.view],
             viewsLn = views.length,
-            rowIdx,
+            recordIndex = me.store.indexOf(record),
             eventName = isSelected ? 'select' : 'deselect',
             i, view;
 
-        if ((suppressEvent || me.fireEvent('before' + eventName, me, record, rowIdx)) !== false &&
+        if ((suppressEvent || me.fireEvent('before' + eventName, me, record, recordIndex)) !== false &&
                 commitFn() !== false) {
 
+            // Selection models can handle more than one view
             for (i = 0; i < viewsLn; i++) {
                 view = views[i];
-                rowIdx  = view.indexOf(record);
+                recordIndex  = view.indexOf(record);
 
                 // The record might not be rendered due to either buffered rendering,
                 // or removal/hiding of all columns (eg empty locked side).
-                if (rowIdx !== -1) {
+                if (view.indexOf(record) !== -1) {
                     if (isSelected) {
-                        view.onRowSelect(rowIdx, suppressEvent);
+                        view.onRowSelect(recordIndex, suppressEvent);
                     } else {
-                        view.onRowDeselect(rowIdx, suppressEvent);
+                        view.onRowDeselect(recordIndex, suppressEvent);
                     }
                 }
             }
 
             if (!suppressEvent) {
-                me.fireEvent(eventName, me, record, rowIdx);
-            }
-        }
-    },
-
-    // Provide indication of what row was last focused via
-    // the gridview.
-    onLastFocusChanged: function(oldFocused, newFocused, supressFocus) {
-        var views   = this.views || [this.view],
-            viewsLn = views.length,
-            rowIdx,
-            i = 0;
-
-        if (oldFocused && viewsLn) {
-            rowIdx = views[0].indexOf(oldFocused);
-            if (rowIdx !== -1) {
-                for (; i < viewsLn; i++) {
-                    views[i].onRowFocus(rowIdx, false, true);
-                }
-            }
-        }
-
-        if (newFocused && viewsLn) {
-            rowIdx = views[0].indexOf(newFocused);
-            if (rowIdx !== -1) {
-                for (i = 0; i < viewsLn; i++) {
-                    views[i].onRowFocus(rowIdx, true, supressFocus);
-                }
+                me.fireEvent(eventName, me, record, recordIndex);
             }
         }
     },
@@ -215,10 +181,10 @@ Ext.define('Ext.selection.RowModel', {
     },
 
     selectByPosition: function (position, keepExisting) {
-        var context = new Ext.grid.CellContext(this.view);
-            
-        context.setPosition(position.row, position.column);
-        this.select(context.record, keepExisting);
+        if (!position.isCellContext) {
+            position = new Ext.grid.CellContext(this.view).setPosition(position.row, position.column);
+        }
+        this.select(position.record, keepExisting);
     },
 
     /**

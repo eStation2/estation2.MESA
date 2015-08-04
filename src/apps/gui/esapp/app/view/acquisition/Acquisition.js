@@ -20,12 +20,13 @@ Ext.define("esapp.view.acquisition.Acquisition",{
 
         'esapp.view.acquisition.product.InternetSourceAdmin',
 
+        'Ext.window.Toast',
         'Ext.layout.container.Center',
-        'Ext.grid.plugin.CellEditing',
+        //'Ext.grid.plugin.CellEditing',
         'Ext.grid.column.Widget',
-        'Ext.grid.column.Boolean',
+        //'Ext.grid.column.Boolean',
         'Ext.grid.column.Template',
-        'Ext.grid.column.Check',
+        //'Ext.grid.column.Check',
         'Ext.button.Split',
         'Ext.menu.Menu',
         'Ext.XTemplate',
@@ -67,22 +68,24 @@ Ext.define("esapp.view.acquisition.Acquisition",{
     rowLines: true,
     frame: false,
     border: false,
+    bufferedRenderer: true,
 
     features: [{
         id: 'productcategories',
         ftype: 'grouping',
-        groupHeaderTpl: Ext.create('Ext.XTemplate', '<div class="group-header-style">{name} ({children.length})</div>'),
-        hideGroupedHeader: true,
-        enableGroupingMenu: false,
-        startCollapsed : false,
-        groupByText: 'Product category'
+        collapsible:false,
+        groupHeaderTpl: Ext.create('Ext.XTemplate', '<div class="group-header-style">{name} ({children.length})</div>')
+        //,hideGroupedHeader: true
+        //,enableGroupingMenu: false
+        //,startCollapsed : true
+        //,groupByText: 'Product category'
     }],
 
-    plugins:[{
+    //plugins:[{
     //    ptype:'lazyitems'
     //},{
-        ptype:'cellediting'
-    }],
+    //    ptype:'cellediting'
+    //}],
 
     // defaultListenerScope: true,
 
@@ -228,28 +231,28 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                 // glyph: 'xf055@FontAwesome',
                 scale: 'medium',
                 handler: 'selectProduct'
-            },{
-                text: 'Expand All',
-                handler: function(btn) {
-                    var view = btn.up().up().getView();
-                    view.getFeature('productcategories').expandAll();
-                    view.refresh();
-                }
-            }, {
-                text: 'Collapse All',
-                handler: function(btn) {
-                    var view = btn.up().up().getView();
-                    view.getFeature('productcategories').collapseAll();
-                    view.refresh();
-                }
+            //},{
+            //    text: 'Expand All',
+            //    handler: function(btn) {
+            //        var view = btn.up().up().getView();
+            //        view.getFeature('productcategories').expandAll();
+            //        view.refresh();
+            //    }
+            //}, {
+            //    text: 'Collapse All',
+            //    handler: function(btn) {
+            //        var view = btn.up().up().getView();
+            //        view.getFeature('productcategories').collapseAll();
+            //        view.refresh();
+            //    }
             }, '->',
             {
                 xtype: 'servicemenubutton',
                 service: 'eumetcast',
                 text: 'Eumetcast',
-                listeners : {
-                    afterrender: 'checkStatusServices'
-                },
+                //listeners : {
+                //    afterrender: 'checkStatusServices'
+                //},
                 handler: 'checkStatusServices'
             },
             // add a vertical separator bar between toolbar items
@@ -286,26 +289,31 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                         acqgridsstore.load();
                     }
                     if (ingestiongridstore.isStore) {
-                        ingestiongridstore.load();
+                        ingestiongridstore.load({
+                            callback: function(records, options, success){
+                                var view = btn.up().up().getView();
+                                view.getFeature('productcategories').expandAll();
+                                view.refresh();
+                            }
+                        });
                     }
-                    // btn.up().up().doLayout();
-                    //    var view = btn.up().up().getView();
-                    //    view.getFeature('productcategories').expandAll();
-                    //    view.refresh();
                 }
             }]
         });
 
-        //me.listeners = {
-        //    afterrender: function(gridpanel,func){
-        //        Ext.toast({ html: 'Afterrender', title: 'Afterrender', width: 200, align: 't' });
-        //
-        //        var view = gridpanel.getView();
-        //        view.getFeature('productcategories').expandAll();
-        //        view.refresh();
-        //        // gridpanel.doLayout();
-        //    }
-        //};
+        me.listeners = {
+            viewready: function(gridpanel,func){
+                //Ext.toast({ html: 'viewready', title: 'viewready', width: 200, align: 't' });
+
+                var task = new Ext.util.DelayedTask(function() {
+                    var view = gridpanel.getView();
+                    view.getFeature('productcategories').expandAll();
+                    view.refresh();
+                });
+
+                task.delay(500);
+            }
+        };
 
         me.defaults = {
             variableRowHeight : true,
@@ -358,7 +366,6 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                     ),
                 width: 375,
                 cellWrap:true
-//                ,hideable: false
             },{
                 xtype: 'actioncolumn',
                 header: 'Active',
@@ -463,17 +470,18 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                         column.titleEl.removeCls('x-column-header-inner');
                     }
                 },
-                onWidgetAttach: function(widget, record) {
+                onWidgetAttach: function(column, widget, record) {
                     Ext.suspendLayouts();
 
                     var daStore = widget.getViewModel().get('productdatasources');
-                    daStore.setFilters({
-                         property:'productid'
-                        ,value:record.id
-                        ,anyMatch:true
-                    });
-
-                     Ext.resumeLayouts(true);
+                    if (daStore) {
+                        daStore.setFilters({
+                            property: 'productid'
+                            , value: record.id
+                            , anyMatch: true
+                        });
+                    }
+                    Ext.resumeLayouts(true);
                 },
                 widget: {
                     xtype: 'dataacquisitiongrid'
@@ -526,14 +534,16 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                       column.titleEl.removeCls('x-column-header-inner');
                   }
                 },
-                onWidgetAttach: function(widget, record) {
+                onWidgetAttach: function(column, widget, record) {
                     Ext.suspendLayouts();
                     var daStore = widget.getViewModel().get('productingestions');
-                    daStore.setFilters({
-                         property:'productid'
-                        ,value:record.id
-                        ,anyMatch:true
-                    });
+                    if (daStore) {
+                        daStore.setFilters({
+                            property: 'productid'
+                            , value: record.id
+                            , anyMatch: true
+                        });
+                    }
                     Ext.resumeLayouts(true);
                 },
                 widget: {
@@ -555,9 +565,7 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                 height:32,
                 tooltip: 'Show log of this Ingestion',
                 scope: me,
-                // handler: me.onRemoveClick
                 handler: function (grid, rowIndex, colIndex, icon) {
-                    //console.info(grid.up());
                     var rec = grid.getStore().getAt(rowIndex);
                     var logViewWin = new esapp.view.acquisition.logviewer.LogView({
                         params: {

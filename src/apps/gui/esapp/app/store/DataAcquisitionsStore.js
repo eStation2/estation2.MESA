@@ -40,10 +40,10 @@ Ext.define('esapp.store.DataAcquisitionsStore', {
         },
         listeners: {
             exception: function(proxy, response, operation){
-                Ext.MessageBox.show({
+                Ext.Msg.show({
                     title: 'ACQUISITION STORE- REMOTE EXCEPTION',
                     msg: operation.getError(),
-                    icon: Ext.MessageBox.ERROR,
+                    icon: Ext.Msg.ERROR,
                     buttons: Ext.Msg.OK
                 });
             }

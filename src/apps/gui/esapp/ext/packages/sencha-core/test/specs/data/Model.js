@@ -281,16 +281,6 @@ describe("Ext.data.Model", function() {
                     
                 });
                 
-                it("should create a new idField if it differs from the superclass", function() {
-                    defineA(['id']);
-                    defineB([], {
-                        idProperty: 'name'
-                    });
-                    var fields = B.getFields();
-                    expect(fields.length).toBe(2);
-                    expect(fields[1].getName()).toBe('name');
-                });
-                
                 it("should copy fields for deep subclasses", function() {
                     defineA(['id']);
                     defineB(['bField']);    
@@ -314,6 +304,205 @@ describe("Ext.data.Model", function() {
                     
                     Ext.undefine('spec.C');
                     Ext.undefine('spec.D');
+                });
+
+                describe("id field", function() {
+                    describe("not changing the idProperty", function() {
+                        it("should inherit the idProperty & keep the generated idField in position", function() {
+                            defineA(['foo', 'bar']);
+                            defineB(['baz']);
+
+                            var fields = spec.A.getFields();
+                            expect(fields.length).toBe(3);
+                            expect(fields[0].name).toBe('foo');
+                            expect(fields[1].name).toBe('bar');
+                            expect(fields[2].name).toBe('id');
+                            expect(spec.A.getField('id')).toBe(fields[2]);
+
+                            fields = spec.B.getFields();
+                            expect(fields.length).toBe(4);
+                            expect(fields[0].name).toBe('foo');
+                            expect(fields[1].name).toBe('bar');
+                            expect(fields[2].name).toBe('id');
+                            expect(fields[3].name).toBe('baz');
+                            expect(spec.B.getField('id')).toBe(fields[2]);
+
+                            expect(spec.A.idField.name).toBe('id');
+                            expect(spec.B.idField.name).toBe('id');
+                        });
+
+                        it("should inherit the idProperty & keep a defined idField in position", function() {
+                            defineA(['foo', 'id', 'bar']);
+                            defineB(['baz']);
+
+                            var fields = spec.A.getFields();
+                            expect(fields.length).toBe(3);
+                            expect(fields[0].name).toBe('foo');
+                            expect(fields[1].name).toBe('id');
+                            expect(fields[2].name).toBe('bar');
+                            expect(spec.A.getField('id')).toBe(fields[1]);
+
+                            fields = spec.B.getFields();
+                            expect(fields.length).toBe(4);
+                            expect(fields[0].name).toBe('foo');
+                            expect(fields[1].name).toBe('id');
+                            expect(fields[2].name).toBe('bar');
+                            expect(fields[3].name).toBe('baz');
+                            expect(spec.B.getField('id')).toBe(fields[1]);
+
+                            expect(spec.A.idField.name).toBe('id');
+                            expect(spec.B.idField.name).toBe('id');
+                        });
+                    });
+
+                    describe("changing the idProperty", function() {
+                        describe("id declared as a field in superclass & subclass", function() {
+                            it("should keep both idFields in the defined order", function() {
+                                defineA(['foo', 'id', 'bar']);
+                                defineB(['customId', 'baz'], {idProperty: 'customId'});
+
+                                var fields = spec.A.getFields();
+                                expect(fields.length).toBe(3);
+                                expect(fields[0].name).toBe('foo');
+                                expect(fields[1].name).toBe('id');
+                                expect(fields[2].name).toBe('bar');
+
+                                expect(spec.A.getField('id')).toBe(fields[1]);
+
+                                fields = spec.B.getFields();
+                                expect(fields.length).toBe(5);
+                                expect(fields[0].name).toBe('foo');
+                                expect(fields[1].name).toBe('id');
+                                expect(fields[2].name).toBe('bar');
+                                expect(fields[3].name).toBe('customId');
+                                expect(fields[4].name).toBe('baz');
+
+                                expect(spec.B.getField('id')).toBe(fields[1]);
+                                expect(spec.B.getField('customId')).toBe(fields[3]);
+
+                                expect(spec.A.idField.name).toBe('id');
+                                expect(spec.B.idField.name).toBe('customId');
+                            });
+                        });
+
+                        describe("id declared as field only in superclass", function() {
+                            it("should keep a defined idField from the parent, but it should not be the idField", function() {
+                                defineA(['foo', 'id', 'bar']);
+                                defineB(['baz'], {idProperty: 'customId'});
+
+                                var fields = spec.A.getFields();
+                                expect(fields.length).toBe(3);
+                                expect(fields[0].name).toBe('foo');
+                                expect(fields[1].name).toBe('id');
+                                expect(fields[2].name).toBe('bar');
+
+                                expect(spec.A.getField('id')).toBe(fields[1]);
+
+                                fields = spec.B.getFields();
+                                expect(fields.length).toBe(5);
+                                expect(fields[0].name).toBe('foo');
+                                expect(fields[1].name).toBe('id');
+                                expect(fields[2].name).toBe('bar');
+                                expect(fields[3].name).toBe('baz');
+                                expect(fields[4].name).toBe('customId');
+
+                                expect(spec.B.getField('id')).toBe(fields[1]);
+                                expect(spec.B.getField('customId')).toBe(fields[4]);
+
+                                expect(spec.A.idField.name).toBe('id');
+                                expect(spec.B.idField.name).toBe('customId');
+                            });
+                        });
+
+                        describe("id declared as a field only in subclass", function() {
+                            it("should remove the generated id field and leave the declared idField in place", function() {
+                                defineA(['foo']);
+                                defineB(['bar', 'customId', 'baz'], {idProperty: 'customId'});
+
+                                var fields = spec.A.getFields();
+                                expect(fields.length).toBe(2);
+                                expect(fields[0].name).toBe('foo');
+                                expect(fields[1].name).toBe('id');
+
+                                fields = spec.B.getFields();
+                                expect(fields.length).toBe(4);
+                                expect(fields[0].name).toBe('foo');
+                                expect(fields[1].name).toBe('bar');
+                                expect(fields[2].name).toBe('customId');
+                                expect(fields[3].name).toBe('baz');
+
+                                expect(spec.B.getField('id')).toBeNull();
+
+                                expect(spec.A.idField.name).toBe('id');
+                                expect(spec.B.idField.name).toBe('customId');
+                            });
+                        });
+
+                        describe("id not declared as a field", function() {
+                            it("should replace a generated idField from the parent", function() {
+                                defineA(['foo', 'bar']);
+                                defineB(['baz'], {idProperty: 'customId'});
+
+                                var fields = spec.A.getFields();
+                                expect(fields.length).toBe(3);
+                                expect(fields[0].name).toBe('foo');
+                                expect(fields[1].name).toBe('bar');
+                                expect(fields[2].name).toBe('id');
+
+                                fields = spec.B.getFields();
+                                expect(fields.length).toBe(4);
+                                expect(fields[0].name).toBe('foo');
+                                expect(fields[1].name).toBe('bar');
+                                expect(fields[2].name).toBe('customId');
+                                expect(fields[3].name).toBe('baz');
+
+                                expect(spec.B.getField('id')).toBeNull();
+
+                                expect(spec.A.idField.name).toBe('id');
+                                expect(spec.B.idField.name).toBe('customId');
+                            });
+                        });
+                    });
+                });
+
+                describe("versionProperty", function() {
+                    it("should append versionProperty if it's not declared as a field", function() {
+                        defineA(['foo'], {
+                            versionProperty: 'version'
+                        });
+
+                        var fields = spec.A.getFields(),
+                            version = fields[2];
+
+                        expect(fields.length).toBe(3);
+                        expect(fields[0].name).toBe('foo');
+                        expect(fields[1].name).toBe('id');
+                        expect(fields[2].name).toBe('version');
+
+                        expect(version.critical).toBe(true);
+                        expect(version.defaultValue).toBe(1);
+                    });
+
+                    it("should leave a declared versionProperty in position", function() {
+                        defineA(['foo', {
+                            name: 'version',
+                            type: 'int'
+                        }, 'bar'], {
+                            versionProperty: 'version'
+                        });
+
+                        var fields = spec.A.getFields(),
+                            version = fields[1];
+
+                        expect(fields.length).toBe(4);
+                        expect(fields[0].name).toBe('foo');
+                        expect(fields[1].name).toBe('version');
+                        expect(fields[2].name).toBe('bar');
+                        expect(fields[3].name).toBe('id');
+
+                        expect(version.critical).toBe(true);
+                        expect(version.defaultValue).toBe(1);
+                    });
                 });
             });
             
@@ -405,6 +594,45 @@ describe("Ext.data.Model", function() {
                         });
                     });
                 });    
+            });
+
+            describe("calculated fields", function() {
+                describe("subclassing", function() {
+                    it("should inherit calculated fields", function() {
+                        defineA(['foo', {
+                            name: 'bar',
+                            calculate: function(data) {
+                                return data.foo * 2;
+                            }
+                        }]);
+
+                        defineB();
+                        var rec = new B({
+                            foo: 10
+                        });
+                        expect(rec.get('bar')).toBe(20);
+                    });
+
+                    // This tests the initialization order of the field rankings on the Model
+                    it("should inherit calculated fields when the parent has been instanced first", function() {
+                        defineA(['foo', {
+                            name: 'bar',
+                            calculate: function(data) {
+                                return data.foo * 2;
+                            }
+                        }]);
+
+                        defineB();
+                        var rec = new A({
+                            foo: 10
+                        });
+                        expect(rec.get('bar')).toBe(20);
+                        rec = new B({
+                            foo: 20
+                        });
+                        expect(rec.get('bar')).toBe(40);
+                    });
+                })
             });
         });
         
@@ -1462,13 +1690,6 @@ describe("Ext.data.Model", function() {
                 });
             }
 
-            it("should throw if the model is a phantom", function() {
-                make();
-                expect(function() {
-                    rec.load();
-                }).toThrow();
-            });
-
             it("should throw if the returned id is different", function() {
                 make(3, {});
                 expect(function() {
@@ -1486,6 +1707,23 @@ describe("Ext.data.Model", function() {
             it("should return the operation", function() {
                 make(3);
                 expect(rec.load().isOperation).toBe(true);
+            });
+
+            describe("with phantoms", function() {
+                it("should not be a phantom after loading", function() {
+                    make();
+                    expect(rec.phantom).toBe(true);
+                    rec.load();
+                    complete({id: 1});
+                    expect(rec.phantom).toBe(false);
+                });
+
+                it("should set the id on the new record", function() {
+                    make();
+                    rec.load();
+                    complete({id: 200});
+                    expect(rec.getId()).toBe(200);
+                });
             });
 
             describe("while loading", function() {
@@ -4148,6 +4386,224 @@ describe("Ext.data.Model", function() {
             });
         });
     });
+
+    describe("model state", function() {
+        var User, convertSpy;
+
+        beforeEach(function() {
+            convertSpy = jasmine.createSpy();
+            User = Ext.define('spec.User', {
+                extend: 'Ext.data.Model',
+                fields: ['name', 'age', {
+                    name: 'withConvert',
+                    convert: convertSpy
+                }]
+            });
+        });
+
+        afterEach(function() {
+            Ext.undefine('spec.User');
+            convertSpy = User = null;
+        });
+
+        describe("commit", function() {
+            it("should clear the dirty state", function() {
+                var rec = new User();
+                rec.set('name', 'Foo');
+                expect(rec.dirty).toBe(true);
+                rec.commit();
+                expect(rec.dirty).toBe(false);
+            });
+
+            it("should not modify any field values", function() {
+                var rec = new User();
+                rec.set('name', 'Foo');
+                rec.set('age', 100);
+                rec.commit();
+                expect(rec.get('name')).toBe('Foo');
+                expect(rec.get('age')).toBe(100);
+            });
+
+            it("should clear the modified state", function() {
+                var rec = new User();
+                rec.set('name', 'Foo');
+                expect(rec.isModified('name')).toBe(true);
+                rec.commit();
+                expect(rec.isModified('name')).toBe(false);
+            });
+
+            it("should clear any editing state", function() {
+                var rec = new User();
+                rec.beginEdit();
+                expect(rec.editing).toBe(true);
+                rec.commit();
+                expect(rec.editing).toBe(false);
+            });
+
+            it("should clear the phantom state", function() {
+                var rec = new User();
+                expect(rec.phantom).toBe(true);
+                rec.commit();
+                expect(rec.phantom).toBe(false);
+            });
+
+            it("should set dropped records to be erased", function() {
+                var rec = new User({
+                    id: 1
+                });
+                rec.drop();
+                expect(rec.erased).toBe(false);
+                rec.commit();
+                expect(rec.erased).toBe(true);
+            });
+
+            describe("notifying joined parties", function() {
+                describe("data commits", function() {
+                    it("should notify after a commit", function() {
+                        var rec = new User(),
+                            spy = spyOn(rec, 'callJoined');
+
+                        rec.commit();
+                        expect(spy.callCount).toBe(1);
+                        expect(spy.mostRecentCall.args[0]).toBe('afterCommit');
+                    });
+
+                    it("should pass along any modified fields", function() {
+                        var rec = new User(),
+                            spy = spyOn(rec, 'callJoined');
+
+                        rec.commit(false, ['foo', 'bar']);
+                        expect(spy.callCount).toBe(1);
+                        expect(spy.mostRecentCall.args[1]).toEqual([['foo', 'bar']]);
+                    });
+
+                    it("should not notify with silent: true", function() {
+                        var rec = new User(),
+                            spy = spyOn(rec, 'callJoined');
+
+                        rec.commit(true);
+                        expect(spy).not.toHaveBeenCalled();
+                    });
+                });
+
+                describe("via an erase", function() {
+                    it("should notify after an erase", function() {
+                        var rec = new User(),
+                            spy;
+
+                        rec.drop();
+                        spy = spyOn(rec, 'callJoined');
+                        rec.commit();
+                        expect(spy.callCount).toBe(1);
+                        expect(spy.mostRecentCall.args[0]).toBe('afterErase');
+                    });
+
+                    it("should not notify with silent: true", function() {
+                        var rec = new User(),
+                            spy;
+
+                        rec.drop();
+                        spy = spyOn(rec, 'callJoined');
+                        rec.commit(true);
+                        expect(spy).not.toHaveBeenCalled();
+                    });
+                });
+            });
+        });
+
+        describe("reject", function() {
+            it("should clear the dirty state", function() {
+                var rec = new User();
+                rec.set('name', 'Foo');
+                expect(rec.dirty).toBe(true);
+                rec.reject();
+                expect(rec.dirty).toBe(false);
+            });
+
+            it("should return field values to their original states", function() {
+                var rec = new User({
+                    name: 'Foo',
+                    age: 1
+                });
+                rec.set('name', 'Bar');
+                rec.set('age', 100);
+                rec.reject();
+                expect(rec.get('name')).toBe('Foo');
+                expect(rec.get('age')).toBe(1);
+            });
+
+            it("should not run converters when restoring data", function() {
+                var rec = new User({
+                    name: 'Foo',
+                    age: 1
+                });
+                rec.set('name', 'Bar');
+                rec.set('age', 100);
+                convertSpy.reset();
+                rec.reject();
+                expect(convertSpy).not.toHaveBeenCalled();
+            });
+
+            it("should clear the modified state", function() {
+                var rec = new User();
+                rec.set('name', 'Foo');
+                expect(rec.isModified('name')).toBe(true);
+                rec.reject();
+                expect(rec.isModified('name')).toBe(false);
+            });
+
+            it("should clear any editing state", function() {
+                var rec = new User();
+                rec.beginEdit();
+                expect(rec.editing).toBe(true);
+                rec.reject();
+                expect(rec.editing).toBe(false);
+            });
+
+            it("should clear the dropped state", function() {
+                var rec = new User({
+                    id: 1
+                });
+                rec.drop();
+                rec.reject();
+                expect(rec.dropped).toBe(false);
+            });
+
+            describe("notifying joined parties", function() {
+                it("should not call afterEdit when restoring values", function() {
+                    var rec = new User({
+                        name: 'Foo'
+                    }), spy;
+                    rec.set('name', 'Bar');
+                    spy = spyOn(rec, 'callJoined');
+                    rec.reject();
+                    expect(spy.callCount).toBe(1);
+                    expect(spy.mostRecentCall.args[0]).not.toBe('afterEdit');
+                });
+
+                it("should call afterReject", function() {
+                    var rec = new User({
+                        name: 'Foo'
+                    }), spy;
+                    rec.set('name', 'Bar');
+                    spy = spyOn(rec, 'callJoined');
+                    rec.reject();
+                    expect(spy.callCount).toBe(1);
+                    expect(spy.mostRecentCall.args[0]).toBe('afterReject');
+                });
+
+                it("should not call afterReject with silent: true", function() {
+                    var rec = new User({
+                        name: 'Foo'
+                    }), spy;
+                    rec.set('name', 'Bar');
+                    spy = spyOn(rec, 'callJoined');
+                    rec.reject(true);
+                    expect(spy).not.toHaveBeenCalled();
+                });
+            });
+        });
+    });
     
     describe("getData", function() {
         var A; 
@@ -4179,6 +4635,411 @@ describe("Ext.data.Model", function() {
                 other: 'val'
             });
             expect(rec.getData().other).toBe('val');
+        });
+
+        describe("options", function() {
+            var User, rec;
+
+            beforeEach(function() {
+                User = Ext.define('spec.User', {
+                    extend: 'Ext.data.Model',
+                    fields: ['id', 'name', {
+                        name: 'age', 
+                        persist: false
+                    }, {
+                        name: 'created',
+                        serialize: function(v) {
+                            return Ext.Date.format(v, 'Y-m-d');
+                        }
+                    }, {
+                        name: 'addressId',
+                        reference: 'Address'
+                    }]
+                });
+
+                rec = new User({
+                    id: 1,
+                    age: 100,
+                    created: new Date(2000, 6, 15),
+                    name: 'Foo'
+                });
+            });
+            
+            afterEach(function() {
+                Ext.undefine('spec.User');
+                rec = User = null;
+            });
+
+            describe("associated", function() {
+                var Post, Address;
+
+                beforeEach(function() {
+                    Post = Ext.define('spec.Post', {
+                        extend: 'Ext.data.Model',
+                        fields: ['id', 'title', {
+                            name: 'content', 
+                            persist: false
+                        }, {
+                            name: 'userId',
+                            reference: 'User'
+                        }, {
+                            name: 'created',
+                            serialize: function(v) {
+                                return Ext.Date.format(v, 'Y-m-d');
+                            }
+                        }]
+                    });
+
+                    Address = Ext.define('spec.Address', {
+                        extend: 'Ext.data.Model',
+                        fields: ['id', {
+                            name: 'street',
+                            persist: false
+                        }, 'city', {
+                            name: 'created',
+                            serialize: function(v) {
+                                return Ext.Date.format(v, 'Y-m-d');
+                            }
+                        }]
+                    });
+                });
+
+                afterEach(function() {
+                    Ext.undefine('spec.Address');
+                    Ext.undefine('spec.Post');
+                    Address = Post = null;
+                });
+
+                it("should not include associated data by default", function() {
+                    expect(rec.getData({})).toEqual({
+                        id: 1,
+                        age: 100,
+                        created: new Date(2000, 6, 15),
+                        name: 'Foo'
+                    });
+                });
+
+                it("should not include associated data with associated: false", function() {
+                    expect(rec.getData({
+                        associated: false
+                    })).toEqual({
+                        id: 1,
+                        age: 100,
+                        created: new Date(2000, 6, 15),
+                        name: 'Foo'
+                    });
+                });
+
+                it("should include associated data with associated: true", function() {
+                    rec.posts().add({
+                        id: 101,
+                        content: 'X'
+                    });
+
+                    expect(rec.getData({
+                        associated: true
+                    })).toEqual({
+                        id: 1,
+                        age: 100,
+                        created: new Date(2000, 6, 15),
+                        name: 'Foo',
+                        posts: [{
+                            id: 101,
+                            content: 'X',
+                            userId: 1
+                        }]
+                    });
+                });
+
+                describe("passing options down to associated records", function() {
+                    describe("changes", function() {
+                        it("should only include changes with changes: true", function() {
+                            rec.posts().add({
+                                id: 1001,
+                                content: 'A',
+                                title: 'B',
+                                userId: 1,
+                                created: new Date(2005, 3, 22)
+                            });
+                            rec.posts().first().set('title', 'X');
+                            rec.setAddress(new Address({
+                                id: 2001,
+                                street: 'B',
+                                city: 'C',
+                                created: new Date(2008, 10, 3)
+                            }));
+                            rec.getAddress().set('city', 'Q');
+
+                            expect(rec.getData({
+                                associated: true,
+                                changes: true
+                            })).toEqual({
+                                addressId: 2001,
+                                address: {
+                                    city: 'Q'
+                                },
+                                posts: [{
+                                    title: 'X'
+                                }]
+                            });
+                        });
+                    });
+
+                    describe("critical", function() {
+                        it("should include critical fields with critical: true", function() {
+                            rec.posts().add({
+                                id: 1001,
+                                content: 'A',
+                                title: 'B',
+                                userId: 1,
+                                created: new Date(2005, 3, 22)
+                            });
+                            rec.posts().first().set('title', 'X');
+                            rec.setAddress(new Address({
+                                id: 2001,
+                                street: 'B',
+                                city: 'C',
+                                created: new Date(2008, 10, 3)
+                            }));
+                            rec.getAddress().set('city', 'Q');
+
+                            expect(rec.getData({
+                                associated: true,
+                                changes: true,
+                                critical: true
+                            })).toEqual({
+                                id: 1,
+                                addressId: 2001,
+                                address: {
+                                    id: 2001,
+                                    city: 'Q'
+                                },
+                                posts: [{
+                                    id: 1001,
+                                    title: 'X'
+                                }]
+                            });
+                        });
+                    });
+
+                    describe("persist", function() {
+                        it("should only include persist fields with persist: true", function() {
+                            rec.posts().add({
+                                id: 1001,
+                                content: 'A',
+                                title: 'B',
+                                userId: 1,
+                                created: new Date(2005, 3, 22)
+                            });
+                            rec.posts().first().set('title', 'X');
+                            rec.posts().first().set('content', 'Y');
+                            rec.setAddress(new Address({
+                                id: 2001,
+                                street: 'B',
+                                city: 'C',
+                                created: new Date(2008, 10, 3)
+                            }));
+                            rec.getAddress().set('city', 'Q');
+                            rec.getAddress().set('street', 'Z');
+                            
+                            expect(rec.getData({
+                                associated: true,
+                                changes: true,
+                                critical: true
+                            })).toEqual({
+                                id: 1,
+                                addressId: 2001,
+                                address: {
+                                    id: 2001,
+                                    city: 'Q'
+                                },
+                                posts: [{
+                                    id: 1001,
+                                    title: 'X'
+                                }]
+                            });
+                        });
+                    });
+
+                    describe("serialize", function() {
+                        it("should serialize with serialize: true", function() {
+                            rec.posts().add({
+                                id: 1001,
+                                content: 'A',
+                                title: 'B',
+                                userId: 1,
+                                created: new Date(2005, 3, 22)
+                            });
+                            rec.setAddress(new Address({
+                                id: 2001,
+                                street: 'B',
+                                city: 'C',
+                                created: new Date(2008, 10, 3)
+                            }));
+                            
+                            expect(rec.getData({
+                                associated: true,
+                                serialize: true
+                            })).toEqual({
+                                id: 1,
+                                age: 100,
+                                created: '2000-07-15',
+                                name: 'Foo',
+                                addressId: 2001,
+                                address: {
+                                    id: 2001,
+                                    street: 'B',
+                                    city: 'C',
+                                    created: '2008-11-03'
+                                },
+                                posts: [{
+                                    id: 1001,
+                                    content: 'A',
+                                    title: 'B',
+                                    userId: 1,
+                                    created: '2005-04-22'
+                                }]
+                            });
+                        });
+                    });
+                });
+            });
+
+            describe("changes", function() {
+                it("should include all fields by default", function() {
+                    rec.set('age', 20);
+
+                    expect(rec.getData({})).toEqual({
+                        id: 1,
+                        age: 20,
+                        created: new Date(2000, 6, 15),
+                        name: 'Foo'
+                    });
+                });
+
+                it("should include all fields with changes: false", function() {
+                    rec.set('age', 20);
+
+                    expect(rec.getData({
+                        changes: false
+                    })).toEqual({
+                        id: 1,
+                        age: 20,
+                        created: new Date(2000, 6, 15),
+                        name: 'Foo'
+                    });
+                });
+
+                it("should include all fields with changes: true", function() {
+                    rec.set('name', 'Bar');
+
+                    expect(rec.getData({
+                        changes: true
+                    })).toEqual({
+                        name: 'Bar'
+                    });
+                });
+            });
+
+            describe("critical", function() {
+                it("should not include critical fields by default", function() {
+                    rec.set('name', 'Bar');
+
+                    expect(rec.getData({
+                        changes: true
+                    })).toEqual({
+                        name: 'Bar'
+                    });
+                });
+
+                it("should not include critical fields with critical: false", function() {
+                    rec.set('name', 'Bar');
+
+                    expect(rec.getData({
+                        changes: true,
+                        critical: false
+                    })).toEqual({
+                        name: 'Bar'
+                    });
+                });
+
+                it("should include critical fields with critical: true", function() {
+                    rec.set('name', 'Bar');
+
+                    expect(rec.getData({
+                        changes: true,
+                        critical: true
+                    })).toEqual({
+                        id: 1,
+                        name: 'Bar'
+                    });
+                });
+            });
+
+            describe("persist", function() {
+                it("should include all fields by default", function() {
+                    expect(rec.getData({})).toEqual({
+                        id: 1,
+                        age: 100,
+                        created: new Date(2000, 6, 15),
+                        name: 'Foo'
+                    });
+                });
+
+                it("should include all fields with persist: false", function() {
+                    expect(rec.getData({
+                        persist: false
+                    })).toEqual({
+                        id: 1,
+                        age: 100,
+                        created: new Date(2000, 6, 15),
+                        name: 'Foo'
+                    });
+                });
+
+                it("should include only persist fields with persist: true", function() {
+                    expect(rec.getData({
+                        persist: true
+                    })).toEqual({
+                        id: 1,
+                        name: 'Foo',
+                        created: new Date(2000, 6, 15)
+                    });
+                });
+            });
+
+            describe("serialize", function() {
+                it("should not serialize by default", function() {
+                    expect(rec.getData({})).toEqual({
+                        id: 1,
+                        name: 'Foo',
+                        age: 100,
+                        created: new Date(2000, 6, 15)
+                    });
+                });
+
+                it("should not serialize with serialize: false", function() {
+                    expect(rec.getData({
+                        serialize: false
+                    })).toEqual({
+                        id: 1,
+                        name: 'Foo',
+                        age: 100,
+                        created: new Date(2000, 6, 15)
+                    });
+                });
+
+                it("should serialize with serialize: true", function() {
+                    expect(rec.getData({
+                        serialize: true
+                    })).toEqual({
+                        id: 1,
+                        name: 'Foo',
+                        age: 100,
+                        created: '2000-07-15'
+                    });
+                });
+            });
         });
         
         describe("with associations", function() {
@@ -4352,12 +5213,13 @@ describe("Ext.data.Model", function() {
                             }]
                         });
 
-                        var postsStore = rec.posts();
-                        var post1 = postsStore.getAt(0);
-                        var post2 = postsStore.getAt(1);
+                        var postsStore = rec.posts(),
+                            post1 = postsStore.getAt(0),
+                            post2 = postsStore.getAt(1),
+                            userName = Post.associations.user.getInstanceName();
 
-                        expect(post1.user).toBe(rec);
-                        expect(post2.user).toBe(rec);
+                        expect(post1[userName]).toBe(rec);
+                        expect(post2[userName]).toBe(rec);
 
                         var posts = rec.getAssociatedData().posts;
                         expect(posts[0].user).toBeUndefined();
@@ -4949,7 +5811,10 @@ describe("Ext.data.Model", function() {
                         // Connect the records to each other so that the association is
                         // traversable. This forces getAssociatetdData to either recurse
                         // (forever) or detect the cycle.
-                        rec.person.passport = rec;
+                        var personName = Passport.associations.person.getInstanceName(),
+                            passportName = Person.associations.passport.getInstanceName();
+
+                        rec.getPerson().setPassport(rec);
 
                         var data = rec.getAssociatedData();
                         expect(data.person.passport).toBeUndefined();
@@ -4958,7 +5823,7 @@ describe("Ext.data.Model", function() {
             });
 
             describe("basic many to many", function() {
-                var User, Group, Thing;
+                var User, Group, Profile;
                 beforeEach(function() {
                     User = Ext.define('spec.User', {
                         extend: 'Ext.data.Model',
@@ -5854,6 +6719,43 @@ describe("Ext.data.Model", function() {
                 expect(o.isValid()).toBe(false);
             });
         });
+
+        describe("validation via getValidation", function() {
+            it("should return true if all fields in the model are valid", function() {
+                defineA({
+                    name: 'presence'
+                });
+                
+                var o = new A({
+                    name: 'Foo'
+                });
+                expect(o.getValidation().isValid()).toBe(true);
+            });
+
+            it("should return false if only some fields are valid", function() {
+                defineA({
+                    name: 'presence',
+                    rank: 'presence'
+                });
+
+                var o = new A({
+                    name: 'foo',
+                    rank: null
+                });
+                expect(o.getValidation().isValid()).toBe(false);
+            });
+            
+            it("should return false if all fields in the model are not valid", function() {
+                defineA({
+                    name: 'presence'
+                });
+                
+                var o = new A({
+                    name: null
+                });
+                expect(o.getValidation().isValid()).toBe(false);
+            });
+        });
     });
 
     describe("synchronize validators with the Validation record", function() {
@@ -6455,6 +7357,54 @@ describe("Ext.data.Model", function() {
                 expect(address.dropped).toBe(false);
                 expect(orderItem.dropped).toBe(false);
             });
+        });
+    });
+
+    describe("versionProperty", function() {
+        var User;
+
+        beforeEach(function() {
+            User = Ext.define('spec.User', {
+                extend: 'Ext.data.Model',
+                fields: ['name'],
+                versionProperty: 'version'
+            })
+        });
+
+        afterEach(function() {
+            Ext.undefine('spec.User');
+            User = null;
+        });
+
+        it("should increment the versionProperty when commiting", function() {
+            var user = new User({
+                id: 1,
+                name: 'Foo',
+                version: 5
+            });
+            user.set('name', 'Bar');
+            user.commit();
+            expect(user.get('version')).toBe(6);
+        });
+
+        it("should not increment the versionProperty when committing a phantom", function() {
+            var user = new User({
+                name: 'Foo'
+            });
+            expect(user.get('version')).toBe(1);
+            user.set('name', 'Bar');
+            user.commit();
+            expect(user.get('version')).toBe(1);
+        });
+
+        it("should not increment the versionProperty when rejecting", function() {
+            var user = new User({
+                id: 1,
+                name: 'X'
+            });
+            user.set('name', 'Bar');
+            user.reject();
+            expect(user.get('version')).toBe(1);
         });
     });
 });

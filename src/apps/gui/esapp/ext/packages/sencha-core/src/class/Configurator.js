@@ -80,6 +80,7 @@ Ext.Configurator = function (cls) {
          * @readonly
          */
         me.values = ExtObject.chain(zuper.values);
+        me.needsFork = zuper.needsFork;
     } else {
         me.configs = {};
         me.cachedConfigs = {};
@@ -93,6 +94,8 @@ Ext.Configurator = function (cls) {
 
 Ext.Configurator.prototype = {
     self: Ext.Configurator,
+
+    needsFork: false,
 
     /**
      * This array holds the properties that need to be set on new instances.
@@ -112,7 +115,7 @@ Ext.Configurator.prototype = {
      * defined that target the class.
      * 
      * @param {Object} config The config object containing the new config properties.
-     * @param {Class} [mixinClass] The mixin class if the configs are from a mixin.
+     * @param {Ext.Class} [mixinClass] The mixin class if the configs are from a mixin.
      * @private
      */
     add: function (config, mixinClass) {
@@ -134,6 +137,7 @@ Ext.Configurator.prototype = {
             if (meta) {
                 isCached = !!meta.cached;
                 value = meta.$value;
+                isObject = value && value.constructor === Object;
             }
 
             merge = meta && meta.merge;
@@ -240,6 +244,12 @@ Ext.Configurator.prototype = {
                 delete cfg.$value;
             }
 
+            // Fork checks all the default values to see if they are arrays or objects
+            // Do this to save us from doing it on each run
+            if (!me.needsFork && value && (value.constructor === Object || value instanceof Array)) {
+                me.needsFork = true;
+            }
+
             // If the value is non-null, we need to initialize it.
             if (value !== null) {
                 initMap[name] = true;
@@ -273,14 +283,13 @@ Ext.Configurator.prototype = {
             initListMap = me.initListMap,
             initList = me.initList,
             prototype = me.cls.prototype,
-            // Make a copy of the config properties for this instance so we can apply the
-            // instanceConfig to it safely later:
-            values = ExtObject.fork(me.values),
-            notStrict = !instance.$configStrict,
+            values = me.values,
             remaining = 0,
             firstInstance = !initList,
             cachedInitList, cfg, getter, needsInit, i, internalName,
-            ln, names, name, value, isCached, merge, valuesKey;
+            ln, names, name, value, isCached, valuesKey;
+
+        values = me.needsFork ? ExtObject.fork(values) : ExtObject.chain(values);
 
         if (firstInstance) {
             // When called to configure the first instance of the class to which we are
@@ -364,6 +373,12 @@ Ext.Configurator.prototype = {
             // those that may have been triggered by their getter.
         }
 
+        // If the instanceConfig has a platformConfig in it, we need to merge the active
+        // rules of that object to make the actual instanceConfig.
+        if (instanceConfig && instanceConfig.platformConfig) {
+            instanceConfig = me.resolvePlatformConfig(instance, instanceConfig);
+        }
+
         if (firstInstance) {
             // Allow the class to do things once the cachedConfig has been processed.
             // We need to call this method always when the first instance is configured
@@ -423,11 +438,16 @@ Ext.Configurator.prototype = {
                 value = instanceConfig[name];
                 cfg = configs[name];
                 if (!cfg) {
+                    //<debug>
+                    if (instance.$configStrict && typeof instance.self.prototype[name] === 'function') {
+                        // In strict mode you cannot override functions
+                        Ext.Error.raise("Cannot override method " + name + " on " + instance.$className + " instance.");
+                    }
+                    //</debug>
+
                     // Not all "configs" use the config system so in this case simply put
                     // the value on the instance:
-                    if (notStrict) {
-                        instance[name] = value;
-                    }
+                    instance[name] = value;
                 } else {
                     // However we still need to create the initial value that needs
                     // to be used. We also need to spin up the initGetter.
@@ -438,9 +458,8 @@ Ext.Configurator.prototype = {
                         instance[cfg.names.get] = cfg.initGetter || cfg.getInitGetter();
                     }
 
-                    merge = cfg.merge;
-                    if (merge) {
-                        value = merge.call(cfg, value, values[name], instance);
+                    if (cfg.merge) {
+                        value = cfg.merge(value, values[name], instance);
                     } else if (value && value.constructor === Object) {
                         valuesKey = values[name];
                         if (valuesKey && valuesKey.constructor === Object) {
@@ -532,19 +551,18 @@ Ext.Configurator.prototype = {
      * @return {Object} the merged config
      * @private
      */
-    merge: function(instance, baseConfig, config) {
+    merge: function (instance, baseConfig, config) {
         // Although this is a "private" method.  It is used by Sencha Architect and so
         // its api should remain stable.
         var configs = this.configs,
-            name, value, baseValue, cfg, merge;
+            name, value, baseValue, cfg;
 
         for (name in config) {
             value = config[name];
             cfg = configs[name];
             if (cfg) {
-                merge = cfg.merge;
-                if (merge) {
-                    value = merge.call(cfg, value, baseConfig[name], instance);
+                if (cfg.merge) {
+                    value = cfg.merge(value, baseConfig[name], instance);
                 } else if (value && value.constructor === Object) {
                     baseValue = baseConfig[name];
                     if (baseValue && baseValue.constructor === Object) {
@@ -563,7 +581,6 @@ Ext.Configurator.prototype = {
     // private
     reconfigure: function (instance, instanceConfig, options) {
         var currentConfig = instance.config,
-            initialConfig = instance.initialConfig,
             configList = [],
             strict = instance.$configStrict,
             configs = this.configs,
@@ -612,25 +629,63 @@ Ext.Configurator.prototype = {
                     instance[names.set](instanceConfig[name]);
                     delete instance[getter];
                 }
-            } else if (!strict) {
+            } else {
                 cfg = configPropMap[name] || Ext.Config.get(name);
                 names = cfg.names;
 
                 if (instance[names.set]) {
                     instance[names.set](instanceConfig[name]);
                 } else if (applyProps) {
+                    //<debug>
+                    if (instance.$configStrict && typeof instance.self.prototype[name] === 'function') {
+                        // In strict mode you cannot override functions
+                        Ext.Error.raise("Cannot override method " + name + " on " + instance.$className + " instance.");
+                    }
+                    //</debug>
                     // apply non-config props directly to the instance if specified in options
                     instance[name] = instanceConfig[name];
                 }
                 //<debug>
                 else if (name !== 'type') {
                     Ext.Error.raise('Config "' + name + '" has no setter on class ' +
-                                    instance.$className);
+                        instance.$className);
                 }
                 //</debug>
             }
         }
+    },
+
+    /**
+     * This method accepts an instance config object containing a `platformConfig`
+     * property and merges the appropriate rules from that sub-object with the root object
+     * to create the final config object that should be used. This is method called by
+     * `{@link #configure}` when it receives an `instanceConfig` containing a
+     * `platformConfig` property.
+     *
+     * @param {Object} instanceConfig The instance config parameter.
+     * @return {Object} The new instance config object with platformConfig results applied.
+     * @private
+     * @since 5.1.0
+     */
+    resolvePlatformConfig: function (instance, instanceConfig) {
+        var platformConfig = instanceConfig && instanceConfig.platformConfig,
+            ret = instanceConfig,
+            i, keys, n;
+
+        if (platformConfig) {
+            keys = Ext.getPlatformConfigKeys(platformConfig);
+            n = keys.length;
+
+            if (n) {
+                ret = Ext.merge({}, ret); // this deep copies sub-objects
+                for (i = 0, n = keys.length; i < n; ++i) {
+                    this.merge(instance, ret, platformConfig[keys[i]]);
+                }
+            }
+        }
+
+        return ret;
     }
-};
+}; // prototype
 
 }()); // closure on whole file

@@ -26,7 +26,7 @@ Ext.define('esapp.view.acquisition.product.InternetSourceAdminController', {
             success: function(response, opts){
                 //var result = Ext.JSON.decode(response.responseText);
                 Ext.data.StoreManager.lookup('DataAcquisitionsStore').reload();
-                console.info(Ext.data.StoreManager.lookup('DataAcquisitionsStore'));
+                //console.info(Ext.data.StoreManager.lookup('DataAcquisitionsStore'));
                 me.close();
             },
             failure: function(response, opts) {
@@ -84,7 +84,7 @@ Ext.define('esapp.view.acquisition.product.InternetSourceAdminController', {
 
         selection.drop();
         //this.getStore('internetsources').remove(selection);
-        console.info(this.getSession().getChanges());
+        //console.info(this.getSession().getChanges());
 
     },
 

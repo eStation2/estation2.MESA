@@ -15,10 +15,9 @@ Ext.define("esapp.view.acquisition.Ingestion",{
         'esapp.view.acquisition.IngestionController',
         'esapp.view.acquisition.logviewer.LogView',
 
-        'Ext.grid.plugin.CellEditing',
         'Ext.grid.column.Action',
-        'Ext.grid.column.Widget',
-        'Ext.grid.column.Check'
+        'Ext.grid.column.Widget'
+        //'Ext.grid.column.Check'
     ],
 
     //mixins: [],
@@ -34,6 +33,7 @@ Ext.define("esapp.view.acquisition.Ingestion",{
     bind:{
         store:'{productingestions}'
     },
+    //session: true,
 
     viewConfig: {
         stripeRows: false,
@@ -45,14 +45,27 @@ Ext.define("esapp.view.acquisition.Ingestion",{
         trackOver: false
     },
     cls: 'grid-color-azur',
-    plugins:[{
-        ptype:'cellediting'
-    }],
     hideHeaders: true,
     columnLines: false,
     rowLines:false,
-    //frame: false,
-    //border: false,
+    bufferedRenderer: true,
+
+    //listeners: {
+    //    beforerender:  function () {
+    //        var me = this,
+    //            record = me.getWidgetRecord();
+    //        Ext.suspendLayouts();
+    //        var daStore = me.getViewModel().get('productingestions');
+    //        if (daStore) {
+    //            daStore.setFilters({
+    //                property: 'productid'
+    //                , value: record.id
+    //                , anyMatch: true
+    //            });
+    //        }
+    //        Ext.resumeLayouts(true);
+    //    }
+    //},
 
     initComponent: function () {
         var me = this;
@@ -81,51 +94,37 @@ Ext.define("esapp.view.acquisition.Ingestion",{
             //dataIndex: 'completeness',
             //bind: '{ingestions.completeness}',
             width: 360,
-            //margin:0,
-            //bodyPadding:0,
+            variableRowHeight:true,
             widget: {
                 xtype: 'datasetchart',
-                height:30
+                height:50
             },
-            onWidgetAttach: function(widget, record) {
+            onWidgetAttach: function(column, widget, record) {
+                //widget.setId('dschart_' + record.get('productcode') + '_' + record.get('version').replace('.', '') + '_' + record.get('mapsetcode') + '_' + record.get('subproductcode'));
 
-                var widgetchart = widget.down('cartesian');
                 var completeness = record.getAssociatedData().completeness;
-
-                var storefields = ['dataset'];
-                var series_yField = [];
-                for (var index = 1; index <= completeness.intervals.length; ++index) {
-                    storefields.push('data'+index);
-                    series_yField.push('data'+index);
-                }
-
-                var datasetdata = [];
-                var dataObj = {dataset: ''};
+                var series = [];
+                var serieObj = {color: '', data: []};
                 var seriestitles = [];
                 var seriestitle = '';
-                var seriescolors = [];
-                var i = 1;
 
                 if (completeness.totfiles < 2 && completeness.missingfiles < 2) {
-                    dataObj["data1"] = '100'; // 100%
-                    datasetdata.push(dataObj);
+                    series = [{
+                            color: '#808080', // gray
+                            data: [100]
+                        }];
+                    widget.setSeries(series);
+                    widget.setTotfiles(0);
                     seriestitle = '<span style="color:#808080">Not any data</span>';
-                    seriestitles.push(seriestitle);
-                    seriescolors.push('#808080'); // gray
-
-                    // Update the 4 sprites (these are not reachable through getSprites() on the chart)
-                    widgetchart.surfaceMap.chart[0].getItems()[0].setText('Not any data');
-                    widgetchart.surfaceMap.chart[0].getItems()[1].setText('');
-                    widgetchart.surfaceMap.chart[0].getItems()[2].setText('');
-                    widgetchart.surfaceMap.chart[0].getItems()[3].setText('');
+                    widget.setTooltipintervals(seriestitle);
                 }
                 else {
                     completeness.intervals.forEach(function (interval) {
+                        var data = 0;
                         if (interval.intervalpercentage<1.5)
-                            dataObj["data" + i] = 2;
+                            data = 2;
                         else
-                            dataObj["data" + i] = interval.intervalpercentage;
-                        ++i;
+                            data = interval.intervalpercentage;
 
                         var color = '';
                         if (interval.intervaltype == 'present')
@@ -134,44 +133,23 @@ Ext.define("esapp.view.acquisition.Ingestion",{
                             color = '#FF0000'; // red
                         if (interval.intervaltype == 'permanent-missing')
                             color = '#808080'; // gray
-                        seriescolors.push(color);
 
-                        seriestitle = '<span style="color:'+color+'">From ' + interval.fromdate + ' to ' + interval.todate + ' - ' + interval.intervaltype + '</span>';
+                        serieObj = {color: color, data: [data]};
+
+                        series.push(serieObj);
+                        seriestitle = '<span style="color:'+color+'">From ' + interval.fromdate + ' to ' + interval.todate + ' - ' + interval.intervaltype + '</span></br>';
                         seriestitles.push(seriestitle);
                     });
-                    datasetdata.push(dataObj);
 
-                    // Update the 4 sprites (these are not reachable through getSprites() on the chart)
-                    widgetchart.surfaceMap.chart[0].getItems()[0].setText('Files: '+completeness.totfiles);
-                    var missingFilesText = '';
+
+                    widget.setSeries(series);
+                    widget.setFirstdate(completeness.firstdate);
+                    widget.setLastdate(completeness.lastdate);
+                    widget.setTotfiles(completeness.totfiles);
+                    widget.setTooltipintervals(seriestitles);
                     if(completeness.missingfiles>0)
-                       missingFilesText = 'Missing: ' + completeness.missingfiles;
-                    widgetchart.surfaceMap.chart[0].getItems()[1].setText(missingFilesText);
-                    widgetchart.surfaceMap.chart[0].getItems()[2].setText(completeness.firstdate);
-                    widgetchart.surfaceMap.chart[0].getItems()[3].setText(completeness.lastdate);
+                        widget.setMissingfiles(completeness.missingfiles);
                 }
-
-                var newstore = Ext.create('Ext.data.JsonStore', {
-                    fields: storefields,
-                    data: datasetdata
-                });
-
-                widgetchart.setStore(newstore);
-
-                var widgetchartaxis = widgetchart.getAxes();
-                widgetchartaxis[0].setFields(series_yField);
-
-                var widgetchartseries = widgetchart.getSeries();
-                widgetchartseries[0].setColors(seriescolors);
-                widgetchartseries[0].setYField(series_yField);
-
-                // update legendStore with new series, otherwise setTitles,
-                // which updates also the legend names will go in error.
-                widgetchart.refreshLegendStore();
-                widgetchartseries[0].setTitle(seriestitles);
-                widgetchart.redraw();
-
-//                var data = Ext.util.JSON.decode(completeness);
             }
 
         },{
@@ -179,13 +157,10 @@ Ext.define("esapp.view.acquisition.Ingestion",{
             // header: 'Active',
             hideable: false,
             hidden: false,
-            // disabled: true,
-            // stopSelection: false,
             width: 65,
             align: 'center',
             items: [{
                 // scope: me,
-                // handler: me.onToggleActivation
                 disabled: false,
                 getClass: function(v, meta, rec) {
                     if (rec.get('activated')) {

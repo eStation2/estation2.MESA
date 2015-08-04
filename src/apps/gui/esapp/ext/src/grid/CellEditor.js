@@ -5,15 +5,33 @@
 Ext.define('Ext.grid.CellEditor', {
     extend: 'Ext.Editor',
 
-    // Editor must appear at the top so that it does not contribute to scrollbars
-    y: 0,
+    alignment: 'l-l?',
+
+    hideEl : false,
+
+    cls: Ext.baseCSSPrefix + 'small-editor ' +
+        Ext.baseCSSPrefix + 'grid-editor ' +
+        Ext.baseCSSPrefix + 'grid-cell-editor',
+
+    treeNodeSelector: '.' + Ext.baseCSSPrefix + 'tree-node-text',
+
+    shim: false,
+
+    shadow: false,
 
     constructor: function(config) {
+        var field;
+
+        // Editor must appear at the top so that it does not contribute to scrollbars.
+        this.y = 0;
+
         config = Ext.apply({}, config);
-        
-        if (config.field) {
-            config.field.monitorTab = false;
+        field = config.field;
+
+        if (field) {
+            field.monitorTab = false;
         }
+
         this.callParent([config]);
     },
 
@@ -42,18 +60,18 @@ Ext.define('Ext.grid.CellEditor', {
             // Set the renderTo target to reflect new grid view ownership
             view = grid.getView();
             me.renderTo = view.getTargetEl().dom;
-            me.grid = me.ownerCt = grid;
+            me.grid = grid;
 
             // On view refresh, we need to copy our DOM into the detached body to prevent it from being garbage collected.
             view.on(viewListeners);
         }
     },
 
-    // @private
-    // @override
-    // Final position is decided upon by the Editor's realign() call which syncs position over the edited element.
-    adjustPosition: function() {
-        return {x:0,y:0};
+    afterFirstLayout: function(width, height) {
+        // After we've been laid out, we can get rid of the y property, we don't want
+        // to be positioned now
+        delete this.y;
+        this.callParent([width, height]);
     },
 
     beforeViewRefresh: function() {
@@ -63,9 +81,9 @@ Ext.define('Ext.grid.CellEditor', {
         if (dom) {
             if (me.editing && !(me.field.column && me.field.column.sorting)) {
 
-                // Clear the Panel's containsFocus flag prior to removing it from the DOM
+                // Clear the Panel's cellFocused flag prior to removing it from the DOM
                 // This will prevent the Panels onFocusLeave from processing the resulting blurring.
-                me.grid.containsFocus = false;
+                me.grid.view.cellFocused = false;
 
                 // Set the Editor.allowBlur setting so that it does not process the upcoming field blur event and terminate the edit
                 me.wasAllowBlur = me.allowBlur;
@@ -93,8 +111,8 @@ Ext.define('Ext.grid.CellEditor', {
                 me.renderTo.appendChild(dom);
                 
                 // The removal will have blurred, so avoid the processing in onFocusEnter by restoring the previous
-                // containsFocus setting
-                me.grid.containsFocus = true;
+                // cellFocused setting
+                me.grid.view.cellFocused = true;
 
                 me.field.focus();
             } else if (!sorting) {
@@ -107,6 +125,11 @@ Ext.define('Ext.grid.CellEditor', {
                 me.completeEdit();
             }
         }
+    },
+
+    startEdit: function(boundEl, value) {
+        this.context = this.editingPlugin.context;
+        this.callParent([boundEl, value]);
     },
 
     /**
@@ -151,7 +174,7 @@ Ext.define('Ext.grid.CellEditor', {
         this.restoreCell();
         this.callParent(arguments);
     },
-        
+
     restoreCell: function() {
         var me = this,
             innerCell = me.boundEl.first();
@@ -181,10 +204,6 @@ Ext.define('Ext.grid.CellEditor', {
                 scope: me
             });
         }
-
-        // listen for the "unstoppable" mousedown event so we can be sure to blur and hide
-        // the editor if the document is clicked, even if another handler stops the event
-        Ext.on('mousedown', me.onDocMouseDown, me);
     },
     
     /**
@@ -193,14 +212,6 @@ Ext.define('Ext.grid.CellEditor', {
      */
     onCheckBoxMouseDown: function() {
         this.completeEdit = Ext.emptyFn;
-    },
-   
-    onDocMouseDown: function(e) {
-        var field = this.field;
-
-        if (field && field.hasFocus && !field.owns(e.target)) {
-            field.blur();
-        }
     },
      
     /**
@@ -242,7 +253,7 @@ Ext.define('Ext.grid.CellEditor', {
         if (grid.columnLines) {
             // Subtract the column border width so that the editor displays inside the
             // borders. The column border could be either on the left or the right depending
-            // on whether the grid is RTL - using the sum of both borders works in both modes. 
+            // on whether the grid is RTL - using the sum of both borders works in both modes.
             width -= boundEl.getBorderWidth('rl');
         }
 
@@ -254,7 +265,9 @@ Ext.define('Ext.grid.CellEditor', {
         if (isEmpty) {
             innerCell.dom.innerHTML = 'X';
         }
+
         me.alignTo(innerCell, me.alignment, offsets);
+
         if (isEmpty) {
             innerCell.dom.firstChild.data = v;
         }
@@ -272,19 +285,15 @@ Ext.define('Ext.grid.CellEditor', {
         }
     },
 
-    onFieldBlur : function() {
-        this.callParent(arguments);
+    onFocusLeave : function(e) {
+        // We are going to hide because of this focus exit.
+        // Ensure that hide processing does not throw focus back to the previously focused element.
+        this.previousFocus = null;
+
+        this.callParent([e]);
+
         // Reset the flag that may have been set by CellEditing#startEdit to prevent
         // Ext.Editor#onFieldBlur from canceling editing.
         this.selectSameEditor = false;
-    },
-
-    alignment: "l-l",
-    hideEl : false,
-    cls: Ext.baseCSSPrefix + 'small-editor ' +
-        Ext.baseCSSPrefix + 'grid-editor ' + 
-        Ext.baseCSSPrefix + 'grid-cell-editor',
-    treeNodeSelector: '.' + Ext.baseCSSPrefix + 'tree-node-text',
-    shim: false,
-    shadow: false
+    }
 });

@@ -9,7 +9,7 @@ Ext.define('esapp.controller.Root', {
     //    'Ext.app.*',
     //    'Ext.window.Toast',
     //    'Ext.state.CookieProvider',
-    //    'Ext.window.MessageBox',
+    //    'Ext.Msg',
     //    'Ext.tip.QuickTipManager'
     //    //'esapp.Utils',
     //    //,'esapp.view.main.Main'
@@ -58,7 +58,7 @@ Ext.define('esapp.controller.Root', {
     //// create a reference in Ext.application so we can access it from multiple functions
     //splashscreen: {},
     init: function () {
-        console.info('Root controller Init()');
+        //console.info('Root controller Init()');
         //esapp.globals = [];
         //esapp.globals['selectedLanguage'] = 'eng';
         //Ext.data.StoreManager.lookup('LanguagesStore').load({

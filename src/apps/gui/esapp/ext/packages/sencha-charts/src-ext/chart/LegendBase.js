@@ -22,20 +22,21 @@ Ext.define('Ext.chart.LegendBase', {
     },
 
     setDocked: function (docked) {
-        var panel = this.ownerCt,
+        var me = this,
+            panel = me.ownerCt,
             layout;
 
-        this.docked = docked;
+        me.docked = docked;
 
         switch (docked) {
             case 'top':
             case 'bottom':
-                this.addCls('x-horizontal');
+                me.addCls(Ext.baseCSSPrefix + 'horizontal');
                 layout = 'hbox';
                 break;
             case 'left':
             case 'right':
-                this.removeCls('x-horizontal');
+                me.removeCls(Ext.baseCSSPrefix + 'horizontal');
                 layout = 'vbox';
                 break;
         }
@@ -47,6 +48,12 @@ Ext.define('Ext.chart.LegendBase', {
 
     setStore: function (store) {
         this.bindStore(store);
+    },
+
+    clearViewEl: function () {
+        this.callParent(arguments);
+        // The legend-container div is not removed automatically.
+        Ext.removeNode(this.getNodeContainer());
     },
 
     onItemClick: function (record, item, index, e) {

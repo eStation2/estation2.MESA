@@ -333,6 +333,7 @@ p {
     font-weight:bold;
     color:#0065A2;
     font-size:18px;
+    height: 20px;
 }
 
 .group-header-style {
@@ -352,12 +353,12 @@ p {
 }
 
 .myclass .x-grid-cell-inner div {
-    padding: 0px;
+    padding: 0;
     /*overflow:visible;  *//*visible|hidden|scroll|auto|initial|inherit;*/
 }
 
 .x-grid-with-row-lines .x-grid-item:last-child {
-    border-bottom-width: 0px;
+    border-bottom-width: 0;
 }
 
 /*.x-hide-display{display:none !important}*/

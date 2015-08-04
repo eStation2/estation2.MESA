@@ -6,7 +6,8 @@ Ext.define('esapp.store.DataSetsStore', {
 
     requires : [
         'esapp.model.DataSet',
-        'Ext.data.proxy.Rest'
+        'Ext.data.proxy.Rest',
+        'Ext.window.Toast'
     ],
 
     storeId : 'DataSetsStore'
@@ -16,7 +17,7 @@ Ext.define('esapp.store.DataSetsStore', {
     ,remoteSort: false
     ,remoteGroup: false
 
-    ,sorters: {property: 'order_index', direction: 'DESC'}
+    //,sorters: {property: 'order_index', direction: 'DESC'}
 
     ,proxy: {
         type: 'rest',
@@ -41,22 +42,22 @@ Ext.define('esapp.store.DataSetsStore', {
         },
         listeners: {
             exception: function(proxy, response, operation){
-                Ext.MessageBox.show({
+                Ext.Msg.show({
                     title: 'DATASETS STORE - REMOTE EXCEPTION',
                     msg: operation.getError(),
-                    icon: Ext.MessageBox.ERROR,
+                    icon: Ext.Msg.ERROR,
                     buttons: Ext.Msg.OK
                 });
             }
         }
     }
     ,grouper:{
-             // property: 'cat_descr_name',
-             groupFn : function (item) {
-                 return "<span style='display: none;'>" + item.get('order_index') + "</span>" + item.get('cat_descr_name')
-                 //return item.get('cat_descr_name')
-             },
-             sortProperty: 'order_index'
+        property: 'cat_descr_name',
+        groupFn : function (item) {
+            //return "<span style='display: none;'>" + item.get('order_index') + "</span>" + item.get('cat_descr_name')
+            return item.get('cat_descr_name')
+        },
+        sortProperty: 'order_index'
     }
     ,listeners: {
         write: function(store, operation){

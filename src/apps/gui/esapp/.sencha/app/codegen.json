@@ -58,7 +58,6 @@
         "controllerNamespace": "esapp.controller",
         "frameworkName": "ext",
         "frameworkPath": "ext",
-        "library": "all",
         "modelNamespace": "esapp.model",
         "name": "esapp",
         "packagesRelPath": "ext/packages",
@@ -136,7 +135,6 @@
         "controllerNamespace": "esapp.controller",
         "frameworkName": "ext",
         "frameworkPath": "ext",
-        "library": "all",
         "modelNamespace": "esapp.model",
         "name": "esapp",
         "packagesRelPath": "ext/packages",
@@ -162,7 +160,6 @@
         "controllerNamespace": "esapp.controller",
         "frameworkName": "ext",
         "frameworkPath": "ext",
-        "library": "all",
         "modelNamespace": "esapp.model",
         "name": "esapp",
         "packagesRelPath": "ext/packages",
@@ -188,7 +185,6 @@
         "controllerNamespace": "esapp.controller",
         "frameworkName": "ext",
         "frameworkPath": "ext",
-        "library": "all",
         "modelNamespace": "esapp.model",
         "name": "esapp",
         "packagesRelPath": "ext/packages",
@@ -214,7 +210,6 @@
         "controllerNamespace": "esapp.controller",
         "frameworkName": "ext",
         "frameworkPath": "ext",
-        "library": "all",
         "modelNamespace": "esapp.model",
         "name": "esapp",
         "packagesRelPath": "ext/packages",
@@ -240,7 +235,6 @@
         "controllerNamespace": "esapp.controller",
         "frameworkName": "ext",
         "frameworkPath": "ext",
-        "library": "all",
         "modelNamespace": "esapp.model",
         "name": "esapp",
         "packagesRelPath": "ext/packages",
@@ -266,7 +260,6 @@
         "controllerNamespace": "esapp.controller",
         "frameworkName": "ext",
         "frameworkPath": "ext",
-        "library": "all",
         "modelNamespace": "esapp.model",
         "name": "esapp",
         "packagesRelPath": "ext/packages",
@@ -292,7 +285,6 @@
         "controllerNamespace": "esapp.controller",
         "frameworkName": "ext",
         "frameworkPath": "ext",
-        "library": "all",
         "modelNamespace": "esapp.model",
         "name": "esapp",
         "packagesRelPath": "ext/packages",
@@ -344,7 +336,6 @@
         "controllerNamespace": "esapp.controller",
         "frameworkName": "ext",
         "frameworkPath": "ext",
-        "library": "all",
         "modelNamespace": "esapp.model",
         "name": "esapp",
         "packagesRelPath": "ext/packages",
@@ -390,6 +381,18 @@
         "modelFileName": "Header",
         "modelNamespace": "esapp.model",
         "name": "Header"
+      }
+    },
+    "app/model/InternetSource.js": {
+      "source": "{modelFileName}.js.tpl.merge",
+      "version": "31d5356142a167c72422f7902f19df3c583f3249",
+      "parameters": {
+        "appName": "esapp",
+        "baseClass": "Ext.data.Model",
+        "fields": "name:string:null",
+        "modelFileName": "InternetSource",
+        "modelNamespace": "esapp.model",
+        "name": "InternetSource"
       }
     }
   }

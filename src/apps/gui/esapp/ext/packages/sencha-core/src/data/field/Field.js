@@ -29,10 +29,10 @@
  *     });
  *
  * # Field Types
- * 
+ *
  * Fields come in various types. When declaring a field, the `type` property is used to
  * specify the type of `Field` derived class used to manage values.
- * 
+ *
  * The predefined set of types are:
  *
  *  - {@link Ext.data.field.Field auto} (Default, implies no conversion)
@@ -41,15 +41,15 @@
  *  - {@link Ext.data.field.Number number}
  *  - {@link Ext.data.field.Boolean boolean}
  *  - {@link Ext.data.field.Date date}
- * 
+ *
  * # Conversion
- * 
+ *
  * When reading fields it is often necessary to convert the values received before using
  * them or storing them in records. To handle these cases there is the
  * `{@link #method-convert convert}` method. This method is passed the received value (as
  * well as the current record instance, but see below) and it returns the value to carry
  * forward.
- * 
+ *
  * For `auto` fields there is no `{@link #method-convert convert}` method. This is for
  * efficiency. For other field types, there are often `convert` methods. You can provide
  * a `{@link #cfg-convert convert}` config when the field is defined like this:
@@ -64,7 +64,7 @@
  *
  * While this can be convenient, see below for details on defining Custom Types as that is
  * often a better practice and avoids repeating these functions.
- * 
+ *
  * Note that when a `defaultValue` is specified, it will also be passed through to
  * `convert` (either to the `{@link #method-convert convert}` method or to the
  * `{@link #cfg-convert convert} config)`.
@@ -130,19 +130,40 @@
  *
  * ### Updating
  *
- * Historically `{@link #method-convert convert}` methods were executed for each field by
- * the `{@link Ext.data.Model#set set}` method and determine the value actually stored.
- *
+ * Fields modified with the {@link Ext.data.Model#set set} method will have their stored 
+ * value set using the convert / calculate method when present.
+ * 
  * For example:
  *
- *     ed.set('age', 25.4); // stores 25 because "age" is an "int" not a "float"
- *     console.log(ed.get('age')); // logs 25 (no decimals allowed for "int" fields)
+ *     Ext.define('MyApp.model.Employee', {
+ *         extend: 'Ext.data.Model',
+ *         fields: [{
+ *             name: 'salary',
+ *             convert: function (val) {
+ *                 var startingBonus = val * .1;
+ *                 return val + startingBonus;
+ *             }
+ *         }],
+ *         convertOnSet: false
+ *     });
+ *     
+ *     var tina = Ext.create('MyApp.model.Employee', {
+ *         salary: 50000
+ *     });
+ *     
+ *     console.log(tina.get('salary')); // logs 55000
+ *     
+ *     tina.set('salary', 60000);
+ *     console.log(tina.get('salary')); // logs 60000
+ * 
+ * This default behavior can be disabled by setting the Model's 
+ * `{@link Ext.data.Model#cfg-convertOnSet}` config to `false`.
+ * 
+ * **Note:** convertOnSet `false` only prevents the convert / calculate call when the 
+ * set `fieldName` param matches the field's `{@link #name}`.  See 
+ * {@link Ext.data.Model#convertOnSet convertOnSet} for additional details.
  *
- * This behavior can be enabled using `{@link Ext.data.Model#cfg-convertOnSet}` but is off
- * by default. By default the `{@link #method-convert convert}` method is only called when
- * processing raw data or when calculating fields.
- *
- * #### Dependencies
+ * ### Dependencies
  *
  * When a field's `{@link #method-convert convert}` method processes values from the record
  * (vs. just the field's value), it is best to also provide a `depends` config as shown
@@ -156,12 +177,12 @@
  * these fields with respect to each other is unspecified and should not be relied upon.
  *
  * # Serialization
- * 
+ *
  * To handle the inverse scenario of `convert` there is the `serialize` method. This
  * method is called to produce the value to send to a server based on the internal value
  * as would be returned from `convert`. In most cases, these methods should "round trip"
  * a value:
- * 
+ *
  *      assertEqual(value, field.serialize(field.convert(value)));
  *
  * By default, only `{@link Ext.data.field.Date date}` fields have a `serialize` method.
@@ -172,17 +193,17 @@
  * Developers may create their own application-specific data types by deriving from this
  * class. This is typically much better than applying multiple configuration values on
  * field instances as these often become repetitive.
- * 
+ *
  * To illustrate, we define a "time" field type that stores a time-of-day represented as a
  * number of minutes since Midnight.
- * 
+ *
  *      Ext.define('App.field.Time', {
  *          extend: 'Ext.data.field.Field',
- *          
+ *
  *          alias: 'data.field.time',
- *          
+ *
  *          timeFormat: 'g:i',
- *          
+ *
  *          convert: function (value) {
  *              if (value && Ext.isString(value)) {
  *                  var date = Ext.Date.parse(value, this.timeFormat);
@@ -237,7 +258,7 @@ Ext.define('Ext.data.field.Field', {
     alias: 'data.field.auto', // also configures Factoryable
 
     aliasPrefix: 'data.field.',
-    
+
     type: 'auto',
 
     factoryConfig: {
@@ -266,8 +287,8 @@ Ext.define('Ext.data.field.Field', {
     /**
      * @cfg {Boolean} allowNull
      *
-     * Use when converting received data into a {@link Ext.data.field.Integer `int`}, 
-     * {@link Ext.data.field.Number `float`}, {@link Ext.data.field.Boolean `bool`} 
+     * Use when converting received data into a {@link Ext.data.field.Integer `int`},
+     * {@link Ext.data.field.Number `float`}, {@link Ext.data.field.Boolean `bool`}
      * or {@link Ext.data.field.String `string`} type. If the value cannot be
      * parsed, `null` will be used if allowNull is true, otherwise a default value for that type will be used:
      *
@@ -275,13 +296,13 @@ Ext.define('Ext.data.field.Field', {
      * - for `string` - `""`.
      * - for `bool` - `false`.
      *
-     * Note that when parsing of {@link Ext.data.field.Date `date`} type fails, the value will 
+     * Note that when parsing of {@link Ext.data.field.Date `date`} type fails, the value will
      * be `null` regardless of this setting.
      */
     allowNull: false,
 
     /**
-     * @cfg {Function} [calculate]
+     * @cfg {Function} calculate
      * This config defines a simple field calculation function. A calculate method only
      * has access to the record data and should return the value of the calculated field.
      * When provided in this way, the `depends` config is automatically determined by
@@ -314,15 +335,26 @@ Ext.define('Ext.data.field.Field', {
      * values must match the following regular expression (case insensitive):
      *
      *      data.([a-z_][a-z0-9_]*)
+     *      // where 'data' is the param passed to the calculate method
      *
      * The only advantage of a `calculate` method over a `convert` method is automatic
      * determination of `depends`.
+     * 
+     * **Note:** The use of calculate and {@link #convert} are exclusive.  The calculate 
+     * method will override the convert method if both are configured.
+     * 
+     * @param {Object} data An object with all values for each field in the parent 
+     * model.  See {@link Ext.data.Model#getData getData}.
+     * @return {Mixed} value The value of the calculated field
      */
 
     /**
-     * @cfg {Function} [convert]
+     * @cfg {Function} convert
      * If specified this config overrides the `{@link #method-convert convert}` method. See
      * also `{@link #cfg-calculate calculate}` for simple field calculations.
+     * 
+     * **Note:** The use of {@link #calculate} and convert are exclusive.  The calculate 
+     * method will override the convert method if both are configured.
      */
 
     /**
@@ -347,7 +379,7 @@ Ext.define('Ext.data.field.Field', {
      * The default value used when the creating an instance from a raw data object,
      * and the property referenced by the `{@link Ext.data.field.Field#mapping mapping}`
      * does not exist in that data object.
-     * 
+     *
      * The value `undefined` prevents defaulting in a value.
      */
     defaultValue: undefined,
@@ -355,41 +387,41 @@ Ext.define('Ext.data.field.Field', {
     /**
      * @property {Ext.Class} definedBy
      * The class (derived from {@link Ext.data.Model}) that defined this field.
-     * 
+     *
      *      Ext.define('MyApp.models.Foo', {
      *          extend: 'Ext.data.Model',
-     *          
+     *
      *          fields: [
      *              { name: 'bar' }
      *          ],
      *          ...
      *      });
-     *      
+     *
      *      var barField = MyApp.models.Foo.getField('bar');
      *
      *      alert(barField.definedBy === MyApp.models.Foo); // alerts 'true'
      *
      * When a field is inherited, this value will reference the class that originally
      * defined the field.
-     * 
+     *
      *      Ext.define('MyApp.models.Base', {
      *          extend: 'Ext.data.Model',
-     *          
+     *
      *          fields: [
      *              { name: 'foo' }
      *          ],
      *          ...
      *      });
-     * 
+     *
      *      Ext.define('MyApp.models.Derived', {
      *          extend: 'MyApp.models.Base',
-     *          
+     *
      *          fields: [
      *              { name: 'bar' }
      *          ],
      *          ...
      *      });
-     *      
+     *
      *      var fooField = MyApp.models.Derived.getField('foo');
      *
      *      alert(fooField.definedBy === MyApp.models.Base); // alerts 'true'
@@ -414,18 +446,18 @@ Ext.define('Ext.data.field.Field', {
      * For example, to display a person's full name, using two separate `firstName` and
      * `lastName` fields, configure the name field like this:
      *
-     *    {
-     *        name: 'name',
-     *
-     *        // Will be called whenever forename or surname fields are set
-     *        convert: function (v, rec) {
-     *            return rec.get('firstName') + ' ' + rec.get('lastName');
-     *        },
-     *
-     *        depends: [ 'firstName', 'lastName' ],
-     *
-     *        // It should not be returned to the server - it's not a database field
-     *        persist: false
+     *     {
+     *         name: 'name',
+     *     
+     *         // Will be called whenever forename or surname fields are set
+     *         convert: function (v, rec) {
+     *             return rec.get('firstName') + ' ' + rec.get('lastName');
+     *         },
+     *     
+     *         depends: [ 'firstName', 'lastName' ],
+     *     
+     *         // It should not be returned to the server - it's not a database field
+     *         persist: false
      *     }
      *
      * Note that if you do not want the calculated field to be part of the field set sent
@@ -459,7 +491,7 @@ Ext.define('Ext.data.field.Field', {
      *   The mapping is a string containing the javascript expression to reference the data from an element of the data
      *   item's {@link Ext.data.reader.Json#cfg-rootProperty rootProperty} Array. Defaults to the field name. If a function is passed,
      *   a single argument is received which contains the raw json object:
-     *   
+     *
      *       // Server returns [{"name": "Foo", "age": 1}, {"name": "Bar", "age": 2}]
      *       mapping: function(data) {
      *           return data.name;
@@ -470,7 +502,7 @@ Ext.define('Ext.data.field.Field', {
      *   The mapping is an {@link Ext.DomQuery} path to the data item relative to the DOM element that represents the
      *   {@link Ext.data.reader.Xml#record record}. Defaults to the field name. If a function is passed, a single argument
      *   is received which contains the record node:
-     *   
+     *
      *       // Server returns <Root><Person><Name>Foo</Name><Age>1</Age></Person><Person><Name>Bar</Name><Age>2</Age></Person></Root>
      *       mapping: function(data) {
      *           return data.firstChild.textContent;
@@ -480,7 +512,7 @@ Ext.define('Ext.data.field.Field', {
      *
      *   The mapping is a number indicating the Array index of the field's value. Defaults to the field specification's
      *   Array position. If a function is passed, a single argument is received which contains the child array.
-     *   
+     *
      *       // Server returns [["Foo", 1], ["Bar", 2]]
      *       mapping: function(data) {
      *           return data[0];
@@ -503,10 +535,10 @@ Ext.define('Ext.data.field.Field', {
      * field definition may consist of just a String for the field name.
      */
     name: null,
-    
+
     /**
      * @property {Number} ordinal
-     * 
+     *
      * The position of this field in the {@link Ext.data.Model} in which it was defined.
      */
     ordinal: undefined,
@@ -518,7 +550,7 @@ Ext.define('Ext.data.field.Field', {
      * record. This will also exclude the field from being written using a
      * {@link Ext.data.writer.Writer}. This option is useful when fields are used to keep
      * state on the client but do not need to be persisted to the server.
-     * 
+     *
      * Defaults to `false` for `calculated` fields and `true` otherwise.
      */
     persist: null,
@@ -529,27 +561,27 @@ Ext.define('Ext.data.field.Field', {
      * In most databases, this relationship is represented by a "foreign key". That is, a
      * value for such a field matches the value of the {@link Ext.data.Model#idProperty id}
      * for an entity of this type.
-     * 
+     *
      *      Ext.define('MyApp.models.Organization', {
      *          extend: 'Ext.data.Model',
      *          ...
      *      });
-     * 
+     *
      *      Ext.define('MyApp.models.User', {
      *          extend: 'Ext.data.Model',
-     *          
+     *
      *          fields: [
      *              { name: 'organizationId', reference: 'Organization' }
      *          ],
      *          ...
      *      });
-     * 
+     *
      * If a `reference` is not nullable, set the {@link Ext.data.field.Field#allowBlank} property
      * to false.
-     * 
+     *
      *      Ext.define('MyApp.models.User', {
      *          extend: 'Ext.data.Model',
-     *          
+     *
      *          fields: [
      *              { name: 'organizationId', reference: 'Organization', allowBlank: false }
      *          ],
@@ -559,10 +591,10 @@ Ext.define('Ext.data.field.Field', {
      * If the name of the generated {@link Ext.data.schema.Association association} or other aspects
      * need to be specified, the `reference` can be an object. The following usage shows
      * what would be generated by default given the above examples using the string form.
-     * 
+     *
      *      Ext.define('MyApp.models.User', {
      *          extend: 'Ext.data.Model',
-     *          
+     *
      *          fields: [{
      *              name: 'organizationId',
      *              reference: {
@@ -574,14 +606,14 @@ Ext.define('Ext.data.field.Field', {
      *          }],
      *          ...
      *      });
-     * 
+     *
      * Finally, a `reference` can also describe ownership between the entities. By default,
      * no ownership relationship is assumed. If, however, the User entities are owned by
      * their Organization, we could say this:
-     * 
+     *
      *      Ext.define('MyApp.models.User', {
      *          extend: 'Ext.data.Model',
-     *          
+     *
      *          fields: [{
      *              name: 'organizationId',
      *              reference: {
@@ -596,16 +628,16 @@ Ext.define('Ext.data.field.Field', {
      * `reference`. If the referenced entity has an ownership relationship this field
      * should be omitted and `reference.parent` or `reference.child` should be specified
      * instead.
-     * 
+     *
      * @cfg {String} [reference.association]
-     * The name of the association. By default, the name of the assocation is the
+     * The name of the association. By default, the name of the association is the
      * capitalized `inverse` plus "By" plus the capitalized `role`.
-     * 
+     *
      * @cfg {String} [reference.child]
      * Set this property instead of `reference.type` to indicate that the referenced entity
      * is an owned child of this entity. That is, the `reference` entity should be deleted
      * when this entity is deleted.
-     * 
+     *
      * @cfg {String} [reference.parent]
      * Set this property instead of `reference.type` to indicate that the referenced entity
      * is the owning parent of this entity. That is, this entity should be deleted when the
@@ -614,33 +646,28 @@ Ext.define('Ext.data.field.Field', {
      * @cfg {String} [reference.role]
      * The name of the role played by the referenced entity. By default, this is the field
      * name (minus its "Id" suffix if present).
-     * 
-     * @cfg {String} [reference.inverse]
+     *
+     * @cfg {String/Object} [reference.inverse]
      * The name of the inverse role (of this entity with respect to the `reference`
      * entity). By default, this is the {@link Ext.util.Inflector#pluralize pluralized}
      * name of this entity, unless this `reference` is `unique`, in which case the default
      * name is the {@link Ext.util.Inflector#singularize singularized} name of this entity.
+     *
+     * This config may also be an object containing a role, getter, or setter.
      */
     reference: null,
 
     /**
-     * @cfg {Function} [serialize]
-     * See the {@link #method-serialize} method.
+     * @cfg {Function} serialize
+     * @inheritdoc #method-serialize
      */
 
-    /**
-     * @cfg {String} sortDir
-     *
-     * Initial direction to sort (`"ASC"` or `"DESC"`). Defaults to `"ASC"`.
-     */
-    sortDir: "ASC",
-    
     /**
      * @cfg {Function/String} sortType
      *
      * A function which converts a Field's value to a comparable value in order to ensure
      * correct sort ordering.
-     * 
+     *
      * Predefined functions are provided in {@link Ext.data.SortTypes}. A custom sort example:
      *
      *     // current sort     after sort we want
@@ -702,13 +729,13 @@ Ext.define('Ext.data.field.Field', {
      * record as opposed to just the data value. This property is determined from the
      * `length` of the `{@link #method-convert convert}` function which means this is
      * *not* calculated:
-     * 
+     *
      *      convert: function (value) {
      *          return ...
      *      }
      *
      * While this *is* calculated:
-     * 
+     *
      *      convert: function (value, record) {
      *          return ...
      *      }
@@ -822,20 +849,14 @@ Ext.define('Ext.data.field.Field', {
 
         defaultValue = me.defaultValue;
         if (me.convert) {
-            if (defaultValue !== undefined) {
-                // If this field has a convert and a defaultValue, run the defaultValue
-                // through convert:
-                me.defaultValue = defaultValue = me.convert(defaultValue);
-            }
-
             me.calculated = calculated = me.convert.length > 1;
             me.evil = calculated && !depends;
         }
 
         if (me.persist === null) {
-            me.persist = !calculated;
+            me.persist = !calculate;
         }
-        
+
         sortType = me.sortType;
         if (!me.sortType) {
             me.sortType = Ext.data.SortTypes.none;
@@ -846,7 +867,7 @@ Ext.define('Ext.data.field.Field', {
         if (depends && typeof depends === 'string') {
             me.depends = [depends];
         }
-        
+
         me.cloneDefaultValue = defaultValue !== undefined &&
                                (Ext.isDate(defaultValue) || Ext.isArray(defaultValue) ||
                                 Ext.isObject(defaultValue));
@@ -885,6 +906,14 @@ Ext.define('Ext.data.field.Field', {
         }
     },
 
+    /**
+     * Compares two values to retrieve their relative position in sort order, taking into account
+     * any {@link #sortType}. Also see {@link #compare}.
+     * @param {Object} value1 The first value.
+     * @param {Object} value2 The second value.
+     * @return {Number} `-1` if `value1` is less than `value2`. `1` if `value1` is greater than `value2`.
+     * `0` otherwise.
+     */
     collate: function (value1, value2) {
         var me = this,
             lhs = value1,
@@ -895,22 +924,38 @@ Ext.define('Ext.data.field.Field', {
             rhs = me.sortType(rhs);
         }
 
-        return (lhs < rhs) ? -1 : ((lhs > rhs) ? 1 : 0);
-    },
-
-    compare: function (lhs, rhs) {
         return (lhs === rhs) ? 0 : ((lhs < rhs) ? -1 : 1);
     },
 
-    isEqual: function (lhs, rhs) {
-        return !this.compare(lhs, rhs);
+    /**
+     * Compares two values to retrieve their relative position in sort order. Also see
+     * {@link #collate}.
+     * @param {Object} value1 The first value.
+     * @param {Object} value2 The second value.
+     * @return {Number} `-1` if `value1` is less than `value2`. `1` if `value1` is greater than `value2`.
+     * `0` otherwise.
+     */
+    compare: function (value1, value2) {
+        return (value1 === value2) ? 0 : ((value1 < value2) ? -1 : 1);
+    },
+
+    /**
+     * Tests whether two values are equal based on this field type.
+     * This uses the {@link #compare} method to determine equality, so
+     * this method should generally not be overridden.
+     * @param {Object} value1 The first value.
+     * @param {Object} value2 The second value.
+     * @return {Boolean} `true` if the values are equal.
+     */
+    isEqual: function (value1, value2) {
+        return this.compare(value1, value2) === 0;
     },
 
     /**
      * A function which converts the value provided by the Reader into the value that will
      * be stored in the record. This method can be overridden by a derived class or set as
      * a `{@link #cfg-convert convert}` config.
-     * 
+     *
      * If configured as `null`, then no conversion will be applied to the raw data property
      * when this Field is read. This will increase performance. but you must ensure that
      * the data is of the correct type and does not *need* converting.
@@ -986,10 +1031,10 @@ Ext.define('Ext.data.field.Field', {
      * @return {String} The string that represents the Field's value.
      */
     serialize: null,
-    
+
     /**
      * Validates the passed value for this field.
-     * 
+     *
      * @param {Object} value The value to validate.
      *
      * @param {String} [separator] This string is passed if the caller wants all validation
@@ -1003,7 +1048,7 @@ Ext.define('Ext.data.field.Field', {
      * the value is not valid, to indicate an error message. Any other non `true` value
      * indicates the value is not valid. This method is not implemented by default,
      * subclasses may override it to provide an implementation.
-     * 
+     *
      * @protected
      * @template
      * @since 5.0.0
@@ -1011,7 +1056,7 @@ Ext.define('Ext.data.field.Field', {
     validate: function(value, separator, errors) {
         var me = this,
             ret = '',
-            result, validator, validators, length;
+            result, validator, validators, length, i;
 
         if (!me._validators) {
             me.compileValidators();
@@ -1054,7 +1099,7 @@ Ext.define('Ext.data.field.Field', {
     getName: function() {
         return this.name;
     },
-    
+
     /**
      * Gets allowBlank for this field. See {@link #allowBlank}.
      * @return {Boolean} allowBlank
@@ -1062,7 +1107,7 @@ Ext.define('Ext.data.field.Field', {
     getAllowBlank: function() {
         return this.allowBlank;
     },
-    
+
     /**
      * Gets allowNull for this field. See {@link #allowNull}.
      * @return {Boolean} allowNull
@@ -1070,7 +1115,7 @@ Ext.define('Ext.data.field.Field', {
     getAllowNull: function() {
         return this.allowNull;
     },
-    
+
     /**
      * Gets converter for this field. See {@link #method-convert}.
      * @return {Function} convert
@@ -1086,15 +1131,15 @@ Ext.define('Ext.data.field.Field', {
     getDefaultValue: function() {
         return this.defaultValue;
     },
-    
+
     /**
      * Gets the depends for this field. See {@link #depends}.
      * @return {String[]} depends
      */
     getDepends: function() {
-        return this.depends;    
+        return this.depends;
     },
-    
+
     /**
      * Get the mapping for this field. See {@link #mapping}.
      * @return {Object} mapping
@@ -1102,7 +1147,7 @@ Ext.define('Ext.data.field.Field', {
     getMapping: function() {
         return this.mapping;
     },
-    
+
     /**
      * Checks if this field has a mapping applied.
      * @return {Boolean} `true` if this field has a mapping.
@@ -1111,7 +1156,7 @@ Ext.define('Ext.data.field.Field', {
         var map = this.mapping;
         return !!(map || map === 0);
     },
-    
+
     /**
      * Gets the persist for this field. See {@link #persist}.
      * @return {Boolean} persist
@@ -1119,28 +1164,35 @@ Ext.define('Ext.data.field.Field', {
     getPersist: function() {
         return this.persist;
     },
-    
-    /**
-     * Gets the sortDir for this field. See {@link #sortDir}.
-     * @return {String} sortDir
-     */
-    getSortDir: function() {
-        return this.sortDir;    
-    },
-    
+
     /**
      * Gets the sortType for this field. See {@link #sortType}.
      * @return {Function} sortType
      */
     getSortType: function() {
-        return this.sortType;    
+        return this.sortType;
     },
-    
+
     /**
      * Gets a string representation of the type of this field.
      * @return {String} type
      */
     getType: function() {
         return 'auto';
+    },
+    deprecated: {
+        5.1: {
+            methods: {
+                /**
+                 * Gets the sortDir for this field.
+                 * @return {String} sortDir
+                 * @deprecated 5.1 Setting sortDir and calling getSortDir were never applied by the
+                 * the Sorter.  This functionality does not natively exist on field instances.
+                 */
+                getSortDir: function () {
+                    return this.sortDir;
+                }
+            }
+        }
     }
 });

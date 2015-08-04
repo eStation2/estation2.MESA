@@ -11,22 +11,6 @@ Ext.define('esapp.view.main.MainController', {
     alias: 'controller.app-main',
 
     requires: [
-        'Ext.MessageBox'
-    ],
 
-
-    handleAction: function(action){
-        Ext.example.msg('<b>Action</b>', 'You clicked "' + action + '"');
-    },
-
-
-    onClickButton: function () {
-        Ext.Msg.confirm('Confirm', 'Are you sure?', 'onConfirm', this);
-    },
-
-    onConfirm: function (choice) {
-        if (choice === 'yes') {
-            //
-        }
-    }
+    ]
 });

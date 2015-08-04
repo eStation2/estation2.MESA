@@ -344,7 +344,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                             }
                         },
                         title: {
-                            text: 'Title'
+                            text: title
                         },
                         subtitle: {
                             text: 'Sub title'

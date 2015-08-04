@@ -1,6 +1,4 @@
 /**
- * @docauthor Jason Johnston <jason@sencha.com>
- *
  * Base class for form fields that provides default event handling, rendering, and other common functionality
  * needed by all form field types. Utilizes the {@link Ext.form.field.Field} mixin for value handling and validation,
  * and the {@link Ext.form.Labelable} mixin to provide label and error message display.
@@ -119,8 +117,12 @@ Ext.define('Ext.form.field.Base', {
 
     /**
      * @cfg {Number} tabIndex
-     * The tabIndex for this field. Note this only applies to fields that are rendered, not those which are built via
-     * applyTo
+     * 
+     * Sets a DOM tabIndex for this field. tabIndex may be set to `-1` in order to remove
+     * the field from the tab rotation.
+     * 
+     * **Note:** tabIndex only applies to fields that are rendered.  It does not effect 
+     * fields built via applyTo
      */
 
     //<locale>
@@ -388,10 +390,24 @@ Ext.define('Ext.form.field.Base', {
 
     // private
     onRender: function() {
+        // This noOptimize can be removed after SDKTOOLS-946 is fixed
+        // @noOptimize.callParent
         this.callParent(arguments);
         this.mixins.labelable.self.initTip();
         this.renderActiveError();
     },
+
+    onFocusLeave: function(e) {
+        this.callParent([e]);
+        this.completeEdit();
+    },
+
+    /**
+     * @protected
+     * Called when focus leaves this input field.
+     * Used to postprocess raw values and perform conversion and validation.
+     */
+    completeEdit: Ext.emptyFn,
 
     isFileUpload: function() {
         return this.inputType === 'file';
@@ -454,14 +470,16 @@ Ext.define('Ext.form.field.Base', {
 
         value = Ext.valueFrom(value, '');
 
-        if (rawValue === undefined || rawValue !== value) {
+        // We always need to go ahead with the set if valueContainsPlaceholder
+        // TODO: Remobve this when IE8 retires and we can use HTML5 placeholder everywhere.
+        if (rawValue === undefined || rawValue !== value || me.valueContainsPlaceholder) {
             me.rawValue = value;
 
             // Some Field subclasses may not render an inputEl
             if (me.inputEl) {
-                me.bindPropertyChange(false);
+                me.bindChangeEvents(false);
                 me.inputEl.dom.value = value;
-                me.bindPropertyChange(true);
+                me.bindChangeEvents(true);
             }
 
             if (me.rendered && me.reference) {
@@ -554,7 +572,7 @@ Ext.define('Ext.form.field.Base', {
 
     onBoxReady: function() {
         var me = this;
-        me.callParent();
+        me.callParent(arguments);
         
         if (me.setReadOnlyOnBoxReady) {
             me.setReadOnly(me.readOnly);
@@ -573,27 +591,39 @@ Ext.define('Ext.form.field.Base', {
             if (me.hasActiveError()) {
                 // clear invalid state since the field is now disabled
                 me.clearInvalid();
-                me.needsValidateOnEnable = true;
+                me.hadErrorOnDisable = true;
             }
+        }
+
+        // Disabled fields always validate to true, so if
+        // wasValid is false, the state will have changed, but
+        // we only want to do so if we have a previous wasValid value
+        if (me.wasValid === false) {
+            me.checkValidityChange(true);
         }
     },
 
     //private
     onEnable: function() {
         var me = this,
-            inputEl = me.inputEl;
+            inputEl = me.inputEl,
+            mark = me.preventMark,
+            valid;
             
         me.callParent();
         if (inputEl) {
             inputEl.dom.disabled = false;
-            if (me.needsValidateOnEnable) {
-                delete me.needsValidateOnEnable;
-                // will trigger errors to be shown
-                me.forceValidation = true;
-                me.isValid();
-                delete me.forceValidation;
-            }
         }
+
+        if (me.wasValid !== undefined) {
+            me.forceValidation = true;
+            me.preventMark = !me.hadErrorOnDisable;
+            valid = me.isValid();
+            me.forceValidation = false;
+            me.preventMark = mark;
+            me.checkValidityChange(valid);
+        }
+        delete me.hadErrorOnDisable;
     },
 
     /**
@@ -602,7 +632,9 @@ Ext.define('Ext.form.field.Base', {
      */
     setReadOnly: function(readOnly) {
         var me = this,
-            inputEl = me.inputEl;
+            inputEl = me.inputEl,
+            old = me.readOnly;
+
         readOnly = !!readOnly;
         me[readOnly ? 'addCls' : 'removeCls'](me.readOnlyCls);
         me.readOnly = readOnly;
@@ -611,7 +643,9 @@ Ext.define('Ext.form.field.Base', {
         } else if (me.rendering) {
             me.setReadOnlyOnBoxReady = true;
         }
-        me.fireEvent('writeablechange', me, readOnly);
+        if (readOnly !== old) {
+            me.fireEvent('writeablechange', me, readOnly);
+        }
     },
 
     // private
@@ -625,48 +659,71 @@ Ext.define('Ext.form.field.Base', {
     initEvents : function(){
         var me = this,
             inputEl = me.inputEl,
-            onChangeTask,
-            onChangeEvent,
+            onFieldMutation = me.onFieldMutation,
             events = me.checkChangeEvents,
-            ignoreChangeRe = me.ignoreChangeRe,
-            eLen = events.length,
-            e, event;
+            len = events.length,
+            i, event;
 
         if (inputEl) {
             me.mon(inputEl, Ext.supports.SpecialKeyDownRepeat ? 'keydown' : 'keypress', me.fireKey,  me);
 
-            // listen for immediate value changes
-            onChangeTask = new Ext.util.DelayedTask(me.checkChange, me);
-            me.onChangeEvent = onChangeEvent = function(e) {
-                // When using propertychange, we want to skip out on various values, since they won't cause
-                // the underlying value to change.
-                if (!(e.type == 'propertychange' && ignoreChangeRe.test(e.browserEvent.propertyName))) {
-                    onChangeTask.delay(me.checkChangeBuffer);
-                }
-            };
-
-            for (e = 0; e < eLen; e++) {
-                event = events[e];
-
+            for (i = 0; i < len; ++i) {
+                event = events[i];
                 if (event === 'propertychange') {
                     me.usesPropertychange = true;
                 }
-
-                me.mon(inputEl, event, onChangeEvent);
+                if (event === 'textInput') {
+                    me.usesTextInput = true;
+                }
+                me.mon(inputEl, event, onFieldMutation, me);
             }
         }
         me.callParent();
     },
 
-    /**
+    /*
      * @private
+     * Called when some event (See the checkChangeEvents property) mutates the input field.
+     * We react to changes.
+     *
+     * Subclasses may provide an inplementation which may perform other tasks (eg ComboBox value matching)
+     * before calling the checkChange method.
      */
-    bindPropertyChange: function(active) {
+    onFieldMutation: function(e) {
+        // When using propertychange, we want to skip out on various values, since they won't cause
+        // the underlying value to change.
         var me = this,
-            usesPropertychange = me.usesPropertychange;
-            
-        if (usesPropertychange) {
-            me[active ? 'mon' : 'mun'](me.inputEl, 'propertychange', me.onChangeEvent);
+            task = me.checkChangeTask;
+
+        if (!me.readOnly && !(e.type === 'propertychange' && me.ignoreChangeRe.test(e.browserEvent.propertyName))) {
+            if (!task) {
+                me.checkChangeTask = task = new Ext.util.DelayedTask(me.doCheckChangeTask, me);
+            }
+            if (!me.bindNotifyListener) {
+                // We continually create/destroy the listener as needed (see doCheckChangeTask) because we're listening
+                // to a global event, so we don't want the event to be triggered unless absolutely necessary. In this case,
+                // we only need to fix the value when we have a pending change to check.
+                me.bindNotifyListener = Ext.on('beforebindnotify', me.onBeforeNotify, me, {destroyable: true});
+            }
+            task.delay(me.checkChangeBuffer);
+        }
+    },
+
+    doCheckChangeTask: function() {
+        var bindNotifyListener = this.bindNotifyListener;
+
+        if (bindNotifyListener) {
+            bindNotifyListener.destroy();
+            this.bindNotifyListener = null;
+        }
+        this.checkChange();
+    },
+
+    publishValue: function () {
+        var me = this;
+
+        if (me.rendered && !me.getErrors().length) {
+            me.publishState('value', me.getValue());
         }
     },
 
@@ -691,7 +748,7 @@ Ext.define('Ext.form.field.Base', {
      *
      * @return {Boolean} True if the value is valid, else false
      */
-    isValid : function() {
+    isValid: function() {
         var me = this,
             disabled = me.disabled,
             validate = me.forceValidation || !disabled;
@@ -726,14 +783,7 @@ Ext.define('Ext.form.field.Base', {
     },
 
     /**
-     * Display one or more error messages associated with this field, using {@link #msgTarget} to determine how to
-     * display the messages and applying {@link #invalidCls} to the field's UI element.
-     *
-     * **Note**: this method does not cause the Field's {@link #validate} or {@link #isValid} methods to return `false`
-     * if the value does _pass_ validation. So simply marking a Field as invalid will not prevent submission of forms
-     * submitted with the {@link Ext.form.action.Submit#clientValidation} option set.
-     *
-     * @param {String/String[]} errors The validation message(s) to display.
+     * @inheritdoc Ext.form.field.Field#markInvalid
      */
     markInvalid : function(errors) {
         // Save the message and fire the 'invalid' event
@@ -759,8 +809,9 @@ Ext.define('Ext.form.field.Base', {
         // Clear the message and fire the 'valid' event
         var me = this,
             hadError = me.hasActiveError();
+
+        delete me.hadErrorOnDisable;
             
-        delete me.needsValidateOnEnable;
         me.unsetActiveError();
         if (hadError) {
             me.setError('');
@@ -778,8 +829,8 @@ Ext.define('Ext.form.field.Base', {
             prop;
             
         if (me.rendered) {
-            if (msgTarget == 'title' || msgTarget == 'qtip') {
-                prop = msgTarget == 'qtip' ? 'data-errorqtip' : 'title';
+            if (msgTarget === 'title' || msgTarget === 'qtip') {
+                prop = msgTarget === 'qtip' ? 'data-errorqtip' : 'title';
                 me.getActionEl().dom.setAttribute(prop, error || '');
             } else {
                 me.updateLayout();
@@ -805,15 +856,29 @@ Ext.define('Ext.form.field.Base', {
         me.mixins.labelable.renderActiveError.call(me);
     },
 
+    beforeDestroy: function() {
+        var me = this,
+            task = me.checkChangeTask;
+
+        if (task) {
+            task.cancel();
+        }
+        me.checkChangeTask = me.bindNotifyListener = Ext.destroy(me.bindNotifyListener);
+        me.callParent();
+    },
+
     privates: {
         applyBind: function (bind, currentBindings) {
             var me = this,
                 valueBinding = currentBindings && currentBindings.value,
-                bindings;
+                bindings, newValueBind;
 
             bindings = me.callParent([ bind, currentBindings ]);
 
-            if (bindings.value !== valueBinding && me.getInherited().modelValidation) {
+            newValueBind = bindings.value;
+            me.hasBindingValue = !!newValueBind;
+
+            if (newValueBind !== valueBinding && me.getInherited().modelValidation) {
                 me.updateValueBinding(bindings);
             }
 
@@ -832,6 +897,21 @@ Ext.define('Ext.form.field.Base', {
             }
         },
 
+        // These 2 events trigger when setting the value programmatically in IE.
+        // propertychange for older browsers, textInput for IE10+. Here we 
+        bindChangeEvents: function(active) {
+            var method = active ? 'resumeEvent' : 'suspendEvent',
+                inputEl = this.inputEl;
+
+            if (this.usesPropertychange) {
+                inputEl[method]('propertychange');
+            }
+
+            if (this.usesTextInput) {
+                inputEl[method]('textInput');
+            }
+        },
+
         getActionEl: function() {
             return this.inputEl || this.el;
         },
@@ -846,6 +926,16 @@ Ext.define('Ext.form.field.Base', {
                 me.renderTpl = me.getTpl('labelableRenderTpl');
             }
             return me.callParent();
+        },
+
+        onBeforeNotify: function() {
+            // This event is fired before the scheduler fires off any bindings.
+            // If we happen to be in the state where we are pending a state change check,
+            // force it to flush here so that we have the correct state in the viewmodel before
+            // the bindings trigger, otherwise we may get an old value pushed into the field before
+            // it runs the check.
+            this.checkChangeTask.cancel();
+            this.checkChange();
         },
 
         updateValueBinding: function (bindings) {
@@ -871,9 +961,9 @@ Ext.define('Ext.form.field.Base', {
                     // In IE if propertychange is one of the checkChangeEvents, we need to remove
                     // the listener prior to layout and re-add it after, to prevent it from firing
                     // needlessly for attribute and style changes applied to the inputEl.
-                    this.bindPropertyChange(false);
+                    this.bindChangeEvents(false);
                     this.callParent(arguments);
-                    this.bindPropertyChange(true);
+                    this.bindChangeEvents(true);
                 }
             }
         }

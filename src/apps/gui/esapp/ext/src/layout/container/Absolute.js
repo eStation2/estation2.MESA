@@ -63,8 +63,8 @@ Ext.define('Ext.layout.container.Absolute', {
     /**
      * @cfg {Boolean} ignoreOnContentChange
      * True indicates that changes to one item in this layout do not effect the layout in
-     * general. This may need to be set to false if {@link Ext.Component#autoScroll}
-     * is enabled for the container.
+     * general. This may need to be set to false if the component is
+     * {@link Ext.Component#scrollable scrollable}.
      */
     ignoreOnContentChange: true,
 
@@ -121,11 +121,11 @@ Ext.define('Ext.layout.container.Absolute', {
 
     calculateContentSize: function (ownerContext, dimensions) {
         var me = this,
-            containerDimensions = (dimensions || 0) |
-                   ((ownerContext.widthModel.shrinkWrap ? 1 : 0) |
+            containerDimensions = (dimensions || 0) | // jshint ignore:line
+                   ((ownerContext.widthModel.shrinkWrap ? 1 : 0) | // jshint ignore:line
                     (ownerContext.heightModel.shrinkWrap ? 2 : 0)),
-            calcWidth = (containerDimensions & 1) || undefined,
-            calcHeight = (containerDimensions & 2) || undefined,
+            calcWidth = (containerDimensions & 1) || undefined,// jshint ignore:line
+            calcHeight = (containerDimensions & 2) || undefined,// jshint ignore:line
             childItems = ownerContext.childItems,
             length = childItems.length,
             contentHeight = 0,

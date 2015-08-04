@@ -15,15 +15,9 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
         'esapp.view.acquisition.DataAcquisitionController',
         'esapp.view.acquisition.logviewer.LogView',
 
-        'Ext.grid.plugin.CellEditing',
-        'Ext.grid.column.Action',
-        'Ext.grid.column.Check'
+        'Ext.grid.column.Action'
+        //'Ext.grid.column.Check'
     ],
-
-    //store: 'DataAcquisitionsStore',
-    //bind: '{ProductAcquisitionsGrid.selection.DataAcquisitions}',
-    //bind: '{products.dataacquisitions}',
-    //bind: '{dataacquisitions}',
 
     // get the chained store from view model
     bind:{
@@ -38,31 +32,39 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
         resizable: false,
         disableSelection: true,
         trackOver: false
-        //style: {
-        //    background: 'lightgray'
-        //}
     },
     cls: 'grid-color-yellow',
-    plugins:[{
-        ptype:'cellediting'
-    }],
     hideHeaders: true,
     columnLines: false,
     rowLines: false,
 
-    listeners: {
-        mouseenter: {
-            element: 'el',
-            fn: function(){
-                this.suspendEvents();
-            }
-        }
-    },
+    bufferedRenderer: true,
+
+    //listeners: {
+    //    beforerender:  function () {
+    //        var me = this,
+    //            record = me.getWidgetRecord();
+    //        Ext.suspendLayouts();
+    //        var daStore = me.getViewModel().get('productdatasources');
+    //        if (daStore) {
+    //            daStore.setFilters({
+    //                property: 'productid'
+    //                , value: record.id
+    //                , anyMatch: true
+    //            });
+    //        }
+    //        Ext.resumeLayouts(true);
+    //    }
+    //    //,mouseenter: {
+    //        //element: 'el',
+    //        //fn: function(){
+    //        //    this.suspendEvents();
+    //        //}
+    //    //}
+    //},
 
     initComponent: function () {
         var me = this;
-
-        //me.cls = 'grid-color-yellow';
 
         me.defaults = {
             menuDisabled: true,
@@ -76,28 +78,21 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
             // text: '', // 'Type',
             width: 105,
             dataIndex: 'type'
-            //bind: '{products.dataacquisitions.type}'
-            //bind: '{dataacquisitions.type}'
         }, {
             // text: '', // 'Latest Acquired',
             width: 110,
             dataIndex: 'time_latest_copy',
             hidden: true
-            //bind: '{products.dataacquisitions.latest}'
-            //bind: '{dataacquisitions.latest}'
         }, {
             // text: '', // 'Latest Acquired',
             width: 110,
             dataIndex: 'time_latest_exec',
             hidden: true
-            //bind: '{products.dataacquisitions.latest}'
-            //bind: '{dataacquisitions.latest}'
         }, {
             xtype: 'actioncolumn',
             // header: 'Store Native',
             hideable: true,
             hidden:true,
-            // disabled: true,
             width: 100,
             align: 'center',
             items: [{
@@ -112,9 +107,9 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
                 },
                 getTip: function(v, meta, rec) {
                     if (rec.get('store_original_data')) {
-                        return 'Deactivate Get';
+                        return 'Deactivate store original data for this Get';
                     } else {
-                        return 'Activate Get';
+                        return 'Activate store original data for this Get';
                     }
                 },
                 handler: function(grid, rowIndex, colIndex) {

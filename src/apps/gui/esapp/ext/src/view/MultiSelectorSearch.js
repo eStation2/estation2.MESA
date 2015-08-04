@@ -29,9 +29,9 @@
  *              return [{
  *                  xtype: 'dataview',
  *                  itemSelector: '.search-item',
- *                  selType: 'rowselection',
+ *                  selModel: 'rowselection',
  *                  store: this.store,
- *                  autoScroll: true,
+ *                  scrollable: true,
  *                  tpl:
  *                      '<tpl for=".">' +
  *                          '<div class="search-item">' +
@@ -75,6 +75,16 @@ Ext.define('Ext.view.MultiSelectorSearch', {
     referenceHolder: true,
 
     /**
+     * @cfg {String} field
+     * A field from your grid's store that will be used for filtering your search results.
+     */
+
+    /**
+     * @cfg store
+     * @inheritdoc Ext.panel.Table#store
+     */
+
+    /**
      * @cfg {String} searchText
      * This text is displayed as the "emptyText" of the search `textfield`.
      */
@@ -96,9 +106,8 @@ Ext.define('Ext.view.MultiSelectorSearch', {
                 item.store = store;
                 item.isSearchGrid = true;
                 item.selModel = item.selModel || {
-                    selType: 'checkboxmodel',
+                    type: 'checkboxmodel',
                     pruneRemoved: false,
-                    mode: 'SIMPLE',
                     listeners: {
                         selectionchange: 'onSelectionChange'
                     }
@@ -128,9 +137,24 @@ Ext.define('Ext.view.MultiSelectorSearch', {
         }
 
         if (store.isLoading() || (store.loadCount === 0 && !store.getCount())) {
+
+            // If it is NOT a preloaded store, then unless a Session is being used,
+            // The newly loaded records will NOT match any in the ownerStore.
+            // So we must match them by ID in order to select the same dataset.
             store.on('load', function() {
-                if (!me.isDestroyed) {
-                    me.selectRecords(records);
+                var len = records.length,
+                    i,
+                    record,
+                    toSelect = [];
+
+                if (!me.destroyed) {
+                    for (i = 0; i < len; i++) {
+                        record = store.getById(records[i].getId());
+                        if (record) {
+                            toSelect.push(record);
+                        }
+                    }
+                    me.selectRecords(toSelect);
                 }
             }, null, {single: true});
         } else {
@@ -173,7 +197,7 @@ Ext.define('Ext.view.MultiSelectorSearch', {
             emptyText: this.searchText,
             triggers: {
                 clear: {
-                    cls: 'x-form-clear-trigger',
+                    cls: Ext.baseCSSPrefix + 'form-clear-trigger',
                     handler: 'onClearSearch',
                     hidden: true
                 }

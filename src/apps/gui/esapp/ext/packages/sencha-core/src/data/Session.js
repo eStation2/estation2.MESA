@@ -196,8 +196,29 @@ Ext.define('Ext.data.Session', {
         }
     },
 
+    /**
+     * Marks the session as "clean" by calling {@link Ext.data.Model#commit} on each record
+     * that is known to the session.
+     *
+     * - Phantom records will no longer be phantom.
+     * - Modified records will no longer be dirty.
+     * - Dropped records will be erased.
+     *
+     * @since 5.1.0
+     */
     commit: function() {
-        // TODO
+        var data = this.data,
+            entityName, entities, id, record;
+
+        for (entityName in data) {
+            entities = data[entityName];
+            for (id in entities) {
+                record = entities[id].record;
+                if (record) {
+                    record.commit();
+                }
+            }
+        }
     },
 
     /**
@@ -599,10 +620,18 @@ Ext.define('Ext.data.Session', {
          */
         dropEntities: function(entityType, ids) {
             var len = ids.length,
-                i, rec, id;
+                i, rec, id, extractId;
+
+            if (len) {
+                // Handle writeAllFields here, we may not have an array of raw ids
+                extractId = Ext.isObject(ids[0]);
+            }
 
             for (i = 0; i < len; ++i) {
                 id = ids[i];
+                if (extractId) {
+                    id = entityType.getIdFromData(id);
+                }
                 rec = this.peekRecord(entityType, id);
                 if (rec) {
                     rec.drop();
@@ -620,11 +649,12 @@ Ext.define('Ext.data.Session', {
          */
         evict: function(record) {
             var entityName = record.entityName,
+                entities = this.data[entityName],
+                id = record.id,
                 entry;
 
-            entry = this.data[entityName];
-
-            if (entry) {
+            if (entities) {
+                delete entities[id];
             }
         },
 
@@ -819,7 +849,7 @@ Ext.define('Ext.data.Session', {
 
         processManyBlock: function(entityType, role, items, processor) {
             var me = this,
-                id, record, store;
+                id, record, records, store;
 
             if (items) {
                 for (id in items) {

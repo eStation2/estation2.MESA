@@ -4,7 +4,7 @@ Ext.define('esapp.view.dashboard.PC3Controller', {
 
     checkStatusServices: function(splitbtn, ev){
         var me = this;
-        console.info('Start checkStatusServices for PC3');
+        //console.info('Start checkStatusServices for PC3');
 
         // Ext.toast({ html: 'checkStatusServices', title: 'checkStatusServices', width: 200, align: 't' });
         // AJAX call to check the status of all 3 services

@@ -30,12 +30,10 @@ Ext.apply(Ext, {
             };
 
         return function(id) {
-            return validIdRe.test(id)
-                ? id
+            return validIdRe.test(id) ? id :
                 // replace the number portion last to keep the trailing ' '
                 // from being escaped
-                : id.replace(escapeRx, escapeFn)
-                    .replace(leadingNumRx, numEscapeFn);
+                id.replace(escapeRx, escapeFn).replace(leadingNumRx, numEscapeFn);
         };
     }()),
 
@@ -104,6 +102,8 @@ Ext.apply(Ext, {
             scope = scope || Ext.global;
             if (delay) {
                 Ext.defer(callback, delay, scope, args);
+            } else if (Ext.elevateFunction) {
+                ret = Ext.elevateFunction(callback, scope, args);
             } else if (args) {
                 ret = callback.apply(scope, args);
             } else {
@@ -177,28 +177,61 @@ Ext.apply(Ext, {
      * @param {Object} source The source object.
      * @param {String/String[]} names Either an Array of property names, or a comma-delimited list
      * of property names to copy.
-     * @param {Boolean} [usePrototypeKeys=falae] Pass `true` to copy keys off of the
+     * @param {Boolean} [usePrototypeKeys=false] Pass `true` to copy keys off of the
      * prototype as well as the instance.
      * @return {Object} The `dest` object.
      */
-    copyTo : function(dest, source, names, usePrototypeKeys){
-        if(typeof names == 'string'){
-            names = names.split(/[,;\s]/);
+    copyTo: function (dest, source, names, usePrototypeKeys) {
+        if (typeof names === 'string') {
+            names = names.split(Ext.propertyNameSplitRe);
         }
 
-        var n,
-            nLen = names? names.length : 0,
-            name;
+        for (var name, i = 0, n = names ? names.length : 0; i < n; i++) {
+            name = names[i];
 
-        for(n = 0; n < nLen; n++) {
-            name = names[n];
-
-            if (usePrototypeKeys || source.hasOwnProperty(name)){
+            if (usePrototypeKeys || source.hasOwnProperty(name)) {
                 dest[name] = source[name];
             }
         }
 
         return dest;
+    },
+
+    propertyNameSplitRe: /[,;\s]+/,
+
+    /**
+     * @method copyToIf
+     * @member Ext
+     * Copies a set of named properties fom the source object to the destination object
+     * if the destination object does not already have them.
+     *
+     * Example:
+     *
+     *     var foo = { a: 1, b: 2, c: 3 };
+     *
+     *     var bar = Ext.copyToIf({ a:42 }, foo, 'a,c');
+     *     // bar = { a: 42, c: 3 };
+     *
+     * @param {Object} destination The destination object.
+     * @param {Object} source The source object.
+     * @param {String/String[]} names Either an Array of property names, or a single string
+     * with a list of property names separated by ",", ";" or spaces.
+     * @return {Object} The `dest` object.
+     */
+    copyToIf: function (destination, source, names) {
+        if (typeof names === 'string') {
+            names = names.split(Ext.propertyNameSplitRe);
+        }
+
+        for (var name, i = 0, n = names ? names.length : 0; i < n; i++) {
+            name = names[i];
+
+            if (destination[name] === undefined) {
+                destination[name] = source[name];
+            }
+        }
+
+        return destination;
     },
 
     /**
@@ -495,7 +528,7 @@ Ext.apply(Ext, {
 
         if (aliasNamespace) {
              // If config is a string value, treat it as an alias
-            if (typeof config == 'string') {
+            if (typeof config === 'string') {
                 return manager.instantiateByAlias(aliasNamespace + '.' + config);
             }
             // Same if 'type' is given in config
@@ -508,7 +541,7 @@ Ext.apply(Ext, {
             return instance || Ext.create(classReference);
         }
 
-        //<debug error>
+        //<debug>
         if (!Ext.isObject(config)) {
             Ext.Logger.error("Invalid config, must be a valid config object");
         }
@@ -631,12 +664,12 @@ Ext.apply(Ext, {
                         value = object[name];
 
                         type = typeof value;
-                        if (type == 'function') {
+                        if (type === 'function') {
                             if (!withFunctions) {
                                 continue;
                             }
                             member = type;
-                        } else if (type == 'undefined') {
+                        } else if (type === 'undefined') {
                             member = type;
                         } else if (value === null || primitiveRe.test(type) || Ext.isDate(value)) {
                             member = Ext.encode(value);
@@ -661,18 +694,18 @@ Ext.apply(Ext, {
                     con = Ext.global.console,
                     level = 'log',
                     indent = log.indent || 0,
-                    stack,
-                    out,
-                    max;
+                    prefix, stack, fn, out, max;
 
                 log.indent = indent;
 
-                if (typeof message != 'string') {
+                if (typeof message !== 'string') {
                     options = message;
                     message = options.msg || '';
                     level = options.level || level;
                     dump = options.dump;
                     stack = options.stack;
+                    prefix = options.prefix;
+                    fn = options.fn;
 
                     if (options.indent) {
                         ++log.indent;
@@ -690,10 +723,18 @@ Ext.apply(Ext, {
                     message += Array.prototype.slice.call(arguments, 1).join('');
                 }
 
+                if (prefix) {
+                    message = prefix + ' - ' + message;
+                }
+
                 message = indent ? Ext.String.repeat(' ', log.indentSize * indent) + message : message;
                 // w/o console, all messages are equal, so munge the level into the message:
-                if (level != 'log') {
+                if (level !== 'log') {
                     message = '[' + level.charAt(0).toUpperCase() + '] ' + message;
+                }
+
+                if (fn) {
+                    message += '\nCaller: ' + fn.toString();
                 }
 
                 // Not obvious, but 'console' comes and goes when Firebug is turned on/off, so
@@ -712,12 +753,12 @@ Ext.apply(Ext, {
 
                     if (stack && con.trace) {
                         // Firebug's console.error() includes a trace already...
-                        if (!con.firebug || level != 'error') {
+                        if (!con.firebug || level !== 'error') {
                             con.trace();
                         }
                     }
                 } else if (Ext.isOpera) {
-                    opera.postError(message);
+                    opera.postError(message); // jshint ignore:line
                 } else {
                     out = log.out;
                     max = log.max;
@@ -737,7 +778,7 @@ Ext.apply(Ext, {
             }
 
             function logx (level, args) {
-                if (typeof args[0] == 'string') {
+                if (typeof args[0] === 'string') {
                     args.unshift({});
                 }
                 args[0].level = level;

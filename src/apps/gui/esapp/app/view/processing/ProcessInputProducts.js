@@ -11,8 +11,6 @@ Ext.define("esapp.view.processing.ProcessInputProducts",{
     requires: [
         'esapp.view.processing.ProcessInputProductsModel',
         'esapp.view.processing.ProcessInputProductsController'
-
-        ,'Ext.grid.column.Widget'
     ],
 
     store : null,
@@ -34,6 +32,17 @@ Ext.define("esapp.view.processing.ProcessInputProducts",{
 
     initComponent: function () {
         var me = this;
+
+        me.listeners = {
+            afterrender: function(grid){
+                // prevent bubbling of the events
+                grid.getEl().swallowEvent([
+                    'mousedown', 'mouseup', 'click',
+                    'contextmenu', 'mouseover', 'mouseout',
+                    'dblclick', 'mousemove'
+                ]);
+            }
+        };
 
         me.defaults = {
             menuDisabled: true,
@@ -108,10 +117,10 @@ Ext.define("esapp.view.processing.ProcessInputProducts",{
         //                },
         //                listeners: {
         //                    exception: function(proxy, response, operation){
-        //                        Ext.MessageBox.show({
+        //                        Ext.Msg.show({
         //                            title: 'PROCESSING STORE - REMOTE EXCEPTION',
         //                            msg: operation.getError(),
-        //                            icon: Ext.MessageBox.ERROR,
+        //                            icon: Ext.Msg.ERROR,
         //                            buttons: Ext.Msg.OK
         //                        });
         //                    }

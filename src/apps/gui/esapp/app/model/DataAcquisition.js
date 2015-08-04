@@ -1,9 +1,8 @@
 Ext.define('esapp.model.DataAcquisition', {
     extend : 'esapp.model.Base',
-//    extend: 'Ext.data.Model',
-//    alias: 'model.dataacquisitions',
+    //alias: 'model.dataacquisitions',
 
-//    idProperty : 'productid',
+    //idProperty : 'productid',
     fields: [
        {name: 'productid'}, //, reference: { parent: 'ProductAcquisition' }},
        {name: 'productcode'},
@@ -21,5 +20,5 @@ Ext.define('esapp.model.DataAcquisition', {
        {name: 'time_latest_exec'}
     ]
 
-//    ,manyToOne: 'ProductAcquisition'
+    //,manyToOne: 'ProductAcquisition'
 });

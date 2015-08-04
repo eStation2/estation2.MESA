@@ -489,16 +489,16 @@ Ext.define('Ext.container.Container', {
      * Usage:
      *
      *     defaults: { // defaults are applied to items, not the container
-     *         autoScroll: true
+     *         scrollable: true
      *     },
      *     items: [
-     *         // default will not be applied here, panel1 will be autoScroll: false
+     *         // default will not be applied here, panel1 will be scrollable: false
      *         {
      *             xtype: 'panel',
      *             id: 'panel1',
-     *             autoScroll: false
+     *             scrollable: false
      *         },
-     *         // this component will have autoScroll: true
+     *         // this component will have scrollable: true
      *         new Ext.panel.Panel({
      *             id: 'panel2'
      *         })
@@ -506,7 +506,7 @@ Ext.define('Ext.container.Container', {
      *
      * @since 2.3.0
      */
-
+    
      /**
       * @cfg {String} [defaultType="panel"]
       * The default {@link Ext.Component xtype} of child Components to create in this Container when
@@ -659,7 +659,14 @@ Ext.define('Ext.container.Container', {
      * See the introductory docs for {@link Ext.container.Container} for more information
      * about references & reference holders.
      */
-
+    
+    /**
+     * @cfg {String} defaultFocus
+     *
+     * Specifies a child Component to receive focus when this Container's {@link #method-focus}
+     * method is called. Should be a valid {@link Ext.ComponentQuery query} selector.
+     */
+    
     // ***********************************************************************************
     // End Config
     // ***********************************************************************************
@@ -700,9 +707,6 @@ Ext.define('Ext.container.Container', {
     /**
      * @event add
      * Fires after any {@link Ext.Component} is added or inserted into the container.
-     * 
-     * **This event bubbles:** 'add' will also be fired when Component is added to any of
-     * the child containers or their childern or ...
      * @param {Ext.container.Container} this
      * @param {Ext.Component} component The component that was added
      * @param {Number} index The index at which the component was added to the container's items collection
@@ -739,24 +743,18 @@ Ext.define('Ext.container.Container', {
     /**
      * @event remove
      * Fires after any {@link Ext.Component} is removed from the container.
-     *
-     * **This event bubbles:** 'remove' will also be fired when Component is removed from any of
-     * the child containers or their children or ...
      * @param {Ext.container.Container} this
      * @param {Ext.Component} component The component that was removed
      * @since 2.3.0
      */
 
     /**
-     * @event move
+     * @event childmove
      * Fires after any {@link Ext.Component} has changed its ordinal position within the container.
-     *
-     * **This event bubbles:** 'move' will also be fired when Component is removed from any of
-     * the child containers or their children or ...
      * @param {Ext.container.Container} this
      * @param {Ext.Component} component The component that was moved
-     * @param {Ext.Component} prevIndex The previous ordinal position of the Component
-     * @param {Ext.Component} newIndex The new ordinal position of the Component
+     * @param {Number} prevIndex The previous ordinal position of the Component
+     * @param {Number} newIndex The new ordinal position of the Component
      */
 
     // ***********************************************************************************
@@ -819,14 +817,13 @@ Ext.define('Ext.container.Container', {
     add: function() {
         var me = this,
             args = Ext.Array.slice(arguments),
-            index = (typeof args[0] == 'number') ? args.shift() : -1,
+            index = (typeof args[0] === 'number') ? args.shift() : -1,
             layout = me.getLayout(),
             needsLayout = false,
-            addingArray, items, i, length, item, pos, ret,
-            instanced;
-            
+            addingArray, items, i, length, item, pos, ret, instanced;
 
-        if (args.length == 1 && Ext.isArray(args[0])) {
+
+        if (args.length === 1 && Ext.isArray(args[0])) {
             items = args[0];
             addingArray = true;
         } else {
@@ -840,7 +837,7 @@ Ext.define('Ext.container.Container', {
         ret = items = me.prepareItems(items, true);
         length = items.length;
 
-        if (!addingArray && length == 1) { // an array of 1 should still return an array...
+        if (!addingArray && length === 1) { // an array of 1 should still return an array...
             ret = items[0];
         }
 
@@ -887,6 +884,7 @@ Ext.define('Ext.container.Container', {
         if (needsLayout) {
             me.updateLayout();
         }
+
         if (me.rendered) {
             Ext.resumeLayouts(true);
         }
@@ -904,6 +902,10 @@ Ext.define('Ext.container.Container', {
         }     
     },
     
+    /**
+     * @method
+     * @inheritdoc
+     */
     onRemoved: function(destroying) {
         var refHolder;
         
@@ -950,12 +952,12 @@ Ext.define('Ext.container.Container', {
      */
     afterLayout: function(layout) {
         var me = this,
-            scrollManager = me.scrollManager;
+            scroller = me.getScrollable();
 
         ++me.layoutCounter;
 
-        if (scrollManager && me.layoutCounter > 1) {
-            scrollManager.refresh();
+        if (scroller && me.layoutCounter > 1) {
+            scroller.refresh();
         }
 
         if (me.hasListeners.afterlayout) {
@@ -997,7 +999,10 @@ Ext.define('Ext.container.Container', {
             layout = me.getLayout(),
             targetCls;
 
+        // In beforeRender in the parent we call disable to allow onDisable to be applied here.
+        me.preventChildDisable = true;
         me.callParent();
+        me.preventChildDisable = false;
 
         if (!layout.initialized) {
             layout.initLayout();
@@ -1075,23 +1080,22 @@ Ext.define('Ext.container.Container', {
      * @override
      * Disables all child input fields and buttons.
      */
-    disable: function() {
-        this.callParent(arguments);
+    disable: function(silent, /* private */fromParent) {
+        var me = this,
+            wasDisabled = me.disabled,
+            itemsToDisable, len, i;
 
-        var itemsToDisable = this.getChildItemsToDisable(),
-            length         = itemsToDisable.length,
-            item, i;
+        me.callParent([silent, fromParent]);
 
-        for (i = 0; i < length; i++) {
-            item = itemsToDisable[i];
+        if (!fromParent && !me.preventChildDisable && !wasDisabled) {
+            itemsToDisable = me.getChildItemsToDisable();
+            len = itemsToDisable.length;
 
-            if (item.resetDisable !== false && !item.disabled) {
-                item.disable();
-                item.resetDisable = true;
+            for (i = 0; i < len; i++) {
+                itemsToDisable[i].disable(silent, true);
             }
         }
-
-        return this;
+        return me;
     },
 
     /**
@@ -1109,22 +1113,23 @@ Ext.define('Ext.container.Container', {
      * @override
      * Enables all child input fields and buttons.
      */
-    enable: function() {
-        this.callParent(arguments);
+    enable: function(silent, /* private */fromParent) {
+        var me = this,
+            wasDisabled = me.disabled,
+            itemsToDisable, len, i;
 
-        var itemsToDisable = this.getChildItemsToDisable(),
-            length         = itemsToDisable.length,
-            item, i;
+        me.callParent([silent, fromParent]);
 
-        for (i = 0; i < length; i++) {
-            item = itemsToDisable[i];
+        if (wasDisabled) {
+            itemsToDisable = me.getChildItemsToDisable();
+            len = itemsToDisable.length;
 
-            if (item.resetDisable) {
-                item.enable();
+            for (i = 0; i < len; i++) {
+                itemsToDisable[i].enable(silent, true);
             }
         }
 
-        return this;
+        return me;
     },
 
     /**
@@ -1176,11 +1181,34 @@ Ext.define('Ext.container.Container', {
         var c = this.items.get(comp);
 
         // Only allow finding by index on the main items container
-        if (!c && typeof comp != 'number') {
+        if (!c && typeof comp !== 'number') {
             c = this.floatingItems.get(comp);
         }
 
         return c;
+    },
+
+    /**
+     * @protected
+     * Returns the focus holder element associated with this Container.
+     * By default, this is the Container's target element; however if {@link #defaultFocus}
+     * is defined, the child component referenced by that property will be found
+     * and returned instead.
+     *
+     * @return {Ext.dom.Element} the focus holding element.
+     */
+    getFocusEl: function() {
+        var delegate = this.getDefaultFocus();
+
+        if (delegate) {
+            return delegate;
+        }
+        else if (this.focusable) {
+            return this.getTargetEl();
+        }
+
+        // Containers that are not focusable should not return a focusEl
+        return undefined;
     },
 
     /**
@@ -1241,7 +1269,22 @@ Ext.define('Ext.container.Container', {
 
         return result;
     },
-
+    
+    /**
+     * Finds the configured default focus item. See {@link #defaultFocus}.
+     */
+    getDefaultFocus: function() {
+        var defaultFocus = this.defaultFocus,
+            result;
+        
+        if (defaultFocus) {
+            result = this.down(defaultFocus);
+        }
+        
+        // Returning undefined is ok
+        return result;
+    },
+    
     initComponent: function(){
         var me = this;
 
@@ -1253,6 +1296,11 @@ Ext.define('Ext.container.Container', {
         me.constructing = true;
 
         me.initItems();
+
+        if (me.disabled) {
+            me.disabled = false;
+            me.disable(true);
+        }
 
         delete me.constructing;
     },
@@ -1326,6 +1374,13 @@ Ext.define('Ext.container.Container', {
              * @since 2.3.0
              */
             me.items = new Ext.util.AbstractMixedCollection(false, me.getComponentId);
+
+            /**
+             * The MixedCollection containing all the floating child items of this container.
+             * @property floatingItems
+             * @type Ext.util.MixedCollection
+             * @since 4.1.0
+            */
             me.floatingItems = new Ext.util.MixedCollection(false, me.getComponentId);
 
             if (items) {
@@ -1427,22 +1482,6 @@ Ext.define('Ext.container.Container', {
         return this.add(index, component);
     },
 
-    /**
-     * Determines whether **this Container** is an ancestor of the passed Component.
-     * This will return `true` if the passed Component is anywhere within the subtree
-     * beneath this Container.
-     * @param {Ext.Component} possibleDescendant The Component to test for presence
-     * within this Container's subtree.
-     */
-    isAncestor: function(possibleDescendant) {
-        while (possibleDescendant) {
-            if (possibleDescendant.ownerCt === this) {
-                return true;
-            }
-            possibleDescendant = possibleDescendant.ownerCt;
-        }
-    },
-
     // @private
     lookupComponent: function(comp) {
         if (!comp.isComponent) {
@@ -1458,12 +1497,12 @@ Ext.define('Ext.container.Container', {
     /**
      * Moves a Component within the Container. This method does **not** account for things
      * like splitter components added by a layout. To better handle these situations, it
-     * is recommended to use `{@link #moveBefore}` or `{@link moveAfter}` instead.
+     * is recommended to use `{@link #moveBefore}` or `{@link #moveAfter}` instead.
      *
      * @param {Number/Ext.Component} fromIdx The index/component to move.
      * @param {Number} toIdx The new index for the Component.
      * @return {Ext.Component} component The Component that was moved.
-     * @deprecated 5.0 Use `{@link #moveBefore}` or `{@link moveAfter}` instead.
+     * @deprecated 5.0 Use `{@link #moveBefore}` or `{@link #moveAfter}` instead.
      */
     move: function(fromIdx, toIdx) {
         var me = this,
@@ -1479,10 +1518,11 @@ Ext.define('Ext.container.Container', {
             if (item === false) {
                 return false;
             }
+            toIdx = Math.min(toIdx, items.getCount());
             items.insert(toIdx, item);
             me.onMove(item, fromIdx, toIdx);
-            if (me.hasListeners.move) {
-                me.fireEvent('move', me, item, fromIdx, toIdx);
+            if (me.hasListeners.childmove) {
+                me.fireEvent('childmove', me, item, fromIdx, toIdx);
             }
             me.updateLayout();
         }
@@ -1492,7 +1532,7 @@ Ext.define('Ext.container.Container', {
     /**
      * Moves the given `item` into this container in front of `before`. This method will
      * account for layout-generated components like splitters and should be used instead
-     * of index based `{@link #move}`. If `before` is `null` then the `item` will be the
+     * of index based `{@link #method-move}`. If `before` is `null` then the `item` will be the
      * last item in this container.
      * @param {Object/Ext.Component} item The item to move. May be a component configuration object.
      * @param {Ext.Component} before The reference component. May be `null`.
@@ -1500,13 +1540,16 @@ Ext.define('Ext.container.Container', {
      * @since 5.0.0
      */
     moveBefore: function (item, before) {
-        return this.layout.moveItemBefore(item, before);
+        if (item !== before) {
+            item = this.layout.moveItemBefore(item, before);
+        }
+        return item;
     },
 
     /**
      * Moves the given `item` into this container following `after`. This method will
      * account for layout-generated components like splitters and should be used instead
-     * of index based `{@link #move}`. If `after` is `null` then the `item` will be the
+     * of index based `{@link #method-move}`. If `after` is `null` then the `item` will be the
      * first item in this container.
      * @param {Ext.Component} item The item to move. May be a component configuration object.
      * @param {Ext.Component} after The reference component. May be `null`.
@@ -1514,13 +1557,14 @@ Ext.define('Ext.container.Container', {
      * @since 5.0.0
      */
     moveAfter: function (item, after) {
-        var me = this,
-            items = me.items,
-            layout = me.layout,
-            index = after ? layout.getMoveAfterIndex(after) : 0,
-            before = items.getAt(index);
-        
-        return layout.moveItemBefore(item, before);
+        var layout = this.layout,
+            index;
+
+        if (item !== after) {
+            index = after ? layout.getMoveAfterIndex(after) : 0;
+            item = layout.moveItemBefore(item, this.items.getAt(index));
+        }
+        return item;
     },
 
     /**
@@ -1529,7 +1573,7 @@ Ext.define('Ext.container.Container', {
      *
      * @param {Ext.Component} child The child to use as a starting point to find the next child.
      * @param {String} [selector] A {@link Ext.ComponentQuery} selector to find the next child. This will return the next child matching this selector. This parameter is optional.
-     * @returns {Ext.Component} The next child found, `null` if no child found.
+     * @return {Ext.Component} The next child found, `null` if no child found.
      */
     nextChild: function(child, selector) {
         var me = this,
@@ -1624,7 +1668,7 @@ Ext.define('Ext.container.Container', {
      *
      * @param {Ext.Component} child The child to use as a starting point to find the previous child.
      * @param {String} [selector] A {@link Ext.ComponentQuery} selector to find the previous child. This will return the first child matching this selector. This parameter is optional.
-     * @returns {Ext.Component} The previous child found, `null` if no child found.
+     * @return {Ext.Component} The previous child found, `null` if no child found.
      */
     prevChild: function(child, selector) {
         var me = this,
@@ -1862,7 +1906,7 @@ Ext.define('Ext.container.Container', {
         // In general, if a class overrides getTargetEl it will also need to override this method. This is necessary to
         // avoid a post-render step to add the targetCls.
         applyTargetCls: function(targetCls) {
-            this.addCls(targetCls);
+            this.layoutTargetCls = targetCls;
         },
 
         /**
@@ -1985,8 +2029,8 @@ Ext.define('Ext.container.Container', {
          * @private
          * @return {Ext.Component[]} Items to be enabled/disabled
          */
-        getChildItemsToDisable: function(){
-            return this.query('[isFormField],button');
+        getChildItemsToDisable: function() {
+            return this.query('[isFormField],[isFocusableContainer],button');
         },
 
         // @private - used as the key lookup function for the items collection
@@ -2002,17 +2046,6 @@ Ext.define('Ext.container.Container', {
         // @private
         getDefaultContentTarget: function() {
             return this.el;
-        },
-
-        /**
-         * @private
-         * Returns the focus holder element associated with this Container. By default, this is the Container's target
-         * element. Subclasses which use embedded focusable elements (such as Window and Button) should override this for use
-         * by the {@link #method-focus} method.
-         * @returns {Ext.dom.Element} the focus holding element.
-         */
-        getFocusEl: function() {
-            return this.getTargetEl();
         },
 
         getScrollerEl: function() {

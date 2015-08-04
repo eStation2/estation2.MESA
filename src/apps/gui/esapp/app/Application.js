@@ -13,7 +13,6 @@ Ext.define('esapp.Application', {
         'Ext.app.*',
         'Ext.window.Toast',
         'Ext.state.CookieProvider',
-        'Ext.window.MessageBox',
         'Ext.tip.QuickTipManager',
 
         'esapp.Utils'
@@ -22,15 +21,15 @@ Ext.define('esapp.Application', {
     ],
 
     views: [
-        'header.Header',
-        'dashboard.Dashboard',
-        'acquisition.Acquisition',
-        'processing.Processing',
-        'datamanagement.DataManagement',
-        'analysis.analysisMain',
-        'system.systemsettings',
-        'widgets.datasetCompletenessChart',
-        'widgets.ServiceMenuButton'
+        'header.Header'
+        //'dashboard.Dashboard',
+        //'acquisition.Acquisition',
+        //'processing.Processing',
+        //'datamanagement.DataManagement',
+        //'analysis.analysisMain',
+        //'system.systemsettings',
+        //'widgets.datasetCompletenessChart',
+        //'widgets.ServiceMenuButton'
     ],
 
     controllers: [
@@ -73,17 +72,19 @@ Ext.define('esapp.Application', {
     init: function () {
         //console.info('Application Init()');
 
+        Ext.tip.QuickTipManager.init();
+
         // start the mask on the body and get a reference to the mask
         splashscreen = Ext.getBody().mask('Loading eStation2, please stand by ...', 'splashscreen');
 
         this.callParent();
     },
 
-    onBeforeLaunch: function () {
-        //console.info("onbeforelaunch!!!");
-
-        this.callParent();
-    },
+    //onBeforeLaunch: function () {
+    //    //console.info("onbeforelaunch!!!");
+    //
+    //    this.callParent();
+    //},
 
     launch: function () {
         //console.info("launch!!!");
@@ -189,17 +190,12 @@ Ext.define('esapp.Application', {
 
         task.delay(2000);
 
-
-
         //Ext.create('esapp.view.main.Main',{renderTo: Ext.getBody()});
         //mainview = Ext.create('esapp.view.main.Main',{});
         //mainview.show();
         //Ext.getCmp("languageCombo").setValue(esapp.globals['selectedLanguage']);
 
         this.callParent();
-
-
-
 
         //esapp.globals = [];
         //esapp.globals['selectedLanguage'] = 'eng';

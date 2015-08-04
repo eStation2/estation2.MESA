@@ -255,7 +255,7 @@ var makeCtor = Ext.Class.makeCtor,
         isCreated: function(className) {
             var i, ln, part, root, parts;
 
-            //<debug error>
+            //<debug>
             if (typeof className !== 'string' || className.length < 1) {
                 throw new Error("[Ext.ClassManager] Invalid classname, must be a string and must not be empty");
             }
@@ -291,7 +291,7 @@ var makeCtor = Ext.Class.makeCtor,
          * @private
          */
         createdListeners: [],
-        
+
         /**
          * @private
          */
@@ -310,11 +310,14 @@ var makeCtor = Ext.Class.makeCtor,
         /**
          * @private
          */
-        triggerCreated: function (className) {
-            if(!Manager.existCache[className]) {
-                Manager.triggerExists(className);
-            }
-            Manager.classState[className] += 20;
+        overrideMap: {},
+
+        /**
+         * @private
+         */
+        triggerCreated: function (className, state) {
+            Manager.existCache[className] = state || 1;
+            Manager.classState[className] += 40;
             Manager.notify(className, Manager.createdListeners, Manager.nameCreatedListeners);
         },
 
@@ -323,22 +326,6 @@ var makeCtor = Ext.Class.makeCtor,
          */
         onCreated: function(fn, scope, className) {
             Manager.addListener(fn, scope, className, Manager.createdListeners, Manager.nameCreatedListeners);
-        },
-
-        /**
-         * @private
-         */
-        triggerExists: function (className, state) {
-            Manager.existCache[className] = state || 1;
-            Manager.classState[className] += 20;
-            Manager.notify(className, Manager.existsListeners, Manager.nameExistsListeners);
-        },
-
-        /**
-         * @private
-         */
-        onExists: function(fn, scope, className) {
-            Manager.addListener(fn, scope, className, Manager.existsListeners, Manager.nameExistsListeners);
         },
 
         /**
@@ -412,7 +399,7 @@ var makeCtor = Ext.Class.makeCtor,
          * @private
          */
         parseNamespace: function(namespace) {
-            //<debug error>
+            //<debug>
             if (typeof namespace !== 'string') {
                 throw new Error("[Ext.ClassManager] Invalid namespace, must be a string");
             }
@@ -649,7 +636,7 @@ var makeCtor = Ext.Class.makeCtor,
          * @private
          */
         create: function(className, data, createdFn) {
-            //<debug error>
+            //<debug>
             if (className != null && typeof className !== 'string') {
                 throw new Error("[Ext.define] Invalid class name '" + className + "' specified, must be a non-empty string");
             }
@@ -665,7 +652,7 @@ var makeCtor = Ext.Class.makeCtor,
                 if(Manager.classes[className]) {
                     Ext.log.warn("[Ext.define] Duplicate class name '" + className + "' specified, must be a non-empty string");
                 }
-                ctor.displayName = className;
+                ctor.name = className;
             }
             //</debug>
 
@@ -715,12 +702,12 @@ var makeCtor = Ext.Class.makeCtor,
             var me = this,
                 postprocessor = clsData.postprocessors.shift(),
                 createdFn = clsData.createdFn;
-            
+
             if (!postprocessor) {
                 //<debug>
                 Ext.classSystemMonitor && Ext.classSystemMonitor(className, 'Ext.ClassManager#classCreated', arguments);
                 //</debug>
-                
+
                 if (className) {
                     me.set(className, cls);
                 }
@@ -813,10 +800,10 @@ var makeCtor = Ext.Class.makeCtor,
 
                     Ext.override(cls, data);
 
-                    // This pushes the overridding file itself into Ext.Loader.history
+                    // This pushes the overriding file itself into Ext.Loader.history
                     // Hence if the target class never exists, the overriding file will
                     // never be included in the build.
-                    me.triggerCreated(className);
+                    Ext.Loader.history.push(className);
 
                     if (uses) {
                         // This "hides" from the Cmd auto-dependency scanner since
@@ -829,13 +816,14 @@ var makeCtor = Ext.Class.makeCtor,
                     }
                 };
 
-            me.triggerExists(className, 2);
+            Manager.overrideMap[className] = true;
 
             if (!compat || Ext.checkVersion(compat)) {
                 // Override the target class right after it's created
                 me.onCreated(classReady, me, overriddenClassName);
             }
 
+            me.triggerCreated(className, 2);
             return me;
         },
 
@@ -859,7 +847,7 @@ var makeCtor = Ext.Class.makeCtor,
                 args = arraySlice.call(arguments),
                 className = this.getNameByAlias(alias);
 
-            //<debug error>
+            //<debug>
             if (!className) {
                 throw new Error("[Ext.createByAlias] Unrecognized alias: " + alias);
             }
@@ -920,7 +908,7 @@ var makeCtor = Ext.Class.makeCtor,
 
                 instantiator = instantiators[length] = new Function('c', 'a', 'return new c(' + args.join(',') + ')');
                 //<debug>
-                instantiator.displayName = "Ext.create" + length;
+                instantiator.name = "Ext.create" + length;
                 //</debug>
             }
 
@@ -1017,6 +1005,29 @@ var makeCtor = Ext.Class.makeCtor,
             return this;
         }
     });
+
+    /**
+     * @cfg xtype
+     * @member Ext.Class
+     * @inheritdoc Ext.Component#cfg-xtype
+     */
+
+    /**
+     * @cfg {String} override
+     * @member Ext.Class
+     * Overrides members of the specified `target` class.
+     * 
+     * **NOTE:** the overridden class must have been defined using 
+     * {@link #define Ext.define} in order to use the `override` config.
+     * 
+     * Methods defined on the overriding class will not automatically call the methods of 
+     * the same name in the ancestor class chain.  To call the parent's method of the 
+     * same name you must call {@link Ext.Base#callParent callParent}.  To skip the 
+     * method of the overridden class and call its parent you will instead call 
+     * {@link Ext.Base#callSuper callSuper}.
+     *
+     * See {@link Ext#define Ext.define} for additional usage examples.
+     */
     
     //<feature classSystem.alias>
     /**
@@ -1134,7 +1145,7 @@ var makeCtor = Ext.Class.makeCtor,
         for (i = 0, ln = alternates.length; i < ln; i++) {
             alternate = alternates[i];
 
-            //<debug error>
+            //<debug>
             if (typeof alternate !== 'string') {
                 throw new Error("[Ext.define] Invalid alternate of: '" + alternate + "' for class: '" + name + "'; must be a valid string");
             }
@@ -1615,7 +1626,7 @@ var makeCtor = Ext.Class.makeCtor,
          *          ]
          *      });
          *
-         * Overrides can also contain statics:
+         * Overrides can also contain statics, inheritableStatics, or privates:
          *
          *      Ext.define('My.app.BarMod', {
          *          override: 'Ext.foo.Bar',
@@ -1704,15 +1715,23 @@ var makeCtor = Ext.Class.makeCtor,
          * Pass `null` to create an anonymous class.
          * @param {Object} data The key - value pairs of properties to apply to this class. Property names can be of any valid
          * strings, except those in the reserved listed below:
-         *  - `mixins`
-         *  - `statics`
-         *  - `config`
-         *  - `alias`
-         *  - `xtype` (for {@link Ext.Component Components} only)
+         *  
+         *  - {@link Ext.Class#cfg-alias alias}
+         *  - {@link Ext.Class#cfg-alternateClassName alternateClassName}
+         *  - {@link Ext.Class#cfg-cachedConfig cachedConfig}
+         *  - {@link Ext.Class#cfg-config config}
+         *  - {@link Ext.Class#cfg-extend extend}
+         *  - {@link Ext.Class#cfg-inheritableStatics inheritableStatics}
+         *  - {@link Ext.Class#cfg-mixins mixins}
+         *  - {@link Ext.Class#cfg-override override}
+         *  - {@link Ext.Class#cfg-platformConfig platformConfig}
+         *  - {@link Ext.Class#cfg-privates privates}
+         *  - {@link Ext.Class#cfg-requires requires}
          *  - `self`
-         *  - `singleton`
-         *  - `alternateClassName`
-         *  - `override`
+         *  - {@link Ext.Class#cfg-singleton singleton}
+         *  - {@link Ext.Class#cfg-statics statics}
+         *  - {@link Ext.Class#cfg-uses uses}
+         *  - {@link Ext.Class#cfg-xtype xtype} (for {@link Ext.Component Components} only)
          *
          * @param {Function} [createdFn] Callback to execute after the class is created, the execution scope of which
          * (`this`) will be the newly created class itself.
@@ -1891,7 +1910,7 @@ var makeCtor = Ext.Class.makeCtor,
         for (i = 0,ln = aliases.length; i < ln; i++) {
             alias = aliases[i];
 
-            //<debug error>
+            //<debug>
             if (typeof alias !== 'string' || alias.length < 1) {
                 throw new Error("[Ext.define] Invalid alias of: '" + alias + "' for class: '" + name + "'; must be a valid string");
             }
@@ -1949,7 +1968,7 @@ var makeCtor = Ext.Class.makeCtor,
         for (i = 0,ln = xtypes.length; i < ln; i++) {
             xtype = xtypes[i];
 
-            //<debug error>
+            //<debug>
             if (typeof xtype !== 'string' || xtype.length < 1) {
                 throw new Error("[Ext.define] Invalid xtype of: '" + xtype + "' for class: '" + name + "'; must be a valid non-empty string");
             }

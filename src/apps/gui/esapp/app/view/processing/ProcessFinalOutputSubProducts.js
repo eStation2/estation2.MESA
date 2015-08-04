@@ -12,8 +12,7 @@ Ext.define("esapp.view.processing.ProcessFinalOutputSubProducts",{
         'esapp.view.processing.ProcessFinalOutputSubProductsModel',
         'esapp.view.processing.ProcessFinalOutputSubProductsController',
 
-        'Ext.grid.column.Action',
-        'Ext.grid.column.Widget'
+        'Ext.grid.column.Action'
     ],
 
     store: null,
@@ -36,6 +35,17 @@ Ext.define("esapp.view.processing.ProcessFinalOutputSubProducts",{
 
     initComponent: function () {
         var me = this;
+
+        me.listeners = {
+            afterrender: function(grid){
+                // prevent bubbling of the events
+                //grid.getEl().swallowEvent([
+                //    'mousedown', 'mouseup', 'click',
+                //    'contextmenu', 'mouseover', 'mouseout',
+                //    'dblclick', 'mousemove'
+                //]);
+            }
+        };
 
         me.defaults = {
             menuDisabled: true,
@@ -64,7 +74,6 @@ Ext.define("esapp.view.processing.ProcessFinalOutputSubProducts",{
             dataIndex: 'mapsetcode',
             width: 200
         }, {
-
             header: '', // 'Subproductcode',
             dataIndex: 'subproductcode',
             width: 150
@@ -78,7 +87,6 @@ Ext.define("esapp.view.processing.ProcessFinalOutputSubProducts",{
                 shrinkWrap: 0,
                 items: [{
                     // scope: me,
-                    // handler: me.onToggleActivation
                     getClass: function(v, meta, rec) {
                         if (rec.get('subactivated')) {
                             return 'activated';

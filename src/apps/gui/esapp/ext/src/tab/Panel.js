@@ -71,8 +71,7 @@
  * # Examples
  *
  * Here is a basic TabPanel rendered to the body. This also shows the useful configuration {@link #activeTab},
- * which allows you to set the active tab on render. If you do not set an {@link #activeTab}, no tabs will be
- * active by default.
+ * which allows you to set the active tab on render.
  *
  *     @example
  *     Ext.create('Ext.tab.Panel', {
@@ -307,6 +306,7 @@ Ext.define('Ext.tab.Panel', {
     requires: ['Ext.layout.container.Card', 'Ext.tab.Bar'],
 
     config: {
+        // @cmd-auto-dependency { directRef: 'Ext.tab.Bar' }
         /**
          * @cfg {Object} tabBar
          * Optional configuration object for the internal {@link Ext.tab.Bar}.
@@ -316,8 +316,12 @@ Ext.define('Ext.tab.Panel', {
 
         /**
          * @cfg {"top"/"bottom"/"left"/"right"} tabPosition
-         * The position where the tab strip should be rendered. Can be `top`, `bottom`,
-         * `left` or `right`
+         * The position where the tab strip should be rendered. Possible values are: 
+         * 
+         *  - top
+         *  - bottom
+         *  - left
+         *  - right
          */
         tabPosition : 'top',
 
@@ -351,8 +355,8 @@ Ext.define('Ext.tab.Panel', {
      * @cfg {Number} tabBarHeaderPosition
      * If specified, the {@link #tabBar} will be rendered as an item of the TabPanel's
      * Header and the specified `tabBarHeaderPosition` will be used as the Panel header's
-     * {@link #itemPosition}.  If not specified, the {@link #tabBar} will be rendered
-     * as a docked item at {@link #tabPosition}
+     * {@link Ext.panel.Header#itemPosition}.  If not specified, the {@link #tabBar}
+     * will be rendered as a docked item at {@link #tabPosition}.
      */
 
     /**
@@ -362,7 +366,7 @@ Ext.define('Ext.tab.Panel', {
 
     /**
      * @cfg {String/Number/Ext.Component} activeTab
-     * The tab to activate initially. Either an ID, index or the tab component itself.
+     * The tab to activate initially. Either an ID, index or the tab component itself. If null, no tab will be set as active.
      */
 
 
@@ -445,9 +449,8 @@ Ext.define('Ext.tab.Panel', {
     //inherit docs
     initComponent: function() {
         var me = this,
-            activeTab = me.activeTab || (me.activeTab = 0),
-            tabPosition = me.getTabPosition(),
-            tabRotation = me.getTabRotation(),
+            // Default to 0 if undefined and not null!
+            activeTab = me.activeTab !== null ? (me.activeTab || 0) : null,
             dockedItems = me.dockedItems,
             header = me.header,
             tabBarHeaderPosition = me.tabBarHeaderPosition,
@@ -463,9 +466,7 @@ Ext.define('Ext.tab.Panel', {
         }, me.layout));
 
         if (tabBarHeaderPosition != null) {
-            if (!header) {
-                header = me.header = {};
-            }
+            header = me.header = Ext.apply({}, header);
 
             headerItems = header.items = (header.items ? header.items.slice() : []);
             header.itemPosition = tabBarHeaderPosition;
@@ -487,6 +488,17 @@ Ext.define('Ext.tab.Panel', {
             tabBar.setActiveTab(activeTab.tab, true);
         }
     },
+    
+    /**
+     * @method getTabBar
+     * Returns the {@link Ext.tab.Bar} associated with this tabPanel.
+     * @return {Ext.tab.Bar} The tabBar for this tabPanel
+     */
+    
+    /**
+     * @method setTabBar
+     * @hide
+     */
 
     onRender: function() {
         var items = this.items.items,
@@ -515,20 +527,22 @@ Ext.define('Ext.tab.Panel', {
         var me = this,
             previous;
 
-        card = me.getComponent(card);
+        // Check for a config object
+        if (!Ext.isObject(card) || card.isComponent) {
+            card = me.getComponent(card);
+        }
+        previous = me.getActiveTab();
         if (card) {
-            previous = me.getActiveTab();
-
-            if (previous === card || me.fireEvent('beforetabchange', me, card, previous) === false) {
-                return false;
-            }
-
+            Ext.suspendLayouts();
             // We may be passed a config object, so add it.
             // Without doing a layout!
             if (!card.isComponent) {
-                Ext.suspendLayouts();
                 card = me.add(card);
-                Ext.resumeLayouts();
+            }
+
+            if (previous === card || me.fireEvent('beforetabchange', me, card, previous) === false) {
+                Ext.resumeLayouts(true);
+                return previous;
             }
 
             // MUST set the activeTab first so that the machinery which listens for show doesn't
@@ -538,7 +552,6 @@ Ext.define('Ext.tab.Panel', {
             // Attempt to switch to the requested card. Suspend layouts because if that was successful
             // we have to also update the active tab in the tab bar which is another layout operation
             // and we must coalesce them.
-            Ext.suspendLayouts();
             me.layout.setActiveItem(card);
 
             // Read the result of the card layout. Events dear boy, events!
@@ -562,6 +575,7 @@ Ext.define('Ext.tab.Panel', {
             }
             return card;
         }
+        return previous;
     },
 
     setActiveItem: function(item) {
@@ -578,10 +592,10 @@ Ext.define('Ext.tab.Panel', {
             result = me.getComponent(me.activeTab);
 
         // Sanitize the result in case the active tab is no longer there.
-        if (result && me.items.indexOf(result) != -1) {
+        if (result && me.items.indexOf(result) !== -1) {
             me.activeTab = result;
         } else {
-            me.activeTab = null;
+            me.activeTab = undefined;
         }
 
         return me.activeTab;
@@ -597,7 +611,7 @@ Ext.define('Ext.tab.Panel', {
             ui: me.ui,
             dock: dock,
             tabRotation: me.getTabRotation(),
-            vertical: (dock == 'left' || dock == 'right'),
+            vertical: (dock === 'left' || dock === 'right'),
             plain: me.plain,
             tabStretchMax: me.getTabStretchMax(),
             tabPanel: me
@@ -693,6 +707,25 @@ Ext.define('Ext.tab.Panel', {
         // Force the view model to be created, see onRender
         if (me.rendered) {
             item.getBind();
+        }
+
+        // Ensure that there is at least one active tab. This is only needed when adding tabs via a loader config, i.e., there
+        // may be no pre-existing tabs. Note that we need to check if activeTab was explicitly set to `null` in the tabpanel
+        // config (which tells the layout not to set an active item), as this is a valid value to mean 'do not set an active tab'.
+        if (me.rendered && me.loader && me.activeTab === undefined && me.layout.activeItem !== null) {
+            me.setActiveTab(0);
+        }
+    },
+
+    onMove: function(item, fromIdx, toIdx) {
+        var tabBar = this.getTabBar();
+
+        this.callParent([item, fromIdx, toIdx]);
+
+        // If the move of the item.tab triggered the movement of the child Panel,
+        // then we're done.
+        if (tabBar.items.indexOf(item.tab) !== toIdx) {
+            tabBar.move(item.tab, toIdx);
         }
     },
 
@@ -790,7 +823,7 @@ Ext.define('Ext.tab.Panel', {
                 toActivate;
 
             // Destroying, or removing the last item, nothing to activate
-            if (me.removingAll || me.destroying || me.items.getCount() == 1) {
+            if (me.removingAll || me.destroying || me.items.getCount() === 1) {
                 me.activeTab = null;
             }
 

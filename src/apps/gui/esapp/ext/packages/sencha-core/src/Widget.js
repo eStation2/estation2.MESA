@@ -54,6 +54,10 @@ Ext.define('Ext.Widget', {
     extend: 'Ext.Evented',
     xtype: 'widget',
 
+    requires: [
+        'Ext.dom.Element'
+    ],
+
     mixins: [
         'Ext.mixin.Inheritable',
         'Ext.mixin.Bindable'
@@ -63,7 +67,6 @@ Ext.define('Ext.Widget', {
 
     /**
      * @property {Object} element
-     * @private
      * A configuration object for Ext.Element.create() that is used to create the Element
      * template.  Supports all the standard options of a Ext.Element.create() config and
      * adds 2 additional options:
@@ -109,12 +112,11 @@ Ext.define('Ext.Widget', {
      * The Widget instance is used as the scope for all listeners specified in this way,
      * so it is invalid to use the `scope` option in the `listeners` config since it will
      * always be overwritten using `this`.
+     * @protected
      */
     element: {
         reference: 'element'
     },
-
-    listenerOptionsRegex: /^(?:scope|order|delegate|single|delay|buffer|args|prepend|destroyable|element)$/,
 
     observableType: 'component',
 
@@ -142,10 +144,10 @@ Ext.define('Ext.Widget', {
 
     /**
      * @property {Array} template
-     * @private
      * An array of child elements to use as the children of the main element in the {@link
      * #element} template.  Only used if "children" are not specified explicitly in the
      * {@link #element} template.
+     * @protected
      */
     template: [],
 
@@ -156,99 +158,6 @@ Ext.define('Ext.Widget', {
         me.initElement();
         me.mixins.observable.constructor.call(me, config);
         Ext.ComponentManager.register(me);
-    },
-
-    /**
-     * @private
-     * Reduces instantiation time for a Widget by lazily instantiating Ext.Element
-     * references the first time they are used.  This optimization only works for elements
-     * with no listeners specified.
-     *
-     * @param {String} name The name of the reference
-     * @param {HTMLElement} domNode
-     */
-    addElementReferenceOnDemand: function(name, domNode) {
-        if (this._elementListeners[name]) {
-            // if the element was configured with listeners then we cannot add the
-            // reference on demand because we need to make sure the element responds
-            // immediately to any events, even if its reference is never accessed
-            this.addElementReference(name, domNode);
-        } else {
-            // no listeners - element reference can be resolved on demand.
-            // TODO: measure if this has any significant performance impact.
-            Ext.Object.defineProperty(this, name, {
-                get: function() {
-                    // remove the property that was defined using defineProperty because
-                    // addElementReference will set the property on the instance, - the
-                    // getter is not needed after the first access.
-                    delete this[name];
-                    return this.addElementReference(name, domNode);
-                },
-                configurable: true
-            });
-        }
-    },
-
-    /**
-     * @private
-     * Adds an element reference to this Widget instance.
-     * @param {String} name The name of the reference
-     * @param {HTMLElement} domNode
-     * @return {Ext.dom.Element}
-     */
-    addElementReference: function (name, domNode) {
-        var me = this,
-            referenceEl = me[name] = Ext.get(domNode),
-            listeners = me._elementListeners[name],
-            eventName, listener;
-
-        referenceEl.skipGarbageCollection = true;
-        referenceEl.component = me;
-
-        if (listeners) {
-            // TODO: these references will be needed when we use delegation to listen
-            // for element events, but for now, we'll just attach the listeners directly
-            // referenceEl.reference = name;
-            // referenceEl.component = me;
-            // referenceEl.listeners = listeners;
-
-            // at this point "listeners" exists on the class prototype.  We need to clone
-            // it before poking the scope reference onto it, because it is used as the
-            // options object by Observable and so can't be safely shared.
-            listeners = Ext.clone(listeners);
-
-            // the outermost listeners object always needs the scope option.  this covers
-            // a listeners object with the following shape
-            //
-            //    {
-            //        click: 'onClick'
-            //        scope: this
-            //    }
-            listeners.scope = me;
-
-            // if the listener is specified as an object it needs to have the scope
-            // option added to that object, for example:
-            //
-            //    {
-            //        click: {
-            //            fn: 'onClick',
-            //            scope: this
-            //        }
-            //    }
-            for (eventName in listeners) {
-                listener = listeners[eventName];
-                if (typeof listener === 'object') {
-                    listener.scope = me;
-                }
-            }
-
-            // hopefully in the future we can stop calling on() here, and just use
-            // event delegation to dispatch events to Widgets that have declared their
-            // listeners in their template
-            referenceEl.on(listeners);
-        }
-
-        return referenceEl;
     },
 
     afterCachedConfig: function() {
@@ -314,58 +223,23 @@ Ext.define('Ext.Widget', {
         Ext.ComponentManager.unregister(me);
     },
 
-    //@private
-    doAddListener: function(name, fn, scope, options, order) {
-        if (options && 'element' in options) {
-            //<debug error>
-            if (this.referenceList.indexOf(options.element) === -1) {
-                Ext.Logger.error("Adding event listener with an invalid element reference of '" + options.element +
-                    "' for this component. Available values are: '" + this.referenceList.join("', '") + "'", this);
-            }
-            //</debug>
-
-            // The default scope is this component
-            return this[options.element].doAddListener(name, fn, scope || this, options, order);
-        }
-
-        return this.callParent([name, fn, scope, options, order]);
-    },
-
-    //@private
-    doRemoveListener: function(name, fn, scope, options, order) {
-        if (options && 'element' in options) {
-            //<debug error>
-            if (this.referenceList.indexOf(options.element) === -1) {
-                Ext.Logger.error("Removing event listener with an invalid element reference of '" + options.element +
-                    "' for this component. Available values are: '" + this.referenceList.join('", "') + "'", this);
-            }
-            //</debug>
-
-            // The default scope is this component
-            this[options.element].doRemoveListener(name, fn, scope || this, options, order);
-        }
-
-        return this.callParent([name, fn, scope, options, order]);
-    },
-
+    /**
+     * @param width
+     * @protected
+     */
     doSetWidth: function(width) {
         this.element.setWidth(width);
     },
 
+    /**
+     * @param height
+     * @protected
+     */
     doSetHeight: function(height) {
         this.element.setHeight(height);
     },
 
-    filterLengthValue: function(value) {
-        if (value === 'auto' || (!value && value !== 0)) {
-            return null;
-        }
-
-        return value;
-    },
-
     /**
-     * @private
      * A template method for modifying the {@link #element} config before it is processed.
      * By default adds the result of `this.getTemplate()` as the `children` array of {@link
      * #element} if `children` were not specified in the original {@link #element} config.
@@ -373,7 +247,13 @@ Ext.define('Ext.Widget', {
      * {@link #element} property should be use to configure the element template for a
      * given Widget subclass.
      *
+     * This method is called once when the first instance of each Widget subclass is
+     * created.  The element config object that is returned is cached and used as the template
+     * for all successive instances.  The scope object for this method is the class prototype,
+     * not the instance.
+     *
      * @return {Object} the element config object
+     * @protected
      */
     getElementConfig: function() {
         var me = this,
@@ -386,6 +266,16 @@ Ext.define('Ext.Widget', {
         }
 
         return el;
+    },
+
+    /**
+     * Returns the value of {@link Ext.Component#itemId} assigned to this component, or when that
+     * is not set, returns the value of {@link Ext.Component#id}.
+     * @return {String}
+     */
+    getItemId: function() {
+        // needed by ComponentQuery
+        return this.itemId || this.id;
     },
 
     /**
@@ -406,12 +296,12 @@ Ext.define('Ext.Widget', {
     },
 
     /**
-     * @private
      * Initializes the Element for this Widget instance.  If this is the first time a
-     * Widget of this type has been instantiated the {@link element} config will be
+     * Widget of this type has been instantiated the {@link #element} config will be
      * processed to create an Element.  This Element is then cached on the prototype (see
      * afterCachedConfig) so that future instances can obtain their element by simply
      * cloning the Element that was cached by the first instance.
+     * @protected
      */
     initElement: function() {
         var me = this,
@@ -420,7 +310,7 @@ Ext.define('Ext.Widget', {
             referenceList = me.referenceList = [],
             cleanAttributes = true,
             renderTemplate, renderElement, element, referenceNodes, i, ln, referenceNode,
-            reference, elementConfig;
+            reference;
 
         if (prototype.hasOwnProperty('renderTemplate')) {
             // we have already created an instance of this Widget type, so the element
@@ -434,13 +324,7 @@ Ext.define('Ext.Widget', {
             // config from scratch to create our Element.
             cleanAttributes = false;
             renderTemplate = document.createDocumentFragment();
-            elementConfig = me.getElementConfig();
-            // initElementListeners needs to be called BEFORE passing the element config
-            // along to Ext.Element.create().  This ensures that the listener meta data is
-            // saved, and then the listeners objects are removed from the element config
-            // so that they do not get added as attributes by create()
-            me.initElementListeners(elementConfig);
-            renderElement = Ext.Element.create(elementConfig, true);
+            renderElement = Ext.Element.create(me.processElementConfig.call(prototype), true);
             renderTemplate.appendChild(renderElement);
         }
 
@@ -496,67 +380,6 @@ Ext.define('Ext.Widget', {
     },
 
     /**
-     * @private
-     * called for the first instance of this Widget to create an object that contains the
-     * listener configs for all of the element references keyed by reference name. The
-     * object is cached on the prototype and has the following shape:
-     *
-     *     _elementListeners: {
-     *         element: {
-     *             click: 'onClick'
-     *             scope: this
-     *         },
-     *         fooReference: {
-     *             tap: {
-     *                 fn: someFunction
-     *                 delay: 100
-     *             }
-     *         }
-     *     }
-     */
-    initElementListeners: function(elementConfig) {
-        var me = this,
-            elementListeners = me._elementListeners ||
-                (me.self.prototype._elementListeners = {}),
-            reference = elementConfig.reference,
-            children = elementConfig.children,
-            listeners, ln, i;
-
-        if (reference) {
-            listeners = elementConfig.listeners;
-            if (listeners) {
-                elementListeners[reference] = listeners;
-                // null out the listeners on the elementConfig, since we are going to pass
-                // it to Element.create(), and don't want "listeners" to be treated as an
-                // attribute
-                elementConfig.listeners = null;
-            }
-        }
-
-        if (children) {
-            for (i = 0, ln = children.length; i < ln; i++) {
-                me.initElementListeners(children[i]);
-            }
-        }
-    },
-
-    initId: function(config) {
-        var me = this,
-            defaultConfig = me.config,
-            id = (config && config.id) || (defaultConfig && defaultConfig.id);
-
-        if (id) {
-            // setId() will normally be inherited from Identifiable, unless "id" is a
-            // proper config, in which case it will be generated by the config system.
-            me.setId(id);
-            me.id = id;
-        } else {
-            // if no id configured, generate one (Identifiable)
-            me.getId();
-        }
-    },
-
-    /**
      * Tests whether this Widget matches a {@link Ext.ComponentQuery ComponentQuery}
      * selector string.
      * @param {String} selector The selector string to test against.
@@ -608,5 +431,267 @@ Ext.define('Ext.Widget', {
         if (height !== undefined) {
             this.setHeight(height);
         }
+    },
+
+    //-------------------------------------------------------------------------
+
+    privates: {
+        /**
+         * Reduces instantiation time for a Widget by lazily instantiating Ext.Element
+         * references the first time they are used.  This optimization only works for elements
+         * with no listeners specified.
+         *
+         * @param {String} name The name of the reference
+         * @param {HTMLElement} domNode
+         * @private
+         */
+        addElementReferenceOnDemand: function(name, domNode) {
+            if (this._elementListeners[name]) {
+                // if the element was configured with listeners then we cannot add the
+                // reference on demand because we need to make sure the element responds
+                // immediately to any events, even if its reference is never accessed
+                this.addElementReference(name, domNode);
+            } else {
+                // no listeners - element reference can be resolved on demand.
+                // TODO: measure if this has any significant performance impact.
+                Ext.Object.defineProperty(this, name, {
+                    get: function() {
+                        // remove the property that was defined using defineProperty because
+                        // addElementReference will set the property on the instance, - the
+                        // getter is not needed after the first access.
+                        delete this[name];
+                        return this.addElementReference(name, domNode);
+                    },
+                    configurable: true
+                });
+            }
+        },
+
+        /**
+         * Adds an element reference to this Widget instance.
+         * @param {String} name The name of the reference
+         * @param {HTMLElement} domNode
+         * @return {Ext.dom.Element}
+         * @private
+         */
+        addElementReference: function (name, domNode) {
+            var me = this,
+                referenceEl = me[name] = Ext.get(domNode),
+                listeners = me._elementListeners[name],
+                eventName, listener;
+
+            referenceEl.skipGarbageCollection = true;
+            referenceEl.component = me;
+
+            if (listeners) {
+                // TODO: these references will be needed when we use delegation to listen
+                // for element events, but for now, we'll just attach the listeners directly
+                // referenceEl.reference = name;
+                // referenceEl.component = me;
+                // referenceEl.listeners = listeners;
+
+                // at this point "listeners" exists on the class prototype.  We need to clone
+                // it before poking the scope reference onto it, because it is used as the
+                // options object by Observable and so can't be safely shared.
+                listeners = Ext.clone(listeners);
+
+                // the outermost listeners object always needs the scope option.  this covers
+                // a listeners object with the following shape
+                //
+                //    {
+                //        click: 'onClick'
+                //        scope: this
+                //    }
+                listeners.scope = me;
+
+                // if the listener is specified as an object it needs to have the scope
+                // option added to that object, for example:
+                //
+                //    {
+                //        click: {
+                //            fn: 'onClick',
+                //            scope: this
+                //        }
+                //    }
+                for (eventName in listeners) {
+                    listener = listeners[eventName];
+                    if (typeof listener === 'object') {
+                        listener.scope = me;
+                    }
+                }
+
+                // hopefully in the future we can stop calling on() here, and just use
+                // event delegation to dispatch events to Widgets that have declared their
+                // listeners in their template
+                referenceEl.on(listeners);
+            }
+
+            return referenceEl;
+        },
+
+        detachFromBody: function() {
+            // See reattachToBody
+            Ext.getDetachedBody().appendChild(this.element);
+            this.isDetached = true;
+        },
+
+        //@private
+        doAddListener: function(name, fn, scope, options, order, caller, manager) {
+            if (options && 'element' in options) {
+                //<debug>
+                if (this.referenceList.indexOf(options.element) === -1) {
+                    Ext.Logger.error("Adding event listener with an invalid element reference of '" + options.element +
+                        "' for this component. Available values are: '" + this.referenceList.join("', '") + "'", this);
+                }
+                //</debug>
+
+                // The default scope is this component
+                this[options.element].doAddListener(name, fn, scope || this, options, order);
+            }
+
+            this.callParent([name, fn, scope, options, order, caller, manager]);
+        },
+
+        filterLengthValue: function(value) {
+            if (value === 'auto' || (!value && value !== 0)) {
+                return null;
+            }
+
+            return value;
+        },
+
+        getFocusEl: function () {
+            return this.element;
+        },
+
+        /**
+         * Called for the first instance of this Widget to create an object that contains the
+         * listener configs for all of the element references keyed by reference name. The
+         * object is cached on the prototype and has the following shape:
+         *
+         *     _elementListeners: {
+         *         element: {
+         *             click: 'onClick',
+         *             scope: this
+         *         },
+         *         fooReference: {
+         *             tap: {
+         *                 fn: someFunction,
+         *                 delay: 100
+         *             }
+         *         }
+         *     }
+         *
+         * The returned object is prototype chained to the _elementListeners object of its
+         * superclass, and each key in the object is prototype chained to object with the
+         * corresponding key in the superclass _elementListeners.  This allows element
+         * listeners to be inherited and overridden when subclassing widgets.
+         *
+         * This method is invoked with the prototype object as the scope
+         *
+         * @private
+         */
+        initElementListeners: function(elementConfig) {
+            var prototype = this,
+                superPrototype = prototype.self.superclass,
+                superElementListeners = superPrototype._elementListeners,
+                reference = elementConfig.reference,
+                children = elementConfig.children,
+                elementListeners, listeners, superListeners, ln, i;
+
+            if (prototype.hasOwnProperty('_elementListeners')) {
+                elementListeners = prototype._elementListeners;
+            } else {
+                elementListeners = prototype._elementListeners =
+                    (superElementListeners ? Ext.Object.chain(superElementListeners) : {});
+            }
+
+            if (reference) {
+                listeners = elementConfig.listeners;
+                if (listeners) {
+                    if (superElementListeners) {
+                        superListeners = superElementListeners[reference];
+                        if (superListeners) {
+                            listeners = Ext.Object.chain(superListeners);
+                            Ext.apply(listeners, elementConfig.listeners);
+                        }
+                    }
+
+                    elementListeners[reference] = listeners;
+                    // null out the listeners on the elementConfig, since we are going to pass
+                    // it to Element.create(), and don't want "listeners" to be treated as an
+                    // attribute
+                    elementConfig.listeners = null;
+                }
+            }
+
+            if (children) {
+                for (i = 0, ln = children.length; i < ln; i++) {
+                    prototype.initElementListeners(children[i]);
+                }
+            }
+        },
+
+        initId: function(config) {
+            var me = this,
+                defaultConfig = me.config,
+                id = (config && config.id) || (defaultConfig && defaultConfig.id);
+
+            if (id) {
+                // setId() will normally be inherited from Identifiable, unless "id" is a
+                // proper config, in which case it will be generated by the config system.
+                me.setId(id);
+                me.id = id;
+            } else {
+                // if no id configured, generate one (Identifiable)
+                me.getId();
+            }
+        },
+
+        /**
+         * Recursively processes the element templates for this class and its superclasses,
+         * ascending the hierarchy until it reaches a superclass whose element template
+         * has already been processed.  This method is invoked using the prototype as the scope.
+         *
+         * @private
+         * @return {Object}
+         */
+        processElementConfig: function() {
+            var prototype = this,
+                superPrototype = prototype.self.superclass,
+                elementConfig;
+
+            if (prototype.hasOwnProperty('_elementConfig')) {
+                elementConfig = prototype._elementConfig;
+            } else {
+                // cache the elementConfig on the prototype, since we may end up here multiple
+                // times if there are multiple subclasses
+                elementConfig = prototype._elementConfig = prototype.getElementConfig();
+
+                if (superPrototype.isWidget) {
+                    // Before initializing element listeners we must process the element template
+                    // for our superclass so that we can chain our listeners to the superclass listeners
+                    prototype.processElementConfig.call(superPrototype);
+                }
+
+                // initElementListeners needs to be called BEFORE passing the element config
+                // along to Ext.Element.create().  This ensures that the listener meta data is
+                // saved, and then the listeners objects are removed from the element config
+                // so that they do not get added as attributes by create()
+                prototype.initElementListeners(elementConfig);
+            }
+
+            return elementConfig;
+        },
+
+        reattachToBody: function() {
+            // See detachFromBody
+            this.isDetached = false;
+        }
     }
+}, function(Widget) {
+    // event options for listeners that use the "element" event options must also include
+    // event options from Ext.Element
+    (Widget.prototype.$elementEventOptions =
+        Ext.Object.chain(Ext.Element.prototype.$eventOptions)).element = 1;
 });
