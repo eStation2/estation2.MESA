@@ -6,7 +6,12 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
         'esapp.view.widgets.datasetCompletenessChartModel',
         'esapp.view.widgets.datasetCompletenessChartController',
 
-        'Ext.data.JsonStore'
+        'Ext.data.JsonStore',
+        'Ext.chart.CartesianChart',
+        'Ext.chart.axis.Numeric',
+        'Ext.chart.axis.Category',
+        'Ext.chart.series.Bar',
+        'Ext.chart.interactions.ItemHighlight'
     ],
 
     "controller": "widgets-datasetcompletenesschart",
@@ -14,177 +19,133 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
         "type": "widgets-datasetcompletenesschart"
     },
     xtype: 'datasetchart',
-    //id: 'dschart',
 
     //configs with auto generated getter/setter methods
     config: {
-        //id: '',
         firstdate:'',
         lastdate:'',
         totfiles:0,
-        missingfiles:0,
-        series: [],
-        tooltipintervals: ''
+        missingfiles:0
     },
 
-    hideMode : 'display',
     margin:0,
     bodyPadding:0,
-    height: 45,
-    width: 350,
-    bufferedRenderer: true,
 
     initComponent: function() {
         var me = this,
+            spriteY = 10,
             fontsize = 10;
 
-        //me.id = 'dschart_' + this.id;
-        //widget.id = record.get('productid') + '_' + record.get('mapsetcode') + '_' + record.get('subproductcode');
+        var missingFilesText = '';
+        if(me.missingfiles>0)
+           missingFilesText = 'Missing: ' + me.missingfiles;
 
-        //me.items = {
-        //    xtype: 'container',
-        //
-        //}
-        me.listeners = {
-            beforerender: function () {
-                //console.info('datasetCompletenessChart: beforerender event called');
-                //var record = me.getWidgetRecord();
-                //console.info(record);
-                //me.setId('dschart_' + record.get('productcode') + '_' + record.get('version').replace('.', '') + '_' + record.get('mapsetcode') + '_' + record.get('subproductcode'));
-                //me.id = 'dschart_' + this.id;
+        me.items = [{
+            xtype: 'cartesian',
+            width: '100%',
+            height: 38,
+
+            colors: [
+                '#81AF34', // green
+                '#FF0000', // red
+                '#808080' // black or gray
+            ],
+            legend: {
+                hidden:true
             },
-            afterrender: function () {
-                //console.info('datasetCompletenessChart: afterrender event called');
-                var missingFilesText = '';
-                if(me.missingfiles>0)
-                   missingFilesText = 'Missing: ' + me.missingfiles;
+            innerPadding: {top: 0, left: 0, right: 0, bottom: 0},
+            insetPadding: {top: 12, left: 15, right: 15, bottom: 5},
+            flipXY: true,
 
-                var totFilesText = '';
-                if(me.totfiles>0)
-                   totFilesText = 'Files: ' + me.totfiles;
-                else
-                    totFilesText = '<span style="color:#808080">Not any data</span>';   // 'Not any data';
-                //console.info(me.id);
-                //if (Ext.getCmp(me.id)) {
-                    me.datasetcompletenesschart = new Highcharts.Chart({
-                        chart: {
-                            renderTo: me.getId(),
-                            type: 'bar',
-                            height: 45,
-                            width: 350,
-                            spacing: [5, 20, 0, 20]
-                        },
-                        credits: {
-                            enabled: false
-                        },
-                        exporting: {
-                            enabled: false
-                        },
-                        title: {
-                            text: ''
-                        },
-                        tooltip: {
-                            //shared: true
-                            enabled: false
-                        },
-                        labels: {
-                            items: [{
-                                html: me.firstdate,
-                                style: {
-                                    left: '-20px',
-                                    top: '-3px',
-                                    color: '#0000',
-                                    fontSize: '10px'
-                                }
-                            }, {
-                                html: totFilesText,
-                                style: {
-                                    left: '80px',
-                                    top: '-4px',
-                                    color: '#0000',
-                                    fontSize: '10px'
-                                }
-                            }, {
-                                html: missingFilesText,
-                                style: {
-                                    left: '170px',
-                                    top: '-4px',
-                                    color: '#FF0000',
-                                    fontSize: '10px'
-                                }
-                            }, {
-                                html: me.lastdate,
-                                style: {
-                                    left: '260px',
-                                    top: '-3px',
-                                    color: '#0000',
-                                    fontSize: '10px'
-                                }
-                            }]
-                        },
+            //store: Ext.create('Ext.data.JsonStore', {
+            //    fields: me.storefields,
+            //    data: me.datasetdata
+            //}),
+            sprites:  [{
+                type: 'text',
+                text: 'Files: ' + me.totfiles,
+                fontSize: fontsize,
+                x: 120,
+                y: spriteY
+            },{
+                type: 'text',
+                text: missingFilesText,
+                fontSize: fontsize+1,
+                fontWeight: 'bold',
+                fillStyle: '#FF0000',
+                x: 190,
+                y: spriteY
+            },{
+                type: 'text',
+                text: me.firstdate,
+                fontSize: fontsize,
+                x: 0,
+                y: spriteY
+            },{
+                type: 'text',
+                text: me.lastdate,
+                fontSize: fontsize,
+                x: 286,
+                y: spriteY
+            }],
 
-                        xAxis: {
-                            title: {
-                                text: ''
-                            },
-                            labels: {
-                                enabled: false
-                            },
-                            gridLineWidth: 0,
-                            lineWidth: 0,
-                            tickWidth: 0
-                            , categories: ['datasetcompleteness']
-                        },
-                        yAxis: {
-                            min: 0,
-                            max: 100,
-                            reversedStacks: false,
-                            gridLineWidth: 0,
-                            lineWidth: 0,
-                            title: {
-                                text: ''
-                            },
-                            labels: {
-                                enabled: false
+            axes: [{
+                type: 'numeric',
+                // fields: ['data1', 'data2', 'data3', 'data4', 'data5', 'data6', 'data7'],
+                grid: false,
+                hidden:true
+            }, {
+                type: 'category',
+                // fields: 'dataset',
+                position: 'left',
+                grid: false
+            }],
+
+            series: [{
+                type: 'bar',
+                // title: ['data1', 'data2', 'data3', 'data4', 'data5', 'data6', 'data7'],
+                // title: me.seriestitles,
+                xField: 'dataset',
+                // yField: me.seriesyField,
+                axis: 'bottom',
+                // colors: me.seriescolors,
+                stacked: true,
+                style: {
+                    opacity: 0.80
+                },
+                //highlight: {
+                //    fillStyle: 'white' // 'transparent'
+                //    ,strokeStyle: "black"
+                //    ,opacity: 30
+                //    ,segment: {
+                //        margin: 5
+                //    }
+                //},
+                tooltip: {
+                    trackMouse: false,
+                    dismissDelay:60000,
+                    style: 'background: #fff',
+                    renderer: function (storeItem, item) {
+                        var allperiods = '';
+                        var arrayLength = item.series.getTitle().length;
+                        var thisperiodindex = Ext.Array.indexOf(item.series.getYField(), item.field);
+
+                        for (var i = 0; i < arrayLength; i++) {
+                            if (i == thisperiodindex) {
+                                allperiods = allperiods + '<b>'+item.series.getTitle()[thisperiodindex] + '</b></br>';
                             }
-                        },
-                        legend: {
-                            enabled: false
-                        },
-                        plotOptions: {
-                            series: {
-                                stacking: 'normal'
+                            else {
+                                allperiods = allperiods + item.series.getTitle()[i] + '</br>';
                             }
-                        },
-                        series: me.series
-                        //series: [{
-                        //    color: '#81AF34',
-                        //    data: [50]
-                        //}, {
-                        //    color: '#808080',
-                        //    data: [10]
-                        //}, {
-                        //    color: '#81AF34',
-                        //    data: [2]
-                        //}, {
-                        //    color: '#808080',
-                        //    data: [8]
-                        //}, {
-                        //    color: '#FF0000',
-                        //    data: [30]
-                        //}]
-                    });
-                //}
+                        }
 
-                var tip = Ext.create('Ext.tip.ToolTip', {
-                    target: me.getId(),
-                    trackMouse: true,
-                    html:  me.tooltipintervals // Tip content
-                });
-            }
-        }
+                        this.setHtml(allperiods);
+                    }
+                }
+            }]
+
+        }];
 
         me.callParent();
-
     }
 });

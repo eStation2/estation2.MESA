@@ -8,8 +8,6 @@
  *
  *     var changingImage = Ext.create('Ext.Img', {
  *         src: 'http://www.sencha.com/img/20110215-feat-html5.png',
- *         width: 184,
- *         height: 90,
  *         renderTo: Ext.getBody()
  *     });
  *
@@ -28,12 +26,6 @@
  *         autoEl: 'div', // wrap in a div
  *         renderTo: Ext.getBody()
  *     });
- *
- * ## Image Dimensions
- *
- * You should include height and width dimensions for any image owned by a parent 
- * container.  By omitting dimensions, an owning container will not know how to 
- * size and position the image in the initial layout.
  */
 Ext.define('Ext.Img', {
     extend: 'Ext.Component',
@@ -104,12 +96,11 @@ Ext.define('Ext.Img', {
             if (typeof glyph === 'string') {
                 glyphParts = glyph.split('@');
                 glyph = glyphParts[0];
-                glyphFontFamily = glyphParts[1] || glyphFontFamily;
+                glyphFontFamily = glyphParts[1];
             }
             config.html = '&#' + glyph + ';';
             if (glyphFontFamily) {
-                config.style = config.style || {};
-                config.style.fontFamily = glyphFontFamily;
+                config.style = 'font-family:' + glyphFontFamily;
             }
         } else {
             config.cn = [img = {
@@ -148,20 +139,14 @@ Ext.define('Ext.Img', {
         
         if (autoEl === 'img' || (Ext.isObject(autoEl) && autoEl.tag === 'img')) {
             me.imgEl = el;
-        } else {
+        }
+        else {
             me.imgEl = el.getById(me.id + '-img');
         }
     },
 
     onDestroy: function () {
-        var me = this,
-            imgEl = me.imgEl;
-
-        // Only clean up when the img is a child, otherwise it will get handled
-        // by the element destruction in the parent
-        if (imgEl && me.el !== imgEl) {
-            imgEl.destroy();
-        }
+        Ext.destroy(this.imgEl);
         this.imgEl = null;
         this.callParent();
     },
@@ -181,28 +166,23 @@ Ext.define('Ext.Img', {
         }
     },
 
-    /**
-     * Updates the {@link #glyph} of the image.
-     * @param {Number/String} glyph
-     */
     setGlyph: function(glyph) {
         var me = this,
             glyphFontFamily = Ext._glyphFontFamily,
-            old = me.glyph,
-            el = me.el,
-            glyphParts;
+            glyphParts, dom;
 
-        me.glyph = glyph;
-        if (me.rendered && glyph !== old) {
+        if (glyph != me.glyph) {
             if (typeof glyph === 'string') {
                 glyphParts = glyph.split('@');
                 glyph = glyphParts[0];
-                glyphFontFamily = glyphParts[1] || glyphFontFamily;
+                glyphFontFamily = glyphParts[1];
             }
 
-            el.dom.innerHTML = '&#' + glyph + ';';
+            dom = me.el.dom;
+
+            dom.innerHTML = '&#' + glyph + ';';
             if (glyphFontFamily) {
-                el.setStyle('font-family', glyphFontFamily);
+                dom.style = 'font-family:' + glyphFontFamily;
             }
         }
     }

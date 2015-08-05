@@ -8,21 +8,19 @@ Ext.define('Ext.form.RadioManager', {
 
     getByName: function(name, formId) {
         return this.filterBy(function(item) {
-            return item.name === name && item.getFormId() === formId;
+            return item.name == name && item.getFormId() == formId;
         });
     },
 
     getWithValue: function(name, value, formId) {
         return this.filterBy(function(item) {
-            return item.name === name &&
-                   item.inputValue == value && // jshint ignore:line
-                   item.getFormId() === formId;
+            return item.name == name && item.inputValue == value && item.getFormId() == formId;
         });
     },
 
     getChecked: function(name, formId) {
         return this.findBy(function(item) {
-            return item.name === name && item.checked && item.getFormId() === formId;
+            return item.name == name && item.checked && item.getFormId() == formId;
         });
     }
 });

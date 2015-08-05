@@ -45,6 +45,8 @@
  * the static EXPRESS\_INSTALL\_URL property to the location of your Express Install SWF file:
  *
  *     Ext.flash.Component.EXPRESS_INSTALL_URL = 'path/to/local/expressInstall.swf';
+ *
+ * @docauthor Jason Johnston <jason@sencha.com>
  */
 Ext.define('Ext.flash.Component', {
     extend: 'Ext.Component',
@@ -174,7 +176,7 @@ Ext.define('Ext.flash.Component', {
             allowedDomain: document.location.hostname
         }, flashVars);
 
-        new swfobject.embedSWF( // jshint ignore:line
+        new swfobject.embedSWF(
             me.url,
             me.getSwfId(),
             me.swfWidth,
@@ -224,7 +226,7 @@ Ext.define('Ext.flash.Component', {
         var me = this,
             swf = me.swf;
         if (swf) {
-            swfobject.removeSWF(me.getSwfId()); // jshint ignore:line
+            swfobject.removeSWF(me.getSwfId());
             Ext.destroy(swf);
             delete me.swf;
         }

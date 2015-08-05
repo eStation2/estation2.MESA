@@ -82,10 +82,6 @@ Ext.define('Ext.container.ButtonGroup', {
 
     frameHeader: false,
 
-    /**
-     * @cfg {String} titleAlign
-     * The alignment of the title text within the available space between the icon and the tools.
-     */
     titleAlign: 'center',
 
     noTitleCls: 'notitle',

@@ -1,4 +1,4 @@
-<project name="x-resources-impl">
+<project name="resources-impl">
     <target name="-before-inherit-resources"/>
     <target name="-after-inherit-resources"/>
     <target name="-inherit-resources">

@@ -97,15 +97,13 @@ Ext.define('Ext.grid.plugin.HeaderResizer', {
     findActiveHeader: function(e) {
         var me = this,
             headerEl = e.getTarget('.' + me.colHeaderCls, 3, true),
-            ownerGrid = me.ownerGrid,
-            ownerLockable = ownerGrid.ownerLockable,
-            overHeader, resizeHeader, headers, header;
+            overHeader, resizeHeader, headers;
 
         if (headerEl) {
             overHeader = Ext.getCmp(headerEl.id);
 
             // If near the right edge, we're resizing the column we are over.
-            if (overHeader.isAtEndEdge(e)) {
+            if (overHeader.isOnRightEdge(e)) {
                 
                 // Cannot resize the only column in a forceFit grid.
                 if (me.headerCt.visibleColumnManager.getColumns().length === 1 && me.headerCt.forceFit) {
@@ -115,16 +113,15 @@ Ext.define('Ext.grid.plugin.HeaderResizer', {
                 resizeHeader = overHeader;
             }
             // Else... we might be near the right edge
-            else if (overHeader.isAtStartEdge(e)) {
+            else if (overHeader.isOnLeftEdge(e)) {
                 // Extract previous visible leaf header
                 headers = me.headerCt.visibleColumnManager.getColumns();
-                header = overHeader.isGroupHeader ? overHeader.getGridColumns()[0] : overHeader;
-                resizeHeader = headers[Ext.Array.indexOf(headers, header) - 1];
+                resizeHeader = headers[Ext.Array.indexOf(headers, overHeader) - 1];
 
                 // If there wasn't one, and we are the normal side of a lockable assembly then
                 // use the last visible leaf header of the locked side.
-                if (!resizeHeader && ownerLockable && !ownerGrid.isLocked) {
-                    headers = ownerLockable.lockedGrid.headerCt.visibleColumnManager.getColumns();
+                if (!resizeHeader && me.ownerGrid.ownerLockable && !me.ownerGrid.isLocked) {
+                    headers = me.ownerGrid.ownerLockable.lockedGrid.headerCt.visibleColumnManager.getColumns();
                     resizeHeader = headers[headers.length - 1];
                 }
             }
@@ -224,7 +221,7 @@ Ext.define('Ext.grid.plugin.HeaderResizer', {
         var me       = this,
             dragHd   = me.dragHd,
             width    = dragHd.el.getWidth(),
-            headerCt = dragHd.getRootHeaderCt(),
+            headerCt = dragHd.getOwnerHeaderCt(),
             x, y, markerOwner, lhsMarker, rhsMarker, markerHeight;
 
         me.headerCt.dragging = true;

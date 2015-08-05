@@ -121,18 +121,18 @@ Ext.define('Ext.dd.DDProxy', {
      * @private
      */
     showFrame: function(iPageX, iPageY) {
-        var me = this,
-            dragEl = me.getDragEl(),
+        var el = this.getEl(),
+            dragEl = this.getDragEl(),
             s = dragEl.style;
 
-        me._resizeProxy();
+        this._resizeProxy();
 
-        if (me.centerFrame) {
-            me.setDelta(Math.round(parseInt(s.width,  10)/2),
-                        Math.round(parseInt(s.height, 10)/2));
+        if (this.centerFrame) {
+            this.setDelta( Math.round(parseInt(s.width,  10)/2),
+                           Math.round(parseInt(s.height, 10)/2) );
         }
 
-        me.setDragElPos(iPageX, iPageY);
+        this.setDragElPos(iPageX, iPageY);
 
         Ext.fly(dragEl).show();
     },

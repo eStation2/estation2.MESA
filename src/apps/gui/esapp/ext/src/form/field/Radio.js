@@ -1,4 +1,6 @@
 /**
+ * @docauthor Robert Dougan <rob@sencha.com>
+ *
  * Single radio field. Similar to checkbox, but automatically handles making sure only one radio is checked
  * at a time within a group of radios with the same name.
  *
@@ -228,7 +230,7 @@ Ext.define('Ext.form.field.Radio', {
      */
     setValue: function(value) {
         var me = this,
-            active;
+            container, active;
 
         if (Ext.isBoolean(value)) {
             me.callParent(arguments);

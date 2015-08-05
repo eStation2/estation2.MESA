@@ -33,25 +33,16 @@ Ext.define('Ext.grid.filters.filter.TriFilter', {
         if (filterLt || filterGt || filterEq) {
             // This filter was restored from stateful filters on the store so enforce it as active.
             stateful = me.active = true;
-            if (filterLt) {
-                me.onStateRestore(filterLt);
-            }
-            if (filterGt) {
-                me.onStateRestore(filterGt);
-            }
-            if (filterEq) {
-                me.onStateRestore(filterEq);
-            }
         } else {
             // Once we've reached this block, we know that this grid filter doesn't have a stateful filter, so if our
             // flag to begin saving future filter mutations is set we know that any configured filter must be nulled
             // out or it will replace our stateful filter.
-            if (me.grid.stateful && me.getGridStore().saveStatefulFilters) {
+            if (me.grid.stateful && me.getStore().saveStatefulFilters) {
                 value = undefined;
             }
 
             // TODO: What do we mean by value === null ?
-            me.active = me.getActiveState(config, value);
+            me.active = !!value;
         }
 
         // Note that stateful filters will have already been gotten above. If not, or if all filters aren't stateful, we
@@ -75,12 +66,9 @@ Ext.define('Ext.grid.filters.filter.TriFilter', {
 
         me.filter = filter;
 
-        if (me.active) {
-            me.setColumnActive(true);
-            if (!stateful) {
-                for (operator in value) {
-                    me.addStoreFilter(me.filter[operator]);
-                }
+        if (!stateful && me.active) {
+            for (operator in value) {
+                me.addStoreFilter(me.filter[operator]);
             }
             // TODO: maybe call this.activate?
         }
@@ -93,11 +81,11 @@ Ext.define('Ext.grid.filters.filter.TriFilter', {
      */
     activate: function (showingMenu) {
         var me = this,
-            filters = me.filter,
+            filters = this.filter,
             fields = me.fields,
-            filter, field, operator, value, isRootMenuItem;
+            filter, field, operator, value;
 
-        if (me.preventFilterRemoval) {
+        if (me.settingValue) {
             return;
         }
 
@@ -107,20 +95,9 @@ Ext.define('Ext.grid.filters.filter.TriFilter', {
             value = filter.getValue();
 
             if (value) {
+                value = me.convertValue(value, /*convertToDate*/ true);
                 field.setValue(value);
-
-                // Some types, such as Date, have additional menu check items in their Filter menu hierarchy. Others, such as Number, do not.
-                // Because of this, it is necessary to make sure that the direct menuitem ancestor of the fields is not the rootMenuItem (the
-                // "Filters" menu item), which has its checked state controlled elsewhere.
-                //
-                // In other words, if the ancestor is not the rootMenuItem, check it.
-                if (isRootMenuItem === undefined) {
-                    isRootMenuItem = me.owner.activeFilterMenuItem === field.up('menuitem');
-                }
-
-                if (!isRootMenuItem) {
-                    field.up('menuitem').setChecked(true, /*suppressEvents*/ true);
-                }
+                field.up('menuitem').setChecked(true, /*suppressEvents*/ true);
 
                 // Note that we only want to add store filters when they've been removed, which means that when Filter.showMenu() is called
                 // we DO NOT want to add a filter as they've already been added!
@@ -136,43 +113,41 @@ Ext.define('Ext.grid.filters.filter.TriFilter', {
      * This method will be called when a filter is deactivated. The UI and the store will be synced.
      */
     deactivate: function () {
-        var me = this,
-            filters = me.filter,
+        var filters = this.filter,
             f, filter;
 
-        if (!me.countActiveFilters() || me.preventFilterRemoval) {
+        if (!this.hasActiveFilter() || this.settingValue) {
             return;
         }
 
-        me.preventFilterRemoval = true;
+        this.settingValue = true;
 
         for (f in filters) {
             filter = filters[f];
 
             if (filter.getValue()) {
-                me.removeStoreFilter(filter);
+                this.removeStoreFilter(filter);
             }
         }
 
-        me.preventFilterRemoval = false;
+        this.settingValue = false;
     },
 
-    countActiveFilters: function () {
-        var filters = this.filter,
-            filterCollection = this.getGridStore().getFilters(),
-            prefix = this.getBaseIdPrefix(),
-            i = 0,
-            filter;
+    hasActiveFilter: function () {
+        var active = false,
+            filters = this.filter,
+            filterCollection = this.getStore().getFilters();
 
         if (filterCollection.length) {
             for (filter in filters) {
-                if (filterCollection.get(prefix + '-' + filter)) {
-                    i++;
+                if (filterCollection.map[this.getBaseIdPrefix() + '-' + filter]) {
+                    active = true;
+                    break;
                 }
             }
         }
 
-        return i;
+        return active;
     },
 
     onFilterRemove: function (operator) {
@@ -182,7 +157,7 @@ Ext.define('Ext.grid.filters.filter.TriFilter', {
         // Filters can be removed at any time, even before a column filter's menu has been created (i.e.,
         // store.clearFilter()). So, only call setValue() if the menu has been created since that method
         // assumes that menu fields exist.
-        if (!me.menu && me.countActiveFilters()) {
+        if (!me.menu && !me.hasActiveFilter()) {
             me.active = false;
         } else if (me.menu) {
             value = {};
@@ -191,102 +166,100 @@ Ext.define('Ext.grid.filters.filter.TriFilter', {
         }
     },
 
-    onStateRestore: Ext.emptyFn,
-
     setValue: function (value) {
         var me = this,
+            fields = me.fields,
             filters = me.filter,
             add = [],
             remove = [],
             active = false,
-            filterCollection = me.getGridStore().getFilters(),
-            field, filter, v, i, len, rLen, aLen;
+            filterCollection = me.getStore().getFilters(),
+            field, filter, v, i, len;
 
-        if (me.preventFilterRemoval) {
+        if (me.settingValue) {
             return;
         }
 
-        me.preventFilterRemoval = true;
+        me.settingValue = true;
 
         if ('eq' in value) {
-            v = filters.lt.getValue();
-            if (v || v === 0) {
-                remove.push(filters.lt);
+            if (filters.lt.getValue()) {
+                remove.push(fields.lt);
             }
 
-            v = filters.gt.getValue();
-            if (v || v === 0) {
-                remove.push(filters.gt);
+            if (filters.gt.getValue()) {
+                remove.push(fields.gt);
             }
 
-            v = value.eq;
-            if (v || v === 0) {
-                add.push(filters.eq);
+            if (value.eq) {
+                v = me.convertValue(value.eq, /*convertToDate*/ false);
+
+                add.push(fields.eq);
                 filters.eq.setValue(v);
             } else {
-                remove.push(filters.eq);
+                remove.push(fields.eq);
             }
         } else {
-            v = filters.eq.getValue();
-            if (v || v === 0) {
-                remove.push(filters.eq);
+            if (filters.eq.getValue()) {
+                remove.push(fields.eq);
             }
 
             if ('lt' in value) {
-                v = value.lt;
-                if (v || v === 0) {
-                    add.push(filters.lt);
+                if (value.lt) {
+                    v = me.convertValue(value.lt, /*convertToDate*/ false);
+
+                    add.push(fields.lt);
                     filters.lt.setValue(v);
                 } else {
-                    remove.push(filters.lt);
+                    remove.push(fields.lt);
                 }
             }
 
             if ('gt' in value) {
-                v = value.gt;
-                if (v || v === 0) {
-                    add.push(filters.gt);
+                if (value.gt) {
+                    v = me.convertValue(value.gt, /*convertToDate*/ false);
+
+                    add.push(fields.gt);
                     filters.gt.setValue(v);
                 } else {
-                    remove.push(filters.gt);
+                    remove.push(fields.gt);
                 }
             }
         }
 
-        // Note that we don't want to update the filter collection unnecessarily, so we must know the
-        // current number of active filters that this TriFilter has +/- the number of filters we're
-        // adding and removing, respectively. This will determine the present active state of the
-        // TriFilter which we can use to not only help determine if the condition below should pass
-        // but (if it does) how the active state should then be updated.
-        rLen = remove.length;
-        aLen = add.length;
-        active = !!(me.countActiveFilters() + aLen - rLen);
-
-        if (rLen || aLen || active !== me.active) {
-            // Begin the update now because the update could also be triggered if #setActive is called.
-            // We must wrap all the calls that could change the filter collection.
+        if (remove.length || add.length) {
             filterCollection.beginUpdate();
 
-            if (rLen) {
-                for (i = 0; i < rLen; i++) {
-                    filter = remove[i];
+            if (remove.length) {
+                for (i = 0, len = remove.length; i < len; i++) {
+                    field = remove[i];
+                    filter = field.filter;
 
-                    me.fields[filter.getOperator()].setValue(null);
+                    field.setValue(null);
                     filter.setValue(null);
                     me.removeStoreFilter(filter);
                 }
             }
-
-            if (aLen) {
-                for (i = 0; i < aLen; i++) {
-                    me.addStoreFilter(add[i]);
+            
+            if (add.length) {
+                for (i = 0, len = add.length; i < len; i++) {
+                    me.addStoreFilter(add[i].filter);
                 }
+
+                active = true;
             }
 
-            me.setActive(active);
             filterCollection.endUpdate();
         }
 
-        me.preventFilterRemoval = false;
+        if (!active && filterCollection.length) {
+            active = me.hasActiveFilter();
+        }
+
+        if (!active || !me.active) {
+            me.setActive(active);
+        }
+
+        me.settingValue = false;
     }
 });

@@ -45,6 +45,7 @@ Ext.define('Ext.app.bindinspector.ComponentDetail', {
     
     initComponent: function() {
         var me = this,
+            parentCt = me.up('bindinspector-container'),
             comp = me.component || {},
             env = me.env,
             publishes = comp.publishes,
@@ -182,6 +183,7 @@ Ext.define('Ext.app.bindinspector.ComponentDetail', {
             key = rec.get('key'),
             descriptor = me.descriptorRenderer(rec.get('descriptor'), meta, rec),
             value = Ext.app.bindinspector.Util.valueRenderer(rec.get('value')),
+            src = '',
             bindingType = 'Direct';
 
         // provide a default output for empty / null bindings values
@@ -196,7 +198,7 @@ Ext.define('Ext.app.bindinspector.ComponentDetail', {
         if (binding.isTemplateBinding) {
             bindingType = 'Template';
         } else if (binding.isMultiBinding) {
-            bindingType = 'Multi';
+            bindingType = 'Multi'
         }
         bindingType = Ext.util.Format.format('<div data-qtip="Binding Type" data-qclass="' + Ext.baseCSSPrefix + 'componentlist-tip" class="' + Ext.baseCSSPrefix + 'bindinspector-bind-type">{0}</div>', bindingType);
 
@@ -207,12 +209,13 @@ Ext.define('Ext.app.bindinspector.ComponentDetail', {
     // selecting a binding detail node will highlight the source from the view model if the
     // checkbox is checked
     onHighlightChange: function (field) {
-        var compDetail = this.down('gridpanel'),
+        var vmDetail = this.down('bindinspector-viewmodeldetail'),
+            compDetail = this.down('gridpanel'),
             selModel = compDetail.getSelectionModel();
 
         // if the checkbox is not checked then remove the highlighting from the view model detail view
         if (!field.checked) {
-            this.onSelectionChange(selModel, null, true);
+            this.onSelectionChange(selModel, null, true)
         } else { // else re-apply the highlighting
             this.onSelectionChange(selModel, selModel.getSelection());
         }
@@ -223,7 +226,7 @@ Ext.define('Ext.app.bindinspector.ComponentDetail', {
     onSelectionChange: function (selModel, selected, clear) {
         var vmDetail = this.down('bindinspector-viewmodeldetail'),
             store = vmDetail.getStore(),
-            tokens, binding, highlight, root, targets, highlighted;
+            tokens, binding, highlight, store, root, targets, highlighted;
 
         if ((selected && selected.length === 0) || clear === true) {
             store.suspendEvents();
@@ -356,7 +359,7 @@ Ext.define('Ext.app.bindinspector.ComponentDetail', {
             addlCls = '',
             tip = '',
             baseToken = '',
-            ownerVMs, len, vmPlural;
+            ownerVms, len, vmPlural;
 
         tokens = tokens || [];
         

@@ -122,13 +122,11 @@ Ext.define('Ext.ProgressBar', {
      */
 
     initRenderData: function() {
-        var me = this,
-            value = me.value || 0;
-
+        var me = this;
         return Ext.apply(me.callParent(), {
             internalText : !me.hasOwnProperty('textEl'),
             text         : me.text || '&#160;',
-            percentage   : value * 100
+            percentage   : me.value ? me.value * 100 : 0
         });
     },
 
@@ -148,10 +146,6 @@ Ext.define('Ext.ProgressBar', {
             // renderSelectors):
             me.textEl = me.el.select('.' + me.baseCls + '-text');
         }
-    },
-
-    applyValue: function(value) {
-        return value || 0;
     },
 
     updateValue: function(value) {
@@ -174,8 +168,6 @@ Ext.define('Ext.ProgressBar', {
      * @return {Ext.ProgressBar} this
      */
     updateProgress: function(value, text, animate) {
-        value = value || 0;
-
         var me = this,
             oldValue = me.value,
             textTpl = me.getTextTpl();

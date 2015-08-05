@@ -52,12 +52,12 @@ Ext.define('esapp.store.DataSetsStore', {
         }
     }
     ,grouper:{
-        property: 'cat_descr_name',
-        groupFn : function (item) {
-            //return "<span style='display: none;'>" + item.get('order_index') + "</span>" + item.get('cat_descr_name')
-            return item.get('cat_descr_name')
-        },
-        sortProperty: 'order_index'
+             // property: 'cat_descr_name',
+             groupFn : function (item) {
+                 return "<span style='display: none;'>" + item.get('order_index') + "</span>" + item.get('cat_descr_name')
+                 //return item.get('cat_descr_name')
+             },
+             sortProperty: 'order_index'
     }
     ,listeners: {
         write: function(store, operation){

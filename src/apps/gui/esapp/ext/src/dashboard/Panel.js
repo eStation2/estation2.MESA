@@ -69,8 +69,7 @@ Ext.define('Ext.dashboard.Panel', {
         Ext.resumeLayouts(true);
 
         if (closeAction === 'hide') {
-            // Restore the opacity from doClose
-            me.el.setOpacity(1);
+            me.el.setOpacity(0);
         }
     },
 

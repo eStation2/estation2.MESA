@@ -122,6 +122,7 @@ Ext.define('Ext.sparkline.Line', {
         this.xvalues = [];
         this.yvalues = [];
         this.yminmax = [];
+        this.hightlightSpotId = null;
     },
 
     getRegion: function(x, y) {

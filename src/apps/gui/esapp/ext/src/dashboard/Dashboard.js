@@ -23,7 +23,7 @@ Ext.define('Ext.dashboard.Dashboard', {
 
     defaultType: 'dashboard-column',
 
-    scrollable: true,
+    autoScroll: true,
 
     layout: null,
 
@@ -41,73 +41,11 @@ Ext.define('Ext.dashboard.Dashboard', {
 
     renderConfig: {
         /**
-         * @cfg {Number} maxColumns
+         * @cfg {Object} maxColumns
          * The maximum number of visible columns.
          */
         maxColumns: 4
     },
-
-    /**
-     * @cfg {Number[]} columnWidths
-     * An array designating the width of columns in your dashboard's default state as described
-     * by the {@link #cfg-defaultContent} property. For example:
-     *
-     *    columnWidths: [
-     *       0.35,
-     *       0.40,
-     *       0.25
-     *    ]
-     *    
-     * As you can see, this array contains the default widths for the 3 columns in the dashboard's 
-     * initial view. The column widths should total to an integer value, typically 1 as shown
-     * above. When column widths exceed 1, they will be wrapped effectively creating "rows". This
-     * means that if your column widths add up to more than 1, you would still want the first few
-     * to total 1 to ensure that the first row fills the dashboard space. This applies whenever
-     * the column widths extend past an integer value.
-     * 
-     * **Note:** columnWidths will not be utilized if there is stateful information that 
-     * dictates different user saved column widths.
-     */
-
-    /**
-     * @cfg {Object[]} defaultContent
-     * An array of {@link Ext.dashboard.Part part} configuration objects that define your dashboard's
-     * default state. These should not be confused with component configurations.
-     *
-     * Each config object should also include:
-     *
-     * + `type` - The type of {@link Ext.dashboard.Part part} that you want to be generated.
-     * + `columnIndex` - The column position in which the {@link Ext.dashboard.Part part} should reside.
-     * + `height` - The desired height of the {@link Ext.dashboard.Part part} to be generated.
-     *
-     * The remaining properties are specific to your part's config object. For example:      
-     *
-     *       defaultContent: [{
-     *           type: 'rss',
-     *           columnIndex: 0,
-     *           height: 500,
-     *           feedUrl: 'http://feeds.feedburner.com/extblog'
-     *       }, {
-     *           type: 'stockTicker',
-     *           columnIndex: 1,
-     *           height: 300
-     *       }, {
-     *           type: 'stocks',
-     *           columnIndex: 1,
-     *           height: 300
-     *       }, {
-     *           type: 'rss',
-     *           columnIndex: 2,
-     *           height: 350,
-     *           feedUrl: 'http://rss.cnn.com/rss/edition.rss'
-     *       }]
-     *
-     * Default column widths are defined by {@link #cfg-columnWidths} and not in these
-     * part config objects.
-     * 
-     * **Note:** defaultContent will not be utilized if there is stateful information that 
-     * dictates different user saved positioning and componentry.
-     */
 
     /**
      * @event validatedrop
@@ -184,9 +122,8 @@ Ext.define('Ext.dashboard.Dashboard', {
 
     addView: function (instance, columnIndex, beforeAfter) {
         var me = this,
-            // We are only concerned with columns (ignore splitters).
-            items = me.query('dashboard-column'),
-            count = items.length,
+            items = me.items,
+            count = items.getCount(),
             index = columnIndex || 0,
             view = instance.id ? instance : me.createView(instance),
             columnWidths = me.columnWidths,
@@ -194,12 +131,9 @@ Ext.define('Ext.dashboard.Dashboard', {
 
         if (!count) {
             // if the layout is empty, assert a full initially
-            column = me.add(0, me.createColumn({
-                columnWidth: (Ext.isArray(columnWidths) ? columnWidths[0] : 1)
-            }));
-
-            items = [column];
+            column = me.add(0, me.createColumn({columnWidth : 1}));
             count = 1;
+            columnWidths = me.columnWidths = [];
         }
 
         if (index >= count) {
@@ -208,8 +142,7 @@ Ext.define('Ext.dashboard.Dashboard', {
         }
 
         if (!beforeAfter) {
-            column = items[index];
-
+            column = items.getAt(index);
             if (column) {
                 return column.add(view);
             }
@@ -230,7 +163,7 @@ Ext.define('Ext.dashboard.Dashboard', {
         }
 
         column.items.push(view);
-        column = me.add(column);
+        column = me.add(index, column);
 
         return column.items.first();
     },
@@ -239,7 +172,7 @@ Ext.define('Ext.dashboard.Dashboard', {
         var cycle = this.cycleLayout;
         return Ext.apply({
             items : [],
-            bubbleEvents : ['add', 'remove', 'childmove', 'resize'],
+            bubbleEvents : ['add','remove','move', 'resize'],
             listeners: {
                 remove: this.onRemoveItem,
                 expand  : cycle,

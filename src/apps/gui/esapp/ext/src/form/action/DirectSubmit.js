@@ -1,5 +1,4 @@
 /**
- * @class Ext.form.action.DirectSubmit
  * Provides Ext.direct support for submitting form data.
  *
  * This example illustrates usage of Ext.direct.Direct to **submit** a form through Ext.Direct.
@@ -88,40 +87,43 @@
  * Also see the discussion in {@link Ext.form.action.DirectLoad}.
  */
 Ext.define('Ext.form.action.DirectSubmit', {
-    extend: 'Ext.form.action.Submit',
+    extend:'Ext.form.action.Submit',
+    requires: ['Ext.direct.Manager'],
     alternateClassName: 'Ext.form.Action.DirectSubmit',
     alias: 'formaction.directsubmit',
-    
-    requires: [
-        'Ext.direct.Manager'
-    ],
-    
-    mixins: [
-        'Ext.form.action.DirectAction'
-    ],
 
     type: 'directsubmit',
 
     doSubmit: function() {
         var me = this,
             form = me.form,
-            metadata = me.metadata || form.metadata,
-            timeout = me.timeout || form.timeout,
-            fn, formInfo, args;
+            api = form.api,
+            fn = api.submit,
+            formInfo, options;
+
+        if (typeof fn !== 'function') {
+            //<debug>
+            var fnName = fn;
+            //</debug>
+            
+            api.submit = fn = Ext.direct.Manager.parseMethod(fn);
+
+            //<debug>
+            if (!Ext.isFunction(fn)) {
+                Ext.Error.raise('Cannot resolve Ext.Direct API method ' + fnName);
+            }
+            //</debug>
+        }
         
-        fn       = me.resolveMethod('submit');
+        if (me.timeout || form.timeout) {
+            options = {
+                timeout: me.timeout * 1000 || form.timeout * 1000
+            };
+        }
+        
         formInfo = me.buildForm();
         
-        args = fn.directCfg.method.getArgs({
-            params: formInfo.formEl,
-            options: timeout != null ? { timeout: timeout * 1000 } : null,
-            metadata: metadata,
-            callback: me.onComplete,
-            scope: me
-        });
-        
-        fn.apply(window, args);
-        
+        fn.call(window, formInfo.formEl, me.onComplete, me, options);
         me.cleanup(formInfo);
     },
 

@@ -1,4 +1,4 @@
-<project name="x-slice-impl">
+<project name="slice-impl">
 
     <!--
     Uses the compiler to generate a special theme-only scss file containing

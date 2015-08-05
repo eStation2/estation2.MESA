@@ -23,12 +23,12 @@ Ext.define('Ext.grid.filters.filter.SingleFilter', {
             // Once we've reached this block, we know that this grid filter doesn't have a stateful filter, so if our
             // flag to begin saving future filter mutations is set we know that any configured filter must be nulled
             // out or it will replace our stateful filter.
-            if (me.grid.stateful && me.getGridStore().saveStatefulFilters) {
+            if (me.grid.stateful && me.getStore().saveStatefulFilters) {
                 value = undefined;
             }
 
             // TODO: What do we mean by value === null ?
-            me.active = me.getActiveState(config, value);
+            me.active = value !== undefined;
 
             // Now we're acting on user configs so let's not futz with any assumed settings.
             filter = me.createFilter({
@@ -39,10 +39,6 @@ Ext.define('Ext.grid.filters.filter.SingleFilter', {
             if (me.active) {
                 me.addStoreFilter(filter);
             }
-        }
-
-        if (me.active) {
-            me.setColumnActive(true);
         }
 
         me.filter = filter;
@@ -58,10 +54,6 @@ Ext.define('Ext.grid.filters.filter.SingleFilter', {
 
     deactivate: function () {
         this.removeStoreFilter(this.filter);
-    },
-
-    getValue: function (field) {
-        return field.getValue();
     },
 
     onFilterRemove: function () {

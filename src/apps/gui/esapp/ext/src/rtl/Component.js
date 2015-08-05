@@ -10,16 +10,6 @@ Ext.define('Ext.rtl.Component', {
      * Can be explicitly set to false to override a true value inherited from an ancestor.
      */
 
-    applyScrollable: function(scrollable, oldScrollable) {
-        var ret = this.callParent([scrollable, oldScrollable]);
-
-        if (ret && this.getInherited().rtl) {
-            ret.setRtl(true);
-        }
-
-        return ret;
-    },
-
     convertPositionSpec: function(posSpec) {
         // Since anchoring is done based on page level coordinates, we need to invert
         // left and right in the position spec when the direction of the compoent being
@@ -34,7 +24,7 @@ Ext.define('Ext.rtl.Component', {
         var doc = document,
             pos, scroll, extraX, extraY;
 
-        if (el.dom === doc.body || el.dom === doc) {
+        if (el.dom == doc.body || el.dom == doc) {
             // anchor the element using the same coordinate system as the viewport or body
             scroll = Ext.rootInheritedState.rtl ? el.rtlGetScroll() : el.getScroll();
             extraX = scroll.left;
@@ -169,10 +159,41 @@ Ext.define('Ext.rtl.Component', {
     },
     
     isOppositeRootDirection: function(){
-        return !this.getInherited().rtl !== !Ext.rootInheritedState.rtl; // jshint ignore:line
+        return !this.getInherited().rtl !== !Ext.rootInheritedState.rtl;
     },
 
     privates: {
+        doScrollTo: function(x, y, animate) {
+            var me = this,
+                overflowEl = me.getOverflowEl();
+
+            overflowEl[me.getInherited().rtl ? 'rtlScrollTo' : 'scrollTo']('left', x, animate);
+            overflowEl.scrollTo('top', y, animate);
+        },
+
+        doScrollBy: function(deltaX, deltaY, animate) {
+            var me = this,
+                overflowEl = me.getOverflowEl();
+
+            if (overflowEl) {
+                overflowEl[me.getInherited().rtl ? 'rtlScrollBy' : 'scrollBy'](deltaX, deltaY, animate);
+            }
+        },
+
+        getScrollLeft: function() {
+            var me = this,
+                rtl = me.getInherited().rtl;
+
+            return me.getOverflowEl()[rtl ? 'rtlGetScrollLeft' : 'getScrollLeft']();
+        },
+
+        setScrollLeft: function(left) {
+            var me = this,
+                rtl = me.getInherited().rtl;
+
+            me.getOverflowEl()[rtl ? 'rtlSetScrollLeft' : 'setScrollLeft'](left);
+        },
+
         initStyles: function(){
             if (this.getInherited().rtl) {
                 this.horizontalPosProp = 'right';
@@ -189,7 +210,7 @@ Ext.define('Ext.rtl.Component', {
         }
     }
 }, function() {
-    Ext.onInternalReady(function() {
+    Ext.onReady(function() {
         // If the document or body has "direction:rtl" then we set the rtl flag in the
         // root hierarchy state so that the page-level coordinate system will be
         // right-based (similar to using a Viewport with "rtl: true").

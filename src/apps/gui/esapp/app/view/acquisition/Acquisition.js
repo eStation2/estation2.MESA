@@ -68,17 +68,15 @@ Ext.define("esapp.view.acquisition.Acquisition",{
     rowLines: true,
     frame: false,
     border: false,
-    bufferedRenderer: true,
 
     features: [{
         id: 'productcategories',
         ftype: 'grouping',
-        collapsible:false,
-        groupHeaderTpl: Ext.create('Ext.XTemplate', '<div class="group-header-style">{name} ({children.length})</div>')
-        //,hideGroupedHeader: true
-        //,enableGroupingMenu: false
-        //,startCollapsed : true
-        //,groupByText: 'Product category'
+        groupHeaderTpl: Ext.create('Ext.XTemplate', '<div class="group-header-style">{name} ({children.length})</div>'),
+        hideGroupedHeader: true,
+        enableGroupingMenu: false,
+        startCollapsed : false,
+        groupByText: 'Product category'
     }],
 
     //plugins:[{
@@ -231,20 +229,20 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                 // glyph: 'xf055@FontAwesome',
                 scale: 'medium',
                 handler: 'selectProduct'
-            //},{
-            //    text: 'Expand All',
-            //    handler: function(btn) {
-            //        var view = btn.up().up().getView();
-            //        view.getFeature('productcategories').expandAll();
-            //        view.refresh();
-            //    }
-            //}, {
-            //    text: 'Collapse All',
-            //    handler: function(btn) {
-            //        var view = btn.up().up().getView();
-            //        view.getFeature('productcategories').collapseAll();
-            //        view.refresh();
-            //    }
+            },{
+                text: 'Expand All',
+                handler: function(btn) {
+                    var view = btn.up().up().getView();
+                    view.getFeature('productcategories').expandAll();
+                    view.refresh();
+                }
+            }, {
+                text: 'Collapse All',
+                handler: function(btn) {
+                    var view = btn.up().up().getView();
+                    view.getFeature('productcategories').collapseAll();
+                    view.refresh();
+                }
             }, '->',
             {
                 xtype: 'servicemenubutton',
@@ -470,18 +468,17 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                         column.titleEl.removeCls('x-column-header-inner');
                     }
                 },
-                onWidgetAttach: function(column, widget, record) {
+                onWidgetAttach: function(widget, record) {
                     Ext.suspendLayouts();
 
                     var daStore = widget.getViewModel().get('productdatasources');
-                    if (daStore) {
-                        daStore.setFilters({
-                            property: 'productid'
-                            , value: record.id
-                            , anyMatch: true
-                        });
-                    }
-                    Ext.resumeLayouts(true);
+                    daStore.setFilters({
+                         property:'productid'
+                        ,value:record.id
+                        ,anyMatch:true
+                    });
+
+                     Ext.resumeLayouts(true);
                 },
                 widget: {
                     xtype: 'dataacquisitiongrid'
@@ -534,16 +531,14 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                       column.titleEl.removeCls('x-column-header-inner');
                   }
                 },
-                onWidgetAttach: function(column, widget, record) {
+                onWidgetAttach: function(widget, record) {
                     Ext.suspendLayouts();
                     var daStore = widget.getViewModel().get('productingestions');
-                    if (daStore) {
-                        daStore.setFilters({
-                            property: 'productid'
-                            , value: record.id
-                            , anyMatch: true
-                        });
-                    }
+                    daStore.setFilters({
+                         property:'productid'
+                        ,value:record.id
+                        ,anyMatch:true
+                    });
                     Ext.resumeLayouts(true);
                 },
                 widget: {

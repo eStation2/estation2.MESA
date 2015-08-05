@@ -46,17 +46,13 @@ Ext.define('Ext.tree.Column', {
         var me = this;
 
         me.setupRenderer();
-
-        // This always uses its own renderer.
-        // Any custom renderer is used as an inner renderer to produce the text node of a tree cell.
-        me.innerRenderer = me.renderer;
+        me.origRenderer = me.renderer;
+        me.origScope = me.scope || window;
 
         me.renderer = me.treeRenderer;
         me.scope = me;
 
         me.callParent();
-        
-        me.hasCustomRenderer = me.innerRenderer && me.innerRenderer.length > 1;
     },
 
     treeRenderer: function(value, metaData, record, rowIdx, colIdx, store, view){
@@ -64,9 +60,7 @@ Ext.define('Ext.tree.Column', {
             cls = record.get('cls'),
             rendererData;
 
-        // The initial render will inject the cls into the TD's attributes.
-        // If cls is ever *changed*, then the full rendering path is followed.
-        if (metaData && cls) {
+        if (cls) {
             metaData.tdCls += ' ' + cls;
         }
 
@@ -77,7 +71,7 @@ Ext.define('Ext.tree.Column', {
     
     initTemplateRendererData: function(value, metaData, record, rowIdx, colIdx, store, view) {
         var me = this,
-            innerRenderer = me.innerRenderer,
+            renderer = me.origRenderer,
             data = record.data,
             parent = record.parentNode,
             rootVisible = view.rootVisible,
@@ -114,7 +108,7 @@ Ext.define('Ext.tree.Column', {
             // expander, elbow, checkbox).  This is used by the rtl override to add the
             // "x-rtl" class to these elements.
             childCls: me.getChildCls ? me.getChildCls() + ' ' : '',
-            value: innerRenderer ? innerRenderer.apply(me.rendererScope, arguments) : value
+            value: renderer ? renderer.apply(me.origScope, arguments) : value
         };
     }
 });

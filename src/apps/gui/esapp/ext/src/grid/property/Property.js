@@ -32,15 +32,5 @@ Ext.define('Ext.grid.property.Property', {
     }, {
         name: 'value'
     }],
-    idProperty: 'name',
-
-    constructor: function(data, value) {
-        if (!Ext.isObject(data)) {
-            data = {
-                name: data,
-                value: value
-            };
-        }
-        this.callParent([data]);
-    }
+    idProperty: 'name'
 });

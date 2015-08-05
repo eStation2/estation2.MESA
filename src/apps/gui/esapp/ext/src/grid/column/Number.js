@@ -59,10 +59,6 @@ Ext.define('Ext.grid.column.Number', {
      * @hide
      */
 
-    /**
-     * @cfg {Boolean} producesHTML
-     * @inheritdoc
-     */
     producesHTML: false,
 
     defaultRenderer: function(value) {

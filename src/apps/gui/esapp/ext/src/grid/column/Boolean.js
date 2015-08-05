@@ -3,22 +3,30 @@
  * config option of {@link Ext.grid.column.Column} for more details.
  *
  *     @example
- *     var store = Ext.create('Ext.data.Store', {
- *        fields: [
+ *     Ext.create('Ext.data.Store', {
+ *        storeId:'sampleStore',
+ *        fields:[
  *            {name: 'framework', type: 'string'},
  *            {name: 'rocks', type: 'boolean'}
  *        ],
- *        data: [
- *            { framework: 'Ext JS 5', rocks: true },
- *            { framework: 'Sencha Touch', rocks: true },
- *            { framework: 'Ext GWT', rocks: true },
- *            { framework: 'Other Guys', rocks: false }
- *        ]
+ *        data:{'items':[
+ *            { 'framework': "Ext JS 4",     'rocks': true  },
+ *            { 'framework': "Sencha Touch", 'rocks': true  },
+ *            { 'framework': "Ext GWT",      'rocks': true  },
+ *            { 'framework': "Other Guys",   'rocks': false }
+ *        ]},
+ *        proxy: {
+ *            type: 'memory',
+ *            reader: {
+ *                type: 'json',
+ *                rootProperty: 'items'
+ *            }
+ *        }
  *     });
  *
  *     Ext.create('Ext.grid.Panel', {
  *         title: 'Boolean Column Demo',
- *         store: store,
+ *         store: Ext.data.StoreManager.lookup('sampleStore'),
  *         columns: [
  *             { text: 'Framework',  dataIndex: 'framework', flex: 1 },
  *             {
@@ -73,10 +81,6 @@ Ext.define('Ext.grid.column.Boolean', {
      * @hide
      */
 
-     /**
-     * @cfg {Boolean} producesHTML
-     * @inheritdoc
-     */
     producesHTML: false,
 
     defaultRenderer: function(value){
@@ -91,6 +95,6 @@ Ext.define('Ext.grid.column.Boolean', {
     },
 
     updater: function(cell, value) {
-        cell.firstChild.innerHTML = Ext.grid.column.Boolean.prototype.defaultRenderer.call(this, value);
+        cell.firstChild.firstChild.data = Ext.grid.column.Boolean.prototype.defaultRenderer.call(this, value);
     }
 });

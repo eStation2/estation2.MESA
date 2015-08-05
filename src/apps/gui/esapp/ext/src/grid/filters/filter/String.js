@@ -1,50 +1,28 @@
 /**
- * The string grid filter allows you to create a filter selection that limits results
- * to values matching a particular string.  The filter can be set programmatically or via 
- * user input with a configurable {@link Ext.form.field.Text text field} in the filter section 
- * of the column header.
+ * Filter by a configurable Ext.form.field.Text
  *
- * Example String Filter Usage:
+ * Example Usage:
  *
- *     @example
- *     var shows = Ext.create('Ext.data.Store', {
- *         fields: ['id','show'],
- *         data: [
- *             {id: 0, show: 'Battlestar Galactica'},
- *             {id: 1, show: 'Doctor Who'},
- *             {id: 2, show: 'Farscape'},
- *             {id: 3, show: 'Firefly'},
- *             {id: 4, show: 'Star Trek'},
- *             {id: 5, show: 'Star Wars: Christmas Special'}
- *         ]
- *     });
- *   
- *     Ext.create('Ext.grid.Panel', {
- *         renderTo: Ext.getBody(),
- *         title: 'Sci-Fi Television',
- *         height: 250,
- *         width: 250,
- *         store: shows,
- *         plugins: 'gridfilters',
+ *     var grid = Ext.create('Ext.grid.Panel', {
+ *         ...
  *         columns: [{
- *             dataIndex: 'id',
- *             text: 'ID',
- *             width: 50
- *         },{
- *             dataIndex: 'show',
- *             text: 'Show',
- *             flex: 1,
+ *             text: 'Name',
+ *             dataIndex: 'name',
+ *
  *             filter: {
  *                 // required configs
  *                 type: 'string',
+ *
  *                 // optional configs
- *                 value: 'star',  // setting a value makes the filter active. 
+ *                 value: 'foo',
+ *                 active: true, // default is false
  *                 itemDefaults: {
  *                     // any Ext.form.field.Text configs accepted
  *                 }
  *             }
- *         }]
- *     }); 
+ *         }],
+ *         ...
+ *     });
  */
 Ext.define('Ext.grid.filters.filter.String', {
     extend: 'Ext.grid.filters.filter.SingleFilter',
@@ -54,13 +32,11 @@ Ext.define('Ext.grid.filters.filter.String', {
 
     operator: 'like',
 
-    //<locale>
     /**
      * @cfg {String} emptyText
      * The empty text to show for each field.
      */
     emptyText: 'Enter Filter Text...',
-    //</locale>
 
     itemDefaults: {
         xtype: 'textfield',
@@ -101,13 +77,29 @@ Ext.define('Ext.grid.filters.filter.String', {
 
         me.inputItem.on({
             scope: me,
-            keyup: me.onValueChange,
+            keyup: {
+                fn: me.onInputKeyUp,
+                buffer: 200
+            },
             el: {
                 click: function(e) {
                     e.stopPropagation();
                 }
             }
         });
+    },
+
+    /**
+     * @private
+     * Handler method called when there is a keyup event on this.inputItem
+     */
+    onInputKeyUp: function (field, e) {
+        if (e.getKey() === e.RETURN && field.isValid()) {
+            this.menu.hide();
+            return;
+        }
+
+        this.setValue(field.getValue());
     },
 
     /**
@@ -125,8 +117,7 @@ Ext.define('Ext.grid.filters.filter.String', {
         me.filter.setValue(value);
 
         if (value && me.active) {
-            me.value = value;
-            me.updateStoreFilter();
+            me.updateStoreFilter(me.filter);
         } else {
             me.setActive(!!value);
         }

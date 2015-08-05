@@ -15,11 +15,19 @@ Ext.define('Ext.overrides.event.publisher.Gesture', {
                 this.callParent([e, isEnd]);
             },
 
-            doDelegatedEvent: function(e) {
-                // Workaround IE's "Member not found" errors when accessing an event
-                // object asynchronously.  Needed for all gesture handlers because
-                // they use requestAnimationFrame (see enableIEAsync for more details)
-                this.callParent([Ext.event.Event.enableIEAsync(e)]);
+            initHandlers: function() {
+                var me = this,
+                    superOnDelegatedEvent;
+
+                me.callParent();
+                superOnDelegatedEvent = me.onDelegatedEvent;
+
+                me.onDelegatedEvent = function(e) {
+                    // Workaround IE's "Member not found" errors when accessing an event
+                    // object asynchronously.  Needed for all gesture handlers because
+                    // they use requestAnimationFrame (see enableIEAsync for more details)
+                    superOnDelegatedEvent.call(me, Ext.event.Event.enableIEAsync(e));
+                };
             }
         });
     }

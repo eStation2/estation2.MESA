@@ -46,60 +46,60 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
     features: [{
         id: 'prodcat',
         ftype: 'grouping',
-        collapsible:false,
-        groupHeaderTpl: Ext.create('Ext.XTemplate', '<div class="group-header-style">{name} ({children.length})</div>')
-        //,hideGroupedHeader: true,
-        //enableGroupingMenu: false,
-        //startCollapsed : false,
-        //groupByText: 'Product category'
+        groupHeaderTpl: Ext.create('Ext.XTemplate', '<div class="group-header-style">{name} ({children.length})</div>'),
+        hideGroupedHeader: true,
+        enableGroupingMenu: false,
+        startCollapsed : true,
+        groupByText: 'Product category'
     }],
 
-    //listeners: {
-    //    viewready: function (){
+    listeners: {
+        viewready: function (){
             //this.suspendEvents(true);
-            //var groupFeature = this.getView().getFeature('prodcat');
-            //var me = this;
+            var groupFeature = this.getView().getFeature('prodcat');
+            var me = this;
             //console.info('me.firstGroupKey defined in afterrender In viewready: ' + me.firstGroupKey);
-            //if ( !this.getStore().isLoaded() ){
-            //    var task = new Ext.util.DelayedTask(function(){
-            //        if (me.firstGroupKey != 'undefined') {
-            //            groupFeature.expand(me.firstGroupKey, true);
-            //        } else {
-            //            groupFeature.expand("<span style='display: none;'>1</span>Vegetation", true);  // rainfall
-            //        }
-            //    });
-            //    task.delay(5000);
-            //
-            //} else {
-            //    if (me.firstGroupKey != 'undefined') {
-            //        groupFeature.expand(me.firstGroupKey, true);
-            //    } else {
-            //        groupFeature.expand("<span style='display: none;'>1</span>Vegetation", true);  // rainfall
-            //    }
-            //}
+
+            if ( !this.getStore().isLoaded() ){
+                var task = new Ext.util.DelayedTask(function(){
+                    if (me.firstGroupKey != 'undefined') {
+                        groupFeature.expand(me.firstGroupKey, true);
+                    } else {
+                        groupFeature.expand("<span style='display: none;'>1</span>Vegetation", true);  // rainfall
+                    }
+                });
+                task.delay(5000);
+
+            } else {
+                if (me.firstGroupKey != 'undefined') {
+                    groupFeature.expand(me.firstGroupKey, true);
+                } else {
+                    groupFeature.expand("<span style='display: none;'>1</span>Vegetation", true);  // rainfall
+                }
+            }
             //this.resumeEvents();
-    //    }
-    //},
+        }
+    },
 
     initComponent: function () {
         var me = this;
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             items: [{
-            //    text: 'Expand All',
-            //    handler: function(btn) {
-            //        var view = btn.up().up().getView();
-            //        view.getFeature('prodcat').expandAll();
-            //        view.refresh();
-            //    }
-            //}, {
-            //    text: 'Collapse All',
-            //    handler: function(btn) {
-            //        var view = btn.up().up().getView();
-            //        view.getFeature('prodcat').collapseAll();
-            //        view.refresh();
-            //    }
-            //}, {
+                text: 'Expand All',
+                handler: function(btn) {
+                    var view = btn.up().up().getView();
+                    view.getFeature('prodcat').expandAll();
+                    view.refresh();
+                }
+            }, {
+                text: 'Collapse All',
+                handler: function(btn) {
+                    var view = btn.up().up().getView();
+                    view.getFeature('prodcat').collapseAll();
+                    view.refresh();
+                }
+            }, {
                 text: 'My requests',
                 handler: function(btn) {
 
@@ -250,17 +250,15 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                       column.titleEl.removeCls('x-column-header-inner');
                   }
                 },
-                onWidgetAttach: function(column, widget, record) {
-                    //Ext.suspendLayouts();
-                    //if (record.getData() != null && record.getData().hasOwnProperty('productmapsets')) {
-                    //    var productmapsets = record.getData().productmapsets;
-                    //    var newstore = Ext.create('Ext.data.JsonStore', {
-                    //        model: 'ProductMapSet',
-                    //        data: productmapsets
-                    //    });
-                    //    widget.setStore(newstore);
-                    //}
-                    //Ext.resumeLayouts(true);
+                onWidgetAttach: function(widget, record) {
+                    Ext.suspendLayouts();
+                    var productmapsets = record.getData().productmapsets;
+                    var newstore = Ext.create('Ext.data.JsonStore', {
+                        model: 'ProductMapSet',
+                        data: productmapsets
+                    });
+                    widget.setStore(newstore);
+                    Ext.resumeLayouts(true);
                 },
                 widget: {
                     xtype: 'productmapsetgrid'
@@ -270,19 +268,19 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
 
         me.callParent();
 
-        //me.groupingFeature = me.view.getFeature('prodcat');
-        //
-        //me.mon(me, 'afterrender', me.onAfterRender, me);
+        me.groupingFeature = me.view.getFeature('prodcat');
+
+        me.mon(me, 'afterrender', me.onAfterRender, me);
     }
 
-    //,onAfterRender: function() {
-        //var me = this;
-        //me.getStore().load({
-        //    callback:function(){
-        //        me.firstGroupKey = me.getStore().getGroups().items[0].getGroupKey();
-        //        //console.info(me.firstGroupKey);
-        //        //me.view.getFeature('prodcat').expand(me.firstGroupKey, true);
-        //    }
-        //});
-    //}
+    ,onAfterRender: function() {
+        var me = this;
+        me.getStore().load({
+            callback:function(){
+                me.firstGroupKey = me.getStore().getGroups().items[0].getGroupKey();
+                //console.info(me.firstGroupKey);
+                //me.view.getFeature('prodcat').expand(me.firstGroupKey, true);
+            }
+        });
+    }
 });

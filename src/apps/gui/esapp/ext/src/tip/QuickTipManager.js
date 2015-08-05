@@ -110,7 +110,7 @@ Ext.define('Ext.tip.QuickTipManager', {
 
         if (!me.tip) {
             if (!Ext.isReady) {
-                Ext.onInternalReady(function(){
+                Ext.onReady(function(){
                     Ext.tip.QuickTipManager.init(autoRender, config);
                 });
                 return false;
@@ -138,7 +138,7 @@ Ext.define('Ext.tip.QuickTipManager', {
                 tipConfig.renderTo = document.body;
 
                 //<debug>
-                if (tipConfig.renderTo.tagName.toUpperCase() !== 'BODY') { // e.g., == 'FRAMESET'
+                if (tipConfig.renderTo.tagName.toUpperCase() != 'BODY') { // e.g., == 'FRAMESET'
                     Ext.Error.raise({
                         sourceClass: 'Ext.tip.QuickTipManager',
                         sourceMethod: 'init',
@@ -151,8 +151,7 @@ Ext.define('Ext.tip.QuickTipManager', {
             me.tip = Ext.create(className || 'Ext.tip.QuickTip', tipConfig);
 
             // private.
-            // Need a globally accessible way of testing whether QuickTipsManager is both 
-            // loaded AND initialized.
+            // Need a globally accessble way of testing whether QuickTipsManager is both loaded AND initialized.
             Ext.quickTipsActive = true;
         }
     },
@@ -233,7 +232,9 @@ Ext.define('Ext.tip.QuickTipManager', {
     },
 
     /**
-     * @inheritdoc Ext.tip.QuickTip#register
+     * Configures a new quick tip instance and assigns it to a target element.  See
+     * {@link Ext.tip.QuickTip#register} for details.
+     * @param {Object} config The config object
      */
     register : function(){
         var tip = this.tip;

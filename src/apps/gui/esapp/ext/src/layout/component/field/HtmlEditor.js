@@ -38,8 +38,7 @@ Ext.define('Ext.layout.component.field.HtmlEditor', {
             heightModel = ownerContext.heightModel,
             owner = me.owner,
             iframeEl = owner.iframeEl,
-            textareaEl = owner.textareaEl,
-            height = (heightModel.natural || heightModel.shrinkWrap) ? me.naturalHeight : '';
+            textareaEl = owner.textareaEl;
             
         me.callParent(arguments);
         if (widthModel.shrinkWrap) {
@@ -49,8 +48,10 @@ Ext.define('Ext.layout.component.field.HtmlEditor', {
             ownerContext.bodyCellContext.setWidth(me.naturalWidth);
         }
         
-        iframeEl.setStyle('height', height);
-        textareaEl.setStyle('height', height);
+        if (heightModel.natural || heightModel.shrinkWrap) {
+            iframeEl.setHeight(me.naturalHeight);
+            textareaEl.setHeight(me.naturalHeight);
+        }
     },
     
     finishedLayout: function(){

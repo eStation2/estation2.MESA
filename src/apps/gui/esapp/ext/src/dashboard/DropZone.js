@@ -6,13 +6,13 @@ Ext.define('Ext.dashboard.DropZone', {
     extend: 'Ext.dd.DropTarget',
 
     ddScrollConfig: {
-        vthresh: 75,
+        vthresh: 50,
         hthresh: -1,
         animate: true,
         increment: 200
     },
 
-    containerScroll: true,
+    containerScroll : true,
 
     // This causes overflow to go hidden during the drag so that we don't cause panels to
     // wrap by triggering overflow.
@@ -27,13 +27,12 @@ Ext.define('Ext.dashboard.DropZone', {
 
     getOverEvent: function (dd, e, data) {
         var dashboard = this.dashboard,
-            dbody = dashboard.body,
             items = dashboard.items.items,
-            bodyBox = dbody.getBox(),
+            bodyBox = dashboard.body.getBox(),
             count = items.length,
             xy = e.getXY(),
-            x = xy[0] - bodyBox.x + dbody.getScrollLeft(),
-            y = xy[1] - bodyBox.y + dbody.getScrollTop(),
+            x = xy[0] - bodyBox.x,
+            y = xy[1] - bodyBox.y,
             over = {
                 columnIndex: 0,
                 column: null,

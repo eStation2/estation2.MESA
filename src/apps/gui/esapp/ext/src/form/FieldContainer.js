@@ -90,6 +90,8 @@
  *         }],
  *         renderTo: Ext.getBody()
  *     });
+ * 
+ * @docauthor Jason Johnston <jason@sencha.com>
  */
 Ext.define('Ext.form.FieldContainer', {
     extend: 'Ext.container.Container',
@@ -107,9 +109,17 @@ Ext.define('Ext.form.FieldContainer', {
 
     shrinkWrap: true,
 
+    // Used by the layout system, typically the scrolling el is the targetEl, however we need
+    // to let it know we're using something different
+    customOverflowEl: 'containerEl',
+    
     childEls: [
         'containerEl'
     ],
+
+    /**
+     * @cfg autoScroll @hide
+     */
 
     /**
      * @cfg {Boolean} combineLabels

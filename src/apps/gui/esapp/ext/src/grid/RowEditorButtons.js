@@ -33,7 +33,6 @@ Ext.define('Ext.grid.RowEditorButtons', {
                 disabled: rowEditor.updateButtonDisabled
             }, {
                 cls: cssPrefix + 'row-editor-cancel-button',
-                itemId: 'cancel',
                 handler: plugin.cancelEdit,
                 text: rowEditor.cancelBtnText
             }]

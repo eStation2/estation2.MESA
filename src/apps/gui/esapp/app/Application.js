@@ -21,15 +21,15 @@ Ext.define('esapp.Application', {
     ],
 
     views: [
-        'header.Header'
-        //'dashboard.Dashboard',
-        //'acquisition.Acquisition',
-        //'processing.Processing',
-        //'datamanagement.DataManagement',
-        //'analysis.analysisMain',
-        //'system.systemsettings',
-        //'widgets.datasetCompletenessChart',
-        //'widgets.ServiceMenuButton'
+        'header.Header',
+        'dashboard.Dashboard',
+        'acquisition.Acquisition',
+        'processing.Processing',
+        'datamanagement.DataManagement',
+        'analysis.analysisMain',
+        'system.systemsettings',
+        'widgets.datasetCompletenessChart',
+        'widgets.ServiceMenuButton'
     ],
 
     controllers: [
@@ -74,6 +74,11 @@ Ext.define('esapp.Application', {
 
         Ext.tip.QuickTipManager.init();
 
+        Ext.Ajax.timeout = 300000; // 300 seconds
+        //Ext.override(Ext.form.Basic, {     timeout: Ext.Ajax.timeout / 1000 });
+        Ext.override(Ext.data.proxy.Server, {     timeout: Ext.Ajax.timeout });
+        Ext.override(Ext.data.Connection, {     timeout: Ext.Ajax.timeout });
+
         // start the mask on the body and get a reference to the mask
         splashscreen = Ext.getBody().mask('Loading eStation2, please stand by ...', 'splashscreen');
 
@@ -89,11 +94,6 @@ Ext.define('esapp.Application', {
     launch: function () {
         //console.info("launch!!!");
         //SenchaInspector.init();
-
-        Ext.Ajax.timeout = 300000; // 300 seconds
-        Ext.override(Ext.form.Basic, {     timeout: Ext.Ajax.timeout / 1000 });
-        Ext.override(Ext.data.proxy.Server, {     timeout: Ext.Ajax.timeout });
-        Ext.override(Ext.data.Connection, {     timeout: Ext.Ajax.timeout });
 
         // Ext.getBody().addCls('graybgcolor');
         Ext.setGlyphFontFamily('FontAwesome');

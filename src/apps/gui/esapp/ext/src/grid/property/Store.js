@@ -74,13 +74,7 @@ Ext.define('Ext.grid.property.Store', {
 
     // @private
     getProperty : function(row) {
-        var rec = Ext.isNumber(row) ? this.getAt(row) : this.getById(row),
-            ret = null;
-
-        if (rec) {
-            ret = rec.get('value');
-        }
-        return ret;
+       return Ext.isNumber(row) ? this.getAt(row) : this.getById(row);
     },
 
     // @private

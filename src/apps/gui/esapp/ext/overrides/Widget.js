@@ -1,8 +1,7 @@
-/** */
 Ext.define('Ext.overrides.Widget', {
     override: 'Ext.Widget',
 
-    uses: ['Ext.Component'],
+    requires: ['Ext.Component'],
 
     $configStrict: false,
 
@@ -17,26 +16,15 @@ Ext.define('Ext.overrides.Widget', {
 
     rendering: true,
 
-    config: {
-        renderTo: null
-    },
-
     cachedConfig: {
         baseCls: Ext.baseCSSPrefix + 'widget'
     },
 
     constructor: function(config) {
-        var me = this,
-            renderTo;
-            
-        me.callParent([config]);
+        this.callParent([config]);
 
         // initialize the component layout
-        me.getComponentLayout();
-        renderTo = me.getRenderTo();
-        if (renderTo) {
-            me.render(renderTo);
-        }
+        this.getComponentLayout();
     },
 
     addCls: function(cls) {
@@ -69,7 +57,6 @@ Ext.define('Ext.overrides.Widget', {
     /**
      * @private
      * Needed for when widget is rendered into a grid cell. The class to add to the cell element.
-     * @member Ext.Widget
      */
     getTdCls: function() {
         return Ext.baseCSSPrefix + this.getTdType() + '-' + (this.ui || 'default') + '-cell';
@@ -82,12 +69,16 @@ Ext.define('Ext.overrides.Widget', {
      * Returns the base type for the component. Defaults to return `this.xtype`, but
      * All derived classes of {@link Ext.form.field.Text TextField} can return the type 'textfield',
      * and all derived classes of {@link Ext.button.Button Button} can return the type 'button'
-     * @member Ext.Widget
      */
     getTdType: function() {
         return this.xtype;
     },
 
+    /**
+     * Returns the value of {@link #itemId} assigned to this component, or when that
+     * is not set, returns the value of {@link #id}.
+     * @return {String}
+     */
     getItemId: function() {
         return this.itemId || this.id;
     },
@@ -140,67 +131,34 @@ Ext.define('Ext.overrides.Widget', {
         return Ext.Element.parseBox(box);
     },
 
-    removeCls: function(cls) {
-        this.el.removeCls(cls);
-    },
-
-    removeClsWithUI: function(cls) {
-        this.el.removeCls(cls);
-    },
-    
     render: function(container, position) {
-        var me = this,
-            element = me.element,
-            proto = Ext.Component.prototype,
+        var element = this.element,
             nextSibling;
 
-        if (!me.ownerCt || me.floating) {
-            if (Ext.scopeCss) {
-                element.addCls(proto.rootCls);
-            }
-            element.addCls(proto.borderBoxCls);
-        }
-
         if (position) {
-            nextSibling = container.childNodes[position];
+            nextSibiling = container.childNodes[position];
             if (nextSibling) {
-                Ext.fly(container).insertBefore(element, nextSibling);
+                container.insertBefore(element, nextSibling);
                 return;
             }
         }
 
-        Ext.fly(container).appendChild(element);
+        container.appendChild(element);
     },
 
     setPosition: function(x, y) {
         this.el.setLocalXY(x, y);
-    },
+    }
 
-    up: function() {
-        return Ext.Component.prototype.up.apply(this, arguments);
-    },
-    
-    isAncestor: function() {
-        return Ext.Component.prototype.isAncestor.apply(this, arguments);
-    },
-    
-    onFocusEnter: function() {
-        return Ext.Component.prototype.onFocusEnter.apply(this, arguments);
-    },
-    
-    onFocusLeave: function() {
-        return Ext.Component.prototype.onFocusLeave.apply(this, arguments);
-    },
-
-    // Widgets are not yet focusable as of 5.1
-    focus: Ext.emptyFn,
-    isFocusable: Ext.emptyFn
-}, function(Cls) {
-    var prototype = Cls.prototype;
+}, function() {
+    var prototype;
 
     if (Ext.isIE8) {
+        prototype = Ext.Widget.prototype;
         // Since IE8 does not support Object.defineProperty we can't add the reference
         // node on demand, so we just fall back to adding all references up front.
         prototype.addElementReferenceOnDemand = prototype.addElementReference;
     }
+
+    this.borrow(Ext.Component, ['up']);
 });

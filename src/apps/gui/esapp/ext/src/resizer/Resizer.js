@@ -294,7 +294,7 @@ Ext.define('Ext.resizer.Resizer', {
 
             box = wrapTarget.getBox();
 
-            if (positioning.position !== 'absolute'){
+            if(positioning.position != 'absolute'){
                 //reset coordinates
                 box.x = 0;
                 box.y = 0;
@@ -351,7 +351,7 @@ Ext.define('Ext.resizer.Resizer', {
             scope: me
         });
 
-        if (me.handles === 'all') {
+        if (me.handles == 'all') {
             me.handles = 'n s e w ne nw se sw';
         }
 
@@ -414,8 +414,8 @@ Ext.define('Ext.resizer.Resizer', {
     /**
      * @private
      * Relay the Tracker's mousedown event as beforeresize
-     * @param {Ext.resizer.ResizeTracker} tracker The tracker
-     * @param {Ext.event.Event} event The event
+     * @param {Ext.resizer.ResizeTracker} The tracker
+     * @param {Ext.event.Event} The event
      */
     onBeforeResize: function(tracker, e) {
         return this.fireResizeEvent('beforeresize', tracker, e);
@@ -424,8 +424,8 @@ Ext.define('Ext.resizer.Resizer', {
     /**
      * @private
      * Relay the Tracker's drag event as resizedrag
-     * @param {Ext.resizer.ResizeTracker} tracker The tracker
-     * @param {Ext.event.Event} event The event
+     * @param {Ext.resizer.ResizeTracker} The tracker
+     * @param {Ext.event.Event} The event
      */
     onResize: function(tracker, e) {
         return this.fireResizeEvent('resizedrag', tracker, e);
@@ -434,8 +434,8 @@ Ext.define('Ext.resizer.Resizer', {
     /**
      * @private
      * Relay the Tracker's dragend event as resize
-     * @param {Ext.resizer.ResizeTracker} tracker The tracker
-     * @param {Ext.event.Event} event The event
+     * @param {Ext.resizer.ResizeTracker} The tracker
+     * @param {Ext.event.Event} The event
      */
     onResizeEnd: function(tracker, e) {
         return this.fireResizeEvent('resize', tracker, e);
@@ -445,8 +445,8 @@ Ext.define('Ext.resizer.Resizer', {
      * @private
      * Fire a resize event, checking if we have listeners before firing.
      * @param {String} name The name of the event
-     * @param {Ext.resizer.ResizeTracker} tracker The tracker
-     * @param {Ext.event.Event} event The event
+     * @param {Ext.resizer.ResizeTracker} The tracker
+     * @param {Ext.event.Event} The event
      */
     fireResizeEvent: function(name, tracker, e) {
         var me = this,

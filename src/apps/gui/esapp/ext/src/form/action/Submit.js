@@ -200,18 +200,10 @@ Ext.define('Ext.form.action.Submit', {
             role: 'presentation',
             action: me.getUrl(),
             method: me.getMethod(),
-            target: me.target ?
-                        (Ext.isString(me.target) ? me.target : Ext.fly(me.target).dom.name) :
-                        '_self',
+            target: me.target || '_self',
             style: 'display:none',
             cn: fieldsSpec
         };
-
-        // <debug>
-        if (!formSpec.target) {
-            Ext.Error.raise('Invalid form target.');
-        }
-        // </debug>
 
         // Set the proper encoding for file uploads
         if (uploadFields.length) {
@@ -253,21 +245,16 @@ Ext.define('Ext.form.action.Submit', {
      */
     onSuccess: function(response) {
         var form = this.form,
-            formActive = form && !form.destroying && !form.isDestroyed,
             success = true,
             result = this.processResponse(response);
-        
         if (result !== true && !result.success) {
-            if (result.errors && formActive) {
+            if (result.errors) {
                 form.markInvalid(result.errors);
             }
             this.failureType = Ext.form.action.Action.SERVER_INVALID;
             success = false;
         }
-        
-        if (formActive) {
-            form.afterAction(this, success);
-        }
+        form.afterAction(this, success);
     },
 
     /**

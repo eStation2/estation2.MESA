@@ -18,25 +18,16 @@ Ext.define('Ext.form.trigger.Spinner', {
     focusFieldOnClick: true,
 
     /**
-     * @cfg {Function/String} [upHandler=undefined]
+     * @cfg {Function/String} upHandler
      * The handler for the 'up' button
-     * @declarativeHandler
      */
 
     /**
-     * @cfg {Function/String} [downHandler=undefined]
+     * @cfg {Function/String} downHandler
      * The handler for the 'down' button
-     * @declarativeHandler
      */
 
-    /**
-     * @cfg
-     * True to layout the spinner in a vertical format.
-     *
-     * **Note:** This is not intended to be configured on an instance level, but is
-     * meant to be overridden by mobile-friendly themes that provide styling for
-     * vertically oriented triggers.
-     */
+    // private
     vertical: true,
 
     bodyTpl:
@@ -51,16 +42,6 @@ Ext.define('Ext.form.trigger.Spinner', {
                 ' {childElCls} {upDisabledCls}"></div>' +
         '</tpl>',
 
-    destroy: function() {
-        var me = this;
-
-        if (me.spinnerEl) {
-            me.spinnerEl.destroy();
-            me.spinnerEl = me.upEl = me.downEl = null;
-        }
-
-        me.callParent();
-    },
 
     getBodyRenderData: function() {
         var me = this;
@@ -79,7 +60,7 @@ Ext.define('Ext.form.trigger.Spinner', {
         return this.spinnerEl;
     },
 
-    onClick: function () {
+    onClick: function(e) {
         var me = this,
             args = arguments,
             e = me.clickRepeater ? args[1] : args[0],

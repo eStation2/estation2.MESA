@@ -7,7 +7,7 @@ Ext.define('Ext.ux.google.Api', {
     ],
 
     requiredScripts: [
-        '//www.google.com/jsapi'
+        'http://www.google.com/jsapi'
     ],
 
     statics: {

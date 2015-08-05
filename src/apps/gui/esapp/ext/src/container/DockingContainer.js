@@ -90,25 +90,12 @@ Ext.define('Ext.container.DockingContainer', {
      */
     addDocked : function(items, pos) {
         var me = this,
-            rendered = me.rendered,
             i = 0,
-            dockedItems = me.dockedItems,
-            lastIndex = dockedItems.getCount(),
-            index, instanced,
+            instanced,
             item, length;
 
         items = me.prepareItems(items);
         length = items.length;
-
-        if (rendered) {
-            Ext.suspendLayouts();
-        }
-
-        if (pos === undefined) {
-            pos = lastIndex;
-        } else {
-            pos = Math.min(pos, lastIndex);
-        }
 
         for (; i < length; i++) {
             item = items[i];
@@ -117,25 +104,27 @@ Ext.define('Ext.container.DockingContainer', {
                 me.horizontalDocks++;
             }
 
-            index = pos + i;
-            dockedItems.insert(index, item);
+            if (pos !== undefined) {
+                i += pos;
+                me.dockedItems.insert(i, item);
+            } else {
+                me.dockedItems.add(item);
+            }
             
             instanced = !!item.instancedCmp;
             delete item.instancedCmp;
-            item.onAdded(me, index, instanced);
+            item.onAdded(me, i, instanced);
             delete item.initOwnerCt;
+            if (me.hasListeners.dockedadd) {
+                me.fireEvent('dockedadd', me, item, i);
+            }
             if (me.onDockedAdd !== Ext.emptyFn) {
                 me.onDockedAdd(item);
             }
-            if (me.hasListeners.dockedadd) {
-                me.fireEvent('dockedadd', me, item, index);
-            }
         }
 
-        
-        if (me.rendered) {
+        if (me.rendered && !me.suspendLayout) {
             me.updateLayout();
-            Ext.resumeLayouts(true);
         }
         return items;
     },
@@ -271,7 +260,7 @@ Ext.define('Ext.container.DockingContainer', {
      * @param {Ext.Component} item The Component to remove.
      * @param {Boolean} autoDestroy (optional) Destroy the component after removal.
      */
-    removeDocked: function(item, autoDestroy) {
+    removeDocked : function(item, autoDestroy) {
         var me = this,
             layout,
             hasLayout;
@@ -307,7 +296,7 @@ Ext.define('Ext.container.DockingContainer', {
             me.fireEvent('dockedremove', me, item);
         }
 
-        if (!me.destroying) {
+        if (!me.destroying && !me.suspendLayout) {
             me.updateLayout();
         }
 
@@ -321,17 +310,15 @@ Ext.define('Ext.container.DockingContainer', {
      * @private
      */
     moveDocked: function(item, side) {
-        var me = this;
-
-        if (me.rendered) {
+        if (this.rendered) {
             Ext.suspendLayouts();
         }
 
-        me.removeDocked(item, false);
+        this.removeDocked(item, false);
         item.dock = side;
-        me.addDocked(item);
+        this.addDocked(item);
 
-        if (me.rendered) {
+        if (this.rendered) {
             if (item.frame) {
                 // temporarily append the item to the detached body while updating framing
                 // elements.  This is so the framing els won't get detected as garbage

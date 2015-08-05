@@ -133,27 +133,11 @@ Ext.Boot.load([
                         }
                         return converted;
                     },
-                    shuffle = function(input, factor) {
-                        if (!factor)
-                            return input;
-                            
-                        var i, f,
-                            reverse = factor < 0,
-                            output = [];
-                        factor = Math.abs(factor);
-                        for (f = 0; f < factor; f++) {
-                            for (i = f; i < input.length; i = i + factor) {
-                                output.push(input[i]);
-                            }
-                        }
-                        return reverse ? output.reverse() : output;
-                    },
-                    files = config[configPropName].src || [],
-                    shuffleFactor = config[configPropName].shuffle || 0, 
+                    files = config[configPropName] || [],
                     len = files.length, file, f,
                     relPath,
-                    converted = [],
-                    shuffled = [];
+                    converted = [];
+
                     for(f = 0; f < len; f++) {
                         file = files[f];
                         if(!PathUtil.isAbsolute(file)) {
@@ -162,35 +146,20 @@ Ext.Boot.load([
                         file = PathUtil.getCanonicalPath(file);
                         converted = converted.concat(getScriptFiles(file, basePath));
                     }
-                    
-                    // FileUtil.getAllFilesByExtension returns files in a different order
-                    // depending on OS.  This sort ensures the files are always ordered the same.
-                    converted.sort(function(a, b) {
-                        return (a < b) ? -1 : (a > b) ? 1 : 0
-                    });
-                    shuffled = shuffle(converted, shuffleFactor);
-                    project.setNewProperty(propName, StringUtil.join(shuffled, ',\n'));
+                    project.setNewProperty(propName, StringUtil.join(converted, ',\n'));
                 ]]>
         </x-script-def>
         <x-load-specs base="${local.runner.dir}" property="specfiles.list" configprop="specs"/>
 <echo file="${local.runner.dir}/${bootstrap.specs.file}"><![CDATA[
-(function() {
-    var url = [
+Ext.Boot.load({
+    charset: "UTF-8",
+    url: [
 ${specfiles.list}
-        ];
-
-    if (window.Cmd) {
-        url = Cmd.status.getCurrentChunk(url);
+    ],
+    success: function() {
+        Ext.Boot.load('../start-tests.js');
     }
-    
-    Ext.Boot.load({
-        charset: "UTF-8",
-        url: url,
-        success: function() {
-            Ext.Boot.load('../start-tests.js');
-        }
-    });
-})();
+});
 ]]>
 </echo>
     </target>

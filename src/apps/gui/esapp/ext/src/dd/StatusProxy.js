@@ -1,6 +1,6 @@
 /**
- * A specialized floating Component that supports a drop status icon and auto-repair.
- * This is the default drag proxy used by all Ext.dd components.
+ * A specialized floating Component that supports a drop status icon, {@link Ext.Layer} styles
+ * and auto-repair.  This is the default drag proxy used by all Ext.dd components.
  */
 Ext.define('Ext.dd.StatusProxy', {
     extend: 'Ext.Component',
@@ -60,7 +60,7 @@ Ext.define('Ext.dd.StatusProxy', {
      */
     setStatus : function(cssClass){
         cssClass = cssClass || this.dropNotAllowed;
-        if (this.dropStatus !== cssClass) {
+        if (this.dropStatus != cssClass) {
             this.el.replaceCls(this.dropStatus, cssClass);
             this.dropStatus = cssClass;
         }
@@ -87,7 +87,7 @@ Ext.define('Ext.dd.StatusProxy', {
      * DOM node to append as the child of the ghost element (in which case the innerHTML will be cleared first).
      */
     update : function(html){
-        if (typeof html === "string") {
+        if (typeof html == "string") {
             this.ghost.setHtml(html);
         } else {
             this.ghost.setHtml('');
@@ -130,10 +130,10 @@ Ext.define('Ext.dd.StatusProxy', {
     },
 
     /**
-     * Force the Element to sync its shadow and shim positions
+     * Force the Layer to sync its shadow and shim positions to the element
      */
     sync : function(){
-        this.el.syncUnderlays();
+        this.el.sync();
     },
 
     /**
@@ -151,7 +151,7 @@ Ext.define('Ext.dd.StatusProxy', {
         me.scope = scope;
         if (xy && me.animRepair !== false) {
             me.el.addCls(me.repairCls);
-            me.el.setUnderlaysVisible(false);
+            me.el.hideUnders(true);
             me.anim = me.el.animate({
                 duration: me.repairDuration || 500,
                 easing: 'ease-out',
@@ -174,7 +174,7 @@ Ext.define('Ext.dd.StatusProxy', {
     
         me.hide(true);
         me.el.removeCls(me.repairCls);
-        if (typeof me.callback === "function") {
+        if (typeof me.callback == "function") {
             me.callback.call(me.scope || me);
         }
         delete me.callback;

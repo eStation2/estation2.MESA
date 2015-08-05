@@ -97,29 +97,24 @@ Ext.define('Ext.fx.PropertyHandler', {
             get: function(from, end, damper, initialFrom, attr) {
                 var ln = from.length,
                     out = [],
-                    i, initial;
-
+                    i, initial, res, j, len;
                 for (i = 0; i < ln; i++) {
                     out.push([from[i][0], this.computeDelta(from[i][1], end, damper, initial, attr)]);
                 }
-
                 return out;
             },
 
             set: function(values, easing) {
                 var ln = values.length,
                     out = [],
-                    i, val;
-
+                    i, val, res, len, j;
                 for (i = 0; i < ln; i++) {
                     val  = values[i][1];
                     out.push([values[i][0], val.delta]);
                 }
-
                 return out;
             }
         },
-
         color: {
             rgbRE: /^rgb\(([0-9]+)\s*,\s*([0-9]+)\s*,\s*([0-9]+)\)$/i,
             hexRE: /^#?([0-9A-F]{2})([0-9A-F]{2})([0-9A-F]{2})$/i,
@@ -158,17 +153,14 @@ Ext.define('Ext.fx.PropertyHandler', {
             computeDelta: function(from, end, damper, initial) {
                 from = this.parseColor(from);
                 end = this.parseColor(end, damper);
-
                 var start = initial ? initial : from,
                     tfrom = typeof start,
                     tend = typeof end;
-
                 //Extra check for when the color string is not recognized.
-                if (tfrom === 'string' || tfrom === 'undefined' ||
-                    tend === 'string' || tend === 'undefined') {
+                if (tfrom == 'string' ||  tfrom == 'undefined'
+                  || tend == 'string' || tend == 'undefined') {
                     return end || start;
                 }
-
                 return {
                     from:  from,
                     delta: {
@@ -202,13 +194,13 @@ Ext.define('Ext.fx.PropertyHandler', {
                         from = val.from;
                         delta = val.delta;
                         //multiple checks to reformat the color if it can't recognized by computeDelta.
-                        val = (typeof val === 'object' && 'red' in val) ?
+                        val = (typeof val == 'object' && 'red' in val)? 
                                 'rgb(' + val.red + ', ' + val.green + ', ' + val.blue + ')' : val;
-                        val = (typeof val === 'object' && val.length)? val[0] : val;
-                        if (typeof val === 'undefined') {
+                        val = (typeof val == 'object' && val.length)? val[0] : val;
+                        if (typeof val == 'undefined') {
                             return [];
                         }
-                        parsedString = typeof val === 'string'? val :
+                        parsedString = typeof val == 'string'? val :
                             'rgb(' + [
                                   (from.red + Math.round(delta.red * easing)) % 256,
                                   (from.green + Math.round(delta.green * easing)) % 256,
@@ -225,7 +217,7 @@ Ext.define('Ext.fx.PropertyHandler', {
         },
         object: {
             interpolate: function(prop, damper) {
-                damper = (typeof damper === 'number') ? damper : 1;
+                damper = (typeof damper == 'number') ? damper : 1;
                 var out = {},
                     p;
                 for(p in prop) {
@@ -286,7 +278,7 @@ Ext.define('Ext.fx.PropertyHandler', {
 
         path: {
             computeDelta: function(from, end, damper, initial) {
-                damper = (typeof damper === 'number') ? damper : 1;
+                damper = (typeof damper == 'number') ? damper : 1;
                 var start;
                 from = +from || 0;
                 end = +end || 0;

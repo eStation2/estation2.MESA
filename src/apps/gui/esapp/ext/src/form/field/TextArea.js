@@ -1,4 +1,6 @@
 /**
+ * @docauthor Robert Dougan <rob@sencha.com>
+ *
  * This class creates a multiline text field, which can be used as a direct replacement for traditional
  * textarea fields. In addition, it supports automatically {@link #grow growing} the height of the textarea to
  * fit its content.
@@ -224,7 +226,7 @@ Ext.define('Ext.form.field.TextArea', {
      */
     autoSize: function() {
         var me = this,
-            inputEl, height, curWidth, value;
+            inputEl, inputHeight, height, curWidth, value;
 
         if (me.grow && me.rendered && me.getSizeModel().height.auto) {
             inputEl = me.inputEl;

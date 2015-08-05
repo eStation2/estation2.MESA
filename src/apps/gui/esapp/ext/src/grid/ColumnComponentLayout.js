@@ -10,58 +10,69 @@ Ext.define('Ext.grid.ColumnComponentLayout', {
 
     setWidthInDom: true,
 
-    _paddingReset: {
-        paddingTop: '',  // reset back to default padding of the style
-        paddingBottom: ''
-    },
-
-    columnAutoCls: Ext.baseCSSPrefix + 'column-header-text-container-auto',
-
     beginLayout: function(ownerContext) {
         this.callParent(arguments);
         ownerContext.titleContext = ownerContext.getEl('titleEl');
+        ownerContext.triggerContext = ownerContext.getEl('triggerEl');
     },
 
     beginLayoutCycle: function(ownerContext) {
-        var me = this,
-            owner = me.owner,
-            shrinkWrap = ownerContext.widthModel.shrinkWrap;
+        var owner = this.owner;
 
-        me.callParent(arguments);
+        this.callParent(arguments);
 
         // If shrinkwrapping, allow content width to stretch the element
-        if (shrinkWrap) {
+        if (ownerContext.widthModel.shrinkWrap) {
             owner.el.setWidth('');
         }
-        owner.textContainerEl[shrinkWrap ? 'addCls' : 'removeCls'](me.columnAutoCls);
-        owner.titleEl.setStyle(me._paddingReset);
+
+        owner.titleEl.setStyle({
+            paddingTop: '',  // reset back to default padding of the style
+            paddingBottom: ''
+        });
     },
 
     // If not shrink wrapping, push height info down into child items
     publishInnerHeight: function(ownerContext, outerHeight) {
         var me = this,
             owner = me.owner,
-            innerHeight;
+            innerHeight, availableHeight,
+            textHeight, titleHeight, paddingTop, paddingBottom;
             
         // TreePanels (and grids with hideHeaders: true) set their column container height to zero to hide them.
         // This is because they need to lay out in order to calculate widths for the columns (eg flexes).
         // If there is no height to lay out, bail out early.
-        if (owner.getRootHeaderCt().hiddenHeaders) {
+        if (owner.getOwnerHeaderCt().hiddenHeaders) {
             ownerContext.setProp('innerHeight', 0);
             return;
         }
         
+        innerHeight = outerHeight - ownerContext.getBorderInfo().height;
+        availableHeight = innerHeight;
 
-        // If this ia a group header; that is, it contains subheaders...
-        // hasRawContent = !(target.isContainer && target.items.items.length > 0)
-        if (!ownerContext.hasRawContent) {
-            // We do not have enough information to get the height of the titleEl
-            if (owner.headerWrap && !ownerContext.hasDomProp('width')) {
-                me.done = false;
-                return;
+        // We do not have enough information to get the height of the titleEl
+        if (owner.headerWrap && !ownerContext.hasDomProp('width')) {
+            me.done = false;
+            return;
+        }
+
+        // If we are not a container, but just have HTML content...
+        if (ownerContext.hasRawContent) {
+            // Vertically center the header text and ensure titleContext occupies availableHeight
+            textHeight = owner.textEl.getHeight();
+            if (textHeight) {
+                availableHeight -= textHeight;
+                if (availableHeight > 0) {
+                    paddingTop = Math.floor(availableHeight / 2);
+                    paddingBottom = availableHeight - paddingTop;
+                    ownerContext.titleContext.setProp('padding-top', paddingTop);
+                    ownerContext.titleContext.setProp('padding-bottom', paddingBottom);
+                }
             }
+        }
 
-            innerHeight = outerHeight - ownerContext.getBorderInfo().height;
+        // There are child items
+        else {
             ownerContext.setProp('innerHeight', innerHeight - owner.titleEl.getHeight(), false);
         }
     },
@@ -118,11 +129,10 @@ Ext.define('Ext.grid.ColumnComponentLayout', {
     
     getTriggerOffset: function(owner, ownerContext) {
         var width = 0;
-        
         if (ownerContext.widthModel.shrinkWrap && !owner.menuDisabled) {
             // If we have any children underneath, then we already have space reserved
             if (owner.query('>:not([hidden])').length === 0) {
-                width = owner.getTriggerElWidth();
+                width = owner.self.triggerElWidth;
             }
         }
         return width;

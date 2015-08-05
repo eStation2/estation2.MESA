@@ -4,26 +4,23 @@
 Ext.define('Ext.selection.DataViewModel', {
     extend: 'Ext.selection.Model',
 
-    alias: 'selection.dataviewmodel',
-
     requires: ['Ext.util.KeyNav'],
 
     deselectOnContainerClick: true,
 
     /**
-     * @cfg {Boolean} [enableKeyNav=true]
+     * @cfg {Boolean} enableKeyNav
      *
-     * @deprecated 5.1.0 Keyboard navigation is a function of the view's {@link Ext.view.NavigationModel navigation model},
-     * and is enabled for accessibilty purposes.
+     * Turns on/off keyboard navigation within the DataView.
      */
+    enableKeyNav: true,
 
     /**
      * @event beforedeselect
      * Fired before a record is deselected. If any listener returns false, the
      * deselection is cancelled.
      * @param {Ext.selection.DataViewModel} this
-     * @param {Ext.data.Model} record The deselected record.
-     * @param {Number} The index within the store of the deselected record.
+     * @param {Ext.data.Model} record The deselected record
      */
 
     /**
@@ -31,8 +28,7 @@ Ext.define('Ext.selection.DataViewModel', {
      * Fired before a record is selected. If any listener returns false, the
      * selection is cancelled.
      * @param {Ext.selection.DataViewModel} this
-     * @param {Ext.data.Model} record The selected record.
-     * @param {Number} The index within the store of the selected record.
+     * @param {Ext.data.Model} record The selected record
      */
 
     /**
@@ -46,40 +42,30 @@ Ext.define('Ext.selection.DataViewModel', {
      * @event select
      * Fired after a record is selected
      * @param {Ext.selection.DataViewModel} this
-     * @param  {Ext.data.Model} record The selected record.
-     * @param {Number} The index within the store of the selected record.
+     * @param  {Ext.data.Model} record The selected record
      */
 
     bindComponent: function(view) {
-        var me = this,
-            viewListeners;
+        var me = this;
 
-        if (me.view !== view) {
-            if (me.view) {
-                me.navigationModel = null;
-                Ext.destroy(me.viewListeners, me.navigationListeners);
-            }
-            me.view = view;
-            if (view) {
-                viewListeners = me.getViewListeners();
-                viewListeners.scope = me;
-                viewListeners.destroyable = true;
-                me.navigationModel = view.getNavigationModel();
-                me.viewListeners = view.on(viewListeners);
-                me.navigationListeners = me.navigationModel.on({
-                    navigate: me.onNavigate,
-                    scope: me,
-                    destroyable: true
-                });
-            }
-        }
+        me.view = view;
+        me.navigationModel = view.getNavigationModel();
+        view.on(me.getViewListeners());
+        me.navigationModel.on({
+            navigate: me.onNavigate,
+            scope: me
+        });
     },
 
     getViewListeners: function() {
         var me = this,
-            eventListeners = {};
+            view = me.view,
+            eventListeners = {
+                refresh: me.refresh,
+                scope: me
+            };
 
-        eventListeners[me.view.triggerCtEvent] = me.onContainerClick;
+        eventListeners[view.triggerCtEvent] = me.onContainerClick;
         return eventListeners;
     },
     
@@ -100,10 +86,9 @@ Ext.define('Ext.selection.DataViewModel', {
     onSelectChange: function(record, isSelected, suppressEvent, commitFn) {
         var me = this,
             view = me.view,
-            eventName = isSelected ? 'select' : 'deselect',
-            recordIndex = me.store.indexOf(record);
+            eventName = isSelected ? 'select' : 'deselect';
 
-        if ((suppressEvent || me.fireEvent('before' + eventName, me, record, recordIndex)) !== false &&
+        if ((suppressEvent || me.fireEvent('before' + eventName, me, record)) !== false &&
                 commitFn() !== false) {
 
             if (view) {
@@ -115,13 +100,12 @@ Ext.define('Ext.selection.DataViewModel', {
             }
 
             if (!suppressEvent) {
-                me.fireEvent(eventName, me, record, recordIndex);
+                me.fireEvent(eventName, me, record);
             }
         }
     },
-
-    destroy: function() {
-        this.bindComponent();
+    
+    destroy: function(){
         Ext.destroy(this.keyNav);
         this.callParent();
     }

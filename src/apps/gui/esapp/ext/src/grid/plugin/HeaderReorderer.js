@@ -9,7 +9,7 @@ Ext.define('Ext.grid.plugin.HeaderReorderer', {
     init: function(headerCt) {
         this.headerCt = headerCt;
         headerCt.on({
-            boxready: this.onHeaderCtRender,
+            render: this.onHeaderCtRender,
             single: true,
             scope: this
         });

@@ -26,9 +26,6 @@
  */
 Ext.define('Ext.toolbar.Spacer', {
     extend: 'Ext.Component',
-    // Toolbar required here because we'll try to decorate it's alternateClassName
-    // with this class' alternate name
-    requires: ['Ext.toolbar.Toolbar'],
     alias: 'widget.tbspacer',
     alternateClassName: 'Ext.Toolbar.Spacer',
     baseCls: Ext.baseCSSPrefix + 'toolbar-spacer',

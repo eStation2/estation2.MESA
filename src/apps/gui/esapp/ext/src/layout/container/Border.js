@@ -249,13 +249,13 @@ Ext.define('Ext.layout.container.Border', {
 
                 // process regions "isVert ? north||south : east||center||west"
 
-                childContext.reverseWeighting = (region === props.borderEnd);
+                childContext.reverseWeighting = (region == props.borderEnd);
 
                 size = comp[sizeProp];
                 type = typeof size;
 
                 if (!comp.collapsed) {
-                    if (type === 'string' && (match = me.percentageRe.exec(size))) {
+                    if (type == 'string' && (match = me.percentageRe.exec(size))) {
                         childContext.percentage = parseInt(match[1], 10);
                     } else if (comp.flex) {
                         totalFlex += childContext.flex = comp.flex;
@@ -319,7 +319,7 @@ Ext.define('Ext.layout.container.Border', {
 
         // We sync the visibility state of splitters with their region:
         if (pad) {
-            if (type === 'string' || type === 'number') {
+            if (type == 'string' || type == 'number') {
                 pad = Ext.util.Format.parseBox(pad);
             }
         } else {
@@ -517,9 +517,9 @@ Ext.define('Ext.layout.container.Border', {
             flex = childContext.flex;
         }
 
-        isBegin = region === axis.borderBegin;
+        isBegin = region == axis.borderBegin;
 
-        if (!isBegin && region !== axis.borderEnd) {
+        if (!isBegin && region != axis.borderEnd) {
             // a north/south region on the horizontal axis or an east/west region on the
             // vertical axis: stretch to fill remaining space:
             childContext[setSizeMethod](axis.end - axis.begin - childMarginSize);
@@ -735,7 +735,8 @@ Ext.define('Ext.layout.container.Border', {
     },
     
     moveItemBefore: function (item, before) {
-        var beforeRegion;
+        var owner = this.owner,
+            beforeRegion;
             
         if (before && before.splitter) {
             beforeRegion = before.region;
@@ -791,7 +792,7 @@ Ext.define('Ext.layout.container.Border', {
                     split = true;
                 }
                 
-                if ((item.isHorz || item.isVert) && (split || item.collapseMode === 'mini')) {
+                if ((item.isHorz || item.isVert) && (split || item.collapseMode == 'mini')) {
                     me.insertSplitter(item, index, hidden || !split, cfg);
                 }
             }
@@ -1011,7 +1012,7 @@ Ext.define('Ext.layout.container.Border', {
                 policy = policies.horz;
             }
 
-            if (item.flex || (typeof size === 'string' && me.percentageRe.test(size))) {
+            if (item.flex || (typeof size == 'string' && me.percentageRe.test(size))) {
                 return policies.flexAll;
             }
 

@@ -28,7 +28,6 @@
  *  - value {Object} - The calculated value.
  *  - summaryData {Object} - Contains all raw summary values for the row.
  *  - field {String} - The name of the field we are calculating
- *  - metaData {Object} - A collection of metadata about the current cell; can be used or modified by the renderer.
  *
  * ## Example Usage
  *
@@ -94,8 +93,10 @@ Ext.define('Ext.grid.feature.GroupingSummary', {
     
     vetoEvent: function(record, row, rowIndex, e){
         var result = this.callParent(arguments);
-        if (result !== false && e.getTarget(this.summaryRowSelector)) {
-            result = false;
+        if (result !== false) {
+            if (e.getTarget(this.summaryRowSelector)) {
+                result = false;
+            }
         }
         return result;
     }

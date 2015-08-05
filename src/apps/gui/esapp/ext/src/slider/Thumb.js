@@ -76,8 +76,7 @@ Ext.define('Ext.slider.Thumb', {
             slider = me.slider,
             styleProp = slider.vertical ? 'bottom' : slider.horizontalProp,
             to,
-            from,
-            animCfg;
+            from;
 
         v += '%';
 
@@ -92,36 +91,24 @@ Ext.define('Ext.slider.Thumb', {
                 from[styleProp] = el.dom.style[styleProp];
             }
 
-            // Animation config
-            animCfg = {
+            new Ext.fx.Anim({
                 target: el,
                 duration: 350,
                 from: from,
-                to: to,
-                scope: me,
-                callback: me.onAnimComplete
-            };
-            if (animate !== true) {
-                Ext.apply(animCfg, animate);
-            }
-
-            me.anim = new Ext.fx.Anim(animCfg);
+                to: to
+            });
         }
-    },
-
-    onAnimComplete: function() {
-        this.anim = null;
     },
 
     /**
      * Enables the thumb if it is currently disabled
      */
     enable: function() {
-        var el = this.el;
+        var me = this;
 
-        this.disabled = false;
-        if (el) {
-            el.removeCls(this.slider.disabledCls);
+        me.disabled = false;
+        if (me.el) {
+            me.el.removeCls(me.slider.disabledCls);
         }
     },
 
@@ -129,11 +116,11 @@ Ext.define('Ext.slider.Thumb', {
      * Disables the thumb if it is currently enabled
      */
     disable: function() {
-        var el = this.el;
+        var me = this;
 
-        this.disabled = true;
-        if (el) {
-            el.addCls(this.slider.disabledCls);
+        me.disabled = true;
+        if (me.el) {
+            me.el.addCls(me.slider.disabledCls);
         }
     },
 
@@ -272,18 +259,14 @@ Ext.define('Ext.slider.Thumb', {
         me.dragging = slider.dragging = false;
         slider.fireEvent('dragend', slider, e);
 
-        if (me.dragStartValue !== value) {
+        if (me.dragStartValue != value) {
             slider.fireEvent('changecomplete', slider, value, me);
         }
     },
 
     destroy: function() {
-        var me = this,
-            anim = this.anim;
-
-        if (anim) {
-            anim.end();
-        }
-        me.el = me.tracker = me.anim = Ext.destroy(me.el, me.tracker);
+        Ext.destroy(this.tracker);
+        this.el.destroy();
+        this.el = null;
     }
 });

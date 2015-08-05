@@ -76,7 +76,7 @@ Ext.define('Ext.util.ElementContainer', {
          * - `id` - The id of the child element.
          * - `leaf` - Set to `true` to ignore content when scanning for childEls. This
          *  should be set on things like the generated content for an `Ext.view.View`.
-         * - `select`: A selector that will be passed to {@link Ext.dom.Element#method-select}.
+         * - `select`: A selector that will be passed to {@link Ext.dom.Element#select}.
          * - `selectNode`: A selector that will be passed to {@link Ext.dom.Element#method-selectNode}.
          *
          * For example:
@@ -212,7 +212,6 @@ Ext.define('Ext.util.ElementContainer', {
 
             if (child) {
                 if (child.destroy) {
-                    child.component = null;
                     child.destroy();
                 }
                 me[childName] = null;

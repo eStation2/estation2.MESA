@@ -37,7 +37,7 @@
      *      ]
      */
     "requires": [
-//        "sencha-charts"
+        "sencha-charts"
 //        "ext-locale"
     ],
 

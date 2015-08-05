@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.3.4
 -- Dumped by pg_dump version 9.3.4
--- Started on 2015-07-30 15:16:09 CEST
+-- Started on 2015-08-04 19:45:59 CEST
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -79,6 +79,75 @@ $_$;
 
 
 ALTER FUNCTION products.check_mapset(mapsetid character varying) OWNER TO estation;
+
+--
+-- TOC entry 212 (class 1255 OID 18427)
+-- Name: set_thema(character varying); Type: FUNCTION; Schema: products; Owner: estation
+--
+
+CREATE FUNCTION set_thema(themaid character varying) RETURNS boolean
+    LANGUAGE plpgsql STRICT
+    AS $_$
+DECLARE
+	themaid   ALIAS FOR  $1;
+BEGIN
+	IF themaid != '' THEN
+		-- BEGIN
+			UPDATE products.product
+			SET activated = FALSE 
+			WHERE defined_by = 'JRC';
+
+			UPDATE products.ingestion
+			SET activated = FALSE 
+			WHERE defined_by = 'JRC';
+
+			UPDATE products.processing
+			SET activated = FALSE 
+			WHERE defined_by = 'JRC';
+
+			UPDATE products.process_product pp
+			SET activated = FALSE 
+			WHERE (pp.process_id) in (SELECT process_id FROM products.processing WHERE defined_by = 'JRC'); 
+
+									
+			UPDATE products.product p
+			SET activated = TRUE 
+			WHERE p.product_type = 'Native'
+			  AND (p.productcode, p.version) in (SELECT productcode, version FROM products.thema_product WHERE thema_id = themaid);
+			
+			UPDATE products.ingestion i
+			SET activated = TRUE 
+			WHERE (i.productcode, i.version, i.mapsetcode) in (SELECT productcode, version, mapsetcode FROM products.thema_product WHERE thema_id = themaid); 
+
+			UPDATE products.process_product pp
+			SET activated = TRUE 
+			WHERE (pp.productcode, pp.version, pp.mapsetcode) in (SELECT productcode, version, mapsetcode FROM products.thema_product WHERE thema_id = themaid); 
+
+			UPDATE products.processing p
+			SET activated = TRUE 
+			WHERE (p.process_id) in (SELECT process_id 
+						 FROM products.process_product pp
+						 WHERE pp.type = 'INPUT' 
+						   AND (pp.productcode, pp.version, pp.mapsetcode) in (SELECT productcode, version, mapsetcode FROM products.thema_product WHERE thema_id = themaid)); 
+
+			-- COMMIT;
+		
+		-- EXCEPTION WHEN data_exception THEN RETURN FALSE;
+				
+
+			-- COMMIT;
+			RETURN TRUE;	
+		-- END;
+	
+	ELSE
+		RETURN FALSE;
+	END IF;
+	
+END;
+$_$;
+
+
+ALTER FUNCTION products.set_thema(themaid character varying) OWNER TO estation;
 
 SET search_path = analysis, pg_catalog;
 
@@ -162,7 +231,7 @@ CREATE SEQUENCE layers_layerid_seq
 ALTER TABLE analysis.layers_layerid_seq OWNER TO estation;
 
 --
--- TOC entry 2197 (class 0 OID 0)
+-- TOC entry 2198 (class 0 OID 0)
 -- Dependencies: 175
 -- Name: layers_layerid_seq; Type: SEQUENCE OWNED BY; Schema: analysis; Owner: estation
 --
@@ -211,7 +280,7 @@ CREATE SEQUENCE legend_legend_id_seq
 ALTER TABLE analysis.legend_legend_id_seq OWNER TO estation;
 
 --
--- TOC entry 2198 (class 0 OID 0)
+-- TOC entry 2199 (class 0 OID 0)
 -- Dependencies: 177
 -- Name: legend_legend_id_seq; Type: SEQUENCE OWNED BY; Schema: analysis; Owner: estation
 --
@@ -237,7 +306,7 @@ CREATE TABLE legend_step (
 ALTER TABLE analysis.legend_step OWNER TO estation;
 
 --
--- TOC entry 2199 (class 0 OID 0)
+-- TOC entry 2200 (class 0 OID 0)
 -- Dependencies: 178
 -- Name: COLUMN legend_step.color_rgb; Type: COMMENT; Schema: analysis; Owner: estation
 --
@@ -335,7 +404,7 @@ CREATE TABLE datasource_description (
 ALTER TABLE products.datasource_description OWNER TO estation;
 
 --
--- TOC entry 2200 (class 0 OID 0)
+-- TOC entry 2201 (class 0 OID 0)
 -- Dependencies: 181
 -- Name: COLUMN datasource_description.format_type; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -346,7 +415,7 @@ COMMENT ON COLUMN datasource_description.format_type IS 'Values:
 
 
 --
--- TOC entry 2201 (class 0 OID 0)
+-- TOC entry 2202 (class 0 OID 0)
 -- Dependencies: 181
 -- Name: COLUMN datasource_description.date_type; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -355,7 +424,7 @@ COMMENT ON COLUMN datasource_description.date_type IS 'A string, case insensitiv
 
 
 --
--- TOC entry 2202 (class 0 OID 0)
+-- TOC entry 2203 (class 0 OID 0)
 -- Dependencies: 181
 -- Name: COLUMN datasource_description.product_identifier; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -364,7 +433,7 @@ COMMENT ON COLUMN datasource_description.product_identifier IS 'Comma-separated 
 
 
 --
--- TOC entry 2203 (class 0 OID 0)
+-- TOC entry 2204 (class 0 OID 0)
 -- Dependencies: 181
 -- Name: COLUMN datasource_description.prod_id_position; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -376,7 +445,7 @@ DELIMITED - comma-separated integers indicating the delimiter positions of the P
 
 
 --
--- TOC entry 2204 (class 0 OID 0)
+-- TOC entry 2205 (class 0 OID 0)
 -- Dependencies: 181
 -- Name: COLUMN datasource_description.prod_id_length; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -385,7 +454,7 @@ COMMENT ON COLUMN datasource_description.prod_id_length IS 'In case of FIXED for
 
 
 --
--- TOC entry 2205 (class 0 OID 0)
+-- TOC entry 2206 (class 0 OID 0)
 -- Dependencies: 181
 -- Name: COLUMN datasource_description.area_type; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -398,7 +467,7 @@ COMMENT ON COLUMN datasource_description.area_type IS 'Values:
 
 
 --
--- TOC entry 2206 (class 0 OID 0)
+-- TOC entry 2207 (class 0 OID 0)
 -- Dependencies: 181
 -- Name: COLUMN datasource_description.area_position; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -410,7 +479,7 @@ DELIMITED - comma-separated integers indicating the delimiter positions of the A
 
 
 --
--- TOC entry 2207 (class 0 OID 0)
+-- TOC entry 2208 (class 0 OID 0)
 -- Dependencies: 181
 -- Name: COLUMN datasource_description.area_length; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -419,7 +488,7 @@ COMMENT ON COLUMN datasource_description.area_length IS 'In case of FIXED format
 
 
 --
--- TOC entry 2208 (class 0 OID 0)
+-- TOC entry 2209 (class 0 OID 0)
 -- Dependencies: 181
 -- Name: COLUMN datasource_description.product_release; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -428,7 +497,7 @@ COMMENT ON COLUMN datasource_description.product_release IS 'String indicating t
 
 
 --
--- TOC entry 2209 (class 0 OID 0)
+-- TOC entry 2210 (class 0 OID 0)
 -- Dependencies: 181
 -- Name: COLUMN datasource_description.release_position; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -440,7 +509,7 @@ DELIMITED - comma-separated integers indicating the delimiter positions of the R
 
 
 --
--- TOC entry 2210 (class 0 OID 0)
+-- TOC entry 2211 (class 0 OID 0)
 -- Dependencies: 181
 -- Name: COLUMN datasource_description.release_length; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -462,7 +531,7 @@ CREATE TABLE date_format (
 ALTER TABLE products.date_format OWNER TO estation;
 
 --
--- TOC entry 2211 (class 0 OID 0)
+-- TOC entry 2212 (class 0 OID 0)
 -- Dependencies: 182
 -- Name: COLUMN date_format.date_format; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -471,7 +540,7 @@ COMMENT ON COLUMN date_format.date_format IS 'A string, case insensitive, in YYY
 
 
 --
--- TOC entry 2212 (class 0 OID 0)
+-- TOC entry 2213 (class 0 OID 0)
 -- Dependencies: 182
 -- Name: COLUMN date_format.definition; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -533,7 +602,7 @@ CREATE TABLE eumetcast_source (
 ALTER TABLE products.eumetcast_source OWNER TO estation;
 
 --
--- TOC entry 2213 (class 0 OID 0)
+-- TOC entry 2214 (class 0 OID 0)
 -- Dependencies: 183
 -- Name: COLUMN eumetcast_source.status; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -559,7 +628,7 @@ CREATE TABLE frequency (
 ALTER TABLE products.frequency OWNER TO estation;
 
 --
--- TOC entry 2214 (class 0 OID 0)
+-- TOC entry 2215 (class 0 OID 0)
 -- Dependencies: 184
 -- Name: COLUMN frequency.frequency_id; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -576,7 +645,7 @@ DEKAD!=10-days
 
 
 --
--- TOC entry 2215 (class 0 OID 0)
+-- TOC entry 2216 (class 0 OID 0)
 -- Dependencies: 184
 -- Name: COLUMN frequency.frequency_type; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -611,7 +680,7 @@ CREATE TABLE ingestion (
 ALTER TABLE products.ingestion OWNER TO estation;
 
 --
--- TOC entry 2216 (class 0 OID 0)
+-- TOC entry 2217 (class 0 OID 0)
 -- Dependencies: 185
 -- Name: COLUMN ingestion.defined_by; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -620,7 +689,7 @@ COMMENT ON COLUMN ingestion.defined_by IS 'values: JRC or USER';
 
 
 --
--- TOC entry 2217 (class 0 OID 0)
+-- TOC entry 2218 (class 0 OID 0)
 -- Dependencies: 185
 -- Name: COLUMN ingestion.wait_for_all_files; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -659,7 +728,7 @@ CREATE TABLE internet_source (
 ALTER TABLE products.internet_source OWNER TO estation;
 
 --
--- TOC entry 2218 (class 0 OID 0)
+-- TOC entry 2219 (class 0 OID 0)
 -- Dependencies: 186
 -- Name: COLUMN internet_source.defined_by; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -668,7 +737,7 @@ COMMENT ON COLUMN internet_source.defined_by IS 'values: JRC or USER';
 
 
 --
--- TOC entry 2219 (class 0 OID 0)
+-- TOC entry 2220 (class 0 OID 0)
 -- Dependencies: 186
 -- Name: COLUMN internet_source.modified_by; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -677,7 +746,7 @@ COMMENT ON COLUMN internet_source.modified_by IS 'Username as value';
 
 
 --
--- TOC entry 2220 (class 0 OID 0)
+-- TOC entry 2221 (class 0 OID 0)
 -- Dependencies: 186
 -- Name: COLUMN internet_source.status; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -687,7 +756,7 @@ Active/Non active';
 
 
 --
--- TOC entry 2221 (class 0 OID 0)
+-- TOC entry 2222 (class 0 OID 0)
 -- Dependencies: 186
 -- Name: COLUMN internet_source.pull_frequency; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -721,7 +790,7 @@ CREATE TABLE mapset (
 ALTER TABLE products.mapset OWNER TO estation;
 
 --
--- TOC entry 2222 (class 0 OID 0)
+-- TOC entry 2223 (class 0 OID 0)
 -- Dependencies: 187
 -- Name: COLUMN mapset.defined_by; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -803,7 +872,7 @@ CREATE TABLE product (
 ALTER TABLE products.product OWNER TO estation;
 
 --
--- TOC entry 2223 (class 0 OID 0)
+-- TOC entry 2224 (class 0 OID 0)
 -- Dependencies: 190
 -- Name: COLUMN product.defined_by; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -812,7 +881,7 @@ COMMENT ON COLUMN product.defined_by IS 'values: JRC or USER';
 
 
 --
--- TOC entry 2224 (class 0 OID 0)
+-- TOC entry 2225 (class 0 OID 0)
 -- Dependencies: 190
 -- Name: COLUMN product.product_type; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -821,7 +890,7 @@ COMMENT ON COLUMN product.product_type IS 'A product can be of type Native, Inge
 
 
 --
--- TOC entry 2225 (class 0 OID 0)
+-- TOC entry 2226 (class 0 OID 0)
 -- Dependencies: 190
 -- Name: COLUMN product.descriptive_name; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -830,7 +899,7 @@ COMMENT ON COLUMN product.descriptive_name IS 'A clear and descriptive name of t
 
 
 --
--- TOC entry 2226 (class 0 OID 0)
+-- TOC entry 2227 (class 0 OID 0)
 -- Dependencies: 190
 -- Name: COLUMN product.frequency_id; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -847,7 +916,7 @@ DEKAD!=10-days
 
 
 --
--- TOC entry 2227 (class 0 OID 0)
+-- TOC entry 2228 (class 0 OID 0)
 -- Dependencies: 190
 -- Name: COLUMN product.date_format; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -856,7 +925,7 @@ COMMENT ON COLUMN product.date_format IS 'A string, case insensitive, in YYYYMMD
 
 
 --
--- TOC entry 2228 (class 0 OID 0)
+-- TOC entry 2229 (class 0 OID 0)
 -- Dependencies: 190
 -- Name: COLUMN product.timeseries_role; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -887,7 +956,7 @@ CREATE TABLE product_acquisition_data_source (
 ALTER TABLE products.product_acquisition_data_source OWNER TO estation;
 
 --
--- TOC entry 2229 (class 0 OID 0)
+-- TOC entry 2230 (class 0 OID 0)
 -- Dependencies: 191
 -- Name: COLUMN product_acquisition_data_source.defined_by; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -896,7 +965,7 @@ COMMENT ON COLUMN product_acquisition_data_source.defined_by IS 'values: JRC or 
 
 
 --
--- TOC entry 2230 (class 0 OID 0)
+-- TOC entry 2231 (class 0 OID 0)
 -- Dependencies: 191
 -- Name: COLUMN product_acquisition_data_source.type; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -973,7 +1042,7 @@ ALTER TABLE products.thema_product OWNER TO estation;
 SET search_path = analysis, pg_catalog;
 
 --
--- TOC entry 1993 (class 2604 OID 17991)
+-- TOC entry 1994 (class 2604 OID 17991)
 -- Name: layerid; Type: DEFAULT; Schema: analysis; Owner: estation
 --
 
@@ -981,7 +1050,7 @@ ALTER TABLE ONLY layers ALTER COLUMN layerid SET DEFAULT nextval('layers_layerid
 
 
 --
--- TOC entry 1994 (class 2604 OID 17992)
+-- TOC entry 1995 (class 2604 OID 17992)
 -- Name: legend_id; Type: DEFAULT; Schema: analysis; Owner: estation
 --
 
@@ -989,7 +1058,7 @@ ALTER TABLE ONLY legend ALTER COLUMN legend_id SET DEFAULT nextval('legend_legen
 
 
 --
--- TOC entry 2022 (class 2606 OID 17407)
+-- TOC entry 2023 (class 2606 OID 17407)
 -- Name: Primary key violation; Type: CONSTRAINT; Schema: analysis; Owner: estation; Tablespace: 
 --
 
@@ -998,7 +1067,7 @@ ALTER TABLE ONLY legend_step
 
 
 --
--- TOC entry 2018 (class 2606 OID 17409)
+-- TOC entry 2019 (class 2606 OID 17409)
 -- Name: Uniqueness of legend violation; Type: CONSTRAINT; Schema: analysis; Owner: estation; Tablespace: 
 --
 
@@ -1007,7 +1076,7 @@ ALTER TABLE ONLY legend
 
 
 --
--- TOC entry 2012 (class 2606 OID 17411)
+-- TOC entry 2013 (class 2606 OID 17411)
 -- Name: i18n_pkey; Type: CONSTRAINT; Schema: analysis; Owner: estation; Tablespace: 
 --
 
@@ -1016,7 +1085,7 @@ ALTER TABLE ONLY i18n
 
 
 --
--- TOC entry 2014 (class 2606 OID 17413)
+-- TOC entry 2015 (class 2606 OID 17413)
 -- Name: languages_pkey; Type: CONSTRAINT; Schema: analysis; Owner: estation; Tablespace: 
 --
 
@@ -1025,7 +1094,7 @@ ALTER TABLE ONLY languages
 
 
 --
--- TOC entry 2016 (class 2606 OID 17415)
+-- TOC entry 2017 (class 2606 OID 17415)
 -- Name: layers_pkey; Type: CONSTRAINT; Schema: analysis; Owner: estation; Tablespace: 
 --
 
@@ -1034,7 +1103,7 @@ ALTER TABLE ONLY layers
 
 
 --
--- TOC entry 2020 (class 2606 OID 17417)
+-- TOC entry 2021 (class 2606 OID 17417)
 -- Name: legend_pkey; Type: CONSTRAINT; Schema: analysis; Owner: estation; Tablespace: 
 --
 
@@ -1043,7 +1112,7 @@ ALTER TABLE ONLY legend
 
 
 --
--- TOC entry 2024 (class 2606 OID 17419)
+-- TOC entry 2025 (class 2606 OID 17419)
 -- Name: product_legend_pkey; Type: CONSTRAINT; Schema: analysis; Owner: estation; Tablespace: 
 --
 
@@ -1052,7 +1121,7 @@ ALTER TABLE ONLY product_legend
 
 
 --
--- TOC entry 2056 (class 2606 OID 18362)
+-- TOC entry 2057 (class 2606 OID 18362)
 -- Name: timeseries_drawproperties_pk; Type: CONSTRAINT; Schema: analysis; Owner: estation; Tablespace: 
 --
 
@@ -1063,7 +1132,7 @@ ALTER TABLE ONLY timeseries_drawproperties
 SET search_path = products, pg_catalog;
 
 --
--- TOC entry 2009 (class 2606 OID 17420)
+-- TOC entry 2010 (class 2606 OID 17420)
 -- Name: check_datasource_chk; Type: CHECK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1072,7 +1141,7 @@ ALTER TABLE product_acquisition_data_source
 
 
 --
--- TOC entry 2026 (class 2606 OID 17422)
+-- TOC entry 2027 (class 2606 OID 17422)
 -- Name: data_type_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -1081,7 +1150,7 @@ ALTER TABLE ONLY data_type
 
 
 --
--- TOC entry 2028 (class 2606 OID 17424)
+-- TOC entry 2029 (class 2606 OID 17424)
 -- Name: datasource_description_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -1090,7 +1159,7 @@ ALTER TABLE ONLY datasource_description
 
 
 --
--- TOC entry 2030 (class 2606 OID 17426)
+-- TOC entry 2031 (class 2606 OID 17426)
 -- Name: date_format_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -1099,7 +1168,7 @@ ALTER TABLE ONLY date_format
 
 
 --
--- TOC entry 2032 (class 2606 OID 17428)
+-- TOC entry 2033 (class 2606 OID 17428)
 -- Name: eumetcast_source_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -1108,7 +1177,7 @@ ALTER TABLE ONLY eumetcast_source
 
 
 --
--- TOC entry 2034 (class 2606 OID 17430)
+-- TOC entry 2035 (class 2606 OID 17430)
 -- Name: frequency_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -1117,7 +1186,7 @@ ALTER TABLE ONLY frequency
 
 
 --
--- TOC entry 2036 (class 2606 OID 17432)
+-- TOC entry 2037 (class 2606 OID 17432)
 -- Name: ingestion_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -1126,7 +1195,7 @@ ALTER TABLE ONLY ingestion
 
 
 --
--- TOC entry 2038 (class 2606 OID 17434)
+-- TOC entry 2039 (class 2606 OID 17434)
 -- Name: internet_source_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -1135,7 +1204,7 @@ ALTER TABLE ONLY internet_source
 
 
 --
--- TOC entry 2040 (class 2606 OID 17436)
+-- TOC entry 2041 (class 2606 OID 17436)
 -- Name: mapset_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -1144,7 +1213,7 @@ ALTER TABLE ONLY mapset
 
 
 --
--- TOC entry 2042 (class 2606 OID 17438)
+-- TOC entry 2043 (class 2606 OID 17438)
 -- Name: process_input_product_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -1153,7 +1222,7 @@ ALTER TABLE ONLY process_product
 
 
 --
--- TOC entry 2044 (class 2606 OID 17440)
+-- TOC entry 2045 (class 2606 OID 17440)
 -- Name: processing_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -1162,7 +1231,7 @@ ALTER TABLE ONLY processing
 
 
 --
--- TOC entry 2048 (class 2606 OID 17442)
+-- TOC entry 2049 (class 2606 OID 17442)
 -- Name: product_acquisition_data_source_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -1171,7 +1240,7 @@ ALTER TABLE ONLY product_acquisition_data_source
 
 
 --
--- TOC entry 2051 (class 2606 OID 17444)
+-- TOC entry 2052 (class 2606 OID 17444)
 -- Name: product_category_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -1180,7 +1249,7 @@ ALTER TABLE ONLY product_category
 
 
 --
--- TOC entry 2046 (class 2606 OID 17446)
+-- TOC entry 2047 (class 2606 OID 17446)
 -- Name: product_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -1189,7 +1258,7 @@ ALTER TABLE ONLY product
 
 
 --
--- TOC entry 2054 (class 2606 OID 17448)
+-- TOC entry 2055 (class 2606 OID 17448)
 -- Name: sub_datasource_description_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -1198,7 +1267,7 @@ ALTER TABLE ONLY sub_datasource_description
 
 
 --
--- TOC entry 2058 (class 2606 OID 18387)
+-- TOC entry 2059 (class 2606 OID 18387)
 -- Name: thema_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -1207,7 +1276,7 @@ ALTER TABLE ONLY thema
 
 
 --
--- TOC entry 2060 (class 2606 OID 18395)
+-- TOC entry 2061 (class 2606 OID 18395)
 -- Name: thema_product_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -1216,7 +1285,7 @@ ALTER TABLE ONLY thema_product
 
 
 --
--- TOC entry 2049 (class 1259 OID 17449)
+-- TOC entry 2050 (class 1259 OID 17449)
 -- Name: product_categories_order_index_key; Type: INDEX; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -1224,7 +1293,7 @@ CREATE UNIQUE INDEX product_categories_order_index_key ON product_category USING
 
 
 --
--- TOC entry 2052 (class 1259 OID 17450)
+-- TOC entry 2053 (class 1259 OID 17450)
 -- Name: unique_product_category_name; Type: INDEX; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -1234,7 +1303,7 @@ CREATE UNIQUE INDEX unique_product_category_name ON product_category USING btree
 SET search_path = analysis, pg_catalog;
 
 --
--- TOC entry 2062 (class 2606 OID 17451)
+-- TOC entry 2063 (class 2606 OID 17451)
 -- Name: legend_pkey; Type: FK CONSTRAINT; Schema: analysis; Owner: estation
 --
 
@@ -1243,7 +1312,7 @@ ALTER TABLE ONLY product_legend
 
 
 --
--- TOC entry 2061 (class 2606 OID 17456)
+-- TOC entry 2062 (class 2606 OID 17456)
 -- Name: legend_step_legend_id_fkey; Type: FK CONSTRAINT; Schema: analysis; Owner: estation
 --
 
@@ -1252,7 +1321,7 @@ ALTER TABLE ONLY legend_step
 
 
 --
--- TOC entry 2063 (class 2606 OID 17461)
+-- TOC entry 2064 (class 2606 OID 17461)
 -- Name: product_legend_product_pkey; Type: FK CONSTRAINT; Schema: analysis; Owner: estation
 --
 
@@ -1263,7 +1332,7 @@ ALTER TABLE ONLY product_legend
 SET search_path = products, pg_catalog;
 
 --
--- TOC entry 2076 (class 2606 OID 17466)
+-- TOC entry 2077 (class 2606 OID 17466)
 -- Name: data_type_product_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1272,7 +1341,7 @@ ALTER TABLE ONLY product
 
 
 --
--- TOC entry 2081 (class 2606 OID 17471)
+-- TOC entry 2082 (class 2606 OID 17471)
 -- Name: data_type_sub_datasource_description_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1281,7 +1350,7 @@ ALTER TABLE ONLY sub_datasource_description
 
 
 --
--- TOC entry 2066 (class 2606 OID 17476)
+-- TOC entry 2067 (class 2606 OID 17476)
 -- Name: datasource_description_eumetcast_source_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1290,7 +1359,7 @@ ALTER TABLE ONLY eumetcast_source
 
 
 --
--- TOC entry 2069 (class 2606 OID 17481)
+-- TOC entry 2070 (class 2606 OID 17481)
 -- Name: datasource_description_internet_source_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1299,7 +1368,7 @@ ALTER TABLE ONLY internet_source
 
 
 --
--- TOC entry 2082 (class 2606 OID 17486)
+-- TOC entry 2083 (class 2606 OID 17486)
 -- Name: datasource_description_sub_datasource_description_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1308,7 +1377,7 @@ ALTER TABLE ONLY sub_datasource_description
 
 
 --
--- TOC entry 2071 (class 2606 OID 17491)
+-- TOC entry 2072 (class 2606 OID 17491)
 -- Name: date_format_process_product_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1317,7 +1386,7 @@ ALTER TABLE ONLY process_product
 
 
 --
--- TOC entry 2064 (class 2606 OID 17496)
+-- TOC entry 2065 (class 2606 OID 17496)
 -- Name: datetype_filename_format_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1326,7 +1395,7 @@ ALTER TABLE ONLY datasource_description
 
 
 --
--- TOC entry 2077 (class 2606 OID 17501)
+-- TOC entry 2078 (class 2606 OID 17501)
 -- Name: datetype_product_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1335,7 +1404,7 @@ ALTER TABLE ONLY product
 
 
 --
--- TOC entry 2078 (class 2606 OID 17506)
+-- TOC entry 2079 (class 2606 OID 17506)
 -- Name: distribution_frequency_product_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1344,7 +1413,7 @@ ALTER TABLE ONLY product
 
 
 --
--- TOC entry 2070 (class 2606 OID 17620)
+-- TOC entry 2071 (class 2606 OID 17620)
 -- Name: frequency_internet_source_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1353,7 +1422,7 @@ ALTER TABLE ONLY internet_source
 
 
 --
--- TOC entry 2065 (class 2606 OID 17511)
+-- TOC entry 2066 (class 2606 OID 17511)
 -- Name: mapset_filename_format_config_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1362,7 +1431,7 @@ ALTER TABLE ONLY datasource_description
 
 
 --
--- TOC entry 2067 (class 2606 OID 17516)
+-- TOC entry 2068 (class 2606 OID 17516)
 -- Name: mapset_ingestion_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1371,7 +1440,7 @@ ALTER TABLE ONLY ingestion
 
 
 --
--- TOC entry 2072 (class 2606 OID 17521)
+-- TOC entry 2073 (class 2606 OID 17521)
 -- Name: mapset_process_input_product_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1380,7 +1449,7 @@ ALTER TABLE ONLY process_product
 
 
 --
--- TOC entry 2075 (class 2606 OID 17526)
+-- TOC entry 2076 (class 2606 OID 17526)
 -- Name: mapset_processing_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1389,7 +1458,7 @@ ALTER TABLE ONLY processing
 
 
 --
--- TOC entry 2084 (class 2606 OID 18396)
+-- TOC entry 2085 (class 2606 OID 18396)
 -- Name: mapset_thema_product_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1398,7 +1467,7 @@ ALTER TABLE ONLY thema_product
 
 
 --
--- TOC entry 2073 (class 2606 OID 17531)
+-- TOC entry 2074 (class 2606 OID 17531)
 -- Name: processing_dependencies_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1407,7 +1476,7 @@ ALTER TABLE ONLY process_product
 
 
 --
--- TOC entry 2079 (class 2606 OID 17536)
+-- TOC entry 2080 (class 2606 OID 17536)
 -- Name: product_categories_products_description_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1416,7 +1485,7 @@ ALTER TABLE ONLY product
 
 
 --
--- TOC entry 2074 (class 2606 OID 17541)
+-- TOC entry 2075 (class 2606 OID 17541)
 -- Name: product_dependencies_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1425,7 +1494,7 @@ ALTER TABLE ONLY process_product
 
 
 --
--- TOC entry 2068 (class 2606 OID 17546)
+-- TOC entry 2069 (class 2606 OID 17546)
 -- Name: product_ingestion_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1434,7 +1503,7 @@ ALTER TABLE ONLY ingestion
 
 
 --
--- TOC entry 2083 (class 2606 OID 17551)
+-- TOC entry 2084 (class 2606 OID 17551)
 -- Name: product_sub_datasource_description_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1443,7 +1512,7 @@ ALTER TABLE ONLY sub_datasource_description
 
 
 --
--- TOC entry 2080 (class 2606 OID 17556)
+-- TOC entry 2081 (class 2606 OID 17556)
 -- Name: products_description_product_acquisition_data_sources_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1452,7 +1521,7 @@ ALTER TABLE ONLY product_acquisition_data_source
 
 
 --
--- TOC entry 2085 (class 2606 OID 18401)
+-- TOC entry 2086 (class 2606 OID 18401)
 -- Name: thema_thema_product_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -1460,7 +1529,7 @@ ALTER TABLE ONLY thema_product
     ADD CONSTRAINT thema_thema_product_fk FOREIGN KEY (thema_id) REFERENCES thema(thema_id) ON UPDATE CASCADE;
 
 
--- Completed on 2015-07-30 15:16:10 CEST
+-- Completed on 2015-08-04 19:45:59 CEST
 
 --
 -- PostgreSQL database dump complete

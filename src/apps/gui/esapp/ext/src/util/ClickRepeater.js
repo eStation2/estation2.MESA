@@ -154,16 +154,18 @@ Ext.define('Ext.util.ClickRepeater', {
         this.clearListeners();
     },
 
-    handleDblClick: function (e) {
+    handleDblClick : function(e){
         clearTimeout(this.timer);
+        this.el.blur();
 
         this.fireEvent("mousedown", this, e);
         this.fireEvent("click", this, e);
     },
 
     // @private
-    handleMouseDown: function (e) {
+    handleMouseDown : function(e){
         clearTimeout(this.timer);
+        this.el.blur();
         if(this.pressedCls){
             this.el.addCls(this.pressedCls);
         }
@@ -195,7 +197,7 @@ Ext.define('Ext.util.ClickRepeater', {
     },
 
     easeOutExpo : function (t, b, c, d) {
-        return (t === d) ? b + c : c * (-Math.pow(2, -10 * t/d) + 1) + b;
+        return (t==d) ? b+c : c * (-Math.pow(2, -10 * t/d) + 1) + b;
     },
 
     // @private

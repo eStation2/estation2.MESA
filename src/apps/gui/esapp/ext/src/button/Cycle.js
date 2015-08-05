@@ -55,12 +55,11 @@ Ext.define('Ext.button.Cycle', {
      * showText = true).
      */
     /**
-     * @cfg {Function/String} [changeHandler=undefined]
+     * @cfg {Function} changeHandler
      * A callback function that will be invoked each time the active menu item in the button's menu has changed. If this
      * callback is not supplied, the SplitButton will instead fire the {@link #change} event on active item change. The
      * changeHandler function will be called with the following argument list: (SplitButton this, Ext.menu.CheckItem
      * item)
-     * @declarativeHandler
      */
     /**
      * @cfg {String} forceIcon
@@ -109,35 +108,38 @@ Ext.define('Ext.button.Cycle', {
     /**
      * Sets the button's active menu item.
      * @param {Ext.menu.CheckItem} item The item to activate
-     * @param {Boolean} [suppressEvent=false] True to prevent the {@link #change} event and {@link #changeHandler} from firing.
+     * @param {Boolean} [suppressEvent=false] True to prevent the button's change event from firing.
      */
     setActiveItem: function(item, suppressEvent) {
-        var me = this,
-            changeHandler = me.changeHandler,
-            forceIcon = me.forceIcon,
-            forceGlyph = me.forceGlyph;
+        var me = this;
 
-        me.settingActive = true;
         if (!Ext.isObject(item)) {
             item = me.menu.getComponent(item);
         }
         if (item) {
-            me.setText(me.getButtonText(item));
-            me.setIconCls(forceIcon ? forceIcon : item.iconCls);
-            me.setGlyph(forceGlyph ? forceGlyph : item.glyph);
-
+            if (!me.rendered) {
+                me.text = me.getButtonText(item);
+                me.iconCls = item.iconCls;
+                me.glyph = item.glyph;
+            } else {
+                me.setText(me.getButtonText(item));
+                me.setIconCls(item.iconCls);
+                me.setGlyph(item.glyph);
+            }
             me.activeItem = item;
             if (!item.checked) {
                 item.setChecked(true, false);
             }
+            if (me.forceIcon) {
+                me.setIconCls(me.forceIcon);
+            }
+            if (me.forceGlyph) {
+                me.setGlyph(me.forceGlyph);
+            }
             if (!suppressEvent) {
-                if (changeHandler) {
-                    Ext.callback(changeHandler, me.scope, [me, item], 0, me);
-                }
                 me.fireEvent('change', me, item);
             }
         }
-        me.settingActive = false;
     },
 
     /**
@@ -154,6 +156,11 @@ Ext.define('Ext.button.Cycle', {
             checked = 0,
             items,
             i, iLen, item;
+
+        if (me.changeHandler) {
+            me.on('change', me.changeHandler, me.scope || me);
+            delete me.changeHandler;
+        }
 
         // Allow them to specify a menu config which is a standard Button config.
         // Remove direct use of "items" in 5.0.
@@ -187,12 +194,12 @@ Ext.define('Ext.button.Cycle', {
         me.itemCount = me.menu.items.length;
         me.callParent(arguments);
         me.on('click', me.toggleSelected, me);
-        me.setActiveItem(checked, true);
+        me.setActiveItem(checked, me);
     },
 
     // @private
     checkHandler: function(item, pressed) {
-        if (pressed && !this.settingActive) {
+        if (pressed) {
             this.setActiveItem(item);
         }
     },

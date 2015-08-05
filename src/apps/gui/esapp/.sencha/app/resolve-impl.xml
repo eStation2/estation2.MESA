@@ -1,4 +1,4 @@
-<project name="x-resolve-impl">
+<project name="resolve-impl">
     
     <target name="-before-web-start"/>
     <target name="-web-start">

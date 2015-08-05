@@ -16,7 +16,7 @@ Ext.define('Ext.form.field.FileButton', {
     preventDefault: false,
     
     // Button element *looks* focused but it should never really receive focus itself,
-    // and with it being a <div></div> we don't need to render tabindex attribute at all
+    // and with it being a <div> we don't need to render tabindex attribute at all
     tabIndex: null,
 
     autoEl: {
@@ -61,8 +61,8 @@ Ext.define('Ext.form.field.FileButton', {
         me.fileInputEl.on({
             scope: me,
             change: me.fireChange,
-            focus: me.onFileFocus,
-            blur: me.onFileBlur
+            focus: me.onFocus,
+            blur: me.onBlur
         });
     },
     
@@ -77,72 +77,39 @@ Ext.define('Ext.form.field.FileButton', {
      * button's clicks.
      */
     createFileInput : function(isTemporary) {
-        var me = this,
-            fileInputEl = me.fileInputEl = me.el.createChild({
-                name: me.inputName,
-                id: !isTemporary ? me.id + '-fileInputEl' : undefined,
-                cls: me.inputCls,
-                tag: 'input',
-                type: 'file',
-                size: 1,
-                role: 'button'
-            });
-
-        // This is our focusEl
-        fileInputEl.dom.setAttribute(Ext.Component.componentIdAttribute, me.id);
+        var me = this;
+        me.fileInputEl = me.el.createChild({
+            name: me.inputName,
+            id: !isTemporary ? me.id + '-fileInputEl' : undefined,
+            cls: me.inputCls,
+            tag: 'input',
+            type: 'file',
+            size: 1,
+            role: 'button'
+        });
         
         // We place focus and blur listeners on fileInputEl to activate Button's
         // focus and blur style treatment
-        fileInputEl.on({
+        me.fileInputEl.on({
             scope: me,
             change: me.fireChange,
-            focus: me.onFileFocus,
-            blur: me.onFileBlur
+            focus: me.onFocus,
+            blur: me.onBlur
         });
     },
-
-    onFileFocus: function(e) {
-        var ownerCt = this.ownerCt;
-        
-        if (!this.hasFocus) {
-            this.onFocus(e);
-        }
-        
-        if (ownerCt && !ownerCt.hasFocus) {
-            ownerCt.onFocus(e);
-        }
-    },
-
-    onFileBlur: function(e) {
-        var ownerCt = this.ownerCt;
-        
-        if (this.hasFocus) {
-            this.onBlur(e);
-        }
-        
-        if (ownerCt && ownerCt.hasFocus) {
-            ownerCt.onBlur(e);
-        }
-    },
     
-    reset: function(remove) {
-        // We do not add listeners to focusEls now.
-        // The Focus event publisher calls into Components on focus and blur
-        var me = this;
+    reset: function(remove){
         if (remove) {
-            me.fileInputEl.destroy();
+            this.fileInputEl.destroy();
         }
-        me.createFileInput(!remove);
+        this.createFileInput(!remove);
     },
     
-    restoreInput: function(el) {
-        // We do not add listeners to focusEls now.
-        // The Focus event publisher calls into Components on focus and blur
-        var me = this;
-        me.fileInputEl.destroy();
+    restoreInput: function(el){
+        this.fileInputEl.destroy();
         el = Ext.get(el);
-        me.el.appendChild(el);
-        me.fileInputEl = el;
+        this.el.appendChild(el);
+        this.fileInputEl = el;
     },
     
     onDisable: function(){

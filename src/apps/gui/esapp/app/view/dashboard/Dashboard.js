@@ -11,6 +11,9 @@ Ext.define("esapp.view.dashboard.Dashboard",{
     xtype  : 'dashboard-main',
 
     requires: [
+        'esapp.view.dashboard.DashboardController',
+        'esapp.view.dashboard.DashboardModel',
+
         'esapp.view.dashboard.PC1',
         'esapp.view.dashboard.PC2',
         'esapp.view.dashboard.PC3',

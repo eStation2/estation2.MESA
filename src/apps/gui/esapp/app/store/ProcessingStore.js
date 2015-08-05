@@ -55,10 +55,10 @@ Ext.define('esapp.store.ProcessingStore', {
         }
     }
     ,grouper:{
-              property: 'cat_descr_name',
-             //groupFn : function (item) {
-             //    return "<span style='display: none;'>" + item.get('order_index') + "</span>" + item.get('cat_descr_name')
-             //},
+             // property: 'cat_descr_name',
+             groupFn : function (item) {
+                 return "<span style='display: none;'>" + item.get('order_index') + "</span>" + item.get('cat_descr_name')
+             },
              sortProperty: 'order_index'
     }
     ,listeners: {

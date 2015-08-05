@@ -5,26 +5,35 @@
  *
  *     @example
  *     var store = Ext.create('Ext.data.Store', {
- *         fields: ['name', 'email', 'phone', 'active'],
- *         data: [
- *             { name: 'Lisa', email: 'lisa@simpsons.com', phone: '555-111-1224', active: true },
- *             { name: 'Bart', email: 'bart@simpsons.com', phone: '555-222-1234', active: true },
- *             { name: 'Homer', email: 'homer@simpsons.com', phone: '555-222-1244', active: false },
- *             { name: 'Marge', email: 'marge@simpsons.com', phone: '555-222-1254', active: true }
- *         ]
+ *         fields : ['name', 'email', 'phone', 'active'],
+ *         data   : {
+ *             items : [
+ *                 { name : 'Lisa',  email : 'lisa@simpsons.com',  phone : '555-111-1224', active : true  },
+ *                 { name : 'Bart',  email : 'bart@simpsons.com',  phone : '555-222-1234', active : true  },
+ *                 { name : 'Homer', email : 'homer@simpsons.com',  phone : '555-222-1244', active : false },
+ *                 { name : 'Marge', email : 'marge@simpsons.com', phone : '555-222-1254', active : true  }
+ *             ]
+ *         },
+ *         proxy  : {
+ *             type   : 'memory',
+ *             reader : {
+ *                 type : 'json',
+ *                 root : 'items'
+ *             }
+ *         }
  *     });
  *
  *     Ext.create('Ext.grid.Panel', {
- *         title: 'Simpsons',
- *         height: 200,
- *         width: 400,
- *         renderTo: Ext.getBody(),
- *         store: store,
- *         columns: [
- *             { text: 'Name', dataIndex: 'name' },
- *             { text: 'Email', dataIndex: 'email', flex: 1 },
- *             { text: 'Phone', dataIndex: 'phone' },
- *             { xtype: 'checkcolumn', text: 'Active', dataIndex: 'active' }
+ *         title    : 'Simpsons',
+ *         height   : 200,
+ *         width    : 400,
+ *         renderTo : Ext.getBody(),
+ *         store    : store,
+ *         columns  : [
+ *             { text : 'Name', dataIndex : 'name' },
+ *             { text : 'Email', dataIndex : 'email', flex : 1 },
+ *             { text : 'Phone', dataIndex : 'phone' },
+ *             { xtype : 'checkcolumn', text : 'Active', dataIndex : 'active' }
  *         ]
  *     });
  *
@@ -84,14 +93,10 @@ Ext.define('Ext.grid.column.Check', {
     processEvent: function(type, view, cell, recordIndex, cellIndex, e, record, row) {
         var me = this,
             key = type === 'keydown' && e.getKey(),
-            mousedown = type === 'mousedown',
-            disabled = me.disabled,
-            ret = false,
-            checked;
+            mousedown = type == 'mousedown';
 
-
-        if (!disabled && (mousedown || (key === e.ENTER || key === e.SPACE))) {
-            checked = !me.isRecordChecked(record);
+        if (!me.disabled && (mousedown || (key == e.ENTER || key == e.SPACE))) {
+            var checked = !me.isRecordChecked(record);
 
             // Allow apps to hook beforecheckchange
             if (me.fireEvent('beforecheckchange', me, recordIndex, checked) !== false) {
@@ -103,22 +108,24 @@ Ext.define('Ext.grid.column.Check', {
                     e.stopEvent();
                 }
 
-                // Selection may not proceed after this because of the DOM update caused by the record modification,
-                // this depends on whether or not we overwrite the DOM element, which may prevent the click event. Regardless,
-                // we'll veto the click event below and just do the selection here if needed.
+                // Selection will not proceed after this because of the DOM update caused by the record modification
+                // Invoke the SelectionModel unless configured not to do so
                 if (!me.stopSelection) {
                     view.selModel.selectByPosition({
                         row: recordIndex,
                         column: cellIndex
                     });
                 }
+
+                // Prevent the view from propagating the event to the selection model - we have done that job.
+                return false;
+            } else {
+                // Prevent the view from propagating the event to the selection model if configured to do so.
+                return !me.stopSelection;
             }
-        } else if (!disabled && type === 'click') {
-            ret = false;
         } else {
-            ret = me.callParent(arguments);
+            return me.callParent(arguments);
         }
-        return ret;
     },
 
     /**
@@ -186,12 +193,8 @@ Ext.define('Ext.grid.column.Check', {
     },
 
     updater: function (cell, value) {
-        var cellValues = {},
-            tdCls;
+        var cellValues = {};
         cell.firstChild.innerHTML = this.defaultRenderer(value, cellValues);
-        tdCls = cellValues.tdCls;
-        if (tdCls) {
-            Ext.fly(cell).addCls(tdCls);
-        }
+        Ext.fly(cell).addCls(cellValues.tdCls);
     }
 });

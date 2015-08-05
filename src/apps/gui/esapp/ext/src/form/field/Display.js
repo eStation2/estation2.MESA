@@ -13,7 +13,7 @@
  *     Ext.create('Ext.form.Panel', {
  *         renderTo: Ext.getBody(),
  *         width: 175,
- *         height: 150,
+ *         height: 120,
  *         bodyPadding: 10,
  *         title: 'Final Score',
  *         items: [{
@@ -74,28 +74,8 @@ Ext.define('Ext.form.field.Display', {
     
     /**
      * @cfg {Function} renderer
-     * A function to transform the raw value for display in the field.
-     * 
-     *     Ext.create('Ext.form.Panel', {
-     *         renderTo: document.body,
-     *         width: 175,
-     *         bodyPadding: 10,
-     *         title: 'Final Score',
-     *         items: [{
-     *             xtype: 'displayfield',
-     *             fieldLabel: 'Grade',
-     *             name: 'final_grade',
-     *             value: 68,
-     *             renderer: function (value, field) {
-     *                 var color = (value < 70) ? 'red' : 'black';
-     *                 return '<span style="color:' + color + ';">' + value + '</span>';
-     *             }
-     *         }]
-     *     });
-     * 
-     * @param {Object} value The raw field {@link #value}
-     * @param {Ext.form.field.Display} field The display field
-     * @return {String} displayValue The HTML string to be rendered
+     * A function to transform the raw value for display in the field. The function will receive 2 arguments, the raw value
+     * and the {@link Ext.form.field.Display} object.
      */
     
     /**
@@ -114,16 +94,12 @@ Ext.define('Ext.form.field.Display', {
     initEvents: Ext.emptyFn,
 
     submitValue: false,
-
-    getValue: function() {
-        return this.value;
-    },
     
     valueToRaw: function(value) {
-        if (value || value === 0 || value === false) {
-            return value;
-        } else {
+        if (!value && value !== 0) {
             return '';
+        } else {
+            return value;
         }
     },
     

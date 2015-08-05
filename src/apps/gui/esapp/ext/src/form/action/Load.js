@@ -93,24 +93,15 @@ Ext.define('Ext.form.action.Load', {
      */
     onSuccess: function(response){
         var result = this.processResponse(response),
-            form = this.form,
-            formActive = form && !form.destroying && !form.isDestroyed;
-        
+            form = this.form;
         if (result === true || !result.success || !result.data) {
             this.failureType = Ext.form.action.Action.LOAD_FAILURE;
-            
-            if (formActive) {
-                form.afterAction(this, false);
-            }
-            
+            form.afterAction(this, false);
             return;
         }
-        
-        if (formActive) {
-            form.clearInvalid();
-            form.setValues(result.data);
-            form.afterAction(this, true);
-        }
+        form.clearInvalid();
+        form.setValues(result.data);
+        form.afterAction(this, true);
     },
 
     /**

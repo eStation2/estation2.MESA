@@ -1,4 +1,6 @@
 /**
+ * @docauthor Jason Johnston <jason@sencha.com>
+ *
  * A file upload field which has custom styling and allows control over the button text and other
  * features of {@link Ext.form.field.Text text fields} like {@link Ext.form.field.Text#emptyText empty text}.
  * It uses a hidden file input element behind the scenes to allow user selection of a file and to
@@ -63,14 +65,7 @@ Ext.define('Ext.form.field.File', {
     triggers: {
         filebutton: {
             type: 'component',
-            hideOnReadOnly: false,
-            // Most form fields prevent the default browser action on mousedown of the trigger.
-            // This is intended to prevent the field's input element from losing focus when
-            // the trigger is clicked.  File fields disable this behavior because:
-            // 1. The input element does not receive focus when the field is focused. The button does.
-            // 2. Preventing the default action of touchstart (translated from mousedown
-            // on mobile browsers) prevents the browser's file dialog from opening.
-            preventMouseDown: false
+            hideOnReadOnly : false
         }
     },
 
@@ -208,13 +203,7 @@ Ext.define('Ext.form.field.File', {
         me.callParent(arguments);
 
         inputEl = me.inputEl;
-        //name goes on the fileInput, not the text input
-        inputEl.dom.name = ''; 
-        // Some browsers will show a blinking cursor in the field, even if it's readonly. If we do happen
-        // to receive focus, forward it on to our focusEl. Also note that in IE, the file input is treated as
-        // 2 elements for tabbing purposes (the text, then the button). So as you tab through, it will take 2
-        // tabs to get to the next field. As far as I know there's no way around this in any kind of reasonable way.
-        inputEl.on('focus', me.focus, me);
+        inputEl.dom.name = ''; //name goes on the fileInput, not the text input
 
         trigger = me.getTrigger('filebutton');
         button = me.button = trigger.component;
@@ -330,7 +319,8 @@ Ext.define('Ext.form.field.File', {
     },
 
     onDestroy: function(){
-        this.fileInputEl = this.button = null;
+        Ext.destroyMembers(this, 'button');
+        delete this.fileInputEl;
         this.callParent();
     },
 
@@ -341,8 +331,6 @@ Ext.define('Ext.form.field.File', {
     privates: {
         getFocusEl: function() {
             return this.button;
-        },
-        
-        getFocusClsEl: Ext.privateFn
+        }
     }
 });

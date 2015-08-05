@@ -29,13 +29,13 @@ Ext.define('Ext.toolbar.Breadcrumb', {
     config: {
         /**
          * @cfg {String} [buttonUI='plain-toolbar']
-         * Button UI to use for breadcrumb items.  Use {@link #extjs-breadcrumb-ui} to
+         * Button UI to use for breadcrumb items.  Use {@link #extjs-breadcrumb-arrow} to
          * add special styling to the breadcrumb arrows
          */
         buttonUI: 'plain-toolbar',
 
         /**
-         * @cfg {String}
+         * @cfg {String} [displayFieldName=text]
          * The name of the field in the data model to display in the navigation items of
          * this breadcrumb toolbar
          */
@@ -69,25 +69,6 @@ Ext.define('Ext.toolbar.Breadcrumb', {
          * 3. `false` - No icons will be displayed in the breadcrumb buttons, only text.
          */
         showIcons: null,
-
-        /**
-         * @cfg {Boolean} [showMenuIcons=null]
-         *
-         * Controls whether or not icons of tree nodes are displayed in the breadcrumb
-         * menu items. There are 3 possible values for this config:
-         *
-         * 1. unspecified (`null`) - the default value. In this mode only icons that are
-         * specified in the tree data using ({@link Ext.data.NodeInterface#icon icon}
-         * or {@link Ext.data.NodeInterface#iconCls iconCls} will be displayed, but the
-         * default "folder" and "leaf" icons will not be displayed.
-         *
-         * 2. `true` - Icons specified in the tree data will be displayed, and the default
-         * "folder" and "leaf" icons will be displayed for nodes that do not specify
-         * an `icon` or `iconCls`.
-         *
-         * 3. `false` - No icons will be displayed on the breadcrumb menu items, only text.
-         */
-        showMenuIcons: null,
 
         /**
          * @cfg {Ext.data.TreeStore} store
@@ -174,21 +155,6 @@ Ext.define('Ext.toolbar.Breadcrumb', {
         }
     },
 
-    /**
-     * @method getSelection
-     * Returns the currently selected {@link Ext.data.TreeModel node}.
-     * @return {Ext.data.TreeModel} node The selected node (or null if there is no
-     * selection).
-     */
-
-    /**
-     * @method setSelection
-     * Selects the passed {@link Ext.data.TreeModel node} in the breadcrumb component.
-     * @param {Ext.data.TreeModel} node The node in the breadcrumb {@link #store} to
-     * select as the active node.
-     * @return {Ext.toolbar.Breadcrumb} this The breadcrumb component
-     */
-
     applySelection: function(node) {
         var store = this.getStore();
         if (store) {
@@ -206,7 +172,7 @@ Ext.define('Ext.toolbar.Breadcrumb', {
             itemCount = me.items.getCount(),
             needsSync = me._needsSync,
             displayField = me.getDisplayField(),
-            showIcons, glyph, iconCls, icon, newItemCount, currentNode, text, button, id, depth, i;
+            showIcons, iconCls, icon, newItemCount, currentNode, text, button, id, depth, i;
 
         Ext.suspendLayouts();
 
@@ -255,32 +221,23 @@ Ext.define('Ext.toolbar.Breadcrumb', {
                 showIcons = this.getShowIcons();
 
                 if (showIcons !== false) {
-                    glyph = currentNode.get('glyph');
                     icon = currentNode.get('icon');
                     iconCls = currentNode.get('iconCls');
 
-                    if (glyph) {
-                        button.setGlyph(glyph);
-                        button.setIcon(null);
-                        button.setIconCls(iconCls); // may need css to get glyph
-                    } else if (icon) {
-                        button.setGlyph(null);
+                    if (icon) {
                         button.setIconCls(null);
                         button.setIcon(icon);
                     } else if (iconCls) {
-                        button.setGlyph(null);
                         button.setIcon(null);
                         button.setIconCls(iconCls);
                     } else if (showIcons) {
                         // only show default icons if showIcons === true
-                        button.setGlyph(null);
                         button.setIcon(null);
                         button.setIconCls(
                             (currentNode.isLeaf() ? me._leafIconCls : me._folderIconCls) + '-' + me.ui
                         );
                     } else {
                         // if showIcons is null do not show default icons
-                        button.setGlyph(null);
                         button.setIcon(null);
                         button.setIconCls(null);
                     }
@@ -374,9 +331,7 @@ Ext.define('Ext.toolbar.Breadcrumb', {
          * @param {Ext.event.Event} e
          */
         _onMenuClick: function(menu, item, e) {
-            if (item) {
-                this.setSelection(this.getStore().getNodeById(item._breadcrumbNodeId));
-            }
+            this.setSelection(this.getStore().getNodeById(item._breadcrumbNodeId));
         },
 
         /**
@@ -385,44 +340,21 @@ Ext.define('Ext.toolbar.Breadcrumb', {
          * @param {Ext.menu.Menu} menu
          */
         _onMenuBeforeShow: function(menu) {
-            var me = this,
-                node = me.getStore().getNodeById(menu.ownerCmp._breadcrumbNodeId),
-                displayField = me.getDisplayField(),
-                showMenuIcons = me.getShowMenuIcons(),
-                childNodes, child, glyph, items, i, icon, iconCls, ln, item;
+            var node = this.getStore().getNodeById(menu.ownerCmp._breadcrumbNodeId),
+                displayField = this.getDisplayField(),
+                childNodes, childNode, items, i, ln;
+
 
             if (node.hasChildNodes()) {
                 childNodes = node.childNodes;
                 items = [];
 
                 for (i = 0, ln = childNodes.length; i < ln; i++) {
-                    child = childNodes[i];
-                    item = {
-                        text: child.get(displayField),
-                        _breadcrumbNodeId: child.getId()
-                    };
-
-                    if (showMenuIcons !== false) {
-                        glyph = child.get('glyph');
-                        icon = child.get('icon');
-                        iconCls = child.get('iconCls');
-
-                        if (glyph) {
-                            item.glyph = glyph;
-                            item.iconCls = iconCls;  // may need css to get glyph
-                        } else if (icon) {
-                            item.icon = icon;
-                        } else if (iconCls) {
-                            item.iconCls = iconCls;
-                        } else if (showMenuIcons) {
-                            // only show default icons if showIcons === true
-                            item.iconCls =
-                                (child.isLeaf() ? me._leafIconCls : me._folderIconCls) +
-                                '-' + me.ui;
-                        }
-                    }
-
-                    items.push(item);
+                    childNode = childNodes[i];
+                    items.push({
+                        text: childNode.get(displayField),
+                        _breadcrumbNodeId: childNode.getId()
+                    });
                 }
 
                 menu.removeAll();

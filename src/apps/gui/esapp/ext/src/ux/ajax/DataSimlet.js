@@ -85,7 +85,7 @@ Ext.define('Ext.ux.ajax.DataSimlet', function () {
         getData: function (ctx) {
             var me = this,
                 params = ctx.params,
-                order = (params.filter || '') + (params.group || '') + '-' + (params.sort || '') + '-' + (params.dir || ''),
+                order = (params.filter||'')+(params.group||'')+'-'+(params.sort||'')+'-'+(params.dir||''),
                 tree = me.tree,
                 dynamicData,
                 data, fields, sortFn;
@@ -100,8 +100,7 @@ Ext.define('Ext.ux.ajax.DataSimlet', function () {
                 data = data.call(this, ctx);
             }
 
-            // If order is '--' then it means we had no order passed, due to the string concat above
-            if (!data || order === '--') {
+            if (!order || !data) {
                 return data || [];
             }
 

@@ -1,6 +1,6 @@
 /**
  * @class Ext.form.trigger.Trigger
- * Base class for {@link Ext.form.field.Text#cfg-triggers Text Field triggers}
+ * Base class for {@link Ext.form.field.Text Text Field} triggers
  */
 Ext.define('Ext.form.trigger.Trigger', {
     alias: 'trigger.trigger',
@@ -34,9 +34,8 @@ Ext.define('Ext.form.trigger.Trigger', {
      */
 
     /**
-     * @cfg {Function/String} [handler=undefined]
+     * @cfg {Function/String} [handler]
      * Function to run when trigger is clicked or tapped.
-     * @declarativeHandler
      */
 
     /**
@@ -53,34 +52,21 @@ Ext.define('Ext.form.trigger.Trigger', {
 
     /**
      * @cfg {Object} [scope]
-     * Execution context for the {@link #handler} function.
+     * Execution context for the handler function.
      */
 
     /**
      * @cfg {Number} weight
      * An optional weighting to change the ordering of the items. The default weight is
-     * `0`.  Triggers are sorted by weight in ascending order before being rendered.  
-     * The value may be a negative value in order to position custom triggers ahead of 
-     * default triggers like that of ComboBox.
+     * `0`.  Triggers are sorted by weight in ascending order before being rendered.
      */
     weight: 0,
 
     /**
      * @cfg {Number} width The trigger's width, in pixels. Typically this is not needed
-     * as the trigger width is normally determined by the style sheet, (see {@link
-     * Ext.form.field.Text#$form-trigger-width extjs-text-field} or
-     * {@link Ext.form.field.Text#css_mixin-extjs-text-field-ui}).
+     * as the trigger width is normally determined by the stylesheet, (see {@link
+     * Ext.form.field.Text#$form-trigger-width extjs-text-field} or {@link or Ext.form.field.Text#$extjs-text-field-ui}).
      */
-
-    /**
-     * @cfg {Boolean} [preventMouseDown=true]
-     * @private
-     * If true, preventDefault() will be called on the mousedown event.  This prevents
-     * a click on the trigger from blurring the field, which is desirable in most cases.
-     * File field sets this to false, because preventing the default behavior of touchstart
-     * prevents the browser's file dialog from opening.
-     */
-    preventMouseDown: true,
 
     /**
      * @property {String}
@@ -201,7 +187,7 @@ Ext.define('Ext.form.trigger.Trigger', {
 
     /**
      * Returns the element that should receive the "state" classes - {@link #focusCls},
-     * {@link #overCls}, and {@link #clickCls}.
+     * {@link {@link #overCls}, and {@link #clickCls}.
      * @protected
      */
     getStateEl: function() {
@@ -289,29 +275,25 @@ Ext.define('Ext.form.trigger.Trigger', {
 
     // "this" refers to our owning input field.
     resolveListenerScope: function(scope) {
-        return this.field.resolveSatelliteListenerScope(this, scope);
+        return this.field.resolveListenerScope(scope);
     },
 
     onMouseDown: function(e) {
-        // If it was a genuine mousedown or pointerdown, NOT a touch, then focus the input field.
+        // If it was a genuine mousedown, NOT a touch, then focus the input field.
         // Usually, the field will be focused, but the mousedown on the trigger
-        // might be the user's first contact with the field.
-        // It's definitely NOT the user's first contact with our field owns the currently
-        // active element (for example a PickerField with a GridPanel as its picker)
-        if (e.pointerType !== 'touch' && !this.field.owns(Ext.Element.getActiveElement())) {
+        // might be the user's first comntact with the field.
+        if (!e.parentEvent || e.parentEvent.type === 'mousedown') {
             this.field.inputEl.focus();
         }
 
-        if (this.preventMouseDown) {
-            // Stop the mousedown from blurring our field
-            e.preventDefault();
-        }
+        // Stop the mousedown from blurring our field
+        e.preventDefault();
     },
 
     onClickRepeaterMouseDown: function(clickRepeater, e) {
         // If it was a genuine mousedown, NOT a touch, then focus the input field.
         // Usually, the field will be focused, but the mousedown on the trigger
-        // might be the user's first contact with the field.
+        // might be the user's first comntact with the field.
         if (!e.parentEvent || e.parentEvent.type === 'mousedown') {
             this.field.inputEl.focus();
         }

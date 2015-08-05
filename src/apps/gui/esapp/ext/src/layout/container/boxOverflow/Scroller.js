@@ -91,6 +91,7 @@ Ext.define('Ext.layout.container.boxOverflow.Scroller', {
         var me = this,
             layout = me.layout,
             owner = layout.owner,
+            prefix = Ext.baseCSSPrefix,
             type = me.getOwnerType(owner),
             scrollerCls = me.scrollerCls,
             cls =
@@ -112,6 +113,8 @@ Ext.define('Ext.layout.container.boxOverflow.Scroller', {
     },
 
     beginLayout: function (ownerContext) {
+        var layout = this.layout;
+
         ownerContext.innerCtScrollPos = this.getScrollPosition();
 
         this.callParent(arguments);
@@ -123,7 +126,7 @@ Ext.define('Ext.layout.container.boxOverflow.Scroller', {
             layout = me.layout,
             names = layout.names,
             scrollPos = Math.min(me.getMaxScrollPosition(), ownerContext.innerCtScrollPos),
-            lastProps;
+            lastProps, lastItemContext;
 
         // If there is overflow...
         if (plan && plan.tooNarrow) {
@@ -212,12 +215,12 @@ Ext.define('Ext.layout.container.boxOverflow.Scroller', {
      */
     createWheelListener: function() {
         var me = this;
-        me.wheelListener = me.layout.innerCt.on('mousewheel', me.onMouseWheel, me, {destroyable: true});
-    },
-
-    onMouseWheel: function(e) {
-        e.stopEvent();
-        this.scrollBy(this.getWheelDelta(e) * this.wheelIncrement * -1, false);
+        me.layout.innerCt.on({
+            mousewheel: function(e) {
+                me.scrollBy(me.getWheelDelta(e) * me.wheelIncrement * -1, false);
+            },
+            stopEvent: true
+        });
     },
 
     getWheelDelta: function (e) {
@@ -238,9 +241,7 @@ Ext.define('Ext.layout.container.boxOverflow.Scroller', {
     showScrollers: function() {
         var me = this;
 
-        if (!me.wheelListener) {
-            me.createWheelListener();
-        }
+        me.createWheelListener();
         me.getBeforeScroller().show();
         me.getAfterScroller().show();
         me.layout.owner.addClsWithUI(me.layout.direction === 'vertical' ? 'vertical-scroller' : 'scroller');
@@ -268,7 +269,9 @@ Ext.define('Ext.layout.container.boxOverflow.Scroller', {
      * @private
      */
     destroy: function() {
-        Ext.destroyMembers(this, 'beforeRepeater', 'afterRepeater', '_beforeScroller', '_afterScroller', 'wheelListener');
+        var me = this;
+
+        Ext.destroy(me.beforeRepeater, me.afterRepeater, me._beforeScroller, me._afterScroller);
     },
 
     /**
@@ -411,7 +414,7 @@ Ext.define('Ext.layout.container.boxOverflow.Scroller', {
             oldPosition = me.getScrollPosition(),
             newPosition = Ext.Number.constrain(position, 0, me.getMaxScrollPosition());
 
-        if (newPosition !== oldPosition && !me.scrolling) {
+        if (newPosition != oldPosition && !me.scrolling) {
             me.scrollPosition = NaN;
             if (animate === undefined) {
                 animate = me.animateScroll;
@@ -445,8 +448,8 @@ Ext.define('Ext.layout.container.boxOverflow.Scroller', {
 
         item = me.getItem(item);
         if (item !== undefined) {
-            if (item === owner.items.first()) {
-                newPos = 0;
+            if (item == owner.items.first()) {
+                newPos = 0
             } else if (item === owner.items.last()) {
                 newPos = me.getMaxScrollPosition();
             } else {
@@ -485,7 +488,7 @@ Ext.define('Ext.layout.container.boxOverflow.Scroller', {
         return {
             hiddenStart : itemStart < scrollStart,
             hiddenEnd   : itemEnd > scrollEnd,
-            fullyVisible: itemStart >= scrollStart && itemEnd <= scrollEnd
+            fullyVisible: itemStart > scrollStart && itemEnd < scrollEnd
         };
     }
 });

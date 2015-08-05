@@ -16,8 +16,7 @@ Ext.define('Ext.ZIndexManager', {
 
     requires: [
         'Ext.util.SorterCollection',
-        'Ext.util.FilterCollection',
-        'Ext.GlobalEvents'
+        'Ext.util.FilterCollection'
     ],
 
     statics: {
@@ -25,9 +24,6 @@ Ext.define('Ext.ZIndexManager', {
         activeCounter: 0
     },
 
-    /**
-     * @private
-     */
     constructor: function(container) {
         var me = this;
 
@@ -61,7 +57,7 @@ Ext.define('Ext.ZIndexManager', {
 
         // Listen for global component hiding and showing.
         // onComponentShowHide only reacts if we are managing the component.
-        me.globalListeners = Ext.GlobalEvents.on({
+        me.globalListeners = Ext.globalEvents.on({
             hide: me.onComponentShowHide,
             show: me.onComponentShowHide,
             scope: me,
@@ -72,7 +68,7 @@ Ext.define('Ext.ZIndexManager', {
 
             // This is the ZIndexManager for an Ext.container.Container, base its zseed on the zIndex of the Container's element
             if (container.isContainer) {
-                container.on('resize', me.onContainerResize, me);
+                container.on('resize', me._onContainerResize, me);
                 me.zseed = Ext.Number.from(me.rendered ? container.getEl().getStyle('zIndex') : undefined, me.getNextZSeed());
                 // The containing element we will be dealing with (eg masking) is the content target
                 me.targetEl = container.getTargetEl();
@@ -80,7 +76,7 @@ Ext.define('Ext.ZIndexManager', {
             }
             // This is the ZIndexManager for a DOM element
             else {
-                Ext.on('resize', me.onContainerResize, me);
+                Ext.on('resize', me._onContainerResize, me);
                 me.zseed = me.getNextZSeed();
                 me.targetEl = Ext.get(container);
             }
@@ -89,8 +85,8 @@ Ext.define('Ext.ZIndexManager', {
         // DOM must be ready to collect that ref.
         else {
             me.zseed = me.getNextZSeed();
-            Ext.onInternalReady(function() {
-                Ext.on('resize', me.onContainerResize, me);
+            Ext.onReady(function() {
+                Ext.on('resize', me._onContainerResize, me);
                 me.targetEl = Ext.getBody();
             });
         }
@@ -116,11 +112,13 @@ Ext.define('Ext.ZIndexManager', {
     onCollectionSort: function() {
         var me = this,
             oldFront = me.front,
-            zIndex = me.zseed,
             a = me.zIndexStack.getRange(),
             len = a.length,
-            i, comp, topModal, topVisible,
-            doFocus = false;
+            i,
+            zIndex = me.zseed,
+            comp,
+            topModal,
+            doFocus;
 
         for (i = 0; i < len; i++) {
             comp = a[i];
@@ -133,54 +131,37 @@ Ext.define('Ext.ZIndexManager', {
             // floating children, starting from that new base, and returns a value 10000 above
             // the highest zIndex which it allocates.
             zIndex = comp.setZIndex(zIndex);
-
-            // Only register a new topmost to activate if we find one that is visible
-            // Unfiltered panels with hidden:"true can end up here during an animated hide process
-            // When the hidden flag is set, and the ghost show operation kicks the ZIndexManager's sort.
-            if (!comp.hidden) {
-                topVisible = comp;
-
-                // Track topmost visible modal so we can place the modal mask just below it.
-                if (comp.modal) {
-                    topModal = comp;
-                }
+            if (comp.modal) {
+                topModal = comp;
             }
         }
 
-        // Sort resulted in a different component (possibly no component) at the top of the stack
-        if (topVisible !== oldFront) {
+        // Sort resulted in a different component at the top of the stack
+        if (comp && comp !== oldFront) {
 
-            // Clear active flag on old front component. Just fires the deactivate event/
+            // Clear active flag on old front component.
             // Do not inform it, if the reason for its deactivation is that it's being destroyed.
             if (oldFront && !oldFront.destroying) {
-                oldFront.setActive(false);
-            }
+                    oldFront.setActive(false, comp);
+                }
 
-            // Only activate topmost *visible* component.
-            if (topVisible) {
-                // Modals always get focused.
-                //
-                // New front only gets focused if the oldFront is still visible.
-                // If the oldFront is no longer the front because it was hidden,
-                // its onHide processing will have handled moving focus out correctly.
-                //
-                // Focus the new front unless it is configured not to do so on toFront.
-                //
-                // Make sure the component or its descendants *can* be focused, too.
-                doFocus = topVisible.modal || ((!oldFront || oldFront.isVisible()) && ((topVisible.focusOnToFront && !topVisible.preventFocusOnActivate))) &&
-                          topVisible.isFocusable(true);
-                topVisible.setActive(true, doFocus);
-            }
+            // Modals always get focused.
+            // Focus the new front unless it is configured not to do so on toFront
+            doFocus = comp.modal || (comp.focusOnToFront && !comp.preventFocusOnActivate);
+
+            comp.setActive(true, null, doFocus);
         }
 
         // Cache the top of the stack
-        me.front = topVisible;
+        me.front = comp;
 
         // If we encountered a modal in our reassigment, ensure our modal mask is just below it.
         if (topModal) {
-            me.showModalMask(topModal);
-        } else {
-            me.hideModalMask();
+            me._showModalMask(topModal);
+        }
+        // Otherwise, ensure the modal mask is hidden
+        else {
+            me._hideModalMask();
         }
         return zIndex;
     },
@@ -198,10 +179,6 @@ Ext.define('Ext.ZIndexManager', {
         }
     },
 
-    onComponentRender: function(comp) {
-        this.zIndexStack.itemChanged(comp, 'hidden');
-    },
-
     /**
      * @private
      * Called when the global hide and show events are fired. If it is one of our components, we must re-sort.
@@ -213,6 +190,114 @@ Ext.define('Ext.ZIndexManager', {
         if (comp.isFloating() && !this.hidingAll && (zIndexStack.getSource() || zIndexStack).contains(comp)) {
             zIndexStack.itemChanged(comp, 'hidden');
             zIndexStack.sort();
+            if (!comp.isVisible()) {
+                comp.setActive(false);
+            }
+        }
+    },
+
+    _showModalMask: function(comp) {
+        var me = this,
+            zIndex = comp.el.getStyle('zIndex') - 4,
+            maskTarget = comp.floatParent ? comp.floatParent.getTargetEl() : comp.container,
+            mask = me.mask,
+            shim = me.maskShim,
+            viewSize, tabbableAttr;
+
+        if (!mask) {
+            // Create the mask at zero size so that it does not affect upcoming target measurements.
+            mask = me.mask = Ext.getBody().createChild({
+                //<debug>
+                // tell the spec runner to ignore this element when checking if the dom is clean 
+                'data-sticky': true,
+                //</debug>
+                role: 'presentation',
+                cls: Ext.baseCSSPrefix + 'mask',
+                style: 'height:0;width:0'
+            });
+            mask.setVisibilityMode(Ext.Element.DISPLAY);
+            mask.on('click', me._onMaskClick, me);
+        }
+
+        mask.maskTarget = maskTarget;
+        viewSize = me._getMaskBox();
+
+        if (shim) {
+            shim.setStyle('zIndex', zIndex);
+            shim.show();
+            shim.setBox(viewSize);
+        }
+        mask.setStyle('zIndex', zIndex);
+        
+        tabbableAttr = 'data-savedtabindex-' + maskTarget.getId();
+        maskTarget.saveTabbableState(tabbableAttr);
+        maskTarget.saveChildrenTabbableState(tabbableAttr);
+
+        mask.show();
+        mask.setBox(viewSize);
+    },
+
+    _hideModalMask: function() {
+        var mask = this.mask,
+            maskShim = this.maskShim,
+            maskTarget, tabbableAttr;
+
+        if (mask && mask.isVisible()) {
+            maskTarget = mask.maskTarget;
+            tabbableAttr = 'data-savedtabindex-' + maskTarget.getId();
+            maskTarget.restoreChildrenTabbableState(tabbableAttr);
+            maskTarget.restoreTabbableState(tabbableAttr);
+            
+            mask.maskTarget = undefined;
+            mask.hide();
+            if (maskShim) {
+                maskShim.hide();
+            }
+        }
+    },
+
+    _onMaskClick: function() {
+        if (this.front) {
+            this.front.focus();
+        }
+    },
+
+    _getMaskBox: function(){
+        var maskTarget = this.mask.maskTarget;
+        if (maskTarget.dom === document.body) {
+            return {
+                height: Math.max(document.body.scrollHeight, Ext.dom.Element.getDocumentHeight()),
+                width: Math.max(document.body.scrollWidth, document.documentElement.clientWidth),
+                x: 0,
+                y: 0
+            };
+        } else {
+            return maskTarget.getBox();
+        } 
+    },
+
+    _onContainerResize: function() {
+        var me = this,
+            mask = me.mask,
+            maskShim = me.maskShim,
+            viewSize;
+
+        if (mask && mask.isVisible()) {
+
+            // At the new container size, the mask might be *causing* the scrollbar, so to find the valid
+            // client size to mask, we must temporarily unmask the parent node.
+            mask.hide();
+            if (maskShim) {
+                maskShim.hide();
+            }
+
+            viewSize = me._getMaskBox();
+            if (maskShim) {
+                maskShim.setSize(viewSize);
+                maskShim.show();
+            }
+            mask.setSize(viewSize);
+            mask.show();
         }
     },
 
@@ -237,13 +322,6 @@ Ext.define('Ext.ZIndexManager', {
             comp.zIndexManager.unregister(comp);
         }
         comp.zIndexManager = me;
-        if (!comp.rendered) {
-            // Checking for rendered as opposed to hide/show is important because
-            // it's still possible to render a floating component and have it be visible.
-            // Since rendered isn't a global event, we need to react individually on each
-            // component and update the state in the collectioh after render.
-            comp.on('render', me.onComponentRender, me, {single: true});
-        }
         me.zIndexStack.add(comp);
     },
 
@@ -254,12 +332,9 @@ Ext.define('Ext.ZIndexManager', {
      * @param {Ext.Component} comp The Component to unregister.
      */
     unregister : function(comp) {
-        var me = this;
-
         delete comp.zIndexManager;
-        comp.un('render', me.onComponentRender, me);
-        me.zIndexStack.remove(comp);
-        me.onCollectionSort();
+        this.zIndexStack.remove(comp);
+        this.onCollectionSort();
     },
 
     /**
@@ -277,21 +352,21 @@ Ext.define('Ext.ZIndexManager', {
      * @param {Boolean} preventFocus Pass `true` to prevent the component being focused when moved to front.
      * @return {Boolean} True if the component was brought to the front, else false
      * if it was already in front, or another component remains at the front due to configuration (eg
-     * {@link Ext.util.Floating#alwaysOnTop}, or if the component was not found.
+     * {@link Ext.util.Floating#alwaysOnTop}.
      */
     bringToFront : function(comp, preventFocus) {
         var me = this,
             zIndexStack = me.zIndexStack,
             oldFront = zIndexStack.last(),
-            newFront, preventFocusSetting;
-            
-        comp = me.get(comp);
+            newFront,
+            preventFocusSetting = comp.preventFocusOnActivate;
+
         // Refuse to perform this operation if there is an visible alwaysOnTop component
-        if (!comp || zIndexStack.find('alwaysOnTop', true)) {
+        if (zIndexStack.find('alwaysOnTop', true)) {
             return false;
         }
 
-        preventFocusSetting = comp.preventFocusOnActivate;
+        comp = me.get(comp);
 
         // The onCollectionSorted reaction to the setting of activeCounter will focus by default.
         // Prevent it if requested.
@@ -311,10 +386,8 @@ Ext.define('Ext.ZIndexManager', {
      */
     sendToBack : function(comp) {
         comp = this.get(comp);
-        if (comp) {
-            comp.setActiveCounter(0);
-        }
-        return comp || null;
+        comp.setActiveCounter(0);
+        return comp;
     },
 
     /**
@@ -329,7 +402,7 @@ Ext.define('Ext.ZIndexManager', {
         for (i = 0; i < len; i++) {
             all[i].hide();
         }
-        this.hidingAll = false;
+        this.hidingAll = true;
     },
 
     /**
@@ -340,19 +413,13 @@ Ext.define('Ext.ZIndexManager', {
      */
     hide: function() {
         var me = this,
-            activeElement = Ext.Element.getActiveElement(),
             all = me.tempHidden = me.zIndexStack.getRange(),
             len = all.length,
             i,
             comp;
 
-        // If any of the components contained focus, we must restore it on show.
-        me.focusRestoreElement = null;
         for (i = 0; i < len; i++) {
             comp = all[i];
-            if (comp.el.contains(activeElement)) {
-                me.focusRestoreElement = activeElement;
-            }
             comp.el.hide();
             comp.hidden = true;
         }
@@ -363,9 +430,8 @@ Ext.define('Ext.ZIndexManager', {
      * Restores temporarily hidden managed Components to visibility.
      */
     show: function() {
-        var me = this,
-            i,
-            tempHidden = me.tempHidden,
+        var i,
+            tempHidden = this.tempHidden,
             len = tempHidden ? tempHidden.length : 0,
             comp;
 
@@ -375,10 +441,7 @@ Ext.define('Ext.ZIndexManager', {
             comp.hidden = false;
             comp.setPosition(comp.x, comp.y);
         }
-        me.tempHidden = null;
-        if (me.focusRestoreElement) {
-            me.focusRestoreElement.focus();
-        }
+        this.tempHidden = null;
     },
 
     /**
@@ -468,139 +531,6 @@ Ext.define('Ext.ZIndexManager', {
 
         Ext.destroy(me.mask, me.maskShim, me.zIndexStack, me.globalListeners);
         me.zIndexStack = me.container = me.targetEl = me.globalListeners = null;
-    },
-
-    privates: {
-        getMaskBox: function() {
-            var maskTarget = this.mask.maskTarget;
-
-            if (maskTarget.dom === document.body) {
-                // If we're masking the body, subtract the border/padding so we don't cause scrollbar.
-                return {
-                    height: Math.max(document.body.scrollHeight, Ext.dom.Element.getDocumentHeight()),
-                    width: Math.max(document.body.scrollWidth, document.documentElement.clientWidth),
-                    x: 0,
-                    y: 0
-                };
-            } else {
-                return maskTarget.getBox();
-            } 
-        },
-
-        hideModalMask: function() {
-            var mask = this.mask,
-                maskShim = this.maskShim,
-                maskTarget, tabbableAttr;
-
-            if (mask && mask.isVisible()) {
-                maskTarget = mask.maskTarget;
-                tabbableAttr = 'data-savedtabindex-' + maskTarget.getId();
-                maskTarget.restoreChildrenTabbableState(tabbableAttr);
-                maskTarget.restoreTabbableState(tabbableAttr);
-                
-                mask.maskTarget = undefined;
-                mask.hide();
-                if (maskShim) {
-                    maskShim.hide();
-                }
-            }
-        },
-
-        onContainerResize: function() {
-            var me = this,
-                mask = me.mask,
-                maskShim = me.maskShim,
-                viewSize;
-
-            if (mask && mask.isVisible()) {
-
-                // At the new container size, the mask might be *causing* the scrollbar, so to find the valid
-                // client size to mask, we must temporarily unmask the parent node.
-                mask.hide();
-                if (maskShim) {
-                    maskShim.hide();
-                }
-
-                viewSize = me.getMaskBox();
-                if (maskShim) {
-                    maskShim.setSize(viewSize);
-                    maskShim.show();
-                }
-                mask.setSize(viewSize);
-                mask.show();
-            }
-        },
-
-        onMaskClick: function() {
-            if (this.front) {
-                this.front.focus();
-            }
-        },
-
-        showModalMask: function(comp) {
-            var me = this,
-                compEl = comp.el,
-                zIndex = compEl.getStyle('zIndex') - 4,
-                maskTarget = comp.floatParent ? comp.floatParent.getTargetEl() : comp.container,
-                mask = me.mask,
-                shim = me.maskShim,
-                viewSize, tabbableAttr, tempTabbableAttr, tabbables;
-
-            if (!mask) {
-                // Create the mask at zero size so that it does not affect upcoming target measurements.
-                me.mask = mask = Ext.getBody().createChild({
-                    //<debug>
-                    // tell the spec runner to ignore this element when checking if the dom is clean 
-                    'data-sticky': true,
-                    //</debug>
-                    role: 'presentation',
-                    cls: Ext.baseCSSPrefix + 'mask ' + Ext.baseCSSPrefix + 'border-box',
-                    style: 'height:0;width:0'
-                });
-                mask.setVisibilityMode(Ext.Element.DISPLAY);
-                mask.on('click', me.onMaskClick, me);
-            } else {
-                // If the mask is already shown, hide it before showing again
-                // to ensure underlying elements' tabbability is restored
-                me.hideModalMask();
-            }
-
-            mask.maskTarget = maskTarget;
-            viewSize = me.getMaskBox();
-
-            if (shim) {
-                shim.setStyle('zIndex', zIndex);
-                shim.show();
-                shim.setBox(viewSize);
-            }
-            mask.setStyle('zIndex', zIndex);
-            
-            tabbableAttr = 'data-savedtabindex-' + maskTarget.getId();
-            tempTabbableAttr = tabbableAttr + '-temp';
-            
-            // Since there is no fast and reliable way of finding elements above or below
-            // a given z-index, we just cheat and prevent tabbable elements within the
-            // topmost component from being made untabbable.
-            tabbables = compEl.findTabbableElements();
-            
-            if (tabbables.length) {
-                compEl.saveTabbableState(tempTabbableAttr);
-                compEl.saveChildrenTabbableState(tempTabbableAttr);
-            }
-            
-            maskTarget.saveTabbableState(tabbableAttr);
-            maskTarget.saveChildrenTabbableState(tabbableAttr);
-            
-            // Now restore the tabbables within the component itself. We don't have to
-            // repeat this when the mask is hidden.
-            if (tabbables.length) {
-                compEl.restoreChildrenTabbableState(tempTabbableAttr);
-                compEl.restoreTabbableState(tempTabbableAttr);
-            }
-
-            mask.show();
-            mask.setBox(viewSize);
-        }    
     }
 }, function() {
     /**

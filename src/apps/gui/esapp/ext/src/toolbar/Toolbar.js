@@ -184,15 +184,16 @@
  * @constructor
  * Creates a new Toolbar
  * @param {Object/Object[]} config A config object or an array of buttons to {@link #method-add}
+ * @docauthor Robert Dougan <rob@sencha.com>
  */
 Ext.define('Ext.toolbar.Toolbar', {
     extend: 'Ext.container.Container',
     requires: [
+        'Ext.toolbar.Fill',
         'Ext.layout.container.HBox',
         'Ext.layout.container.VBox'
     ],
     uses: [
-        'Ext.toolbar.Fill',
         'Ext.toolbar.Separator'
     ],
     alias: 'widget.toolbar',
@@ -222,12 +223,11 @@ Ext.define('Ext.toolbar.Toolbar', {
     layout: undefined,
 
     /**
-     * @cfg {Boolean} [vertical=false]
+     * @cfg {Boolean} vertical
      * Set to `true` to make the toolbar vertical. The layout will become a `vbox`.
      */
-    vertical: undefined,
+    vertical: false,
 
-    // @cmd-auto-dependency { directRef: 'Ext.layout.container.boxOverflow.Menu' }
     /**
      * @cfg {Boolean} enableOverflow
      * Configure true to make the toolbar provide a button which activates a dropdown Menu to show
@@ -236,7 +236,6 @@ Ext.define('Ext.toolbar.Toolbar', {
      */
     enableOverflow: false,
 
-    // @cmd-auto-dependency { aliasPrefix: 'box.overflow.' }
     /**
      * @cfg {String} overflowHandler
      *
@@ -331,18 +330,17 @@ Ext.define('Ext.toolbar.Toolbar', {
 
     initComponent: function () {
         var me = this,
-            layout = me.layout,
-            vertical = me.vertical;
+            layout = me.layout;
 
-        if (vertical === undefined) {
-            me.vertical = vertical = me.dock === 'right' || me.dock === 'left';
+        if (me.dock === 'right' || me.dock === 'left') {
+            me.vertical = true;
         }
 
         me.layout = layout = Ext.applyIf(Ext.isString(layout) ? {
             type: layout
         } : layout || {}, {
-            type: vertical ? 'vbox' : 'hbox',
-            align: vertical ? 'stretchmax' : 'middle'
+            type: me.vertical ? 'vbox' : 'hbox',
+            align: me.vertical ? 'stretchmax' : 'middle'
         });
 
         if (me.overflowHandler) {
@@ -351,7 +349,7 @@ Ext.define('Ext.toolbar.Toolbar', {
             layout.overflowHandler = 'menu';
         }
 
-        if (vertical) {
+        if (me.vertical) {
             me.addClsWithUI('vertical');
         }
 
@@ -415,12 +413,10 @@ Ext.define('Ext.toolbar.Toolbar', {
 
     // @private
     lookupComponent: function (c) {
-        var args = arguments,
-            shortcut, T;
-
+        var args = arguments;
         if (typeof c === 'string') {
-            T = Ext.toolbar.Toolbar;
-            shortcut = T.shortcutsHV[this.vertical ? 1 : 0][c] || T.shortcuts[c];
+            var T = Ext.toolbar.Toolbar,
+                shortcut = T.shortcutsHV[this.vertical ? 1 : 0][c] || T.shortcuts[c];
 
             if (typeof shortcut === 'string') {
                 c = {
@@ -463,7 +459,7 @@ Ext.define('Ext.toolbar.Toolbar', {
 
         // Any separators needs to know if is vertical or not
         if (component instanceof Ext.toolbar.Separator) {
-            component.setUI(me.vertical ? 'vertical' : 'horizontal');
+            component.setUI((me.vertical) ? 'vertical' : 'horizontal');
         }
 
         me.callParent(arguments);
@@ -490,15 +486,13 @@ Ext.define('Ext.toolbar.Toolbar', {
 
         // @private
         trackMenu: function (item, remove) {
-            var me = this;
+            if (this.trackMenus && item.menu) {
+                var method = remove ? 'mun' : 'mon',
+                    me = this;
 
-            if (me.trackMenus && item.menu) {
-                item[remove ? 'un' : 'on']({
-                    mouseover: me.onButtonOver,
-                    menushow: me.onButtonMenuShow,
-                    menuhide: me.onButtonMenuHide,
-                    scope: me
-                });
+                me[method](item, 'mouseover', me.onButtonOver, me);
+                me[method](item, 'menushow', me.onButtonMenuShow, me);
+                me[method](item, 'menuhide', me.onButtonMenuHide, me);
             }
         },
 
@@ -507,12 +501,10 @@ Ext.define('Ext.toolbar.Toolbar', {
         },
 
         // @private
-        onButtonOver: function (btn, e) {
-            var activeMenuBtn = this.activeMenuBtn;
-            if (activeMenuBtn && activeMenuBtn !== btn) {
-                activeMenuBtn.hideMenu();
-                btn.focus();
-                btn.showMenu(e);
+        onButtonOver: function (btn) {
+            if (this.activeMenuBtn && this.activeMenuBtn !== btn) {
+                this.activeMenuBtn.hideMenu();
+                btn.showMenu();
                 this.activeMenuBtn = btn;
             }
         },
@@ -524,7 +516,7 @@ Ext.define('Ext.toolbar.Toolbar', {
 
         // @private
         onButtonMenuHide: function (btn) {
-            this.activeMenuBtn = null;
+            delete this.activeMenuBtn;
         }
     }
 });

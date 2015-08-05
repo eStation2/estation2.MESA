@@ -147,7 +147,6 @@ Ext.define('Ext.form.field.Time', {
     snapToIncrement: false,
 
     /**
-     * @cfg
      * @inheritdoc
      */
     valuePublishEvent: ['select', 'blur'],
@@ -161,6 +160,8 @@ Ext.define('Ext.form.field.Time', {
     initDate: '1/1/2008',
     initDateParts: [2008, 0, 1],
     initDateFormat: 'j/n/Y',
+    
+    ignoreSelection: 0,
 
     queryMode: 'local',
 
@@ -179,6 +180,9 @@ Ext.define('Ext.form.field.Time', {
         if (max) {
             me.setMaxValue(max);
         }
+        // Forcibly create the picker, since we need the store it creates
+        me.store = me.getPicker().store;
+        
         me.displayTpl = new Ext.XTemplate(
             '<tpl for=".">' +
                 '{[typeof values === "string" ? values : this.formatDate(values["' + me.displayField + '"])]}' +
@@ -186,15 +190,7 @@ Ext.define('Ext.form.field.Time', {
             '</tpl>', {
             formatDate: me.formatDate.bind(me)
         });
-
-        // Create a store of times.
-        me.store = Ext.picker.Time.createStore(me.format, me.increment);
-
         me.callParent();
-
-        // Ensure time constraints are applied to the store.
-        // TimePicker does this on create.
-        me.getPicker();
     },
 
     /**
@@ -407,11 +403,15 @@ Ext.define('Ext.form.field.Time', {
      * Creates the {@link Ext.picker.Time}
      */
     createPicker: function() {
-        var me = this;
+        var me = this,
+            picker;
 
         me.listConfig = Ext.apply({
             xtype: 'timepicker',
             pickerField: me,
+            selModel: {
+                mode: me.multiSelect ? 'SIMPLE' : 'SINGLE'
+            },
             cls: undefined,
             minValue: me.minValue,
             maxValue: me.maxValue,
@@ -419,10 +419,77 @@ Ext.define('Ext.form.field.Time', {
             format: me.format,
             maxHeight: me.pickerMaxHeight
         }, me.listConfig);
-        return me.callParent();
+        picker = me.callParent();
+        return picker;
+    },
+    
+    onItemClick: function(picker, record){
+        // The selection change events won't fire when clicking on the selected element. Detect it here.
+        var me = this,
+            selected = picker.getSelectionModel().getSelection();
+
+        if (!me.multiSelect && selected.length) {
+            if (selected.length > 0) {
+                selected = selected[0];
+                if (selected && Ext.Date.isEqual(record.get('date'), selected.get('date'))) {
+                    me.collapse();
+                }
+            }
+        }
     },
 
-    completeEdit: function() {
+    /**
+     * @private 
+     * Synchronizes the selection in the picker to match the current value
+     */
+    syncSelection: function() {
+        var me = this,
+            picker = me.picker,
+            isEqual = Ext.Date.isEqual,
+            toSelect = [],
+            selModel,
+            value, values, i, len, item,
+            data, d, dLen, rec;
+            
+        if (picker) {
+            picker.clearHighlight();
+            value = me.getValue();
+            selModel = picker.getSelectionModel();
+            // Update the selection to match
+            me.ignoreSelection++;
+            if (value === null) {
+                selModel.deselectAll();
+            } else {
+                values = Ext.Array.from(value);
+                data = picker.store.data.items;
+                dLen = data.length;
+
+                for (i = 0, len = values.length; i < len; i++) {
+                    item = values[i];
+                    if (Ext.isDate(item)) {
+                        // find value, select it
+                        for (d = 0; d < dLen; d++) {
+                            rec = data[d];
+
+                            if (isEqual(rec.get('date'), item)) {
+                               toSelect.push(rec);
+                               if (!me.multiSelect) {
+                                   break;
+                               }
+                           }
+                        }
+
+                        if (toSelect.length) {
+                            selModel.select(toSelect);
+                        }
+                    }
+                }
+            }
+            me.ignoreSelection--;
+        }
+    },
+
+    postBlur: function() {
         var me = this,
             val = me.getValue();
 
@@ -465,23 +532,14 @@ Ext.define('Ext.form.field.Time', {
     },
 
     setValue: function (v) {
-        var me = this;
-
-        // The timefield can get in a loop when creating its picker. For instance, when creating the picker, the
-        // timepicker will add a filter (see TimePicker#updateList) which will then trigger the checkValueOnChange
-        // listener which in turn calls into here, rinse and repeat.
-        if (me.creatingPicker) {
-            return;
-        }
-
         // Store MUST be created for parent setValue to function.
-        me.getPicker();
+        this.getPicker();
 
         if (Ext.isDate(v)) {
-            v = me.getInitDate(v.getHours(), v.getMinutes(), v.getSeconds());
+            v = this.getInitDate(v.getHours(), v.getMinutes(), v.getSeconds());
         }
 
-        return me.callParent([v]);
+        return this.callParent([v]);
     },
 
     getValue: function () {

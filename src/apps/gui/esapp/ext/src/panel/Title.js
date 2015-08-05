@@ -264,6 +264,7 @@ Ext.define('Ext.panel.Title', {
     
     onAdded: function(container, pos, instanced) {
         var me = this,
+            cls = me.cls || '',
             suffix = me._titleSuffix,
             baseCls = container.baseCls;
 
@@ -296,7 +297,7 @@ Ext.define('Ext.panel.Title', {
             if (!glyph) {
                 iconEl.dom.innerHTML = '';
                 iconEl.removeCls(glyphCls);
-            } else if (oldGlyph !== glyph) {
+            } else if (oldGlyph != glyph) {
                 iconEl.dom.innerHTML = '&#' + glyph + ';';
                 iconEl.addCls(glyphCls);
             }
@@ -315,7 +316,7 @@ Ext.define('Ext.panel.Title', {
         var me = this,
             iconEl;
 
-        if (me.rendered && icon !== oldIcon) {
+        if (me.rendered && icon != oldIcon) {
             me._syncIconVisibility();
             iconEl = me.iconEl;
             
@@ -329,7 +330,7 @@ Ext.define('Ext.panel.Title', {
     updateIconAlign: function(align, oldAlign) {
         var me = this,
             iconWrapEl = me.iconWrapEl,
-            el, iconAlignClasses;
+            el, iconWrapEl, iconAlignClasses;
 
         if (me.iconWrapEl) {
             el = me.el;
@@ -357,7 +358,7 @@ Ext.define('Ext.panel.Title', {
         var me = this,
             iconEl;
 
-        if (me.rendered && oldCls !== cls) {
+        if (me.rendered && oldCls != cls) {
             me._syncIconVisibility();
             iconEl = me.iconEl;
             
@@ -373,7 +374,7 @@ Ext.define('Ext.panel.Title', {
 
     updateRotation: function(rotation, oldRotation) {
         var me = this,
-            el, rotationClasses;
+            clearStyles, el, rotationClasses;
        
         if (me.rendered) {
             el = me.el;
@@ -407,7 +408,6 @@ Ext.define('Ext.panel.Title', {
     updateText: function(text) {
         if (this.rendered) {
             this.textEl.setHtml(text);
-            this.updateLayout();
         }
     },
 

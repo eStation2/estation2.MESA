@@ -95,7 +95,7 @@ Ext.define('Ext.view.DropZone', {
      * @param records
      * @param record
      * @param offset
-     * @return {Boolean} True if the targeted record is in the drag payload
+     * @returns {Boolean} True if the targeted record is in the drag payload
      */
     containsRecordAtOffset: function(records, record, offset) {
         if (!record) {

@@ -12,10 +12,6 @@ Ext.define('Ext.rtl.dd.DD', {
     // coordinates that go into the calculation are page-level, we need to use rtl local
     // coordinates if the page-level coordinate system is rtl.
     setLocalXY: function(el, x, y) {
-        if (Ext.rootInheritedState.rtl) {
-            el.rtlSetLocalXY(x, y);
-        } else {
-            el.setLocalXY(x, y);
-        }
+        Ext.rootInheritedState.rtl ? el.rtlSetLocalXY(x, y) : el.setLocalXY(x, y);
     }
 });

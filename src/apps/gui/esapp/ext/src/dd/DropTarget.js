@@ -25,13 +25,6 @@ Ext.define('Ext.dd.DropTarget', {
     },
 
     /**
-     * @cfg {Boolean} containerScroll
-     * True to register this container with the ScrollManager for auto scrolling during
-     * drag operations.
-     */
-    containerScroll: false,
-
-    /**
      * @cfg {String} ddGroup
      * A named drag drop group to which this object belongs.  If a group is specified, then this object will only
      * interact with other drag drop objects in the same group.

@@ -31,9 +31,8 @@ Ext.define('Ext.menu.CheckItem', {
      */
     
     /**
-     * @cfg {Function/String} checkHandler
+     * @cfg {Function} checkHandler
      * Alternative for the {@link #checkchange} event.  Gets called with the same parameters.
-     * @declarativeHandler
      */
 
     /**
@@ -117,8 +116,9 @@ Ext.define('Ext.menu.CheckItem', {
 
         me.callParent(arguments);
 
+        Ext.menu.Manager.registerCheckable(me);
+
         if (me.group) {
-            Ext.menu.Manager.registerCheckable(me);
             if (me.initialConfig.hideOnClick !== false) {
                 me.hideOnClick = true;
             }
@@ -164,8 +164,7 @@ Ext.define('Ext.menu.CheckItem', {
     },
 
     /**
-     * Re-enables the checkbox functionality of this menu item after having been 
-     * disabled by {@link #disableCheckChange}
+     * Reenables the checkbox functionality of this menu item after having been disabled by {@link #disableCheckChange}
      */
     enableCheckChange: function() {
         var me = this,
@@ -179,15 +178,8 @@ Ext.define('Ext.menu.CheckItem', {
 
     onClick: function(e) {
         var me = this;
-
-        if (!me.disabled && !me.checkChangeDisabled && !(me.checked && me.group)) {
+        if(!me.disabled && !me.checkChangeDisabled && !(me.checked && me.group)) {
             me.setChecked(!me.checked);
-
-            // Clicked using SPACE or ENTER just un-checks.
-            // RightArrow to invoke any submenu
-            if (e.type === 'keydown' && me.menu) {
-                return false;
-            }
         }
         this.callParent([e]);
     },
@@ -199,7 +191,7 @@ Ext.define('Ext.menu.CheckItem', {
 
     /**
      * Sets the checked state of the item
-     * @param {Boolean} checked True to check, false to un-check
+     * @param {Boolean} checked True to check, false to uncheck
      * @param {Boolean} [suppressEvents=false] True to prevent firing the checkchange events.
      */
     setChecked: function(checked, suppressEvents) {
@@ -207,7 +199,7 @@ Ext.define('Ext.menu.CheckItem', {
             checkedCls = me.checkedCls,
             uncheckedCls = me.uncheckedCls,
             el = me.el;
-
+            
         if (me.checked !== checked && (suppressEvents || me.fireEvent('beforecheckchange', me, checked) !== false)) {
             if (el) {
                 if (checked) {
@@ -218,10 +210,8 @@ Ext.define('Ext.menu.CheckItem', {
                     el.removeCls(checkedCls);
                 }
             }
-
             me.checked = checked;
             Ext.menu.Manager.onCheckChange(me, checked);
-
             if (!suppressEvents) {
                 Ext.callback(me.checkHandler, me.scope || me, [me, checked]);
                 me.fireEvent('checkchange', me, checked);

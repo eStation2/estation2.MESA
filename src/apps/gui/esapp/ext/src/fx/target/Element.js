@@ -16,7 +16,7 @@ Ext.define('Ext.fx.target.Element', {
     type: 'element',
 
     getElVal: function(el, attr, val) {
-        if (val === undefined) {
+        if (val == undefined) {
             if (attr === 'x') {
                 val = el.getX();
             } else if (attr === 'y') {
@@ -42,7 +42,8 @@ Ext.define('Ext.fx.target.Element', {
     },
 
     setAttr: function(targetData) {
-        var ln = targetData.length,
+        var target = this.target,
+            ln = targetData.length,
             attrs, attr, o, i, j, ln2;
             
         for (i = 0; i < ln; i++) {

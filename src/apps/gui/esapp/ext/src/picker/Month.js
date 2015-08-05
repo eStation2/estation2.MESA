@@ -1,25 +1,7 @@
 /**
- * A month / year picker component. This class is used by the 
- * {@link Ext.picker.Date Date picker} to allow browsing and selection of year and 
- * months combinations, but may also be used as a standalone component.
- *
- *     @example
- *     Ext.create({
- *         xtype: 'monthpicker',
- *         renderTo: document.body,
- *         value: new Date(),
- *         onSelect: function() {
- *             Ext.Msg.alert('Selected', this.getValue());
- *         },
- *         listeners: {
- *             okclick: 'onSelect',
- *             monthdblclick: 'onSelect',
- *             yeardblclick: 'onSelect',
- *             cancelclick: function () {
- *                 this.setValue(new Date());
- *             }
- *         }
- *     });
+ * @private
+ * A month picker component. This class is used by the {@link Ext.picker.Date Date picker} class
+ * to allow browsing and selection of year/months combinations.
  */
 Ext.define('Ext.picker.Month', {
     extend: 'Ext.Component',
@@ -169,10 +151,8 @@ Ext.define('Ext.picker.Month', {
      * @param {Array} value The current value
      */
 
-    /**
-     * @inheritdoc
-     * @private
-     */
+    // @private
+    // @inheritdoc
     initComponent: function(){
         var me = this;
 
@@ -200,10 +180,8 @@ Ext.define('Ext.picker.Month', {
         this.callParent();
     },
 
-    /**
-     * @inheritdoc
-     * @private
-     */
+    // @private
+    // @inheritdoc
     beforeRender: function(){
         var me = this,
             i = 0,
@@ -248,10 +226,8 @@ Ext.define('Ext.picker.Month', {
         widthEl.destroy();
     },
 
-    /**
-     * @inheritdoc
-     * @private
-     */
+    // @private
+    // @inheritdoc
     afterRender: function(){
         var me = this,
             body = me.bodyEl;
@@ -287,6 +263,7 @@ Ext.define('Ext.picker.Month', {
         // zh_TW locale the month ends up spanning lines, so we loosen
         // the margins to get some extra space
         var me = this,
+            monthEl = me.monthEl,
             months = me.months,
             first = months.first(),
             itemMargin = first.getMargin('l');
@@ -319,7 +296,9 @@ Ext.define('Ext.picker.Month', {
     setValue: function(value){
         var me = this,
             active = me.activeYear,
-            year;
+            offset = me.monthOffset,
+            year,
+            index;
 
         if (!value) {
             me.value = [null, null];
@@ -410,7 +389,7 @@ Ext.define('Ext.picker.Month', {
 
                 year = yearNumbers[y];
                 el.dom.innerHTML = year;
-                if (year === value) {
+                if (year == value) {
                     el.addCls(cls);
                 }
             }
@@ -444,7 +423,7 @@ Ext.define('Ext.picker.Month', {
      */
     onBodyClick: function(e, t) {
         var me = this,
-            isDouble = e.type === 'dblclick';
+            isDouble = e.type == 'dblclick';
 
         if (e.getTarget('.' + me.baseCls + '-month')) {
             e.stopEvent();
@@ -460,7 +439,7 @@ Ext.define('Ext.picker.Month', {
      * @param {Number} [offset=10] The offset to move by.
      */
     adjustYear: function(offset){
-        if (typeof offset !== 'number') {
+        if (typeof offset != 'number') {
             offset = this.totalYears;
         }
         this.activeYear += offset;
@@ -528,10 +507,8 @@ Ext.define('Ext.picker.Month', {
         }
     },
 
-    /**
-     * @inheritdoc
-     * @private
-     */
+    // @private
+    // @inheritdoc
     beforeDestroy: function(){
         var me = this;
         me.years = me.months = null;

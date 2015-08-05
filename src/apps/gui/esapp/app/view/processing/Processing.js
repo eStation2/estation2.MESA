@@ -146,7 +146,7 @@ Ext.define("esapp.view.processing.Processing",{
                         column.titleEl.removeCls('x-column-header-inner');
                     }
                 },
-                onWidgetAttach: function (column, widget, record) {
+                onWidgetAttach: function (widget, record) {
                     Ext.suspendLayouts();
                     var inputproducts = record.getData().inputproducts;
                     var newstore = Ext.create('Ext.data.JsonStore', {
@@ -257,7 +257,7 @@ Ext.define("esapp.view.processing.Processing",{
                       column.titleEl.removeCls('x-column-header-inner');
                   }
                 },
-                onWidgetAttach: function(column, widget, record) {
+                onWidgetAttach: function(widget, record) {
                     Ext.suspendLayouts();
                     var processrec = record.getData();
                     var outputproducts = processrec.outputproducts;

@@ -16,14 +16,6 @@ Ext.define('Ext.layout.component.FieldSet', {
         }
     },
 
-    beginLayout: function(ownerContext) {
-        var legend = this.owner.legend;
-        this.callParent([ownerContext]);
-        if (legend) {
-            ownerContext.legendContext = ownerContext.context.getCmp(legend);
-        }
-    },
-
     beginLayoutCycle: function (ownerContext) {
         var target = ownerContext.target,
             lastSize;
@@ -44,7 +36,7 @@ Ext.define('Ext.layout.component.FieldSet', {
             // container layout is not going to run).
             //
             if (ownerContext.widthModel.shrinkWrap) {
-                lastSize = this.lastComponentSize;
+                lastSize = target.lastComponentSize;
                 ownerContext.setContentWidth((lastSize && lastSize.contentWidth) || this.defaultCollapsedWidth);
             }
         }
@@ -60,17 +52,9 @@ Ext.define('Ext.layout.component.FieldSet', {
         }
     },
 
-    calculateOwnerWidthFromContentWidth: function(ownerContext, contentWidth) {
-        var legendContext = ownerContext.legendContext;
-        if (legendContext) {
-            contentWidth = Math.max(contentWidth, legendContext.getProp('width'));
-        }
-        return this.callParent([ownerContext, contentWidth]);
-    },
-
     calculateOwnerHeightFromContentHeight: function (ownerContext, contentHeight) {
         var border = ownerContext.getBorderInfo(),
-            legendContext = ownerContext.legendContext;
+            legend = ownerContext.target.legend;
             
         // Height of fieldset is content height plus top border width (which is either the
         // legend height or top border width) plus bottom border width
@@ -79,7 +63,7 @@ Ext.define('Ext.layout.component.FieldSet', {
                // In IE8m the top padding is on the body el
                (Ext.isIE8 ?
                    ownerContext.bodyContext.getPaddingInfo().top : 0) +
-               (legendContext ? legendContext.getProp('height') : border.top) +
+               (legend ? legend.getHeight() : border.top) +
                border.bottom;
     },
 
@@ -87,17 +71,11 @@ Ext.define('Ext.layout.component.FieldSet', {
         // Subtract the legend off here and pass it up to the body
         // We do this because we don't want to set an incorrect body height
         // and then setting it again with the correct value
-        var legendContext = ownerContext.legendContext,
-            legendHeight = 0;
-
-        if (legendContext) {
-            legendHeight = legendContext.getProp('height');
+        var legend = ownerContext.target.legend;
+        if (legend) {
+            height -= legend.getHeight();
         }
-        if (legendHeight === undefined) {
-            this.done = false;
-        } else {
-            this.callParent([ownerContext, height - legendHeight]);
-        }
+        this.callParent([ownerContext, height]);
     },
 
     getLayoutItems : function() {

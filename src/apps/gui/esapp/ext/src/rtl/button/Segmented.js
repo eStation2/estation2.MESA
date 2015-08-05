@@ -3,19 +3,11 @@ Ext.define('Ext.rtl.button.Segmented', {
 
     privates: {
         _getFirstCls: function() {
-            var cls = this._firstCls;
-            if (!this.getVertical() && this.getInherited().rtl) {
-                cls = this._lastCls;
-            }
-            return cls;
+            return this.getInherited().rtl ? this._lastCls : this._firstCls;
         },
 
         _getLastCls: function() {
-            var cls = this._lastCls;
-            if (!this.getVertical() && this.getInherited().rtl) {
-                cls = this._firstCls;
-            }
-            return cls;
+            return this.getInherited().rtl ? this._firstCls : this._lastCls;
         }
     }
 });

@@ -1,4 +1,4 @@
-<project name="x-sass-impl">
+<project name="sass-impl">
     
     <!--
     Uses the compiler to generate the top-level scss file for the app
@@ -51,7 +51,8 @@
                     +append
                     -output=${app.out.scss.tmp}
                 and
-                ${sass.name.filter}
+                restore
+                    page
                 and
                 #only include rules from used classes
                 sass
@@ -157,27 +158,16 @@
             
             <x-ant-call target="-compile-sass"/>
 
-            <if>
-                <x-is-true value="${build.enable.fashion}"/>
-                <then>
-                    <x-fashion-compile
-                        file="${app.out.scss}"
-                        toFile="${app.out.css}"/>
-                </then>
-                <else>
-                    <x-compass-compile
-                            rubyPath="${build.ruby.path}"
-                            dir="${compass.working.dir}"
-                            trace="${compass.compile.trace}"
-                            boring="${compass.compile.boring}"
-                            force="${compass.compile.force}"
-                            sassdir="${compass.sass.dir}"
-                            cssdir="${compass.css.dir}"
-                            config="${compass.config.file}"/>
-
-                </else>
-            </if>
-
+            <x-compass-compile
+                rubyPath="${build.ruby.path}"
+                dir="${compass.working.dir}"
+                trace="${compass.compile.trace}"
+                boring="${compass.compile.boring}"
+                force="${compass.compile.force}"
+                sassdir="${compass.sass.dir}"
+                cssdir="${compass.css.dir}"
+                config="${compass.config.file}"/>
+            
             <uptodate property="compress.uptodate"
                       value="true"
                       srcfile="${app.out.scss}.tmp"

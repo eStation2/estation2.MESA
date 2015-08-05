@@ -1,38 +1,5 @@
 /**
  * Filter type for {@link Ext.grid.column.Number number columns}.
- *
- *     @example
- *     var shows = Ext.create('Ext.data.Store', {
- *           fields: ['id','show'],
- *           data: [
- *               {id: 0, show: 'Battlestar Galactica'},
- *               {id: 1, show: 'Doctor Who'},
- *               {id: 2, show: 'Farscape'},
- *               {id: 3, show: 'Firefly'},
- *               {id: 4, show: 'Star Trek'},
- *               {id: 5, show: 'Star Wars: Christmas Special'}
- *           ]
- *        });
- *       
- *       Ext.create('Ext.grid.Panel', {
- *           renderTo: Ext.getBody(),
- *           title: 'Sci-Fi Television',
- *           height: 250,
- *           width: 250,
- *           store: shows,
- *           plugins: 'gridfilters',
- *           columns: [{
- *               dataIndex: 'id',
- *               text: 'ID',
- *               width: 50,
- *               filter: 'number' // May also be 'numeric'
- *           },{
- *               dataIndex: 'show',
- *               text: 'Show',
- *               flex: 1                  
- *           }]
- *       });
- * 
  */
 Ext.define('Ext.grid.filters.filter.Number', {
     extend: 'Ext.grid.filters.filter.TriFilter',
@@ -75,13 +42,11 @@ Ext.define('Ext.grid.filters.filter.Number', {
         }
     },
 
-    //<locale>
     /**
      * @cfg {String} emptyText
      * The empty text to show for each field.
      */
     emptyText: 'Enter Number...',
-    //</locale>
 
     itemDefaults: {
         xtype: 'numberfield',
@@ -99,11 +64,20 @@ Ext.define('Ext.grid.filters.filter.Number', {
         showSeparator: false
     },
 
+    /**
+     * @private
+     * See the Date type for a full implementation.
+     */
+    convertValue: Ext.identityFn,
+
     createMenu: function () {
         var me = this,
             listeners = {
                 scope: me,
-                keyup: me.onValueChange,
+                keyup: {
+                    fn: me.onInputKeyUp,
+                    buffer: 200
+                },
                 spin: {
                     fn: me.onInputSpin,
                     buffer: 200
@@ -113,7 +87,6 @@ Ext.define('Ext.grid.filters.filter.Number', {
                 }
             },
             itemDefaults = me.getItemDefaults(),
-            menuItems = me.menuItems,
             fields = me.getFields(),
             field, i, len, key, item, cfg;
 
@@ -121,8 +94,8 @@ Ext.define('Ext.grid.filters.filter.Number', {
 
         me.fields = {};
 
-        for (i = 0, len = menuItems.length; i < len; i++) {
-            key = menuItems[i];
+        for (i = 0, len = me.menuItems.length; i < len; i++) {
+            key = me.menuItems[i];
             if (key !== '-') {
                 field = fields[key];
 
@@ -143,17 +116,28 @@ Ext.define('Ext.grid.filters.filter.Number', {
                 item.filter = me.filter[key];
                 item.filterKey = key;
                 item.on(listeners);
-            } else {
-                me.menu.add(key);
             }
         }
     },
 
-    getValue: function (field) {
-        var value = {};
+    /**
+     * @private
+     * Handler method called when there is a keyup event on an input
+     * item of this menu.
+     */
+    onInputKeyUp: function (field, e) {
+        var value;
+
+        if (e.getKey() === e.RETURN && field.isValid()) {
+            this.menu.hide();
+        }
+
+        value = {};
         value[field.filterKey] = field.getValue();
-        return value;
+
+        this.setValue(value);
     },
+
 
     /**
      * @private

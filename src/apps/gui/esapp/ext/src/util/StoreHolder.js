@@ -9,9 +9,6 @@
  * @private
  */
 Ext.define('Ext.util.StoreHolder', {
-    requires: [
-        'Ext.data.StoreManager'
-    ],
     mixinId: 'storeholder',
     
     /**
@@ -26,27 +23,27 @@ Ext.define('Ext.util.StoreHolder', {
         propertyName = propertyName || 'store';
 
         var me = this,
-            oldStore = initial ? null : me[propertyName];
+            oldStore = me[propertyName];
 
-        if (store !== oldStore) {
-            if (oldStore) {
-                // Perform implementation-specific unbinding operations *before* possible Store destruction.
-                me.onUnbindStore(oldStore, initial, propertyName);
+        if (!initial && oldStore) {
+            // Perform implementation-specific unbinding operations *before* possible Store destruction.
+            me.onUnbindStore(oldStore, initial, propertyName);
 
-                // autoDestroy is only intended for when it is unbound from a component
-                if (me.isComponent && propertyName === 'store' && oldStore.autoDestroy) {
+            if (store !== oldStore) {
+                if (propertyName === 'store' && oldStore.autoDestroy) {
                     oldStore.destroy();
                 } else {
                     me.unbindStoreListeners(oldStore);
                 }
             }
-            if (store) {
-                me[propertyName] = store = Ext.data.StoreManager.lookup(store);
-                me.bindStoreListeners(store);
-                me.onBindStore(store, initial, propertyName, oldStore);
-            } else {
-                me[propertyName] = null;
-            }
+        }
+
+        if (store) {
+            me[propertyName] = store = Ext.data.StoreManager.lookup(store);
+            me.bindStoreListeners(store);
+            me.onBindStore(store, initial, propertyName, oldStore);
+        } else {
+            me[propertyName] = null;
         }
         return me;
     },

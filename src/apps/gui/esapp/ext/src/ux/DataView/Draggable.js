@@ -140,12 +140,12 @@ Ext.define('Ext.ux.DataView.Draggable', {
                 item: true
             };
 
-            if (selected.length === 1) {
+            if (selected.length == 1) {
                 dragData.single = true;
                 dragData.ddel = target;
             } else {
                 dragData.multi = true;
-                dragData.ddel = draggable.prepareGhost(selModel.getSelection());
+                dragData.ddel = draggable.prepareGhost(selModel.getSelection()).dom;
             }
 
             return dragData;
@@ -195,10 +195,16 @@ Ext.define('Ext.ux.DataView.Draggable', {
     /**
      * Updates the internal ghost DataView by ensuring it is rendered and contains the correct records
      * @param {Array} records The set of records that is currently selected in the parent DataView
-     * @return {HTMLElement} The Ghost DataView's encapsulating HtmnlElement.
+     * @return {Ext.view.View} The Ghost DataView
      */
     prepareGhost: function(records) {
-        return this.createGhost(records).getEl().dom;
+        var ghost = this.createGhost(records),
+            store = ghost.store;
+
+        store.removeAll();
+        store.add(records);
+
+        return ghost.getEl();
     },
 
     /**
@@ -207,32 +213,18 @@ Ext.define('Ext.ux.DataView.Draggable', {
      * lighter-weight representation of just the nodes that are selected in the parent DataView.
      */
     createGhost: function(records) {
-        var me = this,
-            store;
-
-        if (me.ghost) {
-            (store = me.ghost.store).loadRecords(records);
-        } else {
-            store = Ext.create('Ext.data.Store', {
-                model: records[0].self
+        if (!this.ghost) {
+            var ghostConfig = Ext.apply({}, this.ghostConfig, {
+                store: Ext.create('Ext.data.Store', {
+                    model: records[0].self
+                })
             });
 
-            store.loadRecords(records);
-            me.ghost = Ext.create('Ext.view.View', Ext.apply({
-                renderTo: document.createElement('div'),
-                store: store
-            }, me.ghostConfig));
-            me.ghost.container.skipGarbageCollection = me.ghost.el.skipGarbageCollection = true;
-        }
-        store.clearData();
+            this.ghost = Ext.create('Ext.view.View', ghostConfig);
 
-        return me.ghost;
-    },
-
-    destroy: function() {
-        if (this.ghost) {
-            this.ghost.container.destroy();
-            this.ghost.destroy();
+            this.ghost.render(document.createElement('div'));
         }
+
+        return this.ghost;
     }
 });

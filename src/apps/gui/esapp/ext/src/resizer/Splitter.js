@@ -109,10 +109,6 @@ Ext.define('Ext.resizer.Splitter', {
     tracker: null,
     
     ariaRole: 'separator',
-    
-    focusable: true,
-    
-    tabIndex: 0,
 
     /**
      * Returns the config object (with an `xclass` property) for the splitter tracker. This
@@ -152,7 +148,8 @@ Ext.define('Ext.resizer.Splitter', {
 
     onRender: function() {
         var me = this,
-            collapseEl;
+            collapseEl,
+            cfg;
 
         me.callParent(arguments);
 
@@ -167,7 +164,7 @@ Ext.define('Ext.resizer.Splitter', {
         }
 
         // Ensure the mini collapse icon is set to the correct direction when the target is collapsed/expanded by any means
-        me.getCollapseTarget().on({
+        me.mon(me.getCollapseTarget(), {
             collapse: me.onTargetCollapse,
             expand: me.onTargetExpand,
             beforeexpand: me.onBeforeTargetExpand,
@@ -249,21 +246,13 @@ Ext.define('Ext.resizer.Splitter', {
     },
 
     onTargetCollapse: function(target) {
-        var me = this;
-
-        // Only add the collapsed class if the collapse was from our target (not bubbled from below as in a Dashboard Column)
-        // and was in the dimension which this Splitter controls.
-        if (target === me.getCollapseTarget() && target[me.orientation === 'vertical' ? 'collapsedHorizontal' : 'collapsedVertical']()) {
-            me.el.addCls(me.collapsedClsInternal + ' ' + (me.collapsedCls || ''));
-        }
-        me.setCollapseEl('');
+        this.el.addCls(this.collapsedClsInternal + ' ' + (this.collapsedCls || ''));
+        this.setCollapseEl('');
     },
 
     onTargetExpand: function(target) {
-        var me = this;
-        
-        me.el.removeCls(me.collapsedClsInternal + ' ' + (me.collapsedCls || ''));
-        me.setCollapseEl('');
+        this.el.removeCls(this.collapsedClsInternal + ' ' + (this.collapsedCls || ''));
+        this.setCollapseEl('');
     },
 
     collapseDirProps: {

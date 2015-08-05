@@ -1,4 +1,4 @@
-<project name="x-sub-builds-impl">
+<project name="package.sub.builds">
 
     <macrodef name="x-process-sub-packages">
         <attribute name="all" default="false"/>

@@ -11,6 +11,8 @@
  *
  * This mixin is primarily for internal use by {@link Ext.form.Panel} and {@link Ext.form.FieldContainer},
  * and should not normally need to be used directly.
+ *
+ * @docauthor Jason Johnston <jason@sencha.com>
  */
 Ext.define('Ext.form.FieldAncestor', {
     extend: 'Ext.Mixin',

@@ -3,7 +3,7 @@
  * A cache of View elements keyed using the index of the associated record in the store.
  * 
  * This implements the methods of {Ext.dom.CompositeElement} which are used by {@link Ext.view.AbstractView}
- * to provide a map of record nodes and methods to manipulate the nodes.
+ * to privide a map of record nodes and methods to manipulate the nodes.
  * @class Ext.view.NodeCache
  */
 Ext.define('Ext.view.NodeCache', {
@@ -27,8 +27,8 @@ Ext.define('Ext.view.NodeCache', {
     clear: function(removeDom) {
         var me = this,
             elements = me.elements,
-            range = me.statics().range,
-            key;
+            i, el,
+            range = me.statics().range;
 
         if (me.count && removeDom) {
             if (range) {
@@ -36,8 +36,9 @@ Ext.define('Ext.view.NodeCache', {
                 range.setEndAfter(elements[me.endIndex]);
                 range.deleteContents();
              } else {
-                for (key in elements) {
-                    Ext.removeNode(elements[key]);
+                for (i in elements) {
+                    el = elements[i];
+                    el.parentNode.removeChild(el);
                 }
             }
         }
@@ -140,44 +141,6 @@ Ext.define('Ext.view.NodeCache', {
         return this.item(this.endIndex, asDom);
     },
 
-    // @private
-    // Used by buffered renderer when adding or removing record ranges which are above the
-    // rendered block. The element block must be shuffled up or down the index range,
-    // and the data-recordIndex connector attribute must be updated.
-    moveBlock: function(increment) {
-        var me = this,
-            elements = me.elements,
-            node,
-            end,
-            step,
-            i;
-
-        if (increment < 0) {
-            i = me.startIndex - 1;
-            end = me.endIndex;
-            step = 1;
-        } else {
-            i = me.endIndex + 1;
-            end = me.startIndex;
-            step = -1;
-        }
-        me.startIndex += increment;
-        me.endIndex += increment;
-
-        do {
-            i += step;
-            node = elements[i + increment] = elements[i];
-            node.setAttribute('data-recordIndex', i + increment);
-
-            // "from" element is outside of the new range, then delete it.
-            if (i < me.startIndex || i > me.endIndex) {
-                delete elements[i];
-            }
-        } while (i !== end);
-
-        delete elements[i];
-    },
-
     getCount : function() {
         return this.count;
     },
@@ -244,7 +207,8 @@ Ext.define('Ext.view.NodeCache', {
     removeRange: function(start, end, removeDom) {
         var me = this,
             elements = me.elements,
-            el, i, removeCount, fromPos;
+            el,
+            i, removeCount, fromPos;
 
         if (end == null) {
             end = me.endIndex + 1;
@@ -256,11 +220,9 @@ Ext.define('Ext.view.NodeCache', {
         }
         removeCount = end - start;
         for (i = start, fromPos = end; i <= me.endIndex; i++, fromPos++) {
-            el = elements[i];
-
             // Within removal range and we are removing from DOM
             if (removeDom && i < end) {
-                Ext.removeNode(el);
+                Ext.removeNode(elements[i]);
             }
             // If the from position is occupied, shuffle that entry back into reference "i"
             if (fromPos <= me.endIndex) {
@@ -353,7 +315,6 @@ Ext.define('Ext.view.NodeCache', {
      * @param {Number} direction `-1' = scroll up, `0` = scroll down.
      * @param {Number} removeCount The number of records to remove from the end. if scrolling
      * down, rows are removed from the top and the new rows are added at the bottom.
-     * @return {HTMLElement[]} The view item nodes added either at the top or the bottom of the view.
      */
     scroll: function(newRecords, direction, removeCount) {
         var me = this,
@@ -361,15 +322,13 @@ Ext.define('Ext.view.NodeCache', {
             store = view.store,
             elements = me.elements,
             recCount = newRecords.length,
+            i, el, removeEnd,
+            newNodes,
             nodeContainer = view.getNodeContainer(),
+            frag = document.createDocumentFragment(),
             fireItemRemove = view.hasListeners.itemremove,
             fireItemAdd = view.hasListeners.itemadd,
-            range = me.statics().range,
-            i, el, removeEnd, children, result;
-
-        if (!newRecords.length) {
-            return;
-        }
+            range = me.statics().range;
 
         // Scrolling up (content moved down - new content needed at top, remove from bottom)
         if (direction === -1) {
@@ -389,7 +348,7 @@ Ext.define('Ext.view.NodeCache', {
                     for (i = (me.endIndex - removeCount) + 1; i <= me.endIndex; i++) {
                         el = elements[i];
                         delete elements[i];
-                        Ext.removeNode(el);
+                        el.parentNode.removeChild(el);
                         if (fireItemRemove) {
                             view.fireEvent('itemremove', store.getByInternalId(el.getAttribute('data-recordId')), i, el, view);
                         }
@@ -403,16 +362,16 @@ Ext.define('Ext.view.NodeCache', {
             if (newRecords.length) {
 
                 // grab all nodes rendered, not just the data rows
-                result = view.bufferRender(newRecords, me.startIndex -= recCount);
-                children = result.children;
+                newNodes = view.bufferRender(newRecords, me.startIndex -= recCount);
                 for (i = 0; i < recCount; i++) {
-                    elements[me.startIndex + i] = children[i];
+                    elements[me.startIndex + i] = newNodes[i];
+                    frag.appendChild(newNodes[i]);
                 }
-                nodeContainer.insertBefore(result.fragment, nodeContainer.firstChild);
+                nodeContainer.insertBefore(frag, nodeContainer.firstChild);
 
                 // pass the new DOM to any interested parties
                 if (fireItemAdd) {
-                    view.fireEvent('itemadd', newRecords, me.startIndex, children);
+                    view.fireEvent('itemadd', newRecords, me.startIndex, newNodes);
                 }
             }
         }
@@ -436,7 +395,7 @@ Ext.define('Ext.view.NodeCache', {
                     for (i = me.startIndex; i < removeEnd; i++) {
                         el = elements[i];
                         delete elements[i];
-                        Ext.removeNode(el);
+                        el.parentNode.removeChild(el);
                         if (fireItemRemove) {
                             view.fireEvent('itemremove', store.getByInternalId(el.getAttribute('data-recordId')), i, el, view);
                         }
@@ -446,23 +405,20 @@ Ext.define('Ext.view.NodeCache', {
             }
 
             // grab all nodes rendered, not just the data rows
-            result = view.bufferRender(newRecords, me.endIndex + 1);
-            children = result.children;
-
+            newNodes = view.bufferRender(newRecords, me.endIndex + 1);
             for (i = 0; i < recCount; i++) {
-                elements[me.endIndex += 1] = children[i];
+                elements[me.endIndex += 1] = newNodes[i];
+                frag.appendChild(newNodes[i]);
             }
-            nodeContainer.appendChild(result.fragment);
+            nodeContainer.appendChild(frag);
 
             // pass the new DOM to any interested parties
             if (fireItemAdd) {
-                view.fireEvent('itemadd', newRecords, me.endIndex + 1, children);
+                view.fireEvent('itemadd', newRecords, me.endIndex + 1, newNodes);
             }
         }
         // Keep count consistent.
         me.count = me.endIndex - me.startIndex + 1;
-        
-        return children;
     },
 
     sumHeights: function() {

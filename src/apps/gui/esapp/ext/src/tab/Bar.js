@@ -31,7 +31,7 @@ Ext.define('Ext.tab.Bar', {
          * @cfg {'default'/0/1/2} tabRotation
          * The rotation of the tabs.  Can be one of the following values:
          *
-         * - `default` - use the default rotation, depending on the dock position (see below)
+         * - `null` - use the default rotation, depending on the dock position (see below)
          * - `0` - no rotation
          * - `1` - rotate 90deg clockwise
          * - `2` - rotate 90deg counter-clockwise
@@ -50,20 +50,18 @@ Ext.define('Ext.tab.Bar', {
          * is docked horizontally, or the width of the widest tab when the tabBar is
          * docked vertically.
          */
-        tabStretchMax: true,
-        
-        // NB: This option is named this way for the intent, but in fact activation
-        // happens in arrow key handler, not in focus handler. In IE focus events are
-        // asynchronous, so activation happens before the tab's focus handler is fired.
-        /**
-         * @cfg {Boolean} [activateOnFocus=true]
-         * `true` to follow WAI-ARIA requirement and activate tab when it is navigated to
-         * with arrow keys, or `false` to disable that behavior. When activation on focus
-         * is disabled, users will have to use arrow keys to focus a tab, and then press
-         * Space key to activate it.
-         */
-        activateOnFocus: true
+        tabStretchMax: true
     },
+
+    /**
+     * @cfg {String} title @hide
+     */
+    
+    /**
+     * @cfg {String} iconCls @hide
+     *
+     * There are no default icon classes that come with Ext JS.
+     */
 
     // @private
     defaultType: 'tab',
@@ -73,15 +71,6 @@ Ext.define('Ext.tab.Bar', {
      * True to not show the full background on the tabbar
      */
     plain: false,
-
-    /**
-     * @cfg {Boolean} ensureActiveVisibleOnChange
-     * `true` to ensure the active tab is scrolled into view when the tab changes, the text, the
-     * icon or the glyph. This is only applicable if using an overflow scroller.
-     *
-     * @since 5.1.1
-     */
-    ensureActiveVisibleOnChange: true,
     
     ariaRole: 'tablist',
 
@@ -137,7 +126,8 @@ Ext.define('Ext.tab.Bar', {
         var me = this,
             initialLayout = me.initialConfig.layout,
             initialAlign = initialLayout && initialLayout.align,
-            initialOverflowHandler = initialLayout && initialLayout.overflowHandler;
+            initialOverflowHandler = initialLayout && initialLayout.overflowHandler,
+            layout;
 
         if (me.plain) {
             me.addCls(me.baseCls + '-plain');
@@ -156,37 +146,6 @@ Ext.define('Ext.tab.Bar', {
             element: 'el',
             scope: me
         });
-    },
-
-    /**
-     * Ensure the passed tab is visible if using overflow scrolling 
-     * @param {Ext.tab.Tab/Ext.Component/Number} [tab] The tab, item in the owning {@link Ext.tab.Panel} or
-     * the index of the item to scroll to. Defaults to the active tab.
-     */
-    ensureTabVisible: function(tab) {
-        var me = this,
-            tabPanel = me.tabPanel,
-            overflowHandler = me.layout.overflowHandler;
-
-        if (me.rendered && overflowHandler && me.tooNarrow && overflowHandler.scrollToItem) {
-            if (tab || tab === 0) {
-                if (!tab.isTab) {
-                    if (Ext.isNumber(tab)) {
-                        tab = this.items.getAt(tab);
-                    } else if (tab.isComponent && tabPanel && tabPanel.items.contains(tab)) {
-                        tab = tab.tab;
-                    }
-                }
-            }
-
-            if (!tab) {
-                tab = me.activeTab;
-            }
-
-            if (tab) {
-                overflowHandler.scrollToItem(tab);
-            }
-        }
     },
 
     initRenderData: function() {
@@ -272,19 +231,33 @@ Ext.define('Ext.tab.Bar', {
         this.callParent(arguments);
     },
 
-    onAdd: function(tab, pos) {
-        var fn = this.onTabContentChange;
+    adjustTabPositions: function() {
+        var items = this.items.items,
+            i = items.length,
+            tab, lastBox, el, rotation;
 
-        if (this.ensureActiveVisibleOnChange) {
-            tab.barListeners = tab.on({
-                scope: this,
-                destroyable: true,
-                glyphchange: fn,
-                iconchange: fn,
-                textchange: fn
-            });
+        // When tabs are rotated vertically we don't have a reliable way to position
+        // them using CSS in modern browsers.  This is because of the way transform-orign
+        // works - it requires the width to be known, and the width is not known in css.
+        // Consequently we have to make an adjustment to the tab's position in these browsers.
+        // This is similar to what we do in Ext.panel.Header#adjustTitlePosition
+        if (!Ext.isIE8) {
+            while (i--) {
+                tab = items[i];
+                el = tab.el;
+                lastBox = tab.lastBox;
+                rotation = tab.isTab ? tab.getActualRotation() : 0;
+                if (rotation === 1 && tab.isVisible()) {
+                    // rotated 90 degrees using the top left corner as the axis.
+                    // tabs need to be shifted to the right by their width
+                    el.setStyle('left', (lastBox.x + lastBox.width) + 'px');
+                } else if (rotation === 2 && tab.isVisible()) {
+                    // rotated 270 degrees using the bottom right corner as the axis.
+                    // tabs need to be shifted down by their height
+                    el.setStyle('left', (lastBox.x - lastBox.height) + 'px');
+                }
+            }
         }
-        this.callParent([tab, pos]);
     },
 
     onAdded: function(container, pos, instanced) {
@@ -294,22 +267,13 @@ Ext.define('Ext.tab.Bar', {
         this.callParent([container, pos, instanced]);
     },
 
-    onRemove: function(tab, destroying) {
+    onRemove: function(tab) {
         var me = this;
-
-        // If we're not destroying, no need to do this here since they will
-        // be cleaned up
-        if (me.ensureActiveVisibleOnChange) {
-            if (!destroying) {
-                tab.barListeners.destroy();
-            }
-            tab.barListeners = null;
-        }
 
         if (tab === me.previousTab) {
             me.previousTab = null;
         }
-        me.callParent([tab, destroying]);
+        me.callParent(arguments);
     },
 
     onRemoved: function(destroying) {
@@ -319,12 +283,6 @@ Ext.define('Ext.tab.Bar', {
             this.removeCls(ownerCt.baseCls + '-' + ownerCt.ui + '-tab-bar');
         }
         this.callParent([destroying]);
-    },
-
-    onTabContentChange: function(tab) {
-        if (tab === this.activeTab) {
-            this.ensureTabVisible(tab);
-        }
     },
 
     afterComponentLayout: function(width) {
@@ -555,20 +513,15 @@ Ext.define('Ext.tab.Bar', {
         var me = this;
 
         if (!tab.disabled && tab !== me.activeTab) {
-            // Deactivate the previous tab, and ensure this FocusableContainer knows about it
             if (me.activeTab) {
                 if (me.activeTab.isDestroyed) {
                     me.previousTab = null;
                 } else {
                     me.previousTab = me.activeTab;
                     me.activeTab.deactivate();
-                    me.deactivateFocusable(me.activeTab);
                 }
             }
-
-            // Activate the new tab, and ensure this FocusableContainer knows about it
             tab.activate();
-            me.activateFocusable(tab);
 
             me.activeTab = tab;
             me.needsScroll = true;
@@ -584,46 +537,8 @@ Ext.define('Ext.tab.Bar', {
     },
 
     privates: {
-        adjustTabPositions: function() {
-            var me = this,
-                items = me.items.items,
-                i = items.length,
-                tab, lastBox, el, rotation, prop;
-
-            // When tabs are rotated vertically we don't have a reliable way to position
-            // them using CSS in modern browsers.  This is because of the way transform-orign
-            // works - it requires the width to be known, and the width is not known in css.
-            // Consequently we have to make an adjustment to the tab's position in these browsers.
-            // This is similar to what we do in Ext.panel.Header#adjustTitlePosition
-            if (!Ext.isIE8) {
-                // 'left' in normal mode, 'right' in rtl
-                prop = me._getTabAdjustProp();
-
-                while (i--) {
-                    tab = items[i];
-                    el = tab.el;
-                    lastBox = tab.lastBox;
-                    rotation = tab.isTab ? tab.getActualRotation() : 0;
-                    if (rotation === 1 && tab.isVisible()) {
-                        // rotated 90 degrees using the top left corner as the axis.
-                        // tabs need to be shifted to the right by their width
-                        el.setStyle(prop, (lastBox.x + lastBox.width) + 'px');
-                    } else if (rotation === 2 && tab.isVisible()) {
-                        // rotated 270 degrees using the bottom right corner as the axis.
-                        // tabs need to be shifted to the left by their height
-                        el.setStyle(prop, (lastBox.x - lastBox.height) + 'px');
-                    }
-                }
-            }
-        },
-
         applyTargetCls: function(targetCls) {
             this.bodyTargetCls = targetCls;
-        },
-
-        // rtl hook
-        _getTabAdjustProp: function() {
-            return 'left';
         },
 
         getTargetEl: function() {
@@ -632,6 +547,7 @@ Ext.define('Ext.tab.Bar', {
 
         onClick: function(e, target) {
             var me = this,
+                tabPanel = me.tabPanel,
                 tabEl, tab, isCloseClick, tabInfo;
 
             if (e.getTarget('.' + Ext.baseCSSPrefix + 'box-scroller')) {
@@ -652,20 +568,15 @@ Ext.define('Ext.tab.Bar', {
             if (isCloseClick) {
                 e.preventDefault();
             }
-            
             if (tab && tab.isDisabled && !tab.isDisabled()) {
-                // This will focus the tab; we do it before activating the card
-                // because the card may attempt to focus itself or a child item.
-                // We need to focus the tab explicitly because click target is
-                // the Bar, not the Tab.
-                tab.beforeClick(isCloseClick);
-                
                 if (tab.closable && isCloseClick) {
                     tab.onCloseClick();
                 }
                 else {
                     me.doActivateTab(tab);
                 }
+
+                tab.afterClick(isCloseClick);
             }
         },
         
@@ -673,49 +584,25 @@ Ext.define('Ext.tab.Bar', {
             var tabPanel = this.tabPanel;
             
             if (tabPanel) {
-                // TabPanel will call setActiveTab of the TabBar
-                if (!tab.disabled) {
-                    tabPanel.setActiveTab(tab.card);
-                }
-            } else {
+                // TabPanel will card setActiveTab of the TabBar
+                tabPanel.setActiveTab(tab.card);
+            }
+            else {
                 this.setActiveTab(tab);
             }
         },
         
-        onFocusableContainerFocus: function(e) {
+        beforeFocusableChildFocus: function(child, e) {
             var me = this,
-                mixin = me.mixins.focusablecontainer,
-                child;
+                mixin = me.mixins.focusablecontainer;
             
-            child = mixin.onFocusableContainerFocus.call(me, e);
+            mixin.beforeFocusableChildFocus.call(me, child, e);
             
-            if (child && child.isTab) {
-                me.doActivateTab(child);
+            if (!child.active) {
+                child.activate();
             }
-        },
-        
-        onFocusableContainerFocusEnter: function(e) {
-            var me = this,
-                mixin = me.mixins.focusablecontainer,
-                child;
             
-            child = mixin.onFocusableContainerFocusEnter.call(me, e);
-            
-            if (child && child.isTab) {
-                me.doActivateTab(child);
-            }
-        },
-        
-        focusChild: function(child, forward) {
-            var me = this,
-                mixin = me.mixins.focusablecontainer,
-                nextChild;
-            
-            nextChild = mixin.focusChild.call(me, child, forward);
-            
-            if (me.activateOnFocus && nextChild && nextChild.isTab) {
-                me.doActivateTab(nextChild);
-            }
+            me.doActivateTab(child);
         }
     }
 });
