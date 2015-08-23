@@ -29,4 +29,6 @@ python-pyproj
 python-pip
 python-psycopg2
 python-sqlalchemy
-
+samba
+lftp
+mc
