@@ -1,0 +1,8 @@
+Package: eStation-Apps
+Version: <ESTATION2_VERSION>-<ESTATION2_RELEASE>
+Section: config
+Priority: extra
+Architecture: amd64
+Maintainer: Marco Clerici marco.CLERICI@jrc.ec.europa.eu
+Description: The e-Station Apps 
+ The e-Station Apps.
