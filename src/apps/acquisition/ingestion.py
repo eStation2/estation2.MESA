@@ -55,134 +55,134 @@ def loop_ingestion(dry_run=False):
         # Manage the ingestion of Historical Archives (e.g. eStation prods disseminated via EUMETCast)
         status = ingest_archives_eumetcast(dry_run=dry_run)
 
-        # # Get all active product ingestion records with a subproduct count.
-        # active_product_ingestions = querydb.get_ingestion_product(allrecs=True, echo=echo_query)
-        #
-        # for active_product_ingest in active_product_ingestions:
-        #
-        #     logger.info("Ingestion active for product: [%s] subproduct N. %s" % (active_product_ingest[0],
-        #                                                                          active_product_ingest[2]))
-        #     productcode = active_product_ingest[0]
-        #     productversion = active_product_ingest[1]
-        #
-        #     # For the current active product ingestion: get all
-        #     product = {"productcode": productcode,
-        #                "version": productversion}
-        #     logger.debug("Processing product: %s - version %s" % (productcode,  productversion))
-        #
-        #     # Get the list of acquisition sources that are defined for this ingestion 'trigger'
-        #     # (i.e. prod/version)
-        #     # NOTE: the following implies there is 1 and only 1 '_native' subproduct associated to a 'subproduct';
-        #     native_product = {"productcode": productcode,
-        #                       "subproductcode": productcode + "_native",
-        #                       "version": productversion}
-        #
-        #     sources_list = querydb.get_product_sources(echo=echo_query, **native_product)
-        #
-        #     logger.debug("For product [%s] N. %s  source is/are found" % (productcode,len(sources_list)))
-        #
-        #     for source in sources_list:
-        #
-        #         # logger_spec = log.my_logger('apps.ingestion.'+source.data_source_id)
-        #         logger_spec = log.my_logger('apps.ingestion.'+productcode+'.'+productversion)
-        #         logger.debug("Processing Source type [%s] with id [%s]" % (source.type, source.data_source_id))
-        #         # Get the 'filenaming' info (incl. 'area-type') from the acquisition source
-        #         if source.type == 'EUMETCAST':
-        #             for eumetcast_filter, datasource_descr in querydb.get_datasource_descr(echo=echo_query,
-        #                                                                                    source_type=source.type,
-        #                                                                                    source_id=source.data_source_id):
-        #                 # TODO-M.C.: check the most performing options in real-cases
-        #                 files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(eumetcast_filter, os.path.basename(f))]
-        #                 my_filter_expr = eumetcast_filter
-        #                 logger.info("Eumetcast Source: looking for files in %s - named like: %s" % (ingest_dir_in, eumetcast_filter))
-        #
-        #         if source.type == 'INTERNET':
-        #             # Implement file name filtering for INTERNET data source.
-        #             for internet_filter, datasource_descr in querydb.get_datasource_descr(echo=echo_query,
-        #                                                                                   source_type=source.type,
-        #                                                                                   source_id=source.data_source_id):
-        #             # TODO-Jurvtk: complete/verified
-        #                 temp_internet_filter = internet_filter.files_filter_expression
-        #                 # TODO-M.C.: check the most performing options in real-cases
-        #                 #files = [f for f in os.listdir(ingest_dir_in) if re.match(temp_internet_filter, f)]
-        #                 files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(temp_internet_filter, os.path.basename(f))]
-        #                 my_filter_expr = temp_internet_filter
-        #                 logger.info("Internet Source: looking for files in %s - named like: %s" % (ingest_dir_in, temp_internet_filter))
-        #
-        #         logger_spec.info("Number of files found for product [%s] is: %s" % (active_product_ingest[0], len(files)))
-        #
-        #         # Get list of ingestions triggers [prod/subprod/mapset]
-        #         ingestions = querydb.get_ingestion_subproduct(allrecs=False, echo=echo_query, **product)
-        #
-        #         # Loop over ingestion triggers
-        #         subproducts = list()
-        #         for ingest in ingestions:
-        #             # Create an identifier for the log file
-        #             #log_file_id = functions.set_path_filename_no_date(product['productcode'],
-        #             #                                               ingest.subproductcode,
-        #             #                                               ingest.mapsetcode, ext)
-        #             ### To be done logger = log.my_logger(__name__+log_file_id)
-        #             logger.debug(" --> processing subproduct: %s" % ingest.subproductcode)
-        #             args = {"productcode": product['productcode'],
-        #                     "subproductcode": ingest.subproductcode,
-        #                     "datasource_descr_id": datasource_descr.datasource_descr_id,
-        #                     "version": product['version']}
-        #             product_in_info = querydb.get_product_in_info(echo=echo_query, **args)
-        #             re_process = product_in_info.re_process
-        #             re_extract = product_in_info.re_extract
-        #             sprod = {'subproduct': ingest.subproductcode,
-        #                      'mapsetcode': ingest.mapsetcode,
-        #                      're_extract': re_extract,
-        #                      're_process': re_process}
-        #             subproducts.append(sprod)
-        #
-        #         # Get the list of unique dates by extracting the date from all files.
-        #         dates_list = []
-        #         for filename in files:
-        #             date_position = int(datasource_descr.date_position)
-        #             if datasource_descr.format_type == 'delimited':
-        #                 # splitted_fn = re.split(r'[datasource_descr.delimiter\s]\s*', filename) ???? What is that for ?
-        #                 splitted_fn = re.split(datasource_descr.delimiter, filename)
-        #                 date_string = splitted_fn[date_position]
-        #                 if len(date_string) > len(datasource_descr.date_type):
-        #                     date_string=date_string[0:len(datasource_descr.date_type)]
-        #                 dates_list.append(date_string)
-        #             else:
-        #                 dates_list.append(filename[date_position:date_position + len(datasource_descr.date_type)])
-        #
-        #         dates_list = set(dates_list)
-        #         dates_list = sorted(dates_list, reverse=False)
-        #
-        #         # Loop over dates and get list of files (considering mapset ?)
-        #         for in_date in dates_list:
-        #             # Refresh the files list (some files have been deleted)
-        #             files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(my_filter_expr, os.path.basename(f))]
-        #             logger_spec.debug("     --> processing date, in native format: %s" % in_date)
-        #             # Get the list of existing files for that date
-        #             regex = re.compile(".*(" + in_date + ").*")
-        #             date_fileslist = [ingest_dir_in + m.group(0) for l in files for m in [regex.search(l)] if m]
-        #             # Pass list of files to ingestion routine
-        #             if (not dry_run):
-        #                 result = ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger_spec, echo_query=echo_query)
-        #                 if not result:
-        #                     if source.store_original_data:
-        #                     # Copy to 'Archive' directory
-        #                         output_directory = data_dir_out + functions.set_path_sub_directory(product['productcode'],
-        #                                                                                        sprod['subproduct'],
-        #                                                                                        'Native',
-        #                                                                                        product['version'],
-        #                                                                                        'dummy_mapset_arg' )
-        #                         functions.check_output_dir(output_directory)
-        #                         for file_to_move in date_fileslist:
-        #                             logger_spec.debug("     --> now archiving input files: %s" % file_to_move)
-        #                             new_location=output_directory+os.path.basename(file_to_move)
-        #                             os.rename(file_to_move, new_location)
-        #                     else:
-        #                         for file_to_remove in date_fileslist:
-        #                             logger_spec.debug("     --> now deleting input files: %s" % file_to_remove)
-        #                             os.remove(file_to_remove)
-        #             else:
-        #                 time.sleep(10)
+        # Get all active product ingestion records with a subproduct count.
+        active_product_ingestions = querydb.get_ingestion_product(allrecs=True, echo=echo_query)
+
+        for active_product_ingest in active_product_ingestions:
+
+            logger.info("Ingestion active for product: [%s] subproduct N. %s" % (active_product_ingest[0],
+                                                                                 active_product_ingest[2]))
+            productcode = active_product_ingest[0]
+            productversion = active_product_ingest[1]
+
+            # For the current active product ingestion: get all
+            product = {"productcode": productcode,
+                       "version": productversion}
+            logger.debug("Processing product: %s - version %s" % (productcode,  productversion))
+
+            # Get the list of acquisition sources that are defined for this ingestion 'trigger'
+            # (i.e. prod/version)
+            # NOTE: the following implies there is 1 and only 1 '_native' subproduct associated to a 'subproduct';
+            native_product = {"productcode": productcode,
+                              "subproductcode": productcode + "_native",
+                              "version": productversion}
+
+            sources_list = querydb.get_product_sources(echo=echo_query, **native_product)
+
+            logger.debug("For product [%s] N. %s  source is/are found" % (productcode,len(sources_list)))
+
+            for source in sources_list:
+
+                # logger_spec = log.my_logger('apps.ingestion.'+source.data_source_id)
+                logger_spec = log.my_logger('apps.ingestion.'+productcode+'.'+productversion)
+                logger.debug("Processing Source type [%s] with id [%s]" % (source.type, source.data_source_id))
+                # Get the 'filenaming' info (incl. 'area-type') from the acquisition source
+                if source.type == 'EUMETCAST':
+                    for eumetcast_filter, datasource_descr in querydb.get_datasource_descr(echo=echo_query,
+                                                                                           source_type=source.type,
+                                                                                           source_id=source.data_source_id):
+                        # TODO-M.C.: check the most performing options in real-cases
+                        files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(eumetcast_filter, os.path.basename(f))]
+                        my_filter_expr = eumetcast_filter
+                        logger.info("Eumetcast Source: looking for files in %s - named like: %s" % (ingest_dir_in, eumetcast_filter))
+
+                if source.type == 'INTERNET':
+                    # Implement file name filtering for INTERNET data source.
+                    for internet_filter, datasource_descr in querydb.get_datasource_descr(echo=echo_query,
+                                                                                          source_type=source.type,
+                                                                                          source_id=source.data_source_id):
+                    # TODO-Jurvtk: complete/verified
+                        temp_internet_filter = internet_filter.files_filter_expression
+                        # TODO-M.C.: check the most performing options in real-cases
+                        #files = [f for f in os.listdir(ingest_dir_in) if re.match(temp_internet_filter, f)]
+                        files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(temp_internet_filter, os.path.basename(f))]
+                        my_filter_expr = temp_internet_filter
+                        logger.info("Internet Source: looking for files in %s - named like: %s" % (ingest_dir_in, temp_internet_filter))
+
+                logger_spec.info("Number of files found for product [%s] is: %s" % (active_product_ingest[0], len(files)))
+
+                # Get list of ingestions triggers [prod/subprod/mapset]
+                ingestions = querydb.get_ingestion_subproduct(allrecs=False, echo=echo_query, **product)
+
+                # Loop over ingestion triggers
+                subproducts = list()
+                for ingest in ingestions:
+                    # Create an identifier for the log file
+                    #log_file_id = functions.set_path_filename_no_date(product['productcode'],
+                    #                                               ingest.subproductcode,
+                    #                                               ingest.mapsetcode, ext)
+                    ### To be done logger = log.my_logger(__name__+log_file_id)
+                    logger.debug(" --> processing subproduct: %s" % ingest.subproductcode)
+                    args = {"productcode": product['productcode'],
+                            "subproductcode": ingest.subproductcode,
+                            "datasource_descr_id": datasource_descr.datasource_descr_id,
+                            "version": product['version']}
+                    product_in_info = querydb.get_product_in_info(echo=echo_query, **args)
+                    re_process = product_in_info.re_process
+                    re_extract = product_in_info.re_extract
+                    sprod = {'subproduct': ingest.subproductcode,
+                             'mapsetcode': ingest.mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+                    subproducts.append(sprod)
+
+                # Get the list of unique dates by extracting the date from all files.
+                dates_list = []
+                for filename in files:
+                    date_position = int(datasource_descr.date_position)
+                    if datasource_descr.format_type == 'delimited':
+                        # splitted_fn = re.split(r'[datasource_descr.delimiter\s]\s*', filename) ???? What is that for ?
+                        splitted_fn = re.split(datasource_descr.delimiter, filename)
+                        date_string = splitted_fn[date_position]
+                        if len(date_string) > len(datasource_descr.date_type):
+                            date_string=date_string[0:len(datasource_descr.date_type)]
+                        dates_list.append(date_string)
+                    else:
+                        dates_list.append(filename[date_position:date_position + len(datasource_descr.date_type)])
+
+                dates_list = set(dates_list)
+                dates_list = sorted(dates_list, reverse=False)
+
+                # Loop over dates and get list of files (considering mapset ?)
+                for in_date in dates_list:
+                    # Refresh the files list (some files have been deleted)
+                    files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(my_filter_expr, os.path.basename(f))]
+                    logger_spec.debug("     --> processing date, in native format: %s" % in_date)
+                    # Get the list of existing files for that date
+                    regex = re.compile(".*(" + in_date + ").*")
+                    date_fileslist = [ingest_dir_in + m.group(0) for l in files for m in [regex.search(l)] if m]
+                    # Pass list of files to ingestion routine
+                    if (not dry_run):
+                        result = ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger_spec, echo_query=echo_query)
+                        if not result:
+                            if source.store_original_data:
+                            # Copy to 'Archive' directory
+                                output_directory = data_dir_out + functions.set_path_sub_directory(product['productcode'],
+                                                                                               sprod['subproduct'],
+                                                                                               'Native',
+                                                                                               product['version'],
+                                                                                               'dummy_mapset_arg' )
+                                functions.check_output_dir(output_directory)
+                                for file_to_move in date_fileslist:
+                                    logger_spec.debug("     --> now archiving input files: %s" % file_to_move)
+                                    new_location=output_directory+os.path.basename(file_to_move)
+                                    os.rename(file_to_move, new_location)
+                            else:
+                                for file_to_remove in date_fileslist:
+                                    logger_spec.debug("     --> now deleting input files: %s" % file_to_remove)
+                                    os.remove(file_to_remove)
+                    else:
+                        time.sleep(10)
 
         # Wait at the end of the loop
         logger.info("Entering sleep time of  %s seconds" % str(10))
