@@ -17,6 +17,7 @@ from config import es_constants
 # Put here an existing 2.0 file with correct metadata
 input_dir = es_constants.es2globals['data_dir']+'/data/processing/vgt_ndvi/WGS84_Africa_1km/tif/ndv/'
 file=input_dir+'20130701_vgt_ndvi_ndv_WGS84_Africa_1km.tif'
+file_eStation2='/data/processing/fewsnet-rfe/2.0/FEWSNET-Africa-8km/tif/10d/20110111_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif'
 
 class TestMapSet(TestCase):
 
@@ -76,6 +77,8 @@ class TestMapSet(TestCase):
 
         # Create a dummy output File
         filename = self.create_temp_file()
+        logger.info('Create a file %s: ' % filename)
+
         gtiff_driver = gdal.GetDriverByName('GTiff')
         out_ds = gtiff_driver.Create(filename, 1, 1, 1, 1)
 
@@ -86,6 +89,16 @@ class TestMapSet(TestCase):
         sds_meta.write_to_file(filename)
 
         self.assertTrue(os.path.isfile(filename))
+
+    def test_writing_meta_to_estation2_file(self):
+
+        sds_meta = SdsMetadata()
+
+        # Create a dummy output File
+
+        sds_meta.write_to_file(file_eStation2)
+
+        self.assertTrue(os.path.isfile(file_eStation2))
 
     def test_reading_meta_items_from_ds(self):
 
