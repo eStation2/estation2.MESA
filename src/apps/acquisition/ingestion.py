@@ -1413,7 +1413,7 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False):
         # Copy file to output
         shutil.copyfile(input_file,output_file)
         # Open output dataset for writing metadata
-        trg_ds = gdal.Open(output_file)
+        #trg_ds = gdal.Open(output_file)
 
     else:
 
@@ -1478,6 +1478,8 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False):
     # -------------------------------------------------------------------------
     # Assign Metadata to the ingested file
     # -------------------------------------------------------------------------
+    # Close dataset
+    trg_ds = None
 
     sds_meta_out.assign_es2_version()
     sds_meta_out.assign_mapset(target_mapsetid)
@@ -1486,10 +1488,9 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False):
     sds_meta_out.assign_subdir_from_fullpath(output_dir)
     sds_meta_out.assign_comput_time_now()
     sds_meta_out.assign_input_files(input_file)
-    # Write metadata
-    sds_meta_out.write_to_ds(trg_ds)
-    # Close dataset
-    trg_ds = None
+
+    # Write metadata to file
+    sds_meta_out.write_to_file(output_file)
 
     # -------------------------------------------------------------------------
     # Create a file for deleting from ingest (at the end)

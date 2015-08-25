@@ -217,8 +217,9 @@ class SdsMetadata:
     def assign_input_files(self, input_files):
     #
     #   Assign input file list
+        import six
         file_string = ''
-        if isinstance(input_files,str):
+        if isinstance(input_files,six.string_types):
             file_string+=input_files+';'
         else:
             for ifile in input_files:
