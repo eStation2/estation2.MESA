@@ -1,6 +1,6 @@
 # Variables to be updated !!
 ESTATION2_VERSION=2.0.4
-ESTATION2_RELEASE=32
+ESTATION2_RELEASE=36
 ESTATION2_UBUNTU=12.04
 
 # Users definition
@@ -32,6 +32,6 @@ ESTATION2_INST_LOG_DIR=/var/log/eStation2/
 ESTATION2_PYTHON_DIST_DIR=/usr/local/lib/python2.7/dist-packages/
 
 # Specific definitions for Layers package
-ESTATION2_BASE_DIR_LAYERS=/eStation2/eStation2_Layers
+ESTATION2_BASE_DIR_LAYERS=/srv/www/eStation2_Layers
 ESTATION2_LOCAL_DIR_LAYERS=/home/esuser/eStation2/eStation2_Layers
 

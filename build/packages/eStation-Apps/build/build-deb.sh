@@ -86,7 +86,9 @@ cd ${localdir}
 # Making DEB file
 ##########################
 # Move to ../old existing files 
-mv ${PACKAGE_DESTINATION_DIR}/${Name}-*.deb ${PACKAGE_DESTINATION_DIR}/../old/
+if [ -f ${PACKAGE_DESTINATION_DIR}/${Name}-*.deb ]; then
+	mv ${PACKAGE_DESTINATION_DIR}/${Name}-*.deb ${PACKAGE_DESTINATION_DIR}/../old/
+fi
 # $1 package source dir
 # $2 package dest dir
 # $3 package filename
@@ -109,7 +111,7 @@ if [ "$ANS" == "y" ]; then
     done
   fi  
   echo "INFO - sync  ${PACKAGE_DESTINATION_DIR}";
-  rsync -av  --include="*.deb" --exclude="*" ${PACKAGE_DESTINATION_DIR}/ $ALL_PACKAGE_REPO/amd64/ 
+  rsync -av  --include="${Name}*.deb" --exclude="*" ${PACKAGE_DESTINATION_DIR}/ $ALL_PACKAGE_REPO/amd64/ 
   cd $SCRIPTS_DIR
   ./update-repository.sh
 fi
