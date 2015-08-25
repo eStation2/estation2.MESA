@@ -16,7 +16,7 @@ pip install /media/cdrom/eStation/Python-Modules/greenwich.tar.gz
 sudo dpkg -i /media/cdrom/eStation/repository/amd64/eStation-Apps-*.deb
 
 # install bucardo package and configure it
-#/media/cdrom/eStation/setup/bucardo_config.sh
+#/media/cdrom/eStation/setup/bucardo_install.sh
 
 
 

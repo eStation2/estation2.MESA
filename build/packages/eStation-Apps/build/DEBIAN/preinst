@@ -84,7 +84,8 @@ fi
 #touch "$base_dir_system/database/version_${old_package_version}"
 #echo "`date +'%Y-%m-%d %H:%M:%S'` Old package existing is written as: $base_dir_system/database/version_${old_package_version}" >> ${logfile}
 
-# Change the configuration file to grant access (to be verified)
+# Change the configuration file to grant access
+perl -pi -e "s#local.*all.*all.*peer#local   all             all                                     trust#" /etc/postgresql/9.3/main/pg_hba.conf
 perl -pi -e "s#host    all             all             127.0.0.1/32            md5#host    all         all         127.0.0.1/32          trust#" /etc/postgresql/9.3/main/pg_hba.conf
 perl -pi -e "s#host    all             all             ::1/128                 md5#host    all         all         ::1/128               trust \nhost    all         all         192.168.0.0/24               trust#" /etc/postgresql/9.3/main/pg_hba.conf    
 
