@@ -910,13 +910,16 @@ def get_all_from_filename(filename):
 #
 def get_all_from_filename_eumetcast(filename):
 
+    extension='.tif'
+    # Ensure there is no dir path
+    fileonly = os.path.basename(filename)
     # Get info from directory
-    tokens = [token for token in filename.split('_') if token]
+    tokens = [token for token in fileonly.split('_') if token]
     product_code = tokens[2]
     sub_product_code = tokens[3]
     str_date = tokens[4]
     mapset = tokens[5]
-    [version, extension] =  tokens[6].split('.')
+    version =  tokens[6].strip(extension)
 
     return [str_date, product_code, sub_product_code, mapset, version]
 ######################################################################################

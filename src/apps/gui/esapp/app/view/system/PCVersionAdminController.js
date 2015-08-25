@@ -15,7 +15,7 @@ Ext.define('esapp.view.system.PCVersionAdminController', {
                         checked = false;
 
                     if (version == me.params.currentversion){
-                        fieldlabel = 'Active version';
+                        fieldlabel = esapp.Utils.getTranslation('activeversion'),    // 'Active version';
                         checked = true;
                     }
                     versionradio = {

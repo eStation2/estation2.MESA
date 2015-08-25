@@ -18,6 +18,7 @@ Ext.define('esapp.model.Version', {
         },
         listeners: {
             exception: function(proxy, response, operation){
+                // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
                 Ext.Msg.show({
                     title: 'VERSIONS MODEL- REMOTE EXCEPTION',
                     msg: operation.getError(),

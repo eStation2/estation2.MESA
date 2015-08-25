@@ -17,7 +17,7 @@ class TestQuerydb(TestCase):
         themaset = querydb.set_thema(themaid)
         print themaset
 
-        self.assertEqual(True, themaset[0])
+        self.assertEqual(True, themaset)
 
     def Test_get_i18n(self):
 
@@ -214,9 +214,13 @@ class TestQuerydb(TestCase):
                                                  subproductcode='10d',
                                                  version='undefined',
                                                  datasource_descr_id='USGS:EARLWRN:FEWSNET')
+        # Test fails because version has to be 2.0 for fewsnet-rfe
         logger.info("Product IN info: %s", product_in)
-
-        self.assertEqual(1, 1)
+        if product_in.__len__() == 0:    # No result so test succeeds!
+            result = 1
+        else:
+            result = 0
+        self.assertEqual(1, result)
 
     def Test_get_product_in_info1(self):
 
@@ -225,8 +229,11 @@ class TestQuerydb(TestCase):
                                                  version='spot-v1',
                                                  datasource_descr_id='EO:EUM:DAT:SPOT1:S10NDVI')
         logger.info("Product IN info: %s", product_in)
-
-        self.assertEqual(1, 1)
+        if hasattr(product_in, "c"):    # There is a result so test succeeds!
+            result = 1
+        else:
+            result = 0
+        self.assertEqual(1, result)
 
     def Test_get_product_in_info2(self):
 

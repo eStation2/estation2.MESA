@@ -7,7 +7,7 @@ Ext.apply(Ext.form.field.VTypes, {
     IPAddress:  function(v) {
         return /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(v);
     },
-    IPAddressText: 'Must be a numeric IP address',
+    IPAddressText: esapp.Utils.getTranslation('vtypeipaddress'),  // 'Must be a numeric IP address',
     IPAddressMask: /[\d\.]/i
 });
 
@@ -19,7 +19,7 @@ Ext.apply(Ext.form.field.VTypes, {
         // return /(^(128|192|224|24[08]|25[245])\.0\.0\.0$)|(^255\.(0|128|192|224|24[08]|25[245])\.0\.0$)|(^255\.255\.(0|128|192|224|24[08]|25[245])\.0$)|(^255\.255\.255\.(0|128|192|224|24[08]|252)$)/.test(v);
         return /^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})([/]([0-9]|[0-2][0-9]|3[0-2]))$/.test(v);
     },
-    IPNetmaskText: 'Must be like 192.168.0.0/24'
+    IPNetmaskText: esapp.Utils.getTranslation('vtypeipnetmask')  // 'Must be like 192.168.0.0/24'
     ,IPNetmaskMask: /[/.0-9]/
 });
 
@@ -29,7 +29,7 @@ Ext.apply(Ext.form.field.VTypes, {
 Ext.form.VTypes["directory"]=function(v){
  return /^(([a-zA-Z]:){0,1}(\\|\/){1})(([-_.a-zA-Z0-9\\\/ ]+)(\\|\/){1})+$/.test(v);
 }
-Ext.form.VTypes["directoryText"]="This must be a valid directory location."
+Ext.form.VTypes["directoryText"]=esapp.Utils.getTranslation('vtypedirectory')  // "This must be a valid directory location."
 Ext.form.VTypes["directoryMask"]=/[-_.a-zA-Z0-9\\\/: ]/;
 
 

@@ -43,7 +43,7 @@ Ext.define("esapp.view.acquisition.product.EumetcastSourceAdmin",{
                 + ': ' + me.params.product.productcode + ' ' + me.params.product.version + '</span>');
 
             me.bbar = ['->', {
-                text: 'Assign',
+                text: esapp.Utils.getTranslation('assign'),  // 'Assign',
                 iconCls: 'fa fa-link fa-2x',
                 style: {color: 'green'},
                 scale: 'medium',
@@ -91,19 +91,19 @@ Ext.define("esapp.view.acquisition.product.EumetcastSourceAdmin",{
                 shrinkWrap: 0,
                 items: [{
                     icon: 'resources/img/icons/edit.png',
-                    tooltip: 'Edit Eumetcast Source'
+                    tooltip: esapp.Utils.getTranslation('editeumetcastsource') // 'Edit Eumetcast Source'
                     , handler: 'onEditEumetcastSourceClick'
                 }]
             }, {
-                text: 'ID',
+                text: esapp.Utils.getTranslation('id'),   // 'ID',
                 dataIndex: 'eumetcast_id',
                 flex: 1.5
             }, {
-                text: 'Collection name',
+                text: esapp.Utils.getTranslation('collection_name'),   // 'Collection name',
                 dataIndex: 'collection_name',
                 flex: 2
             }, {
-                text: 'Filter expression',
+                text: esapp.Utils.getTranslation('filter_expression'),   // 'Filter expression',
                 flex: 2,
                 dataIndex: 'filter_expression_jrc'
             }]

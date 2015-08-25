@@ -29,7 +29,7 @@ Ext.define("esapp.view.widgets.ServiceMenuButton",{
         //me.handler = 'checkStatusServices';
 
         me.menu = Ext.create('Ext.menu.Menu', {
-            width: 145,
+            width: 150,
             margin: '0 0 10 0',
             floating: true,  // usually you want this set to True (default)
             collapseDirection: 'right',
@@ -38,7 +38,7 @@ Ext.define("esapp.view.widgets.ServiceMenuButton",{
             },
             items: [
                 // these will render as dropdown menu items when the arrow is clicked:
-                {   text: 'Run',
+                {   text: esapp.Utils.getTranslation('run'),    // 'Run',
                     name: 'run' + me.service,
                     service: me.service,
                     task: 'run',
@@ -48,7 +48,7 @@ Ext.define("esapp.view.widgets.ServiceMenuButton",{
                     // style: { color: 'green' },
                     handler: 'execServiceTask'
                 },
-                {   text: 'Stop',
+                {   text: esapp.Utils.getTranslation('stop'),    // 'Stop',
                     name: 'stop'+ me.service,
                     service: me.service,
                     task: 'stop',
@@ -58,7 +58,7 @@ Ext.define("esapp.view.widgets.ServiceMenuButton",{
                     // style: { color: 'red' },
                     handler: 'execServiceTask'
                 },
-                {   text: 'Restart          ',
+                {   text: esapp.Utils.getTranslation('restart')+'          ',    // 'Restart          ',
                     name: 'restart'+ me.service,
                     service: me.service,
                     task: 'restart',
@@ -69,7 +69,7 @@ Ext.define("esapp.view.widgets.ServiceMenuButton",{
                     handler: 'execServiceTask'
                 },
                 {
-                    text: 'View log file',
+                    text: esapp.Utils.getTranslation('viewlogfile'),    // 'View log file',
                     name: 'view_logfile_' + me.service,
                     service: me.service,
                     task: 'logfile',

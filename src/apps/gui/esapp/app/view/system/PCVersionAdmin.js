@@ -14,7 +14,7 @@ Ext.define("esapp.view.system.PCVersionAdmin",{
         'Ext.layout.container.Center'
     ],
 
-    title: 'Change version',
+    title: esapp.Utils.getTranslation('changeversion'),    // 'Change version',
     header: {
         titlePosition: 0,
         titleAlign: 'center'
@@ -43,7 +43,7 @@ Ext.define("esapp.view.system.PCVersionAdmin",{
         me.bbar = ['->',
             {
                 xtype: 'button',
-                text: 'Save',
+                text: esapp.Utils.getTranslation('save'),    // 'Save',
                 id: 'changeversionbtn',
                 iconCls: 'fa fa-save fa-2x',
                 style: { color: 'lightblue' },
@@ -70,7 +70,7 @@ Ext.define("esapp.view.system.PCVersionAdmin",{
             items: [{
                 xtype: 'radiogroup',
                 id: 'versionsradiogroup',
-                text: 'Available version',
+                text: esapp.Utils.getTranslation('availableversions'),    // 'Available versions',
                 columns: 1,
                 vertical: true,
                 listeners: {

@@ -42,50 +42,56 @@ Ext.define("esapp.view.system.systemsettings",{
     viewConfig:{forceFit:true},
     layout:'hbox',
 
-    fieldset_title_database_connection_settings : '<b>Database connection settings</b>',   // EMMA.getTranslation('fieldset_title_database_connection_settings'),
-    form_fieldlabel_dbhost                      : 'Host',
-    form_fieldlabel_dbport                      : 'Port',
-    form_fieldlabel_dbuser                      : 'User name',
-    form_fieldlabel_dbpassword                  : 'Password',
-    form_fieldlabel_dbname                      : 'Database name',
+    fieldset_title_database_connection_settings : '<b>'+esapp.Utils.getTranslation('dbconnectionsettings')+'</b>',
+    form_fieldlabel_dbhost                      : esapp.Utils.getTranslation('host'),   // 'Host',
+    form_fieldlabel_dbport                      : esapp.Utils.getTranslation('port'),   // 'Port',
+    form_fieldlabel_dbuser                      : esapp.Utils.getTranslation('username'),   // 'User name',
+    form_fieldlabel_dbpassword                  : esapp.Utils.getTranslation('password'),   // 'Password',
+    form_fieldlabel_dbname                      : esapp.Utils.getTranslation('databasename'),   // 'Database name',
 
-    fieldset_title_path_settings                : '<b>Path settings</b>',
-    form_fieldlabel_base_dir                    : 'Base directory',
-    form_fieldlabel_base_tmp_dir                : 'Base temporary directory',
-    form_fieldlabel_data_dir                    : 'Data directory',
-    form_fieldlabel_ingest_dir                  : 'Ingest directory',
-    form_fieldlabel_static_data_dir             : 'Static data directory',
-    form_fieldlabel_archive_dir                 : 'Archive directory',
-    form_fieldlabel_eumetcast_files_dir         : 'Eumetcast files directory',
-    //form_fieldlabel_ingest_server_in_dir        : 'Ingest server in directory',
-    form_fieldlabel_get_internet_output_dir     : 'Get Eumetcast output directory',
-    form_fieldlabel_get_eumetcast_output_dir    : 'Get Internet output directory',
+    fieldset_title_path_settings                : '<b>'+esapp.Utils.getTranslation('pathsettings')+'</b>',
+    form_fieldlabel_base_dir                    : esapp.Utils.getTranslation('basedir'),   // 'Base directory',
+    form_fieldlabel_base_tmp_dir                : esapp.Utils.getTranslation('basetmpdir'),   // 'Base temporary directory',
+    form_fieldlabel_data_dir                    : esapp.Utils.getTranslation('datadir'),   // 'Data directory',
+    form_fieldlabel_ingest_dir                  : esapp.Utils.getTranslation('ingestdir'),   // 'Ingest directory',
+    form_fieldlabel_static_data_dir             : esapp.Utils.getTranslation('staticdatadir'),   // 'Static data directory',
+    form_fieldlabel_archive_dir                 : esapp.Utils.getTranslation('archivedir'),   // 'Archive directory',
+    form_fieldlabel_eumetcast_files_dir         : esapp.Utils.getTranslation('eumetcastfilesdir'),   // 'Eumetcast files directory',
+    //form_fieldlabel_ingest_server_in_dir        : esapp.Utils.getTranslation('ingestserverindir'),   // 'Ingest server in directory',
+    form_fieldlabel_get_internet_output_dir     : esapp.Utils.getTranslation('geteumetcastoutputdir'),   // 'Get Eumetcast output directory',
+    form_fieldlabel_get_eumetcast_output_dir    : esapp.Utils.getTranslation('getinternetoutputdir'),   // 'Get Internet output directory',
 
-    fieldset_title_system_settings              : '<b>System settings</b>',
-    form_fieldlabel_ip_pc1                      : 'PC1',
-    form_fieldlabel_ip_pc2                      : 'PC2',
-    form_fieldlabel_ip_pc3                      : 'PC3',
-    form_fieldlabel_current_mode                : 'Current mode',
-    form_fieldlabel_active_verion               : 'Active version',
-    form_fieldlabel_type_of_install             : 'Type of Install',
-    form_fieldlabel_role                        : 'Role',
-    form_fieldlabel_thema                       : 'Thema',
-    form_fieldlabel_loglevel                    : 'Log level',
+    fieldset_title_system_settings              : '<b>'+esapp.Utils.getTranslation('systemsettings')+'</b>',
+    form_fieldlabel_ip_pc1                      : esapp.Utils.getTranslation('pc1'),   // 'PC1',
+    form_fieldlabel_ip_pc2                      : esapp.Utils.getTranslation('pc2'),   // 'PC2',
+    form_fieldlabel_ip_pc3                      : esapp.Utils.getTranslation('pc3'),   // 'PC3',
+    form_fieldlabel_current_mode                : esapp.Utils.getTranslation('currentmode'),   // 'Current mode',
+    form_fieldlabel_active_verion               : esapp.Utils.getTranslation('activeversion'),   // 'Active version',
+    form_fieldlabel_type_of_install             : esapp.Utils.getTranslation('typeofinstall'),   // 'Type of Install',
+    form_fieldlabel_role                        : esapp.Utils.getTranslation('role'),   // 'Role',
+    form_fieldlabel_thema                       : esapp.Utils.getTranslation('thema'),   // 'Thema',
+    form_fieldlabel_loglevel                    : esapp.Utils.getTranslation('loglevel'),   // 'Log level',
+    fieldset_title_ipaddresses                  : '<b>'+esapp.Utils.getTranslation('ipaddresses')+'</b>',  // '<b>IP addresses</b>',
 
     tools: [
     {
         type: 'refresh',
-        tooltip: 'Reload system parameters.',
+        tooltip: esapp.Utils.getTranslation('reloadsystemparams'),   // 'Reload system parameters.',
         callback: function (formpanel) {
             var systemsettingsstore  = Ext.data.StoreManager.lookup('SystemSettingsStore');
             var systemsettingsrecord = systemsettingsstore.getModel().load(0, {
                 scope: formpanel,
+                loadmask: true,
                 failure: function(record, operation) {
                     //console.info('failure');
                 },
                 success: function(record, operation) {
-                    formpanel.loadRecord(systemsettingsrecord);
-                    formpanel.updateRecord();
+                    if (operation.success){
+                        formpanel.loadRecord(systemsettingsrecord);
+                        formpanel.updateRecord();
+
+                        Ext.toast({ html: esapp.Utils.getTranslation('systemsettingsrefreshed'), title: esapp.Utils.getTranslation('systemsettingsrefreshed'), width: 200, align: 't' });
+                    }
                 }
             });
         }
@@ -141,7 +147,7 @@ Ext.define("esapp.view.system.systemsettings",{
 
         var modify_ips_btn = {
             xtype: 'button',
-            text: 'Modify',
+            text: esapp.Utils.getTranslation('modify'), // 'Modify',
             align:'right',
             flex: 0.8,
             iconCls: 'fa fa-pencil-square-o',
@@ -185,7 +191,7 @@ Ext.define("esapp.view.system.systemsettings",{
             dock: 'bottom',
             xtype: 'toolbar',
             items : [{
-                text: 'Create System Report',
+                text: esapp.Utils.getTranslation('createsystemreport'), // 'Create System Report',
                 scope: me,
                 iconCls: 'fa fa-download fa-2x',
                 style: { color: 'blue' },
@@ -217,7 +223,7 @@ Ext.define("esapp.view.system.systemsettings",{
                     });
                 }
             },{
-                text: 'Create Install Report',
+                text: esapp.Utils.getTranslation('createinstallreport'), // 'Create Install Report',
                 scope:me,
                 iconCls: 'fa fa-download fa-2x',
                 style: { color: 'blue' },
@@ -248,7 +254,7 @@ Ext.define("esapp.view.system.systemsettings",{
                     });
                 }
             },'->',{
-                text: 'Reset to factory settings',
+                text: esapp.Utils.getTranslation('resettofactorysettings'), // 'Reset to factory settings',
                 scope:me,
                 iconCls: 'fa fa-undo fa-2x',    // 'apply_globals-icon',
                 style: { color: 'orange' },
@@ -262,7 +268,7 @@ Ext.define("esapp.view.system.systemsettings",{
                         success: function(response, opts){
                             var result = Ext.JSON.decode(response.responseText);
                             if (result.success){
-                                Ext.toast({ html: 'Settings are reseted to factory settings', title: 'Reset to factory settings', width: 200, align: 't' });
+                                Ext.toast({ html: esapp.Utils.getTranslation('resettofactorysettingstext'), title: esapp.Utils.getTranslation('resettofactorysettings'), width: 200, align: 't' });
                             }
                             var systemsettingsstore  = Ext.data.StoreManager.lookup('SystemSettingsStore');
                             var systemsettingsrecord = systemsettingsstore.getModel().load(0, {
@@ -282,7 +288,7 @@ Ext.define("esapp.view.system.systemsettings",{
                     });
                 }
             },{
-                text: 'Save',
+                text: esapp.Utils.getTranslation('save'), // 'Save',
                 scope:me,
                 iconCls: 'fa fa-save fa-2x',    // 'icon-disk',
                 style: { color: 'lightblue' },
@@ -292,7 +298,7 @@ Ext.define("esapp.view.system.systemsettings",{
                     // me.onHandleAction('Save','save');
                     if (me.getSession().getChanges() != null){
                         me.getSession().getSaveBatch().start();
-                        Ext.toast({ html: 'System Settings are saved!', title: 'System settings saved', width: 200, align: 't' });
+                        Ext.toast({ html: esapp.Utils.getTranslation('systemsettingssaved'), title: esapp.Utils.getTranslation('systemsettingssaved'), width: 200, align: 't' });
                     }
                 }
             }]
@@ -352,7 +358,7 @@ Ext.define("esapp.view.system.systemsettings",{
                            flex: 2.2
                         },{
                             xtype: 'button',
-                            text: 'Modify',
+                            text: esapp.Utils.getTranslation('modify'),    // 'Modify',
                             flex: 0.8,
                             iconCls: 'fa fa-pencil-square-o',
                             style: { color: 'white' },
@@ -379,7 +385,7 @@ Ext.define("esapp.view.system.systemsettings",{
                            flex: 2.2
                         },{
                             xtype: 'button',
-                            text: 'Modify',
+                            text: esapp.Utils.getTranslation('modify'),    // 'Modify',
                             flex: 0.8,
                             iconCls: 'fa fa-pencil-square-o',
                             style: { color: 'white' },
@@ -405,7 +411,7 @@ Ext.define("esapp.view.system.systemsettings",{
                            flex: 2.2
                         },{
                             xtype: 'button',
-                            text: 'Modify',
+                            text: esapp.Utils.getTranslation('modify'),    // 'Modify',
                             flex: 0.8,
                             iconCls: 'fa fa-pencil-square-o',
                             style: { color: 'white' },
@@ -431,7 +437,7 @@ Ext.define("esapp.view.system.systemsettings",{
                            flex: 2.2
                         },{
                             xtype: 'button',
-                            text: 'Modify',
+                            text: esapp.Utils.getTranslation('modify'),    // 'Modify',
                             flex: 0.8,
                             iconCls: 'fa fa-pencil-square-o',
                             style: { color: 'white' },
@@ -449,7 +455,7 @@ Ext.define("esapp.view.system.systemsettings",{
                     }]
                 },{
                     xtype: 'fieldset',
-                    title: '<b>IP addresses</b>',
+                    title: me.fieldset_title_ipaddresses,  // '<b>IP addresses</b>',
                     id: 'ipaddresses',
                     name: 'ipaddresses',
                     collapseable:false,

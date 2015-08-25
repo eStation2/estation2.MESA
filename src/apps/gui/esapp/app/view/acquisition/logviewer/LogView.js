@@ -19,7 +19,7 @@ Ext.define("esapp.view.acquisition.logviewer.LogView",{
     ],
     // id: null,
 
-    title: 'Log viewer',
+    title: esapp.Utils.getTranslation('logviewer'),     // 'Log viewer',
     header: {
         titlePosition: 0,
         titleAlign: 'center'
@@ -56,12 +56,12 @@ Ext.define("esapp.view.acquisition.logviewer.LogView",{
             {
                 xtype: 'textfield',
                 id:'highlightfindstring', // + me.logtype + me.params.record.get('productid'),
-                fieldLabel: 'Search',
+                fieldLabel: esapp.Utils.getTranslation('search'),    // 'Search',
                 labelWidth: 60,
                 labelAlign: 'left',
                 labelStyle: 'font-weight:bold;',
                 hidden:false,
-                qtip:'Search and highlight in current file.',
+                qtip: esapp.Utils.getTranslation('tiplogviewsearch'),    // 'Search and highlight in current file.',
                 width:250
 //                scope:this
 //                listeners: {

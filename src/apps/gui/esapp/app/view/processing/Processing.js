@@ -52,7 +52,7 @@ Ext.define("esapp.view.processing.Processing",{
         hideGroupedHeader: true,
         enableGroupingMenu: false,
         startCollapsed : false,
-        groupByText: 'Product category'
+        groupByText: esapp.Utils.getTranslation('productcategories')  // 'Product category'
     }],
 
     initComponent: function () {
@@ -60,14 +60,14 @@ Ext.define("esapp.view.processing.Processing",{
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             items: [{
-                text: 'Expand All',
+                text: esapp.Utils.getTranslation('expandall'),    // 'Expand All',
                 handler: function(btn) {
                     var view = btn.up().up().getView();
                     view.getFeature('processprodcat').expandAll();
                     view.refresh();
                 }
             }, {
-                text: 'Collapse All',
+                text: esapp.Utils.getTranslation('collapseall'),    // 'Collapse All',
                 handler: function(btn) {
                     var view = btn.up().up().getView();
                     view.getFeature('processprodcat').collapseAll();
@@ -77,7 +77,7 @@ Ext.define("esapp.view.processing.Processing",{
             {
                 xtype: 'servicemenubutton',
                 service: 'processing',
-                text: 'Processing',
+                text: esapp.Utils.getTranslation('processing'),    // 'Processing',
                 handler: 'checkStatusServices',
                 listeners : {
                     afterrender: 'checkStatusServices'
@@ -110,7 +110,7 @@ Ext.define("esapp.view.processing.Processing",{
         };
 
         me.columns = [{
-            header: '<div class="grid-header-style">Processing inputs</div>',
+            header: '<div class="grid-header-style">' + esapp.Utils.getTranslation('processinginputs') + '</div>',
             menuDisabled: true,
             variableRowHeight: true,
             defaults: {
@@ -128,17 +128,17 @@ Ext.define("esapp.view.processing.Processing",{
 
                 header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 260px; left: 0px; tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Product</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('product') + '</span>' +
                 '           </div>' +
                 '       </div>' +
                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 150px; right: auto; left: 260px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Sub Product</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('subproduct') + '</span>' +
                 '           </div>' +
                 '       </div>' +
                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 200px;  left: 410px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Mapset</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text"' + esapp.Utils.getTranslation('mapset') + '></span>' +
                 '           </div>' +
                 '       </div>',
                 listeners: {
@@ -161,7 +161,7 @@ Ext.define("esapp.view.processing.Processing",{
                 }
             }]
         },{
-            header: '<div class="grid-header-style">Algorithm</div>',
+            header: '<div class="grid-header-style">' + esapp.Utils.getTranslation('algorithm') + '</div>',
             menuDisabled: true,
             variableRowHeight : true,
             defaults: {
@@ -173,18 +173,18 @@ Ext.define("esapp.view.processing.Processing",{
                 hideable: true
             },
             columns: [{
-                header: 'Type',
+                header: esapp.Utils.getTranslation('type'),    // 'Type',
                 width: 150,
                 dataIndex: 'algorithm',
                 cellWrap:true
             },{
-                header: 'Options',
+                header: esapp.Utils.getTranslation('options'),    // 'Options',
                 width: 150,
                 dataIndex: 'derivation_method',
                 cellWrap:true
             },{
                 xtype: 'actioncolumn',
-                header: 'Active',
+                header: esapp.Utils.getTranslation('active'),    // 'Active',
                 hideable: false,
                 hidden: false,
                 width: 65,
@@ -202,9 +202,9 @@ Ext.define("esapp.view.processing.Processing",{
                     },
                     getTip: function(v, meta, rec) {
                         if (rec.get('process_activated')) {
-                            return 'Deactivate Product';
+                            return  esapp.Utils.getTranslation('deactivateprocess');   // 'Deactivate Process';
                         } else {
-                            return 'Activate Product';
+                            return  esapp.Utils.getTranslation('activateprocess');   // 'Activate Process';
                         }
                     },
                     handler: function(grid, rowIndex, colIndex) {
@@ -216,7 +216,7 @@ Ext.define("esapp.view.processing.Processing",{
                 }]
             }]
         }, {
-            header:  '<div class="grid-header-style">Processing outputs</div>',
+            header:  '<div class="grid-header-style">' + esapp.Utils.getTranslation('processingoutputs') + '</div>',
             menuDisabled: true,
             variableRowHeight : true,
             defaults: {
@@ -234,22 +234,22 @@ Ext.define("esapp.view.processing.Processing",{
 
                 header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 250px; left: 0px; tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Product</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('product') + '</span>' +
                 '           </div>' +
                 '       </div>' +
                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; right: auto; left: 250px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Mapset</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('mapset') + '</span>' +
                 '           </div>' +
                 '       </div>' +
                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 150px; right: auto; left: 450px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Sub Product</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('subproduct') + '</span>' +
                 '           </div>' +
                 '       </div>' +
                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 600px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Active</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('active') + '</span>' +
                 '           </div>' +
                 '       </div>',
                 listeners: {
@@ -290,17 +290,18 @@ Ext.define("esapp.view.processing.Processing",{
                             writer: {
                                 type: 'json',
                                 writeAllFields: false,
-                                allowSingle : true,
+                                allowSingle : false,
                                 encode: false,
                                 rootProperty: 'processoutputproduct',
                                 allDataOptions: {
-                                    associated: false,
+                                    associated: true,
                                     changes: true,
                                     critical: true
                                 }
                             },
                             listeners: {
                                 exception: function(proxy, response, operation){
+                                    // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
                                      Ext.Msg.show({
                                         title: 'PROCESSING OUTPUT PRODUCTS STORE - REMOTE EXCEPTION',
                                         msg: operation.getError(),

@@ -1,3 +1,5 @@
+// STORE NOT USED ANYMORE! REMOVE THIS FILE?
+// The Product Navigator is using a binding to the ProductNavigator Model!
 Ext.define('esapp.store.ProductNavigatorStore', {
     extend  : 'Ext.data.Store',
     alias: 'store.productnavigator',
@@ -48,6 +50,7 @@ Ext.define('esapp.store.ProductNavigatorStore', {
         },
         listeners: {
             exception: function(proxy, response, operation){
+                // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
                 Ext.Msg.show({
                     title: 'PRODUCT NAVIGATOR STORE - REMOTE EXCEPTION',
                     msg: operation.getError(),
@@ -60,7 +63,7 @@ Ext.define('esapp.store.ProductNavigatorStore', {
     ,grouper:{
              // property: 'cat_descr_name',
              groupFn : function (item) {
-                 return "<span style='display: none;'>" + item.get('order_index') + "</span>" + item.get('cat_descr_name')
+                 return "<span style='display: none;'>" + item.get('order_index') + "</span>" + esapp.Utils.getTranslation(item.get('category_id'))
                  //return item.get('cat_descr_name')
              },
              sortProperty: 'order_index'

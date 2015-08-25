@@ -14,7 +14,7 @@ Ext.define('esapp.view.analysis.ProductNavigatorModel', {
             ,grouper:{
                      // property: 'cat_descr_name',
                      groupFn : function (item) {
-                         return "<span style='display: none;'>" + item.get('order_index') + "</span>" + item.get('cat_descr_name')
+                         return "<span style='display: none;'>" + item.get('order_index') + "</span>" + esapp.Utils.getTranslation(item.get('category_id'))
                          //return item.get('cat_descr_name')
                      },
                      sortProperty: 'order_index'

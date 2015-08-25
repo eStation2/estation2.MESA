@@ -62,17 +62,18 @@ Ext.define('esapp.model.MapSetDataSet', {
     extend : 'esapp.model.Base',
 
     fields: [
-       {name: 'mapsetcode', reference:'ProductMapSet'},
-       {name: 'datasetID'},
-       {name: 'productcode'},
-       {name: 'subproductcode'},
-       {name: 'version'},
-       {name: 'defined_by'},
-       {name: 'activated', type: 'boolean'},
-       {name: 'product_type'},
-       {name: 'prod_descriptive_name'},
-       {name: 'description'}
-        ,{name: 'datasetcompleteness_id', mapping:'datasetID'}
+        {name: 'mapsetcode', reference:'ProductMapSet'},
+        {name: 'mapset_descriptive_name'},
+        {name: 'datasetID'},
+        {name: 'productcode'},
+        {name: 'subproductcode'},
+        {name: 'version'},
+        {name: 'defined_by'},
+        {name: 'activated', type: 'boolean'},
+        {name: 'product_type'},
+        {name: 'prod_descriptive_name'},
+        {name: 'description'},
+        {name: 'datasetcompleteness_id', mapping:'datasetID'}
     ]
     ,associations:[
         {

@@ -68,6 +68,7 @@ Ext.define("esapp.view.acquisition.Acquisition",{
     rowLines: true,
     frame: false,
     border: false,
+    //bufferedRenderer: true,
 
     features: [{
         id: 'productcategories',
@@ -76,7 +77,7 @@ Ext.define("esapp.view.acquisition.Acquisition",{
         hideGroupedHeader: true,
         enableGroupingMenu: false,
         startCollapsed : false,
-        groupByText: 'Product category'
+        groupByText: esapp.Utils.getTranslation('productcategories')  // 'Product categories'
     }],
 
     //plugins:[{
@@ -116,32 +117,32 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                         acq_main[0].columns[3].setWidth(575);
                         acq_main[0].columns[3].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 111px; left: 0px; tabindex="-1">' +
                         '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                        '               <span data-ref="textEl" class="x-column-header-text">Type</span>' +
+                        '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('type') + '</span>' +
                         '           </div>' +
                         '       </div>' +
                         '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 110px; right: auto; left: 111px; margin: 0px; top: 0px;" tabindex="-1">' +
                         '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                        '               <span data-ref="textEl" class="x-column-header-text">Last copied</span>' +
+                        '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('lastcopied') + '</span>' +
                         '           </div>' +
                         '       </div>' +
                         '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 110px; right: auto; left: 221px; margin: 0px; top: 0px;" tabindex="-1">' +
                         '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                        '               <span data-ref="textEl" class="x-column-header-text">Last executed</span>' +
+                        '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('lastexecuted') + '</span>' +
                         '           </div>' +
                         '       </div>' +
                         '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 100px; left: 332px; margin: 0px; top: 0px;" tabindex="-1">' +
                         '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                        '               <span data-ref="textEl" class="x-column-header-text">Store Native</span>' +
+                        '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('storenative') + '</span>' +
                         '           </div>' +
                         '       </div>' +
                         '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 60px; right: auto; left: 432px; margin: 0px; top: 0px;" tabindex="-1">' +
                         '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                        '               <span data-ref="textEl" class="x-column-header-text">Active</span>' +
+                        '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('active') + '</span>' +
                         '           </div>' +
                         '       </div>' +
                         '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 55px; left: 492px; margin: 0px; top: 0px;" tabindex="-1">' +
                         '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                        '               <span data-ref="textEl" class="x-column-header-text">Log</span>' +
+                        '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('log') + '</span>' +
                         '           </div>' +
                         '       </div>');
 
@@ -154,39 +155,40 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                             dataacquisitiongrid.columns[2].show();   // Last executed
                             dataacquisitiongrid.columns[3].show();   // Store Native
                         });
+
+                        btn.setIconCls('fa fa-unlock fa-2x');
+
                         //Ext.Object.each(checkColumns, function(id, chkCol, myself) {
                         //    chkCol.enable();
                         //});
-                        // TODO: Enable action columns
+                        // Enable action columns
                         //Ext.Object.each(actionColumns, function(id, actionCol, myself) {
                         //    actionCol.enable();
                         //    actionCol.items[0].disabled = false;
                         //    actionCol.enableAction(0);
                         //    actionCol.updateLayout();
                         //})
-                        btn.setIconCls('fa fa-unlock fa-2x');
-
                     }
                     else {
                         acq_main[0].columns[3].setWidth(245);
                         acq_main[0].columns[3].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 111px; left: 0px; tabindex="-1">' +
                                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                                '               <span data-ref="textEl" class="x-column-header-text">Type</span>' +
+                                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('type') + '</span>' +
                                 '           </div>' +
                                 '       </div>' +
                                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 60px; left: 111px; margin: 0px; top: 0px;" tabindex="-1">' +
                                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                                '               <span data-ref="textEl" class="x-column-header-text">Active</span>' +
+                                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('active') + '</span>' +
                                 '           </div>' +
                                 '       </div>' +
                                 //'       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 100px; left: 171px; margin: 0px; top: 0px;" tabindex="-1">' +
                                 //'           <div data-ref="titleEl" class="x-column-header-inner">' +
-                                //'               <span data-ref="textEl" class="x-column-header-text">Store Native</span>' +
+                                //'               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('storenative') + '</span>' +
                                 //'           </div>' +
                                 //'       </div>' +
                                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 55px; left: 171px; margin: 0px; top: 0px;" tabindex="-1">' +
                                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                                '               <span data-ref="textEl" class="x-column-header-text">Log</span>' +
+                                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('log') + '</span>' +
                                 '           </div>' +
                                 '       </div>');
 
@@ -199,6 +201,8 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                             dataacquisitiongrid.columns[2].hide();
                             dataacquisitiongrid.columns[3].hide();
                         });
+                        btn.setIconCls('fa fa-lock fa-2x');
+
                         //Ext.Object.each(checkColumns, function(id, chkCol, myself) {
                         //    chkCol.disable();
                         //});
@@ -209,7 +213,6 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                         //    actionCol.disableAction(0);
                         //    actionCol.updateLayout();
                         //})
-                        btn.setIconCls('fa fa-lock fa-2x');
                     }
 
                     Ext.resumeLayouts(true);
@@ -221,7 +224,7 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                 }
             }, {
                 xtype: 'button',
-                text: 'Add Product',
+                text: esapp.Utils.getTranslation('addproduct'),    // 'Add Product',
                 name: 'addproduct',
                 iconCls: 'fa fa-plus-circle fa-2x',
                 style: { color: 'green' },
@@ -230,14 +233,14 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                 scale: 'medium',
                 handler: 'selectProduct'
             },{
-                text: 'Expand All',
+                text:  esapp.Utils.getTranslation('expandall'),    // 'Expand All',
                 handler: function(btn) {
                     var view = btn.up().up().getView();
                     view.getFeature('productcategories').expandAll();
                     view.refresh();
                 }
             }, {
-                text: 'Collapse All',
+                text:  esapp.Utils.getTranslation('collapseall'),    // 'Collapse All',
                 handler: function(btn) {
                     var view = btn.up().up().getView();
                     view.getFeature('productcategories').collapseAll();
@@ -247,7 +250,7 @@ Ext.define("esapp.view.acquisition.Acquisition",{
             {
                 xtype: 'servicemenubutton',
                 service: 'eumetcast',
-                text: 'Eumetcast',
+                text:  esapp.Utils.getTranslation('eumetcast'),    // 'Eumetcast',
                 //listeners : {
                 //    afterrender: 'checkStatusServices'
                 //},
@@ -258,14 +261,14 @@ Ext.define("esapp.view.acquisition.Acquisition",{
             {
                 xtype: 'servicemenubutton',
                 service: 'internet',
-                text: 'Internet',
+                text: esapp.Utils.getTranslation('internet'),    // 'Internet',
                 handler: 'checkStatusServices'
             },
             '-',
             {
                 xtype: 'servicemenubutton',
                 service: 'ingest',
-                text: 'Ingest',
+                text: esapp.Utils.getTranslation('ingest'),    // 'Ingest',
                 handler: 'checkStatusServices'
             },
             '->', // same as { xtype: 'tbfill' }
@@ -324,7 +327,7 @@ Ext.define("esapp.view.acquisition.Acquisition",{
 
         me.columns = [
         {
-            header: '<div class="grid-header-style">Product categories</div>',
+            header: '<div class="grid-header-style">' + esapp.Utils.getTranslation('productcategories') + '</div>',
             menuDisabled: true,
             variableRowHeight : true,
             defaults: {
@@ -346,12 +349,12 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                     icon: 'resources/img/icons/edit.png',
                     // iconCls: 'fa fa-edit fa-2x', // xf044
                     // cls: 'fa fa-edit fa-2x', // xf044
-                    tooltip: 'Edit Product',
+                    tooltip: esapp.Utils.getTranslation('editproduct'),   // 'Edit Product',
                     handler: 'editProduct'
                 }]
             }, {
                 xtype:'templatecolumn',
-                header: 'Product',
+                header: esapp.Utils.getTranslation('product'),   // 'Product',
                 tpl: new Ext.XTemplate(
                         '<b>{prod_descriptive_name}</b>' +
                         '<tpl if="version != \'undefined\'">',
@@ -366,7 +369,7 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                 cellWrap:true
             },{
                 xtype: 'actioncolumn',
-                header: 'Active',
+                header: esapp.Utils.getTranslation('active'),   // 'Active',
                 hideable: true,
                 hidden:true,
                 width: 65,
@@ -382,9 +385,9 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                     },
                     getTip: function(v, meta, rec) {
                         if (rec.get('activated')) {
-                            return 'Deactivate Product';
+                            return esapp.Utils.getTranslation('deactivateproduct');   // 'Deactivate Product';
                         } else {
-                            return 'Activate Product';
+                            return esapp.Utils.getTranslation('activateproduct');   // 'Activate Product';
                         }
                     },
                     isDisabled: function(view, rowIndex, colIndex, item, record) {
@@ -426,7 +429,7 @@ Ext.define("esapp.view.acquisition.Acquisition",{
     //            align: 'center'
             }]
         }, {
-            header:  '<div class="grid-header-style">Get</div>',
+            header:  '<div class="grid-header-style">' + esapp.Utils.getTranslation('get') + '</div>',
             id:'acquisitioncolumn',
             menuDisabled: true,
             variableRowHeight : true,
@@ -444,22 +447,22 @@ Ext.define("esapp.view.acquisition.Acquisition",{
 
                 header: ' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 111px; left: 0px; tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Type</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('type') + '</span>' +
                 '           </div>' +
                 '       </div>' +
                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 60px; left: 111px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Active</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('active') + '</span>' +
                 '           </div>' +
                 '       </div>' +
                 //'       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 100px; left: 171px; margin: 0px; top: 0px;" tabindex="-1">' +
                 //'           <div data-ref="titleEl" class="x-column-header-inner">' +
-                //'               <span data-ref="textEl" class="x-column-header-text">Store Native</span>' +
+                //'               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('storenative') + '</span>' +
                 //'           </div>' +
                 //'       </div>' +
                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 55px; left: 171px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Log</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('log') + '</span>' +
                 '           </div>' +
                 '       </div>',
 
@@ -469,23 +472,23 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                     }
                 },
                 onWidgetAttach: function(widget, record) {
-                    Ext.suspendLayouts();
-
                     var daStore = widget.getViewModel().get('productdatasources');
-                    daStore.setFilters({
-                         property:'productid'
-                        ,value:record.id
-                        ,anyMatch:true
-                    });
-
-                     Ext.resumeLayouts(true);
+                    //if (daStore.getFilters().items.length == 0) {
+                        Ext.suspendLayouts();
+                        daStore.setFilters({
+                            property: 'productid'
+                            , value: record.id
+                            , anyMatch: true
+                        });
+                        Ext.resumeLayouts(true);
+                    //}
                 },
                 widget: {
                     xtype: 'dataacquisitiongrid'
                 }
             }]
         }, {
-            header:  '<div class="grid-header-style">Ingestion</div>',
+            header:  '<div class="grid-header-style">' + esapp.Utils.getTranslation('ingestion') + '</div>',
             menuDisabled: true,
             variableRowHeight : true,
             defaults: {
@@ -503,27 +506,27 @@ Ext.define("esapp.view.acquisition.Acquisition",{
 
                 header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 170px; left: 0px; tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Mapset</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('mapset') + '</span>' +
                 '           </div>' +
                 '       </div>' +
                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 100px; right: auto; left: 170px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Sub Product</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('subproduct') + '</span>' +
                 '           </div>' +
                 '       </div>' +
                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 360px; right: auto; left: 270px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Completeness</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('completeness') + '</span>' +
                 '           </div>' +
                 '       </div>' +
                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 65px; right: auto; left: 630px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Active</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('active') + '</span>' +
                 '           </div>' +
                 //'       </div>' +
                 //'       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 695px; margin: 0px; top: 0px;" tabindex="-1">' +
                 //'           <div data-ref="titleEl" class="x-column-header-inner">' +
-                //'               <span data-ref="textEl" class="x-column-header-text">Log</span>' +
+                //'               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('log') + '</span>' +
                 //'           </div>' +
                 '       </div>',
                 listeners: {
@@ -531,26 +534,29 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                       column.titleEl.removeCls('x-column-header-inner');
                   }
                 },
-                onWidgetAttach: function(widget, record) {
-                    Ext.suspendLayouts();
-                    var daStore = widget.getViewModel().get('productingestions');
-                    daStore.setFilters({
-                         property:'productid'
-                        ,value:record.id
-                        ,anyMatch:true
-                    });
-                    Ext.resumeLayouts(true);
-                },
                 widget: {
                     xtype: 'ingestiongrid'
+                },
+                onWidgetAttach: function(widget, record) {
+                    var daStore = widget.getViewModel().get('productingestions');
+                    //if (daStore.getFilters().items.length == 0) {
+                        Ext.suspendLayouts();
+                        daStore.setFilters({
+                            property: 'productid'
+                            , value: record.id
+                            , anyMatch: true
+                        });
+                        Ext.resumeLayouts(true);
+                    //}
                 }
             }]
         },{
             xtype: 'actioncolumn',
-            text: 'Log',
+            text: esapp.Utils.getTranslation('log'),    // 'Log',
             id: 'ingestionlogcolumn',
             width: 65,
             height:40,
+            menuDisabled: true,
             align:'center',
             cls:'x-grid3-td-ingestionlogcolumn',
             items: [{
@@ -558,7 +564,7 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                 iconCls:'log-icon',
                 width:32,
                 height:32,
-                tooltip: 'Show log of this Ingestion',
+                tooltip: esapp.Utils.getTranslation('showingestionlog'),     // 'Show log of this Ingestion',
                 scope: me,
                 handler: function (grid, rowIndex, colIndex, icon) {
                     var rec = grid.getStore().getAt(rowIndex);

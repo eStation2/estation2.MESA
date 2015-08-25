@@ -10,7 +10,7 @@ Ext.define('esapp.view.system.IPAddressAdminController', {
             if (form.isValid()) {
                 if (me.getSession().getChanges() != null) {
                     me.getSession().getSaveBatch().start();
-                    Ext.toast({html: 'IP settings are saved!', title: 'IP settings saved', width: 200, align: 't'});
+                    Ext.toast({html: esapp.Utils.getTranslation('ipsettingssaved'), title: esapp.Utils.getTranslation('ipsettingssaved'), width: 200, align: 't'});
                     me.closeView();
                 }
             }

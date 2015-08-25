@@ -2,6 +2,74 @@ Ext.define('esapp.view.dashboard.PC2Controller', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.dashboard-pc2',
 
+    execEnableDisableAutoSync: function(chkbox, ev) {
+        var me = this;
+        //console.info(chkbox);
+        Ext.Ajax.request({
+            method: 'POST',
+            url: 'dashboard/setdataautosync',
+            params:{
+                dataautosync: chkbox.checked
+            },
+            success: function(response, opts){
+                var responseText = Ext.JSON.decode(response.responseText);
+                // ToDO: Set checkbox text to enable or disable and show a toast message!
+                console.info(responseText);
+            },
+            failure: function(response, opts) {
+                console.info(response.status);
+            }
+        });
+    },
+    execManualDataSync: function(menuitem, ev) {
+        var me = this;
+        Ext.Ajax.request({
+            method: 'POST',
+            url: 'dashboard/rundatasync',
+            success: function(response, opts){
+                var responseText = Ext.JSON.decode(response.responseText);
+                // ToDO: Show a toast message with the result of the manual data sync!
+                console.info(responseText);
+            },
+            failure: function(response, opts) {
+                console.info(response.status);
+            }
+        });
+    },
+    execEnableDisableAutoDBSync: function(chkbox, ev) {
+        var me = this;
+        console.info(chkbox);
+        Ext.Ajax.request({
+            method: 'POST',
+            url: 'dashboard/setdbautosync',
+            params:{
+                dbautosync: chkbox.checked
+            },
+            success: function(response, opts){
+                var responseText = Ext.JSON.decode(response.responseText);
+                // ToDO: Set checkbox text to enable or disable and show a toast message!
+                console.info(responseText);
+            },
+            failure: function(response, opts) {
+                console.info(response.status);
+            }
+        });
+    },
+    execManualDBSync: function(menuitem, ev) {
+        var me = this;
+        Ext.Ajax.request({
+            method: 'POST',
+            url: 'dashboard/rundbsync',
+            success: function(response, opts){
+                var responseText = Ext.JSON.decode(response.responseText);
+                // ToDO: Show a toast message with the result of the manual DB sync!
+                console.info(responseText);
+            },
+            failure: function(response, opts) {
+                console.info(response.status);
+            }
+        });
+    },
     checkStatusServices: function(splitbtn, ev){
         var me = this;
         //console.info('Start checkStatusServices for PC2');

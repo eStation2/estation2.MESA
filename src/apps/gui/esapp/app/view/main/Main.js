@@ -12,6 +12,15 @@ Ext.define('esapp.view.main.Main', {
         'esapp.view.main.MainModel',
         'esapp.view.main.MainController',
 
+        'esapp.view.header.Header',
+        'esapp.view.dashboard.Dashboard',
+        'esapp.view.acquisition.Acquisition',
+        'esapp.view.processing.Processing',
+        'esapp.view.datamanagement.DataManagement',
+        'esapp.view.analysis.analysisMain',
+        'esapp.view.system.systemsettings',
+        'esapp.view.help.help',
+
         'Ext.layout.container.Center',
         'Ext.form.field.ComboBox'
     ],
@@ -44,28 +53,12 @@ Ext.define('esapp.view.main.Main', {
             },{
                 region: 'west',
                 stateId: 'navigation-panel',
-                id: 'west-panel', // see Ext.getCmp() below
+                id: 'versioninfo-west-panel', // see Ext.getCmp() below
                 title: '<span class="panel-title-style">eStation 2.0</span>',
                 split: false,
                 width: 2,
                 collapsible: false,
                 collapsed: true
-                //animCollapse: true,
-                //margins: '0 0 0 5',
-                //layout: 'accordion',
-                //items: [{
-                //    contentEl: 'west',
-                //    title: 'Navigation',
-                //    iconCls: 'nav' // see the HEAD section for style used
-                //}, {
-                //    title: 'Settings',
-                //    html: '<p>Some settings in here.</p>',
-                //    iconCls: 'settings'
-                //}, {
-                //    title: 'Information',
-                //    html: '<p>Some info in here.</p>',
-                //    iconCls: 'info'
-                //}]
             },{
                 region: 'center',
                 xtype: 'tabpanel',
@@ -90,7 +83,7 @@ Ext.define('esapp.view.main.Main', {
                             store: 'LanguagesStore',
                             displayField:'langdescription',
                             valueField: 'langcode',
-                            emptyText:'Select...',
+                            emptyText:esapp.Utils.getTranslation('select'),  // 'Select...',
                             labelWidth: 50,
                             labelAlign: 'left',
                             publishes: ['langcode'],
@@ -233,7 +226,11 @@ Ext.define('esapp.view.main.Main', {
                     title: esapp.Utils.getTranslation('help'),  // 'Help',
                     xtype: 'container',
                     autoScroll: true,
-                    html: '', // '<a id="hideit" href="#">Toggle the west region</a>',
+                    layout : 'center',
+                    items: [{
+                       xtype  : 'help',
+                       id:'helpview'
+                    }],
                     listeners: {
                         activate: function (helptab) {
                             var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];

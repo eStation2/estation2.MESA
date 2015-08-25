@@ -44,7 +44,8 @@ Ext.define('esapp.view.acquisition.product.InternetSourceAdminController', {
             xtype: 'editinternetsource',
             viewModel: {
                 data: {
-                    title: record ? 'Edit: ' + record.get('descriptive_name') : 'Add Internet Source'
+                    title: record ? esapp.Utils.getTranslation('edit') + ': ' + record.get('descriptive_name') : esapp.Utils.getTranslation('addinternetsource')  // 'Add Internet Source'
+
                 },
                 // If we are passed a record, a copy of it will be created in the newly spawned session.
                 // Otherwise, create a new phantom customer in the child.
@@ -98,7 +99,7 @@ Ext.define('esapp.view.acquisition.product.InternetSourceAdminController', {
 
             if (dialog.getSession().getChanges() != null) {
                 dialog.getSession().getSaveBatch().start();
-                Ext.toast({html: 'Saved!', title: 'Saved', width: 200, align: 't'});
+                Ext.toast({html: esapp.Utils.getTranslation('saved'), title: esapp.Utils.getTranslation('saved'), width: 200, align: 't'});
                 this.onCancelClick();
             }
 

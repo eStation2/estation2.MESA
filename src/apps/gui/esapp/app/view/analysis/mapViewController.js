@@ -21,7 +21,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             method: 'GET',
             url:'analysis/gettimeline',
             params: params,
-            loadMask:'Loading data...',
+            loadMask:esapp.Utils.getTranslation('loadingdata'),  // 'Loading data...',
             scope: me,
             success:function(response, request ){
                 var responseJSON = Ext.util.JSON.decode(response.responseText);
@@ -102,7 +102,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
         //mapviewtimeline.expand();
 
         me.getView().productlayer = new ol.layer.Image({
-            title: 'Product layer',
+            title: esapp.Utils.getTranslation('productlayer'),  // 'Product layer',
             layer_id: 'productlayer',
             layerorderidx: 0,
             type: 'base',
@@ -112,7 +112,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 type: 'base',
                 crossOrigin: 'anonymous',
                 attributions: [new ol.Attribution({
-                    html: '&copy; <a href="https://ec.europa.eu/jrc/">eStation 2 </a>'
+                    html: '&copy; <a href="https://ec.europa.eu/jrc/">'+esapp.Utils.getTranslation('estation2')+'</a>'
                 })],
                 params: {
                     productcode:productcode,
@@ -138,7 +138,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
     ,updateProductLayer: function(productcode, productversion, mapsetcode, subproductcode, legendid, clickeddate) {
         this.getView().productlayer = new ol.layer.Image({
-            title: 'Product layer',
+            title: esapp.Utils.getTranslation('productlayer'),  // 'Product layer',
             layer_id: 'productlayer',
             layerorderidx: 0,
             type: 'base',
@@ -147,7 +147,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 url: 'analysis/getproductlayer',
                 crossOrigin: 'anonymous',
                 attributions: [new ol.Attribution({
-                    html: '&copy; <a href="https://ec.europa.eu/jrc/">eStation 2 </a>'
+                    html: '&copy; <a href="https://ec.europa.eu/jrc/">'+esapp.Utils.getTranslation('estation2')+'</a>'
                 })],
                 params: {
                     productcode:productcode,
@@ -248,7 +248,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
         }
         if (!layerswitcherexists) {
             var layerSwitcher = new ol.control.LayerSwitcher({
-                tipLabel: 'Layers' // Optional label for button
+                tipLabel: esapp.Utils.getTranslation('layers')   // 'Layers' // Optional label for button
             });
             map.addControl(layerSwitcher);
         }
@@ -285,7 +285,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             //console.info(Ext.getCmp(me.id));
             //var mapViewContainer = this.getView().lookupReference('mapcontainer_'+me.id);
             var myLoadMask = new Ext.LoadMask({
-                msg    : 'Loading vector layer...',
+                msg    : esapp.Utils.getTranslation('loadingvectorlayer'),   // 'Loading vector layer...',
                 target : Ext.getCmp(me.id)
             });
             myLoadMask.show();
@@ -294,7 +294,8 @@ Ext.define('esapp.view.analysis.mapViewController', {
             var vectorSource = new ol.source.GeoJSON({
                 projection: 'EPSG:4326', // 'EPSG:3857',  //
                 //url: 'resources/geojson/countries.geojson'
-                url: 'resources/geojson/' + geojsonfile
+                //url: 'resources/geojson/' + geojsonfile,
+                url: 'analysis/getvectorlayer?file=' + geojsonfile
             });
 
             var listenerKey = vectorSource.on('change', function(e) {
@@ -306,6 +307,9 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 // or vectorSource.unByKey(listenerKey) if
                 // you don't use the current master branch
                 // of ol3
+              }
+              else {
+                myLoadMask.hide();
               }
             });
 

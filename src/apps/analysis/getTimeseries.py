@@ -57,14 +57,17 @@ def getFilesList(productcode, subproductcode, version, mapsetcode, date_format, 
 
     if date_format == 'YYYYMMDD':
         # Loop over dates
-        for date in dataset.get_dates():
+        for date in dataset._frequency.get_dates(start_date, end_date):
             if (date >= start_date) and (date <= end_date):
                 filedate = date.strftime("%Y%m%d")
                 productfilename = functions.set_path_filename(filedate, productcode, subproductcode, mapsetcode, version, '.tif')
                 productfilepath = dataset.fullpath + productfilename
+                dates_list.append(date)
                 if os.path.isfile(productfilepath):
                     list_files.append(productfilepath)
-                    dates_list.append(date)
+                    # dates_list.append(date)
+                else:
+                    list_files.append('')
 
     if date_format == 'MMDD':
         # Extract MMDD
@@ -150,10 +153,10 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
         uniqueFilesValues = []
 
         for infile in unique_list:
+            single_result = {'filename': '', 'meanvalue_noscaling': nodata, 'meanvalue': None}
             if os.path.isfile(infile):
                 try:
                     mx = []
-                    single_result = {'filename': '', 'meanvalue_noscaling': nodata, 'meanvalue': nodata}
                     with Raster(infile) as img:
                         # Assign nodata from prod_info
                         img._nodata = nodata
@@ -177,14 +180,14 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
                     finalvalue = (meanResult*scale_factor+scale_offset)
                     single_result['meanvalue'] = finalvalue
 
-                    uniqueFilesValues.append(single_result)
-
                 except Exception, e:
                     logger.debug('ERROR: clipping - %s' % (e))
                     # sys.exit (1)
             else:
                 logger.debug('ERROR: raster file does not exist - %s' % infile)
                 # sys.exit (1)
+
+            uniqueFilesValues.append(single_result)
 
         # Define a dictionary to associate filenames/values
         files_to_values_dict = dict((x['filename'], x['meanvalue']) for x in uniqueFilesValues)

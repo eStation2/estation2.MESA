@@ -30,7 +30,7 @@ Ext.define('esapp.view.acquisition.logviewer.LogViewController', {
             method: 'GET',
             url:'getlogfile',
             params: params,
-            loadMask:'Loading data...',
+            loadMask: esapp.Utils.getTranslation('loading'),    // 'Loading...',
             callback:function(callinfo,responseOK,response ){
                 var logfile = Ext.JSON.decode(response.responseText.trim());
                 Ext.getCmp('logfilecontent').setValue(logfile.logfilecontent);

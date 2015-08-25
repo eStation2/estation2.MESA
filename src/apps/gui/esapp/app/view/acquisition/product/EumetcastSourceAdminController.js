@@ -44,7 +44,7 @@ Ext.define('esapp.view.acquisition.product.EumetcastSourceAdminController', {
             xtype: 'editeumetcastsource',
             viewModel: {
                 data: {
-                    title: record ? 'Edit: ' + record.get('collection_name') : 'Add Eumetcast Source'
+                    title: record ? esapp.Utils.getTranslation('edit') + ': ' + record.get('collection_name') : esapp.Utils.getTranslation('addeumetcastsource')  // 'Add Eumetcast Source'
                 },
                 // If we are passed a record, a copy of it will be created in the newly spawned session.
                 // Otherwise, create a new phantom customer in the child.
@@ -98,7 +98,7 @@ Ext.define('esapp.view.acquisition.product.EumetcastSourceAdminController', {
 
             if (dialog.getSession().getChanges() != null) {
                 dialog.getSession().getSaveBatch().start();
-                Ext.toast({html: 'Saved!', title: 'Saved', width: 200, align: 't'});
+                Ext.toast({html: esapp.Utils.getTranslation('saved'), title: esapp.Utils.getTranslation('saved'), width: 200, align: 't'});
                 this.onCancelClick();
             }
         }

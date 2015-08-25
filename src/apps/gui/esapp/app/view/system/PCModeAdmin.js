@@ -14,7 +14,7 @@ Ext.define("esapp.view.system.PCModeAdmin",{
         'Ext.layout.container.Center'
     ],
 
-    title: 'Change Mode',
+    title: esapp.Utils.getTranslation('changemode'),    // 'Change Mode',
     header: {
         titlePosition: 0,
         titleAlign: 'center'
@@ -46,7 +46,7 @@ Ext.define("esapp.view.system.PCModeAdmin",{
         me.bbar = ['->',
             {
                 xtype: 'button',
-                text: 'Save',
+                text: esapp.Utils.getTranslation('save'),    // 'Save',
                 id: 'changemodebtn',
                 iconCls: 'fa fa-save fa-2x',
                 style: { color: 'lightblue' },
@@ -72,13 +72,13 @@ Ext.define("esapp.view.system.PCModeAdmin",{
                 columns: 1,
                 vertical: true,
                 items: [{
-                    boxLabel: '<b>Nominal mode</b>',
+                    boxLabel: '<b>'+esapp.Utils.getTranslation('nominalmode')+'</b>',
                     id: 'nominalradio',
                     name: 'mode',
                     inputValue: 'nominal',
                     checked: nominal
                 }, {
-                    boxLabel: '<b>Recovery mode</b>',
+                    boxLabel: '<b>'+esapp.Utils.getTranslation('recoverymode')+'</b>',
                     id: 'recoveryradio',
                     name: 'mode',
                     inputValue: 'recovery',

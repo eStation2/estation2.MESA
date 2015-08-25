@@ -107,9 +107,9 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
                 },
                 getTip: function(v, meta, rec) {
                     if (rec.get('store_original_data')) {
-                        return 'Deactivate store original data for this Get';
+                        return esapp.Utils.getTranslation('tipdeactivatestoreoriginalget');     // 'Deactivate store original data for this Get';
                     } else {
-                        return 'Activate store original data for this Get';
+                        return esapp.Utils.getTranslation('tipactivatestoreoriginalget');     // 'Activate store original data for this Get';
                     }
                 },
                 handler: function(grid, rowIndex, colIndex) {
@@ -139,9 +139,9 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
                 },
                 getTip: function(v, meta, rec) {
                     if (rec.get('activated')) {
-                        return 'Deactivate Get';
+                        return esapp.Utils.getTranslation('tipdeactivateget');     // 'Deactivate Get';
                     } else {
-                        return 'Activate Get';
+                        return esapp.Utils.getTranslation('tipactivateget');     // 'Activate Get';
                     }
                 },
                 handler: function(grid, rowIndex, colIndex) {
@@ -161,7 +161,7 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
                 iconCls:'log-icon',
                 width:32,
                 height:32,
-                tooltip: 'Show log of this Get',
+                tooltip: esapp.Utils.getTranslation('showgetlog'),     // 'Show log of this Get',
                 scope: me,
                 handler: function (grid, rowIndex, colIndex, icon) {
                     var rec = grid.getStore().getAt(rowIndex);

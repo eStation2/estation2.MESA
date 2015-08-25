@@ -16,7 +16,7 @@ Ext.define("esapp.view.acquisition.product.InternetSourceAdmin",{
         'Ext.grid.column.Action'
     ],
 
-    title: 'Internet sources',
+    title: '',
     header: {
         titlePosition: 0,
         titleAlign: 'center'
@@ -39,7 +39,7 @@ Ext.define("esapp.view.acquisition.product.InternetSourceAdmin",{
         var me = this;
 
         var assignButton = {
-            text: 'Assign',
+            text: esapp.Utils.getTranslation('assign'),  // 'Assign',
             iconCls: 'fa fa-link fa-2x',
             style: {color: 'green'},
             scale: 'medium',
@@ -47,7 +47,7 @@ Ext.define("esapp.view.acquisition.product.InternetSourceAdmin",{
             handler: 'onAssignInternetSourceClick'
         };
         var addButton = {
-            text: 'Add',
+            text: esapp.Utils.getTranslation('add'),  // 'Add',
             iconCls: 'fa fa-plus-circle fa-2x',
             style: {color: 'green'},
             scale: 'medium',
@@ -55,7 +55,7 @@ Ext.define("esapp.view.acquisition.product.InternetSourceAdmin",{
             handler: 'onAddInternetSourceClick'
         };
         var deleteButton = {
-            text: 'Delete',
+            text: esapp.Utils.getTranslation('delete'),  // 'Delete',
             iconCls: 'fa fa-minus-circle fa-2x',
             style: {color: 'red'},
             scale: 'medium',
@@ -97,33 +97,33 @@ Ext.define("esapp.view.acquisition.product.InternetSourceAdmin",{
                 shrinkWrap: 0,
                 items: [{
                     icon: 'resources/img/icons/edit.png',
-                    tooltip: 'Edit Internet Source'
+                    tooltip: esapp.Utils.getTranslation('editinternetsource') // 'Edit Internet Source'
                     , handler: 'onEditInternetSourceClick'
                 }]
             }, {
                 dataIndex: 'internet_id',
                 flex: 1.5,
-                text: 'ID'
+                text: esapp.Utils.getTranslation('id') // 'ID'
             }, {
                 dataIndex: 'descriptive_name',
                 flex: 2,
-                text: 'Name'
+                text: esapp.Utils.getTranslation('name') // 'Name'
             }, {
                 dataIndex: 'url',
                 flex: 2,
-                text: 'URL'
+                text: esapp.Utils.getTranslation('url') // 'URL'
             }, {
                 dataIndex: 'update_datetime',
                 flex: 1,
-                text: 'Last updated'
+                text: esapp.Utils.getTranslation('lastupdated') // 'Last updated'
             }, {
                 dataIndex: 'type',
                 flex: 0.5,
-                text: 'Type'
+                text: esapp.Utils.getTranslation('type') // 'Type'
             }, {
                 dataIndex: 'status',
                 flex: 0.5,
-                text: 'Status'
+                text: esapp.Utils.getTranslation('status') // 'Status'
             }]
         }]
 

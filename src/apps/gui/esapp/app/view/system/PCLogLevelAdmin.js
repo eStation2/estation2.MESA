@@ -14,7 +14,7 @@ Ext.define("esapp.view.system.PCLogLevelAdmin",{
         'Ext.layout.container.Center'
     ],
 
-    title: 'Change Log level',
+    title: esapp.Utils.getTranslation('changeloglevel'),    // 'Change Log level',
     header: {
         titlePosition: 0,
         titleAlign: 'center'
@@ -44,7 +44,7 @@ Ext.define("esapp.view.system.PCLogLevelAdmin",{
         me.bbar = ['->',
             {
                 xtype: 'button',
-                text: 'Save',
+                text: esapp.Utils.getTranslation('save'),    // 'Save',
                 id: 'changeloglevelbtn',
                 iconCls: 'fa fa-save fa-2x',
                 style: { color: 'lightblue' },
@@ -71,7 +71,7 @@ Ext.define("esapp.view.system.PCLogLevelAdmin",{
             items: [{
                 xtype: 'radiogroup',
                 id: 'loglevelsradiogroup',
-                text: "Available loglevel's",
+                text: esapp.Utils.getTranslation('availableloglevels'),    // "Available loglevel's",
                 columns: 1,
                 vertical: true,
                 listeners: {

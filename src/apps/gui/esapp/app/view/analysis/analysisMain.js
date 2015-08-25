@@ -49,7 +49,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
             items: [{
                 xtype: 'button',
                 name: 'newmapbtn',
-                text: 'New map',
+                text: esapp.Utils.getTranslation('newmap'),  // 'New map',
                 iconCls: 'map_add',
                 style: { color: 'gray' },
                 scale: 'small',
@@ -59,7 +59,8 @@ Ext.define("esapp.view.analysis.analysisMain",{
             {
                 xtype: 'button',
                 name: 'togglebackgroundlayer',
-                text: 'Hide Background layer',
+                //text: esapp.Utils.getTranslation('hidebackgroundlayer'),  // 'Hide Background layer',
+                text: esapp.Utils.getTranslation('showbackgroundlayer'),  // 'Show Background layer',
                 enableToggle: true,
                 // iconCls: 'fa fa-cog', // fa-2x fa-spin 'icon-play', // icomoon fonts
                 // style: { color: 'gray' },
@@ -73,7 +74,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
 
         me.items = [{
             region: 'east',
-            title: 'Time series',
+            title: esapp.Utils.getTranslation('timeseries'),  // 'Time series',
             width: 402,
             minWidth: 402,
             split: true,
@@ -85,7 +86,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
             frame: false,
             border: false,
             items: [{
-                title: 'Timeseries',
+                title: esapp.Utils.getTranslation('timeseries'),  // 'Timeseries',
                 margin:3,
                 //padding: '5px 5px 25px 5px',
                 layout:'vbox',
@@ -93,7 +94,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                     margin: '5 0 15 0'
                 },
                 items: [{
-                    title:'Products',
+                    title: esapp.Utils.getTranslation('products'),  // 'Products',
                     xtype : 'grid',
                     reference: 'TimeSeriesProductsGrid',
                     region: 'center',
@@ -129,7 +130,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
 
                     tools:[{
                         type: 'refresh',
-                        tooltip: 'Refresh product list',
+                        tooltip: esapp.Utils.getTranslation('refreshproductlist'),  // 'Refresh product list',
                         callback: function (grid) {
                             var timeseriesProductsStore  = grid.getStore('products');
 
@@ -146,7 +147,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                         hideGroupedHeader: true,
                         enableGroupingMenu: false,
                         startCollapsed : false,
-                        groupByText: 'Product category'
+                        groupByText: esapp.Utils.getTranslation('productcategories')  // 'Product category'
                     }],
 
                     plugins: [{
@@ -166,7 +167,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                     },
 
                     columns : [{
-                        text: '<div class="grid-header-style">Product categories</div>',
+                        text: '<div class="grid-header-style">' + esapp.Utils.getTranslation('productcategories') + '</div>',   // '<div class="grid-header-style">Product categories</div>',
                         menuDisabled: true,
                         defaults: {
                             sortable: false,
@@ -191,7 +192,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                                             '<b class="smalltext" style="color:darkgrey"> - {descriptive_name}</b>',
                                         '</tpl>',
                                     '<tpl else>',
-                                        '<b class="smalltext" style="color:darkgrey"> - Mapsets {productmapsets.length}, click to choose...</b>',
+                                        '<b class="smalltext" style="color:darkgrey"> - ' + esapp.Utils.getTranslation('mapsets') + ' {productmapsets.length}, ' + esapp.Utils.getTranslation('clicktochoose') + '</b>',
                                     '</tpl>'
                                 )
                             }
@@ -244,7 +245,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                         variableRowHeight: false
                     },
                     columns: [{
-                        text: '<div class="grid-header-style">Time series</div>',
+                        text: '<div class="grid-header-style">' + esapp.Utils.getTranslation('timeseries') + '</div>',   //'<div class="grid-header-style">Time series</div>',
                         xtype: 'templatecolumn',
                         tpl: new Ext.XTemplate(
                             '<b>{prod_descriptive_name}</b>' +
@@ -262,7 +263,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                 }, {
                     xtype: 'fieldset',
                     id: 'ts_timeframe',
-                    title: '<b style="font-size:16px; color:#0065A2; line-height: 18px;">Time frame</b>',
+                    title: '<b style="font-size:16px; color:#0065A2; line-height: 18px;">' + esapp.Utils.getTranslation('timeframe') + '</b>',
                     hidden: true,
                     width: 395,
                     height: 175,
@@ -287,7 +288,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                         },{
                             xtype: 'datefield',
                             id: 'ts_from_period',
-                            fieldLabel: 'From',
+                            fieldLabel: esapp.Utils.getTranslation('from'),    // 'From',
                             labelAlign: 'top',
                             style: {"margin-right": "10px"},
                             width: 150,
@@ -303,7 +304,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                         },{
                             xtype: 'datefield',
                             id: 'ts_to_period',
-                            fieldLabel: 'To',
+                            fieldLabel: esapp.Utils.getTranslation('to'),    // 'To',
                             labelAlign: 'top',
                             style: {"margin-right": "10px"},
                             width: 150,
@@ -337,7 +338,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                             bind: {
                                 store: '{years}'
                             },
-                            fieldLabel: 'Year',
+                            fieldLabel: esapp.Utils.getTranslation('year'),    // 'Year',
                             labelWidth: 50,
                             labelAlign: 'top',
                             width: 150,
@@ -347,7 +348,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                             publishes: ['year'],
                             typeAhead: true,
                             queryMode: 'local',
-                            emptyText: 'Select...',
+                            emptyText: esapp.Utils.getTranslation('select'),    // 'Select...',
                             listeners: {
                                 select: function() {
                                     Ext.getCmp("radio-year").setValue(true);
@@ -357,7 +358,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                     }]
                 },{
                     xtype: 'button',
-                    text: 'Get timeseries',
+                    text: esapp.Utils.getTranslation('gettimeseries'),    // 'Get timeseries',
                     id: 'gettimeseries_btn',
                     reference: 'gettimeseries',
                     iconCls: 'chart-curve_medium',
@@ -367,6 +368,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                 }]
             },{
                 title: 'Debug info',
+                hidden: true,
                 items: [{
                     xtype: 'displayfield',
                     id: 'regionname',
@@ -485,7 +487,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
 
                     me.backgroundLayers.push(
                       new ol.layer.Tile({
-                          visible: true,
+                          visible: false,
                           projection: 'EPSG:4326',
                           source: new ol.source.TileWMS({
                               url: 'http://demo.boundlessgeo.com/geoserver/wms',
@@ -541,7 +543,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                             attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
                               collapsible: true // false to show always without the icon.
                             })
-                        }).extend([me.mousePositionControl, me.scaleline])
+                        }).extend([me.scaleline])   // me.mousePositionControl,
                     });
                 }
             }

@@ -46,7 +46,7 @@ Ext.define("esapp.view.analysis.mapView",{
     tools: [
     {
         type: 'gear',
-        tooltip: 'Map tools menu',
+        tooltip: esapp.Utils.getTranslation('maptoolsmenu'), // 'Map tools menu',
         callback: function (mapwin) {
             // toggle hide/show toolbar and adjust map size.
             var sizeWinBody = [];
@@ -83,7 +83,7 @@ Ext.define("esapp.view.analysis.mapView",{
             shadow: false,
             padding:0,
             items: [{
-                text: 'Product navigator',
+                text: esapp.Utils.getTranslation('productnavigator'), // 'Product navigator',
                 iconCls: 'africa',
                 scale: 'medium',
                 handler: 'openProductNavigator'
@@ -104,7 +104,7 @@ Ext.define("esapp.view.analysis.mapView",{
                     },
                     items: [{
                         xtype: 'checkbox',
-                        boxLabel: 'Administative level 0',
+                        boxLabel: esapp.Utils.getTranslation('adminlevel0'), // 'Administative level 0',
                         //text: 'Administative level 0',
                         name: 'admin0',
                         level: 'admin0',
@@ -117,7 +117,7 @@ Ext.define("esapp.view.analysis.mapView",{
                         handler: 'addVectorLayer'
                     }, {
                         xtype: 'checkbox',
-                        boxLabel: 'Administative level 1',
+                        boxLabel: esapp.Utils.getTranslation('adminlevel1'), // 'Administative level 1',
                         //text: 'Administative level 1',
                         name: 'admin1',
                         level: 'admin1',
@@ -143,7 +143,7 @@ Ext.define("esapp.view.analysis.mapView",{
                             },
                             items: [{
                                 xtype: 'checkbox',
-                                boxLabel: 'ICPAC level 0',
+                                boxLabel: 'ICPAC '+esapp.Utils.getTranslation('level0'), // level 0',
                                 name: 'icpac0',
                                 level: 'admin0',
                                 geojsonfile: 'AFR_G2014_2013_0.geojson',
@@ -155,7 +155,7 @@ Ext.define("esapp.view.analysis.mapView",{
                                 handler: 'addVectorLayer'
                             }, {
                                 xtype: 'checkbox',
-                                boxLabel: 'MOI level 0',
+                                boxLabel: 'MOI '+esapp.Utils.getTranslation('level0'), // level 0',
                                 name: 'moi0',
                                 level: 'admin0',
                                 geojsonfile: 'AFR_G2014_2013_0.geojson',
@@ -167,7 +167,7 @@ Ext.define("esapp.view.analysis.mapView",{
                                 handler: 'addVectorLayer'
                             }, {
                                 xtype: 'checkbox',
-                                boxLabel: 'CICOS level 0',
+                                boxLabel: 'CICOS '+esapp.Utils.getTranslation('level0'), // level 0',
                                 name: 'cicos0',
                                 level: 'admin0',
                                 geojsonfile: 'AFR_G2014_2013_0.geojson',
@@ -338,12 +338,12 @@ Ext.define("esapp.view.analysis.mapView",{
                 //});
                 //this.map.addControl(layerSwitcher);
 
-//                this.map.getView().projection = me.projection;
-//                console.info(Ext.getCmp('opacityslider'+ this.id));
-//                console.info(this.layers[0]);
-//                var opacity = new ol.dom.Input(document.getElementById('opacityslider'+ this.id));
-//                opacity.bindTo('value', this.layers[0], 'opacity')
-//                       .transform(parseFloat, String);
+                //this.map.getView().projection = me.projection;
+                //console.info(Ext.getCmp('opacityslider'+ this.id));
+                //console.info(this.layers[0]);
+                //var opacity = new ol.dom.Input(document.getElementById('opacityslider'+ this.id));
+                //opacity.bindTo('value', this.layers[0], 'opacity')
+                //       .transform(parseFloat, String);
 
             }
             // The resize handle is necessary to set the map!

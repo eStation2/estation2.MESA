@@ -16,7 +16,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
         'Ext.toolbar.Toolbar'
     ],
 
-    title: '<span class="panel-title-style"Time series</span>',
+    title: '<span class="panel-title-style">'+esapp.Utils.getTranslation('timeseries')+'</span>',
     margin: '0 0 0 0',
     layout: {
         type: 'fit'
@@ -48,7 +48,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
     tools: [
     {
         type: 'gear',
-        tooltip: 'Show/hide time series chart tools menu',
+        tooltip: esapp.Utils.getTranslation('tiptimeserieschartshowhidetools'),  // 'Show/hide time series chart tools menu',
         callback: function (tswin) {
             // toggle hide/show toolbar and adjust map size.
             var winBodyWidth = tswin.getWidth()-5;
@@ -90,7 +90,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
             }
 
             var myLoadMask = new Ext.LoadMask({
-                msg    : 'Generating requested time series...',
+                msg    : esapp.Utils.getTranslation('generatingtimeseries'), // 'Generating requested time series...',
                 target : Ext.getCmp(me.id)
             });
             myLoadMask.show();
@@ -440,17 +440,17 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
             shadow: false,
             padding:0,
             items: [{
-                text: 'Chart properties',
+                text: esapp.Utils.getTranslation('chartproperties'),    // 'Chart properties',
                 iconCls: 'chart-curve_edit',
                 scale: 'medium'
                 //,handler: 'openChartProperties'
             },'->',{
-                text: 'Download timeseries',
+                text: esapp.Utils.getTranslation('downloadtimeseries'),    // 'Download timeseries',
                 iconCls: 'fa fa-download fa-2x',
                 scale: 'medium'
                 //,handler: 'tsDownload'
             },{
-                text: 'Save chart',
+                text: esapp.Utils.getTranslation('savechart'),    // 'Save chart',
                 iconCls: 'fa fa-floppy-o fa-2x',
                 scale: 'medium'
                 //,handler: 'saveChart'

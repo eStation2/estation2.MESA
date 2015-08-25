@@ -6,8 +6,8 @@ Ext.define('esapp.view.system.PCLogLevelAdminModel', {
         loglevels:{
             fields: ['loglevel'],
             data: [
-                {loglevel: 'INFO'},
                 {loglevel: 'DEBUG'},
+                {loglevel: 'INFO'},
                 {loglevel: 'WARNING'},
                 {loglevel: 'ERROR'},
                 {loglevel: 'FATAL'}

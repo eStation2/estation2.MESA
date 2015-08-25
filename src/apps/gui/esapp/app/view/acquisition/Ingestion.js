@@ -15,6 +15,8 @@ Ext.define("esapp.view.acquisition.Ingestion",{
         'esapp.view.acquisition.IngestionController',
         'esapp.view.acquisition.logviewer.LogView',
 
+        'esapp.view.widgets.datasetCompletenessChart',
+
         'Ext.grid.column.Action',
         'Ext.grid.column.Widget'
         //'Ext.grid.column.Check'
@@ -45,29 +47,35 @@ Ext.define("esapp.view.acquisition.Ingestion",{
         trackOver: false
     },
     cls: 'grid-color-azur',
-    plugins:[{
-        ptype:'cellediting'
-    }],
+    //plugins:[{
+    //    ptype:'cellediting'
+    //}],
     hideHeaders: true,
     columnLines: false,
     rowLines:false,
-    bufferedRenderer: true,
+    //bufferedRenderer: true,
 
     //listeners: {
-    //    beforerender:  function () {
-    //        var me = this,
-    //            record = me.getWidgetRecord();
-    //        Ext.suspendLayouts();
-    //        var daStore = me.getViewModel().get('productingestions');
-    //        if (daStore) {
-    //            daStore.setFilters({
-    //                property: 'productid'
-    //                , value: record.id
-    //                , anyMatch: true
-    //            });
-    //        }
-    //        Ext.resumeLayouts(true);
-    //    }
+        //rowclick:  function (gridview, record) {
+            //console.info('row clicked');
+            //console.info(gridview);
+            //console.info(gridview.grid.getWidgetColumn());
+            //console.info(Ext.getCmp(gridview.grid.getWidgetColumn().getWidget().getId()+ '_tooltip'));
+        //}
+        //beforerender:  function () {
+        //    var me = this,
+        //        record = me.getWidgetRecord();
+        //    Ext.suspendLayouts();
+        //    var daStore = me.getViewModel().get('productingestions');
+        //    if (daStore) {
+        //        daStore.setFilters({
+        //            property: 'productid'
+        //            , value: record.id
+        //            , anyMatch: true
+        //        });
+        //    }
+        //    Ext.resumeLayouts(true);
+        //}
     //},
 
     initComponent: function () {
@@ -100,18 +108,18 @@ Ext.define("esapp.view.acquisition.Ingestion",{
             variableRowHeight:true,
             widget: {
                 xtype: 'datasetchart',
-                height:40
+                height:40,
+                widgetattached: false
             },
             onWidgetAttach: function(widget, record) {
-
                 var widgetchart = widget.down('cartesian');
                 var completeness = record.getAssociatedData().completeness;
 
                 var storefields = ['dataset'];
                 var series_yField = [];
                 for (var index = 1; index <= completeness.intervals.length; ++index) {
-                    storefields.push('data'+index);
-                    series_yField.push('data'+index);
+                    storefields.push('data' + index);
+                    series_yField.push('data' + index);
                 }
 
                 var datasetdata = [];
@@ -121,50 +129,87 @@ Ext.define("esapp.view.acquisition.Ingestion",{
                 var seriescolors = [];
                 var i = 1;
 
+                var ingestionForTipText = '<b>' + 'Data set intervals for' + ':</br>' +
+                    record.get('productcode') + ' - ' +
+                    record.get('version') + ' - ' +
+                    record.get('mapsetname') + ' - ' +
+                    record.get('subproductcode') + '</b></br></br>';
+
+                seriestitles.push(ingestionForTipText);
+
                 if (completeness.totfiles < 2 && completeness.missingfiles < 2) {
                     dataObj["data1"] = '100'; // 100%
                     datasetdata.push(dataObj);
-                    seriestitle = '<span style="color:#808080">Not any data</span>';
+                    seriestitle = '<span style="color:#808080">' + esapp.Utils.getTranslation('notanydata') + '</span>';
                     seriestitles.push(seriestitle);
                     seriescolors.push('#808080'); // gray
 
                     // Update the 4 sprites (these are not reachable through getSprites() on the chart)
-                    widgetchart.surfaceMap.chart[0].getItems()[0].setText('Not any data');
+                    widgetchart.surfaceMap.chart[0].getItems()[0].setText(esapp.Utils.getTranslation('notanydata'));
                     widgetchart.surfaceMap.chart[0].getItems()[1].setText('');
                     widgetchart.surfaceMap.chart[0].getItems()[2].setText('');
                     widgetchart.surfaceMap.chart[0].getItems()[3].setText('');
                 }
                 else {
                     completeness.intervals.forEach(function (interval) {
-                        if (interval.intervalpercentage<1.5)
+                        if (interval.intervalpercentage < 1.5)
                             dataObj["data" + i] = 2;
                         else
                             dataObj["data" + i] = interval.intervalpercentage;
                         ++i;
 
-                        var color = '';
-                        if (interval.intervaltype == 'present')
+                        var color, intervaltype = '';
+                        if (interval.intervaltype == 'present') {
                             color = '#81AF34'; // green
-                        if (interval.intervaltype == 'missing')
+                            intervaltype = esapp.Utils.getTranslation('present');
+                        }
+                        if (interval.intervaltype == 'missing') {
                             color = '#FF0000'; // red
-                        if (interval.intervaltype == 'permanent-missing')
+                            intervaltype = esapp.Utils.getTranslation('missing');
+                        }
+                        if (interval.intervaltype == 'permanent-missing') {
                             color = '#808080'; // gray
+                            intervaltype = esapp.Utils.getTranslation('permanent-missing');
+                        }
                         seriescolors.push(color);
 
-                        seriestitle = '<span style="color:'+color+'">From ' + interval.fromdate + ' to ' + interval.todate + ' - ' + interval.intervaltype + '</span>';
+                        seriestitle = '<span style="color:' + color + '">' + esapp.Utils.getTranslation('from') + ' ' + interval.fromdate + ' ' + esapp.Utils.getTranslation('to') + ' ' + interval.todate + ' - ' + intervaltype + '</span></br>';
                         seriestitles.push(seriestitle);
                     });
                     datasetdata.push(dataObj);
 
                     // Update the 4 sprites (these are not reachable through getSprites() on the chart)
-                    widgetchart.surfaceMap.chart[0].getItems()[0].setText('Files: '+completeness.totfiles);
+                    widgetchart.surfaceMap.chart[0].getItems()[0].setText(esapp.Utils.getTranslation('files') + ': ' + completeness.totfiles);
                     var missingFilesText = '';
-                    if(completeness.missingfiles>0)
-                       missingFilesText = 'Missing: ' + completeness.missingfiles;
+                    if (completeness.missingfiles > 0)
+                        missingFilesText = esapp.Utils.getTranslation('Missing') + ': ' + completeness.missingfiles;
                     widgetchart.surfaceMap.chart[0].getItems()[1].setText(missingFilesText);
                     widgetchart.surfaceMap.chart[0].getItems()[2].setText(completeness.firstdate);
                     widgetchart.surfaceMap.chart[0].getItems()[3].setText(completeness.lastdate);
                 }
+
+                widget.tooltipintervals = seriestitles;
+
+                //if (!widget.widgetattached) {
+                //    widget.widgetattached = true;
+                //    var tip = Ext.create('Ext.tip.ToolTip', {
+                //        id: widget.getId() + '_tooltip',
+                //        target: widget.getId(),
+                //        disabled: true,
+                //        trackMouse: false,
+                //        autoHide: false,
+                //        dismissDelay: 5000, // auto hide after 5 seconds
+                //        closable: true,
+                //        anchor: 'left',
+                //        padding: 10,
+                //        html: widget.tooltipintervals, // Tip content
+                //        listeners: {
+                //            close: function() {
+                //                this.disable();
+                //            }
+                //        }
+                //    });
+                //}
 
                 var newstore = Ext.create('Ext.data.JsonStore', {
                     fields: storefields,
@@ -183,10 +228,9 @@ Ext.define("esapp.view.acquisition.Ingestion",{
                 // update legendStore with new series, otherwise setTitles,
                 // which updates also the legend names will go in error.
                 widgetchart.refreshLegendStore();
-                widgetchartseries[0].setTitle(seriestitles);
                 widgetchart.redraw();
-
-//                var data = Ext.util.JSON.decode(completeness);
+                //widgetchartseries[0].setTitle(seriestitles);
+                //widget.setTooltipintervals(seriestitles);
             }
 
         },{
@@ -208,9 +252,9 @@ Ext.define("esapp.view.acquisition.Ingestion",{
                 },
                 getTip: function(v, meta, rec) {
                     if (rec.get('activated')) {
-                        return 'Deactivate Ingestion';
+                        return esapp.Utils.getTranslation('deactivateingestion');   // 'Deactivate Ingestion';
                     } else {
-                        return 'Activate Ingestion';
+                        return esapp.Utils.getTranslation('activateingestion');   // 'Activate Ingestion';
                     }
                 },
                 handler: function(grid, rowIndex, colIndex) {

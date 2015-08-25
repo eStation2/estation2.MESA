@@ -35,7 +35,7 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
         var me = this.getView();
 
         var selectdatasourcetypeWin = Ext.create('Ext.window.Window', {
-            title: 'Data Source Type',
+            title: esapp.Utils.getTranslation('datasourcetype'),   // 'Data Source Type',
             id: 'selectdatasourcetypeWin',
             titleAlign: 'center',
             modal: true,
@@ -50,7 +50,7 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
             bbar: ['->',{
                 xtype: 'button',
                 id: 'selectdatasourcebtn',
-                text: 'Choose',
+                text: esapp.Utils.getTranslation('choose'),   // 'Choose',
                 iconCls: 'fa fa-thumbs-o-up fa-2x',
                 style: { color: 'green' },
                 scale: 'medium',
@@ -153,7 +153,7 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
                 success: function(response, opts){
                     var result = Ext.JSON.decode(response.responseText);
                     if (result.success){
-                        Ext.toast({ html: 'Product data source unassigned', title: 'Product data source', width: 200, align: 't' });
+                        Ext.toast({ html: esapp.Utils.getTranslation('productdatasourceunassigned'), title: esapp.Utils.getTranslation('productdatasourceunassigned'), width: 200, align: 't' });
                     }
 
                     Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
@@ -211,7 +211,7 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
             success: function(response, opts){
                 var result = Ext.JSON.decode(response.responseText);
                 if (result.success){
-                    Ext.toast({ html: 'Product info updated', title: 'Product updated', width: 200, align: 't' });
+                    Ext.toast({ html: esapp.Utils.getTranslation('productinfoupdated'), title: esapp.Utils.getTranslation('productinfoupdated'), width: 200, align: 't' });
                 }
                 if (!me.params.edit){
                     me.params.edit = true;

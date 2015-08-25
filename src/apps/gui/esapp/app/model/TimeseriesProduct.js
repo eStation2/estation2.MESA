@@ -52,6 +52,7 @@ Ext.define('esapp.model.TimeseriesProduct', {
         },
         listeners: {
             exception: function(proxy, response, operation){
+                // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
                 Ext.Msg.show({
                     title: 'TIMESERIES PRODUCT MODEL - REMOTE EXCEPTION',
                     msg: operation.getError(),

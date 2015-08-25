@@ -79,7 +79,7 @@ Ext.define("esapp.view.processing.ProcessFinalOutputSubProducts",{
             width: 150
             },{
                 xtype: 'actioncolumn',
-                header: 'Active',
+                //header: 'Active',
                 hideable: false,
                 hidden: false,
                 width: 65,
@@ -96,9 +96,9 @@ Ext.define("esapp.view.processing.ProcessFinalOutputSubProducts",{
                     },
                     getTip: function(v, meta, rec) {
                         if (rec.get('subactivated')) {
-                            return 'Deactivate SubProduct';
+                            return esapp.Utils.getTranslation('deactivatesubproduct');   // 'Deactivate SubProduct';
                         } else {
-                            return 'Activate SubProduct';
+                            return esapp.Utils.getTranslation('activatesubproduct');   // 'Activate SubProduct';
                         }
                     },
                     handler: function(grid, rowIndex, colIndex) {

@@ -15,7 +15,7 @@ Ext.define('esapp.view.system.PCLogLevelAdminController', {
                         checked = false;
 
                     if (loglevel == me.params.currentloglevel){
-                        fieldlabel = 'Active log level';
+                        fieldlabel =  esapp.Utils.getTranslation('activeloglevel'); // 'Active log level';
                         checked = true;
                     }
                     loglevelradio = {
@@ -44,7 +44,9 @@ Ext.define('esapp.view.system.PCLogLevelAdminController', {
             success: function(response, opts){
                 var result = Ext.JSON.decode(response.responseText);
                 if (result.success){
-                    Ext.toast({ html: 'System Log level is set to '+newloglevel.loglevel, title: 'Log level changed', width: 200, align: 't' });
+                    Ext.toast({ html: esapp.Utils.getTranslation('systemloglevelsetto') + " " + newloglevel.loglevel,
+                                title: esapp.Utils.getTranslation('loglevelchanged'),
+                                width: 200, align: 't' });
                 }
                 var systemsettingsstore  = Ext.data.StoreManager.lookup('SystemSettingsStore');
                 var systemsettingsrecord = systemsettingsstore.getModel().load(0, {

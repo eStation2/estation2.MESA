@@ -51,7 +51,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
         }
 
         var deleteDataSourceAction = Ext.create('Ext.Action', {
-            text: 'Unassign',
+            text: esapp.Utils.getTranslation('unassign'),    // 'Unassign',
             iconCls: 'fa fa-chain-broken fa-2x',
             style: { color: 'red' },
             scale: 'medium',
@@ -60,7 +60,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
         });
 
         var addDataSourceAction = Ext.create('Ext.Action', {
-            text: 'Add',
+            text: esapp.Utils.getTranslation('add'),    // 'Add',
             iconCls: 'fa fa-plus-circle fa-2x',
             style: { color: 'green' },
             scale: 'medium',
@@ -72,7 +72,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
             //margin:'0 15 5 0',
             items: [{
                 xtype: 'fieldset',
-                title: '<b>Product info</b>',
+                title: '<b>'+esapp.Utils.getTranslation('productinfo')+'</b>',    // '<b>Product info</b>',
                 collapseable:false,
                 width:565,
                 //height:500,
@@ -87,7 +87,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                     name: 'category',
                     //bind: '{product.category_id}',
                     xtype: 'combobox',
-                    fieldLabel: 'Category',
+                    fieldLabel: esapp.Utils.getTranslation('category'),    // 'Category',
                     width:150+120,
                     allowBlank: false,
                     //store: 'categories',
@@ -98,14 +98,13 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                     displayField: 'descriptive_name',
                     typeAhead: false,
                     queryMode: 'local',
-                    emptyText: 'Select a category...'
-
+                    emptyText: esapp.Utils.getTranslation('selectacategory')    // 'Select a category...'
                 },{
                     id: 'productcode',
                     name: 'productcode',
                     //bind: '{product.productcode}',
                     xtype: 'textfield',
-                    fieldLabel: 'Product code',
+                    fieldLabel: esapp.Utils.getTranslation('productcode'),    // 'Product code',
                     width:150+120,
                     allowBlank: false
                 },{
@@ -113,7 +112,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                     name: 'version',
                     //bind: '{product.version}',
                     xtype: 'textfield',
-                    fieldLabel: 'Version',
+                    fieldLabel: esapp.Utils.getTranslation('version'),    // 'Version',
                     width:150+120,
                     allowBlank: false
                 },{
@@ -121,7 +120,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                     name: 'provider',
                     //bind: '{product.provider}',
                     xtype: 'textfield',
-                    fieldLabel: 'Provider',
+                    fieldLabel: esapp.Utils.getTranslation('provider'),    // 'Provider',
                     width:530,
                     allowBlank: true
                 },{
@@ -129,7 +128,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                     name: 'product_name',
                     //bind: '{product.prod_descriptive_name}',
                     xtype: 'textfield',
-                    fieldLabel: 'Product name',
+                    fieldLabel: esapp.Utils.getTranslation('product_name'),    // 'Product name',
                     width:530,
                     allowBlank: true
                 }, {
@@ -137,14 +136,14 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                     name: 'productdescription',
                     //bind: '{product.description}',
                     xtype: 'textareafield',
-                    fieldLabel: 'Product description',
+                    fieldLabel: esapp.Utils.getTranslation('productdescription'),    // 'Product description',
                     labelAlign: 'top',
                     width: 530,
                     allowBlank: true,
                     grow: true
                 },{
                     xtype: 'button',
-                    text: 'Save',
+                    text: esapp.Utils.getTranslation('save'),    // 'Save',
                     //scope:me,
                     iconCls: 'fa fa-save fa-2x',    // 'icon-disk',
                     style: { color: 'lightblue' },
@@ -156,7 +155,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
         },{
             items: [{
                 xtype: 'fieldset',
-                title: '<b>Data sources</b>',
+                title: '<b>'+esapp.Utils.getTranslation('datasources')+'</b>',    // '<b>Data sources</b>',
                 id: 'datasourcesfieldset',
                 hidden: true,
                 collapseable:false,
@@ -222,11 +221,11 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                         menuDisabled: true,
                         items: [{
                             icon: 'resources/img/icons/edit.png',
-                            tooltip: 'Edit Data Source',
+                            tooltip: esapp.Utils.getTranslation('editdatasource'),    // 'Edit Data Source',
                             handler: 'editDataSource'
                         }]
                     }, {
-                        header: 'Type',
+                        header: esapp.Utils.getTranslation('type'),    // 'Type',
                         dataIndex: 'type',
                         //bind: '{productdatasources.type}',
                         width: 120,
@@ -235,7 +234,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                         variableRowHeight: true,
                         menuDisabled: true
                     }, {
-                        header: 'ID',
+                        header: esapp.Utils.getTranslation('id'),    // 'ID',
                         dataIndex: 'data_source_id',
                         //bind: '{productdatasources.data_source_id}',
                         width: 300,
@@ -245,7 +244,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                         menuDisabled: true
                     }, {
                         xtype: 'actioncolumn',
-                        header: 'Active',
+                        header: esapp.Utils.getTranslation('active'),    // 'Active',
                         hideable: false,
                         hidden: false,
                         menuDisabled: true,
@@ -262,9 +261,9 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                             },
                             getTip: function (v, meta, rec) {
                                 if (rec.get('activated')) {
-                                    return 'Deactivate Data Source';
+                                    return esapp.Utils.getTranslation('deactivatedatasource');    // 'Deactivate Data Source';
                                 } else {
-                                    return 'Activate Data Source';
+                                    return esapp.Utils.getTranslation('activatedatasource');    // 'Activate Data Source';
                                 }
                             },
                             isDisabled: function (view, rowIndex, colIndex, item, record) {

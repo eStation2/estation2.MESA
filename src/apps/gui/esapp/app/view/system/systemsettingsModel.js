@@ -5,11 +5,11 @@ Ext.define('esapp.view.system.systemsettingsModel', {
     ,links: {
         system_setting: {
             reference: 'esapp.model.SystemSetting',
-//            type: 'SystemSetting',
+            //type: 'SystemSetting',
             id: 0
             ,listeners: {
                 update: function () {
-                    Ext.Msg.alert('Message', 'Path settings updated!');
+                    //Ext.Msg.alert('Message', 'Path settings updated!');
                 }
             }
         }

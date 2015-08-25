@@ -50,7 +50,7 @@ Ext.define("esapp.view.acquisition.product.editInternetSource",{
             },
             items: [{
                 xtype: 'fieldset',
-                title: '<b>Internet data source info</b>',
+                title: '<b>'+esapp.Utils.getTranslation('internetdatasourceinfo')+'</b>',    // '<b>Internet data source info</b>',
                 collapseable: false,
                 width: 600,
                 margin: '10 5 10 10',
@@ -62,26 +62,26 @@ Ext.define("esapp.view.acquisition.product.editInternetSource",{
                 },
                 items: [{
                     xtype: 'textfield',
-                    fieldLabel: 'ID',
+                    fieldLabel: esapp.Utils.getTranslation('id'),    // 'ID',
                     reference: 'internet_id',
                     msgTarget: 'side',
                     bind: '{theInternetSource.internet_id}',
                     allowBlank: false
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Defined by',
+                    fieldLabel: esapp.Utils.getTranslation('defined_by'),    // 'Defined by',
                     reference: 'defined_by',
                     msgTarget: 'side',
                     bind: '{theInternetSource.defined_by}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Name',
+                    fieldLabel: esapp.Utils.getTranslation('name'),    // 'Name',
                     reference: 'descriptive_name',
                     msgTarget: 'side',
                     bind: '{theInternetSource.descriptive_name}'
                 }, {
                     xtype: 'textareafield',
-                    fieldLabel: 'Description',
+                    fieldLabel: esapp.Utils.getTranslation('description'),    // 'Description',
                     labelAlign: 'top',
                     reference: 'description',
                     msgTarget: 'side',
@@ -89,37 +89,37 @@ Ext.define("esapp.view.acquisition.product.editInternetSource",{
                     grow: true
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Modified by',
+                    fieldLabel: esapp.Utils.getTranslation('modified_by'),    // 'Modified by',
                     reference: 'modified_by',
                     msgTarget: 'side',
                     bind: '{theInternetSource.modified_by}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'URL',
+                    fieldLabel: esapp.Utils.getTranslation('url'),    // 'URL',
                     reference: 'url',
                     msgTarget: 'side',
                     bind: '{theInternetSource.url}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'User name',
+                    fieldLabel: esapp.Utils.getTranslation('user_name'),    // 'User name',
                     reference: 'user_name',
                     msgTarget: 'side',
                     bind: '{theInternetSource.user_name}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Password',
+                    fieldLabel: esapp.Utils.getTranslation('password'),    // 'Password',
                     reference: 'password',
                     msgTarget: 'side',
                     bind: '{theInternetSource.password}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Type',
+                    fieldLabel: esapp.Utils.getTranslation('type'),    // 'Type',
                     reference: 'type',
                     msgTarget: 'side',
                     bind: '{theInternetSource.type}'
                 }, {
                     xtype: 'textareafield',
-                    fieldLabel: 'Include files expression',
+                    fieldLabel: esapp.Utils.getTranslation('include_files_expression'),    // 'Include files expression',
                     labelAlign: 'top',
                     reference: 'include_files_expression',
                     msgTarget: 'side',
@@ -127,7 +127,7 @@ Ext.define("esapp.view.acquisition.product.editInternetSource",{
                     grow: true
                 }, {
                     xtype: 'textareafield',
-                    fieldLabel: 'Files filter expression',
+                    fieldLabel: esapp.Utils.getTranslation('files_filter_expression'),    // 'Files filter expression',
                     labelAlign: 'top',
                     reference: 'files_filter_expression',
                     msgTarget: 'side',
@@ -135,38 +135,38 @@ Ext.define("esapp.view.acquisition.product.editInternetSource",{
                     grow: true
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Status',
+                    fieldLabel: esapp.Utils.getTranslation('status'),    // 'Status',
                     reference: 'status',
                     msgTarget: 'side',
                     bind: '{theInternetSource.status}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Pull frequency',
+                    fieldLabel: esapp.Utils.getTranslation('pull_frequency'),    // 'Pull frequency',
                     reference: 'pull_frequency',
                     msgTarget: 'side',
                     bind: '{theInternetSource.pull_frequency}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Frequency',
+                    fieldLabel: esapp.Utils.getTranslation('frequency'),    // 'Frequency',
                     reference: 'frequency_id',
                     msgTarget: 'side',
                     bind: '{theInternetSource.frequency_id}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Start date',
+                    fieldLabel: esapp.Utils.getTranslation('start_date'),    // 'Start date',
                     reference: 'start_date',
                     msgTarget: 'side',
                     bind: '{theInternetSource.start_date}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'End date',
+                    fieldLabel: esapp.Utils.getTranslation('end_date'),    // 'End date',
                     reference: 'end_date',
                     msgTarget: 'side',
                     bind: '{theInternetSource.end_date}'
                 }]
             },{
                 xtype: 'fieldset',
-                title: '<b>Data source description</b>',
+                title: '<b>'+esapp.Utils.getTranslation('datasourcedescription')+'</b>',    // '<b>Data source description</b>',
                 collapseable: false,
                 width: 450,
                 margin: '10 10 10 5',
@@ -177,98 +177,98 @@ Ext.define("esapp.view.acquisition.product.editInternetSource",{
                 },
                 items: [{
                     xtype: 'textfield',
-                    fieldLabel: 'Format type',
+                    fieldLabel: esapp.Utils.getTranslation('format_type'),    // 'Format type',
                     reference: 'format_type',
                     msgTarget: 'side',
                     bind: '{theInternetSource.format_type}',
                     allowBlank: false
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'File extension',
+                    fieldLabel: esapp.Utils.getTranslation('file_extension'),    // 'File extension',
                     reference: 'file_extension',
                     msgTarget: 'side',
                     bind: '{theInternetSource.file_extension}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Delimiter',
+                    fieldLabel: esapp.Utils.getTranslation('delimiter'),    // 'Delimiter',
                     reference: 'delimiter',
                     msgTarget: 'side',
                     bind: '{theInternetSource.delimiter}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Date type',
+                    fieldLabel: esapp.Utils.getTranslation('date_type'),    // 'Date type',
                     reference: 'date_type',
                     msgTarget: 'side',
                     bind: '{theInternetSource.date_type}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Date position',
+                    fieldLabel: esapp.Utils.getTranslation('date_position'),    // 'Date position',
                     reference: 'date_position',
                     msgTarget: 'side',
                     bind: '{theInternetSource.date_position}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Product identifier',
+                    fieldLabel: esapp.Utils.getTranslation('product_identifier'),    // 'Product identifier',
                     reference: 'product_identifier',
                     msgTarget: 'side',
                     bind: '{theInternetSource.product_identifier}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Prod id position',
+                    fieldLabel: esapp.Utils.getTranslation('prod_id_position'),    // 'Prod id position',
                     reference: 'prod_id_position',
                     msgTarget: 'side',
                     bind: '{theInternetSource.prod_id_position}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Prod id length',
+                    fieldLabel: esapp.Utils.getTranslation('prod_id_length'),    // 'Prod id length',
                     reference: 'prod_id_length',
                     msgTarget: 'side',
                     bind: '{theInternetSource.prod_id_length}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Area type',
+                    fieldLabel: esapp.Utils.getTranslation('area_type'),    // 'Area type',
                     reference: 'area_type',
                     msgTarget: 'side',
                     bind: '{theInternetSource.area_type}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Area position',
+                    fieldLabel: esapp.Utils.getTranslation('area_position'),    // 'Area position',
                     reference: 'area_position',
                     msgTarget: 'side',
                     bind: '{theInternetSource.area_position}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Area length',
+                    fieldLabel: esapp.Utils.getTranslation('area_length'),    // 'Area length',
                     reference: 'area_length',
                     msgTarget: 'side',
                     bind: '{theInternetSource.area_length}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Preproc type',
+                    fieldLabel: esapp.Utils.getTranslation('preproc_type'),    // 'Preproc type',
                     reference: 'preproc_type',
                     msgTarget: 'side',
                     bind: '{theInternetSource.preproc_type}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Product release',
+                    fieldLabel: esapp.Utils.getTranslation('product_release'),    // 'Product release',
                     reference: 'product_release',
                     msgTarget: 'side',
                     bind: '{theInternetSource.product_release}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Release position',
+                    fieldLabel: esapp.Utils.getTranslation('release_position'),    // 'Release position',
                     reference: 'release_position',
                     msgTarget: 'side',
                     bind: '{theInternetSource.release_position}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Release length',
+                    fieldLabel: esapp.Utils.getTranslation('release_length'),    // 'Release length',
                     reference: 'release_length',
                     msgTarget: 'side',
                     bind: '{theInternetSource.release_length}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: 'Native mapset',
+                    fieldLabel: esapp.Utils.getTranslation('native_mapset'),    // 'Native mapset',
                     reference: 'native_mapset',
                     msgTarget: 'side',
                     bind: '{theInternetSource.native_mapset}'

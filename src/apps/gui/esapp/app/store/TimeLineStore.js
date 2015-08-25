@@ -3,18 +3,20 @@ Ext.define('esapp.store.TimeLineStore', {
     alias: 'store.timeline',
 
     requires : [
-        'esapp.model.TimeLine'
+        'esapp.model.TimeLine',
+
+        'Ext.data.proxy.JsonP',
+        'Ext.Msg'
     ],
 
     model: 'esapp.model.TimeLine',
 
     storeId : 'TimeLineStore'
 
-//    session: true,
     ,autoLoad: false
+    //session: true,
     //,remoteSort: false
-
-//    sorters: {property: 'productcode', direction: 'ASC'}
+    //sorters: {property: 'productcode', direction: 'ASC'}
 
     ,proxy: {
         type : 'jsonp',
@@ -27,6 +29,7 @@ Ext.define('esapp.store.TimeLineStore', {
         },
         listeners: {
             exception: function(proxy, response, operation){
+                // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
                 Ext.Msg.show({
                     title: 'TIME LINE STORE- REMOTE EXCEPTION',
                     msg: operation.getError(),

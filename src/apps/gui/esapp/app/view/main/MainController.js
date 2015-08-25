@@ -8,9 +8,5 @@
 Ext.define('esapp.view.main.MainController', {
     extend: 'Ext.app.ViewController',
 
-    alias: 'controller.app-main',
-
-    requires: [
-
-    ]
+    alias: 'controller.app-main'
 });

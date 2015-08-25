@@ -15,7 +15,9 @@ Ext.define('esapp.view.system.PCModeAdminController', {
             success: function(response, opts){
                 var result = Ext.JSON.decode(response.responseText);
                 if (result.success){
-                    Ext.toast({ html: 'System is set to '+newmode.mode+' mode', title: 'Mode changed', width: 200, align: 't' });
+                    Ext.toast({ html: esapp.Utils.getTranslation('systemmodesetto') + " " + newmode.mode,
+                                title: esapp.Utils.getTranslation('modechanged'),
+                                width: 200, align: 't' });
                 }
                 var systemsettingsstore  = Ext.data.StoreManager.lookup('SystemSettingsStore');
                 var systemsettingsrecord = systemsettingsstore.getModel().load(0, {
@@ -28,6 +30,9 @@ Ext.define('esapp.view.system.PCModeAdminController', {
 
                         systemsettingview.loadRecord(systemsettingsrecord);
                         systemsettingview.updateRecord();
+
+                        Ext.getCmp('dashboard-panel').getController().setupDashboard();
+
                         me.closeView();
                     }
                 });

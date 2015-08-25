@@ -25,7 +25,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
     //bind: '{products}',
     //session: true,
 
-    title: '<div class="panel-title-style-16">Product Navigator</div>',
+    title: '<div class="panel-title-style-16">' + esapp.Utils.getTranslation('productnavigator') + '</div>',    // '<div class="panel-title-style-16">Product Navigator</div>',
     header: {
         titlePosition: 0,
         titleAlign: 'center',
@@ -42,7 +42,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
     {
         type: 'refresh',
         align: 'c-c',
-        tooltip: 'Refresh product list',
+        tooltip: esapp.Utils.getTranslation('refreshproductlist'),    // 'Refresh product list',
         callback: 'loadProductsGrid'
     }],
 
@@ -122,7 +122,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     hideGroupedHeader: true,
                     enableGroupingMenu: false,
                     startCollapsed : false,
-                    groupByText: 'Product category'
+                    groupByText: esapp.Utils.getTranslation('productcategories')  // 'Product categories'
                 }],
 
                 plugins: [{
@@ -143,7 +143,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 },
 
                 columns : [{
-                    text: '<div class="grid-header-style">Product categories</div>',
+                    text: '<div class="grid-header-style">'+esapp.Utils.getTranslation('productcategories')+'</div>',
                     menuDisabled: true,
                     defaults: {
                         sortable: false,
@@ -153,7 +153,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     },
                     columns: [
                         {
-                            text: "Product",
+                            text: esapp.Utils.getTranslation('product'),   // "Product",
                             xtype: 'templatecolumn',
                             width: 485,
                             tpl:  new Ext.XTemplate(
@@ -174,7 +174,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
             }, {
                 region: 'east',
                 reference: 'product-datasets-info',
-                title: '<div class="panel-title-style-16">Product Info</div>',
+                title: '<div class="panel-title-style-16">'+esapp.Utils.getTranslation('productinfo')+'</div>',
                 header: {
                     titlePosition: 0,
                     titleAlign: 'left',
@@ -211,7 +211,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 },
                 bbar: Ext.create('Ext.toolbar.Toolbar', {
                     items: ['->',{
-                        text: 'Add to Map',
+                        text: esapp.Utils.getTranslation('addtomap'),    // 'Add to Map',
                         reference: 'addtomapbtn',
                         disabled: true,
                         handler: function(btn) {
@@ -235,7 +235,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
 
                 items: [{
                     xtype: 'fieldset',
-                    title: '<div class="grid-header-style">Mapsets available</div>',
+                    title: '<div class="grid-header-style">'+esapp.Utils.getTranslation('mapsetsavailable')+'</div>',
                     titleAlign: 'center',
                     reference: 'product-mapsets-dataview',
                     border: true,
@@ -266,7 +266,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         cls:'mapsets',
                         overItemCls: 'mapset-hover',
                         itemSelector: 'div.mapset',
-                        emptyText: 'No mapsets to display. Please select a product to view its mapsets',
+                        emptyText: esapp.Utils.getTranslation('nomapsetstodisplay'),    // 'No mapsets to display. Please select a product to view its mapsets',
                         autoScroll: true,
                         listeners: {
                             itemclick: 'mapsetItemClick'
@@ -336,7 +336,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         variableRowHeight: false
                     },
                     columns: [{
-                        text: '<div class="grid-header-style">Data sets</div>',
+                        text: '<div class="grid-header-style">'+esapp.Utils.getTranslation('datasets')+'</div>',
                         xtype: 'templatecolumn',
                         tpl: new Ext.XTemplate(
                             '<b>{descriptive_name}</b>' +
@@ -403,7 +403,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         align: 'center',
                         shrinkWrap: 0,
                         items: [{
-                            tooltip: 'Select color scheme',
+                            tooltip: esapp.Utils.getTranslation('selectacolorscheme'),    // 'Select color scheme',
                             getClass: function(v, meta, rec) {
                                 return rec.get('defaulticon');
                             },
@@ -411,7 +411,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         }]
                     },{
                         xtype:'templatecolumn',
-                        text: '<div class="grid-header-style">Color Schemes</div>',
+                        text: '<div class="grid-header-style">'+esapp.Utils.getTranslation('colorschemes')+'</div>',
                         width: 475,
                         sortable: false,
                         menuDisabled: true,

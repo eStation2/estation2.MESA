@@ -27,8 +27,8 @@ class TestTS(unittest.TestCase):
         subproductcode = "ndv"
         version = "spot-v1"
         mapsetcode = "SPOTV-Africa-1km"
-        from_date = date(2000, 01, 01)
-        to_date = date(2000, 12, 31)
+        from_date = date(2002, 01, 01)
+        to_date = date(2002, 12, 31)
         date_format = 'YYYYMMDD'
         list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt, from_date, to_date)
         # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, from_date, to_date)

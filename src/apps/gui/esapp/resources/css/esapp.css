@@ -94,10 +94,6 @@ p {
     background-image:url(../img/link_break.png);
 }
 
-.estation {
-    background-image:url(../img/icon_eStation.png);
-}
-
 .connected {
     background-image:url(../img/icons/signal_1df31d_24.png);
     background-repeat: no-repeat;
@@ -426,4 +422,180 @@ p {
 
 .mapsets div.mapset span {
     color: #999;
+}
+
+/**********************************************
+* CSS for the HELP TAB
+***********************************************/
+
+.help-main {
+    background-color: #ececec
+}
+
+.help-main .help-dataview {
+    padding: 10px 15px 15px
+}
+
+.help-main .statement-type {
+    width: 100%;
+    float: left;
+    color: #878ea2;
+    font-weight: bold;
+    font-size: 14px;
+    margin: 20px 5px 0
+}
+
+.help-main .thumb-title-container {
+    float: left;
+    padding-top: 4px
+}
+
+.help-main .thumb-title {
+    color: #3e4752;
+    font-weight: 800
+}
+
+.help-main .thumb-title-small {
+    color: #878ea2;
+    font-size: 10px;
+    font-weight: 500
+}
+
+.help-main .thumb-pdf {
+    background-image: url(../img/pdf.png);
+    height: 40px;
+    width: 40px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    float: left;
+    margin-right: 5px
+}
+
+.x-ie8 .help-main .thumb-pdf {
+    background-image: url(../img/pdf-small.png)
+}
+
+.help-main .thumb-word {
+    background-image: url(../img/64px-word.png);
+    height: 40px;
+    width: 40px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    float: left;
+    margin-right: 5px
+}
+
+.x-ie8 .help-main .thumb-word {
+    background-image: url(../img/32px-word.png)
+}
+
+.help-main .thumb-mesa {
+    background-image: url(../img/logo/MESA_logo.png);
+    height: 50px;
+    width: 100px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    float: left;
+    margin-right: 5px
+}
+
+.x-ie8 .help-main .thumb-mesa {
+    background-image: url(../img/logo/MESA_logo.png)
+}
+
+.help-main .thumb-copernicus {
+    background-image: url(../img/logo/copernicus-logo.png);
+    height: 50px;
+    width: 100px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    float: left;
+    margin-right: 5px
+}
+
+.x-ie8 .help-main .thumb-copernicus {
+    background-image: url(../img/logo/copernicus-logo.png)
+}
+
+.help-main .thumb-eumetsat {
+    background-image: url(../img/logo/eumetsat-logo.png);
+    height: 50px;
+    width: 100px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    float: left;
+    margin-right: 5px
+}
+
+.x-ie8 .help-main .thumb-eumetsat {
+    background-image: url(../img/logo/eumetsat-logo.png)
+}
+
+.help-main .thumb-estation2 {
+    background-image: url(../img/logo/estation2-logo.png);
+    height: 50px;
+    width: 100px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    float: left;
+    margin-right: 5px
+}
+
+.x-ie8 .help-main .thumb-estation2 {
+    background-image: url(../img/logo/estation2-logo.png)
+}
+
+.help-main .thumb-download {
+    height: 40px;
+    width: 40px;
+    background-image: url(../img/download-small.png);
+    background-position: right center;
+    background-repeat: no-repeat;
+    background-size: 50%;
+    opacity: .5;
+    float: right
+}
+
+.help-main .thumb-gotolink {
+    height: 40px;
+    width: 40px;
+    background-image: url(../img/external-link-small.png);
+    background-position: right center;
+    background-repeat: no-repeat;
+    background-size: 50%;
+    opacity: .5;
+    float: right
+}
+
+.help-main .thumb {
+    display: table-cell;
+    background-color: white;
+    padding: 16px;
+    border-radius: 3px;
+    -webkit-box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.25);
+    -moz-box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.25);
+    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.25)
+}
+
+.help-main .thumb:hover .thumb-download {
+    opacity: 1
+}
+
+.help-main .thumb:hover .thumb-gotolink {
+    opacity: 1
+}
+
+.help-main .thumb-wrap {
+    display: table;
+    float: left;
+    width: 50%;
+    padding: 5px
+}
+
+@media screen and (max-width: 980px) and (orientation: landscape), screen and (max-width: 760px) and (orientation: portrait) {
+    .help-main .thumb-wrap {
+        float: none;
+        width: 100%;
+        padding: 5px 0
+    }
 }

@@ -27,7 +27,7 @@ Ext.define("esapp.view.dashboard.Dashboard",{
     name:'dashboardmain',
     id: 'dashboard-panel',
 
-    title: '<span class="dashboard-header-title-style">MESA Full eStation</span>',
+    title: '<span class="dashboard-header-title-style">' + esapp.Utils.getTranslation('mesa_full_estation') + '</span>',
     titleAlign: 'center',
     header: {
         cls: 'dashboard-header-style'
@@ -122,7 +122,7 @@ Ext.define("esapp.view.dashboard.Dashboard",{
         ups_status = {
             xtype: 'panel',
             name: 'ups-status',
-            title: '<span class="dashboard-header-title-style">UPS/power status</span>',
+            title: '<span class="dashboard-header-title-style">' + esapp.Utils.getTranslation('ups-powerstatus') + '</span>',
             titleAlign: 'center',
             header: {
                 cls: 'dashboard-header-style'

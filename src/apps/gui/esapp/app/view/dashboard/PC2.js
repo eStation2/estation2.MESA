@@ -25,7 +25,7 @@ Ext.define("esapp.view.dashboard.PC2",{
     name:'dashboardpc',
     id: 'dashboardpc',
 
-    title: '<span class="panel-title-style">Processing (PC2)</span>',
+    title: '<span class="panel-title-style">' + esapp.Utils.getTranslation('processing_pc2') + '</span>',
     paneltitle:'',
     setdisabledPartial:false,
     setdisabledAll:false,
@@ -83,88 +83,88 @@ Ext.define("esapp.view.dashboard.PC2",{
                 {
                     xtype: 'servicemenubutton',
                     service: 'eumetcast',
-                    text: 'Eumetcast',
+                    text: esapp.Utils.getTranslation('eumetcast'),     // 'Eumetcast',
                     handler: 'checkStatusServices',
                     disabled: me.setdisabledPartial
                 }, ' ',
                 {
                     xtype: 'servicemenubutton',
                     service: 'internet',
-                    text: 'Internet',
+                    text: esapp.Utils.getTranslation('internet'),     // 'Internet',
                     handler: 'checkStatusServices',
                     disabled: me.setdisabledPartial
                 }, ' ',
                 {
                     xtype: 'servicemenubutton',
                     service: 'ingest',
-                    text: 'Ingest',
+                    text: esapp.Utils.getTranslation('ingest'),     // 'Ingest',
                     handler: 'checkStatusServices',
                     disabled: me.setdisabledPartial
                 }, ' ',
                 {
                     xtype: 'servicemenubutton',
                     service: 'processing',
-                    text: 'Processing',
+                    text: esapp.Utils.getTranslation('processing'),     // 'Processing',
                     handler: 'checkStatusServices',
                     disabled: me.setdisabledPartial
                 }, ' ',
                 {
                     xtype: 'servicemenubutton',
                     service: 'system',
-                    text: 'System',
+                    text: esapp.Utils.getTranslation('system'),     // 'System',
                     handler: 'checkStatusServices'
                 }, '-',
                 {
                 xtype: 'splitbutton',
                 name: 'datasyncbtn',
-                text: 'Data Synchronization',
+                text: esapp.Utils.getTranslation('datasynchronization'),     // 'Data Synchronization',
                 iconCls: 'data-sync',       // 'fa fa-exchange fa-2x',  //  fa-spin 'icon-loop', // icomoon fonts
                 //style: { color: 'blue' },
                 scale: 'medium',
-                width: 225,
-                handler: 'checkStatusServices',
+                width: 255,
+                handler: function(){this.showMenu();},
                 menu: Ext.create('Ext.menu.Menu', {
-                    width: 200,
+                    width: 230,
                     margin: '0 0 10 0',
                     floating: true,
                     items: [
                         {   xtype: 'checkbox',
-                            boxLabel: 'Disable Auto Sync',
+                            boxLabel: esapp.Utils.getTranslation('disableautosync'),     // 'Disable Auto Sync',
                             name: 'enabledisableautosync',
                             checked   : true,
                             handler: 'execEnableDisableAutoSync'
                         },
-                        {   text: 'Execute Now',
+                        {   text: esapp.Utils.getTranslation('executenow'),     // 'Execute Now',
                             name: 'executenow',
                             glyph: 'xf04b@FontAwesome',
                             cls:'menu-glyph-color-green',
-                            handler: 'execManualSync'
+                            handler: 'execManualDataSync'
                         }
                     ]
                 })
             },{
                 xtype: 'splitbutton',
                 name: 'dbsyncbtn',
-                text: 'DB Synchronization',
+                text: esapp.Utils.getTranslation('dbsynchronization'),     // 'DB Synchronization',
                 iconCls: 'db-sync',       // 'fa fa-database fa-2x',  //  fa-spin 'icon-loop', // icomoon fonts
                 //style: { color: 'blue' },
                 scale: 'medium',
-                width: 225,
-                handler: 'checkStatusServices',
+                width: 255,
+                handler: function(){this.showMenu();},
                 menu: Ext.create('Ext.menu.Menu', {
-                    width: 200,
+                    width: 230,
                     margin: '0 0 10 0',
                     floating: true,
                     items: [
                         {   xtype: 'checkbox',
-                            boxLabel: 'Disable Auto Sync',
+                            boxLabel: esapp.Utils.getTranslation('disableautosync'),     // 'Disable Auto Sync',
                             name: 'enabledisableautodbsync',
                             checked   : true,
 //                            glyph: 'xf04b@FontAwesome',
 //                            cls:'menu-glyph-color-green',
                             handler: 'execEnableDisableAutoDBSync'
                         },
-                        {   text: 'Execute Now',
+                        {   text: esapp.Utils.getTranslation('executenow'),     // 'Execute Now',
                             name: 'executenow',
                             glyph: 'xf04b@FontAwesome',
                             cls:'menu-glyph-color-green',
@@ -194,24 +194,25 @@ Ext.define("esapp.view.dashboard.PC2",{
             },
             items: [{
                 xtype: 'box',
-                html: 'Active version:',
+                html: esapp.Utils.getTranslation('activeversion'),     // 'Active version:',
                 cls: me.textCls
             },{
                 xtype: 'box',
-                html: '<b>'+me.activeversion+'</b>'
+                html: '<b>'+me.activeversion+'</b>',
+                width: 120
             },{
                 xtype: 'box',
-                html: 'Mode:',
+                html: esapp.Utils.getTranslation('mode'),     // 'Mode:',
                 cls: me.textCls,
-                width: 140
+                width: 150
             },{
                 xtype: 'box',
                 html: '<b>'+me.currentmode+'</b>'
             },{
                 xtype: 'box',
-                html: 'PostgreSQL Status:',
+                html: esapp.Utils.getTranslation('postgresql-status'),     // 'PostgreSQL Status:',
                 cls: me.textCls,
-                width: 140
+                width: 150
             },{
                 xtype: 'box',
                 height:26,
@@ -219,9 +220,9 @@ Ext.define("esapp.view.dashboard.PC2",{
                 //src: 'resources/img/icons/check-square-o.png'
             },{
                 xtype: 'box',
-                html: 'Internet connection:',
+                html: esapp.Utils.getTranslation('internetconnection'),     // 'Internet connection:',
                 cls: me.textCls,
-                width: 140
+                width: 150
             },{
                 xtype: 'box',
                 height:26,
@@ -230,7 +231,7 @@ Ext.define("esapp.view.dashboard.PC2",{
             }]
         },{
             region: 'south',
-            title: '&nbsp;Disk status',
+            title: '&nbsp;' + esapp.Utils.getTranslation('diskstatus'),     // , 'Disk status'
             split:false,
             collapsible:true,
             collapsed: true,

@@ -175,6 +175,9 @@
         },{
             "path": "resources/css/esapp.css",
             "update": "full"
+//        },{
+//            "path": "resources/css/help.css",
+//            "update": "full"
         },{
             "path": "/eStation2/lib/js/OL3/css/ol.css",
             "remote": true

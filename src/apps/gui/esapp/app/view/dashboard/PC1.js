@@ -22,7 +22,7 @@ Ext.define("esapp.view.dashboard.PC1",{
     name:'dashboardpc1',
     id: 'dashboardpc1',
 
-    title: '<span class="panel-title-style">Receiving station (PC1)</span>',
+    title: '<span class="panel-title-style">' + esapp.Utils.getTranslation('receivingstation') + '</span>',
     disabled:false,
 
     layout: 'border',

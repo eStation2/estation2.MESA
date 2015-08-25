@@ -351,6 +351,8 @@ def loop_system(dry_run=False):
         schemas_db_dump  = []
         do_save_system = True
 
+        logger.info("Starting the System Service loop")
+
         # Implement the logic of operations based on type/role/mode
         if system_settings['type_installation'] == 'Full':
             if system_settings['role'] == 'PC2':
@@ -390,6 +392,7 @@ def loop_system(dry_run=False):
         if do_data_sync:
             check_time = check_delay_time(operation,delay_minutes=delay_data_sync_minutes)
             if check_time:
+                logger.info("Executing data synchronization")
                 data_source=es_constants.es2globals['processing_dir']
                 data_target=ip_target+'::products'+es_constants.es2globals['processing_dir']
                 system_data_sync(data_source, data_target)
@@ -400,6 +403,7 @@ def loop_system(dry_run=False):
         if len(schemas_db_sync) > 0:
             check_time = check_delay_time(operation,delay_minutes=delay_db_sync_minutes)
             if check_time:
+                logger.info("Executing db synchronization")
                 # Build the list of rsyncs to be activated
                 list_rsyncs=[]
                 for schema in schemas_db_sync:
@@ -414,11 +418,13 @@ def loop_system(dry_run=False):
         if len(schemas_db_dump) > 0:
             check_time = check_delay_time(operation,time=time_for_db_dump)
             if check_time:
+                logger.info("Executing db dump")
                 system_db_dump(schemas_db_sync)
 
         # Save System Status
         operation = 'save_status'
         if do_save_system:
+            logger.info("Saving the status of the machine")
             save_status_local_machine()
 
         # Sleep some time

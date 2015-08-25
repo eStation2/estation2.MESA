@@ -10,8 +10,8 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
         'Ext.chart.CartesianChart',
         'Ext.chart.axis.Numeric',
         'Ext.chart.axis.Category',
-        'Ext.chart.series.Bar',
-        'Ext.chart.interactions.ItemHighlight'
+        'Ext.chart.series.Bar'
+        //,'Ext.chart.interactions.ItemHighlight'
     ],
 
     "controller": "widgets-datasetcompletenesschart",
@@ -21,15 +21,23 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
     xtype: 'datasetchart',
 
     //configs with auto generated getter/setter methods
-    config: {
-        firstdate:'',
-        lastdate:'',
-        totfiles:0,
-        missingfiles:0
-    },
+    //config: {
+    //    firstdate:'',
+    //    lastdate:'',
+    //    totfiles:0,
+    //    missingfiles:0,
+    //    tooltipintervals: ''
+    //},
+
+    firstdate:'',
+    lastdate:'',
+    totfiles:0,
+    missingfiles:0,
+    tooltipintervals: '',
 
     margin:0,
     bodyPadding:0,
+    //bufferedRenderer: true,
 
     initComponent: function() {
         var me = this,
@@ -38,7 +46,45 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
 
         var missingFilesText = '';
         if(me.missingfiles>0)
-           missingFilesText = 'Missing: ' + me.missingfiles;
+           missingFilesText = esapp.Utils.getTranslation('Missing') + ': ' + me.missingfiles;
+
+        me.listeners = {
+            //element: 'el',
+            //click: function() {
+            //    var me = this;
+            //    console.info(me.tooltipintervals);
+            //    var widgettooltip = Ext.getCmp(me.getId() + '_tooltip');
+            //    widgettooltip.enable();
+            //    widgettooltip.show();
+            //},
+            afterrender: function () {
+                Ext.create('Ext.tip.ToolTip', {
+                    id: me.getId() + '_tooltip',
+                    target: me.getId(),
+                    disabled: true,
+                    trackMouse: false,
+                    autoHide: false,
+                    dismissDelay: 5000, // auto hide after 5 seconds
+                    closable: true,
+                    anchor: 'left',
+                    padding: 10,
+                    html: me.tooltipintervals, // Tip content
+                    listeners: {
+                        close: function() {
+                            this.disable();
+                        }
+                    }
+                });
+
+                this.getEl().on('click', function() {
+                    var widgettooltip = Ext.getCmp(me.getId() + '_tooltip');
+                    widgettooltip.html = me.tooltipintervals;
+                    widgettooltip.enable();
+                    widgettooltip.show();
+                });
+
+            }
+        };
 
         me.items = [{
             xtype: 'cartesian',
@@ -63,7 +109,7 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
             //}),
             sprites:  [{
                 type: 'text',
-                text: 'Files: ' + me.totfiles,
+                text: esapp.Utils.getTranslation('files') + ': ' + me.totfiles,
                 fontSize: fontsize,
                 x: 120,
                 y: spriteY
@@ -112,8 +158,8 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
                 stacked: true,
                 style: {
                     opacity: 0.80
-                },
-                //highlight: {
+                }
+                //,highlight: {
                 //    fillStyle: 'white' // 'transparent'
                 //    ,strokeStyle: "black"
                 //    ,opacity: 30
@@ -121,27 +167,27 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
                 //        margin: 5
                 //    }
                 //},
-                tooltip: {
-                    trackMouse: false,
-                    dismissDelay:60000,
-                    style: 'background: #fff',
-                    renderer: function (storeItem, item) {
-                        var allperiods = '';
-                        var arrayLength = item.series.getTitle().length;
-                        var thisperiodindex = Ext.Array.indexOf(item.series.getYField(), item.field);
-
-                        for (var i = 0; i < arrayLength; i++) {
-                            if (i == thisperiodindex) {
-                                allperiods = allperiods + '<b>'+item.series.getTitle()[thisperiodindex] + '</b></br>';
-                            }
-                            else {
-                                allperiods = allperiods + item.series.getTitle()[i] + '</br>';
-                            }
-                        }
-
-                        this.setHtml(allperiods);
-                    }
-                }
+                //,tooltip: {
+                //    trackMouse: false,
+                //    dismissDelay:60000,
+                //    style: 'background: #fff',
+                //    renderer: function (storeItem, item) {
+                //        var allperiods = '';
+                //        var arrayLength = item.series.getTitle().length;
+                //        var thisperiodindex = Ext.Array.indexOf(item.series.getYField(), item.field);
+                //
+                //        for (var i = 0; i < arrayLength; i++) {
+                //            if (i == thisperiodindex) {
+                //                allperiods = allperiods + '<b>'+item.series.getTitle()[thisperiodindex] + '</b></br>';
+                //            }
+                //            else {
+                //                allperiods = allperiods + item.series.getTitle()[i] + '</br>';
+                //            }
+                //        }
+                //
+                //        this.setHtml(allperiods);
+                //    }
+                //}
             }]
 
         }];

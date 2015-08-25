@@ -12,6 +12,8 @@ import traceback
 
 from sqlalchemy.sql import func, select, or_, and_, desc, asc, expression
 from sqlalchemy.orm import aliased
+from sqlalchemy.orm import exc
+
 from lib.python import es_logging as log
 from database import connectdb
 from database import crud
@@ -158,6 +160,7 @@ def set_thema(themaid='', echo=False):
             print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("set_thema: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -955,9 +958,6 @@ def get_frequency(frequency_id='', echo=False):
         #frequency = db.frequency.filter(where).one()
         frequency = db.frequency.get(frequency_id)
 
-        # if echo:
-        #     print frequency
-
         return frequency
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
@@ -1078,25 +1078,23 @@ def get_product_in_info(allrecs=False, echo=False,
     try:
         if allrecs:
             product_in_info = db.sub_datasource_description.order_by(asc(db.sub_datasource_description.productcode)).all()
-            # if echo:
-            #     for row in product_in_info:
-            #         print row
         else:
             where = and_(db.sub_datasource_description.productcode == productcode,
                          db.sub_datasource_description.subproductcode == subproductcode,
                          db.sub_datasource_description.version == version,
                          db.sub_datasource_description.datasource_descr_id == datasource_descr_id)
-            product_in_info = db.sub_datasource_description.filter(where).one()
-            # if echo:
-            #     print product_in_info
+            product_in_info = db.sub_datasource_description.filter(where).first()
+        if product_in_info is None:
+            product_in_info = []
         return product_in_info
-    except:
+    except exc.NoResultFound:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         if echo:
             print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_product_in_info: Database query error!\n -> {}".format(exceptionvalue))
-        #raise Exception("get_product_in_info: Database query error!\n ->%s" % exceptionvalue)
+        product_in_info = []
+        return product_in_info
     finally:
         if db.session:
             db.session.close()
@@ -1120,25 +1118,22 @@ def get_product_native(productcode='', version='undefined', allrecs=False, echo=
         if allrecs:
             where = db.product.product_type == 'Native'
             product = db.product.filter(where).order_by(asc(db.product.productcode)).all()
-            # if echo:
-            #     for row in product:
-            #         print row
         else:
             where = and_(db.product.productcode == productcode,
                          db.product.product_type == 'Native',
                          db.product.version == version)
-            product = db.product.filter(where).one()
-
-            # if echo:
-            #     print product
+            product = db.product.filter(where).first()
+        if product is None:
+            product = []
         return product
-    except:
+    except exc.NoResultFound:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         if echo:
             print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_product_native : Database query error!\n -> {}".format(exceptionvalue))
-        #raise Exception("get_product_native: Database query error!\n ->%s" % exceptionvalue)
+        product = []
+        return product
     finally:
         if db.session:
             db.session.close()
@@ -1162,19 +1157,18 @@ def get_subproduct(productcode='', version='undefined', subproductcode='', echo=
         where = and_(db.product.productcode == productcode,
                      db.product.subproductcode == subproductcode,
                      db.product.version == version)
-        subproduct = db.product.filter(where).one()
-
-        # if echo:
-        #     print subproduct
-
+        subproduct = db.product.filter(where).first()
+        if subproduct is None:
+            subproduct = []
         return subproduct
-    except:
+    except exc.NoResultFound:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         if echo:
             print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_subproduct: Database query error!\n -> {}".format(exceptionvalue))
-        #raise Exception("get_subproduct: Database query error!\n ->%s" % exceptionvalue)
+        subproduct = []
+        return subproduct
     finally:
         if db.session:
             db.session.close()
@@ -1196,22 +1190,20 @@ def get_eumetcast(source_id='', allrecs=False, echo=False):
     try:
         if allrecs:
             eumetcasts = db.eumetcast_source.order_by(asc(db.eumetcast_source.eumetcast_id)).all()
-            # if echo:
-            #     for row in eumetcasts:
-            #         print row
         else:
             where = db.eumetcast_source.eumetcast_id == source_id
-            eumetcasts = db.eumetcast_source.filter(where).one()
-            # if echo:
-            #     print eumetcasts
+            eumetcasts = db.eumetcast_source.filter(where).first()
+        if eumetcasts is None:
+            eumetcasts = []
         return eumetcasts
-    except:
+    except exc.NoResultFound:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         if echo:
             print traceback.format_exc()
         # Exit the script and print an error telling what happened.
-        raise logger.error("get_eumetcast: Database query error!\n -> {}".format(exceptionvalue))
-        #raise Exception("get_eumetcast: Database query error!\n ->%s" % exceptionvalue)
+        logger.error("get_eumetcast: Database query error!\n -> {}".format(exceptionvalue))
+        eumetcasts = []
+        return eumetcasts
     finally:
         if db.session:
             db.session.close()
@@ -1233,22 +1225,20 @@ def get_internet(internet_id='', allrecs=False, echo=False):
     try:
         if allrecs:
             internet = db.internet_source.order_by(asc(db.internet_source.internet_id)).all()
-            # if echo:
-            #     for row in internet:
-            #         print row
         else:
             where = db.internet_source.internet_id == internet_id
-            internet = db.internet_source.filter(where).one()
-            # if echo:
-            #     print internet
+            internet = db.internet_source.filter(where).first()
+        if internet is None:
+            internet = []
         return internet
-    except:
+    except exc.NoResultFound:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         if echo:
             print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_internet: Database query error!\n -> {}".format(exceptionvalue))
-        #raise Exception("get_internet: Database query error!\n ->%s" % exceptionvalue)
+        internet = []
+        return internet
     finally:
         if db.session:
             db.session.close()
@@ -1272,15 +1262,11 @@ def get_mapset(mapsetcode='', allrecs=False, echo=False):
         if allrecs:
             if db.mapset.order_by(asc(db.mapset.mapsetcode)).count() >= 1:
                 mapset = db.mapset.order_by(asc(db.mapset.mapsetcode)).all()
-                # if echo:
-                #     for row in mapset:
-                #         print row
         else:
             where = db.mapset.mapsetcode == mapsetcode
             if db.mapset.filter(where).count() == 1:
                 mapset = db.mapset.filter(where).one()
-                # if echo:
-                #     print mapset
+
         return mapset
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()

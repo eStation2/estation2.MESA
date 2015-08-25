@@ -29,6 +29,7 @@ from apps.acquisition import get_eumetcast
 from apps.acquisition import acquisition
 from apps.processing import processing
 from apps.productmanagement.datasets import Dataset
+from apps.es2system import es2system
 # from apps.productmanagement.datasets import Frequency
 from apps.productmanagement.products import Product
 # from apps.analysis import mapserver
@@ -95,6 +96,7 @@ urls = (
     "/datasets", "DataSets",
 
     "/analysis/getproductlayer", "GetProductLayer",
+    "/analysis/getvectorlayer", "GetVectorLayer",
     "/analysis/productnavigator", "ProductNavigatorDataSets",
     "/analysis/getcolorschemes", "GetColorSchemes",
     "/analysis/gettimeline", "GetTimeLine",
@@ -1159,6 +1161,20 @@ class ChangeLogLevel:
         return changethema_json
 
 
+class GetVectorLayer:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        getparams = web.input()
+        filename = getparams['file']
+        layerfilepath = '/srv/www/eStation2_Layers/'+filename
+
+        layerfile = open(layerfilepath, 'r')
+        layerfilecontent = layerfile.read()
+        return layerfilecontent
+
+
 class SystemReport:
     def __init__(self):
         self.lang = "eng"
@@ -1756,6 +1772,8 @@ class DataSets:
                                 dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
                                 completeness = dataset.get_dataset_normalized_info()
                                 dataset_dict['datasetcompleteness'] = completeness
+                                dataset_dict['mapsetcode'] = mapset_dict['mapsetcode']
+                                dataset_dict['mapset_descriptive_name'] = mapset_dict['descriptive_name']
 
                                 mapset_dict['mapsetdatasets'].append(dataset_dict)
                         prod_dict['productmapsets'].append(mapset_dict)
@@ -1810,10 +1828,10 @@ class CheckStatusAllServices:
             process = "true"
 
         system = "false"
-        # pid_file = es_constants.system_pid_filename
-        # system_daemon = system.SystemDaemon(pid_file, dry_run=dry_run)
-        # if system_daemon.status():
-        #     system = "true"
+        pid_file = es_constants.system_pid_filename
+        system_daemon = es2system.SystemDaemon(pid_file, dry_run=dry_run)
+        if system_daemon.status():
+            system = "true"
 
         servicesstatus_json = '{"success": true, "eumetcast": ' + eumetcast + \
                               ', "internet": ' + internet + \
@@ -1941,31 +1959,30 @@ class ExecuteServiceTask:
                 message = 'Processing service restarted'
 
         if getparams.service == 'system':
-            message = 'System service to be implemented!'
-            # # Define pid file and create daemon
-            # pid_file = es_constants.system_pid_filename
-            # system_daemon = system.SystemDaemon(pid_file, dry_run=dryrun)
+            # Define pid file and create daemon
+            pid_file = es_constants.system_pid_filename
+            system_daemon = es2system.SystemDaemon(pid_file, dry_run=dryrun)
             #
-            # status = system_daemon.status()
-            # system_service_script = es_constants.es2globals['proc_service_dir']+os.sep+'service_system.py'
-            # if getparams.task == 'stop':
-            #     if status:
-            #         os.system("python " + system_service_script + " stop")
-            #         message = 'System service stopped'
-            #     else:
-            #         message = 'System service is already down'
+            status = system_daemon.status()
+            system_service_script = es_constants.es2globals['status_system_dir']+os.sep+'service_system.py'
+            if getparams.task == 'stop':
+                if status:
+                    os.system("python " + system_service_script + " stop")
+                    message = 'System service stopped'
+                else:
+                    message = 'System service is already down'
             #
-            # elif getparams.task == 'run':
-            #     if not status:
-            #         os.system("python " + system_service_script + " start")
-            #         message = 'System service started'
-            #     else:
-            #         message = 'System service was already up'
-            #
-            # elif getparams.task == 'restart':
-            #     os.system("python " + system_service_script + " stop")
-            #     os.system("python " + system_service_script + " start")
-            #     message = 'System service restarted'
+            elif getparams.task == 'run':
+                if not status:
+                    os.system("python " + system_service_script + " start")
+                    message = 'System service started'
+                else:
+                    message = 'System service was already up'
+
+            elif getparams.task == 'restart':
+                os.system("python " + system_service_script + " stop")
+                os.system("python " + system_service_script + " start")
+                message = 'System service restarted'
 
         logger.info(message)
         servicesstatus_json = '{"success": true, "message": "' + message + '"}'

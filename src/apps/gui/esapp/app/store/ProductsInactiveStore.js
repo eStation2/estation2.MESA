@@ -40,6 +40,7 @@ Ext.define('esapp.store.ProductsInactiveStore', {
         },
         listeners: {
             exception: function(proxy, response, operation){
+                // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
                 Ext.Msg.show({
                     title: 'PRODUCTS INACTIVE STORE - REMOTE EXCEPTION',
                     msg: operation.getError(),
@@ -52,7 +53,7 @@ Ext.define('esapp.store.ProductsInactiveStore', {
     ,grouper:{
              // property: 'cat_descr_name',
              groupFn : function (item) {
-                 return "<span style='display: none;'>" + item.get('order_index') + "</span>" + item.get('cat_descr_name')
+                 return "<span style='display: none;'>" + item.get('order_index') + "</span>" + esapp.Utils.getTranslation(item.get('category_id'))
 //                                "</span><span class='group-header-style'>" + item.get('cat_descr_name') + "</span>"
              },
              sortProperty: 'order_index'

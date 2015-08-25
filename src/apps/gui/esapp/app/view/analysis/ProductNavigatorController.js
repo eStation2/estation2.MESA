@@ -5,7 +5,7 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
     loadProductsGrid: function() {
 
         var productinfopanel = this.getView().lookupReference('product-datasets-info');
-        productinfopanel.setTitle('<div class="panel-title-style-16">Product Info</div>');
+        productinfopanel.setTitle('<div class="panel-title-style-16">'+esapp.Utils.getTranslation('productinfo')+'</div>');
         productinfopanel.collapse();
 
         var mapsetdatasetgrid = this.getView().lookupReference('mapset-dataset-grid');
@@ -23,7 +23,7 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
 
         var prodgrid = this.getView().lookupReference('productsGrid');
         var myLoadMask = new Ext.LoadMask({
-            msg    : 'Loading...',
+            msg    : esapp.Utils.getTranslation('loading'), // 'Loading...',
             target : prodgrid
         });
         myLoadMask.show();
@@ -93,7 +93,7 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
         // here we do not use multiSelect so nodes is the record of the selected mapset!
         this.getStore('mapsetdatasets').setData(record.get('mapsetdatasets'));
         var mapsetdatasetgrid = this.lookupReference('mapset-dataset-grid');
-        mapsetdatasetgrid.columns[0].setText('<div class="grid-header-style">Data sets' + '<b class="smalltext"> for mapset ' + record.get('descriptive_name') + '</b></div>');
+        mapsetdatasetgrid.columns[0].setText('<div class="grid-header-style">' + esapp.Utils.getTranslation('datasets') + ' <b class="smalltext">' + esapp.Utils.getTranslation('formapset') + ' ' + record.get('descriptive_name') + '</b></div>');
         mapsetdatasetgrid.show();
     },
 
@@ -119,7 +119,7 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
         this.getStore('colorschemes').removeAll();
 
         var myLoadMask = new Ext.LoadMask({
-            msg    : 'Loading...',
+            msg    : esapp.Utils.getTranslation('loading'), // 'Loading...',
             target : colorschemesgrid
         });
         myLoadMask.show();

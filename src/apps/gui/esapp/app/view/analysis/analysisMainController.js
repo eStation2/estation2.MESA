@@ -15,18 +15,18 @@ Ext.define('esapp.view.analysis.analysisMainController', {
         var analysismain = btn.up().up();
         var i, ii;
         if (btn.pressed){
-            btn.setText('Show Background layer');
-            analysismain.map.removeControl(analysismain.mousePositionControl);
-            for (i = 0, ii = analysismain.backgroundLayers.length; i < ii; ++i) {
-                analysismain.backgroundLayers[i].setVisible(!btn.pressed);
-            }
-        }
-        else {
-            btn.setText('Hide Background layer');
+            btn.setText(esapp.Utils.getTranslation('hidebackgroundlayer'));
             analysismain.map.addControl(analysismain.mousePositionControl);
             for (i = 0, ii = analysismain.backgroundLayers.length; i < ii; ++i) {
                 //analysismain.backgroundLayers[i].setVisible(analysismain.bingStyles[i] == 'Road');
                 analysismain.backgroundLayers[i].setVisible(true);
+            }
+        }
+        else {
+            btn.setText(esapp.Utils.getTranslation('showbackgroundlayer'));
+            analysismain.map.removeControl(analysismain.mousePositionControl);
+            for (i = 0, ii = analysismain.backgroundLayers.length; i < ii; ++i) {
+                analysismain.backgroundLayers[i].setVisible(false);
             }
         }
     }
@@ -35,7 +35,7 @@ Ext.define('esapp.view.analysis.analysisMainController', {
 
         var prodgrid = this.getView().lookupReference('TimeSeriesProductsGrid');
         var myLoadMask = new Ext.LoadMask({
-            msg    : 'Loading...',
+            msg    : esapp.Utils.getTranslation('loading'), // 'Loading...',
             target : prodgrid
         });
         myLoadMask.show();
@@ -84,8 +84,8 @@ Ext.define('esapp.view.analysis.analysisMainController', {
 
         if (wkt_polygon.getValue() == '') {
             Ext.Msg.show({
-               title: 'Select a polygon!',
-               msg: 'Please select or draw a polygon in a MapView!',
+               title: esapp.Utils.getTranslation('selectapolygon'),    // 'Select a polygon!',
+               msg: esapp.Utils.getTranslation('pleaseselectapolygon'),    // 'Please select or draw a polygon in a MapView!',
                width: 300,
                buttons: Ext.Msg.OK,
                animEl: '',
@@ -99,8 +99,8 @@ Ext.define('esapp.view.analysis.analysisMainController', {
                 if (Ext.getCmp("YearTimeseries").getValue()== null || Ext.getCmp("YearTimeseries").getValue() == '') {
                     Ext.getCmp("YearTimeseries").validate();
                     Ext.Msg.show({
-                       title: 'Mandatory field',
-                       msg: 'Please select a year!',
+                       title: esapp.Utils.getTranslation('mandatoryfield'),    // 'Mandatory field',
+                       msg: esapp.Utils.getTranslation('pleaseselectayear'),    // 'Please select a year!',
                        width: 300,
                        buttons: Ext.Msg.OK,
                        animEl: '',
@@ -116,8 +116,8 @@ Ext.define('esapp.view.analysis.analysisMainController', {
                 if (Ext.getCmp("ts_from_period").getValue()== null || Ext.getCmp("ts_from_period").getValue() == '') {
                     Ext.getCmp("ts_from_period").validate();
                     Ext.Msg.show({
-                       title: 'Mandatory field',
-                       msg: 'Please select a "From date"!',
+                       title: esapp.Utils.getTranslation('mandatoryfield'),    // 'Mandatory field',
+                       msg: esapp.Utils.getTranslation('pleaseselectafromdate'),    // 'Please select a "From date"!',
                        width: 300,
                        buttons: Ext.Msg.OK,
                        animEl: '',
@@ -128,8 +128,8 @@ Ext.define('esapp.view.analysis.analysisMainController', {
                 if (Ext.getCmp("ts_to_period").getValue()== null || Ext.getCmp("ts_to_period").getValue() == '') {
                     Ext.getCmp("ts_to_period").validate();
                     Ext.Msg.show({
-                       title: 'Mandatory field',
-                       msg: 'Please select a "To date"!',
+                       title: esapp.Utils.getTranslation('mandatoryfield'),    // 'Mandatory field',
+                       msg: esapp.Utils.getTranslation('pleaseselectatodate'),    // 'Please select a "To date"!',
                        width: 300,
                        buttons: Ext.Msg.OK,
                        animEl: '',
@@ -158,8 +158,8 @@ Ext.define('esapp.view.analysis.analysisMainController', {
         }
         else {
             Ext.Msg.show({
-               title: 'Mandatory field',
-               msg: 'Please select one or more times series!',
+               title: esapp.Utils.getTranslation('mandatoryfield'),    // 'Mandatory field',
+               msg: esapp.Utils.getTranslation('pleaseselectatimeseries'),    // 'Please select one or more times series!',
                width: 300,
                buttons: Ext.Msg.OK,
                animEl: '',

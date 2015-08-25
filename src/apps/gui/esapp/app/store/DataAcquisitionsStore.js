@@ -40,6 +40,7 @@ Ext.define('esapp.store.DataAcquisitionsStore', {
         },
         listeners: {
             exception: function(proxy, response, operation){
+                // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
                 Ext.Msg.show({
                     title: 'ACQUISITION STORE- REMOTE EXCEPTION',
                     msg: operation.getError(),
@@ -52,7 +53,9 @@ Ext.define('esapp.store.DataAcquisitionsStore', {
 
     ,listeners: {
         write: function(store, operation){
-            Ext.toast({ html: operation.getResultSet().message, title: "Get update", width: 300, align: 't' });
+            Ext.toast({ html: operation.getResultSet().message,
+                        title: esapp.Utils.getTranslation('getupdated'),  // "Get updated",  "Obtenir mise à jour"
+                        width: 300, align: 't' });
         }
     }
 });

@@ -16,7 +16,7 @@ Ext.define('esapp.view.system.ThemaAdminController', {
                         checked = false;
 
                     if (thema_id == me.params.currentthema){
-                        fieldlabel = 'Active thema';
+                        fieldlabel = esapp.Utils.getTranslation('activethema');    // 'Active thema';
                         checked = true;
                     }
                     themaradio = {
@@ -45,7 +45,9 @@ Ext.define('esapp.view.system.ThemaAdminController', {
             success: function(response, opts){
                 var result = Ext.JSON.decode(response.responseText);
                 if (result.success){
-                    Ext.toast({ html: 'System thema is set to '+newthema.thema, title: 'Thema changed', width: 200, align: 't' });
+                    Ext.toast({ html: esapp.Utils.getTranslation('systemthemasetto') + " " + newthema.thema,
+                                title: esapp.Utils.getTranslation('themachanged'),
+                                width: 200, align: 't' });
                 }
                 var systemsettingsstore  = Ext.data.StoreManager.lookup('SystemSettingsStore');
                 var systemsettingsrecord = systemsettingsstore.getModel().load(0, {

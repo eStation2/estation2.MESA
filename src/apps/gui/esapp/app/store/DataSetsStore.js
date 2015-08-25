@@ -12,7 +12,7 @@ Ext.define('esapp.store.DataSetsStore', {
 
     storeId : 'DataSetsStore'
 
-    ,autoLoad: true
+    ,autoLoad: false
     ,autoSync: true
     ,remoteSort: false
     ,remoteGroup: false
@@ -42,6 +42,7 @@ Ext.define('esapp.store.DataSetsStore', {
         },
         listeners: {
             exception: function(proxy, response, operation){
+                // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
                 Ext.Msg.show({
                     title: 'DATASETS STORE - REMOTE EXCEPTION',
                     msg: operation.getError(),
@@ -54,7 +55,7 @@ Ext.define('esapp.store.DataSetsStore', {
     ,grouper:{
              // property: 'cat_descr_name',
              groupFn : function (item) {
-                 return "<span style='display: none;'>" + item.get('order_index') + "</span>" + item.get('cat_descr_name')
+                 return "<span style='display: none;'>" + item.get('order_index') + "</span>" + esapp.Utils.getTranslation(item.get('category_id'))
                  //return item.get('cat_descr_name')
              },
              sortProperty: 'order_index'

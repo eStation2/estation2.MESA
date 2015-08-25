@@ -20,18 +20,21 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
         'Ext.grid.column.Action'
     ],
 
-    title: 'Activate Product',
+    title: esapp.Utils.getTranslation('activateproduct'),  // 'Activate Product',
     header: {
         titlePosition: 0,
         titleAlign: 'center'
     },
     modal: true,
+    constrainHeader: true,
+    //constrain: true,
     closable: true,
     closeAction: 'destroy', // 'hide',
-    resizable: false,
+    resizable: true,
     maximizable: false,
+    minWidth: 650,
     width: 650,
-    height: 800,
+    height: 700,
     layout: {
         type  : 'fit'
         //,padding: 5
@@ -40,7 +43,7 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
 
     bbar : {
         items : ['->',{
-            text: 'New product',
+            text: esapp.Utils.getTranslation('newproduct'),  // 'New product',
             name: 'newproduct',
             iconCls: 'fa fa-plus-circle fa-2x',
             style: { color: 'green' },
@@ -72,8 +75,9 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
 
             items : [{
                 xtype : 'grid',
-                region: 'center',
-                width: 630,
+                //region: 'center',
+                //width: 630,
+                layout: 'fit',
                 store: 'ProductsInactiveStore',
                 session:true,
 
@@ -101,7 +105,7 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                 multiColumnSort: false,
                 columnLines: false,
                 rowLines: true,
-                frame: true,
+                frame: false,
                 border: false,
 
                 features: [{
@@ -111,7 +115,7 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                     hideGroupedHeader: true,
                     enableGroupingMenu: false,
                     startCollapsed : false,
-                    groupByText: 'Product category'
+                    groupByText: esapp.Utils.getTranslation('productcategories')  // 'Product categories'
                 }],
 
                 //listeners: {
@@ -123,7 +127,7 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                 //},
 
                 columns : [{
-                    text: '<div class="grid-header-style">Product categories</div>',
+                    text: '<div class="grid-header-style">' + esapp.Utils.getTranslation('productcategories') + '</div>',
                     menuDisabled: true,
                     columns: [{
                         xtype: 'actioncolumn',
@@ -135,12 +139,12 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                         shrinkWrap: 0,
                         items: [{
                             icon: 'resources/img/icons/edit.png',
-                            tooltip: 'Edit Product',
+                            tooltip: esapp.Utils.getTranslation('editproduct'),  // 'Edit Product',
                             handler: 'editProduct'
                         }]
                     }, {
                         xtype:'templatecolumn',
-                        header: 'Product',
+                        header: esapp.Utils.getTranslation('product'),  // 'Product',
                         tpl: new Ext.XTemplate(
                                 '<b>{prod_descriptive_name}</b>' +
                                 '<tpl if="version != \'undefined\'">',
@@ -154,7 +158,7 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                                 '<p>{description}</p>' +
                                 '</span>'
                             ),
-                        width: 515,
+                        minWidth: 515,
                         cellWrap:true,
                         sortable: false,
                         hideable: false,
@@ -162,7 +166,7 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                         menuDisabled:true
                     }, {
                         xtype: 'actioncolumn',
-                        header: 'Active',
+                        header: esapp.Utils.getTranslation('active'),  // 'Active',
                         hideable: false,
                         hidden:false,
                         width: 65,
@@ -178,9 +182,9 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                             },
                             getTip: function(v, meta, rec) {
                                 if (rec.get('activated')) {
-                                    return 'Deactivate Product';
+                                    return esapp.Utils.getTranslation('deactivateproduct');  // 'Deactivate Product';
                                 } else {
-                                    return 'Activate Product';
+                                    return esapp.Utils.getTranslation('activateproduct');  // 'Activate Product';
                                 }
                             },
                             isDisabled: function(view, rowIndex, colIndex, item, record) {

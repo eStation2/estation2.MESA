@@ -14,7 +14,7 @@ Ext.define("esapp.view.system.ThemaAdmin",{
         'Ext.layout.container.Center'
     ],
 
-    title: 'Change Thema',
+    title: esapp.Utils.getTranslation('changethema'),    // 'Change Thema',
     header: {
         titlePosition: 0,
         titleAlign: 'center'
@@ -44,7 +44,7 @@ Ext.define("esapp.view.system.ThemaAdmin",{
         me.bbar = ['->',
             {
                 xtype: 'button',
-                text: 'Save',
+                text: esapp.Utils.getTranslation('save'),    // 'Save',
                 id: 'changethemabtn',
                 iconCls: 'fa fa-save fa-2x',
                 style: { color: 'lightblue' },
@@ -71,7 +71,7 @@ Ext.define("esapp.view.system.ThemaAdmin",{
             items: [{
                 xtype: 'radiogroup',
                 id: 'themasradiogroup',
-                text: "Available thema's",
+                text: esapp.Utils.getTranslation('availablethemas'),    // "Available thema's",
                 columns: 1,
                 vertical: true,
                 listeners: {

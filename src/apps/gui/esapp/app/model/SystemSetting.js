@@ -64,6 +64,7 @@ Ext.define('esapp.model.SystemSetting', {
         },
         listeners: {
             exception: function(proxy, response, operation){
+                // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
                 Ext.Msg.show({
                     title: 'SYSTEM SETTINGS MODEL - REMOTE EXCEPTION',
                     msg: operation.getError(),
@@ -75,11 +76,11 @@ Ext.define('esapp.model.SystemSetting', {
     }
     ,listeners: {
         update: function(store, record, operation, modifiedFieldNames, details, eOpts  ){
-            Ext.toast({ html: "Update: "+operation.getResultSet().message, title: operation.action, width: 200, align: 't' });
+            Ext.toast({ html: operation.getResultSet().message, title: operation.action, width: 200, align: 't' });
         },
         write: function(store, operation){
             if (operation.action == 'update' && operation.success) {
-               Ext.toast({ html: "Write: "+operation.getResultSet().message, title: operation.action, width: 200, align: 't' });
+               Ext.toast({ html: operation.getResultSet().message, title: operation.action, width: 200, align: 't' });
             }
         }
     }

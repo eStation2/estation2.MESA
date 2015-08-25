@@ -50,7 +50,7 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         hideGroupedHeader: true,
         enableGroupingMenu: false,
         startCollapsed : true,
-        groupByText: 'Product category'
+        groupByText: esapp.Utils.getTranslation('productcategories')  // 'Product category'
     }],
 
     listeners: {
@@ -65,16 +65,16 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                     if (me.firstGroupKey != 'undefined') {
                         groupFeature.expand(me.firstGroupKey, true);
                     } else {
-                        groupFeature.expand("<span style='display: none;'>1</span>Vegetation", true);  // rainfall
+                        groupFeature.expand("<span style='display: none;'>1</span>"+esapp.Utils.getTranslation('vegetation'), true);  // rainfall
                     }
                 });
-                task.delay(5000);
+                task.delay(2000);
 
             } else {
                 if (me.firstGroupKey != 'undefined') {
                     groupFeature.expand(me.firstGroupKey, true);
                 } else {
-                    groupFeature.expand("<span style='display: none;'>1</span>Vegetation", true);  // rainfall
+                    groupFeature.expand("<span style='display: none;'>1</span>"+esapp.Utils.getTranslation('vegetation'), true);  // rainfall
                 }
             }
             //this.resumeEvents();
@@ -86,21 +86,21 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             items: [{
-                text: 'Expand All',
+                text: esapp.Utils.getTranslation('expandall'),    // 'Expand All',
                 handler: function(btn) {
                     var view = btn.up().up().getView();
                     view.getFeature('prodcat').expandAll();
                     view.refresh();
                 }
             }, {
-                text: 'Collapse All',
+                text: esapp.Utils.getTranslation('collapseall'),    // 'Collapse All',
                 handler: function(btn) {
                     var view = btn.up().up().getView();
                     view.getFeature('prodcat').collapseAll();
                     view.refresh();
                 }
             }, {
-                text: 'My requests',
+                text: esapp.Utils.getTranslation('myrequests'),    // 'My requests',
                 handler: function(btn) {
 
                 }
@@ -124,19 +124,19 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
             }]
         });
 
-        me.listeners = {
-            viewready: function(gridpanel,func){
-                //Ext.toast({ html: 'viewready', title: 'viewready', width: 200, align: 't' });
-
-                var task = new Ext.util.DelayedTask(function() {
-                    var view = gridpanel.getView();
-                    view.getFeature('prodcat').expandAll();
-                    view.refresh();
-                });
-
-                task.delay(2000);
-            }
-        };
+        //me.listeners = {
+        //    viewready: function(gridpanel,func){
+        //        //Ext.toast({ html: 'viewready', title: 'viewready', width: 200, align: 't' });
+        //
+        //        var task = new Ext.util.DelayedTask(function() {
+        //            var view = gridpanel.getView();
+        //            view.getFeature('prodcat').expandAll();
+        //            view.refresh();
+        //        });
+        //
+        //        task.delay(1000);
+        //    }
+        //};
 
         me.defaults = {
             variableRowHeight : true,
@@ -149,7 +149,7 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
 
         me.columns = [
         {
-            header: '<div class="grid-header-style">Product categories</div>',
+            header: '<div class="grid-header-style">' + esapp.Utils.getTranslation('productcategories') + '</div>',
             menuDisabled: true,
             variableRowHeight : true,
             defaults: {
@@ -162,7 +162,7 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
             },
             columns: [{
                 xtype:'templatecolumn',
-                header: 'Product',
+                header: esapp.Utils.getTranslation('product'),    // 'Product',
                 tpl: new Ext.XTemplate(
                         '<b>{prod_descriptive_name}</b>' +
                         '<tpl if="version != \'undefined\'">',
@@ -186,12 +186,12 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
 //                disabled: true
             },{
                 xtype: 'actioncolumn',
-                header: 'Actions',
+                header: esapp.Utils.getTranslation('actions'),    // 'Actions',
                 width: 70,
                 align:'center',
                 items: [{
                     icon: 'resources/img/icons/download.png',
-                    tooltip: 'Complete all product data sets (all mapsets and its subproducts).',
+                    tooltip: esapp.Utils.getTranslation('tipcompletedatasetall'),    // 'Complete all product data sets (all mapsets and its subproducts).',
                     //scope: me,
                     handler: function (grid, rowIndex) {
                         Ext.toast({
@@ -204,7 +204,7 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                 }]
             }]
         }, {
-            header:  '<div class="grid-header-style">Data set completeness</div>',
+            header:  '<div class="grid-header-style">' + esapp.Utils.getTranslation('datasetcompleteness') + '</div>',
             menuDisabled: true,
             variableRowHeight : true,
             defaults: {
@@ -222,27 +222,27 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
 
                 header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 215px; left: 0px; tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Mapset</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('mapset') + '</span>' +
                 '           </div>' +
                 '       </div>' +
                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 70px; right: auto; left: 215px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Actions</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('actions') + '</span>' +
                 '           </div>' +
                 '       </div>' +
                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 215px; right: auto; left: 285px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Sub Product</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('subproduct') + '</span>' +
                 '           </div>' +
                 '       </div>' +
                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 360px; right: auto; left: 505px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Status</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('status') + '</span>' +
                 '           </div>' +
                 '       </div>' +
                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 865px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">Actions</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('actions') + '</span>' +
                 '           </div>' +
                 '       </div>',
                 listeners: {

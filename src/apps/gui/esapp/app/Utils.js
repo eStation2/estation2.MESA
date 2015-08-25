@@ -1,8 +1,11 @@
 /**
- * Created by tklooju on 6/9/2015.
+ * Created by Jurriaan van 't Klooster on 6/9/2015.
  */
 
 Ext.define('esapp.Utils', {
+    requires: [
+        'Ext.data.StoreManager'
+    ],
     //singleton: true,
     alternateClassName: ['Utils'],
     statics: {
@@ -12,7 +15,8 @@ Ext.define('esapp.Utils', {
             //console.info(i18nstore);
             if (i18nstore) {
                 var records = i18nstore.findRecord('label', label);
-                if (records) {     // && records.getCount() > 0
+                if (records) {
+                    // && records.getCount() > 0
                     //var record = records.get(0);
                     return Ext.String.htmlDecode(records.data.langtranslation);
                 }

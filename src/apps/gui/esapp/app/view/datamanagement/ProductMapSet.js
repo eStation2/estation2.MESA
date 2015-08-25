@@ -73,7 +73,7 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
             align:'center',
             items: [{
                 icon: 'resources/img/icons/download.png',
-                tooltip: 'Complete all data sets for this product\'s mapset',
+                tooltip: esapp.Utils.getTranslation('tipcompletedatasetmapset'),    // 'Complete all data sets for this product\'s mapset',
                 //scope: me,
                 handler: function (grid, rowIndex) {
                     Ext.toast({

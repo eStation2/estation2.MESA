@@ -16,7 +16,7 @@ Ext.define("esapp.view.system.IPAddressAdmin",{
         'Ext.form.FieldSet'
     ],
 
-    title: 'IP address administration',
+    title: esapp.Utils.getTranslation('ipaddressadmin'),    // 'IP address administration',
     header: {
         titlePosition: 0,
         titleAlign: 'center'
@@ -72,7 +72,7 @@ Ext.define("esapp.view.system.IPAddressAdmin",{
             bbar: ['->',
                 {
                     xtype: 'button',
-                    text: 'Save',
+                    text: esapp.Utils.getTranslation('save'),    // 'Save',
                     id: 'save_ipaddress_settings_btn',
                     iconCls: 'fa fa-save fa-2x',
                     style: { color: 'lightblue' },
@@ -109,7 +109,7 @@ Ext.define("esapp.view.system.IPAddressAdmin",{
                     name: 'pc1_ip',
                     bind: '{ip_settings.ip_pc1}',
                     xtype: 'textfield',
-                    fieldLabel: 'IP address PC1',
+                    fieldLabel: esapp.Utils.getTranslation('ipaddresspc1'),    // 'IP address PC1',
                     //style:'font-weight: bold;',
                     allowBlank: false,
                     vtype:'IPAddress'
@@ -118,7 +118,7 @@ Ext.define("esapp.view.system.IPAddressAdmin",{
                     name: 'pc2_ip',
                     bind: '{ip_settings.ip_pc2}',
                     xtype: 'textfield',
-                    fieldLabel: 'IP address PC2',
+                    fieldLabel: esapp.Utils.getTranslation('ipaddresspc2'),    // 'IP address PC2',
                     //style:'font-weight: bold;',
                     allowBlank: false,
                     vtype:'IPAddress'
@@ -127,7 +127,7 @@ Ext.define("esapp.view.system.IPAddressAdmin",{
                     name: 'pc3_ip',
                     bind: '{ip_settings.ip_pc3}',
                     xtype: 'textfield',
-                    fieldLabel: 'IP address PC3',
+                    fieldLabel: esapp.Utils.getTranslation('ipaddresspc3'),    // 'IP address PC3',
                     //style:'font-weight: bold;',
                     allowBlank: false,
                     vtype:'IPAddress'
@@ -136,7 +136,7 @@ Ext.define("esapp.view.system.IPAddressAdmin",{
                     name: 'dns_ip',
                     bind: '{ip_settings.dns_ip}',
                     xtype: 'textfield',
-                    fieldLabel: 'DNS IP address',
+                    fieldLabel: esapp.Utils.getTranslation('dnsipaddress'),    // 'DNS IP address',
                     //style:'font-weight: bold;',
                     allowBlank: false,
                     vtype:'IPAddress'
@@ -145,7 +145,7 @@ Ext.define("esapp.view.system.IPAddressAdmin",{
                     name: 'gateway_ip',
                     bind: '{ip_settings.gateway_ip}',
                     xtype: 'textfield',
-                    fieldLabel: 'Gateway IP address',
+                    fieldLabel: esapp.Utils.getTranslation('gatewayipaddress'),    // 'Gateway IP address',
                     //style:'font-weight: bold;',
                     allowBlank: false,
                     vtype:'IPAddress'
@@ -154,7 +154,7 @@ Ext.define("esapp.view.system.IPAddressAdmin",{
                     name: 'lan_access_ip',
                     bind: '{ip_settings.lan_access_ip}',
                     xtype: 'textfield',
-                    fieldLabel: 'LAN Access IP address<br>(like 192.168.0.0/24)',
+                    fieldLabel: esapp.Utils.getTranslation('lanaccessipaddress'),    // 'LAN Access IP address<br>(like 192.168.0.0/24)',
                     //style:'font-weight: bold;',
                     allowBlank: false,
                     vtype:'IPNetmask'
