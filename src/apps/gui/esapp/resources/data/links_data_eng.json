@@ -1,0 +1,29 @@
+[{
+    "name": "link1",
+    "title": "eStation2",
+    "thumb": "estation2",
+    "url": "http://estation2.jrc.ec.europa.eu",
+    "type": "USEFUL LINKS",
+    "description": "eStation2 web site..."
+},{
+    "name": "link2",
+    "title": "MESA",
+    "thumb": "mesa",
+    "url": "http://rea.au.int/mesa/",
+    "type": "USEFUL LINKS",
+    "description": "MESA web site..."
+},{
+    "name": "link3",
+    "title": "Copernicus",
+    "thumb": "copernicus",
+    "url": "http://www.copernicus.eu/",
+    "type": "USEFUL LINKS",
+    "description": "This is the Copernicus web site..."
+},{
+    "name": "link4",
+    "title": "EUMETSAT Product Navigator",
+    "thumb": "eumetsat",
+    "url": "http://navigator.eumetsat.int",
+    "type": "USEFUL LINKS",
+    "description": "The EUMETSAT Product Navigator..."
+}]
