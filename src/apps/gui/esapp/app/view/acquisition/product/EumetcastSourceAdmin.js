@@ -21,10 +21,21 @@ Ext.define("esapp.view.acquisition.product.EumetcastSourceAdmin",{
         titlePosition: 0,
         titleAlign: 'center'
     },
+
+    constrainHeader: true,
+    //constrain: true,
     modal: true,
+    closable: true,
+    closeAction: 'destroy', // 'hide',
+    resizable: true,
+    autoScroll:true,
+    maximizable: false,
+
     frame: true,
-    width: 1200,
-    height: 800,
+    width: 1000,
+    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-10 : 800,  // 600,
+    maxHeight: 800,
+
     layout: {
         type: 'vbox',
         align: 'stretch'

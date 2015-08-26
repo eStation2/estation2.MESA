@@ -24,19 +24,25 @@ Ext.define("esapp.view.acquisition.logviewer.LogView",{
         titlePosition: 0,
         titleAlign: 'center'
     },
+
+    constrainHeader: true,
+    //constrain: true,
     modal: true,
     closable: true,
     closeAction: 'destroy', // 'hide',
+    resizable: true,
+    autoScroll:true,
     maximizable: false,
-    width:1000,
-    height:600,
+    width:800,
+    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-10 : 800,  // 600,
+    maxHeight: 800,
+
     border:true,
     frame:true,
     layout: {
         type  : 'fit',
         padding: 5
     },
-    autoScroll: true,
 
     params: {
        logtype: null,

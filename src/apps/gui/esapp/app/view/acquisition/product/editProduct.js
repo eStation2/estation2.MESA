@@ -21,14 +21,24 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
     session:true,
 
     title: '',
-    titleAlign: 'center',
+    header: {
+        titlePosition: 0,
+        titleAlign: 'center'
+    },
+
+    constrainHeader: true,
+    //constrain: true,
     modal: true,
-    resizable: false,
     closable: true,
     closeAction: 'destroy', // 'hide',
+    resizable: true,
+    autoScroll:true,
+    maximizable: false,
+    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-10 : 800,  // 600,
+    maxHeight: 800,
+
     border:true,
     frame:true,
-    autoScroll:false,
     fieldDefaults: {
         labelWidth: 120,
         labelAlign: 'left'
