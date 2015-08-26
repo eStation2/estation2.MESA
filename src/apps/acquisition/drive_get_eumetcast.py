@@ -5,7 +5,7 @@ from config import es_constants
 from apps.acquisition import get_eumetcast
 from apps.acquisition import acquisition
 from lib.python import es_logging as log
-logger = log.my_logger(__name__)
+logger = log.my_logger("apps.acquisition.drive_get_eumetcast")
 
 # Manual Switch for START/STOP
 do_start = True

@@ -624,6 +624,23 @@ def conv_yyyydmmdk_2_yyyymmdd(yymmk):
 
 
 ######################################################################################
+#   conv_list_2_string
+#   Purpose: convert a list of strings in a single string (mainly for messages)
+#   Author: M. Clerici
+#   Date: 2015/02/25
+#   Input: string of numbers in the format YYYYdMMdK
+#   Output: date (YYYYMMDD), otherwise -1
+#
+def conv_list_2_string(inlist):
+    file_string = ''
+    if isinstance(inlist,basestring):
+        file_string+=inlist
+    else:
+        for ifile in inlist:
+            file_string+=ifile+';'
+    return file_string
+
+######################################################################################
 #   extract_from_date
 #   Purpose: extract year, month, day, hour and min from string date
 #            String is in format:

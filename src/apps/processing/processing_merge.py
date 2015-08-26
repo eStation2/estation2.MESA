@@ -48,6 +48,16 @@ def processing_merge(pipeline_run_level=0, pipeline_printout_level=0,
 
     # Check the output product directory
     functions.check_output_dir(out_dir)
+    # Fill the processing list -> some fields to be taken by innput products
+    output_sprod_group=proc_lists.proc_add_subprod_group("merged")
+    output_sprod=proc_lists.proc_add_subprod(out_sub_product_code, "merged", final=False,
+                                             descriptive_name='undefined',
+                                             description='undefined',
+                                             frequency_id='e1dekad',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='10d',
+                                             active_default=True)
 
     # Loop over the input products:
     for input in input_products:

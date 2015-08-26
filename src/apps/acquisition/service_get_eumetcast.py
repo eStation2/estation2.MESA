@@ -5,7 +5,7 @@ import sys
 from config import es_constants
 from apps.acquisition import acquisition
 from lib.python import es_logging as log
-logger = log.my_logger(__name__)
+logger = log.my_logger("apps.acquisition.service_get_eumetcast")
 
 try:
     command = str(sys.argv[1])
