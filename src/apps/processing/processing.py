@@ -94,7 +94,7 @@ def loop_processing(dry_run=False, serialize=False):
         for chain in active_processing_chains:
 
             logger.debug("Processing Chain N.:%s" % str(chain.process_id))
-
+            sleep_time=es_constants.processing_sleep_time_sec
             derivation_method = chain.derivation_method             # name of the method in the module
             algorithm = chain.algorithm                             # name of the .py module
             mapset = chain.output_mapsetcode
@@ -128,6 +128,51 @@ def loop_processing(dry_run=False, serialize=False):
                         'mapset':mapset,\
                         'starting_dates': list_dates,\
                         'version':version}
+                # Define an id from a combination of fields
+                processing_unique_id='ID='+str(process_id)+'_METHOD='+derivation_method+'_ALGO='+algorithm+'.lock'
+                processing_unique_lock=es_constants.processing_tasks_dir+processing_unique_id
+
+                if not os.path.isfile(processing_unique_lock):
+                    logger.debug("Launching processing for ID: %s" % processing_unique_id)
+                    open(processing_unique_lock,'a').close()
+
+                    # Define the module name and function()
+                    module_name = 'processing_'+algorithm
+                    function_name = 'processing_'+derivation_method
+                    # Enter the module and walk until to the name of the function() to be executed
+                    proc_dir = __import__("apps.processing")
+                    proc_pck = getattr(proc_dir, "processing")
+                    proc_mod = getattr(proc_pck, module_name)
+                    proc_func= getattr(proc_mod, function_name)
+
+                    #  Fork and call the std_precip 'generic' processing
+                    if serialize==False:
+                        pid = os.fork()
+                        if pid == 0:
+                            # Here I'm the child process ->  call to the processing pipeline
+                            proc_lists = proc_func(**args)
+                            # Upsert database
+                            upsert_database(process_id, product_code, version, mapset, proc_lists, input_product_info)
+                            # Sleep time to be read from processing
+                            logger.debug("Going to sleep for a while - to be removed")
+                            time.sleep(float(sleep_time))
+                            os.remove(processing_unique_lock)
+                            sys.exit(0)
+                        else:
+                            # Here I'm the parent process -> just go on ..
+                            pass
+                    # Do NOT detach process (work in series)
+                    else:
+                        proc_lists = proc_func(**args)
+                        # Upsert database
+                        # upsert_database(process_id, product_code, version, mapset, proc_lists, input_product_info)
+                        os.remove(processing_unique_lock)
+
+                    logger.debug("Going to sleep for a while - to be removed")
+                    time.sleep(float(sleep_time))
+
+                else:
+                    logger.debug("Processing already running for ID: %s " % processing_unique_id)
 
             # Case of no 'std' (e.g. merge processing) -> get output products and pass everything to function
             else:
@@ -137,57 +182,78 @@ def loop_processing(dry_run=False, serialize=False):
                         'pipeline_printout_level':pipeline_printout_level,\
                         'input_products': input_products, \
                         'output_product': output_products}
+                # Define an id from a combination of fields
+                processing_unique_id='ID='+str(process_id)+'_METHOD='+derivation_method+'_ALGO='+algorithm+'.lock'
+                processing_unique_lock=es_constants.processing_tasks_dir+processing_unique_id
 
-            # Define an id from a combination of fields
-            processing_unique_id='ID='+str(process_id)+'_METHOD='+derivation_method+'_ALGO='+algorithm+'.lock'
-            processing_unique_lock=es_constants.processing_tasks_dir+processing_unique_id
+                if not os.path.isfile(processing_unique_lock):
+                    logger.debug("Launching processing for ID: %s" % processing_unique_id)
+                    open(processing_unique_lock,'a').close()
 
-            if not os.path.isfile(processing_unique_lock):
-                logger.debug("Launching processing for ID: %s" % processing_unique_id)
-                open(processing_unique_lock,'a').close()
+                    # Define the module name and function()
+                    module_name = 'processing_'+algorithm
+                    function_name = 'processing_'+derivation_method
+                    # Enter the module and walk until to the name of the function() to be executed
+                    proc_dir = __import__("apps.processing")
+                    proc_pck = getattr(proc_dir, "processing")
+                    proc_mod = getattr(proc_pck, module_name)
+                    proc_func= getattr(proc_mod, function_name)
 
-                # Define the module name and function()
-                module_name = 'processing_'+algorithm
-                function_name = 'processing_'+derivation_method
-                # Enter the module and walk until to the name of the function() to be executed
-                proc_dir = __import__("apps.processing")
-                proc_pck = getattr(proc_dir, "processing")
-                proc_mod = getattr(proc_pck, module_name)
-                proc_func= getattr(proc_mod, function_name)
-
-                #  Fork and call the std_precip 'generic' processing
-                if serialize==False:
-                    pid = os.fork()
-                    if pid == 0:
-                        # Here I'm the child process ->  call to the processing pipeline
-                        proc_lists = proc_func(**args)
-                        # Upsert database
-                        upsert_database(process_id, product_code, version, mapset, proc_lists, input_product_info)
-                        # Simulate longer processing (TEMP)
-                        logger.info("Going to sleep for a while - to be removed")
-                        time.sleep(2)
-                        logger.info("Waking-up now, and removing the .lock")
-                        os.remove(processing_unique_lock)
-                        sys.exit(0)
-                    else:
-                        # Here I'm the parent process -> just go on ..
-                        pass
-                # Do NOT detach process (work in series)
-                else:
+                    # Do NOT detach process (work in series)
                     proc_lists = proc_func(**args)
-                    logger.info("Going to sleep for a while - to be removed")
                     # Upsert database
-                    upsert_database(process_id, product_code, version, mapset, proc_lists, input_product_info)
-                    time.sleep(2)
+                    # upsert_database(process_id, product_code, version, mapset, proc_lists, input_product_info)
+                    time.sleep(float(sleep_time))
                     logger.info("Waking-up now, and removing the .lock")
                     os.remove(processing_unique_lock)
-            else:
-                logger.debug("Processing already running for ID: %s " % processing_unique_id)
+                else:
+                    logger.debug("Processing already running for ID: %s " % processing_unique_id)
+
+            # # Define an id from a combination of fields
+            # processing_unique_id='ID='+str(process_id)+'_METHOD='+derivation_method+'_ALGO='+algorithm+'.lock'
+            # processing_unique_lock=es_constants.processing_tasks_dir+processing_unique_id
+            #
+            # if not os.path.isfile(processing_unique_lock):
+            #     logger.debug("Launching processing for ID: %s" % processing_unique_id)
+            #     open(processing_unique_lock,'a').close()
+            #
+            #     # Define the module name and function()
+            #     module_name = 'processing_'+algorithm
+            #     function_name = 'processing_'+derivation_method
+            #     # Enter the module and walk until to the name of the function() to be executed
+            #     proc_dir = __import__("apps.processing")
+            #     proc_pck = getattr(proc_dir, "processing")
+            #     proc_mod = getattr(proc_pck, module_name)
+            #     proc_func= getattr(proc_mod, function_name)
+            #
+            #     #  Fork and call the std_precip 'generic' processing
+            #     if serialize==False:
+            #         pid = os.fork()
+            #         if pid == 0:
+            #             # Here I'm the child process ->  call to the processing pipeline
+            #             proc_lists = proc_func(**args)
+            #             # Upsert database
+            #             upsert_database(process_id, product_code, version, mapset, proc_lists, input_product_info)
+            #             # Simulate longer processing (TEMP)
+            #             logger.info("Going to sleep for a while - to be removed")
+            #             time.sleep(2)
+            #             logger.info("Waking-up now, and removing the .lock")
+            #             os.remove(processing_unique_lock)
+            #             sys.exit(0)
+            #         else:
+            #             # Here I'm the parent process -> just go on ..
+            #             pass
+            #     # Do NOT detach process (work in series)
+            #     else:
+            #         proc_lists = proc_func(**args)
+            #         logger.info("Going to sleep for a while - to be removed")
+            #         # Upsert database
+            #         upsert_database(process_id, product_code, version, mapset, proc_lists, input_product_info)
+            #         time.sleep(2)
+            #         logger.info("Waking-up now, and removing the .lock")
+            #         os.remove(processing_unique_lock)
+            # else:
+            #     logger.debug("Processing already running for ID: %s " % processing_unique_id)
         #
         logger.info("End of the loop ... wait a while")
         time.sleep(5)
-
-class ProcessingDaemon(DaemonDryRunnable):
-    def run(self):
-        loop_processing(dry_run=self.dry_run)
-

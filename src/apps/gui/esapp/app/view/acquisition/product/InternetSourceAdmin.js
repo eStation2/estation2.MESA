@@ -21,10 +21,20 @@ Ext.define("esapp.view.acquisition.product.InternetSourceAdmin",{
         titlePosition: 0,
         titleAlign: 'center'
     },
+    constrainHeader: true,
+    //constrain: true,
     modal: true,
+    closable: true,
+    closeAction: 'destroy', // 'hide',
+    resizable: true,
+    autoScroll:true,
+    maximizable: false,
+
+    width: 1000,
+    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-10 : 800,  // 600,
+    maxHeight: 800,
+
     frame: true,
-    width: 1200,
-    height: 600,
     layout: {
         type: 'vbox',
         align: 'stretch'

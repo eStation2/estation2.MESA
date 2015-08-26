@@ -17,25 +17,28 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
     ],
 
     title: '<span class="panel-title-style">'+esapp.Utils.getTranslation('timeseries')+'</span>',
-    margin: '0 0 0 0',
-    layout: {
-        type: 'fit'
+    header: {
+        titlePosition: 2,
+        titleAlign: "center"
     },
-    width:850,
-    height:800,
-    minWidth:400,
-    minHeight:350,
-    // glyph : 'xf080@FontAwesome',
-    constrain: true,
+    constrainHeader: true,
+    //constrain: true,
     autoShow : false,
     closeable: true,
     closeAction: 'destroy', // 'hide',
     maximizable: true,
     collapsible: true,
+    resizable: true,
 
-    header: {
-        titlePosition: 2,
-        titleAlign: "center"
+    width:850,
+    height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-80 : 800,  // 600,
+    minWidth:400,
+    minHeight:350,
+    // glyph : 'xf080@FontAwesome',
+
+    margin: '0 0 0 0',
+    layout: {
+        type: 'fit'
     },
 
     tschart: null,

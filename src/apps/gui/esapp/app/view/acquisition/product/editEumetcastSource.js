@@ -15,19 +15,26 @@ Ext.define("esapp.view.acquisition.product.editEumetcastSource",{
         titlePosition: 0,
         titleAlign: 'center'
     },
-    viewConfig:{forceFit:true},
-    layout:'hbox',
+
+    constrainHeader: true,
+    //constrain: true,
     modal: true,
-    width: 1100,
-    //height: 600,
     closable: true,
     closeAction: 'destroy', // 'hide',
-    resizable:false,
+    resizable: true,
+    autoScroll:true,
     maximizable: false,
+
+    width: 960,
+    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-35 : 625,  // 600,
+    maxHeight: 625,
+
     frame: true,
     border: true,
-    bodyStyle: 'padding:5px 5px 0',
-    autoScroll: false,
+    bodyStyle: 'padding:5px 0px 0',
+
+    viewConfig:{forceFit:true},
+    layout:'hbox',
 
     //session:true,
 
@@ -45,18 +52,18 @@ Ext.define("esapp.view.acquisition.product.editEumetcastSource",{
         },
         items : [{
             layout: {
-                type: 'hbox',
-                align: 'stretch'
+                type: 'hbox'
+                ,align: 'stretch'
             },
             items: [{
                 xtype: 'fieldset',
                 title: '<b>'+esapp.Utils.getTranslation('eumetcastdatasourceinfo')+'</b>',    // '<b>Eumetcast data source info</b>',
                 collapseable: false,
-                width: 600,
+                width: 475,
                 margin: '10 5 10 10',
                 padding: '10 10 10 10',
                 defaults: {
-                    width: 575,
+                    width: 450,
                     labelWidth: 140,
                     labelAlign: 'top'
                 },
@@ -120,11 +127,11 @@ Ext.define("esapp.view.acquisition.product.editEumetcastSource",{
                 xtype: 'fieldset',
                 title: '<b>'+esapp.Utils.getTranslation('datasourcedescription')+'</b>',    // '<b>Data source description</b>',
                 collapseable: false,
-                width: 450,
+                width: 425,
                 margin: '10 10 10 5',
                 padding: '10 10 10 10',
                 defaults: {
-                    width: 420,
+                    width: 400,
                     labelWidth: 140
                 },
                 items: [{
