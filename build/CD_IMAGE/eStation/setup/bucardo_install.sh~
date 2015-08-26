@@ -37,7 +37,6 @@ if [ -f ${bucardo_tgz} ]; then
     mkdir -p ${run_dir}
     chown adminuser:estation ${run_dir}
     chmod 777 ${run_dir}
-    chmod 666 /home/adminuser/.pgpass
 else
 	echo "$(date +'%Y-%m-%d %H:%M:%S') Error: bucardo .tgz ${bucardo_tgz} not found. Exit"
 	exit 1
