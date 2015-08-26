@@ -31,13 +31,26 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
         titleAlign: 'center',
         iconCls: 'africa'
     },
+    constrainHeader: Ext.getBody(),
 
     modal: true,
-    border:false,
-    frame: false,
-
     closable: true,
     closeAction: 'hide', // 'destroy',
+    maximizable: false,
+    resizable: true,
+    resizeHandles: 'n,s',
+    autoScroll: false,
+    width: 575,
+    height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-10 : 800,  // 600,
+    minHeight:650,
+
+    border:false,
+    frame: false,
+    layout: {
+        type  : 'border',
+        padding: 5
+    },
+
     tools: [
     {
         type: 'refresh',
@@ -46,15 +59,6 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
         callback: 'loadProductsGrid'
     }],
 
-    maximizable: false,
-    resizable: false,
-    width: 575,
-    height: 800,
-    layout: {
-        type  : 'border',
-        padding: 5
-    },
-    autoScroll: false,
     productselected:false,
     mapviewid:null,
     selectedproduct:{
@@ -182,6 +186,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     //,style: {backgroundColor:'#ADD2ED'}
                 },
                 autoWidth:true,
+                autoScroll:true,
                 split: true,
                 collapsible: true,
                 collapsed: true,
@@ -199,13 +204,15 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     expand: function(){
                         //this.up().down('grid').setWidth(460)
                         this.setWidth(550);
-                        this.up().setPosition(370,140);
+                        me.center();
+                        this.up().setPosition(200,10);
                         this.up().setWidth(1100);
                     },
                     collapse: function(){
                         //this.up().down('grid').setWidth(485)
                         this.setWidth(5);
-                        this.up().setPosition(670,140);
+                        me.center();
+                        //this.up().setPosition(670,140);
                         this.up().setWidth(575);
                     }
                 },

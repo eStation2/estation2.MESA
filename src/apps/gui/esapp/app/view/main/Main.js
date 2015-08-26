@@ -58,7 +58,8 @@ Ext.define('esapp.view.main.Main', {
                 split: false,
                 width: 2,
                 collapsible: false,
-                collapsed: true
+                collapsed: true,
+                hideCollapseTool: true
             },{
                 region: 'center',
                 xtype: 'tabpanel',

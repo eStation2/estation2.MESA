@@ -75,12 +75,13 @@ Ext.define("esapp.view.analysis.analysisMain",{
         me.items = [{
             region: 'east',
             title: esapp.Utils.getTranslation('timeseries'),  // 'Time series',
-            width: 402,
+            width: 420,
             minWidth: 402,
+            maxWidth : 475,
             split: true,
-            maxWidth : 450,
             collapsible: true,
             collapsed: false,
+            autoScroll:true,
             floatable: false,
             xtype: 'tabpanel',
             frame: false,
@@ -88,7 +89,9 @@ Ext.define("esapp.view.analysis.analysisMain",{
             items: [{
                 title: esapp.Utils.getTranslation('timeseries'),  // 'Timeseries',
                 margin:3,
-                //padding: '5px 5px 25px 5px',
+                minHeight: 800,
+                autoHeight: true,
+                autoScroll:true,
                 layout:'vbox',
                 defaults: {
                     margin: '5 0 15 0'
@@ -422,6 +425,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
             }
         }, {
             region: 'center',
+            autoScroll:true,
             layout: {
                 type: 'fit'
             },
