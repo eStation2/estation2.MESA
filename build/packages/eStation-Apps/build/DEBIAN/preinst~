@@ -88,7 +88,7 @@ fi
 perl -pi -e "s#local.*all.*all.*peer#local   all             all                                     trust#" /etc/postgresql/9.3/main/pg_hba.conf
 perl -pi -e "s#host    all             all             127.0.0.1/32            md5#host    all         all         127.0.0.1/32          trust#" /etc/postgresql/9.3/main/pg_hba.conf
 perl -pi -e "s#host    all             all             ::1/128                 md5#host    all         all         ::1/128               trust \nhost    all         all         192.168.0.0/24               trust#" /etc/postgresql/9.3/main/pg_hba.conf    
-perl -pi -e "s#.*listen_addresses =.*#listen_addresses = '*'                  \# what IP address(es) to listen on;#" /etc/postgresql/9.3/main/postgresql.conf
+perl -pi -e "s#listen_addresses =.*#listen_addresses = '*'                  \# what IP address(es) to listen on;#" /etc/postgresql/9.3/main/postgresql.conf
 
 echo "`date +'%Y-%m-%d %H:%M:%S'` pg_hba configuration file changed" >> ${logfile}
 # Restart the database
