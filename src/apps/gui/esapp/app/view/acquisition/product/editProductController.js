@@ -5,7 +5,8 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
     setup: function() {
         var me = this.getView();
 
-        var daStore = me.getViewModel().get('productdatasources');
+        var productDatasourcesStore = me.getViewModel().get('productdatasources');
+        var productIngestionsStore = me.getViewModel().get('productingestions');
         if (me.params.product){
             Ext.getCmp('category').setValue(me.params.product.get('category_id'));
             Ext.getCmp('productcode').setValue(me.params.product.get('productcode'));
@@ -14,16 +15,29 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
             Ext.getCmp('product_name').setValue(me.params.product.get('prod_descriptive_name'));
             Ext.getCmp('productdescription').setValue(me.params.product.get('description'));
 
-            daStore.setFilters({
+            productDatasourcesStore.setFilters({
+                 property:'productid'
+                ,value:me.params.product.get('productid')
+                ,anyMatch:true
+            });
+
+            productIngestionsStore.setFilters({
                  property:'productid'
                 ,value:me.params.product.get('productid')
                 ,anyMatch:true
             });
 
             Ext.getCmp('datasourcesfieldset').show();
+            Ext.getCmp('ingestionsfieldset').show();
         }
         else {
-            daStore.setFilters({
+            productDatasourcesStore.setFilters({
+                 property:'productid'
+                ,value:' '
+                //,anyMatch:true
+            });
+
+            productIngestionsStore.setFilters({
                  property:'productid'
                 ,value:' '
                 //,anyMatch:true
@@ -178,7 +192,10 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
                     orig_version: record.get('version')
                 }
             });
-            editProductWin.show();
+            editInternetDataSourceWin.show();
+        }
+        else {
+
         }
     },
 

@@ -25,21 +25,25 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
         titlePosition: 0,
         titleAlign: 'center'
     },
-    modal: true,
+
     constrainHeader: true,
     //constrain: true,
+    modal: true,
     closable: true,
     closeAction: 'destroy', // 'hide',
     resizable: true,
+    autoScroll:true,
     maximizable: false,
+
     minWidth: 650,
     width: 650,
-    height: 700,
+    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-10 : 800,  // 600,
+    maxHeight: 800,
+
     layout: {
         type  : 'fit'
         //,padding: 5
     },
-    autoScroll: false,
 
     bbar : {
         items : ['->',{

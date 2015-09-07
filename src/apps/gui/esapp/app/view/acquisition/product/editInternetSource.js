@@ -15,19 +15,26 @@ Ext.define("esapp.view.acquisition.product.editInternetSource",{
         titlePosition: 0,
         titleAlign: 'center'
     },
-    viewConfig:{forceFit:true},
-    layout:'hbox',
+
+    constrainHeader: true,
+    //constrain: true,
     modal: true,
-    width: 1100,
-    //height: 600,
     closable: true,
     closeAction: 'destroy', // 'hide',
-    resizable:false,
+    resizable: true,
+    autoScroll:true,
     maximizable: false,
+
+    width: 975,
+    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-35 : 800,  // 725,
+    maxHeight: 800,
+
     frame: true,
     border: true,
-    bodyStyle: 'padding:5px 5px 0',
-    autoScroll: false,
+    bodyStyle: 'padding:5px 0px 0',
+
+    viewConfig:{forceFit:true},
+    layout:'hbox',
 
     //session:true,
 
@@ -45,18 +52,18 @@ Ext.define("esapp.view.acquisition.product.editInternetSource",{
         },
         items : [{
             layout: {
-                type: 'hbox',
-                align: 'stretch'
+                type: 'hbox'
+                ,align: 'stretch'
             },
             items: [{
                 xtype: 'fieldset',
                 title: '<b>'+esapp.Utils.getTranslation('internetdatasourceinfo')+'</b>',    // '<b>Internet data source info</b>',
                 collapseable: false,
-                width: 600,
+                width: 425,
                 margin: '10 5 10 10',
                 padding: '10 10 10 10',
                 defaults: {
-                    width: 575,
+                    width: 400,
                     labelWidth: 120,
                     labelAlign: 'left'
                 },
@@ -168,12 +175,12 @@ Ext.define("esapp.view.acquisition.product.editInternetSource",{
                 xtype: 'fieldset',
                 title: '<b>'+esapp.Utils.getTranslation('datasourcedescription')+'</b>',    // '<b>Data source description</b>',
                 collapseable: false,
-                width: 450,
+                width: 475,
                 margin: '10 10 10 5',
                 padding: '10 10 10 10',
                 defaults: {
-                    width: 420,
-                    labelWidth: 120
+                    width: 450,
+                    labelWidth: 140
                 },
                 items: [{
                     xtype: 'textfield',

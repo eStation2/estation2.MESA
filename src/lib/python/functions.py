@@ -26,6 +26,10 @@ import uuid
 import pickle
 import json
 import glob
+import subprocess
+from socket import socket
+import urllib2
+import ast
 
 # Import eStation2 modules
 from lib.python import es_logging as log
@@ -34,6 +38,87 @@ from config import es_constants
 logger = log.my_logger(__name__)
 
 dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'derived'}
+
+
+def get_remote_system_status(server_address):
+    print "http://" + server_address + "/esapp/dashboard/systemstatus"
+    response = urllib2.urlopen("http://" + server_address + "/esapp/dashboard/systemstatus")
+    result = response.read()
+    status_remote_machine = ast.literal_eval(result)
+    return status_remote_machine
+
+
+def check_connection(server_info):
+    cpos = server_info.find(':')
+    try:
+        sock = socket()
+        # sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(2)
+        sock.connect((server_info[:cpos], int(server_info[cpos+1:])))
+        # sock.shutdown(1)
+        sock.close
+        return True
+    except:
+        return False
+
+
+def getStatusPostgreSQL():
+    # Get status of postgresql
+    command = ['/etc/init.d/postgresql', 'status']
+    p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = p.communicate()
+    if re.search('online', out):
+        psql_status = True
+    else:
+        psql_status = False
+
+    return psql_status
+
+
+def system_status_filename():
+    check_output_dir(es_constants.es2globals['status_system_dir'])
+    pickle_filename = es_constants.es2globals['status_system_pickle']
+    return pickle_filename
+
+
+def getStatusAllServices():
+    from apps.acquisition import acquisition
+    from apps.processing import processing
+    from apps.es2system import es2system
+    dry_run = True  # TODO: for getting the status of the services dry_run has to be False?
+
+    # Get status of the ingestion service
+    pid_file = es_constants.ingestion_pid_filename
+    ingest_daemon = acquisition.IngestionDaemon(pid_file, dry_run=dry_run)
+    ingest = ingest_daemon.status()
+
+    # Get status of the get_internet service
+    pid_file = es_constants.get_internet_pid_filename
+    getinternet_daemon = acquisition.GetInternetDaemon(pid_file, dry_run=dry_run)
+    internet = getinternet_daemon.status()
+
+    # Get status of the get_eumetcast service
+    pid_file = es_constants.get_eumetcast_pid_filename
+    geteumetcast_daemon = acquisition.GetEumetcastDaemon(pid_file, dry_run=dry_run)
+    eumetcast = geteumetcast_daemon.status()
+
+    # Get status of the processing service
+    pid_file = es_constants.processing_pid_filename
+    processing_daemon = processing.ProcessingDaemon(pid_file, dry_run=dry_run)
+    process = processing_daemon.status()
+
+    # Get status of system service
+    pid_file = es_constants.system_pid_filename
+    system_daemon = es2system.SystemDaemon(pid_file, dry_run=dry_run)
+    system = system_daemon.status()
+
+    services_status = {'eumetcast': str(eumetcast).lower(),
+                       'internet': str(internet).lower(),
+                       'ingest': str(ingest).lower(),
+                       'process': str(process).lower(),
+                       'system': str(system).lower()}
+
+    return services_status
 
 
 def getListVersions():
@@ -106,7 +191,7 @@ def getSystemSettings():
 
     systemsettingsfile = es_constants.es2globals['settings_dir']+'/system_settings.ini'
     if not os.path.isfile(systemsettingsfile):
-        systemsettingsfile = os.path.join(thisfiledir, 'config/install/', 'user_settings.ini')
+        systemsettingsfile = os.path.join(thisfiledir, 'config/install/', 'system_settings.ini')
 
     config_systemsettings = ConfigParser.ConfigParser()
     config_systemsettings.read([systemsettingsfile])
@@ -117,6 +202,14 @@ def getSystemSettings():
     systemsettings = dict(systemsettings)   # convert list of tuples to dict
     # print systemsettings
     return systemsettings
+
+
+def checkIP():
+    import socket
+
+    hostname = socket.gethostname()
+    IP = socket.gethostbyname(hostname)
+    return IP
 
 
 def unix_time(dt):
@@ -186,7 +279,7 @@ def tojson(queryresult):
 def internet_on():
     import urllib2
     try:
-        response = urllib2.urlopen('http://74.125.228.100', timeout=1)
+        response = urllib2.urlopen('http://74.125.228.100', timeout=2)
         return True
     except urllib2.URLError as err: pass
     return False
@@ -624,6 +717,23 @@ def conv_yyyydmmdk_2_yyyymmdd(yymmk):
 
 
 ######################################################################################
+#   conv_list_2_string
+#   Purpose: convert a list of strings in a single string (mainly for messages)
+#   Author: M. Clerici
+#   Date: 2015/02/25
+#   Input: string of numbers in the format YYYYdMMdK
+#   Output: date (YYYYMMDD), otherwise -1
+#
+def conv_list_2_string(inlist):
+    file_string = ''
+    if isinstance(inlist,basestring):
+        file_string+=inlist
+    else:
+        for ifile in inlist:
+            file_string+=ifile+';'
+    return file_string
+
+######################################################################################
 #   extract_from_date
 #   Purpose: extract year, month, day, hour and min from string date
 #            String is in format:
@@ -1004,7 +1114,7 @@ def check_output_dir(output_dir):
         try:
             os.makedirs(my_dir)
         except:
-            logger.error("Cannot create directory %s"  % my_dir)
+            logger.error("Cannot create directory %s" % my_dir)
 
         logger.info("Output directory %s created" % my_dir)
 
@@ -1082,22 +1192,19 @@ def mem_usage(point=""):
 ######################################################################################
 #  Dump an object info a file (pickle serialization)
 #
-def dump_obj_to_pickle(object, filename):
+def dump_obj_to_pickle(obj, filename):
 
     dump_file = open(filename, 'wb')
-    pickle.dump(object, dump_file)
+    pickle.dump(obj, dump_file)
     dump_file.close()
 
-#  Restore an object from a file (pickle serialization), if the file exist
-#  If file does not exist, do not alter the passed object
-#  If file cannot be loaded (corrupted), delete it (and return the passed object)
 
 ######################################################################################
 #  Restore an object from a file (pickle serialization), if the file exist
 #  If file does not exist, do not alter the passed object
 #  If file cannot be loaded (corrupted), delete it (and return the passed object)
 #
-def restore_obj_from_pickle(object, filename):
+def restore_obj_from_pickle(obj, filename):
 
     # Restore/Create Info
     if os.path.exists(filename):
@@ -1105,7 +1212,7 @@ def restore_obj_from_pickle(object, filename):
             dump_file_info = open(filename, 'r')
             tmp_object = pickle.load(dump_file_info)
             logger.debug("Dump file info loaded from %s.", filename)
-            object=tmp_object
+            obj = tmp_object
         except:
             logger.warning("Dump file %s can't be loaded, the file will be removed.", filename)
             os.remove(filename)
@@ -1114,7 +1221,7 @@ def restore_obj_from_pickle(object, filename):
         logger.info("Dump file %s does not exist", filename)
         #open(filename, 'a').close()
 
-    return object
+    return obj
 
 
 ######################################################################################
@@ -1122,21 +1229,20 @@ def restore_obj_from_pickle(object, filename):
 #
 def load_obj_from_pickle(filename):
 
-    object = None
+    obj = None
 
     # Restore/Create Info
     if os.path.exists(filename):
         try:
             dump_file_info = open(filename, 'r')
-            object = pickle.load(dump_file_info)
-
+            obj = pickle.load(dump_file_info)
         except:
             logger.warning("Dump file %s can't be loaded, the file will be removed.", filename)
     else:
         # Raise warning
         logger.warning("Dump file %s does not exist.", filename)
 
-    return object
+    return obj
 
 
 ######################################################################################
@@ -1293,7 +1399,7 @@ def get_machine_mac_address():
 
 def get_eumetcast_info(eumetcast_id):
 
-    filename = es2globals.get_eumetcast_processed_list_prefix+str(eumetcast_id)+'.info'
+    filename = es_constants.es2globals.get_eumetcast_processed_list_prefix+str(eumetcast_id)+'.info'
     info = load_obj_from_pickle(filename)
     return info
 

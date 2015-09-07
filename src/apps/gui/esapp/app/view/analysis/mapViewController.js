@@ -487,6 +487,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 var admin0name = Ext.getCmp('admin0name');
                 var admin1name = Ext.getCmp('admin1name');
                 var admin2name = Ext.getCmp('admin2name');
+                var selectedregion = Ext.getCmp('selectedregionname');
 
                 var wkt_polygon = Ext.getCmp('wkt_polygon');
 
@@ -496,16 +497,19 @@ Ext.define('esapp.view.analysis.mapViewController', {
                         admin0name.setValue(feature.get('ADM0_NAME'));
                         admin1name.setValue('&nbsp;');
                         admin2name.setValue('&nbsp;');
+                        selectedregion.setValue(feature.get('ADM0_NAME'));
                     }
                     else if (adminlevel == 'admin1') {
                         admin0name.setValue(feature.get('ADM0_NAME'));
                         admin1name.setValue(feature.get('ADM1_NAME'));
                         admin2name.setValue('&nbsp;');
+                        selectedregion.setValue(feature.get('ADM0_NAME') + ' - ' + feature.get('ADM1_NAME'));
                     }
                     else if (adminlevel == 'admin2') {
                         admin0name.setValue(feature.get('ADM0_NAME'));
                         admin1name.setValue(feature.get('ADM1_NAME'));
                         admin2name.setValue(feature.get('ADM2_NAME'));
+                        selectedregion.setValue(feature.get('ADM0_NAME') + ' - ' + feature.get('ADM1_NAME') + ' - ' + feature.get('ADM2_NAME'));
                     }
 
                     if (displaywkt) {
@@ -515,12 +519,17 @@ Ext.define('esapp.view.analysis.mapViewController', {
                         wktstr = wktstr.replace(/,/g, ', ');
                         wkt_polygon.setValue(wktstr);
                     }
+
+                    Ext.getCmp('fieldset_selectedregion').show();
+
                 } else {
                     regionname.setValue('&nbsp;');
                     admin0name.setValue('&nbsp;');
                     admin1name.setValue('&nbsp;');
                     admin2name.setValue('&nbsp;');
                     wkt_polygon.setValue('&nbsp;');
+                    selectedregion.setValue('&nbsp;');
+                    Ext.getCmp('fieldset_selectedregion').hide();
                 }
 
                 if (feature !== selectfeature) {

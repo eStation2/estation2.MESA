@@ -16,7 +16,7 @@ Ext.define("esapp.view.dashboard.Dashboard",{
 
         'esapp.view.dashboard.PC1',
         'esapp.view.dashboard.PC2',
-        'esapp.view.dashboard.PC3',
+        //'esapp.view.dashboard.PC3',
         'esapp.view.dashboard.Connection',
 
         'Ext.layout.container.HBox',

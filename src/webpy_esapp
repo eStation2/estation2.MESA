@@ -52,6 +52,7 @@ urls = (
     "/categories", "GetCategories",
 
     "/dashboard/getdashboard", "GetDashboard",
+    "/dashboard/systemstatus", "GetSystemStatus",
 
     "/services/checkstatusall", "CheckStatusAllServices",
     "/services/execservicetask", "ExecuteServiceTask",
@@ -61,6 +62,7 @@ urls = (
 
     "/getlogfile", "GetLogFile",
 
+    "/acquisition/setingestarchives", "setIngestArchives",
     "/dataacquisition", "DataAcquisition",
     "/dataacquisition/update", "UpdateDataAcquisition",
 
@@ -425,52 +427,175 @@ class UpdateInternetSource:
         return updatestatus
 
 
+class GetSystemStatus:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        # getparams = web.input()
+        pickle_filename = functions.system_status_filename()
+
+        info = functions.load_obj_from_pickle(pickle_filename)
+        status_local_machine = {'get_eumetcast_status': info['get_eumetcast_status'],
+                                'get_internet_status': info['get_internet_status'],
+                                'ingestion_status': info['ingestion_status'],
+                                'processing_status': info['processing_status'],
+                                'system_status': info['system_status'],
+                                'system_execution_time': info['system_execution_time'],
+                                'postgresql_status': info['postgresql_status'],
+                                'internet_connection_status': info['internet_connection_status'],
+                                'active_version': info['active_version'],
+                                'mode': info['mode'],
+                                'disk_status': info['disk_status']}
+
+        return status_local_machine
+
+
 class GetDashboard:
     def __init__(self):
         self.lang = "eng"
 
-    def checkIP(self):
-        import socket
-
-        hostname = socket.gethostname()
-        IP = socket.gethostbyname(hostname)
-
     def GET(self):
-        getparams = web.input()
+        # getparams = web.input()
+
+        PC1_connection = False
+        PC23_connection = False
+
+        PC2_mode = ''   # 'nominal' 'recovery'
+        PC2_version = ''
+        PC2_disk_status = True
+        PC2_postgresql_status = None
+        PC2_internet_status = None
+        PC2_service_eumetcast = None
+        PC2_service_internet = None
+        PC2_service_ingest = None
+        PC2_service_processing = None
+        PC2_service_system = None
+
+        PC3_mode = ''   # 'nominal' 'recovery'
+        PC3_version = ''
+        PC3_disk_status = None
+        PC3_postgresql_status = None
+        PC3_internet_status = None
+        PC3_service_eumetcast = None
+        PC3_service_internet = None
+        PC3_service_ingest = None
+        PC3_service_processing = None
+        PC3_service_system = None
+
         systemsettings = functions.getSystemSettings()
-        PC1_mode = ''
-        PC2_mode = 'nominal'
-        PC3_mode = 'nominal'
-        if systemsettings['role'].lower() == 'pc1':
-            PC1_mode = systemsettings['mode'].lower()
-        elif systemsettings['role'].lower() == 'pc2':
-            PC2_mode = systemsettings['mode'].lower()
-        elif systemsettings['role'].lower() == 'pc3':
-            PC3_mode = systemsettings['mode'].lower()
+        status_services = functions.getStatusAllServices()
+
+        # TODO: Use port 80?
+        IP_port = ':22'
+
+        # IP_PC1 = '139.191.147.79:22'
+        PC1_connection = functions.check_connection(systemsettings['ip_pc1'] + IP_port)
+
+        if systemsettings['type_installation'].lower() == 'full':
+            if systemsettings['role'].lower() == 'pc1':
+                PC1_mode = systemsettings['mode'].lower()
+
+            elif systemsettings['role'].lower() == 'pc2':
+                PC2_mode = systemsettings['mode'].lower()
+                PC2_version = systemsettings['active_version']
+                PC2_postgresql_status = functions.getStatusPostgreSQL()
+                PC2_internet_status = functions.internet_on()
+                PC2_service_eumetcast = status_services['eumetcast']
+                PC2_service_internet = status_services['internet']
+                PC2_service_ingest = status_services['ingest']
+                PC2_service_processing = status_services['process']
+                PC2_service_system = status_services['system']
+
+                # if role is PC2 and type_installation is Full and there is a connection to PC3, then on PC3 get the file
+                # /srv/www/eStation2/src/apps/es2system/system_status.pkl and read its content:
+                #       role, version, mode, postgresql status, internet status (status services if in degradation mode?)
+
+                # Check connection to PC3
+                PC23_connection = functions.check_connection(systemsettings['ip_pc3'] + IP_port)
+                # print "PC23_connection: " + str(PC23_connection)
+                if PC23_connection:
+                    status_PC3 = functions.get_remote_system_status(systemsettings['ip_pc3'])
+
+                    PC3_mode = status_PC3['mode']
+                    PC3_disk_status = status_PC3['disk_status']
+                    PC3_version = status_PC3['active_version']
+                    PC3_postgresql_status = status_PC3['postgresql_status']
+                    PC3_internet_status = status_PC3['internet_connection_status']
+                    PC3_service_eumetcast = status_PC3['get_eumetcast_status']
+                    PC3_service_internet = status_PC3['get_internet_status']
+                    PC3_service_ingest = status_PC3['ingestion_status']
+                    PC3_service_processing = status_PC3['processing_status']
+                    PC3_service_system = status_PC3['system_status']
+                    PC3_system_execution_time = status_PC3['system_execution_time']
+
+                    # pickle_filename = functions.system_status_filename()
+                    # info = functions.load_obj_from_pickle(remotePC, pickle_filename)
+
+            elif systemsettings['role'].lower() == 'pc3':
+                # ToDo: check disk status!
+                # PC3_disk_status = checkDiskStatus()
+                PC3_mode = systemsettings['mode'].lower()
+                PC3_version = systemsettings['active_version']
+                PC3_postgresql_status = functions.getStatusPostgreSQL()
+                PC3_internet_status = functions.internet_on()
+                PC3_service_eumetcast = status_services['eumetcast']
+                PC3_service_internet = status_services['internet']
+                PC3_service_ingest = status_services['ingest']
+                PC3_service_processing = status_services['process']
+                PC3_service_system = status_services['system']
+
+                # if role is PC3 and type_installation is Full and there is a connection to PC2, then on PC2 get the file
+                # /srv/www/eStation2/src/apps/es2system/system_status.pkl and read its content:
+                #       role, version, mode, postgresql status, internet status, status services if in nominal mode
+
+                # Check connection to PC2
+                PC23_connection = functions.check_connection(systemsettings['ip_pc2'] + IP_port)
+                if PC23_connection:
+                    status_PC2 = functions.get_remote_system_status(systemsettings['ip_pc2'])
+
+                    PC2_mode = status_PC2['mode']
+                    PC2_disk_status = status_PC2['disk_status']
+                    PC2_version = status_PC2['active_version']
+                    PC2_postgresql_status = status_PC2['postgresql_status']
+                    PC2_internet_status = status_PC2['internet_connection_status']
+                    PC2_service_eumetcast = status_PC2['get_eumetcast_status']
+                    PC2_service_internet = status_PC2['get_internet_status']
+                    PC2_service_ingest = status_PC2['ingestion_status']
+                    PC2_service_processing = status_PC2['processing_status']
+                    PC2_service_system = status_PC2['system_status']
+                    PC2_system_execution_time = status_PC2['system_execution_time']
 
         # /sbin/service postgresql status    or     /etc/init.d/postgresql status
 
-        # if role is PC2 and type_installation is Full and there is a connection to PC3, then on PC3 get the file
-        # /tmp/eStation2/system/system_status.xml and read its content:
-        #       role, version, mode, postgresql status, internet status (status services if in degradation mode?)
-
-        # if role is PC3 and type_installation is Full and there is a connection to PC2, then on PC2 get the file
-        # /tmp/eStation2/system/system_status.xml and read its content:
-        #       role, version, mode, postgresql status, internet status, status services if in nominal mode
-
         dashboard_dict = {'type_installation': systemsettings['type_installation'].lower(),
                           'activePC': systemsettings['role'].lower(),
-                          'pc1_connection': 'true',
-                          'pc3_connection': 'true',
-                          'PC2_version': systemsettings['active_version'],
-                          'PC2_mode': PC2_mode,
-                          'PC2_postgresql_status': 'true',
-                          'PC2_internet_status': 'true',
-                          'PC3_version': '2.0.4',
-                          'PC3_mode': PC3_mode,
-                          'PC3_postgresql_status': 'true',
-                          'PC3_internet_status': 'true'}
+                          'PC1_connection': PC1_connection,
+                          'PC23_connection': PC23_connection,
 
+                          'PC2_service_eumetcast': PC2_service_eumetcast,
+                          'PC2_service_internet': PC2_service_internet,
+                          'PC2_service_ingest': PC2_service_ingest,
+                          'PC2_service_processing': PC2_service_processing,
+                          'PC2_service_system': PC2_service_system,
+                          'PC2_version': PC2_version,
+                          'PC2_mode': PC2_mode,
+                          'PC2_postgresql_status': PC2_postgresql_status,
+                          'PC2_internet_status': PC2_internet_status,
+                          'PC2_disk_status': PC2_disk_status,
+
+                          'PC3_service_eumetcast': PC3_service_eumetcast,
+                          'PC3_service_internet': PC3_service_internet,
+                          'PC3_service_ingest': PC3_service_ingest,
+                          'PC3_service_processing': PC3_service_processing,
+                          'PC3_service_system': PC3_service_system,
+                          'PC3_version': PC3_version,
+                          'PC3_mode': PC3_mode,
+                          'PC3_postgresql_status': PC3_postgresql_status,
+                          'PC3_internet_status': PC3_internet_status,
+                          'PC3_disk_status': PC3_disk_status}
+
+        # print dashboard_dict
         dashboard_json = json.dumps(dashboard_dict,
                                     ensure_ascii=False,
                                     encoding='utf-8',
@@ -1018,6 +1143,30 @@ class GetLogFile:
         logfile_json = '{"success":"true", "filename":\'' + logfilename + '\',"logfilecontent":\''+logfilecontent+'\'}'
 
         return logfile_json
+
+
+class setIngestArchives:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        getparams = web.input()
+        if hasattr(getparams, "setingestarchives"):
+
+            functions.setSystemSetting('ingest_archive_eum', getparams['setingestarchives'])
+
+            # Todo: call system service to change the mode
+
+            # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
+            from lib.python import reloadmodules
+            reloadmodules.reloadallmodules()
+            # Reloading the settings does not work well so set manually
+
+            changemode_json = '{"success":"true", "message":"Setting Ingest Archives from Eumetcast changed!"}'
+        else:
+            changemode_json = '{"success":false, "error":"No setting given!"}'
+
+        return changemode_json
 
 
 class ChangeMode:
@@ -1769,9 +1918,14 @@ class DataSets:
                                 dataset_dict = functions.row2dict(dataset_info)
                                 # dataset_dict = dataset_info.__dict__
                                 # del dataset_dict['_labels']
-                                dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
-                                completeness = dataset.get_dataset_normalized_info()
-                                dataset_dict['datasetcompleteness'] = completeness
+                                if dataset_info.frequency_id == 'e15minute' or dataset_info.frequency_id == 'e30minute':
+                                    dataset_dict['nodisplay'] = 'no_minutes_display'
+                                else:
+                                    dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+                                    completeness = dataset.get_dataset_normalized_info()
+                                    dataset_dict['datasetcompleteness'] = completeness
+                                    dataset_dict['nodisplay'] = 'false'
+
                                 dataset_dict['mapsetcode'] = mapset_dict['mapsetcode']
                                 dataset_dict['mapset_descriptive_name'] = mapset_dict['descriptive_name']
 
@@ -1800,44 +1954,17 @@ class CheckStatusAllServices:
         self.lang = "eng"
 
     def POST(self):
-        #return web.ctx
-        dry_run = False
 
-        ingest = "false"
-        pid_file = es_constants.ingestion_pid_filename
-        ingest_daemon = acquisition.IngestionDaemon(pid_file, dry_run=dry_run)
-        if ingest_daemon.status():
-            ingest = "true"
+        status_services = functions.getStatusAllServices()
 
-        internet = "false"
-        pid_file = es_constants.get_internet_pid_filename
-        getinternet_daemon = acquisition.GetInternetDaemon(pid_file, dry_run=dry_run)
-        if getinternet_daemon.status():
-            internet = "true"
+        systemsettings = functions.getSystemSettings()
 
-        eumetcast = "false"
-        pid_file = es_constants.get_eumetcast_pid_filename
-        geteumetcast_daemon = acquisition.GetEumetcastDaemon(pid_file, dry_run=dry_run)
-        if geteumetcast_daemon.status():
-            eumetcast = "true"
-
-        process = "false"
-        pid_file = es_constants.processing_pid_filename
-        processing_daemon = processing.ProcessingDaemon(pid_file, dry_run=dry_run)
-        if processing_daemon.status():
-            process = "true"
-
-        system = "false"
-        pid_file = es_constants.system_pid_filename
-        system_daemon = es2system.SystemDaemon(pid_file, dry_run=dry_run)
-        if system_daemon.status():
-            system = "true"
-
-        servicesstatus_json = '{"success": true, "eumetcast": ' + eumetcast + \
-                              ', "internet": ' + internet + \
-                              ', "ingest": ' + ingest + \
-                              ', "processing": ' + process + \
-                              ', "system": ' + system + '}'
+        servicesstatus_json = '{"success": true, "eumetcast": ' + status_services['eumetcast'] + \
+                              ', "internet": ' + status_services['internet'] + \
+                              ', "ingest": ' + status_services['ingest'] + \
+                              ', "processing": ' + status_services['process'] + \
+                              ', "system": ' + status_services['system'] + \
+                              ', "ingest_archive_eum": ' + systemsettings['ingest_archive_eum'] + '}'
 
         return servicesstatus_json
 
@@ -2156,15 +2283,31 @@ class Ingestion:
         if ingestions.__len__() > 0:
             ingest_dict_all = []
             for row in ingestions:
-                kwargs = {'product_code': row.productcode,
-                          'sub_product_code': row.subproductcode,
-                          'version': row.version,
-                          'mapset': row.mapsetcode}
-                # kwargs.update({'to_date': datetime.date(2013, 12, 31)})
-                dataset = Dataset(**kwargs)
-                completeness = dataset.get_dataset_normalized_info()
                 ingest_dict = functions.row2dict(row)
-                ingest_dict['completeness'] = completeness
+
+                if row.frequency_id == 'e15minute' or row.frequency_id == 'e30minute':
+                    ingest_dict['nodisplay'] = 'no_minutes_display'
+                    # today = datetime.date.today()
+                    # # week_ago = today - datetime.timedelta(days=7)
+                    # week_ago = datetime.datetime(2015, 8, 27, 00, 00)   # .strftime('%Y%m%d%H%S')
+                    # # kwargs.update({'from_date': week_ago})  # datetime.date(2015, 08, 27)
+                    # kwargs = {'product_code': row.productcode,
+                    #           'sub_product_code': row.subproductcode,
+                    #           'version': row.version,
+                    #           'mapset': row.mapsetcode,
+                    #           'from_date': week_ago}
+                    # dataset = Dataset(**kwargs)
+                    # completeness = dataset.get_dataset_normalized_info()
+                else:
+                    kwargs = {'product_code': row.productcode,
+                              'sub_product_code': row.subproductcode,
+                              'version': row.version,
+                              'mapset': row.mapsetcode}
+                    dataset = Dataset(**kwargs)
+                    completeness = dataset.get_dataset_normalized_info()
+                    ingest_dict['completeness'] = completeness
+                    ingest_dict['nodisplay'] = 'false'
+
                 ingest_dict_all.append(ingest_dict)
 
             # ingestions_json = tojson(ingestions)

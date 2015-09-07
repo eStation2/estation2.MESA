@@ -50,15 +50,16 @@ Ext.define('esapp.view.main.Main', {
                 split: false,
                 collapsible: false,
                 collapsed: false
-            },{
-                region: 'west',
-                stateId: 'navigation-panel',
-                id: 'versioninfo-west-panel', // see Ext.getCmp() below
-                title: '<span class="panel-title-style">eStation 2.0</span>',
-                split: false,
-                width: 2,
-                collapsible: false,
-                collapsed: true
+            //},{
+            //    region: 'west',
+            //    stateId: 'navigation-panel',
+            //    id: 'versioninfo-west-panel', // see Ext.getCmp() below
+            //    title: '<span class="panel-title-style">eStation 2.0</span>',
+            //    split: false,
+            //    width: 2,
+            //    collapsible: false,
+            //    collapsed: true,
+            //    hideCollapseTool: true
             },{
                 region: 'center',
                 xtype: 'tabpanel',

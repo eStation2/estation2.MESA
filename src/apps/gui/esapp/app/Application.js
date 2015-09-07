@@ -121,7 +121,7 @@ Ext.define('esapp.Application', {
 
                         });
 
-                        task.delay(2000);
+                        task.delay(6500);
 
                         Ext.create('esapp.view.main.Main');
 

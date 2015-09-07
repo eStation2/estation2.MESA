@@ -117,9 +117,15 @@ Ext.define("esapp.view.acquisition.Ingestion",{
 
                 var storefields = ['dataset'];
                 var series_yField = [];
-                for (var index = 1; index <= completeness.intervals.length; ++index) {
-                    storefields.push('data' + index);
-                    series_yField.push('data' + index);
+                if (record.get('nodisplay') == 'no_minutes_display'){
+                    storefields.push('data1');
+                    series_yField.push('data1');
+                }
+                else {
+                    for (var index = 1; index <= completeness.intervals.length; ++index) {
+                        storefields.push('data' + index);
+                        series_yField.push('data' + index);
+                    }
                 }
 
                 var datasetdata = [];
@@ -137,7 +143,20 @@ Ext.define("esapp.view.acquisition.Ingestion",{
 
                 seriestitles.push(ingestionForTipText);
 
-                if (completeness.totfiles < 2 && completeness.missingfiles < 2) {
+                if (record.get('nodisplay')  == 'no_minutes_display'){
+                    dataObj["data1"] = '100'; // 100%
+                    datasetdata.push(dataObj);
+                    seriestitle = '<span style="color:#f78b07">' + esapp.Utils.getTranslation('no_minutes_display') + '</span>';
+                    seriestitles.push(seriestitle);
+                    seriescolors.push('#f78b07'); // orange
+
+                    // Update the 4 sprites (these are not reachable through getSprites() on the chart)
+                    widgetchart.surfaceMap.chart[0].getItems()[0].setText(esapp.Utils.getTranslation('no_minutes_display'));
+                    widgetchart.surfaceMap.chart[0].getItems()[1].setText('');
+                    widgetchart.surfaceMap.chart[0].getItems()[2].setText('');
+                    widgetchart.surfaceMap.chart[0].getItems()[3].setText('');
+                }
+                else if (completeness.totfiles < 2 && completeness.missingfiles < 2) {
                     dataObj["data1"] = '100'; // 100%
                     datasetdata.push(dataObj);
                     seriestitle = '<span style="color:#808080">' + esapp.Utils.getTranslation('notanydata') + '</span>';

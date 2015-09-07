@@ -20,25 +20,25 @@ INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('processing
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('datamanagement', 'Data Management', 'Gestion des données', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('analysis', 'Analysis', 'Analyse', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('system', 'System', 'Système', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('deactivateingestion', 'Deactivate Ingestion', 'Désactiver:''Ingestion''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('deactivateproduct', 'Deactivate product', 'Désactiver ''Produit''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('logfile', 'Log file', 'Fichier journal', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('permanent-missing', 'permanent missing', 'Données manquantes en permanence', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('postgresql-status', 'PostgreSQL Status', 'PostgreSQL Statut', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('ingestionupdated', 'Ingestion updated', 'Ingestion mise à jour', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('dashboard', 'Dashboard', 'Tableau de bord', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('editproduct', 'Edit product', 'Modifier:''Produit''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('tipdeactivateget', 'Deactivate Get', 'Désactiver ''Acquisition''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('processingchainupdated', 'Processing chain updated', 'Chaîne de traitement mise à jour', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('vtypeipaddress', 'Must be a numeric IP address', 'Doit être une adresse IP numérique', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('vtypeipnetmask', 'Must be like 192.168.0.0/24', 'Doit être comme 192.168.0.0/24', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('productcategories', 'Product categories', 'Catégories de produits', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('disableautosync', 'Disable Auto Sync', 'Désactiver:''Synchronisation automatique''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('editproduct', 'Edit product', 'Modifie ''Produit''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('getupdated', 'Get updated', 'Acquisition mise à jour', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('ingestion', 'Ingestion', 'Ingestion', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('processing_pc2', 'Processing (PC2)', 'Traitement (PC2)', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('processing_pc3', 'Analysis (PC3)', 'Analyse (PC3)', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('recovery', 'Recovery mode', 'Mode de récupération', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('nominal', 'Nominal mode', 'Mode nominal', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('tipactivateget', 'Activate Get', 'Activer: ''Acquisition''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('tipactivatestoreoriginalget', 'Activate store original data for this Get', 'Activer ''Stocker les données originales de cette Acquisition''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('newproduct', 'New product', 'Nouveau produit', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('internetsources', 'Internet Sources', 'Sources Internet', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('get', 'Get', 'Acquisition', NULL, NULL, NULL, NULL);
@@ -48,10 +48,11 @@ INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('assigneume
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('collapseall', 'Collapse All', 'Tout Réduire', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('receivingstation', 'Receiving station (PC1)', 'Station de réception (PC1)', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('help', 'Help', 'Aide', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('deactivateproduct', 'Deactivate product', 'Désactiver:''Produit''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('disableautosync', 'Disable Auto Sync', 'Désactiver ''Synchronisation automatique''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('executenow', 'Execute Now', 'Exécuter maintenant
 ', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('splashscreenmessage', 'Loading eStation2, please standby...', 'eStation2 en cours de chargement. Attendez un instant...', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('activateingestion', 'Activate Ingestion', 'Activer Ingestion', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('System', 'System', 'Système', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('loading', 'Loading...', 'Chargement...', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('ups-powerstatus', 'UPS / power status', 'UPS / état ​​de l''alimentation', NULL, NULL, NULL, NULL);
@@ -64,7 +65,7 @@ INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('uploaded',
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('description', 'Description', 'Description', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('completeness', 'Completeness', 'Complétude', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('expandall', 'Expand All', 'Tout visualiser', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('activateproduct', 'Activate Product', 'Activer:''Produit''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('activeversion', 'Active version', 'Actif Version', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('assigninternetsource', 'Assign Internet Source to product', 'Associer ''Internet Source'' au produit', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('active', 'Active', 'Actif', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('addproduct', 'Add Product', 'Ajouter un produit', NULL, NULL, NULL, NULL);
@@ -81,10 +82,10 @@ INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('logviewer'
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('mesa_full_estation', 'MESA Full eStation', 'MESA eStation version complète', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('present', 'present', 'Présent', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('search', 'Search', 'Rechercher', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('activateingestion', 'Activate Ingestion', 'Activer:''Ingestion''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('activateproduct', 'Activate Product', 'Activer Produit', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('Missing', 'Missing', 'Manquant', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('notanydata', 'Not any data', 'Pas de données', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('tipactivatestoreoriginalget', 'Activate store original data for this Get', 'Activer: ''Stocker les données originales de cette Acquisition''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('tipactivateget', 'Activate Get', 'Activer ''Acquisition''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('product', 'Product', 'Produit', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('select', 'Select...', 'Sélectionner...', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('showgetlog', 'Show log of this Get', 'Afficher le journal de cette ''Acquisition''', NULL, NULL, NULL, NULL);
@@ -94,9 +95,8 @@ INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('showingest
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('type', 'Type', 'Type', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('to', 'to', 'à', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('tiplogviewsearch', 'Search and highlight in current file.', 'Rechercher et souligner dans le fichier actuel', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('tipdeactivatestoreoriginalget', 'Deactivate store original data for this Get', 'Désactiver:''Stocker les données originales de cette Acquisition''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('datasynchronization', 'Data Synchronization', 'Synchro des données', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('tipdeactivateget', 'Deactivate Get', 'Désactiver: ''Acquisition''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('tipdeactivatestoreoriginalget', 'Deactivate store original data for this Get', 'Désactiver ''Stocker les données originales de cette Acquisition''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('fire', 'Fire', 'Feu', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('inlandwater', 'Inland water', 'Eaux intérieures', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('miscellaneous', 'Miscellaneous', 'Divers', NULL, NULL, NULL, NULL);
@@ -105,7 +105,7 @@ INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('radiationf
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('rainfall', 'Rainfall', 'Pluie', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('temperature', 'Temperature', 'Température', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('vegetation', 'Vegetation', 'Végétation', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('activeversion', 'Active version', 'Actif:''Version''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('deactivateingestion', 'Deactivate Ingestion', 'Désactiver ''Ingestion''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('helptitle', 'User documentation and usefull website links', 'Documentation utilisateur et liens internet', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('mesa_light_estation', 'MESA Light eStation', 'MESA eStation version légère', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('myrequests', 'My requests', 'Mes requêtes', NULL, NULL, NULL, NULL);
@@ -116,27 +116,26 @@ INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('run', 'Run
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('systemsettingsrefreshed', 'System settings refreshed', 'Paramètres du système rafraichis', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('restart', 'Restart', 'Redémarrage', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('viewlogfile', 'View log file', 'Voir le fichier journal', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('activethema', 'Active thema', 'Actif:''Thema''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('availablethemas', 'Available thema''s', 'Disponible Thema', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('defined_by', 'Defined by', 'Défini par', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('add', 'Add', 'Ajouter', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('internetconnection', 'Internet connection', 'Connexion Internet', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('availablethemas', 'Available thema''s', 'Disponible:''Thema''', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('activateprocess', 'Activate Process', 'Activer:''Traitement''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('availableversions', 'Available versions', 'Disponible Version', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('activeloglevel', 'Active log level', 'Actif Niveau du Journal', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('algorithm', 'Algorithm', 'Algorithme', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('archivedir', 'Archive directory', 'Répertoire d''Archive', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('area_type', 'Area type', 'Type du champs ''Zone''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('area_length', 'Area length', 'Longueur du champs ''Zone''', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('changeloglevel', 'Change Log level', 'Changer:''Niveau du Journal''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('changemode', 'Change Mode', 'Changer ''Mode''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('basedir', 'Base directory', 'Répertoire de Base', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('availableversions', 'Available versions', 'Disponible:''Version''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('changeloglevel', 'Change Log level', 'Changer ''Niveau du Journal''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('cancel', 'Cancel', 'Annuler', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('category', 'Category', 'Categorie', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('stop', 'Stop', 'Arrêter', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('choose', 'Choose', 'Choisir', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('changemode', 'Change Mode', 'Changer:''Mode''', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('changeversion', 'Change version', 'Changer:''Version''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('changeversion', 'Change version', 'Changer ''Version''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('createsystemreport', 'Create System Report', 'Créer ''Rapport système''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('collectionname', 'Collection name', 'Nom de la Collection', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('createsystemreport', 'Create System Report', 'Créer:''Rapport système''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('deactivatedatasource', 'Deactivate Data Source', 'Désactiver ''Source de données''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('databasename', 'Database name', 'Nom de la Base de Données', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('currentmode', 'Current mode', 'Mode actuel', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('datasetcompleteness', 'Data set completeness', 'Complètude du jeu de données', NULL, NULL, NULL, NULL);
@@ -144,8 +143,8 @@ INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('datasource
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('date_position', 'Date position', 'Position des données', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('date_type', 'Date type', 'Type de données', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('dbconnectionsettings', 'Database connection settings', 'Paramètres de connection de la BD', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('deactivatesubproduct', 'Deactivate Sub Product', 'Désactiver:''Sous Produit''', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('deactivatedatasource', 'Deactivate Data Source', 'Désactiver:''Source de données''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('ingestserverindir', 'Ingest server in directory', 'Ingérer ''Serveur dans le Répertoire''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('deactivatesubproduct', 'Deactivate Sub Product', 'Désactiver ''Sous Produit''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('delimiter', 'Delimiter', 'Séparateur', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('end_date', 'End date', 'Date de Fin', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('eumetcastdatasourceinfo', 'Eumetcast data source info', 'Information sur les sources de données Eumetcast', NULL, NULL, NULL, NULL);
@@ -157,13 +156,13 @@ INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('gatewayipa
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('host', 'Host', 'Hôte', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('id', 'ID', 'ID', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('include_files_expression', 'Include files expression', 'Inclure les fichiers d''expression', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('ingestdir', 'Ingest directory', 'Ingérer:''Répertoire''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('ipaddresspc1', 'IP address PC1', 'Adresse IP ''PC1''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('ipaddressadmin', 'IP address administration', 'Adresse IP Administration', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('ingestserverindir', 'Ingest server in directory', 'Ingérer:''Serveur dans le Répertoire''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('ingestdir', 'Ingest directory', 'Ingérer ''Répertoire''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('ipaddresses', 'IP addresses', 'Adresse IP', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('ipaddresspc1', 'IP address PC1', 'Adresse IP:''PC1''', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('lanaccessipaddress', 'LAN Access IP address<br>(like 192.168.0.0/24)', 'Adresse IP:''LAN Access''', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('ipaddresspc3', 'IP address PC3', 'Adresse IP:''PC3''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('ipaddresspc3', 'IP address PC3', 'Adresse IP ''PC3''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('themachanged', 'Thema changed', 'Thema changé', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('lanaccessipaddress', 'LAN Access IP address<br>(like 192.168.0.0/24)', 'Adresse IP ''LAN Access''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('loglevel', 'Log level', 'Niveau du journal', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('loglevelchanged', 'Log level changed', 'Niveau du journal changé', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('modechanged', 'Mode changed', 'Mode changé', NULL, NULL, NULL, NULL);
@@ -177,11 +176,11 @@ INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('pc1', 'PC1
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('pc2', 'PC2', 'PC2', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('pc3', 'PC3', 'PC3', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('processinginputs', 'Processing inputs', 'Donnees de traitement en entrée', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('prod_id_position', 'Product ID length', 'Dimension du ''ID''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('activateprocess', 'Activate Process', 'Activer Traitement', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('productcode', 'Product code', 'Code produit', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('product_identifier', 'Product identifier', 'Identifiant du produit', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('productinfo', 'Product info', 'Information du produit', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('activeloglevel', 'Active log level', 'Actif:''Niveau du Journal''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('activethema', 'Active thema', 'Actif Thema', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('productinfoupdated', 'Product info updated', 'Information du produit mise à jour', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('product_name', 'Product name', 'Nom du produit', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('provider', 'Provider', 'Fournisseur', NULL, NULL, NULL, NULL);
@@ -197,7 +196,6 @@ INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('start_date
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('productdescription', 'Product description', 'Description du produit', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('status', 'Status', 'Statut', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('systemthemasetto', 'System thema is set to', 'Système ''Thema'' défini comme', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('themachanged', 'Thema changed', '''Thema'' changé', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('thema', 'Thema', 'Thema', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('tipcompletedatasetmapset', 'Complete all data sets for this product''s mapset', 'Compléter tous les jeux de données pour ce type de carte ', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('theme', 'Theme', 'Theme', NULL, NULL, NULL, NULL);
@@ -208,34 +206,31 @@ INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('user_name'
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('version', 'Version', 'Version', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('datasourcedescription', 'Data source description', 'Description de la Source de données', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('earthobservationprocessingservice', 'Earth Observation Processing Service', 'Service de traitement des données d''Observation de la Terre', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('deactivateprocess', 'Deactivate Process', 'Désactiver:''Traitement''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('editdatasource', 'Edit Data Source', 'Modifier ''Source de Données''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('delete', 'Delete', 'Supprimer', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('dnsipaddress', 'DNS IP address', 'Adresse DNS IP', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('ipaddresspc2', 'IP address PC2', 'Adresse IP:''PC2''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('downloadtimeseries', 'Download timeseries', 'Télécharger les séries temporelles', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('ipsettingssaved', 'IP settings are saved!', 'Les définitions IP sont sauvegardées', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('password', 'Password', 'Mot de passe', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('preproc_type', 'Preproc type', 'Type de ''Preproc''', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('activatedatasource', 'Activate Data Source', 'Activer:''Sources de Données''', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('activatesubproduct', 'Activate Sub Product', 'Activer:''Sous Produit''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('activatesubproduct', 'Activate Sub Product', 'Activer Sous Produit', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('addeumetcastsource', 'Add Eumetcast Source', 'Ajouter Source Eumetcast', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('lastupdated', 'Last updated', 'Dernière tâche mise à jour', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('addeumetcastsource', 'Add Eumetcast Source', 'Ajouter:''Source Eumetcast''', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('addinternetsource', 'Add Internet Source', 'Ajouter:''Source Internet''', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('editinternetsource', 'Edit Internet Source', 'Modifier:''Source Internet''', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('editeumetcastsource', 'Edit Eumetcast Source', 'Modifier:''Source Eumetcast''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('add', 'Add', 'Ajouter', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('addinternetsource', 'Add Internet Source', 'Ajouter Source Internet', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('availableloglevels', 'Available loglevel''s', 'Disponible Niveau du Journal', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('getinternetoutputdir', 'Get Internet output directory', 'Acquisition ''Répertoire de sortie Internet'' ', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('editinternetsource', 'Edit Internet Source', 'Modifier ''Source Internet''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('adminlevel0', 'Administative level 0', 'Niveau Administratif 0', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('adminlevel1', 'Administative level 1', 'Niveau Administratif 1', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('assign', 'Assign', 'Associer', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('loadingdata', 'Loading data...', 'Chargement des données...', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('area_position', 'Area position', 'Position du champs ''Zone''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('basetmpdir', 'Base temporary directory', 'Répertoire de Base temporaire', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('changethema', 'Change Thema', 'Changer:''Thema''', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('chartproperties', 'Chart properties', 'Changer:''Propriétés''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('createinstallreport', 'Create Install Report', 'Créer ''Rapport d''Installation''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('clicktochoose', 'click to choose...', 'Clicker pour Choisir', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('collection_name', 'Collection name', 'Nom de la Collection', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('editdatasource', 'Edit Data Source', 'Modifier:''Source de Données''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('colorschemes', 'Color Schemes', 'Type de Couleur', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('createinstallreport', 'Create Install Report', 'Créer:''Rapport d''Installation''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('datadir', 'Data directory', 'Répertoire de données', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('datasets', 'Data sets', 'Jeu de données', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('datasourcetype', 'Data Source Type', 'Type de Source de données', NULL, NULL, NULL, NULL);
@@ -248,10 +243,10 @@ INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('formapset'
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('frequency', 'Frequency', 'Fréquence', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('generatingtimeseries', 'Generating requested time series...', 'Générer la série temporelle définie', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('level0', 'level 0', 'Niveau 0', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('getinternetoutputdir', 'Get Internet output directory', 'Acquisition:''Répertoire de sortie Internet'' ', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('geteumetcastoutputdir', 'Get Eumetcast output directory', 'Acquisition:''Répertoire de sortie Eumetcast'' ', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('ipaddresspc2', 'IP address PC2', 'Adresse IP ''PC2''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('pleaseselectafromdate', 'Please select a "From date"!', 'Sélectionner une date de début', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('hidebackgroundlayer', 'Hide Background layer', 'Masquer la couche de fond', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('activatedatasource', 'Activate Data Source', 'Activer Sources de Données', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('pleaseselectapolygon', 'Please select or draw a polygon in a MapView!', 'Sélectionner ou dessiner un polygone dans le ''MapView''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('loadingvectorlayer', 'Loading vector layer...', 'Chargement des couches vecteurs...', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('processingoutputs', 'Processing outputs', 'Donnees de traitement en sortie', NULL, NULL, NULL, NULL);
@@ -280,7 +275,7 @@ INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('selectacol
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('selectapolygon', 'Select a polygon!', 'Sélectionner un polygone!', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('staticdatadir', 'Static data directory', 'Répertoire des données Statiques', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('showbackgroundlayer', 'Show Background layer', 'Afficher un fond de carte', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('availableloglevels', 'Available loglevel''s', 'Disponible:''Niveau du Journal''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('changethema', 'Change Thema', 'Changer ''Thema''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('systemsettingssaved', 'System settings saved!', 'Paramètres du système sauvegardés!', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('tipcompletedataset', 'Complete data set', 'Compléter le jeu de données', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('timeseries', 'Time series', 'Série temporelle', NULL, NULL, NULL, NULL);
@@ -289,10 +284,17 @@ INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('systemlogl
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('tiptimeserieschartshowhidetools', 'Show/hide time series chart tools menu', 'Montrer/Masquer le menu de l''outil graphique ', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('year', 'Year', 'Année', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('addtomap', 'Add to Map', 'Associer à une carte', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('chartproperties', 'Chart properties', 'Changer ''Propriétés''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('deactivateprocess', 'Deactivate Process', 'Désactiver ''Traitement''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('editeumetcastsource', 'Edit Eumetcast Source', 'Modifier ''Source Eumetcast''', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('tipcompletedatasetall', 'Complete all product data sets (all mapsets and its subproducts).', 'Compléter tous les jeux de données pour tous types de cartes, leurs produits et sous produits)', NULL, NULL, NULL, NULL);
 INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('username', 'User name', 'Nom utilisateur', NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('gettimeseries', 'Get timeseries', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('unassign', 'Unassign', NULL, NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('prod_id_position', 'Product ID position', 'Position du ''ID''', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('prod_id_length', 'Product ID length', 'Dimension du ID', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('geteumetcastoutputdir', 'Get Eumetcast output directory', 'Acquisition ''Répertoire de sortie Eumetcast'' ', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('gettimeseries', 'Get timeseries', 'Obtenez série temporelle
+', NULL, NULL, NULL, NULL);
+INSERT INTO i18n (label, eng, fra, por, lang1, lang2, lang3) VALUES ('unassign', 'Unassign', 'Non assign', NULL, NULL, NULL, NULL);
 
 
 --
@@ -2055,7 +2057,6 @@ INSERT INTO product (productcode, subproductcode, version, defined_by, activated
 INSERT INTO product (productcode, subproductcode, version, defined_by, activated, category_id, product_type, descriptive_name, description, provider, frequency_id, date_format, scale_factor, scale_offset, nodata, mask_min, mask_max, unit, data_type_id, masked, timeseries_role) VALUES ('vgt-ndvi', '10dmax_linearx2', 'spot-v2', 'JRC', true, 'vegetation', 'Derived', '10d lineax2 Maximum', 'Maximum NDVI linearx2 for dekad', 'VITO/Copernicus - JRC', 'e1dekad', 'MMDD', 0.00100000000000000002, 0, -32768, NULL, NULL, '', 'Int16', false, 'ndvi_linearx2');
 INSERT INTO product (productcode, subproductcode, version, defined_by, activated, category_id, product_type, descriptive_name, description, provider, frequency_id, date_format, scale_factor, scale_offset, nodata, mask_min, mask_max, unit, data_type_id, masked, timeseries_role) VALUES ('vgt-ndvi', 'diff_linearx2', 'spot-v2', 'JRC', true, 'vegetation', 'Derived', 'NDVI difference', 'NDVI difference vs. filtered average', 'VITO/Copernicus - JRC', 'e1dekad', 'YYYYMMDD', 0.00100000000000000002, 0, -32768, NULL, NULL, '', 'Int16', false, '');
 INSERT INTO product (productcode, subproductcode, version, defined_by, activated, category_id, product_type, descriptive_name, description, provider, frequency_id, date_format, scale_factor, scale_offset, nodata, mask_min, mask_max, unit, data_type_id, masked, timeseries_role) VALUES ('fewsnet-rfe', '1monperc', '2.0', 'JRC', false, 'rainfall', 'Derived', '"Rainfall Estimate - Relative Difference with respect to the monthly average"', 'The RFE imagery combines Meteosat infrared data, rain gauge reports from the global telecommunications system, and microwave satellite observations to provide daily rainfall estimate in mm at an approximate horizontal resolution of 10 km. These products provide input for hydrological and agrometeorological models as well as climate information e.g. compare the current state of rainfall with previous time periods.', 'FEWSNET - JRC', 'e1month', 'YYYYMMDD', 1, 0, -32768, NULL, NULL, 'mm', 'Int16', false, NULL);
-INSERT INTO product (productcode, subproductcode, version, defined_by, activated, category_id, product_type, descriptive_name, description, provider, frequency_id, date_format, scale_factor, scale_offset, nodata, mask_min, mask_max, unit, data_type_id, masked, timeseries_role) VALUES ('msg-mpe', 'msg-mpe_native', 'undefined', 'JRC', false, 'rainfall', 'Native', 'Multi-Sensor Precipitation Estimate', NULL, 'EUMETCAST', 'e15minute', 'YYYYMMDDHHMM', 0, 0, 0, NULL, NULL, '', 'undefined', true, NULL);
 INSERT INTO product (productcode, subproductcode, version, defined_by, activated, category_id, product_type, descriptive_name, description, provider, frequency_id, date_format, scale_factor, scale_offset, nodata, mask_min, mask_max, unit, data_type_id, masked, timeseries_role) VALUES ('modis-firms', '1day', 'v5.0', 'JRC', false, 'fire', 'Ingest', '', '', 'NASA-FIRMS', 'e1day', 'YYYYMMDD', 1, 0, 0, NULL, NULL, '', 'Byte', true, NULL);
 INSERT INTO product (productcode, subproductcode, version, defined_by, activated, category_id, product_type, descriptive_name, description, provider, frequency_id, date_format, scale_factor, scale_offset, nodata, mask_min, mask_max, unit, data_type_id, masked, timeseries_role) VALUES ('fewsnet-rfe', '1monnp', '2.0', 'JRC', false, 'rainfall', 'Derived', '"Rainfall Estimate - Normalized Difference with respect to the monthly average"', 'The RFE imagery combines Meteosat infrared data, rain gauge reports from the global telecommunications system, and microwave satellite observations to provide daily rainfall estimate in mm at an approximate horizontal resolution of 10 km. These products provide input for hydrological and agrometeorological models as well as climate information e.g. compare the current state of rainfall with previous time periods.', 'FEWSNET - JRC', 'e1month', 'YYYYMMDD', 1, 0, -32768, NULL, NULL, 'mm', 'Int16', false, NULL);
 INSERT INTO product (productcode, subproductcode, version, defined_by, activated, category_id, product_type, descriptive_name, description, provider, frequency_id, date_format, scale_factor, scale_offset, nodata, mask_min, mask_max, unit, data_type_id, masked, timeseries_role) VALUES ('fewsnet-rfe', '1monmin', '2.0', 'JRC', false, 'rainfall', 'Derived', '"Rainfall Estimate - Monthly cumulated precipitations minimum"', 'The RFE imagery combines Meteosat infrared data, rain gauge reports from the global telecommunications system, and microwave satellite observations to provide daily rainfall estimate in mm at an approximate horizontal resolution of 10 km. These products provide input for hydrological and agrometeorological models as well as climate information e.g. compare the current state of rainfall with previous time periods.', 'FEWSNET - JRC', 'e1month', 'MMDD', 1, 0, -32768, NULL, NULL, 'mm', 'Int16', false, NULL);
@@ -2090,7 +2091,6 @@ INSERT INTO product (productcode, subproductcode, version, defined_by, activated
 INSERT INTO product (productcode, subproductcode, version, defined_by, activated, category_id, product_type, descriptive_name, description, provider, frequency_id, date_format, scale_factor, scale_offset, nodata, mask_min, mask_max, unit, data_type_id, masked, timeseries_role) VALUES ('pml-meris-chl', 'chl1-3day', 'undefined', 'JRC', false, 'oceanography', 'Ingest', '', '', 'ESA - JRC', 'e1day', 'YYYYMMDD', 1, 0, 0, NULL, NULL, '', 'undefined', true, NULL);
 INSERT INTO product (productcode, subproductcode, version, defined_by, activated, category_id, product_type, descriptive_name, description, provider, frequency_id, date_format, scale_factor, scale_offset, nodata, mask_min, mask_max, unit, data_type_id, masked, timeseries_role) VALUES ('vgt-swb', 'wbs', 'undefined', 'JRC', false, 'inlandwater', 'Ingest', 'Water Body Start', 'The WBS indicate when water (or humid area) started to be detected ', 'VITO/DevCoCast - JRC', 'e1dekad', 'YYYYMMDD', 0, 0, 0, NULL, NULL, '', 'undefined', true, NULL);
 INSERT INTO product (productcode, subproductcode, version, defined_by, activated, category_id, product_type, descriptive_name, description, provider, frequency_id, date_format, scale_factor, scale_offset, nodata, mask_min, mask_max, unit, data_type_id, masked, timeseries_role) VALUES ('modis-chla', 'modis-chla_native', 'v2013.1', 'JRC', true, 'oceanography', 'Native', 'MODIS Chlor-a', 'MODIS Chlorophyl-A', 'NASA', 'e1day', 'YYYYMMDD', 0, 0, 0, NULL, NULL, 'mg m^-3', 'undefined', true, NULL);
-INSERT INTO product (productcode, subproductcode, version, defined_by, activated, category_id, product_type, descriptive_name, description, provider, frequency_id, date_format, scale_factor, scale_offset, nodata, mask_min, mask_max, unit, data_type_id, masked, timeseries_role) VALUES ('msg-mpe', 'mpe', 'undefined', 'JRC', false, 'rainfall', 'Ingest', 'Multi-Sensor Precipitation Estimate', NULL, 'EUMETCAST', 'e15minute', 'YYYYMMDDHHMM', 0.00100000000000000002, 0, -32768, NULL, NULL, 'mm', 'Int16', true, NULL);
 INSERT INTO product (productcode, subproductcode, version, defined_by, activated, category_id, product_type, descriptive_name, description, provider, frequency_id, date_format, scale_factor, scale_offset, nodata, mask_min, mask_max, unit, data_type_id, masked, timeseries_role) VALUES ('vgt-ndvi', '10dmax', 'sv2-pv2.1', 'JRC', true, 'vegetation', NULL, NULL, NULL, NULL, 'e1dekad', 'MMDD', NULL, NULL, NULL, NULL, NULL, NULL, 'Int16', false, NULL);
 INSERT INTO product (productcode, subproductcode, version, defined_by, activated, category_id, product_type, descriptive_name, description, provider, frequency_id, date_format, scale_factor, scale_offset, nodata, mask_min, mask_max, unit, data_type_id, masked, timeseries_role) VALUES ('pml-modis-chl', 'chl-3day', '3.0', 'JRC', true, 'oceanography', 'Ingest', 'MODIS Chlor-a', 'MODIS Chlor-a from PML', 'Plymouth Marine Laboratory', 'e1day', 'YYYYMMDD', 1, 0, -32767, NULL, NULL, '', 'Float32', false, NULL);
 INSERT INTO product (productcode, subproductcode, version, defined_by, activated, category_id, product_type, descriptive_name, description, provider, frequency_id, date_format, scale_factor, scale_offset, nodata, mask_min, mask_max, unit, data_type_id, masked, timeseries_role) VALUES ('modis-chla', 'chla-day', 'v2013.1', 'JRC', true, 'oceanography', 'Ingest', 'MODIS Chlor-a', 'MODIS Chlorophyl-A', 'NASA', 'e1day', 'YYYYMMDD', 1, 0, -32767, NULL, NULL, 'mg m^-3', 'Float32', false, NULL);
@@ -2254,6 +2254,8 @@ INSERT INTO product (productcode, subproductcode, version, defined_by, activated
 INSERT INTO product (productcode, subproductcode, version, defined_by, activated, category_id, product_type, descriptive_name, description, provider, frequency_id, date_format, scale_factor, scale_offset, nodata, mask_min, mask_max, unit, data_type_id, masked, timeseries_role) VALUES ('vgt-ndvi', '1monmin', 'sv2-pv2.1', 'JRC', true, 'vegetation', 'Derived', 'Monthly Minimum NDVI', 'Monthly Minimum NDVI', 'VITO/Copernicus - JRC', 'e1month', 'MMDD', 0.00100000000000000002, 0, -32768, NULL, NULL, '', 'Int16', false, '');
 INSERT INTO product (productcode, subproductcode, version, defined_by, activated, category_id, product_type, descriptive_name, description, provider, frequency_id, date_format, scale_factor, scale_offset, nodata, mask_min, mask_max, unit, data_type_id, masked, timeseries_role) VALUES ('vgt-ndvi', '1monmax', 'sv2-pv2.1', 'JRC', true, 'vegetation', 'Derived', 'Monthly Maximum NDVI', 'Monthly Maximum NDVI', 'VITO/Copernicus - JRC', 'e1month', 'MMDD', 0.00100000000000000002, 0, -32768, NULL, NULL, '', 'Int16', false, '');
 INSERT INTO product (productcode, subproductcode, version, defined_by, activated, category_id, product_type, descriptive_name, description, provider, frequency_id, date_format, scale_factor, scale_offset, nodata, mask_min, mask_max, unit, data_type_id, masked, timeseries_role) VALUES ('vgt-ndvi', 'ndv', 'sv2-pv2.1', 'JRC', false, 'vegetation', 'Ingest', 'NDVI merged SPOT-V2 and PROBAV-2.1', 'The NDVI can be used to measure and monitor plant growth, vegetation cover, and biomass production. It is a dimensionless variable.  The values vary between -1 and 1. Increasing positive NDVI values indicate increasing amounts of green vegetation. Moderate values represent shrub and grassland (0.2 to 0.3), while high values indicate temperate and tropical rainforests (0.6 to 0.8). NDVI values near zero and decreasing negative values indicate non-vegetated features such as barren surfaces (rock and soil) and water, snow, ice, and clouds.', 'VITO/Copernicus - JRC', 'e1dekad', 'YYYYMMDD', 0.00100000000000000002, 0, -32768, NULL, NULL, '', 'Int16', false, 'Initial');
+INSERT INTO product (productcode, subproductcode, version, defined_by, activated, category_id, product_type, descriptive_name, description, provider, frequency_id, date_format, scale_factor, scale_offset, nodata, mask_min, mask_max, unit, data_type_id, masked, timeseries_role) VALUES ('msg-mpe', 'mpe', 'undefined', 'JRC', true, 'rainfall', 'Ingest', 'Multi-Sensor Precipitation Estimate', NULL, 'EUMETCAST', 'e15minute', 'YYYYMMDDHHMM', 0.00100000000000000002, 0, -32768, NULL, NULL, 'mm', 'Int16', true, NULL);
+INSERT INTO product (productcode, subproductcode, version, defined_by, activated, category_id, product_type, descriptive_name, description, provider, frequency_id, date_format, scale_factor, scale_offset, nodata, mask_min, mask_max, unit, data_type_id, masked, timeseries_role) VALUES ('msg-mpe', 'msg-mpe_native', 'undefined', 'JRC', true, 'rainfall', 'Native', 'Multi-Sensor Precipitation Estimate', NULL, 'EUMETCAST', 'e15minute', 'YYYYMMDDHHMM', 0, 0, 0, NULL, NULL, '', 'undefined', true, NULL);
 
 
 SET search_path = analysis, pg_catalog;
@@ -2728,24 +2730,24 @@ INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined
 INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('lsasaf-lst', 'lst', 'undefined', 'SPOTV-ECOWAS-1km', 'Test_JRC', false, false, '', false);
 INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('modis-ba', 'firedate', 'undefined', 'SPOTV-ECOWAS-1km', 'Test_JRC', false, false, NULL, false);
 INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('vgt-fapar', 'fapar', 'V1.3', 'SPOTV-ECOWAS-1km', 'JRC', false, false, 'Null', false);
-INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('msg-mpe', 'mpe', 'undefined', 'MSG-satellite-3km', 'JRC', false, false, NULL, false);
 INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('vgt-ndvi', 'ndv', 'proba-v2.0', 'SPOTV-Africa-1km', 'JRC', false, false, NULL, false);
 INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('tamsat-rfe', '10d', '2.0', 'SPOTV-Africa-1km', 'Test_JRC', false, false, 'Null
 ', false);
 INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('vgt-ndvi', 'ndv', 'spot-v1', 'SPOTV-Africa-1km', 'JRC', false, false, 'Null', false);
-INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('fewsnet-rfe', '10d', '2.0', 'FEWSNET-Africa-8km', 'JRC', true, false, 'Null', false);
-INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('chirps-dekad', '10d', '2.0', 'CHIRP-Africa-5km', 'JRC', true, false, NULL, false);
 INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('vgt-ndvi', 'ndv', 'spot-v2', 'SPOTV-Africa-1km', 'JRC', false, false, 'Null', false);
 INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('vgt-ndvi', 'sm', 'spot-v2', 'SPOTV-Africa-1km', 'JRC', false, false, 'Null', false);
-INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('vgt-ndvi', 'ndv', 'proba-v2.1', 'SPOTV-Africa-1km', 'JRC', true, false, NULL, false);
-INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('tamsat-rfe', '10d', '2.0', 'TAMSAT-Africa-4km', 'JRC', false, false, 'Null
+INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('chirps-dekad', '10d', '2.0', 'CHIRP-Africa-5km', 'JRC', false, false, NULL, false);
+INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('fewsnet-rfe', '10d', '2.0', 'FEWSNET-Africa-8km', 'JRC', false, false, 'Null', false);
+INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('tamsat-rfe', '10d', '2.0', 'TAMSAT-Africa-4km', 'JRC', true, false, 'Null
 ', false);
-INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('lsasaf-lst', 'lst', 'undefined', 'MSG-satellite-3km', 'JRC', true, false, '', false);
 INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('modis-firms', '1day', 'v5.0', 'SPOTV-Africa-1km', 'JRC', false, false, NULL, false);
 INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('modis-chla', 'chla-day', 'v2013.1', 'MODIS-Africa-4km', 'JRC', false, false, NULL, false);
 INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('modis-kd490', 'kd490-day', 'v2012.0', 'MODIS-Africa-4km', 'JRC', false, false, NULL, false);
 INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('modis-par', 'par-day', 'v2012.0', 'MODIS-Africa-4km', 'JRC', false, false, NULL, false);
 INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('modis-sst', 'sst-day', 'v2013.1', 'MODIS-Africa-4km', 'JRC', false, false, NULL, false);
+INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('msg-mpe', 'mpe', 'undefined', 'MSG-satellite-3km', 'JRC', false, false, NULL, false);
+INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('vgt-ndvi', 'ndv', 'proba-v2.1', 'SPOTV-Africa-1km', 'JRC', true, false, NULL, false);
+INSERT INTO ingestion (productcode, subproductcode, version, mapsetcode, defined_by, activated, wait_for_all_files, input_to_process_re, enabled) VALUES ('lsasaf-lst', 'lst', 'undefined', 'MSG-satellite-3km', 'JRC', true, false, '', false);
 
 
 --
@@ -2771,21 +2773,21 @@ INSERT INTO internet_source (internet_id, defined_by, descriptive_name, descript
 INSERT INTO internet_source (internet_id, defined_by, descriptive_name, description, modified_by, update_datetime, url, user_name, password, type, include_files_expression, files_filter_expression, status, pull_frequency, datasource_descr_id, frequency_id, start_date, end_date) VALUES ('GSFC:CGI:MODIS:CHLA:1D', 'JRC', 'MODIS 4km Chla Daily', 'MODIS 4km Chla Daily', NULL, '2014-03-06 15:58:21', 'http://oceandata.sci.gsfc.nasa.gov/cgi/getfile/', 'anonymous', 'u@u@u', 'http_tmpl', 'A%Y%j.L3m_DAY_CHL_chlor_a_4km.bz2', '.*.L3m_DAY_CHL_chlor_a_4km.bz2', true, 3, 'GSFC:CGI:MODIS:CHLA:1D', 'e1day', 20150217, NULL);
 INSERT INTO internet_source (internet_id, defined_by, descriptive_name, description, modified_by, update_datetime, url, user_name, password, type, include_files_expression, files_filter_expression, status, pull_frequency, datasource_descr_id, frequency_id, start_date, end_date) VALUES ('GSFC:CGI:MODIS:PAR:1D', 'JRC', 'MODIS Global Kd 1 day - 4km', 'MODIS Global Sea Surface Temperature 1 day - from OceanColor site', NULL, '2014-03-06 15:52:07', 'http://oceandata.sci.gsfc.nasa.gov/cgi/getfile/', 'anonymous', 'anonymous', 'http_tmpl', 'A%Y%j.L3m_DAY_PAR_par_4km.bz2', '.*.L3m_DAY_PAR_par_4km.bz2', false, 3, 'GSFC:CGI:MODIS:PAR:1D', 'e1day', 20150217, NULL);
 INSERT INTO internet_source (internet_id, defined_by, descriptive_name, description, modified_by, update_datetime, url, user_name, password, type, include_files_expression, files_filter_expression, status, pull_frequency, datasource_descr_id, frequency_id, start_date, end_date) VALUES ('USGS:EARLWRN:FEWSNET', 'JRC', 'FEWSNET Rainfall Estimate for Africa', 'FEWSNET Rainfall Estimate for Africa', NULL, '2014-03-06 15:52:07', 'http://earlywarning.usgs.gov/ftp2/raster/rf/a/', NULL, NULL, 'http_tmpl', '%Y/a%y%m%{dkm}rb.zip', 'a.*rb.zip', false, 3, 'USGS:EARLWRN:FEWSNET', 'e1dekad', 20150201, NULL);
-INSERT INTO internet_source (internet_id, defined_by, descriptive_name, description, modified_by, update_datetime, url, user_name, password, type, include_files_expression, files_filter_expression, status, pull_frequency, datasource_descr_id, frequency_id, start_date, end_date) VALUES ('READINGS:TAMSAT:10D:NC', 'JRC', 'TAMSAT data from Readings website', 'TAMSAT data from Readings website', NULL, '2015-08-04 17:22:24.951009', 'http://www.met.reading.ac.uk/~tamsat/public_data/', 'anonymous', NULL, 'http_tmpl', '%Y/%m/rfe%Y_%m-dk%{dkm}.nc', NULL, true, 3, 'READINGS:TAMSAT:10D:NC', 'e1dekad', 20150501, NULL);
 INSERT INTO internet_source (internet_id, defined_by, descriptive_name, description, modified_by, update_datetime, url, user_name, password, type, include_files_expression, files_filter_expression, status, pull_frequency, datasource_descr_id, frequency_id, start_date, end_date) VALUES ('GSFC:CGI:MODIS:KD490:1D', 'JRC', 'MODIS Global Kd 1 day - 4km', 'MODIS Global Sea Surface Temperature 1 day - from OceanColor site', NULL, '2014-03-06 15:52:07', 'http://oceandata.sci.gsfc.nasa.gov/cgi/getfile/', 'anonymous', 'anonymous', 'http_tmpl', 'A%Y%j.L3m_DAY_KD490_Kd_490_4km.bz2', '.*.L3m_DAY_KD490_Kd_490_4km.bz2', false, 3, 'GSFC:CGI:MODIS:KD490:1D', 'e1day', 20150217, NULL);
 INSERT INTO internet_source (internet_id, defined_by, descriptive_name, description, modified_by, update_datetime, url, user_name, password, type, include_files_expression, files_filter_expression, status, pull_frequency, datasource_descr_id, frequency_id, start_date, end_date) VALUES ('FIRMS:NASA', 'JRC', 'USGS/firms team active fires - from NASA', 'USGS/firms team active fires - from NASA', NULL, '2014-03-06 15:56:11', 'ftp://nrt1.modaps.eosdis.nasa.gov/FIRMS/Global', 'jrcMondeFires', 'FIRE@data1', 'ftp', 'Global_MCD14DL.*.txt', '^Global_MCD14DL.*$', false, 5, 'FIRMS:NASA', NULL, NULL, NULL);
+INSERT INTO internet_source (internet_id, defined_by, descriptive_name, description, modified_by, update_datetime, url, user_name, password, type, include_files_expression, files_filter_expression, status, pull_frequency, datasource_descr_id, frequency_id, start_date, end_date) VALUES ('READINGS:TAMSAT:10D:NC', 'JRC', 'TAMSAT data from Readings website', 'TAMSAT data from Readings website', NULL, '2015-08-04 17:22:24.951009', 'http://www.met.reading.ac.uk/~tamsat/public_data/', 'anonymous', NULL, 'http_tmpl', '%Y/%m/rfe%Y_%m-dk%{dkm}.nc', 'rfe.*-dk[123].nc', true, 3, 'READINGS:TAMSAT:10D:NC', 'e1dekad', 20150501, NULL);
 
 
 --
 -- Data for Name: processing; Type: TABLE DATA; Schema: products; Owner: estation
 --
 
-INSERT INTO processing (process_id, defined_by, output_mapsetcode, activated, derivation_method, algorithm, priority, enabled) VALUES (1, 'JRC', 'FEWSNET-Africa-8km', false, 'std_precip_prods_only', 'std_precip', '1', false);
-INSERT INTO processing (process_id, defined_by, output_mapsetcode, activated, derivation_method, algorithm, priority, enabled) VALUES (4, 'JRC', 'SPOTV-Africa-1km', false, 'merge', 'merge', '1', false);
 INSERT INTO processing (process_id, defined_by, output_mapsetcode, activated, derivation_method, algorithm, priority, enabled) VALUES (6, 'JRC', 'TAMSAT-Africa-4km', false, 'std_precip_prods_only', 'std_precip', '1', false);
-INSERT INTO processing (process_id, defined_by, output_mapsetcode, activated, derivation_method, algorithm, priority, enabled) VALUES (5, 'JRC', 'SPOTV-Africa-1km', true, 'std_ndvi_all', 'std_ndvi', '1', false);
 INSERT INTO processing (process_id, defined_by, output_mapsetcode, activated, derivation_method, algorithm, priority, enabled) VALUES (3, 'JRC', 'CHIRP-Africa-5km', false, 'std_precip_all', 'std_precip', '1', false);
-INSERT INTO processing (process_id, defined_by, output_mapsetcode, activated, derivation_method, algorithm, priority, enabled) VALUES (2, 'JRC', 'SPOTV-Africa-1km', true, 'std_ndvi_all', 'std_ndvi', '1', false);
+INSERT INTO processing (process_id, defined_by, output_mapsetcode, activated, derivation_method, algorithm, priority, enabled) VALUES (5, 'JRC', 'SPOTV-Africa-1km', false, 'std_ndvi_all', 'std_ndvi', '1', false);
+INSERT INTO processing (process_id, defined_by, output_mapsetcode, activated, derivation_method, algorithm, priority, enabled) VALUES (2, 'JRC', 'SPOTV-Africa-1km', false, 'std_ndvi_all', 'std_ndvi', '1', false);
+INSERT INTO processing (process_id, defined_by, output_mapsetcode, activated, derivation_method, algorithm, priority, enabled) VALUES (4, 'JRC', 'SPOTV-Africa-1km', true, 'merge', 'merge', '1', false);
+INSERT INTO processing (process_id, defined_by, output_mapsetcode, activated, derivation_method, algorithm, priority, enabled) VALUES (1, 'JRC', 'FEWSNET-Africa-8km', false, 'std_precip_prods_only', 'std_precip', '1', false);
 
 
 --
@@ -2821,7 +2823,6 @@ INSERT INTO process_product (process_id, productcode, subproductcode, version, m
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (2, 'vgt-ndvi', '10dmed_linearx2', 'spot-v2', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'MMDD', NULL, NULL);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (2, 'vgt-ndvi', 'year_min_linearx2', 'spot-v2', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'YYYY', NULL, NULL);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (2, 'vgt-ndvi', 'year_max_linearx2', 'spot-v2', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'YYYY', NULL, NULL);
-INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (4, 'vgt-ndvi', '10dmax', 'sv2-pv2.1', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'MMDD', NULL, NULL);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (2, 'vgt-ndvi', 'absol_min_linearx2', 'spot-v2', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'YYYY', NULL, NULL);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (2, 'vgt-ndvi', 'absol_max_linearx2', 'spot-v2', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'YYYY', NULL, NULL);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (2, 'vgt-ndvi', 'baresoil_linearx2', 'spot-v2', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'YYYYMMDD', NULL, NULL);
@@ -2844,11 +2845,11 @@ INSERT INTO process_product (process_id, productcode, subproductcode, version, m
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (2, 'vgt-ndvi', 'ndv', 'spot-v2', 'SPOTV-Africa-1km', 'INPUT', true, false, 'YYYYMMDD', NULL, NULL);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (3, 'chirps-dekad', '10d', '2.0', 'CHIRP-Africa-5km', 'INPUT', true, false, 'YYYYMMDD', NULL, NULL);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (5, 'vgt-ndvi', '10davg', 'sv2-pv2.1', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'MMDD', NULL, NULL);
-INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (4, 'vgt-ndvi', 'ndv', 'proba-v2.1', 'SPOTV-Africa-1km', 'INPUT', true, false, 'YYYYMMDD', 20140101, 20150521);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (5, 'vgt-ndvi', '10dmin', 'sv2-pv2.1', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'MMDD', NULL, NULL);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (5, 'vgt-ndvi', '10dmax', 'sv2-pv2.1', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'MMDD', NULL, NULL);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (5, 'vgt-ndvi', '10dmed', 'sv2-pv2.1', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'MMDD', NULL, NULL);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (5, 'vgt-ndvi', 'ndvi_linearx1', 'sv2-pv2.1', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'YYYYMMDD', NULL, NULL);
+INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (4, 'vgt-ndvi', 'ndv', 'proba-v2.1', 'SPOTV-Africa-1km', 'INPUT', true, false, 'YYYYMMDD', 20140101, 20150811);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (5, 'vgt-ndvi', 'ndvi_linearx2', 'sv2-pv2.1', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'YYYYMMDD', NULL, NULL);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (5, 'vgt-ndvi', '10davg_linearx2', 'sv2-pv2.1', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'MMDD', NULL, NULL);
 INSERT INTO process_product (process_id, productcode, subproductcode, version, mapsetcode, type, activated, final, date_format, start_date, end_date) VALUES (5, 'vgt-ndvi', '10dmin_linearx2', 'sv2-pv2.1', 'SPOTV-Africa-1km', 'OUTPUT', true, false, 'MMDD', NULL, NULL);
@@ -2871,27 +2872,27 @@ INSERT INTO process_product (process_id, productcode, subproductcode, version, m
 -- Data for Name: product_acquisition_data_source; Type: TABLE DATA; Schema: products; Owner: estation
 --
 
-INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('modis-chla', 'modis-chla_native', 'v2013.1', 'EO:EUM:DAT:AQUA:CHLORA', 'JRC', 'EUMETCAST', true, true);
 INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('modis-firms', 'modis-firms_native', 'v5.0', 'FIRMS:NASA', 'JRC', 'INTERNET', false, true);
 INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('vgt-ndvi', 'vgt-ndvi_native', 'proba-v2.1', 'EO:EUM:DAT:PROBA-V2.1:NDVI', 'JRC', 'EUMETCAST', true, true);
-INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('vgt-ndvi', 'vgt-ndvi_native', 'spot-v2', 'EO:EUM:DAT:SPOT2:S10NDVI', 'JRC', 'EUMETCAST', true, true);
 INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('modis-ba', 'modis-ba_native', 'undefined', 'UMD:MCD45A1:TIF:51', 'JRC', 'INTERNET', false, true);
 INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('modis-ba', 'modis-ba_native', 'undefined', 'UMD:MCD45A1:HDF:51', 'JRC', 'INTERNET', false, true);
-INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('tamsat-rfe', 'tamsat-rfe_native', '2.0', 'READINGS:TAMSAT:10D:NC', 'JRC', 'INTERNET', true, true);
-INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('tamsat-rfe', 'tamsat-rfe_native', '2.0', 'EO:EUM:DAT:MSG:RFE', 'JRC', 'EUMETCAST', false, true);
 INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('modis-chla', 'modis-chla_native', 'v2013.1', 'GSFC:CGI:MODIS:CHLA:1D', 'JRC', 'INTERNET', false, true);
 INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('chirp', 'chirp_native', 'undefined', 'UCSB:CHIRP:DEKAD', 'JRC', 'INTERNET', false, true);
 INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('modis-kd490', 'modis-kd490_native', 'v2012.0', 'GSFC:CGI:MODIS:KD490:1D', 'JRC', 'INTERNET', false, true);
 INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('modis-par', 'modis-par_native', 'v2012.0', 'GSFC:CGI:MODIS:PAR:1D', 'JRC', 'INTERNET', false, true);
 INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('modis-sst', 'modis-sst_native', 'v2013.1', 'GSFC:CGI:MODIS:SST:1D', 'JRC', 'INTERNET', false, true);
-INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('chirps-dekad', 'chirps-dekad_native', '2.0', 'UCSB:CHIRPS:DEKAD:2.0', 'JRC', 'INTERNET', true, true);
-INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('fewsnet-rfe', 'fewsnet-rfe_native', '2.0', 'USGS:EARLWRN:FEWSNET', 'JRC', 'INTERNET', true, true);
 INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('msg-mpe', 'msg-mpe_native', 'undefined', 'EO:EUM:DAT:MSG:MPE-GRIB', 'JRC', 'EUMETCAST', true, false);
+INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('vgt-ndvi', 'vgt-ndvi_native', 'spot-v2', 'EO:EUM:DAT:SPOT2:S10NDVI', 'JRC', 'EUMETCAST', false, true);
+INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('chirps-dekad', 'chirps-dekad_native', '2.0', 'UCSB:CHIRPS:DEKAD:2.0', 'JRC', 'INTERNET', false, true);
+INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('fewsnet-rfe', 'fewsnet-rfe_native', '2.0', 'USGS:EARLWRN:FEWSNET', 'JRC', 'INTERNET', false, true);
 INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('vgt-ndvi', 'vgt-ndvi_native', 'spot-v1', 'EO:EUM:DAT:SPOT1:S10NDVI', 'JRC', 'EUMETCAST', false, true);
+INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('tamsat-rfe', 'tamsat-rfe_native', '2.0', 'READINGS:TAMSAT:10D:NC', 'JRC', 'INTERNET', false, true);
 INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('pml-modis-chl-nrt', 'pml-modis-chl-nrt_native', '3.0', 'EO:EUM:DAT:MULT:NRTOAFR:OC', 'JRC', 'EUMETCAST', false, true);
 INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('vgt-ndvi', 'vgt-ndvi_native', 'proba-v2.0', 'EO:EUM:DAT:PROBA-V2.0:NDVI', 'JRC', 'EUMETCAST', false, true);
 INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('pml-modis-sst-nrt', 'pml-modis-sst-nrt_native', '3.0', 'EO:EUM:DAT:MULT:NRTOAFR:SST', 'JRC', 'EUMETCAST', false, true);
+INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('modis-chla', 'modis-chla_native', 'v2013.1', 'EO:EUM:DAT:AQUA:CHLORA', 'JRC', 'EUMETCAST', false, true);
 INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('pml-modis-chl-ref', 'pml-modis-chl-ref_native', '3.0', 'EO:EUM:DAT:AQUA:ROPAFR:OC', 'JRC', 'EUMETCAST', false, true);
+INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('tamsat-rfe', 'tamsat-rfe_native', '2.0', 'EO:EUM:DAT:MSG:RFE', 'JRC', 'EUMETCAST', true, true);
 INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('pml-modis-sst-ref', 'pml-modis-sst-ref_native', '3.0', 'EO:EUM:DAT:AQUA:ROPAFR:SST', 'JRC', 'EUMETCAST', false, true);
 INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('pml-modis-chl', 'pml-modis-chl_native', '3.0', 'EO:EUM:DAT:MULT:CPMAD:OC', 'JRC', 'EUMETCAST', false, true);
 INSERT INTO product_acquisition_data_source (productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data) VALUES ('pml-modis-sst', 'pml-modis-sst_native', '3.0', 'EO:EUM:DAT:MULT:CPMAD:SST', 'JRC', 'EUMETCAST', false, true);
@@ -2918,6 +2919,7 @@ INSERT INTO sub_datasource_description (productcode, subproductcode, version, da
 INSERT INTO sub_datasource_description (productcode, subproductcode, version, datasource_descr_id, scale_factor, scale_offset, no_data, data_type_id, mask_min, mask_max, re_process, re_extract) VALUES ('modis-chla', 'chla-day', 'v2013.1', 'GSFC:CGI:MODIS:CHLA:1D', 1, 0, -32767, 'Float32', NULL, NULL, NULL, NULL);
 INSERT INTO sub_datasource_description (productcode, subproductcode, version, datasource_descr_id, scale_factor, scale_offset, no_data, data_type_id, mask_min, mask_max, re_process, re_extract) VALUES ('msg-mpe', 'mpe', 'undefined', 'EO:EUM:DAT:MSG:MPE-GRIB', 900, 0, 9999, 'Float32', NULL, NULL, NULL, NULL);
 INSERT INTO sub_datasource_description (productcode, subproductcode, version, datasource_descr_id, scale_factor, scale_offset, no_data, data_type_id, mask_min, mask_max, re_process, re_extract) VALUES ('vgt-fapar', 'fapar', 'V1.3', 'EO:EUM:DAT:PROBA-V:FAPAR', 0.00400000000000000008, 0, 255, 'Byte', NULL, NULL, 'FAPAR', '.h5');
+INSERT INTO sub_datasource_description (productcode, subproductcode, version, datasource_descr_id, scale_factor, scale_offset, no_data, data_type_id, mask_min, mask_max, re_process, re_extract) VALUES ('tamsat-rfe', '10d', '2.0', 'READINGS:TAMSAT:10D:NC', 1, 0, -99, 'Int16', NULL, NULL, NULL, NULL);
 INSERT INTO sub_datasource_description (productcode, subproductcode, version, datasource_descr_id, scale_factor, scale_offset, no_data, data_type_id, mask_min, mask_max, re_process, re_extract) VALUES ('modis-firms', '1day', 'v5.0', 'FIRMS:NASA', 1, 0, 0, 'Byte', NULL, NULL, NULL, NULL);
 INSERT INTO sub_datasource_description (productcode, subproductcode, version, datasource_descr_id, scale_factor, scale_offset, no_data, data_type_id, mask_min, mask_max, re_process, re_extract) VALUES ('vgt-ndvi', 'ndv', 'spot-v1', 'EO:EUM:DAT:SPOT1:S10NDVI', 0.00400000000000000008, -0.100000000000000006, 0, 'Byte', NULL, NULL, 'NDV', 'NDV');
 INSERT INTO sub_datasource_description (productcode, subproductcode, version, datasource_descr_id, scale_factor, scale_offset, no_data, data_type_id, mask_min, mask_max, re_process, re_extract) VALUES ('vgt-ndvi', 'sm', 'spot-v1', 'EO:EUM:DAT:SPOT1:S10NDVI', 1, 0, NULL, 'Byte', NULL, NULL, 'SM', 'SM');

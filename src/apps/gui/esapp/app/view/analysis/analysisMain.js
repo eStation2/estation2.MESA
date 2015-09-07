@@ -75,12 +75,13 @@ Ext.define("esapp.view.analysis.analysisMain",{
         me.items = [{
             region: 'east',
             title: esapp.Utils.getTranslation('timeseries'),  // 'Time series',
-            width: 402,
+            width: 420,
             minWidth: 402,
+            maxWidth : 475,
             split: true,
-            maxWidth : 450,
             collapsible: true,
             collapsed: false,
+            autoScroll:true,
             floatable: false,
             xtype: 'tabpanel',
             frame: false,
@@ -88,12 +89,40 @@ Ext.define("esapp.view.analysis.analysisMain",{
             items: [{
                 title: esapp.Utils.getTranslation('timeseries'),  // 'Timeseries',
                 margin:3,
-                //padding: '5px 5px 25px 5px',
+                minHeight: 800,
+                autoHeight: true,
+                autoScroll:true,
                 layout:'vbox',
                 defaults: {
                     margin: '5 0 15 0'
                 },
                 items: [{
+                    xtype: 'fieldset',
+                    id: 'fieldset_selectedregion',
+                    title: '<b style="font-size:16px; color:#0065A2; line-height: 18px;">' + esapp.Utils.getTranslation('selectedregion') + '</b>',
+                    hidden: true,
+                    width: 395,
+                    height: 65,
+                    border: 3,
+                    //padding: 5,
+                    style: {
+                        borderColor: '#157FCC',
+                        borderStyle: 'solid'
+                    },
+                    //layout: 'vbox',
+                    items: [{
+                        xtype: 'displayfield',
+                        id: 'selectedregionname',
+                        reference: 'selectedregionname',
+                        fieldLabel: '',
+                        labelAlign : 'left',
+                        fieldStyle: {
+                            color:'darkgreen',
+                            fontWeight:'bold'
+                        },
+                        value: ''
+                    }]
+                },{
                     title: esapp.Utils.getTranslation('products'),  // 'Products',
                     xtype : 'grid',
                     reference: 'TimeSeriesProductsGrid',
@@ -422,6 +451,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
             }
         }, {
             region: 'center',
+            autoScroll:true,
             layout: {
                 type: 'fit'
             },

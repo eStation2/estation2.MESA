@@ -1,1 +1,6 @@
 .DS_Store
+.old
+.idea
+*.pyc
+*.swp
+*.*~

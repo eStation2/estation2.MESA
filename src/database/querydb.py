@@ -694,14 +694,20 @@ def get_ingestions(echo=False):
     try:
         i = db.ingestion._table
         m = db.mapset._table
+        p = db.product._table
+
         s = select([func.CONCAT(i.c.productcode, '_', i.c.version).label('productid'),
                     i.c.productcode,
                     i.c.subproductcode,
                     i.c.version,
                     i.c.mapsetcode,
+                    p.c.frequency_id,
                     i.c.defined_by,
                     i.c.activated,
-                    m.c.descriptive_name.label('mapsetname')]).select_from(i.outerjoin(m, i.c.mapsetcode == m.c.mapsetcode))
+                    m.c.descriptive_name.label('mapsetname')]).\
+            select_from(i.outerjoin(m, i.c.mapsetcode == m.c.mapsetcode).outerjoin(p, and_(i.c.productcode == p.c.productcode,
+                                            i.c.subproductcode == p.c.subproductcode,
+                                            i.c.version == p.c.version)))
 
         s = s.alias('ingest')
         i = db.map(s, primary_key=[s.c.productid, i.c.subproductcode, i.c.mapsetcode])

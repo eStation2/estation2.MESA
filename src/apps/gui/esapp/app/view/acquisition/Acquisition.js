@@ -271,6 +271,17 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                 text: esapp.Utils.getTranslation('ingest'),    // 'Ingest',
                 handler: 'checkStatusServices'
             },
+            {
+                xtype: 'checkboxfield',
+                boxLabel  : esapp.Utils.getTranslation('ingest_archives_from_eumetcast'),    // 'Ingest Archives from EUMETCast',
+                name      : 'ingest_archives_from_eumetcast',
+                inputValue: '1',
+                id        : 'ingest_archives_from_eumetcast',
+                //listeners: {
+                //    boxclick: 'setIngestArchivesFromEumetcast'
+                //}
+                handler: 'setIngestArchivesFromEumetcast'
+            },
             '->', // same as { xtype: 'tbfill' }
             {
                 xtype: 'button',
@@ -298,6 +309,7 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                             }
                         });
                     }
+                    me.getController().checkStatusServices();
                 }
             }]
         });

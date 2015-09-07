@@ -18,7 +18,7 @@ Ext.define('esapp.view.dashboard.DashboardController', {
             PC2 = {},
             PC3 = {},
             PC1_connection = {},
-            PC3_connection = {};
+            PC23_connection = {};
 
         var pc1Active = false,
             pc2Active = false,
@@ -32,19 +32,31 @@ Ext.define('esapp.view.dashboard.DashboardController', {
         this.getStore('dashboard').load({
             callback: function(records, options, success){
                 records.forEach(function(dashboard) {
+                    me.PC2_service_eumetcast = dashboard.get('PC2_service_eumetcast');
+                    me.PC2_service_internet = dashboard.get('PC2_service_internet');
+                    me.PC2_service_ingest = dashboard.get('PC2_service_ingest');
+                    me.PC2_service_processing = dashboard.get('PC2_service_processing');
+                    me.PC2_service_system = dashboard.get('PC2_service_system');
                     me.PC2_internet_status = dashboard.get('PC2_internet_status');
                     me.PC2_mode = dashboard.get('PC2_mode');
                     me.PC2_postgresql_status = dashboard.get('PC2_postgresql_status');
                     me.PC2_version = dashboard.get('PC2_version');
+                    me.PC2_disk_status = dashboard.get('PC2_disk_status');
 
+                    me.PC3_service_eumetcast = dashboard.get('PC3_service_eumetcast');
+                    me.PC3_service_internet = dashboard.get('PC3_service_internet');
+                    me.PC3_service_ingest = dashboard.get('PC3_service_ingest');
+                    me.PC3_service_processing = dashboard.get('PC3_service_processing');
+                    me.PC3_service_system = dashboard.get('PC3_service_system');
                     me.PC3_internet_status = dashboard.get('PC3_internet_status');
                     me.PC3_mode = dashboard.get('PC3_mode');
                     me.PC3_postgresql_status = dashboard.get('PC3_postgresql_status');
                     me.PC3_version = dashboard.get('PC3_version');
+                    me.PC3_disk_status = dashboard.get('PC3_disk_status');
 
                     me.activePC = dashboard.get('activePC');
-                    me.pc1_connection = dashboard.get('pc1_connection');
-                    me.pc3_connection = dashboard.get('pc3_connection');
+                    me.PC1_connection = dashboard.get('PC1_connection');
+                    me.PC23_connection = dashboard.get('PC23_connection');
                     me.type_installation = dashboard.get('type_installation');
                 });
 
@@ -143,8 +155,14 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                         activePC:pc2Active,
                         activeversion: me.PC2_version,
                         currentmode: me.PC2_modeText,
+                        diskstatus: me.PC2_disk_status,
                         dbstatus: me.PC2_postgresql_status,
-                        internetconnection: me.PC2_internet_status
+                        internetconnection: me.PC2_internet_status,
+                        service_eumetcast : me.PC2_service_eumetcast,
+                        service_internet : me.PC2_service_internet,
+                        service_ingest : me.PC2_service_ingest,
+                        service_processing : me.PC2_service_processing,
+                        service_system : me.PC2_service_system
                     };
 
                     PC3 = {
@@ -157,29 +175,52 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                         activePC: pc3Active,
                         activeversion: me.PC3_version,
                         currentmode: me.PC3_modeText,
+                        diskstatus: me.PC3_disk_status,
                         dbstatus: me.PC3_postgresql_status,
-                        internetconnection: me.PC3_internet_status
+                        internetconnection: me.PC3_internet_status,
+                        service_eumetcast : me.PC3_service_eumetcast,
+                        service_internet : me.PC3_service_internet,
+                        service_ingest : me.PC3_service_ingest,
+                        service_processing : me.PC3_service_processing,
+                        service_system : me.PC3_service_system
                     };
 
                     PC1_connection = {
                         xtype: 'dashboard-connection',
                         id: 'pc1_connection',
-                        connected: me.pc1_connection,
+                        connected: me.PC1_connection,
                         direction: 'left'
                     };
 
-                    PC3_connection = {
+                    PC23_connection = {
                         xtype: 'dashboard-connection',
-                        id: 'pc3_connection',
-                        connected: me.pc3_connection,
+                        id: 'pc23_connection',
+                        connected: me.PC23_connection,
                         direction: 'right'
                     };
 
-                    pcs_container.add(PC1);
-                    pcs_container.add(PC1_connection);
-                    pcs_container.add(PC2);
-                    pcs_container.add(PC3_connection);
-                    pcs_container.add(PC3);
+                    if (me.activePC == 'pc1') {
+                        pcs_container.add(PC2);
+                        pcs_container.add(PC1_connection);
+                        pcs_container.add(PC1);
+                        pcs_container.add(PC23_connection);
+                        pcs_container.add(PC3);
+                    }
+                    else if (me.activePC == 'pc2') {
+                        pcs_container.add(PC1);
+                        pcs_container.add(PC1_connection);
+                        pcs_container.add(PC2);
+                        pcs_container.add(PC23_connection);
+                        pcs_container.add(PC3);
+                    }
+                    else if (me.activePC == 'pc3') {
+                        pcs_container.add(PC1);
+                        pcs_container.add(PC1_connection);
+                        pcs_container.add(PC3);
+                        pcs_container.add(PC23_connection);
+                        pcs_container.add(PC2);
+                    }
+
                 }
                 else {
                     me.setTitle('<span class="dashboard-header-title-style">' + esapp.Utils.getTranslation('mesa_light_estation') + '</span>');  // 'MESA Light eStation',

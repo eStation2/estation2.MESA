@@ -56,15 +56,55 @@ Ext.define("esapp.view.dashboard.PC2",{
             me.textCls = 'panel-text-style-gray';
         }
 
+        me.diskstatusCls = '';
+        if (me.diskstatus)
+            me.diskstatusCls = 'x-tool-okay';
+        else if (me.diskstatus == false)
+            me.diskstatusCls = 'x-tool-notokay';
+
+        me.dbstatusCls = '';
         if (me.dbstatus)
             me.dbstatusCls = 'running';
-        else
+        else if (me.dbstatus == false)
             me.dbstatusCls = 'notrunning';
 
+        me.internetCls = '';
         if (me.internetconnection)
             me.internetCls = 'connected';
-        else
+        else if (me.internetconnection == false)
             me.internetCls = 'notconnected';
+
+        me.service_eumetcast_Style = 'gray';
+        me.service_internet_Style = 'gray';
+        me.service_ingest_Style = 'gray';
+        me.service_processing_Style = 'gray';
+        me.service_system_Style = 'gray';
+
+        if (me.service_eumetcast)
+            me.service_eumetcast_Style = 'green';
+        else if (me.service_eumetcast == 'false')
+            me.service_eumetcast_Style = 'red';
+
+        if (me.service_internet)
+            me.service_internet_Style = 'green';
+        else if (me.service_internet == 'false')
+            me.service_internet_Style = 'red';
+
+        if (me.service_ingest)
+            me.service_ingest_Style = 'green';
+        else if (me.service_ingest == 'false')
+            me.service_ingest_Style = 'red';
+
+        if (me.service_processing)
+            me.service_processing_Style = 'green';
+        else if (me.service_processing == 'false')
+            me.service_processing_Style = 'red';
+
+        if (me.service_system)
+            me.service_system_Style = 'green';
+        else if (me.service_system == 'false')
+            me.service_system_Style = 'red';
+
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             layout: {
@@ -85,6 +125,9 @@ Ext.define("esapp.view.dashboard.PC2",{
                     service: 'eumetcast',
                     text: esapp.Utils.getTranslation('eumetcast'),     // 'Eumetcast',
                     handler: 'checkStatusServices',
+                    style: {
+                        color: me.service_eumetcast_Style
+                    },
                     disabled: me.setdisabledPartial
                 }, ' ',
                 {
@@ -92,6 +135,9 @@ Ext.define("esapp.view.dashboard.PC2",{
                     service: 'internet',
                     text: esapp.Utils.getTranslation('internet'),     // 'Internet',
                     handler: 'checkStatusServices',
+                    style: {
+                        color: me.service_internet_Style
+                    },
                     disabled: me.setdisabledPartial
                 }, ' ',
                 {
@@ -99,6 +145,9 @@ Ext.define("esapp.view.dashboard.PC2",{
                     service: 'ingest',
                     text: esapp.Utils.getTranslation('ingest'),     // 'Ingest',
                     handler: 'checkStatusServices',
+                    style: {
+                        color: me.service_ingest_Style
+                    },
                     disabled: me.setdisabledPartial
                 }, ' ',
                 {
@@ -106,13 +155,20 @@ Ext.define("esapp.view.dashboard.PC2",{
                     service: 'processing',
                     text: esapp.Utils.getTranslation('processing'),     // 'Processing',
                     handler: 'checkStatusServices',
+                    style: {
+                        color: me.service_processing_Style
+                    },
                     disabled: me.setdisabledPartial
                 }, ' ',
                 {
                     xtype: 'servicemenubutton',
                     service: 'system',
                     text: esapp.Utils.getTranslation('system'),     // 'System',
-                    handler: 'checkStatusServices'
+                    handler: 'checkStatusServices',
+                    style: {
+                        color: me.service_system_Style
+                    },
+                    disabled: me.setdisabledPartial
                 }, '-',
                 {
                 xtype: 'splitbutton',
@@ -235,8 +291,9 @@ Ext.define("esapp.view.dashboard.PC2",{
             split:false,
             collapsible:true,
             collapsed: true,
+            hideCollapseTool: me.diskstatus == null ? true : false,
             // flex:1.5,
-            iconCls: 'x-tool-okay', // 'fa fa-check-circle-o fa-2x', // fa-check-square fa-chevron-circle-down fa-check-circle fa-check
+            iconCls: me.diskstatusCls,  // 'x-tool-okay', // 'fa fa-check-circle-o fa-2x', // fa-check-square fa-chevron-circle-down fa-check-circle fa-check
             iconAlign : 'left',
             height: 210,
             minHeight: 200,

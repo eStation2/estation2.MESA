@@ -46,38 +46,43 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
                     me.getView().down('button[name=ingestbtn]').down('menuitem[name=stopingest]').setDisabled(true);
                     me.getView().down('button[name=ingestbtn]').down('menuitem[name=restartingest]').setDisabled(true);
                 }
+                var ingestarchives_chkbox = Ext.getCmp('ingest_archives_from_eumetcast');
+                //console.info(ingestarchives_chkbox);
+                //ingestarchives_chkbox.suspendEvents(false);
+                ingestarchives_chkbox.setRawValue(services.ingest_archive_eum);
+                //ingestarchives_chkbox.resumeEvents();
+            },
+            failure: function(response, opts) {
+                console.info(response.status);
+            }
+        });
+    },
+
+
+    setIngestArchivesFromEumetcast: function(chkbox, ev){
+
+        // AJAX call to run/start a specified service (specified through the menuitem name).
+        Ext.Ajax.request({
+            method: 'GET',
+            url: 'acquisition/setingestarchives',
+            params: {
+                setingestarchives: chkbox.value
+            },
+            success: function(response, opts){
+                var result = Ext.JSON.decode(response.responseText);
+                var message = esapp.Utils.getTranslation('turnedoff');     // 'turned off'
+                if (chkbox.value) {
+                    message = esapp.Utils.getTranslation('turnedon');  // 'turned on'
+                }
+                if (result.success){
+                    Ext.toast({ html: esapp.Utils.getTranslation('ingest_archives_from_eumetcast') + ' ' + message, title: esapp.Utils.getTranslation('ingest_archives_from_eumetcast'), width: 350, align: 't' });
+                }
             },
             failure: function(response, opts) {
                 console.info(response.status);
             }
         });
     }
-
-
-    //execServiceTask: function(menuitem, ev){
-    //    var me = me;
-    //
-    //    // AJAX call to run/start a specified service (specified through the menuitem name).
-    //    Ext.Ajax.request({
-    //        method: 'POST',
-    //        url: 'services/execservicetask',
-    //        // extraParams: {task: menuitem.name},
-    //        params: {
-    //            task: menuitem.name
-    //        },
-    //        success: function(response, opts){
-    //            var runresult = Ext.JSON.decode(response.responseText);
-    //            if (runresult.success){
-    //                Ext.toast({ html: 'Execute Service Task' + menuitem.name, title: 'Execute Service Task', width: 200, align: 't' });
-    //                // menuitem.up().up().fireEvent('click', me);
-    //                me.getView().getController('acquisition').checkStatusServices(menuitem.up().up());
-    //            }
-    //        },
-    //        failure: function(response, opts) {
-    //            console.info(response.status);
-    //        }
-    //    });
-    //}
 
 
     ,selectProduct: function(btn, event) {
@@ -98,48 +103,49 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
             }
         });
         editProductWin.show();
-
-//        win = Ext.create('esapp.view.acquisition.product.editProduct', {
-//            product : "",
-//            module: true
-//        });
-//
-//        win.show();
-//
-//        if (!win) {
-//            win = Ext.create('esapp.view.acquisition.product.editProduct', {
-//                product : "",
-//                module: true
-//            });
-//        }
-//
-//        if (win.isVisible()) {
-//            win.hide(me, function() {
-//
-//            });
-//        } else {
-//            win.show(me, function() {
-//
-//            });
-//        }
     }
 
-    ,onAddClick: function(){
-        // Create a model instance
-        //var rec = new esapp.model.ProductAcquisition({
-        //    productcode: 'newproductcode',
-        //    version: 'undefined',
-        //    activated: false,
-        //    category_id: 'fire',
-        //    descriptive_name: false,
-        //    order_index:1
-        //});
-        //
-        //me.getStore().insert(0, rec);
-        //me.cellEditing.startEditByPosition({
-        //    row: 0,
-        //    column: 0
-        //});
-    }
+    //,onAddClick: function(){
+    //
+    //    win = Ext.create('esapp.view.acquisition.product.editProduct', {
+    //        product : "",
+    //        module: true
+    //    });
+    //
+    //    win.show();
+    //
+    //    if (!win) {
+    //        win = Ext.create('esapp.view.acquisition.product.editProduct', {
+    //            product : "",
+    //            module: true
+    //        });
+    //    }
+    //
+    //    if (win.isVisible()) {
+    //        win.hide(me, function() {
+    //
+    //        });
+    //    } else {
+    //        win.show(me, function() {
+    //
+    //        });
+    //    }
+    //
+    //    // Create a model instance
+    //    var rec = new esapp.model.ProductAcquisition({
+    //        productcode: 'newproductcode',
+    //        version: 'undefined',
+    //        activated: false,
+    //        category_id: 'fire',
+    //        descriptive_name: false,
+    //        order_index:1
+    //    });
+    //
+    //    me.getStore().insert(0, rec);
+    //    me.cellEditing.startEditByPosition({
+    //        row: 0,
+    //        column: 0
+    //    });
+    //}
 
 });
