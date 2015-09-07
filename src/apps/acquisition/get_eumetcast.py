@@ -28,12 +28,12 @@ from lib.python import mapset
 from lib.python import functions
 from lib.python import metadata
 
-logger = log.my_logger(__name__)
+logger = log.my_logger('apps.acquisition.get_eumetcast')
 
 # Defined in lib.python.es_constants.py
 input_dir = es_constants.eumetcast_files_dir
 output_dir = es_constants.get_eumetcast_output_dir
-user_def_sleep = es_constants.poll_frequency
+user_def_sleep = es_constants.get_eumetcast_sleep_time_sec
 
 echo_query = False
 
@@ -97,7 +97,6 @@ def loop_eumetcast(dry_run=False):
         logger.debug("Check if the Ingest Server input directory : %s exists.", output_dir)
         if not os.path.exists(output_dir):
             logger.fatal("The Ingest Server input directory : %s doesn't exists.", output_dir)
-            # TODO Jurvtk: Create the Ingest Server output directory if it doesn't exist!
             exit(1)
 
         if not os.path.exists(es_constants.base_tmp_dir):
@@ -127,7 +126,7 @@ def loop_eumetcast(dry_run=False):
 
                 # Define a file_handler logger 'source-specific' (for GUI)
                 logger_spec = log.my_logger('apps.get_eumetcast.'+eumetcast_source.eumetcast_id)
-                logger.debug("Processing eumetcast source  %s.", eumetcast_source.eumetcast_id)
+                logger.info("Processing eumetcast source  %s.", eumetcast_source.eumetcast_id)
 
                 processed_list_filename = es_constants.get_eumetcast_processed_list_prefix+str(eumetcast_source.eumetcast_id)+'.list'
                 processed_info_filename = es_constants.get_eumetcast_processed_list_prefix+str(eumetcast_source.eumetcast_id)+'.info'
@@ -150,7 +149,7 @@ def loop_eumetcast(dry_run=False):
                 logger.debug("Create current list of file to process for trigger %s.", eumetcast_source.eumetcast_id)
                 current_list = find_files(input_dir, eumetcast_source.filter_expression_jrc)
                 #logger.debug("Number of files currently on PC1 for trigger %s is %i", eumetcast_source.eumetcast_id, len(current_list))
-                logger_spec.debug("Number of files currently on PC1 for trigger %s is %i", eumetcast_source.eumetcast_id, len(current_list))
+                logger_spec.info("Number of files currently on PC1 for trigger %s is %i", eumetcast_source.eumetcast_id, len(current_list))
                 if len(current_list) > 0:
 
                     #logger.debug("Number of files already copied for trigger %s is %i", eumetcast_source.eumetcast_id, len(processed_list))
@@ -167,7 +166,7 @@ def loop_eumetcast(dry_run=False):
                                     logger_spec.debug("Processing file: "+os.path.basename(filename))
                                     if not dry_run:
                                         if commands.getstatusoutput("cp " + filename + " " + output_dir + os.sep + os.path.basename(filename))[0] == 0:
-                                            logger.info("File %s copied.", filename)
+                                            logger_spec.info("File %s copied.", filename)
                                             processed_list.append(filename)
                                             # Update processing info
                                             processed_info['time_latest_copy']=datetime.datetime.now()
@@ -190,10 +189,8 @@ def loop_eumetcast(dry_run=False):
                     functions.dump_obj_to_pickle(processed_list, processed_list_filename)
                     functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
-            time.sleep(float(10))
+            logger.info("End of Get EUMETCast loop. Sleep")
+            time.sleep(float(time_sleep))
 
-        # except Exception, e:
-        #     logger.fatal(str(e))
-        #     exit(1)
     exit(0)
 

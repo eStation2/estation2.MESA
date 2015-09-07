@@ -4,7 +4,7 @@ import sys, os, time, atexit
 import psutil
 from signal import SIGKILL, SIGTERM
 from lib.python import es_logging as log
-logger = log.my_logger(__name__)
+logger = log.my_logger("lib.python.daemon")
 from config import es_constants
 
 if not os.path.isdir(es_constants.pid_file_dir):

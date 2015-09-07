@@ -22,6 +22,7 @@ import numpy as N
 import time
 import shutil
 import gzip
+
 # import eStation2 modules
 from database import querydb
 from lib.python import functions
@@ -53,7 +54,10 @@ def loop_ingestion(dry_run=False):
     while True:
 
         # Manage the ingestion of Historical Archives (e.g. eStation prods disseminated via EUMETCast)
-        status = ingest_archives_eumetcast(dry_run=dry_run)
+        try:
+            status = ingest_archives_eumetcast(dry_run=dry_run)
+        except:
+            logger.error("Error in executing ingest_archives_eumetcast")
 
         # Get all active product ingestion records with a subproduct count.
         active_product_ingestions = querydb.get_ingestion_product(allrecs=True, echo=echo_query)
@@ -153,7 +157,7 @@ def loop_ingestion(dry_run=False):
                 dates_list = set(dates_list)
                 dates_list = sorted(dates_list, reverse=False)
 
-                # Loop over dates and get list of files (considering mapset ?)
+                # Loop over dates and get list of files
                 for in_date in dates_list:
                     # Refresh the files list (some files have been deleted)
                     files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(my_filter_expr, os.path.basename(f))]
@@ -163,7 +167,11 @@ def loop_ingestion(dry_run=False):
                     date_fileslist = [ingest_dir_in + m.group(0) for l in files for m in [regex.search(l)] if m]
                     # Pass list of files to ingestion routine
                     if (not dry_run):
-                        result = ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger_spec, echo_query=echo_query)
+                        try:
+                            result = ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger_spec, echo_query=echo_query)
+                        except:
+                            logger.error("Error in ingestion of file [%s] " % (functions.conv_list_2_string(date_fileslist)))
+                            result = 1
                         if not result:
                             if source.store_original_data:
                             # Copy to 'Archive' directory
@@ -1006,7 +1014,7 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
             interm_files = pre_process_bzip2 (subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'GEOREF_NETCDF':
-            interm_files = pre_process_georef_netcdf(subproducts, native_mapset_code, tmpdir, input_files, my_logger)
+            interm_files = pre_process_georef_netcdf(subproducts, native_mapset_code, tmpdir, input_files)
             georef_already_done = True
 
         elif preproc_type == 'BZ2_HDF4':
