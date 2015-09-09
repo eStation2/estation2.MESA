@@ -461,6 +461,13 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
+    def Test_get_frequency(self):
+
+        frequency_id = 'e1dekad'
+        output_products = querydb.get_frequency(frequency_id)
+        logger.info("Frequency  id:%s", frequency_id)
+        self.assertEqual(1, 1)
+
     # def Test_update_processing_chain_products(self):
     #
     #     process_id = 4

@@ -245,7 +245,7 @@ def ingest_archives_eumetcast(dry_run=False):
             subproductcode = processed_product.subproductcode
             mapset = processed_product.mapsetcode
             logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (productcode, version,subproductcode,mapset))
-            ingest_archives_eumetcast_product(productcode, productversion,ingest.subproductcode,mapset)
+            ingest_archives_eumetcast_product(productcode, version,subproductcode,mapset)
 
 
     # Get the list of files that have been treated
@@ -277,7 +277,10 @@ def ingest_archives_eumetcast_product(product_code, version, subproduct_code, ma
     # Call the ingestion routine
     if len(available_files)>0:
         for in_file in available_files:
-            ingest_file_archive(in_file, mapset_id, echo_query=False)
+            try:
+                ingest_file_archive(in_file, mapset_id, echo_query=False)
+            except:
+                logger.warning("Error in ingesting file %s" % in_file)
 
 
 def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_logger, echo_query=False):
@@ -1396,7 +1399,7 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False):
     # Read metadata from input_file
     sds_meta_in = metadata.SdsMetadata()
     sds_meta_in.read_from_file(input_file)
-    sds_meta_in.print_out()
+    #sds_meta_in.print_out()
 
     # Extract info from input file
     [str_date, product_code, sub_product_code, mapsetid, version] = functions.get_all_from_filename_eumetcast(input_file)
