@@ -99,6 +99,7 @@ urls = (
 
     "/analysis/getproductlayer", "GetProductLayer",
     "/analysis/getvectorlayer", "GetVectorLayer",
+    "/analysis/getbackgroundlayer", "GetBackgroundLayer",
     "/analysis/productnavigator", "ProductNavigatorDataSets",
     "/analysis/getcolorschemes", "GetColorSchemes",
     "/analysis/gettimeline", "GetTimeLine",
@@ -1598,8 +1599,9 @@ class GetProductLayer:
         mapscript.msIO_installStdoutToBuffer()
 
         projlib = "/usr/share/proj/"
-        errorfile = es_constants.apps_dir+"/analysis/ms_tmp/ms_errors.log"
-        imagepath = es_constants.apps_dir+"/analysis/ms_tmp/"
+        # errorfile = es_constants.apps_dir+"/analysis/ms_tmp/ms_errors.log"
+        errorfile = es_constants.log_dir+"/mapserver_error.log"
+        # imagepath = es_constants.apps_dir+"/analysis/ms_tmp/"
 
 
         owsrequest = mapscript.OWSRequest()
@@ -1735,16 +1737,103 @@ class GetProductLayer:
                     style = mapscript.styleObj(layerclass)
                     style.color.setRGB(colors[0], colors[1], colors[2])
 
-
         result_map_file = es_constants.apps_dir+'/analysis/MAP_result.map'
         if os.path.isfile(result_map_file):
             os.remove(result_map_file)
-        productmap.save(result_map_file)
+        # productmap.save(result_map_file)
         image = productmap.draw()
         # image.save(es_constants.apps_dir+'/analysis/'+filenamenoextention+'.png')
 
-
         contents = productmap.OWSDispatch(owsrequest)
+        content_type = mapscript.msIO_stripStdoutBufferContentType()
+        content = mapscript.msIO_getStdoutBufferBytes()
+        #web.header = "Content-Type","%s; charset=utf-8"%content_type
+        web.header('Content-type', 'image/png')
+        #web.header('Content-transfer-encoding', 'binary')
+        return content
+
+
+
+class GetBackgroundLayer:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        import mapscript
+        getparams = web.input()
+
+        filename = '/srv/www/eStation2_Layers/HYP_HR_SR_OB_DR/HYP_HR_SR_OB_DR.tif'
+
+        mapscript.msIO_installStdoutToBuffer()
+
+        projlib = "/usr/share/proj/"
+        # errorfile = es_constants.apps_dir+"/analysis/ms_tmp/ms_errors.log"
+        errorfile = es_constants.log_dir+"/mapserver_error.log"
+
+        # imagepath = es_constants.apps_dir+"/analysis/ms_tmp/"
+
+        owsrequest = mapscript.OWSRequest()
+
+        inputparams = web.input()
+        for k, v in inputparams.iteritems():
+            #print k + ':' + v
+            owsrequest.setParameter(k.upper(), v)
+
+        owsrequest.setParameter("LAYERS", getparams['layername'])
+
+        backgroundlayer = mapscript.mapObj(es_constants.template_mapfile)
+        backgroundlayer.setConfigOption("PROJ_LIB", projlib)
+        backgroundlayer.setConfigOption("MS_ERRORFILE", errorfile)
+        backgroundlayer.maxsize = 4096
+
+        outputformat_png = mapscript.outputFormatObj('GD/PNG', 'png')
+        outputformat_png.setOption("INTERLACE", "OFF")
+        backgroundlayer.appendOutputFormat(outputformat_png)
+        #outputformat_gd = mapscript.outputFormatObj('GD/GIF', 'gif')
+        #backgroundlayer.appendOutputFormat(outputformat_gd)
+        backgroundlayer.selectOutputFormat('png')
+        backgroundlayer.debug = mapscript.MS_TRUE
+        backgroundlayer.status = mapscript.MS_ON
+        backgroundlayer.units = mapscript.MS_DD
+
+        coords = map(float, inputparams.BBOX.split(","))
+        llx = coords[0]
+        lly = coords[1]
+        urx = coords[2]
+        ury = coords[3]
+        backgroundlayer.setExtent(llx, lly, urx, ury)   # -26, -35, 60, 38
+
+        # epsg must be in lowercase because in unix/linux systems the proj filenames are lowercase!
+        #epsg = "+init=epsg:3857"
+        epsg = "+init=" + inputparams.CRS.lower()   # CRS = "EPSG:4326"
+        backgroundlayer.setProjection(epsg)
+
+        w = int(inputparams.WIDTH)
+        h = int(inputparams.HEIGHT)
+        backgroundlayer.setSize(w, h)
+
+        # General web service information
+        backgroundlayer.setMetaData("WMS_TITLE", "Background layer description")
+        backgroundlayer.setMetaData("WMS_SRS", inputparams.CRS.lower())
+        # backgroundlayer.setMetaData("WMS_SRS", "epsg:3857")
+        backgroundlayer.setMetaData("WMS_ABSTRACT", "A Web Map Service returning eStation2 background layers.")
+        backgroundlayer.setMetaData("WMS_ENABLE_REQUEST", "*")   # necessary!!
+
+        layer = mapscript.layerObj(backgroundlayer)
+        layer.name = getparams['layername']
+        layer.type = mapscript.MS_LAYER_RASTER
+        layer.status = mapscript.MS_ON     # MS_DEFAULT
+        layer.data = filename
+        layer.setProjection("+init=epsg:4326")
+        layer.dump = mapscript.MS_TRUE
+
+        result_map_file = es_constants.apps_dir+'/analysis/Backgroundlayer_result.map'
+        if os.path.isfile(result_map_file):
+            os.remove(result_map_file)
+        # backgroundlayer.save(result_map_file)
+        image = backgroundlayer.draw()
+
+        contents = backgroundlayer.OWSDispatch(owsrequest)
         content_type = mapscript.msIO_stripStdoutBufferContentType()
         content = mapscript.msIO_getStdoutBufferBytes()
         #web.header = "Content-Type","%s; charset=utf-8"%content_type
