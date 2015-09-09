@@ -520,13 +520,33 @@ Ext.define("esapp.view.analysis.analysisMain",{
                           visible: false,
                           projection: 'EPSG:4326',
                           source: new ol.source.TileWMS({
-                              url: 'http://demo.boundlessgeo.com/geoserver/wms',
+                              url: 'analysis/getbackgroundlayer',   // 'http://demo.boundlessgeo.com/geoserver/wms',
                               params: {
-                                'LAYERS': 'ne:NE1_HR_LC_SR_W_DR'
+                                  layername:'naturalearth',
+                                  'LAYERS': 'HYP_HR_SR_OB_DR'       // 'ne:NE1_HR_LC_SR_W_DR'
                               }
                         })
                       })
                     );
+
+                    //me.backgroundLayers.push(
+                    //    new ol.layer.Image({
+                    //        title: esapp.Utils.getTranslation('backgroundlayer'),  // 'Background layer',
+                    //        layer_id: 'backgroundlayer',
+                    //        layerorderidx: 0,
+                    //        type: 'base',
+                    //        visible: false,
+                    //        source: new ol.source.ImageWMS({
+                    //            url: 'analysis/getbackgroundlayer',
+                    //            crossOrigin: 'anonymous',
+                    //            params: {
+                    //                layername:'naturalearth',
+                    //                'FORMAT': 'image/png'
+                    //            },
+                    //            serverType: 'mapserver' /** @type {ol.source.wms.ServerType}  ('mapserver') */
+                    //        })
+                    //    })
+                    //);
 
                     //layer = new ol.layer.XYZ(
                     //    "ESRI",
