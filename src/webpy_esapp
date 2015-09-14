@@ -2007,18 +2007,21 @@ class DataSets:
                                 dataset_dict = functions.row2dict(dataset_info)
                                 # dataset_dict = dataset_info.__dict__
                                 # del dataset_dict['_labels']
-                                if dataset_info.frequency_id == 'e15minute' or dataset_info.frequency_id == 'e30minute':
-                                    dataset_dict['nodisplay'] = 'no_minutes_display'
+                                if hasattr(dataset_info,'frequency_id'):
+                                    if dataset_info.frequency_id == 'e15minute' or dataset_info.frequency_id == 'e30minute':
+                                        dataset_dict['nodisplay'] = 'no_minutes_display'
+                                    else:
+                                        dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+                                        completeness = dataset.get_dataset_normalized_info()
+                                        dataset_dict['datasetcompleteness'] = completeness
+                                        dataset_dict['nodisplay'] = 'false'
+
+                                    dataset_dict['mapsetcode'] = mapset_dict['mapsetcode']
+                                    dataset_dict['mapset_descriptive_name'] = mapset_dict['descriptive_name']
+
+                                    mapset_dict['mapsetdatasets'].append(dataset_dict)
                                 else:
-                                    dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
-                                    completeness = dataset.get_dataset_normalized_info()
-                                    dataset_dict['datasetcompleteness'] = completeness
-                                    dataset_dict['nodisplay'] = 'false'
-
-                                dataset_dict['mapsetcode'] = mapset_dict['mapsetcode']
-                                dataset_dict['mapset_descriptive_name'] = mapset_dict['descriptive_name']
-
-                                mapset_dict['mapsetdatasets'].append(dataset_dict)
+                                    pass
                         prod_dict['productmapsets'].append(mapset_dict)
                 products_dict_all.append(prod_dict)
 
