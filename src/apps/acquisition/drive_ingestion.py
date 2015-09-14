@@ -38,5 +38,4 @@ if service:
             daemon.stop()
 else:
     ingestion.loop_ingestion(dry_run=dry_run)
-#    ingestion.ingest_archives_eumetcast(dry_run=dry_run)
 
