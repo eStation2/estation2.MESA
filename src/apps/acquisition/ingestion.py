@@ -38,6 +38,7 @@ from osgeo import osr
 logger = log.my_logger(__name__)
 
 ingest_dir_in = es_constants.ingest_dir
+ingest_error_dir = es_constants.ingest_error_dir
 data_dir_out = es_constants.processing_dir
 
 def loop_ingestion(dry_run=False):
@@ -313,20 +314,42 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
     except IOError:
         my_logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
         return 1
+
     if preproc_type != 'None':
         do_preprocess = 1
 
     if do_preprocess == 1:
         my_logger.debug("Calling routine %s" % 'preprocess_files')
-        composed_file_list = pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files, tmpdir, my_logger)
+        try:
+            composed_file_list = pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files, tmpdir, my_logger)
+        except:
+            # Error occurred and was NOT detected in pre_process routine
+            my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
+            # Move files to 'error/storage' directory
+            for error_file in input_files:
+                shutil.move(error_file, ingest_error_dir)
+            shutil.rmtree(tmpdir)
+            return 1
+        # Error occurred and was detected in pre_process routine
         if str(composed_file_list)=='1':
             my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
+            # Move files to 'error/storage' directory
+            for error_file in input_files:
+                shutil.move(error_file, ingest_error_dir)
+            shutil.rmtree(tmpdir)
             return 1
     else:
         composed_file_list = input_files
-
-    ingest_file(composed_file_list, in_date, product, subproducts, datasource_descr, my_logger, in_files=input_files,
+    try:
+        ingest_file(composed_file_list, in_date, product, subproducts, datasource_descr, my_logger, in_files=input_files,
                 echo_query=echo_query)
+    except:
+        my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
+        # Move files to 'error/storage' directory
+        for error_file in input_files:
+            shutil.move(error_file, ingest_error_dir)
+        shutil.rmtree(tmpdir)
+        return 1
 
     # -------------------------------------------------------------------------
     # Remove the Temp working directory
