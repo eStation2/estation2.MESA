@@ -82,6 +82,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     if update_stats:
         group_no_filter_stats = 0                  # 1.a    -> no relevant - FTTB
         group_filtered_stats = 1                   # 2.b
+        group_monthly_prods = 1                    # 3.a
         group_monthly_stats = 1                    # 3.b
 
     #   switch wrt single products: not to be changed !!
@@ -935,7 +936,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     @active_if(group_monthly_prods, activate_monndvi)
     @collate(starting_files_linearx2, formatter(formatter_in), formatter_out)
     @follows(vgt_ndvi_icn_linearx2)
-    def vgt_ndvi_monmdvi(input_file, output_file):
+    def vgt_ndvi_monndvi(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
@@ -980,7 +981,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     @active_if(group_monthly_stats, activate_1monavg)
     @collate(starting_files_monndvi, formatter(formatter_in), formatter_out)
-    @follows(vgt_ndvi_monmdvi)
+    @follows(vgt_ndvi_monndvi)
     def vgt_ndvi_1monavg(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
