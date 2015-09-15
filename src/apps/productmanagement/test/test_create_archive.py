@@ -3,7 +3,9 @@ from __future__ import absolute_import
 import unittest
 import datetime
 
-from ..create_archive import *
+from apps.productmanagement.create_archive import *
+from lib.python import functions
+import os
 from database import connectdb
 
 
@@ -41,7 +43,7 @@ class TestCreate(unittest.TestCase):
         start_date=None
         end_date=None
         for subproduct in subproducts:
-            target_dir = base_target_dir + os.path.sep + subproduct
+            target_dir = base_target_dir + product + os.path.sep + subproduct
             functions.check_output_dir(target_dir)
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
@@ -51,7 +53,7 @@ class TestCreate(unittest.TestCase):
         end_date=None
         for subproduct in subproducts:
 
-            target_dir = base_target_dir + os.path.sep + subproduct
+            target_dir = base_target_dir + product + os.path.sep + subproduct
             functions.check_output_dir(target_dir)
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
@@ -139,13 +141,13 @@ class TestCreate(unittest.TestCase):
         create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
         # 10day stats
-        # subproducts=['10davg', '10dmin','10dmax']
-        # start_date=None
-        # end_date=None
-        # for subproduct in subproducts:
-        #     target_dir = base_target_dir + product + os.path.sep + subproduct
-        #     functions.check_output_dir(target_dir)
-        #     create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
+        subproducts=['10davg', '10dmin','10dmax']
+        start_date=None
+        end_date=None
+        for subproduct in subproducts:
+            target_dir = base_target_dir + product + os.path.sep + subproduct
+            functions.check_output_dir(target_dir)
+            create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
         #
         # # 1mon stats
         # subproducts=['1moncum', '1monavg', '1monmin', '1monmax']
