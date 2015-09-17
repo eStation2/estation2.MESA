@@ -53,15 +53,18 @@ class Frequency(object):
         DAY = 'day'
         HOUR = 'hour'
         MINUTE = 'minute'
+        NONE = 'none'
 
     class TYPE:
         PER = 'p'
         EVERY = 'e'
+        NONE = 'n'
 
     class DATEFORMAT:
         DATETIME = 'YYYYMMDDHHMM'
         DATE = 'YYYYMMDD'
         MONTHDAY = 'MMDD'
+        YYYY = 'YYYY'
 
     @classmethod
     def dateformat_default(class_, unit):
@@ -95,6 +98,8 @@ class Frequency(object):
             return date.strftime("%m%d")
         elif self.dateformat == self.DATEFORMAT.DATETIME:
             return date.strftime("%Y%m%d%H%M")
+        elif self.dateformat == self.DATEFORMAT.YYYY:
+            return date.strftime("%Y")
         else:
             raise Exception("Dateformat not managed: %s" % self.dateformat)
 
@@ -139,6 +144,9 @@ class Frequency(object):
     def extract_date(self, filename):
         if self.dateformat == self.DATEFORMAT.MONTHDAY:
             date_parts = (datetime.date.today().year, int(filename[:2]), int(filename[2:4]))
+            date = datetime.date(*date_parts)
+        elif self.dateformat == self.DATEFORMAT.YYYY:
+            date_parts = (int(filename[:4]),1,1)
             date = datetime.date(*date_parts)
         else:
             date_parts = (int(filename[:4]), int(filename[4:6]), int(filename[6:8]))
@@ -373,6 +381,15 @@ class Dataset(object):
 
     def get_dataset_normalized_info(self, from_date=None, to_date=None):
         refresh = False
+        if self._frequency.frequency_type == 'n':
+            return {
+                'firstdate': '',
+                'lastdate':  '',
+                'totfiles': 1,
+                'missingfiles': 0,
+                'intervals': ''
+        }
+
         if from_date and (not self.from_date or from_date < self.from_date):
             self.from_date = from_date
             refresh = True
