@@ -11,8 +11,8 @@ from __future__ import absolute_import
 import unittest
 import datetime
 
-from ..datasets import Frequency
-from ..exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
+from apps.productmanagement.datasets import Frequency
+from apps.productmanagement.exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
         WrongFrequencyType, WrongFrequencyDateFormat )
 
 
@@ -36,6 +36,15 @@ class TestFrequency(unittest.TestCase):
     def test_dataformat_default_2(self):
         frequency =  Frequency(4, Frequency.UNIT.HOUR, Frequency.TYPE.PER)
         self.assertEqual(frequency.dateformat, Frequency.DATEFORMAT.DATETIME)
+
+    def test_dataformat_default_3(self):
+        frequency =  Frequency(9, Frequency.UNIT.YEAR, Frequency.TYPE.EVERY)
+        self.assertEqual(frequency.dateformat, Frequency.DATEFORMAT.DATE)
+
+    # Test the single file frequency
+    def test_today_datetime(self):
+        frequency =  Frequency(0, Frequency.UNIT.NONE, Frequency.TYPE.NONE, dateformat=Frequency.DATEFORMAT.DATETIME)
+        self.assertEqual(type(frequency.today()), type(datetime.datetime.today()))
 
     def test_wrong_dataformat(self):
         self.assertRaises(WrongFrequencyDateFormat, Frequency, *(4, Frequency.UNIT.HOUR, Frequency.TYPE.PER, '-' + Frequency.DATEFORMAT.DATETIME))
