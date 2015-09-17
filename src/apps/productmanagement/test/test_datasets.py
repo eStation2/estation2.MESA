@@ -330,3 +330,16 @@ class TestDatasets4UI(unittest.TestCase):
 
         return datamanagement_json
 
+    def test_normalized_info_vgt_ndvi_1(self):
+        dataset=Dataset('vgt-ndvi','absol_min_linearx2', 'SPOTV-Africa-1km', version='sv2-pv2.1')
+        filenames=dataset.get_filenames()
+        info = dataset.get_dataset_normalized_info()
+        self.assertEquals(info['missingfiles'], 0)
+
+    def test_normalized_info_vgt_ndvi_2(self):
+        dataset=Dataset('vgt-ndvi','year_min_linearx2', 'SPOTV-Africa-1km', version='sv2-pv2.1')
+        filenames=dataset.get_filenames()
+        print filenames
+        info = dataset.get_dataset_normalized_info()
+        print info
+        self.assertEquals(info['missingfiles'], 1)
