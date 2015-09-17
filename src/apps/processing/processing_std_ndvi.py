@@ -57,7 +57,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   switch wrt groups - according to options
 
     # DEFAULT: ALL off
-    group_no_filter_stats = 0                  # 1.a
+    group_no_filter_stats = 0                  # 1.a    -> Not done anymore
     group_no_filter_anomalies = 0              # 1.b    -> To be done
 
     group_filtered_prods = 0                   # 2.a
@@ -82,7 +82,6 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     if update_stats:
         group_no_filter_stats = 0                  # 1.a    -> no relevant - FTTB
         group_filtered_stats = 1                   # 2.b
-        group_monthly_prods = 1                    # 3.a
         group_monthly_stats = 1                    # 3.b
 
     #   switch wrt single products: not to be changed !!
@@ -1064,9 +1063,9 @@ def processing_std_ndvi(pipeline_run_level=0, pipeline_run_touch_only=0, pipelin
 
     if pipeline_run_level > 0:
         pipeline_run(verbose=pipeline_run_level, touch_files_only=pipeline_run_touch_only, multiprocess=multiprocess)
-
+    fout=open('/data/processing/ruffus_printout.txt','w')
     if pipeline_printout_level > 0:
-        pipeline_printout(verbose=pipeline_printout_level)
+        pipeline_printout(verbose=pipeline_printout_level, output_stream=fout)
 
     if pipeline_printout_graph_level > 0:
         pipeline_printout_graph('flowchart.jpg')
