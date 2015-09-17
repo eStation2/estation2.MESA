@@ -36,6 +36,7 @@ __author__ = 'clerima'
 from lib.python import es_logging as log
 from lib.python import metadata
 from lib.python import functions
+from config import es_constants
 
 # Import third-party modules
 from osgeo.gdalconst import *
@@ -54,7 +55,7 @@ def do_avg_image(input_file='', output_file='', input_nodata=None, output_nodata
     input_list = return_as_list(input_file)
 
     # Manage options
-    options_list = []
+    options_list = [es_constants.ES2_OUTFILE_OPTIONS]
     options_list.append(options)
 
     # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
@@ -189,7 +190,7 @@ def do_min_image(input_file='', output_file='', input_nodata=None, output_nodata
     input_list = return_as_list(input_file)
 
     # Manage options
-    options_list = []
+    options_list = [es_constants.ES2_OUTFILE_OPTIONS]
     options_list.append(options)
 
     # get infos from the last file (to manage case of 'upgraded' DataType - e.g. FEWSNET).
@@ -306,7 +307,7 @@ def do_max_image(input_file='', output_file='', input_nodata=None, output_nodata
     input_list = return_as_list(input_file)
 
     # Manage options
-    options_list = []
+    options_list = [es_constants.ES2_OUTFILE_OPTIONS]
     options_list.append(options)
 
     # get infos from the last file (to manage case of 'upgraded' DataType - e.g. FEWSNET).
@@ -431,7 +432,7 @@ def do_med_image(input_file='', output_file='', input_nodata=None, output_nodata
     input_list = return_as_list(input_file)
 
     # Manage options
-    options_list = []
+    options_list = [es_constants.ES2_OUTFILE_OPTIONS]
     options_list.append(options)
 
     # get infos from the last file (to manage case of 'upgraded' DataType - e.g. FEWSNET).
@@ -514,7 +515,7 @@ def do_oper_subtraction(input_file='', output_file='', input_nodata=None, output
     # Notes:'The command expects exactly 2 files in input.'
 
     # Manage options
-    options_list = []
+    options_list = [es_constants.ES2_OUTFILE_OPTIONS]
     options_list.append(options)
 
     # Open input files
@@ -595,7 +596,7 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
     epsilon = 1e-10
 
     # Manage options
-    options_list = []
+    options_list = [es_constants.ES2_OUTFILE_OPTIONS]
     options_list.append(options)
 
     # Open input files
@@ -680,7 +681,7 @@ def do_oper_scalar_multiplication(input_file='', output_file='', scalar=1, input
     # Notes:'The command expects exactly 1 file in input.'
 
     # Manage options
-    options_list = []
+    options_list = [es_constants.ES2_OUTFILE_OPTIONS]
     options_list.append(options)
 
     # Open input file
@@ -748,7 +749,7 @@ def do_make_vci(input_file='', min_file='', max_file='', output_file='', input_n
            output_type=None, options=''):
 
     # Manage options
-    options_list = []
+    options_list = [es_constants.ES2_OUTFILE_OPTIONS]
     options_list.append(options)
 
     # open files
@@ -851,7 +852,7 @@ def do_make_baresoil(input_file='', min_file='', max_file='', output_file='', in
 #
 
     # Manage options
-    options_list = []
+    options_list = [es_constants.ES2_OUTFILE_OPTIONS]
     options_list.append(options)
 
     # open files
@@ -957,7 +958,7 @@ def do_mask_image(input_file='', mask_file='', output_file='',output_format=None
 
 
     # Manage options
-    options_list = []
+    options_list = [es_constants.ES2_OUTFILE_OPTIONS]
     options_list.append(options)
 
     # open files
@@ -1030,7 +1031,7 @@ def do_cumulate(input_file='', output_file='', input_nodata=None, output_nodata=
     # Notes:'The command expects exactly 1 file in input.'
 
     # Manage options
-    options_list = []
+    options_list = [es_constants.ES2_OUTFILE_OPTIONS]
     options_list.append(options)
 
     # Open input file
@@ -1157,7 +1158,7 @@ def do_compute_perc_diff_vs_avg(input_file='', avg_file='', output_file='', inpu
     epsilon = 1e-10
 
     # Manage options
-    options_list = []
+    options_list = [es_constants.ES2_OUTFILE_OPTIONS]
     options_list.append(options)
 
     # open files
@@ -1242,7 +1243,7 @@ def do_compute_primary_production(chla_file='', sst_file='', kd_file='', par_fil
                                   options=''):
 
     # Manage options
-    options_list = []
+    options_list = [es_constants.ES2_OUTFILE_OPTIONS]
     options_list.append(options)
 
     # open files
@@ -1354,7 +1355,7 @@ def do_ts_linear_filter(input_file='', before_file='', after_file='', output_fil
     #       'The input_nodata defines the output_nodata as well (no recoding)'
 
     # Manage options
-    options_list = []
+    options_list = [es_constants.ES2_OUTFILE_OPTIONS]
     options_list.append(options)
 
     # Open the threee files (add checks)

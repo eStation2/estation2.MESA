@@ -487,7 +487,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
 def processing_std_precip(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None, update_stats=False, nrt_products=True):
+                          starting_dates=None, update_stats=False, nrt_products=True, write2file=None):
 
     proc_lists = None
     proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
@@ -495,20 +495,25 @@ def processing_std_precip(pipeline_run_level=0,pipeline_run_touch_only=0, pipeli
 
     logger.info("Entering routine %s" % 'processing_std_precip')
     logger.info("pipeline_run_level %i" % pipeline_run_level)
+    if write2file is not None:
+        fwrite_id=open(write2file,'w')
     if pipeline_run_level > 0:
         pipeline_run(verbose=pipeline_run_level, touch_files_only=pipeline_run_touch_only)
 
     if pipeline_printout_level > 0:
-        pipeline_printout(verbose=pipeline_printout_level)
+        pipeline_printout(verbose=pipeline_printout_level, output_stream=fwrite_id)
 
     if pipeline_printout_graph_level > 0:
         pipeline_printout_graph('flowchart.jpg')
+
+    if write2file is not None:
+        fwrite_id.close()
 
     return proc_lists
 
 def processing_std_precip_stats_only(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None):
+                          starting_dates=None,write2file=None):
 
     proc_lists = processing_std_precip(pipeline_run_level=pipeline_run_level,
                           pipeline_run_touch_only=pipeline_run_touch_only,
@@ -520,13 +525,14 @@ def processing_std_precip_stats_only(pipeline_run_level=0,pipeline_run_touch_onl
                           version=version,
                           starting_dates=starting_dates,
                           nrt_products=False,
-                          update_stats=True)
+                          update_stats=True,
+                          write2file=write2file)
 
     return proc_lists
 
 def processing_std_precip_prods_only(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None):
+                          starting_dates=None,write2file=None):
 
     proc_lists = processing_std_precip(pipeline_run_level=pipeline_run_level,
                           pipeline_run_touch_only=pipeline_run_touch_only,
@@ -538,13 +544,14 @@ def processing_std_precip_prods_only(pipeline_run_level=0,pipeline_run_touch_onl
                           version=version,
                           starting_dates=starting_dates,
                           nrt_products=True,
-                          update_stats=False)
+                          update_stats=False,
+                          write2file=write2file)
 
     return proc_lists
 
 def processing_std_precip_all(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None):
+                          starting_dates=None,write2file=None):
 
     proc_lists = processing_std_precip(pipeline_run_level=pipeline_run_level,
                           pipeline_run_touch_only=pipeline_run_touch_only,
@@ -556,6 +563,7 @@ def processing_std_precip_all(pipeline_run_level=0,pipeline_run_touch_only=0, pi
                           version=version,
                           starting_dates=starting_dates,
                           nrt_products=True,
-                          update_stats=True)
+                          update_stats=True,
+                          write2file=write2file)
 
     return proc_lists

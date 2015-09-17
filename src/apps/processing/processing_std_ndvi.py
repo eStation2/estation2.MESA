@@ -57,7 +57,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   switch wrt groups - according to options
 
     # DEFAULT: ALL off
-    group_no_filter_stats = 0                  # 1.a
+    group_no_filter_stats = 0                  # 1.a    -> Not done anymore
     group_no_filter_anomalies = 0              # 1.b    -> To be done
 
     group_filtered_prods = 0                   # 2.a
@@ -935,7 +935,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     @active_if(group_monthly_prods, activate_monndvi)
     @collate(starting_files_linearx2, formatter(formatter_in), formatter_out)
     @follows(vgt_ndvi_icn_linearx2)
-    def vgt_ndvi_monmdvi(input_file, output_file):
+    def vgt_ndvi_monndvi(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
@@ -980,7 +980,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     @active_if(group_monthly_stats, activate_1monavg)
     @collate(starting_files_monndvi, formatter(formatter_in), formatter_out)
-    @follows(vgt_ndvi_monmdvi)
+    @follows(vgt_ndvi_monndvi)
     def vgt_ndvi_1monavg(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -1063,9 +1063,9 @@ def processing_std_ndvi(pipeline_run_level=0, pipeline_run_touch_only=0, pipelin
 
     if pipeline_run_level > 0:
         pipeline_run(verbose=pipeline_run_level, touch_files_only=pipeline_run_touch_only, multiprocess=multiprocess)
-
+    fout=open('/data/processing/ruffus_printout.txt','w')
     if pipeline_printout_level > 0:
-        pipeline_printout(verbose=pipeline_printout_level)
+        pipeline_printout(verbose=pipeline_printout_level, output_stream=fout)
 
     if pipeline_printout_graph_level > 0:
         pipeline_printout_graph('flowchart.jpg')

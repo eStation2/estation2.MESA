@@ -1219,10 +1219,11 @@ def get_subproduct(productcode='', version='undefined', subproductcode='', echo=
     try:
         where = and_(db.product.productcode == productcode,
                      db.product.subproductcode == subproductcode,
-                     db.product.version == version)
+                     db.product.version == version,
+                     db.product.masked == 'f')
         subproduct = db.product.filter(where).first()
-        if subproduct is None:
-            subproduct = []
+        #if subproduct is None:
+        #    subproduct = []
         return subproduct
     except exc.NoResultFound:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
