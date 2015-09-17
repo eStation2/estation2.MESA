@@ -1,31 +1,31 @@
-Ext.define('esapp.store.CategoriesStore', {
+Ext.define('esapp.store.DataTypesStore', {
     extend  : 'Ext.data.Store',
-    alias: 'store.categories',
+    alias: 'store.datatypes',
 
     requires : [
-        'esapp.model.Category'
+        'esapp.model.DataType'
     ],
 
-    model: 'esapp.model.Category',
+    model: 'esapp.model.DataType',
 
-    storeId : 'categories'
+    storeId : 'datatypes'
 
     ,autoLoad: true
 
     ,proxy: {
         type : 'ajax',
-        url : 'categories',
+        url : 'datatypes',
         reader: {
              type: 'json'
             ,successProperty: 'success'
-            ,rootProperty: 'categories'
+            ,rootProperty: 'datatypes'
             //,messageProperty: 'message'
         },
         listeners: {
             exception: function(proxy, response, operation){
                 // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
                 Ext.Msg.show({
-                    title: 'CATEGORIES STORE- REMOTE EXCEPTION',
+                    title: 'DATA TYPES STORE- REMOTE EXCEPTION',
                     msg: operation.getError(),
                     icon: Ext.Msg.ERROR,
                     buttons: Ext.Msg.OK

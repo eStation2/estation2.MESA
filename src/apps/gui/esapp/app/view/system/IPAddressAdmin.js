@@ -94,7 +94,7 @@ Ext.define("esapp.view.system.IPAddressAdmin",{
                 xtype: 'fieldset',
                 title: '', // "IP Address settings",
                 id: 'ipaddress_settings',
-                collapseable:false,
+                collapsible:false,
                 padding: 10,
                 defaults: {
                     //width: 300,

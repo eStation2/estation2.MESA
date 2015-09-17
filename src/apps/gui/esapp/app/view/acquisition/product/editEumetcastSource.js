@@ -58,7 +58,7 @@ Ext.define("esapp.view.acquisition.product.editEumetcastSource",{
             items: [{
                 xtype: 'fieldset',
                 title: '<b>'+esapp.Utils.getTranslation('eumetcastdatasourceinfo')+'</b>',    // '<b>Eumetcast data source info</b>',
-                collapseable: false,
+                collapsible: false,
                 width: 475,
                 margin: '10 5 10 10',
                 padding: '10 10 10 10',
@@ -126,7 +126,7 @@ Ext.define("esapp.view.acquisition.product.editEumetcastSource",{
             },{
                 xtype: 'fieldset',
                 title: '<b>'+esapp.Utils.getTranslation('datasourcedescription')+'</b>',    // '<b>Data source description</b>',
-                collapseable: false,
+                collapsible: false,
                 width: 425,
                 margin: '10 10 10 5',
                 padding: '10 10 10 10',

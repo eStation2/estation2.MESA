@@ -7,6 +7,7 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
         'esapp.view.widgets.datasetCompletenessChartController',
 
         'Ext.data.JsonStore',
+        'Ext.draw.engine.Svg',
         'Ext.chart.CartesianChart',
         'Ext.chart.axis.Numeric',
         'Ext.chart.axis.Category',
@@ -90,6 +91,9 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
             xtype: 'cartesian',
             width: '100%',
             height: 38,
+
+            //engine: Ext.draw.engine.Canvas,
+            engine: Ext.draw.engine.Svg,
 
             colors: [
                 '#81AF34', // green

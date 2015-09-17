@@ -204,7 +204,7 @@ class TestProducts(unittest.TestCase):
         filetar = Product.create_tar(missing)
         #TODO check for file size
 
-#   Additional test to mimic/replicate what happens in webpy_esapp (M.C.)
+#   Additional test to mimic/replicate what happens in webpy_esapp.py (M.C.)
 class TestProducts4UI(unittest.TestCase):
 
     def hide_some_files(self, productcode, version, subproductcode, type, mapset, dates):

@@ -47,13 +47,18 @@ Ext.define("esapp.view.acquisition.Ingestion",{
         trackOver: false
     },
     cls: 'grid-color-azur',
-    //plugins:[{
-    //    ptype:'cellediting'
-    //}],
+
     hideHeaders: true,
     columnLines: false,
     rowLines:false,
+
     //bufferedRenderer: true,
+    //autoHeight: false,
+    //plugins: [{
+    //    ptype: 'bufferedrenderer',
+    //    trailingBufferZone: 20,  // Keep 20 rows rendered in the table behind scroll
+    //    leadingBufferZone: 50   // Keep 50 rows rendered in the table ahead of scroll
+    //}],
 
     //listeners: {
         //rowclick:  function (gridview, record) {

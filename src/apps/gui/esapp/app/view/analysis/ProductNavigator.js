@@ -338,7 +338,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         //}
                     },
                     defaults: {
-                        sortable: false,
+                        sortable: true,
                         hideable: false,
                         variableRowHeight: false
                     },
@@ -355,7 +355,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                             '</span>'
                         ),
                         width: 475,
-                        sortable: false,
+                        sortable: true,
                         menuDisabled: true
                     }]
                 },{

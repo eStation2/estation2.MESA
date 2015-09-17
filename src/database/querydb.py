@@ -79,7 +79,64 @@ def get_categories(echo=False):
         if echo:
             print traceback.format_exc()
         # Exit the script and print an error telling what happened.
-        logger.error("get_themas: Database query error!\n -> {}".format(exceptionvalue))
+        logger.error("get_categories: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
+def get_frequencies(echo=False):
+    global db
+    try:
+        query = "SELECT * FROM products.frequency ORDER BY frequency_id"
+        result = db.execute(query)
+        result = result.fetchall()
+
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_frequencies: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
+def get_dateformats(echo=False):
+    global db
+    try:
+        query = "SELECT * FROM products.date_format ORDER BY date_format"
+        result = db.execute(query)
+        result = result.fetchall()
+
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_dateformats: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
+def get_datatypes(echo=False):
+    global db
+    try:
+        query = "SELECT * FROM products.data_type ORDER BY data_type_id"
+        result = db.execute(query)
+        result = result.fetchall()
+
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_datatypes: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if db.session:
             db.session.close()
@@ -100,7 +157,7 @@ def get_eumetcastsources(echo=False):
         if echo:
             print traceback.format_exc()
         # Exit the script and print an error telling what happened.
-        logger.error("get_themas: Database query error!\n -> {}".format(exceptionvalue))
+        logger.error("get_eumetcastsources: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if db.session:
             db.session.close()
@@ -121,7 +178,7 @@ def get_internetsources(echo=False):
         if echo:
             print traceback.format_exc()
         # Exit the script and print an error telling what happened.
-        logger.error("get_themas: Database query error!\n -> {}".format(exceptionvalue))
+        logger.error("get_internetsources: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if db.session:
             db.session.close()

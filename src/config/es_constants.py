@@ -31,7 +31,7 @@ config_factorysettings.read([os.path.join(thisfiledir, 'factory_settings.ini')])
 
 usersettingsfile = '/eStation2/settings/user_settings.ini'
 if not os.path.isfile(usersettingsfile):
-    usersettingsfile = os.path.join(thisfiledir, 'user_settings.ini')
+    usersettingsfile = os.path.join(thisfiledir, 'install/user_settings.ini')
     # ToDo: copy user_settings.ini from config dir to /eStation2/settings/ ???
 
 config_usersettings = ConfigParser.ConfigParser()

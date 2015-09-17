@@ -12,6 +12,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
         'esapp.view.acquisition.product.editProductController',
         'esapp.view.acquisition.product.InternetSourceAdmin',
         'esapp.view.acquisition.product.EumetcastSourceAdmin',
+        'esapp.view.acquisition.product.editIngestion',
 
         'Ext.form.FieldSet',
         'Ext.form.field.Number',
@@ -102,11 +103,11 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
             //margin:'0 15 5 0',
             items: [{
                 xtype: 'fieldset',
-                title: '<b>'+esapp.Utils.getTranslation('productinfo')+'</b>',    // '<b>Product info</b>',
-                collapseable:false,
+                title: '<div class="grid-header-style">'+esapp.Utils.getTranslation('productinfo')+'</div>',   // '<b>Product info</b>',
+                collapsible:false,
                 width:630,
                 //height:500,
-                padding:'10 10 10 10',
+                padding:'10 5 10 10',
                 //layout: 'fit',
                 defaults: {
                     //autoWidth: true,
@@ -168,7 +169,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                     xtype: 'textareafield',
                     fieldLabel: esapp.Utils.getTranslation('productdescription'),    // 'Product description',
                     labelAlign: 'top',
-                    width: 530,
+                    width: 590,
                     allowBlank: true,
                     grow: true
                 },{
@@ -185,11 +186,11 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
         },{
             items: [{
                 xtype: 'fieldset',
-                title: '<b>'+esapp.Utils.getTranslation('datasources')+'</b>',    // '<b>Data sources</b>',
+                title: '<div class="grid-header-style">'+esapp.Utils.getTranslation('datasources')+'</div>',   // '<b>Data sources</b>',
                 id: 'datasourcesfieldset',
                 hidden: true,
-                collapseable:false,
-                padding:'10 10 10 10',
+                collapsible: false,
+                padding: '10 10 10 10',
                 width: 630,
 
                 items:[{
@@ -239,7 +240,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                     multiColumnSort: false,
                     columnLines: false,
                     rowLines: true,
-                    frame: false,
+                    frame: true,
                     border: false,
 
                     columns: [{
@@ -349,10 +350,10 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
         },{
             items: [{
                 xtype: 'fieldset',
-                title: '<b>'+esapp.Utils.getTranslation('ingestions')+'</b>',    // '<b>Ingestions</b>',
+                title: '<div class="grid-header-style">'+esapp.Utils.getTranslation('ingestions')+'</div>',   // '<b>Ingestions</b>',
                 id: 'ingestionsfieldset',
                 hidden: true,
-                collapseable:false,
+                collapsible:false,
                 padding:'10 10 10 10',
                 width: 630,
 
@@ -403,7 +404,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                     multiColumnSort: false,
                     columnLines: false,
                     rowLines: true,
-                    frame: false,
+                    frame: true,
                     border: false,
 
                     columns: [{
