@@ -86,3 +86,20 @@ def create_permanently_missing_for_dataset(product_code, sub_product_code, versi
         list_dates = None
 
     return list_dates
+
+######################################################################################
+#
+#   Purpose: ensure the subproducts are present in the products.product table
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2015/05/15
+#   Inputs:
+#   Output: none
+#
+
+def upsert_database(product_code, version, proc_lists, input_product_info):
+
+    # Get the existing dates for the dataset
+    product = products.Product(product_code,version=version)
+    missing_filenames = product.get_missing_filenames({'product':product_code, 'version':version})
+
+    return status
