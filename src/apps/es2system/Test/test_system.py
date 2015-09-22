@@ -99,3 +99,13 @@ class TestSystem(unittest.TestCase):
         list_dump = ['products','analysis']
         status = es2system.system_db_dump(list_dump)
         self.assertEquals(status, 0)
+
+    def test_system_data_sync(self):
+
+        source = es_constants.es2globals['processing_dir']
+        system_settings = functions.getSystemSettings()
+        ip_target = system_settings['ip_pc2']
+        target = ip_target+'::products'+es_constants.es2globals['processing_dir']
+
+        status = es2system.system_data_sync(source, target)
+        self.assertEquals(status, 0)

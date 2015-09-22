@@ -14,7 +14,7 @@ class TestFunctions(TestCase):
         self.assertTrue(functions.check_connection(pc3))
 
     def test_get_remote_system_status(self):
-        server_address = '139.191.147.177'  # vm19
+        server_address = '10.191.231.89'  # vm19
         status_remote_machine = functions.get_remote_system_status(server_address)
         print status_remote_machine
 
