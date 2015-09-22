@@ -32,6 +32,7 @@ from lib.python import metadata
 from config import es_constants
 
 import pygrib
+import fnmatch
 from osgeo import gdal
 from osgeo import osr
 
@@ -149,11 +150,11 @@ def loop_ingestion(dry_run=False):
                         # splitted_fn = re.split(r'[datasource_descr.delimiter\s]\s*', filename) ???? What is that for ?
                         splitted_fn = re.split(datasource_descr.delimiter, filename)
                         date_string = splitted_fn[date_position]
-                        if len(date_string) > len(datasource_descr.date_format):
-                            date_string=date_string[0:len(datasource_descr.date_format)]
+                        if len(date_string) > len(datasource_descr.date_type):
+                            date_string=date_string[0:len(datasource_descr.date_type)]
                         dates_list.append(date_string)
                     else:
-                        dates_list.append(filename[date_position:date_position + len(datasource_descr.date_format)])
+                        dates_list.append(filename[date_position:date_position + len(datasource_descr.date_type)])
 
                 dates_list = set(dates_list)
                 dates_list = sorted(dates_list, reverse=False)
@@ -232,7 +233,7 @@ def ingest_archives_eumetcast(dry_run=False):
         ingestions = querydb.get_ingestion_subproduct(allrecs=False, echo=echo_query, **product)
         for ingest in ingestions:
             logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (productcode, productversion,ingest.subproductcode,ingest.mapsetcode))
-            ingest_archives_eumetcast_product(productcode, productversion,ingest.subproductcode,ingest.mapsetcode)
+            ingest_archives_eumetcast_product(productcode, productversion,ingest.subproductcode,ingest.mapsetcode,dry_run=dry_run)
 
     # Get all active processing chains [product/version/algo/mapset].
     active_processing_chains = querydb.get_active_processing_chains()
@@ -246,7 +247,7 @@ def ingest_archives_eumetcast(dry_run=False):
             subproductcode = processed_product.subproductcode
             mapset = processed_product.mapsetcode
             logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (productcode, version,subproductcode,mapset))
-            ingest_archives_eumetcast_product(productcode, version,subproductcode,mapset)
+            ingest_archives_eumetcast_product(productcode, version,subproductcode,mapset,dry_run=dry_run)
 
 
     # Get the list of files that have been treated
@@ -268,20 +269,43 @@ def ingest_archives_eumetcast_product(product_code, version, subproduct_code, ma
 #    Note that mapset is the 'target' mapset
 
     logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (product_code, version, subproduct_code, mapset_id))
-    # Get the list of matching files in /data/ingest
-    available_files=glob.glob(es_constants.es2globals['ingest_dir']+
-                              es_constants.es2globals['prefix_eumetcast_files']+\
+    match_regex=es_constants.es2globals['prefix_eumetcast_files']+\
                               product_code + '_' + \
                               subproduct_code + '_*_' +\
-                              version +'*')
+                              version +'*'
+
+    logger.debug("Looking in directory: %s" % es_constants.es2globals['ingest_dir'])
+    # Get the list of matching files in /data/ingest
+    available_files=glob.glob(es_constants.es2globals['ingest_dir']+ match_regex)
 
     # Call the ingestion routine
     if len(available_files)>0:
         for in_file in available_files:
-            try:
-                ingest_file_archive(in_file, mapset_id, echo_query=False)
-            except:
-                logger.warning("Error in ingesting file %s" % in_file)
+            if dry_run:
+                logger.info("Found file: %s" % in_file)
+            else:
+                try:
+                    ingest_file_archive(in_file, mapset_id, echo_query=False)
+                except:
+                    logger.warning("Error in ingesting file %s" % in_file)
+
+    # Get the list of matching files in /data/ingest
+    logger.debug("Looking in directory: %s" % es_constants.es2globals['archive_dir'])
+    available_files=[]
+    for root, dirnames, filenames in os.walk(es_constants.es2globals['archive_dir']):
+        for filename in fnmatch.filter(filenames, match_regex):
+            available_files.append(os.path.join(root, filename))
+
+    # Call the ingestion routine
+    if len(available_files)>0:
+        for in_file in available_files:
+            if dry_run:
+                logger.info("Found file: %s" % in_file)
+            else:
+                try:
+                    ingest_file_archive(in_file, mapset_id, echo_query=False, no_delete=True)
+                except:
+                    logger.warning("Error in ingesting file %s" % in_file)
 
 
 def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_logger, echo_query=False):
@@ -1190,36 +1214,36 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         # Convert the in_date format into a convenient one for DB and file naming
         # (i.e YYYYMMDD or YYYYMMDDHHMM)
-        if datasource_descr.date_format == 'YYYYMMDD':
+        if datasource_descr.date_type == 'YYYYMMDD':
             if functions.is_date_yyyymmdd(in_date):
                 output_date_str = in_date
             else:
                 output_date_str = -1
 
-        if datasource_descr.date_format == 'YYYYMMDDHHMM':
+        if datasource_descr.date_type == 'YYYYMMDDHHMM':
             if functions.is_date_yyyymmddhhmm(in_date):
                 output_date_str = in_date
             else:
                 output_date_str = -1
 
-        if datasource_descr.date_format == 'YYYYDOY_YYYYDOY':
+        if datasource_descr.date_type == 'YYYYDOY_YYYYDOY':
             output_date_str = functions.conv_date_yyyydoy_2_yyyymmdd(str(in_date)[0:7])
 
-        if datasource_descr.date_format == 'YYYYMMDD_YYYYMMDD':
+        if datasource_descr.date_type == 'YYYYMMDD_YYYYMMDD':
             output_date_str = str(in_date)[0:8]
             if not functions.is_date_yyyymmdd(output_date_str):
                 output_date_str = -1
 
-        if datasource_descr.date_format == 'YYYYDOY':
+        if datasource_descr.date_type == 'YYYYDOY':
             output_date_str = functions.conv_date_yyyydoy_2_yyyymmdd(in_date)
 
-        if datasource_descr.date_format == 'YYYY_MM_DKX':
+        if datasource_descr.date_type == 'YYYY_MM_DKX':
             output_date_str = functions.conv_yyyy_mm_dkx_2_yyyymmdd(in_date)
 
-        if datasource_descr.date_format == 'YYMMK':
+        if datasource_descr.date_type == 'YYMMK':
             output_date_str = functions.conv_yymmk_2_yyyymmdd(in_date)
 
-        if datasource_descr.date_format == 'YYYYdMMdK':
+        if datasource_descr.date_type == 'YYYYdMMdK':
             output_date_str = functions.conv_yyyydmmdk_2_yyyymmdd(in_date)
 
         if output_date_str == -1:
@@ -1401,12 +1425,13 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # Loop on interm_files
         ii += 1
 
-def ingest_file_archive(input_file, target_mapsetid, echo_query=False):
+def ingest_file_archive(input_file, target_mapsetid, echo_query=False,no_delete=False):
 # -------------------------------------------------------------------------------------------------------
 #   Ingest a file of type MESA_JRC_
 #   Arguments:
 #       input_file: input file full name
 #       target_mapset: target mapset
+#       no_delete: do not delete input file (for external medium)
 #
 
     logger.info("Entering routine %s for file %s" % ('ingest_file_archive', input_file))
@@ -1532,9 +1557,14 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False):
 
     working_dir=es_constants.es2globals['base_tmp_dir']+os.path.sep+'ingested_files'
     functions.check_output_dir(working_dir)
-    trace_file=working_dir+os.path.sep+os.path.basename(input_file)+'.tbd'
-    with open(trace_file, 'a'):
-        os.utime(trace_file, None)
+    if no_delete == False:
+        trace_file=working_dir+os.path.sep+os.path.basename(input_file)+'.tbd'
+        logger.debug('Trace for deleting ingested file %s' % trace_file)
+        with open(trace_file, 'a'):
+            os.utime(trace_file, None)
+    else:
+        logger.debug('Do not delete ingest file.')
+
 
 def write_ds_to_geotiff(dataset, output_file):
 #

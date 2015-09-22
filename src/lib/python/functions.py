@@ -1218,7 +1218,7 @@ def restore_obj_from_pickle(obj, filename):
             os.remove(filename)
     else:
         # Create an empty file in the tmp dir
-        logger.info("Dump file %s does not exist", filename)
+        logger.debug("Dump file %s does not exist", filename)
         #open(filename, 'a').close()
 
     return obj

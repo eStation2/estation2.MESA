@@ -155,7 +155,10 @@ def system_db_dump(list_dump):
         for dump_schema in list_dump:
             dump_file = dump_dir+os.path.sep+'estationdb_'+dump_schema+'_'+now.strftime("%Y-%m-%d-%H:%M:%S")+'.sql'
             command = 'pg_dump -f '+dump_file+' -n '+dump_schema+' -F p' + ' -U postgres -d estationdb'
-            status = os.system(command)
+            logger.info('Command is: %s' % command)
+            status =+ os.system(command)
+
+        return status
 
 
 
@@ -214,12 +217,6 @@ def system_create_report(target_file=None):
 
     # Remove temporary dir
     shutil.rmtree(tmp_dir)
-
-
-# def system_recovery_mode():
-# #   Manage the transition to/from nominal/recovery mode on a machine
-# #
-#
 
 
 def check_delay_time(operation, delay_minutes=None, time=None, write=False):
@@ -331,7 +328,9 @@ def loop_system(dry_run=False):
         # Read the relevant info from system settings
         system_settings = functions.getSystemSettings()
 
-        # Initialize ToDo flags
+        logger.info('System Settings Mode: %s ' % system_settings['mode'])
+        time.sleep(5)
+        # Initialize To Do flags
         do_data_sync = False
         schemas_db_sync = []
         schemas_db_dump = []
@@ -339,17 +338,22 @@ def loop_system(dry_run=False):
 
         logger.info("Starting the System Service loop")
 
+        # Read the System settings
+        systemsettings = functions.getSystemSettings()
+        do_data_sync = system_settings['data_sync']
+        do_db_sync = system_settings['db_sync']
+
         # Implement the logic of operations based on type/role/mode
         if system_settings['type_installation'] == 'Full':
             if system_settings['role'] == 'PC2':
                 ip_target = system_settings['ip_pc3']
                 if system_settings['mode'] == 'nominal':
-                    do_data_sync = True
+                    #do_data_sync = True
                     schemas_db_sync = ['products']
                     schemas_db_dump = ['products', 'analysis']
 
                 if system_settings['mode'] == 'recovery':
-                    do_data_sync = False
+                    #do_data_sync = False
                     schemas_db_sync = []
                     schemas_db_dump = ['products', 'analysis']
 
@@ -357,11 +361,11 @@ def loop_system(dry_run=False):
 
                 ip_target = system_settings['ip_pc2']
                 if system_settings['mode'] == 'nominal':
-                    do_data_sync = False
+                    #do_data_sync = False
                     schemas_db_sync = ['analysis']
                     schemas_db_dump = ['products', 'analysis']
                 if system_settings['mode'] == 'recovery':
-                    do_data_sync = False
+                    #do_data_sync = False
                     schemas_db_sync = []
                     schemas_db_dump = ['products', 'analysis']
 
@@ -384,11 +388,11 @@ def loop_system(dry_run=False):
                 system_data_sync(data_source, data_target)
                 check_delay_time(operation,delay_minutes=delay_data_sync_minutes, write=True)
 
-        # DB sync
+        # DB sync: execute every cycle if in system_setting (no delay)
         operation = 'db_sync'
         if len(schemas_db_sync) > 0:
-            check_time = check_delay_time(operation, delay_minutes=delay_db_sync_minutes)
-            if check_time:
+            #check_time = check_delay_time(operation, delay_minutes=delay_db_sync_minutes)
+            if do_db_sync:
                 logger.info("Executing db synchronization")
                 # Build the list of rsyncs to be activated
                 list_rsyncs = []
@@ -414,7 +418,7 @@ def loop_system(dry_run=False):
             save_status_local_machine()
 
         # Sleep some time
-        time.sleep(10)
+        time.sleep(es_constants.es2globals['system_sleep_time_sec'])
 
 class SystemDaemon(DaemonDryRunnable):
     def run(self):
