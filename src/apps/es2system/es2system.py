@@ -86,13 +86,19 @@ def system_data_sync(source, target):
 #   It is based on rsync daemon, the correct module should be set in /etc/rsyncd.conf file
 #   The rsync daemon should running (permission set in /etc/default/rsync)
 
+    logfile=es_constants.es2globals['log_dir']+'rsync.log'
+    message=time.strftime("%Y-%m-%d %H:%M")+' INFO: Running the data sync now ... \n'
+    log_id=open(logfile,'w')
+    log_id.write(message)
+    log_id.close()
     logger.debug("Entering routine %s" % 'system_data_sync')
-    command = 'rsync -CavK '+source+' '+target
+    command = 'rsync -CavK '+source+' '+target+ ' >> '+logfile
     logger.debug("Executing %s" % command)
     status = os.system(command)
     if status:
         logger.error("Error in executing %s" % command)
-
+    else:
+        return status
 
 def system_db_sync(list_syncs):
 #   Synchronize database contents from one instance to another (push)
@@ -314,7 +320,7 @@ def loop_system(dry_run=False):
 
     # Specific settings for the system operations
     delay_data_sync_minutes = es_constants.es2globals['system_delay_data_sync_min']
-    delay_db_sync_minutes = es_constants.es2globals['system_delay_db_sync_min']
+    #delay_db_sync_minutes = es_constants.es2globals['system_delay_db_sync_min']
     time_for_db_dump = es_constants.es2globals['system_time_db_dump_hhmm']
 
     # Loop to manage the 'cron-like' operations, i.e.:
@@ -401,7 +407,7 @@ def loop_system(dry_run=False):
                     list_rsyncs.append(new_sync)
                 # Call the function
                 system_db_sync(list_rsyncs)
-                check_delay_time(operation, delay_minutes=delay_db_sync_minutes, write=True)
+                #check_delay_time(operation, delay_minutes=delay_db_sync_minutes, write=True)
 
         # DB dump
         operation = 'db_dump'
@@ -418,7 +424,7 @@ def loop_system(dry_run=False):
             save_status_local_machine()
 
         # Sleep some time
-        time.sleep(es_constants.es2globals['system_sleep_time_sec'])
+        time.sleep(float(es_constants.es2globals['system_sleep_time_sec']))
 
 class SystemDaemon(DaemonDryRunnable):
     def run(self):
