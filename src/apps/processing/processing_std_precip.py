@@ -497,6 +497,8 @@ def processing_std_precip(pipeline_run_level=0,pipeline_run_touch_only=0, pipeli
     logger.info("pipeline_run_level %i" % pipeline_run_level)
     if write2file is not None:
         fwrite_id=open(write2file,'w')
+    else:
+        fwrite_id=None
     if pipeline_run_level > 0:
         pipeline_run(verbose=pipeline_run_level, touch_files_only=pipeline_run_touch_only)
 
