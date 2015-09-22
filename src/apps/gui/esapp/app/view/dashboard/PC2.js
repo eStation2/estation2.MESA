@@ -34,6 +34,9 @@ Ext.define("esapp.view.dashboard.PC2",{
     currentmode: '',
     dbstatus:false,
     internetconnection:false,
+    dbautosync: false,
+    datautosync: false,
+    autosync_onoff: false,
 
     layout: 'border',
     bodyBorder: true,
@@ -105,6 +108,7 @@ Ext.define("esapp.view.dashboard.PC2",{
         else if (me.service_system == 'false')
             me.service_system_Style = 'red';
 
+        // me.autosync_onoff = me.currentmode != 'Recovery';
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             layout: {
@@ -185,9 +189,10 @@ Ext.define("esapp.view.dashboard.PC2",{
                     floating: true,
                     items: [
                         {   xtype: 'checkbox',
-                            boxLabel: esapp.Utils.getTranslation('disableautosync'),     // 'Disable Auto Sync',
+                            boxLabel: esapp.Utils.getTranslation('autosyncdata'),     // 'Auto Sync Data',
                             name: 'enabledisableautosync',
-                            checked   : true,
+                            checked   : me.datautosync,
+                            disabled: me.autosync_onoff,
                             handler: 'execEnableDisableAutoSync'
                         },
                         {   text: esapp.Utils.getTranslation('executenow'),     // 'Execute Now',
@@ -213,9 +218,10 @@ Ext.define("esapp.view.dashboard.PC2",{
                     floating: true,
                     items: [
                         {   xtype: 'checkbox',
-                            boxLabel: esapp.Utils.getTranslation('disableautosync'),     // 'Disable Auto Sync',
+                            boxLabel: esapp.Utils.getTranslation('autosyncdb'),     // 'Auto Sync Database',
                             name: 'enabledisableautodbsync',
-                            checked   : true,
+                            checked   : me.dbautosync,
+                            disabled: me.autosync_onoff,
 //                            glyph: 'xf04b@FontAwesome',
 //                            cls:'menu-glyph-color-green',
                             handler: 'execEnableDisableAutoDBSync'

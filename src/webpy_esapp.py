@@ -56,6 +56,8 @@ urls = (
 
     "/dashboard/getdashboard", "GetDashboard",
     "/dashboard/systemstatus", "GetSystemStatus",
+    "/dashboard/setdataautosync", "SetDataAutoSync",
+    "/dashboard/setdbautosync", "SetDBAutoSync",
 
     "/services/checkstatusall", "CheckStatusAllServices",
     "/services/execservicetask", "ExecuteServiceTask",
@@ -84,7 +86,6 @@ urls = (
     "/systemsettings", "UserSettings",
     "/systemsettings/update", "UpdateUserSettings",
     "/systemsettings/changerole", "ChangeRole",
-
     "/systemsettings/reset", "ResetUserSettings",
     "/systemsettings/systemreport", "SystemReport",
     "/systemsettings/installreport", "InstallReport",
@@ -565,6 +566,8 @@ class GetDashboard:
 
         PC2_mode = ''   # 'nominal' 'recovery'
         PC2_version = ''
+        PC2_DBAutoSync = None
+        PC2_DataAutoSync = None
         PC2_disk_status = True
         PC2_postgresql_status = None
         PC2_internet_status = None
@@ -576,6 +579,8 @@ class GetDashboard:
 
         PC3_mode = ''   # 'nominal' 'recovery'
         PC3_version = ''
+        PC3_DBAutoSync = None
+        PC3_DataAutoSync = None
         PC3_disk_status = None
         PC3_postgresql_status = None
         PC3_internet_status = None
@@ -601,6 +606,8 @@ class GetDashboard:
             elif systemsettings['role'].lower() == 'pc2':
                 PC2_mode = systemsettings['mode'].lower()
                 PC2_version = systemsettings['active_version']
+                PC2_DBAutoSync = systemsettings['db_sync']
+                PC2_DataAutoSync = systemsettings['data_sync']
                 PC2_postgresql_status = functions.getStatusPostgreSQL()
                 PC2_internet_status = functions.internet_on()
                 PC2_service_eumetcast = status_services['eumetcast']
@@ -622,6 +629,8 @@ class GetDashboard:
                     PC3_mode = status_PC3['mode']
                     PC3_disk_status = status_PC3['disk_status']
                     PC3_version = status_PC3['active_version']
+                    PC3_DBAutoSync = status_PC3['db_sync']
+                    PC3_DataAutoSync = status_PC3['data_sync']
                     PC3_postgresql_status = status_PC3['postgresql_status']
                     PC3_internet_status = status_PC3['internet_connection_status']
                     PC3_service_eumetcast = status_PC3['get_eumetcast_status']
@@ -639,6 +648,8 @@ class GetDashboard:
                 # PC3_disk_status = checkDiskStatus()
                 PC3_mode = systemsettings['mode'].lower()
                 PC3_version = systemsettings['active_version']
+                PC3_DBAutoSync = systemsettings['db_sync']
+                PC3_DataAutoSync = systemsettings['data_sync']
                 PC3_postgresql_status = functions.getStatusPostgreSQL()
                 PC3_internet_status = functions.internet_on()
                 PC3_service_eumetcast = status_services['eumetcast']
@@ -659,6 +670,8 @@ class GetDashboard:
                     PC2_mode = status_PC2['mode']
                     PC2_disk_status = status_PC2['disk_status']
                     PC2_version = status_PC2['active_version']
+                    PC2_DBAutoSync = status_PC2['db_sync']
+                    PC2_DataAutoSync = status_PC2['data_sync']
                     PC2_postgresql_status = status_PC2['postgresql_status']
                     PC2_internet_status = status_PC2['internet_connection_status']
                     PC2_service_eumetcast = status_PC2['get_eumetcast_status']
@@ -669,6 +682,26 @@ class GetDashboard:
                     PC2_system_execution_time = status_PC2['system_execution_time']
 
         # /sbin/service postgresql status    or     /etc/init.d/postgresql status
+
+        if PC2_DBAutoSync in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+            PC2_DBAutoSync = True
+        else:
+            PC2_DBAutoSync = False
+
+        if PC2_DataAutoSync in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+            PC2_DataAutoSync = True
+        else:
+            PC2_DataAutoSync = False
+
+        if PC3_DBAutoSync in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+            PC3_DBAutoSync = True
+        else:
+            PC3_DBAutoSync = False
+
+        if PC3_DataAutoSync in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+            PC3_DataAutoSync = True
+        else:
+            PC3_DataAutoSync = False
 
         dashboard_dict = {'type_installation': systemsettings['type_installation'].lower(),
                           'activePC': systemsettings['role'].lower(),
@@ -681,6 +714,8 @@ class GetDashboard:
                           'PC2_service_processing': PC2_service_processing,
                           'PC2_service_system': PC2_service_system,
                           'PC2_version': PC2_version,
+                          'PC2_DBAutoSync': PC2_DBAutoSync,
+                          'PC2_DataAutoSync': PC2_DataAutoSync,
                           'PC2_mode': PC2_mode,
                           'PC2_postgresql_status': PC2_postgresql_status,
                           'PC2_internet_status': PC2_internet_status,
@@ -692,6 +727,8 @@ class GetDashboard:
                           'PC3_service_processing': PC3_service_processing,
                           'PC3_service_system': PC3_service_system,
                           'PC3_version': PC3_version,
+                          'PC3_DBAutoSync': PC3_DBAutoSync,
+                          'PC3_DataAutoSync': PC3_DataAutoSync,
                           'PC3_mode': PC3_mode,
                           'PC3_postgresql_status': PC3_postgresql_status,
                           'PC3_internet_status': PC3_internet_status,
@@ -708,6 +745,50 @@ class GetDashboard:
         dashboard_json = '{"success":"true", "dashboard":'+dashboard_json + '}'
 
         return dashboard_json
+
+
+class SetDataAutoSync:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        getparams = web.input()
+        if hasattr(getparams, "dataautosync"):
+
+            functions.setSystemSetting('data_sync', getparams['dataautosync'])
+
+            # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
+            from lib.python import reloadmodules
+            reloadmodules.reloadallmodules()
+            # Reloading the settings does not work well so set manually
+
+            result_json = '{"success":"true", "message":"Data Auto Sync changed!"}'
+        else:
+            result_json = '{"success":false, "error":"No setting given!"}'
+
+        return result_json
+
+
+class SetDBAutoSync:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        getparams = web.input()
+        if hasattr(getparams, "dbautosync"):
+
+            functions.setSystemSetting('db_sync', getparams['dbautosync'])
+
+            # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
+            from lib.python import reloadmodules
+            reloadmodules.reloadallmodules()
+            # Reloading the settings does not work well so set manually
+
+            result_json = '{"success":"true", "message":"DB Auto Sync changed!"}'
+        else:
+            result_json = '{"success":false, "error":"No setting given!"}'
+
+        return result_json
 
 
 class GetI18n:
@@ -1264,11 +1345,11 @@ class setIngestArchives:
             reloadmodules.reloadallmodules()
             # Reloading the settings does not work well so set manually
 
-            changemode_json = '{"success":"true", "message":"Setting Ingest Archives from Eumetcast changed!"}'
+            result_json = '{"success":"true", "message":"Setting Ingest Archives from Eumetcast changed!"}'
         else:
-            changemode_json = '{"success":false, "error":"No setting given!"}'
+            result_json = '{"success":false, "error":"No setting given!"}'
 
-        return changemode_json
+        return result_json
 
 
 class ChangeRole:
@@ -1304,8 +1385,12 @@ class ChangeMode:
         if hasattr(getparams, "mode"):
 
             functions.setSystemSetting('mode', getparams['mode'])
-
-            # Todo: call system service to change the mode
+            if getparams['mode'] == 'recovery':
+                functions.setSystemSetting('data_sync', 'false')
+                functions.setSystemSetting('db_sync', 'false')
+            elif getparams['mode'] == 'nominal':
+                functions.setSystemSetting('data_sync', 'true')
+                functions.setSystemSetting('db_sync', 'true')
 
             # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
             from lib.python import reloadmodules

@@ -42,6 +42,8 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                     me.PC2_postgresql_status = dashboard.get('PC2_postgresql_status');
                     me.PC2_version = dashboard.get('PC2_version');
                     me.PC2_disk_status = dashboard.get('PC2_disk_status');
+                    me.PC2_DBAutoSync = dashboard.get('PC2_DBAutoSync');
+                    me.PC2_DataAutoSync = dashboard.get('PC2_DataAutoSync');
 
                     me.PC3_service_eumetcast = dashboard.get('PC3_service_eumetcast');
                     me.PC3_service_internet = dashboard.get('PC3_service_internet');
@@ -53,6 +55,8 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                     me.PC3_postgresql_status = dashboard.get('PC3_postgresql_status');
                     me.PC3_version = dashboard.get('PC3_version');
                     me.PC3_disk_status = dashboard.get('PC3_disk_status');
+                    me.PC3_DBAutoSync = dashboard.get('PC3_DBAutoSync');
+                    me.PC3_DataAutoSync = dashboard.get('PC3_DataAutoSync');
 
                     me.activePC = dashboard.get('activePC');
                     me.PC1_connection = dashboard.get('PC1_connection');
@@ -158,6 +162,10 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                     me.PC2_modeText = esapp.Utils.getTranslation(me.PC2_mode);
                     me.PC3_modeText = esapp.Utils.getTranslation(me.PC3_mode);
 
+                    me.PC2_autosync_onoff = me.PC2_mode == 'recovery';
+                    me.PC3_autosync_onoff = me.PC3_mode == 'recovery';
+
+
                     PC1 = {
                         xtype: 'dashboard-pc1',
                         setdisabled:pc1Disabled,
@@ -174,6 +182,9 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                         activePC:pc2Active,
                         activeversion: me.PC2_version,
                         currentmode: me.PC2_modeText,
+                        autosync_onoff: me.PC2_autosync_onoff,
+                        dbautosync: me.PC2_DBAutoSync,
+                        datautosync: me.PC2_DataAutoSync,
                         diskstatus: me.PC2_disk_status,
                         dbstatus: me.PC2_postgresql_status,
                         internetconnection: me.PC2_internet_status,
@@ -193,6 +204,9 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                         setdisabledAll:pc3DisabledAll,
                         activePC: pc3Active,
                         activeversion: me.PC3_version,
+                        autosync_onoff: me.PC3_autosync_onoff,
+                        dbautosync: me.PC3_DBAutoSync,
+                        datautosync: me.PC3_DataAutoSync,
                         currentmode: me.PC3_modeText,
                         diskstatus: me.PC3_disk_status,
                         dbstatus: me.PC3_postgresql_status,

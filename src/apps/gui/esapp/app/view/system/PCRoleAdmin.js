@@ -24,7 +24,7 @@ Ext.define("esapp.view.system.PCRoleAdmin",{
     closeAction: 'destroy', // 'hide',
     resizable:false,
     maximizable: false,
-    width:170,
+    width:140,
     height:160,
     border:true,
     frame:true,

@@ -17,6 +17,8 @@ Ext.define('esapp.model.Dashboard', {
         {name: 'PC2_postgresql_status', mapping: 'PC2_postgresql_status'},
         {name: 'PC2_internet_status', mapping: 'PC2_internet_status'},
         {name: 'PC2_disk_status', mapping: 'PC2_disk_status'},
+        {name: 'PC2_DBAutoSync', mapping: 'PC2_DBAutoSync'},
+        {name: 'PC2_DataAutoSync', mapping: 'PC2_DataAutoSync'},
 
         {name: 'PC3_service_eumetcast', mapping: 'PC3_service_eumetcast'},
         {name: 'PC3_service_internet', mapping: 'PC3_service_internet'},
@@ -27,7 +29,9 @@ Ext.define('esapp.model.Dashboard', {
         {name: 'PC3_mode', type: 'string', mapping: 'PC3_mode'},
         {name: 'PC3_postgresql_status', mapping: 'PC3_postgresql_status'},
         {name: 'PC3_internet_status', mapping: 'PC3_internet_status'},
-        {name: 'PC3_disk_status', mapping: 'PC3_disk_status'}
+        {name: 'PC3_disk_status', mapping: 'PC3_disk_status'},
+        {name: 'PC3_DBAutoSync', mapping: 'PC3_DBAutoSync'},
+        {name: 'PC3_DataAutoSync', mapping: 'PC3_DataAutoSync'}
     ]
 
     //fields: [
