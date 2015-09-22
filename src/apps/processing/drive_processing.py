@@ -23,7 +23,7 @@ if service:
             logger.error("Cannot create pid directory")
 
     # Define pid file and create daemon
-    pid_file = es_constants.es2globals['get_eumetcast_pid_filename']
+    pid_file = es_constants.es2globals['processing_pid_filename']
     daemon = processing.ProcessingDaemon(pid_file, dry_run=dry_run)
 
     if do_start:

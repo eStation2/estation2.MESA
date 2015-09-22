@@ -25,24 +25,23 @@ import proc_functions
 from apps.processing.processing_std_precip import *
 # Create the list of dates -> returns empty if start==end==None
 start_date='20110101'
-end_date='20150601'
+end_date='20150901'
 starting_dates = proc_functions.get_list_dates_for_dataset('chirps-dekad', '10d', '2.0',
                                                                start_date=start_date, end_date=end_date)
 
-args = {'pipeline_run_level':0, \
+args = {'pipeline_run_level':5, \
         'pipeline_run_touch_only':0, \
-        'pipeline_printout_level':1, \
+        'pipeline_printout_level':0, \
         'pipeline_printout_graph_level': 0, \
         'prod': 'chirps-dekad',\
         'starting_sprod':'10d',\
         'starting_dates': starting_dates,\
         'mapset': 'CHIRP-Africa-5km',\
-        'version':'2.0',
-        'write2file':'/tmp/eStation2/ruffus_chirps-dekad.txt'
-        }
+        'version':'2.0'}
+        #'write2file':'/tmp/eStation2/ruffus_chirps-dekad.txt'}
 
 proc_lists=processing_std_precip_prods_only(**args)
-print(proc_lists)
+#print(proc_lists)
 #upsert_database(process_id, product_code, version, mapset, proc_lists, input_product_info)
 
 #from apps.processing.processing_modis_sst import *
