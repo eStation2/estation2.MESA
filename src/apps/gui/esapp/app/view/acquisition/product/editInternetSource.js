@@ -58,7 +58,7 @@ Ext.define("esapp.view.acquisition.product.editInternetSource",{
             items: [{
                 xtype: 'fieldset',
                 title: '<b>'+esapp.Utils.getTranslation('internetdatasourceinfo')+'</b>',    // '<b>Internet data source info</b>',
-                collapseable: false,
+                collapsible: false,
                 width: 425,
                 margin: '10 5 10 10',
                 padding: '10 10 10 10',
@@ -174,7 +174,7 @@ Ext.define("esapp.view.acquisition.product.editInternetSource",{
             },{
                 xtype: 'fieldset',
                 title: '<b>'+esapp.Utils.getTranslation('datasourcedescription')+'</b>',    // '<b>Data source description</b>',
-                collapseable: false,
+                collapsible: false,
                 width: 475,
                 margin: '10 10 10 5',
                 padding: '10 10 10 10',

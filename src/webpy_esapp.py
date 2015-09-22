@@ -50,6 +50,9 @@ urls = (
     "/product/unassigndatasource", "UnassignProductDataSource",
 
     "/categories", "GetCategories",
+    "/frequencies", "GetFrequencies",
+    "/dateformats", "GetDateFormats",
+    "/datatypes", "GetDataTypes",
 
     "/dashboard/getdashboard", "GetDashboard",
     "/dashboard/systemstatus", "GetSystemStatus",
@@ -149,10 +152,10 @@ class GetCategories:
         if categories.__len__() > 0:
             for row in categories:
                 row_dict = functions.row2dict(row)
-                internetsource = {'category_id': row_dict['category_id'],
+                categories_dict = {'category_id': row_dict['category_id'],
                                   'descriptive_name': row_dict['descriptive_name']}
 
-                categories_dict_all.append(internetsource)
+                categories_dict_all.append(categories_dict)
 
             categories_json = json.dumps(categories_dict_all,
                                          ensure_ascii=False,
@@ -169,6 +172,102 @@ class GetCategories:
             categories_json = '{"success":false, "error":"No Categories defined!"}'
 
         return categories_json
+
+
+class GetFrequencies:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        frequencies_dict_all = []
+        frequencies = querydb.get_frequencies()
+
+        if frequencies.__len__() > 0:
+            for row in frequencies:
+                row_dict = functions.row2dict(row)
+                # internetsource = {'category_id': row_dict['category_id'],
+                #                   'descriptive_name': row_dict['descriptive_name']}
+                frequencies_dict_all.append(row_dict)
+
+            frequencies_json = json.dumps(frequencies_dict_all,
+                                         ensure_ascii=False,
+                                         encoding='utf-8',
+                                         sort_keys=True,
+                                         indent=4,
+                                         separators=(', ', ': '))
+
+            frequencies_json = '{"success":"true", "total":'\
+                                   + str(frequencies.__len__())\
+                                   + ',"frequencies":'+frequencies_json+'}'
+
+        else:
+            frequencies_json = '{"success":false, "error":"No Frequencies defined!"}'
+
+        return frequencies_json
+
+
+class GetDateFormats:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        dateformats_dict_all = []
+        dateformats = querydb.get_dateformats()
+
+        if dateformats.__len__() > 0:
+            for row in dateformats:
+                row_dict = functions.row2dict(row)
+                # internetsource = {'category_id': row_dict['category_id'],
+                #                   'descriptive_name': row_dict['descriptive_name']}
+                dateformats_dict_all.append(row_dict)
+
+            dateformats_json = json.dumps(dateformats_dict_all,
+                                         ensure_ascii=False,
+                                         encoding='utf-8',
+                                         sort_keys=True,
+                                         indent=4,
+                                         separators=(', ', ': '))
+
+            dateformats_json = '{"success":"true", "total":'\
+                                   + str(dateformats.__len__())\
+                                   + ',"dateformats":'+dateformats_json+'}'
+
+        else:
+            dateformats_json = '{"success":false, "error":"No Date Formats defined!"}'
+
+        return dateformats_json
+
+
+class GetDataTypes:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        datatypes_dict_all = []
+        datatypes = querydb.get_datatypes()
+
+        if datatypes.__len__() > 0:
+            for row in datatypes:
+                row_dict = functions.row2dict(row)
+                # internetsource = {'category_id': row_dict['category_id'],
+                #                   'descriptive_name': row_dict['descriptive_name']}
+                datatypes_dict_all.append(row_dict)
+
+            datatypes_json = json.dumps(datatypes_dict_all,
+                                         ensure_ascii=False,
+                                         encoding='utf-8',
+                                         sort_keys=True,
+                                         indent=4,
+                                         separators=(', ', ': '))
+
+            datatypes_json = '{"success":"true", "total":'\
+                                   + str(datatypes.__len__())\
+                                   + ',"datatypes":'+datatypes_json+'}'
+
+        else:
+            datatypes_json = '{"success":false, "error":"No Data Types defined!"}'
+
+        return datatypes_json
 
 
 class AssignInternetSource:
@@ -752,7 +851,7 @@ class GetTimeseries:
                       'color': ts_drawprops.color,
                       'yAxis': ts_drawprops.yaxes_id,
                       'data': data}
-            timeseries.append(ts)
+                timeseries.append(ts)
 
         ts_json = {"data_available": "true",
                    "showYearInTicks": "false",
@@ -1318,7 +1417,8 @@ class GetVectorLayer:
     def GET(self):
         getparams = web.input()
         filename = getparams['file']
-        layerfilepath = '/srv/www/eStation2_Layers/'+filename
+        # layerfilepath = '/srv/www/eStation2_Layers/'+filename
+        layerfilepath = es_constants.estation2_layers_dir + os.path.sep + filename
 
         layerfile = open(layerfilepath, 'r')
         layerfilecontent = layerfile.read()
@@ -1601,11 +1701,11 @@ class GetProductLayer:
         #logger.debug("MapServer: Installing stdout to buffer.")
         mapscript.msIO_installStdoutToBuffer()
 
-        projlib = "/usr/share/proj/"
+        # projlib = "/usr/share/proj/"
+        projlib = es_constants.proj4_lib_dir
         # errorfile = es_constants.apps_dir+"/analysis/ms_tmp/ms_errors.log"
         errorfile = es_constants.log_dir+"/mapserver_error.log"
         # imagepath = es_constants.apps_dir+"/analysis/ms_tmp/"
-
 
         owsrequest = mapscript.OWSRequest()
 
@@ -1645,8 +1745,9 @@ class GetProductLayer:
         productmap.setExtent(llx, lly, urx, ury)   # -26, -35, 60, 38
 
         # epsg must be in lowercase because in unix/linux systems the proj filenames are lowercase!
-        #epsg = "+init=epsg:3857"
-        epsg = "+init=" + inputparams.CRS.lower()   # CRS = "EPSG:4326"
+        # epsg = "+init=epsg:3857"
+        # epsg = "+init=" + inputparams.CRS.lower()   # CRS = "EPSG:4326"
+        epsg = inputparams.CRS.lower()   # CRS = "EPSG:4326"
         productmap.setProjection(epsg)
 
         w = int(inputparams.WIDTH)
@@ -1709,7 +1810,8 @@ class GetProductLayer:
             layer.type = mapscript.MS_LAYER_RASTER
             layer.status = mapscript.MS_ON     # MS_DEFAULT
             layer.data = productfile
-            layer.setProjection("+init=epsg:4326")
+            # layer.setProjection("+init=epsg:4326")
+            layer.setProjection("epsg:4326")
             layer.dump = mapscript.MS_TRUE
 
             # scale & buckets
@@ -1765,11 +1867,13 @@ class GetBackgroundLayer:
         import mapscript
         getparams = web.input()
 
-        filename = '/srv/www/eStation2_Layers/HYP_HR_SR_OB_DR/HYP_HR_SR_OB_DR.tif'
+        # filename = '/srv/www/eStation2_Layers/HYP_HR_SR_OB_DR/HYP_HR_SR_OB_DR.tif'
+        filename = es_constants.estation2_layers_dir + '/HYP_HR_SR_OB_DR/HYP_HR_SR_OB_DR.tif'
 
         mapscript.msIO_installStdoutToBuffer()
 
-        projlib = "/usr/share/proj/"
+        # projlib = "/usr/share/proj/"
+        projlib = es_constants.proj4_lib_dir
         # errorfile = es_constants.apps_dir+"/analysis/ms_tmp/ms_errors.log"
         errorfile = es_constants.log_dir+"/mapserver_error.log"
 
@@ -1808,7 +1912,8 @@ class GetBackgroundLayer:
 
         # epsg must be in lowercase because in unix/linux systems the proj filenames are lowercase!
         #epsg = "+init=epsg:3857"
-        epsg = "+init=" + inputparams.CRS.lower()   # CRS = "EPSG:4326"
+        #epsg = "+init=" + inputparams.CRS.lower()   # CRS = "EPSG:4326"
+        epsg = inputparams.CRS.lower()   # CRS = "EPSG:4326"
         backgroundlayer.setProjection(epsg)
 
         w = int(inputparams.WIDTH)
@@ -1827,7 +1932,8 @@ class GetBackgroundLayer:
         layer.type = mapscript.MS_LAYER_RASTER
         layer.status = mapscript.MS_ON     # MS_DEFAULT
         layer.data = filename
-        layer.setProjection("+init=epsg:4326")
+        # layer.setProjection("+init=epsg:4326")
+        layer.setProjection("epsg:4326")
         layer.dump = mapscript.MS_TRUE
 
         result_map_file = es_constants.apps_dir+'/analysis/Backgroundlayer_result.map'

@@ -92,6 +92,7 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
             width: '100%',
             height: 38,
 
+            //engine: Ext.draw.engine.Canvas,
             engine: Ext.draw.engine.Svg,
 
             colors: [

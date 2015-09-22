@@ -35,7 +35,7 @@
 	# WEB.PY SETUP
 	##############################
 
-	WSGIScriptAlias /esapp /srv/www/eStation2/webpy_esapp/
+	WSGIScriptAlias /esapp /srv/www/eStation2/webpy_esapp.py/
 
 	Alias /static /srv/www/eStation2/apps/gui/esapp
 

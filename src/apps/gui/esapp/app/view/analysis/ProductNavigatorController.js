@@ -92,6 +92,13 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
         // nodes contain all selected records when dataview has multiSelect to true!
         // here we do not use multiSelect so nodes is the record of the selected mapset!
         this.getStore('mapsetdatasets').setData(record.get('mapsetdatasets'));
+        var sorters = [{
+            property: 'descriptive_name',
+            direction: 'ASC'
+        }];
+
+        this.getStore('mapsetdatasets').setSorters(sorters);
+        this.getStore('mapsetdatasets').sort(sorters);
         var mapsetdatasetgrid = this.lookupReference('mapset-dataset-grid');
         mapsetdatasetgrid.columns[0].setText('<div class="grid-header-style">' + esapp.Utils.getTranslation('datasets') + ' <b class="smalltext">' + esapp.Utils.getTranslation('formapset') + ' ' + record.get('descriptive_name') + '</b></div>');
         mapsetdatasetgrid.show();

@@ -2,6 +2,10 @@
 from __future__ import absolute_import
 __author__ = "Jurriaan van 't Klooster"
 
+import site
+
+site.addsitedir('/var/www/eStation2', known_paths=None)
+
 from unittest import TestCase
 from lib.python import es_logging as log
 logger = log.my_logger(__name__)

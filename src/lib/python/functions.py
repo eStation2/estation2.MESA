@@ -53,7 +53,7 @@ def check_connection(server_info):
     try:
         sock = socket()
         # sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(2)
+        sock.settimeout(1)
         sock.connect((server_info[:cpos], int(server_info[cpos+1:])))
         # sock.shutdown(1)
         sock.close
@@ -279,9 +279,9 @@ def tojson(queryresult):
 def internet_on():
     import urllib2
     try:
-        response = urllib2.urlopen('http://74.125.228.100', timeout=2)
+        response = urllib2.urlopen('http://www.google.com', timeout=1)
         return True
-    except urllib2.URLError as err: pass
+    except: pass    #  urllib2.URLError as err: pass
     return False
 
 

@@ -253,6 +253,19 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
                 console.info(response.status);
             }
         });
-    }
+    },
 
+    editIngestion: function(grid, rowIndex, row){
+        var record = grid.getStore().getAt(rowIndex);
+        console.info(record);
+        var editIngestionWin = new esapp.view.acquisition.product.editIngestion({
+            params: {
+                edit: true,
+                product: record,
+                orig_productcode: record.get('productcode'),
+                orig_version : record.get('version')
+            }
+        });
+        editIngestionWin.show();
+    }
 });

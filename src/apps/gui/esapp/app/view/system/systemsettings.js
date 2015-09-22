@@ -309,7 +309,7 @@ Ext.define("esapp.view.system.systemsettings",{
             items: [{
                 xtype: 'fieldset',
                 title: me.fieldset_title_system_settings,
-                collapseable:false,
+                collapsible:false,
                 height:'800',
                 defaults: {
                     width: 350,
@@ -318,7 +318,7 @@ Ext.define("esapp.view.system.systemsettings",{
                 items: [{
                     xtype: 'fieldset',
                     title: '',
-                    collapseable:false,
+                    collapsible:false,
                     padding: 5,
                     defaults: {
                         labelWidth: 100
@@ -341,7 +341,7 @@ Ext.define("esapp.view.system.systemsettings",{
                 },{
                     xtype: 'fieldset',
                     title: '',
-                    collapseable:false,
+                    collapsible:false,
                     padding: 10,
                     defaults: {
                         labelWidth: 100,
@@ -458,7 +458,7 @@ Ext.define("esapp.view.system.systemsettings",{
                     title: me.fieldset_title_ipaddresses,  // '<b>IP addresses</b>',
                     id: 'ipaddresses',
                     name: 'ipaddresses',
-                    collapseable:false,
+                    collapsible:false,
                     padding: 10,
                     defaults: {
                         labelWidth: 100,
@@ -470,7 +470,7 @@ Ext.define("esapp.view.system.systemsettings",{
             items: [{
                 xtype: 'fieldset',
                 title: me.fieldset_title_path_settings,
-                collapseable:false,
+                collapsible:false,
                 defaults: {
                     width: 350,
                     labelWidth: 120
@@ -551,7 +551,7 @@ Ext.define("esapp.view.system.systemsettings",{
             },{
                 xtype: 'fieldset',
                 title: me.fieldset_title_database_connection_settings,
-                collapseable:false,
+                collapsible:false,
                 defaults: {
                     width: 350,
                     labelWidth: 120
