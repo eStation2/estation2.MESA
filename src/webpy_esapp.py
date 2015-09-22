@@ -83,6 +83,8 @@ urls = (
 
     "/systemsettings", "UserSettings",
     "/systemsettings/update", "UpdateUserSettings",
+    "/systemsettings/changerole", "ChangeRole",
+
     "/systemsettings/reset", "ResetUserSettings",
     "/systemsettings/systemreport", "SystemReport",
     "/systemsettings/installreport", "InstallReport",
@@ -1267,6 +1269,30 @@ class setIngestArchives:
             changemode_json = '{"success":false, "error":"No setting given!"}'
 
         return changemode_json
+
+
+class ChangeRole:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        getparams = web.input()
+        if hasattr(getparams, "role"):
+
+            functions.setSystemSetting('role', getparams['role'])
+
+            # Todo: call system service to change the mode
+
+            # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
+            from lib.python import reloadmodules
+            reloadmodules.reloadallmodules()
+            # Reloading the settings does not work well so set manually
+
+            changerole_json = '{"success":"true", "message":"Role changed!"}'
+        else:
+            changerole_json = '{"success":false, "error":"No role given!"}'
+
+        return changerole_json
 
 
 class ChangeMode:
