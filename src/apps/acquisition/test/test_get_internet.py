@@ -70,10 +70,10 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def TestRemoteFtp_CHIRPS(self):
         # Retrieve a list of CHIRP
-        remote_url='ftp://chg-ftpout.geog.ucsb.edu/pub/org/chg/products/CHIRPS-latest/prelim/global_pentad/tifs/'
+        remote_url='ftp://chg-ftpout.geog.ucsb.edu/pub/org/chg/products/CHIRPS-2.0/prelim/global_dekad/tifs/'
         usr_pwd='anonymous:anonymous'
-        full_regex   ='chirps-v1.8.*.tif'
-        file_to_check='chirps-v1.8.2014.09.4.tif'
+        full_regex   ='chirps-v2.0.*.tif'
+        file_to_check='chirps-v2.0.2015.08.3.tif.gz'
 
         list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
         self.assertTrue(file_to_check in list)
@@ -85,7 +85,7 @@ class TestGetInternet(unittest.TestCase):
         remote_url='ftp://chg-ftpout.geog.ucsb.edu/pub/org/chg/products/CHIRPS-2.0/global_dekad/tifs/'
         usr_pwd='anonymous:anonymous'
         full_regex   ='chirps-v2.0.*.tif'
-        file_to_check='chirps-v2.0.2015.02.1.tif.gz'
+        file_to_check='chirps-v2.0.2015.07.3.tif.gz'
 
         list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
         print(list)
