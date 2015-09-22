@@ -67,13 +67,32 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                     var processingtab = Ext.getCmp('processingmaintab');
                     var datamanagementtab = Ext.getCmp('datamanagementmaintab');
                     var analysistab = Ext.getCmp('analysistab');
+                    var systemtab = Ext.getCmp('systemtab');
                     var maintabpanel = Ext.getCmp('maintabpanel');
 
                     var indexAcquisitionTab = 1;
                     var indexProcessingTab = 2;
                     var indexDataManagementTab = 3;
                     var indexAnalysisTab = 4; // maintabpanel.getTabBar().items.indexOf(analysistab);
+                    var indexSystemTab = 5;
 
+                    if (me.activePC == '') {
+                        maintabpanel.getTabBar().items.getAt(indexAcquisitionTab).hide();
+                        acquisitiontab.disable();
+
+                        maintabpanel.getTabBar().items.getAt(indexProcessingTab).hide();
+                        processingtab.disable();
+
+                        maintabpanel.getTabBar().items.getAt(indexDataManagementTab).hide();
+                        datamanagementtab.disable();
+
+                        maintabpanel.getTabBar().items.getAt(indexAnalysisTab).hide();
+                        analysistab.disable();
+
+                        maintabpanel.getTabBar().items.getAt(indexSystemTab).show();
+                        systemtab.enable();
+                        maintabpanel.setActiveTab(indexSystemTab);
+                    }
                     if (me.activePC == 'pc1') {
                         pc1Active = true;
                     }
