@@ -93,3 +93,9 @@ class TestSystem(unittest.TestCase):
 
         status = es2system.loop_system(dry_run=False)
         self.assertEquals(status, 0)
+
+    def test_system_db_dump(self):
+
+        list_dump = ['products','analysis']
+        status = es2system.system_db_dump(list_dump)
+        self.assertEquals(status, 0)
