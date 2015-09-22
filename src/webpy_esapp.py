@@ -499,7 +499,7 @@ class UpdateInternetSource:
                                   'format_type': getparams['internetsources']['format_type'],
                                   'file_extension': getparams['internetsources']['file_extension'],
                                   'delimiter': getparams['internetsources']['delimiter'],
-                                  'date_type': getparams['internetsources']['date_type'],
+                                  'date_format': getparams['internetsources']['date_format'],
                                   'date_position': getparams['internetsources']['date_position'],
                                   'product_identifier': getparams['internetsources']['product_identifier'],
                                   'prod_id_position': int(getparams['internetsources']['prod_id_position']),

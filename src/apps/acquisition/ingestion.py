@@ -149,11 +149,11 @@ def loop_ingestion(dry_run=False):
                         # splitted_fn = re.split(r'[datasource_descr.delimiter\s]\s*', filename) ???? What is that for ?
                         splitted_fn = re.split(datasource_descr.delimiter, filename)
                         date_string = splitted_fn[date_position]
-                        if len(date_string) > len(datasource_descr.date_type):
-                            date_string=date_string[0:len(datasource_descr.date_type)]
+                        if len(date_string) > len(datasource_descr.date_format):
+                            date_string=date_string[0:len(datasource_descr.date_format)]
                         dates_list.append(date_string)
                     else:
-                        dates_list.append(filename[date_position:date_position + len(datasource_descr.date_type)])
+                        dates_list.append(filename[date_position:date_position + len(datasource_descr.date_format)])
 
                 dates_list = set(dates_list)
                 dates_list = sorted(dates_list, reverse=False)
@@ -1190,36 +1190,36 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         # Convert the in_date format into a convenient one for DB and file naming
         # (i.e YYYYMMDD or YYYYMMDDHHMM)
-        if datasource_descr.date_type == 'YYYYMMDD':
+        if datasource_descr.date_format == 'YYYYMMDD':
             if functions.is_date_yyyymmdd(in_date):
                 output_date_str = in_date
             else:
                 output_date_str = -1
 
-        if datasource_descr.date_type == 'YYYYMMDDHHMM':
+        if datasource_descr.date_format == 'YYYYMMDDHHMM':
             if functions.is_date_yyyymmddhhmm(in_date):
                 output_date_str = in_date
             else:
                 output_date_str = -1
 
-        if datasource_descr.date_type == 'YYYYDOY_YYYYDOY':
+        if datasource_descr.date_format == 'YYYYDOY_YYYYDOY':
             output_date_str = functions.conv_date_yyyydoy_2_yyyymmdd(str(in_date)[0:7])
 
-        if datasource_descr.date_type == 'YYYYMMDD_YYYYMMDD':
+        if datasource_descr.date_format == 'YYYYMMDD_YYYYMMDD':
             output_date_str = str(in_date)[0:8]
             if not functions.is_date_yyyymmdd(output_date_str):
                 output_date_str = -1
 
-        if datasource_descr.date_type == 'YYYYDOY':
+        if datasource_descr.date_format == 'YYYYDOY':
             output_date_str = functions.conv_date_yyyydoy_2_yyyymmdd(in_date)
 
-        if datasource_descr.date_type == 'YYYY_MM_DKX':
+        if datasource_descr.date_format == 'YYYY_MM_DKX':
             output_date_str = functions.conv_yyyy_mm_dkx_2_yyyymmdd(in_date)
 
-        if datasource_descr.date_type == 'YYMMK':
+        if datasource_descr.date_format == 'YYMMK':
             output_date_str = functions.conv_yymmk_2_yyyymmdd(in_date)
 
-        if datasource_descr.date_type == 'YYYYdMMdK':
+        if datasource_descr.date_format == 'YYYYdMMdK':
             output_date_str = functions.conv_yyyydmmdk_2_yyyymmdd(in_date)
 
         if output_date_str == -1:

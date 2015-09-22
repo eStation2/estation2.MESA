@@ -203,10 +203,10 @@ Ext.define("esapp.view.acquisition.product.editInternetSource",{
                     bind: '{theInternetSource.delimiter}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: esapp.Utils.getTranslation('date_type'),    // 'Date type',
-                    reference: 'date_type',
+                    fieldLabel: esapp.Utils.getTranslation('date_format'),    // 'Date format',
+                    reference: 'date_format',
                     msgTarget: 'side',
-                    bind: '{theInternetSource.date_type}'
+                    bind: '{theInternetSource.date_format}'
                 }, {
                     xtype: 'textfield',
                     fieldLabel: esapp.Utils.getTranslation('date_position'),    // 'Date position',

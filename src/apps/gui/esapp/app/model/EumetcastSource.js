@@ -17,7 +17,7 @@ Ext.define('esapp.model.EumetcastSource', {
         {name: 'format_type'},
         {name: 'file_extension'},
         {name: 'delimiter'},
-        {name: 'date_type'},
+        {name: 'date_format'},
         {name: 'date_position'},
         {name: 'product_identifier'},
         {name: 'prod_id_position'},

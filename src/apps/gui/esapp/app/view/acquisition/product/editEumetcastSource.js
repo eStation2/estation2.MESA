@@ -155,10 +155,10 @@ Ext.define("esapp.view.acquisition.product.editEumetcastSource",{
                     bind: '{theEumetcastSource.delimiter}'
                 }, {
                     xtype: 'textfield',
-                    fieldLabel: esapp.Utils.getTranslation('date_type'),    // 'Date type',
-                    reference: 'date_type',
+                    fieldLabel: esapp.Utils.getTranslation('date_format'),    // 'Date format',
+                    reference: 'date_format',
                     msgTarget: 'side',
-                    bind: '{theEumetcastSource.date_type}'
+                    bind: '{theEumetcastSource.date_format}'
                 }, {
                     xtype: 'textfield',
                     fieldLabel: esapp.Utils.getTranslation('date_position'),    // 'Date position',

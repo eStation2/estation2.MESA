@@ -53,33 +53,33 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         groupByText: esapp.Utils.getTranslation('productcategories')  // 'Product category'
     }],
 
-    listeners: {
-        viewready: function (){
-            //this.suspendEvents(true);
-            var groupFeature = this.getView().getFeature('prodcat');
-            var me = this;
-            //console.info('me.firstGroupKey defined in afterrender In viewready: ' + me.firstGroupKey);
-
-            if ( !this.getStore().isLoaded() ){
-                var task = new Ext.util.DelayedTask(function(){
-                    if (me.firstGroupKey != 'undefined') {
-                        groupFeature.expand(me.firstGroupKey, true);
-                    } else {
-                        groupFeature.expand("<span style='display: none;'>1</span>"+esapp.Utils.getTranslation('vegetation'), true);  // rainfall
-                    }
-                });
-                task.delay(2000);
-
-            } else {
-                if (me.firstGroupKey != 'undefined') {
-                    groupFeature.expand(me.firstGroupKey, true);
-                } else {
-                    groupFeature.expand("<span style='display: none;'>1</span>"+esapp.Utils.getTranslation('vegetation'), true);  // rainfall
-                }
-            }
-            //this.resumeEvents();
-        }
-    },
+    //listeners: {
+    //    viewready: function (){
+    //        //this.suspendEvents(true);
+    //        var groupFeature = this.getView().getFeature('prodcat');
+    //        var me = this;
+    //        //console.info('me.firstGroupKey defined in afterrender In viewready: ' + me.firstGroupKey);
+    //
+    //        if ( !this.getStore().isLoaded() ){
+    //            var task = new Ext.util.DelayedTask(function(){
+    //                if (me.firstGroupKey != 'undefined') {
+    //                    groupFeature.expand(me.firstGroupKey, true);
+    //                } else {
+    //                    groupFeature.expand("<span style='display: none;'>1</span>"+esapp.Utils.getTranslation('vegetation'), true);  // rainfall
+    //                }
+    //            });
+    //            task.delay(2000);
+    //
+    //        } else {
+    //            if (me.firstGroupKey != 'undefined') {
+    //                groupFeature.expand(me.firstGroupKey, true);
+    //            } else {
+    //                groupFeature.expand("<span style='display: none;'>1</span>"+esapp.Utils.getTranslation('vegetation'), true);  // rainfall
+    //            }
+    //        }
+    //        //this.resumeEvents();
+    //    }
+    //},
 
     initComponent: function () {
         var me = this;

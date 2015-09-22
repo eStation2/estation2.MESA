@@ -142,7 +142,7 @@ Ext.define('esapp.view.main.Main', {
                            var acquisitionmain = acquisitiontab.down('panel[name=acquisitionmain]');
                            acquisitionmain.getController().checkStatusServices();
 
-                           acquisitionmain.getView().getFeature('productcategories').expandAll();
+                           //acquisitionmain.getView().getFeature('productcategories').expandAll();
                            acquisitionmain.getView().refresh();
                        }
                     }

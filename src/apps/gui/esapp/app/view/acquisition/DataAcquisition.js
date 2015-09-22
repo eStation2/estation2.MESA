@@ -76,8 +76,16 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
 
         me.columns = [{
             // text: '', // 'Type',
-            width: 105,
-            dataIndex: 'type'
+            width: 195,     // 105,
+            //dataIndex: 'type'
+            xtype:'templatecolumn',
+            tpl: new Ext.XTemplate(
+                    '<b>{type}</b>' +
+                    '</br>' +
+                    '<b class="smalltext" style="color:darkgrey">{data_source_id}</b>' +
+                    '</br>'
+                ),
+            cellWrap:true
         }, {
             // text: '', // 'Latest Acquired',
             width: 110,
@@ -93,7 +101,7 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
             // header: 'Store Native',
             hideable: true,
             hidden:true,
-            width: 100,
+            width: 80,
             align: 'center',
             items: [{
                 // scope: me,
