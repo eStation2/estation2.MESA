@@ -314,7 +314,7 @@ def loop_system(dry_run=False):
 
     # Specific settings for the system operations
     delay_data_sync_minutes = es_constants.es2globals['system_delay_data_sync_min']
-    delay_db_sync_minutes = es_constants.es2globals['system_delay_db_sync_min']
+    # delay_db_sync_minutes = es_constants.es2globals['system_delay_db_sync_min']
     time_for_db_dump = es_constants.es2globals['system_time_db_dump_hhmm']
 
     # Loop to manage the 'cron-like' operations, i.e.:
@@ -338,10 +338,15 @@ def loop_system(dry_run=False):
 
         logger.info("Starting the System Service loop")
 
-        # Read the System settings
-        systemsettings = functions.getSystemSettings()
-        do_data_sync = system_settings['data_sync']
-        do_db_sync = system_settings['db_sync']
+        if system_settings['data_sync'] in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+            do_data_sync = True
+        else:
+            do_data_sync = False
+
+        if system_settings['db_sync'] in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+            do_db_sync = True
+        else:
+            do_db_sync = False
 
         # Implement the logic of operations based on type/role/mode
         if system_settings['type_installation'] == 'Full':
@@ -401,7 +406,7 @@ def loop_system(dry_run=False):
                     list_rsyncs.append(new_sync)
                 # Call the function
                 system_db_sync(list_rsyncs)
-                check_delay_time(operation, delay_minutes=delay_db_sync_minutes, write=True)
+                # check_delay_time(operation, delay_minutes=delay_db_sync_minutes, write=True)
 
         # DB dump
         operation = 'db_dump'
@@ -418,7 +423,7 @@ def loop_system(dry_run=False):
             save_status_local_machine()
 
         # Sleep some time
-        time.sleep(es_constants.es2globals['system_sleep_time_sec'])
+        time.sleep(float(es_constants.es2globals['system_sleep_time_sec']))
 
 class SystemDaemon(DaemonDryRunnable):
     def run(self):
