@@ -622,6 +622,7 @@ class GetDashboard:
                 # Check connection to PC3
                 PC23_connection = functions.check_connection(systemsettings['ip_pc3'] + IP_port)
                 # print "PC23_connection: " + str(PC23_connection)
+                
                 if PC23_connection:
                     status_PC3 = functions.get_remote_system_status(systemsettings['ip_pc3'])
                     if 'mode' in status_PC3:
