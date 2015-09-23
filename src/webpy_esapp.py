@@ -578,7 +578,7 @@ class GetDashboard:
 
         PC3_mode = ''   # 'nominal' 'recovery'
         PC3_version = ''
-        PC3_disk_status = None
+        PC3_disk_status = True
         PC3_DBAutoSync = None
         PC3_DataAutoSync = None
         PC3_postgresql_status = None

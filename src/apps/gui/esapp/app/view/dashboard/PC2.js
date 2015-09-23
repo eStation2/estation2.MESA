@@ -173,7 +173,7 @@ Ext.define("esapp.view.dashboard.PC2",{
                     style: {
                         color: me.service_system_Style
                     },
-                    disabled: me.setdisabledPartial
+                    disabled: me.setdisabledAll ? true : false // me.setdisabledPartial
                 }, '-',
                 {
                 xtype: 'splitbutton',

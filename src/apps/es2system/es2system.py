@@ -206,6 +206,7 @@ def system_db_dump(list_dump):
         return status
 
 
+
 def system_create_report(target_file=None):
 #   Create a .zip file with the relevant information to be sent as for diagnostic
 #
@@ -295,7 +296,7 @@ def check_delay_time(operation, delay_minutes=None, time=None, write=False):
             time_latest_execution = info['latest_exec_time']
             current_delta=datetime.datetime.now()-time_latest_execution
             current_delta_minutes = int(current_delta.seconds/60)
-            if current_delta_minutes > delay_minutes:
+            if current_delta_minutes > float(delay_minutes):
                to_be_executed = True
 
     elif time is not None:
@@ -373,7 +374,7 @@ def loop_system(dry_run=False):
         system_settings = functions.getSystemSettings()
 
         logger.info('System Settings Mode: %s ' % system_settings['mode'])
-        time.sleep(5)
+        #time.sleep(5)
         # Initialize To Do flags
         do_data_sync = False
         schemas_db_sync = []
@@ -468,7 +469,6 @@ def loop_system(dry_run=False):
 
         # Sleep some time
         time.sleep(float(es_constants.es2globals['system_sleep_time_sec']))
-
 
 class SystemDaemon(DaemonDryRunnable):
     def run(self):
