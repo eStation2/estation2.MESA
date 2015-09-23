@@ -41,10 +41,27 @@ dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'der
 
 
 def get_remote_system_status(server_address):
-    print "http://" + server_address + "/esapp/dashboard/systemstatus"
-    response = urllib2.urlopen("http://" + server_address + "/esapp/dashboard/systemstatus")
-    result = response.read()
-    status_remote_machine = ast.literal_eval(result)
+    from urllib2 import Request, urlopen, URLError
+    status_remote_machine = []
+    # ToDo: Set "/esapp" in factorysettings as webserver_root because on CentOS no /esapp is needed!
+    url = "http://" + server_address + "/esapp/dashboard/systemstatus"
+    req = Request(url)
+    try:
+        response = urlopen(req)
+    except URLError as e:
+        if hasattr(e, 'reason'):
+            logger.warning('We failed to reach a server: %s' % server_address)
+            logger.warning('Reason: %s' % e.reason)
+        elif hasattr(e, 'code'):
+            logger.warning('The server %s couldn\'t fulfill the request.' % server_address)
+            logger.warning('Error code: %s' % e.code)
+        return status_remote_machine
+    else:
+        # everything is fine
+        # response = urllib2.urlopen("http://" + server_address + "/esapp/dashboard/systemstatus")
+        result = response.read()
+        status_remote_machine = ast.literal_eval(result)
+        response.close()  # best practice to close the file
     return status_remote_machine
 
 

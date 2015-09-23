@@ -82,28 +82,29 @@ Ext.define("esapp.view.dashboard.PC2",{
         me.service_ingest_Style = 'gray';
         me.service_processing_Style = 'gray';
         me.service_system_Style = 'gray';
+        //console.info(me);
 
-        if (me.service_eumetcast)
+        if (me.service_eumetcast == 'true')
             me.service_eumetcast_Style = 'green';
         else if (me.service_eumetcast == 'false')
             me.service_eumetcast_Style = 'red';
 
-        if (me.service_internet)
+        if (me.service_internet == 'true')
             me.service_internet_Style = 'green';
         else if (me.service_internet == 'false')
             me.service_internet_Style = 'red';
 
-        if (me.service_ingest)
+        if (me.service_ingest == 'true')
             me.service_ingest_Style = 'green';
         else if (me.service_ingest == 'false')
             me.service_ingest_Style = 'red';
 
-        if (me.service_processing)
+        if (me.service_processing == 'true')
             me.service_processing_Style = 'green';
         else if (me.service_processing == 'false')
             me.service_processing_Style = 'red';
 
-        if (me.service_system)
+        if (me.service_system == 'true')
             me.service_system_Style = 'green';
         else if (me.service_system == 'false')
             me.service_system_Style = 'red';
@@ -195,12 +196,20 @@ Ext.define("esapp.view.dashboard.PC2",{
                             disabled: me.autosync_onoff,
                             handler: 'execEnableDisableAutoSync'
                         },
-                        {   text: esapp.Utils.getTranslation('executenow'),     // 'Execute Now',
-                            name: 'executenow',
-                            glyph: 'xf04b@FontAwesome',
-                            cls:'menu-glyph-color-green',
-                            handler: 'execManualDataSync'
+                        {
+                            text: esapp.Utils.getTranslation('viewlogfile'),    // 'View log file',
+                            name: 'view_logfile_datasync',
+                            service: 'datasync',
+                            task: 'logfile',
+                            iconCls:'log-icon-small',
+                            handler: 'viewLogFile'
                         }
+                        //{   text: esapp.Utils.getTranslation('executenow'),     // 'Execute Now',
+                        //    name: 'executenow',
+                        //    glyph: 'xf04b@FontAwesome',
+                        //    cls:'menu-glyph-color-green',
+                        //    handler: 'execManualDataSync'
+                        //}
                     ]
                 })
             },{
@@ -226,12 +235,20 @@ Ext.define("esapp.view.dashboard.PC2",{
 //                            cls:'menu-glyph-color-green',
                             handler: 'execEnableDisableAutoDBSync'
                         },
-                        {   text: esapp.Utils.getTranslation('executenow'),     // 'Execute Now',
-                            name: 'executenow',
-                            glyph: 'xf04b@FontAwesome',
-                            cls:'menu-glyph-color-green',
-                            handler: 'execManualDBSync'
+                        {
+                            text: esapp.Utils.getTranslation('viewlogfile'),    // 'View log file',
+                            name: 'view_logfile_dbsync',
+                            service: 'dbsync',
+                            task: 'logfile',
+                            iconCls:'log-icon-small',
+                            handler: 'viewLogFile'
                         }
+                        //{   text: esapp.Utils.getTranslation('executenow'),     // 'Execute Now',
+                        //    name: 'executenow',
+                        //    glyph: 'xf04b@FontAwesome',
+                        //    cls:'menu-glyph-color-green',
+                        //    handler: 'execManualDBSync'
+                        //}
                     ]
                 })
             }]
