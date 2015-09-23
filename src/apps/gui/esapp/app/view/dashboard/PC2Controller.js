@@ -2,6 +2,16 @@ Ext.define('esapp.view.dashboard.PC2Controller', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.dashboard-pc2',
 
+    viewLogFile: function (menuitem) {
+        var logViewWin = new esapp.view.acquisition.logviewer.LogView({
+            params: {
+                logtype: 'service',
+                record: menuitem.service
+            }
+        });
+        logViewWin.show();
+    },
+
     execEnableDisableAutoSync: function(chkbox, ev) {
         var me = this;
         //console.info(chkbox);

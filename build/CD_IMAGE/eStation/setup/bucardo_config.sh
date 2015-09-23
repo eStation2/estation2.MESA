@@ -20,14 +20,14 @@ echo "$(date +'%Y-%m-%d %H:%M:%S') Configuration of bucardo"
 
 echo "$(date +'%Y-%m-%d %H:%M:%S') Create bucardo objects"
 
-# Create 'dbs'-> mesa-pc2 and mesa-pc2	
-bucardo add db mesa-pc2 dbname=estationdb host=${ip_pc2} port=5432 user=bucardo
-bucardo add db mesa-pc3 dbname=estationdb host=${ip_pc3} port=5432 user=bucardo
+# Create 'dbs'-> mesa_pc2 and mesa_pc3	
+bucardo add db mesa_pc2 dbname=estationdb host=${ip_pc2} port=5432 user=bucardo
+bucardo add db mesa_pc3 dbname=estationdb host=${ip_pc3} port=5432 user=bucardo
 
-# Create 'dbgroups'-> group-pc2 (pc2 source) 
-# 		   -> group-pc3 (pc3 source) 
-bucardo add dbgroup group-pc2 mesa-pc2:source mesa-pc3:target
-bucardo add dbgroup group-pc3 mesa-pc3:source mesa-pc2:target
+# Create 'dbgroups'-> group_pc2 (pc2 source) 
+# 		   -> group_pc3 (pc3 source) 
+bucardo add dbgroup group_pc2 mesa_pc2:source mesa_pc3:target
+bucardo add dbgroup group_pc3 mesa_pc3:source mesa_pc2:target
 
 # Create 'relgroups' -> rel-analysis: all tables of 'analysis' schema
 #	 		rel-products-config: products tables for configuration by User (no static defs)
@@ -53,10 +53,10 @@ bucardo add relgroup rel-products-config products.sub_datasource_description
 
 # Create 'syncs' -> see header
 
-bucardo add sync sync-pc2-analysis relgroup=rel-analysis dbs=group-pc2
-bucardo add sync sync-pc3-analysis relgroup=rel-analysis dbs=group-pc3
-bucardo add sync sync-pc2-products relgroup=rel-products-config dbs=group-pc2
-bucardo add sync sync-pc3-products relgroup=rel-products-config dbs=group-pc3
+bucardo add sync sync-pc2-analysis relgroup=rel-analysis dbs=group_pc2
+bucardo add sync sync-pc3-analysis relgroup=rel-analysis dbs=group_pc3
+bucardo add sync sync-pc2-products relgroup=rel-products-config dbs=group_pc2
+bucardo add sync sync-pc3-products relgroup=rel-products-config dbs=group_pc3
 
 # Activate and start
 bucardo start
