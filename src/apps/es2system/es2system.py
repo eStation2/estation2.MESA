@@ -200,7 +200,6 @@ def system_db_dump(list_dump):
         return status
 
 
-
 def system_create_report(target_file=None):
 #   Create a .zip file with the relevant information to be sent as for diagnostic
 #
@@ -463,6 +462,7 @@ def loop_system(dry_run=False):
 
         # Sleep some time
         time.sleep(float(es_constants.es2globals['system_sleep_time_sec']))
+
 
 class SystemDaemon(DaemonDryRunnable):
     def run(self):
