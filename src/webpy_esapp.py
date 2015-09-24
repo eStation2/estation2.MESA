@@ -578,7 +578,7 @@ class GetDashboard:
 
         PC3_mode = ''   # 'nominal' 'recovery'
         PC3_version = ''
-        PC3_disk_status = None
+        PC3_disk_status = True
         PC3_DBAutoSync = None
         PC3_DataAutoSync = None
         PC3_postgresql_status = None
@@ -622,7 +622,7 @@ class GetDashboard:
                 # Check connection to PC3
                 PC23_connection = functions.check_connection(systemsettings['ip_pc3'] + IP_port)
                 # print "PC23_connection: " + str(PC23_connection)
-                
+
                 if PC23_connection:
                     status_PC3 = functions.get_remote_system_status(systemsettings['ip_pc3'])
                     if 'mode' in status_PC3:
@@ -1388,21 +1388,81 @@ class ChangeMode:
     def GET(self):
         getparams = web.input()
         if hasattr(getparams, "mode"):
-
-            functions.setSystemSetting('mode', getparams['mode'])
             if getparams['mode'] == 'recovery':
-                functions.setSystemSetting('data_sync', 'false')
-                functions.setSystemSetting('db_sync', 'false')
+                # TODO: Use port 80?
+                IP_port = ':22'
+                # Check if other PC is reachable and in which mode it is!
+                systemsettings = functions.getSystemSettings()
+
+                if systemsettings['type_installation'].lower() == 'full':
+                    PC23_connection = False
+                    Other_PC_mode = None
+
+                    if systemsettings['role'].lower() == 'pc2':
+                        This_PC_mode = systemsettings['mode'].lower()
+
+                        # Check connection to PC3
+                        PC23_connection = functions.check_connection(systemsettings['ip_pc3'] + IP_port)
+
+                        if PC23_connection:
+                            status_PC3 = functions.get_remote_system_status(systemsettings['ip_pc3'])
+                            if 'mode' in status_PC3:
+                                Other_PC_mode = status_PC3['mode']
+                            else:
+                                PC3_Webserver_Status = False
+
+                    elif systemsettings['role'].lower() == 'pc3':
+                        This_PC_mode = systemsettings['mode'].lower()
+
+                        # Check connection to PC2
+                        PC23_connection = functions.check_connection(systemsettings['ip_pc2'] + IP_port)
+                        if PC23_connection:
+                            status_PC2 = functions.get_remote_system_status(systemsettings['ip_pc2'])
+                            if 'mode' in status_PC2:
+                                Other_PC_mode = status_PC2['mode']
+                            else:
+                                PC2_Webserver_Status = False
+                    if PC23_connection and Other_PC_mode == 'nominal':
+                        changemode_json = '{"success":false, "message":"Changing to Recovery Mode NOT possible!"}'
+                    else:
+                        functions.setSystemSetting('mode', getparams['mode'])
+                        if getparams['mode'] == 'recovery':
+                            functions.setSystemSetting('data_sync', 'false')
+                            functions.setSystemSetting('db_sync', 'false')
+                        elif getparams['mode'] == 'nominal':
+                            functions.setSystemSetting('data_sync', 'true')
+                            functions.setSystemSetting('db_sync', 'true')
+
+                        # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
+                        from lib.python import reloadmodules
+                        reloadmodules.reloadallmodules()
+                        # Reloading the settings does not work well so set manually
+
+                        changemode_json = '{"success":"true", "message":"Mode changed!"}'
+
             elif getparams['mode'] == 'nominal':
-                functions.setSystemSetting('data_sync', 'true')
-                functions.setSystemSetting('db_sync', 'true')
+                functions.setSystemSetting('mode', getparams['mode'])
+                changemode_json = '{"success":"true", "message":"Mode changed!"}'
 
-            # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
-            from lib.python import reloadmodules
-            reloadmodules.reloadallmodules()
-            # Reloading the settings does not work well so set manually
+            elif getparams['mode'] == 'maintenance':
+                functions.setSystemSetting('mode', getparams['mode'])
+                changemode_json = '{"success":"true", "message":"Mode changed!"}'
 
-            changemode_json = '{"success":"true", "message":"Mode changed!"}'
+            else:
+                functions.setSystemSetting('mode', getparams['mode'])
+                if getparams['mode'] == 'recovery':
+                    functions.setSystemSetting('data_sync', 'false')
+                    functions.setSystemSetting('db_sync', 'false')
+                elif getparams['mode'] == 'nominal':
+                    functions.setSystemSetting('data_sync', 'true')
+                    functions.setSystemSetting('db_sync', 'true')
+
+                # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
+                from lib.python import reloadmodules
+                reloadmodules.reloadallmodules()
+                # Reloading the settings does not work well so set manually
+
+                changemode_json = '{"success":"true", "message":"Mode changed!"}'
         else:
             changemode_json = '{"success":false, "error":"No mode given!"}'
 

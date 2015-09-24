@@ -400,7 +400,7 @@ Ext.define("esapp.view.system.systemsettings",{
                             handler: function(){
                                 var PCModeAdminWin = new esapp.view.system.PCModeAdmin({
                                     params: {
-                                        currentmode: Ext.getCmp('current_mode').getValue()
+                                        currentmode: Ext.getCmp('current_mode').getValue().toLowerCase()
                                     }
                                 });
                                 PCModeAdminWin.show();

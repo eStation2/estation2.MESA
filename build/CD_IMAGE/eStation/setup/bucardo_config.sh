@@ -50,6 +50,7 @@ bucardo add relgroup rel_products_config products.product
 bucardo add relgroup rel_products_config products.product_acquisition_data_source
 bucardo add relgroup rel_products_config products.product_category
 bucardo add relgroup rel_products_config products.sub_datasource_description
+bucardo add relgroup rel_products_config products.thema_product
 
 # Create 'syncs' -> see header
 

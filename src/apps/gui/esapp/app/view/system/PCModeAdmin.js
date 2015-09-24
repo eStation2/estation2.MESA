@@ -24,8 +24,8 @@ Ext.define("esapp.view.system.PCModeAdmin",{
     closeAction: 'destroy', // 'hide',
     resizable:false,
     maximizable: false,
-    width:170,
-    height:160,
+    width:200,
+    height:180,
     border:true,
     frame:true,
     bodyStyle: 'padding:5px 5px 0',
@@ -38,10 +38,12 @@ Ext.define("esapp.view.system.PCModeAdmin",{
     initComponent: function () {
         var me = this,
             nominal = false,
-            recovery = false;
+            recovery = false,
+            maintenance = false;
 
-        if (me.params.currentmode == 'Nominal') nominal = true;
-        else recovery = true;
+        if (me.params.currentmode == 'nominal') nominal = true;
+        else if (me.params.currentmode == 'recovery') recovery = true;
+        else if (me.params.currentmode == 'maintenance') maintenance = true;
 
         me.bbar = ['->',
             {
@@ -83,16 +85,25 @@ Ext.define("esapp.view.system.PCModeAdmin",{
                     name: 'mode',
                     inputValue: 'recovery',
                     checked: recovery
+                }, {
+                    boxLabel: '<b>'+esapp.Utils.getTranslation('maintenancemode')+'</b>',
+                    id: 'maintenanceradio',
+                    name: 'mode',
+                    inputValue: 'maintenance',
+                    checked: maintenance
                 }],
                 listeners: {
                     change: function(){
                         var nominalradio = Ext.getCmp('nominalradio'),
                             recoveryradio = Ext.getCmp('recoveryradio'),
+                            maintenanceradio = Ext.getCmp('maintenanceradio'),
                             changemodebtn = Ext.getCmp('changemodebtn');
 
-                        if (me.params.currentmode == 'Nominal' && recoveryradio.getValue())
+                        if (me.params.currentmode == 'Nominal' && (recoveryradio.getValue() || maintenanceradio.getValue()))
                             changemodebtn.enable();
-                        else if (me.params.currentmode == 'Recovery' && nominalradio.getValue())
+                        else if (me.params.currentmode == 'Recovery' && (nominalradio.getValue() || maintenanceradio.getValue()))
+                            changemodebtn.enable();
+                        else if (me.params.currentmode == 'Maintenance' && (nominalradio.getValue() || recoveryradio.getValue()))
                             changemodebtn.enable();
                         else changemodebtn.disable();
                     }
