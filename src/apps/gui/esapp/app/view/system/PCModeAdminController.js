@@ -3,10 +3,11 @@ Ext.define('esapp.view.system.PCModeAdminController', {
     alias: 'controller.system-pcmodeadmin'
 
     ,changeMode: function() {
-        var me = this,
+        var me = this.getView(),
             permitChangeMode = false,
             otherPCMode = '',
-            newmode = Ext.getCmp('modesradiogroup').getValue(),
+            currentmode = me.params.currentmode,
+            newmode = Ext.getCmp('modesradiogroup').getValue().mode,
             dashboard = Ext.getCmp('dashboard-panel');
 
         Ext.getCmp('dashboard-panel').getController().setupDashboard();
@@ -17,7 +18,11 @@ Ext.define('esapp.view.system.PCModeAdminController', {
             otherPCMode = dashboard.PC2_mode;
         }
 
-        if (me.params.currentmode == 'nominal' && newmode == 'recovery'){
+        console.info("current mode:" + currentmode);
+        console.info("new mode:" + newmode);
+        console.info("other pc mode:" + otherPCMode);
+
+        if (currentmode == 'nominal' && newmode == 'recovery'){
 
             if (dashboard.PC23_connection) {
                 if (otherPCMode == 'nominal') {
@@ -37,30 +42,36 @@ Ext.define('esapp.view.system.PCModeAdminController', {
             }
         }
 
-        if (me.params.currentmode == 'recovery' && newmode == 'nominal'){
-
-            if (dashboard.PC23_connection) {
-                if (otherPCMode == 'nominal') {
-                    permitChangeMode = false
-                }
-                if (otherPCMode == 'recovery') {
-                    permitChangeMode = false
-                }
-                if (otherPCMode == 'maintenance') {
-                    permitChangeMode = true
-                }
-            }
-            else {
-                permitChangeMode = false
-            }
-        }
-
-        if (me.params.currentmode == 'nominal' && newmode == 'maintenance'){
+        if (currentmode == 'nominal' && newmode == 'maintenance'){
 
             permitChangeMode = true
         }
 
-        if (me.params.currentmode == 'maintenance' && newmode == 'nominal'){
+
+        if (currentmode == 'recovery' && newmode == 'nominal'){
+
+            if (dashboard.PC23_connection) {
+                if (otherPCMode == 'nominal') {
+                    permitChangeMode = false
+                }
+                if (otherPCMode == 'recovery') {
+                    permitChangeMode = false
+                }
+                if (otherPCMode == 'maintenance') {
+                    permitChangeMode = true
+                }
+            }
+            else {
+                permitChangeMode = false
+            }
+        }
+
+        if (currentmode == 'recovery' && newmode == 'maintenance'){
+
+            permitChangeMode = false
+        }
+
+        if (currentmode == 'maintenance' && newmode == 'nominal'){
 
             if (dashboard.PC23_connection) {
                 if (otherPCMode == 'nominal') {
@@ -78,7 +89,14 @@ Ext.define('esapp.view.system.PCModeAdminController', {
             }
         }
 
+        if (currentmode == 'maintenance' && newmode == 'recovery'){
+
+            permitChangeMode = true
+        }
+
+        console.info("permit change mode:" + newmode);
         if (permitChangeMode){
+            console.info(me.getController());
             me.getController().setMode(newmode)
         }
         else {
@@ -89,17 +107,19 @@ Ext.define('esapp.view.system.PCModeAdminController', {
     },
 
     setMode: function(newmode) {
+        var me = this;
+
         Ext.Ajax.request({
             method: 'GET',
             url: 'systemsettings/changemode',
             params: {
-                mode: newmode.mode
+                mode: newmode
             },
             success: function(response, opts){
                 var result = Ext.JSON.decode(response.responseText);
                 //console.info(result);
                 if (result.success){
-                    Ext.toast({ html: esapp.Utils.getTranslation('systemmodesetto') + " " + newmode.mode,
+                    Ext.toast({ html: esapp.Utils.getTranslation('systemmodesetto') + " " + newmode,
                                 title: esapp.Utils.getTranslation('modechanged'),
                                 width: 200, align: 't' });
 

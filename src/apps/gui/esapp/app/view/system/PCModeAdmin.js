@@ -25,7 +25,7 @@ Ext.define("esapp.view.system.PCModeAdmin",{
     resizable:false,
     maximizable: false,
     width:200,
-    height:180,
+    height:190,
     border:true,
     frame:true,
     bodyStyle: 'padding:5px 5px 0',
@@ -99,11 +99,11 @@ Ext.define("esapp.view.system.PCModeAdmin",{
                             maintenanceradio = Ext.getCmp('maintenanceradio'),
                             changemodebtn = Ext.getCmp('changemodebtn');
 
-                        if (me.params.currentmode == 'Nominal' && (recoveryradio.getValue() || maintenanceradio.getValue()))
+                        if (me.params.currentmode == 'nominal' && (recoveryradio.getValue() || maintenanceradio.getValue()))
                             changemodebtn.enable();
-                        else if (me.params.currentmode == 'Recovery' && (nominalradio.getValue() || maintenanceradio.getValue()))
+                        else if (me.params.currentmode == 'recovery' && (nominalradio.getValue() || maintenanceradio.getValue()))
                             changemodebtn.enable();
-                        else if (me.params.currentmode == 'Maintenance' && (nominalradio.getValue() || recoveryradio.getValue()))
+                        else if (me.params.currentmode == 'maintenance' && (nominalradio.getValue() || recoveryradio.getValue()))
                             changemodebtn.enable();
                         else changemodebtn.disable();
                     }

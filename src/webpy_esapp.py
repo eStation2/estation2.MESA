@@ -1388,72 +1388,92 @@ class ChangeMode:
     def GET(self):
         getparams = web.input()
         if hasattr(getparams, "mode"):
-            if getparams['mode'] == 'recovery':
-                # TODO: Use port 80?
-                IP_port = ':22'
+            newmode = getparams['mode']
+            systemsettings = functions.getSystemSettings()
+            This_PC_mode = systemsettings['mode'].lower()
+            PC23_connection = False
+            Other_PC_mode = None
+            permitChangeMode = False
+
+            # TODO: Use port 80?
+            IP_port = ':22'
+
+            if systemsettings['type_installation'].lower() == 'full':
                 # Check if other PC is reachable and in which mode it is!
-                systemsettings = functions.getSystemSettings()
+                if systemsettings['role'].lower() == 'pc2':
+                    # Check connection to PC3
+                    PC23_connection = functions.check_connection(systemsettings['ip_pc3'] + IP_port)
 
-                if systemsettings['type_installation'].lower() == 'full':
-                    PC23_connection = False
-                    Other_PC_mode = None
+                    if PC23_connection:
+                        status_PC3 = functions.get_remote_system_status(systemsettings['ip_pc3'])
+                        if 'mode' in status_PC3:
+                            Other_PC_mode = status_PC3['mode']
+                        else:
+                            PC3_Webserver_Status = False
 
-                    if systemsettings['role'].lower() == 'pc2':
-                        This_PC_mode = systemsettings['mode'].lower()
+                elif systemsettings['role'].lower() == 'pc3':
+                    This_PC_mode = systemsettings['mode'].lower()
 
-                        # Check connection to PC3
-                        PC23_connection = functions.check_connection(systemsettings['ip_pc3'] + IP_port)
+                    # Check connection to PC2
+                    PC23_connection = functions.check_connection(systemsettings['ip_pc2'] + IP_port)
+                    if PC23_connection:
+                        status_PC2 = functions.get_remote_system_status(systemsettings['ip_pc2'])
+                        if 'mode' in status_PC2:
+                            Other_PC_mode = status_PC2['mode']
+                        else:
+                            PC2_Webserver_Status = False
 
-                        if PC23_connection:
-                            status_PC3 = functions.get_remote_system_status(systemsettings['ip_pc3'])
-                            if 'mode' in status_PC3:
-                                Other_PC_mode = status_PC3['mode']
-                            else:
-                                PC3_Webserver_Status = False
+            if This_PC_mode == 'nominal' and newmode == 'recovery':
+                if PC23_connection:
+                    if Other_PC_mode == 'nominal':
+                        permitChangeMode = False
+                    if Other_PC_mode == 'recovery':
+                        permitChangeMode = False
+                    if Other_PC_mode == 'maintenance':
+                        permitChangeMode = True
+                else:
+                    permitChangeMode = True
 
-                    elif systemsettings['role'].lower() == 'pc3':
-                        This_PC_mode = systemsettings['mode'].lower()
+            elif This_PC_mode == 'nominal' and newmode == 'maintenance':
+                permitChangeMode = True
 
-                        # Check connection to PC2
-                        PC23_connection = functions.check_connection(systemsettings['ip_pc2'] + IP_port)
-                        if PC23_connection:
-                            status_PC2 = functions.get_remote_system_status(systemsettings['ip_pc2'])
-                            if 'mode' in status_PC2:
-                                Other_PC_mode = status_PC2['mode']
-                            else:
-                                PC2_Webserver_Status = False
-                    if PC23_connection and Other_PC_mode == 'nominal':
-                        changemode_json = '{"success":false, "message":"Changing to Recovery Mode NOT possible!"}'
-                    else:
-                        functions.setSystemSetting('mode', getparams['mode'])
-                        if getparams['mode'] == 'recovery':
-                            functions.setSystemSetting('data_sync', 'false')
-                            functions.setSystemSetting('db_sync', 'false')
-                        elif getparams['mode'] == 'nominal':
-                            functions.setSystemSetting('data_sync', 'true')
-                            functions.setSystemSetting('db_sync', 'true')
+            elif This_PC_mode == 'recovery' and newmode == 'nominal':
+                if PC23_connection:
+                    if Other_PC_mode == 'nominal':
+                        permitChangeMode = False
+                    if Other_PC_mode == 'recovery':
+                        permitChangeMode = False
+                    if Other_PC_mode == 'maintenance':
+                        permitChangeMode = True
+                else:
+                    permitChangeMode = False
 
-                        # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
-                        from lib.python import reloadmodules
-                        reloadmodules.reloadallmodules()
-                        # Reloading the settings does not work well so set manually
+            elif This_PC_mode == 'recovery' and newmode == 'maintenance':
+                permitChangeMode = False
 
-                        changemode_json = '{"success":"true", "message":"Mode changed!"}'
+            elif This_PC_mode == 'maintenance' and newmode == 'nominal':
+                if PC23_connection:
+                    if Other_PC_mode == 'nominal':
+                        permitChangeMode = False
+                    if Other_PC_mode == 'recovery':
+                        permitChangeMode = True
+                    if Other_PC_mode == 'maintenance':
+                        permitChangeMode = False
+                else:
+                    permitChangeMode = False
 
-            elif getparams['mode'] == 'nominal':
-                functions.setSystemSetting('mode', getparams['mode'])
-                changemode_json = '{"success":"true", "message":"Mode changed!"}'
-
-            elif getparams['mode'] == 'maintenance':
-                functions.setSystemSetting('mode', getparams['mode'])
-                changemode_json = '{"success":"true", "message":"Mode changed!"}'
+            elif This_PC_mode == 'maintenance' and newmode == 'recovery':
+                permitChangeMode = True
 
             else:
+                permitChangeMode = False
+
+            if permitChangeMode:
                 functions.setSystemSetting('mode', getparams['mode'])
-                if getparams['mode'] == 'recovery':
+                if newmode == 'recovery':
                     functions.setSystemSetting('data_sync', 'false')
                     functions.setSystemSetting('db_sync', 'false')
-                elif getparams['mode'] == 'nominal':
+                elif newmode == 'nominal':
                     functions.setSystemSetting('data_sync', 'true')
                     functions.setSystemSetting('db_sync', 'true')
 
@@ -1463,6 +1483,9 @@ class ChangeMode:
                 # Reloading the settings does not work well so set manually
 
                 changemode_json = '{"success":"true", "message":"Mode changed!"}'
+            else:
+                changemode_json = '{"success":false, "message":"Changing to Mode NOT possible!"}'
+
         else:
             changemode_json = '{"success":false, "error":"No mode given!"}'
 
