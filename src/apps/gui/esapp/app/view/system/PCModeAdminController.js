@@ -135,7 +135,7 @@ Ext.define('esapp.view.system.PCModeAdminController', {
                             systemsettingview.loadRecord(systemsettingsrecord);
                             systemsettingview.updateRecord();
 
-                            Ext.getCmp('dashboard-panel').getController().setupDashboard();
+                            //Ext.getCmp('dashboard-panel').getController().setupDashboard();
 
                             me.closeView();
                         }

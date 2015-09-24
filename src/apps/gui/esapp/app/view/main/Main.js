@@ -119,6 +119,7 @@ Ext.define('esapp.view.main.Main', {
                            headerlogos.setHidden(false);
                            dashboardtab.up().down('container[id=acquisitionmaintab]').doLayout();
                            dashboardtab.up().down('container[id=datamanagementmaintab]').doLayout();
+                           //Ext.getCmp('dashboard-panel').getController().setupDashboard();
                            //dashboardtab.down('panel[id=dashboardpc2]').getController().checkStatusServices();
                        }
                     }
