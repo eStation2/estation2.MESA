@@ -51,12 +51,19 @@ bucardo add relgroup rel_products_config products.product_acquisition_data_sourc
 bucardo add relgroup rel_products_config products.product_category
 bucardo add relgroup rel_products_config products.sub_datasource_description
 
-# Create 'syncs' -> see header
+# Create 'delta' syncs
 
 bucardo add sync sync_pc2_analysis relgroup=rel_analysis dbs=group_pc2
 bucardo add sync sync_pc3_analysis relgroup=rel_analysis dbs=group_pc3
 bucardo add sync sync_pc2_products relgroup=rel_products_config dbs=group_pc2
 bucardo add sync sync_pc3_products relgroup=rel_products_config dbs=group_pc3
+
+# Create 'fullcopy' syncs
+
+bucardo add sync sync_pc2_analysis_full relgroup=rel_analysis dbs=group_pc2 onetimecopy=1
+bucardo add sync sync_pc3_analysis_full relgroup=rel_analysis dbs=group_pc3 onetimecopy=1
+bucardo add sync sync_pc2_products_full relgroup=rel_products_config dbs=group_pc2 onetimecopy=1
+bucardo add sync sync_pc3_products_full relgroup=rel_products_config dbs=group_pc3 onetimecopy=1
 
 # Activate and start
 bucardo start

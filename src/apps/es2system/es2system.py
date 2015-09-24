@@ -395,29 +395,35 @@ def loop_system(dry_run=False):
 
         # Implement the logic of operations based on type/role/mode
         if system_settings['type_installation'] == 'Full':
+
             if system_settings['role'] == 'PC2':
                 ip_target = system_settings['ip_pc3']
                 if system_settings['mode'] == 'nominal':
-                    #do_data_sync = True
                     schemas_db_sync = ['products']
                     schemas_db_dump = ['products', 'analysis']
 
                 if system_settings['mode'] == 'recovery':
-                    #do_data_sync = False
                     schemas_db_sync = []
                     schemas_db_dump = ['products', 'analysis']
+
+                if system_settings['mode'] == 'maintenance':
+                    schemas_db_sync = []
+                    schemas_db_dump = []
 
             if system_settings['role'] == 'PC3':
 
                 ip_target = system_settings['ip_pc2']
                 if system_settings['mode'] == 'nominal':
-                    #do_data_sync = False
                     schemas_db_sync = ['analysis']
                     schemas_db_dump = ['products', 'analysis']
+
                 if system_settings['mode'] == 'recovery':
-                    #do_data_sync = False
                     schemas_db_sync = []
                     schemas_db_dump = ['products', 'analysis']
+
+                if system_settings['mode'] == 'maintenance':
+                    schemas_db_sync = []
+                    schemas_db_dump = []
 
         if system_settings['type_installation'] == 'SinglePC':
             do_data_sync = False
