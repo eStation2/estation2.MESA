@@ -125,13 +125,19 @@ def system_data_sync(source, target):
 #   It is based on rsync daemon, the correct module should be set in /etc/rsyncd.conf file
 #   The rsync daemon should running (permission set in /etc/default/rsync)
 
+    logfile=es_constants.es2globals['log_dir']+'rsync.log'
+    message=time.strftime("%Y-%m-%d %H:%M")+' INFO: Running the data sync now ... \n'
+    log_id=open(logfile,'w')
+    log_id.write(message)
+    log_id.close()
     logger.debug("Entering routine %s" % 'system_data_sync')
-    command = 'rsync -CavK '+source+' '+target
+    command = 'rsync -CavK '+source+' '+target+ ' >> '+logfile
     logger.debug("Executing %s" % command)
     status = os.system(command)
     if status:
         logger.error("Error in executing %s" % command)
-
+    else:
+        return status
 
 def system_db_sync(list_syncs):
 #   Synchronize database contents from one instance to another (push)
@@ -198,6 +204,7 @@ def system_db_dump(list_dump):
             status =+ os.system(command)
 
         return status
+
 
 
 def system_create_report(target_file=None):
@@ -289,7 +296,7 @@ def check_delay_time(operation, delay_minutes=None, time=None, write=False):
             time_latest_execution = info['latest_exec_time']
             current_delta=datetime.datetime.now()-time_latest_execution
             current_delta_minutes = int(current_delta.seconds/60)
-            if current_delta_minutes > delay_minutes:
+            if current_delta_minutes > float(delay_minutes):
                to_be_executed = True
 
     elif time is not None:
@@ -367,7 +374,7 @@ def loop_system(dry_run=False):
         system_settings = functions.getSystemSettings()
 
         logger.info('System Settings Mode: %s ' % system_settings['mode'])
-        time.sleep(5)
+        #time.sleep(5)
         # Initialize To Do flags
         do_data_sync = False
         schemas_db_sync = []
@@ -388,29 +395,35 @@ def loop_system(dry_run=False):
 
         # Implement the logic of operations based on type/role/mode
         if system_settings['type_installation'] == 'Full':
+
             if system_settings['role'] == 'PC2':
                 ip_target = system_settings['ip_pc3']
                 if system_settings['mode'] == 'nominal':
-                    #do_data_sync = True
                     schemas_db_sync = ['products']
                     schemas_db_dump = ['products', 'analysis']
 
                 if system_settings['mode'] == 'recovery':
-                    #do_data_sync = False
                     schemas_db_sync = []
                     schemas_db_dump = ['products', 'analysis']
+
+                if system_settings['mode'] == 'maintenance':
+                    schemas_db_sync = []
+                    schemas_db_dump = []
 
             if system_settings['role'] == 'PC3':
 
                 ip_target = system_settings['ip_pc2']
                 if system_settings['mode'] == 'nominal':
-                    #do_data_sync = False
                     schemas_db_sync = ['analysis']
                     schemas_db_dump = ['products', 'analysis']
+
                 if system_settings['mode'] == 'recovery':
-                    #do_data_sync = False
                     schemas_db_sync = []
                     schemas_db_dump = ['products', 'analysis']
+
+                if system_settings['mode'] == 'maintenance':
+                    schemas_db_sync = []
+                    schemas_db_dump = []
 
         if system_settings['type_installation'] == 'SinglePC':
             do_data_sync = False
@@ -462,7 +475,6 @@ def loop_system(dry_run=False):
 
         # Sleep some time
         time.sleep(float(es_constants.es2globals['system_sleep_time_sec']))
-
 
 class SystemDaemon(DaemonDryRunnable):
     def run(self):
