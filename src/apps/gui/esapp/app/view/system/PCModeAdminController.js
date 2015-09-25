@@ -75,10 +75,10 @@ Ext.define('esapp.view.system.PCModeAdminController', {
 
             if (dashboard.PC23_connection) {
                 if (otherPCMode == 'nominal') {
-                    permitChangeMode = false
+                    permitChangeMode = true
                 }
                 if (otherPCMode == 'recovery') {
-                    permitChangeMode = true
+                    permitChangeMode = false
                 }
                 if (otherPCMode == 'maintenance') {
                     permitChangeMode = false
@@ -91,7 +91,7 @@ Ext.define('esapp.view.system.PCModeAdminController', {
 
         if (currentmode == 'maintenance' && newmode == 'recovery'){
 
-            permitChangeMode = true
+            permitChangeMode = false
         }
 
         console.info("permit change mode:" + newmode);

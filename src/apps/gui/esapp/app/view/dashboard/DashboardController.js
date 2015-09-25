@@ -29,6 +29,13 @@ Ext.define('esapp.view.dashboard.DashboardController', {
             pc2DisabledAll = true,
             pc3DisabledAll = true;
 
+        //var myMask = new Ext.LoadMask({
+        //    msg    : esapp.Utils.getTranslation('loading'),
+        //    target : pcs_container
+        //});
+        //
+        //myMask.show();
+
         this.getStore('dashboard').load({
             callback: function(records, options, success){
                 records.forEach(function(dashboard) {
@@ -287,38 +294,6 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                 }
             }
         });
-
-        //this.getStore('dashboard').load();
-        //console.info(this.getStore('dashboard').getData());
-        //this.getStore('dashboard').getData().each(function(dashboard) {
-        //            me.PC2_internet_status = dashboard.get('PC2_internet_status');
-        //            me.PC2_mode = dashboard.get('PC2_mode');
-        //            me.PC2_postgresql_status = dashboard.get('PC2_postgresql_status');
-        //            me.PC2_version = dashboard.get('PC2_version');
-        //            me.PC3_internet_status = dashboard.get('PC3_internet_status');
-        //            me.PC3_mode = dashboard.get('PC3_mode');
-        //            me.PC3_postgresql_status = dashboard.get('PC3_postgresql_status');
-        //            me.PC3_version = dashboard.get('PC3_version');
-        //            me.activePC = dashboard.get('activePC');
-        //            me.pc1_connection = dashboard.get('pc1_connection');
-        //            me.pc3_connection = dashboard.get('pc3_connection');
-        //            me.type_installation = dashboard.get('type_installation');
-        //        });
-        //me.PC2_internet_status = true;
-        //me.PC2_mode = 'nominal';
-        //me.PC2_postgresql_status = true;
-        //me.PC2_version = '2.0.1';
-        //me.PC3_internet_status = false;
-        //me.PC3_mode = 'degradation';
-        //me.PC3_postgresql_status = false;
-        //me.PC3_version = '2.0.4';
-        //me.activePC = 'pc2';
-        //me.pc1_connection = true;
-        //me.pc3_connection = true;
-        //me.type_installation = 'full';
-
-        //var pcs_container = me.getReferences();
-        //var pcs_container = me.down('container[name=pcs_container]');
-
+        //myMask.hide();
     }
 });

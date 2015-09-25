@@ -1454,16 +1454,16 @@ class ChangeMode:
             elif This_PC_mode == 'maintenance' and newmode == 'nominal':
                 if PC23_connection:
                     if Other_PC_mode == 'nominal':
-                        permitChangeMode = False
-                    if Other_PC_mode == 'recovery':
                         permitChangeMode = True
+                    if Other_PC_mode == 'recovery':
+                        permitChangeMode = False
                     if Other_PC_mode == 'maintenance':
                         permitChangeMode = False
                 else:
                     permitChangeMode = False
 
             elif This_PC_mode == 'maintenance' and newmode == 'recovery':
-                permitChangeMode = True
+                permitChangeMode = False
 
             else:
                 permitChangeMode = False
