@@ -17,7 +17,7 @@ import web
 import datetime
 import json
 import glob
-# import re
+import time
 
 # import config
 from config import es_constants
@@ -56,6 +56,8 @@ urls = (
 
     "/dashboard/getdashboard", "GetDashboard",
     "/dashboard/systemstatus", "GetSystemStatus",
+    "/dashboard/setdataautosync", "SetDataAutoSync",
+    "/dashboard/setdbautosync", "SetDBAutoSync",
 
     "/services/checkstatusall", "CheckStatusAllServices",
     "/services/execservicetask", "ExecuteServiceTask",
@@ -83,6 +85,7 @@ urls = (
 
     "/systemsettings", "UserSettings",
     "/systemsettings/update", "UpdateUserSettings",
+    "/systemsettings/changerole", "ChangeRole",
     "/systemsettings/reset", "ResetUserSettings",
     "/systemsettings/systemreport", "SystemReport",
     "/systemsettings/installreport", "InstallReport",
@@ -532,10 +535,9 @@ class GetSystemStatus:
         self.lang = "eng"
 
     def GET(self):
-        # getparams = web.input()
-        pickle_filename = functions.system_status_filename()
-
-        info = functions.load_obj_from_pickle(pickle_filename)
+        # pickle_filename = functions.system_status_filename()
+        # info = functions.load_obj_from_pickle(pickle_filename)
+        info = es2system.get_status_local_machine()
         status_local_machine = {'get_eumetcast_status': info['get_eumetcast_status'],
                                 'get_internet_status': info['get_internet_status'],
                                 'ingestion_status': info['ingestion_status'],
@@ -562,8 +564,10 @@ class GetDashboard:
         PC23_connection = False
 
         PC2_mode = ''   # 'nominal' 'recovery'
-        PC2_version = ''
         PC2_disk_status = True
+        PC2_version = ''
+        PC2_DBAutoSync = None
+        PC2_DataAutoSync = None
         PC2_postgresql_status = None
         PC2_internet_status = None
         PC2_service_eumetcast = None
@@ -574,7 +578,9 @@ class GetDashboard:
 
         PC3_mode = ''   # 'nominal' 'recovery'
         PC3_version = ''
-        PC3_disk_status = None
+        PC3_disk_status = True
+        PC3_DBAutoSync = None
+        PC3_DataAutoSync = None
         PC3_postgresql_status = None
         PC3_internet_status = None
         PC3_service_eumetcast = None
@@ -599,6 +605,8 @@ class GetDashboard:
             elif systemsettings['role'].lower() == 'pc2':
                 PC2_mode = systemsettings['mode'].lower()
                 PC2_version = systemsettings['active_version']
+                PC2_DBAutoSync = systemsettings['db_sync']
+                PC2_DataAutoSync = systemsettings['data_sync']
                 PC2_postgresql_status = functions.getStatusPostgreSQL()
                 PC2_internet_status = functions.internet_on()
                 PC2_service_eumetcast = status_services['eumetcast']
@@ -614,29 +622,33 @@ class GetDashboard:
                 # Check connection to PC3
                 PC23_connection = functions.check_connection(systemsettings['ip_pc3'] + IP_port)
                 # print "PC23_connection: " + str(PC23_connection)
+
                 if PC23_connection:
                     status_PC3 = functions.get_remote_system_status(systemsettings['ip_pc3'])
-
-                    PC3_mode = status_PC3['mode']
-                    PC3_disk_status = status_PC3['disk_status']
-                    PC3_version = status_PC3['active_version']
-                    PC3_postgresql_status = status_PC3['postgresql_status']
-                    PC3_internet_status = status_PC3['internet_connection_status']
-                    PC3_service_eumetcast = status_PC3['get_eumetcast_status']
-                    PC3_service_internet = status_PC3['get_internet_status']
-                    PC3_service_ingest = status_PC3['ingestion_status']
-                    PC3_service_processing = status_PC3['processing_status']
-                    PC3_service_system = status_PC3['system_status']
-                    PC3_system_execution_time = status_PC3['system_execution_time']
-
-                    # pickle_filename = functions.system_status_filename()
-                    # info = functions.load_obj_from_pickle(remotePC, pickle_filename)
+                    if 'mode' in status_PC3:
+                        PC3_mode = status_PC3['mode']
+                        PC3_disk_status = status_PC3['disk_status']
+                        PC3_version = status_PC3['active_version']
+                        PC3_DBAutoSync = False  # status_PC3['db_sync']
+                        PC3_DataAutoSync = False  # status_PC3['data_sync']
+                        PC3_postgresql_status = status_PC3['postgresql_status']
+                        PC3_internet_status = status_PC3['internet_connection_status']
+                        PC3_service_eumetcast = status_PC3['get_eumetcast_status']
+                        PC3_service_internet = status_PC3['get_internet_status']
+                        PC3_service_ingest = status_PC3['ingestion_status']
+                        PC3_service_processing = status_PC3['processing_status']
+                        PC3_service_system = status_PC3['system_status']
+                        PC3_system_execution_time = status_PC3['system_execution_time']
+                    else:
+                        PC3_Webserver_Status = False
 
             elif systemsettings['role'].lower() == 'pc3':
                 # ToDo: check disk status!
                 # PC3_disk_status = checkDiskStatus()
                 PC3_mode = systemsettings['mode'].lower()
                 PC3_version = systemsettings['active_version']
+                PC3_DBAutoSync = systemsettings['db_sync']
+                PC3_DataAutoSync = systemsettings['data_sync']
                 PC3_postgresql_status = functions.getStatusPostgreSQL()
                 PC3_internet_status = functions.internet_on()
                 PC3_service_eumetcast = status_services['eumetcast']
@@ -648,25 +660,48 @@ class GetDashboard:
                 # if role is PC3 and type_installation is Full and there is a connection to PC2, then on PC2 get the file
                 # /srv/www/eStation2/src/apps/es2system/system_status.pkl and read its content:
                 #       role, version, mode, postgresql status, internet status, status services if in nominal mode
+                # /sbin/service postgresql status    or     /etc/init.d/postgresql status
 
                 # Check connection to PC2
                 PC23_connection = functions.check_connection(systemsettings['ip_pc2'] + IP_port)
                 if PC23_connection:
                     status_PC2 = functions.get_remote_system_status(systemsettings['ip_pc2'])
+                    if 'mode' in status_PC2:
+                        PC2_mode = status_PC2['mode']
+                        PC2_disk_status = status_PC2['disk_status']
+                        PC2_version = status_PC2['active_version']
+                        PC2_DBAutoSync = False  # status_PC2['db_sync']
+                        PC2_DataAutoSync = False  # status_PC2['data_sync']
+                        PC2_postgresql_status = status_PC2['postgresql_status']
+                        PC2_internet_status = status_PC2['internet_connection_status']
+                        PC2_service_eumetcast = status_PC2['get_eumetcast_status']
+                        PC2_service_internet = status_PC2['get_internet_status']
+                        PC2_service_ingest = status_PC2['ingestion_status']
+                        PC2_service_processing = status_PC2['processing_status']
+                        PC2_service_system = status_PC2['system_status']
+                        PC2_system_execution_time = status_PC2['system_execution_time']
+                    else:
+                        PC2_Webserver_Status = False
 
-                    PC2_mode = status_PC2['mode']
-                    PC2_disk_status = status_PC2['disk_status']
-                    PC2_version = status_PC2['active_version']
-                    PC2_postgresql_status = status_PC2['postgresql_status']
-                    PC2_internet_status = status_PC2['internet_connection_status']
-                    PC2_service_eumetcast = status_PC2['get_eumetcast_status']
-                    PC2_service_internet = status_PC2['get_internet_status']
-                    PC2_service_ingest = status_PC2['ingestion_status']
-                    PC2_service_processing = status_PC2['processing_status']
-                    PC2_service_system = status_PC2['system_status']
-                    PC2_system_execution_time = status_PC2['system_execution_time']
+        if PC2_DBAutoSync in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+            PC2_DBAutoSync = True
+        else:
+            PC2_DBAutoSync = False
 
-        # /sbin/service postgresql status    or     /etc/init.d/postgresql status
+        if PC2_DataAutoSync in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+            PC2_DataAutoSync = True
+        else:
+            PC2_DataAutoSync = False
+
+        if PC3_DBAutoSync in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+            PC3_DBAutoSync = True
+        else:
+            PC3_DBAutoSync = False
+
+        if PC3_DataAutoSync in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+            PC3_DataAutoSync = True
+        else:
+            PC3_DataAutoSync = False
 
         dashboard_dict = {'type_installation': systemsettings['type_installation'].lower(),
                           'activePC': systemsettings['role'].lower(),
@@ -679,6 +714,8 @@ class GetDashboard:
                           'PC2_service_processing': PC2_service_processing,
                           'PC2_service_system': PC2_service_system,
                           'PC2_version': PC2_version,
+                          'PC2_DBAutoSync': PC2_DBAutoSync,
+                          'PC2_DataAutoSync': PC2_DataAutoSync,
                           'PC2_mode': PC2_mode,
                           'PC2_postgresql_status': PC2_postgresql_status,
                           'PC2_internet_status': PC2_internet_status,
@@ -690,6 +727,8 @@ class GetDashboard:
                           'PC3_service_processing': PC3_service_processing,
                           'PC3_service_system': PC3_service_system,
                           'PC3_version': PC3_version,
+                          'PC3_DBAutoSync': PC3_DBAutoSync,
+                          'PC3_DataAutoSync': PC3_DataAutoSync,
                           'PC3_mode': PC3_mode,
                           'PC3_postgresql_status': PC3_postgresql_status,
                           'PC3_internet_status': PC3_internet_status,
@@ -706,6 +745,50 @@ class GetDashboard:
         dashboard_json = '{"success":"true", "dashboard":'+dashboard_json + '}'
 
         return dashboard_json
+
+
+class SetDataAutoSync:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        getparams = web.input()
+        if hasattr(getparams, "dataautosync"):
+
+            functions.setSystemSetting('data_sync', getparams['dataautosync'])
+
+            # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
+            from lib.python import reloadmodules
+            reloadmodules.reloadallmodules()
+            # Reloading the settings does not work well so set manually
+
+            result_json = '{"success":"true", "message":"Data Auto Sync changed!"}'
+        else:
+            result_json = '{"success":false, "error":"No setting given!"}'
+
+        return result_json
+
+
+class SetDBAutoSync:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        getparams = web.input()
+        if hasattr(getparams, "dbautosync"):
+
+            functions.setSystemSetting('db_sync', getparams['dbautosync'])
+
+            # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
+            from lib.python import reloadmodules
+            reloadmodules.reloadallmodules()
+            # Reloading the settings does not work well so set manually
+
+            result_json = '{"success":"true", "message":"DB Auto Sync changed!"}'
+        else:
+            result_json = '{"success":false, "error":"No setting given!"}'
+
+        return result_json
 
 
 class GetI18n:
@@ -1191,25 +1274,29 @@ class GetLogFile:
         logfilename = ''
         if getparams['logtype'] == 'get':
             if getparams['gettype'] == 'EUMETCAST':
-                logfilename = 'apps.get_eumetcast.' + getparams['data_source_id'] + '.log'
+                logfilename = es_constants.es2globals['log_dir']+'apps.get_eumetcast.' + getparams['data_source_id'] + '.log'
             else:
-                logfilename = 'apps.get_internet.' + getparams['data_source_id'] + '.log'
+                logfilename = es_constants.es2globals['log_dir']+'apps.get_internet.' + getparams['data_source_id'] + '.log'
         elif getparams['logtype'] == 'ingest':
-            logfilename = 'apps.ingestion.' + getparams['productcode'] + '.' + getparams['version'] + '.log'
+            logfilename = es_constants.es2globals['log_dir']+'apps.ingestion.' + getparams['productcode'] + '.' + getparams['version'] + '.log'
         elif getparams['logtype'] == 'service':
             if getparams['service'] == 'eumetcast':
-                logfilename = 'apps.acquisition.get_eumetcast.log'
+                logfilename = es_constants.es2globals['log_dir']+'apps.acquisition.get_eumetcast.log'
             if getparams['service'] == 'internet':
-                logfilename = 'apps.acquisition.get_internet.log'
+                logfilename = es_constants.es2globals['log_dir']+'apps.acquisition.get_internet.log'
             if getparams['service'] == 'ingest':
-                logfilename = 'apps.acquisition.ingestion.log'
+                logfilename = es_constants.es2globals['log_dir']+'apps.acquisition.ingestion.log'
             if getparams['service'] == 'processing':
-                logfilename = 'apps.processing.processing.log'
+                logfilename = es_constants.es2globals['log_dir']+'apps.processing.processing.log'
+            if getparams['service'] == 'dbsync':
+                logfilename = '/var/log/bucardo/log.bucardo'
+            if getparams['service'] == 'datasync':
+                logfilename = '/var/log/rsyncd.log'
 
-        logfilepath = es_constants.es2globals['log_dir']+logfilename
+        # logfilepath = es_constants.es2globals['log_dir']+logfilename
         # Display only latest (most recent file) - see #69-1
         #logfilenames = sorted(glob.glob(logfilepath + "*"), key=str, reverse=False)
-        logfilenames = sorted(glob.glob(logfilepath), key=str, reverse=False)
+        logfilenames = sorted(glob.glob(logfilename), key=str, reverse=False)
 
         # print sorted(logfilenames, key=str, reverse=False)
         if len(logfilenames) > 0:
@@ -1219,6 +1306,7 @@ class GetLogFile:
                 if os.path.isfile(logfilepath):
                     logfile = open(logfilepath, 'r')
                     logfilecontent = logfile.read()
+                    logfilecontent = logfilecontent.replace('\'', '"')
                     logfilecontent = logfilecontent.replace(chr(10), '<br />')
                     logfilecontent = logfilecontent.replace(' TRACE ', '<b style="color:gray"> TRACE </b>')
                     logfilecontent = logfilecontent.replace(' DEBUG ', '<b style="color:gray"> DEBUG </b>')
@@ -1262,11 +1350,35 @@ class setIngestArchives:
             reloadmodules.reloadallmodules()
             # Reloading the settings does not work well so set manually
 
-            changemode_json = '{"success":"true", "message":"Setting Ingest Archives from Eumetcast changed!"}'
+            result_json = '{"success":"true", "message":"Setting Ingest Archives from Eumetcast changed!"}'
         else:
-            changemode_json = '{"success":false, "error":"No setting given!"}'
+            result_json = '{"success":false, "error":"No setting given!"}'
 
-        return changemode_json
+        return result_json
+
+
+class ChangeRole:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        getparams = web.input()
+        if hasattr(getparams, "role"):
+
+            functions.setSystemSetting('role', getparams['role'])
+
+            # Todo: call system service to change the mode
+
+            # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
+            from lib.python import reloadmodules
+            reloadmodules.reloadallmodules()
+            # Reloading the settings does not work well so set manually
+
+            changerole_json = '{"success":"true", "message":"Role changed!"}'
+        else:
+            changerole_json = '{"success":false, "error":"No role given!"}'
+
+        return changerole_json
 
 
 class ChangeMode:
@@ -1276,17 +1388,126 @@ class ChangeMode:
     def GET(self):
         getparams = web.input()
         if hasattr(getparams, "mode"):
+            newmode = getparams['mode']
+            systemsettings = functions.getSystemSettings()
+            This_PC_mode = systemsettings['mode'].lower()
+            PC23_connection = False
+            Other_PC_mode = None
+            IP_other_PC = None
+            permitChangeMode = False
+            message = 'Changing to Mode NOT possible!'
 
-            functions.setSystemSetting('mode', getparams['mode'])
+            # TODO: Use port 80?
+            IP_port = ':22'
 
-            # Todo: call system service to change the mode
+            if systemsettings['type_installation'].lower() == 'full':
+                # Check if other PC is reachable and in which mode it is!
+                if systemsettings['role'].lower() == 'pc2':
+                    # Check connection to PC3
+                    PC23_connection = functions.check_connection(systemsettings['ip_pc3'] + IP_port)
+                    IP_other_PC = systemsettings['ip_pc3']
 
-            # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
-            from lib.python import reloadmodules
-            reloadmodules.reloadallmodules()
-            # Reloading the settings does not work well so set manually
+                    if PC23_connection:
+                        status_PC3 = functions.get_remote_system_status(systemsettings['ip_pc3'])
+                        if 'mode' in status_PC3:
+                            Other_PC_mode = status_PC3['mode']
+                        else:
+                            PC3_Webserver_Status = False
 
-            changemode_json = '{"success":"true", "message":"Mode changed!"}'
+                elif systemsettings['role'].lower() == 'pc3':
+                    This_PC_mode = systemsettings['mode'].lower()
+
+                    # Check connection to PC2
+                    PC23_connection = functions.check_connection(systemsettings['ip_pc2'] + IP_port)
+                    IP_other_PC = systemsettings['ip_pc2']
+
+                    if PC23_connection:
+                        status_PC2 = functions.get_remote_system_status(systemsettings['ip_pc2'])
+                        if 'mode' in status_PC2:
+                            Other_PC_mode = status_PC2['mode']
+                        else:
+                            PC2_Webserver_Status = False
+
+            if This_PC_mode == 'nominal' and newmode == 'recovery':
+                if PC23_connection:
+                    if Other_PC_mode == 'nominal':
+                        permitChangeMode = False
+                    if Other_PC_mode == 'recovery':
+                        permitChangeMode = False
+                    if Other_PC_mode == 'maintenance':
+                        permitChangeMode = True
+                else:
+                    permitChangeMode = True
+
+            elif This_PC_mode == 'nominal' and newmode == 'maintenance':
+                permitChangeMode = True
+
+            elif This_PC_mode == 'recovery' and newmode == 'nominal':
+                if PC23_connection:
+                    if Other_PC_mode == 'nominal':
+                        permitChangeMode = False
+                    if Other_PC_mode == 'recovery':
+                        permitChangeMode = False
+                    if Other_PC_mode == 'maintenance':
+                        permitChangeMode = True
+                else:
+                    permitChangeMode = False
+
+            elif This_PC_mode == 'recovery' and newmode == 'maintenance':
+                permitChangeMode = False
+
+            elif This_PC_mode == 'maintenance' and newmode == 'nominal':
+                if PC23_connection:
+                    if Other_PC_mode == 'nominal':
+                        permitChangeMode = True
+                    if Other_PC_mode == 'recovery':
+                        permitChangeMode = False
+                    if Other_PC_mode == 'maintenance':
+                        permitChangeMode = False
+                else:
+                    permitChangeMode = True
+
+            elif This_PC_mode == 'maintenance' and newmode == 'recovery':
+                permitChangeMode = False
+
+            else:
+                permitChangeMode = False
+
+            if permitChangeMode:
+                functions.setSystemSetting('mode', getparams['mode'])
+                message = 'Mode changed!'
+
+                # Set Data and DB sync.
+                if newmode == 'recovery':
+                    functions.setSystemSetting('data_sync', 'false')
+                    functions.setSystemSetting('db_sync', 'false')
+                elif newmode == 'nominal':
+                    functions.setSystemSetting('data_sync', 'true')
+                    functions.setSystemSetting('db_sync', 'true')
+                elif newmode == 'maintenance':
+                    functions.setSystemSetting('data_sync', 'false')
+                    functions.setSystemSetting('db_sync', 'false')
+
+                # Specific transition actions
+                if This_PC_mode == 'recovery' and newmode == 'nominal':
+                    source = es_constants.es2globals['processing_dir']
+                    target = IP_other_PC+'::products'+es_constants.es2globals['processing_dir']
+
+                    statusdatasync = es2system.system_data_sync(source, target)
+
+                    statusdbsync = es2system.system_db_sync_full(systemsettings['role'].lower())
+
+                    message = 'Data and Settings Synchronized to the other PC. You must now put the other PC in Nominal mode!'
+
+                # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
+                from lib.python import reloadmodules
+                reloadmodules.reloadallmodules()
+                # Reloading the settings does not work well so set manually
+
+                changemode_json = '{"success":"true", "message":"'+message+'"}'
+            else:
+                changemode_json = '{"success":false, "message":"'+message+'"}'
+
         else:
             changemode_json = '{"success":false, "error":"No mode given!"}'
 

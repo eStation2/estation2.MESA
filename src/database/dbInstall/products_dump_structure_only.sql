@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.3.4
 -- Dumped by pg_dump version 9.3.4
--- Started on 2015-09-09 11:30:59 CEST
+-- Started on 2015-09-22 10:46:21 CEST
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -384,7 +384,7 @@ CREATE TABLE datasource_description (
     format_type character varying,
     file_extension character varying,
     delimiter character varying,
-    date_type character varying NOT NULL,
+    date_format character varying NOT NULL,
     date_position character varying,
     product_identifier character varying,
     prod_id_position integer,
@@ -417,10 +417,10 @@ COMMENT ON COLUMN datasource_description.format_type IS 'Values:
 --
 -- TOC entry 2202 (class 0 OID 0)
 -- Dependencies: 181
--- Name: COLUMN datasource_description.date_type; Type: COMMENT; Schema: products; Owner: estation
+-- Name: COLUMN datasource_description.date_format; Type: COMMENT; Schema: products; Owner: estation
 --
 
-COMMENT ON COLUMN datasource_description.date_type IS 'A string, case insensitive, in YYYYMMDD, YYYYMMDDHHMM,YYYY,MMDD,HHMM. HHMM (may be used for MSG 15 minutes synthesis). This list may change with the project life. It is maintained by JRC';
+COMMENT ON COLUMN datasource_description.date_format IS 'A string, case insensitive, in YYYYMMDD, YYYYMMDDHHMM,YYYY,MMDD,HHMM. HHMM (may be used for MSG 15 minutes synthesis). This list may change with the project life. It is maintained by JRC';
 
 
 --
@@ -1391,7 +1391,7 @@ ALTER TABLE ONLY process_product
 --
 
 ALTER TABLE ONLY datasource_description
-    ADD CONSTRAINT datetype_filename_format_fk FOREIGN KEY (date_type) REFERENCES date_format(date_format) ON UPDATE CASCADE;
+    ADD CONSTRAINT datetype_filename_format_fk FOREIGN KEY (date_format) REFERENCES date_format(date_format) ON UPDATE CASCADE;
 
 
 --
@@ -1529,7 +1529,7 @@ ALTER TABLE ONLY thema_product
     ADD CONSTRAINT thema_thema_product_fk FOREIGN KEY (thema_id) REFERENCES thema(thema_id) ON UPDATE CASCADE;
 
 
--- Completed on 2015-09-09 11:30:59 CEST
+-- Completed on 2015-09-22 10:46:21 CEST
 
 --
 -- PostgreSQL database dump complete

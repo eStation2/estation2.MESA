@@ -37,6 +37,45 @@ from lib.python.daemon import DaemonDryRunnable
 #     return pickle_filename
 
 
+def get_status_local_machine():
+#   Get info on the status of the local machine
+#
+    logger.debug("Entering routine %s" % 'get_status_local_machine')
+
+    # Get the local systems settings
+    systemsettings = functions.getSystemSettings()
+
+    # Get status of all services
+    status_services = functions.getStatusAllServices()
+
+    get_eumetcast_status = status_services['eumetcast']
+    get_internet_status = status_services['internet']
+    ingestion_status = status_services['ingest']
+    processing_status = status_services['process']
+    system_status = status_services['system']
+
+    # Get status of postgresql
+    psql_status = functions.getStatusPostgreSQL()
+
+    # Get internet connection
+    internet_status = functions.internet_on()
+
+    # ToDo: check disk status!
+
+    status_local_machine = {'get_eumetcast_status': get_eumetcast_status,
+                            'get_internet_status': get_internet_status,
+                            'ingestion_status': ingestion_status,
+                            'processing_status': processing_status,
+                            'system_status': system_status,
+                            'system_execution_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                            'postgresql_status': str(psql_status).lower(),
+                            'internet_connection_status': str(internet_status).lower(),
+                            'active_version': systemsettings['active_version'],
+                            'mode': systemsettings['mode'],
+                            'disk_status': 'true'}
+    return status_local_machine
+
+
 def save_status_local_machine():
 #   Save a pickle containing info on the status of the local machine
 #
@@ -86,13 +125,19 @@ def system_data_sync(source, target):
 #   It is based on rsync daemon, the correct module should be set in /etc/rsyncd.conf file
 #   The rsync daemon should running (permission set in /etc/default/rsync)
 
+    logfile=es_constants.es2globals['log_dir']+'rsync.log'
+    message=time.strftime("%Y-%m-%d %H:%M")+' INFO: Running the data sync now ... \n'
+    log_id=open(logfile,'w')
+    log_id.write(message)
+    log_id.close()
     logger.debug("Entering routine %s" % 'system_data_sync')
-    command = 'rsync -CavK '+source+' '+target
+    command = 'rsync -CavK '+source+' '+target+ ' >> '+logfile
     logger.debug("Executing %s" % command)
     status = os.system(command)
     if status:
         logger.error("Error in executing %s" % command)
-
+    else:
+        return status
 
 def system_db_sync(list_syncs):
 #   Synchronize database contents from one instance to another (push)
@@ -130,9 +175,11 @@ def system_db_sync(list_syncs):
                 command = ['bucardo', 'activate', sync]
                 p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 out, err = p.communicate()
-
+                logger.info("Activating bucardo sync returned: %s" % out)
                 # Check error
-
+                if err:
+                    logger.warning('Bucardo activation returned err: %s' % err)
+                time.sleep(0.5)
     # De-activate the active rsync, not in the passed list
     if len(list_active_syncs) > 0:
         for sync in list_active_syncs:
@@ -141,8 +188,70 @@ def system_db_sync(list_syncs):
                 command = ['bucardo', 'deactivate', sync]
                 p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 out, err=p.communicate()
+                logger.info("De-activating bucardo sync returned: %s" % out)
                 # Check error
+                if err:
+                    logger.warning('Bucardo de-activation returned err: %s' % err)
 
+def system_db_sync_full(pc_role):
+#   Manage the transition from Recovery to Nominal, by forcing a full sync of both DB schemas
+#   pc_role:    role of my PC (either PC2 or PC3)
+
+    logger.debug("Entering routine %s" % 'system_db_sync_full')
+
+    # Detect PC -> set sync to be executed
+    if pc_role=='pc2':
+        list_syncs = ['sync_pc2_products_full','sync_pc2_analysis_full']
+    elif pc_role=='pc3':
+        list_syncs = ['sync_pc3_products_full','sync_pc3_analysis_full']
+
+    # Check that bucardo is running
+    command = ['bucardo','status']
+    p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = p.communicate()
+    if not re.search('PID', out):
+        logger.error("Bucardo is not running - DB sync not possible")
+        return 1
+
+    # Get list of active rsyncs
+    command = ['bucardo', 'list', 'sync']
+    p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = p.communicate()
+    list_active_syncs = []
+    # Active rsync are identified as: Sync "sync_pc2_analysis"  Relgroup "rel_analysis"        [Active]
+    for line in out.split('\n'):
+        found=re.match('Sync\s*\"(.+?)\".*\[Active\]', line)
+        if found:
+            list_active_syncs.append(found.group(1))
+
+    # Activate the list of full syncs
+    if len(list_syncs) > 0:
+        for sync in list_syncs:
+            if sync not in list_active_syncs:
+                logger.info("Activating bucardo sync: %s" % sync)
+                command = ['bucardo', 'activate', sync]
+                p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                out, err = p.communicate()
+                logger.info("Activating bucardo sync returned: %s" % out)
+                # Check error
+                if err:
+                    logger.warning('Bucardo activation returned err: %s' % err)
+                time.sleep(0.5)
+
+    # Wait a second
+    time.sleep(10)
+
+    # De-activate the list of full syncs
+    if len(list_syncs) > 0:
+        for sync in list_syncs:
+            logger.info("De-activating bucardo sync: %s" % sync)
+            command = ['bucardo', 'deactivate', sync]
+            p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            out, err=p.communicate()
+            logger.info("De-activating bucardo sync returned: %s" % out)
+            # Check error
+            if err:
+                logger.warning('Bucardo activation returned err: %s' % err)
 
 def system_db_dump(list_dump):
 #   Dump the database schemas (for backup)
@@ -155,8 +264,10 @@ def system_db_dump(list_dump):
         for dump_schema in list_dump:
             dump_file = dump_dir+os.path.sep+'estationdb_'+dump_schema+'_'+now.strftime("%Y-%m-%d-%H:%M:%S")+'.sql'
             command = 'pg_dump -f '+dump_file+' -n '+dump_schema+' -F p' + ' -U postgres -d estationdb'
-            status = os.system(command)
+            logger.info('Command is: %s' % command)
+            status =+ os.system(command)
 
+        return status
 
 
 def system_create_report(target_file=None):
@@ -216,12 +327,6 @@ def system_create_report(target_file=None):
     shutil.rmtree(tmp_dir)
 
 
-# def system_recovery_mode():
-# #   Manage the transition to/from nominal/recovery mode on a machine
-# #
-#
-
-
 def check_delay_time(operation, delay_minutes=None, time=None, write=False):
 # For a given operation, check if the delay has passed, or if it is time to execute it
 #
@@ -254,7 +359,7 @@ def check_delay_time(operation, delay_minutes=None, time=None, write=False):
             time_latest_execution = info['latest_exec_time']
             current_delta=datetime.datetime.now()-time_latest_execution
             current_delta_minutes = int(current_delta.seconds/60)
-            if current_delta_minutes > delay_minutes:
+            if current_delta_minutes > float(delay_minutes):
                to_be_executed = True
 
     elif time is not None:
@@ -317,7 +422,7 @@ def loop_system(dry_run=False):
 
     # Specific settings for the system operations
     delay_data_sync_minutes = es_constants.es2globals['system_delay_data_sync_min']
-    delay_db_sync_minutes = es_constants.es2globals['system_delay_db_sync_min']
+    # delay_db_sync_minutes = es_constants.es2globals['system_delay_db_sync_min']
     time_for_db_dump = es_constants.es2globals['system_time_db_dump_hhmm']
 
     # Loop to manage the 'cron-like' operations, i.e.:
@@ -331,7 +436,9 @@ def loop_system(dry_run=False):
         # Read the relevant info from system settings
         system_settings = functions.getSystemSettings()
 
-        # Initialize ToDo flags
+        logger.info('System Settings Mode: %s ' % system_settings['mode'])
+        #time.sleep(5)
+        # Initialize To Do flags
         do_data_sync = False
         schemas_db_sync = []
         schemas_db_dump = []
@@ -339,31 +446,47 @@ def loop_system(dry_run=False):
 
         logger.info("Starting the System Service loop")
 
+        if system_settings['data_sync'] in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+            do_data_sync = True
+        else:
+            do_data_sync = False
+
+        if system_settings['db_sync'] in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+            do_db_sync = True
+        else:
+            do_db_sync = False
+
         # Implement the logic of operations based on type/role/mode
         if system_settings['type_installation'] == 'Full':
+
             if system_settings['role'] == 'PC2':
                 ip_target = system_settings['ip_pc3']
                 if system_settings['mode'] == 'nominal':
-                    do_data_sync = True
                     schemas_db_sync = ['products']
                     schemas_db_dump = ['products', 'analysis']
 
                 if system_settings['mode'] == 'recovery':
-                    do_data_sync = False
                     schemas_db_sync = []
                     schemas_db_dump = ['products', 'analysis']
+
+                if system_settings['mode'] == 'maintenance':
+                    schemas_db_sync = []
+                    schemas_db_dump = []
 
             if system_settings['role'] == 'PC3':
 
                 ip_target = system_settings['ip_pc2']
                 if system_settings['mode'] == 'nominal':
-                    do_data_sync = False
                     schemas_db_sync = ['analysis']
                     schemas_db_dump = ['products', 'analysis']
+
                 if system_settings['mode'] == 'recovery':
-                    do_data_sync = False
                     schemas_db_sync = []
                     schemas_db_dump = ['products', 'analysis']
+
+                if system_settings['mode'] == 'maintenance':
+                    schemas_db_sync = []
+                    schemas_db_dump = []
 
         if system_settings['type_installation'] == 'SinglePC':
             do_data_sync = False
@@ -384,11 +507,11 @@ def loop_system(dry_run=False):
                 system_data_sync(data_source, data_target)
                 check_delay_time(operation,delay_minutes=delay_data_sync_minutes, write=True)
 
-        # DB sync
+        # DB sync: execute every cycle if in system_setting (no delay)
         operation = 'db_sync'
         if len(schemas_db_sync) > 0:
-            check_time = check_delay_time(operation, delay_minutes=delay_db_sync_minutes)
-            if check_time:
+            #check_time = check_delay_time(operation, delay_minutes=delay_db_sync_minutes)
+            if do_db_sync:
                 logger.info("Executing db synchronization")
                 # Build the list of rsyncs to be activated
                 list_rsyncs = []
@@ -397,7 +520,11 @@ def loop_system(dry_run=False):
                     list_rsyncs.append(new_sync)
                 # Call the function
                 system_db_sync(list_rsyncs)
-                check_delay_time(operation, delay_minutes=delay_db_sync_minutes, write=True)
+                # check_delay_time(operation, delay_minutes=delay_db_sync_minutes, write=True)
+
+        # De-activate all syncs
+        if (len(schemas_db_sync) > 0) or not do_db_sync:
+            system_db_sync([])
 
         # DB dump
         operation = 'db_dump'
@@ -414,7 +541,7 @@ def loop_system(dry_run=False):
             save_status_local_machine()
 
         # Sleep some time
-        time.sleep(10)
+        time.sleep(float(es_constants.es2globals['system_sleep_time_sec']))
 
 class SystemDaemon(DaemonDryRunnable):
     def run(self):

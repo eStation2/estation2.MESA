@@ -5,8 +5,8 @@ __author__ = "Jurriaan van 't Klooster"
 import lib.python.functions as functions
 import json
 
-class TestFunctions(TestCase):
 
+class TestFunctions(TestCase):
     def test_tcp_test(self):
         mesaproc = "139.191.147.79:22"
         self.assertTrue(functions.check_connection(mesaproc))
@@ -14,20 +14,20 @@ class TestFunctions(TestCase):
         self.assertTrue(functions.check_connection(pc3))
 
     def test_get_remote_system_status(self):
-        server_address = '139.191.147.177'  # vm19
+        server_address = '10.191.231.90'  # vm19
         status_remote_machine = functions.get_remote_system_status(server_address)
         print status_remote_machine
-
-        PC2_mode = status_remote_machine['mode']
-        PC2_disk_status = status_remote_machine['disk_status']
-        PC2_version = status_remote_machine['active_version']
-        PC2_postgresql_status = status_remote_machine['postgresql_status']
-        PC2_internet_status = status_remote_machine['internet_connection_status']
-        PC2_service_eumetcast = status_remote_machine['get_eumetcast_status']
-        PC2_service_internet = status_remote_machine['get_internet_status']
-        PC2_service_ingest = status_remote_machine['ingestion_status']
-        PC2_service_processing = status_remote_machine['processing_status']
-        PC2_service_system = status_remote_machine['system_status']
-        PC2_system_execution_time = status_remote_machine['system_execution_time']
+        if "mode" in status_remote_machine:
+            PC2_mode = status_remote_machine['mode']
+            PC2_disk_status = status_remote_machine['disk_status']
+            PC2_version = status_remote_machine['active_version']
+            PC2_postgresql_status = status_remote_machine['postgresql_status']
+            PC2_internet_status = status_remote_machine['internet_connection_status']
+            PC2_service_eumetcast = status_remote_machine['get_eumetcast_status']
+            PC2_service_internet = status_remote_machine['get_internet_status']
+            PC2_service_ingest = status_remote_machine['ingestion_status']
+            PC2_service_processing = status_remote_machine['processing_status']
+            PC2_service_system = status_remote_machine['system_status']
+            PC2_system_execution_time = status_remote_machine['system_execution_time']
 
         print "Done"

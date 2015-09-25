@@ -13,6 +13,7 @@ Ext.define("esapp.view.system.systemsettings",{
     requires: [
         'esapp.view.system.systemsettingsController',
         'esapp.view.system.systemsettingsModel',
+        'esapp.view.system.PCRoleAdmin',
         'esapp.view.system.PCModeAdmin',
         'esapp.view.system.PCVersionAdmin',
         'esapp.view.system.ThemaAdmin',
@@ -170,8 +171,12 @@ Ext.define("esapp.view.system.systemsettings",{
                 //console.info('failure');
             },
             success: function(record, operation) {
-                me.type_install = record.data.type_installation
+                me.type_install = record.data.type_installation;
+                me.pcrole = record.data.role;
 
+                if (me.pcrole == ''){
+                    Ext.getCmp('modify-role-btn').show();
+                }
                 var ipadresses_fieldset = Ext.getCmp('ipaddresses');
                 if (me.type_install == 'Full'){
                     ipadresses_fieldset.add(ip_pc1);
@@ -321,22 +326,49 @@ Ext.define("esapp.view.system.systemsettings",{
                     collapsible:false,
                     padding: 5,
                     defaults: {
-                        labelWidth: 100
+                        labelWidth: 100,
+                        layout: 'hbox'
                     },
                     items:[{
-                       id: 'type_of_install',
-                       name: 'type_of_install',
-                       bind: '{system_setting.type_installation}',
-                       xtype: 'displayfield',
-                       fieldLabel: me.form_fieldlabel_type_of_install,
-                       fieldStyle:'font-weight: bold;'
+                        xtype: 'container',
+                        items: [{
+                            id: 'type_of_install',
+                            name: 'type_of_install',
+                            bind: '{system_setting.type_installation}',
+                            xtype: 'displayfield',
+                            fieldLabel: me.form_fieldlabel_type_of_install,
+                            fieldStyle: 'font-weight: bold;'
+                        }]
                     },{
-                       id: 'role',
-                       name: 'role',
-                       bind: '{system_setting.role}',
-                       xtype: 'displayfield',
-                       fieldLabel: me.form_fieldlabel_role,
-                       fieldStyle:'font-weight: bold;'
+                        xtype: 'container',
+                        items: [{
+                            id: 'role',
+                            name: 'role',
+                            bind: '{system_setting.role}',
+                            xtype: 'displayfield',
+                            fieldLabel: me.form_fieldlabel_role,
+                            fieldStyle: 'font-weight: bold;',
+                            flex: 2.2
+                        },{
+                            xtype: 'button',
+                            id: 'modify-role-btn',
+                            hidden: true,
+                            text: esapp.Utils.getTranslation('modify'),    // 'Modify',
+                            flex: 0.8,
+                            iconCls: 'fa fa-pencil-square-o',
+                            style: { color: 'white' },
+                            // glyph: 'xf055@FontAwesome',
+                            //scale: 'medium',
+                            scope:me,
+                            handler: function(){
+                                var PCRoleAdminWin = new esapp.view.system.PCRoleAdmin({
+                                    params: {
+                                        currentrole: Ext.getCmp('role').getValue()
+                                    }
+                                });
+                                PCRoleAdminWin.show();
+                            }
+                        }]
                     }]
                 },{
                     xtype: 'fieldset',
@@ -368,7 +400,7 @@ Ext.define("esapp.view.system.systemsettings",{
                             handler: function(){
                                 var PCModeAdminWin = new esapp.view.system.PCModeAdmin({
                                     params: {
-                                        currentmode: Ext.getCmp('current_mode').getValue()
+                                        currentmode: Ext.getCmp('current_mode').getValue().toLowerCase()
                                     }
                                 });
                                 PCModeAdminWin.show();

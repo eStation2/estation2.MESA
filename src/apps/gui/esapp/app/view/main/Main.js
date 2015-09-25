@@ -119,6 +119,7 @@ Ext.define('esapp.view.main.Main', {
                            headerlogos.setHidden(false);
                            dashboardtab.up().down('container[id=acquisitionmaintab]').doLayout();
                            dashboardtab.up().down('container[id=datamanagementmaintab]').doLayout();
+                           //Ext.getCmp('dashboard-panel').getController().setupDashboard();
                            //dashboardtab.down('panel[id=dashboardpc2]').getController().checkStatusServices();
                        }
                     }
@@ -221,6 +222,22 @@ Ext.define('esapp.view.main.Main', {
                        activate: function (systemtab) {
                             var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
                             headerlogos.setHidden(false);
+
+                            var systemsettingsstore  = Ext.data.StoreManager.lookup('SystemSettingsStore');
+                            var formpanel = Ext.getCmp('systemsettingsview');
+                            var systemsettingsrecord = systemsettingsstore.getModel().load(0, {
+                                scope: formpanel,
+                                loadmask: true,
+                                failure: function(record, operation) {
+                                    //console.info('failure');
+                                },
+                                success: function(record, operation) {
+                                    if (operation.success){
+                                        formpanel.loadRecord(systemsettingsrecord);
+                                        formpanel.updateRecord();
+                                    }
+                                }
+                            });
                        }
                     }
                 }, {

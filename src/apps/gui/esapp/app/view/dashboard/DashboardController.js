@@ -29,6 +29,13 @@ Ext.define('esapp.view.dashboard.DashboardController', {
             pc2DisabledAll = true,
             pc3DisabledAll = true;
 
+        //var myMask = new Ext.LoadMask({
+        //    msg    : esapp.Utils.getTranslation('loading'),
+        //    target : pcs_container
+        //});
+        //
+        //myMask.show();
+
         this.getStore('dashboard').load({
             callback: function(records, options, success){
                 records.forEach(function(dashboard) {
@@ -42,6 +49,8 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                     me.PC2_postgresql_status = dashboard.get('PC2_postgresql_status');
                     me.PC2_version = dashboard.get('PC2_version');
                     me.PC2_disk_status = dashboard.get('PC2_disk_status');
+                    me.PC2_DBAutoSync = dashboard.get('PC2_DBAutoSync');
+                    me.PC2_DataAutoSync = dashboard.get('PC2_DataAutoSync');
 
                     me.PC3_service_eumetcast = dashboard.get('PC3_service_eumetcast');
                     me.PC3_service_internet = dashboard.get('PC3_service_internet');
@@ -53,6 +62,8 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                     me.PC3_postgresql_status = dashboard.get('PC3_postgresql_status');
                     me.PC3_version = dashboard.get('PC3_version');
                     me.PC3_disk_status = dashboard.get('PC3_disk_status');
+                    me.PC3_DBAutoSync = dashboard.get('PC3_DBAutoSync');
+                    me.PC3_DataAutoSync = dashboard.get('PC3_DataAutoSync');
 
                     me.activePC = dashboard.get('activePC');
                     me.PC1_connection = dashboard.get('PC1_connection');
@@ -67,13 +78,32 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                     var processingtab = Ext.getCmp('processingmaintab');
                     var datamanagementtab = Ext.getCmp('datamanagementmaintab');
                     var analysistab = Ext.getCmp('analysistab');
+                    var systemtab = Ext.getCmp('systemtab');
                     var maintabpanel = Ext.getCmp('maintabpanel');
 
                     var indexAcquisitionTab = 1;
                     var indexProcessingTab = 2;
                     var indexDataManagementTab = 3;
                     var indexAnalysisTab = 4; // maintabpanel.getTabBar().items.indexOf(analysistab);
+                    var indexSystemTab = 5;
 
+                    if (me.activePC == '') {
+                        maintabpanel.getTabBar().items.getAt(indexAcquisitionTab).hide();
+                        acquisitiontab.disable();
+
+                        maintabpanel.getTabBar().items.getAt(indexProcessingTab).hide();
+                        processingtab.disable();
+
+                        maintabpanel.getTabBar().items.getAt(indexDataManagementTab).hide();
+                        datamanagementtab.disable();
+
+                        maintabpanel.getTabBar().items.getAt(indexAnalysisTab).hide();
+                        analysistab.disable();
+
+                        maintabpanel.getTabBar().items.getAt(indexSystemTab).show();
+                        systemtab.enable();
+                        maintabpanel.setActiveTab(indexSystemTab);
+                    }
                     if (me.activePC == 'pc1') {
                         pc1Active = true;
                     }
@@ -139,6 +169,10 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                     me.PC2_modeText = esapp.Utils.getTranslation(me.PC2_mode);
                     me.PC3_modeText = esapp.Utils.getTranslation(me.PC3_mode);
 
+                    me.PC2_autosync_onoff = me.PC2_mode == 'recovery';
+                    me.PC3_autosync_onoff = me.PC3_mode == 'recovery';
+
+
                     PC1 = {
                         xtype: 'dashboard-pc1',
                         setdisabled:pc1Disabled,
@@ -155,6 +189,9 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                         activePC:pc2Active,
                         activeversion: me.PC2_version,
                         currentmode: me.PC2_modeText,
+                        autosync_onoff: me.PC2_autosync_onoff,
+                        dbautosync: me.PC2_DBAutoSync,
+                        datautosync: me.PC2_DataAutoSync,
                         diskstatus: me.PC2_disk_status,
                         dbstatus: me.PC2_postgresql_status,
                         internetconnection: me.PC2_internet_status,
@@ -174,6 +211,9 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                         setdisabledAll:pc3DisabledAll,
                         activePC: pc3Active,
                         activeversion: me.PC3_version,
+                        autosync_onoff: me.PC3_autosync_onoff,
+                        dbautosync: me.PC3_DBAutoSync,
+                        datautosync: me.PC3_DataAutoSync,
                         currentmode: me.PC3_modeText,
                         diskstatus: me.PC3_disk_status,
                         dbstatus: me.PC3_postgresql_status,
@@ -254,38 +294,6 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                 }
             }
         });
-
-        //this.getStore('dashboard').load();
-        //console.info(this.getStore('dashboard').getData());
-        //this.getStore('dashboard').getData().each(function(dashboard) {
-        //            me.PC2_internet_status = dashboard.get('PC2_internet_status');
-        //            me.PC2_mode = dashboard.get('PC2_mode');
-        //            me.PC2_postgresql_status = dashboard.get('PC2_postgresql_status');
-        //            me.PC2_version = dashboard.get('PC2_version');
-        //            me.PC3_internet_status = dashboard.get('PC3_internet_status');
-        //            me.PC3_mode = dashboard.get('PC3_mode');
-        //            me.PC3_postgresql_status = dashboard.get('PC3_postgresql_status');
-        //            me.PC3_version = dashboard.get('PC3_version');
-        //            me.activePC = dashboard.get('activePC');
-        //            me.pc1_connection = dashboard.get('pc1_connection');
-        //            me.pc3_connection = dashboard.get('pc3_connection');
-        //            me.type_installation = dashboard.get('type_installation');
-        //        });
-        //me.PC2_internet_status = true;
-        //me.PC2_mode = 'nominal';
-        //me.PC2_postgresql_status = true;
-        //me.PC2_version = '2.0.1';
-        //me.PC3_internet_status = false;
-        //me.PC3_mode = 'degradation';
-        //me.PC3_postgresql_status = false;
-        //me.PC3_version = '2.0.4';
-        //me.activePC = 'pc2';
-        //me.pc1_connection = true;
-        //me.pc3_connection = true;
-        //me.type_installation = 'full';
-
-        //var pcs_container = me.getReferences();
-        //var pcs_container = me.down('container[name=pcs_container]');
-
+        //myMask.hide();
     }
 });
