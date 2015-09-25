@@ -100,41 +100,53 @@ class TestMapSet(TestCase):
 
         self.assertTrue(os.path.isfile(file_eStation2))
 
-    def test_reading_meta_items_from_ds(self):
+    def test_reading_nodata_value(self):
+
+        myfile='/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi_linearx2/20000811_vgt-ndvi_ndvi_linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif'
+
+        sds_meta = SdsMetadata()
+
+        if os.path.exists(myfile):
+            nodata=sds_meta.get_nodata_value(myfile)
+            self.assertEqual(float(nodata), -32768)
+
+        else:
+            logger.info('Test file not existing: skip test')
+
+    def test_reading_meta_items_from_file(self):
 
         if os.path.exists(file):
-            # Read from a reference file
-            fid = gdal.Open(file)
-            sds_meta = SdsMetadata()
-            sds_meta.read_from_ds(fid)
-            sds_meta.print_out()
+             sds_meta = SdsMetadata()
+             # Read from a reference file
+             sds_meta.read_from_file(file)
+             sds_meta.print_out()
 
-            value = sds_meta.get_item('eStation2_mapset')
-            self.assertEqual(value, 'FEWSNET_Africa_8km')
+             value = sds_meta.get_item('eStation2_mapset')
+             self.assertEqual(value, 'FEWSNET_Africa_8km')
 
-            value = sds_meta.get_item('eStation2_nodata')
-            self.assertEqual(value, '-32768')
+             value = sds_meta.get_item('eStation2_nodata')
+             self.assertEqual(value, '-32768')
 
-            value = sds_meta.get_item('eStation2_es2_version')
-            self.assertEqual(value, 'my_eStation2_sw_release')
+             value = sds_meta.get_item('eStation2_es2_version')
+             self.assertEqual(value, 'my_eStation2_sw_release')
 
-            value = sds_meta.get_item('eStation2_conversion')
-            self.assertEqual(value, 'Phys = DN * scaling_factor + scaling_offset')
+             value = sds_meta.get_item('eStation2_conversion')
+             self.assertEqual(value, 'Phys = DN * scaling_factor + scaling_offset')
 
-            value = sds_meta.get_item('eStation2_input_files')
-            self.assertEqual(value, '/data/Archives/FewsNET/a14061rb.zip;')
+             value = sds_meta.get_item('eStation2_input_files')
+             self.assertEqual(value, '/data/Archives/FewsNET/a14061rb.zip;')
 
-            value = sds_meta.get_item('eStation2_subProduct')
-            self.assertEqual(value, 'rfe')
+             value = sds_meta.get_item('eStation2_subProduct')
+             self.assertEqual(value, 'rfe')
 
-            value = sds_meta.get_item('eStation2_product')
-            self.assertEqual(value, 'fewsnet_rfe')
+             value = sds_meta.get_item('eStation2_product')
+             self.assertEqual(value, 'fewsnet_rfe')
 
-            value = sds_meta.get_item('eStation2_scaling_factor')
-            self.assertEqual(value, '1.0')
+             value = sds_meta.get_item('eStation2_scaling_factor')
+             self.assertEqual(value, '1.0')
 
-            value = sds_meta.get_item('eStation2_unit')
-            self.assertEqual(value, None)
+             value = sds_meta.get_item('eStation2_unit')
+             self.assertEqual(value, None)
 
         else:
             logger.info('Test file not existing: skip test')
