@@ -195,7 +195,7 @@ def system_db_sync(list_syncs):
 
 def system_db_sync_full(pc_role):
 #   Manage the transition from Recovery to Nominal, by forcing a full sync of both DB schemas
-#   pc_role:    either PC2 or PC3
+#   pc_role:    role of my PC (either PC2 or PC3)
 
     logger.debug("Entering routine %s" % 'system_db_sync_full')
 
