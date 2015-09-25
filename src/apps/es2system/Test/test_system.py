@@ -112,10 +112,15 @@ class TestSystem(unittest.TestCase):
 
     def test_db_sync_full_from_PC2(self):
 
-        list_syncs = ['sync_pc2_analysis_full','sync_pc2_products_full']
+        list_syncs = ['sync_pc2_products_full','sync_pc2_analysis_full']
         status = es2system.system_db_sync(list_syncs)
 
     def test_db_sync_full_from_PC3(self):
 
         list_syncs = ['sync_pc3_analysis_full','sync_pc3_products_full']
         status = es2system.system_db_sync(list_syncs)
+
+    def test_system_db_sync_full(self):
+
+        # Should get here the role of my machine ...
+        status = es2system.system_db_sync_full('pc3')
