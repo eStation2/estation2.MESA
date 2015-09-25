@@ -5,6 +5,7 @@ Ext.define('esapp.view.system.PCModeAdminController', {
     ,changeMode: function() {
         var me = this.getView(),
             permitChangeMode = false,
+            waitForFullSync = false,
             otherPCMode = '',
             currentmode = me.params.currentmode,
             newmode = Ext.getCmp('modesradiogroup').getValue().mode,
@@ -18,19 +19,13 @@ Ext.define('esapp.view.system.PCModeAdminController', {
             otherPCMode = dashboard.PC2_mode;
         }
 
-        console.info("current mode:" + currentmode);
-        console.info("new mode:" + newmode);
-        console.info("other pc mode:" + otherPCMode);
-
         if (currentmode == 'nominal' && newmode == 'recovery'){
 
             if (dashboard.PC23_connection) {
                 if (otherPCMode == 'nominal') {
-                    //Ext.Msg.alert('Mode can NOT be changed!', 'Mode can NOT be changed to Recovery because the other PC is still reachable and in Nominal Mode!');
                     permitChangeMode = false
                 }
                 if (otherPCMode == 'recovery') {
-                    //Ext.Msg.alert('Mode can NOT be changed!', 'Mode can NOT be changed to Recovery because the other PC is still reachable and in Recovery Mode!');
                     permitChangeMode = false
                 }
                 if (otherPCMode == 'maintenance') {
@@ -59,6 +54,7 @@ Ext.define('esapp.view.system.PCModeAdminController', {
                 }
                 if (otherPCMode == 'maintenance') {
                     permitChangeMode = true
+                    waitForFullSync = true
                 }
             }
             else {
@@ -94,21 +90,27 @@ Ext.define('esapp.view.system.PCModeAdminController', {
             permitChangeMode = false
         }
 
-        console.info("permit change mode:" + newmode);
         if (permitChangeMode){
-            console.info(me.getController());
-            me.getController().setMode(newmode)
+            me.getController().setMode(newmode, waitForFullSync)
         }
         else {
             Ext.Msg.alert('Mode can NOT be changed!',
-                'Mode can NOT be changed to ' + esapp.Utils.getTranslation(newmode) + ' because the other PC is still reachable and in ' + esapp.Utils.getTranslation(otherPCMode) + ' Mode!');
+                'You cannot change to ' + esapp.Utils.getTranslation(newmode) + ' while the other PC is in ' + esapp.Utils.getTranslation(otherPCMode) + '!');
         }
 
     },
 
-    setMode: function(newmode) {
+    setMode: function(newmode, waitForFullSync) {
         var me = this;
 
+        if (waitForFullSync){
+            var myMask = new Ext.LoadMask({
+                msg    : 'Syncing Data and Settings to the other PC. This may take a while, please be patient.',
+                target : Ext.getCmp('systemsettingsview')
+            });
+            me.getView().hide();
+            myMask.show();
+        }
         Ext.Ajax.request({
             method: 'GET',
             url: 'systemsettings/changemode',
@@ -118,10 +120,15 @@ Ext.define('esapp.view.system.PCModeAdminController', {
             success: function(response, opts){
                 var result = Ext.JSON.decode(response.responseText);
                 //console.info(result);
+                if (waitForFullSync) {
+                    myMask.hide();
+                    me.getView().show();
+                }
                 if (result.success){
-                    Ext.toast({ html: esapp.Utils.getTranslation('systemmodesetto') + " " + newmode,
-                                title: esapp.Utils.getTranslation('modechanged'),
-                                width: 200, align: 't' });
+                    Ext.Msg.alert(esapp.Utils.getTranslation('modechanged'), result.message);
+                    //Ext.toast({ html: esapp.Utils.getTranslation('systemmodesetto') + " " + newmode,
+                    //            title: esapp.Utils.getTranslation('modechanged'),
+                    //            width: 200, align: 't' });
 
                     var systemsettingsstore  = Ext.data.StoreManager.lookup('SystemSettingsStore');
                     var systemsettingsrecord = systemsettingsstore.getModel().load(0, {
@@ -147,7 +154,6 @@ Ext.define('esapp.view.system.PCModeAdminController', {
                     //            title: "Mode NOT changed!",
                     //            width: 200, align: 't' });
                 }
-
             },
             failure: function(response, opts) {
                 console.info(response.status);

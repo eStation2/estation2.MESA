@@ -17,7 +17,7 @@ import web
 import datetime
 import json
 import glob
-# import re
+import time
 
 # import config
 from config import es_constants
@@ -1394,6 +1394,7 @@ class ChangeMode:
             PC23_connection = False
             Other_PC_mode = None
             permitChangeMode = False
+            message = 'Changing to Mode NOT possible!'
 
             # TODO: Use port 80?
             IP_port = ':22'
@@ -1470,21 +1471,32 @@ class ChangeMode:
 
             if permitChangeMode:
                 functions.setSystemSetting('mode', getparams['mode'])
+                message = 'Mode changed!'
+
+                # Set Data and DB sync.
                 if newmode == 'recovery':
                     functions.setSystemSetting('data_sync', 'false')
                     functions.setSystemSetting('db_sync', 'false')
                 elif newmode == 'nominal':
                     functions.setSystemSetting('data_sync', 'true')
                     functions.setSystemSetting('db_sync', 'true')
+                elif newmode == 'maintenance':
+                    functions.setSystemSetting('data_sync', 'false')
+                    functions.setSystemSetting('db_sync', 'false')
+
+                # Specific transition actions
+                if This_PC_mode == 'recovery' and newmode == 'nominal':
+                    time.sleep(5)
+                    message = 'Data and Settings Synchronized to the other PC. You must now put the other PC in Nominal mode!'
 
                 # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
                 from lib.python import reloadmodules
                 reloadmodules.reloadallmodules()
                 # Reloading the settings does not work well so set manually
 
-                changemode_json = '{"success":"true", "message":"Mode changed!"}'
+                changemode_json = '{"success":"true", "message":"'+message+'"}'
             else:
-                changemode_json = '{"success":false, "message":"Changing to Mode NOT possible!"}'
+                changemode_json = '{"success":false, "message":"'+message+'"}'
 
         else:
             changemode_json = '{"success":false, "error":"No mode given!"}'
