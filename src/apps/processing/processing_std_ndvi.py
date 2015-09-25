@@ -1063,9 +1063,9 @@ def processing_std_ndvi(pipeline_run_level=0, pipeline_run_touch_only=0, pipelin
 
     if pipeline_run_level > 0:
         pipeline_run(verbose=pipeline_run_level, touch_files_only=pipeline_run_touch_only, multiprocess=multiprocess)
-    fout=open('/data/processing/ruffus_printout.txt','w')
+    #fout=open('/data/processing/ruffus_printout.txt','w')
     if pipeline_printout_level > 0:
-        pipeline_printout(verbose=pipeline_printout_level, output_stream=fout)
+        pipeline_printout(verbose=pipeline_printout_level) #, output_stream=fout)
 
     if pipeline_printout_graph_level > 0:
         pipeline_printout_graph('flowchart.jpg')
