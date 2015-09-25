@@ -188,10 +188,10 @@ def system_db_sync(list_syncs):
                 command = ['bucardo', 'deactivate', sync]
                 p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 out, err=p.communicate()
-                logger.info("Activating bucardo sync returned: %s" % out)
+                logger.info("De-activating bucardo sync returned: %s" % out)
                 # Check error
                 if err:
-                    logger.warning('Bucardo activation returned err: %s' % err)
+                    logger.warning('Bucardo de-activation returned err: %s' % err)
 
 def system_db_sync_full(pc_role):
 #   Manage the transition from Recovery to Nominal, by forcing a full sync of both DB schemas
@@ -521,6 +521,10 @@ def loop_system(dry_run=False):
                 # Call the function
                 system_db_sync(list_rsyncs)
                 # check_delay_time(operation, delay_minutes=delay_db_sync_minutes, write=True)
+
+        # De-activate all syncs
+        if (len(schemas_db_sync) > 0) or not do_db_sync:
+            system_db_sync([])
 
         # DB dump
         operation = 'db_dump'
