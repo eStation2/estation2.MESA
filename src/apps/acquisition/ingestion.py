@@ -1308,7 +1308,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # Generate the output file
         # -------------------------------------------------------------------------
         # Prepare output driver
-        out_driver = gdal.GetDriverByName(es_constants.ES2_OUTFILE_FORMAT, options=['compress=LZW'])
+        out_driver = gdal.GetDriverByName(es_constants.ES2_OUTFILE_FORMAT)
 
         # Do re-projection, or write to GTIFF file
         if reprojection == 1:
