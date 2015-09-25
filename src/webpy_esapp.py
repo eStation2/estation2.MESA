@@ -1393,6 +1393,7 @@ class ChangeMode:
             This_PC_mode = systemsettings['mode'].lower()
             PC23_connection = False
             Other_PC_mode = None
+            IP_other_PC = None
             permitChangeMode = False
             message = 'Changing to Mode NOT possible!'
 
@@ -1404,6 +1405,7 @@ class ChangeMode:
                 if systemsettings['role'].lower() == 'pc2':
                     # Check connection to PC3
                     PC23_connection = functions.check_connection(systemsettings['ip_pc3'] + IP_port)
+                    IP_other_PC = systemsettings['ip_pc3']
 
                     if PC23_connection:
                         status_PC3 = functions.get_remote_system_status(systemsettings['ip_pc3'])
@@ -1417,6 +1419,8 @@ class ChangeMode:
 
                     # Check connection to PC2
                     PC23_connection = functions.check_connection(systemsettings['ip_pc2'] + IP_port)
+                    IP_other_PC = systemsettings['ip_pc2']
+
                     if PC23_connection:
                         status_PC2 = functions.get_remote_system_status(systemsettings['ip_pc2'])
                         if 'mode' in status_PC2:
@@ -1486,7 +1490,13 @@ class ChangeMode:
 
                 # Specific transition actions
                 if This_PC_mode == 'recovery' and newmode == 'nominal':
-                    time.sleep(5)
+                    source = es_constants.es2globals['processing_dir']
+                    target = IP_other_PC+'::products'+es_constants.es2globals['processing_dir']
+
+                    statusdatasync = es2system.system_data_sync(source, target)
+
+                    statusdbsync = es2system.system_db_sync_full(systemsettings['role'].lower())
+                    
                     message = 'Data and Settings Synchronized to the other PC. You must now put the other PC in Nominal mode!'
 
                 # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
