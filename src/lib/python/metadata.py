@@ -269,6 +269,23 @@ class SdsMetadata:
             logger.warning('File %s does not exist. Exit' % input_file)
             return None
 
+    def get_nodata_value(self, input_file):
+
+    # Given a .GTiff file, reads its metadata and extract NoData value
+
+    # Check the file exists
+        if os.path.isfile(input_file):
+            try:
+                self.read_from_file(input_file)
+            except:
+                logger.warning('Error in loading from file %s . Exit' % input_file)
+
+            nodata_value = sds_metadata['eStation2_nodata']
+            return nodata_value
+        else:
+            logger.warning('File %s does not exist. Exit' % input_file)
+            return None
+
 
     def print_out(self):
     #
