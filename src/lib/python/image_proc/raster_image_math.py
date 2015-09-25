@@ -58,6 +58,14 @@ def do_avg_image(input_file='', output_file='', input_nodata=None, output_nodata
     options_list = [es_constants.ES2_OUTFILE_OPTIONS]
     options_list.append(options)
 
+    # Try and assign input_nodata if it is UNDEF
+    if input_nodata is None:
+        sds_meta = metadata.SdsMetadata()
+        if os.path.exists(input_list[0]):
+            input_nodata=float(sds_meta.get_nodata_value(input_list[0]))
+        else:
+            logger.info('Test file not existing: do not assign metadata')
+
     # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
     if output_nodata is None and input_nodata is not None:
         output_nodata = input_nodata
@@ -204,6 +212,14 @@ def do_min_image(input_file='', output_file='', input_nodata=None, output_nodata
     projection = f1Fid.GetProjection()
     driver_type=f1Fid.GetDriver().ShortName
 
+    # Try and assign input_nodata if it is UNDEF
+    if input_nodata is None:
+        sds_meta = metadata.SdsMetadata()
+        if os.path.exists(input_list[0]):
+            input_nodata=float(sds_meta.get_nodata_value(input_list[0]))
+        else:
+            logger.info('Test file not existing: do not assign metadata')
+
     # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
     if output_nodata is None and input_nodata is not None:
         output_nodata = input_nodata
@@ -320,6 +336,14 @@ def do_max_image(input_file='', output_file='', input_nodata=None, output_nodata
     geoTransform = f1Fid.GetGeoTransform()
     projection = f1Fid.GetProjection()
     driver_type=f1Fid.GetDriver().ShortName
+
+    # Try and assign input_nodata if it is UNDEF
+    if input_nodata is None:
+        sds_meta = metadata.SdsMetadata()
+        if os.path.exists(input_list[0]):
+            input_nodata=float(sds_meta.get_nodata_value(input_list[0]))
+        else:
+            logger.info('Test file not existing: do not assign metadata')
 
     # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
     if output_nodata is None and input_nodata is not None:
@@ -446,6 +470,14 @@ def do_med_image(input_file='', output_file='', input_nodata=None, output_nodata
     projection = f1Fid.GetProjection()
     driver_type=f1Fid.GetDriver().ShortName
 
+    # Try and assign input_nodata if it is UNDEF
+    if input_nodata is None:
+        sds_meta = metadata.SdsMetadata()
+        if os.path.exists(input_list[0]):
+            input_nodata=float(sds_meta.get_nodata_value(input_list[0]))
+        else:
+            logger.info('Test file not existing: do not assign metadata')
+
     # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
     if output_nodata is None and input_nodata is not None:
         output_nodata = input_nodata
@@ -531,6 +563,14 @@ def do_oper_subtraction(input_file='', output_file='', input_nodata=None, output
     projection = fid0.GetProjection()
     driver_type=fid0.GetDriver().ShortName
 
+    # Try and assign input_nodata if it is UNDEF
+    if input_nodata is None:
+        sds_meta = metadata.SdsMetadata()
+        if os.path.exists(input_file[0]):
+            input_nodata=float(sds_meta.get_nodata_value(input_file[0]))
+        else:
+            logger.info('Test file not existing: do not assign metadata')
+
     # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
     if output_nodata is None and input_nodata is not None:
         output_nodata = input_nodata
@@ -611,7 +651,15 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
     geoTransform = fid0.GetGeoTransform()
     projection = fid0.GetProjection()
     driver_type=fid0.GetDriver().ShortName
-    
+
+    # Try and assign input_nodata if it is UNDEF
+    if input_nodata is None:
+        sds_meta = metadata.SdsMetadata()
+        if os.path.exists(input_file[0]):
+            input_nodata=float(sds_meta.get_nodata_value(input_file[0]))
+        else:
+            logger.info('Test file not existing: do not assign metadata')
+
     # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
     if output_nodata is None and input_nodata is not None:
         output_nodata = input_nodata
@@ -696,6 +744,14 @@ def do_oper_scalar_multiplication(input_file='', output_file='', scalar=1, input
     projection = fid0.GetProjection()
     driver_type=fid0.GetDriver().ShortName
 
+    # Try and assign input_nodata if it is UNDEF
+    if input_nodata is None:
+        sds_meta = metadata.SdsMetadata()
+        if os.path.exists(input_file[0]):
+            input_nodata=float(sds_meta.get_nodata_value(input_file[0]))
+        else:
+            logger.info('Test file not existing: do not assign metadata')
+
     # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
     if output_nodata is None and input_nodata is not None:
         output_nodata = input_nodata
@@ -765,6 +821,14 @@ def do_make_vci(input_file='', min_file='', max_file='', output_file='', input_n
     geoTransform = fileFID.GetGeoTransform()
     projection = fileFID.GetProjection()
     driver_type=fileFID.GetDriver().ShortName
+
+    # Try and assign input_nodata if it is UNDEF
+    if input_nodata is None:
+        sds_meta = metadata.SdsMetadata()
+        if os.path.exists(input_file):
+            input_nodata=float(sds_meta.get_nodata_value(input_file))
+        else:
+            logger.info('Test file not existing: do not assign metadata')
 
     # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
     if output_nodata is None and input_nodata is not None:
@@ -869,6 +933,14 @@ def do_make_baresoil(input_file='', min_file='', max_file='', output_file='', in
     geoTransform = fileFID.GetGeoTransform()
     projection = fileFID.GetProjection()
     driver_type=fileFID.GetDriver().ShortName
+
+    # Try and assign input_nodata if it is UNDEF
+    if input_nodata is None:
+        sds_meta = metadata.SdsMetadata()
+        if os.path.exists(input_file):
+            input_nodata=float(sds_meta.get_nodata_value(input_file))
+        else:
+            logger.info('Test file not existing: do not assign metadata')
 
     # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
     if output_nodata is None and input_nodata is not None:
@@ -1046,6 +1118,14 @@ def do_cumulate(input_file='', output_file='', input_nodata=None, output_nodata=
     projection = fid0.GetProjection()
     driver_type=fid0.GetDriver().ShortName
 
+    # Try and assign input_nodata if it is UNDEF
+    if input_nodata is None:
+        sds_meta = metadata.SdsMetadata()
+        if os.path.exists(input_file[0]):
+            input_nodata=float(sds_meta.get_nodata_value(input_file[0]))
+        else:
+            logger.info('Test file not existing: do not assign metadata')
+
     # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
     if output_nodata is None and input_nodata is not None:
         output_nodata = input_nodata
@@ -1173,6 +1253,14 @@ def do_compute_perc_diff_vs_avg(input_file='', avg_file='', output_file='', inpu
     geoTransform = fileFID.GetGeoTransform()
     projection = fileFID.GetProjection()
     driver_type=fileFID.GetDriver().ShortName
+
+    # Try and assign input_nodata if it is UNDEF
+    if input_nodata is None:
+        sds_meta = metadata.SdsMetadata()
+        if os.path.exists(input_file):
+            input_nodata=float(sds_meta.get_nodata_value(input_file))
+        else:
+            logger.info('Test file not existing: do not assign metadata')
 
     # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
     if output_nodata is None and input_nodata is not None:
@@ -1371,6 +1459,14 @@ def do_ts_linear_filter(input_file='', before_file='', after_file='', output_fil
     geoTransform = f0.GetGeoTransform()
     projection = f0.GetProjection()
     driver_type=f0.GetDriver().ShortName
+
+    # Try and assign input_nodata if it is UNDEF
+    if input_nodata is None:
+        sds_meta = metadata.SdsMetadata()
+        if os.path.exists(input_file):
+            input_nodata=float(sds_meta.get_nodata_value(input_file))
+        else:
+            logger.info('Test file not existing: do not assign metadata')
 
     # manage out_type (take the input one as default)
     if output_type is None:
