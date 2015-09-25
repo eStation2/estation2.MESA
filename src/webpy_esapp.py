@@ -1460,7 +1460,7 @@ class ChangeMode:
                     if Other_PC_mode == 'maintenance':
                         permitChangeMode = False
                 else:
-                    permitChangeMode = False
+                    permitChangeMode = True
 
             elif This_PC_mode == 'maintenance' and newmode == 'recovery':
                 permitChangeMode = False

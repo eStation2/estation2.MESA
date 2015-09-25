@@ -85,7 +85,7 @@ Ext.define('esapp.view.system.PCModeAdminController', {
                 }
             }
             else {
-                permitChangeMode = false
+                permitChangeMode = true
             }
         }
 
