@@ -130,7 +130,7 @@ def create_pipeline(starting_sprod):
 #   ---------------------------------------------------------------------
 #   Run the pipeline
 
-def processing_modis_kd490(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
+def processing_modis_kd490(pipeline_run_level=0,pipeline_printout_level=0,
                            pipeline_printout_graph_level=0):
 
     create_pipeline(starting_sprod='kd490-day')
@@ -138,7 +138,7 @@ def processing_modis_kd490(pipeline_run_level=0,pipeline_run_touch_only=0, pipel
     logger.info("Entering routine %s" % 'processing_modis kd490-day')
     if pipeline_run_level > 0:
         logger.info("Now calling pipeline_run")
-        pipeline_run(verbose=pipeline_run_level, touch_files_only=pipeline_run_touch_only)
+        pipeline_run(verbose=pipeline_run_level)
     
     if pipeline_printout_level > 0:
         

@@ -485,7 +485,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 #   Run the pipeline
 
 
-def processing_std_precip(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
+def processing_std_precip(pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None, update_stats=False, nrt_products=True, write2file=None):
 
@@ -500,7 +500,7 @@ def processing_std_precip(pipeline_run_level=0,pipeline_run_touch_only=0, pipeli
     else:
         fwrite_id=None
     if pipeline_run_level > 0:
-        pipeline_run(verbose=pipeline_run_level, touch_files_only=pipeline_run_touch_only)
+        pipeline_run(verbose=pipeline_run_level)
 
     if pipeline_printout_level > 0:
         pipeline_printout(verbose=pipeline_printout_level, output_stream=fwrite_id)
@@ -513,12 +513,11 @@ def processing_std_precip(pipeline_run_level=0,pipeline_run_touch_only=0, pipeli
 
     return proc_lists
 
-def processing_std_precip_stats_only(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
+def processing_std_precip_stats_only(pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None,write2file=None):
 
     proc_lists = processing_std_precip(pipeline_run_level=pipeline_run_level,
-                          pipeline_run_touch_only=pipeline_run_touch_only,
                           pipeline_printout_level=pipeline_printout_level,
                           pipeline_printout_graph_level=pipeline_printout_graph_level,
                           prod=prod,
@@ -532,12 +531,11 @@ def processing_std_precip_stats_only(pipeline_run_level=0,pipeline_run_touch_onl
 
     return proc_lists
 
-def processing_std_precip_prods_only(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
+def processing_std_precip_prods_only(pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None,write2file=None):
 
     proc_lists = processing_std_precip(pipeline_run_level=pipeline_run_level,
-                          pipeline_run_touch_only=pipeline_run_touch_only,
                           pipeline_printout_level=pipeline_printout_level,
                           pipeline_printout_graph_level=pipeline_printout_graph_level,
                           prod=prod,
@@ -551,12 +549,11 @@ def processing_std_precip_prods_only(pipeline_run_level=0,pipeline_run_touch_onl
 
     return proc_lists
 
-def processing_std_precip_all(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
+def processing_std_precip_all(pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None,write2file=None):
 
     proc_lists = processing_std_precip(pipeline_run_level=pipeline_run_level,
-                          pipeline_run_touch_only=pipeline_run_touch_only,
                           pipeline_printout_level=pipeline_printout_level,
                           pipeline_printout_graph_level=pipeline_printout_graph_level,
                           prod=prod,

@@ -1050,7 +1050,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     return proc_lists
 #   ---------------------------------------------------------------------
 #   Run the pipeline
-def processing_std_ndvi(pipeline_run_level=0, pipeline_run_touch_only=0, pipeline_printout_level=0,
+def processing_std_ndvi(pipeline_run_level=0, pipeline_printout_level=0,
                         pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                         starting_dates=None, update_stats=False, nrt_products=True):
 
@@ -1062,7 +1062,7 @@ def processing_std_ndvi(pipeline_run_level=0, pipeline_run_touch_only=0, pipelin
     logger.info("pipeline_run_level %i" % pipeline_run_level)
 
     if pipeline_run_level > 0:
-        pipeline_run(verbose=pipeline_run_level, touch_files_only=pipeline_run_touch_only, multiprocess=multiprocess)
+        pipeline_run(verbose=pipeline_run_level, multiprocess=multiprocess)
     #fout=open('/data/processing/ruffus_printout.txt','w')
     if pipeline_printout_level > 0:
         pipeline_printout(verbose=pipeline_printout_level) #, output_stream=fout)
@@ -1073,12 +1073,11 @@ def processing_std_ndvi(pipeline_run_level=0, pipeline_run_touch_only=0, pipelin
     return proc_lists
 
 
-def processing_std_ndvi_stats_only(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
+def processing_std_ndvi_stats_only(pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None):
 
     proc_lists = processing_std_ndvi(pipeline_run_level=pipeline_run_level,
-                                                               pipeline_run_touch_only=pipeline_run_touch_only,
                                                                pipeline_printout_level=pipeline_printout_level,
                                                                pipeline_printout_graph_level=pipeline_printout_graph_level,
                                                                prod=prod,
@@ -1091,12 +1090,11 @@ def processing_std_ndvi_stats_only(pipeline_run_level=0,pipeline_run_touch_only=
 
     return proc_lists
 
-def processing_std_ndvi_prods_only(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
+def processing_std_ndvi_prods_only(pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None):
 
     proc_lists = processing_std_ndvi(pipeline_run_level=pipeline_run_level,
-                                                               pipeline_run_touch_only=pipeline_run_touch_only,
                                                                pipeline_printout_level=pipeline_printout_level,
                                                                pipeline_printout_graph_level=pipeline_printout_graph_level,
                                                                prod=prod,
@@ -1109,12 +1107,11 @@ def processing_std_ndvi_prods_only(pipeline_run_level=0,pipeline_run_touch_only=
 
     return proc_lists
 
-def processing_std_ndvi_all(pipeline_run_level=0,pipeline_run_touch_only=0, pipeline_printout_level=0,
+def processing_std_ndvi_all(pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None):
 
     proc_lists = processing_std_ndvi(pipeline_run_level=pipeline_run_level,
-                                                               pipeline_run_touch_only=pipeline_run_touch_only,
                                                                pipeline_printout_level=pipeline_printout_level,
                                                                pipeline_printout_graph_level=pipeline_printout_graph_level,
                                                                prod=prod,
