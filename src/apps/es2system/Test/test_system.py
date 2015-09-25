@@ -123,4 +123,4 @@ class TestSystem(unittest.TestCase):
     def test_system_db_sync_full(self):
 
         # Should get here the role of my machine ...
-        status = es2system.system_db_sync_full('pc3')
+        status = es2system.system_db_sync_full('pc2')

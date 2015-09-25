@@ -1496,7 +1496,7 @@ class ChangeMode:
                     statusdatasync = es2system.system_data_sync(source, target)
 
                     statusdbsync = es2system.system_db_sync_full(systemsettings['role'].lower())
-                    
+
                     message = 'Data and Settings Synchronized to the other PC. You must now put the other PC in Nominal mode!'
 
                 # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
