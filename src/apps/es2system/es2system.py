@@ -175,9 +175,11 @@ def system_db_sync(list_syncs):
                 command = ['bucardo', 'activate', sync]
                 p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 out, err = p.communicate()
-
+                logger.info("Activating bucardo sync returned: %s" % out)
                 # Check error
-
+                if err:
+                    logger.warning('Bucardo activation returned err: %s' % err)
+                time.sleep(0.5)
     # De-activate the active rsync, not in the passed list
     if len(list_active_syncs) > 0:
         for sync in list_active_syncs:
@@ -186,8 +188,70 @@ def system_db_sync(list_syncs):
                 command = ['bucardo', 'deactivate', sync]
                 p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 out, err=p.communicate()
+                logger.info("Activating bucardo sync returned: %s" % out)
                 # Check error
+                if err:
+                    logger.warning('Bucardo activation returned err: %s' % err)
 
+def system_db_sync_full(pc_role):
+#   Manage the transition from Recovery to Nominal, by forcing a full sync of both DB schemas
+#   pc_role:    either PC2 or PC3
+
+    logger.debug("Entering routine %s" % 'system_db_sync_full')
+
+    # Detect PC -> set sync to be executed
+    if pc_role=='pc2':
+        list_syncs = ['sync_pc2_products_full','sync_pc2_analysis_full']
+    elif pc_role=='pc3':
+        list_syncs = ['sync_pc3_products_full','sync_pc3_analysis_full']
+
+    # Check that bucardo is running
+    command = ['bucardo','status']
+    p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = p.communicate()
+    if not re.search('PID', out):
+        logger.error("Bucardo is not running - DB sync not possible")
+        return 1
+
+    # Get list of active rsyncs
+    command = ['bucardo', 'list', 'sync']
+    p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = p.communicate()
+    list_active_syncs = []
+    # Active rsync are identified as: Sync "sync_pc2_analysis"  Relgroup "rel_analysis"        [Active]
+    for line in out.split('\n'):
+        found=re.match('Sync\s*\"(.+?)\".*\[Active\]', line)
+        if found:
+            list_active_syncs.append(found.group(1))
+
+    # Activate the list of full syncs
+    if len(list_syncs) > 0:
+        for sync in list_syncs:
+            if sync not in list_active_syncs:
+                logger.info("Activating bucardo sync: %s" % sync)
+                command = ['bucardo', 'activate', sync]
+                p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                out, err = p.communicate()
+                logger.info("Activating bucardo sync returned: %s" % out)
+                # Check error
+                if err:
+                    logger.warning('Bucardo activation returned err: %s' % err)
+                time.sleep(0.5)
+
+    # Wait a second
+    time.sleep(10)
+
+    # De-activate the list of full syncs
+    if len(list_syncs) > 0:
+        for sync in list_syncs:
+            logger.info("De-activating bucardo sync: %s" % sync)
+            command = ['bucardo', 'deactivate', sync]
+            p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            out, err=p.communicate()
+            logger.info("De-activating bucardo sync returned: %s" % out)
+            # Check error
+            if err:
+                logger.warning('Bucardo activation returned err: %s' % err)
 
 def system_db_dump(list_dump):
 #   Dump the database schemas (for backup)
@@ -204,7 +268,6 @@ def system_db_dump(list_dump):
             status =+ os.system(command)
 
         return status
-
 
 
 def system_create_report(target_file=None):
