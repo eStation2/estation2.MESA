@@ -43,8 +43,8 @@ dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'der
 def get_remote_system_status(server_address):
     from urllib2 import Request, urlopen, URLError
     status_remote_machine = []
-    # ToDo: Set "/esapp" in factorysettings as webserver_root because on CentOS no /esapp is needed!
-    url = "http://" + server_address + "/dashboard/systemstatus"
+    # Set "/esapp" in factorysettings.ini as webserver_root because on CentOS no /esapp is needed!
+    url = "http://" + server_address + es_constants.es2globals['webserver_root'] + "/dashboard/systemstatus"
     req = Request(url)
     try:
         response = urlopen(req)
@@ -81,10 +81,10 @@ def check_connection(server_info):
 
 def getStatusPostgreSQL():
     # Get status of postgresql
-    command = ['/etc/init.d/postgresql-9.3', 'status']
+    command = [es_constants.es2globals['postgresql_executable'], 'status']  # /etc/init.d/postgresql-9.3  on CentOS
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
-    if re.search('online', out) or  re.search('en cours', out):
+    if re.search('online', out) or re.search('en cours', out):      # ToDo: Add Portuguese!
         psql_status = True
     else:
         psql_status = False
