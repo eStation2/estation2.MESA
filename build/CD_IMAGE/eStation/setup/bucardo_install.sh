@@ -6,8 +6,8 @@
 
 echo "$(date +'%Y-%m-%d %H:%M:%S') Install bucardo from /media/cdrom"
 
-file_tgz='Bucardo-5.3.1.tar.gz'
-bucardo_tgz="/media/cdrom/eStation/Tarball/${file_tgz}"
+file_tgz='Bucardo-5.4.1.tar.gz'
+bucardo_tgz="/home/analyst/${file_tgz}"
 target_dir="/usr/lib/bucardo/"
 log_dir="/var/log/bucardo"
 run_dir="/var/run/bucardo"
@@ -20,7 +20,7 @@ if [ -f ${bucardo_tgz} ]; then
 	gunzip ${file_tgz}
 	tar -xvf "${file_tgz%.*}"	
 	echo "$(date +'%Y-%m-%d %H:%M:%S') Bucardo files extracted"
-	cd Bucardo-5.3.1
+	cd Bucardo-5.4.1
 	# Build the package
 	perl Makefile.PL
 	make 
@@ -28,7 +28,7 @@ if [ -f ${bucardo_tgz} ]; then
 	echo "$(date +'%Y-%m-%d %H:%M:%S') Bucardo package ready to install"
 	# Install the package
 	mkdir -p /var/log/bucardo
-	bucardo install --batch --dbname estationdb --dbhost localhost
+	./bucardo install --batch --dbname estationdb --dbhost localhost
 	echo "$(date +'%Y-%m-%d %H:%M:%S') Bucardo package installed"
 	# Create log and run dir
     mkdir -p ${log_dir}

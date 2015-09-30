@@ -44,7 +44,7 @@ def get_remote_system_status(server_address):
     from urllib2 import Request, urlopen, URLError
     status_remote_machine = []
     # ToDo: Set "/esapp" in factorysettings as webserver_root because on CentOS no /esapp is needed!
-    url = "http://" + server_address + "/esapp/dashboard/systemstatus"
+    url = "http://" + server_address + "/dashboard/systemstatus"
     req = Request(url)
     try:
         response = urlopen(req)
@@ -81,10 +81,10 @@ def check_connection(server_info):
 
 def getStatusPostgreSQL():
     # Get status of postgresql
-    command = ['/etc/init.d/postgresql', 'status']
+    command = ['/etc/init.d/postgresql-9.3', 'status']
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
-    if re.search('online', out):
+    if re.search('online', out) or  re.search('en cours', out):
         psql_status = True
     else:
         psql_status = False
