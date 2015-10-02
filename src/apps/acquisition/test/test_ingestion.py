@@ -7,6 +7,9 @@ from database import querydb
 import unittest
 import os
 # Overwrite Dirs
+from lib.python import es_logging as log
+logger = log.my_logger(__name__)
+
 
 class TestIngestion(unittest.TestCase):
 
@@ -15,35 +18,6 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(1, 1)
 
 
-    def test_ingest_vgt_ndvi(self):
-        
-        productcode = 'vgt_ndvi'
-        productversion = 'undefined'
-        subproductcode = 'ndvi_native'
-        mapsetcode = 'WGS84_Africa_1km'
-        
-        product = {"productcode": productcode,
-                   "version": productversion}
-        args = {"productcode": productcode,
-                "subproductcode": subproductcode,
-                "datasource_descr_id": '',
-                "version": productversion}
-        
-        product_in_info = querydb.get_product_in_info(echo=echo_query, **args)
-
-        re_process = product_in_info.re_process
-        re_extract = product_in_info.re_extract
-
-        sprod = {'subproduct': ingest.subproductcode,
-                             'mapsetcode': ingest.mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
-
-        subproducts.append(sprod)
-        
-        ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, echo_query=echo_query)
-
-        self.assertEqual(1, 1)
 
     def test_ingest_modis_firms_nasa(self):
 
@@ -92,6 +66,154 @@ class TestIngestion(unittest.TestCase):
 
         #print('['+command+']')
         os.system(command)
+
+    def test_ingest_modis_sst_netcdf(self):
+
+        date_fileslist = ['/data/ingest/A2015189.L3m_DAY_SST_sst_4km.nc']
+        in_date = '2015189'
+        productcode = 'modis-sst'
+        productversion = 'v2013.1'
+        subproductcode = 'sst-day'
+        mapsetcode = 'MODIS-Africa-4km'
+        datasource_descrID='GSFC:CGI:MODIS:SST:1D'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
+                                                                              source_id=datasource_descrID):
+
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+            self.assertEqual(1, 1)
+
+    def test_ingest_modis_chlor_netcdf(self):
+
+        date_fileslist = ['/data/ingest/A2015189.L3m_DAY_CHL_chlor_a_4km.nc']
+        in_date = '2015189'
+        productcode = 'modis-chla'
+        productversion = 'v2013.1'
+        subproductcode = 'chla-day'
+        mapsetcode = 'MODIS-Africa-4km'
+        datasource_descrID='GSFC:CGI:MODIS:CHLA:1D'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
+                                                                              source_id=datasource_descrID):
+
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+            self.assertEqual(1, 1)
+    def test_ingest_modis_kd490_netcdf(self):
+
+        date_fileslist = ['/data/ingest/A2015189.L3m_DAY_KD490_Kd_490_4km.nc']
+        in_date = '2015189'
+        productcode = 'modis-kd490'
+        productversion = 'v2012.0'
+        subproductcode = 'kd490-day'
+        mapsetcode = 'MODIS-Africa-4km'
+        datasource_descrID='GSFC:CGI:MODIS:KD490:1D'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
+                                                                              source_id=datasource_descrID):
+
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+            self.assertEqual(1, 1)
+
+    def test_ingest_modis_par_netcdf(self):
+
+        date_fileslist = ['/data/ingest/A2015189.L3m_DAY_PAR_par_4km.nc']
+        in_date = '2015189'
+        productcode = 'modis-par'
+        productversion = 'v2012.0'
+        subproductcode = 'par-day'
+        mapsetcode = 'MODIS-Africa-4km'
+        datasource_descrID='GSFC:CGI:MODIS:PAR:1D'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
+                                                                              source_id=datasource_descrID):
+
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+            self.assertEqual(1, 1)
+
 
     def test_ingest_eumetcast(self):
 
