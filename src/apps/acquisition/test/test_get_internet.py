@@ -166,23 +166,6 @@ class TestGetInternet(unittest.TestCase):
     #
     #     self.assertTrue(file_to_check in list)
 
-    #   ---------------------------------------------------------------------------
-    #   Test download of files from GSFC oceandata http site (id:GSFC:OCEAN:MODIS:SST:1D)
-    #   ---------------------------------------------------------------------------
-    def TestRemoteHttp_MODIS_SST_1DAY(self):
-
-        remote_url='http://oceandata.sci.gsfc.nasa.gov/'
-        from_date= datetime.date(2015,1,1)
-        to_date= datetime.date(2015,2,1)
-        template='%Y/%j/A%Y%j.L3m_DAY_SST_4.bz2'
-        usr_pwd='anonymous:anonymous'
-        frequency='e1day'
-
-        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
-        print(files_list)
-        file_to_check='2015/001/A2015001.L3m_DAY_SST_4.bz2'
-
-        self.assertTrue(file_to_check in files_list)
 
     #   ---------------------------------------------------------------------------
     #   Get list of files from FEWSNET HTTP (id: USGS:EARLWRN:FEWSNET)
@@ -202,20 +185,21 @@ class TestGetInternet(unittest.TestCase):
         self.assertTrue(file_to_check in files_list)
 
     #   ---------------------------------------------------------------------------
-    #   Test download of 8DAY data from GSFC oceandata http site (id:GSFC:OCEAN:MODIS:SST:1D)
+    #   Test download of files from GSFC oceandata http site (id:GSFC:OCEAN:MODIS:SST:1D)
     #   ---------------------------------------------------------------------------
     def TestRemoteHttp_MODIS_SST_1DAY(self):
 
         remote_url='http://oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Daily/4km/SST/'
-        from_date = datetime.date(2014,1,1)
-        to_date = datetime.date(2014,12,31)
-        template='%Y/A%Y%j.L3m_DAY_SST_4.bz2'       # introduce non-standard placeholder
+        remote_url='http://oceandata.sci.gsfc.nasa.gov/cgi/getfile/'
+        from_date = datetime.date(2015,7,7)
+        to_date = datetime.date(2015,10,1)
+        template='A%Y%j.L3m_DAY_SST_sst_4km.nc'
         usr_pwd='anonymous:anonymous'
-        frequency = 'e1dekad'
+        frequency = 'e1day'
 
         files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
         print files_list
-        file_to_check='2014/A2014001.L3m_DAY_SST_4.bz2'
+        file_to_check='A2015211.L3m_DAY_SST_sst_4km.nc'
         self.assertTrue(file_to_check in files_list)
 
     #   ---------------------------------------------------------------------------
