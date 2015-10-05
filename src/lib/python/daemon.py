@@ -82,7 +82,6 @@ class Daemon(object):
         #logger.debug("sys.stdout.fileno %i" % sys.stdout.fileno())
         #logger.debug("sys.stderr.fileno %i" % sys.stderr.fileno())
 
-
         # write pidfile
         atexit.register(self.delpid)
         pid = str(os.getpid())
@@ -90,7 +89,12 @@ class Daemon(object):
         logger.debug("Pid written")
 
     def delpid(self):
-        os.remove(self.pidfile)
+        # Change to deal with forking in processing (otherwise the pidfile is deleted by child process)
+        my_pid=os.getpgid
+        pid_file=open(self.pidfile)
+        pid = pid_file.read()
+        if pid == my_pid:
+            os.remove(self.pidfile)
 
     def status(self):
         #If : pid exists + process run -> ON - return True

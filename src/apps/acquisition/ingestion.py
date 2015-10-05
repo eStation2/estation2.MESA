@@ -142,6 +142,7 @@ def loop_ingestion(dry_run=False):
                              're_process': re_process}
                     subproducts.append(sprod)
 
+
                 # Get the list of unique dates by extracting the date from all files.
                 dates_list = []
                 for filename in files:
@@ -150,11 +151,11 @@ def loop_ingestion(dry_run=False):
                         # splitted_fn = re.split(r'[datasource_descr.delimiter\s]\s*', filename) ???? What is that for ?
                         splitted_fn = re.split(datasource_descr.delimiter, filename)
                         date_string = splitted_fn[date_position]
-                        if len(date_string) > len(datasource_descr.date_type):
-                            date_string=date_string[0:len(datasource_descr.date_type)]
+                        if len(date_string) > len(datasource_descr.date_format):
+                            date_string=date_string[0:len(datasource_descr.date_format)]
                         dates_list.append(date_string)
                     else:
-                        dates_list.append(filename[date_position:date_position + len(datasource_descr.date_type)])
+                        dates_list.append(filename[date_position:date_position + len(datasource_descr.date_format)])
 
                 dates_list = set(dates_list)
                 dates_list = sorted(dates_list, reverse=False)
@@ -656,6 +657,54 @@ def pre_process_pml_netcdf(subproducts, tmpdir , input_files, my_logger):
 
     return pre_processed_list
 
+def pre_process_netcdf(subproducts, tmpdir , input_files, my_logger):
+# -------------------------------------------------------------------------------------------------------
+#   Pre-process NETCDF files (e.g. MODIS Global since July 2015)
+#
+# It receives in input the netcdf file (1 ONLY)
+# It does the extraction of relevant datasets
+#
+    # Prepare the output file list
+    pre_processed_list = []
+
+    # Build a list of subdatasets to be extracted
+    list_to_extr = []
+    for sprod in subproducts:
+        if sprod != 0:
+            list_to_extr.append(sprod['re_extract'])
+
+    geotiff_files = []
+    # Loop over unzipped files and extract the relevant sds to tmp geotiffs
+    for input_file in input_files:
+
+        # Test the. nc file and read list of datasets
+        netcdf = gdal.Open(input_file)
+        sdslist = netcdf.GetSubDatasets()
+
+        if len(sdslist) >= 1:
+            # Loop over datasets and extract the one from each unzipped
+            for subdataset in sdslist:
+                netcdf_subdataset = subdataset[0]
+                id_subdataset = netcdf_subdataset.split(':')[-1]
+
+                if id_subdataset in list_to_extr:
+                    selected_sds = 'NETCDF:' + input_file + ':' + id_subdataset
+                    sds_tmp = gdal.Open(selected_sds)
+                    filename = os.path.basename(input_file) + '.geotiff'
+                    myfile_path = os.path.join(tmpdir, filename)
+                    write_ds_to_geotiff(sds_tmp, myfile_path)
+                    sds_tmp = None
+                    geotiff_files.append(myfile_path)
+        else:
+          # No subdatasets: e.g. SST -> read directly the .nc
+            filename = os.path.basename(input_file) + '.geotiff'
+            myfile_path = os.path.join(tmpdir, filename)
+            write_ds_to_geotiff(netcdf, myfile_path)
+            geotiff_files.append(myfile_path)
+        netcdf = None
+
+    return geotiff_files
+
 
 def pre_process_unzip(subproducts, tmpdir , input_files, my_logger):
 # -------------------------------------------------------------------------------------------------------
@@ -1032,6 +1081,7 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 #           GEOREF: only georeference, by assigning native mapset
 #           HDF5_UNZIP: zipped files containing HDF5 (see g2_BIOPAR)
 #           NASA_FIRMS: convert from csv to GTiff
+#           NETCDF: netcdf datasets (e.g. MODIS Ocean products)
 #
 #       native_mapset_code: id code of the native mapset (from datasource_descr)
 #       subproducts: list of subproducts to be extracted from the file. Contains dictionaries such as:
@@ -1078,6 +1128,9 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 
         elif preproc_type == 'GZIP':
             interm_files = pre_process_gzip (subproducts, tmpdir, input_files, my_logger)
+
+        elif preproc_type == 'NETCDF':
+            interm_files = pre_process_netcdf (subproducts, tmpdir, input_files, my_logger)
 
         else:
             my_logger.error('Preproc_type not recognized:[%s] Check in DB table. Exit' % preproc_type)
@@ -1214,36 +1267,36 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         # Convert the in_date format into a convenient one for DB and file naming
         # (i.e YYYYMMDD or YYYYMMDDHHMM)
-        if datasource_descr.date_type == 'YYYYMMDD':
+        if datasource_descr.date_format == 'YYYYMMDD':
             if functions.is_date_yyyymmdd(in_date):
                 output_date_str = in_date
             else:
                 output_date_str = -1
 
-        if datasource_descr.date_type == 'YYYYMMDDHHMM':
+        if datasource_descr.date_format == 'YYYYMMDDHHMM':
             if functions.is_date_yyyymmddhhmm(in_date):
                 output_date_str = in_date
             else:
                 output_date_str = -1
 
-        if datasource_descr.date_type == 'YYYYDOY_YYYYDOY':
+        if datasource_descr.date_format == 'YYYYDOY_YYYYDOY':
             output_date_str = functions.conv_date_yyyydoy_2_yyyymmdd(str(in_date)[0:7])
 
-        if datasource_descr.date_type == 'YYYYMMDD_YYYYMMDD':
+        if datasource_descr.date_format == 'YYYYMMDD_YYYYMMDD':
             output_date_str = str(in_date)[0:8]
             if not functions.is_date_yyyymmdd(output_date_str):
                 output_date_str = -1
 
-        if datasource_descr.date_type == 'YYYYDOY':
+        if datasource_descr.date_format == 'YYYYDOY':
             output_date_str = functions.conv_date_yyyydoy_2_yyyymmdd(in_date)
 
-        if datasource_descr.date_type == 'YYYY_MM_DKX':
+        if datasource_descr.date_format == 'YYYY_MM_DKX':
             output_date_str = functions.conv_yyyy_mm_dkx_2_yyyymmdd(in_date)
 
-        if datasource_descr.date_type == 'YYMMK':
+        if datasource_descr.date_format == 'YYMMK':
             output_date_str = functions.conv_yymmk_2_yyyymmdd(in_date)
 
-        if datasource_descr.date_type == 'YYYYdMMdK':
+        if datasource_descr.date_format == 'YYYYdMMdK':
             output_date_str = functions.conv_yyyydmmdk_2_yyyymmdd(in_date)
 
         if output_date_str == -1:
