@@ -142,6 +142,7 @@ def loop_ingestion(dry_run=False):
                              're_process': re_process}
                     subproducts.append(sprod)
 
+
                 # Get the list of unique dates by extracting the date from all files.
                 dates_list = []
                 for filename in files:
