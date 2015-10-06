@@ -18,7 +18,7 @@ from config import es_constants
 # Import third-party modules
 from ruffus import *
 
-logger = log.my_logger(__name__)
+#logger = log.my_logger(__name__)
 
 #   General definitions for this processing chain
 ext=es_constants.ES2_OUTFILE_EXTENSION
@@ -70,11 +70,11 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   Define input files
     in_prod_ident = functions.set_path_filename_no_date(prod, starting_sprod, mapset, version, ext)
 
-    logger.debug('Base data directory is: %s' % es2_data_dir)
+    #logger.debug('Base data directory is: %s' % es2_data_dir)
     input_dir = es2_data_dir+ \
                 functions.set_path_sub_directory(prod, starting_sprod, 'Ingest', version, mapset)
 
-    logger.debug('Input data directory is: %s' % input_dir)
+    #logger.debug('Input data directory is: %s' % input_dir)
 
     if starting_dates is not None:
         starting_files = []
@@ -83,7 +83,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     else:
         starting_files=input_dir+"*"+in_prod_ident
 
-    logger.debug('Starting files wild card is: %s' % starting_files)
+    #logger.debug('Starting files wild card is: %s' % starting_files)
 
     #   ---------------------------------------------------------------------
     #   Average
@@ -487,20 +487,22 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
 def processing_std_precip(pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None, update_stats=False, nrt_products=True, write2file=None):
+                          starting_dates=None, update_stats=False, nrt_products=True, write2file=None, logfile=None):
 
     proc_lists = None
     proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
                                  starting_dates=starting_dates, proc_lists=proc_lists, update_stats=update_stats, nrt_products=nrt_products)
 
-    logger.info("Entering routine %s" % 'processing_std_precip')
-    logger.info("pipeline_run_level %i" % pipeline_run_level)
+    #logger.info("Entering routine %s" % 'processing_std_precip')
+    #logger.info("pipeline_run_level %i" % pipeline_run_level)
+    spec_logger = log.my_logger(logfile)
+
     if write2file is not None:
         fwrite_id=open(write2file,'w')
     else:
         fwrite_id=None
     if pipeline_run_level > 0:
-        pipeline_run(verbose=pipeline_run_level)
+        pipeline_run(verbose=pipeline_run_level, logger=spec_logger)
 
     if pipeline_printout_level > 0:
         pipeline_printout(verbose=pipeline_printout_level, output_stream=fwrite_id)
@@ -515,7 +517,7 @@ def processing_std_precip(pipeline_run_level=0,pipeline_printout_level=0,
 
 def processing_std_precip_stats_only(pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None,write2file=None):
+                          starting_dates=None,write2file=None, logfile=None):
 
     proc_lists = processing_std_precip(pipeline_run_level=pipeline_run_level,
                           pipeline_printout_level=pipeline_printout_level,
@@ -527,13 +529,14 @@ def processing_std_precip_stats_only(pipeline_run_level=0,pipeline_printout_leve
                           starting_dates=starting_dates,
                           nrt_products=False,
                           update_stats=True,
-                          write2file=write2file)
+                          write2file=write2file,
+                          logfile=logfile)
 
     return proc_lists
 
 def processing_std_precip_prods_only(pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None,write2file=None):
+                          starting_dates=None,write2file=None, logfile=None):
 
     proc_lists = processing_std_precip(pipeline_run_level=pipeline_run_level,
                           pipeline_printout_level=pipeline_printout_level,
@@ -545,13 +548,14 @@ def processing_std_precip_prods_only(pipeline_run_level=0,pipeline_printout_leve
                           starting_dates=starting_dates,
                           nrt_products=True,
                           update_stats=False,
-                          write2file=write2file)
+                          write2file=write2file,
+                          logfile=logfile)
 
     return proc_lists
 
 def processing_std_precip_all(pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None,write2file=None):
+                          starting_dates=None,write2file=None, logfile=None):
 
     proc_lists = processing_std_precip(pipeline_run_level=pipeline_run_level,
                           pipeline_printout_level=pipeline_printout_level,
@@ -563,6 +567,7 @@ def processing_std_precip_all(pipeline_run_level=0,pipeline_printout_level=0,
                           starting_dates=starting_dates,
                           nrt_products=True,
                           update_stats=True,
-                          write2file=write2file)
+                          write2file=write2file,
+                          logfile=logfile)
 
     return proc_lists

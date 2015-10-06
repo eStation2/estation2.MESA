@@ -19,7 +19,7 @@ from config import es_constants
 # Import third-party modules
 from ruffus import *
 
-logger = log.my_logger(__name__)
+#logger = log.my_logger(__name__)
 
 #   Still to be done
 
@@ -136,17 +136,18 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 #   Run the pipeline
 def processing_std_fronts(pipeline_run_level=0, pipeline_printout_level=0,
                         pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                        starting_dates=None, update_stats=False, nrt_products=True):
+                        starting_dates=None, update_stats=False, nrt_products=True, logfile=None):
 
     proc_lists = None
     proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
                                  starting_dates=starting_dates, update_stats=update_stats, nrt_products=nrt_products)
 
-    logger.info("Entering routine %s" % 'processing_std_fronts')
-    logger.info("pipeline_run_level %i" % pipeline_run_level)
+    #logger.info("Entering routine %s" % 'processing_std_fronts')
+    #logger.info("pipeline_run_level %i" % pipeline_run_level)
+    spec_logger = log.my_logger(logfile)
 
     if pipeline_run_level > 0:
-        pipeline_run(verbose=pipeline_run_level, multiprocess=multiprocess)
+        pipeline_run(verbose=pipeline_run_level, multiprocess=multiprocess, logger=spec_logger)
     #fout=open('/data/processing/ruffus_printout.txt','w')
     if pipeline_printout_level > 0:
         pipeline_printout(verbose=pipeline_printout_level) #, output_stream=fout)
