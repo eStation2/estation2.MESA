@@ -308,29 +308,29 @@ Ext.define("esapp.view.dashboard.PC2",{
                 cls: me.internetCls
                 //src: 'resources/img/icons/check-square-o.png'
             }]
-        },{
-            region: 'south',
-            title: '&nbsp;' + esapp.Utils.getTranslation('diskstatus'),     // , 'Disk status'
-            split:false,
-            collapsible:true,
-            collapsed: true,
-            hideCollapseTool: me.diskstatus == null ? true : false,
-            // flex:1.5,
-            iconCls: me.diskstatusCls,  // 'x-tool-okay', // 'fa fa-check-circle-o fa-2x', // fa-check-square fa-chevron-circle-down fa-check-circle fa-check
-            iconAlign : 'left',
-            height: 210,
-            minHeight: 200,
-            maxHeight: 210,
-            layout: 'fit',
-            style: {
-                color: 'white'
-            },
-            items: [{
-                xtype: 'image',
-                src: 'resources/img/RAID_Monitor.png',
-                width: 265,
-                height: 158
-            }]
+        //},{
+        //    region: 'south',
+        //    title: '&nbsp;' + esapp.Utils.getTranslation('diskstatus'),     // , 'Disk status'
+        //    split:false,
+        //    collapsible:true,
+        //    collapsed: true,
+        //    hideCollapseTool: me.diskstatus == null ? true : false,
+        //    // flex:1.5,
+        //    iconCls: me.diskstatusCls,  // 'x-tool-okay', // 'fa fa-check-circle-o fa-2x', // fa-check-square fa-chevron-circle-down fa-check-circle fa-check
+        //    iconAlign : 'left',
+        //    height: 210,
+        //    minHeight: 200,
+        //    maxHeight: 210,
+        //    layout: 'fit',
+        //    style: {
+        //        color: 'white'
+        //    },
+        //    items: [{
+        //        xtype: 'image',
+        //        src: 'resources/img/RAID_Monitor.png',
+        //        width: 265,
+        //        height: 158
+        //    }]
         }];
 
         if (me.activePC) {

@@ -110,6 +110,9 @@ def loop_processing(dry_run=False, serialize=False):
             input_product_info = querydb.get_product_out_info(productcode=product_code,
                                                               subproductcode=sub_product_code,
                                                               version=version)
+            # Define a standard logfile asoiated to the processing chain
+            processing_unique_id='ID='+str(process_id)+'_PROD='+product_code+'_METHOD='+derivation_method+'_ALGO='+algorithm
+            logfile='apps.processing.'+processing_unique_id
 
             # Case of a 'std_' (i.e. ruffus with 1 input) processing -> get all info from 1st INPUT and manage dates
             if re.search('^std_.*',algorithm):
@@ -127,10 +130,10 @@ def loop_processing(dry_run=False, serialize=False):
                         'prod': product_code, \
                         'mapset':mapset,\
                         'starting_dates': list_dates,\
-                        'version':version}
+                        'version':version,
+                        'logfile':logfile}
                 # Define an id from a combination of fields
-                processing_unique_id='ID='+str(process_id)+'_METHOD='+derivation_method+'_ALGO='+algorithm+'.lock'
-                processing_unique_lock=es_constants.processing_tasks_dir+processing_unique_id
+                processing_unique_lock=es_constants.processing_tasks_dir+processing_unique_id+'.lock'
 
                 if not os.path.isfile(processing_unique_lock):
                     open(processing_unique_lock,'a').close()
@@ -177,7 +180,7 @@ def loop_processing(dry_run=False, serialize=False):
                             time.sleep(3)
                             sys.exit(0)
                         else:
-                            # Here I'm the parent process -> just go on ..
+                            # Here I'm the parent process -> just wait (not to create a defunct process)
                             status = os.wait()
                             pass
                     # Do NOT detach process (work in series)

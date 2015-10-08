@@ -214,6 +214,33 @@ Ext.define("esapp.view.processing.Processing",{
                         rec.get('process_activated') ? rec.set('process_activated', false) : rec.set('process_activated', true);
                     }
                 }]
+            },{
+                xtype: 'actioncolumn',
+                text: esapp.Utils.getTranslation('log'),    // 'Log',
+                id: 'processinglogcolumn',
+                width: 65,
+                height:40,
+                menuDisabled: true,
+                align:'center',
+                // cls:'x-grid3-td-ingestionlogcolumn',
+                items: [{
+                    //icon: 'resources/img/icons/file-extension-log-icon-32x32.png',
+                    iconCls:'log-icon',
+                    width:32,
+                    height:32,
+                    tooltip: esapp.Utils.getTranslation('showprocessinglog'),     // 'Show log of this Ingestion',
+                    scope: me,
+                    handler: function (grid, rowIndex, colIndex, icon) {
+                        var rec = grid.getStore().getAt(rowIndex);
+                        var logViewWin = new esapp.view.acquisition.logviewer.LogView({
+                            params: {
+                                logtype: 'processing',
+                                record: rec
+                            }
+                        });
+                        logViewWin.show();
+                    }
+                }]
             }]
         }, {
             header:  '<div class="grid-header-style">' + esapp.Utils.getTranslation('processingoutputs') + '</div>',
@@ -229,28 +256,28 @@ Ext.define("esapp.view.processing.Processing",{
             }
             ,columns: [{
                 xtype: 'widgetcolumn',
-                width: 700,
+                width: 600,
                 bodyPadding:0,
 
-                header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 250px; left: 0px; tabindex="-1">' +
+                header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; left: 0px; tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('product') + '</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; right: auto; left: 250px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; right: auto; left: 200px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('mapset') + '</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 150px; right: auto; left: 450px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; right: auto; left: 400px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('subproduct') + '</span>' +
                 '           </div>' +
-                '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 600px; margin: 0px; top: 0px;" tabindex="-1">' +
-                '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('active') + '</span>' +
-                '           </div>' +
+                //'       </div>' +
+                //'       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 600px; margin: 0px; top: 0px;" tabindex="-1">' +
+                //'           <div data-ref="titleEl" class="x-column-header-inner">' +
+                //'               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('active') + '</span>' +
+                //'           </div>' +
                 '       </div>',
                 listeners: {
                   render: function(column){

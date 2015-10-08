@@ -77,20 +77,24 @@ class Daemon(object):
         else:
             logger.debug("Inputs and Outputs not redirected")
 
-        #logger.debug("sys.stdout %s %s %s" % (sys.stdout, type(sys.stdout), str(dir(sys.stdout))))
-        #logger.debug("sys.stdin.fileno %i" % sys.stdin.fileno())
-        #logger.debug("sys.stdout.fileno %i" % sys.stdout.fileno())
-        #logger.debug("sys.stderr.fileno %i" % sys.stderr.fileno())
-
-
         # write pidfile
         atexit.register(self.delpid)
         pid = str(os.getpid())
         file(self.pidfile, 'w+').write("%s\n" % pid)
-        logger.debug("Pid written")
+        logger.debug("Pid %s written into file %s" % (pid,self.pidfile))
 
     def delpid(self):
-        os.remove(self.pidfile)
+        # Change to deal with forking in processing (otherwise the pidfile is deleted by child process)
+        logger = log.my_logger("lib.python.daemon")
+        my_pid=os.getpgid
+        logger.info("My Pid: %i" % my_pid)
+
+        pid_file=open(self.pidfile)
+        pid = pid_file.read()
+        logger.info("Pid: %i" % pid)
+        if pid == my_pid:
+            logger.info("Removing the Pid")
+            os.remove(self.pidfile)
 
     def status(self):
         #If : pid exists + process run -> ON - return True
@@ -170,7 +174,7 @@ class Daemon(object):
         return pid
 
 
-#    Moved here as it is used by acquisition.py and processing.py
+#  Moved here as it is used by acquisition.py and processing.py
 class DaemonDryRunnable(Daemon):
     def __init__(self, *args, **kwargs):
         self.dry_run = kwargs.pop('dry_run', True)

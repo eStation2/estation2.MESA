@@ -1279,6 +1279,13 @@ class GetLogFile:
                 logfilename = es_constants.es2globals['log_dir']+'apps.get_internet.' + getparams['data_source_id'] + '.log'
         elif getparams['logtype'] == 'ingest':
             logfilename = es_constants.es2globals['log_dir']+'apps.ingestion.' + getparams['productcode'] + '.' + getparams['version'] + '.log'
+        elif getparams['logtype'] == 'processing':
+            # apps.processing.ID=6_PROD=tamsat-rfe_METHOD=std_precip_prods_only_ALGO=std_precip.log
+            logfilename = es_constants.es2globals['log_dir']+'apps.processing.' \
+                                        + 'ID=' + getparams['process_id'] + '.' \
+                                        + '_PROD=' + getparams['productcode'] + '.' \
+                                        + '_METHOD=' + getparams['subproductcode'] + '.' +\
+                                        + '_ALGO=' + getparams['algorithm'] + '.log'
         elif getparams['logtype'] == 'service':
             if getparams['service'] == 'eumetcast':
                 logfilename = es_constants.es2globals['log_dir']+'apps.acquisition.get_eumetcast.log'
@@ -1306,7 +1313,7 @@ class GetLogFile:
                 if os.path.isfile(logfilepath):
                     logfile = open(logfilepath, 'r')
                     logfilecontent = logfile.read()
-                    logfilecontent = logfilecontent.replace('\'', '"')
+                    logfilecontent = logfilecontent.replace('\'', '')
                     logfilecontent = logfilecontent.replace(chr(10), '<br />')
                     logfilecontent = logfilecontent.replace(' TRACE ', '<b style="color:gray"> TRACE </b>')
                     logfilecontent = logfilecontent.replace(' DEBUG ', '<b style="color:gray"> DEBUG </b>')
@@ -2066,7 +2073,7 @@ class GetProductLayer:
         result_map_file = es_constants.apps_dir+'/analysis/MAP_result.map'
         if os.path.isfile(result_map_file):
             os.remove(result_map_file)
-        # productmap.save(result_map_file)
+        productmap.save(result_map_file)
         image = productmap.draw()
         # image.save(es_constants.apps_dir+'/analysis/'+filenamenoextention+'.png')
 
@@ -2184,7 +2191,7 @@ class Processing:
         #   Todo JURVTK:  Use: from apps . processing import processing_std_precip
         #   Todo JURVTK:       brachet l1, l2 brachet = processing_std_precip . get_subprods_std_precip ()
 
-        processing_chains_json = '{"success":false, "error":"No processing chains defined!"}'
+        processing_chains_json = '{"success":true, "message":"No processing chains defined!"}'
 
         processing_chains = querydb.get_processing_chains()
 

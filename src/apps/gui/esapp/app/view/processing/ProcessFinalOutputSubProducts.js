@@ -59,15 +59,15 @@ Ext.define("esapp.view.processing.ProcessFinalOutputSubProducts",{
             xtype:'templatecolumn',
             header: '', // 'Productcode',
             tpl: new Ext.XTemplate(
-                    '<b>{productcode}</b>' +
-                    '<tpl if="version != \'undefined\'">',
-                        '<b> - {version}</b>',
-                    '</tpl>',
+                    '<b>{prod_descriptive_name}</b>' +
                     '</br>' +
-                    '<b class="smalltext" style="color:darkgrey">{prod_descriptive_name}</b>' +
+                    '<b class="smalltext" style="color:darkgrey">{productcode}</b>' +
+                    '<tpl if="version != \'undefined\'">',
+                        '<b class="smalltext" style="color:darkgrey"> - {version}</b>',
+                    '</tpl>',
                     '</br>'
                 ),
-            width: 250,
+            width: 200,
             cellWrap:true
         }, {
             header: '', // 'Mapsetcode',
@@ -76,38 +76,38 @@ Ext.define("esapp.view.processing.ProcessFinalOutputSubProducts",{
         }, {
             header: '', // 'Subproductcode',
             dataIndex: 'subproductcode',
-            width: 150
-            },{
-                xtype: 'actioncolumn',
-                //header: 'Active',
-                hideable: false,
-                hidden: false,
-                width: 65,
-                align: 'center',
-                shrinkWrap: 0,
-                items: [{
-                    // scope: me,
-                    getClass: function(v, meta, rec) {
-                        if (rec.get('subactivated')) {
-                            return 'activated';
-                        } else {
-                            return 'deactivated';
-                        }
-                    },
-                    getTip: function(v, meta, rec) {
-                        if (rec.get('subactivated')) {
-                            return esapp.Utils.getTranslation('deactivatesubproduct');   // 'Deactivate SubProduct';
-                        } else {
-                            return esapp.Utils.getTranslation('activatesubproduct');   // 'Activate SubProduct';
-                        }
-                    },
-                    handler: function(grid, rowIndex, colIndex) {
-                        var rec = grid.getStore().getAt(rowIndex),
-                            action = (rec.get('subactivated') ? 'deactivated' : 'activated');
-                        //Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
-                        rec.get('subactivated') ? rec.set('subactivated', false) : rec.set('subactivated', true);
-                    }
-                }]
+            width: 180
+            //},{
+            //    xtype: 'actioncolumn',
+            //    //header: 'Active',
+            //    hideable: false,
+            //    hidden: false,
+            //    width: 65,
+            //    align: 'center',
+            //    shrinkWrap: 0,
+            //    items: [{
+            //        // scope: me,
+            //        getClass: function(v, meta, rec) {
+            //            if (rec.get('subactivated')) {
+            //                return 'activated';
+            //            } else {
+            //                return 'deactivated';
+            //            }
+            //        },
+            //        getTip: function(v, meta, rec) {
+            //            if (rec.get('subactivated')) {
+            //                return esapp.Utils.getTranslation('deactivatesubproduct');   // 'Deactivate SubProduct';
+            //            } else {
+            //                return esapp.Utils.getTranslation('activatesubproduct');   // 'Activate SubProduct';
+            //            }
+            //        },
+            //        handler: function(grid, rowIndex, colIndex) {
+            //            var rec = grid.getStore().getAt(rowIndex),
+            //                action = (rec.get('subactivated') ? 'deactivated' : 'activated');
+            //            //Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
+            //            rec.get('subactivated') ? rec.set('subactivated', false) : rec.set('subactivated', true);
+            //        }
+            //    }]
 //        },{
 //            xtype: 'checkcolumn',
 //            header: '', // Active
