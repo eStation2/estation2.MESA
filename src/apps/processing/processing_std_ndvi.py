@@ -19,7 +19,7 @@ from config import es_constants
 # Import third-party modules
 from ruffus import *
 
-logger = log.my_logger(__name__)
+#logger = log.my_logger(__name__)
 
 #   Still to be done
 
@@ -146,12 +146,12 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   Define input files (NDV)
     in_prod_ident = functions.set_path_filename_no_date(prod, starting_sprod,mapset, version, ext)
 
-    logger.debug('Base data directory is: %s' % es2_data_dir)
+    #logger.debug('Base data directory is: %s' % es2_data_dir)
     input_dir = es2_data_dir+ functions.set_path_sub_directory(prod, starting_sprod, 'Ingest', version, mapset)
 
-    logger.debug('Input data directory is: %s' % input_dir)
+    #logger.debug('Input data directory is: %s' % input_dir)
     starting_files = input_dir+"*"+in_prod_ident
-    logger.debug('Starting files wild card is: %s' % starting_files)
+    #logger.debug('Starting files wild card is: %s' % starting_files)
 
     #   ---------------------------------------------------------------------
     #   1.a 10Day non-filtered Stats
@@ -1052,18 +1052,21 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 #   Run the pipeline
 def processing_std_ndvi(pipeline_run_level=0, pipeline_printout_level=0,
                         pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                        starting_dates=None, update_stats=False, nrt_products=True):
+                        starting_dates=None, update_stats=False, nrt_products=True, logfile=None):
 
     proc_lists = None
     proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
                                  starting_dates=starting_dates, update_stats=update_stats, nrt_products=nrt_products)
 
-    logger.info("Entering routine %s" % 'processing_std_ndvi')
-    logger.info("pipeline_run_level %i" % pipeline_run_level)
+    #logger.info("Entering routine %s" % 'processing_std_ndvi')
+    #logger.info("pipeline_run_level %i" % pipeline_run_level)
+    spec_logger = log.my_logger(logfile)
 
     if pipeline_run_level > 0:
-        pipeline_run(verbose=pipeline_run_level, multiprocess=multiprocess)
-    #fout=open('/data/processing/ruffus_printout.txt','w')
+        #pipeline_run(verbose=pipeline_run_level, multiprocess=multiprocess, logger=spec_logger, touch_files_only = True)
+        pipeline_run(verbose=pipeline_run_level, multiprocess=multiprocess, logger=spec_logger)
+
+    #logfile=open('/data/processing/ruffus_printout.txt','w')
     if pipeline_printout_level > 0:
         pipeline_printout(verbose=pipeline_printout_level) #, output_stream=fout)
 
@@ -1075,7 +1078,7 @@ def processing_std_ndvi(pipeline_run_level=0, pipeline_printout_level=0,
 
 def processing_std_ndvi_stats_only(pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None):
+                          starting_dates=None, logfile=None):
 
     proc_lists = processing_std_ndvi(pipeline_run_level=pipeline_run_level,
                                                                pipeline_printout_level=pipeline_printout_level,
@@ -1086,13 +1089,14 @@ def processing_std_ndvi_stats_only(pipeline_run_level=0,pipeline_printout_level=
                                                                version=version,
                                                                starting_dates=starting_dates,
                                                                nrt_products=False,
-                                                               update_stats=True)
+                                                               update_stats=True,
+                                                               logfile=logfile)
 
     return proc_lists
 
 def processing_std_ndvi_prods_only(pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None):
+                          starting_dates=None, logfile=None):
 
     proc_lists = processing_std_ndvi(pipeline_run_level=pipeline_run_level,
                                                                pipeline_printout_level=pipeline_printout_level,
@@ -1103,13 +1107,14 @@ def processing_std_ndvi_prods_only(pipeline_run_level=0,pipeline_printout_level=
                                                                version=version,
                                                                starting_dates=starting_dates,
                                                                nrt_products=True,
-                                                               update_stats=False)
+                                                               update_stats=False,
+                                                               logfile=logfile)
 
     return proc_lists
 
 def processing_std_ndvi_all(pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None):
+                          starting_dates=None, logfile=None):
 
     proc_lists = processing_std_ndvi(pipeline_run_level=pipeline_run_level,
                                                                pipeline_printout_level=pipeline_printout_level,
@@ -1120,6 +1125,7 @@ def processing_std_ndvi_all(pipeline_run_level=0,pipeline_printout_level=0,
                                                                version=version,
                                                                starting_dates=starting_dates,
                                                                nrt_products=True,
-                                                               update_stats=True)
+                                                               update_stats=True,
+                                                               logfile=logfile)
 
     return proc_lists

@@ -124,14 +124,20 @@ class TestQuerydb(TestCase):
 
     def Test_get_datasource_descr(self):
 
-        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                        source_id='EO:EUM:DAT:SPOT:S10NDVI')
-        logger.info("Eumetcast source description is: %s", datasource_descr)
-        for row in datasource_descr:
-            print row
+        # datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+        #                                                 source_id='EO:EUM:DAT:SPOT:S10NDVI')
+        # logger.info("Eumetcast source description is: %s", datasource_descr)
+        # for row in datasource_descr:
+        #     print row
+        #
+        # datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+        #                                                 source_id='USGS:EARLWRN:FEWSNET')
+        # logger.info("Internet source description is: %s", datasource_descr)
+        # for row in datasource_descr:
+        #     print row
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                        source_id='USGS:EARLWRN:FEWSNET')
+                                                        source_id='UCSB:CHIRPS:PREL:DEKAD')
         logger.info("Internet source description is: %s", datasource_descr)
         for row in datasource_descr:
             print row

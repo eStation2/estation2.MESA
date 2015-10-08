@@ -1938,7 +1938,7 @@ def do_ts_linear_filter(input_file='', before_file='', after_file='', output_fil
             if input_nodata is None:
                 wtp = N.ravel((data_m1 != 0) * (data_p1 != 0))
             else:
-                wtp = N.ravel((data_m1 != input_nodata) * (data_p1 != input_nodata))
+                wtp = N.ravel((data_m1 != input_nodata) * (data_p1 != input_nodata) * N.ravel((data_m1 != 0) * (data_p1 != 0)))
 
             correct = data
             if wtp.any():

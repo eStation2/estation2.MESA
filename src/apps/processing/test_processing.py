@@ -2,21 +2,22 @@ __author__ = "Marco Clerici"
 
 import datetime
 import proc_functions
+
 # #   ---------------------------------------------------------------------
 # # vgt-ndvi
 # #   ---------------------------------------------------------------------
-# from apps.processing.processing_std_ndvi import *
-# args = {'pipeline_run_level':4, \
-#         'pipeline_printout_level':0, \
-#         'pipeline_printout_graph_level': 0, \
-#         'prod': 'vgt-ndvi',\
-#         'starting_sprod':'ndv',\
-#         'mapset': 'SPOTV-Africa-1km',\
-#         'version':'sv2-pv2.1'
-#         }
-# # processing_std_ndvi(**args)
-# #processing_std_ndvi_stats_only(**args)
-# processing_std_ndvi_prods_only(**args)
+from apps.processing.processing_std_ndvi import *
+args = {'pipeline_run_level':2, \
+        'pipeline_printout_level':0, \
+        'pipeline_printout_graph_level': 0, \
+        'prod': 'vgt-ndvi',\
+        'starting_sprod':'ndv',\
+        'mapset': 'SPOTV-Africa-1km',\
+        'version':'sv2-pv2.1'
+        }
+# processing_std_ndvi(**args)
+#processing_std_ndvi_stats_only(**args)
+processing_std_ndvi_prods_only(**args)
 
 #   ---------------------------------------------------------------------
 # chirps-dekad
@@ -46,13 +47,13 @@ import proc_functions
 #   ---------------------------------------------------------------------
 # modis-sst
 #   ---------------------------------------------------------------------
-from apps.processing.processing_std_fronts import *
-args = {'pipeline_run_level':5, \
-        'pipeline_printout_level':0, \
-        'pipeline_printout_graph_level': 0, \
-        'prod': 'modis-sst',\
-        'starting_sprod':'sst-day',\
-        'mapset': 'MODIS-Africa-4km',\
-        'version':'v2013.1'
-        }
-processing_std_fronts(**args)
+# from apps.processing.processing_std_fronts import *
+# args = {'pipeline_run_level':5, \
+#         'pipeline_printout_level':0, \
+#         'pipeline_printout_graph_level': 0, \
+#         'prod': 'modis-sst',\
+#         'starting_sprod':'sst-day',\
+#         'mapset': 'MODIS-Africa-4km',\
+#         'version':'v2013.1'
+#         }
+# processing_std_fronts(**args)
