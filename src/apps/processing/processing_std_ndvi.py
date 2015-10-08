@@ -1063,6 +1063,7 @@ def processing_std_ndvi(pipeline_run_level=0, pipeline_printout_level=0,
     spec_logger = log.my_logger(logfile)
 
     if pipeline_run_level > 0:
+        #pipeline_run(verbose=pipeline_run_level, multiprocess=multiprocess, logger=spec_logger, touch_files_only = True)
         pipeline_run(verbose=pipeline_run_level, multiprocess=multiprocess, logger=spec_logger)
 
     #logfile=open('/data/processing/ruffus_printout.txt','w')
