@@ -88,7 +88,7 @@ def loop_processing(dry_run=False, serialize=False):
             pipeline_run_level = 0
             pipeline_printout_level = 3
         else:
-            pipeline_run_level = 2
+            pipeline_run_level = 3
             pipeline_printout_level = 0
 
         for chain in active_processing_chains:
