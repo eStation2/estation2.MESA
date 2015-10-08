@@ -30,18 +30,6 @@ Ext.define("esapp.view.dashboard.PC1",{
     bodyPadding:0,
     flex:1,
 
-//    margin: '0 0 0 0',
-//    layout: {
-//        type: 'vbox',
-//        pack: 'start',
-//        align: 'stretch'
-//    },
-//    bodyBorder: false,
-//    bodyPadding:0,
-//    defaults: {
-//        border: false
-//    },
-
     initComponent: function () {
         var me = this;
 
@@ -86,63 +74,29 @@ Ext.define("esapp.view.dashboard.PC1",{
                 xtype: 'container',
                 html: 'status okay',
                 cls: 'panel-text-style'
-            },{
-                xtype: 'container',
-                html: 'EFTS:',
-                cls: 'panel-text-style',
-                align: 'right'
-            },{
-                xtype: 'container',
-                html: 'status okay',
-                cls: 'panel-text-style'
             }]
-        },{
-            region: 'south',
-            title: '&nbsp;Disk status',
-            split:false,
-            collapsible:true,
-            collapsed: true,
-            // flex:1.5,
-            iconCls: 'x-tool-okay', // 'fa fa-check-circle-o fa-2x', // fa-check-square fa-chevron-circle-down fa-check-circle fa-check
-            iconAlign : 'left',
-            height: 240,
-            minHeight: 200,
-            maxHeight: 240,
-            layout: 'fit',
-            style: {
-                color: 'white'
-            },
-            items: [{
-                xtype: 'image',
-                src: 'resources/img/RAID_Monitor.png',
-                width: 265,
-                height: 158
-            }]
-
-
-//            xtype:'panel',
-//            layout: 'accordion',
-//            height: 200,
-//            width: '100%',
-//            bodyPadding:0,
-//            items:[{
-//                xtype: 'panel', // << fake hidden panel
-//                hidden: true,
-//                collapsed: false
-//            },{
-//                title: 'Disk status',
-//                // layout: 'hbox',
-//                collapsed: false,
-//                bodyPadding:3,
-//                iconCls: 'x-tool-okay',
-//                items: [{
-//                    xtype: 'image',
-//                    src: 'resources/img/RAID_Monitor.png',
-//                    // colspan: 2,
-//                    width: 265,
-//                    height: 158
-//                }]
-//            }]
+        //},{
+        //    region: 'south',
+        //    title: '&nbsp;Disk status',
+        //    split:false,
+        //    collapsible:true,
+        //    collapsed: true,
+        //    // flex:1.5,
+        //    iconCls: 'x-tool-okay', // 'fa fa-check-circle-o fa-2x', // fa-check-square fa-chevron-circle-down fa-check-circle fa-check
+        //    iconAlign : 'left',
+        //    height: 240,
+        //    minHeight: 200,
+        //    maxHeight: 240,
+        //    layout: 'fit',
+        //    style: {
+        //        color: 'white'
+        //    },
+        //    items: [{
+        //        xtype: 'image',
+        //        src: 'resources/img/RAID_Monitor.png',
+        //        width: 265,
+        //        height: 158
+        //    }]
         }];
 
         me.callParent();

@@ -14,13 +14,13 @@ Ext.define("esapp.view.system.PCRoleAdmin",{
         'Ext.layout.container.Center'
     ],
 
-    title: esapp.Utils.getTranslation('changerole'),    // 'Change Role',
+    title: esapp.Utils.getTranslation('assignrole'),    // 'Assign Role',
     header: {
         titlePosition: 0,
         titleAlign: 'center'
     },
     modal: true,
-    closable: true,
+    closable: false,
     closeAction: 'destroy', // 'hide',
     resizable:false,
     maximizable: false,

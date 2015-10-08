@@ -14,6 +14,16 @@ Ext.define('esapp.view.acquisition.logviewer.LogViewController', {
                 service: me.params.record
             };
         }
+        else if (me.params.logtype == 'processing') {
+            var inputproducts = me.params.record.get('inputproducts');
+            params = {
+                logtype: me.params.logtype,
+                process_id: me.params.record.get('process_id'),
+                productcode: inputproducts[0].productcode,
+                subproductcode: inputproducts[0].subproductcode,
+                algorithm: me.params.record.get('algorithm')
+            };
+        }
         else {
             params = {
                 logtype: me.params.logtype,

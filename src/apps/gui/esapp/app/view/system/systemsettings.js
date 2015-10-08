@@ -50,7 +50,7 @@ Ext.define("esapp.view.system.systemsettings",{
     form_fieldlabel_dbpassword                  : esapp.Utils.getTranslation('password'),   // 'Password',
     form_fieldlabel_dbname                      : esapp.Utils.getTranslation('databasename'),   // 'Database name',
 
-    fieldset_title_path_settings                : '<b>'+esapp.Utils.getTranslation('pathsettings')+'</b>',
+    fieldset_title_path_settings                : '<b>'+esapp.Utils.getTranslation('directorypaths')+'</b>',
     form_fieldlabel_base_dir                    : esapp.Utils.getTranslation('basedir'),   // 'Base directory',
     form_fieldlabel_base_tmp_dir                : esapp.Utils.getTranslation('basetmpdir'),   // 'Base temporary directory',
     form_fieldlabel_data_dir                    : esapp.Utils.getTranslation('datadir'),   // 'Data directory',
@@ -175,7 +175,9 @@ Ext.define("esapp.view.system.systemsettings",{
                 me.pcrole = record.data.role;
 
                 if (me.pcrole == ''){
+                    console.info(Ext.getCmp('modify-role-btn'));
                     Ext.getCmp('modify-role-btn').show();
+                    Ext.getCmp('modify-role-btn').fireHandler();
                 }
                 var ipadresses_fieldset = Ext.getCmp('ipaddresses');
                 if (me.type_install == 'Full'){

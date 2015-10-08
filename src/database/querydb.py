@@ -1878,12 +1878,13 @@ def get_processing_chains(echo=False):
                     p.c.output_mapsetcode,
                     p.c.derivation_method,
                     p.c.algorithm,
-                    p.c.priority])
+                    p.c.priority,
+                    p.c.enabled])
 
         s = s.alias('pc')
         pc = db.map(s, primary_key=[s.c.process_id])
-
-        processing_chains = pc.all()
+        where = and_(pc.enabled == 't')
+        processing_chains = pc.filter(where).all()
 
         # session = db.session
         # process = aliased(db.processing)
