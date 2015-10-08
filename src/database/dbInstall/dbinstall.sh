@@ -10,7 +10,7 @@ echo "Machine Name = ${uname}" >> ${logfile}
 if [ "$(nc -v -z localhost 5432 2> /dev/null;echo $?)" = 0 ]; then
     echo "Postgresql is running" > ${logfile}
     # estationdb exists ?
-    if [ ! "$(su postgres -c "psql -c 'select usename from pg_user'"|grep estation)" ];then
+    if [ ! "$(su postgres -c "psql -c 'select datname from pg_database'"|grep estationdb)" ];then
         echo "Create User and Database" >> ${logfile}
         su postgres -c psql << EOF
             CREATE USER estation;
