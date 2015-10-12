@@ -93,6 +93,7 @@ def loop_ingestion(dry_run=False):
                 logger.debug("Processing Source type [%s] with id [%s]" % (source.type, source.data_source_id))
                 # Re-initialize the datasource_descr
                 datasource_descr = None
+                files = []
                 # Get the 'filenaming' info (incl. 'area-type') from the acquisition source
                 if source.type == 'EUMETCAST':
                     for eumetcast_filter, datasource_descr in querydb.get_datasource_descr(echo=echo_query,
