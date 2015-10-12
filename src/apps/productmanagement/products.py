@@ -221,3 +221,58 @@ class Product(object):
         shutil.rmtree(tmpdir)
 
         return result
+
+    def list_all_ingested_and_derived_subproducts_mapsets(self):
+
+        # Initialize list of prod/version/subprods/mapset to be returned
+        list_ingested_and_derived_subproducts = []
+
+        # Get all active product ingestion records with a subproduct count.
+        active_product_ingestions = querydb.get_ingestion_product(productcode=self.product_code, version=self.version)
+        # Convert tuple to list (if 1 tuple is returned)
+        if isinstance(active_product_ingestions,tuple):
+            my_list= []
+            my_list.append(active_product_ingestions)
+            active_product_ingestions=my_list
+
+        for active_product_ingest in active_product_ingestions:
+
+            # For the current active product ingestion: get all
+            product = {"productcode": self.product_code,
+                       "version": self.version}
+
+            # Get the list of acquisition sources that are defined for this ingestion 'trigger'
+            # (i.e. prod/version)
+            # NOTE: the following implies there is 1 and only 1 '_native' subproduct associated to a 'subproduct';
+            native_product = {"productcode":  self.product_code,
+                              "subproductcode":  self.product_code + "_native",
+                              "version": self.version}
+            sources_list = querydb.get_product_sources(**native_product)
+            logger.debug("For product [%s] N. %s  source is/are found" % (self.product_code,len(sources_list)))
+
+            ingestions = querydb.get_ingestion_subproduct(allrecs=False, **product)
+            for ingest in ingestions:
+                my_tuple = {"productcode":  self.product_code,
+                            "subproductcode":  ingest.subproductcode,
+                            "version": self.version,
+                            "mapset": ingest.mapsetcode}
+                logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (self.product_code, self.version,ingest.subproductcode,ingest.mapsetcode))
+                list_ingested_and_derived_subproducts.append(my_tuple)
+
+        # Get all active processing chains [product/version/algo/mapset].
+        active_processing_chains = querydb.get_active_processing_chains()
+        for chain in active_processing_chains:
+            a = chain.process_id
+            logger.debug("Processing Chain N.:%s" % str(chain.process_id))
+            processed_products = querydb.get_processing_chain_products(chain.process_id, type='output')
+            for processed_product in processed_products:
+                if processed_product.productcode==self.product_code and processed_product.version==self.version:
+                    my_tuple = {"productcode":  self.product_code,
+                                "subproductcode":  processed_product.subproductcode,
+                                "version": self.version,
+                                "mapset": processed_product.mapsetcode}
+
+                    logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (self.product_code, self.version,processed_product.subproductcode,processed_product.mapsetcode))
+                    list_ingested_and_derived_subproducts.append(my_tuple)
+
+        return list_ingested_and_derived_subproducts
