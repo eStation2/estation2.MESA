@@ -13,9 +13,9 @@ import os
 import datetime
 import glob
 import shutil
-from ..products import Product
-from ..datasets import Dataset
-from ..exceptions import (NoProductFound, MissingMapset)
+from apps.productmanagement.products import Product
+from apps.productmanagement.datasets import Dataset
+from apps.productmanagement.exceptions import (NoProductFound, MissingMapset)
 
 from config import es_constants
 from lib.python import functions
@@ -322,3 +322,14 @@ class TestProducts4UI(unittest.TestCase):
         output_dir='/data/archives/'
         shutil.copyfile(input_file,output_dir+new_name)
         print(output_dir+new_name)
+
+    def test_list_my_subproducts(self):
+
+        productcode='vgt-ndvi'
+        version='sv2-pv2.1'
+        #productcode='fewsnet-rfe'
+        #version='2.0'
+        product = Product(product_code=productcode, version=version)
+        my_list = product.list_all_ingested_and_derived_subproducts_mapsets()
+        for sprod in my_list:
+            print sprod
