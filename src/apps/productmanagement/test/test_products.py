@@ -13,9 +13,9 @@ import os
 import datetime
 import glob
 import shutil
-from ..products import Product
-from ..datasets import Dataset
-from ..exceptions import (NoProductFound, MissingMapset)
+from apps.productmanagement.products import Product
+from apps.productmanagement.datasets import Dataset
+from apps.productmanagement.exceptions import (NoProductFound, MissingMapset)
 
 from config import es_constants
 from lib.python import functions
@@ -238,7 +238,7 @@ class TestProducts4UI(unittest.TestCase):
             try:
                 os.rename(my_file, fullpath_dest)
             except:
-                logger.error('Error in moving file %s' % fullpath)
+                logger.error('Error in moving file %s' % fullpath_dest)
 
 
     # This is to test the data completeness for a single product/version
@@ -322,3 +322,4 @@ class TestProducts4UI(unittest.TestCase):
         output_dir='/data/archives/'
         shutil.copyfile(input_file,output_dir+new_name)
         print(output_dir+new_name)
+
