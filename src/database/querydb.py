@@ -24,24 +24,44 @@ db = connectdb.ConnectDB().db
 dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
 
 
-def get_enabled_ingest_derived_of_product(productcode, version, echo=False):
+def get_enabled_ingest_derived_of_product(productcode, version, mapsetcode=None, echo=False):
     global db
     try:
-        query = "select p.productcode, p.version, i.mapsetcode, p.subproductcode, p.product_type " + \
-                "from products.product p " + \
-                "     inner join products.ingestion i on p.productcode = i.productcode and p.subproductcode = i.subproductcode and p.version = i.version " + \
-                "where p.productcode = '"+productcode+"' and p.version = '"+version+"' and p.product_type = 'Ingest' and i.enabled = true " + \
-                "union " + \
-                "select p.productcode, p.version, derived.mapsetcode, p.subproductcode, p.product_type " + \
-                "from products.product p " + \
-                "     inner join ( " + \
-                "        select pp.productcode, pp.subproductcode, pp.version, pp.mapsetcode, proc.activated " + \
-                "        from products.process_product pp " + \
-                "             inner join products.processing proc on pp.process_id = proc.process_id where proc.enabled = true and pp.type = 'OUTPUT' and pp.final = true " + \
-                "        ) derived " + \
-                "     on p.productcode = derived.productcode and p.subproductcode = derived.subproductcode and p.version = derived.version " + \
-                "where p.productcode = '"+productcode+"' and p.version = '"+version+"' and p.product_type = 'Derived' " + \
-                "order by mapsetcode"
+        if mapsetcode is None:
+            query = "select p.productcode, p.version, i.mapsetcode, p.subproductcode, p.product_type " + \
+                    "from products.product p " + \
+                    "     inner join products.ingestion i on p.productcode = i.productcode and p.subproductcode = i.subproductcode and p.version = i.version " + \
+                    "where p.productcode = '"+productcode+"' and p.version = '"+version+"' and p.product_type = 'Ingest' and i.enabled = true " + \
+                    "union " + \
+                    "select p.productcode, p.version, derived.mapsetcode, p.subproductcode, p.product_type " + \
+                    "from products.product p " + \
+                    "     inner join ( " + \
+                    "        select pp.productcode, pp.subproductcode, pp.version, pp.mapsetcode, proc.activated " + \
+                    "        from products.process_product pp " + \
+                    "             inner join products.processing proc on pp.process_id = proc.process_id where proc.enabled = true and pp.type = 'OUTPUT' and pp.final = true " + \
+                    "        ) derived " + \
+                    "     on p.productcode = derived.productcode and p.subproductcode = derived.subproductcode and p.version = derived.version " + \
+                    "where p.productcode = '"+productcode+"' and p.version = '"+version+"' and p.product_type = 'Derived' " + \
+                    "order by mapsetcode"
+        else:
+            query = "select p.productcode, p.version, i.mapsetcode, p.subproductcode, p.product_type " + \
+                    "from products.product p " + \
+                    "     inner join products.ingestion i on p.productcode = i.productcode and p.subproductcode = i.subproductcode and p.version = i.version " + \
+                    "where p.productcode = '"+productcode+"' and p.version = '"+version+"' and p.product_type = 'Ingest' and i.enabled = true " + \
+                    " and i.mapsetcode = '"+mapsetcode+"'" + \
+                    "union " + \
+                    "select p.productcode, p.version, derived.mapsetcode, p.subproductcode, p.product_type " + \
+                    "from products.product p " + \
+                    "     inner join ( " + \
+                    "        select pp.productcode, pp.subproductcode, pp.version, pp.mapsetcode, proc.activated " + \
+                    "        from products.process_product pp " + \
+                    "             inner join products.processing proc on pp.process_id = proc.process_id where proc.enabled = true and pp.type = 'OUTPUT' and pp.final = true " + \
+                    "        ) derived " + \
+                    "     on p.productcode = derived.productcode and p.subproductcode = derived.subproductcode and p.version = derived.version " + \
+                    "where p.productcode = '"+productcode+"' and p.version = '"+version+"' and p.product_type = 'Derived' " + \
+                    "and derived.mapsetcode = '"+mapsetcode+"'" + \
+                    "order by mapsetcode"
+
         result = db.execute(query)
         result = result.fetchall()
 

@@ -10,6 +10,7 @@ from __future__ import absolute_import
 
 import unittest
 import os
+import json
 
 from apps.productmanagement import requests
 
@@ -28,5 +29,10 @@ class TestRequests(unittest.TestCase):
         version = 'spot-v2'
         mapsetcode = 'SPOTV-Africa-1km'
         subproductcode = 'ndv'
-        request = requests.create_request(productcode, version, mapsetcode=None, subproductcode=None)
-        print request
+        request = requests.create_request(productcode, version, mapsetcode=mapsetcode, subproductcode=subproductcode)
+        request_json = json.dumps(request,
+                               ensure_ascii=False,
+                               sort_keys=True,
+                               indent=4,
+                               separators=(', ', ': '))
+        print request_json
