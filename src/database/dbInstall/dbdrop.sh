@@ -10,7 +10,7 @@ uname=$(uname -n)
 echo "Machine Name = ${uname}" >> ${logfile}
 
 # localhost reachable
-if [ "$(nc -v -z localhost 5432 2> /dev/null;echo $?)" = 0 ]; then
+if [ "$(nc -v -z localhost 5432 > /dev/null 2>&1; echo $?)" = 0 ]; then
     echo "Postgresql is running" >> ${logfile}
     # estationdb exists ?
     if [ "$(su postgres -c "psql -l |grep estation")" ];then

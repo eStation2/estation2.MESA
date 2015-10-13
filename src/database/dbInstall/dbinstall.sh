@@ -7,7 +7,7 @@ echo "Machine Name = ${uname}" >> ${logfile}
 
 # Operate only on PC2 - do nothing on PC3
 # localhost reachable
-if [ "$(nc -v -z localhost 5432 2> /dev/null;echo $?)" = 0 ]; then
+if [ "$(nc -v -z localhost 5432 > /dev/null 2>&1;echo $?)" = 0 ]; then
     echo "Postgresql is running" > ${logfile}
     # estationdb exists ?
     if [ ! "$(su postgres -c "psql -c 'select datname from pg_database'"|grep estationdb)" ];then
@@ -24,7 +24,7 @@ EOF
         #First install from scratch data
         echo "Create database structure" >> ${logfile}
         # End automatically added section
-        psql -h localhost -U estation -d estationdb -f /srv/www/eStation2/database/dbInstall/products_dump_structure_only.sql >> ${logfile} 2>&1 << EOF
+        psql -h localhost -U estation -d estationdb -f /var/www/eStation2/database/dbInstall/products_dump_structure_only.sql >> ${logfile} 2>&1 << EOF
         mesadmin
 EOF
 
@@ -32,7 +32,7 @@ EOF
 
     # Update Tables (both for upgrade and installation from scratch)
     echo "Tables contents" >> ${logfile}
-    psql -h localhost -U estation -d estationdb -f /srv/www/eStation2/database/dbInstall/products_dump_data_only.sql >> ${logfile} 2>&1 << EOF
+    psql -h localhost -U estation -d estationdb -f /var/www/eStation2/database/dbInstall/products_dump_data_only.sql >> ${logfile} 2>&1 << EOF
     mesadmin
 EOF
 
