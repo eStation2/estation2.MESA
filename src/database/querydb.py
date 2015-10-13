@@ -1214,13 +1214,18 @@ def get_product_native(productcode='', version='undefined', allrecs=False, echo=
 #          allrecs          - If True return all products. Default=False
 #          echo             - If True echo the query result in the console for debugging purposes. Default=False
 #   Output: Return the fields of all or a specific product record with product_type='Native' from the table product.
-def get_subproduct(productcode='', version='undefined', subproductcode='', echo=False):
+def get_subproduct(productcode='', version='undefined', subproductcode='', masked=False, echo=False):
     global db
     try:
-        where = and_(db.product.productcode == productcode,
-                     db.product.subproductcode == subproductcode,
-                     db.product.version == version,
-                     db.product.masked == 'f')
+        if masked:
+            where = and_(db.product.productcode == productcode,
+                         db.product.subproductcode == subproductcode,
+                         db.product.version == version,
+                         db.product.masked == 'f')
+        else:
+            where = and_(db.product.productcode == productcode,
+                         db.product.subproductcode == subproductcode,
+                         db.product.version == version)
         subproduct = db.product.filter(where).first()
         #if subproduct is None:
         #    subproduct = []
