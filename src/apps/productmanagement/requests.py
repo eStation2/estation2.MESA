@@ -12,9 +12,15 @@ import tempfile
 
 # from config import es_constants
 # from lib.python import es_logging as log
+<<<<<<< HEAD
 from lib.python import functions
 # from lib.python import metadata
 from database import querydb
+=======
+# from lib.python import functions
+# from lib.python import metadata
+# from database import querydb
+>>>>>>> ca42728ebaf80ee0b698276544d89f72a5ef9992
 #
 # from .exceptions import (NoProductFound, MissingMapset)
 # from .datasets import Dataset
@@ -29,6 +35,7 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
 
     # Define the 'request' object
     request = {'product': productcode,
+<<<<<<< HEAD
                'version': version}
 
     # Check the level of the request
@@ -59,6 +66,19 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
                     dataset_dict = {}
                 request['productmapsets'].append(mapset_dict)
                 return request
+=======
+               'version': version,}
+
+    #   Check the level of the request
+    if mapsetcode is None:
+        if subproductcode is not None:
+            logger.error('If mapset in not defined, subproduct cannot be defined !')
+            return 1
+        else:
+            # Get list of all ACTIVE ingested/derived subproducts and associated mapsets
+            pass
+
+>>>>>>> ca42728ebaf80ee0b698276544d89f72a5ef9992
     # Mapset is defined
     else:
         if subproductcode is None:
@@ -66,7 +86,11 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
             pass
         else:
             # All variable defined -> get missing object
+<<<<<<< HEAD
             missing = product.get_missing_datasets(mapset=mapsetcode, sub_product_code=subproductcode, from_date=None, to_date=None)
+=======
+            missing = product.get_missing_datasets(mapset=mapsetcode,sub_product_code=subproductcode, from_date=None, to_date=None)
+>>>>>>> ca42728ebaf80ee0b698276544d89f72a5ef9992
 
     # Dump the request object to JSON
 

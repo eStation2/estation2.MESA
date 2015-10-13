@@ -32,7 +32,7 @@ class TestCreate(unittest.TestCase):
         start_date=datetime.date(2011, 1, 1)
         end_date=None
 
-        # # NDV from sv2-pv2.1: since 01.01.2011 -> real files or link are created ??
+        # # NDV from sv2-pv2.1: since 01.01.2011 -> real files (not or ) are created !
         subproduct='ndv'
         target_dir = base_target_dir + product+ os.path.sep + subproduct
         functions.check_output_dir(target_dir)

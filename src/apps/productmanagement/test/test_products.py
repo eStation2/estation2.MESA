@@ -335,7 +335,10 @@ class TestProducts4UI(unittest.TestCase):
             print sprod
 
     def test_data_management(self):
+<<<<<<< HEAD
         import json
+=======
+>>>>>>> ca42728ebaf80ee0b698276544d89f72a5ef9992
 
         db_products = querydb.get_products(activated=True)
 
