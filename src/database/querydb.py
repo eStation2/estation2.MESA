@@ -24,6 +24,39 @@ db = connectdb.ConnectDB().db
 dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
 
 
+def get_enabled_ingest_derived_of_product(productcode, version, echo=False):
+    global db
+    try:
+        query = "select p.productcode, p.version, i.mapsetcode, p.subproductcode, p.product_type " + \
+                "from products.product p " + \
+                "     inner join products.ingestion i on p.productcode = i.productcode and p.subproductcode = i.subproductcode and p.version = i.version " + \
+                "where p.productcode = '"+productcode+"' and p.version = '"+version+"' and p.product_type = 'Ingest' and i.enabled = true " + \
+                "union " + \
+                "select p.productcode, p.version, derived.mapsetcode, p.subproductcode, p.product_type " + \
+                "from products.product p " + \
+                "     inner join ( " + \
+                "        select pp.productcode, pp.subproductcode, pp.version, pp.mapsetcode, proc.activated " + \
+                "        from products.process_product pp " + \
+                "             inner join products.processing proc on pp.process_id = proc.process_id where proc.enabled = true and pp.type = 'OUTPUT' and pp.final = true " + \
+                "        ) derived " + \
+                "     on p.productcode = derived.productcode and p.subproductcode = derived.subproductcode and p.version = derived.version " + \
+                "where p.productcode = '"+productcode+"' and p.version = '"+version+"' and p.product_type = 'Derived' " + \
+                "order by mapsetcode"
+        result = db.execute(query)
+        result = result.fetchall()
+
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_enabled_ingest_derived_of_product: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
 def update_product_info(productinfo, echo=False):
     global db
     status = False
@@ -1214,13 +1247,18 @@ def get_product_native(productcode='', version='undefined', allrecs=False, echo=
 #          allrecs          - If True return all products. Default=False
 #          echo             - If True echo the query result in the console for debugging purposes. Default=False
 #   Output: Return the fields of all or a specific product record with product_type='Native' from the table product.
-def get_subproduct(productcode='', version='undefined', subproductcode='', echo=False):
+def get_subproduct(productcode='', version='undefined', subproductcode='', masked=False, echo=False):
     global db
     try:
-        where = and_(db.product.productcode == productcode,
-                     db.product.subproductcode == subproductcode,
-                     db.product.version == version,
-                     db.product.masked == 'f')
+        if masked:
+            where = and_(db.product.productcode == productcode,
+                         db.product.subproductcode == subproductcode,
+                         db.product.version == version,
+                         db.product.masked == 'f')
+        else:
+            where = and_(db.product.productcode == productcode,
+                         db.product.subproductcode == subproductcode,
+                         db.product.version == version)
         subproduct = db.product.filter(where).first()
         #if subproduct is None:
         #    subproduct = []

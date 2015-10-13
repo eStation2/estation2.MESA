@@ -15,13 +15,13 @@ from apps.productmanagement.datasets import Dataset
 
 logger = log.my_logger(__name__)
 
-def create_archive_eumetcast(product, version, subproducts, mapset, start_date=None, end_date=None, target_dir=None):
+def create_archive_eumetcast(product, version, subproducts, mapset, start_date=None, end_date=None, target_dir=None, overwrite=False):
 
-# Rename and copy to target dir (/data/ingest by default) the eStation2 files
+    # Rename and copy to target dir (/data/archives by default) the eStation2 files
 
     # Check target_dir
     if target_dir is None:
-        target_dir = es_constants.es2globals['ingest_dir']
+        target_dir = es_constants.es2globals['archive_dir']
 
     # Loop over subproducts
     if not isinstance(subproducts,list):
@@ -44,7 +44,9 @@ def create_archive_eumetcast(product, version, subproducts, mapset, start_date=N
         for filename in filenames:
             # Derive MESA_JRC_ filename
             archive_name=functions.convert_name_to_eumetcast(filename)
-            # Copy to target_dir
-            status=shutil.copyfile(filename,target_dir+os.path.sep+archive_name)
+            # Check if the target_file already exist
+            if not os.path.isfile(target_dir+os.path.sep+archive_name) or overwrite:
+                # Copy to target_dir
+                status=shutil.copyfile(filename,target_dir+os.path.sep+archive_name)
 
         logger.info("Files copied for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" %(product, version, subproduct, mapset))

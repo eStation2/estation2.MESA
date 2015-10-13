@@ -33,6 +33,7 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
     columnLines: false,
     rowLines:false,
     bufferedRenderer: true,
+    minHeight: 60,
 
     //listeners: {
     //    beforerender:  function () {
