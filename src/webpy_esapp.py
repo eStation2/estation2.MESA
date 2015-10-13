@@ -2302,7 +2302,7 @@ class DataSets:
 
     def GET(self):
         # return web.ctx
-        db_products = querydb.get_products(echo=False, activated=True)
+        db_products = querydb.get_products(activated=True)
 
         if db_products.__len__() > 0:
             products_dict_all = []

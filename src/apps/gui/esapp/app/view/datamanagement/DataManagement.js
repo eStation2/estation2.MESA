@@ -13,6 +13,7 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         'esapp.view.datamanagement.DataManagementController',
         'esapp.view.datamanagement.ProductMapSet',
         'esapp.view.datamanagement.MapSetDataSet',
+        'esapp.view.datamanagement.sendRequest',
 
         'Ext.grid.column.Widget',
         'Ext.grid.column.Action',
@@ -194,12 +195,23 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                     tooltip: esapp.Utils.getTranslation('tipcompletedatasetall'),    // 'Complete all product data sets (all mapsets and its subproducts).',
                     //scope: me,
                     handler: function (grid, rowIndex) {
-                        Ext.toast({
-                            html: 'Show window which proposes places to send a request to complete all product data sets.',
-                            title: 'Request to complete all product data sets.',
-                            width: 200,
-                            align: 't'
+                        var rec = grid.getStore().getAt(rowIndex);
+
+                        var sendRequestWin = new esapp.view.datamanagement.sendRequest({
+                            params: {
+                                level: 'product',
+                                record: rec
+                            }
                         });
+                        sendRequestWin.show();
+                        console.info(rec);
+                        //rec.get('store_original_data')
+                        //Ext.toast({
+                        //    html: 'Show window which proposes places to send a request to complete all product data sets.',
+                        //    title: 'Request to complete all product data sets.',
+                        //    width: 200,
+                        //    align: 't'
+                        //});
                     }
                 }]
             }]
