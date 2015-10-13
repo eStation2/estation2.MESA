@@ -12,9 +12,9 @@ import tempfile
 
 # from config import es_constants
 # from lib.python import es_logging as log
-# from lib.python import functions
+from lib.python import functions
 # from lib.python import metadata
-# from database import querydb
+from database import querydb
 #
 # from .exceptions import (NoProductFound, MissingMapset)
 # from .datasets import Dataset
@@ -29,17 +29,36 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
 
     # Define the 'request' object
     request = {'product': productcode,
-               'version': version,}
+               'version': version}
 
     # Check the level of the request
     if mapsetcode is None:
         if subproductcode is not None:
-            logger.error('If mapset in not defined, subproduct cannot be defined !')
+            logger.error('If mapset is not defined, subproduct cannot be defined !')
             return 1
         else:
             # Get list of all ACTIVE ingested/derived subproducts and associated mapsets
-            pass
+            product_mapsets_subproducts = querydb.get_enabled_ingest_derived_of_product(productcode=productcode, version=version)
+            if product_mapsets_subproducts.__len__() > 0:
+                request['productmapsets'] = []
+                mapset_dict = {}
+                dataset_dict = {}
+                mapsetcode = ''
+                for row in product_mapsets_subproducts:
+                    row_dict = functions.row2dict(row)
+                    if row_dict['mapsetcode'] != mapsetcode:
+                        if mapsetcode != '':
+                            request['productmapsets'].append(mapset_dict)
+                        mapsetcode = row_dict['mapsetcode']
+                        mapset_dict = {'mapsetcode': mapsetcode, 'mapsetdatasets': []}
+                        dataset_dict = {}
 
+                    dataset_dict['subproductcode'] = row_dict['subproductcode']
+                    dataset_dict['product_type'] = row_dict['product_type']
+                    mapset_dict['mapsetdatasets'].append(dataset_dict)
+                    dataset_dict = {}
+                request['productmapsets'].append(mapset_dict)
+                return request
     # Mapset is defined
     else:
         if subproductcode is None:
