@@ -84,6 +84,8 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
     return request
     # Dump the request object to JSON
 
-
-def handle_request():
-    pass
+#
+# def handle_request(json_request):
+#
+#     product = json_request.
+#     version = json_request.
