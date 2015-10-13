@@ -12,6 +12,16 @@ from database import querydb
 from lib.python import functions
 
 class TestQuerydb(TestCase):
+    def Test_get_spirits(self):
+
+        spirits = querydb.get_spirits()
+        if spirits.__len__() > 0:
+            for row in spirits:
+                row_dict = functions.row2dict(row)
+                print row_dict
+
+        self.assertEqual(1, 1)
+
     def Test_set_thema(self):
         themaid = 'AGRYHMET'
         themaset = querydb.set_thema(themaid)

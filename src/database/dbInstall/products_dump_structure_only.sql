@@ -2727,21 +2727,33 @@ ALTER TABLE products.product_category OWNER TO estation;
 -- Name: spirits; Type: TABLE; Schema: products; Owner: estation; Tablespace: 
 --
 
-CREATE TABLE spirits (
-    productcode character varying NOT NULL,
-    subproductcode character varying NOT NULL,
-    version character varying NOT NULL,
-    prod_values character varying NOT NULL,
-    flags character varying,
-    data_ignore_value integer,
-    days integer,
-    sensor_type character varying,
-    comment character varying,
-    sensor_filename_prefix character varying,
-    frequency_filename_prefix character varying,
-    product_anomaly_filename_prefix character varying
+CREATE TABLE products.spirits
+(
+  productcode character varying NOT NULL,
+  subproductcode character varying NOT NULL,
+  version character varying NOT NULL,
+  mapsetcode character varying,
+  prod_values character varying,
+  flags character varying,
+  data_ignore_value integer,
+  days integer,
+  sensor_type character varying,
+  comment character varying,
+  sensor_filename_prefix character varying,
+  frequency_filename_prefix character varying,
+  product_anomaly_filename_prefix character varying,
+  activated boolean NOT NULL DEFAULT false,
+  CONSTRAINT spirits_pk PRIMARY KEY (productcode, subproductcode, version),
+  CONSTRAINT spirits_product_fk FOREIGN KEY (productcode, subproductcode, version)
+      REFERENCES products.product (productcode, subproductcode, version) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT mapset_spirits_fk FOREIGN KEY (mapsetcode)
+      REFERENCES products.mapset (mapsetcode) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE SET NULL
+)
+WITH (
+  OIDS=FALSE
 );
-
 
 ALTER TABLE products.spirits OWNER TO estation;
 

@@ -23,6 +23,24 @@ logger = log.my_logger(__name__)
 db = connectdb.ConnectDB().db
 dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
 
+def get_spirits(echo=False):
+    global db
+    try:
+        query = "SELECT * FROM products.spirits WHERE activated = true ORDER BY productcode, version, subproductcode, mapsetcode"
+        spirits = db.execute(query)
+        spirits = spirits.fetchall()
+
+        return spirits
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_spirits: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
 
 def get_enabled_ingest_derived_of_product(productcode, version, mapsetcode=None, echo=False):
     global db
@@ -59,7 +77,7 @@ def get_enabled_ingest_derived_of_product(productcode, version, mapsetcode=None,
                     "        ) derived " + \
                     "     on p.productcode = derived.productcode and p.subproductcode = derived.subproductcode and p.version = derived.version " + \
                     "where p.productcode = '"+productcode+"' and p.version = '"+version+"' and p.product_type = 'Derived' " + \
-                    "and derived.mapsetcode = '"+mapsetcode+"'" + \
+                    "and derived.mapsetcode = '"+mapsetcode+"' " + \
                     "order by mapsetcode"
 
         result = db.execute(query)
