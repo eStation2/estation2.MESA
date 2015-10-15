@@ -86,15 +86,15 @@ class Daemon(object):
     def delpid(self):
         # Change to deal with forking in processing (otherwise the pidfile is deleted by child process)
         logger = log.my_logger("lib.python.daemon")
-        my_pid=os.getpgid
-        logger.info("My Pid: %i" % my_pid)
+        #my_pid=os.getpgid
+        #logger.info("My Pid: %i" % my_pid)
 
-        pid_file=open(self.pidfile)
-        pid = pid_file.read()
-        logger.info("Pid: %i" % pid)
-        if pid == my_pid:
-            logger.info("Removing the Pid")
-            os.remove(self.pidfile)
+        #pid_file=open(self.pidfile)
+        #pid = pid_file.read()
+        #logger.info("Pid: %i" % pid)
+        #if pid == my_pid:
+        logger.info("Removing the Pid")
+        os.remove(self.pidfile)
 
     def status(self):
         #If : pid exists + process run -> ON - return True
@@ -112,10 +112,12 @@ class Daemon(object):
         pid = self.getpid_from_file()
 
         if pid:
-            message = "pidfile %s already exist. Daemon already running?\n"
-            sys.stderr.write(message % self.pidfile)
-            sys.exit(1)
-
+            if psutil.pid_exists(pid):
+                message = "pidfile %s already exist and process running. Daemon already running?\n"
+                sys.stderr.write(message % self.pidfile)
+                sys.exit(1)
+            else:
+                self.delpid()
         # Start the daemon
         self.daemonize()
         self.run()
