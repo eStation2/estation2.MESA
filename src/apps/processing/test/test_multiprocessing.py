@@ -41,14 +41,9 @@ import time
 from multiprocessing import Process, Queue
 from apps.processing import processing_std_precip
 
-def f(name, var):
-    time.sleep(1)
-    print 'hello', name, str(var)
-
 
 if __name__ == '__main__':
-
-    logfile='test'
+    logfile='test-multiprocessing'
     result_queue = Queue()
     # Prepare arguments
     args = {'pipeline_run_level':1, \

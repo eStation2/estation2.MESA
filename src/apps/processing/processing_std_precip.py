@@ -7,8 +7,7 @@
 #
 
 # Source generic modules
-import os, time
-import multiprocessing
+import os, time, sys
 
 # Import eStation2 modules
 from lib.python import functions
@@ -489,20 +488,26 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 def processing_std_precip(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None, update_stats=False, nrt_products=True, write2file=None, logfile=None):
-    proc_lists = None
-    proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
-                                 starting_dates=starting_dates, proc_lists=proc_lists, update_stats=update_stats, nrt_products=nrt_products)
-
 
     spec_logger = log.my_logger(logfile)
     spec_logger.info("Entering routine %s" % 'processing_std_precip')
+
+    proc_lists = None
+    proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
+                                 starting_dates=starting_dates, proc_lists=proc_lists, update_stats=update_stats, nrt_products=nrt_products)
 
     if write2file is not None:
         fwrite_id=open(write2file,'w')
     else:
         fwrite_id=None
+
     if pipeline_run_level > 0:
-        pipeline_run(verbose=pipeline_run_level, logger=spec_logger)
+        spec_logger.info("Run the pipeline %s" % 'processing_std_precip')
+        #pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger)
+        tasks = pipeline_get_task_names()
+        #pipeline_printout(output_stream=sys.stdout)
+        spec_logger.info("Run the pipeline %s" % tasks[0])
+        spec_logger.info("After running the pipeline %s" % 'processing_std_precip')
 
     if pipeline_printout_level > 0:
         pipeline_printout(verbose=pipeline_printout_level, output_stream=fwrite_id)
