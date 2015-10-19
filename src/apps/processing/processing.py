@@ -7,14 +7,12 @@ _author__ = "Marco Clerici"
 #	history: 1.0
 #
 
-# source eStation2 base definitions
+# import standard modules
 import os, sys
 import shutil
 import re
-import atexit
-# import standard modules
 import time
-import datetime
+from multiprocessing import Process, Queue
 
 # import eStation2 modules
 from database import querydb
@@ -31,6 +29,7 @@ data_dir= es_constants.es2globals['data_dir']
 
 from apps.processing import processing_std_precip
 from apps.processing import processing_std_ndvi
+from apps.processing import processing_std_fronts
 from apps.processing import processing_merge
 
 from lib.python.daemon import DaemonDryRunnable
@@ -71,12 +70,16 @@ def loop_processing(dry_run=False, serialize=False):
 #               serialize -> False (default): detach the process and work in parallel
 #                         -> True: do NOT detach processes and work in series (mainly for debugging)
 
-    # Clean dir with locks
+    # Clean dir with locks at restart
     if os.path.isdir(es_constants.processing_tasks_dir):
         shutil.rmtree(es_constants.processing_tasks_dir)
+
     logger.info("Entering routine %s" % 'loop_processing')
-    echo_query = False
     functions.check_output_dir(es_constants.processing_tasks_dir)
+
+    # Read sleep time (used by each processing chain)
+    sleep_time=es_constants.processing_sleep_time_sec
+
     while True:
 
         logger.debug("Entering infinite loop")
@@ -94,7 +97,6 @@ def loop_processing(dry_run=False, serialize=False):
         for chain in active_processing_chains:
 
             logger.debug("Processing Chain N.:%s" % str(chain.process_id))
-            sleep_time=es_constants.processing_sleep_time_sec
             derivation_method = chain.derivation_method             # name of the method in the module
             algorithm = chain.algorithm                             # name of the .py module
             mapset = chain.output_mapsetcode
@@ -110,12 +112,15 @@ def loop_processing(dry_run=False, serialize=False):
             input_product_info = querydb.get_product_out_info(productcode=product_code,
                                                               subproductcode=sub_product_code,
                                                               version=version)
-            # Define a standard logfile asoiated to the processing chain
+
+            # Define a standard logfile associated to the processing chain
             processing_unique_id='ID='+str(process_id)+'_PROD='+product_code+'_METHOD='+derivation_method+'_ALGO='+algorithm
             logfile='apps.processing.'+processing_unique_id
 
-            # Case of a 'std_' (i.e. ruffus with 1 input) processing -> get all info from 1st INPUT and manage dates
+            # Case of a 'std_' processing (i.e. ruffus with 1 input) -> get all info from 1st INPUT and manage dates
+
             if re.search('^std_.*',algorithm):
+                logger.debug("Processing Chain is standard type")
 
                 start_date = input_products[0].start_date
                 end_date = input_products[0].end_date
@@ -132,11 +137,15 @@ def loop_processing(dry_run=False, serialize=False):
                         'starting_dates': list_dates,\
                         'version':version,
                         'logfile':logfile}
+
                 # Define an id from a combination of fields
                 processing_unique_lock=es_constants.processing_tasks_dir+processing_unique_id+'.lock'
 
+                # Check the processing chain is not locked
                 if not os.path.isfile(processing_unique_lock):
+
                     open(processing_unique_lock,'a').close()
+                    logger.debug("Unique lock created: % s" % processing_unique_id)
                     # Define the module name and function()
                     module_name = 'processing_'+algorithm
                     function_name = 'processing_'+derivation_method
@@ -158,31 +167,29 @@ def loop_processing(dry_run=False, serialize=False):
                         logger.error("Error in loading algoritm [%s] for module [%s]" % (function_name,module_name))
                         return
 
-                    #  Fork and call the std_precip 'generic' processing
+                    #  Check serialize option
                     if serialize==False:
-                        pid = os.fork()
-                        if pid == 0:
-                            # Decoupling from parent environment
-                            os.setsid()
-                            # Here I'm the child process ->  call to the processing pipeline
-                            logger.debug("Launching the pipeline")
-                            proc_lists = proc_func(**args)
-                            # Upsert database
-                            # upsert_database(process_id, product_code, version, mapset, proc_lists, input_product_info)
-                            # Sleep time to be read from processing
-                            time.sleep(float(sleep_time))
-                            logger.debug("Execution finished - remove lock")
-                            try:
-                                os.remove(processing_unique_lock)
-                            except:
-                                logger.warning("Lock not removed: %s" % processing_unique_lock)
-                            logger.debug("Lock should have been removed now .. got to sleep 3 sec")
-                            time.sleep(3)
-                            sys.exit(0)
-                        else:
-                            # Here I'm the parent process -> just wait (not to create a defunct process)
-                            status = os.wait()
-                            pass
+
+                        # Call to the processing pipeline
+                        logger.debug("Launching the pipeline")
+
+                        #proc_lists = proc_func(**args)
+                        results_queue = Queue()
+                        p = Process(target=proc_func, args=(results_queue,), kwargs=args)
+                        p.start()
+                        proc_lists=results_queue.get()
+                        #for spg in proc_lists.list_subprod_groups:
+                        #    print(spg.group)
+                        # Upsert database
+                        # upsert_database(process_id, product_code, version, mapset, proc_lists, input_product_info)
+                        # Sleep time to be read from processing
+                        #time.sleep(float(sleep_time))
+                        logger.debug("Execution finished - remove lock")
+                        try:
+                            os.remove(processing_unique_lock)
+                        except:
+                            logger.warning("Lock not removed: %s" % processing_unique_lock)
+
                     # Do NOT detach process (work in series)
                     else:
                         proc_lists = proc_func(**args)
@@ -190,7 +197,7 @@ def loop_processing(dry_run=False, serialize=False):
                         # upsert_database(process_id, product_code, version, mapset, proc_lists, input_product_info)
                         os.remove(processing_unique_lock)
 
-                    time.sleep(float(sleep_time))
+                    #time.sleep(float(sleep_time))
                 else:
                     logger.debug("Lock already exist: %s" % processing_unique_id)
 

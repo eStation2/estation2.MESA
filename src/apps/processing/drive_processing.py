@@ -10,7 +10,7 @@ start = time.clock()
 
 # Manual Switch for START/STOP
 do_start = True
-dry_run = False
+dry_run = True
 service = False
 serialize = False    # for debug
 
