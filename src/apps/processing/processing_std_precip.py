@@ -7,7 +7,8 @@
 #
 
 # Source generic modules
-import os
+import os, time
+import multiprocessing
 
 # Import eStation2 modules
 from lib.python import functions
@@ -485,17 +486,16 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 #   Run the pipeline
 
 
-def processing_std_precip(pipeline_run_level=0,pipeline_printout_level=0,
+def processing_std_precip(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None, update_stats=False, nrt_products=True, write2file=None, logfile=None):
-
     proc_lists = None
     proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
                                  starting_dates=starting_dates, proc_lists=proc_lists, update_stats=update_stats, nrt_products=nrt_products)
 
-    #logger.info("Entering routine %s" % 'processing_std_precip')
-    #logger.info("pipeline_run_level %i" % pipeline_run_level)
+
     spec_logger = log.my_logger(logfile)
+    spec_logger.info("Entering routine %s" % 'processing_std_precip')
 
     if write2file is not None:
         fwrite_id=open(write2file,'w')
@@ -513,13 +513,14 @@ def processing_std_precip(pipeline_run_level=0,pipeline_printout_level=0,
     if write2file is not None:
         fwrite_id.close()
 
-    return proc_lists
+    res_queue.put(proc_lists)
+    return True
 
-def processing_std_precip_stats_only(pipeline_run_level=0,pipeline_printout_level=0,
+def processing_std_precip_stats_only(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None,write2file=None, logfile=None):
 
-    proc_lists = processing_std_precip(pipeline_run_level=pipeline_run_level,
+    result = processing_std_precip(res_queue, pipeline_run_level=pipeline_run_level,
                           pipeline_printout_level=pipeline_printout_level,
                           pipeline_printout_graph_level=pipeline_printout_graph_level,
                           prod=prod,
@@ -532,13 +533,14 @@ def processing_std_precip_stats_only(pipeline_run_level=0,pipeline_printout_leve
                           write2file=write2file,
                           logfile=logfile)
 
-    return proc_lists
+    return result
 
-def processing_std_precip_prods_only(pipeline_run_level=0,pipeline_printout_level=0,
+
+def processing_std_precip_prods_only(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None,write2file=None, logfile=None):
 
-    proc_lists = processing_std_precip(pipeline_run_level=pipeline_run_level,
+    result = processing_std_precip(res_queue, pipeline_run_level=pipeline_run_level,
                           pipeline_printout_level=pipeline_printout_level,
                           pipeline_printout_graph_level=pipeline_printout_graph_level,
                           prod=prod,
@@ -551,13 +553,14 @@ def processing_std_precip_prods_only(pipeline_run_level=0,pipeline_printout_leve
                           write2file=write2file,
                           logfile=logfile)
 
-    return proc_lists
+    return result
 
-def processing_std_precip_all(pipeline_run_level=0,pipeline_printout_level=0,
+
+def processing_std_precip_all(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None,write2file=None, logfile=None):
 
-    proc_lists = processing_std_precip(pipeline_run_level=pipeline_run_level,
+    result = processing_std_precip(res_queue, pipeline_run_level=pipeline_run_level,
                           pipeline_printout_level=pipeline_printout_level,
                           pipeline_printout_graph_level=pipeline_printout_graph_level,
                           prod=prod,
@@ -570,4 +573,5 @@ def processing_std_precip_all(pipeline_run_level=0,pipeline_printout_level=0,
                           write2file=write2file,
                           logfile=logfile)
 
-    return proc_lists
+    return result
+
