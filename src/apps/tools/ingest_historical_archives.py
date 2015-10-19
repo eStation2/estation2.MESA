@@ -8,6 +8,7 @@ __author__ = 'analyst'
 #	history: 1.0
 #
 
+import sys
 from apps.acquisition.ingestion import *
 
 logger = log.my_logger(__name__)
@@ -60,3 +61,8 @@ def ingest_historical_archives(input_dir, dry_run=False):
             mapset = processed_product.mapsetcode
             logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (productcode, version,subproductcode,mapset))
             ingest_archives_eumetcast_product(productcode, version,subproductcode,mapset,dry_run=dry_run, input_dir=input_dir)
+
+if __name__=='__main__':
+
+    input_dir = str(sys.argv[1])
+    result = ingest_historical_archives(input_dir)
