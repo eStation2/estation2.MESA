@@ -12,7 +12,7 @@ import os, sys
 import shutil
 import re
 import time
-from multiprocessing import Process, Queue
+from multiprocessing import *
 
 # import eStation2 modules
 from database import querydb
@@ -94,9 +94,11 @@ def loop_processing(dry_run=False, serialize=False):
             pipeline_run_level = 3
             pipeline_printout_level = 0
 
+        logger.debug("Pipeline run level: %i" % pipeline_run_level)
+        logger.debug("Pipeline printout level: %i" % pipeline_printout_level)
+
         for chain in active_processing_chains:
 
-            logger.debug("Processing Chain N.:%s" % str(chain.process_id))
             derivation_method = chain.derivation_method             # name of the method in the module
             algorithm = chain.algorithm                             # name of the .py module
             mapset = chain.output_mapsetcode
@@ -107,6 +109,8 @@ def loop_processing(dry_run=False, serialize=False):
             product_code = input_products[0].productcode
             sub_product_code = input_products[0].subproductcode
             version = input_products[0].version
+
+            logger.info("Processing product: %s" % str(product_code))
 
             # Get product metadata for output products (from first input)
             input_product_info = querydb.get_product_out_info(productcode=product_code,
@@ -122,6 +126,7 @@ def loop_processing(dry_run=False, serialize=False):
             if re.search('^std_.*',algorithm):
                 logger.debug("Processing Chain is standard type")
 
+                #log_to_stderr()
                 start_date = input_products[0].start_date
                 end_date = input_products[0].end_date
 
@@ -176,14 +181,20 @@ def loop_processing(dry_run=False, serialize=False):
                         #proc_lists = proc_func(**args)
                         results_queue = Queue()
                         p = Process(target=proc_func, args=(results_queue,), kwargs=args)
+                        #p.daemon = True
+                        logger.debug("Before starting the process .. %i", p.is_alive())
+
                         p.start()
-                        proc_lists=results_queue.get()
+                        logger.debug("After start  .. %i", p.is_alive())
+                        #proc_lists=results_queue.get()
+                        p.join()
+                        logger.debug("After join  .. %i", p.is_alive())
                         #for spg in proc_lists.list_subprod_groups:
                         #    print(spg.group)
                         # Upsert database
                         # upsert_database(process_id, product_code, version, mapset, proc_lists, input_product_info)
                         # Sleep time to be read from processing
-                        #time.sleep(float(sleep_time))
+                        time.sleep(float(sleep_time))
                         logger.debug("Execution finished - remove lock")
                         try:
                             os.remove(processing_unique_lock)
@@ -192,12 +203,12 @@ def loop_processing(dry_run=False, serialize=False):
 
                     # Do NOT detach process (work in series)
                     else:
-                        proc_lists = proc_func(**args)
+                        proc_lists = proc_func(results_queue, **args)
                         # Upsert database
                         # upsert_database(process_id, product_code, version, mapset, proc_lists, input_product_info)
                         os.remove(processing_unique_lock)
 
-                    #time.sleep(float(sleep_time))
+                        time.sleep(float(sleep_time))
                 else:
                     logger.debug("Lock already exist: %s" % processing_unique_id)
 
@@ -238,4 +249,4 @@ def loop_processing(dry_run=False, serialize=False):
                     logger.debug("Processing already running for ID: %s " % processing_unique_id)
 
         logger.info("End of the loop ... wait a while")
-        time.sleep(10)
+        time.sleep(1)
