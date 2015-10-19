@@ -18,8 +18,6 @@ from config import es_constants
 # Import third-party modules
 from ruffus import *
 
-#logger = log.my_logger(__name__)
-
 #   General definitions for this processing chain
 ext=es_constants.ES2_OUTFILE_EXTENSION
 
@@ -503,7 +501,7 @@ def processing_std_precip(res_queue, pipeline_run_level=0,pipeline_printout_leve
 
     if pipeline_run_level > 0:
         spec_logger.info("Run the pipeline %s" % 'processing_std_precip')
-        #pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger)
+        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger)
         tasks = pipeline_get_task_names()
         #pipeline_printout(output_stream=sys.stdout)
         spec_logger.info("Run the pipeline %s" % tasks[0])
@@ -518,7 +516,7 @@ def processing_std_precip(res_queue, pipeline_run_level=0,pipeline_printout_leve
     if write2file is not None:
         fwrite_id.close()
 
-    res_queue.put(proc_lists)
+    #res_queue.put(proc_lists)
     return True
 
 def processing_std_precip_stats_only(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
