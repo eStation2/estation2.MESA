@@ -266,7 +266,7 @@ def ingest_archives_eumetcast(dry_run=False):
             # Remove trace file also
             os.remove(trace)
 
-def ingest_archives_eumetcast_product(product_code, version, subproduct_code, mapset_id, dry_run=False,input_dir=None):
+def ingest_archives_eumetcast_product(product_code, version, subproduct_code, mapset_id, dry_run=False,input_dir=None, no_delete=False):
 
 #    Ingest all files of type MESA_JRC_ for a give prod/version/subprod/mapset
 #    Note that mapset is the 'target' mapset
@@ -297,7 +297,7 @@ def ingest_archives_eumetcast_product(product_code, version, subproduct_code, ma
                 logger.info("Found file: %s" % in_file)
             else:
                 try:
-                    ingest_file_archive(in_file, mapset_id, echo_query=False)
+                    ingest_file_archive(in_file, mapset_id, echo_query=False, no_delete=no_delete)
                 except:
                     logger.warning("Error in ingesting file %s" % in_file)
 
@@ -1482,7 +1482,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # Loop on interm_files
         ii += 1
 
-def ingest_file_archive(input_file, target_mapsetid, echo_query=False,no_delete=False):
+def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete=False):
 # -------------------------------------------------------------------------------------------------------
 #   Ingest a file of type MESA_JRC_
 #   Arguments:
