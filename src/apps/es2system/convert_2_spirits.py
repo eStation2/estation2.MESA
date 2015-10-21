@@ -11,11 +11,15 @@ import csv
 import operator
 from config import es_constants
 import fnmatch
+import datetime
 
 # Import eStation2 modules
 from lib.python import es_logging as log
 from lib.python import functions
 from database import querydb
+from apps.productmanagement.datasets import Dataset
+from apps.productmanagement.products import Product
+
 logger = log.my_logger(__name__)
 
 naming_spirits = { 'sensor_filename_prefix':'', \
@@ -88,8 +92,6 @@ def convert_geotiff_file(input_file, output_dir, str_date, naming_spirits, metad
               input_file  + ' ' + \
               output_path
 
-    print command
-
     # Execute command
     status = os.system(command)
     if status:
@@ -106,6 +108,11 @@ def convert_driver(output_dir=None):
 
     # Definitions
     input_dir = es_constants.es2globals['processing_dir']
+
+    # Check base output dir
+    if output_dir is None:
+        output_dir=es_constants.es2globals['spirits_output_dir']
+    functions.check_output_dir(output_dir)
 
     # Read the spirits table and convert all existing files
     spirits_list = querydb.get_spirits()
@@ -128,25 +135,40 @@ def convert_driver(output_dir=None):
                            'sensor_type':entry['sensor_type'], \
                            'comment':entry['comment']}
 
-        # Input subdir
-        subdir = product_code + os.path.sep + version + os.path.sep
-        if mapset is not None:
-            mapset+=mapset+ os.path.sep
+        # Manage mapsets: if defined use it, else read the existing ones from filesystem
+        my_mapsets = []
+        if entry['mapsetcode']:
+            my_mapsets.append(entry['mapsetcode'])
+        else:
+            prod = Product(product_code,version=version)
+            for mp in prod.mapsets:
+                my_mapsets.append(mp)
 
-        # Get the list of input products
-        match_regex='*' + product_code + '_' + \
-                    sub_product_code + '_*_' +\
-                    version +'*'
+        # Manage dates
+        if entry['start_date']:
+            from_date=datetime.datetime.strptime(str(entry['start_date']), '%Y%m%d').date()
+        else:
+            from_date = None
+        if entry['end_date']:
+            to_date=datetime.datetime.strptime(str(entry['end_date']), '%Y%m%d').date()
+        else:
+            to_date = None
 
-        logger.debug("Looking in directory: %s" % input_dir)
+        for my_mapset in my_mapsets:
+            # Manage output dirs
+            out_sub_dir = my_mapset+os.path.sep+\
+                          product_code+os.path.sep+\
+                          entry['product_anomaly_filename_prefix']+\
+                          entry['frequency_filename_prefix']+\
+                          entry['days']+os.path.sep
 
-        # Get the list of matching files in /data/ingest
-        available_files=[]
-        for root, dirnames, filenames in os.walk(input_dir+subdir):
-            for filename in fnmatch.filter(filenames, match_regex):
-                available_files.append(os.path.join(root, filename))
 
-        if len(available_files) > 0:
-            for input_file in available_files:
-                str_date = functions.get_date_from_path_filename(os.path.basename(input_file))
-                convert_geotiff_file(input_file, output_dir, str_date, naming_spirits, metadata_spirits)
+            ds = Dataset(product_code,sub_product_code,my_mapset,version=version,from_date=from_date,to_date=to_date)
+            available_files=ds.get_filenames_range()
+
+            # Convert input products
+            if len(available_files) > 0:
+                for input_file in available_files:
+                    str_date = functions.get_date_from_path_filename(os.path.basename(input_file))
+                    convert_geotiff_file(input_file, output_dir+out_sub_dir, str_date, naming_spirits, metadata_spirits)
+            return
