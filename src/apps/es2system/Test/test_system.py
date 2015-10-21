@@ -100,6 +100,11 @@ class TestSystem(unittest.TestCase):
         status = es2system.system_db_dump(list_dump)
         self.assertEquals(status, 0)
 
+    def test_system_manage_dumps(self):
+
+        status = es2system.system_manage_dumps()
+        self.assertEquals(status, 0)
+
     def test_system_data_sync(self):
 
         source = es_constants.es2globals['processing_dir']
