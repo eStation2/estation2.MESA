@@ -129,26 +129,3 @@ class TestSystem(unittest.TestCase):
         # Should get here the role of my machine ...
         status = es2system.system_db_sync_full('pc2')
 
-    def test_spirits_modify_header(self):
-
-        # Should get here the role of my machine ...
-        header_file = '/data/temp/spirits/20100101_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0_SPIRITS.hdr'
-        cv.append_to_header_file(header_file, cv.metadata_spirits)
-
-    def test_spirits_convert_1_file(self):
-
-        metadata_spirits= {'prod_values': '{NDVI-toc, -, 0, 250, 0, 250, -0.08, 0.004}',
-                           'flags': '{251=missing, 252=cloud, 253=snow, 254=sea, 255=back, 254=back}', \
-                           'data_ignore_value':'255', \
-                           'days': 10, \
-                           'sensor_type':'VEGETATION', \
-                           'comment':'My comment',\
-                           'sensor_filename_prefix':'vgt', \
-                           'frequency_filename_prefix':'10d', \
-                           'pa_filename_prefix':'ndv'}
-
-        # Should get here the role of my machine ...
-        input_file = '/data/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/tif/ndv/20150101_vgt-ndvi_ndv_SPOTV-Africa-1km_sv2-pv2.1.tif'
-        output_dir = '/data/temp/spirits/mytest'
-        functions.check_output_dir(output_dir)
-        cv.convert_geotiff_file(input_file, output_dir, str(20150101), metadata_spirits)

@@ -9,6 +9,11 @@ logger = log.my_logger(__name__)
 from unittest import TestCase
 
 class TestSpirits(TestCase):
+    def test_spirits_modify_header(self):
+
+        # Should get here the role of my machine ...
+        header_file = '/data/temp/spirits/20100101_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0_SPIRITS.hdr'
+        conv.append_to_header_file(header_file, cv.metadata_spirits)
 
     def test_convert_1_file(self):
 
