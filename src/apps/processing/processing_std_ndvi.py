@@ -19,14 +19,9 @@ from config import es_constants
 # Import third-party modules
 from ruffus import *
 
-#logger = log.my_logger(__name__)
-
-#   Still to be done
-
-#   General definitions for this processing chain
 #   General definitions for this processing chain
 ext=es_constants.ES2_OUTFILE_EXTENSION
-multiprocess = 0
+
 #
 #   Rational for 'active' flags:
 #   A flag is defined for each product, with name 'activate_'+ prodname, ans initialized to 1: it is
@@ -1050,37 +1045,43 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     return proc_lists
 #   ---------------------------------------------------------------------
 #   Run the pipeline
-def processing_std_ndvi(pipeline_run_level=0, pipeline_printout_level=0,
+def processing_std_ndvi(res_queue, pipeline_run_level=0, pipeline_printout_level=0,
                         pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                        starting_dates=None, update_stats=False, nrt_products=True, logfile=None):
+                        starting_dates=None, update_stats=False, nrt_products=True, write2file=None, logfile=None):
+
+    spec_logger = log.my_logger(logfile)
+    spec_logger.info("Entering routine %s" % 'processing_std_ndvi')
 
     proc_lists = None
     proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
                                  starting_dates=starting_dates, update_stats=update_stats, nrt_products=nrt_products)
 
-    #logger.info("Entering routine %s" % 'processing_std_ndvi')
-    #logger.info("pipeline_run_level %i" % pipeline_run_level)
-    spec_logger = log.my_logger(logfile)
+    if write2file is not None:
+        fwrite_id=open(write2file,'w')
+    else:
+        fwrite_id=None
 
     if pipeline_run_level > 0:
-        #pipeline_run(verbose=pipeline_run_level, multiprocess=multiprocess, logger=spec_logger, touch_files_only = True)
-        pipeline_run(verbose=pipeline_run_level, multiprocess=multiprocess, logger=spec_logger)
+        pipeline_run(verbose=pipeline_run_level, logger=spec_logger)
 
-    #logfile=open('/data/processing/ruffus_printout.txt','w')
     if pipeline_printout_level > 0:
         pipeline_printout(verbose=pipeline_printout_level) #, output_stream=fout)
 
     if pipeline_printout_graph_level > 0:
         pipeline_printout_graph('flowchart.jpg')
 
-    return proc_lists
+    if write2file is not None:
+        fwrite_id.close()
+
+    #res_queue.put(proc_lists)
+    return True
 
 
-def processing_std_ndvi_stats_only(pipeline_run_level=0,pipeline_printout_level=0,
+def processing_std_ndvi_stats_only(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None, logfile=None):
+                          starting_dates=None, write2file=None,logfile=None):
 
-    proc_lists = processing_std_ndvi(pipeline_run_level=pipeline_run_level,
+    result = processing_std_ndvi(res_queue, pipeline_run_level=pipeline_run_level,
                                                                pipeline_printout_level=pipeline_printout_level,
                                                                pipeline_printout_graph_level=pipeline_printout_graph_level,
                                                                prod=prod,
@@ -1090,15 +1091,16 @@ def processing_std_ndvi_stats_only(pipeline_run_level=0,pipeline_printout_level=
                                                                starting_dates=starting_dates,
                                                                nrt_products=False,
                                                                update_stats=True,
+                                                               write2file=write2file,
                                                                logfile=logfile)
 
-    return proc_lists
+    return result
 
-def processing_std_ndvi_prods_only(pipeline_run_level=0,pipeline_printout_level=0,
+def processing_std_ndvi_prods_only(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None, logfile=None):
+                          starting_dates=None,write2file=None, logfile=None):
 
-    proc_lists = processing_std_ndvi(pipeline_run_level=pipeline_run_level,
+    result = processing_std_ndvi(res_queue, pipeline_run_level=pipeline_run_level,
                                                                pipeline_printout_level=pipeline_printout_level,
                                                                pipeline_printout_graph_level=pipeline_printout_graph_level,
                                                                prod=prod,
@@ -1108,15 +1110,16 @@ def processing_std_ndvi_prods_only(pipeline_run_level=0,pipeline_printout_level=
                                                                starting_dates=starting_dates,
                                                                nrt_products=True,
                                                                update_stats=False,
+                                                               write2file=write2file,
                                                                logfile=logfile)
 
-    return proc_lists
+    return result
 
-def processing_std_ndvi_all(pipeline_run_level=0,pipeline_printout_level=0,
+def processing_std_ndvi_all(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None, logfile=None):
 
-    proc_lists = processing_std_ndvi(pipeline_run_level=pipeline_run_level,
+    result = processing_std_ndvi(res_queue, pipeline_run_level=pipeline_run_level,
                                                                pipeline_printout_level=pipeline_printout_level,
                                                                pipeline_printout_graph_level=pipeline_printout_graph_level,
                                                                prod=prod,
@@ -1128,4 +1131,4 @@ def processing_std_ndvi_all(pipeline_run_level=0,pipeline_printout_level=0,
                                                                update_stats=True,
                                                                logfile=logfile)
 
-    return proc_lists
+    return result

@@ -9,7 +9,7 @@
 # Import std modules
 import glob
 import os
-import subprocess
+
 # Import eStation2 modules
 from lib.python import functions
 from lib.python.image_proc import raster_image_math
@@ -19,14 +19,9 @@ from config import es_constants
 # Import third-party modules
 from ruffus import *
 
-#logger = log.my_logger(__name__)
-
-#   Still to be done
-
-#   General definitions for this processing chain
 #   General definitions for this processing chain
 ext=es_constants.ES2_OUTFILE_EXTENSION
-multiprocess = 0
+
 #
 #   Rational for 'active' flags:
 #   A flag is defined for each product, with name 'activate_'+ prodname, ans initialized to 1: it is
@@ -134,26 +129,31 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
 #   ---------------------------------------------------------------------
 #   Run the pipeline
-def processing_std_fronts(pipeline_run_level=0, pipeline_printout_level=0,
+def processing_std_fronts(res_queue, pipeline_run_level=0, pipeline_printout_level=0,
                         pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                        starting_dates=None, update_stats=False, nrt_products=True, logfile=None):
+                        starting_dates=None, update_stats=False, nrt_products=True, write2file=None, logfile=None):
+
+    spec_logger = log.my_logger(logfile)
+    spec_logger.info("Entering routine %s" % 'processing_std_fronts')
 
     proc_lists = None
     proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
                                  starting_dates=starting_dates, update_stats=update_stats, nrt_products=nrt_products)
 
-    #logger.info("Entering routine %s" % 'processing_std_fronts')
-    #logger.info("pipeline_run_level %i" % pipeline_run_level)
-    spec_logger = log.my_logger(logfile)
+    if write2file is not None:
+        fwrite_id=open(write2file,'w')
+    else:
+        fwrite_id=None
 
     if pipeline_run_level > 0:
-        pipeline_run(verbose=pipeline_run_level, multiprocess=multiprocess, logger=spec_logger)
-    #fout=open('/data/processing/ruffus_printout.txt','w')
+        pipeline_run(verbose=pipeline_run_level, logger=spec_logger)
+
     if pipeline_printout_level > 0:
-        pipeline_printout(verbose=pipeline_printout_level) #, output_stream=fout)
+        pipeline_printout(verbose=pipeline_printout_level, output_stream=fwrite_id)
 
     if pipeline_printout_graph_level > 0:
         pipeline_printout_graph('flowchart.jpg')
 
-    return proc_lists
+    #res_queue.put(proc_lists)
+    return True
 
