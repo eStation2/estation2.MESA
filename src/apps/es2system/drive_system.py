@@ -25,15 +25,15 @@ if service:
 
     if do_start:
         if daemon.status():
-            logger.info('Ingest process is running: Exit')
+            logger.info('System process is running: Exit')
         else:
-            logger.info('Ingest process is NOT running: Start it.')
+            logger.info('System process is NOT running: Start it.')
             daemon.start()
     else:
         if not daemon.status():
-            logger.info('Ingest process is NOT running: Exit')
+            logger.info('System process is NOT running: Exit')
         else:
-            logger.info('Ingest process is running: Stop it.')
+            logger.info('System process is running: Stop it.')
             daemon.stop()
 else:
     es2system.loop_system(dry_run=dry_run)

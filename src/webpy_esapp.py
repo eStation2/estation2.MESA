@@ -186,7 +186,7 @@ class GetHelpFile:
         web.header('Content-Type', contenttype)   # 'text/html'   'application/x-compressed'  'application/force-download' 'application/pdf'
         web.header('Content-transfer-encoding', 'binary')
         # web.header('Content-Disposition', 'attachment; filename=' + getparams['file'])  # force browser to autodownload or show "Save as" dialog.
-        web.header('Content-Disposition', content_disposition_type + ' filename=' + getparams['file'])  # force browser to show "Save as" dialog.
+        web.header('Content-Disposition', content_disposition_type + ' filename= "' + getparams['file'] + '"')  # force browser to show "Save as" dialog.
 
         f = open(docfile, 'rb')
         while 1:
@@ -1482,6 +1482,8 @@ class GetLogFile:
                 logfilename = es_constants.es2globals['log_dir']+'apps.acquisition.ingestion.log'
             if getparams['service'] == 'processing':
                 logfilename = es_constants.es2globals['log_dir']+'apps.processing.processing.log'
+            if getparams['service'] == 'system':
+                logfilename = es_constants.es2globals['log_dir']+'apps.es2system.es2system.log'
             if getparams['service'] == 'dbsync':
                 logfilename = '/var/log/bucardo/log.bucardo'
             if getparams['service'] == 'datasync':
