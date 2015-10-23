@@ -1,0 +1,69 @@
+__author__ = 'analyst'
+#
+#	purpose: Run the script to ingest Historical archives
+#	author:  M.Clerici
+#	date:	 28.08.2015
+#   descr:	 It runs the ingestion of historical files (e.g. after the initial installation)
+#
+#	history: 1.0
+#
+
+import sys
+from apps.acquisition.ingestion import *
+
+logger = log.my_logger(__name__)
+
+def ingest_historical_archives(input_dir, dry_run=False):
+
+#    Ingest the files in format MESA_JRC_<prod>_<sprod>_<date>_<mapset>_<version>
+#    from a given location
+#    Gets the list of products/version/subproducts active for ingestion and active for processing
+
+    logger.info("Entering routine %s" % 'ingest_historical_archives')
+    echo_query = False
+
+    # Get all active product ingestion records with a subproduct count.
+    active_product_ingestions = querydb.get_ingestion_product(allrecs=True, echo=echo_query)
+    for active_product_ingest in active_product_ingestions:
+
+        productcode = active_product_ingest[0]
+        productversion = active_product_ingest[1]
+
+        # For the current active product ingestion: get all
+        product = {"productcode": productcode,
+                   "version": productversion}
+
+        # Get the list of acquisition sources that are defined for this ingestion 'trigger'
+        # (i.e. prod/version)
+        # NOTE: the following implies there is 1 and only 1 '_native' subproduct associated to a 'subproduct';
+        native_product = {"productcode": productcode,
+                              "subproductcode": productcode + "_native",
+                              "version": productversion}
+        sources_list = querydb.get_product_sources(echo=echo_query, **native_product)
+
+        logger.debug("For product [%s] N. %s  source is/are found" % (productcode,len(sources_list)))
+
+        ingestions = querydb.get_ingestion_subproduct(allrecs=False, echo=echo_query, **product)
+        for ingest in ingestions:
+            logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (productcode, productversion,ingest.subproductcode,ingest.mapsetcode))
+            ingest_archives_eumetcast_product(productcode, productversion,ingest.subproductcode,ingest.mapsetcode,dry_run=dry_run, input_dir=input_dir, no_delete=True)
+
+    # Get all active processing chains [product/version/algo/mapset].
+    active_processing_chains = querydb.get_active_processing_chains()
+    for chain in active_processing_chains:
+        a = chain.process_id
+        logger.debug("Processing Chain N.:%s" % str(chain.process_id))
+        processed_products = querydb.get_processing_chain_products(chain.process_id, type='output')
+        for processed_product in processed_products:
+            productcode = processed_product.productcode
+            version = processed_product.version
+            subproductcode = processed_product.subproductcode
+            mapset = processed_product.mapsetcode
+            logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (productcode, version,subproductcode,mapset))
+            ingest_archives_eumetcast_product(productcode, version,subproductcode,mapset,dry_run=dry_run, input_dir=input_dir, no_delete=True)
+
+if __name__=='__main__':
+
+    #input_dir = str(sys.argv[1])
+    input_dir = '/media/MESA-2/Archives2.0/'
+    result = ingest_historical_archives(input_dir)

@@ -102,80 +102,11 @@ class TestCreate(unittest.TestCase):
         mapset='FEWSNET-Africa-8km'
         product='fewsnet-rfe'
         version='2.0'
+        start_date=datetime.date(2011, 1, 1)
+        end_date=None
 
         # RFE from 2.0: since 01.01.2011
         subproduct='10d'
-        start_date=datetime.date(2011, 1, 1)
-        end_date=None
-        target_dir = base_target_dir + product+ os.path.sep + subproduct
-        functions.check_output_dir(target_dir)
-        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
-
-        # 10day stats
-        subproducts=['10davg', '10dmin','10dmax']
-        start_date=None
-        end_date=None
-        for subproduct in subproducts:
-            target_dir = base_target_dir + product + os.path.sep + subproduct
-            functions.check_output_dir(target_dir)
-            create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
-
-        # 1mon stats
-        subproducts=['1moncum', '1monavg', '1monmin', '1monmax']
-        start_date=None
-        end_date=None
-        for subproduct in subproducts:
-
-            target_dir = base_target_dir+ product + os.path.sep + subproduct
-            functions.check_output_dir(target_dir)
-            create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
-
-    def TestCreateArchive_tamsat_rfe(self):
-
-        base_target_dir='/data/archives/'
-        mapset='TAMSAT-Africa-4km'
-        product='tamsat-rfe'
-        version='2.0'
-
-        # RFE from 2.0: since 01.01.2011
-        subproduct='10d'
-        start_date=datetime.date(2011, 1, 1)
-        end_date=None
-        target_dir = base_target_dir + product+ os.path.sep + subproduct
-        functions.check_output_dir(target_dir)
-        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
-
-
-        # 10day stats
-        subproducts=['10davg', '10dmin','10dmax']
-        start_date=None
-        end_date=None
-        for subproduct in subproducts:
-            target_dir = base_target_dir + product + os.path.sep + subproduct
-            functions.check_output_dir(target_dir)
-            create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
-
-        # 1mon stats
-        subproducts=['1moncum', '1monavg', '1monmin', '1monmax']
-        start_date=None
-        end_date=None
-        for subproduct in subproducts:
-
-            target_dir = base_target_dir+ product + os.path.sep + subproduct
-            functions.check_output_dir(target_dir)
-            create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
-
-    def TestCreateArchive_chirps_dekad(self):
-
-        base_target_dir='/data/archives/'
-        mapset='CHIRP-Africa-5km'
-        product='chirps-dekad'
-        version='2.0'
-
-        # RFE from 2.0: since 01.01.2011
-        subproduct='10d'
-        start_date=datetime.date(2011, 1, 1)
-        end_date=None
         target_dir = base_target_dir + product+ os.path.sep + subproduct
         functions.check_output_dir(target_dir)
         create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
@@ -194,9 +125,16 @@ class TestCreate(unittest.TestCase):
             functions.check_output_dir(target_dir)
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
+        # 1 mon cum: since 01.01.2011
+        subproduct='1moncum'
+        target_dir = base_target_dir + product+ os.path.sep + subproduct
+        functions.check_output_dir(target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
         # 1mon stats
-        subproducts=['1moncum', '1monavg', '1monmin', '1monmax']
+        subproducts=['1monavg', '1monmin', '1monmax']
         for subproduct in subproducts:
+
             target_dir = base_target_dir+ product + os.path.sep + subproduct
             functions.check_output_dir(target_dir)
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
@@ -206,4 +144,105 @@ class TestCreate(unittest.TestCase):
         for subproduct in subproducts:
             target_dir = base_target_dir+ product + os.path.sep + subproduct
             functions.check_output_dir(target_dir)
+            create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+
+    def TestCreateArchive_tamsat_rfe(self):
+
+        base_target_dir='/data/archives/'
+        mapset='TAMSAT-Africa-4km'
+        product='tamsat-rfe'
+        version='2.0'
+        start_date=datetime.date(2011, 1, 1)
+        end_date=None
+
+        # RFE from 2.0: since 01.01.2011
+        subproduct='10d'
+        target_dir = base_target_dir + product+ os.path.sep + subproduct
+        functions.check_output_dir(target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+        # 10day stats
+        subproducts=['10davg', '10dmin','10dmax']
+        for subproduct in subproducts:
+            target_dir = base_target_dir + product + os.path.sep + subproduct
+            functions.check_output_dir(target_dir)
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
+
+        # 10day anomalies
+        subproducts=['10ddiff', '10dperc','10dnp']
+        for subproduct in subproducts:
+            target_dir = base_target_dir + product + os.path.sep + subproduct
+            functions.check_output_dir(target_dir)
+            create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+        # 1 mon cum: since 01.01.2011
+        subproduct='1moncum'
+        target_dir = base_target_dir + product+ os.path.sep + subproduct
+        functions.check_output_dir(target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+        # 1mon stats
+        subproducts=['1monavg', '1monmin', '1monmax']
+        for subproduct in subproducts:
+
+            target_dir = base_target_dir+ product + os.path.sep + subproduct
+            functions.check_output_dir(target_dir)
+            create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
+
+        # 1mon anomalies
+        subproducts=['1mondiff', '1monperc', '1monnp']
+        for subproduct in subproducts:
+            target_dir = base_target_dir+ product + os.path.sep + subproduct
+            functions.check_output_dir(target_dir)
+            create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+    def TestCreateArchive_chirps_dekad(self):
+
+        base_target_dir='/data/archives/'
+        mapset='CHIRP-Africa-5km'
+        product='chirps-dekad'
+        version='2.0'
+        start_date=datetime.date(2011, 1, 1)
+        end_date=None
+
+        # RFE from 2.0: since 01.01.2011
+        subproduct='10d'
+        target_dir = base_target_dir + product+ os.path.sep + subproduct
+        functions.check_output_dir(target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+       # 10day stats
+        subproducts=['10davg', '10dmin','10dmax']
+        for subproduct in subproducts:
+            target_dir = base_target_dir + product + os.path.sep + subproduct
+            functions.check_output_dir(target_dir)
+            create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
+
+        # 10day anomalies
+        subproducts=['10ddiff', '10dperc','10dnp']
+        for subproduct in subproducts:
+            target_dir = base_target_dir + product + os.path.sep + subproduct
+            functions.check_output_dir(target_dir)
+            create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+        # 1 mon cum: since 01.01.2011
+        subproduct='1moncum'
+        target_dir = base_target_dir + product+ os.path.sep + subproduct
+        functions.check_output_dir(target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+        # 1mon stats
+        subproducts=['1monavg', '1monmin', '1monmax']
+        for subproduct in subproducts:
+
+            target_dir = base_target_dir+ product + os.path.sep + subproduct
+            functions.check_output_dir(target_dir)
+            create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
+
+        # 1mon anomalies
+        subproducts=['1mondiff', '1monperc', '1monnp']
+        for subproduct in subproducts:
+            target_dir = base_target_dir+ product + os.path.sep + subproduct
+            functions.check_output_dir(target_dir)
+            create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)

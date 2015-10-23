@@ -9,8 +9,7 @@ from config import es_constants
 __author__ = "Jurriaan van 't Klooster"
 
 from apps.es2system import es2system
-
-
+import apps.es2system.convert_2_spirits  as cv
 
 class TestSystem(unittest.TestCase):
     def test_manage_lock(self):
@@ -100,6 +99,11 @@ class TestSystem(unittest.TestCase):
         status = es2system.system_db_dump(list_dump)
         self.assertEquals(status, 0)
 
+    def test_system_manage_dumps(self):
+
+        status = es2system.system_manage_dumps()
+        self.assertEquals(status, 0)
+
     def test_system_data_sync(self):
 
         source = es_constants.es2globals['processing_dir']
@@ -124,3 +128,4 @@ class TestSystem(unittest.TestCase):
 
         # Should get here the role of my machine ...
         status = es2system.system_db_sync_full('pc2')
+

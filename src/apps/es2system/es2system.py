@@ -258,17 +258,105 @@ def system_db_dump(list_dump):
 
     logger.debug("Entering routine %s" % 'system_db_dump')
     now = datetime.datetime.now()
-    # Use psql for dump
+    # Use db_dump
     dump_dir = es_constants.es2globals['db_dump_dir']
+    db_dump = es_constants.es2globals['db_dump_exec']
+
     if len(list_dump) > 0:
         for dump_schema in list_dump:
             dump_file = dump_dir+os.path.sep+'estationdb_'+dump_schema+'_'+now.strftime("%Y-%m-%d-%H:%M:%S")+'.sql'
-            command = 'pg_dump -f '+dump_file+' -n '+dump_schema+' -F p' + ' -U postgres -d estationdb'
+            command = db_dump+ ' -i '+  \
+                     ' -h localhost '+\
+                     ' -U estation ' +\
+                     ' -F p -a --column-inserts ' +\
+                     ' -f '+dump_file+ \
+                     ' -n '+dump_schema+' estationdb'
+
             logger.info('Command is: %s' % command)
             status =+ os.system(command)
 
         return status
 
+def keep_one_for_month(yymm_date, date_list, remove_list, mode='1perM'):
+
+    month_list = []
+    # Create the list of files for that yyyy.mm
+    # Keep only one file per month
+    for my_date in date_list:
+        if my_date.month == yymm_date.month and my_date.year == yymm_date.year:
+            month_list.append(my_date)
+    month_list = sorted(month_list)
+
+    if mode == '1perM':
+        # Sort the list, and keep only the last file
+        if len(month_list) > 1:
+            for mm in month_list[:-1]:
+                remove_list.append(mm)
+        else:
+            pass
+    elif mode == '3files':
+        # Keep only 3 files: first and last two
+        if len(month_list) > 3:
+            for mm in month_list[1:-2]:
+                remove_list.append(mm)
+
+    return remove_list
+
+def system_manage_dumps():
+#   Manage the dump files (house-keeping)
+
+    status = 0
+
+    logger.debug("Entering routine %s" % 'system_manage_dumps')
+
+    for schema in ('products','analysis'):
+
+        # Initialize lists
+        date_list = []
+        yyyymm_list = []
+        remove_list = []
+
+        # Get a list of the existing dump files
+        dump_dir = es_constants.es2globals['db_dump_dir']
+        existing_dumps = glob.glob(dump_dir+os.path.sep+'estationdb_'+schema+'_*')
+
+        # Extract list of ALL dates, and yyyymm dates (1 per month)
+        for file_full in existing_dumps:
+            file=os.path.basename(file_full)
+            date_list.append(datetime.date(int(file.split('_')[2].split('-')[0]),int(file.split('_')[2].split('-')[1]),int(file.split('_')[2].split('-')[2])))
+            yyyymm_list.append(datetime.date(int(file.split('_')[2].split('-')[0]),int(file.split('_')[2].split('-')[1]),1))
+
+        # Sort month list
+        yyyymm_list=set(yyyymm_list)
+        yyyymm_list=sorted(list(yyyymm_list))
+
+        today = datetime.date.today()
+
+        # Loop over all months, and build the list of files to be deleted
+        for yymm_date in yyyymm_list:
+
+            # For all months but current, keep only 1 files
+            if today.month != yymm_date.month or today.year != yymm_date.year:
+                remove_list = keep_one_for_month(yymm_date,date_list, remove_list)
+                logger.debug('Remove list length %i: ' % len(remove_list))
+            else:
+                # For the current month
+                remove_list = keep_one_for_month(yymm_date,date_list, remove_list, mode='3files')
+                logger.debug('Remove list length %i: ' % len(remove_list))
+
+        # Remove files strftime('We are the %d, %b %Y')
+        for deldate in remove_list:
+            date_string = deldate.strftime('%Y-%m-%d')
+            delfiles = glob.glob(dump_dir+os.path.sep+'estationdb_'+schema+'_'+date_string+'*')
+            try:
+                for delfile in delfiles:
+                    os.remove(delfile)
+                    logger.info('Deleted file %s' % delfile)
+            except:
+                logger.error('Error in deleting file %s' % delfile)
+                status = 1
+    # Exit
+    return status
 
 def system_create_report(target_file=None):
 #   Create a .zip file with the relevant information to be sent as for diagnostic

@@ -11,6 +11,7 @@ logger = log.my_logger("apps.acquisition.drive_get_eumetcast")
 do_start = True
 dry_run = False
 service  = False
+use_ftp  = False
 
 if service:
     # Make sure the pid dir exists
@@ -37,6 +38,8 @@ if service:
             logger.info('GetEumetcast process is running: Stop it.')
             daemon.stop()
 else:
-    get_eumetcast.loop_eumetcast(dry_run=dry_run)
-
+    if use_ftp:
+        get_eumetcast.loop_eumetcast_ftp(dry_run=dry_run)
+    else:
+        get_eumetcast.loop_eumetcast(dry_run=dry_run)
 

@@ -266,10 +266,16 @@ def ingest_archives_eumetcast(dry_run=False):
             # Remove trace file also
             os.remove(trace)
 
-def ingest_archives_eumetcast_product(product_code, version, subproduct_code, mapset_id, dry_run=False):
+def ingest_archives_eumetcast_product(product_code, version, subproduct_code, mapset_id, dry_run=False,input_dir=None, no_delete=False):
 
 #    Ingest all files of type MESA_JRC_ for a give prod/version/subprod/mapset
 #    Note that mapset is the 'target' mapset
+#    input_dir = if None -> looks in ingest_dir (default for EUMETCast dissemination)
+#                if defined -> looks in the specific location (for Historical Archives)
+
+    # Manage the input_dir option
+    if input_dir is None:
+        input_dir = es_constants.es2globals['ingest_dir']
 
     logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (product_code, version, subproduct_code, mapset_id))
     match_regex=es_constants.es2globals['prefix_eumetcast_files']+\
@@ -277,25 +283,10 @@ def ingest_archives_eumetcast_product(product_code, version, subproduct_code, ma
                               subproduct_code + '_*_' +\
                               version +'*'
 
-    logger.debug("Looking in directory: %s" % es_constants.es2globals['ingest_dir'])
+    logger.debug("Looking in directory: %s" % input_dir)
     # Get the list of matching files in /data/ingest
-    available_files=glob.glob(es_constants.es2globals['ingest_dir']+ match_regex)
-
-    # Call the ingestion routine
-    if len(available_files)>0:
-        for in_file in available_files:
-            if dry_run:
-                logger.info("Found file: %s" % in_file)
-            else:
-                try:
-                    ingest_file_archive(in_file, mapset_id, echo_query=False)
-                except:
-                    logger.warning("Error in ingesting file %s" % in_file)
-
-    # Get the list of matching files in /data/ingest
-    logger.debug("Looking in directory: %s" % es_constants.es2globals['archive_dir'])
     available_files=[]
-    for root, dirnames, filenames in os.walk(es_constants.es2globals['archive_dir']):
+    for root, dirnames, filenames in os.walk(input_dir):
         for filename in fnmatch.filter(filenames, match_regex):
             available_files.append(os.path.join(root, filename))
 
@@ -306,9 +297,23 @@ def ingest_archives_eumetcast_product(product_code, version, subproduct_code, ma
                 logger.info("Found file: %s" % in_file)
             else:
                 try:
-                    ingest_file_archive(in_file, mapset_id, echo_query=False, no_delete=True)
+                    ingest_file_archive(in_file, mapset_id, echo_query=False, no_delete=no_delete)
                 except:
                     logger.warning("Error in ingesting file %s" % in_file)
+
+    # Get the list of matching files in /data/ingest
+    # logger.debug("Looking in directory: %s" % es_constants.es2globals['archive_dir'])
+
+    # # Call the ingestion routine
+    # if len(available_files)>0:
+    #     for in_file in available_files:
+    #         if dry_run:
+    #             logger.info("Found file: %s" % in_file)
+    #         else:
+    #             try:
+    #                 ingest_file_archive(in_file, mapset_id, echo_query=False, no_delete=True)
+    #             except:
+    #                 logger.warning("Error in ingesting file %s" % in_file)
 
 
 def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_logger, nodata_value=None, echo_query=False):
@@ -1477,7 +1482,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # Loop on interm_files
         ii += 1
 
-def ingest_file_archive(input_file, target_mapsetid, echo_query=False,no_delete=False):
+def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete=False):
 # -------------------------------------------------------------------------------------------------------
 #   Ingest a file of type MESA_JRC_
 #   Arguments:
