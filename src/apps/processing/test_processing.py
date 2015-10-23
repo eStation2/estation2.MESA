@@ -3,22 +3,22 @@ __author__ = "Marco Clerici"
 import datetime
 import proc_functions
 from multiprocessing import Queue
-# #   ---------------------------------------------------------------------
-# # vgt-ndvi
-# #   ---------------------------------------------------------------------
-from apps.processing.processing_std_ndvi import *
-args = {'pipeline_run_level':3, \
-        'pipeline_printout_level':0, \
-        'pipeline_printout_graph_level': 0, \
-        'prod': 'vgt-ndvi',\
-        'starting_sprod':'ndv',\
-        'mapset': 'SPOTV-Africa-1km',\
-        'version':'sv2-pv2.1',
-        'logfile':'test_processing'}
-# processing_std_ndvi(**args)
-#processing_std_ndvi_stats_only(**args)
-res_queue = None
-processing_std_ndvi_prods_only(res_queue,**args)
+# # #   ---------------------------------------------------------------------
+# # # vgt-ndvi
+# # #   ---------------------------------------------------------------------
+# from apps.processing.processing_std_ndvi import *
+# args = {'pipeline_run_level':3, \
+#         'pipeline_printout_level':0, \
+#         'pipeline_printout_graph_level': 0, \
+#         'prod': 'vgt-ndvi',\
+#         'starting_sprod':'ndv',\
+#         'mapset': 'SPOTV-Africa-1km',\
+#         'version':'sv2-pv2.1',
+#         'logfile':'test_processing'}
+# # processing_std_ndvi(**args)
+# #processing_std_ndvi_stats_only(**args)
+# res_queue = None
+# processing_std_ndvi_prods_only(res_queue,**args)
 
 #   ---------------------------------------------------------------------
 # chirps-dekad
@@ -82,3 +82,25 @@ processing_std_ndvi_prods_only(res_queue,**args)
 #
 # proc_lists=processing_std_precip_prods_only(**args)
 # print(proc_lists)
+#   ---------------------------------------------------------------------
+# fewsnet-rfe
+#   ---------------------------------------------------------------------
+from apps.processing.processing_std_precip import *
+# Create the list of dates -> returns empty if start==end==None
+#start_date='20010101'
+#end_date='20141221'
+#starting_dates = proc_functions.get_list_dates_for_dataset('fewsnet-rfe', '10d', '2.0', start_date=start_date, end_date=end_date)
+starting_dates = None
+args = {'pipeline_run_level':3, \
+        'pipeline_printout_level':0, \
+        'pipeline_printout_graph_level': 0, \
+        'prod': 'tamsat-rfe',\
+        'starting_sprod':'10d',\
+        'starting_dates': starting_dates,\
+        'mapset': 'TAMSAT-Africa-4km',\
+        'version':'2.0',
+        'logfile':'log-tamsat.log'}
+
+res_queue = None
+proc_lists=processing_std_precip_prods_only(res_queue,**args)
+print(proc_lists)
