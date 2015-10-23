@@ -36,16 +36,16 @@ Ext.define("esapp.view.processing.ProcessFinalOutputSubProducts",{
     initComponent: function () {
         var me = this;
 
-        me.listeners = {
-            afterrender: function(grid){
-                // prevent bubbling of the events
-                //grid.getEl().swallowEvent([
-                //    'mousedown', 'mouseup', 'click',
-                //    'contextmenu', 'mouseover', 'mouseout',
-                //    'dblclick', 'mousemove'
-                //]);
-            }
-        };
+        //me.listeners = {
+        //    afterrender: function(grid){
+        //        // prevent bubbling of the events
+        //        //grid.getEl().swallowEvent([
+        //        //    'mousedown', 'mouseup', 'click',
+        //        //    'contextmenu', 'mouseover', 'mouseout',
+        //        //    'dblclick', 'mousemove'
+        //        //]);
+        //    }
+        //};
 
         me.defaults = {
             menuDisabled: true,

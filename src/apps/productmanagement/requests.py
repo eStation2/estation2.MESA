@@ -29,6 +29,7 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
     request = {'product': productcode,
                'version': version}
 
+    product = Product(product_code=productcode, version=version)
     # Check the level of the request
     if mapsetcode is None:
         if subproductcode is not None:
@@ -51,8 +52,11 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
                         mapset_dict = {'mapsetcode': mapsetcode, 'mapsetdatasets': []}
                         dataset_dict = {}
 
-                    dataset_dict['subproductcode'] = row_dict['subproductcode']
-                    dataset_dict['product_type'] = row_dict['product_type']
+                    missing = product.get_missing_datasets(mapset=mapsetcode, sub_product_code=row_dict['subproductcode'], from_date=None, to_date=None)
+                    # dataset_dict['subproductcode'] = row_dict['subproductcode']
+                    # dataset_dict['product_type'] = row_dict['product_type']
+                    dataset_dict = {'subproductcode': row_dict['subproductcode'], 'missing': missing,
+                                    'product_type': row_dict['product_type']}
                     mapset_dict['mapsetdatasets'].append(dataset_dict)
                     dataset_dict = {}
                 request['productmapsets'].append(mapset_dict)
@@ -62,19 +66,22 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
             # Get full list of subproducts (ingest/derived) for the given mapset
             request['productmapsets'] = []
             mapset_dict = {'mapsetcode': mapsetcode, 'mapsetdatasets': []}
+            # product = Product(product_code=productcode, version=version)
             product_mapset_subproducts = querydb.get_enabled_ingest_derived_of_product(productcode=productcode, version=version, mapsetcode=mapsetcode)
             if product_mapset_subproducts.__len__() > 0:
-                dataset_dict = {}
+                # dataset_dict = {}
                 for row in product_mapset_subproducts:
                     row_dict = functions.row2dict(row)
-                    dataset_dict['subproductcode'] = row_dict['subproductcode']
-                    dataset_dict['product_type'] = row_dict['product_type']
+                    missing = product.get_missing_datasets(mapset=mapsetcode, sub_product_code=row_dict['subproductcode'], from_date=None, to_date=None)
+                    # dataset_dict['subproductcode'] = row_dict['subproductcode']
+                    dataset_dict = {'subproductcode': row_dict['subproductcode'], 'missing': missing,
+                                    'product_type': row_dict['product_type']}
                     mapset_dict['mapsetdatasets'].append(dataset_dict)
                     dataset_dict = {}
             request['productmapsets'].append(mapset_dict)
         else:
             # All variable defined -> get missing object
-            product = Product(product_code=productcode, version=version)
+            # product = Product(product_code=productcode, version=version)
             missing = product.get_missing_datasets(mapset=mapsetcode, sub_product_code=subproductcode, from_date=None, to_date=None)
             request['productmapsets'] = []
             mapset_dict = {'mapsetcode': mapsetcode, 'mapsetdatasets': []}

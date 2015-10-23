@@ -16,12 +16,14 @@ Ext.define('esapp.view.acquisition.logviewer.LogViewController', {
         }
         else if (me.params.logtype == 'processing') {
             var inputproducts = me.params.record.get('inputproducts');
+            //console.info(inputproducts);
             params = {
                 logtype: me.params.logtype,
                 process_id: me.params.record.get('process_id'),
                 productcode: inputproducts[0].productcode,
                 subproductcode: inputproducts[0].subproductcode,
-                algorithm: me.params.record.get('algorithm')
+                algorithm: me.params.record.get('algorithm'),
+                derivation_method: me.params.record.get('derivation_method')
             };
         }
         else {
@@ -51,7 +53,9 @@ Ext.define('esapp.view.acquisition.logviewer.LogViewController', {
                 //eStation.LogfileShowPanel.setTitle('File: ' + record.data.filename);
             },
             success: function ( result, request ) {},
-            failure: function ( result, request) {}
+            failure: function ( result, request) {
+                me = Ext.destroy(me);
+            }
         });
     } // eo getFile
     //   }}}

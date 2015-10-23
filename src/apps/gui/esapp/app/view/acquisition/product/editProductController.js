@@ -195,7 +195,15 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
             editInternetDataSourceWin.show();
         }
         else {
-
+            var editEumetcastDataSourceWin = new esapp.view.acquisition.product.editEumetcastSource({
+                params: {
+                    edit: true,
+                    product: record,
+                    orig_productcode: record.get('productcode'),
+                    orig_version: record.get('version')
+                }
+            });
+            editEumetcastDataSourceWin.show();
         }
     },
 
@@ -253,6 +261,16 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
                 console.info(response.status);
             }
         });
+    },
+
+    addIngestion: function(grid){
+
+        var newIngestionWin = new esapp.view.acquisition.product.editIngestion({
+            params: {
+                edit: false
+            }
+        });
+        newIngestionWin.show();
     },
 
     editIngestion: function(grid, rowIndex, row){

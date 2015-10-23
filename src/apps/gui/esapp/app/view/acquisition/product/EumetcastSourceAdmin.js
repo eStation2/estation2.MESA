@@ -96,7 +96,7 @@ Ext.define("esapp.view.acquisition.product.EumetcastSourceAdmin",{
             },
             columns: [{
                 xtype: 'actioncolumn',
-                width: 30,
+                width: 50,
                 //flex: 0.5,
                 align: 'center',
                 shrinkWrap: 0,

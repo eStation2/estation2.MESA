@@ -223,8 +223,10 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         disabled: true,
                         handler: function(btn) {
                             me.getViewModel().getStore('colorschemes').each(function(rec){
-                                if (rec.get('default_legend')){
+                                if (rec.get('default_legend')==='true'){
+                                    console.info(rec);
                                     me.selectedproduct.legendid = rec.get('legend_id');
+                                    me.selectedproduct.colorschemeHTML = rec.get('colorschemeHTML');
                                 }
                             },this);
 
@@ -233,6 +235,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                                                                                      me.selectedproduct.mapsetcode,
                                                                                      me.selectedproduct.subproductcode,
                                                                                      me.selectedproduct.legendid,
+                                                                                     me.selectedproduct.colorschemeHTML,
                                                                                      me.selectedproduct.productname
                             );
                             me.close();

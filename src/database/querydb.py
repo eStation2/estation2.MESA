@@ -970,15 +970,17 @@ def get_products_acquisition(echo=False, activated=None):
                          db.pl.c.activated,
                          db.pa.c.totgets > 0)
         elif activated is False or activated in ['False', 'false', '0', 'f', 'n', 'N', 'no', 'No']:
+            # where = and_(db.pl.c.product_type == 'Native',
+            #              db.pl.c.activated != 't',
+            #              db.pa.c.totgets > 0)
             where = and_(db.pl.c.product_type == 'Native',
-                         db.pl.c.activated != 't',
-                         db.pa.c.totgets > 0)
+                         db.pl.c.activated != 't')
         else:
             where = and_(db.pl.c.product_type == 'Native', db.pa.c.totgets > 0)
 
-        productslist = db.join(db.pa, db.pl, and_(db.pa.pads_productcode == db.pl.productcode,
-                                                  db.pa.pads_subproductcode == db.pl.subproductcode,
-                                                  db.pa.pads_version == db.pl.version), isouter=True)
+        productslist = db.join(db.pl, db.pa, and_(db.pl.productcode == db.pa.pads_productcode,
+                                                  db.pl.subproductcode == db.pa.pads_subproductcode,
+                                                  db.pl.version == db.pa.pads_version), isouter=True)
 
         productslist = productslist.filter(where).order_by(asc(db.pl.c.order_index), asc(db.pl.c.productcode)).all()
 

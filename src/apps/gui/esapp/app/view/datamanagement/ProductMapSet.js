@@ -77,12 +77,15 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
                 tooltip: esapp.Utils.getTranslation('tipcompletedatasetmapset'),    // 'Complete all data sets for this product\'s mapset',
                 //scope: me,
                 handler: function (grid, rowIndex) {
-                    Ext.toast({
-                        html: 'Show window which proposes places to send a request to complete all data sets for this product\'s mapset',
-                        title: 'Request to complete all data sets for this product\'s mapset',
-                        width: 200,
-                        align: 't'
+                    var rec = grid.getStore().getAt(rowIndex);
+
+                    var sendRequestWin = new esapp.view.datamanagement.sendRequest({
+                        params: {
+                            level: 'mapset',
+                            record: rec
+                        }
                     });
+                    sendRequestWin.show();
                 }
             }]
         }, {
