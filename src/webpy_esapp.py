@@ -49,6 +49,9 @@ urls = (
     "/product/updateproductinfo", "UpdateProductInfo",
     "/product/unassigndatasource", "UnassignProductDataSource",
 
+    "/help", "GetHelp",
+    "/help/getfile", "GetHelpFile",
+
     "/categories", "GetCategories",
     "/frequencies", "GetFrequencies",
     "/dateformats", "GetDateFormats",
@@ -102,6 +105,8 @@ urls = (
     "/processing/update", "UpdateProcessing",
 
     "/datasets", "DataSets",
+    "/datamanagement/getrequest", "GetRequest",
+    "/datamanagement/saverequest", "SaveRequest",
 
     "/analysis/getproductlayer", "GetProductLayer",
     "/analysis/getvectorlayer", "GetVectorLayer",
@@ -142,6 +147,188 @@ class EsApp:
             return render.index_fr()
         else:
             return render.index()
+
+
+class GetHelpFile:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        getparams = web.input()
+
+        if getparams['lang'] == 'eng':
+            lang_dir = 'EN/'
+        elif getparams['lang'] == 'fra':
+            lang_dir = 'FR/'
+        elif getparams['lang'] == 'por':
+            lang_dir = 'POR/'
+        else:
+            lang_dir = 'EN/'
+
+        docs_dir = es_constants.es2globals['docs_dir']
+        if not os.path.isdir(es_constants.es2globals['docs_dir']):
+            docs_dir = es_constants.es2globals['base_dir'] + '/apps/help/userdocs/'
+
+        docfile = docs_dir + lang_dir + getparams['file']
+
+        filename, file_extension = os.path.splitext(docfile)
+        if file_extension == '.pdf':
+            contenttype = 'application/pdf'
+            content_disposition_type = 'inline;'
+        elif file_extension == '.docx' or file_extension == '.doc':
+            # contenttype = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            contenttype = 'application/force-download'
+            content_disposition_type = 'attachment;'
+        else:
+            contenttype = 'text/html'
+            content_disposition_type = 'inline;'
+
+        web.header('Content-Type', contenttype)   # 'text/html'   'application/x-compressed'  'application/force-download' 'application/pdf'
+        web.header('Content-transfer-encoding', 'binary')
+        # web.header('Content-Disposition', 'attachment; filename=' + getparams['file'])  # force browser to autodownload or show "Save as" dialog.
+        web.header('Content-Disposition', content_disposition_type + ' filename=' + getparams['file'])  # force browser to show "Save as" dialog.
+
+        f = open(docfile, 'rb')
+        while 1:
+            buf = f.read(1024 * 8)
+            if not buf:
+                break
+            yield buf
+
+
+class GetHelp:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        getparams = web.input()
+
+        docs_dir = es_constants.es2globals['docs_dir']
+        if not os.path.isdir(es_constants.es2globals['docs_dir']):
+            docs_dir = es_constants.es2globals['base_dir'] + '/apps/help/userdocs/'
+
+        if getparams['lang'] == 'eng':
+            lang_dir = 'EN/'
+        elif getparams['lang'] == 'fra':
+            lang_dir = 'FR/'
+        elif getparams['lang'] == 'por':
+            lang_dir = 'POR/'
+        else:
+            lang_dir = 'EN/'
+
+        jsonfile = docs_dir+lang_dir + getparams['type'] + '_data_'+getparams['lang']+'.json'
+
+        print jsonfile
+
+        if os.path.isfile(jsonfile):
+            jsonfile = open(jsonfile, 'r')
+            filecontent_json = jsonfile.read()
+            jsonfile.close()
+        else:
+            docs_dir = es_constants.es2globals['base_dir'] + '/apps/help/userdocs/'
+            jsonfile = docs_dir+lang_dir + getparams['type'] + '_data_'+getparams['lang']+'.json'
+            if os.path.isfile(jsonfile):
+                jsonfile = open(jsonfile, 'r')
+                filecontent_json = jsonfile.read()
+                jsonfile.close()
+            else:
+                filecontent_json = ''
+
+        return filecontent_json
+
+
+class GetRequest:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        from apps.productmanagement import requests
+        getparams = web.input()
+        productcode = None
+        version = None
+        mapsetcode = None
+        subproductcode = None
+        if hasattr(getparams, "level"):
+            if getparams['level'] == 'product':
+                productcode = getparams['productcode']
+                version = getparams['version']
+            elif getparams['level'] == 'mapset':
+                productcode = getparams['productcode']
+                version = getparams['version']
+                mapsetcode = getparams['mapsetcode']
+            elif getparams['level'] == 'dataset':
+                productcode = getparams['productcode']
+                version = getparams['version']
+                mapsetcode = getparams['mapsetcode']
+                subproductcode = getparams['subproductcode']
+
+            request = requests.create_request(productcode, version, mapsetcode=mapsetcode, subproductcode=subproductcode)
+            request_json = json.dumps(request,
+                                   ensure_ascii=False,
+                                   sort_keys=True,
+                                   indent=4,
+                                   separators=(', ', ': '))
+
+            request_json = '{"success":"true", "request":'+request_json+'}'
+        else:
+            request_json = '{"success":false, "error":"No parameters passed for request!"}'
+
+        return request_json
+
+
+class SaveRequest:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        from apps.productmanagement import requests
+        getparams = web.input()
+        productcode = None
+        version = None
+        mapsetcode = None
+        subproductcode = None
+        requestfilename = 'error'
+        if hasattr(getparams, "level"):
+            if getparams['level'] == 'product':
+                productcode = getparams['productcode']
+                version = getparams['version']
+                requestfilename = getparams['productcode'] + '_' + getparams['version'] + '_all_enabled_mapsets'
+            elif getparams['level'] == 'mapset':
+                productcode = getparams['productcode']
+                version = getparams['version']
+                mapsetcode = getparams['mapsetcode']
+                requestfilename = getparams['productcode'] + '_' + getparams['version'] + '_' + getparams['mapsetcode'] + '_all_enabled_datasets'
+            elif getparams['level'] == 'dataset':
+                productcode = getparams['productcode']
+                version = getparams['version']
+                mapsetcode = getparams['mapsetcode']
+                subproductcode = getparams['subproductcode']
+                requestfilename = getparams['productcode'] + '_' + getparams['version'] + '_' + getparams['mapsetcode'] + '_' + getparams['subproductcode']
+
+            request = requests.create_request(productcode, version, mapsetcode=mapsetcode, subproductcode=subproductcode)
+            request_json = json.dumps(request,
+                                   ensure_ascii=False,
+                                   sort_keys=True,
+                                   indent=4,
+                                   separators=(', ', ': '))
+
+            ts = time.time()
+            st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H%M')
+
+            requestfilename = requestfilename + '_' + st + '.req'
+            with open(es_constants.es2globals['requests_dir']+requestfilename, 'w+') as f:
+                f.write(request_json)
+            f.close()
+
+            web.header('Content-Type', 'text/html')   # 'application/x-compressed'  'application/force-download'
+            web.header('Content-transfer-encoding', 'binary')
+            web.header('Content-Disposition', 'attachment; filename=' + requestfilename)  # force browser to show "Save as" dialog.
+            f = open(es_constants.es2globals['requests_dir']+requestfilename, 'rb')
+            while 1:
+                buf = f.read(1024 * 8)
+                if not buf:
+                    break
+                yield buf
 
 
 class GetCategories:
@@ -1282,10 +1469,10 @@ class GetLogFile:
         elif getparams['logtype'] == 'processing':
             # apps.processing.ID=6_PROD=tamsat-rfe_METHOD=std_precip_prods_only_ALGO=std_precip.log
             logfilename = es_constants.es2globals['log_dir']+'apps.processing.' \
-                                        + 'ID=' + getparams['process_id'] + '.' \
-                                        + '_PROD=' + getparams['productcode'] + '.' \
-                                        + '_METHOD=' + getparams['subproductcode'] + '.' +\
-                                        + '_ALGO=' + getparams['algorithm'] + '.log'
+                                        + 'ID=' + getparams['process_id'] + '' \
+                                        + 'PROD=' + getparams['productcode'] + '' \
+                                        + 'METHOD=' + getparams['derivation_method'] + '' \
+                                        + 'ALGO=' + getparams['algorithm'] + '.log'
         elif getparams['logtype'] == 'service':
             if getparams['service'] == 'eumetcast':
                 logfilename = es_constants.es2globals['log_dir']+'apps.acquisition.get_eumetcast.log'
@@ -2086,7 +2273,6 @@ class GetProductLayer:
         return content
 
 
-
 class GetBackgroundLayer:
     def __init__(self):
         self.lang = "eng"
@@ -2325,6 +2511,8 @@ class DataSets:
                         mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
                         # if mapset_info.__len__() > 0:
                         mapset_dict = functions.row2dict(mapset_info)
+                        mapset_dict['productcode'] = productcode
+                        mapset_dict['version'] = version
                         # else:
                         #   mapset_dict['mapsetcode'] = mapset
                         mapset_dict['mapsetdatasets'] = []
@@ -2593,8 +2781,8 @@ class CreateProduct:
                        'subproductcode': getparams['productcode']+'_native',
                        'version': version,
                        'product_type': 'Native',
-                       'defined_by': 'JRC',
-                       'activated': 'false',
+                       'defined_by': 'USER',
+                       'activated': 'f',
                        'provider': getparams['provider'],
                        'descriptive_name': getparams['prod_descriptive_name'],
                        'description': getparams['description'],
@@ -2602,7 +2790,7 @@ class CreateProduct:
                        'frequency_id': 'undefined',
                        'date_format': 'undefined',
                        'data_type_id': 'undefined',
-                       'masked':'true'
+                       'masked': 'f'
                        }
 
         if self.crud_db.create('product', productinfo):

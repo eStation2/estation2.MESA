@@ -103,8 +103,10 @@ Ext.define("esapp.view.analysis.mapView",{
                 collapseDirection: 'left',
                 menu: {
                     hideOnClick: true,
+                    iconAlign: '',
                     defaults: {
-                        hideOnClick: true
+                        hideOnClick: true,
+                        iconAlign: ''
                     },
                     items: [{
                         xtype: 'checkbox',
@@ -135,7 +137,6 @@ Ext.define("esapp.view.analysis.mapView",{
                     }, {
                         text: 'RICs',
                         name: 'rics',
-                        cls: "x-menu-no-icon",
                         //iconCls: 'layer-vector-add', // 'layers'
                         scale: 'medium',
                         floating: false,
@@ -144,6 +145,9 @@ Ext.define("esapp.view.analysis.mapView",{
                             hideOnClick: true,
                             defaults: {
                                 hideOnClick: true
+                            },
+                            style: {
+                                'margin-left': '0px'
                             },
                             items: [{
                                 xtype: 'checkbox',
@@ -187,7 +191,7 @@ Ext.define("esapp.view.analysis.mapView",{
                 }
             },{
                 xtype: 'container',
-                width: 275,
+                width: 250,
                 height: 38,
                 top: 0,
                 align:'left',
@@ -203,11 +207,26 @@ Ext.define("esapp.view.analysis.mapView",{
                     html: '<div id="region_name_' + me.id + '" style="text-align:center; font-weight: bold;"></div>'
                 },{
                     xtype: 'box',
-                    height: 17,
+                    height: 15,
                     top:17,
                     html: '<div id="mouse-position_' + me.id + '"></div>'
                 }]
-            },'->',{
+            },'->', {
+                //id: 'legendbtn_'+me.id,
+                reference: 'legendbtn',
+                hidden: true,
+                iconCls: 'legends',
+                scale: 'medium',
+                enableToggle: true,
+                handler: 'toggleLegend'
+            },{
+                iconCls: 'fa fa-save fa-2x',
+                style: { color: 'lightblue' },
+                scale: 'medium',
+                handler: 'saveMap',
+                href: '',
+                download: 'estationmap.png'
+            },{
                 //text: 'Unlink',
                 enableToggle: true,
                 iconCls: 'unlink',
@@ -245,7 +264,7 @@ Ext.define("esapp.view.analysis.mapView",{
                 autoShow: true,
                 floating: true,
                 // alignTarget : me,
-                defaultAlign: 'tr-c?',
+                defaultAlign: 'tl-tl',  // 'tr-c?',
                 alwaysOnTop: true,
                 constrain: true,
                 width: 180,
@@ -262,6 +281,40 @@ Ext.define("esapp.view.analysis.mapView",{
                         _layers.a[0].setOpacity(newValue / 100)
                     }
                 }
+            }, {
+                title: "Legend",
+                id: 'product-legend_panel_' + me.id,
+                reference: 'product-legend_panel_' + me.id,
+                x:10,
+                autoWidth: true,
+                autoHeight: true,
+                layout: 'fit',
+                hidden: true,
+                floating: true,
+                defaultAlign: 'bl-bl',
+                closable: true,
+                closeAction: 'hide',
+                draggable: true,
+                constrain: true,
+                alwaysOnTop: true,
+                autoShow: false,
+                frame: false,
+                frameHeader : false,
+                border: false,
+                //bodyStyle:  'background:transparent;',
+                header: {
+                    style: 'background:transparent;'
+                },
+                // Do not use default Panel dragging: use window type dragging
+                initDraggable: Ext.window.Window.prototype.initDraggable,
+                items: [{
+                    xtype: 'container',
+                    id: 'product-legend' + me.id,
+                    reference: 'product-legend' + me.id,
+                    minWidth: 400,
+                    layout: 'fit',
+                    html: ''
+                }]
             }]
         },{
             region: 'south',
@@ -317,7 +370,7 @@ Ext.define("esapp.view.analysis.mapView",{
                     projection: 'EPSG:4326',
                     // comment the following two lines to have the mouse position be placed within the map.
                     // className: 'ol-full-screen',
-                    // className: 'custom-mouse-position',
+                    className: 'ol-custom-mouse-position',
                     target:  document.getElementById('mouse-position_'+ me.id), // Ext.get('mouse-position_'+ me.id), //
                     undefinedHTML: '&nbsp;'
                 });

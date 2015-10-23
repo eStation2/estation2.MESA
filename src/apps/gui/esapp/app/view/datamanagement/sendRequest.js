@@ -15,7 +15,7 @@ Ext.define("esapp.view.datamanagement.sendRequest",{
         'Ext.XTemplate'
     ],
 
-    title: esapp.Utils.getTranslation('sendrequest'),     // 'Send request',
+    title: esapp.Utils.getTranslation('getrequestfile'),     // 'Send request',
     header: {
         titlePosition: 0,
         titleAlign: 'center'
@@ -27,21 +27,24 @@ Ext.define("esapp.view.datamanagement.sendRequest",{
     closable: true,
     closeAction: 'destroy', // 'hide',
     resizable: true,
-    autoScroll:true,
+    autoScroll:false,
     maximizable: false,
-    width:300,
-    height: 300,
+    width:500,
+    height: 350,
+    bodyStyle: 'padding:5px 5px 5px 5px',
+    defaultAlign: 'b-c',
 
     border:true,
     frame:true,
-    layout: {
-        type  : 'fit',
-        padding: 5
-    },
+    layout: 'fit',
 
     params: {
        level: null,
        record: null
+    },
+
+    listeners: {
+        beforerender: 'getRequest'
     },
 
     initComponent: function () {
@@ -52,18 +55,20 @@ Ext.define("esapp.view.datamanagement.sendRequest",{
             scale: 'medium',
             handler: 'onCancelClick'
         },{
-            text: esapp.Utils.getTranslation('send'),    // 'Send',
-            iconCls: 'fa fa-paper-plane-o fa-2x',
+            text: esapp.Utils.getTranslation('saverequestfile'),    // 'Save Request file',
+            iconCls: 'fa fa-floppy-o fa-2x',
             style: { color: 'lightblue' },
             scale: 'medium',
             disabled: false,
-            formBind: true,
-            handler: 'onSendClick'
+            handler: 'onSaveClick'
         }];
 
         me.items = [{
-            html: "Send a request to receive an archive of all missing data for:<BR><BR>" +
-            "List of product - mapsets - subproducts"
+            xtype:'container',
+            id: 'requestcontent',
+            layout: 'fit',
+            autoScroll:true,
+            html:''
         }];
 
         me.callParent();

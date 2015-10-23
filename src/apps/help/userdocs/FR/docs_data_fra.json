@@ -1,0 +1,22 @@
+[{
+    "name": "doc1",
+    "title": "MANUEL UTILISATEUR",
+    "thumb": "pdf",
+    "url": "help/getfile?lang=fra&file=eStation 2.0 User Manual D1.1.pdf",
+    "type": "DOCUMENTATION UTILISATEUR",
+    "uploaded": "DECEMBER 20, 2015"
+},{
+    "name": "doc2",
+    "title": "ADMINISTATION MANUEL",
+    "thumb": "pdf",
+    "url": "help/getfile?lang=fra&file=eStation 2.0 Administration Manual D1.1.pdf",
+    "type": "DOCUMENTATION UTILISATEUR",
+    "uploaded": "SEPTEMBER 20, 2015"
+},{
+    "name": "doc3",
+    "title": "INSTALLATION MANUEL",
+    "thumb": "pdf",
+    "url": "help/getfile?lang=fra&file=eStation 2.0 Installation Manual.pdf",
+    "type": "DOCUMENTATION UTILISATEUR",
+    "uploaded": "JUNE 20, 2015"
+}]

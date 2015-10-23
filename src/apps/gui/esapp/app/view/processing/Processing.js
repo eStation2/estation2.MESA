@@ -55,6 +55,18 @@ Ext.define("esapp.view.processing.Processing",{
         groupByText: esapp.Utils.getTranslation('productcategories')  // 'Product category'
     }],
 
+    listeners: {
+        //beforecellclick: function(view, td, cellIndex) {
+        //    console.info('hallo cell: ' + cellIndex);
+        //    if (cellIndex > 0) return false;    // check the cellIndex for whatever columns you need.
+        //}
+        cellclick : function(view, cell, cellIndex, record, row, rowIndex, e) {
+            //e.stopPropagation();
+            //console.info('cellclick');
+            return false;
+        }
+    },
+
     initComponent: function () {
         var me = this;
 
@@ -209,8 +221,8 @@ Ext.define("esapp.view.processing.Processing",{
                     },
                     handler: function(grid, rowIndex, colIndex) {
                         var rec = grid.getStore().getAt(rowIndex),
-                            action = (rec.get('process_activated') ? 'deactivated' : 'activated');
-                        //Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
+                        action = (rec.get('process_activated') ? 'deactivated' : 'activated');
+                        //console.info(rec);
                         rec.get('process_activated') ? rec.set('process_activated', false) : rec.set('process_activated', true);
                     }
                 }]
@@ -222,6 +234,7 @@ Ext.define("esapp.view.processing.Processing",{
                 height:40,
                 menuDisabled: true,
                 align:'center',
+                stopSelection: false,
                 // cls:'x-grid3-td-ingestionlogcolumn',
                 items: [{
                     //icon: 'resources/img/icons/file-extension-log-icon-32x32.png',
@@ -231,7 +244,12 @@ Ext.define("esapp.view.processing.Processing",{
                     tooltip: esapp.Utils.getTranslation('showprocessinglog'),     // 'Show log of this Ingestion',
                     scope: me,
                     handler: function (grid, rowIndex, colIndex, icon) {
+
                         var rec = grid.getStore().getAt(rowIndex);
+                        //console.info(grid.getStore());
+                        //console.info(rec);
+                        //console.info(rowIndex);
+                        //console.info(colIndex);
                         var logViewWin = new esapp.view.acquisition.logviewer.LogView({
                             params: {
                                 logtype: 'processing',

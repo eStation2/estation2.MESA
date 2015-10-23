@@ -94,15 +94,17 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
 
     ,editProduct: function(grid, rowIndex, row){
         var record = grid.getStore().getAt(rowIndex);
-        var editProductWin = new esapp.view.acquisition.product.editProduct({
-            params: {
-                edit: true,
-                product: record,
-                orig_productcode: record.get('productcode'),
-                orig_version : record.get('version')
-            }
-        });
-        editProductWin.show();
+        if (record.get('defined_by') != 'JRC') {
+            var editProductWin = new esapp.view.acquisition.product.editProduct({
+                params: {
+                    edit: true,
+                    product: record,
+                    orig_productcode: record.get('productcode'),
+                    orig_version: record.get('version')
+                }
+            });
+            editProductWin.show();
+        }
     }
 
     //,onAddClick: function(){

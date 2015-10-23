@@ -142,8 +142,21 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                         menuDisabled: true,
                         shrinkWrap: 0,
                         items: [{
-                            icon: 'resources/img/icons/edit.png',
-                            tooltip: esapp.Utils.getTranslation('editproduct'),  // 'Edit Product',
+                            //icon: 'resources/img/icons/edit.png',
+                            getClass: function(v, meta, rec) {
+                                if (rec.get('defined_by') != 'JRC') {
+                                    return 'editproduct';
+                                }
+                                else {
+                                    return 'x-hide-display';
+                                }
+                            },
+                            getTip: function(v, meta, rec) {
+                                if (rec.get('defined_by') != 'JRC') {
+                                    return esapp.Utils.getTranslation('editproduct');    // 'Edit Product',
+                                }
+                            },
+                            //tooltip: esapp.Utils.getTranslation('editproduct'),  // 'Edit Product',
                             handler: 'editProduct'
                         }]
                     }, {
