@@ -96,7 +96,10 @@ Ext.define("esapp.view.dashboard.Dashboard",{
                 style: { color: 'gray' },
                 enableToggle: false,
                 scale: 'medium',
-                handler: 'setupDashboard'
+                handler: function(){
+                    var reload=true;
+                    me.getController().setupDashboard(reload);
+                }
             }]
         });
 
