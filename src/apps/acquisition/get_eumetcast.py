@@ -210,9 +210,6 @@ def loop_eumetcast_ftp(dry_run=False):
     ftp_eumetcast_userpwd =  es_constants.es2globals['ftp_eumetcast_userpwd']
 
     while True:
-        logger.debug("Check if the EUMETCast input directory : %s exists.", input_dir)
-        if not os.path.exists(input_dir):
-            logger.error("The EUMETCast input directory : %s is not yet mounted.", input_dir)
 
         logger.debug("Check if the Ingest Server input directory : %s exists.", output_dir)
         if not os.path.exists(output_dir):
@@ -281,22 +278,15 @@ def loop_eumetcast_ftp(dry_run=False):
                     if listtoprocess != set([]):
                         logger_spec.debug("Loop on the found files.")
                         for filename in list(listtoprocess):
-                            if os.path.isfile(os.path.join(input_dir, filename)):
-                                if os.stat(os.path.join(input_dir, filename)).st_mtime < int(time.time()):
-                                    logger_spec.debug("Processing file: "+os.path.basename(filename))
-                                    if not dry_run:
-                                        if commands.getstatusoutput("cp " + filename + " " + output_dir + os.sep + os.path.basename(filename))[0] == 0:
-                                            logger_spec.info("File %s copied.", filename)
-                                            processed_list.append(filename)
-                                            # Update processing info
-                                            processed_info['time_latest_copy']=datetime.datetime.now()
-                                            processed_info['length_proc_list']=len(processed_list)
-                                        else:
-                                            logger_spec.warning("Problem while copying file: %s.", filename)
-                                    else:
-                                        logger_spec.info('Dry_run is set: do not get files')
-                            else:
-                                logger_spec.error("File %s removed by the system before being processed.", filename)
+                             try:
+                                result = get_file_from_url(str(ftp_eumetcast_url)+os.path.sep+filename, target_file=os.path.basename(filename), target_dir=es_constants.ingest_dir, userpwd=str(ftp_eumetcast_userpwd))
+                                if not result:
+                                    logger_spec.info("File %s copied.", filename)
+                                    processed_list.append(filename)
+                                else:
+                                    logger_spec.warning("File %s not copied: ", filename)
+                             except:
+                               logger_spec.warning("Problem while copying file: %s.", filename)
                     else:
                         logger.debug("Nothing to process - go to next trigger.")
                         pass
