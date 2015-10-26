@@ -246,7 +246,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                     columns: [{
                         xtype: 'actioncolumn',
                         hidden: false,
-                        width: 35,
+                        width: 50,
                         align: 'center',
                         sortable: false,
                         menuDisabled: true,
@@ -268,7 +268,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                         header: esapp.Utils.getTranslation('id'),    // 'ID',
                         dataIndex: 'data_source_id',
                         //bind: '{productdatasources.data_source_id}',
-                        width: 280,
+                        width: 265,
                         sortable: false,
                         hideable: false,
                         variableRowHeight: true,
@@ -410,7 +410,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                     columns: [{
                         xtype: 'actioncolumn',
                         hidden: false,
-                        width: 35,
+                        width: 50,
                         align: 'center',
                         sortable: false,
                         menuDisabled: true,
@@ -430,7 +430,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                     }, {
                         header: esapp.Utils.getTranslation('subproduct'),
                         dataIndex: 'subproductcode',
-                        width: 250,
+                        width: 230,
                         sortable: false,
                         hideable: false,
                         variableRowHeight: true,

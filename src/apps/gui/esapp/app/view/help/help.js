@@ -24,7 +24,8 @@ Ext.define("esapp.view.help.help",{
     },
 
     width: 1150,
-    height: 650,
+    //height: 650,
+    autoHeight: true,
 
     layout: {
         type: 'vbox',
@@ -93,6 +94,36 @@ Ext.define("esapp.view.help.help",{
             '<div class="thumb-title-small">'+esapp.Utils.getTranslation('description')+': {description}</div>',
             '</div>',
             '<div class="thumb-gotolink"></div>',
+            '</a>',
+            '</div>',
+            '</tpl>'
+        ]
+    },{
+        xtype: 'dataview',
+        cls: 'help-dataview',
+
+        bind: '{notes}',
+
+        itemSelector: 'div.thumb-wrap',
+
+        listeners: {
+            itemclick: 'onDocumentClick'
+        },
+
+        tpl: [
+            '<tpl for=".">',
+            // Break every four dataviews
+            '<tpl if="xindex % 10 === 1">',
+            '<div class="statement-type">{type}</div>',
+            '</tpl>',
+            '<div class="thumb-wrap">',
+            '<a class="thumb" href="{url}" target="_blank">',
+            '<div class="thumb-{thumb}"></div>',
+            '<div class="thumb-title-container">',
+            '<div class="thumb-title">{title}</div>',
+            '<div class="thumb-title-small">'+esapp.Utils.getTranslation('uploaded')+': {uploaded}</div>',
+            '</div>',
+            '<div class="thumb-download"></div>',
             '</a>',
             '</div>',
             '</tpl>'

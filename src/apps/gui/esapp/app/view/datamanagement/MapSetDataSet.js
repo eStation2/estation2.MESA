@@ -212,12 +212,15 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
                 tooltip: esapp.Utils.getTranslation('tipcompletedataset'),    // 'Complete data set',
                 scope: me,
                 handler: function (grid, rowIndex) {
-                    Ext.toast({
-                        html: 'Show window which proposes places to send a request to complete the selected data set',
-                        title: 'Request to complete data set',
-                        width: 200,
-                        align: 't'
-                    });
+                        var rec = grid.getStore().getAt(rowIndex);
+
+                        var sendRequestWin = new esapp.view.datamanagement.sendRequest({
+                            params: {
+                                level: 'dataset',
+                                record: rec
+                            }
+                        });
+                        sendRequestWin.show();
                 }
             }]
         }];

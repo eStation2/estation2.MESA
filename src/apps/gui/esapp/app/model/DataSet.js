@@ -32,6 +32,8 @@ Ext.define('esapp.model.ProductMapSet', {
 
     fields: [
         {name: 'productid', reference:'DataSet', type: 'string'},
+        {name: 'productcode'},
+        {name: 'version'},
         {name: 'mapsetcode'},
         {name: 'defined_by'},
         {name: 'descriptive_name'},

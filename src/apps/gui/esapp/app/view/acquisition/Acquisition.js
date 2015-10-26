@@ -357,14 +357,28 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                 xtype: 'actioncolumn',
                 hideable: true,
                 hidden:true,
-                width: 30,
+                width: 50,
+                height: 50,
                 align: 'center',
                 shrinkWrap: 0,
                 items: [{
-                    icon: 'resources/img/icons/edit.png',
+                    //icon: 'resources/img/icons/edit.png',
+                    getClass: function(v, meta, rec) {
+                        if (rec.get('defined_by') != 'JRC') {
+                            return 'editproduct';
+                        }
+                        else {
+                            return 'x-hide-display';
+                        }
+                    },
+                    getTip: function(v, meta, rec) {
+                        if (rec.get('defined_by') != 'JRC') {
+                            return esapp.Utils.getTranslation('editproduct');    // 'Edit Product',
+                        }
+                    },
                     // iconCls: 'fa fa-edit fa-2x', // xf044
                     // cls: 'fa fa-edit fa-2x', // xf044
-                    tooltip: esapp.Utils.getTranslation('editproduct'),   // 'Edit Product',
+                    //tooltip: esapp.Utils.getTranslation('editproduct'),   // 'Edit Product',
                     handler: 'editProduct'
                 }]
             }, {

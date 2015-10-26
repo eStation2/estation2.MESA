@@ -23,102 +23,95 @@ from lib.python import es_logging as log
 from config import es_constants
 from apps.acquisition import acquisition
 from apps.processing import processing
+from apps.es2system import convert_2_spirits as conv
 
 logger = log.my_logger(__name__)
 data_dir = es_constants.es2globals['data_dir']
 
 from lib.python.daemon import DaemonDryRunnable
 
-
-# def system_status_filename():
+# def get_status_local_machine():
+# #   Get info on the status of the local machine
+# #
+#     logger.debug("Entering routine %s" % 'get_status_local_machine')
 #
-#     functions.check_output_dir(es_constants.es2globals['status_system_dir'])
-#     pickle_filename = es_constants.es2globals['status_system_pickle']
-#     return pickle_filename
-
-
-def get_status_local_machine():
-#   Get info on the status of the local machine
+#     # Get the local systems settings
+#     systemsettings = functions.getSystemSettings()
 #
-    logger.debug("Entering routine %s" % 'get_status_local_machine')
-
-    # Get the local systems settings
-    systemsettings = functions.getSystemSettings()
-
-    # Get status of all services
-    status_services = functions.getStatusAllServices()
-
-    get_eumetcast_status = status_services['eumetcast']
-    get_internet_status = status_services['internet']
-    ingestion_status = status_services['ingest']
-    processing_status = status_services['process']
-    system_status = status_services['system']
-
-    # Get status of postgresql
-    psql_status = functions.getStatusPostgreSQL()
-
-    # Get internet connection
-    internet_status = functions.internet_on()
-
-    # ToDo: check disk status!
-
-    status_local_machine = {'get_eumetcast_status': get_eumetcast_status,
-                            'get_internet_status': get_internet_status,
-                            'ingestion_status': ingestion_status,
-                            'processing_status': processing_status,
-                            'system_status': system_status,
-                            'system_execution_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                            'postgresql_status': str(psql_status).lower(),
-                            'internet_connection_status': str(internet_status).lower(),
-                            'active_version': systemsettings['active_version'],
-                            'mode': systemsettings['mode'],
-                            'disk_status': 'true'}
-    return status_local_machine
-
-
-def save_status_local_machine():
-#   Save a pickle containing info on the status of the local machine
+#     # Get status of all services
+#     status_services = functions.getStatusAllServices()
 #
-    logger.debug("Entering routine %s" % 'save_status_local_machine')
-
-    # Define .pck filename
-    pickle_filename = functions.system_status_filename()
-
-    # Get the local systems settings
-    systemsettings = functions.getSystemSettings()
-
-    # Get status of all services
-    status_services = functions.getStatusAllServices()
-
-    get_eumetcast_status = status_services['eumetcast']
-    get_internet_status = status_services['internet']
-    ingestion_status = status_services['ingest']
-    processing_status = status_services['process']
-    system_status = status_services['system']
-
-    # Get status of postgresql
-    psql_status = functions.getStatusPostgreSQL()
-
-    # Get internet connection
-    internet_status = functions.internet_on()
-
-    # ToDo: check disk status!
-
-    status_local_machine = {'get_eumetcast_status': get_eumetcast_status,
-                            'get_internet_status': get_internet_status,
-                            'ingestion_status': ingestion_status,
-                            'processing_status': processing_status,
-                            'system_status': system_status,
-                            'system_execution_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                            'postgresql_status': str(psql_status).lower(),
-                            'internet_connection_status': str(internet_status).lower(),
-                            'active_version': systemsettings['active_version'],
-                            'mode': systemsettings['mode'],
-                            'disk_status': 'true'}
-    # Save to pickle
-    functions.dump_obj_to_pickle(status_local_machine, pickle_filename)
-    return 0
-
+#     get_eumetcast_status = status_services['eumetcast']
+#     get_internet_status = status_services['internet']
+#     ingestion_status = status_services['ingest']
+#     processing_status = status_services['process']
+#     system_status = status_services['system']
+#
+#     # Get status of postgresql
+#     psql_status = functions.getStatusPostgreSQL()
+#
+#     # Get internet connection
+#     internet_status = functions.internet_on()
+#
+#     # ToDo: check disk status!
+#
+#     status_local_machine = {'get_eumetcast_status': get_eumetcast_status,
+#                             'get_internet_status': get_internet_status,
+#                             'ingestion_status': ingestion_status,
+#                             'processing_status': processing_status,
+#                             'system_status': system_status,
+#                             'system_execution_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+#                             'postgresql_status': str(psql_status).lower(),
+#                             'internet_connection_status': str(internet_status).lower(),
+#                             'active_version': systemsettings['active_version'],
+#                             'mode': systemsettings['mode'],
+#                             'disk_status': 'true'}
+#     return status_local_machine
+#
+#
+# def save_status_local_machine():
+# #   Save a pickle containing info on the status of the local machine
+# #
+#     logger.debug("Entering routine %s" % 'save_status_local_machine')
+#
+#     # Define .pck filename
+#     pickle_filename = functions.system_status_filename()
+#
+#     # Get the local systems settings
+#     systemsettings = functions.getSystemSettings()
+#
+#     # Get status of all services
+#     status_services = functions.getStatusAllServices()
+#
+#     get_eumetcast_status = status_services['eumetcast']
+#     get_internet_status = status_services['internet']
+#     ingestion_status = status_services['ingest']
+#     processing_status = status_services['process']
+#     system_status = status_services['system']
+#
+#     # Get status of postgresql
+#     psql_status = functions.getStatusPostgreSQL()
+#
+#     # Get internet connection
+#     internet_status = functions.internet_on()
+#
+#     # ToDo: check disk status!
+#
+#     status_local_machine = {'get_eumetcast_status': get_eumetcast_status,
+#                             'get_internet_status': get_internet_status,
+#                             'ingestion_status': ingestion_status,
+#                             'processing_status': processing_status,
+#                             'system_status': system_status,
+#                             'system_execution_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+#                             'postgresql_status': str(psql_status).lower(),
+#                             'internet_connection_status': str(internet_status).lower(),
+#                             'active_version': systemsettings['active_version'],
+#                             'mode': systemsettings['mode'],
+#                             'disk_status': 'true'}
+#     # Save to pickle
+#     functions.dump_obj_to_pickle(status_local_machine, pickle_filename)
+#     return 0
+#
 
 def system_data_sync(source, target):
 #   Synchronize data directory from one machine to another (push)
@@ -416,6 +409,7 @@ def system_create_report(target_file=None):
 
 
 def check_delay_time(operation, delay_minutes=None, time=None, write=False):
+#
 # For a given operation, check if the delay has passed, or if it is time to execute it
 #
 # Input arguments: operation= is one of the foreseen operations ('sync_data', 'sync_db')
@@ -461,6 +455,7 @@ def check_delay_time(operation, delay_minutes=None, time=None, write=False):
 
 
 def system_manage_lock(lock_id, action):
+#
 # Manage the lock file for an action
 #
 # lock_id is whatever string (but 'All_locks' which is reserved)
@@ -510,14 +505,15 @@ def loop_system(dry_run=False):
 
     # Specific settings for the system operations
     delay_data_sync_minutes = es_constants.es2globals['system_delay_data_sync_min']
-    # delay_db_sync_minutes = es_constants.es2globals['system_delay_db_sync_min']
     time_for_db_dump = es_constants.es2globals['system_time_db_dump_hhmm']
+    time_for_spirits_conv = es_constants.es2globals['system_time_spirits_conv']
 
     # Loop to manage the 'cron-like' operations, i.e.:
     #   a. Data sync
     #   b. DB sync
-    #   c. DB dump
-    #   d. Save system status
+    #   c. DB dumpd (create/manage)
+    #   d. Spirits conversion
+    #
 
     while True:
 
@@ -525,12 +521,13 @@ def loop_system(dry_run=False):
         system_settings = functions.getSystemSettings()
 
         logger.info('System Settings Mode: %s ' % system_settings['mode'])
-        #time.sleep(5)
+
         # Initialize To Do flags
         do_data_sync = False
         schemas_db_sync = []
         schemas_db_dump = []
-        do_save_system = True
+        #do_save_system = True
+        do_convert_spirits = False
 
         logger.info("Starting the System Service loop")
 
@@ -552,10 +549,12 @@ def loop_system(dry_run=False):
                 if system_settings['mode'] == 'nominal':
                     schemas_db_sync = ['products']
                     schemas_db_dump = ['products', 'analysis']
+                    do_convert_spirits = True
 
                 if system_settings['mode'] == 'recovery':
                     schemas_db_sync = []
                     schemas_db_dump = ['products', 'analysis']
+                    do_convert_spirits = True
 
                 if system_settings['mode'] == 'maintenance':
                     schemas_db_sync = []
@@ -619,14 +618,28 @@ def loop_system(dry_run=False):
         if len(schemas_db_dump) > 0:
             check_time = check_delay_time(operation, time=time_for_db_dump)
             if check_time:
+                # Execute the dump of the schemas active on the machine
                 logger.info("Executing db dump")
                 system_db_dump(schemas_db_sync)
 
+                # Manage the file dumps (rotation)
+                logger.info("Executing manage dumps")
+                system_manage_dumps()
+
         # Save System Status
-        operation = 'save_status'
-        if do_save_system:
-            logger.info("Saving the status of the machine")
-            save_status_local_machine()
+        # operation = 'save_status'
+        # if do_save_system:
+        #     logger.info("Saving the status of the machine")
+        #     save_status_local_machine()
+
+        # Convert to spirits format
+        operation = 'convert_spirits'
+        if do_convert_spirits:
+            check_time = check_delay_time(operation, time=time_for_spirits_conv)
+            if check_time:
+                logger.info("Saving the status of the machine")
+                output_dir = es_constants.es2globals['spirits_output_dir']
+                conv.convert_driver(output_dir)
 
         # Sleep some time
         time.sleep(float(es_constants.es2globals['system_sleep_time_sec']))

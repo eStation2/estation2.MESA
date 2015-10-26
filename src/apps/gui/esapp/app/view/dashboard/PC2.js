@@ -72,9 +72,9 @@ Ext.define("esapp.view.dashboard.PC2",{
             me.dbstatusCls = 'notrunning';
 
         me.internetCls = '';
-        if (me.internetconnection)
+        if (me.internetconnection == true || me.internetconnection == 'true')
             me.internetCls = 'connected';
-        else if (me.internetconnection == false)
+        else if (me.internetconnection == false || me.internetconnection == 'false')
             me.internetCls = 'notconnected';
 
         me.service_eumetcast_Style = 'gray';

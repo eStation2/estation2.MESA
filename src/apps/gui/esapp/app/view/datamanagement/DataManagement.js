@@ -204,14 +204,6 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                             }
                         });
                         sendRequestWin.show();
-                        console.info(rec);
-                        //rec.get('store_original_data')
-                        //Ext.toast({
-                        //    html: 'Show window which proposes places to send a request to complete all product data sets.',
-                        //    title: 'Request to complete all product data sets.',
-                        //    width: 200,
-                        //    align: 't'
-                        //});
                     }
                 }]
             }]
