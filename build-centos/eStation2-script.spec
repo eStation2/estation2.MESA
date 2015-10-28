@@ -3,7 +3,7 @@ Name: eStation-Apps
 Version: 2.0.1
 Release: 1
 URL: http://estation.jrc.ec.europa.eu       
-License: GPL 
+License: GPL license
 Group: Applications/Internet
 BuildRoot: /tmp/ 
 Requires: bash perl
