@@ -4,7 +4,7 @@ Version: 2.0.1
 Release: 1
 Group: eStation
 License: GPL
-Source: /home/adminuser/rpms/Layers/%{name}-%{version}-%{release}.tgz
+Source: /home/adminuser/rpms/eStation-Layers/%{name}-%{version}-%{release}.tgz
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 
 
