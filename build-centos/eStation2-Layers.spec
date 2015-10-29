@@ -17,8 +17,8 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 
 %prep
 # Get the sources from the JRC ftp and create .tgz
-lftp -e "mirror -Le /ftp/private/narma/eStation_2.0/Packages/eStation-Layers/ /home/adminuser/rpms/Layers/; exit" -u narmauser:narma11 h05-ftp.jrc.it"" 
-cd /home/adminuser/rpms/Layers/
+lftp -e "mirror -Le /ftp/private/narma/eStation_2.0/Packages/eStation-Layers/ /home/adminuser/rpms/; exit" -u narmauser:narma11 h05-ftp.jrc.it"" 
+cd /home/adminuser/rpms/eStation-Layers/
 tar -cvzf %{name}-%{version}-%{release}.tgz *
 
 # Prepare the Layers in BUILD_ROOT
