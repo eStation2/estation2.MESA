@@ -271,6 +271,16 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
+    def Test_get_product_in_info4(self):
+
+        product_in = querydb.get_product_in_info(productcode='lsasaf-et',
+                                                 subproductcode='et',
+                                                 version='undefined',
+                                                 datasource_descr_id='EO:EUM:DAT:MSG:ET-SEVIRI')
+        logger.info("Product IN info: %s", product_in)
+
+        self.assertEqual(1, 1)
+
 
     def Test_get_product_out_info(self):
 
