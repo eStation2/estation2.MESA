@@ -1,7 +1,7 @@
 Summary: eStation 2.0 application from JRC
 Name: eStation2-Apps
 Version: 2.0.1
-Release: 1
+Release: 2
 Group: eStation
 License: GPL
 Source: /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz
@@ -94,6 +94,7 @@ mkdir -p -m 777 /eStation2/db_dump
 mkdir -p -m 775 /eStation2/system
 chown -R analyst:estation /eStation2/
 
+
 # Creation of /data path
 mkdir -p -m 775 /data/ingest
 mkdir -p -m 775 /data/processing
@@ -103,3 +104,4 @@ chown -R analyst:estation /data
 
 # Creation of the symlink on the /var/www/eStation2-%{version}
 ln -fs /var/www/eStation2-%{version} /var/www/eStation
+
