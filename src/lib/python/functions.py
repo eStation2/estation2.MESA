@@ -732,6 +732,27 @@ def conv_yyyydmmdk_2_yyyymmdd(yymmk):
     date_yyyymmdd = str(year)+month+day
     return date_yyyymmdd
 
+######################################################################################
+#   day_per_dekad
+#   Purpose: Function returns the number of days per dekad (from 8 to 11)
+#   Author: M. Clerici
+#   Date: 2015/02/25
+#   Input: dekad in format YYYYMMDD
+#   Output: number of days
+#
+def day_per_dekad(yyyymmdd):
+
+    from calendar import monthrange
+    year = int(str(yyyymmdd)[0:4])
+    month = int(str(yyyymmdd)[4:6])
+    dekad = int(str(yyyymmdd)[6:8])
+    if dekad <= 20:
+        days = 10
+    else:
+        tot_days = monthrange(year,month)[1]
+        days = tot_days - 20
+
+    return days
 
 ######################################################################################
 #   conv_list_2_string
@@ -990,18 +1011,18 @@ def get_all_from_path_full(full_path):
 #   Output: product_code, sub_product_code, date, mapset, version
 #   Description: returns information form the fullpath
 #
-def get_all_from_path_full(full_path):
-
-    # Split directory and filename
-    dir, filename = os.path.split(full_path)
-
-    # Get info from directory
-    product_code, sub_product_code, version, mapset = get_from_path_dir(dir)
-
-    # Get info from filename
-    str_date = get_date_from_path_filename(filename)
-
-    return [product_code, sub_product_code, version, str_date, mapset]
+# def get_all_from_filename(full_path):
+#
+#     # Split directory and filename
+#     dir, filename = os.path.split(full_path)
+#
+#     # Get info from directory
+#     product_code, sub_product_code, version, mapset = get_from_path_dir(dir)
+#
+#     # Get info from filename
+#     str_date = get_date_from_path_filename(filename)
+#
+#     return [product_code, sub_product_code, version, str_date, mapset]
 
 ######################################################################################
 #   get_all_from_filename
