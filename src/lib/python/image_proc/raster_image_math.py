@@ -2053,16 +2053,20 @@ def assign_metadata_processing(input_file_list, output_file):
 
     # Modify/Assign some to the ingested file
     sds_meta.assign_comput_time_now()
-
-    [productcode, subproductcode, version, str_date, mapset] = functions.get_all_from_path_full(output_file)
+    str_date, productcode, subproductcode, mapset, version = functions.get_all_from_filename(os.path.basename(output_file))
+    # [productcode, subproductcode, version, str_date, mapset] = functions.get_all_from_path_full(output_file)
 
     #   TODO-M.C.: cannot read metadata from database for a newly created product ! Copy from input file ?
     #
-    # sds_meta.assign_from_product(productcode,subproductcode,version)
+    sds_meta.assign_from_product(productcode, subproductcode, version)
+    #sds_meta.assign_product_elemets(productcode, subproductcode, version)
 
     sds_meta.assign_date(str_date)
     sds_meta.assign_input_files(input_file_list)
-    sds_meta.assign_subdir_from_fullpath(output_file)
+
+    # Define subdirectory
+    sub_directory = functions.set_path_sub_directory(productcode,subproductcode,'Derived',version,mapset)
+    sds_meta.assign_subdir(sub_directory)
 
     # Write Metadata
     sds_meta.write_to_file(output_file)
