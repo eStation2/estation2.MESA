@@ -65,7 +65,7 @@ Ext.define('esapp.store.ProcessingStore', {
     ,listeners: {
         write: function(store, operation){
             Ext.toast({ html: operation.getResultSet().message,
-                        title: esapp.Utils.getTranslation('processingchainupdated'),  // "Processing chain updated",  "Chaîne de traitement mise à jour"
+                        title: esapp.Utils.getTranslation('processingchainupdated'),  // "Processing chain updated",  "Chaï¿½ne de traitement mise ï¿½ jour"
                         width: 300, align: 't' });
         }
     }
