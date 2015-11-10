@@ -86,19 +86,45 @@ from multiprocessing import Queue
 # fewsnet-rfe
 #   ---------------------------------------------------------------------
 #   ---------------------------------------------------------------------
-# fewsnet-rfe
+# lsasaf-et
 #   ---------------------------------------------------------------------
-from apps.processing.processing_std_lsasaf_et import *
+# from apps.processing.processing_std_lsasaf_et import *
+# # Create the list of dates -> returns empty if start==end==None
+# start_date='201510010000'
+# end_date='201510102345'
+# starting_dates = proc_functions.get_list_dates_for_dataset('lsasaf-et', 'et', 'undefined', start_date=start_date, end_date=end_date)
+# starting_dates = None
+# native_mapset='MSG-satellite-3km'
+# target_mapset='SPOTV-CEMAC-1km'
+#
+# args = {'pipeline_run_level':4, \
+#         'pipeline_printout_level':0, \
+#         'pipeline_printout_graph_level': 0, \
+#         'prod': 'lsasaf-et',\
+#         'starting_sprod':'et',\
+#         'starting_dates': starting_dates,\
+#         'native_mapset': native_mapset,\
+#         'target_mapset': target_mapset,\
+#         'version':'undefined',
+#         'logfile':'log-lsasaf-et.log'}
+#
+# res_queue = None
+# proc_lists=processing_std_lsasaf_et(res_queue,**args)
+# print(proc_lists)
+#   ---------------------------------------------------------------------
+# lsasaf-et
+#   ---------------------------------------------------------------------
+from apps.processing.processing_std_lsasaf_lst import *
 # Create the list of dates -> returns empty if start==end==None
 start_date='201510010000'
 end_date='201510102345'
-starting_dates = proc_functions.get_list_dates_for_dataset('lsasaf-et', 'et', 'undefined', start_date=start_date, end_date=end_date)
+starting_dates = proc_functions.get_list_dates_for_dataset('lsasaf-lst', 'lst', 'undefined', start_date=start_date, end_date=end_date)
 starting_dates = None
 native_mapset='MSG-satellite-3km'
 target_mapset='SPOTV-CEMAC-1km'
 
-args = {'pipeline_run_level':4, \
-        'pipeline_printout_level':0, \
+args = {'pipeline_run_level':0, \
+        'pipeline_printout_level':4, \
         'pipeline_printout_graph_level': 0, \
         'prod': 'lsasaf-et',\
         'starting_sprod':'et',\
@@ -106,8 +132,8 @@ args = {'pipeline_run_level':4, \
         'native_mapset': native_mapset,\
         'target_mapset': target_mapset,\
         'version':'undefined',
-        'logfile':'log-lsasaf-et.log'}
+        'logfile':'log-lsasaf-lst.log'}
 
 res_queue = None
-proc_lists=processing_std_lsasaf_et(res_queue,**args)
+proc_lists=processing_std_lsasaf_lst(res_queue,**args)
 print(proc_lists)
