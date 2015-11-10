@@ -26,7 +26,8 @@ naming_spirits = { 'sensor_filename_prefix':'', \
                    'frequency_filename_prefix':'', \
                    'pa_filename_prefix':''}
 
-metadata_spirits= {'prod_values': '',
+metadata_spirits= {'values': '',
+                   'date': '', \
                    'flags': '', \
                    'data_ignore_value':'', \
                    'days': 0, \
@@ -76,7 +77,7 @@ def append_to_header_file(header_file, metadata_spirit):
 # Convert a single file
 def convert_geotiff_file(input_file, output_dir, str_date, naming_spirits, metadata_spirits, overwrite=False):
 
-    extension_bin = '.bin'
+    extension_bin = '.img'
     extension_hdr = '.hdr'
     status = 0
 
@@ -132,12 +133,13 @@ def convert_driver(output_dir=None):
                            'frequency_filename_prefix':entry['frequency_filename_prefix'], \
                            'pa_filename_prefix':entry['product_anomaly_filename_prefix']}
 
-        metadata_spirits= {'prod_values': entry['prod_values'],
+        metadata_spirits= {'values': entry['prod_values'],
                            'flags': entry['flags'], \
                            'data_ignore_value':entry['data_ignore_value'], \
                            'days': entry['days'], \
                            'sensor_type':entry['sensor_type'], \
-                           'comment':entry['comment']}
+                           'comment':entry['comment'], \
+                           'date':''}
 
         # Manage mapsets: if defined use it, else read the existing ones from filesystem
         my_mapsets = []
@@ -183,7 +185,7 @@ def convert_driver(output_dir=None):
 
                     # Check input file exists
                     if os.path.isfile(input_file):
-
+                        metadata_spirits['date'] = str_date
                         # Check output file exists
                         convert_geotiff_file(input_file, output_dir+out_sub_dir, str_date, naming_spirits, metadata_spirits)
                     else:
