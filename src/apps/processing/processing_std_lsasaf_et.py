@@ -64,7 +64,7 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
                                              descriptive_name='10day Average over 30 min',
                                              description='10day Average computed for every 30 min',
                                              frequency_id='e30minute', # Is it OK ???????
-                                             date_format='YYYYMMDD',
+                                             date_format='YYYYMMDDHHMM',
                                              masked=False,
                                              timeseries_role='',
                                              active_default=True)
