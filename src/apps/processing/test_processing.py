@@ -123,11 +123,11 @@ starting_dates = None
 native_mapset='MSG-satellite-3km'
 target_mapset='SPOTV-CEMAC-1km'
 
-args = {'pipeline_run_level':0, \
-        'pipeline_printout_level':4, \
+args = {'pipeline_run_level':3, \
+        'pipeline_printout_level':0, \
         'pipeline_printout_graph_level': 0, \
-        'prod': 'lsasaf-et',\
-        'starting_sprod':'et',\
+        'prod': 'lsasaf-lst',\
+        'starting_sprod':'lst',\
         'starting_dates': starting_dates,\
         'native_mapset': native_mapset,\
         'target_mapset': target_mapset,\
