@@ -36,14 +36,14 @@ echo "adminuser All=(ALL) ALL" >> /etc/sudoers
 #Install FrontUtils
 cp -p /mnt/stage2/estation/FrontsUtils.so /usr/lib64/FrontsUtils.so
 
-#Create tmp dir
-mkdir -p -m 777 /tmp/eStation2/{services,processing}
-chown -R analyst:adminuser /tmp/eStation2/services/
-chown -R analyst:adminuser /tmp/eStation2/processing/
-echo "mkdir -p -m 777 /tmp/eStation2/{services,processing}
-chown analyst:adminuser /tmp/eStation2/
-chown analyst:adminuser /tmp/eStation2/services/
-chown analyst:adminuser /tmp/eStation2/processing/" >> /etc/rc.d/rc.local
+#Create tmp dir: all lines to be removed -> done in Apps.rpm
+#mkdir -p -m 777 /tmp/eStation2/{services,processing}
+#chown -R analyst:adminuser /tmp/eStation2/services/
+#chown -R analyst:adminuser /tmp/eStation2/processing/
+#echo "mkdir -p -m 777 /tmp/eStation2/{services,processing}
+#chown analyst:adminuser /tmp/eStation2/
+#chown analyst:adminuser /tmp/eStation2/services/
+#chown analyst:adminuser /tmp/eStation2/processing/" >> /etc/rc.d/rc.local
 
 #Export proj to /usr/local/src/tas/
 tar -zxf /mnt/stage2/estation/proj.4-4.8.tar.gz -C /usr/local/src/tas/
@@ -77,28 +77,30 @@ cp /mnt/stage2/estation/httpd.conf /usr/local/src/tas/
 cp /mnt/stage2/estation/estation.sh /usr/local/src/tas/scripts/
 ln -s /usr/local/src/tas/scripts/estation.sh /etc/init.d/estation
 
-#Export Estation dans /var/www/
-tar -zxf /mnt/stage2/estation/estation_www.tar.gz -C /var/www/
-ln -s /var/www/eStation2-2.0.1/ /var/www/eStation2
+#Export Estation dans /var/www/ -> remove: done through .rpms
+#tar -zxf /mnt/stage2/estation/estation_www.tar.gz -C /var/www/
+#ln -s /var/www/eStation2-2.0.1/ /var/www/eStation2
 
-
-
-
-#Install estation
-tar -zxf /mnt/stage2/estation/estation2.tar.gz -C /
-#What PC?
-pc=$(cat /etc/sysconfig/network | grep HOSTNAME | cut -d "-" -f 2)
-sed -i "s/role = PC1.*/role = $pc/g" /eStation2/settings/system_settings.ini
-
-#Config Postgresql
+#Config Postgresql -> moved upwards (before eStation install)
 su postgres -c "/usr/pgsql-9.3/bin/initdb -D /var/lib/pgsql/9.3/data"
 
-#Dump database
-tar -zxf /mnt/stage2/estation/estation_pgsql.tar.gz -C /var/lib/pgsql/9.3/data/
+#Dump database -> removed: done in Apps.rpm
+#tar -zxf /mnt/stage2/estation/estation_pgsql.tar.gz -C /var/lib/pgsql/9.3/data/
 
 #Start the database
 /etc/init.d/postgresql-9.3 start
 chkconfig postgresql-9.3 on
+
+#Install estation: from the rpms !! Still to be tested
+rpm_files=($(ls /mnt/stage2/estation/eStation2*.rpm))
+for rpm_file in ${rpm_files}
+do
+	yum install -y ${rpm_file}
+done
+
+#What PC?
+pc=$(cat /etc/sysconfig/network | grep HOSTNAME | cut -d "-" -f 2)
+sed -i "s/role = PC1.*/role = $pc/g" /eStation2/settings/system_settings.ini
 
 #Install/Start apache
 cd /usr/local/src/tas/
