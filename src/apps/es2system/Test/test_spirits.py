@@ -22,8 +22,8 @@ class TestSpirits(TestCase):
                            'pa_filename_prefix':'k'}
 
         metadata_spirits= {'values': '{NDVI, -, 0, 1000, 0, 1000, 0, 0.001}',
-                           'flags': ' {-32768=missing}', \
-                           'data_ignore_value':'', \
+                           'flags': '{-32768=missing}', \
+                           'data_ignore_value':'-32768', \
                            'days': 10, \
                            'sensor_type':'SPOT VGT-PROBA V', \
                            'comment':'Smoothed NDVI v2.1, JRC eStation2.0',
