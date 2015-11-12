@@ -34,33 +34,33 @@ metadata_spirits= {'values': '',
                    'sensor_type':'', \
                    'comment':''}
 
-
-def write_properties(filename,dictionary):
-    """ Writes the provided dictionary in key-sorted order to a properties file with each line of the format key=value
-
-    Keyword arguments:
-        filename -- the name of the file to be written
-        dictionary -- a dictionary containing the key/value pairs.
-    """
-    with open(filename, "wb") as csvfile:
-        writer = csv.writer(csvfile, delimiter='=', escapechar='\\', quoting=csv.QUOTE_NONE)
-        for key, value in sorted(dictionary.items(), key=operator.itemgetter(0)):
-                writer.writerow([ key, value])
-
-def read_properties(filename,dictionary):
-    """ Reads a given properties file with each line of the format key=value.  Returns a dictionary containing the pairs.
-
-    Keyword arguments:
-        filename -- the name of the file to be read
-    """
-    result={ }
-    with open(filename, "rb") as csvfile:
-        reader = csv.reader(csvfile, delimiter='=', escapechar='\\', quoting=csv.QUOTE_NONE)
-        for row in reader:
-            if len(row) != 2:
-                raise csv.Error("Too many fields on row with contents: "+str(row))
-            result[row[0]] = row[1]
-    return result
+#
+# def write_properties(filename,dictionary):
+#     """ Writes the provided dictionary in key-sorted order to a properties file with each line of the format key=value
+#
+#     Keyword arguments:
+#         filename -- the name of the file to be written
+#         dictionary -- a dictionary containing the key/value pairs.
+#     """
+#     with open(filename, "wb") as csvfile:
+#         writer = csv.writer(csvfile, delimiter='=', escapechar='\\', quoting=csv.QUOTE_NONE)
+#         for key, value in sorted(dictionary.items(), key=operator.itemgetter(0)):
+#                 writer.writerow([ key, value])
+#
+# def read_properties(filename,dictionary):
+#     """ Reads a given properties file with each line of the format key=value.  Returns a dictionary containing the pairs.
+#
+#     Keyword arguments:
+#         filename -- the name of the file to be read
+#     """
+#     result={ }
+#     with open(filename, "rb") as csvfile:
+#         reader = csv.reader(csvfile, delimiter='=', escapechar='\\', quoting=csv.QUOTE_NONE)
+#         for row in reader:
+#             if len(row) != 2:
+#                 raise csv.Error("Too many fields on row with contents: "+str(row))
+#             result[row[0]] = row[1]
+#     return result
 
 # Modify the header file created by the conversion
 def append_to_header_file(header_file, metadata_spirit):
@@ -68,7 +68,7 @@ def append_to_header_file(header_file, metadata_spirit):
     # Check the file exists
     if os.path.isfile(header_file):
         with open(header_file, "a") as csvfile:
-            writer = csv.writer(csvfile, delimiter='=', escapechar='\\', quoting=csv.QUOTE_NONE)
+            writer = csv.writer(csvfile, delimiter='=', escapechar='\\', quoting=csv.QUOTE_MINIMAL, quotechar=' ')
             for key, value in sorted(metadata_spirit.items(), key=operator.itemgetter(0)):
                     writer.writerow([ key, value])
     else:
@@ -185,7 +185,12 @@ def convert_driver(output_dir=None):
 
                     # Check input file exists
                     if os.path.isfile(input_file):
-                        metadata_spirits['date'] = str_date
+                        if len(naming_spirits['frequency_filename_prefix']) > 1:
+                            my_str_date=naming_spirits['frequency_filename_prefix'][1:5]+str_date
+                            metadata_spirits['date'] = my_str_date
+                        else:
+                            metadata_spirits['date'] = str_date
+
                         # Check output file exists
                         convert_geotiff_file(input_file, output_dir+out_sub_dir, str_date, naming_spirits, metadata_spirits)
                     else:
