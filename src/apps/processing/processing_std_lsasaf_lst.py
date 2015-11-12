@@ -37,10 +37,10 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
         proc_lists = functions.ProcLists()
 
     # Set DEFAULTS: all ON
-    activate_1dmax_comput=0
-    activate_10dmax_comput=0
+    activate_1dmax_comput=1
+    activate_10dmax_comput=1
     activate_10d15min_comput=1
-    activate_10dmin_comput=0
+    activate_10dmin_comput=1
 
     es2_data_dir = es_constants.es2globals['processing_dir']+os.path.sep
 
@@ -56,7 +56,7 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
         for my_date in starting_dates:
             starting_files.append(input_dir+my_date+in_prod_ident)
     else:
-        starting_files=input_dir+"201510*"+in_prod_ident        # -> TEMP !!!????
+        starting_files=input_dir+"*"+in_prod_ident
 
     logger.info("starting_files %s" % starting_files)
 
