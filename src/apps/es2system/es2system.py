@@ -351,6 +351,45 @@ def system_manage_dumps():
     # Exit
     return status
 
+def system_bucardo_config():
+#   Check if bucardo has been already configured, and if there are conditions to do so
+
+    res_bucardo_config = 0
+
+    logger.debug("Entering routine %s" % 'system_bucardo_config')
+
+    # Returns 0 if no any sync exists
+    res_list_sync=os.system('bucardo list sync | grep "No syncs found" 1>/dev/null')
+
+    # If no any sync exists, bucardo still to be configured
+    if not res_list_sync:
+
+        # Get relevant variables
+        sysSettings = functions.getSystemSettings()
+        role = sysSettings['role']
+
+        # Check the other computer is ready
+        if role == 'PC2':
+            other_pc = 'MESA-PC3'
+        else:
+            other_pc = 'MESA-PC2'
+
+        command = '/usr/pgsql-9.3/bin/pg_isready '+other_pc
+        other_pc_not_ready = os.system(command)
+
+        if not other_pc_not_ready:
+
+            # Execute the configuration
+            command = '/var/www/eStation2/config/install/bucardo_config.sh '+ role.lower() +\
+                      ' 1>/var/log/bucardo/bucardo_config.log'+ ' 2>/var/log/bucardo/bucardo_config.err'
+
+            res_bucardo_config=os.system(command)
+        else:
+            logger.error('The other computer '+other_pc+' is not ready. Exit.')
+
+    # Exit
+    return res_bucardo_config
+
 def system_create_report(target_file=None):
 #   Create a .zip file with the relevant information to be sent as for diagnostic
 #
