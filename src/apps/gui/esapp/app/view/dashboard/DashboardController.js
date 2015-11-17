@@ -2,11 +2,11 @@ Ext.define('esapp.view.dashboard.DashboardController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.dashboard-dashboard',
 
-    selectProduct: function(btn, event) {
-        var selectProductWin = new esapp.view.acquisition.product.selectProduct();
-        selectProductWin.down('grid').getStore().load();
-        selectProductWin.show();
-    },
+    //selectProduct: function(btn, event) {
+    //    var selectProductWin = new esapp.view.acquisition.product.selectProduct();
+    //    selectProductWin.down('grid').getStore().load();
+    //    selectProductWin.show();
+    //},
 
     setupDashboard: function() {
         var me = this.getView();

@@ -1,4 +1,31 @@
-.e0eef43c17c919002b6a9cfe02e0ceed0057d3a{display:block;}.x-grid3-body .x-grid3-radio-col-td .x-grid3-cell-inner {
+.c5f2d38f1091ce6a2cf8b833ff19b156f12a58ad{display:block;}/*.x-grid-header-ct {*/
+    /*height: 70px !important;*/
+/*}*/
+
+/*.x-column-header {*/
+    /*height: 70px !important;*/
+/*}*/
+
+/* Remove grid cell focus border: https://www.sencha.com/blog/top-support-tips-september-2014/ */
+.x-grid-item-focused .x-grid-cell-inner:before {
+    border: 0;
+}
+
+.cursorpointer {
+    cursor: pointer !important;
+}
+
+.cursordefault {
+    cursor: default !important;
+}
+
+.hide-actioncolumn{
+    background-image:none;
+    cursor: default !important;
+    display:none !important
+}
+
+.x-grid3-body .x-grid3-radio-col-td .x-grid3-cell-inner {
 	padding: 1px 0 0 0!important;
 }
 .x-grid3-radio-col {
@@ -15,7 +42,7 @@
 .not-dirty .x-grid3-dirty-cell {background: transparent;}
 
 
-.x-menu-no-icon {background-image: none;}
+.x-menu-no-icon {background-image: none;  left: 5px !important;}
 .x-menu-no-icon a.x-menu-item-link {padding-left: 3px;}
 .x-menu-no-icon .x-menu-item-icon {display: none;}
 
@@ -23,6 +50,10 @@ p {
     margin:5px;
 }
 
+.ol-custom-mouse-position {
+    top: 0px;
+    right: 0px;
+}
 
 .ol-zoom{top:2em !important; left:.5em !important;}
 
@@ -73,6 +104,9 @@ p {
 .africa {
     background-image:url(../img/africa.png);
 }
+.africa-orange24 {
+    background-image:url(../img/Africa_icon25x24.png);
+}
 
 .system-settings {
     background-image:url(../img/system_settings.png);
@@ -84,6 +118,8 @@ p {
 
 .map_add  {
     background-image:url(../img/map_add.png);
+    /*background-size: 32px 32px;*/
+    background-repeat: no-repeat;
 }
 
 .link {
@@ -112,6 +148,11 @@ p {
     background-repeat: no-repeat;
 }
 
+.editproduct {
+    background-image:url(../img/icons/edit.png);
+    background-repeat: no-repeat;
+}
+
 .activated {
     /*background-image:url(../img/icons/check.png);*/
     background-image:url(../img/icons/check-square-o_095c30_24.png);
@@ -133,6 +174,31 @@ p {
 }
 .add {
     background-image: url(../img/icons/add.png ) !important;
+    background-repeat: no-repeat;
+}
+.add16 {
+    background-image: url(../img/add16.png ) !important;
+    background-repeat: no-repeat;
+}
+.add24 {
+    background-image: url(../img/add24.png ) !important;
+    background-repeat: no-repeat;
+}
+.add32 {
+    background-image: url(../img/add32.png ) !important;
+    background-repeat: no-repeat;
+}
+.delete16 {
+    background-image: url(../img/delete16.png ) !important;
+    background-repeat: no-repeat;
+}
+.delete24 {
+    background-image: url(../img/delete24.png ) !important;
+    background-repeat: no-repeat;
+}
+.edit16 {
+    background-image: url(../img/edit16.png ) !important;
+    background-repeat: no-repeat;
 }
 .edit {
     background-image: url(../img/icons/edit.png ) !important;
@@ -257,6 +323,8 @@ p {
 .smalltext {font-size:10px;}
 /*.smalltext {display:block;font-size:10px;}*/
 
+.smalltext12 {font-size:12px;}
+
 .menu-glyph-color-green .x-menu-item-glyph {
     color: green;
 }
@@ -344,8 +412,8 @@ p {
 }
 
 .x-action-col-cell img {
-  height: 24px;
-  width: 24px;
+  height: 35px;
+  width: 35px;
 }
 
 .myclass .x-grid-cell-inner div {
@@ -598,4 +666,48 @@ p {
         width: 100%;
         padding: 5px 0
     }
+}
+
+
+/* ------------------
+ styling for the tables
+   ------------------   */
+
+#gradient-style
+{
+	font-family: "Lucida Sans Unicode", "Lucida Grande", "Sans-Serif";
+	font-size: 12px;
+	/*margin: 45px;*/
+	/*width: 480px;*/
+	text-align: left;
+	border-collapse: collapse;
+}
+#gradient-style th
+{
+	font-size: 13px;
+	font-weight: bold;
+	padding: 8px;
+	background-color: #b9c9fe; /* url('../img/table-images/gradhead.png') repeat-x;  #b9c9fe #A9DEEC */
+	border-top: 2px solid #d3ddff;
+	border-bottom: 1px solid #fff;
+	color: #039;
+}
+#gradient-style td
+{
+	padding: 8px;
+	border-bottom: 1px solid #fff;
+	color: #669;
+	border-top: 1px solid #fff;
+	background-color: #e8edff; /* url('../img/table-images/gradback.png') repeat-x; */
+}
+#gradient-style tfoot tr td
+{
+	background: #e8edff;
+	font-size: 12px;
+	color: #99c;
+}
+#gradient-style tbody tr:hover td
+{
+	background: #d0dafd url('../img/table-images/gradhover.png') repeat-x;
+	color: #339;
 }

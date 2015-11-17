@@ -2,7 +2,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.analysis-mapview'
 
-    ,addProductLayer: function(productcode, productversion, mapsetcode, subproductcode, legendid, colorschemeHTML, productname) {
+    ,addProductLayer: function(productcode, productversion, mapsetcode, subproductcode, legendid, colorschemeHTML, legendHTML, productname) {
         var me = this;
         var params = {
                productcode:productcode,
@@ -44,12 +44,19 @@ Ext.define('esapp.view.analysis.mapViewController', {
                             date: responseJSON.timeline[i]['date'],
                             events: {
                                 click: function () {
-                                    me.getView().getController().updateProductLayer(productcode,
-                                        productversion,
-                                        mapsetcode,
-                                        subproductcode,
-                                        legendid,
-                                        this.date);
+                                    me.getView().productdate = this.date;
+                                    me.getView().getController().updateProductLayer();
+                                    var outmask = me.lookupReference('outmaskbtn_'+ me.getView().id.replace(/-/g,'_')).pressed;
+                                    if (outmask){
+                                        me.getView().getController().outmaskFeature();
+                                    }
+
+                                    //me.getView().getController().updateProductLayer(productcode,
+                                    //    productversion,
+                                    //    mapsetcode,
+                                    //    subproductcode,
+                                    //    legendid,
+                                    //    this.date);
                                 }
                             }
                         });
@@ -75,11 +82,11 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 var mapsetcodeHTML = ' - <b class="smalltext">' + me.getView().mapsetcode + '</b>';
 
                 var pattern = /(\d{4})(\d{2})(\d{2})/;
-                me.getView().productdate = me.getView().productdate.replace(pattern,'$3-$2-$1');
+                //me.getView().productdate = me.getView().productdate.replace(pattern,'$3-$2-$1');
                 //var dt = new Date(me.getView().productdate.replace(pattern,'$3-$2-$1'));
-                var productdateHTML = ' - <b class="smalltext">' + me.getView().productdate + '</b>';
-                var mapwvieTitle = productname + versiontitle + mapsetcodeHTML + productdateHTML;
-                me.getView().setTitle(mapwvieTitle);
+                var productdateHTML = ' - <b class="smalltext">' + me.getView().productdate.replace(pattern,'$3-$2-$1') + '</b>';
+                var mapviewTitle = productname + versiontitle + mapsetcodeHTML + productdateHTML;
+                me.getView().setTitle(mapviewTitle);
 
                 // Show product time line
                 var mapviewtimeline = me.lookupReference('product-time-line_' + me.getView().id);
@@ -93,17 +100,6 @@ Ext.define('esapp.view.analysis.mapViewController', {
             failure: function ( result, request) {}
         });
 
-        var maplegendhtml = me.lookupReference('product-legend' + me.getView().id);
-        console.info(colorschemeHTML);
-        console.info(maplegendhtml);
-        maplegendhtml.setHtml(colorschemeHTML);
-
-        var maplegendpanel = me.lookupReference('product-legend_panel_' + me.getView().id);
-        maplegendpanel.show();
-        var maplegend_togglebtn = me.lookupReference('legendbtn'); //  + me.getView().id);
-        maplegend_togglebtn.show();
-        maplegend_togglebtn.toggle();
-
         //var mapviewtimeline = this.getView().getDockedItems('toolbar[dock="bottom"]')[0];
         //var searchtimeline = 'container[id="product-time-line_' + this.getView().id + '"]'
         //var mapviewtimeline = this.getView().down(searchtimeline);
@@ -111,16 +107,17 @@ Ext.define('esapp.view.analysis.mapViewController', {
         //mapviewtimeline.setHidden(false);
         //mapviewtimeline.expand();
 
-        me.getView().productlayer = new ol.layer.Image({
+        me.getView().productlayer = new ol.layer.Tile({       // Image
             title: esapp.Utils.getTranslation('productlayer'),  // 'Product layer',
             layer_id: 'productlayer',
             layerorderidx: 0,
+            layertype: 'raster',
             type: 'base',
             visible: true,
-            source: new ol.source.ImageWMS({
+            source: new ol.source.TileWMS({    // ImageWMS
                 url: 'analysis/getproductlayer',
                 type: 'base',
-                crossOrigin: 'anonymous',
+                crossOrigin: '', // 'anonymous',
                 attributions: [new ol.Attribution({
                     html: '&copy; <a href="https://ec.europa.eu/jrc/">'+esapp.Utils.getTranslation('estation2')+'</a>'
                 })],
@@ -143,31 +140,90 @@ Ext.define('esapp.view.analysis.mapViewController', {
         //me.getView().map.addLayer(me.getView().productlayer);
         me.getView().map.getLayers().insertAt(0, me.getView().productlayer);
 
+
         me.getView().getController().addLayerSwitcher(me.getView().map);
+
+        // Show legend panel with selected legend and show view legend toggle button.
+        var maplegendhtml = me.lookupReference('product-legend' + me.getView().id);
+        maplegendhtml.setHtml(legendHTML);
+
+        var maplegendpanel = me.lookupReference('product-legend_panel_' + me.getView().id);
+        maplegendpanel.show();
+
+        var maplegend_togglebtn = me.lookupReference('legendbtn_'+ me.getView().id.replace(/-/g,'_')); //  + me.getView().id);
+        maplegend_togglebtn.show();
+        maplegend_togglebtn.toggle();
+
+        var outmask_togglebtn = me.lookupReference('outmaskbtn_'+ me.getView().id.replace(/-/g,'_')); //  + me.getView().id);
+        if (me.getView().getController().outmaskingPossible(me.getView().map)){
+            outmask_togglebtn.show();
+        }
+        else outmask_togglebtn.hide();
     }
 
-    ,updateProductLayer: function(productcode, productversion, mapsetcode, subproductcode, legendid, clickeddate) {
-        this.getView().productlayer = new ol.layer.Image({
+    //,updateProductLayer: function(productcode, productversion, mapsetcode, subproductcode, legendid, clickeddate) {
+    ,updateProductLayer: function() {
+        var params = {};
+        var outmask = this.lookupReference('outmaskbtn_'+ this.getView().id.replace(/-/g,'_')).pressed;
+        //console.info(this.lookupReference('outmaskbtn_'+ this.getView().id.replace(/-/g,'_')));
+        //console.info(outmask);
+        //console.info(this.getView().selectedfeature);
+
+        // Does not work passing the WKT. Gives error: 414 Request-URI Too Long
+        // The requested URL's length exceeds the capacity limit for this server.
+        //if (outmask && this.getView().selectedfeature){
+        //    var wkt = new ol.format.WKT();
+        //    var wktstr = wkt.writeFeature(this.getView().selectedfeature);
+        //    wktstr = wktstr.replace(/,/g, ', ');  // not a good idea in general
+        //    params = {
+        //        productcode: this.getView().productcode,
+        //        productversion: this.getView().productversion,
+        //        subproductcode: this.getView().subproductcode,
+        //        mapsetcode: this.getView().mapsetcode,
+        //        legendid: this.getView().legendid,
+        //        date: this.getView().productdate,
+        //        outmask:true,
+        //        selectedfeature: wktstr,
+        //        'FORMAT': 'image/png'
+        //    };
+        //}
+        //else {
+            params = {
+                productcode: this.getView().productcode,
+                productversion: this.getView().productversion,
+                subproductcode: this.getView().subproductcode,
+                mapsetcode: this.getView().mapsetcode,
+                legendid: this.getView().legendid,
+                date: this.getView().productdate,
+                'FORMAT': 'image/png'
+            };
+        //}
+        //console.info(params);
+
+        this.getView().productlayer = new ol.layer.Tile({
             title: esapp.Utils.getTranslation('productlayer'),  // 'Product layer',
             layer_id: 'productlayer',
             layerorderidx: 0,
+            layertype: 'raster',
             type: 'base',
             visible: true,
-            source: new ol.source.ImageWMS({
+            source: new ol.source.TileWMS({
                 url: 'analysis/getproductlayer',
-                crossOrigin: 'anonymous',
+                crossOrigin: '',  // 'anonymous',
                 attributions: [new ol.Attribution({
                     html: '&copy; <a href="https://ec.europa.eu/jrc/">'+esapp.Utils.getTranslation('estation2')+'</a>'
                 })],
-                params: {
-                    productcode:productcode,
-                    productversion:productversion,
-                    subproductcode:subproductcode,
-                    mapsetcode:mapsetcode,
-                    legendid:legendid,
-                    date:clickeddate,
-                    'FORMAT': 'image/png'
-                },
+                params: params,
+
+                //params: {
+                //    productcode:productcode,
+                //    productversion:productversion,
+                //    subproductcode:subproductcode,
+                //    mapsetcode:mapsetcode,
+                //    legendid:legendid,
+                //    date:clickeddate,
+                //    'FORMAT': 'image/png'
+                //},
                 serverType: 'mapserver' /** @type {ol.source.wms.ServerType}  ('mapserver') */
             })
         });
@@ -179,20 +235,20 @@ Ext.define('esapp.view.analysis.mapViewController', {
         this.getView().map.getLayers().insertAt(0, this.getView().productlayer);
 
         var versiontitle = '';
-        if (productversion !== 'undefined'){
-            versiontitle = ' <b class="smalltext">' + productversion + '</b>';
+        if (this.getView().productversion !== 'undefined'){
+            versiontitle = ' <b class="smalltext">' + this.getView().productversion + '</b>';
         }
 
         var mapsetcodeHTML = ' - <b class="smalltext">' + this.getView().mapsetcode + '</b>';
 
         var pattern = /(\d{4})(\d{2})(\d{2})/;
-        this.getView().productdate = clickeddate.replace(pattern,'$3-$2-$1');
-        var productdateHTML = ' - <b class="smalltext">' + this.getView().productdate + '</b>';
+        //this.getView().productdate = clickeddate.replace(pattern,'$3-$2-$1');
+        var productdateHTML = ' - <b class="smalltext">' + this.getView().productdate.replace(pattern,'$3-$2-$1') + '</b>';
 
-        //var mapwvieTitle = this.getView().productname + versiontitle + ' - <b class="smalltext">' + this.getView().productdate + '</b>';
-        var mapwvieTitle = this.getView().productname + versiontitle + mapsetcodeHTML + productdateHTML;
+        //var mapviewTitle = this.getView().productname + versiontitle + ' - <b class="smalltext">' + this.getView().productdate + '</b>';
+        var mapviewTitle = this.getView().productname + versiontitle + mapsetcodeHTML + productdateHTML;
 
-        this.getView().setTitle(mapwvieTitle);
+        this.getView().setTitle(mapviewTitle);
 
     }
 
@@ -213,7 +269,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
         var mapviewwin = btn.up().up();
         var mapimage_url = '';
 
-        if (filename == '')
+        if (filename == null || filename.trim() == '')
             filename = 'estation2map.png'
         else
             filename = filename.replace(/<\/?[^>]+(>|$)/g, "");
@@ -266,6 +322,20 @@ Ext.define('esapp.view.analysis.mapViewController', {
         }
     }
 
+    ,toggleOutmask: function(btn, event) {
+        var mapviewwin = btn.up().up();
+
+        if (btn.pressed) {
+            //console.info(mapviewwin.selectedfeature);
+            if (Ext.isDefined(mapviewwin.selectedfeature)){
+                mapviewwin.getController().outmaskFeature();
+            }
+        }
+        else {
+            mapviewwin.getController().updateProductLayer();
+        }
+    }
+
     ,openProductNavigator: function(btn, event) {
         var productNavigatorWin = Ext.getCmp(btn.up().up().getId()+'-productnavigator');
         //var productNavigatorWin = btn.up().up().up('window[id='+btn.up().up().getId()+'-productnavigator]');
@@ -291,6 +361,143 @@ Ext.define('esapp.view.analysis.mapViewController', {
         return layer_idx;
     }
 
+    ,outmaskingPossible: function (map){
+        var possible = false,
+            productlayerexists = false,
+            vectorlayerexists = false;
+
+        map.getLayers().getArray().forEach(function (layer,idx){
+            var layer_type = layer.get("layertype")
+            if(layer_type == 'raster'){
+              productlayerexists = true;
+            }
+            else if(layer_type == 'vector'){
+              vectorlayerexists = true;
+            }
+        });
+        if (productlayerexists && vectorlayerexists)
+            possible = true;
+
+        return possible;
+    }
+
+    ,outmaskFeature: function(){
+        var me = this;
+
+        function isFunction(possibleFunction) {
+          return typeof(possibleFunction) === typeof(Function);
+        }
+
+        if (me.getView().selectedfeature != null && isFunction(me.getView().selectedfeature.getGeometry) && isFunction(me.getView().selectedfeature.getGeometry().getPolygons))
+            console.info(me.getView().selectedfeature.getGeometry().getPolygons());
+        else {
+            console.info(me.getView().selectedfeature.getGeometry());
+        }
+
+        //// get the pixel position with every move
+        //var mousePosition = null;
+        //var mapcontainer = me.getView().map;
+        //mapcontainer.on('pointermove', function(evt) {
+        //  mousePosition = me.getView().map.getEventPixel(evt.originalEvent);
+        //  me.getView().map.render();
+        //});
+        //mapcontainer.on('mouseout', function() {
+        //  mousePosition = null;
+        //  me.getView().map.render();
+        //});
+        //
+        //// before rendering the layer, do the clipping of a circle around the mouspointer
+        //me.getView().productlayer.on('precompose', function(event) {
+        //  var ctx = event.context;
+        //  var radius = 75;
+        //  var pixelRatio = event.frameState.pixelRatio;
+        //  ctx.save();
+        //  ctx.beginPath();
+        //  if (mousePosition) {
+        //    // only show a circle around the mouse
+        //    ctx.arc(mousePosition[0] * pixelRatio, mousePosition[1] * pixelRatio,
+        //        radius * pixelRatio, 0, 2 * Math.PI);
+        //    ctx.lineWidth = 5 * pixelRatio;
+        //    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+        //    ctx.stroke();
+        //  }
+        //  ctx.clip();
+        //});
+        //
+        //// after rendering the layer, restore the canvas context
+        //me.getView().productlayer.on('postcompose', function(event) {
+        //  var ctx = event.context;
+        //  ctx.restore();
+        //});
+        //console.info(me.getView().selectedfeature);
+        if ( Ext.isDefined(me.getView().selectedfeature) && me.getView().selectedfeature !== null){
+            // A style for the geometry.
+            var fillStyle = new ol.style.Fill({color: [0, 0, 0, 0]});
+
+            // before rendering the layer, do the feature clipping  ( http://bl.ocks.org/elemoine/b95420de2db3707f2e89 )
+            me.getView().productlayer.on('precompose', function(event) {
+                var ctx = event.context;
+                var vecCtx = event.vectorContext;
+
+                ctx.save();
+                //ctx.beginPath();
+                if (isFunction(me.getView().selectedfeature.getGeometry) && isFunction(me.getView().selectedfeature.getGeometry().getPolygons)) {
+                    // Using a style is a hack to workaround a limitation in
+                    // OpenLayers 3, where a geometry will not be draw if no
+                    // style has been provided.
+                    vecCtx.setFillStrokeStyle(fillStyle, null);
+                    //var multipoligon = new ol.geom.MultiPolygon(me.getView().selectedfeature.getGeometry().getPolygons(), 'XY');
+                    //console.info(multipoligon);
+                    //vecCtx.drawMultiPolygonGeometry(me.getView().selectedfeature.getGeometry());  // , me.getView().selectedfeature
+
+                    me.getView().selectedfeature.getGeometry().getPolygons().forEach(function (polygon, idx) {
+                        //console.info(polygon);
+                        vecCtx.drawPolygonGeometry(polygon);
+                        ctx.clip();
+                    });
+                }
+                else if (isFunction(me.getView().selectedfeature.getGeometry)){
+                    vecCtx.drawPolygonGeometry(me.getView().selectedfeature.getGeometry());
+                    ctx.clip();
+                }
+                else {
+                    vecCtx.drawFeature(me.getView().selectedfeature, fillStyle);
+                    ctx.clip();
+                }
+
+            });
+
+            // after rendering the layer, restore the canvas context
+            me.getView().productlayer.on('postcompose', function(event) {
+              var ctx = event.context;
+              ctx.restore();
+            });
+
+            me.getView().map.render();
+        }
+        //console.info(me.getView().productlayer.getExtent());
+        //var extent = [-43.576171875,-22.978515625,52.576171875,62.978515625];
+        //var projection = new ol.proj.Projection({
+        //  code: 'xkcd-image',
+        //  units: 'pixels',
+        //  extent: extent
+        //});
+        //var blanklayer = new ol.layer.Image({
+        //    title: 'blanklayer',
+        //    layer_id: 'blanklayer',
+        //    layerorderidx: 1,
+        //    layertype: 'raster',
+        //    visible: true,
+        //    source: new ol.source.ImageStatic({
+        //        url: 'resources/img/Africa_icon.png',
+        //        projection: projection,
+        //        imageExtent: extent
+        //    })
+        //});   // {isBaseLayer: false, displayInLayerSwitcher: true}
+        //
+        //me.getView().map.getLayers().insertAt(1, blanklayer);
+    }
+
     ,addLayerSwitcher: function (map){
         var layerswitcherexists = false;
         var mControls = map.getControls().a;
@@ -312,10 +519,10 @@ Ext.define('esapp.view.analysis.mapViewController', {
         // ToDo: Open a new window from which the user can select an in the eStation2 existing or upload a vector layer.
         // ToDo: Have the user set vector layer setting before adding the layer to the map.
         // For now a predefined GeoJSON layer with fixed settings is added.
-        //console.info(Ext.ComponentQuery.query('button[name=vbtn-'+this.getView().id+']'));
-        //Ext.ComponentQuery.query('button[name=vbtn-'+this.getView().id+']').collapse();
 
-        //this.getView().lookupReference('vbtn-'+this.getView().id).collapse();
+        //console.info(Ext.ComponentQuery.query('button[name=vbtn-'+this.getView().id+']')[0]);
+        Ext.ComponentQuery.query('button[name=vbtn-'+this.getView().id+']')[0].hideMenu();
+        //this.getView().lookupReference('vbtn-'+this.getView().id).hideMenu();
 
         var me = this.getView();
         var geojsonfile = menuitem.geojsonfile,
@@ -324,6 +531,8 @@ Ext.define('esapp.view.analysis.mapViewController', {
             vectorlayer_idx = -1,
             layertitle = menuitem.boxLabel,
             linecolor = menuitem.linecolor;
+
+        var outmask_togglebtn = me.lookupReference('outmaskbtn_'+ me.id.replace(/-/g,'_')); //  + me.getView().id);
 
         if (menuitem.name == 'admin0'){
             namefield = 'ADM0_NAME';
@@ -345,11 +554,13 @@ Ext.define('esapp.view.analysis.mapViewController', {
             myLoadMask.show();
 
 
-            var vectorSource = new ol.source.GeoJSON({
-                projection: 'EPSG:4326', // 'EPSG:3857',  //
+            var vectorSource = new ol.source.Vector({      // ol.source.GeoJSON({
+                //projection: 'EPSG:4326', // 'EPSG:3857',  //
                 //url: 'resources/geojson/countries.geojson'
                 //url: 'resources/geojson/' + geojsonfile,
                 url: 'analysis/getvectorlayer?file=' + geojsonfile
+                ,format: new ol.format.GeoJSON()
+                //,wrapX: false
             });
 
             var listenerKey = vectorSource.on('change', function(e) {
@@ -372,6 +583,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 title: layertitle,
                 layer_id: menuitem.name,
                 layerorderidx: menuitem.layerorderidx,
+                layertype: 'vector',
                 visible: true,
                 source: vectorSource,
                 style: function (feature, resolution) {
@@ -422,9 +634,23 @@ Ext.define('esapp.view.analysis.mapViewController', {
             me.getController().addLayerSwitcher(me.map);
 
 
-            var highlightStyleCache = {};
+            if (me.getController().outmaskingPossible(me.map)){
+                outmask_togglebtn.show();
+            }
+            else outmask_togglebtn.hide();
 
-            var featureOverlay = new ol.FeatureOverlay({
+
+
+            var highlightStyleCache = {};
+            var collectionFO = new ol.Collection();
+            var featureOverlay = new ol.layer.Vector({      //new ol.FeatureOverlay({
+              source: new ol.source.Vector({
+                  features: collectionFO,
+                  useSpatialIndex: false // optional, might improve performance
+              }),
+              updateWhileAnimating: true, // optional, for instant visual feedback
+              updateWhileInteracting: true, // optional, for instant visual feedback
+
               map: me.map,
               style: function(feature, resolution) {
                 var text = resolution < 5000 ? feature.get(namefield) : '';
@@ -482,17 +708,30 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
                 if (feature) {
                     //regionname.setHtml(feature.get(namefield));
-                    if (adminlevel == 'admin0') {
-                        regionname.setHtml(feature.get('ADM0_NAME'));
-                    }
-                    else if (adminlevel == 'admin1') {
-                        regionname.setHtml(feature.get('ADM0_NAME') + ' - ' + feature.get('ADM1_NAME'));
-                    }
-                    else if (adminlevel == 'admin2') {
+
+                    //var region = '';
+                    if (Ext.isDefined(feature.get('ADM2_NAME'))){
                         regionname.setHtml(feature.get('ADM0_NAME') + ' - ' +
                                            feature.get('ADM1_NAME') + ' - ' +
                                            feature.get('ADM2_NAME'));
                     }
+                    else if (Ext.isDefined(feature.get('ADM1_NAME'))){
+                        regionname.setHtml(feature.get('ADM0_NAME') + ' - ' + feature.get('ADM1_NAME'));
+                    }
+                    else if (Ext.isDefined(feature.get('ADM0_NAME'))){
+                        regionname.setHtml(feature.get('ADM0_NAME'));
+                    }
+                    //if (adminlevel == 'admin0') {
+                    //    regionname.setHtml(feature.get('ADM0_NAME'));
+                    //}
+                    //else if (adminlevel == 'admin1') {
+                    //    regionname.setHtml(feature.get('ADM0_NAME') + ' - ' + feature.get('ADM1_NAME'));
+                    //}
+                    //else if (adminlevel == 'admin2') {
+                    //    regionname.setHtml(feature.get('ADM0_NAME') + ' - ' +
+                    //                       feature.get('ADM1_NAME') + ' - ' +
+                    //                       feature.get('ADM2_NAME'));
+                    //}
                     //featureTooltip.html = feature.getId() + ': ' + feature.get(namefield);
                 } else {
                     regionname.setHtml('&nbsp;');
@@ -501,17 +740,25 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
                 if (feature !== highlight) {
                     if (highlight) {
-                        featureOverlay.removeFeature(highlight);
+                        featureOverlay.getSource().removeFeature(highlight);
                     }
                     if (feature) {
-                        featureOverlay.addFeature(feature);
+                        featureOverlay.getSource().addFeature(feature);
                     }
                     highlight = feature;
                 }
             };
 
             selectStyleCache = {};
-            var selectedFeatureOverlay = new ol.FeatureOverlay({
+            var collectionSFO = new ol.Collection();
+            var selectedFeatureOverlay =new ol.layer.Vector({      //new ol.FeatureOverlay({
+              source: new ol.source.Vector({
+                  features: collectionSFO,
+                  useSpatialIndex: false // optional, might improve performance
+              }),
+              updateWhileAnimating: true, // optional, for instant visual feedback
+              updateWhileInteracting: true, // optional, for instant visual feedback
+
               map: me.map,
               style: function(feature, resolution) {
                 var text = resolution < 5000 ? feature.get(namefield) : '';
@@ -522,7 +769,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                       width: 2
                     })
                     ,fill: new ol.style.Fill({
-                      color: 'Transparent' // 'rgba(255,0,0,0.1)'
+                      color:  'Transparent' // 'rgba(255,0,0,0.1)'
                     })
                   })];
                 }
@@ -545,26 +792,46 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
                 var wkt_polygon = Ext.getCmp('wkt_polygon');
 
-                if (feature) {
+                if (Ext.isDefined(feature)) {
                     regionname.setValue(feature.get(namefield));
-                    if (adminlevel == 'admin0') {
-                        admin0name.setValue(feature.get('ADM0_NAME'));
-                        admin1name.setValue('&nbsp;');
-                        admin2name.setValue('&nbsp;');
-                        selectedregion.setValue(feature.get('ADM0_NAME'));
-                    }
-                    else if (adminlevel == 'admin1') {
-                        admin0name.setValue(feature.get('ADM0_NAME'));
-                        admin1name.setValue(feature.get('ADM1_NAME'));
-                        admin2name.setValue('&nbsp;');
-                        selectedregion.setValue(feature.get('ADM0_NAME') + ' - ' + feature.get('ADM1_NAME'));
-                    }
-                    else if (adminlevel == 'admin2') {
+
+                    if (Ext.isDefined(feature.get('ADM2_NAME'))){
                         admin0name.setValue(feature.get('ADM0_NAME'));
                         admin1name.setValue(feature.get('ADM1_NAME'));
                         admin2name.setValue(feature.get('ADM2_NAME'));
                         selectedregion.setValue(feature.get('ADM0_NAME') + ' - ' + feature.get('ADM1_NAME') + ' - ' + feature.get('ADM2_NAME'));
                     }
+                    else if (Ext.isDefined(feature.get('ADM1_NAME'))){
+                        admin0name.setValue(feature.get('ADM0_NAME'));
+                        admin1name.setValue(feature.get('ADM1_NAME'));
+                        admin2name.setValue('&nbsp;');
+                        selectedregion.setValue(feature.get('ADM0_NAME') + ' - ' + feature.get('ADM1_NAME'));
+                    }
+                    else if (Ext.isDefined(feature.get('ADM0_NAME'))){
+                        admin0name.setValue(feature.get('ADM0_NAME'));
+                        admin1name.setValue('&nbsp;');
+                        admin2name.setValue('&nbsp;');
+                        selectedregion.setValue(feature.get('ADM0_NAME'));
+                    }
+
+                    //if (adminlevel == 'admin0') {
+                    //    admin0name.setValue(feature.get('ADM0_NAME'));
+                    //    admin1name.setValue('&nbsp;');
+                    //    admin2name.setValue('&nbsp;');
+                    //    selectedregion.setValue(feature.get('ADM0_NAME'));
+                    //}
+                    //else if (adminlevel == 'admin1') {
+                    //    admin0name.setValue(feature.get('ADM0_NAME'));
+                    //    admin1name.setValue(feature.get('ADM1_NAME'));
+                    //    admin2name.setValue('&nbsp;');
+                    //    selectedregion.setValue(feature.get('ADM0_NAME') + ' - ' + feature.get('ADM1_NAME'));
+                    //}
+                    //else if (adminlevel == 'admin2') {
+                    //    admin0name.setValue(feature.get('ADM0_NAME'));
+                    //    admin1name.setValue(feature.get('ADM1_NAME'));
+                    //    admin2name.setValue(feature.get('ADM2_NAME'));
+                    //    selectedregion.setValue(feature.get('ADM0_NAME') + ' - ' + feature.get('ADM1_NAME') + ' - ' + feature.get('ADM2_NAME'));
+                    //}
 
                     if (displaywkt) {
                         var wkt = new ol.format.WKT();
@@ -587,11 +854,11 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 }
 
                 if (feature !== selectfeature) {
-                    if (selectfeature) {
-                        selectedFeatureOverlay.removeFeature(selectfeature);
+                    if (Ext.isDefined(selectfeature)) {
+                        selectedFeatureOverlay.getSource().removeFeature(selectfeature);
                     }
-                    if (feature) {
-                        selectedFeatureOverlay.addFeature(feature);
+                    if (Ext.isDefined(feature)) {
+                        selectedFeatureOverlay.getSource().addFeature(feature);
                     }
                     selectfeature = feature;
                 }
@@ -612,19 +879,28 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 //}
                 //vectorLayer.setStyle(styleCache[text]);
 
-                if (feature) {
-                    // Zoom to and center the selected feature
-                    var polygon = /** @type {ol.geom.SimpleGeometry} */ (feature.getGeometry());
-                    var size = /** @type {ol.Size} */ (me.map.getSize());
-                    me.map.getView().fitGeometry(
-                        polygon,
-                        size,
-                        {
-                            padding: [50, 50, 50, 50],
-                            //padding: [170, 50, 30, 150],
-                            constrainResolution: false
-                        }
-                    );
+                if (Ext.isDefined(feature)) {
+                    me.selectedfeature = feature;
+                    //// Zoom to and center the selected feature
+                    //var polygon = /** @type {ol.geom.SimpleGeometry} */ (feature.getGeometry());
+                    //var size = /** @type {ol.Size} */ (me.map.getSize());
+                    //me.map.getView().fitGeometry(
+                    //    polygon,
+                    //    size,
+                    //    {
+                    //        padding: [50, 50, 50, 50],
+                    //        //padding: [170, 50, 30, 150],
+                    //        constrainResolution: false
+                    //    }
+                    //);
+
+                    var outmask = me.lookupReference('outmaskbtn_'+ me.id.replace(/-/g,'_')).pressed;
+                    if (outmask){
+                        me.getController().outmaskFeature();
+                    }
+                }
+                else {
+                    me.selectedfeature = null;
                 }
             };
 
@@ -647,6 +923,11 @@ Ext.define('esapp.view.analysis.mapViewController', {
             vectorlayer_idx = me.getController().findlayer(me.map, menuitem.name);
             if (vectorlayer_idx != -1)
                 me.map.getLayers().removeAt(vectorlayer_idx);
+
+            if (me.getController().outmaskingPossible(me.map)){
+                outmask_togglebtn.show();
+            }
+            else outmask_togglebtn.hide();
         }
 
 

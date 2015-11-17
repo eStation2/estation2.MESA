@@ -23,6 +23,30 @@ logger = log.my_logger(__name__)
 db = connectdb.ConnectDB().db
 dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
 
+
+def get_legend_totals(legendid, echo=False):
+    global db
+    try:
+
+        query = " SELECT ts.TotSteps, tsl.TotColorLabels, tgl.TotGroupLabels " + \
+                " FROM ( SELECT count(*) as TotSteps FROM analysis.legend_step ls1 WHERE ls1.legend_id = " + str(legendid) + " ) ts, " + \
+                "      ( SELECT count(color_label) as TotColorLabels FROM analysis.legend_step ls2 WHERE ls2.legend_id = " + str(legendid) + " AND trim(color_label) != '') tsl, " + \
+                "      ( SELECT count(group_label) as TotGroupLabels FROM analysis.legend_step ls3 WHERE ls3.legend_id = " + str(legendid) + " AND trim(group_label) != '') tgl "
+        legendtotals = db.execute(query)
+        legendtotals = legendtotals.fetchall()
+
+        return legendtotals
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_legend_totals: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
 def get_spirits(echo=False):
     global db
     try:
@@ -135,6 +159,32 @@ def update_product_info(productinfo, echo=False):
             db.session.close()
         return status
 
+
+def get_mapsets_for_ingest(productcode, version, subproductcode, echo=False):
+    global db
+    try:
+        query = "SELECT * FROM products.mapset " \
+                "WHERE mapsetcode not in (SELECT mapsetcode FROM products.ingestion " \
+                "                         WHERE productcode = '" + productcode + "'" + \
+                "                           AND version = '" + version + "'" + \
+                "                           AND subproductcode = '" + subproductcode + "'" + \
+                "                           AND enabled " + \
+                "                         ) " \
+                "ORDER BY descriptive_name"
+
+        mapsets = db.execute(query)
+        mapsets = mapsets.fetchall()
+
+        return mapsets
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_mapsets_for_ingest: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
 
 
 def get_categories(echo=False):
@@ -405,7 +455,8 @@ def get_timeseries_yaxes(products, echo=False):
                                                   ts_drawprobs.unit,
                                                   ts_drawprobs.min,
                                                   ts_drawprobs.max,
-                                                  ts_drawprobs.oposite)
+                                                  ts_drawprobs.oposite,
+                                                  ts_drawprobs.title_color)
 
         whereall = ''
         count = 0
@@ -832,6 +883,7 @@ def get_ingestions(echo=False):
                     p.c.frequency_id,
                     i.c.defined_by,
                     i.c.activated,
+                    i.c.enabled,
                     m.c.descriptive_name.label('mapsetname')]).\
             select_from(i.outerjoin(m, i.c.mapsetcode == m.c.mapsetcode).outerjoin(p, and_(i.c.productcode == p.c.productcode,
                                             i.c.subproductcode == p.c.subproductcode,
@@ -840,7 +892,8 @@ def get_ingestions(echo=False):
         s = s.alias('ingest')
         i = db.map(s, primary_key=[s.c.productid, i.c.subproductcode, i.c.mapsetcode])
 
-        where = and_(i.c.defined_by != 'Test_JRC')
+        # where = and_(i.c.defined_by != 'Test_JRC')
+        where = and_(i.c.enabled)
         ingestions = i.filter(where).order_by(desc(i.productcode)).all()
         #ingestions = i.order_by(desc(i.productcode)).all()
 

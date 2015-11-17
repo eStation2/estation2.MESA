@@ -30,7 +30,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
     collapsible: true,
     resizable: true,
 
-    width:850,
+    width:1200,
     height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-80 : 800,  // 600,
     minWidth:400,
     minHeight:350,
@@ -118,7 +118,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
 
 	                //var title = Ext.String.htmlDecode(json.countryName) + ' - ' + Ext.String.htmlDecode(json.areaName);
                     var title = Ext.getCmp('selectedregionname').getValue();
-	                var subtitle = ' ';
+	                var subtitle = '';
                     var plotBackgroundImage = '';
                     var categories = [];
                     //var categories = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -135,13 +135,18 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                         plotBackgroundImage = 'resources/img/no_data.gif';
                     }
 
+                    var xaxis_labelstyle = {
+                            color: '#000',
+                            font: 'bold 24px Arial, Verdana, Helvetica, sans-serif',
+                            margin: '0 0 0 0'
+                        }
                     var xAxisLabels = {};
-                    if (json.showYearInTicks){
+                    if (json.showYearInTicks){      //  === 'true'
                         xAxisLabels = {
                             enabled: 1,
-                            rotation: 270,
+                            rotation: 0,
                             y:28,
-                            //style: xaxis_labelstyle,
+                            style: xaxis_labelstyle,
                             formatter: function() {
                                 return Highcharts.dateFormat('%b', this.value)+'<br/>'+Highcharts.dateFormat('\'%y', this.value);
                             }
@@ -149,9 +154,10 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                     } else {
                         xAxisLabels = {
                             enabled: 1,
-                            rotation: 270,
+                            //rotation: 0,
                             y:28,
-                            //style: xaxis_labelstyle,
+                            //step: 3,
+                            style: xaxis_labelstyle,
                             formatter: function() {
                                 return Highcharts.dateFormat('%b', this.value);
                             }
@@ -194,27 +200,46 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                     var Yaxes = [];
                     for (var yaxescount = 0; yaxescount < json.yaxes.length; yaxescount++) {
                         var opposite = false;
-                        if (json.yaxes[yaxescount].opposite == 'true')
+                        if (json.yaxes[yaxescount].opposite === 'true')
                             opposite = true;
+
                         var unit = json.yaxes[yaxescount].unit;
-                        if (json.yaxes[yaxescount].unit == null)
+                        if (unit == null)
                             unit = ''
+                        else unit = ' ('+unit+')'
+
+                        var titlecolor = json.yaxes[yaxescount].title_color
+                        if(titlecolor.charAt(0)!="#"){ // convert RBG to HEX if RGB value is given. Highcharts excepts only HEX.
+                            var rgb_arr = [];
+                            if (is_array(titlecolor)){
+                                rgb_arr = titlecolor;
+                            }
+                            else {
+                                rgb_arr = titlecolor.split(" "); // toString().replace(/,/g,' ');
+                            }
+                            var R = rgb_arr[0];
+                            var G = rgb_arr[1];
+                            var B = rgb_arr[2];
+                            titlecolor = RGBtoHex(R,G,B);
+                            json.yaxes[yaxescount].title_color = titlecolor;
+                        }
+
                         var yaxe = {
                             id: json.yaxes[yaxescount].id,
                             tickAmount: 8,
                             gridLineWidth: 1,
                             labels: {
-                                format: '{value} '+unit,
+                                format: '{value} ',
                                 style: {
-                                    color: Highcharts.getOptions().colors[yaxescount],
-                                    font: 'bold 16px Arial, Verdana, Helvetica, sans-serif'
+                                    color: titlecolor,  // Highcharts.getOptions().colors[yaxescount],
+                                    font: 'bold 30px Arial, Verdana, Helvetica, sans-serif'
                                 }
                             },
                             title: {
-                                text: json.yaxes[yaxescount].title,
+                                text: json.yaxes[yaxescount].title+unit,
                                 style: {
-                                    color: Highcharts.getOptions().colors[yaxescount],
-                                    font: 'bold 20px Arial, Verdana, Helvetica, sans-serif'
+                                    color: titlecolor,  // Highcharts.getOptions().colors[yaxescount],
+                                    font: 'bold 30px Arial, Verdana, Helvetica, sans-serif'
                                 }
                             },
                             opposite: opposite,
@@ -348,20 +373,44 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                             }
                         },
                         title: {
-                            text: title
+                            text: title,
+                            align: 'center',
+                            //y: 50,
+                            style:{
+                                 color: '#000',
+                                 font: 'bold 34px Arial, Verdana, Helvetica, sans-serif'
+                            }
                         },
                         subtitle: {
-                            text: subtitle
+                            text: subtitle,
+                            align: 'center',
+                            //y: 65,
+                            style:{
+                                 color: '#666666',
+                                 font: 'bold 30px Arial, Verdana, Helvetica, sans-serif'
+                            }
                         },
                         xAxis: [{
-                            type: 'datetime'
+                            type: 'datetime',
+                            tickmarkPlacement: 'on', // on between
+                            startOnTick: false,
+                            labels: xAxisLabels,
+                            tickInterval: 30 * 24 * 3600 * 1000
+
+                            //labels: {
+                            //    enabled: 1,
+                            //    y:28,
+                            //    //step: 1,
+                            //    style: xaxis_labelstyle,
+                            //    formatter: function() {
+                            //        return Highcharts.dateFormat('%b', this.value);
+                            //    }
+                            //}
+                           //,minorTickInterval: 3
                             //dateTimeLabelFormats: {
                             //    day: '%e %b'
                             //},
-                            //categories: categories,
-                            //crosshair: true,
-                            //labels: xAxisLabels,
-                           //,tickInterval: 3 // json.xaxis.ticks
+                            //categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                         }],
                         yAxis: Yaxes,
                         tooltip: {
@@ -386,12 +435,12 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                             backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF',
                             //borderColor: Highcharts.theme.legendBackgroundColor || '#FFFFFF',
                             symbolPadding: 3,
-                            symbolWidth: 15,
-                            symbolHeight: 15,
+                            symbolWidth: 35,
+                            symbolHeight: 25,
                             borderRadius: 3,
                             borderWidth: 0,
                             itemStyle: {
-                                 font: '12pt Arial, Verdana, Helvetica, sans-serif',
+                                 font: 'bold 28px Arial, Verdana, Helvetica, sans-serif',
                                  color: 'black'
                             }
 
@@ -443,12 +492,14 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
             border: false,
             shadow: false,
             padding:0,
-            items: [{
-                text: esapp.Utils.getTranslation('chartproperties'),    // 'Chart properties',
-                iconCls: 'chart-curve_edit',
-                scale: 'medium'
-                //,handler: 'openChartProperties'
-            },'->',{
+            items: [
+                //{
+                //text: esapp.Utils.getTranslation('chartproperties'),    // 'Chart properties',
+                //iconCls: 'chart-curve_edit',
+                //scale: 'medium'
+                ////,handler: 'openChartProperties'
+            //},
+            '->',{
                 text: esapp.Utils.getTranslation('downloadtimeseries'),    // 'Download timeseries',
                 iconCls: 'fa fa-download fa-2x',
                 scale: 'medium'

@@ -221,6 +221,30 @@ def getSystemSettings():
     return systemsettings
 
 
+def getUserSettings():
+    import ConfigParser
+
+    thisfiledir = os.path.dirname(os.path.abspath(__file__))
+
+    if es_constants.es2globals['settings_dir'] != '':
+        usersettingsfile = es_constants.es2globals['settings_dir']+'/user_settings.ini'
+    else:
+        usersettingsfile = '/eStation2/settings/user_settings.ini'
+
+    if not os.path.isfile(usersettingsfile):
+        usersettingsfile = os.path.join(thisfiledir, 'config/install/', 'user_settings.ini')
+
+    config_usersettings = ConfigParser.ConfigParser()
+    config_usersettings.read([usersettingsfile])
+
+    usersettings = config_usersettings.items('USER_SETTINGS')  # returns a list of tuples
+    # for setting, value in usersettings:
+    #      print setting + ': ' + value
+    usersettings = dict(usersettings)   # convert list of tuples to dict
+    # print usersettings
+    return usersettings
+
+
 def checkIP():
     import socket
 
@@ -1231,11 +1255,11 @@ def restore_obj_from_pickle(obj, filename):
             logger.debug("Dump file info loaded from %s.", filename)
             obj = tmp_object
         except:
-            logger.warning("Dump file %s can't be loaded, the file will be removed.", filename)
+            logger.debug("Dump file %s can't be loaded, the file will be removed.", filename)
             os.remove(filename)
-    else:
+    # else:
         # Create an empty file in the tmp dir
-        logger.debug("Dump file %s does not exist", filename)
+        # logger.debug("Dump file %s does not exist", filename)
         #open(filename, 'a').close()
 
     return obj
@@ -1254,10 +1278,10 @@ def load_obj_from_pickle(filename):
             dump_file_info = open(filename, 'r')
             obj = pickle.load(dump_file_info)
         except:
-            logger.warning("Dump file %s can't be loaded, the file will be removed.", filename)
-    else:
+            logger.debug("Dump file %s can't be loaded, the file will be removed.", filename)
+    # else:
         # Raise warning
-        logger.warning("Dump file %s does not exist.", filename)
+        # logger.debug("Dump file %s does not exist.", filename)
 
     return obj
 

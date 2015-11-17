@@ -50,16 +50,38 @@ Ext.define('esapp.view.analysis.analysisMainController', {
     TimeseriesProductsGridRowClick: function(gridview, record){
         var selectedTimeSeriesProducts = gridview.getSelectionModel().selected.items;
         var timeseriesmapsetdatasets = [];
+        var yearsData = [];
+
+        function union_arrays (x, y) {
+          var obj = {};
+          for (var i = x.length-1; i >= 0; -- i)
+             obj[x[i]] = x[i];
+          for (var i = y.length-1; i >= 0; -- i)
+             obj[y[i]] = y[i];
+          var res = []
+          for (var k in obj) {
+            if (obj.hasOwnProperty(k))  // <-- optional
+              res.push(obj[k]);
+          }
+          return res;
+        }
+
         selectedTimeSeriesProducts.forEach(function(product) {
             // ToDO: First loop the mapsets to get the by the user selected mapset if the product has > 1 mapsets.
             var datasets = product.get('productmapsets')[0].timeseriesmapsetdatasets;
             datasets.forEach(function(datasetObj) {
+                //yearsData = Ext.Object.merge(yearsData, datasetObj.years);
+                yearsData = union_arrays(yearsData, datasetObj.years);
                 timeseriesmapsetdatasets.push(datasetObj);
             });
             //console.info(product.get('productmapsets')[0].timeseriesmapsetdatasets);
         });
+        var yearsDataDict = [];
+        yearsData.forEach(function(year) {
+            yearsDataDict.push({'year': year});
+        });
         //var productmapset = record.get('productmapsets')[0];
-
+        this.getStore('years').setData(yearsDataDict);
         this.getStore('timeseriesmapsetdatasets').setData(timeseriesmapsetdatasets);
 
         if (selectedTimeSeriesProducts.length == 0) {
@@ -112,7 +134,7 @@ Ext.define('esapp.view.analysis.analysisMainController', {
                 tsFromPeriod = '';
                 tsToPeriod = '';
             }
-            if (Ext.getCmp('radio-fromto').getValue()){
+            else if (Ext.getCmp('radio-fromto').getValue()){
                 if (Ext.getCmp("ts_from_period").getValue()== null || Ext.getCmp("ts_from_period").getValue() == '') {
                     Ext.getCmp("ts_from_period").validate();
                     Ext.Msg.show({
@@ -140,6 +162,17 @@ Ext.define('esapp.view.analysis.analysisMainController', {
                 tsFromPeriod = Ext.getCmp("ts_from_period").getValue();
                 tsToPeriod = Ext.getCmp("ts_to_period").getValue();
                 yearTS = '';
+            }
+            else {
+                Ext.Msg.show({
+                   title: esapp.Utils.getTranslation('mandatoryfield'),    // 'Mandatory field',
+                   msg: esapp.Utils.getTranslation('pleaseselectatimeframe'),    // 'Please select a "From date"!',
+                   width: 300,
+                   buttons: Ext.Msg.OK,
+                   animEl: '',
+                   icon: Ext.Msg.WARNING
+                });
+                return;
             }
 
             var timeseriesselected = [];

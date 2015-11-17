@@ -47,7 +47,7 @@ Ext.define('esapp.view.acquisition.product.EumetcastSourceAdminController', {
                     title: record ? esapp.Utils.getTranslation('edit') + ': ' + record.get('collection_name') : esapp.Utils.getTranslation('addeumetcastsource')  // 'Add Eumetcast Source'
                 },
                 // If we are passed a record, a copy of it will be created in the newly spawned session.
-                // Otherwise, create a new phantom customer in the child.
+                // Otherwise, create a new phantom record in the child.
                 links: {
                     theEumetcastSource: record || {
                         //type: 'EumetcastSource',

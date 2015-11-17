@@ -342,6 +342,19 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
+    def Test_get_legend_totals(self):
+
+        legend_info = querydb.get_legend_totals(legendid=6)
+        logger.info("Legend info: %s", legend_info)
+        if legend_info.__len__() > 0:
+            for row in legend_info:
+                TotSteps = row['totsteps']
+                TotColorLabels = row['totcolorlabels']
+                TotGroupLabels = row['totgrouplabels']
+                print row
+
+        self.assertEqual(1, 1)
+
     def Test_get_legend_info(self):
 
         legend_info = querydb.get_legend_info(legendid=6)

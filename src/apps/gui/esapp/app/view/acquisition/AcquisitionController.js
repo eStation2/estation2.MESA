@@ -107,6 +107,31 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
         }
     }
 
+
+    ,renderHiddenColumnsWhenUnlocked: function(){
+        if (Ext.getCmp('lockunlock').pressed) {
+            var dataacquisitiongrids = Ext.ComponentQuery.query('dataacquisitiongrid');
+            var ingestiongrids = Ext.ComponentQuery.query('ingestiongrid');
+
+            Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
+                dataacquisitiongrid.columns[1].show();      // Edit Data Source
+                dataacquisitiongrid.columns[1].updateLayout();
+                dataacquisitiongrid.columns[2].show();      // Store Native
+                dataacquisitiongrid.columns[2].updateLayout();
+                //dataacquisitiongrid.columns[2].show();   // Last executed
+                //dataacquisitiongrid.columns[3].show();   // Store Native
+            });
+
+            Ext.Object.each(ingestiongrids, function(id, ingestiongrid, myself) {
+                ingestiongrid.columns[1].show();    // Add Mapset
+                ingestiongrid.columns[1].updateLayout();
+                ingestiongrid.columns[3].show();    // Delete Mapset
+                ingestiongrid.columns[3].updateLayout();
+            });
+        }
+    }
+
+
     //,onAddClick: function(){
     //
     //    win = Ext.create('esapp.view.acquisition.product.editProduct', {
