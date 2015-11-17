@@ -48,26 +48,26 @@ exec 2>/var/log/eStation2/%{name}-%{version}-preinst.err
 
 # En preinst pas de script externe inclus dans le RPM car pas encore decompressé
 # Ajout du compte analyst
-echo "`date +'%Y-%m-%d %H:%M:%S'` Checking/creating analyst User"
+echo "`date +'%Y-%m-%d %H:%M '` Checking/creating analyst User"
 getent passwd analyst >/dev/null || useradd -c "eStation Thematic User" -s /bin/bash -m -p '$1$QzIcDpOX$MTmh852fnqwQm3MSFyRq10' analyst
 # Ajout du compte adminuser
-echo "`date +'%Y-%m-%d %H:%M:%S'` Checking/creating Admin"
+echo "`date +'%Y-%m-%d %H:%M '` Checking/creating Admin"
 getent passwd adminuser >/dev/null || useradd -c "eStation Administrator" -s /bin/bash -m -p '$1$QzIcDpOX$MTmh852fnqwQm3MSFyRq10' adminuser
 # Ajout du groupe estation
-echo "`date +'%Y-%m-%d %H:%M:%S'` Checking/creating estation Group"
+echo "`date +'%Y-%m-%d %H:%M '` Checking/creating estation Group"
 getent group estation >/dev/null || groupadd estation
 # Association des utilisateurs aux groupes
-echo "`date +'%Y-%m-%d %H:%M:%S'` Checking/adding Users to Groups"
+echo "`date +'%Y-%m-%d %H:%M '` Checking/adding Users to Groups"
 awk -F':' '/estation/{print $4}' /etc/group | grep adminuser >/dev/null || usermod -a -G estation adminuser
 awk -F':' '/apache/{print $4}' /etc/group | grep analyst >/dev/null || usermod -a -G apache analyst
 awk -F':' '/estation/{print $4}' /etc/group | grep analyst >/dev/null || usermod -a -G estation analyst
 
-echo "`date +'%Y-%m-%d %H:%M:%S'` Adding adminuser to sudoers"
+echo "`date +'%Y-%m-%d %H:%M '` Adding adminuser to sudoers"
 echo "adminuser	All=(ALL) ALL" >> /etc/sudoers
 
 %post
 # Create log file
-echo "`date +'%Y-%m-%d %H:%M:%S'` Create log files"
+echo "`date +'%Y-%m-%d %H:%M '` Create log files"
 mkdir -p /var/log/eStation2
 touch /var/log/eStation2/%{name}-%{version}-postinst.log
 touch /var/log/eStation2/%{name}-%{version}-postinst.err
@@ -75,13 +75,13 @@ exec 1>/var/log/eStation2/%{name}-%{version}-postinst.log
 exec 2>/var/log/eStation2/%{name}-%{version}-postinst.err
 
 # Change code owner/perms
-echo "`date +'%Y-%m-%d %H:%M:%S'` Assign /var/www/eStation to adminuser"
+echo "`date +'%Y-%m-%d %H:%M '` Assign /var/www/eStation to adminuser"
 chown adminuser:adminuser -R /var/www/eStation2-%{version}
-echo "`date +'%Y-%m-%d %H:%M:%S'` Change permissions of /var/www/eStation"
+echo "`date +'%Y-%m-%d %H:%M '` Change permissions of /var/www/eStation"
 chmod 755 -R /var/www/eStation2-%{version}
 
 # Create temporary path 
-echo "`date +'%Y-%m-%d %H:%M:%S'` Create temporary paths"
+echo "`date +'%Y-%m-%d %H:%M '` Create temporary paths"
 mkdir -p -m 775 /tmp/eStation2/
 mkdir -p -m 775 /tmp/eStation2/services/
 mkdir -p -m 775 /tmp/eStation2/processing/
@@ -89,7 +89,7 @@ mkdir -p -m 775 /tmp/eStation2/ingested_files/
 chown -R analyst:estation /tmp/eStation2/
 
 # Creating temporary path in tmp after boot (in case of). Configuration of rc.local
-echo "`date +'%Y-%m-%d %H:%M:%S'` Create temporary paths in rc.local"
+echo "`date +'%Y-%m-%d %H:%M '` Create temporary paths in rc.local"
 grep "mkdir -p -m 775 /tmp/eStation2/" /etc/rc.local >/dev/null ||echo "mkdir -p -m 775 /tmp/eStation2/" >> /etc/rc.local
 grep "mkdir -p -m 775 /tmp/eStation2/services/" /etc/rc.local >/dev/null ||echo "mkdir -p -m 775 /tmp/eStation2/services/" >> /etc/rc.local
 grep "mkdir -p -m 775 /tmp/eStation2/processing/" /etc/rc.local >/dev/null ||echo "mkdir -p -m 775 /tmp/eStation2/processing/" >> /etc/rc.local
@@ -97,7 +97,7 @@ grep "mkdir -p -m 775 /tmp/eStation2/ingested_files/" /etc/rc.local >/dev/null |
 grep "chown -R analyst:estation /tmp/eStation2/" /etc/rc.local >/dev/null ||echo "chown -R analyst:estation /tmp/eStation2/" >> /etc/rc.local
 
 # Creation of /estation2 path
-echo "`date +'%Y-%m-%d %H:%M:%S'` Create eStation2 paths"
+echo "`date +'%Y-%m-%d %H:%M '` Create eStation2 paths"
 mkdir -p -m 775 /eStation2
 mkdir -p -m 775 /eStation2/settings
 mkdir -p -m 775 /eStation2/get_lists
@@ -109,69 +109,69 @@ mkdir -p -m 775 /eStation2/system
 chown -R analyst:estation /eStation2/
 
 # Creation of /data path
-echo "`date +'%Y-%m-%d %H:%M:%S'` Create /data paths"
+echo "`date +'%Y-%m-%d %H:%M '` Create /data paths"
 mkdir -p -m 775 /data/ingest
 mkdir -p -m 775 /data/ingest.wrong
 mkdir -p -m 775 /data/processing
 mkdir -p -m 775 /data/spirits
 
 # Chown a vérifier si utile
-echo "`date +'%Y-%m-%d %H:%M:%S'` Assign /data to analyst User"
+echo "`date +'%Y-%m-%d %H:%M '` Assign /data to analyst User"
 chown -R analyst:estation /data 
 
 # Creation of the symlink on the /var/www/eStation2-%{version}
-echo "`date +'%Y-%m-%d %H:%M:%S'` Create sym link /var/www/eStation2-%{version}"
+echo "`date +'%Y-%m-%d %H:%M '` Create sym link /var/www/eStation2-%{version}"
 ln -fs /var/www/eStation2-%{version} /var/www/eStation2
 
 # Restart postgresql 
-echo "`date +'%Y-%m-%d %H:%M:%S'` Restart postgresql-9.3"
+echo "`date +'%Y-%m-%d %H:%M '` Restart postgresql-9.3"
 /etc/init.d/postgresql-9.3 restart
 if [ $? -eq 0 ]; then
-    echo "`date +'%Y-%m-%d %H:%M:%S'` Postgresql restarted"				 	
+    echo "`date +'%Y-%m-%d %H:%M '` Postgresql restarted"				 	
 else
-    echo "`date +'%Y-%m-%d %H:%M:%S'` ERROR in restarting Postgresql"
+    echo "`date +'%Y-%m-%d %H:%M '` ERROR in restarting Postgresql"
 fi
-echo "`date +'%Y-%m-%d %H:%M:%S'` Wait for postgresql-9.3 restart ..."
+echo "`date +'%Y-%m-%d %H:%M '` Wait for postgresql-9.3 restart ..."
 sleep 3
 # localhost reachable
-echo "`date +'%Y-%m-%d %H:%M:%S'` Check localhost is reachable"
+echo "`date +'%Y-%m-%d %H:%M '` Check localhost is reachable"
 if [[ `nc -v -z localhost 5432 1>/dev/null 2>&1;echo $?` -eq 0 ]]; then
-    echo "`date +'%Y-%m-%d %H:%M:%S'` Postgresql is running" 
+    echo "`date +'%Y-%m-%d %H:%M '` Postgresql is running" 
     # estation User exists ?
     if [[ `su postgres -c "psql -c 'select usename from pg_user'"  2>/dev/null|grep estation` == '' ]];then
-        echo "`date +'%Y-%m-%d %H:%M:%S'` Create estation User" 
+        echo "`date +'%Y-%m-%d %H:%M '` Create estation User" 
         su postgres -c psql << EOF
 CREATE USER estation;
 EOF
     else
-        echo "`date +'%Y-%m-%d %H:%M:%S'` User estation already exists. Continue" 
+        echo "`date +'%Y-%m-%d %H:%M '` User estation already exists. Continue" 
     fi
     # estationdb exists ?
     if [[ `su postgres -c "psql -c 'select datname from pg_database'"  2>/dev/null|grep estationdb` == '' ]];then
-        echo "`date +'%Y-%m-%d %H:%M:%S'` Create estationdb Database" 
+        echo "`date +'%Y-%m-%d %H:%M '` Create estationdb Database" 
         su postgres -c psql << EOF
 ALTER ROLE estation WITH CREATEDB;
 CREATE DATABASE estationdb WITH OWNER estation;
 ALTER USER estation WITH ENCRYPTED PASSWORD 'mesadmin';
 EOF
     else
-        echo "`date +'%Y-%m-%d %H:%M:%S'` DB estationdb already exists. Continue" 
+        echo "`date +'%Y-%m-%d %H:%M '` DB estationdb already exists. Continue" 
     fi
 
     if [[ ! `su postgres -c "psql -d estationdb -c 'select * from products.mapset'" 2> /dev/null` ]];then
         # First install from scratch data
-        echo "`date +'%Y-%m-%d %H:%M:%S'` Create database structure" 
+        echo "`date +'%Y-%m-%d %H:%M '` Create database structure" 
         # End automatically added section
         psql -h localhost -U estation -d estationdb -f /var/www/eStation2/database/dbInstall/products_dump_structure_only.sql >/dev/null 2>&1
     else
-        echo "`date +'%Y-%m-%d %H:%M:%S'` Database structure already exists. Continue" 
+        echo "`date +'%Y-%m-%d %H:%M '` Database structure already exists. Continue" 
     fi
     # Update Tables (both for upgrade and installation from scratch)
-    echo "`date +'%Y-%m-%d %H:%M:%S'` Populate tables" 
+    echo "`date +'%Y-%m-%d %H:%M '` Populate tables" 
     psql -h localhost -U estation -d estationdb -f /var/www/eStation2/database/dbInstall/products_dump_data_only.sql > /dev/null 2>&1
 
 else
-    echo "`date +'%Y-%m-%d %H:%M:%S'` Postgresql is NOT running: DB not created !" 
+    echo "`date +'%Y-%m-%d %H:%M '` Postgresql is NOT running: DB not created !" 
 fi # localhost reachable
 
 # Copy the User Settings file (if does not exist)
@@ -179,15 +179,15 @@ src_file='/var/www/eStation2/config/install/user_settings.ini'
 trg_file='/eStation2/settings/user_settings.ini'
 
 if [ -f  ${trg_file} ]; then
-    echo "`date +'%Y-%m-%d %H:%M:%S'` User Setting file already exist $trg_file" 
+    echo "`date +'%Y-%m-%d %H:%M '` User Setting file already exist $trg_file" 
 else
     cp $src_file $trg_file
     if [ $? -eq 0 ]; then 
-        echo "`date +'%Y-%m-%d %H:%M:%S'` User Setting file $trg_file created" 
+        echo "`date +'%Y-%m-%d %H:%M '` User Setting file $trg_file created" 
         chown analyst:estation ${trg_file}
         chmod 775 ${trg_file}
     else
-        echo "`date +'%Y-%m-%d %H:%M:%S'` ERROR in creating User Setting file $trg_file" 
+        echo "`date +'%Y-%m-%d %H:%M '` ERROR in creating User Setting file $trg_file" 
     fi
 fi
 
@@ -196,15 +196,15 @@ src_file='/var/www/eStation2/config/install/system_settings.ini'
 trg_file='/eStation2/settings/system_settings.ini'
 
 if [[ -f  ${trg_file} ]]; then
-    echo "`date +'%Y-%m-%d %H:%M:%S'` System Setting file already exist $trg_file" 
+    echo "`date +'%Y-%m-%d %H:%M '` System Setting file already exist $trg_file" 
 else
     cp $src_file $trg_file
     if [[ $? -eq 0 ]]; then 
-        echo "`date +'%Y-%m-%d %H:%M:%S'` System Setting file $trg_file created" 
+        echo "`date +'%Y-%m-%d %H:%M '` System Setting file $trg_file created" 
         chown analyst:estation ${trg_file}
         chmod 775 ${trg_file}
     else
-        echo "`date +'%Y-%m-%d %H:%M:%S'` ERROR in creating System Setting file $trg_file" 
+        echo "`date +'%Y-%m-%d %H:%M '` ERROR in creating System Setting file $trg_file" 
     fi
 fi
 
@@ -212,7 +212,7 @@ fi
 log_dir="/var/log/bucardo"
 run_dir="/var/run/bucardo"
 /usr/bin/bucardo install --batch --dbname estationdb --dbhost localhost
-echo "$(date +'%Y-%m-%d %H:%M:%S') Bucardo package installed"
+echo "$(date +'%Y-%m-%d %H:%M ') Bucardo package installed"
 
 # Create log and run dir for Bucardo
 mkdir -p ${log_dir}
