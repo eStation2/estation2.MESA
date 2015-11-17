@@ -208,6 +208,22 @@ else
     fi
 fi
 
+# Initialize the bucardo installation
+log_dir="/var/log/bucardo"
+run_dir="/var/run/bucardo"
+/usr/bin/bucardo install --batch --dbname estationdb --dbhost localhost
+echo "$(date +'%Y-%m-%d %H:%M:%S') Bucardo package installed"
+
+# Create log and run dir for Bucardo
+mkdir -p ${log_dir}
+chown adminuser:estation ${log_dir}
+chmod 777 ${log_dir}
+mkdir -p ${run_dir}
+chown adminuser:estation ${run_dir}
+chmod 777 ${run_dir}
+chmod 666 /home/adminuser/.pgpass
+
+
 # Clean system after uninstall
 %postun
 rm -fr /tmp/eStation2
