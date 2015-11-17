@@ -67,6 +67,7 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
                     autoHide: false,
                     dismissDelay: 5000, // auto hide after 5 seconds
                     closable: true,
+                    anchorToTarget: true,
                     anchor: 'left',
                     padding: 10,
                     html: me.tooltipintervals, // Tip content

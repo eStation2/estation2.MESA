@@ -30,3 +30,5 @@ class GetEumetcastDaemon(DaemonDryRunnable):
 class GetInternetDaemon(DaemonDryRunnable):
     def run(self):
         get_internet.loop_get_internet(dry_run=self.dry_run)
+
+

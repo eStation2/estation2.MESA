@@ -54,7 +54,7 @@ Ext.define('esapp.store.DataAcquisitionsStore', {
     ,listeners: {
         write: function(store, operation){
             Ext.toast({ html: operation.getResultSet().message,
-                        title: esapp.Utils.getTranslation('getupdated'),  // "Get updated",  "Obtenir mise à jour"
+                        title: esapp.Utils.getTranslation('getupdated'),  // "Get updated",  "Obtenir mise ï¿½ jour"
                         width: 300, align: 't' });
         }
     }

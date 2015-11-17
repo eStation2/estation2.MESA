@@ -2,7 +2,7 @@
 Ext.define("esapp.view.acquisition.product.editEumetcastSource",{
     extend: "Ext.window.Window",
 
-    xtype: 'editeumetcastsource',
+    xtype: '__editeumetcastsource',
 
     requires: [
         'Ext.layout.container.Center'

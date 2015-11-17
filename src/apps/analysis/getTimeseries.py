@@ -154,6 +154,7 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
 
         for infile in unique_list:
             single_result = {'filename': '', 'meanvalue_noscaling': nodata, 'meanvalue': None}
+
             if os.path.isfile(infile):
                 try:
                     mx = []

@@ -100,11 +100,11 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                     view.getFeature('prodcat').collapseAll();
                     view.refresh();
                 }
-            }, {
-                text: esapp.Utils.getTranslation('myrequests'),    // 'My requests',
-                handler: function(btn) {
-
-                }
+            //}, {
+            //    text: esapp.Utils.getTranslation('myrequests'),    // 'My requests',
+            //    handler: function(btn) {
+            //
+            //    }
             },
             // add a vertical separator bar between toolbar items
             //'-', // same as {xtype: 'tbseparator'} to create Ext.toolbar.Separator

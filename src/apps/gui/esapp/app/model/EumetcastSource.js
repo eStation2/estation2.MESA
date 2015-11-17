@@ -1,9 +1,5 @@
 Ext.define('esapp.model.EumetcastSource', {
     extend: 'esapp.model.Base',
-    
-    requires : [
-        'Ext.data.proxy.Rest'
-    ],
 
     fields: [
         {name: 'eumetcast_id'},
@@ -32,51 +28,55 @@ Ext.define('esapp.model.EumetcastSource', {
         {name: 'native_mapset'}
     ]
 
-    ,autoLoad: true
-    ,autoSync: true
-
-    ,proxy: {
-        type: 'rest',
-
-        appendId: false,
-
-        api: {
-            read: 'eumetcastsource',
-            create: 'eumetcastsource/create',
-            update: 'eumetcastsource/update',
-            destroy: 'eumetcastsource/delete'
-        },
-        reader: {
-             type: 'json'
-            ,successProperty: 'success'
-            ,rootProperty: 'eumetcastsources'
-            ,messageProperty: 'message'
-        },
-        writer: {
-            type: 'json',
-            writeAllFields: true,
-            rootProperty: 'eumetcastsources'
-        },
-        listeners: {
-            exception: function(proxy, response, operation){
-                // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
-                Ext.Msg.show({
-                    title: 'EUMETCAST SOURCE MODEL - REMOTE EXCEPTION',
-                    msg: operation.getError(),
-                    icon: Ext.Msg.ERROR,
-                    buttons: Ext.Msg.OK
-                });
-            }
-        }
-    }
-    ,listeners: {
-        update: function(store, record, operation, modifiedFieldNames, details, eOpts  ){
-            Ext.toast({ html: operation.getResultSet().message, title: operation.action, width: 200, align: 't' });
-        },
-        write: function(store, operation){
-            if (operation.action == 'update' && operation.success) {
-               Ext.toast({ html: operation.getResultSet().message, title: operation.action, width: 200, align: 't' });
-            }
-        }
-    }
+    //,requires : [
+    //    'Ext.data.proxy.Rest'
+    //]
+    //
+    //,autoLoad: true
+    //,autoSync: false
+    //
+    //,proxy: {
+    //    type: 'rest',
+    //
+    //    appendId: false,
+    //
+    //    api: {
+    //        read: 'eumetcastsource',
+    //        create: 'eumetcastsource/create',
+    //        update: 'eumetcastsource/update',
+    //        destroy: 'eumetcastsource/delete'
+    //    },
+    //    reader: {
+    //         type: 'json'
+    //        ,successProperty: 'success'
+    //        ,rootProperty: 'eumetcastsources'
+    //        ,messageProperty: 'message'
+    //    },
+    //    writer: {
+    //        type: 'json',
+    //        writeAllFields: true,
+    //        rootProperty: 'eumetcastsources'
+    //    },
+    //    listeners: {
+    //        exception: function(proxy, response, operation){
+    //            // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
+    //            Ext.Msg.show({
+    //                title: 'EUMETCAST SOURCE MODEL - REMOTE EXCEPTION',
+    //                msg: operation.getError(),
+    //                icon: Ext.Msg.ERROR,
+    //                buttons: Ext.Msg.OK
+    //            });
+    //        }
+    //    }
+    //}
+    //,listeners: {
+    //    update: function(store, record, operation, modifiedFieldNames, details, eOpts  ){
+    //        Ext.toast({ html: operation.getResultSet().message, title: operation.action, width: 200, align: 't' });
+    //    },
+    //    write: function(store, operation){
+    //        if (operation.action == 'update' && operation.success) {
+    //           Ext.toast({ html: operation.getResultSet().message, title: operation.action, width: 200, align: 't' });
+    //        }
+    //    }
+    //}
 });

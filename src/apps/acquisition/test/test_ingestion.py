@@ -214,6 +214,152 @@ class TestIngestion(unittest.TestCase):
 
             self.assertEqual(1, 1)
 
+    def test_ingest_lsasaf_et(self):
+
+        date_fileslist = ['/data/ingest/test/S-LSA_-HDF5_LSASAF_MSG_ET_NAfr_201511040900.bz2','/data/ingest/test/S-LSA_-HDF5_LSASAF_MSG_ET_SAfr_201511040900.bz2']
+        in_date = '201511040900'
+        productcode = 'lsasaf-et'
+        productversion = 'undefined'
+        subproductcode = 'et'
+        mapsetcode = 'MSG-satellite-3km'
+        datasource_descrID='EO:EUM:DAT:MSG:ET-SEVIRI'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                                              source_id=datasource_descrID):
+
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+            self.assertEqual(1, 1)
+
+    def test_ingest_vgt_lai(self):
+
+        date_fileslist = ['/data/ingest/test/g2_BIOPAR_LAI_201510240000_AFRI_PROBAV_V1.4.zip']
+        in_date = '201510240000'
+        productcode = 'vgt-lai'
+        productversion = 'V1.4'
+        subproductcode = 'lai'
+        mapsetcode = 'SPOTV-Africa-1km'
+        datasource_descrID='EO:EUM:DAT:PROBA-V:LAI'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                                              source_id=datasource_descrID):
+
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+            self.assertEqual(1, 1)
+    def test_ingest_vgt_fcover(self):
+
+        date_fileslist = ['/data/ingest/test/g2_BIOPAR_FCOVER_201510240000_AFRI_PROBAV_V1.4.zip']
+        in_date = '201510240000'
+        productcode = 'vgt-fcover'
+        productversion = 'V1.4'
+        subproductcode = 'fcover'
+        mapsetcode = 'SPOTV-Africa-1km'
+        datasource_descrID='EO:EUM:DAT:PROBA-V:FCOVER'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                                              source_id=datasource_descrID):
+
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+            self.assertEqual(1, 1)
+
+    def test_ingest_vgt_fapar(self):
+
+        date_fileslist = ['/data/ingest/test/g2_BIOPAR_FAPAR_201510240000_AFRI_PROBAV_V1.4.zip']
+        in_date = '201510240000'
+        productcode = 'vgt-fapar'
+        productversion = 'V1.4'
+        subproductcode = 'fapar'
+        mapsetcode = 'SPOTV-Africa-1km'
+        datasource_descrID='EO:EUM:DAT:PROBA-V:FAPAR'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                                              source_id=datasource_descrID):
+
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+            self.assertEqual(1, 1)
 
     def test_ingest_eumetcast(self):
 
