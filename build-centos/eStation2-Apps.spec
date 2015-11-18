@@ -221,8 +221,11 @@ chmod 777 ${log_dir}
 mkdir -p ${run_dir}
 chown adminuser:estation ${run_dir}
 chmod 777 ${run_dir}
-chmod 666 /home/adminuser/.pgpass
+#chmod 666 /home/adminuser/.pgpass
 
+# Set the 'role' in system_settings
+my_role=$(hostname | cut -d '-' -f2)
+sed -i "s|.*role.=.*|role = ${my_role}|" /eStation2/settings/system_settings.ini
 
 # Clean system after uninstall
 %postun
