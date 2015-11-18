@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.3.4
 -- Dumped by pg_dump version 9.3.4
--- Started on 2015-11-17 10:12:02 CET
+-- Started on 2015-11-18 18:16:50 CET
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -32,6 +32,275 @@ CREATE SCHEMA products;
 
 
 ALTER SCHEMA products OWNER TO estation;
+
+SET search_path = analysis, pg_catalog;
+
+--
+-- TOC entry 232 (class 1255 OID 18670)
+-- Name: update_insert_i18n(character varying, text, text, text, text, text, text); Type: FUNCTION; Schema: analysis; Owner: estation
+--
+
+CREATE FUNCTION update_insert_i18n(label character varying, eng text, fra text, por text, lang1 text, lang2 text, lang3 text) RETURNS boolean
+    LANGUAGE plpgsql STRICT
+    AS $_$
+	DECLARE
+		_label  ALIAS FOR  $1;
+		_eng  	ALIAS FOR  $2;
+		_fra   	ALIAS FOR  $3;
+		_por   	ALIAS FOR  $4;		
+		_lang1  ALIAS FOR  $5;
+		_lang2  ALIAS FOR  $6;
+		_lang3  ALIAS FOR  $7;
+  
+	BEGIN	
+		PERFORM * FROM analysis.i18n WHERE i18n.label = TRIM(_label);
+		IF FOUND THEN
+			UPDATE analysis.i18n 
+			SET eng = TRIM(_eng), 
+			    fra = TRIM(_fra),  
+			    por = TRIM(_por), 
+			    lang1 = TRIM(_lang1), 
+			    lang2 = TRIM(_lang2), 
+			    lang3 = TRIM(_lang3)				
+			WHERE i18n.label = TRIM(_label);
+		ELSE
+			INSERT INTO analysis.i18n (label, eng, fra, por, lang1, lang2, lang3) 
+			VALUES (TRIM(_label), TRIM(_eng), TRIM(_fra), TRIM(_por), TRIM(_lang1), TRIM(_lang2), TRIM(_lang3));
+		END IF;	   
+		RETURN TRUE;
+	END;
+$_$;
+
+
+ALTER FUNCTION analysis.update_insert_i18n(label character varying, eng text, fra text, por text, lang1 text, lang2 text, lang3 text) OWNER TO estation;
+
+--
+-- TOC entry 236 (class 1255 OID 18671)
+-- Name: update_insert_languages(character varying, character varying, boolean); Type: FUNCTION; Schema: analysis; Owner: estation
+--
+
+CREATE FUNCTION update_insert_languages(langcode character varying, langdescription character varying, active boolean) RETURNS boolean
+    LANGUAGE plpgsql STRICT
+    AS $_$
+	DECLARE
+		_langcode  		ALIAS FOR  $1;
+		_langdescription  	ALIAS FOR  $2;
+		_active   		ALIAS FOR  $3;
+  
+	BEGIN	
+		PERFORM * FROM analysis.languages l WHERE l.langcode = TRIM(_langcode);
+		IF FOUND THEN
+			UPDATE analysis.languages l
+			SET langdescription = TRIM(_langdescription),  
+			    active = _active		
+			WHERE l.langcode = TRIM(_langcode);
+		ELSE
+			INSERT INTO analysis.languages (langcode, langdescription, active) 
+			VALUES (TRIM(_langcode), TRIM(_langdescription), _active);
+		END IF;	   
+		RETURN TRUE;
+	END;
+$_$;
+
+
+ALTER FUNCTION analysis.update_insert_languages(langcode character varying, langdescription character varying, active boolean) OWNER TO estation;
+
+--
+-- TOC entry 233 (class 1255 OID 18672)
+-- Name: update_insert_legend(integer, character varying, character varying, double precision, double precision, character varying, text, text, double precision, double precision, double precision, character varying); Type: FUNCTION; Schema: analysis; Owner: estation
+--
+
+CREATE FUNCTION update_insert_legend(legend_id integer, legend_name character varying, step_type character varying, min_value double precision, max_value double precision, min_real_value character varying, max_real_value text, colorbar text, step double precision, step_range_from double precision, step_range_to double precision, unit character varying) RETURNS boolean
+    LANGUAGE plpgsql STRICT
+    AS $_$
+	DECLARE
+		_legend_id 		ALIAS FOR  $1;
+		_legend_name 		ALIAS FOR  $2;
+		_step_type 		ALIAS FOR  $3;
+		_min_value 		ALIAS FOR  $4;
+		_max_value 		ALIAS FOR  $5;
+		_min_real_value 	ALIAS FOR  $6;
+		_max_real_value 	ALIAS FOR  $7;
+		_colorbar 		ALIAS FOR  $8;
+		_step 			ALIAS FOR  $9;
+		_step_range_from	ALIAS FOR  $10;
+		_step_range_to 		ALIAS FOR  $11;
+		_unit 			ALIAS FOR  $12;
+  
+	BEGIN	
+		PERFORM * FROM analysis.legend l WHERE l.legend_id = _legend_id;
+		IF FOUND THEN
+			UPDATE analysis.legend l
+			SET legend_name = TRIM(_legend_name),  
+			    step_type = TRIM(_step_type),
+			    min_value = _min_value,
+			    max_value = _max_value,
+			    min_real_value = TRIM(_min_real_value),
+			    max_real_value = TRIM(_max_real_value),
+			    colorbar = TRIM(_colorbar),
+			    step = _step,
+			    step_range_from = _step_range_from,
+			    step_range_to = _step_range_to,
+			    unit = TRIM(_unit)
+			WHERE l.legend_id = _legend_id;
+		ELSE
+			INSERT INTO analysis.legend (legend_id, legend_name, step_type, min_value, max_value, min_real_value, max_real_value, colorbar, step, step_range_from, step_range_to, unit) 
+			VALUES (_legend_id, TRIM(legend_name), TRIM(_step_type), _min_value, _max_value, TRIM(_min_real_value), TRIM(_max_real_value), TRIM(_colorbar), _step, _step_range_from, _step_range_to, _unit);
+		END IF;	   
+		RETURN TRUE;
+	END;
+$_$;
+
+
+ALTER FUNCTION analysis.update_insert_legend(legend_id integer, legend_name character varying, step_type character varying, min_value double precision, max_value double precision, min_real_value character varying, max_real_value text, colorbar text, step double precision, step_range_from double precision, step_range_to double precision, unit character varying) OWNER TO estation;
+
+--
+-- TOC entry 235 (class 1255 OID 18673)
+-- Name: update_insert_legend_step(integer, double precision, double precision, character varying, character varying, character varying); Type: FUNCTION; Schema: analysis; Owner: estation
+--
+
+CREATE FUNCTION update_insert_legend_step(legend_id integer, from_step double precision, to_step double precision, color_rgb character varying, color_label character varying, group_label character varying) RETURNS boolean
+    LANGUAGE plpgsql STRICT
+    AS $_$
+	DECLARE
+		_legend_id 	ALIAS FOR  $1;
+		_from_step 	ALIAS FOR  $2;
+		_to_step 	ALIAS FOR  $3;
+		_color_rgb 	ALIAS FOR  $4;
+		_color_label 	ALIAS FOR  $5;
+		_group_label 	ALIAS FOR  $6;
+  
+	BEGIN	
+		PERFORM * FROM analysis.legend_step ls WHERE ls.legend_id = _legend_id AND ls.from_step = _from_step AND ls.to_step = _to_step;
+		IF FOUND THEN
+			UPDATE analysis.legend_step ls
+			SET color_rgb = TRIM(_color_rgb),  
+			    color_label = TRIM(_color_label),
+			    group_label = TRIM(_group_label)
+			WHERE ls.legend_id = _legend_id AND ls.from_step = _from_step AND ls.to_step = _to_step;
+		ELSE
+			INSERT INTO analysis.legend_step (legend_id, from_step, to_step, color_rgb, color_label, group_label) 
+			VALUES (_legend_id, _from_step, _to_step, TRIM(_color_rgb), TRIM(_color_label), TRIM(_group_label));
+		END IF;	   
+		RETURN TRUE;
+	END;
+$_$;
+
+
+ALTER FUNCTION analysis.update_insert_legend_step(legend_id integer, from_step double precision, to_step double precision, color_rgb character varying, color_label character varying, group_label character varying) OWNER TO estation;
+
+--
+-- TOC entry 234 (class 1255 OID 18674)
+-- Name: update_insert_product_legend(character varying, character varying, character varying, bigint, boolean); Type: FUNCTION; Schema: analysis; Owner: estation
+--
+
+CREATE FUNCTION update_insert_product_legend(productcode character varying, subproductcode character varying, version character varying, legend_id bigint, default_legend boolean) RETURNS boolean
+    LANGUAGE plpgsql STRICT
+    AS $_$
+	DECLARE
+		_productcode 		ALIAS FOR  $1;
+		_subproductcode 	ALIAS FOR  $2;
+		_version 		ALIAS FOR  $3;
+		_legend_id 		ALIAS FOR  $4;
+		_default_legend 	ALIAS FOR  $5;
+  
+	BEGIN	
+		PERFORM * FROM analysis.product_legend pl WHERE pl.productcode = TRIM(_productcode) AND pl.subproductcode = TRIM(_subproductcode) AND pl.version = TRIM(_version) AND pl.legend_id = _legend_id;
+		IF FOUND THEN
+			UPDATE analysis.product_legend pl
+			SET default_legend = _default_legend
+			WHERE pl.productcode = TRIM(_productcode) AND pl.subproductcode = TRIM(_subproductcode) AND pl.version = TRIM(_version) AND pl.legend_id = _legend_id;
+		ELSE
+			INSERT INTO analysis.product_legend (productcode, subproductcode, version, legend_id, default_legend) 
+			VALUES (TRIM(_productcode), TRIM(_subproductcode), TRIM(_version), _legend_id, _default_legend);
+		END IF;	   
+		RETURN TRUE;
+	END;
+$_$;
+
+
+ALTER FUNCTION analysis.update_insert_product_legend(productcode character varying, subproductcode character varying, version character varying, legend_id bigint, default_legend boolean) OWNER TO estation;
+
+--
+-- TOC entry 238 (class 1255 OID 18675)
+-- Name: update_insert_timeseries_drawproperties(character varying, character varying, character varying, character varying, character varying, double precision, double precision, boolean, character varying, character varying, character varying, integer, character varying, character varying, character varying); Type: FUNCTION; Schema: analysis; Owner: estation
+--
+
+CREATE FUNCTION update_insert_timeseries_drawproperties(productcode character varying, subproductcode character varying, version character varying, title character varying, unit character varying, min double precision, max double precision, oposite boolean, tsname_in_legend character varying, charttype character varying, linestyle character varying, linewidth integer, color character varying, yaxes_id character varying, title_color character varying) RETURNS boolean
+    LANGUAGE plpgsql STRICT
+    AS $_$
+	DECLARE
+		_productcode 		ALIAS FOR  $1;
+		_subproductcode 	ALIAS FOR  $2;
+		_version 		ALIAS FOR  $3;
+		_title 			ALIAS FOR  $4;
+		_unit 			ALIAS FOR  $5;
+		_min 			ALIAS FOR  $6;
+		_max 			ALIAS FOR  $7;
+		_oposite 		ALIAS FOR  $8;
+		_tsname_in_legend 	ALIAS FOR  $9;
+		_charttype 		ALIAS FOR  $10;
+		_linestyle 		ALIAS FOR  $11;
+		_linewidth 		ALIAS FOR  $12;
+		_color 			ALIAS FOR  $13;
+		_yaxes_id 		ALIAS FOR  $14;
+		_title_color 		ALIAS FOR  $15;
+  
+	BEGIN	
+		PERFORM * FROM analysis.timeseries_drawproperties tsdp WHERE tsdp.productcode = TRIM(_productcode) AND tsdp.subproductcode = TRIM(_subproductcode) AND tsdp.version = TRIM(_version);
+		IF FOUND THEN
+			UPDATE analysis.timeseries_drawproperties tsdp
+			SET title = TRIM(_title),
+			    unit = TRIM(_unit),
+			    min = _min,
+			    max = _max,
+			    oposite = _oposite,
+			    tsname_in_legend = TRIM(_tsname_in_legend),
+    			    charttype = TRIM(_charttype),
+			    linestyle = TRIM(_linestyle),
+			    linewidth = _linewidth,
+			    color = TRIM(_color),
+			    yaxes_id = TRIM(_yaxes_id),
+			    title_color = TRIM(_title_color)				
+			WHERE tsdp.productcode = TRIM(_productcode) AND tsdp.subproductcode = TRIM(_subproductcode) AND tsdp.version = TRIM(_version);
+		ELSE
+			INSERT INTO analysis.timeseries_drawproperties (productcode, 
+									subproductcode, 
+									version, 
+									title,
+									unit,
+									min,
+									max,
+									oposite,
+									tsname_in_legend,
+									charttype,
+									linestyle,
+									linewidth,
+									color,
+									yaxes_id,
+									title_color) 
+			VALUES (TRIM(_productcode), 
+				TRIM(_subproductcode), 
+				TRIM(_version), 
+				TRIM(_title), 
+				TRIM(_unit), 
+				_min, 
+				_max, 
+				_oposite, 
+				TRIM(_tsname_in_legend), 
+				TRIM(_charttype), 
+				TRIM(_linestyle), 
+				_linewidth, 
+				TRIM(_color), 
+				TRIM(_yaxes_id), 
+				TRIM(_title_color));
+		END IF;	   
+		RETURN TRUE;
+	END;
+$_$;
+
+
+ALTER FUNCTION analysis.update_insert_timeseries_drawproperties(productcode character varying, subproductcode character varying, version character varying, title character varying, unit character varying, min double precision, max double precision, oposite boolean, tsname_in_legend character varying, charttype character varying, linestyle character varying, linewidth integer, color character varying, yaxes_id character varying, title_color character varying) OWNER TO estation;
 
 SET search_path = products, pg_catalog;
 
@@ -179,6 +448,386 @@ $$;
 
 
 ALTER FUNCTION products.deactivate_ingestion_when_disabled() OWNER TO estation;
+
+--
+-- TOC entry 237 (class 1255 OID 18676)
+-- Name: export_all_data(boolean); Type: FUNCTION; Schema: products; Owner: estation
+--
+
+CREATE FUNCTION export_all_data(full_copy boolean DEFAULT true) RETURNS SETOF text
+    LANGUAGE plpgsql
+    AS $_$
+DECLARE 
+	_full_copy 			ALIAS FOR  $1;
+BEGIN
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_product_category('
+		|| 'category_id := ''' || category_id || ''''
+		|| ', order_index :=  ' || order_index 
+		|| ', descriptive_name := ''' || COALESCE(descriptive_name, '') || ''''
+		|| ' );'  as inserts	   
+	FROM products.product_category;
+
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_frequency('
+		|| 'frequency_id := ''' || frequency_id || ''''
+		|| ', time_unit := ''' || time_unit || ''''	
+		|| ', frequency :=  ' || frequency 
+		|| ', frequency_type := ''' || COALESCE(frequency_type, '') || ''''
+		|| ', description := ''' || COALESCE(description, '') || ''''	
+		|| ' );'  as inserts	   
+	FROM products.frequency;
+
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_date_format('
+		|| 'date_format := ''' || date_format || ''''
+		|| ', definition := ''' || COALESCE(definition, '') || ''''	
+		|| ' );'  as inserts	   
+	FROM products.date_format;
+
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_data_type('
+		|| 'data_type_id := ''' || data_type_id || ''''
+		|| ', description := ''' || COALESCE(description, '') || ''''	
+		|| ' );'  as inserts	   
+	FROM products.data_type;
+
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_mapset('
+		|| 'mapsetcode := ''' || mapsetcode || ''''
+		|| ', defined_by := ''' || defined_by || ''''	
+		|| ', descriptive_name := ''' || COALESCE(descriptive_name, '') || ''''	
+		|| ', description := ''' || COALESCE(description, '') || ''''	
+		|| ', srs_wkt := ''' || COALESCE(srs_wkt, '') || ''''		
+		|| ', upper_left_long :=  ' || upper_left_long 	
+		|| ', pixel_shift_long :=  ' || pixel_shift_long 	
+		|| ', rotation_factor_long :=  ' || rotation_factor_long 	
+		|| ', upper_left_lat :=  ' || upper_left_lat 	
+		|| ', pixel_shift_lat :=  ' || pixel_shift_lat 	
+		|| ', rotation_factor_lat :=  ' || rotation_factor_lat 	
+		|| ', pixel_size_x :=  ' || pixel_size_x 	
+		|| ', pixel_size_y:=  ' || pixel_size_y 	
+		|| ', footprint_image := ''' || COALESCE(footprint_image, '') || ''''	
+		|| ', full_copy :=  ' || _full_copy		
+		|| ' );'  as inserts	   
+	FROM products.mapset;
+
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_thema('
+		|| 'thema_id := ''' || thema_id || ''''
+		|| ', description := ''' || COALESCE(description, '') || ''''	
+		|| ' );'  as inserts	   
+	FROM products.thema;
+
+
+	  
+	RETURN QUERY SELECT 'SELECT products.update_insert_product('
+		|| '  productcode := ''' || COALESCE(productcode, '') || ''''
+		|| ', subproductcode := ''' || COALESCE(subproductcode, '') || ''''
+		|| ', version := ''' || COALESCE(version, '') || ''''
+		|| ', defined_by := ''' || COALESCE(defined_by, '') || ''''
+		|| ', activated :=  ' || activated	
+		|| ', category_id := ''' || COALESCE(category_id, '') || ''''	
+		|| ', product_type := ''' || COALESCE(product_type, '') || ''''
+		|| ', descriptive_name := ''' || COALESCE(replace(descriptive_name, '''', '"'), '') || ''''	
+		|| ', description := ''' || COALESCE(replace(description, '''', '"'), '') || ''''	
+		|| ', provider := ''' || COALESCE(provider, '') || ''''	
+		|| ', frequency_id := ''' || COALESCE(frequency_id, '') || ''''
+		|| ', date_format := ''' || COALESCE(date_format, '') || ''''
+		|| ', scale_factor :=  ' || COALESCE(TRIM(to_char(scale_factor, '99999999')), 'NULL')
+		|| ', scale_offset :=  ' || COALESCE(TRIM(to_char(scale_offset, '99999999')), 'NULL')
+		|| ', nodata :=  ' || COALESCE(TRIM(to_char(nodata, '99999999')), 'NULL')
+		|| ', mask_min :=  ' || COALESCE(TRIM(to_char(mask_min, '99999999')), 'NULL')
+		|| ', mask_max :=  ' || COALESCE(TRIM(to_char(mask_max, '99999999')), 'NULL')	
+		|| ', unit := ''' || COALESCE(unit, '') || ''''
+		|| ', data_type_id := ''' || COALESCE(data_type_id, '') || ''''
+		|| ', masked :=  ' || masked
+		|| ', timeseries_role := ''' || COALESCE(timeseries_role, '') || ''''		
+		|| ', full_copy :=  ' || _full_copy				
+		|| ' );'  as inserts	   
+	FROM products.product;
+
+
+	  
+	RETURN QUERY SELECT 'SELECT products.update_insert_thema_product('
+		|| 'thema_id := ''' || thema_id || ''''
+		|| ', productcode := ''' || productcode || ''''	
+		|| ', version := ''' || version || ''''	
+		|| ', mapsetcode := ''' || mapsetcode || ''''	
+		|| ', activated :=  ' || activated 	
+		|| ' );'  as inserts	   
+	FROM products.thema_product;
+
+
+	
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_internet_source('
+		|| 'internet_id := ''' || internet_id || ''''
+		|| ', defined_by := ''' || defined_by || ''''	
+		|| ', descriptive_name := ''' || COALESCE(descriptive_name, '') || ''''	
+		|| ', description := ''' || COALESCE(description, '') || ''''	
+		|| ', modified_by := ''' || COALESCE(modified_by, '') || ''''	
+		|| ', update_datetime := ''' || COALESCE(update_datetime, now()) || ''''		
+		|| ', url := ''' || COALESCE(url, '') || ''''	
+		|| ', user_name := ''' || COALESCE(user_name, '') || ''''	
+		|| ', password := ''' || COALESCE(password, '') || ''''	
+		|| ', type := ''' || COALESCE(type, '') || ''''	
+		|| ', include_files_expression := ''' || COALESCE(include_files_expression, '') || ''''	
+		|| ', files_filter_expression := ''' || COALESCE(files_filter_expression, '') || ''''		
+		|| ', status :=  ' || status 		
+		|| ', pull_frequency:=  ' || pull_frequency 	
+		|| ', datasource_descr_id := ''' || COALESCE(internet_id, '') || ''''		
+		|| ', frequency_id := ''' || COALESCE(frequency_id, 'undefined') || ''''						
+		|| ', start_date:=   ' || COALESCE(TRIM(to_char(start_date, '999999999999')), 'NULL')	  
+		|| ', end_date:=  ' || COALESCE(TRIM(to_char(end_date, '999999999999')), 'NULL')
+		|| ', full_copy :=  ' || _full_copy						
+		|| ' );'  as inserts	   
+	FROM products.internet_source;
+
+
+
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_eumetcast_source('
+		|| '  eumetcast_id := ''' || COALESCE(eumetcast_id, '') || ''''
+		|| ', filter_expression_jrc := ''' || COALESCE(filter_expression_jrc, '') || ''''
+		|| ', collection_name := ''' || COALESCE(collection_name, '') || ''''
+		|| ', status :=  ' || status	
+		|| ', internal_identifier := ''' || COALESCE(internal_identifier, '') || ''''	
+		|| ', collection_reference := ''' || COALESCE(collection_reference, '') || ''''	
+		|| ', acronym := ''' || COALESCE(acronym, '') || ''''
+		|| ', description := ''' || COALESCE(replace(description, '''', '"'), '') || ''''	
+		|| ', product_status := ''' || COALESCE(product_status, '') || ''''
+		|| ', date_creation := ' || COALESCE('''' || to_char(date_creation, 'YYYY-MM-DD') || '''', 'NULL') 	
+		|| ', date_revision := ' || COALESCE('''' || to_char(date_revision, 'YYYY-MM-DD') || '''', 'NULL') 		
+		|| ', date_publication := ' || COALESCE('''' || to_char(date_publication, 'YYYY-MM-DD') || '''', 'NULL') 	
+		|| ', west_bound_longitude :=  ' || COALESCE(TRIM(to_char(west_bound_longitude, '99999999')), 'NULL')
+		|| ', east_bound_longitude :=  ' || COALESCE(TRIM(to_char(east_bound_longitude, '99999999')), 'NULL')
+		|| ', north_bound_latitude :=  ' || COALESCE(TRIM(to_char(north_bound_latitude, '99999999')), 'NULL')
+		|| ', south_bound_latitude :=  ' || COALESCE(TRIM(to_char(south_bound_latitude, '99999999')), 'NULL')
+		|| ', provider_short_name := ''' || COALESCE(provider_short_name, '') || ''''
+		|| ', collection_type := ''' || COALESCE(collection_type, '') || ''''
+		|| ', keywords_distribution := ''' || COALESCE(keywords_distribution, '') || ''''	
+		|| ', keywords_theme := ''' || COALESCE(keywords_theme, '') || ''''
+		|| ', keywords_societal_benefit_area := ''' || COALESCE(keywords_societal_benefit_area, '') || ''''
+		|| ', orbit_type := ''' || COALESCE(orbit_type, '') || ''''
+		|| ', satellite := ''' || COALESCE(satellite, '') || ''''
+		|| ', satellite_description := ''' || COALESCE(satellite_description, '') || ''''	
+		|| ', instrument := ''' || COALESCE(instrument, '') || ''''
+		|| ', spatial_coverage := ''' || COALESCE(spatial_coverage, '') || ''''
+		|| ', thumbnails := ''' || COALESCE(thumbnails, '') || ''''
+		|| ', online_resources := ''' || COALESCE(replace(online_resources, '''', '"'), '') || ''''
+		|| ', distribution := ''' || COALESCE(distribution, '') || ''''
+		|| ', channels := ''' || COALESCE(channels , '') || ''''
+		|| ', data_access := ''' || COALESCE(replace(data_access, '''', '"'), '') || ''''
+		|| ', available_format := ''' || COALESCE(available_format, '') || ''''
+		|| ', version := ''' || COALESCE(version, '') || ''''
+		|| ', typical_file_name := ''' || COALESCE(typical_file_name, '') || ''''
+		|| ', average_file_size := ''' || COALESCE(average_file_size, '') || ''''
+		|| ', frequency := ''' || COALESCE(frequency, '') || ''''
+		|| ', legal_constraints_access_constraint := ''' || COALESCE(legal_constraints_access_constraint, '') || ''''
+		|| ', legal_use_constraint := ''' || COALESCE(legal_use_constraint, '') || ''''
+		|| ', legal_constraints_data_policy := ''' || COALESCE(legal_constraints_data_policy, '') || ''''	
+		|| ', entry_date := ' || COALESCE('''' || to_char(entry_date, 'YYYY-MM-DD') || '''', 'NULL')
+		|| ', reference_file := ''' || COALESCE(reference_file, '') || ''''
+		|| ', datasource_descr_id := ''' || COALESCE(eumetcast_id, '') || ''''	
+		|| ', full_copy :=  ' || _full_copy						
+		|| ' );'  as inserts	   
+	FROM products.eumetcast_source;
+
+	  
+	  
+	RETURN QUERY SELECT 'SELECT products.update_insert_datasource_description('
+		|| '  datasource_descr_id := ''' || COALESCE(datasource_descr_id, '') || ''''
+		|| ', format_type := ''' || COALESCE(format_type, '') || ''''
+		|| ', file_extension := ''' || COALESCE(file_extension, '') || ''''
+		|| ', delimiter := ''' || COALESCE(delimiter, '') || ''''
+		|| ', date_format := ''' || COALESCE(date_format, '') || ''''	
+		|| ', date_position := ''' || COALESCE(date_position, '') || ''''	
+		|| ', product_identifier := ''' || COALESCE(product_identifier, '') || ''''
+		|| ', prod_id_position :=  ' || COALESCE(TRIM(to_char(prod_id_position, '99999999')), 'NULL')
+		|| ', prod_id_length :=  ' || COALESCE(TRIM(to_char(prod_id_length, '99999999')), 'NULL')
+		|| ', area_type := ''' || COALESCE(area_type, '') || ''''	
+		|| ', area_position := ''' || COALESCE(area_position, '') || ''''
+		|| ', area_length :=  ' || COALESCE(TRIM(to_char(area_length, '99999999')), 'NULL')
+		|| ', preproc_type := ''' || COALESCE(preproc_type, '') || ''''	
+		|| ', product_release := ''' || COALESCE(product_release, '') || ''''
+		|| ', release_position := ''' || COALESCE(release_position, '') || ''''
+		|| ', release_length :=  ' || COALESCE(TRIM(to_char(release_length, '99999999')), 'NULL')
+		|| ', native_mapset := ''' || COALESCE(native_mapset, '') || ''''	
+		|| ', full_copy :=  ' || _full_copy						
+		|| ' );'  as inserts	   
+	FROM products.datasource_description dd;
+
+
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_product_acquisition_data_source('
+		|| ' productcode := ''' || productcode || ''''	
+		|| ', subproductcode := ''' || subproductcode || ''''		
+		|| ', version := ''' || version || ''''	
+		|| ', data_source_id := ''' || data_source_id || ''''	
+		|| ', defined_by := ''' || defined_by || ''''	
+		|| ', type := ''' || type || ''''		
+		|| ', activated :=  ' || activated 	
+		|| ', store_original_data :=  ' || store_original_data 	
+		|| ', full_copy :=  ' || _full_copy						
+		|| ' );'  as inserts	   
+	FROM products.product_acquisition_data_source;
+
+
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_sub_datasource_description('
+		|| '  productcode := ''' || COALESCE(productcode, '') || ''''
+		|| ', subproductcode := ''' || COALESCE(subproductcode, '') || ''''
+		|| ', version := ''' || COALESCE(version, '') || ''''
+		|| ', datasource_descr_id := ''' || COALESCE(datasource_descr_id, '') || ''''
+		|| ', scale_factor :=  ' || COALESCE(TRIM(to_char(scale_factor, '99999999')), 'NULL')
+		|| ', scale_offset :=  ' || COALESCE(TRIM(to_char(scale_offset, '99999999')), 'NULL')
+		|| ', no_data :=  ' || COALESCE(TRIM(to_char(no_data, '99999999')), 'NULL')
+		|| ', data_type_id := ''' || COALESCE(data_type_id, '') || ''''	
+		|| ', mask_min :=  ' || COALESCE(TRIM(to_char(mask_min, '99999999')), 'NULL')
+		|| ', mask_max :=  ' || COALESCE(TRIM(to_char(mask_max, '99999999')), 'NULL')	
+		|| ', re_process := ''' || COALESCE(re_process, '') || ''''
+		|| ', re_extract := ''' || COALESCE(re_extract, '') || ''''		
+		|| ', full_copy :=  ' || _full_copy						
+		|| ' );'  as inserts	   
+	FROM products.sub_datasource_description;
+
+
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_ingestion('
+		|| '  productcode := ''' || COALESCE(productcode, '') || ''''
+		|| ', subproductcode := ''' || COALESCE(subproductcode, '') || ''''
+		|| ', version := ''' || COALESCE(version, '') || ''''
+		|| ', mapsetcode := ''' || COALESCE(mapsetcode, '') || ''''
+		|| ', defined_by := ''' || COALESCE(defined_by, '') || ''''
+		|| ', activated :=  ' || activated 	
+		|| ', wait_for_all_files :=  ' || wait_for_all_files 		
+		|| ', input_to_process_re := ''' || COALESCE(input_to_process_re, '') || ''''
+		|| ', enabled :=  ' || enabled 		
+		|| ', full_copy :=  ' || _full_copy						
+		|| ' );'  as inserts	   
+	FROM products.ingestion;
+
+
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_processing('
+		|| ' process_id :=  ' || process_id
+		|| ', defined_by := ''' || COALESCE(defined_by, '') || ''''
+		|| ', output_mapsetcode := ''' || COALESCE(output_mapsetcode, '') || ''''
+		|| ', activated :=  ' || activated 	
+		|| ', derivation_method := ''' || COALESCE(derivation_method, '') || ''''
+		|| ', algorithm := ''' || COALESCE(algorithm, '') || ''''
+		|| ', priority := ''' || COALESCE(priority, '') || ''''
+		|| ', enabled :=  ' || enabled 	
+		|| ', full_copy :=  ' || _full_copy						
+		|| ' );'  as inserts	   
+	FROM products.processing;
+
+
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_process_product('
+		|| ' process_id :=  ' || process_id
+		|| ', productcode := ''' || COALESCE(productcode, '') || ''''
+		|| ', subproductcode := ''' || COALESCE(subproductcode, '') || ''''
+		|| ', version := ''' || COALESCE(version, '') || ''''
+		|| ', mapsetcode := ''' || COALESCE(mapsetcode, '') || ''''
+		|| ', type := ''' || COALESCE(type, '') || ''''
+		|| ', activated :=  ' || activated 	
+		|| ', final :=  ' || final 		
+		|| ', date_format := ''' || COALESCE(date_format, '') || ''''
+		|| ', start_date:=   ' || COALESCE(TRIM(to_char(start_date, '999999999999')), 'NULL')	  
+		|| ', end_date:=  ' || COALESCE(TRIM(to_char(end_date, '999999999999')), 'NULL')	
+		|| ', full_copy :=  ' || _full_copy						
+		|| ' );'  as inserts	   
+	FROM products.process_product;
+
+		
+	RETURN QUERY SELECT 'SELECT analysis.update_insert_i18n('
+		|| ' label := ''' || COALESCE(label, '') || ''''
+		|| ', eng := ''' || COALESCE(replace(eng, '''', '"'), '') || ''''	
+		|| ', fra := ''' || COALESCE(replace(fra, '''', '"'), '') || ''''	
+		|| ', por := ''' || COALESCE(replace(por, '''', '"'), '') || ''''	
+		|| ', lang1 := ''' || COALESCE(replace(lang1, '''', '"'), '') || ''''	
+		|| ', lang2 := ''' || COALESCE(replace(lang2, '''', '"'), '') || ''''	
+		|| ', lang3 := ''' || COALESCE(replace(lang3, '''', '"'), '') || ''''	
+		|| ' );'  as inserts	   
+	FROM analysis.i18n;
+
+
+	RETURN QUERY SELECT 'SELECT analysis.update_insert_languages('
+		|| ' langcode := ''' || COALESCE(langcode, '') || ''''
+		|| ', langdescription := ''' || COALESCE(langdescription, '') || ''''
+		|| ', active :=  ' || active 	
+		|| ' );'  as inserts	   
+	FROM analysis.languages;
+	
+
+														  
+	RETURN QUERY SELECT 'SELECT analysis.update_insert_legend('
+		|| ' legend_id :=  ' || legend_id
+		|| ', legend_name := ''' || COALESCE(legend_name, '') || ''''
+		|| ', step_type := ''' || COALESCE(step_type, '') || ''''
+		|| ', min_value :=  ' || COALESCE(TRIM(to_char(min_value, '99999999')), 'NULL')
+		|| ', max_value :=  ' || COALESCE(TRIM(to_char(max_value, '99999999')), 'NULL')	
+		|| ', min_real_value := ''' || COALESCE(min_real_value, '') || ''''
+		|| ', max_real_value := ''' || COALESCE(max_real_value, '') || ''''
+		|| ', colorbar := ''' || COALESCE(colorbar, '') || ''''		
+		|| ', step :=  ' || COALESCE(TRIM(to_char(step, '99999999')), 'NULL')
+		|| ', step_range_from :=  ' || COALESCE(TRIM(to_char(step_range_from, '99999999')), 'NULL')
+		|| ', step_range_to :=  ' || COALESCE(TRIM(to_char(step_range_to, '99999999')), 'NULL')
+		|| ', unit := ''' || COALESCE(unit, '') || ''''
+		|| ' );'  as inserts	   
+	FROM analysis.legend;
+
+	
+
+	RETURN QUERY SELECT 'SELECT analysis.update_insert_legend_step('
+		|| ' legend_id :=  ' || legend_id
+		|| ', from_step :=  ' || from_step
+		|| ', to_step :=  ' || to_step		
+		|| ', color_rgb := ''' || COALESCE(color_rgb, '') || ''''
+		|| ', color_label := ''' || COALESCE(color_label, '') || ''''
+		|| ', group_label := ''' || COALESCE(group_label, '') || ''''
+		|| ' );'  as inserts	   
+	FROM analysis.legend_step;
+
+
+	
+	RETURN QUERY SELECT 'SELECT analysis.update_insert_product_legend('	
+		|| ' productcode := ''' || COALESCE(productcode, '') || ''''
+		|| ', subproductcode := ''' || COALESCE(subproductcode, '') || ''''
+		|| ', version := ''' || COALESCE(version, '') || ''''
+		|| ', legend_id :=  ' || legend_id
+		|| ', default_legend :=  ' || default_legend			
+		|| ' );'  as inserts	   
+	FROM analysis.product_legend;
+
+	
+																			
+	RETURN QUERY SELECT 'SELECT analysis.update_insert_timeseries_drawproperties('
+		|| ' productcode := ''' || COALESCE(productcode, '') || ''''
+		|| ', subproductcode := ''' || COALESCE(subproductcode, '') || ''''
+		|| ', version := ''' || COALESCE(version, '') || ''''		
+		|| ', title := ''' || COALESCE(title, '') || ''''
+		|| ', unit := ''' || COALESCE(unit, '') || ''''		
+		|| ', min :=  ' || COALESCE(TRIM(to_char(min, '99999999')), 'NULL')
+		|| ', max :=  ' || COALESCE(TRIM(to_char(max, '99999999')), 'NULL')		
+		|| ', oposite :=  ' || oposite				
+		|| ', tsname_in_legend := ''' || COALESCE(tsname_in_legend, '') || ''''
+		|| ', charttype := ''' || COALESCE(charttype, '') || ''''
+		|| ', linestyle := ''' || COALESCE(linestyle, '') || ''''
+		|| ', linewidth :=  ' || COALESCE(TRIM(to_char(linewidth, '99999999')), 'NULL')
+		|| ', color := ''' || COALESCE(color, '') || ''''
+		|| ', yaxes_id := ''' || COALESCE(yaxes_id, '') || ''''
+		|| ', title_color := ''' || COALESCE(title_color, '') || ''''
+		|| ' );'  as inserts	   
+	FROM analysis.timeseries_drawproperties;	
+	
+END;
+$_$;
+
+
+ALTER FUNCTION products.export_all_data(full_copy boolean) OWNER TO estation;
 
 --
 -- TOC entry 229 (class 1255 OID 18610)
@@ -2007,7 +2656,7 @@ CREATE SEQUENCE legend_legend_id_seq
 ALTER TABLE analysis.legend_legend_id_seq OWNER TO estation;
 
 --
--- TOC entry 2218 (class 0 OID 0)
+-- TOC entry 2223 (class 0 OID 0)
 -- Dependencies: 175
 -- Name: legend_legend_id_seq; Type: SEQUENCE OWNED BY; Schema: analysis; Owner: estation
 --
@@ -2033,7 +2682,7 @@ CREATE TABLE legend_step (
 ALTER TABLE analysis.legend_step OWNER TO estation;
 
 --
--- TOC entry 2219 (class 0 OID 0)
+-- TOC entry 2224 (class 0 OID 0)
 -- Dependencies: 176
 -- Name: COLUMN legend_step.color_rgb; Type: COMMENT; Schema: analysis; Owner: estation
 --
@@ -2132,7 +2781,7 @@ CREATE TABLE datasource_description (
 ALTER TABLE products.datasource_description OWNER TO estation;
 
 --
--- TOC entry 2220 (class 0 OID 0)
+-- TOC entry 2225 (class 0 OID 0)
 -- Dependencies: 179
 -- Name: COLUMN datasource_description.format_type; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2143,7 +2792,7 @@ COMMENT ON COLUMN datasource_description.format_type IS 'Values:
 
 
 --
--- TOC entry 2221 (class 0 OID 0)
+-- TOC entry 2226 (class 0 OID 0)
 -- Dependencies: 179
 -- Name: COLUMN datasource_description.date_format; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2152,7 +2801,7 @@ COMMENT ON COLUMN datasource_description.date_format IS 'A string, case insensit
 
 
 --
--- TOC entry 2222 (class 0 OID 0)
+-- TOC entry 2227 (class 0 OID 0)
 -- Dependencies: 179
 -- Name: COLUMN datasource_description.product_identifier; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2161,7 +2810,7 @@ COMMENT ON COLUMN datasource_description.product_identifier IS 'Comma-separated 
 
 
 --
--- TOC entry 2223 (class 0 OID 0)
+-- TOC entry 2228 (class 0 OID 0)
 -- Dependencies: 179
 -- Name: COLUMN datasource_description.prod_id_position; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2173,7 +2822,7 @@ DELIMITED - comma-separated integers indicating the delimiter positions of the P
 
 
 --
--- TOC entry 2224 (class 0 OID 0)
+-- TOC entry 2229 (class 0 OID 0)
 -- Dependencies: 179
 -- Name: COLUMN datasource_description.prod_id_length; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2182,7 +2831,7 @@ COMMENT ON COLUMN datasource_description.prod_id_length IS 'In case of FIXED for
 
 
 --
--- TOC entry 2225 (class 0 OID 0)
+-- TOC entry 2230 (class 0 OID 0)
 -- Dependencies: 179
 -- Name: COLUMN datasource_description.area_type; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2195,7 +2844,7 @@ COMMENT ON COLUMN datasource_description.area_type IS 'Values:
 
 
 --
--- TOC entry 2226 (class 0 OID 0)
+-- TOC entry 2231 (class 0 OID 0)
 -- Dependencies: 179
 -- Name: COLUMN datasource_description.area_position; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2207,7 +2856,7 @@ DELIMITED - comma-separated integers indicating the delimiter positions of the A
 
 
 --
--- TOC entry 2227 (class 0 OID 0)
+-- TOC entry 2232 (class 0 OID 0)
 -- Dependencies: 179
 -- Name: COLUMN datasource_description.area_length; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2216,7 +2865,7 @@ COMMENT ON COLUMN datasource_description.area_length IS 'In case of FIXED format
 
 
 --
--- TOC entry 2228 (class 0 OID 0)
+-- TOC entry 2233 (class 0 OID 0)
 -- Dependencies: 179
 -- Name: COLUMN datasource_description.product_release; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2225,7 +2874,7 @@ COMMENT ON COLUMN datasource_description.product_release IS 'String indicating t
 
 
 --
--- TOC entry 2229 (class 0 OID 0)
+-- TOC entry 2234 (class 0 OID 0)
 -- Dependencies: 179
 -- Name: COLUMN datasource_description.release_position; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2237,7 +2886,7 @@ DELIMITED - comma-separated integers indicating the delimiter positions of the R
 
 
 --
--- TOC entry 2230 (class 0 OID 0)
+-- TOC entry 2235 (class 0 OID 0)
 -- Dependencies: 179
 -- Name: COLUMN datasource_description.release_length; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2259,7 +2908,7 @@ CREATE TABLE date_format (
 ALTER TABLE products.date_format OWNER TO estation;
 
 --
--- TOC entry 2231 (class 0 OID 0)
+-- TOC entry 2236 (class 0 OID 0)
 -- Dependencies: 180
 -- Name: COLUMN date_format.date_format; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2268,7 +2917,7 @@ COMMENT ON COLUMN date_format.date_format IS 'A string, case insensitive, in YYY
 
 
 --
--- TOC entry 2232 (class 0 OID 0)
+-- TOC entry 2237 (class 0 OID 0)
 -- Dependencies: 180
 -- Name: COLUMN date_format.definition; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2330,7 +2979,7 @@ CREATE TABLE eumetcast_source (
 ALTER TABLE products.eumetcast_source OWNER TO estation;
 
 --
--- TOC entry 2233 (class 0 OID 0)
+-- TOC entry 2238 (class 0 OID 0)
 -- Dependencies: 181
 -- Name: COLUMN eumetcast_source.status; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2356,7 +3005,7 @@ CREATE TABLE frequency (
 ALTER TABLE products.frequency OWNER TO estation;
 
 --
--- TOC entry 2234 (class 0 OID 0)
+-- TOC entry 2239 (class 0 OID 0)
 -- Dependencies: 182
 -- Name: COLUMN frequency.frequency_id; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2373,7 +3022,7 @@ DEKAD!=10-days
 
 
 --
--- TOC entry 2235 (class 0 OID 0)
+-- TOC entry 2240 (class 0 OID 0)
 -- Dependencies: 182
 -- Name: COLUMN frequency.frequency_type; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2408,7 +3057,7 @@ CREATE TABLE ingestion (
 ALTER TABLE products.ingestion OWNER TO estation;
 
 --
--- TOC entry 2236 (class 0 OID 0)
+-- TOC entry 2241 (class 0 OID 0)
 -- Dependencies: 183
 -- Name: TABLE ingestion; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2417,7 +3066,7 @@ COMMENT ON TABLE ingestion IS 'Define which products/versions have to be ingeste
 
 
 --
--- TOC entry 2237 (class 0 OID 0)
+-- TOC entry 2242 (class 0 OID 0)
 -- Dependencies: 183
 -- Name: COLUMN ingestion.defined_by; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2426,7 +3075,7 @@ COMMENT ON COLUMN ingestion.defined_by IS 'values: JRC or USER';
 
 
 --
--- TOC entry 2238 (class 0 OID 0)
+-- TOC entry 2243 (class 0 OID 0)
 -- Dependencies: 183
 -- Name: COLUMN ingestion.wait_for_all_files; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2465,7 +3114,7 @@ CREATE TABLE internet_source (
 ALTER TABLE products.internet_source OWNER TO estation;
 
 --
--- TOC entry 2239 (class 0 OID 0)
+-- TOC entry 2244 (class 0 OID 0)
 -- Dependencies: 184
 -- Name: COLUMN internet_source.defined_by; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2474,7 +3123,7 @@ COMMENT ON COLUMN internet_source.defined_by IS 'values: JRC or USER';
 
 
 --
--- TOC entry 2240 (class 0 OID 0)
+-- TOC entry 2245 (class 0 OID 0)
 -- Dependencies: 184
 -- Name: COLUMN internet_source.modified_by; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2483,7 +3132,7 @@ COMMENT ON COLUMN internet_source.modified_by IS 'Username as value';
 
 
 --
--- TOC entry 2241 (class 0 OID 0)
+-- TOC entry 2246 (class 0 OID 0)
 -- Dependencies: 184
 -- Name: COLUMN internet_source.status; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2493,7 +3142,7 @@ Active/Non active';
 
 
 --
--- TOC entry 2242 (class 0 OID 0)
+-- TOC entry 2247 (class 0 OID 0)
 -- Dependencies: 184
 -- Name: COLUMN internet_source.pull_frequency; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2527,7 +3176,7 @@ CREATE TABLE mapset (
 ALTER TABLE products.mapset OWNER TO estation;
 
 --
--- TOC entry 2243 (class 0 OID 0)
+-- TOC entry 2248 (class 0 OID 0)
 -- Dependencies: 185
 -- Name: COLUMN mapset.defined_by; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2609,7 +3258,7 @@ CREATE TABLE product (
 ALTER TABLE products.product OWNER TO estation;
 
 --
--- TOC entry 2244 (class 0 OID 0)
+-- TOC entry 2249 (class 0 OID 0)
 -- Dependencies: 188
 -- Name: COLUMN product.defined_by; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2618,7 +3267,7 @@ COMMENT ON COLUMN product.defined_by IS 'values: JRC or USER';
 
 
 --
--- TOC entry 2245 (class 0 OID 0)
+-- TOC entry 2250 (class 0 OID 0)
 -- Dependencies: 188
 -- Name: COLUMN product.product_type; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2627,7 +3276,7 @@ COMMENT ON COLUMN product.product_type IS 'A product can be of type Native, Inge
 
 
 --
--- TOC entry 2246 (class 0 OID 0)
+-- TOC entry 2251 (class 0 OID 0)
 -- Dependencies: 188
 -- Name: COLUMN product.descriptive_name; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2636,7 +3285,7 @@ COMMENT ON COLUMN product.descriptive_name IS 'A clear and descriptive name of t
 
 
 --
--- TOC entry 2247 (class 0 OID 0)
+-- TOC entry 2252 (class 0 OID 0)
 -- Dependencies: 188
 -- Name: COLUMN product.frequency_id; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2653,7 +3302,7 @@ DEKAD!=10-days
 
 
 --
--- TOC entry 2248 (class 0 OID 0)
+-- TOC entry 2253 (class 0 OID 0)
 -- Dependencies: 188
 -- Name: COLUMN product.date_format; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2662,7 +3311,7 @@ COMMENT ON COLUMN product.date_format IS 'A string, case insensitive, in YYYYMMD
 
 
 --
--- TOC entry 2249 (class 0 OID 0)
+-- TOC entry 2254 (class 0 OID 0)
 -- Dependencies: 188
 -- Name: COLUMN product.timeseries_role; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2693,7 +3342,7 @@ CREATE TABLE product_acquisition_data_source (
 ALTER TABLE products.product_acquisition_data_source OWNER TO estation;
 
 --
--- TOC entry 2250 (class 0 OID 0)
+-- TOC entry 2255 (class 0 OID 0)
 -- Dependencies: 189
 -- Name: COLUMN product_acquisition_data_source.defined_by; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2702,7 +3351,7 @@ COMMENT ON COLUMN product_acquisition_data_source.defined_by IS 'values: JRC or 
 
 
 --
--- TOC entry 2251 (class 0 OID 0)
+-- TOC entry 2256 (class 0 OID 0)
 -- Dependencies: 189
 -- Name: COLUMN product_acquisition_data_source.type; Type: COMMENT; Schema: products; Owner: estation
 --
@@ -2806,7 +3455,7 @@ ALTER TABLE products.thema_product OWNER TO estation;
 SET search_path = analysis, pg_catalog;
 
 --
--- TOC entry 2008 (class 2604 OID 17992)
+-- TOC entry 2015 (class 2604 OID 17992)
 -- Name: legend_id; Type: DEFAULT; Schema: analysis; Owner: estation
 --
 
@@ -2814,7 +3463,7 @@ ALTER TABLE ONLY legend ALTER COLUMN legend_id SET DEFAULT nextval('legend_legen
 
 
 --
--- TOC entry 2035 (class 2606 OID 17407)
+-- TOC entry 2040 (class 2606 OID 17407)
 -- Name: Primary key violation; Type: CONSTRAINT; Schema: analysis; Owner: estation; Tablespace: 
 --
 
@@ -2823,16 +3472,7 @@ ALTER TABLE ONLY legend_step
 
 
 --
--- TOC entry 2031 (class 2606 OID 17409)
--- Name: Uniqueness of legend violation; Type: CONSTRAINT; Schema: analysis; Owner: estation; Tablespace: 
---
-
-ALTER TABLE ONLY legend
-    ADD CONSTRAINT "Uniqueness of legend violation" UNIQUE (legend_name);
-
-
---
--- TOC entry 2027 (class 2606 OID 17411)
+-- TOC entry 2034 (class 2606 OID 17411)
 -- Name: i18n_pkey; Type: CONSTRAINT; Schema: analysis; Owner: estation; Tablespace: 
 --
 
@@ -2841,7 +3481,7 @@ ALTER TABLE ONLY i18n
 
 
 --
--- TOC entry 2029 (class 2606 OID 17413)
+-- TOC entry 2036 (class 2606 OID 17413)
 -- Name: languages_pkey; Type: CONSTRAINT; Schema: analysis; Owner: estation; Tablespace: 
 --
 
@@ -2850,7 +3490,7 @@ ALTER TABLE ONLY languages
 
 
 --
--- TOC entry 2033 (class 2606 OID 17417)
+-- TOC entry 2038 (class 2606 OID 17417)
 -- Name: legend_pkey; Type: CONSTRAINT; Schema: analysis; Owner: estation; Tablespace: 
 --
 
@@ -2859,7 +3499,7 @@ ALTER TABLE ONLY legend
 
 
 --
--- TOC entry 2037 (class 2606 OID 17419)
+-- TOC entry 2042 (class 2606 OID 17419)
 -- Name: product_legend_pkey; Type: CONSTRAINT; Schema: analysis; Owner: estation; Tablespace: 
 --
 
@@ -2868,7 +3508,7 @@ ALTER TABLE ONLY product_legend
 
 
 --
--- TOC entry 2069 (class 2606 OID 18362)
+-- TOC entry 2074 (class 2606 OID 18362)
 -- Name: timeseries_drawproperties_pk; Type: CONSTRAINT; Schema: analysis; Owner: estation; Tablespace: 
 --
 
@@ -2879,7 +3519,7 @@ ALTER TABLE ONLY timeseries_drawproperties
 SET search_path = products, pg_catalog;
 
 --
--- TOC entry 2023 (class 2606 OID 17420)
+-- TOC entry 2030 (class 2606 OID 17420)
 -- Name: check_datasource_chk; Type: CHECK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -2888,7 +3528,7 @@ ALTER TABLE product_acquisition_data_source
 
 
 --
--- TOC entry 2039 (class 2606 OID 17422)
+-- TOC entry 2044 (class 2606 OID 17422)
 -- Name: data_type_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -2897,7 +3537,7 @@ ALTER TABLE ONLY data_type
 
 
 --
--- TOC entry 2041 (class 2606 OID 17424)
+-- TOC entry 2046 (class 2606 OID 17424)
 -- Name: datasource_description_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -2906,7 +3546,7 @@ ALTER TABLE ONLY datasource_description
 
 
 --
--- TOC entry 2043 (class 2606 OID 17426)
+-- TOC entry 2048 (class 2606 OID 17426)
 -- Name: date_format_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -2915,7 +3555,7 @@ ALTER TABLE ONLY date_format
 
 
 --
--- TOC entry 2045 (class 2606 OID 17428)
+-- TOC entry 2050 (class 2606 OID 17428)
 -- Name: eumetcast_source_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -2924,7 +3564,7 @@ ALTER TABLE ONLY eumetcast_source
 
 
 --
--- TOC entry 2047 (class 2606 OID 17430)
+-- TOC entry 2052 (class 2606 OID 17430)
 -- Name: frequency_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -2933,7 +3573,7 @@ ALTER TABLE ONLY frequency
 
 
 --
--- TOC entry 2049 (class 2606 OID 17432)
+-- TOC entry 2054 (class 2606 OID 17432)
 -- Name: ingestion_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -2942,7 +3582,7 @@ ALTER TABLE ONLY ingestion
 
 
 --
--- TOC entry 2051 (class 2606 OID 17434)
+-- TOC entry 2056 (class 2606 OID 17434)
 -- Name: internet_source_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -2951,7 +3591,7 @@ ALTER TABLE ONLY internet_source
 
 
 --
--- TOC entry 2053 (class 2606 OID 17436)
+-- TOC entry 2058 (class 2606 OID 17436)
 -- Name: mapset_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -2960,7 +3600,7 @@ ALTER TABLE ONLY mapset
 
 
 --
--- TOC entry 2055 (class 2606 OID 17438)
+-- TOC entry 2060 (class 2606 OID 17438)
 -- Name: process_input_product_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -2969,7 +3609,7 @@ ALTER TABLE ONLY process_product
 
 
 --
--- TOC entry 2057 (class 2606 OID 17440)
+-- TOC entry 2062 (class 2606 OID 17440)
 -- Name: processing_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -2978,7 +3618,7 @@ ALTER TABLE ONLY processing
 
 
 --
--- TOC entry 2061 (class 2606 OID 17442)
+-- TOC entry 2066 (class 2606 OID 17442)
 -- Name: product_acquisition_data_source_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -2987,7 +3627,7 @@ ALTER TABLE ONLY product_acquisition_data_source
 
 
 --
--- TOC entry 2064 (class 2606 OID 17444)
+-- TOC entry 2069 (class 2606 OID 17444)
 -- Name: product_category_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -2996,7 +3636,7 @@ ALTER TABLE ONLY product_category
 
 
 --
--- TOC entry 2059 (class 2606 OID 17446)
+-- TOC entry 2064 (class 2606 OID 17446)
 -- Name: product_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -3005,7 +3645,7 @@ ALTER TABLE ONLY product
 
 
 --
--- TOC entry 2075 (class 2606 OID 18624)
+-- TOC entry 2080 (class 2606 OID 18624)
 -- Name: spirits_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -3014,7 +3654,7 @@ ALTER TABLE ONLY spirits
 
 
 --
--- TOC entry 2067 (class 2606 OID 17448)
+-- TOC entry 2072 (class 2606 OID 17448)
 -- Name: sub_datasource_description_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -3023,7 +3663,7 @@ ALTER TABLE ONLY sub_datasource_description
 
 
 --
--- TOC entry 2071 (class 2606 OID 18387)
+-- TOC entry 2076 (class 2606 OID 18387)
 -- Name: thema_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -3032,7 +3672,7 @@ ALTER TABLE ONLY thema
 
 
 --
--- TOC entry 2073 (class 2606 OID 18395)
+-- TOC entry 2078 (class 2606 OID 18395)
 -- Name: thema_product_pk; Type: CONSTRAINT; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -3041,7 +3681,7 @@ ALTER TABLE ONLY thema_product
 
 
 --
--- TOC entry 2062 (class 1259 OID 17449)
+-- TOC entry 2067 (class 1259 OID 17449)
 -- Name: product_categories_order_index_key; Type: INDEX; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -3049,7 +3689,7 @@ CREATE UNIQUE INDEX product_categories_order_index_key ON product_category USING
 
 
 --
--- TOC entry 2065 (class 1259 OID 17450)
+-- TOC entry 2070 (class 1259 OID 17450)
 -- Name: unique_product_category_name; Type: INDEX; Schema: products; Owner: estation; Tablespace: 
 --
 
@@ -3057,7 +3697,7 @@ CREATE UNIQUE INDEX unique_product_category_name ON product_category USING btree
 
 
 --
--- TOC entry 2105 (class 2620 OID 18662)
+-- TOC entry 2110 (class 2620 OID 18662)
 -- Name: check_update; Type: TRIGGER; Schema: products; Owner: estation
 --
 
@@ -3065,7 +3705,7 @@ CREATE TRIGGER check_update BEFORE UPDATE ON ingestion FOR EACH ROW WHEN (((old.
 
 
 --
--- TOC entry 2103 (class 2620 OID 18592)
+-- TOC entry 2108 (class 2620 OID 18592)
 -- Name: insert_eumetcast_source; Type: TRIGGER; Schema: products; Owner: estation
 --
 
@@ -3073,7 +3713,7 @@ CREATE TRIGGER insert_eumetcast_source BEFORE INSERT ON eumetcast_source FOR EAC
 
 
 --
--- TOC entry 2104 (class 2620 OID 18661)
+-- TOC entry 2109 (class 2620 OID 18661)
 -- Name: insert_ingestion; Type: TRIGGER; Schema: products; Owner: estation
 --
 
@@ -3081,7 +3721,7 @@ CREATE TRIGGER insert_ingestion BEFORE INSERT ON ingestion FOR EACH ROW EXECUTE 
 
 
 --
--- TOC entry 2106 (class 2620 OID 18590)
+-- TOC entry 2111 (class 2620 OID 18590)
 -- Name: insert_internet_source; Type: TRIGGER; Schema: products; Owner: estation
 --
 
@@ -3091,7 +3731,7 @@ CREATE TRIGGER insert_internet_source BEFORE INSERT ON internet_source FOR EACH 
 SET search_path = analysis, pg_catalog;
 
 --
--- TOC entry 2077 (class 2606 OID 17451)
+-- TOC entry 2082 (class 2606 OID 17451)
 -- Name: legend_pkey; Type: FK CONSTRAINT; Schema: analysis; Owner: estation
 --
 
@@ -3100,7 +3740,7 @@ ALTER TABLE ONLY product_legend
 
 
 --
--- TOC entry 2076 (class 2606 OID 17456)
+-- TOC entry 2081 (class 2606 OID 17456)
 -- Name: legend_step_legend_id_fkey; Type: FK CONSTRAINT; Schema: analysis; Owner: estation
 --
 
@@ -3109,7 +3749,7 @@ ALTER TABLE ONLY legend_step
 
 
 --
--- TOC entry 2078 (class 2606 OID 17461)
+-- TOC entry 2083 (class 2606 OID 17461)
 -- Name: product_legend_product_pkey; Type: FK CONSTRAINT; Schema: analysis; Owner: estation
 --
 
@@ -3120,7 +3760,7 @@ ALTER TABLE ONLY product_legend
 SET search_path = products, pg_catalog;
 
 --
--- TOC entry 2091 (class 2606 OID 18479)
+-- TOC entry 2096 (class 2606 OID 18479)
 -- Name: data_type_product_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3129,7 +3769,7 @@ ALTER TABLE ONLY product
 
 
 --
--- TOC entry 2096 (class 2606 OID 18544)
+-- TOC entry 2101 (class 2606 OID 18544)
 -- Name: data_type_sub_datasource_description_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3138,7 +3778,7 @@ ALTER TABLE ONLY sub_datasource_description
 
 
 --
--- TOC entry 2081 (class 2606 OID 18509)
+-- TOC entry 2086 (class 2606 OID 18509)
 -- Name: datasource_description_eumetcast_source_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3147,7 +3787,7 @@ ALTER TABLE ONLY eumetcast_source
 
 
 --
--- TOC entry 2085 (class 2606 OID 18504)
+-- TOC entry 2090 (class 2606 OID 18504)
 -- Name: datasource_description_internet_source_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3156,7 +3796,7 @@ ALTER TABLE ONLY internet_source
 
 
 --
--- TOC entry 2097 (class 2606 OID 18549)
+-- TOC entry 2102 (class 2606 OID 18549)
 -- Name: datasource_description_sub_datasource_description_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3165,7 +3805,7 @@ ALTER TABLE ONLY sub_datasource_description
 
 
 --
--- TOC entry 2086 (class 2606 OID 18524)
+-- TOC entry 2091 (class 2606 OID 18524)
 -- Name: date_format_process_product_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3174,7 +3814,7 @@ ALTER TABLE ONLY process_product
 
 
 --
--- TOC entry 2079 (class 2606 OID 18514)
+-- TOC entry 2084 (class 2606 OID 18514)
 -- Name: dateformat_datasource_description_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3183,7 +3823,7 @@ ALTER TABLE ONLY datasource_description
 
 
 --
--- TOC entry 2092 (class 2606 OID 18484)
+-- TOC entry 2097 (class 2606 OID 18484)
 -- Name: datetype_product_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3192,7 +3832,7 @@ ALTER TABLE ONLY product
 
 
 --
--- TOC entry 2093 (class 2606 OID 18489)
+-- TOC entry 2098 (class 2606 OID 18489)
 -- Name: distribution_frequency_product_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3201,7 +3841,7 @@ ALTER TABLE ONLY product
 
 
 --
--- TOC entry 2084 (class 2606 OID 18499)
+-- TOC entry 2089 (class 2606 OID 18499)
 -- Name: frequency_internet_source_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3210,7 +3850,7 @@ ALTER TABLE ONLY internet_source
 
 
 --
--- TOC entry 2080 (class 2606 OID 18519)
+-- TOC entry 2085 (class 2606 OID 18519)
 -- Name: mapset_datasource_description_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3219,7 +3859,7 @@ ALTER TABLE ONLY datasource_description
 
 
 --
--- TOC entry 2082 (class 2606 OID 18559)
+-- TOC entry 2087 (class 2606 OID 18559)
 -- Name: mapset_ingestion_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3228,7 +3868,7 @@ ALTER TABLE ONLY ingestion
 
 
 --
--- TOC entry 2087 (class 2606 OID 18529)
+-- TOC entry 2092 (class 2606 OID 18529)
 -- Name: mapset_process_input_product_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3237,7 +3877,7 @@ ALTER TABLE ONLY process_product
 
 
 --
--- TOC entry 2090 (class 2606 OID 18569)
+-- TOC entry 2095 (class 2606 OID 18569)
 -- Name: mapset_processing_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3246,7 +3886,7 @@ ALTER TABLE ONLY processing
 
 
 --
--- TOC entry 2102 (class 2606 OID 18630)
+-- TOC entry 2107 (class 2606 OID 18630)
 -- Name: mapset_spirits_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3255,7 +3895,7 @@ ALTER TABLE ONLY spirits
 
 
 --
--- TOC entry 2099 (class 2606 OID 18574)
+-- TOC entry 2104 (class 2606 OID 18574)
 -- Name: mapset_thema_product_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3264,7 +3904,7 @@ ALTER TABLE ONLY thema_product
 
 
 --
--- TOC entry 2088 (class 2606 OID 18534)
+-- TOC entry 2093 (class 2606 OID 18534)
 -- Name: processing_dependencies_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3273,7 +3913,7 @@ ALTER TABLE ONLY process_product
 
 
 --
--- TOC entry 2094 (class 2606 OID 18494)
+-- TOC entry 2099 (class 2606 OID 18494)
 -- Name: product_category_product_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3282,7 +3922,7 @@ ALTER TABLE ONLY product
 
 
 --
--- TOC entry 2089 (class 2606 OID 18539)
+-- TOC entry 2094 (class 2606 OID 18539)
 -- Name: product_dependencies_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3291,7 +3931,7 @@ ALTER TABLE ONLY process_product
 
 
 --
--- TOC entry 2083 (class 2606 OID 18564)
+-- TOC entry 2088 (class 2606 OID 18564)
 -- Name: product_ingestion_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3300,7 +3940,7 @@ ALTER TABLE ONLY ingestion
 
 
 --
--- TOC entry 2098 (class 2606 OID 18554)
+-- TOC entry 2103 (class 2606 OID 18554)
 -- Name: product_sub_datasource_description_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3309,7 +3949,7 @@ ALTER TABLE ONLY sub_datasource_description
 
 
 --
--- TOC entry 2095 (class 2606 OID 18584)
+-- TOC entry 2100 (class 2606 OID 18584)
 -- Name: products_description_product_acquisition_data_sources_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3318,7 +3958,7 @@ ALTER TABLE ONLY product_acquisition_data_source
 
 
 --
--- TOC entry 2101 (class 2606 OID 18625)
+-- TOC entry 2106 (class 2606 OID 18625)
 -- Name: spirits_product_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3327,7 +3967,7 @@ ALTER TABLE ONLY spirits
 
 
 --
--- TOC entry 2100 (class 2606 OID 18579)
+-- TOC entry 2105 (class 2606 OID 18579)
 -- Name: thema_thema_product_fk; Type: FK CONSTRAINT; Schema: products; Owner: estation
 --
 
@@ -3335,7 +3975,7 @@ ALTER TABLE ONLY thema_product
     ADD CONSTRAINT thema_thema_product_fk FOREIGN KEY (thema_id) REFERENCES thema(thema_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
--- Completed on 2015-11-17 10:12:02 CET
+-- Completed on 2015-11-18 18:16:51 CET
 
 --
 -- PostgreSQL database dump complete
