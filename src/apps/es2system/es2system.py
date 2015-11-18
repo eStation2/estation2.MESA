@@ -374,7 +374,7 @@ def system_bucardo_config():
         else:
             other_pc = 'MESA-PC2'
 
-        command = '/usr/pgsql-9.3/bin/pg_isready '+other_pc
+        command = '/usr/pgsql-9.3/bin/pg_isready -h '+other_pc
         other_pc_not_ready = os.system(command)
 
         if not other_pc_not_ready:

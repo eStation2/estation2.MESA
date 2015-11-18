@@ -19,7 +19,7 @@ from lib.python.daemon import DaemonDryRunnable
 
 class IngestionDaemon(DaemonDryRunnable):
     def run(self):
-        ingestion.loop_ingestion(dry_run=self.dry_run)
+        ingestion.loop_ingestion_ftp(dry_run=self.dry_run)
 
 
 class GetEumetcastDaemon(DaemonDryRunnable):

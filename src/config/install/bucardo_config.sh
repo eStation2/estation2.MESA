@@ -43,8 +43,8 @@ fi
 echo "$(date +'%Y-%m-%d %H:%M:%S') Configuration of bucardo"
 echo "$(date +'%Y-%m-%d %H:%M:%S') Create bucardo objects"
 
-# Install bucardo DB
-echo bucardo install --batch --dbname estationdb --dbhost localhost --dbport 5432 --piddir /var/run/bucardo
+# Install bucardo DB (already done in eStation-Apps postinst)
+# bucardo install --batch --dbname estationdb --dbhost localhost --dbport 5432 --piddir /var/run/bucardo
 
 # Create 'dbs'-> mesa_pc2 and mesa_pc3	
 bucardo add db mesa_thispc dbname=estationdb host=${ip_thispc} port=5432
