@@ -105,6 +105,7 @@ mkdir -p -m 775 /eStation2/get_lists/get_internet
 mkdir -p -m 775 /eStation2/get_lists/get_eumetcast
 mkdir -p -m 777 /eStation2/log
 mkdir -p -m 775 /eStation2/db_dump
+mkdir -p -m 775 /eStation2/requests
 mkdir -p -m 775 /eStation2/system
 chown -R analyst:estation /eStation2/
 
@@ -230,9 +231,6 @@ sed -i "s|.*role.=.*|role = ${my_role}|" /eStation2/settings/system_settings.ini
 # Clean system after uninstall
 %postun
 rm -fr /tmp/eStation2
-rm -fr /eStation2
-rm -fr /data/*
 rm -fr /var/www/eStation2
-rm -fr /var/log/eStation2
 rm -fr /var/www/eStation2-%{version}
 dropdb -U estation estationdb
