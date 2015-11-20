@@ -757,6 +757,29 @@ def conv_yyyydmmdk_2_yyyymmdd(yymmk):
     return date_yyyymmdd
 
 ######################################################################################
+#   conv_yyyymmdd_g2_2_yyyymmdd
+#   Purpose: Function returns a date (YYYYMMDD) with YYYYdMMdK as input.
+#   Author: M. Clerici
+#   Date: 2015/02/25
+#   Input: string of numbers in the format YYYYdMMdK
+#   Output: date (YYYYMMDD), otherwise -1
+#
+def conv_yyyymmdd_g2_2_yyyymmdd(yymmk):
+
+    year = int(str(yymmk)[0:4])
+    month = str(yymmk)[4:6]
+    day = int(str(yymmk)[6:8])
+    if day <= 10:
+        day = '01'
+    elif day <= 20:
+        day = '11'
+    else:
+        day = '21'
+
+    date_yyyymmdd = str(year)+month+day
+    return date_yyyymmdd
+
+######################################################################################
 #   day_per_dekad
 #   Purpose: Function returns the number of days per dekad (from 8 to 11)
 #   Author: M. Clerici

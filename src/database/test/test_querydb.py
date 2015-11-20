@@ -188,8 +188,7 @@ class TestQuerydb(TestCase):
 
     def Test_get_ingestion_product(self):
 
-        ingestion_product = querydb.get_ingestion_product(productcode='vgt_ndvi',
-                                                          version='undefined')
+        ingestion_product = querydb.get_ingestion_product(allrecs=True)
         logger.info("Active ingestions of product are: %s", ingestion_product)
         for row in ingestion_product:
             print row
