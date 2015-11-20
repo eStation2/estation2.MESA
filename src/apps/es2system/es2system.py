@@ -30,44 +30,44 @@ data_dir = es_constants.es2globals['data_dir']
 
 from lib.python.daemon import DaemonDryRunnable
 
-# def get_status_local_machine():
-# #   Get info on the status of the local machine
-# #
-#     logger.debug("Entering routine %s" % 'get_status_local_machine')
+def get_status_local_machine():
+#   Get info on the status of the local machine
 #
-#     # Get the local systems settings
-#     systemsettings = functions.getSystemSettings()
-#
-#     # Get status of all services
-#     status_services = functions.getStatusAllServices()
-#
-#     get_eumetcast_status = status_services['eumetcast']
-#     get_internet_status = status_services['internet']
-#     ingestion_status = status_services['ingest']
-#     processing_status = status_services['process']
-#     system_status = status_services['system']
-#
-#     # Get status of postgresql
-#     psql_status = functions.getStatusPostgreSQL()
-#
-#     # Get internet connection
-#     internet_status = functions.internet_on()
-#
-#     # ToDo: check disk status!
-#
-#     status_local_machine = {'get_eumetcast_status': get_eumetcast_status,
-#                             'get_internet_status': get_internet_status,
-#                             'ingestion_status': ingestion_status,
-#                             'processing_status': processing_status,
-#                             'system_status': system_status,
-#                             'system_execution_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-#                             'postgresql_status': str(psql_status).lower(),
-#                             'internet_connection_status': str(internet_status).lower(),
-#                             'active_version': systemsettings['active_version'],
-#                             'mode': systemsettings['mode'],
-#                             'disk_status': 'true'}
-#     return status_local_machine
-#
+    logger.debug("Entering routine %s" % 'get_status_local_machine')
+
+    # Get the local systems settings
+    systemsettings = functions.getSystemSettings()
+
+    # Get status of all services
+    status_services = functions.getStatusAllServices()
+
+    get_eumetcast_status = status_services['eumetcast']
+    get_internet_status = status_services['internet']
+    ingestion_status = status_services['ingest']
+    processing_status = status_services['process']
+    system_status = status_services['system']
+
+    # Get status of postgresql
+    psql_status = functions.getStatusPostgreSQL()
+
+    # Get internet connection
+    internet_status = functions.internet_on()
+
+    # ToDo: check disk status!
+
+    status_local_machine = {'get_eumetcast_status': get_eumetcast_status,
+                            'get_internet_status': get_internet_status,
+                            'ingestion_status': ingestion_status,
+                            'processing_status': processing_status,
+                            'system_status': system_status,
+                            'system_execution_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                            'postgresql_status': str(psql_status).lower(),
+                            'internet_connection_status': str(internet_status).lower(),
+                            'active_version': systemsettings['active_version'],
+                            'mode': systemsettings['mode'],
+                            'disk_status': 'true'}
+    return status_local_machine
+
 #
 # def save_status_local_machine():
 # #   Save a pickle containing info on the status of the local machine

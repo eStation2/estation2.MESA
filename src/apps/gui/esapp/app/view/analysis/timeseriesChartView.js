@@ -135,18 +135,24 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                         plotBackgroundImage = 'resources/img/no_data.gif';
                     }
 
-                    var xaxis_labelstyle = {
-                            color: '#000',
-                            font: 'bold 24px Arial, Verdana, Helvetica, sans-serif',
-                            margin: '0 0 0 0'
-                        }
+                    //var xaxis_labelstyle = {
+                    //        color: '#000',
+                    //        font: 'bold 20px Arial, Verdana, Helvetica, sans-serif',
+                    //        margin: '0 0 0 0'
+                    //    }
                     var xAxisLabels = {};
                     if (json.showYearInTicks){      //  === 'true'
                         xAxisLabels = {
                             enabled: 1,
-                            rotation: 0,
+                            autoRotation: [-2, -5],
+                            autoRotationLimit: -5,
+                            //rotation: 1,
                             y:28,
-                            style: xaxis_labelstyle,
+                            style: {
+                                color: '#000',
+                                font: 'bold 20px Arial, Verdana, Helvetica, sans-serif',
+                                margin: '0 0 0 0'
+                            },
                             formatter: function() {
                                 return Highcharts.dateFormat('%b', this.value)+'<br/>'+Highcharts.dateFormat('\'%y', this.value);
                             }
@@ -157,7 +163,11 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                             //rotation: 0,
                             y:28,
                             //step: 3,
-                            style: xaxis_labelstyle,
+                            style: {
+                                color: '#000',
+                                font: 'bold 26px Arial, Verdana, Helvetica, sans-serif',
+                                margin: '0 0 0 0'
+                            },
                             formatter: function() {
                                 return Highcharts.dateFormat('%b', this.value);
                             }
@@ -332,6 +342,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                         spacingRight = 40;
                     }
 
+
                     me.tschart = new Highcharts.Chart({
                         //colors: ['#006600', '#000000', '#0070CC', '#00008A', '#8C8C8C', '#1EB611', '#FF9655', '#FFF263', '#6AF9C4'],
                         chart: {
@@ -342,10 +353,23 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                             //margin: chartMargin, // [35, 15, 65, 65],  // for legend on the bottom of the chart
                             //marginTop:top,
                             //marginRight: marginright,
-                            //marginBottom:bottom,
+                            marginBottom:150,
                             //marginLeft:left,
                             plotBackgroundImage: plotBackgroundImage
                         },
+                        //exporting: {
+                        //    //chartOptions: { // specific options for the exported image
+                        //    //    plotOptions: {
+                        //    //        series: {
+                        //    //            dataLabels: {
+                        //    //                enabled: false
+                        //    //            }
+                        //    //        }
+                        //    //    }
+                        //    //},
+                        //    scale: 1,
+                        //    fallbackToExportServer: false
+                        //},
                         credits: {
                            enabled: false
                         },
@@ -370,6 +394,13 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                                         lineWidthPlus: 1
                                     }
                                 }
+                            },
+                            column: {
+                                pointPadding: 0,
+                                //pointWidth: 15,
+                                borderWidth: 0,
+                                groupPadding: 0,
+                                shadow: false
                             }
                         },
                         title: {
@@ -392,7 +423,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                         },
                         xAxis: [{
                             type: 'datetime',
-                            tickmarkPlacement: 'on', // on between
+                            //tickmarkPlacement: 'on', // on between  - For categorized axes only!
                             startOnTick: false,
                             labels: xAxisLabels,
                             tickInterval: 30 * 24 * 3600 * 1000
@@ -516,13 +547,14 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
         me.name ='tschartwindow_' + me.id;
 
         me.items = [{
-            region: 'center',
-            items: [{
+            //xtype: 'container',
+            //id: 'tschartcontainer_' + me.id,
+            //items: [{
                 xtype: 'container',
                 layout:'fit',
-                reference:'tschartcontainer_'+me.id,
+                reference:'tschart_'+me.id,
                 id: 'tschart_' + me.id
-            }]
+            //}]
         }];
 
         me.callParent();

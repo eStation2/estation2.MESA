@@ -135,6 +135,9 @@ Ext.define('esapp.Application', {
 
                         if (esapp.globals['selectedLanguage'] == 'fra') {
                             Highcharts.setOptions({
+                                //global: {
+                                //    canvasToolsURL: ''
+                                //},
                                 lang: {
                                     contextButtonTitle: 'Graphique menu contextuel',  // 'Chart context menu',
                                     downloadJPEG: 'Télécharger image JPEG',  // 'Download JPEG image',

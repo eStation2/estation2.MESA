@@ -72,6 +72,7 @@ Ext.define('esapp.view.analysis.analysisMainController', {
             datasets.forEach(function(datasetObj) {
                 //yearsData = Ext.Object.merge(yearsData, datasetObj.years);
                 yearsData = union_arrays(yearsData, datasetObj.years);
+                //console.info(yearsData);
                 timeseriesmapsetdatasets.push(datasetObj);
             });
             //console.info(product.get('productmapsets')[0].timeseriesmapsetdatasets);
