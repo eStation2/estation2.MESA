@@ -1306,6 +1306,10 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         if datasource_descr.date_format == 'YYYYdMMdK':
             output_date_str = functions.conv_yyyydmmdk_2_yyyymmdd(in_date)
 
+        if datasource_descr.date_format == 'YYYYMMDD_G2':
+            # The date (e.g. 20151103) is converted to the dekad it belongs to (e.g. 20151101)
+            output_date_str = functions.conv_yyyymmdd_g2_2_yyyymmdd(in_date)
+
         if output_date_str == -1:
             output_date_str = in_date+'_DATE_ERROR_'
         else:
