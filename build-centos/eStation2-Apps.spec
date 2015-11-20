@@ -214,6 +214,7 @@ log_dir="/var/log/bucardo"
 run_dir="/var/run/bucardo"
 /usr/bin/bucardo install --batch --dbname estationdb --dbhost localhost
 echo "$(date +'%Y-%m-%d %H:%M ') Bucardo package installed"
+bucardo set log_level=terse
 
 # Create log and run dir for Bucardo
 mkdir -p ${log_dir}
