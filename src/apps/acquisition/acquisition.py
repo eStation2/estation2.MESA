@@ -19,12 +19,12 @@ from lib.python.daemon import DaemonDryRunnable
 
 class IngestionDaemon(DaemonDryRunnable):
     def run(self):
-        ingestion.loop_ingestion_ftp(dry_run=self.dry_run)
+        ingestion.loop_ingestion(dry_run=self.dry_run)
 
 
 class GetEumetcastDaemon(DaemonDryRunnable):
     def run(self):
-        get_eumetcast.loop_eumetcast(dry_run=self.dry_run)
+        get_eumetcast.loop_eumetcast_ftp(dry_run=self.dry_run)
 
 
 class GetInternetDaemon(DaemonDryRunnable):
