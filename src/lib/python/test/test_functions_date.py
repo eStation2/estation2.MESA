@@ -48,4 +48,13 @@ class TestFunctionsDate(TestCase):
         self.assertEqual(f.conv_yyyy_mm_dkx_2_yyyymmdd(self.string_yyyy_mm_dkx), self.string_yyyymmdd)
         self.assertEqual(f.conv_yymmk_2_yyyymmdd(self.string_yymmk), self.string_yyyymmdd)
 
+    def test_convert_date_g2(self):
+        import lib.python.functions as f
+        self.assertEqual(f.conv_yyyymmdd_g2_2_yyyymmdd('20151103'), '20151101')
+        self.assertEqual(f.conv_yyyymmdd_g2_2_yyyymmdd('20151110'), '20151101')
+        self.assertEqual(f.conv_yyyymmdd_g2_2_yyyymmdd('20151131'), '20151121')
+        self.assertEqual(f.conv_yyyymmdd_g2_2_yyyymmdd('20151105'), '20151101')
+        self.assertEqual(f.conv_yyyymmdd_g2_2_yyyymmdd('20151109'), '20151101')
+
 #
+
