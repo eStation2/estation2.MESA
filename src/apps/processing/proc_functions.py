@@ -4,6 +4,7 @@
 import datetime
 import os
 from osgeo import gdal, osr
+import glob
 
 # import eStation2 modules
 from database import querydb
@@ -248,3 +249,46 @@ def reproject_output(input_file, native_mapset_id, target_mapset_id, logger=None
 
     # Write metadata to file
     sds_meta_out.write_to_file(output_file)
+
+######################################################################################
+#
+#   Purpose: Remove files older than a number of months
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2015/05/15
+#   Inputs: product identifiers (prod/sprod/version/mapset)
+#           number of months
+#   Output: none
+#
+
+def remove_old_files(productcode, subproductcode, version, mapsetcode, product_type, nmonths, logger=None):
+
+    # Check logger
+    if logger is None:
+        logger = log.my_logger(__name__)
+
+    # Get the existing dates for the dataset
+    logger.info("Entering routine %s " % 'remove_old_files')
+
+    # Check the installation type
+    sysSettings = functions.getSystemSettings()
+    if sysSettings['type_installation'] == 'Server':
+        logger.info("File housekeeping not done on Server ")
+        return
+
+    prod_subdir  = functions.set_path_sub_directory(productcode, subproductcode, product_type, version, mapsetcode)
+    prod_dir = es_constants.es2globals['processing_dir']+os.path.sep+prod_subdir
+    list_files = sorted(glob.glob(prod_dir+os.path.sep+'*.tif'))
+
+    # Define the earliest date to be kept
+    month_now = datetime.date.today().month
+    year_now = datetime.date.today().year
+
+    for my_file in list_files:
+        # Extract the date
+        date = functions.get_date_from_path_filename(os.path.basename(my_file))
+        date_yyyy=int(date[0:4])
+        date_month=int(date[4:6])
+
+        if date_yyyy < year_now or (date_month + nmonths) <= month_now:
+            logger.debug("Deleting file %s " % my_file)
+            os.remove(my_file)
