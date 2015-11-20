@@ -16,7 +16,7 @@ import shutil
 # Import eStation2 modules
 from lib.python import functions
 from lib.python.image_proc import raster_image_math
-from apps.processing.proc_functions import reproject_output
+from apps.processing.proc_functions import reproject_output, remove_old_files
 from lib.python import es_logging as log
 
 # Import third-party modules
@@ -232,8 +232,8 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
                         mydekad_nbr=functions.conv_date_2_dekad(mydate_yyyymmdd[0:8])
                         if mydekad_nbr == dekad:
                             file_list.append(myfile)
-
-                    yield (file_list, output_file)
+                    if len(file_list)> 8:
+                        yield (file_list, output_file)
 
     @active_if(activate_10d15min_comput)
     @files(generate_parameters_10d15min)
@@ -245,6 +245,10 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
                 "options": "compress=lzw", "input_nodata":-32768}
 
         raster_image_math.do_max_image(**args)
+
+        # Do also the house-keeping, by deleting the files older than 6 months
+        number_months_keep = 6
+        remove_old_files(prod, starting_sprod, version, native_mapset, 'Ingest', number_months_keep)
 
     # ----------------------------------------------------------------------------------------------------------------
     #   10 day minimum (mm)
@@ -297,6 +301,9 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
 
         shutil.rmtree(tmpdir)
 
+        # Do also the house-keeping, by deleting the files older than 6 months
+        number_months_keep = 6
+        remove_old_files(prod, '10d15min', version, native_mapset, 'Ingest', number_months_keep)
 
     return proc_lists
 

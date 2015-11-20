@@ -24,7 +24,7 @@ class IngestionDaemon(DaemonDryRunnable):
 
 class GetEumetcastDaemon(DaemonDryRunnable):
     def run(self):
-        get_eumetcast.loop_eumetcast(dry_run=self.dry_run)
+        get_eumetcast.loop_eumetcast_ftp(dry_run=self.dry_run)
 
 
 class GetInternetDaemon(DaemonDryRunnable):
