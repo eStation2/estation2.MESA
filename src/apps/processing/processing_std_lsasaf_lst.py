@@ -232,8 +232,8 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
                         mydekad_nbr=functions.conv_date_2_dekad(mydate_yyyymmdd[0:8])
                         if mydekad_nbr == dekad:
                             file_list.append(myfile)
-
-                    yield (file_list, output_file)
+                    if len(file_list)> 8:
+                        yield (file_list, output_file)
 
     @active_if(activate_10d15min_comput)
     @files(generate_parameters_10d15min)
