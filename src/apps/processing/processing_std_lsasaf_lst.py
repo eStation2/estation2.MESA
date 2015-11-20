@@ -16,7 +16,7 @@ import shutil
 # Import eStation2 modules
 from lib.python import functions
 from lib.python.image_proc import raster_image_math
-from apps.processing.proc_functions import reproject_output
+from apps.processing.proc_functions import reproject_output, remove_old_files
 from lib.python import es_logging as log
 
 # Import third-party modules
@@ -246,6 +246,10 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
 
         raster_image_math.do_max_image(**args)
 
+        # Do also the house-keeping, by deleting the files older than 6 months
+        number_months_keep = 6
+        remove_old_files(prod, starting_sprod, version, native_mapset, 'Ingest', number_months_keep)
+
     # ----------------------------------------------------------------------------------------------------------------
     #   10 day minimum (mm)
     #   NOTE: this product is compute with re-projection, i.e. on the 'target' mapset
@@ -297,6 +301,9 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
 
         shutil.rmtree(tmpdir)
 
+        # Do also the house-keeping, by deleting the files older than 6 months
+        number_months_keep = 6
+        remove_old_files(prod, '10d15min', version, native_mapset, 'Ingest', number_months_keep)
 
     return proc_lists
 
