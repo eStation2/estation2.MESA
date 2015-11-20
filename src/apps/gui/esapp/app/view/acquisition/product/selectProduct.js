@@ -35,33 +35,14 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
     autoScroll:true,
     maximizable: false,
 
-    minWidth: 650,
-    width: 650,
+    minWidth: 620,
+    width: 620,
     height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-10 : 800,  // 600,
     maxHeight: 800,
 
     layout: {
         type  : 'fit'
         //,padding: 5
-    },
-
-    bbar : {
-        items : ['->',{
-            text: esapp.Utils.getTranslation('newproduct'),  // 'New product',
-            name: 'newproduct',
-            iconCls: 'fa fa-plus-circle fa-2x',
-            style: { color: 'green' },
-            hidden: false,
-            scale: 'medium',
-            handler: function () {
-                var newProductWin = new esapp.view.acquisition.product.editProduct({
-                    params: {
-                        edit: false
-                    }
-                });
-                newProductWin.show();
-            }
-        }]
     },
 
     changesmade:false,
@@ -77,6 +58,35 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                 close:me.onClose
             },
 
+            bbar : {
+                items: ['->', {
+                //    text: esapp.Utils.getTranslation('newproduct'),  // 'New product',
+                //    name: 'newproduct',
+                //    iconCls: 'fa fa-plus-circle fa-2x',
+                //    style: {color: 'green'},
+                //    hidden: false,
+                //    scale: 'medium',
+                //    handler: function () {
+                //        var newProductWin = new esapp.view.acquisition.product.editProduct({
+                //            params: {
+                //                edit: false
+                //            }
+                //        });
+                //        newProductWin.show();
+                //    }
+                //},{
+                    text: esapp.Utils.getTranslation('close'),  // 'Close',
+                    iconCls: 'fa fa-times fa-2x',
+                    style: { color: 'green' },
+                    hidden: false,
+                    scale: 'medium',
+                    handler: function () {
+                        me.close();
+                        //me.onClose(me.getView());
+                    }
+                }]
+            },
+
             items : [{
                 xtype : 'grid',
                 //region: 'center',
@@ -85,9 +95,9 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                 store: 'ProductsInactiveStore',
                 session:true,
 
-                plugins:[{
-                    ptype:'cellediting'
-                }],
+                //plugins:[{
+                //    ptype:'cellediting'
+                //}],
 
                 viewConfig: {
                     stripeRows: false,
@@ -99,9 +109,9 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                     trackOver:true
                 },
 
-                selModel : {
-                    allowDeselect : true
-                },
+                //selModel : {
+                //    allowDeselect : true
+                //},
 
                 collapsible: false,
                 enableColumnMove:false,
@@ -134,32 +144,32 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                     text: '<div class="grid-header-style">' + esapp.Utils.getTranslation('productcategories') + '</div>',
                     menuDisabled: true,
                     columns: [{
-                        xtype: 'actioncolumn',
-                        hidden:false,
-                        width: 35,
-                        align: 'center',
-                        sortable: false,
-                        menuDisabled: true,
-                        shrinkWrap: 0,
-                        items: [{
-                            //icon: 'resources/img/icons/edit.png',
-                            getClass: function(v, meta, rec) {
-                                if (rec.get('defined_by') != 'JRC') {
-                                    return 'editproduct';
-                                }
-                                else {
-                                    return 'x-hide-display';
-                                }
-                            },
-                            getTip: function(v, meta, rec) {
-                                if (rec.get('defined_by') != 'JRC') {
-                                    return esapp.Utils.getTranslation('editproduct');    // 'Edit Product',
-                                }
-                            },
-                            //tooltip: esapp.Utils.getTranslation('editproduct'),  // 'Edit Product',
-                            handler: 'editProduct'
-                        }]
-                    }, {
+                    //    xtype: 'actioncolumn',
+                    //    hidden:false,
+                    //    width: 35,
+                    //    align: 'center',
+                    //    sortable: false,
+                    //    menuDisabled: true,
+                    //    shrinkWrap: 0,
+                    //    items: [{
+                    //        //icon: 'resources/img/icons/edit.png',
+                    //        getClass: function(v, meta, rec) {
+                    //            if (rec.get('defined_by') != 'JRC') {
+                    //                return 'editproduct';
+                    //            }
+                    //            else {
+                    //                return 'x-hide-display';
+                    //            }
+                    //        },
+                    //        getTip: function(v, meta, rec) {
+                    //            if (rec.get('defined_by') != 'JRC') {
+                    //                return esapp.Utils.getTranslation('editproduct');    // 'Edit Product',
+                    //            }
+                    //        },
+                    //        //tooltip: esapp.Utils.getTranslation('editproduct'),  // 'Edit Product',
+                    //        handler: 'editProduct'
+                    //    }]
+                    //}, {
                         xtype:'templatecolumn',
                         header: esapp.Utils.getTranslation('product'),  // 'Product',
                         tpl: new Ext.XTemplate(
@@ -185,11 +195,14 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                         xtype: 'actioncolumn',
                         header: esapp.Utils.getTranslation('active'),  // 'Active',
                         hideable: false,
-                        hidden:false,
+                        hidden: false,
                         width: 65,
                         align: 'center',
                         shrinkWrap: 0,
+                        menuDisabled: true,
+                        stopSelection: false,
                         items: [{
+                            height: 85,
                             getClass: function(v, meta, rec) {
                                 if (rec.get('activated')) {
                                     return 'activated';
@@ -254,7 +267,54 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
     }
     ,onClose: function(win, ev) {
         if (win.changesmade){
-            Ext.data.StoreManager.lookup('ProductsActiveStore').load();
+            var productgridstore  = Ext.data.StoreManager.lookup('ProductsActiveStore');
+            var acqgridsstore = Ext.data.StoreManager.lookup('DataAcquisitionsStore');
+            var ingestiongridstore = Ext.data.StoreManager.lookup('IngestionsStore');
+            var acq_main = Ext.ComponentQuery.query('panel[name=acquisitionmain]');
+            acq_main[0].getController().renderHiddenColumnsWhenUnlocked();
+
+            //if (Ext.getCmp('lockunlock').pressed) {
+            //    var dataacquisitiongrids = Ext.ComponentQuery.query('dataacquisitiongrid');
+            //    var ingestiongrids = Ext.ComponentQuery.query('ingestiongrid');
+            //
+            //    Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
+            //        dataacquisitiongrid.columns[1].show();      // Edit Data Source
+            //        dataacquisitiongrid.columns[1].updateLayout();
+            //        dataacquisitiongrid.columns[2].show();      // Store Native
+            //        dataacquisitiongrid.columns[2].updateLayout();
+            //        //dataacquisitiongrid.columns[2].show();   // Last executed
+            //        //dataacquisitiongrid.columns[3].show();   // Store Native
+            //    });
+            //
+            //    Ext.Object.each(ingestiongrids, function(id, ingestiongrid, myself) {
+            //        ingestiongrid.columns[1].show();    // Add Mapset
+            //        ingestiongrid.columns[1].updateLayout();
+            //        ingestiongrid.columns[3].show();    // Delete Mapset
+            //        ingestiongrid.columns[3].updateLayout();
+            //    });
+            //}
+
+            if (productgridstore.isStore) {
+                productgridstore.load({
+                    callback: function(records, options, success) {
+                        if (acqgridsstore.isStore) {
+                            acqgridsstore.load({
+                                callback: function(records, options, success) {
+                                    if (ingestiongridstore.isStore) {
+                                        ingestiongridstore.load({
+                                            callback: function(records, options, success){
+                                                //var view = btn.up().up().getView();
+                                                ////view.getFeature('productcategories').expandAll();
+                                                //view.refresh();
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+            }
         }
     }
 });

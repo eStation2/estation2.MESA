@@ -192,6 +192,9 @@ def system_db_sync_full(pc_role):
 
     logger.debug("Entering routine %s" % 'system_db_sync_full')
 
+    dumpdata = ' psql -h localhost -p 5432 -U estation -d estationdb -t -A -c "SELECT products.export_all_data()" -o ./update_insert_data.sql'
+    sync_other_pc = ' psql -h mesa-pc2 -p 5432 -U estation -d estationdb -f ./update_insert_data.sql -o ./update_insert_data.log'
+
     # Detect PC -> set sync to be executed
     if pc_role=='pc2':
         list_syncs = ['sync_pc2_products_full','sync_pc2_analysis_full']

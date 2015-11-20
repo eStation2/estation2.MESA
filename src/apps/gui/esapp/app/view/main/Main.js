@@ -117,8 +117,8 @@ Ext.define('esapp.view.main.Main', {
                        activate: function (dashboardtab) {
                            var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
                            headerlogos.setHidden(false);
-                           dashboardtab.up().down('container[id=acquisitionmaintab]').doLayout();
-                           dashboardtab.up().down('container[id=datamanagementmaintab]').doLayout();
+                           //dashboardtab.up().down('container[id=acquisitionmaintab]').doLayout();
+                           //dashboardtab.up().down('container[id=datamanagementmaintab]').doLayout();
                            //Ext.getCmp('dashboard-panel').getController().setupDashboard();
                            //dashboardtab.down('panel[id=dashboardpc2]').getController().checkStatusServices();
                        }
@@ -144,7 +144,7 @@ Ext.define('esapp.view.main.Main', {
                            acquisitionmain.getController().checkStatusServices();
 
                            //acquisitionmain.getView().getFeature('productcategories').expandAll();
-                           acquisitionmain.getView().refresh();
+                           //acquisitionmain.getView().refresh();
                        }
                     }
                 }, {
@@ -179,10 +179,10 @@ Ext.define('esapp.view.main.Main', {
                            var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
                            headerlogos.setHidden(false);
 
-                           var datamanagementmain = datamanagementtab.down('panel[name=datamanagementmain]');
-
-                           //datamanagementmain.getView().getFeature('prodcat').expandAll();
-                           datamanagementmain.getView().refresh();
+                           //var datamanagementmain = datamanagementtab.down('panel[name=datamanagementmain]');
+                           //
+                           ////datamanagementmain.getView().getFeature('prodcat').expandAll();
+                           //datamanagementmain.getView().refresh();
                        }
                     }
                 }, {

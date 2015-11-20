@@ -151,12 +151,12 @@ Ext.define('esapp.model.ColorScheme', {
     extend : 'esapp.model.Base',
 
     fields: [
-        {name: 'defaultlegend', mapping: 'defaultlegend'},
+        {name: 'default_legend', mapping: 'default_legend'},
         {name: 'defaulticon', mapping: 'defaulticon'},
         {name: 'legend_id', mapping: 'legend_id'},
-        {name: 'legendname', mapping: 'legendname'},
-        {name: 'colorscheme', mapping: 'colorscheme'},
-        {name: 'legendhtml', mapping: 'legendhtml'}
+        {name: 'legend_name', mapping: 'legend_name'},
+        {name: 'colorschemeHTML', mapping: 'colorschemeHTML'},
+        {name: 'legendHTML', mapping: 'legendHTML'}
     ],
 
     proxy: {

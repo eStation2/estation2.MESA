@@ -48,6 +48,8 @@ Ext.define('esapp.Application', {
         ,'FrequenciesStore'
         ,'DateFormatsStore'
         ,'DataTypesStore'
+        ,'EumetcastSourceStore'
+        ,'InternetSourceStore'
 
         ,'ProductsActiveStore'
         ,'ProductsInactiveStore'
@@ -63,6 +65,7 @@ Ext.define('esapp.Application', {
     ],
 
     //models: [
+    //    'EumetcastSource'
         //'ProductNavigator',
         //'ProductNavigatorMapSet',
         //'ProductNavigatorMapSetDataSet',

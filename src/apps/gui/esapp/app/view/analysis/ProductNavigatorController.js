@@ -42,7 +42,7 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
 
     productsGridRowClick: function(gridview, record){
 
-        this.lookupReference('addtomapbtn').disable();
+        this.lookupReference('addtomapbtn_'+this.getView().mapviewid.replace(/-/g,'_')).disable();
         this.lookupReference('mapset-dataset-grid').hide();
         this.lookupReference('colorschemesGrid').hide();
         this.getStore('colorschemes').removeAll();
@@ -85,7 +85,7 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
 
     mapsetItemClick: function(dataview, record ){
 
-        this.lookupReference('addtomapbtn').disable();
+        this.lookupReference('addtomapbtn_'+this.getView().mapviewid.replace(/-/g,'_')).disable();
         this.lookupReference('colorschemesGrid').hide();
         this.getStore('colorschemes').removeAll();
         this.getStore('mapsetdatasets').removeAll();
@@ -131,7 +131,7 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
         });
         myLoadMask.show();
 
-        var addToMapBtn = this.getView().lookupReference('addtomapbtn');
+        var addToMapBtn = this.getView().lookupReference('addtomapbtn_'+this.getView().mapviewid.replace(/-/g,'_'));
 
         this.getStore('colorschemes').load({
             params:this.getView().selectedproduct,
@@ -156,9 +156,10 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
     },
 
     onRadioColumnAction:function(view, rowIndex, colIndex, item, e, record ) {
+        //console.info(record);
         switch(record.get('defaulticon')) {
             case 'x-grid3-radio-col':
-                    view.getStore().each(function(rec){
+                    view.getStore('colorschemes').each(function(rec){
                         if (view.getStore().indexOf(rec) != rowIndex) {
                             rec.set('default_legend', false);
                             rec.set('defaulticon', 'x-grid3-radio-col');

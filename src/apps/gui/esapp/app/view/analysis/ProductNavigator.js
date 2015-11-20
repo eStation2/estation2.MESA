@@ -219,14 +219,16 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 bbar: Ext.create('Ext.toolbar.Toolbar', {
                     items: ['->',{
                         text: esapp.Utils.getTranslation('addtomap'),    // 'Add to Map',
-                        reference: 'addtomapbtn',
+                        reference: 'addtomapbtn_'+me.mapviewid.replace(/-/g,'_'),
                         disabled: true,
                         handler: function(btn) {
+                            //console.info(me.getViewModel().getStore('colorschemes'));
                             me.getViewModel().getStore('colorschemes').each(function(rec){
-                                if (rec.get('default_legend')==='true'){
-                                    console.info(rec);
+                                if (rec.get('default_legend')){
+                                    //console.info(rec);
                                     me.selectedproduct.legendid = rec.get('legend_id');
                                     me.selectedproduct.colorschemeHTML = rec.get('colorschemeHTML');
+                                    me.selectedproduct.legendHTML = rec.get('legendHTML');
                                 }
                             },this);
 
@@ -236,6 +238,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                                                                                      me.selectedproduct.subproductcode,
                                                                                      me.selectedproduct.legendid,
                                                                                      me.selectedproduct.colorschemeHTML,
+                                                                                     me.selectedproduct.legendHTML,
                                                                                      me.selectedproduct.productname
                             );
                             me.close();
