@@ -887,7 +887,7 @@ class GetDashboard:
 
         # IP_PC1 = '139.191.147.79:22'
         # PC1_connection = functions.check_connection(systemsettings['ip_pc1'] + IP_port)
-        PC1_connection = functions.check_connection('mesa_pc1')
+        PC1_connection = functions.check_connection('mesa-pc1')
 
         if systemsettings['type_installation'].lower() == 'full':
             if systemsettings['role'].lower() == 'pc1':
@@ -912,12 +912,12 @@ class GetDashboard:
 
                 # Check connection to PC3
                 # PC23_connection = functions.check_connection(systemsettings['ip_pc3'] + IP_port)
-                PC23_connection = functions.check_connection('mesa_pc3')
+                PC23_connection = functions.check_connection('mesa-pc3')
                 # print "PC23_connection: " + str(PC23_connection)
 
                 if PC23_connection:
                     # status_PC3 = functions.get_remote_system_status(systemsettings['ip_pc3'])
-                    status_PC3 = functions.get_remote_system_status('mesa_pc3')
+                    status_PC3 = functions.get_remote_system_status('mesa-pc3')
                     if 'mode' in status_PC3:
                         PC3_mode = status_PC3['mode']
                         PC3_disk_status = status_PC3['disk_status']
@@ -957,10 +957,10 @@ class GetDashboard:
 
                 # Check connection to PC2
                 # PC23_connection = functions.check_connection(systemsettings['ip_pc2'] + IP_port)
-                PC23_connection = functions.check_connection('mesa_pc2')
+                PC23_connection = functions.check_connection('mesa-pc2')
                 if PC23_connection:
                     # status_PC2 = functions.get_remote_system_status(systemsettings['ip_pc2'])
-                    status_PC2 = functions.get_remote_system_status('mesa_pc2')
+                    status_PC2 = functions.get_remote_system_status('mesa-pc2')
                     if 'mode' in status_PC2:
                         PC2_mode = status_PC2['mode']
                         PC2_disk_status = status_PC2['disk_status']
@@ -1833,12 +1833,12 @@ class ChangeMode:
                 if systemsettings['role'].lower() == 'pc2':
                     # Check connection to PC3
                     # PC23_connection = functions.check_connection(systemsettings['ip_pc3'] + IP_port)
-                    PC23_connection = functions.check_connection('mesa_pc3')
+                    PC23_connection = functions.check_connection('mesa-pc3')
                     IP_other_PC = systemsettings['ip_pc3']
 
                     if PC23_connection:
                         # status_PC3 = functions.get_remote_system_status(systemsettings['ip_pc3'])
-                        status_PC3 = functions.get_remote_system_status('mesa_pc3')
+                        status_PC3 = functions.get_remote_system_status('mesa-pc3')
                         if 'mode' in status_PC3:
                             Other_PC_mode = status_PC3['mode']
                         else:
@@ -1849,12 +1849,12 @@ class ChangeMode:
 
                     # Check connection to PC2
                     # PC23_connection = functions.check_connection(systemsettings['ip_pc2'] + IP_port)
-                    PC23_connection = functions.check_connection('mesa_pc2')
+                    PC23_connection = functions.check_connection('mesa-pc2')
                     IP_other_PC = systemsettings['ip_pc2']
 
                     if PC23_connection:
                         # status_PC2 = functions.get_remote_system_status(systemsettings['ip_pc2'])
-                        status_PC2 = functions.get_remote_system_status('mesa_pc2')
+                        status_PC2 = functions.get_remote_system_status('mesa-pc2')
                         if 'mode' in status_PC2:
                             Other_PC_mode = status_PC2['mode']
                         else:
