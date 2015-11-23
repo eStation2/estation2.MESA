@@ -203,6 +203,7 @@ def loop_processing(dry_run=False, serialize=False):
 
                     # Do NOT detach process (work in series)
                     else:
+                        results_queue = Queue()
                         proc_lists = proc_func(results_queue, **args)
                         # Upsert database
                         # upsert_database(process_id, product_code, version, mapset, proc_lists, input_product_info)
