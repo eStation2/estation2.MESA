@@ -1199,7 +1199,7 @@ def get_product_out_info(allrecs=False, echo=False, productcode='', subproductco
     finally:
         if db.session:
             db.session.close()
-        # db = None
+        #db = None
 
 ######################################################################################
 #   get_product_out_info_connect(allrecs=False, echo=False, productcode='', subproductcode='', version='undefined')
