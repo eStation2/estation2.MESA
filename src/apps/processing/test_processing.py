@@ -21,11 +21,12 @@ args = {'pipeline_run_level':3, \
         'starting_sprod':subproductcode,\
         'mapset': 'SPOTV-Africa-1km',\
         'version': version,
-        'starting_dates_linearx2': list_dates,
+        'starting_dates': list_dates,
         'logfile':'test_processing_ndvi'}
-#processing_std_ndvi_stats_only(**args)
+
 res_queue = None
-processing_std_ndvi_all(res_queue,**args)
+processing_std_ndvi_prods_only(res_queue,**args)
+#processing_std_ndvi_all(res_queue,**args)
 
 #   ---------------------------------------------------------------------
 # chirps-dekad
