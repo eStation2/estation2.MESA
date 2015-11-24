@@ -395,6 +395,7 @@ def system_create_report(target_file=None):
                    "/etc/default/rsync",
                    "/etc/rsyncd.conf"]
 
+
     # Create a temp directory
     try:
         tmp_dir = tempfile.mkdtemp(prefix=__name__+'_', suffix='_' + 'system_report',
