@@ -102,7 +102,7 @@ def generateLegendHTML(legend_id):
         legendstep_dict = functions.row2dict(row)
         if legendstep_dict['color_label'].strip() != '':
             # ColorLabel = '&nbsp;'+legendstep_dict['color_label']+'&nbsp;'
-            legendColorLabels += '<td colspan="' + str(ColumnSpan) + '" style="font-size:9px; max-width:50px;" align="center">'+legendstep_dict['color_label']+'</td>'
+            legendColorLabels += '<td colspan="' + str(ColumnSpan) + '" style="font-size:9px; line-height:10px; max-width:30px;" align="center">'+legendstep_dict['color_label']+'</td>'
 
     legendColorLabels += '</tr>'
 

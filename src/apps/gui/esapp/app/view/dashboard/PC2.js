@@ -226,15 +226,15 @@ Ext.define("esapp.view.dashboard.PC2",{
                     margin: '0 0 10 0',
                     floating: true,
                     items: [
-                        {   xtype: 'checkbox',
-                            boxLabel: esapp.Utils.getTranslation('autosyncdb'),     // 'Auto Sync Database',
-                            name: 'enabledisableautodbsync',
-                            checked   : me.dbautosync,
-                            disabled: me.autosync_onoff,
-//                            glyph: 'xf04b@FontAwesome',
-//                            cls:'menu-glyph-color-green',
-                            handler: 'execEnableDisableAutoDBSync'
-                        },
+//                        {   xtype: 'checkbox',
+//                            boxLabel: esapp.Utils.getTranslation('autosyncdb'),     // 'Auto Sync Database',
+//                            name: 'enabledisableautodbsync',
+//                            checked   : me.dbautosync,
+//                            disabled: me.autosync_onoff,
+////                            glyph: 'xf04b@FontAwesome',
+////                            cls:'menu-glyph-color-green',
+//                            handler: 'execEnableDisableAutoDBSync'
+//                        },
                         {
                             text: esapp.Utils.getTranslation('viewlogfile'),    // 'View log file',
                             name: 'view_logfile_dbsync',

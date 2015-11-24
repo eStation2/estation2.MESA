@@ -24,7 +24,7 @@ Ext.define("esapp.view.system.ThemaAdmin",{
     closeAction: 'destroy', // 'hide',
     resizable:false,
     maximizable: false,
-    width:400,
+    width:550,
     layout: 'fit',
     border:true,
     frame:true,
