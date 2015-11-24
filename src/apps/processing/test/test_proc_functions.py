@@ -26,3 +26,16 @@ class TestProcFunctions(TestCase):
 
         self.assertEqual(1, 1)
 
+    def Test_remove_old_files(self):
+
+        productcode='lsasaf-lst'
+        subprod='lst'
+        version='undefined'
+        type='Ingest'
+        nmonths=6
+        mapset = 'MSG-satellite-3km'
+
+        proc_functions.remove_old_files(productcode, subprod, version, mapset, type, nmonths)
+
+        self.assertEqual(1, 1)
+
