@@ -16,7 +16,8 @@ import shutil
 # Import eStation2 modules
 from lib.python import functions
 from lib.python.image_proc import raster_image_math
-from apps.processing.proc_functions import reproject_output, remove_old_files
+from apps.processing.proc_functions import reproject_output
+from apps.processing.proc_functions import remove_old_files
 from lib.python import es_logging as log
 
 # Import third-party modules
@@ -309,8 +310,11 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
 
 def processing_std_lsasaf_lst(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                              pipeline_printout_graph_level=0, prod='', starting_sprod='', native_mapset='',
-                             target_mapset='', version='',
+                             mapset='', version='',
                              starting_dates=None, write2file=None, logfile=None):
+
+    native_mapset='MSG-satellite-3km'
+    target_mapset=mapset
 
     spec_logger = log.my_logger(logfile)
     spec_logger.info("Entering routine %s" % 'processing_std_lsasaf_lst')

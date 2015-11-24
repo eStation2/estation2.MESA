@@ -1060,14 +1060,16 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 #   Run the pipeline
 def processing_std_ndvi(res_queue, pipeline_run_level=0, pipeline_printout_level=0,
                         pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                        starting_dates_linearx2=None, update_stats=False, nrt_products=True, write2file=None, logfile=None):
+                        starting_dates_linearx2=None, update_stats=False, nrt_products=True, write2file=None, logfile=None,
+                        touch_files_only=False):
 
     spec_logger = log.my_logger(logfile)
     spec_logger.info("Entering routine %s" % 'processing_std_ndvi')
 
     proc_lists = None
     proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
-                                 starting_dates_linearx2=starting_dates_linearx2, update_stats=update_stats, nrt_products=nrt_products)
+                                 starting_dates_linearx2=starting_dates_linearx2, update_stats=update_stats,
+                                 nrt_products=nrt_products)
 
     if write2file is not None:
         fwrite_id=open(write2file,'w')
@@ -1075,7 +1077,7 @@ def processing_std_ndvi(res_queue, pipeline_run_level=0, pipeline_printout_level
         fwrite_id=None
 
     if pipeline_run_level > 0:
-        pipeline_run(verbose=pipeline_run_level, logger=spec_logger)
+        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, touch_files_only=touch_files_only)
 
     if pipeline_printout_level > 0:
         pipeline_printout(verbose=pipeline_printout_level) #, output_stream=fout)
@@ -1092,7 +1094,7 @@ def processing_std_ndvi(res_queue, pipeline_run_level=0, pipeline_printout_level
 
 def processing_std_ndvi_stats_only(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates_linearx2=None, write2file=None,logfile=None):
+                          starting_dates=None, write2file=None,logfile=None,touch_files_only=False):
 
     result = processing_std_ndvi(res_queue, pipeline_run_level=pipeline_run_level,
                                                                pipeline_printout_level=pipeline_printout_level,
@@ -1101,17 +1103,18 @@ def processing_std_ndvi_stats_only(res_queue, pipeline_run_level=0,pipeline_prin
                                                                starting_sprod=starting_sprod,
                                                                mapset=mapset,
                                                                version=version,
-                                                               starting_dates_linearx2=starting_dates_linearx2,
+                                                               starting_dates_linearx2=starting_dates,
                                                                nrt_products=False,
                                                                update_stats=True,
                                                                write2file=write2file,
-                                                               logfile=logfile)
+                                                               logfile=logfile,
+                                                               touch_files_only=touch_files_only)
 
     return result
 
 def processing_std_ndvi_prods_only(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates_linearx2=None,write2file=None, logfile=None):
+                          starting_dates=None,write2file=None, logfile=None,touch_files_only=False):
 
     result = processing_std_ndvi(res_queue, pipeline_run_level=pipeline_run_level,
                                                                pipeline_printout_level=pipeline_printout_level,
@@ -1120,17 +1123,18 @@ def processing_std_ndvi_prods_only(res_queue, pipeline_run_level=0,pipeline_prin
                                                                starting_sprod=starting_sprod,
                                                                mapset=mapset,
                                                                version=version,
-                                                               starting_dates_linearx2=starting_dates_linearx2,
+                                                               starting_dates_linearx2=starting_dates,
                                                                nrt_products=True,
                                                                update_stats=False,
                                                                write2file=write2file,
-                                                               logfile=logfile)
+                                                               logfile=logfile,
+                                                               touch_files_only=touch_files_only)
 
     return result
 
 def processing_std_ndvi_all(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates_linearx2=None, logfile=None):
+                          starting_dates=None, logfile=None,touch_files_only=False):
 
     result = processing_std_ndvi(res_queue, pipeline_run_level=pipeline_run_level,
                                                                pipeline_printout_level=pipeline_printout_level,
@@ -1139,9 +1143,10 @@ def processing_std_ndvi_all(res_queue, pipeline_run_level=0,pipeline_printout_le
                                                                starting_sprod=starting_sprod,
                                                                mapset=mapset,
                                                                version=version,
-                                                               starting_dates_linearx2=starting_dates_linearx2,
+                                                               starting_dates_linearx2=starting_dates,
                                                                nrt_products=True,
                                                                update_stats=True,
-                                                               logfile=logfile)
+                                                               logfile=logfile,
+                                                               touch_files_only=touch_files_only)
 
     return result
