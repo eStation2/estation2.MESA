@@ -6,26 +6,26 @@ from multiprocessing import Queue
 # #   ---------------------------------------------------------------------
 # # vgt-ndvi
 # #   ---------------------------------------------------------------------
-from apps.processing.processing_std_ndvi import *
-productcode='vgt-ndvi'
-subproductcode='ndv'
-version='sv2-pv2.1'
-start_date='19990101'
-end_date='20141231'
-list_dates = proc_functions.get_list_dates_for_dataset(productcode, subproductcode, version, start_date=start_date, end_date=end_date)
-
-args = {'pipeline_run_level':3, \
-        'pipeline_printout_level':0, \
-        'pipeline_printout_graph_level': 0, \
-        'prod': productcode,\
-        'starting_sprod':subproductcode,\
-        'mapset': 'SPOTV-Africa-1km',\
-        'version': version,
-        'starting_dates': list_dates,
-        'logfile':'test_processing_ndvi'}
-
-res_queue = None
-processing_std_ndvi_prods_only(res_queue,**args)
+# from apps.processing.processing_std_ndvi import *
+# productcode='vgt-ndvi'
+# subproductcode='ndv'
+# version='sv2-pv2.1'
+# start_date='19990101'
+# end_date='20141231'
+# list_dates = proc_functions.get_list_dates_for_dataset(productcode, subproductcode, version, start_date=start_date, end_date=end_date)
+#
+# args = {'pipeline_run_level':3, \
+#         'pipeline_printout_level':0, \
+#         'pipeline_printout_graph_level': 0, \
+#         'prod': productcode,\
+#         'starting_sprod':subproductcode,\
+#         'mapset': 'SPOTV-Africa-1km',\
+#         'version': version,
+#         'starting_dates': list_dates,
+#         'logfile':'test_processing_ndvi'}
+#
+# res_queue = None
+# processing_std_ndvi_prods_only(res_queue,**args)
 #processing_std_ndvi_all(res_queue,**args)
 
 #   ---------------------------------------------------------------------
@@ -122,26 +122,26 @@ processing_std_ndvi_prods_only(res_queue,**args)
 #   ---------------------------------------------------------------------
 # lsasaf-et
 #   ---------------------------------------------------------------------
-# from apps.processing.processing_std_lsasaf_lst import *
-# # Create the list of dates -> returns empty if start==end==None
-# start_date='201510010000'
-# end_date='201510102345'
-# starting_dates = proc_functions.get_list_dates_for_dataset('lsasaf-lst', 'lst', 'undefined', start_date=start_date, end_date=end_date)
-# starting_dates = None
-# native_mapset='MSG-satellite-3km'
-# target_mapset='SPOTV-CEMAC-1km'
-#
-# args = {'pipeline_run_level':3, \
-#         'pipeline_printout_level':0, \
-#         'pipeline_printout_graph_level': 0, \
-#         'prod': 'lsasaf-lst',\
-#         'starting_sprod':'lst',\
-#         'starting_dates': starting_dates,\
-#         'native_mapset': native_mapset,\
-#         'target_mapset': target_mapset,\
-#         'version':'undefined',
-#         'logfile':'log-lsasaf-lst.log'}
-#
-# res_queue = None
-# proc_lists=processing_std_lsasaf_lst(res_queue,**args)
-# print(proc_lists)
+from apps.processing.processing_std_lsasaf_lst import *
+# Create the list of dates -> returns empty if start==end==None
+start_date='201510010000'
+end_date='201510102345'
+starting_dates = proc_functions.get_list_dates_for_dataset('lsasaf-lst', 'lst', 'undefined', start_date=start_date, end_date=end_date)
+starting_dates = None
+native_mapset='MSG-satellite-3km'
+target_mapset='SPOTV-CEMAC-1km'
+
+args = {'pipeline_run_level':3, \
+        'pipeline_printout_level':0, \
+        'pipeline_printout_graph_level': 0, \
+        'prod': 'lsasaf-lst',\
+        'starting_sprod':'lst',\
+        'starting_dates': starting_dates,\
+        'native_mapset': native_mapset,\
+        'target_mapset': target_mapset,\
+        'version':'undefined',
+        'logfile':'log-lsasaf-lst.log'}
+
+res_queue = None
+proc_lists=processing_std_lsasaf_lst(res_queue,**args)
+print(proc_lists)
