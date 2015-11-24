@@ -72,16 +72,12 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     input_dir = es2_data_dir+ \
                 functions.set_path_sub_directory(prod, starting_sprod, 'Ingest', version, mapset)
 
-    #logger.debug('Input data directory is: %s' % input_dir)
-
     if starting_dates is not None:
         starting_files = []
         for my_date in starting_dates:
             starting_files.append(input_dir+my_date+in_prod_ident)
     else:
         starting_files=input_dir+"*"+in_prod_ident
-
-    #logger.debug('Starting files wild card is: %s' % starting_files)
 
     #   ---------------------------------------------------------------------
     #   Average
@@ -503,7 +499,6 @@ def processing_std_precip(res_queue, pipeline_run_level=0,pipeline_printout_leve
         spec_logger.info("Run the pipeline %s" % 'processing_std_precip')
         pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger)
         tasks = pipeline_get_task_names()
-        #pipeline_printout(output_stream=sys.stdout)
         spec_logger.info("Run the pipeline %s" % tasks[0])
         spec_logger.info("After running the pipeline %s" % 'processing_std_precip')
 

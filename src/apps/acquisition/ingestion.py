@@ -1306,6 +1306,10 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         if datasource_descr.date_format == 'YYYYdMMdK':
             output_date_str = functions.conv_yyyydmmdk_2_yyyymmdd(in_date)
 
+        if datasource_descr.date_format == 'YYYYMMDD_G2':
+            # The date (e.g. 20151103) is converted to the dekad it belongs to (e.g. 20151101)
+            output_date_str = functions.conv_yyyymmdd_g2_2_yyyymmdd(in_date)
+
         if output_date_str == -1:
             output_date_str = in_date+'_DATE_ERROR_'
         else:
@@ -1481,6 +1485,167 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         filename = os.path.basename(output_filename)
         # Loop on interm_files
         ii += 1
+
+def ingest_file_vers_1_0(input_file, in_date, product_def, target_mapset, my_logger, product_in_info, echo_query=False):
+# -------------------------------------------------------------------------------------------------------
+#   Convert 1 file from 1.0 to 2.0 eStation format
+#   Arguments:
+#       input_file: input file full name (1 per subproduct)
+#       in_date: product date
+#       product_def: definition of the 2.0 product. It contains:
+#                   productcode
+#                   subproductcode
+#                   version
+#                   type: Ingest/Derived
+#
+#       echo_query[option]: force print-out from query_db functions
+#
+#   NOTE: mapset management: mapset is the geo-reference information associated to datasets
+#         The input product is already georeferenced: case 'default'
+#         'target_mapset": comes from table 'ingestion' ('mapsetcode')
+#                          MUST be specified.
+
+    version_undef = 'undefined'
+    my_logger.info("Entering routine %s for product %s - date %s" % ('ingest_file_vers_1_0', product_def['productcode'], in_date))
+
+    # Test the file exists
+    if not os.path.isfile(input_file):
+        my_logger.error('Input file: %s does not exist' % input_file)
+        return 1
+
+    # Instance metadata object
+    sds_meta = metadata.SdsMetadata()
+
+    # Printout list of intermediate files
+    my_logger.info('In ingest_file_vers_1_0: Input file: %s' % input_file)
+
+    # -------------------------------------------------------------------------
+    # Collect info and prepare filenaming
+    # -------------------------------------------------------------------------
+
+    # # Get information from product_in_info
+    #
+    in_scale_factor = product_in_info['scale_factor']
+    in_offset = product_in_info['scale_offset']
+    in_nodata = product_in_info['no_data']
+    in_mask_min = product_in_info['mask_min']
+    in_mask_max = product_in_info['mask_max']
+    in_data_type = product_in_info['data_type_id']
+    in_data_type_gdal = conv_data_type_to_gdal(in_data_type)
+
+    # Get information from 'product' table
+    args = {"productcode": product_def['productcode'], "subproductcode": product_def['subproductcode'], "version":product_def['version']}
+    product_info = querydb.get_product_out_info(echo=echo_query, **args)
+    product_info = functions.list_to_element(product_info)
+
+    out_data_type = product_info.data_type_id
+    out_scale_factor = product_info.scale_factor
+    out_offset = product_info.scale_offset
+    out_nodata = product_info.nodata
+    out_date_format = product_info.date_format
+
+    # Translate data type for gdal and numpy
+    out_data_type_gdal = conv_data_type_to_gdal(out_data_type)
+    out_data_type_numpy = conv_data_type_to_numpy(out_data_type)
+
+    # Copy the in_date format into a convenient one for DB and file naming
+    # No change done FTTB !
+    out_date_str_final = in_date
+
+    # Get only the short_name for output file naming
+    mapset_id = target_mapset
+
+    # Define output directory and make sure it exists
+    output_directory = data_dir_out + functions.set_path_sub_directory(product_def['productcode'],
+                                                                       product_def['subproductcode'],
+                                                                       product_def['type'],
+                                                                       product_def['version'],
+                                                                       mapset_id,)
+    my_logger.debug('Output Directory is: %s' % output_directory)
+    try:
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+    except:
+        my_logger.error('Cannot create output directory: ' + output_directory)
+        return 1
+
+    # Define output filename
+    output_filename = output_directory + functions.set_path_filename(out_date_str_final,
+                                                                     product_def['productcode'],
+                                                                     product_def['subproductcode'],
+                                                                     mapset_id,
+                                                                     product_def['version'],
+                                                                     '.tif')
+
+    # -------------------------------------------------------------------------
+    # Manage the geo-referencing associated to input file
+    # -------------------------------------------------------------------------
+
+    orig_ds = gdal.Open(input_file, gdal.GA_ReadOnly)
+
+    # Go straight for the case of 'default' mapset
+    try:
+        # Read geo-reference from input file
+        orig_cs = osr.SpatialReference()
+        orig_cs.ImportFromWkt(orig_ds.GetProjectionRef())
+        orig_geo_transform = orig_ds.GetGeoTransform()
+        orig_size_x = orig_ds.RasterXSize
+        orig_size_y = orig_ds.RasterYSize
+    except:
+        my_logger.debug('Cannot read geo-reference from file .. Continue')
+
+    # TODO-M.C.: add a test on the mapset id in DB table !
+    trg_mapset = mapset.MapSet()
+    trg_mapset.assigndb(mapset_id)
+    logger.debug('Target Mapset is: %s' % mapset_id)
+    reprojection = 0
+
+    # -------------------------------------------------------------------------
+    # Generate the output file
+    # -------------------------------------------------------------------------
+    # Prepare output driver
+    out_driver = gdal.GetDriverByName(es_constants.ES2_OUTFILE_FORMAT)
+
+    # Write to GTIFF file
+    try:
+        my_logger.debug('Doing only rescaling/format conversion')
+
+        # Read from input file
+        band = orig_ds.GetRasterBand(1)
+        my_logger.debug('Band Type='+gdal.GetDataTypeName(band.DataType))
+        out_data = band.ReadAsArray(0, 0, orig_size_x, orig_size_y)
+
+        # No reprojection, only format-conversion
+        trg_ds = out_driver.Create(output_filename, orig_size_x, orig_size_y, 1, out_data_type_gdal,
+                                   [es_constants.ES2_OUTFILE_OPTIONS])
+        trg_ds.SetProjection(orig_ds.GetProjectionRef())
+        trg_ds.SetGeoTransform(orig_geo_transform)
+
+        # Apply rescale to data
+        scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
+                                   out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger)
+
+        trg_ds.GetRasterBand(1).WriteArray(scaled_data)
+
+        orig_ds = None
+
+    except:
+        my_logger.error('Error in writing output file [%s]' % output_filename)
+
+    # -------------------------------------------------------------------------
+    # Assign Metadata to the ingested file
+    # -------------------------------------------------------------------------
+
+    sds_meta.assign_es2_version()
+    sds_meta.assign_mapset(mapset_id)
+    sds_meta.assign_from_product(product_def['productcode'], product_def['subproductcode'], product_def['version'])
+    sds_meta.assign_date(out_date_str_final)
+    sds_meta.assign_subdir_from_fullpath(output_directory)
+    sds_meta.assign_comput_time_now()
+    sds_meta.assign_input_files(input_file)
+
+    sds_meta.write_to_ds(trg_ds)
+    trg_ds = None
 
 def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete=False):
 # -------------------------------------------------------------------------------------------------------

@@ -15,6 +15,9 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
         'esapp.view.acquisition.DataAcquisitionController',
         'esapp.view.acquisition.logviewer.LogView',
 
+        'esapp.view.acquisition.editEumetcastSource',
+        'esapp.view.acquisition.editInternetSource',
+
         'Ext.grid.column.Action'
         //'Ext.grid.column.Check'
     ],
@@ -26,20 +29,107 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
 
     viewConfig: {
         stripeRows: false,
-        enableTextSelection: true,
+        enableTextSelection: false,
         draggable: false,
         markDirty: false,
         resizable: false,
-        disableSelection: true,
-        trackOver: false
+        disableSelection: false,
+        trackOver: true,
+        forceFit:true
+        //,height:70
+        //,getRowClass: function (record, rowIndex, rp, store) {
+        //    rp.tstyle += 'height: 70px;';
+        //    //if(record.id == 439){ //id is some field from the store model
+        //    //     rp.tstyle += 'height: 70px;';
+        //    //}
+        //    //
+        //    ////or
+        //    //if(rowIndex == 1){
+        //    //     rp.tstyle += 'height: 50px;';
+        //    //}
+        //}
     },
     cls: 'grid-color-yellow',
     hideHeaders: true,
     columnLines: false,
     rowLines: false,
 
-    bufferedRenderer: true,
+    //bufferedRenderer: true,
 
+    //listeners: {
+    //    celldblclick: function(grid, el, colIndex, record){
+    //        //console.info(record);
+    //        var data_source_id = record.get('data_source_id');
+    //        if (record.get('type') == 'INTERNET'){
+    //            var editInternetSourceWin = new esapp.view.acquisition.editInternetSource({
+    //                data_source_id: data_source_id
+    //            });
+    //            editInternetSourceWin.show();
+    //        }
+    //        else if (record.get('type') == 'EUMETCAST'){
+    //            //var eumetcaststore = Ext.data.StoreManager.lookup('EumetcastSourceStore');
+    //            //var eumetcastsource_record = eumetcaststore.findRecord('eumetcast_id', data_source_id, 0, true, false, true);
+    //
+    //            var editEumetcastSourceWin = new esapp.view.acquisition.editEumetcastSource({
+    //                data_source_id: data_source_id
+    //                //,viewModel: {
+    //                //        // If we are passed a record, a copy of it will be created in the newly spawned session.
+    //                //        // Otherwise, create a new phantom record in the child.
+    //                //        links: {
+    //                //            theEumetcastSource: eumetcastsource_record
+    //                //        }
+    //                //}
+    //            });
+    //            //editEumetcastSourceWin.down('grid').getStore().load();
+    //            editEumetcastSourceWin.show();
+    //        }
+    //    }
+        //,viewready: function (grid) {
+        //    var view = grid.view;
+        //
+        //    // record the current cellIndex
+        //    grid.mon(view, {
+        //        uievent: function (type, view, cell, recordIndex, cellIndex, e) {
+        //            grid.cellIndex = cellIndex;
+        //            grid.recordIndex = recordIndex;
+        //        }
+        //    });
+        //
+        //    grid.tip = Ext.create('Ext.tip.ToolTip', {
+        //        target: view.el,
+        //        delegate: '.x-grid-cell',
+        //        trackMouse: false,
+        //        renderTo: Ext.getBody()
+        //        //listeners: {
+        //        //    beforeshow: function updateTipBody(tip) {
+        //        //        if (grid.cellIndex == 0) {
+        //        //            tip.enable();
+        //        //            tip.show();
+        //        //        }
+        //        //        else {
+        //        //            //tip.update('');
+        //        //            tip.disable();
+        //        //            tip.hide();
+        //        //        }
+        //        //    }
+        //        //}
+        //    });
+        //
+        //    var tipRenderer = function (e, t, grid){
+        //        e.stopEvent();
+        //        if (grid.cellIndex == 0) {
+        //            var tipbody = esapp.Utils.getTranslation('doubleclicktoeditdatasource')+': ' + grid.getStore().getAt(grid.recordIndex).get('data_source_id');
+        //            grid.tip.update(tipbody);
+        //            grid.tip.show();
+        //        }
+        //    };
+        //
+        //    grid.getEl().on('mouseover', function(e,t,a){
+        //        tipRenderer(e,t,grid);
+        //    }, null, {delegate:'.x-grid-cell'});
+        //
+        //}
+    //},
     //listeners: {
     //    beforerender:  function () {
     //        var me = this,
@@ -76,36 +166,93 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
 
         me.columns = [{
             // text: '', // 'Type',
-            width: 195,     // 105,
+            width: 220,
             //dataIndex: 'type'
             xtype:'templatecolumn',
             tpl: new Ext.XTemplate(
-                    '<b>{type}</b>' +
+                    '<b>{type}</b>   ' +
                     '</br>' +
                     '<b class="smalltext" style="color:darkgrey">{data_source_id}</b>' +
+                    '</br>' +
+                    '<tpl if="time_latest_copy != \'\'">',
+                        '<b class="smalltext" style="color:lightgrey">'+esapp.Utils.getTranslation('lastcopied')+': {time_latest_copy}</b>' +
+                        '</br>' +
+                    '</tpl>',
+                    '<tpl if="time_latest_exec != \'\'">',
+                        '<b class="smalltext" style="color:lightgrey">'+esapp.Utils.getTranslation('lastexecuted')+': {time_latest_exec}</b>' +
+                    '</tpl>',
                     '</br>'
                 ),
             cellWrap:true
-        }, {
-            // text: '', // 'Latest Acquired',
-            width: 110,
-            dataIndex: 'time_latest_copy',
-            hidden: true
-        }, {
-            // text: '', // 'Latest Acquired',
-            width: 110,
-            dataIndex: 'time_latest_exec',
-            hidden: true
+            //,tdCls: 'cursorpointer'
+        },{
+            xtype: 'actioncolumn',
+            // header: 'Active',
+            hideable: false,
+            hidden: true,
+            width: 35,
+            align: 'center',
+            stopSelection: false,
+            items: [{
+                // scope: me,
+                disabled: false,
+                getClass: function(v, meta, rec) {
+                    return 'edit16';
+                },
+                getTip: function(v, meta, rec) {
+                    return esapp.Utils.getTranslation('editdatasource')+' ' + rec.get('data_source_id');
+                },
+                handler: function(grid, rowIndex, colIndex) {
+                    var rec = grid.getStore().getAt(rowIndex);
+                    var data_source_id = rec.get('data_source_id');
+                    if (rec.get('type') == 'INTERNET'){
+                        var editInternetSourceWin = new esapp.view.acquisition.editInternetSource({
+                            data_source_id: data_source_id
+                        });
+                        editInternetSourceWin.show();
+                    }
+                    else if (rec.get('type') == 'EUMETCAST'){
+                        //var eumetcaststore = Ext.data.StoreManager.lookup('EumetcastSourceStore');
+                        //var eumetcastsource_record = eumetcaststore.findRecord('eumetcast_id', data_source_id, 0, true, false, true);
+
+                        var editEumetcastSourceWin = new esapp.view.acquisition.editEumetcastSource({
+                            data_source_id: data_source_id
+                            //,viewModel: {
+                            //        // If we are passed a record, a copy of it will be created in the newly spawned session.
+                            //        // Otherwise, create a new phantom record in the child.
+                            //        links: {
+                            //            theEumetcastSource: eumetcastsource_record
+                            //        }
+                            //}
+                        });
+                        //editEumetcastSourceWin.down('grid').getStore().load();
+                        editEumetcastSourceWin.show();
+                    }
+                }
+            }]
+        //}, {
+        //    // text: '', // 'Latest Acquired',
+        //    width: 110,
+        //    dataIndex: 'time_latest_copy',
+        //    hidden: true
+        //}, {
+        //    // text: '', // 'Latest Acquired',
+        //    width: 110,
+        //    dataIndex: 'time_latest_exec',
+        //    hidden: true
         }, {
             xtype: 'actioncolumn',
             // header: 'Store Native',
             hideable: true,
             hidden:true,
-            width: 80,
+            width: 90,
             align: 'center',
+            stopSelection: false,
+            variableRowHeight: true,
             items: [{
                 // scope: me,
                 disabled: false,
+                style: {"line-height": "70px"},
                 getClass: function(v, meta, rec) {
                     if (rec.get('store_original_data')) {
                         return 'activated';
@@ -135,6 +282,8 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
             // disabled: true,
             width: 65,
             align: 'center',
+            stopSelection: false,
+            variableRowHeight: true,
             items: [{
                 // scope: me,
                 disabled: false,
@@ -164,6 +313,7 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
             width: 55,
             height:40,
             align:'center',
+            stopSelection: false,
             items: [{
                 //icon: 'resources/img/icons/file-extension-log-icon-32x32.png',
                 iconCls:'log-icon',

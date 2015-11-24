@@ -16,7 +16,7 @@ from functions import *
 # Import eStation2 modules
 from lib.python import es_logging as log
 from lib.python import functions
-from database import querydb
+from database import querydb_meta
 logger = log.my_logger(__name__)
 
 # TODO-M.C.: Add all the attributes of 'mapset' and 'category_id' ? so that the contents of the db tables can be created (if not existing on the target station) from metadata ?
@@ -175,7 +175,12 @@ class SdsMetadata:
 
     def assign_from_product(self, product, subproduct, version):
     #
-        product_out_info = querydb.get_product_out_info(productcode=product,subproductcode=subproduct,version=version, echo=False)
+        try:
+            product_out_info = querydb_meta.get_product_out_info(productcode=product,subproductcode=subproduct,version=version, echo=False)
+        except:
+            logger.error('The product is not defined in the DB')
+            return 1
+
         product_out_info = functions.list_to_element(product_out_info)
 
     #   Assign prod/subprod/version
@@ -198,6 +203,17 @@ class SdsMetadata:
         sds_metadata['eStation2_unit'] = product_out_info.unit
         sds_metadata['eStation2_nodata'] = product_out_info.nodata
 
+    def assign_product_elemets(self, product, subproduct, version):
+    #
+    #   Assign prod/subprod/version
+        sds_metadata['eStation2_product'] = str(product)
+        sds_metadata['eStation2_subProduct'] = str(subproduct)
+
+        if isinstance(version, str) or isinstance(version, unicode):
+            sds_metadata['eStation2_product_version'] = version
+        else:
+            sds_metadata['eStation2_product_version'] = 'undefined'
+
     def assign_date(self, date):
     #
     #   Assign date of the product
@@ -213,6 +229,11 @@ class SdsMetadata:
     #   Assign subdir
         subdir = functions.get_subdir_from_path_full(full_directory)
         sds_metadata['eStation2_subdir'] = str(subdir)
+
+    def assign_subdir(self, subdirectory):
+    #
+    #   Assign subdir
+        sds_metadata['eStation2_subdir'] = str(subdirectory)
 
     def assign_input_files(self, input_files):
     #

@@ -65,7 +65,7 @@ def get_remote_system_status(server_address):
     return status_remote_machine
 
 
-def check_connection(server_info):
+def _check_connection(server_info):
     cpos = server_info.find(':')
     try:
         sock = socket()
@@ -75,6 +75,18 @@ def check_connection(server_info):
         # sock.shutdown(1)
         sock.close
         return True
+    except:
+        return False
+
+def check_connection(server_info):
+    try:
+        # response = os.system("ping -c 1 " + hostname)
+        response = os.system("ping -c 1 -w2 " + server_info + " > /dev/null 2>&1")
+        # check the response...
+        if response == 0:
+          return True
+        else:
+          return False
     except:
         return False
 
@@ -219,6 +231,30 @@ def getSystemSettings():
     systemsettings = dict(systemsettings)   # convert list of tuples to dict
     # print systemsettings
     return systemsettings
+
+
+def getUserSettings():
+    import ConfigParser
+
+    thisfiledir = os.path.dirname(os.path.abspath(__file__))
+
+    if es_constants.es2globals['settings_dir'] != '':
+        usersettingsfile = es_constants.es2globals['settings_dir']+'/user_settings.ini'
+    else:
+        usersettingsfile = '/eStation2/settings/user_settings.ini'
+
+    if not os.path.isfile(usersettingsfile):
+        usersettingsfile = os.path.join(thisfiledir, 'config/install/', 'user_settings.ini')
+
+    config_usersettings = ConfigParser.ConfigParser()
+    config_usersettings.read([usersettingsfile])
+
+    usersettings = config_usersettings.items('USER_SETTINGS')  # returns a list of tuples
+    # for setting, value in usersettings:
+    #      print setting + ': ' + value
+    usersettings = dict(usersettings)   # convert list of tuples to dict
+    # print usersettings
+    return usersettings
 
 
 def checkIP():
@@ -732,6 +768,50 @@ def conv_yyyydmmdk_2_yyyymmdd(yymmk):
     date_yyyymmdd = str(year)+month+day
     return date_yyyymmdd
 
+######################################################################################
+#   conv_yyyymmdd_g2_2_yyyymmdd
+#   Purpose: Function returns a date (YYYYMMDD) with YYYYdMMdK as input.
+#   Author: M. Clerici
+#   Date: 2015/02/25
+#   Input: string of numbers in the format YYYYdMMdK
+#   Output: date (YYYYMMDD), otherwise -1
+#
+def conv_yyyymmdd_g2_2_yyyymmdd(yymmk):
+
+    year = int(str(yymmk)[0:4])
+    month = str(yymmk)[4:6]
+    day = int(str(yymmk)[6:8])
+    if day <= 10:
+        day = '01'
+    elif day <= 20:
+        day = '11'
+    else:
+        day = '21'
+
+    date_yyyymmdd = str(year)+month+day
+    return date_yyyymmdd
+
+######################################################################################
+#   day_per_dekad
+#   Purpose: Function returns the number of days per dekad (from 8 to 11)
+#   Author: M. Clerici
+#   Date: 2015/02/25
+#   Input: dekad in format YYYYMMDD
+#   Output: number of days
+#
+def day_per_dekad(yyyymmdd):
+
+    from calendar import monthrange
+    year = int(str(yyyymmdd)[0:4])
+    month = int(str(yyyymmdd)[4:6])
+    dekad = int(str(yyyymmdd)[6:8])
+    if dekad <= 20:
+        days = 10
+    else:
+        tot_days = monthrange(year,month)[1]
+        days = tot_days - 20
+
+    return days
 
 ######################################################################################
 #   conv_list_2_string
@@ -990,18 +1070,18 @@ def get_all_from_path_full(full_path):
 #   Output: product_code, sub_product_code, date, mapset, version
 #   Description: returns information form the fullpath
 #
-def get_all_from_path_full(full_path):
-
-    # Split directory and filename
-    dir, filename = os.path.split(full_path)
-
-    # Get info from directory
-    product_code, sub_product_code, version, mapset = get_from_path_dir(dir)
-
-    # Get info from filename
-    str_date = get_date_from_path_filename(filename)
-
-    return [product_code, sub_product_code, version, str_date, mapset]
+# def get_all_from_filename(full_path):
+#
+#     # Split directory and filename
+#     dir, filename = os.path.split(full_path)
+#
+#     # Get info from directory
+#     product_code, sub_product_code, version, mapset = get_from_path_dir(dir)
+#
+#     # Get info from filename
+#     str_date = get_date_from_path_filename(filename)
+#
+#     return [product_code, sub_product_code, version, str_date, mapset]
 
 ######################################################################################
 #   get_all_from_filename
@@ -1231,11 +1311,11 @@ def restore_obj_from_pickle(obj, filename):
             logger.debug("Dump file info loaded from %s.", filename)
             obj = tmp_object
         except:
-            logger.warning("Dump file %s can't be loaded, the file will be removed.", filename)
+            logger.debug("Dump file %s can't be loaded, the file will be removed.", filename)
             os.remove(filename)
-    else:
+    # else:
         # Create an empty file in the tmp dir
-        logger.debug("Dump file %s does not exist", filename)
+        # logger.debug("Dump file %s does not exist", filename)
         #open(filename, 'a').close()
 
     return obj
@@ -1254,10 +1334,10 @@ def load_obj_from_pickle(filename):
             dump_file_info = open(filename, 'r')
             obj = pickle.load(dump_file_info)
         except:
-            logger.warning("Dump file %s can't be loaded, the file will be removed.", filename)
-    else:
+            logger.debug("Dump file %s can't be loaded, the file will be removed.", filename)
+    # else:
         # Raise warning
-        logger.warning("Dump file %s does not exist.", filename)
+        # logger.debug("Dump file %s does not exist.", filename)
 
     return obj
 

@@ -78,6 +78,17 @@ class TestFunctionsPath(TestCase):
         self.assertEqual(my_mapset,self.str_mapset)
         self.assertEqual(my_version,self.str_version)
 
+    def test_get_all_from_filename(self):
+
+        my_full_path = '20151001_lsasaf-et_10daycum_SPOTV-CEMAC-1km_undefined.tif'
+        my_date, my_product_code, my_sub_product_code, my_mapset , my_version= get_all_from_filename(my_full_path)
+
+        self.assertEqual(my_product_code,self.str_prod)
+        self.assertEqual(my_sub_product_code,self.str_sprod)
+        self.assertEqual(my_date,self.str_date)
+        self.assertEqual(my_mapset,self.str_mapset)
+        self.assertEqual(my_version,self.str_version)
+
     def test_get_subdir_from_path_full(self):
 
         full_path = self.dir_name+self.filename

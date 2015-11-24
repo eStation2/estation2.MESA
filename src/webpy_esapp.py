@@ -32,7 +32,7 @@ from apps.productmanagement.datasets import Dataset
 from apps.es2system import es2system
 # from apps.productmanagement.datasets import Frequency
 from apps.productmanagement.products import Product
-# from apps.analysis import mapserver
+from apps.analysis import generateLegendHTML
 
 from lib.python import functions
 from lib.python import es_logging as log
@@ -117,6 +117,10 @@ urls = (
     "/analysis/timeseriesproduct", "TimeseriesProducts",
     "/analysis/gettimeseries", "GetTimeseries",
 
+    "/getmapsets", "GetMapsets",
+    "/addingestmapset", "AddIngestMapset",
+    "/deleteingestmapset", "DisableIngestMapset",
+
     "/getlanguages", "GetLanguages",
     "/geti18n", "GetI18n",
 
@@ -137,13 +141,17 @@ class EsApp:
         #return web.ctx
         getparams = web.input()
         if hasattr(getparams, "lang"):
+            # print getparams['lang']
             functions.setUserSetting('default_language', getparams['lang'])
+            es_constants.es2globals['default_language'] = getparams['lang']
 
         render = web.template.render(es_constants.es2globals['base_dir']+'/apps/gui/esapp')
-        # print es_constants.es2globals['default_language']
+        # print 'default_language: ' + es_constants.es2globals['default_language']
         if es_constants.es2globals['default_language'] == 'eng':
+            # print 'rendering index'
             return render.index()
         elif es_constants.es2globals['default_language'] == 'fra':
+            # print 'rendering index_fr'
             return render.index_fr()
         else:
             return render.index()
@@ -218,7 +226,7 @@ class GetHelp:
 
         jsonfile = docs_dir+lang_dir + getparams['type'] + '_data_'+getparams['lang']+'.json'
 
-        print jsonfile
+        # print jsonfile
 
         if os.path.isfile(jsonfile):
             jsonfile = open(jsonfile, 'r')
@@ -262,7 +270,7 @@ class GetRequest:
                 mapsetcode = getparams['mapsetcode']
                 subproductcode = getparams['subproductcode']
 
-            request = requests.create_request(productcode, version, mapsetcode=mapsetcode, subproductcode=subproductcode)
+            request = requests.create_request(productcode=productcode, version=version, mapsetcode=mapsetcode, subproductcode=subproductcode)
             request_json = json.dumps(request,
                                    ensure_ascii=False,
                                    sort_keys=True,
@@ -339,7 +347,7 @@ class GetCategories:
         categories_dict_all = []
         categories = querydb.get_categories()
 
-        if categories.__len__() > 0:
+        if hasattr(categories, "__len__") and categories.__len__() > 0:
             for row in categories:
                 row_dict = functions.row2dict(row)
                 categories_dict = {'category_id': row_dict['category_id'],
@@ -372,7 +380,7 @@ class GetFrequencies:
         frequencies_dict_all = []
         frequencies = querydb.get_frequencies()
 
-        if frequencies.__len__() > 0:
+        if hasattr(frequencies, "__len__") and frequencies.__len__() > 0:
             for row in frequencies:
                 row_dict = functions.row2dict(row)
                 # internetsource = {'category_id': row_dict['category_id'],
@@ -404,7 +412,7 @@ class GetDateFormats:
         dateformats_dict_all = []
         dateformats = querydb.get_dateformats()
 
-        if dateformats.__len__() > 0:
+        if hasattr(dateformats, "__len__") and dateformats.__len__() > 0:
             for row in dateformats:
                 row_dict = functions.row2dict(row)
                 # internetsource = {'category_id': row_dict['category_id'],
@@ -436,7 +444,7 @@ class GetDataTypes:
         datatypes_dict_all = []
         datatypes = querydb.get_datatypes()
 
-        if datatypes.__len__() > 0:
+        if hasattr(datatypes, "__len__") and datatypes.__len__() > 0:
             for row in datatypes:
                 row_dict = functions.row2dict(row)
                 # internetsource = {'category_id': row_dict['category_id'],
@@ -468,13 +476,17 @@ class AssignInternetSource:
     def POST(self):
         # getparams = json.loads(web.data())
         getparams = web.input()
+        if getparams['version'] == '':
+            version = 'undefined'
+        else:
+            version = getparams['version']
 
         productinfo = {
             'productcode': getparams['productcode'],
             'subproductcode': getparams['subproductcode'],
-            'version': getparams['version'],
+            'version': version,
             'data_source_id': getparams['data_source_id'],
-            'defined_by': 'JRC',
+            'defined_by': 'USER',
             'type': 'INTERNET'
         }
 
@@ -497,12 +509,17 @@ class AssignEumetcastSource:
         # getparams = json.loads(web.data())
         getparams = web.input()
 
+        if getparams['version'] == '':
+            version = 'undefined'
+        else:
+            version = getparams['version']
+
         productinfo = {
             'productcode': getparams['productcode'],
             'subproductcode': getparams['subproductcode'],
-            'version': getparams['version'],
+            'version': version,
             'data_source_id': getparams['data_source_id'],
-            'defined_by': 'JRC',
+            'defined_by': 'USER',
             'type': 'EUMETCAST'
         }
 
@@ -546,7 +563,7 @@ class GetEumetcastSources:
         eumetcastsources_dict_all = []
         eumetcastsources = querydb.get_eumetcastsources()
 
-        if eumetcastsources.__len__() > 0:
+        if hasattr(eumetcastsources, "__len__") and eumetcastsources.__len__() > 0:
             for row in eumetcastsources:
                 row_dict = functions.row2dict(row)
                 eumetcastsource = {'eumetcast_id': row_dict['eumetcast_id'],
@@ -593,6 +610,67 @@ class GetEumetcastSources:
         return eumetcastsources_json
 
 
+
+class UpdateEumetcastSource:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    def PUT(self):
+        getparams = json.loads(web.data())  # get PUT data
+        if 'eumetcastsources' in getparams:
+
+            prod_id_position = None
+            if getparams['eumetcastsources']['prod_id_position'].isdigit():
+                prod_id_position = int(getparams['eumetcastsources']['prod_id_position'])
+
+            prod_id_length = None
+            if getparams['eumetcastsources']['prod_id_length'].isdigit():
+                prod_id_length = int(getparams['eumetcastsources']['prod_id_length'])
+
+            area_length = None
+            if getparams['eumetcastsources']['area_length'].isdigit():
+                area_length = int(getparams['eumetcastsources']['area_length'])
+
+            release_length = None
+            if getparams['eumetcastsources']['release_length'].isdigit():
+                release_length = int(getparams['eumetcastsources']['release_length'])
+
+            eumetcastsourceinfo = {'eumetcast_id': getparams['eumetcastsources']['eumetcast_id'],
+                                   'filter_expression_jrc': getparams['eumetcastsources']['filter_expression_jrc']}
+
+            datasourcedescrinfo = {'datasource_descr_id': getparams['eumetcastsources']['eumetcast_id'],
+                                  'format_type': getparams['eumetcastsources']['format_type'],
+                                  'file_extension': getparams['eumetcastsources']['file_extension'],
+                                  'delimiter': getparams['eumetcastsources']['delimiter'],
+                                  'date_format': getparams['eumetcastsources']['date_format'],
+                                  'date_position': getparams['eumetcastsources']['date_position'],
+                                  'product_identifier': getparams['eumetcastsources']['product_identifier'],
+                                  'prod_id_position': prod_id_position,
+                                  'prod_id_length': prod_id_length,
+                                  'area_type': getparams['eumetcastsources']['area_type'],
+                                  'area_position': getparams['eumetcastsources']['area_position'],
+                                  'area_length': area_length,
+                                  'preproc_type': getparams['eumetcastsources']['preproc_type'],
+                                  'product_release': getparams['eumetcastsources']['product_release'],
+                                  'release_position': getparams['eumetcastsources']['release_position'],
+                                  'release_length': release_length,
+                                  'native_mapset': getparams['eumetcastsources']['native_mapset']}
+
+            if self.crud_db.update('eumetcast_source', eumetcastsourceinfo):
+                if self.crud_db.update('datasource_description', datasourcedescrinfo):
+                    updatestatus = '{"success":"true", "message":"Eumetcast data source and description updated!"}'
+                else:
+                    updatestatus = '{"success":"true", "message":"Eumetcast data source updated!"}'
+            else:
+                updatestatus = '{"success":false, "message":"An error occured while updating the Eumetcast data source!"}'
+
+        else:
+            updatestatus = '{"success":false, "message":"No Eumetcast data source passed!"}'
+
+        return updatestatus
+
+
 class GetInternetSources:
     def __init__(self):
         self.lang = "eng"
@@ -601,7 +679,7 @@ class GetInternetSources:
         internetsources_dict_all = []
         internetsources = querydb.get_internetsources()
 
-        if internetsources.__len__() > 0:
+        if hasattr(internetsources, "__len__") and internetsources.__len__() > 0:
             for row in internetsources:
                 row_dict = functions.row2dict(row)
                 internetsource = {'internet_id': row_dict['internet_id'],
@@ -666,6 +744,31 @@ class UpdateInternetSource:
     def PUT(self):
         getparams = json.loads(web.data())  # get PUT data
         if 'internetsources' in getparams:
+
+            startdate = None
+            if getparams['internetsources']['start_date'].isdigit():
+                startdate = int(getparams['internetsources']['start_date'])
+
+            enddate = None
+            if getparams['internetsources']['end_date'].isdigit():
+                enddate = int(getparams['internetsources']['end_date'])
+
+            prod_id_position = None
+            if getparams['internetsources']['prod_id_position'].isdigit():
+                prod_id_position = int(getparams['internetsources']['prod_id_position'])
+
+            prod_id_length = None
+            if getparams['internetsources']['prod_id_length'].isdigit():
+                prod_id_length = int(getparams['internetsources']['prod_id_length'])
+
+            area_length = None
+            if getparams['internetsources']['area_length'].isdigit():
+                area_length = int(getparams['internetsources']['area_length'])
+
+            release_length = None
+            if getparams['internetsources']['release_length'].isdigit():
+                release_length = int(getparams['internetsources']['release_length'])
+
             internetsourceinfo = {'internet_id': getparams['internetsources']['internet_id'],
                                   'defined_by': getparams['internetsources']['defined_by'],
                                   'descriptive_name': getparams['internetsources']['descriptive_name'],
@@ -681,8 +784,8 @@ class UpdateInternetSource:
                                   'status': getparams['internetsources']['status'],
                                   'pull_frequency': getparams['internetsources']['pull_frequency'],
                                   'frequency_id': getparams['internetsources']['frequency_id'],
-                                  'start_date': int(getparams['internetsources']['start_date']),
-                                  'end_date': int(getparams['internetsources']['end_date']),
+                                  'start_date': startdate,
+                                  'end_date': enddate,
                                   'datasource_descr_id': getparams['internetsources']['internet_id']}
 
             datasourcedescrinfo = {'datasource_descr_id': getparams['internetsources']['internet_id'],
@@ -692,15 +795,15 @@ class UpdateInternetSource:
                                   'date_format': getparams['internetsources']['date_format'],
                                   'date_position': getparams['internetsources']['date_position'],
                                   'product_identifier': getparams['internetsources']['product_identifier'],
-                                  'prod_id_position': int(getparams['internetsources']['prod_id_position']),
-                                  'prod_id_length': int(getparams['internetsources']['prod_id_length']),
+                                  'prod_id_position': prod_id_position,
+                                  'prod_id_length': prod_id_length,
                                   'area_type': getparams['internetsources']['area_type'],
                                   'area_position': getparams['internetsources']['area_position'],
-                                  'area_length': int(getparams['internetsources']['area_length']),
+                                  'area_length': area_length,
                                   'preproc_type': getparams['internetsources']['preproc_type'],
                                   'product_release': getparams['internetsources']['product_release'],
                                   'release_position': getparams['internetsources']['release_position'],
-                                  'release_length': int(getparams['internetsources']['release_length']),
+                                  'release_length': release_length,
                                   'native_mapset': getparams['internetsources']['native_mapset']}
 
             if self.crud_db.update('internet_source', internetsourceinfo):
@@ -783,7 +886,8 @@ class GetDashboard:
         IP_port = ':22'
 
         # IP_PC1 = '139.191.147.79:22'
-        PC1_connection = functions.check_connection(systemsettings['ip_pc1'] + IP_port)
+        # PC1_connection = functions.check_connection(systemsettings['ip_pc1'] + IP_port)
+        PC1_connection = functions.check_connection('mesa-pc1')
 
         if systemsettings['type_installation'].lower() == 'full':
             if systemsettings['role'].lower() == 'pc1':
@@ -807,11 +911,13 @@ class GetDashboard:
                 #       role, version, mode, postgresql status, internet status (status services if in degradation mode?)
 
                 # Check connection to PC3
-                PC23_connection = functions.check_connection(systemsettings['ip_pc3'] + IP_port)
+                # PC23_connection = functions.check_connection(systemsettings['ip_pc3'] + IP_port)
+                PC23_connection = functions.check_connection('mesa-pc3')
                 # print "PC23_connection: " + str(PC23_connection)
 
                 if PC23_connection:
-                    status_PC3 = functions.get_remote_system_status(systemsettings['ip_pc3'])
+                    # status_PC3 = functions.get_remote_system_status(systemsettings['ip_pc3'])
+                    status_PC3 = functions.get_remote_system_status('mesa-pc3')
                     if 'mode' in status_PC3:
                         PC3_mode = status_PC3['mode']
                         PC3_disk_status = status_PC3['disk_status']
@@ -850,9 +956,11 @@ class GetDashboard:
                 # /sbin/service postgresql status    or     /etc/init.d/postgresql status
 
                 # Check connection to PC2
-                PC23_connection = functions.check_connection(systemsettings['ip_pc2'] + IP_port)
+                # PC23_connection = functions.check_connection(systemsettings['ip_pc2'] + IP_port)
+                PC23_connection = functions.check_connection('mesa-pc2')
                 if PC23_connection:
-                    status_PC2 = functions.get_remote_system_status(systemsettings['ip_pc2'])
+                    # status_PC2 = functions.get_remote_system_status(systemsettings['ip_pc2'])
+                    status_PC2 = functions.get_remote_system_status('mesa-pc2')
                     if 'mode' in status_PC2:
                         PC2_mode = status_PC2['mode']
                         PC2_disk_status = status_PC2['disk_status']
@@ -992,7 +1100,7 @@ class GetI18n:
         translations_dict_all = []
         i18n = querydb.get_i18n(lang=lang)
 
-        if i18n.__len__() > 0:
+        if hasattr(i18n, "__len__") and i18n.__len__() > 0:
             for label, langtranslation in i18n:
                 translation_dict = {'label': label,
                                     'langtranslation': langtranslation}  # .encode('utf-8')
@@ -1015,6 +1123,112 @@ class GetI18n:
         return translations_json
 
 
+class AddIngestMapset:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    def GET(self):
+        getparams = web.input()
+        if hasattr(getparams, "selectedmapset"):
+
+            mapsetingest = {'productcode': getparams['productcode'],
+                            'subproductcode': getparams['subproductcode'],
+                            'version': getparams['version'],
+                            'mapsetcode': getparams['selectedmapset']}
+
+            if self.crud_db.read('ingestion', **mapsetingest):
+
+                mapsetingest = {'productcode': getparams['productcode'],
+                                'subproductcode': getparams['subproductcode'],
+                                'version': getparams['version'],
+                                'mapsetcode': getparams['selectedmapset'],
+                                'enabled': True
+                                }
+
+                if self.crud_db.update('ingestion', mapsetingest):
+                    insertstatus = '{"success":"true", "message":"Ingest mapset enabled!"}'
+                else:
+                    insertstatus = '{"success":false, "message":"An error occured while enabling the mapset for ingest!"}'
+            else:
+                mapsetingest = {'productcode': getparams['productcode'],
+                                'subproductcode': getparams['subproductcode'],
+                                'version': getparams['version'],
+                                'mapsetcode': getparams['selectedmapset'],
+                                'defined_by': 'USER',
+                                'activated': True,
+                                'wait_for_all_files': False,
+                                'input_to_process_re': '',
+                                'enabled': True
+                                }
+
+                if self.crud_db.create('ingestion', mapsetingest):
+                    insertstatus = '{"success":"true", "message":"Ingest mapset inserted!"}'
+                else:
+                    insertstatus = '{"success":false, "message":"An error occured while inserting the mapset for ingest!"}'
+        else:
+            insertstatus = '{"success":false, "error":"No mapset given!"}'
+
+        return insertstatus
+
+
+class DisableIngestMapset:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    def GET(self):
+        getparams = web.input()
+        if hasattr(getparams, "mapsetcode"):
+
+            mapsetingest = {'productcode': getparams['productcode'],
+                            'subproductcode': getparams['subproductcode'],
+                            'version': getparams['version'],
+                            'mapsetcode': getparams['mapsetcode'],
+                            'enabled': False
+                            }
+
+            if self.crud_db.update('ingestion', mapsetingest):
+                deletestatus = '{"success":"true", "message":"Ingest mapset deleted!"}'
+            else:
+                deletestatus = '{"success":false, "message":"An error occured while deleting the mapset for ingest!"}'
+        else:
+            deletestatus = '{"success":false, "error":"No mapset given!"}'
+
+        return deletestatus
+
+
+class GetMapsets:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        getparams = web.input()
+
+        mapsets_dict_all = []
+        mapsets = querydb.get_mapsets_for_ingest(productcode=getparams['productcode'], version=getparams['version'], subproductcode=getparams['subproductcode'])
+
+        if hasattr(mapsets, "__len__") and mapsets.__len__() > 0:
+            for mapset in mapsets:
+                mapset_dict = functions.row2dict(mapset)
+                mapsets_dict_all.append(mapset_dict)
+
+            mapsets_json = json.dumps(mapsets_dict_all,
+                                   ensure_ascii=False,
+                                   encoding='utf-8',
+                                   sort_keys=True,
+                                   indent=4,
+                                   separators=(', ', ': '))
+
+            mapsets_json = '{"success":"true", "total":'\
+                                  + str(mapsets.__len__())\
+                                  + ',"mapsets":'+mapsets_json+'}'
+
+        else:
+            mapsets_json = '{"success":false, "error":"No Mapsets defined!"}'
+
+        return mapsets_json
+
 class GetLanguages:
     def __init__(self):
         self.lang = "eng"
@@ -1023,9 +1237,13 @@ class GetLanguages:
         languages_dict_all = []
         languages = querydb.get_languages()
 
-        if languages.__len__() > 0:
+        if hasattr(languages, "__len__") and languages.__len__() > 0:
+            usersettings = functions.getUserSettings()
+
             for lang in languages:
-                if es_constants.es2globals['default_language'] == lang.langcode:
+                # Sometimes es_constants.es2globals['default_language'] does not change well so take
+                # usersettings['default_language'] which is safer.
+                if usersettings['default_language'] == lang.langcode:
                     selected = True
                 else:
                     selected = False
@@ -1065,11 +1283,13 @@ class GetTimeseries:
         requestedtimeseries = json.loads(getparams.selectedTimeseries)
         tsFromPeriod = getparams.tsFromPeriod
         tsToPeriod = getparams.tsToPeriod
+        showYearInTicks = True
         # print tsFromPeriod
 
         if getparams.yearTS != '':
             from_date = datetime.date(int(yearts), 01, 01)
             to_date = datetime.date(int(yearts), 12, 31)
+            showYearInTicks = False
         elif tsFromPeriod != '' and tsToPeriod != '':
             from_date = datetime.datetime.strptime(tsFromPeriod, '%Y-%m-%d').date()
             to_date = datetime.datetime.strptime(tsToPeriod, '%Y-%m-%d').date()
@@ -1081,13 +1301,16 @@ class GetTimeseries:
         for yaxe in timeseries_yaxes:
             count += 1
             opposite = "false"
-            if axes >= 2 and count % 2 == 0:   # and yaxe.oposite == "f"
-                opposite = "false"
-            if axes >= 2 and count % 2 != 0:   # and yaxe.oposite == "t"
-                opposite = "true"
+            # if axes >= 2 and count % 2 == 0:   # and yaxe.oposite == "f"
+            #     opposite = "false"
+            # if axes >= 2 and count % 2 != 0:   # and yaxe.oposite == "t"
+            #     opposite = "true"
+            if axes >= 2:
+                if yaxe.oposite:
+                    opposite = "true"
             if axes == 1:
                 opposite = "false"
-            yaxe = {'id': yaxe.yaxes_id, 'title': yaxe.title, 'unit': yaxe.unit, 'opposite': opposite, 'min': yaxe.min, 'max': yaxe.max}
+            yaxe = {'id': yaxe.yaxes_id, 'title': yaxe.title, 'title_color': yaxe.title_color, 'unit': yaxe.unit, 'opposite': opposite, 'min': yaxe.min, 'max': yaxe.max}
             yaxes.append(yaxe)
 
         timeseries = []
@@ -1124,8 +1347,8 @@ class GetTimeseries:
                 timeseries.append(ts)
 
         ts_json = {"data_available": "true",
-                   "showYearInTicks": "false",
-                   "showYearInToolTip": "false",
+                   "showYearInTicks": showYearInTicks,
+                   "showYearInToolTip": "true",
                    "yaxes": yaxes,
                    "timeseries": timeseries}
 
@@ -1216,7 +1439,7 @@ class TimeseriesProducts:
     def GET(self):
         db_products = querydb.get_timeseries_products()
 
-        if db_products.__len__() > 0:
+        if hasattr(db_products, "__len__") and db_products.__len__() > 0:
             products_dict_all = []
             # loop the products list
             for row in db_products:
@@ -1231,7 +1454,7 @@ class TimeseriesProducts:
                 all_prod_mapsets = p.mapsets
                 # print productcode
                 # print all_prod_mapsets
-                if all_prod_mapsets.__len__() > 0:
+                if hasattr(all_prod_mapsets, "__len__") and all_prod_mapsets.__len__() > 0:
                     prod_dict['productmapsets'] = []
                     for mapset in all_prod_mapsets:
                         mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
@@ -1242,7 +1465,16 @@ class TimeseriesProducts:
                                                                                         subproductcode=subproductcode)
                         for subproduct in timeseries_mapset_datasets:
                             if subproduct is not None:
+                                dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+                                dataset.get_filenames()
+                                all_present_product_dates = dataset.get_dates()
+                                distinctyears = []
+                                for product_date in all_present_product_dates:
+                                    if product_date.year not in distinctyears:
+                                        distinctyears.append(product_date.year)
+
                                 dataset_dict = functions.row2dict(subproduct)
+                                dataset_dict['years'] = distinctyears
                                 dataset_dict['mapsetcode'] = mapset
                                 mapset_dict['timeseriesmapsetdatasets'].append(dataset_dict)
 
@@ -1373,7 +1605,7 @@ class GetColorSchemes:
                 legend_dict['default_legend'] = defaultlegend
                 legend_dict['defaulticon'] = defaulticon
                 legend_dict['colorschemeHTML'] = colorschemeHTML
-                # legend_dict['legendHTML'] = legendHTML
+                legend_dict['legendHTML'] = generateLegendHTML.generateLegendHTML(legend_id)
 
                 legends_dict_all.append(legend_dict)
 
@@ -1397,7 +1629,7 @@ class ProductNavigatorDataSets:
     def GET(self):
         db_products = querydb.get_products(echo=False, activated=None, masked=False)
 
-        if db_products.__len__() > 0:
+        if hasattr(db_products, "__len__") and db_products.__len__() > 0:
             products_dict_all = []
             # loop the products list
             for row in db_products:
@@ -1469,9 +1701,9 @@ class GetLogFile:
         elif getparams['logtype'] == 'processing':
             # apps.processing.ID=6_PROD=tamsat-rfe_METHOD=std_precip_prods_only_ALGO=std_precip.log
             logfilename = es_constants.es2globals['log_dir']+'apps.processing.' \
-                                        + 'ID=' + getparams['process_id'] + '' \
-                                        + 'PROD=' + getparams['productcode'] + '' \
-                                        + 'METHOD=' + getparams['derivation_method'] + '' \
+                                        + 'ID=' + getparams['process_id'] + '_' \
+                                        + 'PROD=' + getparams['productcode'] + '_' \
+                                        + 'METHOD=' + getparams['derivation_method'] + '_' \
                                         + 'ALGO=' + getparams['algorithm'] + '.log'
         elif getparams['logtype'] == 'service':
             if getparams['service'] == 'eumetcast':
@@ -1600,11 +1832,13 @@ class ChangeMode:
                 # Check if other PC is reachable and in which mode it is!
                 if systemsettings['role'].lower() == 'pc2':
                     # Check connection to PC3
-                    PC23_connection = functions.check_connection(systemsettings['ip_pc3'] + IP_port)
+                    # PC23_connection = functions.check_connection(systemsettings['ip_pc3'] + IP_port)
+                    PC23_connection = functions.check_connection('mesa-pc3')
                     IP_other_PC = systemsettings['ip_pc3']
 
                     if PC23_connection:
-                        status_PC3 = functions.get_remote_system_status(systemsettings['ip_pc3'])
+                        # status_PC3 = functions.get_remote_system_status(systemsettings['ip_pc3'])
+                        status_PC3 = functions.get_remote_system_status('mesa-pc3')
                         if 'mode' in status_PC3:
                             Other_PC_mode = status_PC3['mode']
                         else:
@@ -1614,11 +1848,13 @@ class ChangeMode:
                     This_PC_mode = systemsettings['mode'].lower()
 
                     # Check connection to PC2
-                    PC23_connection = functions.check_connection(systemsettings['ip_pc2'] + IP_port)
+                    # PC23_connection = functions.check_connection(systemsettings['ip_pc2'] + IP_port)
+                    PC23_connection = functions.check_connection('mesa-pc2')
                     IP_other_PC = systemsettings['ip_pc2']
 
                     if PC23_connection:
-                        status_PC2 = functions.get_remote_system_status(systemsettings['ip_pc2'])
+                        # status_PC2 = functions.get_remote_system_status(systemsettings['ip_pc2'])
+                        status_PC2 = functions.get_remote_system_status('mesa-pc2')
                         if 'mode' in status_PC2:
                             Other_PC_mode = status_PC2['mode']
                         else:
@@ -1759,7 +1995,7 @@ class GetThemas:
         themas_dict_all = []
         themas = querydb.get_themas()
 
-        if themas.__len__() > 0:
+        if hasattr(themas, "__len__") and themas.__len__() > 0:
             for thema_id, description in themas:
                 thema_dict = {'thema_id': thema_id,
                               'thema_description': description}  # .encode('utf-8')
@@ -1973,12 +2209,12 @@ class UserSettings:
 
         systemsettings = functions.getSystemSettings()
         settings['id'] = 0
-        settings['ip_pc1'] = systemsettings['ip_pc1']
-        settings['ip_pc2'] = systemsettings['ip_pc2']
-        settings['ip_pc3'] = systemsettings['ip_pc3']
-        settings['dns_ip'] = systemsettings['dns_ip']
-        settings['gateway_ip'] = systemsettings['gateway_ip']
-        settings['lan_access_ip'] = systemsettings['lan_access_ip']
+        # settings['ip_pc1'] = systemsettings['ip_pc1']
+        # settings['ip_pc2'] = systemsettings['ip_pc2']
+        # settings['ip_pc3'] = systemsettings['ip_pc3']
+        # settings['dns_ip'] = systemsettings['dns_ip']
+        # settings['gateway_ip'] = systemsettings['gateway_ip']
+        # settings['lan_access_ip'] = systemsettings['lan_access_ip']
         settings['type_installation'] = systemsettings['type_installation'].title()
         settings['role'] = systemsettings['role'].upper()
         settings['current_mode'] = systemsettings['mode'].title()
@@ -2181,14 +2417,14 @@ class GetProductLayer:
         product_info = querydb.get_product_out_info(productcode=inputparams.productcode,
                                                     subproductcode=inputparams.subproductcode,
                                                     version=inputparams.productversion)
-        if product_info.__len__() > 0:
+        if hasattr(product_info, "__len__") and product_info.__len__() > 0:
             for row in product_info:
                 scale_factor = row.scale_factor
                 scale_offset = row.scale_offset
                 nodata = row.nodata
 
         legend_info = querydb.get_legend_info(legendid=inputparams.legendid)
-        if legend_info.__len__() > 0:
+        if hasattr(legend_info, "__len__") and legend_info.__len__() > 0:
             for row in legend_info:
                 minstep = int((row.min_value - scale_offset)/scale_factor)    #int(row.min_value*scale_factor+scale_offset)
                 maxstep = int((row.max_value - scale_offset)/scale_factor)    # int(row.max_value*scale_factor+scale_offset)
@@ -2240,7 +2476,7 @@ class GetProductLayer:
                 layer.setProcessing(processing_novalue)
 
             legend_steps = querydb.get_legend_steps(legendid=inputparams.legendid)
-            if legend_steps.__len__() > 0:
+            if hasattr(legend_steps, "__len__") and legend_steps.__len__() > 0:
                 stepcount = 0
                 for step in legend_steps:
                     stepcount += 1
@@ -2260,8 +2496,8 @@ class GetProductLayer:
                     style.color.setRGB(colors[0], colors[1], colors[2])
 
         result_map_file = es_constants.apps_dir+'/analysis/MAP_result.map'
-        if os.path.isfile(result_map_file):
-            os.remove(result_map_file)
+        # if os.path.isfile(result_map_file):
+        #     os.remove(result_map_file)
         productmap.save(result_map_file)
         image = productmap.draw()
         # image.save(es_constants.apps_dir+'/analysis/'+filenamenoextention+'.png')
@@ -2383,7 +2619,7 @@ class Processing:
 
         processing_chains = querydb.get_processing_chains()
 
-        if processing_chains.__len__() > 0:
+        if hasattr(processing_chains, "__len__") and processing_chains.__len__() > 0:
             processing_chains_dict_all = []
 
             for process in processing_chains:
@@ -2392,7 +2628,7 @@ class Processing:
 
                 db_process_input_products = querydb.get_processingchains_input_products(process_id)
                 process_dict['inputproducts'] = []
-                if db_process_input_products.__len__() > 0:
+                if hasattr(db_process_input_products, "__len__") and db_process_input_products.__len__() > 0:
 
                     for input_product in db_process_input_products:
                         # process_id = input_product.process_id
@@ -2412,7 +2648,7 @@ class Processing:
 
                 db_process_output_products = querydb.get_processingchain_output_products(process_id)
                 process_dict['outputproducts'] = []
-                if db_process_output_products.__len__() > 0:
+                if hasattr(db_process_output_products, "__len__") and db_process_output_products.__len__() > 0:
                     for outputproduct in db_process_output_products:
                         output_mapsetcode = outputproduct.mapsetcode
                         output_product_dict = functions.row2dict(outputproduct)
@@ -2492,7 +2728,7 @@ class DataSets:
         # return web.ctx
         db_products = querydb.get_products(activated=True)
 
-        if db_products.__len__() > 0:
+        if hasattr(db_products, "__len__") and db_products.__len__() > 0:
             products_dict_all = []
             # loop the products list
             for row in db_products:
@@ -2902,7 +3138,7 @@ class Ingestion:
         # return web.ctx
         ingestions = querydb.get_ingestions(echo=False)
 
-        if ingestions.__len__() > 0:
+        if hasattr(ingestions, "__len__") and ingestions.__len__() > 0:
             ingest_dict_all = []
             for row in ingestions:
                 ingest_dict = functions.row2dict(row)
@@ -2954,7 +3190,7 @@ class DataAcquisition:
 
         dataacquisitions = querydb.get_dataacquisitions(echo=False)
 
-        if dataacquisitions.__len__() > 0:
+        if hasattr(dataacquisitions, "__len__") and dataacquisitions.__len__() > 0:
             # dataacquisitions_json = tojson(dataacquisitions)
 
             acq_dict_all = []

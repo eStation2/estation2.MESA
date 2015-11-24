@@ -2,7 +2,7 @@
 Ext.define("esapp.view.acquisition.product.editInternetSource",{
     "extend": "Ext.window.Window",
 
-    xtype: 'editinternetsource',
+    xtype: '__editinternetsource',
 
     requires: [
         'Ext.layout.container.Center'

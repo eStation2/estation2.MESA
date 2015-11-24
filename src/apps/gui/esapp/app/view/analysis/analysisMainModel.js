@@ -36,6 +36,7 @@ Ext.define('esapp.view.analysis.analysisMainModel', {
         years:{
             //model: 'esapp.model.Year'
             fields: ['year'],
+            sorters: {property: 'year', direction: 'DESC'},
             data: [
                 {year: 2000},
                 {year: 2001},
@@ -52,7 +53,12 @@ Ext.define('esapp.view.analysis.analysisMainModel', {
                 {year: 2012},
                 {year: 2013},
                 {year: 2014},
-                {year: 2015}
+                {year: 2015},
+                {year: 2016},
+                {year: 2017},
+                {year: 2018},
+                {year: 2019},
+                {year: 2020}
             ]
         }
     }

@@ -188,8 +188,7 @@ class TestQuerydb(TestCase):
 
     def Test_get_ingestion_product(self):
 
-        ingestion_product = querydb.get_ingestion_product(productcode='vgt_ndvi',
-                                                          version='undefined')
+        ingestion_product = querydb.get_ingestion_product(allrecs=True)
         logger.info("Active ingestions of product are: %s", ingestion_product)
         for row in ingestion_product:
             print row
@@ -271,6 +270,16 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
+    def Test_get_product_in_info4(self):
+
+        product_in = querydb.get_product_in_info(productcode='lsasaf-et',
+                                                 subproductcode='et',
+                                                 version='undefined',
+                                                 datasource_descr_id='EO:EUM:DAT:MSG:ET-SEVIRI')
+        logger.info("Product IN info: %s", product_in)
+
+        self.assertEqual(1, 1)
+
 
     def Test_get_product_out_info(self):
 
@@ -339,6 +348,19 @@ class TestQuerydb(TestCase):
         logger.info("All Ingestions: %s", ingestions)
         for row in ingestions:
             print row
+
+        self.assertEqual(1, 1)
+
+    def Test_get_legend_totals(self):
+
+        legend_info = querydb.get_legend_totals(legendid=6)
+        logger.info("Legend info: %s", legend_info)
+        if legend_info.__len__() > 0:
+            for row in legend_info:
+                TotSteps = row['totsteps']
+                TotColorLabels = row['totcolorlabels']
+                TotGroupLabels = row['totgrouplabels']
+                print row
 
         self.assertEqual(1, 1)
 

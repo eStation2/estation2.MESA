@@ -188,3 +188,22 @@ class TestMapSet(TestCase):
 
         else:
             logger.info('Test file not existing: skip test')
+
+    def test_assign_from_product(self):
+
+
+        first_input = '/data/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/tif/ndv/19990101_vgt-ndvi_ndv_SPOTV-Africa-1km_sv2-pv2.1.tif'
+        sds_meta = SdsMetadata()
+        output_file='/data/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx1/19981221_vgt-ndvi_ndvi-linearx1_SPOTV-Africa-1km_sv2-pv2.1.tif'
+        # Open and read data
+        sds_meta.read_from_file(first_input)
+
+        # Modify/Assign some to the ingested file
+        sds_meta.assign_comput_time_now()
+        str_date, productcode, subproductcode, mapset, version = functions.get_all_from_filename(os.path.basename(output_file))
+
+        #productcode='vgt-ndvi'
+        #subproductcode='ndvi_linearx1'
+        #version='sv2-pv2.1'
+        sds_meta.assign_from_product(productcode, subproductcode, version)
+        sds_meta.print_out()

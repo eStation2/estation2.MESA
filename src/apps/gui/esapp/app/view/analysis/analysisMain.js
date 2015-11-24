@@ -26,7 +26,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
 
     frame: false,
     border: false,
-    bodyPadding: '0 0 0 0',
+    bodyPadding: '5 0 0 0',
     //suspendLayout : true,
 
     layout: {
@@ -37,12 +37,6 @@ Ext.define("esapp.view.analysis.analysisMain",{
     initComponent: function () {
         var me = this;
 
-        me.defaults = {
-            titleAlign: 'center',
-            frame: false,
-            border: false,
-            bodyPadding: 0
-        };
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             padding: 3,
             style: {backgroundColor:'#ADD2ED'},
@@ -72,16 +66,24 @@ Ext.define("esapp.view.analysis.analysisMain",{
 
         //me.html = '<div id="backgroundmap_' + me.id + '"></div>';
 
+        me.defaults = {
+            titleAlign: 'center',
+            frame: false,
+            border: false,
+            bodyPadding: 0
+        };
         me.items = [{
             region: 'east',
-            title: esapp.Utils.getTranslation('timeseries'),  // 'Time series',
+            //title: esapp.Utils.getTranslation('timeseries'),  // 'Time series',
             width: 420,
             minWidth: 402,
             maxWidth : 475,
             split: true,
+            hideCollapseTool: true,
+            header: false,
             collapsible: true,
             collapsed: false,
-            autoScroll:true,
+            autoScroll:false,
             floatable: false,
             xtype: 'tabpanel',
             frame: false,
@@ -89,7 +91,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
             items: [{
                 title: esapp.Utils.getTranslation('timeseries'),  // 'Timeseries',
                 margin:3,
-                minHeight: 800,
+                //minHeight: 800,
                 autoHeight: true,
                 autoScroll:true,
                 layout:'vbox',
@@ -326,7 +328,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                             allowBlank: true,
                             maxValue: new Date(),
                             listeners: {
-                                select: function() {
+                                change: function() {
                                     Ext.getCmp("radio-fromto").setValue(true);
                                 }
                             }
@@ -343,7 +345,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                             maxValue: new Date(),
                             //,value: new Date()
                             listeners: {
-                                select: function() {
+                                change: function() {
                                     Ext.getCmp("radio-fromto").setValue(true);
                                 }
                             }
@@ -442,11 +444,15 @@ Ext.define("esapp.view.analysis.analysisMain",{
                     //var size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight];
                     var size = [document.getElementById('backgroundmap_'+ me.id).offsetWidth, document.getElementById('backgroundmap_'+ me.id).offsetHeight];
                     me.map.setSize(size);
+                    this.header =  false;
+                    this.setTitle('');
                 },
                 collapse: function () {
                     //var size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight];
                     var size = [document.getElementById('backgroundmap_'+ me.id).offsetWidth, document.getElementById('backgroundmap_'+ me.id).offsetHeight];
                     me.map.setSize(size);
+                    this.header =  true;
+                    this.setTitle('<span class="panel-title-style">'+esapp.Utils.getTranslation('timeseries')+'</span>');
                 }
             }
         }, {
@@ -466,55 +472,9 @@ Ext.define("esapp.view.analysis.analysisMain",{
         });
 
         me.listeners = {
-            show: function(){
-                // Open a new MapView with latest NDVI product.
-                //me.controller.newMapView();
-            },
             afterrender: function() {
                 if (window.navigator.onLine){
-                    // http://services.arcgisonline.com/arcgis/rest/services/ESRI_StreetMap_World_2D/MapServer
-                    // http://services.arcgisonline.com/arcgis/rest/services/ESRI_Imagery_World_2D/MapServer
                     me.backgroundLayers = [];
-
-                    //me.bingStyles = [
-                    //  'Road',
-                    //  'Aerial',
-                    //  'AerialWithLabels'
-                    //];
-
-                    //var i, ii;
-                    //for (i = 0, ii = me.bingStyles.length; i < ii; ++i) {
-                    //    me.backgroundLayers.push(new ol.layer.Tile({
-                    //        visible: false,
-                    //        preload: Infinity,
-                    //        projection: 'EPSG:4326',
-                    //        source: new ol.source.BingMaps({
-                    //            // My personal key jurvtk@gmail.com for http://h05-dev-vm19.ies.jrc.it/esapp/ created on www.bingmapsportal.com
-                    //            key: 'Alp8PmGAclkgN_QJQTjgrkPlyRdkFfTnayMuMobAxMha_QF1ikefhdMlUQPdxNS3',
-                    //            imagerySet: me.bingStyles[i]
-                    //        })
-                    //    }));
-                    //}
-                    //for (i = 0, ii = me.backgroundLayers.length; i < ii; ++i) {
-                    //   me.backgroundLayers[i].setVisible(me.bingStyles[i] == 'Road');
-                    //}
-
-                    var _getRendererFromQueryString = function() {
-                      var obj = {}, queryString = location.search.slice(1),
-                          re = /([^&=]+)=([^&]*)/g, m;
-
-                      while (m = re.exec(queryString)) {
-                        obj[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
-                      }
-                      if ('renderers' in obj) {
-                        return obj['renderers'].split(',');
-                      } else if ('renderer' in obj) {
-                        return [obj['renderer']];
-                      } else {
-                        return undefined;
-                      }
-                    };
-
                     me.backgroundLayers.push(
                       new ol.layer.Tile({
                           visible: false,
@@ -528,46 +488,6 @@ Ext.define("esapp.view.analysis.analysisMain",{
                         })
                       })
                     );
-
-                    //me.backgroundLayers.push(
-                    //    new ol.layer.Image({
-                    //        title: esapp.Utils.getTranslation('backgroundlayer'),  // 'Background layer',
-                    //        layer_id: 'backgroundlayer',
-                    //        layerorderidx: 0,
-                    //        type: 'base',
-                    //        visible: false,
-                    //        source: new ol.source.ImageWMS({
-                    //            url: 'analysis/getbackgroundlayer',
-                    //            crossOrigin: 'anonymous',
-                    //            params: {
-                    //                layername:'naturalearth',
-                    //                'FORMAT': 'image/png'
-                    //            },
-                    //            serverType: 'mapserver' /** @type {ol.source.wms.ServerType}  ('mapserver') */
-                    //        })
-                    //    })
-                    //);
-
-                    //layer = new ol.layer.XYZ(
-                    //    "ESRI",
-                    //    "http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer",
-                    //    {sphericalMercator: true}
-                    //);
-
-
-                    //me.backgroundLayers.push(
-                    //  new ol.layer.Tile({
-                    //      visible: true,
-                    //      projection: 'EPSG:4326',
-                    //      source: new ol.source.TileWMS({
-                    //          url: 'http://services.arcgisonline.com/arcgis/rest/services/ESRI_StreetMap_World_2D/MapServer',
-                    //          params: {
-                    //            LAYERS: '0,1,2',
-                    //            FORMAT:"image/png"
-                    //          }
-                    //    })
-                    //  })
-                    //);
 
                     me.mousePositionControl = new ol.control.MousePosition({
                       coordinateFormat: ol.coordinate.createStringXY(4),
@@ -595,6 +515,87 @@ Ext.define("esapp.view.analysis.analysisMain",{
                             })
                         }).extend([me.scaleline])   // me.mousePositionControl,
                     });
+
+                    // http://services.arcgisonline.com/arcgis/rest/services/ESRI_StreetMap_World_2D/MapServer
+                    // http://services.arcgisonline.com/arcgis/rest/services/ESRI_Imagery_World_2D/MapServer
+                    //
+                    //me.bingStyles = [
+                    //  'Road',
+                    //  'Aerial',
+                    //  'AerialWithLabels'
+                    //];
+                    //
+                    //var i, ii;
+                    //for (i = 0, ii = me.bingStyles.length; i < ii; ++i) {
+                    //    me.backgroundLayers.push(new ol.layer.Tile({
+                    //        visible: false,
+                    //        preload: Infinity,
+                    //        projection: 'EPSG:4326',
+                    //        source: new ol.source.BingMaps({
+                    //            // My personal key jurvtk@gmail.com for http://h05-dev-vm19.ies.jrc.it/esapp/ created on www.bingmapsportal.com
+                    //            key: 'Alp8PmGAclkgN_QJQTjgrkPlyRdkFfTnayMuMobAxMha_QF1ikefhdMlUQPdxNS3',
+                    //            imagerySet: me.bingStyles[i]
+                    //        })
+                    //    }));
+                    //}
+                    //for (i = 0, ii = me.backgroundLayers.length; i < ii; ++i) {
+                    //   me.backgroundLayers[i].setVisible(me.bingStyles[i] == 'Road');
+                    //}
+                    //
+                    //var _getRendererFromQueryString = function() {
+                    //  var obj = {}, queryString = location.search.slice(1),
+                    //      re = /([^&=]+)=([^&]*)/g, m;
+                    //
+                    //  while (m = re.exec(queryString)) {
+                    //    obj[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+                    //  }
+                    //  if ('renderers' in obj) {
+                    //    return obj['renderers'].split(',');
+                    //  } else if ('renderer' in obj) {
+                    //    return [obj['renderer']];
+                    //  } else {
+                    //    return undefined;
+                    //  }
+                    //};
+                    //
+                    //me.backgroundLayers.push(
+                    //    new ol.layer.Image({
+                    //        title: esapp.Utils.getTranslation('backgroundlayer'),  // 'Background layer',
+                    //        layer_id: 'backgroundlayer',
+                    //        layerorderidx: 0,
+                    //        type: 'base',
+                    //        visible: false,
+                    //        source: new ol.source.ImageWMS({
+                    //            url: 'analysis/getbackgroundlayer',
+                    //            crossOrigin: 'anonymous',
+                    //            params: {
+                    //                layername:'naturalearth',
+                    //                'FORMAT': 'image/png'
+                    //            },
+                    //            serverType: 'mapserver' /** @type {ol.source.wms.ServerType}  ('mapserver') */
+                    //        })
+                    //    })
+                    //);
+                    //
+                    //layer = new ol.layer.XYZ(
+                    //    "ESRI",
+                    //    "http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer",
+                    //    {sphericalMercator: true}
+                    //);
+                    //
+                    //me.backgroundLayers.push(
+                    //  new ol.layer.Tile({
+                    //      visible: true,
+                    //      projection: 'EPSG:4326',
+                    //      source: new ol.source.TileWMS({
+                    //          url: 'http://services.arcgisonline.com/arcgis/rest/services/ESRI_StreetMap_World_2D/MapServer',
+                    //          params: {
+                    //            LAYERS: '0,1,2',
+                    //            FORMAT:"image/png"
+                    //          }
+                    //    })
+                    //  })
+                    //);
                 }
             }
             // The resize handle is necessary to set the map!
@@ -603,6 +604,11 @@ Ext.define("esapp.view.analysis.analysisMain",{
                 var size = [document.getElementById('backgroundmap_'+ me.id).offsetWidth, document.getElementById('backgroundmap_'+ me.id).offsetHeight];
                 me.map.setSize(size);
             }
+
+            //show: function(){
+            //    // Open a new MapView with latest NDVI product.
+            //    //me.controller.newMapView();
+            //},
         };
 
         me.callParent();
