@@ -10,6 +10,7 @@ __author__ = 'analyst'
 
 import sys
 from apps.acquisition.ingestion import *
+from config import es_constants
 
 logger = log.my_logger(__name__)
 
@@ -65,5 +66,6 @@ def ingest_historical_archives(input_dir, dry_run=False):
 if __name__=='__main__':
 
     #input_dir = str(sys.argv[1])
-    input_dir = '/media/MESA-2/Archives2.0/'
+    input_dir = es_constants.es2globals['archive_dir']
+    print input_dir
     result = ingest_historical_archives(input_dir)

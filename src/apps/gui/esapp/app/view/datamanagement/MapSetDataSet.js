@@ -174,8 +174,8 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
                             seriestitle = '<span style="color:'+color+'">' + esapp.Utils.getTranslation('from') + ' ' + interval.fromdate + ' ' + esapp.Utils.getTranslation('to') + ' ' + interval.todate + ' - ' + intervaltype + '</span></br>';
                             seriestitles.push(seriestitle);
                         });
-                        console.info('------------------');
-                        console.info('dataObj biggest before: ' +  dataObj["data" + i_biggest]);
+//                        console.info('------------------');
+//                        console.info('dataObj biggest before: ' +  dataObj["data" + i_biggest]);
                         var fill_to_onehunderd = 100 - tot_percentage;
                         if (fill_to_onehunderd > 0) // add to last data to fill up to 100%
                             dataObj["data" + i_biggest] = dataObj["data" + i_biggest] + fill_to_onehunderd;
@@ -183,9 +183,9 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
                             dataObj["data" + i_biggest] = dataObj["data" + i_biggest] + (fill_to_onehunderd);
                         }
                         datasetdata.push(dataObj);
-                        console.info('tot_percentage: ' + tot_percentage);
-                        console.info('fill_to_onehunderd: ' + fill_to_onehunderd);
-                        console.info('dataObj biggest after: ' +  dataObj["data" + i_biggest]);
+//                        console.info('tot_percentage: ' + tot_percentage);
+//                        console.info('fill_to_onehunderd: ' + fill_to_onehunderd);
+//                        console.info('dataObj biggest after: ' +  dataObj["data" + i_biggest]);
 
                         // Update the 4 sprites (these are not reachable through getSprites() on the chart)
                         widgetchart.surfaceMap.chart[0].getItems()[0].setText(esapp.Utils.getTranslation('files') + ': ' + completeness.totfiles);

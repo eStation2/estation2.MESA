@@ -54,11 +54,11 @@ Ext.define('esapp.Application', {
         ,'ProductsActiveStore'
         ,'ProductsInactiveStore'
         ,'DataAcquisitionsStore'
+        ,'IngestionsStore'
         ,'DataSetsStore'
         ,'ProcessingStore'
-        ,'IngestionsStore'
 
-        ,'IPSettingsStore'
+//        ,'IPSettingsStore'
         //,'ProductNavigatorStore'  // using viewmodel model binding, which is loaded onAfterRender
         ,'SystemSettingsStore'
         //,'TimeLineStore'
@@ -130,6 +130,13 @@ Ext.define('esapp.Application', {
                         });
 
                         task.delay(4000);
+
+                        Ext.data.StoreManager.lookup('ProductsActiveStore').load();
+//                        Ext.data.StoreManager.lookup('ProductsInactiveStore').load();
+                        Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
+                        Ext.data.StoreManager.lookup('IngestionsStore').load();
+//                        Ext.data.StoreManager.lookup('DataSetsStore').load();
+                        Ext.data.StoreManager.lookup('ProcessingStore').load();
 
                         Ext.create('esapp.view.main.Main');
 

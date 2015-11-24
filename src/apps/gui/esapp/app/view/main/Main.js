@@ -120,7 +120,9 @@ Ext.define('esapp.view.main.Main', {
                            //dashboardtab.up().down('container[id=acquisitionmaintab]').doLayout();
                            //dashboardtab.up().down('container[id=datamanagementmaintab]').doLayout();
                            //Ext.getCmp('dashboard-panel').getController().setupDashboard();
-                           //dashboardtab.down('panel[id=dashboardpc2]').getController().checkStatusServices();
+                           if (Ext.isObject(dashboardtab.down('panel[id=dashboardpc2]'))){
+                                dashboardtab.down('panel[id=dashboardpc2]').getController().checkStatusServices();
+                           }
                        }
                     }
                 }, {

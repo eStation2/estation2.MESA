@@ -11,7 +11,7 @@ Ext.define('esapp.store.DataAcquisitionsStore', {
     storeId : 'DataAcquisitionsStore'
 
 //    session: true,
-    ,autoLoad: true
+    ,autoLoad: false
     ,autoSync: true
     ,remoteSort: false
 

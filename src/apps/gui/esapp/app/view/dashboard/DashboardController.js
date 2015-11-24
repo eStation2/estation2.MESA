@@ -31,7 +31,7 @@ Ext.define('esapp.view.dashboard.DashboardController', {
             pc2DisabledAll = true,
             pc3DisabledAll = true;
         if (reload){
-            console.info('reloading dashboard...');
+//            console.info('reloading dashboard...');
             var myMask = new Ext.LoadMask({
                 msg    : esapp.Utils.getTranslation('loading'),
                 target : dashboard_panel
