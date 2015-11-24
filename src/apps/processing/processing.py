@@ -31,6 +31,8 @@ from apps.processing import processing_std_precip
 from apps.processing import processing_std_ndvi
 from apps.processing import processing_std_fronts
 from apps.processing import processing_merge
+from apps.processing import processing_std_lsasaf_lst
+from apps.processing import processing_std_lsasaf_et
 
 from lib.python.daemon import DaemonDryRunnable
 
