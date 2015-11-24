@@ -229,8 +229,11 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
 
 def processing_std_lsasaf_et(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                              pipeline_printout_graph_level=0, prod='', starting_sprod='', native_mapset='',
-                             target_mapset='', version='',
+                             mapset='', version='',
                              starting_dates=None, write2file=None, logfile=None):
+
+    native_mapset='MSG-satellite-3km'
+    target_mapset=mapset
 
     spec_logger = log.my_logger(logfile)
     spec_logger.info("Entering routine %s" % 'processing_std_precip')
