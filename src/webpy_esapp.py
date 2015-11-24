@@ -886,7 +886,8 @@ class GetDashboard:
         IP_port = ':22'
 
         # IP_PC1 = '139.191.147.79:22'
-        PC1_connection = functions.check_connection(systemsettings['ip_pc1'] + IP_port)
+        # PC1_connection = functions.check_connection(systemsettings['ip_pc1'] + IP_port)
+        PC1_connection = functions.check_connection('mesa-pc1')
 
         if systemsettings['type_installation'].lower() == 'full':
             if systemsettings['role'].lower() == 'pc1':
@@ -910,11 +911,13 @@ class GetDashboard:
                 #       role, version, mode, postgresql status, internet status (status services if in degradation mode?)
 
                 # Check connection to PC3
-                PC23_connection = functions.check_connection(systemsettings['ip_pc3'] + IP_port)
+                # PC23_connection = functions.check_connection(systemsettings['ip_pc3'] + IP_port)
+                PC23_connection = functions.check_connection('mesa-pc3')
                 # print "PC23_connection: " + str(PC23_connection)
 
                 if PC23_connection:
-                    status_PC3 = functions.get_remote_system_status(systemsettings['ip_pc3'])
+                    # status_PC3 = functions.get_remote_system_status(systemsettings['ip_pc3'])
+                    status_PC3 = functions.get_remote_system_status('mesa-pc3')
                     if 'mode' in status_PC3:
                         PC3_mode = status_PC3['mode']
                         PC3_disk_status = status_PC3['disk_status']
@@ -953,9 +956,11 @@ class GetDashboard:
                 # /sbin/service postgresql status    or     /etc/init.d/postgresql status
 
                 # Check connection to PC2
-                PC23_connection = functions.check_connection(systemsettings['ip_pc2'] + IP_port)
+                # PC23_connection = functions.check_connection(systemsettings['ip_pc2'] + IP_port)
+                PC23_connection = functions.check_connection('mesa-pc2')
                 if PC23_connection:
-                    status_PC2 = functions.get_remote_system_status(systemsettings['ip_pc2'])
+                    # status_PC2 = functions.get_remote_system_status(systemsettings['ip_pc2'])
+                    status_PC2 = functions.get_remote_system_status('mesa-pc2')
                     if 'mode' in status_PC2:
                         PC2_mode = status_PC2['mode']
                         PC2_disk_status = status_PC2['disk_status']
@@ -1296,10 +1301,13 @@ class GetTimeseries:
         for yaxe in timeseries_yaxes:
             count += 1
             opposite = "false"
-            if axes >= 2 and count % 2 == 0:   # and yaxe.oposite == "f"
-                opposite = "false"
-            if axes >= 2 and count % 2 != 0:   # and yaxe.oposite == "t"
-                opposite = "true"
+            # if axes >= 2 and count % 2 == 0:   # and yaxe.oposite == "f"
+            #     opposite = "false"
+            # if axes >= 2 and count % 2 != 0:   # and yaxe.oposite == "t"
+            #     opposite = "true"
+            if axes >= 2:
+                if yaxe.oposite:
+                    opposite = "true"
             if axes == 1:
                 opposite = "false"
             yaxe = {'id': yaxe.yaxes_id, 'title': yaxe.title, 'title_color': yaxe.title_color, 'unit': yaxe.unit, 'opposite': opposite, 'min': yaxe.min, 'max': yaxe.max}
@@ -1824,11 +1832,13 @@ class ChangeMode:
                 # Check if other PC is reachable and in which mode it is!
                 if systemsettings['role'].lower() == 'pc2':
                     # Check connection to PC3
-                    PC23_connection = functions.check_connection(systemsettings['ip_pc3'] + IP_port)
+                    # PC23_connection = functions.check_connection(systemsettings['ip_pc3'] + IP_port)
+                    PC23_connection = functions.check_connection('mesa-pc3')
                     IP_other_PC = systemsettings['ip_pc3']
 
                     if PC23_connection:
-                        status_PC3 = functions.get_remote_system_status(systemsettings['ip_pc3'])
+                        # status_PC3 = functions.get_remote_system_status(systemsettings['ip_pc3'])
+                        status_PC3 = functions.get_remote_system_status('mesa-pc3')
                         if 'mode' in status_PC3:
                             Other_PC_mode = status_PC3['mode']
                         else:
@@ -1838,11 +1848,13 @@ class ChangeMode:
                     This_PC_mode = systemsettings['mode'].lower()
 
                     # Check connection to PC2
-                    PC23_connection = functions.check_connection(systemsettings['ip_pc2'] + IP_port)
+                    # PC23_connection = functions.check_connection(systemsettings['ip_pc2'] + IP_port)
+                    PC23_connection = functions.check_connection('mesa-pc2')
                     IP_other_PC = systemsettings['ip_pc2']
 
                     if PC23_connection:
-                        status_PC2 = functions.get_remote_system_status(systemsettings['ip_pc2'])
+                        # status_PC2 = functions.get_remote_system_status(systemsettings['ip_pc2'])
+                        status_PC2 = functions.get_remote_system_status('mesa-pc2')
                         if 'mode' in status_PC2:
                             Other_PC_mode = status_PC2['mode']
                         else:
@@ -2197,12 +2209,12 @@ class UserSettings:
 
         systemsettings = functions.getSystemSettings()
         settings['id'] = 0
-        settings['ip_pc1'] = systemsettings['ip_pc1']
-        settings['ip_pc2'] = systemsettings['ip_pc2']
-        settings['ip_pc3'] = systemsettings['ip_pc3']
-        settings['dns_ip'] = systemsettings['dns_ip']
-        settings['gateway_ip'] = systemsettings['gateway_ip']
-        settings['lan_access_ip'] = systemsettings['lan_access_ip']
+        # settings['ip_pc1'] = systemsettings['ip_pc1']
+        # settings['ip_pc2'] = systemsettings['ip_pc2']
+        # settings['ip_pc3'] = systemsettings['ip_pc3']
+        # settings['dns_ip'] = systemsettings['dns_ip']
+        # settings['gateway_ip'] = systemsettings['gateway_ip']
+        # settings['lan_access_ip'] = systemsettings['lan_access_ip']
         settings['type_installation'] = systemsettings['type_installation'].title()
         settings['role'] = systemsettings['role'].upper()
         settings['current_mode'] = systemsettings['mode'].title()

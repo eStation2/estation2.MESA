@@ -102,49 +102,49 @@ Ext.define("esapp.view.system.systemsettings",{
         var me = this;
         me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('systemsettings') + '</span>');
 
-        var ip_pc1 = {
-            items:[{
-                id: 'ip_pc1',
-                name: 'ip_pc1',
-                bind: '{system_setting.ip_pc1}',
-                xtype: 'displayfield',
-                fieldLabel: me.form_fieldlabel_ip_pc1,
-                vtype: 'IPAddress',
-                msgTarget: 'side',
-                fieldStyle:'font-weight: bold;',
-                allowBlank: false,
-                flex: 2.2
-            }]
-        };
-
-        var ip_pc2 = {
-            items:[{
-                id: 'ip_pc2',
-                name: 'ip_pc2',
-                bind: '{system_setting.ip_pc2}',
-                xtype: 'displayfield',
-                fieldLabel: me.form_fieldlabel_ip_pc2,
-                vtype: 'IPAddress',
-                msgTarget: 'side',
-                fieldStyle:'font-weight: bold;',
-                allowBlank: false,
-                flex: 2.2
-            }]
-        };
-        var ip_pc3 = {
-            items:[{
-                id: 'ip_pc3',
-                name: 'ip_pc3',
-                bind: '{system_setting.ip_pc3}',
-                xtype: 'displayfield',
-                fieldLabel: me.form_fieldlabel_ip_pc3,
-                vtype: 'IPAddress',
-                msgTarget: 'side',
-                fieldStyle:'font-weight: bold;',
-                allowBlank: false,
-                flex: 2.2
-            }]
-        };
+        //var ip_pc1 = {
+        //    items:[{
+        //        id: 'ip_pc1',
+        //        name: 'ip_pc1',
+        //        bind: '{system_setting.ip_pc1}',
+        //        xtype: 'displayfield',
+        //        fieldLabel: me.form_fieldlabel_ip_pc1,
+        //        vtype: 'IPAddress',
+        //        msgTarget: 'side',
+        //        fieldStyle:'font-weight: bold;',
+        //        allowBlank: false,
+        //        flex: 2.2
+        //    }]
+        //};
+        //
+        //var ip_pc2 = {
+        //    items:[{
+        //        id: 'ip_pc2',
+        //        name: 'ip_pc2',
+        //        bind: '{system_setting.ip_pc2}',
+        //        xtype: 'displayfield',
+        //        fieldLabel: me.form_fieldlabel_ip_pc2,
+        //        vtype: 'IPAddress',
+        //        msgTarget: 'side',
+        //        fieldStyle:'font-weight: bold;',
+        //        allowBlank: false,
+        //        flex: 2.2
+        //    }]
+        //};
+        //var ip_pc3 = {
+        //    items:[{
+        //        id: 'ip_pc3',
+        //        name: 'ip_pc3',
+        //        bind: '{system_setting.ip_pc3}',
+        //        xtype: 'displayfield',
+        //        fieldLabel: me.form_fieldlabel_ip_pc3,
+        //        vtype: 'IPAddress',
+        //        msgTarget: 'side',
+        //        fieldStyle:'font-weight: bold;',
+        //        allowBlank: false,
+        //        flex: 2.2
+        //    }]
+        //};
 
         var modify_ips_btn = {
             xtype: 'button',
@@ -175,22 +175,22 @@ Ext.define("esapp.view.system.systemsettings",{
                 me.pcrole = record.data.role;
 
                 if (me.pcrole == ''){
-                    console.info(Ext.getCmp('modify-role-btn'));
+                    //console.info(Ext.getCmp('modify-role-btn'));
                     Ext.getCmp('modify-role-btn').show();
                     Ext.getCmp('modify-role-btn').fireHandler();
                 }
-                var ipadresses_fieldset = Ext.getCmp('ipaddresses');
-                if (me.type_install == 'Full'){
-                    ipadresses_fieldset.add(ip_pc1);
-                    ipadresses_fieldset.add(ip_pc2);
-                    ip_pc3.items.push(modify_ips_btn);
-                    ipadresses_fieldset.add(ip_pc3);
-                }
-                else {
-                    ipadresses_fieldset.add(ip_pc1);
-                    ip_pc2.items.push(modify_ips_btn);
-                    ipadresses_fieldset.add(ip_pc2);
-                }
+                //var ipadresses_fieldset = Ext.getCmp('ipaddresses');
+                //if (me.type_install == 'Full'){
+                //    ipadresses_fieldset.add(ip_pc1);
+                //    ipadresses_fieldset.add(ip_pc2);
+                //    ip_pc3.items.push(modify_ips_btn);
+                //    ipadresses_fieldset.add(ip_pc3);
+                //}
+                //else {
+                //    ipadresses_fieldset.add(ip_pc1);
+                //    ip_pc2.items.push(modify_ips_btn);
+                //    ipadresses_fieldset.add(ip_pc2);
+                //}
             }
         });
 
@@ -390,23 +390,23 @@ Ext.define("esapp.view.system.systemsettings",{
                            fieldLabel: me.form_fieldlabel_current_mode,
                            fieldStyle:'font-weight: bold;',
                            flex: 2.2
-                        },{
-                            xtype: 'button',
-                            text: esapp.Utils.getTranslation('modify'),    // 'Modify',
-                            flex: 0.8,
-                            iconCls: 'fa fa-pencil-square-o',
-                            style: { color: 'white' },
-                            // glyph: 'xf055@FontAwesome',
-                            //scale: 'medium',
-                            scope:me,
-                            handler: function(){
-                                var PCModeAdminWin = new esapp.view.system.PCModeAdmin({
-                                    params: {
-                                        currentmode: Ext.getCmp('current_mode').getValue().toLowerCase()
-                                    }
-                                });
-                                PCModeAdminWin.show();
-                            }
+                        //},{
+                        //    xtype: 'button',
+                        //    text: esapp.Utils.getTranslation('modify'),    // 'Modify',
+                        //    flex: 0.8,
+                        //    iconCls: 'fa fa-pencil-square-o',
+                        //    style: { color: 'white' },
+                        //    // glyph: 'xf055@FontAwesome',
+                        //    //scale: 'medium',
+                        //    scope:me,
+                        //    handler: function(){
+                        //        var PCModeAdminWin = new esapp.view.system.PCModeAdmin({
+                        //            params: {
+                        //                currentmode: Ext.getCmp('current_mode').getValue().toLowerCase()
+                        //            }
+                        //        });
+                        //        PCModeAdminWin.show();
+                        //    }
                         }]
                     },{
                        items:[{
@@ -487,17 +487,17 @@ Ext.define("esapp.view.system.systemsettings",{
                             }
                         }]
                     }]
-                },{
-                    xtype: 'fieldset',
-                    title: me.fieldset_title_ipaddresses,  // '<b>IP addresses</b>',
-                    id: 'ipaddresses',
-                    name: 'ipaddresses',
-                    collapsible:false,
-                    padding: 10,
-                    defaults: {
-                        labelWidth: 100,
-                        layout: 'hbox'
-                    }
+                //},{
+                //    xtype: 'fieldset',
+                //    title: me.fieldset_title_ipaddresses,  // '<b>IP addresses</b>',
+                //    id: 'ipaddresses',
+                //    name: 'ipaddresses',
+                //    collapsible:false,
+                //    padding: 10,
+                //    defaults: {
+                //        labelWidth: 100,
+                //        layout: 'hbox'
+                //    }
                 }]
             }]
         },{

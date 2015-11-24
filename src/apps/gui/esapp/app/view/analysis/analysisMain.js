@@ -328,7 +328,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                             allowBlank: true,
                             maxValue: new Date(),
                             listeners: {
-                                select: function() {
+                                change: function() {
                                     Ext.getCmp("radio-fromto").setValue(true);
                                 }
                             }
@@ -345,7 +345,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                             maxValue: new Date(),
                             //,value: new Date()
                             listeners: {
-                                select: function() {
+                                change: function() {
                                     Ext.getCmp("radio-fromto").setValue(true);
                                 }
                             }

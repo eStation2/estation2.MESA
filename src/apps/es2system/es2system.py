@@ -30,44 +30,44 @@ data_dir = es_constants.es2globals['data_dir']
 
 from lib.python.daemon import DaemonDryRunnable
 
-# def get_status_local_machine():
-# #   Get info on the status of the local machine
-# #
-#     logger.debug("Entering routine %s" % 'get_status_local_machine')
+def get_status_local_machine():
+#   Get info on the status of the local machine
 #
-#     # Get the local systems settings
-#     systemsettings = functions.getSystemSettings()
-#
-#     # Get status of all services
-#     status_services = functions.getStatusAllServices()
-#
-#     get_eumetcast_status = status_services['eumetcast']
-#     get_internet_status = status_services['internet']
-#     ingestion_status = status_services['ingest']
-#     processing_status = status_services['process']
-#     system_status = status_services['system']
-#
-#     # Get status of postgresql
-#     psql_status = functions.getStatusPostgreSQL()
-#
-#     # Get internet connection
-#     internet_status = functions.internet_on()
-#
-#     # ToDo: check disk status!
-#
-#     status_local_machine = {'get_eumetcast_status': get_eumetcast_status,
-#                             'get_internet_status': get_internet_status,
-#                             'ingestion_status': ingestion_status,
-#                             'processing_status': processing_status,
-#                             'system_status': system_status,
-#                             'system_execution_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-#                             'postgresql_status': str(psql_status).lower(),
-#                             'internet_connection_status': str(internet_status).lower(),
-#                             'active_version': systemsettings['active_version'],
-#                             'mode': systemsettings['mode'],
-#                             'disk_status': 'true'}
-#     return status_local_machine
-#
+    logger.debug("Entering routine %s" % 'get_status_local_machine')
+
+    # Get the local systems settings
+    systemsettings = functions.getSystemSettings()
+
+    # Get status of all services
+    status_services = functions.getStatusAllServices()
+
+    get_eumetcast_status = status_services['eumetcast']
+    get_internet_status = status_services['internet']
+    ingestion_status = status_services['ingest']
+    processing_status = status_services['process']
+    system_status = status_services['system']
+
+    # Get status of postgresql
+    psql_status = functions.getStatusPostgreSQL()
+
+    # Get internet connection
+    internet_status = functions.internet_on()
+
+    # ToDo: check disk status!
+
+    status_local_machine = {'get_eumetcast_status': get_eumetcast_status,
+                            'get_internet_status': get_internet_status,
+                            'ingestion_status': ingestion_status,
+                            'processing_status': processing_status,
+                            'system_status': system_status,
+                            'system_execution_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                            'postgresql_status': str(psql_status).lower(),
+                            'internet_connection_status': str(internet_status).lower(),
+                            'active_version': systemsettings['active_version'],
+                            'mode': systemsettings['mode'],
+                            'disk_status': 'true'}
+    return status_local_machine
+
 #
 # def save_status_local_machine():
 # #   Save a pickle containing info on the status of the local machine
@@ -126,6 +126,7 @@ def system_data_sync(source, target):
     logger.debug("Entering routine %s" % 'system_data_sync')
     command = 'rsync -CavK '+source+' '+target+ ' >> '+logfile
     logger.debug("Executing %s" % command)
+    return
     status = os.system(command)
     if status:
         logger.error("Error in executing %s" % command)
@@ -187,67 +188,39 @@ def system_db_sync(list_syncs):
                     logger.warning('Bucardo de-activation returned err: %s' % err)
 
 def system_db_sync_full(pc_role):
+
 #   Manage the transition from Recovery to Nominal, by forcing a full sync of both DB schemas
 #   pc_role:    role of my PC (either PC2 or PC3)
 
+
     logger.debug("Entering routine %s" % 'system_db_sync_full')
 
-    dumpdata = ' psql -h localhost -p 5432 -U estation -d estationdb -t -A -c "SELECT products.export_all_data()" -o ./update_insert_data.sql'
-    sync_other_pc = ' psql -h mesa-pc2 -p 5432 -U estation -d estationdb -f ./update_insert_data.sql -o ./update_insert_data.log'
+    dump_dir=es_constants.es2globals['db_dump_dir']
 
-    # Detect PC -> set sync to be executed
-    if pc_role=='pc2':
-        list_syncs = ['sync_pc2_products_full','sync_pc2_analysis_full']
-    elif pc_role=='pc3':
-        list_syncs = ['sync_pc3_products_full','sync_pc3_analysis_full']
+    dump_filename=dump_dir+'/dump_data_all_'+datetime.datetime.now().strftime("%Y-%m-%d-%H:%M:%S")+'.sql'
 
-    # Check that bucardo is running
-    command = ['bucardo','status']
-    p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = p.communicate()
-    if not re.search('PID', out):
-        logger.error("Bucardo is not running - DB sync not possible")
-        return 1
+    # Create a full dump
+    dumpcommand = 'psql -h localhost -p 5432 -U estation -d estationdb -t -A -c "SELECT products.export_all_data()" -o '+\
+               dump_filename
 
-    # Get list of active rsyncs
-    command = ['bucardo', 'list', 'sync']
-    p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = p.communicate()
-    list_active_syncs = []
-    # Active rsync are identified as: Sync "sync_pc2_analysis"  Relgroup "rel_analysis"        [Active]
-    for line in out.split('\n'):
-        found=re.match('Sync\s*\"(.+?)\".*\[Active\]', line)
-        if found:
-            list_active_syncs.append(found.group(1))
-
-    # Activate the list of full syncs
-    if len(list_syncs) > 0:
-        for sync in list_syncs:
-            if sync not in list_active_syncs:
-                logger.info("Activating bucardo sync: %s" % sync)
-                command = ['bucardo', 'activate', sync]
-                p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                out, err = p.communicate()
-                logger.info("Activating bucardo sync returned: %s" % out)
-                # Check error
-                if err:
-                    logger.warning('Bucardo activation returned err: %s' % err)
-                time.sleep(0.5)
+    status = os.system(dumpcommand)
 
     # Wait a second
-    time.sleep(10)
+    time.sleep(1)
 
-    # De-activate the list of full syncs
-    if len(list_syncs) > 0:
-        for sync in list_syncs:
-            logger.info("De-activating bucardo sync: %s" % sync)
-            command = ['bucardo', 'deactivate', sync]
-            p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            out, err=p.communicate()
-            logger.info("De-activating bucardo sync returned: %s" % out)
-            # Check error
-            if err:
-                logger.warning('Bucardo activation returned err: %s' % err)
+    # Check the other computer is ready
+    if pc_role == 'PC2':
+        other_pc = 'MESA-PC3'
+    else:
+        other_pc = 'MESA-PC2'
+
+    # Inject the data into the DB of the other PC
+    sync_command = 'psql -h '+other_pc+' -p 5432 -U estation -d estationdb -f '+dump_filename+\
+                   '1>/dev/null 2>/eStation2/log/system_db_sync_full.log'
+
+    status += os.system(sync_command)
+
+    return status
 
 def system_db_dump(list_dump):
 #   Dump the database schemas (for backup)
@@ -353,6 +326,45 @@ def system_manage_dumps():
                 status = 1
     # Exit
     return status
+
+def system_bucardo_config():
+#   Check if bucardo has been already configured, and if there are conditions to do so
+
+    res_bucardo_config = 0
+
+    logger.debug("Entering routine %s" % 'system_bucardo_config')
+
+    # Returns 0 if no any sync exists
+    res_list_sync=os.system('bucardo list sync | grep "No syncs found" 1>/dev/null')
+
+    # If no any sync exists, bucardo still to be configured
+    if not res_list_sync:
+
+        # Get relevant variables
+        sysSettings = functions.getSystemSettings()
+        role = sysSettings['role']
+
+        # Check the other computer is ready
+        if role == 'PC2':
+            other_pc = 'MESA-PC3'
+        else:
+            other_pc = 'MESA-PC2'
+
+        command = '/usr/pgsql-9.3/bin/pg_isready -h '+other_pc
+        other_pc_not_ready = os.system(command)
+
+        if not other_pc_not_ready:
+
+            # Execute the configuration
+            command = '/var/www/eStation2/config/install/bucardo_config.sh '+ role.lower() +\
+                      ' 1>/var/log/bucardo/bucardo_config.log'+ ' 2>/var/log/bucardo/bucardo_config.err'
+
+            res_bucardo_config=os.system(command)
+        else:
+            logger.error('The other computer '+other_pc+' is not ready. Exit.')
+
+    # Exit
+    return res_bucardo_config
 
 def system_create_report(target_file=None):
 #   Create a .zip file with the relevant information to be sent as for diagnostic

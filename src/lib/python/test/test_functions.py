@@ -9,12 +9,15 @@ import json
 class TestFunctions(TestCase):
     def test_tcp_test(self):
         mesaproc = "139.191.147.79:22"
+        mesaproc = 'mesa-proc.ies.jrc.it'
         self.assertTrue(functions.check_connection(mesaproc))
         pc3 = "192.168.0.15:22"
+        pc3 = "h05-dev-vm19.ies.jrc.it"
         self.assertTrue(functions.check_connection(pc3))
 
     def test_get_remote_system_status(self):
         server_address = '10.191.231.90'  # vm19
+        server_address = "h05-dev-vm19.ies.jrc.it"
         status_remote_machine = functions.get_remote_system_status(server_address)
         print status_remote_machine
         if "mode" in status_remote_machine:

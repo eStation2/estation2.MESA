@@ -129,3 +129,8 @@ class TestSystem(unittest.TestCase):
         # Should get here the role of my machine ...
         status = es2system.system_db_sync_full('pc2')
 
+    def test_system_bucardo_config(self):
+
+        # Should get here the role of my machine ...
+        status = es2system.system_bucardo_config()
+

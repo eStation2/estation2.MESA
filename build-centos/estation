@@ -1,0 +1,219 @@
+#!/bin/bash
+###########################################################################
+# File : estation.sh
+# Author : TAS
+###########################################################################
+
+# chkconfig: 2345 20 80
+
+###########################################################################
+# Functions
+###########################################################################
+
+export LD_LIBRARY_PATH=/usr/local/src/tas/anaconda/lib
+export PATH=/usr/local/src/tas/anaconda/bin:$PATH
+export PYTHONHOME=/usr/local/src/tas/anaconda
+
+#--------------------------------------------------------------------------
+function Start_Services()
+{
+     local dir_service="$1"
+     local s_str="$2[*]"
+     local services=(${!s_str})
+     local i=0
+     local name=""
+    
+     for ((i=0; i<${#services[@]}; i++))
+     do
+     	if [ "$(python ${dir_service}/${services[${i}]} status | grep False | wc --lines)" == 1 ]
+        name=$(echo "${services[${i}]}" | sed -e "s/^service_//" | sed -e "s/\.py$//")
+        then
+	     echo -e "\t\tStarting service estation: ${name}."
+	     su analyst -c "python ${dir_service}/${services[${i}]} start"
+        else
+	     echo -e "\t\tService estation: ${name} already running. Continue"
+        fi
+     done
+
+}
+
+function Start_Services_Acquisition()
+{
+     local path_services_acquisition="/var/www/eStation2/apps/acquisition"
+     local services_acquisition=( "service_get_eumetcast.py" \
+                                  "service_get_internet.py" \
+                                  "service_ingestion.py" )
+     Start_Services ${path_services_acquisition} "services_acquisition"
+}
+
+function Start_Services_Processing()
+{
+     local path_services_processing="/var/www/eStation2/apps/processing"
+     local services_processing=( "service_processing.py" )
+     
+     Start_Services ${path_services_processing} "services_processing"
+}
+
+function Start_Services_System()
+{
+
+     local path_services_system="/var/www/eStation2/apps/es2system"
+     local services_system=( "service_system.py" )
+     
+     Start_Services ${path_services_system} "services_system"
+}
+function Start()
+{
+    /usr/local/src/tas/eStation_wsgi_srv/apachectl start &
+    echo -e "\testation : start"
+
+    # Get the Role and Mode
+    mode=$(grep  "mode = " /eStation2/settings/system_settings.ini | cut -d "=" -f2 | sed 's/ //')	
+    role=$(grep  "role = " /eStation2/settings/system_settings.ini | cut -d "=" -f2 | sed 's/ //')	 	
+
+    if [[ $role == 'PC2' || $mode == 'recovery' ]]; then
+
+	    # Start Services Acquisition
+	    Start_Services_Acquisition
+	    # Start Services Processing
+	    Start_Services_Processing
+    fi
+	
+    # Start Services System
+    Start_Services_System
+
+    # Start Bucardo 
+    bucardo start
+
+}
+#--------------------------------------------------------------------------
+function Stop_Services()
+{
+     local dir_service="$1"
+     local s_str="$2[*]"
+     local services=(${!s_str})
+     local i=0
+     local name=""
+    
+     for ((i=0; i<${#services[@]}; i++))
+     do
+        name=$(echo "${services[${i}]}" | sed -e "s/^service_//" | sed -e "s/\.py$//")
+     	if [ "$(python ${dir_service}/${services[${i}]} status | grep True | wc --lines)" == 1 ]
+        then
+	     echo -e "\t\tStopping service estation: ${name}"
+	     su analyst -c "python ${dir_service}/${services[${i}]} stop"
+        else
+	     echo -e "\t\tService estation: ${name} not running. Continue"
+        fi
+     done
+
+}
+
+function Stop_Services_Acquisition()
+{
+     local path_services_acquisition="/var/www/eStation2/apps/acquisition"
+     local services_acquisition=( "service_get_eumetcast.py" \
+                                  "service_get_internet.py" \
+                                  "service_ingestion.py" )
+     Stop_Services ${path_services_acquisition} "services_acquisition"
+}
+
+function Stop_Services_Processing()
+{
+     local path_services_processing="/var/www/eStation2/apps/processing"
+     local services_processing=( "service_processing.py" )
+     
+     Stop_Services ${path_services_processing} "services_processing"
+}
+
+function Stop_Services_System()
+{
+
+     local path_services_system="/var/www/eStation2/apps/es2system"
+     local services_system=( "service_system.py" )
+     
+     Stop_Services ${path_services_system} "services_system"
+}
+
+function Stop()
+{
+     echo -e "\testation : stopping in progress ..."
+     # Stop Bucardo 
+     bucardo stop
+     # Stop Services Acquisition
+     Stop_Services_Acquisition
+     # Stop Services Processing
+     Stop_Services_Processing
+     # Stop Services System
+     Stop_Services_System
+     # Stop Apache
+     /usr/local/src/tas/eStation_wsgi_srv/apachectl stop
+     sleep 2
+     echo -e "\testation : stop"
+}
+#--------------------------------------------------------------------------
+function Restart()
+{
+    Stop
+    Start
+}
+#--------------------------------------------------------------------------
+function GetStatus()
+{
+    local ftemp=$(mktemp /tmp/estation_status_XXXXXXX.log)
+    local nb_root_process=0
+    local nb_analyst_process=0
+    local cr_estatus=0
+    local what=""
+    ps -aef | grep http | grep -i "estation" >${ftemp}
+    while read line
+    do
+	what=$(echo "${line}" | grep "root")
+	if [ -n "${what}" ]
+	then
+	    nb_root_process=$((${nb_root_process} + 1))
+	else
+	    what=$(echo "${line}" | grep "analyst")
+	    if [ -n "${what}" ]
+	    then
+		nb_analyst_process=$((${nb_analyst_process}  + 1))
+	    fi
+	fi
+    done <${ftemp}
+    if [ ${nb_root_process} -eq 1 ] && [ ${nb_analyst_process} -gt 1 ]
+    then
+	echo -e "\testation is running."
+	cr_estatus=0
+    else
+	echo -e "\testation is not running"
+	cr_estatus=1
+    fi
+    rm -f ${ftemp} 1>/dev/null 2>/dev/null
+    return ${cr_estatus}
+
+}
+
+###########################################################################
+# Main
+###########################################################################
+
+cr=0
+case $(echo "$1" | tr [:upper:] [:lower:]) in
+        start) Start
+	;;
+
+        stop) Stop
+	;;
+
+        restart) Restart
+	;;
+       
+        status) GetStatus
+		cr=$?
+		;;
+
+        *)
+                echo "Usage: $0 {start|stop|restart|status}"
+                exit 1
+esac
+exit ${cr}
