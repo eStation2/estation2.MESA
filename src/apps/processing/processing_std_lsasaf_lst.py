@@ -161,7 +161,7 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
                     if mydekad_nbr == dekad:
                         file_list.append(input_file)
 
-                    output_file=es_constants.processing_dir+output_subdir_10dmax+os.path.sep+my_dekad_str+my_dekad_str+out_prod_ident_10dmax
+                    output_file=es_constants.processing_dir+output_subdir_10dmax+os.path.sep+my_dekad_str+out_prod_ident_10dmax
 
                 yield (file_list, output_file)
 
