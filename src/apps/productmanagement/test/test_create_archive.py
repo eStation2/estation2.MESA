@@ -10,8 +10,6 @@ from database import connectdb
 
 
 class TestCreate(unittest.TestCase):
-    #def setUp(self):
-        #setattr(querydb, 'db', connectdb.ConnectDB(use_sqlite=False).db)
 
     def TestCreateArchive(self):
         product='vgt-ndvi'
@@ -39,42 +37,42 @@ class TestCreate(unittest.TestCase):
         create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
         # ndvi_linearx1/2
-        subproducts=['ndvi_linearx1','ndvi_linearx2']
+        subproducts=['ndvi-linearx1','ndvi-linearx2']
         for subproduct in subproducts:
             target_dir = base_target_dir + product+ os.path.sep + subproduct
             functions.check_output_dir(target_dir)
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
         # 10day stats
-        subproducts=['10davg_linearx2', '10dmin_linearx2','10dmax_linearx2', '10dmed_linearx2']
+        subproducts=['10davg-linearx2', '10dmin-linearx2','10dmax-linearx2', '10dmed-linearx2']
         for subproduct in subproducts:
             target_dir = base_target_dir + product + os.path.sep + subproduct
             functions.check_output_dir(target_dir)
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
         # 10day stats - additional
-        subproducts=['year_min_linearx2','year_max_linearx2','absol_min_linearx2','absol_max_linearx2']
+        subproducts=['year-min-linearx2','year-max-linearx2','absol-min-linearx2','absol-max-linearx2']
         for subproduct in subproducts:
              target_dir = base_target_dir + product + os.path.sep + subproduct
              functions.check_output_dir(target_dir)
              create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
         # # baresoil mask
-        subproducts=['baresoil_linearx2']
+        subproducts=['baresoil-linearx2']
         for subproduct in subproducts:
             target_dir = base_target_dir + product + os.path.sep + subproduct
             functions.check_output_dir(target_dir)
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
         #
         # # anomalies based on ndv (not filtered) and linearx2 statistics
-        subproducts=['diff_linearx2','vci','icn']
+        subproducts=['diff-linearx2','vci','icn']
         for subproduct in subproducts:
             target_dir = base_target_dir + product + os.path.sep + subproduct
             functions.check_output_dir(target_dir)
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
         #
         # # anomalies based on filtered ndv and statistics
-        subproducts=['linearx2diff_linearx2','vci_linearx2','icn_linearx2']
+        subproducts=['linearx2diff-linearx2','vci-linearx2','icn-linearx2']
         for subproduct in subproducts:
             target_dir = base_target_dir + product + os.path.sep + subproduct
             functions.check_output_dir(target_dir)
@@ -95,6 +93,51 @@ class TestCreate(unittest.TestCase):
             target_dir = base_target_dir + product + os.path.sep + subproduct
             functions.check_output_dir(target_dir)
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
+
+    def TestCreateArchive_vgt_fapar(self):
+
+        base_target_dir='/data/archives/'
+        mapset='SPOTV-Africa-1km'
+        product='vgt-fapar'
+        version='V1.4'
+        start_date=datetime.date(2015, 5, 11)
+        end_date=None
+
+        # Only fapar subproduct
+        subproduct='fapar'
+        target_dir = base_target_dir + product+ os.path.sep + subproduct
+        functions.check_output_dir(target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+    def TestCreateArchive_vgt_fcover(self):
+
+        base_target_dir='/data/archives/'
+        mapset='SPOTV-Africa-1km'
+        product='vgt-fcover'
+        version='V1.4'
+        start_date=datetime.date(2014, 5, 21)
+        end_date=None
+
+        # Only fapar subproduct
+        subproduct='fcover'
+        target_dir = base_target_dir + product+ os.path.sep + subproduct
+        functions.check_output_dir(target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+    def TestCreateArchive_vgt_lai(self):
+
+        base_target_dir='/data/archives/'
+        mapset='SPOTV-Africa-1km'
+        product='vgt-lai'
+        version='V1.4'
+        start_date=datetime.date(2014, 5, 21)
+        end_date=None
+
+        # Only fapar subproduct
+        subproduct='lai'
+        target_dir = base_target_dir + product+ os.path.sep + subproduct
+        functions.check_output_dir(target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
     def TestCreateArchive_fewsnet_rfe(self):
 
@@ -145,7 +188,6 @@ class TestCreate(unittest.TestCase):
             target_dir = base_target_dir+ product + os.path.sep + subproduct
             functions.check_output_dir(target_dir)
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
-
 
     def TestCreateArchive_tamsat_rfe(self):
 
@@ -356,3 +398,16 @@ class TestCreate(unittest.TestCase):
         target_dir = base_target_dir + product+ os.path.sep + subproduct
         functions.check_output_dir(target_dir)
         create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+    def TestCreateArchive_all(self):
+
+        self.TestCreateArchive_vgt_ndvi()
+        self.TestCreateArchive_vgt_fapar()
+        self.TestCreateArchive_vgt_fcover()
+        self.TestCreateArchive_vgt_lai()
+        self.TestCreateArchive_fewsnet_rfe()
+        self.TestCreateArchive_tamsat_rfe()
+        self.TestCreateArchive_modis_chla()
+        self.TestCreateArchive_modis_sst()
+        self.TestCreateArchive_modis_par()
+        self.TestCreateArchive_modis_kd490()
