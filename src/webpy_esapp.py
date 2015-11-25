@@ -1654,7 +1654,8 @@ class ProductNavigatorDataSets:
                             dataset_info = querydb.get_subproduct(productcode=productcode,
                                                                   version=version,
                                                                   subproductcode=subproductcode,
-                                                                  echo=False)
+                                                                  echo=False,
+                                                                  masked=True)
 
                             if dataset_info is not None:
                                 dataset_dict = functions.row2dict(dataset_info)
@@ -2328,7 +2329,6 @@ class GetProductLayer:
 
         if dataset.no_year():
             filedate=dataset.strip_year(filedate)
-
         # lastdate = lastdate.replace("-", "")
         # mydate=lastdate.strftime("%Y%m%d")
 
