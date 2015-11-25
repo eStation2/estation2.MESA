@@ -1531,7 +1531,6 @@ class GetTimeLine:
             dateinmilisecond = functions.unix_time_millis(productdate)
             date_dict = {'datetime': dateinmilisecond, 'date': productdate.strftime("%Y%m%d"), 'present': present}
             timeline.append(date_dict)
-
         # missingdate = datetime.date(2003, 2, 1)
         # dateinmilisecond = functions.unix_time_millis(missingdate)
         # date_dict = {'datetime': dateinmilisecond, 'date': missingdate.strftime("%Y%m%d"), 'present': "false"}
@@ -2478,8 +2477,8 @@ class GetProductLayer:
                 stepcount = 0
                 for step in legend_steps:
                     stepcount += 1
-                    min_step = int((step.from_step - scale_offset)/scale_factor)
-                    max_step = int((step.to_step - scale_offset)/scale_factor)
+                    min_step = float((step.from_step - scale_offset)/scale_factor)
+                    max_step = float((step.to_step - scale_offset)/scale_factor)
                     colors = map(int, (color.strip() for color in step.color_rgb.split(" ") if color.strip()))
 
                     if stepcount == legend_steps.__len__():    # For the last step use <= max_step
