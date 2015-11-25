@@ -41,7 +41,7 @@ Ext.define('esapp.view.datamanagement.sendRequestController', {
             loadMask: esapp.Utils.getTranslation('loading'),    // 'Loading...',
             callback:function(callinfo,responseOK,response ){
                 var request = Ext.JSON.decode(response.responseText.trim());
-                console.info(request.request);
+//                console.info(request.request);
                 request = request.request;
                 var requestHTML = '<h3><b style="word-wrap: break-word;">' + esapp.Utils.getTranslation('generate_request_text') + '</b></h3>';
                 requestHTML = requestHTML + '<table><tr><td><b>' + esapp.Utils.getTranslation('productcode') + ': </b></td><td><b>' + request.product + '</b></td></tr><tr><td><b>' + esapp.Utils.getTranslation('version') + ': </b></td><td><b>' + request.version + '</b></td></tr></table>';

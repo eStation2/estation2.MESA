@@ -24,10 +24,10 @@ Ext.define('esapp.view.dashboard.PC2Controller', {
             success: function(response, opts){
                 var responseText = Ext.JSON.decode(response.responseText);
                 // ToDO: Set checkbox text to enable or disable and show a toast message!
-                console.info(responseText);
+//                console.info(responseText);
             },
             failure: function(response, opts) {
-                console.info(response.status);
+//                console.info(response.status);
             }
         });
     },
@@ -39,16 +39,16 @@ Ext.define('esapp.view.dashboard.PC2Controller', {
             success: function(response, opts){
                 var responseText = Ext.JSON.decode(response.responseText);
                 // ToDO: Show a toast message with the result of the manual data sync!
-                console.info(responseText);
+//                console.info(responseText);
             },
             failure: function(response, opts) {
-                console.info(response.status);
+//                console.info(response.status);
             }
         });
     },
     execEnableDisableAutoDBSync: function(chkbox, ev) {
         var me = this;
-        console.info(chkbox);
+//        console.info(chkbox);
         Ext.Ajax.request({
             method: 'POST',
             url: 'dashboard/setdbautosync',
@@ -58,7 +58,7 @@ Ext.define('esapp.view.dashboard.PC2Controller', {
             success: function(response, opts){
                 var responseText = Ext.JSON.decode(response.responseText);
                 // ToDO: Set checkbox text to enable or disable and show a toast message!
-                console.info(responseText);
+//                console.info(responseText);
             },
             failure: function(response, opts) {
                 console.info(response.status);
@@ -73,7 +73,7 @@ Ext.define('esapp.view.dashboard.PC2Controller', {
             success: function(response, opts){
                 var responseText = Ext.JSON.decode(response.responseText);
                 // ToDO: Show a toast message with the result of the manual DB sync!
-                console.info(responseText);
+//                console.info(responseText);
             },
             failure: function(response, opts) {
                 console.info(response.status);

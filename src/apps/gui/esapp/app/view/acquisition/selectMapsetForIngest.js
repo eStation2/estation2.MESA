@@ -132,7 +132,7 @@ Ext.define("esapp.view.acquisition.selectMapsetForIngest",{
                 ),
                 multiSelect: false,
                 height: 250,
-                width: 140,
+                maxWidth: 140,
                 trackOver: true,
                 cls:'mapsets',
                 overItemCls: 'mapset-hover',

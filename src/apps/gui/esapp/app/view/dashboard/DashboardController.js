@@ -8,11 +8,13 @@ Ext.define('esapp.view.dashboard.DashboardController', {
     //    selectProductWin.show();
     //},
 
-    setupDashboard: function() {
+    setupDashboard: function(reload) {
         var me = this.getView();
 
         var pcs_container = Ext.getCmp('pcs_container');
-        pcs_container.removeAll();
+        var dashboard_panel = Ext.getCmp('dashboard-panel');
+
+        //pcs_container.removeAll();
 
         var PC1 = {},
             PC2 = {},
@@ -28,16 +30,21 @@ Ext.define('esapp.view.dashboard.DashboardController', {
             pc3DisabledPartial = true,
             pc2DisabledAll = true,
             pc3DisabledAll = true;
+        if (reload){
+//            console.info('reloading dashboard...');
+            var myMask = new Ext.LoadMask({
+                msg    : esapp.Utils.getTranslation('loading'),
+                target : dashboard_panel
+            });
 
-        //var myMask = new Ext.LoadMask({
-        //    msg    : esapp.Utils.getTranslation('loading'),
-        //    target : pcs_container
-        //});
-        //
-        //myMask.show();
+            myMask.show();
+        }
 
         this.getStore('dashboard').load({
             callback: function(records, options, success){
+
+                pcs_container.removeAll();
+
                 records.forEach(function(dashboard) {
                     me.PC2_service_eumetcast = dashboard.get('PC2_service_eumetcast');
                     me.PC2_service_internet = dashboard.get('PC2_service_internet');
@@ -292,6 +299,10 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                     pcs_container.add(PC1_connection);
                     pcs_container.add(PC2);
                 }
+                if (reload){
+                     myMask.hide();
+                }
+
             }
         });
         //myMask.hide();

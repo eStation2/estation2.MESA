@@ -326,6 +326,11 @@ def loop_get_internet(dry_run=False):
 
         while 1:
 
+            # Check internet connection (or die)
+            if not functions.internet_on():
+                logger.fatal("The computer is not currently connected to the internet. Exit.")
+                exit(1)
+
             try:
                 time_sleep = user_def_sleep
                 logger.debug("Sleep time set to : %s.", time_sleep)

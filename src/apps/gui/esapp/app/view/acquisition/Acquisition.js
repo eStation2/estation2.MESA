@@ -126,7 +126,7 @@ Ext.define("esapp.view.acquisition.Acquisition",{
 
                         btn.setIconCls('fa fa-unlock fa-2x');
 
-                        acq_main[0].columns[2].setWidth(490);   // GET
+                        acq_main[0].columns[2].setWidth(500);   // GET
                         acq_main[0].columns[2].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 265px; left: 0px; tabindex="-1">' +
                         '           <div data-ref="titleEl" class="x-column-header-inner">' +
                         '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('type') + '</span>' +

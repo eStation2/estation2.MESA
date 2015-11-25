@@ -245,7 +245,7 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
             // header: 'Store Native',
             hideable: true,
             hidden:true,
-            width: 90,
+            width: 100,
             align: 'center',
             stopSelection: false,
             variableRowHeight: true,
