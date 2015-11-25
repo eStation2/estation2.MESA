@@ -2083,20 +2083,18 @@ class SystemReport:
         self.lang = "eng"
 
     def POST(self):
-        filename = 'eStation-PS-Report_2015-05-13.tgz'
-        reportfile = es_constants.es2globals['base_tmp_dir']+'/'+filename
 
+        filename = es2system.system_create_report()
         web.header('Content-Type', 'application/force-download')   # 'application/x-compressed')
         web.header('Content-transfer-encoding', 'binary')
         web.header('Content-Disposition', 'attachment; filename=' + filename)  # force browser to show "Save as" dialog.
-        f = open(reportfile, 'rb')
+        f = open(filename, 'rb')
         while 1:
             buf = f.read(1024 * 8)
             if not buf:
                 break
             yield buf
-        #return contents
-
+        os.remove(filename)
 
 class InstallReport:
     def __init__(self):
