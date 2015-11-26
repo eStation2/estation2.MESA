@@ -347,12 +347,14 @@ Ext.define("esapp.view.processing.Processing",{
                             listeners: {
                                 exception: function(proxy, response, operation){
                                     // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
-                                     Ext.Msg.show({
-                                        title: 'PROCESSING OUTPUT PRODUCTS STORE - REMOTE EXCEPTION',
-                                        msg: operation.getError(),
-                                        icon: Ext.Msg.ERROR,
-                                        buttons: Ext.Msg.OK
-                                    });
+                                    console.info('PROCESSING OUTPUT PRODUCTS STORE - REMOTE EXCEPTION - Reload the processing page!');
+
+                                    // Ext.Msg.show({
+                                    //    title: 'PROCESSING OUTPUT PRODUCTS STORE - REMOTE EXCEPTION',
+                                    //    msg: operation.getError(),
+                                    //    icon: Ext.Msg.ERROR,
+                                    //    buttons: Ext.Msg.OK
+                                    //});
                                 }
                             }
                         }

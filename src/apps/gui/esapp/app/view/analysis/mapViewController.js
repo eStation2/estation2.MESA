@@ -2,7 +2,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.analysis-mapview'
 
-    ,addProductLayer: function(productcode, productversion, mapsetcode, subproductcode, legendid, colorschemeHTML, legendHTML, productname) {
+    ,addProductLayer: function(productcode, productversion, mapsetcode, subproductcode, legendid, colorschemeHTML, legendHTML, legendHTMLVertical, productname) {
         var me = this;
         var params = {
                productcode:productcode,
@@ -16,6 +16,8 @@ Ext.define('esapp.view.analysis.mapViewController', {
         me.getView().subproductcode = subproductcode;
         me.getView().legendid = legendid;
         me.getView().productname = productname;
+        me.getView().legendHTML = legendHTML;
+        me.getView().legendHTMLVertical = legendHTMLVertical;
 
         Ext.Ajax.request({
             method: 'GET',
@@ -145,7 +147,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
         // Show legend panel with selected legend and show view legend toggle button.
         var maplegendhtml = me.lookupReference('product-legend' + me.getView().id);
-        maplegendhtml.setHtml(legendHTML);
+        maplegendhtml.setHtml(legendHTMLVertical);
 
         var maplegendpanel = me.lookupReference('product-legend_panel_' + me.getView().id);
         maplegendpanel.show();
@@ -311,14 +313,19 @@ Ext.define('esapp.view.analysis.mapViewController', {
     ,toggleLegend: function(btn, event) {
         var mapviewwin = btn.up().up();
         var maplegendpanel = mapviewwin.lookupReference('product-legend_panel_' + mapviewwin.id);
+        var maplegendhtml = mapviewwin.lookupReference('product-legend' + mapviewwin.id);
 
         if (btn.pressed) {
+            //console.info(mapviewwin.legendHTMLVertical);
+            maplegendhtml.setHtml(mapviewwin.legendHTMLVertical);
+            //maplegendpanel.doConstrain();
             maplegendpanel.show();
-            //btn.setIconCls('link');
         }
         else {
-            maplegendpanel.hide();
-            //btn.setIconCls('unlink');
+            maplegendhtml.setHtml(mapviewwin.legendHTML);
+            //maplegendpanel.doConstrain();
+            maplegendpanel.show();
+            //maplegendpanel.hide();
         }
     }
 

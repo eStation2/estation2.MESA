@@ -67,7 +67,7 @@ def generateLegendHTML(legend_id):
         PrevGroupLabel = ''
         Counter = 0
         for row in legend_steps:
-            GroupLabel = row['group_label']
+            GroupLabel = row.group_label
             if GroupLabel.strip() == PrevGroupLabel:
                 Counter += 1
                 PrevGroupLabel = GroupLabel
@@ -109,4 +109,90 @@ def generateLegendHTML(legend_id):
     legendTableEnd = '</table>'
 
     legendHTML = legendHeader + legendTableBegin + legendGroupLabels + legendColors + legendColorLabels + legendTableEnd
-    return legendHTML
+
+    # Create vertical legend
+    legendHTMLVertical = ''
+    legendColorLabelColumn = ''
+    legendGroupLabelColumn = ''
+    PrevGroupLabel = ''
+    Counter = 0
+    ColorLabelCounter = 1
+
+    if TotSteps > 36:
+        stepWidth = 20
+        stepHeight = 1
+    else:
+        stepWidth = 30
+        stepHeight = 20
+    #
+    # if stepHeight < 3:
+    #     stepWidth = 20
+    #     stepHeight = 1
+
+    for row in legend_steps:
+
+        # Add color column
+        # convert row['color_rgb'] from RGB to html color
+        color_rgb = row.color_rgb.split(' ')
+        color_html = functions.rgb2html(color_rgb)
+        r = color_rgb[0]
+        g = color_rgb[1]
+        b = color_rgb[2]
+        color_html = 'rgb('+r+','+g+','+b+')'
+
+        border = ""
+        if TotSteps <= 30:
+            border = "border:1px solid black; "
+
+        legendColorColumn = '<td width='+str(stepWidth)+'px; height='+str(stepHeight)+'px; style="'+border+' background-color: '+color_html+'"></td>'
+
+        # Add label column
+        Counter += 1
+        if ColumnSpan > 1:
+            if Counter == 1:
+                # print ColorLabelCounter
+                # print legend_steps[int((ColumnSpan * ColorLabelCounter)-1)]
+                legendstep_withlabel_dict = functions.row2dict(legend_steps[int((ColumnSpan * ColorLabelCounter)-1)])
+                if legendstep_withlabel_dict['color_label'] != '':
+                    legendColorLabelColumn = '<td rowspan="' + str(ColumnSpan-1) + '" style="font-size:9px; line-height:10px; " align="center">'+legendstep_withlabel_dict['color_label']+'</td>'
+                # if Counter > 1:
+                # ColorLabelCounter += 1
+            elif Counter == (ColumnSpan * ColorLabelCounter):
+                # print ColorLabelCounter
+                if TotColorLabels == ColorLabelCounter + 1:
+                    # print legend_steps[TotSteps-1]
+                    legendstep_withlabel_dict = functions.row2dict(legend_steps[TotSteps-1])
+                else:
+                    # print legend_steps[int((ColumnSpan * (ColorLabelCounter+1))-1)]
+                    legendstep_withlabel_dict = functions.row2dict(legend_steps[int((ColumnSpan * (ColorLabelCounter+1))-1)])
+                ColorLabelCounter += 1
+                if legendstep_withlabel_dict['color_label'] != '':
+                    legendColorLabelColumn = '<td rowspan="' + str(ColumnSpan) + '" style="font-size:9px; line-height:10px; " align="center">'+legendstep_withlabel_dict['color_label']+'</td>'
+            else:
+                legendColorLabelColumn = ''
+        else:
+            legendstep_dict = functions.row2dict(row)
+            if legendstep_dict['color_label'] != '':
+                # ColorLabel = '&nbsp;'+legendstep_dict['color_label'].strip()+'&nbsp;'
+                legendColorLabelColumn = '<td rowspan="' + str(ColumnSpan) + '" style="font-size:9px; line-height:10px; " align="center">'+legendstep_dict['color_label']+'</td>'
+
+        # if TotGroupLabels > 0:
+        #     legendGroupLabelColumn = ''
+        #     GroupLabel = row.group_label.strip()
+        #     # if Counter == 0:
+        #     #     Counter += 1
+        #     #     PrevGroupLabel = GroupLabel
+        #     if GroupLabel == PrevGroupLabel:
+        #         Counter += 1
+        #         PrevGroupLabel = GroupLabel
+        #     else:
+        #         legendGroupLabelColumn = '<td rowspan="'+str(Counter)+'"" style="font-size:9px; line-height:10px; " align="center">'+PrevGroupLabel+'</td>'
+        #         PrevGroupLabel = GroupLabel
+        #         Counter = 1
+
+        legendHTMLVertical += '<tr>' + legendColorColumn + legendColorLabelColumn + legendGroupLabelColumn + '</tr>'
+
+    legendHTMLVertical =  legendTableBegin + legendHTMLVertical + legendTableEnd
+    # print legendHTMLVertical
+    legends_HTML = {'legendHTML': legendHTML, 'legendHTMLVertical': legendHTMLVertical}
+    return legends_HTML

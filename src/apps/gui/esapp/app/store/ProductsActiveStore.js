@@ -42,12 +42,14 @@ Ext.define('esapp.store.ProductsActiveStore', {
         listeners: {
             exception: function(proxy, response, operation){
                 // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
-                Ext.Msg.show({
-                    title: 'PRODUCTS ACTIVE STORE - REMOTE EXCEPTION',
-                    msg: operation.getError(),
-                    icon: Ext.Msg.ERROR,
-                    buttons: Ext.Msg.OK
-                });
+                console.info('PRODUCTS ACTIVE STORE - REMOTE EXCEPTION - Reload Acquisition page!');
+
+                //Ext.Msg.show({
+                //    title: 'PRODUCTS ACTIVE STORE - REMOTE EXCEPTION',
+                //    msg: operation.getError(),
+                //    icon: Ext.Msg.ERROR,
+                //    buttons: Ext.Msg.OK
+                //});
             }
         }
     }

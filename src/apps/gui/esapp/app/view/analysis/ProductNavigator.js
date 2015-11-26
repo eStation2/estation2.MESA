@@ -229,6 +229,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                                     me.selectedproduct.legendid = rec.get('legend_id');
                                     me.selectedproduct.colorschemeHTML = rec.get('colorschemeHTML');
                                     me.selectedproduct.legendHTML = rec.get('legendHTML');
+                                    me.selectedproduct.legendHTMLVertical = rec.get('legendHTMLVertical');
                                 }
                             },this);
 
@@ -239,6 +240,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                                                                                      me.selectedproduct.legendid,
                                                                                      me.selectedproduct.colorschemeHTML,
                                                                                      me.selectedproduct.legendHTML,
+                                                                                     me.selectedproduct.legendHTMLVertical,
                                                                                      me.selectedproduct.productname
                             );
                             me.close();

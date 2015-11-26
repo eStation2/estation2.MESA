@@ -77,12 +77,13 @@ Ext.define('esapp.model.Dashboard', {
         listeners: {
             exception: function(proxy, response, operation){
                 // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
-                Ext.Msg.show({
-                    title: 'DASHBOARD MODEL- REMOTE EXCEPTION',
-                    msg: operation.getError(),
-                    icon: Ext.Msg.ERROR,
-                    buttons: Ext.Msg.OK
-                });
+                console.info('DASHBOARD MODEL- REMOTE EXCEPTION - Reload dashboard!');
+                //Ext.Msg.show({
+                //    title: 'DASHBOARD MODEL- REMOTE EXCEPTION',
+                //    msg: operation.getError(),
+                //    icon: Ext.Msg.ERROR,
+                //    buttons: Ext.Msg.OK
+                //});
             }
         }
     }

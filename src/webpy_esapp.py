@@ -1605,7 +1605,11 @@ class GetColorSchemes:
                 legend_dict['default_legend'] = defaultlegend
                 legend_dict['defaulticon'] = defaulticon
                 legend_dict['colorschemeHTML'] = colorschemeHTML
-                legend_dict['legendHTML'] = generateLegendHTML.generateLegendHTML(legend_id)
+                legendsHTML = generateLegendHTML.generateLegendHTML(legend_id)
+                # print "HALLOOOOOOOO"
+                # print legendsHTML['legendHTML']
+                legend_dict['legendHTML'] = legendsHTML['legendHTML']
+                legend_dict['legendHTMLVertical'] = legendsHTML['legendHTMLVertical']
 
                 legends_dict_all.append(legend_dict)
 

@@ -24,12 +24,14 @@ Ext.define('esapp.view.acquisition.selectMapsetForIngestModel', {
                 listeners: {
                     exception: function(proxy, response, operation){
                         // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
-                        Ext.Msg.show({
-                            title: 'MAPSET MODEL- REMOTE EXCEPTION',
-                            msg: operation.getError(),
-                            icon: Ext.Msg.ERROR,
-                            buttons: Ext.Msg.OK
-                        });
+                        console.info('MAPSET VIEW MODEL - REMOTE EXCEPTION - Reload the select mapset for ingest window!');
+
+                        //Ext.Msg.show({
+                        //    title: 'MAPSET VIEW MODEL- REMOTE EXCEPTION',
+                        //    msg: operation.getError(),
+                        //    icon: Ext.Msg.ERROR,
+                        //    buttons: Ext.Msg.OK
+                        //});
                     }
                 }
             }
