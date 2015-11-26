@@ -88,7 +88,7 @@ class Frequency(object):
 
     def strip_year(self, date):
         if self.no_year():
-            return date[5:]
+            return date[4:]
         return date
 
     def format_date(self, date):
