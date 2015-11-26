@@ -1,10 +1,10 @@
 Summary: eStation 2.0 reference Layers for visualization
 Name: eStation2-Layers
-Version: 2.0.1
+Version: 2.1.0
 Release: 1
 Group: eStation
 License: GPL
-Source: /home/adminuser/rpms/eStation-Layers/%{name}-%{version}-%{release}.tgz
+Source: /home/adminuser/rpms/eStation-Layers-2.1.0/%{name}-%{version}-%{release}.tgz
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 
 
@@ -17,8 +17,8 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 
 %prep
 # Get the sources from the JRC ftp and create .tgz
-#lftp -e "mirror -Le /ftp/private/narma/eStation_2.0/Packages/eStation-Layers/ /home/adminuser/rpms/; exit" -u narmauser:narma11 h05-ftp.jrc.it"" 
-cd /home/adminuser/rpms/eStation-Layers/
+lftp -e "mirror -Le /ftp/private/narma/eStation_2.0/Packages/eStation-Layers-2.1.0/ /home/adminuser/rpms/; exit" -u narmauser:narma11 h05-ftp.jrc.it"" 
+cd /home/adminuser/rpms/eStation-Layers-2.1.0/
 tar -cvzf %{name}-%{version}-%{release}.tgz *
 
 # Prepare the Layers in BUILD_ROOT
@@ -45,5 +45,5 @@ cp -r /eStation2/layers/* /eStation2/layers-%{version}.bck/
 %postun
 mkdir -fr /eStation2/layers/
 mv /eStation2/layers-%{version}.bck/* /eStation2/layers/
-rmdir /eStation2/layers-%{version}.bck
+rmdir /var/www/eStation2-%{version}.bck
 

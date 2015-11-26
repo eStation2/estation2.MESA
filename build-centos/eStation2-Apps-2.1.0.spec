@@ -1,14 +1,13 @@
-Summary: eStation 2.0 application from JRC
+Summary: eStation 2.0 application from JRC - Test upgrade to 2.1.0
 Name: eStation2-Apps
-Version: 2.0.1
-Release: 2
+Version: 2.1.0
+Release: 1
 Group: eStation
 License: GPL
 Source: /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 
-# Procedure: the whole eStation2.git repo is synchronized on the local machine (in /home/adminuser/eStation2.git) 
-#	     A Package with all /src contents is packed in a .tgz (in %{Source}), 
+# Procedure: the eStation2-2.1.0 (Test) is located in /home/adminuser/eStation2-2.1.0 (manually managed)
 #	     and subsequently unpacked in the BUILD_ROOT dir
 
 %description
@@ -16,10 +15,8 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 
 %prep
 # Sync the git repository from github
-cd /home/adminuser/eStation2.git
-git pull origin 12.04-2.0
+cd /home/adminuser/eStation2-2.1.0
 # Create the .tgz
-cd src
 tar -cvzf /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz *
 
 # Prepare the files in BUILD_ROOT
@@ -36,8 +33,6 @@ rm -r -f $RPM_BUILD_ROOT
 
 %files
 /var/www/eStation2-%{version}/*
-
-####%config(noreplace) /var/www/eStation2-%{version}/*
 
 %pre
 # Create log file
@@ -124,6 +119,7 @@ chown -R analyst:estation /data
 
 # Creation of the symlink on the /var/www/eStation2-%{version}
 echo "`date +'%Y-%m-%d %H:%M '` Create sym link /var/www/eStation2-%{version}"
+rm -fr /var/www/eStation2
 ln -fs /var/www/eStation2-%{version} /var/www/eStation2
 
 # Restart postgresql 
@@ -170,8 +166,11 @@ EOF
         echo "`date +'%Y-%m-%d %H:%M '` Database structure already exists. Continue" 
     fi
     # Update Tables (both for upgrade and installation from scratch)
-    echo "`date +'%Y-%m-%d %H:%M '` Populate tables" 
-    psql -h localhost -U estation -d estationdb -f /var/www/eStation2/database/dbInstall/products_dump_data_only.sql > /dev/null 2>&1
+    echo "`date +'%Y-%m-%d %H:%M '` Update the database structure for version %{version}" 
+    psql -h localhost -U estation -d estationdb -f /var/www/eStation2/database/dbInstall/update_db_structure.sql > /dev/null 2>&1
+    echo "`date +'%Y-%m-%d %H:%M '` Update the database contents for version %{version}" 
+    psql -h localhost -U estation -d estationdb -f /var/www/eStation2/database/dbInstall/update_insert_jrc_data.sql > /dev/null 2>&1
+
 
 else
     echo "`date +'%Y-%m-%d %H:%M '` Postgresql is NOT running: DB not created !" 
@@ -223,6 +222,7 @@ else
 	echo "$(date +'%Y-%m-%d %H:%M ') Bucardo package already installed. Continue"
 	bucardo set log_level=terse
 fi
+
 # Create log and run dir for Bucardo
 mkdir -p ${log_dir}
 chown adminuser:estation ${log_dir}
