@@ -610,7 +610,6 @@ class GetEumetcastSources:
         return eumetcastsources_json
 
 
-
 class UpdateEumetcastSource:
     def __init__(self):
         self.lang = "eng"
@@ -889,6 +888,14 @@ class GetDashboard:
         # PC1_connection = functions.check_connection(systemsettings['ip_pc1'] + IP_port)
         PC1_connection = functions.check_connection('mesa-pc1')
 
+        # status_PC1 = es2system.get_status_PC1()
+        status_PC1 = {'dvb_status': False,
+                      'tellicast_status': True,
+                      'fts_status': True}
+        PC1_dvb_status = status_PC1['dvb_status']
+        PC1_tellicast_status = status_PC1['tellicast_status']
+        PC1_fts_status = status_PC1['fts_status']
+
         if systemsettings['type_installation'].lower() == 'full':
             if systemsettings['role'].lower() == 'pc1':
                 PC1_mode = systemsettings['mode'].lower()
@@ -1001,6 +1008,10 @@ class GetDashboard:
         dashboard_dict = {'type_installation': systemsettings['type_installation'].lower(),
                           'activePC': systemsettings['role'].lower(),
                           'PC1_connection': PC1_connection,
+                          'PC1_dvb_status': PC1_dvb_status,
+                          'PC1_tellicast_status': PC1_tellicast_status,
+                          'PC1_fts_status': PC1_fts_status,
+
                           'PC23_connection': PC23_connection,
 
                           'PC2_service_eumetcast': PC2_service_eumetcast,
@@ -1228,6 +1239,7 @@ class GetMapsets:
             mapsets_json = '{"success":false, "error":"No Mapsets defined!"}'
 
         return mapsets_json
+
 
 class GetLanguages:
     def __init__(self):
@@ -1604,7 +1616,11 @@ class GetColorSchemes:
                 legend_dict['default_legend'] = defaultlegend
                 legend_dict['defaulticon'] = defaulticon
                 legend_dict['colorschemeHTML'] = colorschemeHTML
-                legend_dict['legendHTML'] = generateLegendHTML.generateLegendHTML(legend_id)
+                legendsHTML = generateLegendHTML.generateLegendHTML(legend_id)
+                # print "HALLOOOOOOOO"
+                # print legendsHTML['legendHTML']
+                legend_dict['legendHTML'] = legendsHTML['legendHTML']
+                legend_dict['legendHTMLVertical'] = legendsHTML['legendHTMLVertical']
 
                 legends_dict_all.append(legend_dict)
 
@@ -2095,6 +2111,7 @@ class SystemReport:
                 break
             yield buf
         os.remove(filename)
+
 
 class InstallReport:
     def __init__(self):

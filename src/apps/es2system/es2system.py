@@ -69,25 +69,49 @@ def get_status_local_machine():
     return status_local_machine
 
 #
-def save_status_local_machine():
-#   Save a pickle containing info on the status of the local machine
+# def save_status_local_machine():
+# #   Save a pickle containing info on the status of the local machine
+# #
+#     logger.debug("Entering routine %s" % 'save_status_local_machine')
 #
-    logger.debug("Entering routine %s" % 'save_status_local_machine')
-
-    # Define .pck filename
-    status_local_machine = get_status_local_machine()
-
-    # Save status to a file
-    filename = es_constants.es2globals['base_local_dir']+os.path.sep+'system'+os.path.sep+'system_status.txt'
-
-    fid = open(filename,'w')
-    for value in status_local_machine:
-        fid.write("%s = %s \n" % (value, status_local_machine[value]))
-
-    # Close the file
-    fid.close()
-    return 0
-
+#     # Define .pck filename
+#     pickle_filename = functions.system_status_filename()
+#
+#     # Get the local systems settings
+#     systemsettings = functions.getSystemSettings()
+#
+#     # Get status of all services
+#     status_services = functions.getStatusAllServices()
+#
+#     get_eumetcast_status = status_services['eumetcast']
+#     get_internet_status = status_services['internet']
+#     ingestion_status = status_services['ingest']
+#     processing_status = status_services['process']
+#     system_status = status_services['system']
+#
+#     # Get status of postgresql
+#     psql_status = functions.getStatusPostgreSQL()
+#
+#     # Get internet connection
+#     internet_status = functions.internet_on()
+#
+#     # ToDo: check disk status!
+#
+#     status_local_machine = {'get_eumetcast_status': get_eumetcast_status,
+#                             'get_internet_status': get_internet_status,
+#                             'ingestion_status': ingestion_status,
+#                             'processing_status': processing_status,
+#                             'system_status': system_status,
+#                             'system_execution_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+#                             'postgresql_status': str(psql_status).lower(),
+#                             'internet_connection_status': str(internet_status).lower(),
+#                             'active_version': systemsettings['active_version'],
+#                             'mode': systemsettings['mode'],
+#                             'disk_status': 'true'}
+#     # Save to pickle
+#     functions.dump_obj_to_pickle(status_local_machine, pickle_filename)
+#     return 0
+#
 
 def system_data_sync(source, target):
 #   Synchronize data directory from one machine to another (push)
@@ -343,7 +367,6 @@ def system_bucardo_config():
     return res_bucardo_config
 
 def system_create_report(target_file=None):
-
 #   Create a .zip file with the relevant information to be sent as for diagnostic
 #
 
@@ -352,22 +375,24 @@ def system_create_report(target_file=None):
     now = datetime.datetime.now()
 
     # Use a module (to be identified) for dump
-    target_dir = es_constants.es2globals['base_tmp_dir']+os.path.sep
+    target_dir = es_constants.es2globals['status_system_dir']+os.path.sep
 
     output_filename = target_dir+'System_report_'+now.strftime("%Y-%m-%d-%H:%M:%S")+'.tgz'
 
     # Define List of files to be copied
     report_files= ["/eStation2/log/*",                          # All log files
-                   "/eStation2/system/system_status.txt",       # System Status file
+                   "/eStation2/system/system_status.pkl",       # System Status pickle
                    "/eStation2/get_lists/get_eumetcast/*",      # All get lists
                    "/eStation2/get_lists/get_internet/*",       # All get lists
                    "/eStation2/settings/*",                     # Machine settings (User+System)
+                  # "/eStation2/db_dump/*",                     # All dumps -> only latest
                    "/etc/passwd",                               # Users
                    "/etc/hosts",                                # Hosts
                    "/var/log/eStation2/eStation-Apps_*.log",    # All eStation .deb installation files
-                   "/var/lib/pgsql/9.3/data/pg_hba.conf",       # Postgresql configuration file
-                   "/var/lib/pgsql/9.3/data/postgresql.conf",   # Postgresql configuration file
+                  # "/etc/postgresql/9.3/main/pg_hba.conf",     # No permissions !!
+                   "/etc/apache2/sites-available/000-default.conf",
                    "/usr/local/lib/python2.7/dist-packages/eStation2.pth",
+                   "/etc/default/rsync",
                    "/etc/rsyncd.conf"]
 
 
@@ -398,8 +423,6 @@ def system_create_report(target_file=None):
     # Remove temporary dir
     shutil.rmtree(tmp_dir)
 
-    # Return the filename
-    return output_filename
 
 def check_delay_time(operation, delay_minutes=None, time=None, write=False):
 #
@@ -636,6 +659,36 @@ def loop_system(dry_run=False):
 
         # Sleep some time
         time.sleep(float(es_constants.es2globals['system_sleep_time_sec']))
+
+def get_status_PC1():
+#   Get info on the status of the services on PC1:
+#   DVB
+#   Tellicast
+#   FTS
+
+    logger.debug("Entering routine %s" % 'get_status_PC1')
+
+    # Get the local systems settings
+    systemsettings = functions.getSystemSettings()
+
+    # Get status of all services
+    status_services = functions.getStatusAllServices()
+
+    tellicast_status = False
+    command_tellicast = ['ssh','adminuser@mesa-pc1', '/etc/init.d/tellicast-client status', 'status']
+    p = subprocess.Popen(command_tellicast, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = p.communicate()
+    if err == '':
+        if re.search('not running', out):
+            logger.error("Bucardo is not running - DB sync not possible")
+            return 1
+
+
+    status_PC1 = {'dvb_status': dvb_status,
+                  'tellicast_status': tellicast_status,
+                  'fts_status': fts_status}
+
+    return status_PC1
 
 class SystemDaemon(DaemonDryRunnable):
     def run(self):

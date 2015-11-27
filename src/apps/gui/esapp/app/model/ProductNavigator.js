@@ -53,12 +53,13 @@ Ext.define('esapp.model.ProductNavigator', {
         listeners: {
             exception: function(proxy, response, operation){
                 // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
-                Ext.Msg.show({
-                    title: 'PRODUCT NAVIGATOR STORE - REMOTE EXCEPTION',
-                    msg: operation.getError(),
-                    icon: Ext.Msg.ERROR,
-                    buttons: Ext.Msg.OK
-                });
+                console.info('PRODUCT NAVIGATOR STORE - REMOTE EXCEPTION - Reload Product Navigator!');
+                //Ext.Msg.show({
+                //    title: 'PRODUCT NAVIGATOR STORE - REMOTE EXCEPTION',
+                //    msg: operation.getError(),
+                //    icon: Ext.Msg.ERROR,
+                //    buttons: Ext.Msg.OK
+                //});
             }
         }
     }
@@ -156,7 +157,8 @@ Ext.define('esapp.model.ColorScheme', {
         {name: 'legend_id', mapping: 'legend_id'},
         {name: 'legend_name', mapping: 'legend_name'},
         {name: 'colorschemeHTML', mapping: 'colorschemeHTML'},
-        {name: 'legendHTML', mapping: 'legendHTML'}
+        {name: 'legendHTML', mapping: 'legendHTML'},
+        {name: 'legendHTMLVertical', mapping: 'legendHTMLVertical'}
     ],
 
     proxy: {

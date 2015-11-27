@@ -41,12 +41,14 @@ Ext.define('esapp.store.InternetSourceStore', {
         listeners: {
             exception: function(proxy, response, operation){
                 // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
-                Ext.Msg.show({
-                    title: 'INTERNET SOURCE MODEL - REMOTE EXCEPTION',
-                    msg: operation.getError(),
-                    icon: Ext.Msg.ERROR,
-                    buttons: Ext.Msg.OK
-                });
+                console.info('INTERNET SOURCE STORE - REMOTE EXCEPTION - Reopen edit internet source window!');
+
+                //Ext.Msg.show({
+                //    title: 'INTERNET SOURCE STORE - REMOTE EXCEPTION',
+                //    msg: operation.getError(),
+                //    icon: Ext.Msg.ERROR,
+                //    buttons: Ext.Msg.OK
+                //});
             }
         }
     }

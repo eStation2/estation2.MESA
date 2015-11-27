@@ -44,12 +44,13 @@ Ext.define('esapp.model.IPSetting', {
         listeners: {
             exception: function(proxy, response, operation){
                 // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
-                Ext.Msg.show({
-                    title: 'IP SETTINGS MODEL - REMOTE EXCEPTION',
-                    msg: operation.getError(),
-                    icon: Ext.Msg.ERROR,
-                    buttons: Ext.Msg.OK
-                });
+                console.info('IP SETTINGS MODEL- REMOTE EXCEPTION - Reload System page!');
+                //Ext.Msg.show({
+                //    title: 'IP SETTINGS MODEL - REMOTE EXCEPTION',
+                //    msg: operation.getError(),
+                //    icon: Ext.Msg.ERROR,
+                //    buttons: Ext.Msg.OK
+                //});
             }
         }
     }

@@ -17,7 +17,7 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 
 %prep
 # Get the sources from the JRC ftp and create .tgz
-lftp -e "mirror -Le /ftp/private/narma/eStation_2.0/Packages/eStation-Layers/ /home/adminuser/rpms/; exit" -u narmauser:narma11 h05-ftp.jrc.it"" 
+#lftp -e "mirror -Le /ftp/private/narma/eStation_2.0/Packages/eStation-Layers/ /home/adminuser/rpms/; exit" -u narmauser:narma11 h05-ftp.jrc.it"" 
 cd /home/adminuser/rpms/eStation-Layers/
 tar -cvzf %{name}-%{version}-%{release}.tgz *
 
@@ -35,4 +35,15 @@ rm -r -f $RPM_BUILD_ROOT
 
 %files
 /eStation2/layers/*
+
+# Before uninstall: remove the link and copy all code into a bck dir
+%preun
+mkdir -p /eStation2/layers-%{version}.bck
+cp -r /eStation2/layers/* /eStation2/layers-%{version}.bck/
+
+# After uninstall: remove /tmp files, and move the .bck dir to 'old-version' place
+%postun
+mkdir -fr /eStation2/layers/
+mv /eStation2/layers-%{version}.bck/* /eStation2/layers/
+rmdir /eStation2/layers-%{version}.bck
 

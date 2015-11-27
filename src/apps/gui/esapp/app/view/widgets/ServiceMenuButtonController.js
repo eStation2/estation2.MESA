@@ -18,7 +18,15 @@ Ext.define('esapp.view.widgets.ServiceMenuButtonController', {
             success: function(response, opts){
                 var runresult = Ext.JSON.decode(response.responseText);
                 if (runresult.success){
-                    //Ext.toast({ html: 'Execute Service ' + menuitem.service + ' is ' + menuitem.task + 'ed', title: 'Service Task Executed', width: 200, align: 't' });
+                    if (menuitem.task=='restart') {
+                        var message = esapp.Utils.getTranslation(menuitem.service) + ' ' + esapp.Utils.getTranslation('restarted');
+                        Ext.toast({
+                            html: message,
+                            title: message,
+                            width: 200,
+                            align: 't'
+                        });
+                    }
                     // menuitem.up().up().fireEvent('click', this);
                     menuitem.up().up().up().up().getController().checkStatusServices(menuitem.up().up());
                 }

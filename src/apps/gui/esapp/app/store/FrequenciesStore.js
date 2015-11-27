@@ -24,12 +24,14 @@ Ext.define('esapp.store.FrequenciesStore', {
         listeners: {
             exception: function(proxy, response, operation){
                 // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
-                Ext.Msg.show({
-                    title: 'FREQUENCIES STORE- REMOTE EXCEPTION',
-                    msg: operation.getError(),
-                    icon: Ext.Msg.ERROR,
-                    buttons: Ext.Msg.OK
-                });
+                console.info('FREQUENCIES STORE - REMOTE EXCEPTION - Reopen window (edit datasource or edit product!');
+
+                //Ext.Msg.show({
+                //    title: 'FREQUENCIES STORE- REMOTE EXCEPTION',
+                //    msg: operation.getError(),
+                //    icon: Ext.Msg.ERROR,
+                //    buttons: Ext.Msg.OK
+                //});
             }
         }
     }

@@ -37,6 +37,8 @@ rm -r -f $RPM_BUILD_ROOT
 %files
 /var/www/eStation2-%{version}/*
 
+####%config(noreplace) /var/www/eStation2-%{version}/*
+
 %pre
 # Create log file
 mkdir -p /var/log/eStation2
@@ -212,10 +214,15 @@ fi
 # Initialize the bucardo installation
 log_dir="/var/log/bucardo"
 run_dir="/var/run/bucardo"
-/usr/bin/bucardo install --batch --dbname estationdb --dbhost localhost
-echo "$(date +'%Y-%m-%d %H:%M ') Bucardo package installed"
-bucardo set log_level=terse
 
+# Check if the bucardo db already exists
+if [[ `su postgres -c "psql -c 'select datname from pg_database'"  2>/dev/null|grep bucardo` == '' ]];then
+	/usr/bin/bucardo install --batch --dbname estationdb --dbhost localhost
+	echo "$(date +'%Y-%m-%d %H:%M ') Bucardo package installed"
+else
+	echo "$(date +'%Y-%m-%d %H:%M ') Bucardo package already installed. Continue"
+	bucardo set log_level=terse
+fi
 # Create log and run dir for Bucardo
 mkdir -p ${log_dir}
 chown adminuser:estation ${log_dir}
@@ -229,9 +236,13 @@ chmod 777 ${run_dir}
 my_role=$(hostname | cut -d '-' -f2)
 sed -i "s|.*role.=.*|role = ${my_role}|" /eStation2/settings/system_settings.ini
 
-# Clean system after uninstall
+# Before uninstall: remove the link and copy all code into a bck dir
+%preun
+mkdir -p /var/www/eStation2-%{version}.bck
+cp -r /var/www/eStation2-%{version}/* /var/www/eStation2-%{version}.bck/
+
+# After uninstall: remove /tmp files, and move the .bck dir to 'old-version' place
 %postun
-rm -fr /tmp/eStation2
-rm -fr /var/www/eStation2
 rm -fr /var/www/eStation2-%{version}
-dropdb -U estation estationdb
+mv /var/www/eStation2-%{version}.bck /var/www/eStation2-%{version}
+

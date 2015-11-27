@@ -135,8 +135,7 @@ class TestSystem(unittest.TestCase):
         # Should get here the role of my machine ...
         status = es2system.system_bucardo_config()
 
-    def test_system_create_report(self):
+    def test_system_status_PC1(self):
 
         # Should get here the role of my machine ...
-        filename = es2system.system_create_report()
-        print filename
+        status = es2system.get_status_PC1()

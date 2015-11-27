@@ -41,12 +41,14 @@ Ext.define('esapp.store.EumetcastSourceStore', {
         listeners: {
             exception: function(proxy, response, operation){
                 // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
-                Ext.Msg.show({
-                    title: 'EUMETCAST SOURCE MODEL - REMOTE EXCEPTION',
-                    msg: operation.getError(),
-                    icon: Ext.Msg.ERROR,
-                    buttons: Ext.Msg.OK
-                });
+                console.info('EUMETCAST SOURCE STORE - REMOTE EXCEPTION - Reopen window edit eumetcast datasource!');
+
+                //Ext.Msg.show({
+                //    title: 'EUMETCAST SOURCE MODEL - REMOTE EXCEPTION',
+                //    msg: operation.getError(),
+                //    icon: Ext.Msg.ERROR,
+                //    buttons: Ext.Msg.OK
+                //});
             }
         }
     }

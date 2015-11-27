@@ -650,7 +650,7 @@ Ext.define("esapp.view.analysis.mapView",{
                 title: "",
                 id: 'product-legend_panel_' + me.id,
                 reference: 'product-legend_panel_' + me.id,
-                x:10,
+                //x:10,
                 autoWidth: true,
                 autoHeight: true,
                 layout: 'fit',
@@ -671,7 +671,8 @@ Ext.define("esapp.view.analysis.mapView",{
                     style: 'background:transparent;'
                 },
                 // Do not use default Panel dragging: use window type dragging
-                initDraggable: Ext.window.Window.prototype.initDraggable,
+                // initDraggable: Ext.window.Window.prototype.initDraggable,
+                // simpleDrag: true,
                 listeners: {
                     close: function(){
                         var maplegend_togglebtn = me.lookupReference('legendbtn_'+me.id.replace(/-/g,'_')); //  + me.getView().id);
@@ -683,7 +684,7 @@ Ext.define("esapp.view.analysis.mapView",{
                     xtype: 'container',
                     id: 'product-legend' + me.id,
                     reference: 'product-legend' + me.id,
-                    minWidth: 400,
+                    //minWidth: 400,
                     layout: 'fit',
                     html: ''
                 }]
@@ -787,11 +788,22 @@ Ext.define("esapp.view.analysis.mapView",{
                 this.map.setSize(size);
 
                 this.getController().redrawTimeLine(this);
+                this.updateLayout();
             }
             ,move: function () {
                 this.getController().redrawTimeLine(this);
+                this.updateLayout();
             }
-
+            ,maximize: function () {
+                this.updateLayout();
+            }
+            ,restore: function () {
+                //console.info(this.getPosition());
+                //this.setPosition(this.getPosition()+1);
+                this.updateLayout();
+                var maplegendpanel = me.lookupReference('product-legend_panel_' + this.id);
+                maplegendpanel.doConstrain();
+            }
         };
 
         me.callParent();

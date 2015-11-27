@@ -40,12 +40,14 @@ Ext.define('esapp.store.IngestionsStore', {
         listeners: {
             exception: function(proxy, response, operation){
                 // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
-                Ext.Msg.show({
-                    title: 'INGESTION STORE - REMOTE EXCEPTION',
-                    msg: operation.getError(),
-                    icon: Ext.Msg.ERROR,
-                    buttons: Ext.Msg.OK
-                });
+                console.info('INGESTION STORE - REMOTE EXCEPTION - Reload acquisition page!');
+
+                //Ext.Msg.show({
+                //    title: 'INGESTION STORE - REMOTE EXCEPTION',
+                //    msg: operation.getError(),
+                //    icon: Ext.Msg.ERROR,
+                //    buttons: Ext.Msg.OK
+                //});
             }
         }
     }

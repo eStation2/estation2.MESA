@@ -43,12 +43,14 @@ Ext.define('esapp.store.DataSetsStore', {
         listeners: {
             exception: function(proxy, response, operation){
                 // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
-                Ext.Msg.show({
-                    title: 'DATASETS STORE - REMOTE EXCEPTION',
-                    msg: operation.getError(),
-                    icon: Ext.Msg.ERROR,
-                    buttons: Ext.Msg.OK
-                });
+                console.info('DATASETS STORE - REMOTE EXCEPTION - Reload data management page!');
+
+                //Ext.Msg.show({
+                //    title: 'DATASETS STORE - REMOTE EXCEPTION',
+                //    msg: operation.getError(),
+                //    icon: Ext.Msg.ERROR,
+                //    buttons: Ext.Msg.OK
+                //});
             }
         }
     }

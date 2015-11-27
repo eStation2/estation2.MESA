@@ -30,12 +30,14 @@ Ext.define('esapp.store.TimeLineStore', {
         listeners: {
             exception: function(proxy, response, operation){
                 // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
-                Ext.Msg.show({
-                    title: 'TIME LINE STORE- REMOTE EXCEPTION',
-                    msg: operation.getError(),
-                    icon: Ext.Msg.ERROR,
-                    buttons: Ext.Msg.OK
-                });
+                console.info('TIME LINE STORE - REMOTE EXCEPTION - Reopen product navigator and choose a different legend or sub product!');
+
+                //Ext.Msg.show({
+                //    title: 'TIME LINE STORE- REMOTE EXCEPTION',
+                //    msg: operation.getError(),
+                //    icon: Ext.Msg.ERROR,
+                //    buttons: Ext.Msg.OK
+                //});
             }
         }
     }

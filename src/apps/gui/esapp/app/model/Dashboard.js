@@ -7,6 +7,10 @@ Ext.define('esapp.model.Dashboard', {
         {name: 'PC1_connection', type: 'boolean', mapping: 'PC1_connection'},
         {name: 'PC23_connection', type: 'boolean', mapping: 'PC23_connection'},
 
+        {name: 'PC1_dvb_status', type: 'boolean', mapping: 'PC1_dvb_status'},
+        {name: 'PC1_tellicast_status', type: 'boolean', mapping: 'PC1_tellicast_status'},
+        {name: 'PC1_fts_status', type: 'boolean', mapping: 'PC1_fts_status'},
+
         {name: 'PC2_service_eumetcast', mapping: 'PC2_service_eumetcast'},
         {name: 'PC2_service_internet', mapping: 'PC2_service_internet'},
         {name: 'PC2_service_ingest', mapping: 'PC2_service_ingest'},
@@ -77,12 +81,13 @@ Ext.define('esapp.model.Dashboard', {
         listeners: {
             exception: function(proxy, response, operation){
                 // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
-                Ext.Msg.show({
-                    title: 'DASHBOARD MODEL- REMOTE EXCEPTION',
-                    msg: operation.getError(),
-                    icon: Ext.Msg.ERROR,
-                    buttons: Ext.Msg.OK
-                });
+                console.info('DASHBOARD MODEL- REMOTE EXCEPTION - Reload dashboard!');
+                //Ext.Msg.show({
+                //    title: 'DASHBOARD MODEL- REMOTE EXCEPTION',
+                //    msg: operation.getError(),
+                //    icon: Ext.Msg.ERROR,
+                //    buttons: Ext.Msg.OK
+                //});
             }
         }
     }
