@@ -130,6 +130,15 @@ p {
     background-image:url(../img/link_break.png);
 }
 
+.statusok {
+    background-image:url(../img/icons/power-off_008000_24.png);
+    background-repeat: no-repeat;
+}
+.statusnotok {
+    background-image:url(../img/icons/power-off_ff0000_24.png);
+    background-repeat: no-repeat;
+}
+
 .connected {
     background-image:url(../img/icons/signal_1df31d_24.png);
     background-repeat: no-repeat;

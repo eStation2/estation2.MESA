@@ -30,15 +30,37 @@ Ext.define("esapp.view.dashboard.PC1",{
     bodyPadding:0,
     flex:1,
 
+    dvb_status:false,
+    tellicast_status:false,
+    fts_status:false,
+
     initComponent: function () {
         var me = this;
 
         me.bodyPadding = 0;
 
+        me.dvb_statusCls = '';
+        if (me.dvb_status == true || me.dvb_status == 'true')
+            me.dvb_statusCls = 'statusok';
+        else if (me.dvb_status == false || me.dvb_status == 'false')
+            me.dvb_statusCls = 'statusnotok';
+
+        me.tellicast_statusCls = '';
+        if (me.tellicast_status == true || me.tellicast_status == 'true')
+            me.tellicast_statusCls = 'statusok';
+        else if (me.tellicast_status == false || me.tellicast_status == 'false')
+            me.tellicast_statusCls = 'statusnotok';
+
+        me.fts_statusCls = '';
+        if (me.fts_status == true || me.fts_status == 'true')
+            me.fts_statusCls = 'statusok';
+        else if (me.fts_status == false || me.fts_status == 'false')
+            me.fts_statusCls = 'statusnotok';
+
+
         me.items = [{
             xtype: 'panel',
             region: 'center',
-//            flex:2,
             layout: {
                 type: 'table',
                 columns: 2,
@@ -50,30 +72,45 @@ Ext.define("esapp.view.dashboard.PC1",{
                 }
             },
             bodyPadding:10,
+            defaults: {
+                margin:'0 0 10 0',
+                flex: 1
+            },
             items: [{
-                xtype: 'container',
-                html: 'Services:</br></br>',
+                xtype: 'box',
+                html: esapp.Utils.getTranslation('services')+':</br></br>',
                 cls: 'panel-textheader-style',
                 colspan:2
             },{
-                xtype: 'container',
-                html: 'DVB:',
+                xtype: 'box',
+                html: 'DVB',
                 cls: 'panel-text-style',
-                width: '70%',
-                align: 'right'
+                width: 120
             },{
-                xtype: 'container',
-                html: 'status okay',
-                cls: 'panel-text-style'
+                xtype: 'box',
+                height:26,
+                cls: me.dvb_statusCls,
+                width: 120
             },{
-                xtype: 'container',
-                html: 'Tellicast:',
+                xtype: 'box',
+                html: 'Tellicast',
                 cls: 'panel-text-style',
-                align: 'right'
+                width: 120
             },{
-                xtype: 'container',
-                html: 'status okay',
-                cls: 'panel-text-style'
+                xtype: 'box',
+                height:26,
+                cls: me.tellicast_statusCls,
+                width: 120
+            },{
+                xtype: 'box',
+                html: 'FTS',
+                cls: 'panel-text-style',
+                width: 120
+            },{
+                xtype: 'box',
+                height:26,
+                cls: me.fts_statusCls,
+                width: 120
             }]
         //},{
         //    region: 'south',

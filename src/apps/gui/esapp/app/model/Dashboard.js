@@ -7,6 +7,10 @@ Ext.define('esapp.model.Dashboard', {
         {name: 'PC1_connection', type: 'boolean', mapping: 'PC1_connection'},
         {name: 'PC23_connection', type: 'boolean', mapping: 'PC23_connection'},
 
+        {name: 'PC1_dvb_status', type: 'boolean', mapping: 'PC1_dvb_status'},
+        {name: 'PC1_tellicast_status', type: 'boolean', mapping: 'PC1_tellicast_status'},
+        {name: 'PC1_fts_status', type: 'boolean', mapping: 'PC1_fts_status'},
+
         {name: 'PC2_service_eumetcast', mapping: 'PC2_service_eumetcast'},
         {name: 'PC2_service_internet', mapping: 'PC2_service_internet'},
         {name: 'PC2_service_ingest', mapping: 'PC2_service_ingest'},
