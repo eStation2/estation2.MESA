@@ -376,7 +376,6 @@ def system_create_report(target_file=None):
 
     # Use a module (to be identified) for dump
     target_dir = es_constants.es2globals['status_system_dir']+os.path.sep
-
     output_filename = target_dir+'System_report_'+now.strftime("%Y-%m-%d-%H:%M:%S")+'.tgz'
 
     # Define List of files to be copied
@@ -403,6 +402,68 @@ def system_create_report(target_file=None):
     except IOError:
         logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
         return 1
+
+    # Copy all files there
+    for my_item in report_files:
+        all_files = glob.glob(my_item)
+        for element in all_files:
+            if os.path.isfile(element):
+                if not os.path.isdir(tmp_dir+os.path.dirname(element)):
+                    os.makedirs(tmp_dir+os.path.dirname(element))
+                shutil.copy(element, tmp_dir+os.path.dirname(element))
+            else:
+                logger.warning('Will not copy dir ' + element + '. Continue')
+
+    # Create the .tgz and move to target dir
+    with tarfile.open(output_filename, "w:gz") as tar:
+        tar.add(tmp_dir, arcname=os.path.basename(tmp_dir))
+    tar.close()
+
+    # Remove temporary dir
+    shutil.rmtree(tmp_dir)
+
+def system_install_report(target_file=None):
+#   Create a .zip file with the relevant information on the system installation
+#
+
+    # Dump the database schemas (for backup)
+    logger.debug("Entering routine %s" % 'system_install_report')
+    now = datetime.datetime.now()
+
+    # Create a temp directory
+    try:
+        tmp_dir = tempfile.mkdtemp(prefix=__name__+'_', suffix='_' + 'system_report',
+                                   dir=es_constants.base_tmp_dir)
+    except IOError:
+        logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
+        return 1
+
+    # Use a module (to be identified) for dump
+    target_dir = es_constants.es2globals['status_system_dir']+os.path.sep
+    logger.info(target_dir)
+
+    output_filename = target_dir+'Install_report_'+now.strftime("%Y-%m-%d-%H:%M:%S")+'.tgz'
+
+    # Create some tmp files
+    cmd = 'rpm -qa | grep -v eStation > '+tmp_dir+os.path.sep+'List_list_noEstation.txt'
+    status = os.system(cmd)
+    cmd = 'rpm -qa | grep  eStation > '+tmp_dir+os.path.sep+'List_list_Estation.txt'
+    status = os.system(cmd)
+    cmd = ['pip','freeze']
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = p.communicate()
+    pipf = open(tmp_dir+os.path.sep+'List_pip_freeze.txt','w')
+    for value in out:
+        pipf.write(value)
+    pipf.close()
+
+
+    # Define List of files to be copied
+    report_files= [tmp_dir+os.path.sep+"List_list_noEstation.txt",   # All yum module installed, but eStation
+                   tmp_dir+os.path.sep+"List_list_Estation.txt",     # All eStation module installed
+                   tmp_dir+os.path.sep+"List_pip_freeze.txt"]        # All pip module
+
+
 
     # Copy all files there
     for my_item in report_files:
