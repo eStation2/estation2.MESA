@@ -72,6 +72,10 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                     me.PC3_DBAutoSync = dashboard.get('PC3_DBAutoSync');
                     me.PC3_DataAutoSync = dashboard.get('PC3_DataAutoSync');
 
+                    me.PC1_dvb_status = dashboard.get('PC1_dvb_status');
+                    me.PC1_tellicast_status = dashboard.get('PC1_tellicast_status');
+                    me.PC1_fts_status = dashboard.get('PC1_fts_status');
+
                     me.activePC = dashboard.get('activePC');
                     me.PC1_connection = dashboard.get('PC1_connection');
                     me.PC23_connection = dashboard.get('PC23_connection');
@@ -183,9 +187,12 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                     PC1 = {
                         xtype: 'dashboard-pc1',
                         setdisabled:pc1Disabled,
-                        activePC:pc1Active
+                        activePC:pc1Active,
+                        dvb_status:me.PC1_dvb_status,
+                        tellicast_status:me.PC1_tellicast_status,
+                        fts_status:me.PC1_fts_status
                     };
-
+console.info(PC1);
                     PC2 = {
                         xtype: 'dashboard-pc2',
                         name:'dashboardpc2',
@@ -278,20 +285,39 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                     PC1 = {
                         xtype: 'dashboard-pc1',
                         setdisabled:pc1Disabled,
-                        activePC:pc1Active
+                        activePC:pc1Active,
+                        dvb_status:me.PC1_dvb_status,
+                        tellicast_status:me.PC1_tellicast_status,
+                        fts_status:me.PC1_fts_status
                     };
 
                     PC2 = {
                         xtype: 'dashboard-pc2',
+                        name:'dashboardpc2',
+                        id: 'dashboardpc2',
+                        paneltitle: esapp.Utils.getTranslation('processing_pc2'),
                         setdisabledPartial:pc2DisabledPartial,
                         setdisabledAll:pc2DisabledAll,
-                        activePC:pc2Active
+                        activePC:pc2Active,
+                        activeversion: me.PC2_version,
+                        currentmode: me.PC2_modeText,
+                        autosync_onoff: me.PC2_autosync_onoff,
+                        dbautosync: me.PC2_DBAutoSync,
+                        datautosync: me.PC2_DataAutoSync,
+                        diskstatus: me.PC2_disk_status,
+                        dbstatus: me.PC2_postgresql_status,
+                        internetconnection: me.PC2_internet_status,
+                        service_eumetcast : me.PC2_service_eumetcast,
+                        service_internet : me.PC2_service_internet,
+                        service_ingest : me.PC2_service_ingest,
+                        service_processing : me.PC2_service_processing,
+                        service_system : me.PC2_service_system
                     };
 
                     PC1_connection = {
                         xtype: 'dashboard-connection',
                         id: 'pc1_connection',
-                        connected: me.pc1_connection,
+                        connected: me.PC1_connection,
                         direction: 'right'
                     };
 
