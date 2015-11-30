@@ -68,50 +68,25 @@ def get_status_local_machine():
                             'disk_status': 'true'}
     return status_local_machine
 
+def save_status_local_machine():
+
+#   Save a text file containing the status of the local machine
 #
-# def save_status_local_machine():
-# #   Save a pickle containing info on the status of the local machine
-# #
-#     logger.debug("Entering routine %s" % 'save_status_local_machine')
-#
-#     # Define .pck filename
-#     pickle_filename = functions.system_status_filename()
-#
-#     # Get the local systems settings
-#     systemsettings = functions.getSystemSettings()
-#
-#     # Get status of all services
-#     status_services = functions.getStatusAllServices()
-#
-#     get_eumetcast_status = status_services['eumetcast']
-#     get_internet_status = status_services['internet']
-#     ingestion_status = status_services['ingest']
-#     processing_status = status_services['process']
-#     system_status = status_services['system']
-#
-#     # Get status of postgresql
-#     psql_status = functions.getStatusPostgreSQL()
-#
-#     # Get internet connection
-#     internet_status = functions.internet_on()
-#
-#     # ToDo: check disk status!
-#
-#     status_local_machine = {'get_eumetcast_status': get_eumetcast_status,
-#                             'get_internet_status': get_internet_status,
-#                             'ingestion_status': ingestion_status,
-#                             'processing_status': processing_status,
-#                             'system_status': system_status,
-#                             'system_execution_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-#                             'postgresql_status': str(psql_status).lower(),
-#                             'internet_connection_status': str(internet_status).lower(),
-#                             'active_version': systemsettings['active_version'],
-#                             'mode': systemsettings['mode'],
-#                             'disk_status': 'true'}
-#     # Save to pickle
-#     functions.dump_obj_to_pickle(status_local_machine, pickle_filename)
-#     return 0
-#
+    logger.debug("Entering routine %s " % 'save_status_local_machine')
+
+    # Define .txt filename
+    status_system_file=es_constants.es2globals['status_system_file']
+
+    # Get status of all services
+    machine_status = get_status_local_machine()
+
+    # Write to file
+    fid = open(status_system_file,'w')
+    for value in machine_status:
+        fid.write('%s = %s \n' % (value, machine_status[value]))
+    fid.close()
+
+    return 0
 
 def system_data_sync(source, target):
 #   Synchronize data directory from one machine to another (push)
@@ -374,27 +349,6 @@ def system_create_report(target_file=None):
     logger.debug("Entering routine %s" % 'system_create_report')
     now = datetime.datetime.now()
 
-    # Use a module (to be identified) for dump
-    target_dir = es_constants.es2globals['status_system_dir']+os.path.sep
-    output_filename = target_dir+'System_report_'+now.strftime("%Y-%m-%d-%H:%M:%S")+'.tgz'
-
-    # Define List of files to be copied
-    report_files= ["/eStation2/log/*",                          # All log files
-                   "/eStation2/system/system_status.pkl",       # System Status pickle
-                   "/eStation2/get_lists/get_eumetcast/*",      # All get lists
-                   "/eStation2/get_lists/get_internet/*",       # All get lists
-                   "/eStation2/settings/*",                     # Machine settings (User+System)
-                  # "/eStation2/db_dump/*",                     # All dumps -> only latest
-                   "/etc/passwd",                               # Users
-                   "/etc/hosts",                                # Hosts
-                   "/var/log/eStation2/eStation-Apps_*.log",    # All eStation .deb installation files
-                  # "/etc/postgresql/9.3/main/pg_hba.conf",     # No permissions !!
-                   "/etc/apache2/sites-available/000-default.conf",
-                   "/usr/local/lib/python2.7/dist-packages/eStation2.pth",
-                   "/etc/default/rsync",
-                   "/etc/rsyncd.conf"]
-
-
     # Create a temp directory
     try:
         tmp_dir = tempfile.mkdtemp(prefix=__name__+'_', suffix='_' + 'system_report',
@@ -402,6 +356,26 @@ def system_create_report(target_file=None):
     except IOError:
         logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
         return 1
+
+    # Use a module (to be identified) for dump
+    #target_dir = es_constants.es2globals['status_system_dir']+os.path.sep
+    target_dir=tmp_dir
+    output_filename = target_dir+os.path.sep+'System_report_'+now.strftime("%Y-%m-%d-%H:%M:%S")+'.tgz'
+
+    # Define List of files to be copied
+    report_files= ["/eStation2/log/*",                                  # All log files
+                   "/eStation2/get_lists/get_eumetcast/*",              # All get lists
+                   "/eStation2/get_lists/get_internet/*",               # All get lists
+                   "/eStation2/settings/*",                             # Machine settings (User+System)
+                   "/eStation2/system/system_status.txt",               # System status
+                   "/etc/passwd",                                       # Users
+                   "/etc/hosts",                                        # Hosts
+                   "/var/log/eStation2/eStation-Apps_*.log",            # All eStation .deb installation files
+                   "/var/lib/pgsql/9.3/data/pg_hba.conf",               # Postgresql config
+                   "/var/lib/pgsql/9.3/data/postgresql.conf",           # Postgresql config
+                   "/usr/local/src/tas/eStation_wsgi_srv/httpd.conf",
+                   "/usr/local/src/tas/anaconda/lib/python2.7/site-packages/eStation.pth",
+                   "/etc/rsyncd.conf"]
 
     # Copy all files there
     for my_item in report_files:
@@ -419,8 +393,7 @@ def system_create_report(target_file=None):
         tar.add(tmp_dir, arcname=os.path.basename(tmp_dir))
     tar.close()
 
-    # Remove temporary dir
-    shutil.rmtree(tmp_dir)
+    return output_filename
 
 def system_install_report(target_file=None):
 #   Create a .zip file with the relevant information on the system installation
@@ -432,14 +405,14 @@ def system_install_report(target_file=None):
 
     # Create a temp directory
     try:
-        tmp_dir = tempfile.mkdtemp(prefix=__name__+'_', suffix='_' + 'system_report',
+        tmp_dir = tempfile.mkdtemp(prefix=__name__+'_', suffix='_' + 'install_report',
                                    dir=es_constants.base_tmp_dir)
     except IOError:
         logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
         return 1
 
     # Use a module (to be identified) for dump
-    target_dir = es_constants.es2globals['status_system_dir']+os.path.sep
+    target_dir = tmp_dir+os.path.sep
     logger.info(target_dir)
 
     output_filename = target_dir+'Install_report_'+now.strftime("%Y-%m-%d-%H:%M:%S")+'.tgz'
@@ -464,26 +437,23 @@ def system_install_report(target_file=None):
                    tmp_dir+os.path.sep+"List_pip_freeze.txt"]        # All pip module
 
 
-
-    # Copy all files there
-    for my_item in report_files:
-        all_files = glob.glob(my_item)
-        for element in all_files:
-            if os.path.isfile(element):
-                if not os.path.isdir(tmp_dir+os.path.dirname(element)):
-                    os.makedirs(tmp_dir+os.path.dirname(element))
-                shutil.copy(element, tmp_dir+os.path.dirname(element))
-            else:
-                logger.warning('Will not copy dir ' + element + '. Continue')
+    # # Copy all files there -> Not needed: files already there
+    # for my_item in report_files:
+    #     all_files = glob.glob(my_item)
+    #     for element in all_files:
+    #         if os.path.isfile(element):
+    #             if not os.path.isdir(tmp_dir+os.path.dirname(element)):
+    #                 os.makedirs(tmp_dir+os.path.dirname(element))
+    #             shutil.copy(element, tmp_dir+os.path.dirname(element))
+    #         else:
+    #             logger.warning('Will not copy dir ' + element + '. Continue')
 
     # Create the .tgz and move to target dir
     with tarfile.open(output_filename, "w:gz") as tar:
         tar.add(tmp_dir, arcname=os.path.basename(tmp_dir))
     tar.close()
 
-    # Remove temporary dir
-    shutil.rmtree(tmp_dir)
-
+    return output_filename
 
 def check_delay_time(operation, delay_minutes=None, time=None, write=False):
 #
@@ -530,7 +500,6 @@ def check_delay_time(operation, delay_minutes=None, time=None, write=False):
 
     return to_be_executed
 
-
 def system_manage_lock(lock_id, action):
 #
 # Manage the lock file for an action
@@ -570,6 +539,24 @@ def system_manage_lock(lock_id, action):
                 os.utime(lock_file, None)
     return status
 
+def clean_temp_dir():
+#
+# Look into /eStation2/tmp directory and delete directories older than 3 days
+#
+#
+    logger.debug("Entering routine %s" % 'clean_temp_dir')
+
+    now = time.time()
+
+    for f in glob.glob(es_constants.es2globals['base_tmp_dir']+os.path.sep+'*'):
+        if os.stat(f).st_mtime < now - 3 * 86400:
+            if os.path.isdir(f):
+                logger.info('Deleting directory: %s' % f)
+                try:
+                    shutil.rmtree(f)
+                except:
+                    logger.warning('Cannot delete directory: %s' % f)
+    return 0
 
 def loop_system(dry_run=False):
 #    Driver of the system service
@@ -586,11 +573,12 @@ def loop_system(dry_run=False):
     time_for_spirits_conv = es_constants.es2globals['system_time_spirits_conv']
 
     # Loop to manage the 'cron-like' operations, i.e.:
-    #   a. Data sync
+
+    #   a. Data sync (not anymore, done by TPZF)
     #   b. DB sync
-    #   c. DB dumpd (create/manage)
+    #   c. DB dump (create/manage)
     #   d. Spirits conversion
-    #
+    #   e. Clean Temporary directory
 
     while True:
 
@@ -605,6 +593,7 @@ def loop_system(dry_run=False):
         schemas_db_dump = []
         #do_save_system = True
         do_convert_spirits = False
+        do_clean_tmp= True
 
         logger.info("Starting the System Service loop")
 
@@ -717,6 +706,12 @@ def loop_system(dry_run=False):
                 logger.info("Saving the status of the machine")
                 output_dir = es_constants.es2globals['spirits_output_dir']
                 conv.convert_driver(output_dir)
+
+        # Clean temporary directory
+        operation = 'clean_temp'
+        if do_clean_tmp:
+            logger.info("Cleaning Temporary dirs")
+            clean_temp_dir()
 
         # Sleep some time
         time.sleep(float(es_constants.es2globals['system_sleep_time_sec']))
