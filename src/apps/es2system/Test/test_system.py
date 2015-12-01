@@ -36,18 +36,8 @@ class TestSystem(unittest.TestCase):
     def test_save_status(self):
 
         # Define .pck filename
-        pickle_filename=es2system.system_status_filename()
+        status_system_file=es2system.save_status_local_machine()
 
-        # Run the method to save status
-        result = es2system.save_status_local_machine()
-
-        # Read the .pck
-        object=None
-        machine_status=functions.restore_obj_from_pickle(object, pickle_filename)
-
-        # Checks
-        print('Check psql ON')
-        self.assertEquals(machine_status['postgresql_status'], True)
 
     def test_change_ip_addresses_default(self):
 
@@ -139,3 +129,18 @@ class TestSystem(unittest.TestCase):
 
         # Should get here the role of my machine ...
         status = es2system.get_status_PC1()
+
+    def test_system_install_report(self):
+
+        # Should get here the role of my machine ...
+        status = es2system.system_install_report()
+
+    def test_system_create_report(self):
+
+        # Should get here the role of my machine ...
+        status = es2system.system_create_report()
+
+    def test_clean_temp_dir(self):
+
+        # Should get here the role of my machine ...
+        status = es2system.clean_temp_dir()
