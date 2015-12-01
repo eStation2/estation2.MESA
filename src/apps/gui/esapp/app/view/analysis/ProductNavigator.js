@@ -40,9 +40,9 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
     resizable: true,
     resizeHandles: 'n,s',
     autoScroll: false,
-    width: 575,
-    height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-10 : 800,  // 600,
-    minHeight:650,
+    width: 565,
+    height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-10 : 830,  // 600,
+    minHeight:750,
 
     border:false,
     frame: false,
@@ -89,7 +89,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 xtype : 'grid',
                 reference: 'productsGrid',
                 region: 'center',
-                width: 485,
+                width: 465,
                 //store: 'ProductNavigatorStore',
                 bind: '{products}',
                 session:true,
@@ -100,7 +100,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     draggable:false,
                     markDirty: false,
                     resizable:false,
-                    disableSelection: true,
+                    disableSelection: false,
                     trackOver:true
                 },
 
@@ -159,7 +159,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         {
                             text: esapp.Utils.getTranslation('product'),   // "Product",
                             xtype: 'templatecolumn',
-                            width: 485,
+                            width: 455,
                             tpl:  new Ext.XTemplate(
                                 '<b>{prod_descriptive_name}</b>' +
                                 '<tpl if="version != \'undefined\'">',
@@ -213,7 +213,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         this.setWidth(5);
                         me.center();
                         //this.up().setPosition(670,140);
-                        this.up().setWidth(575);
+                        this.up().setWidth(565);
                     }
                 },
                 bbar: Ext.create('Ext.toolbar.Toolbar', {
@@ -305,7 +305,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         draggable: false,
                         markDirty: false,
                         resizable: false,
-                        disableSelection: true,
+                        disableSelection: false,
                         trackOver: true
                     },
 

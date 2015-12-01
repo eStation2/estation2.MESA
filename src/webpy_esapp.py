@@ -889,7 +889,7 @@ class GetDashboard:
         PC1_connection = functions.check_connection('mesa-pc1')
 
         # status_PC1 = es2system.get_status_PC1()
-        status_PC1 = {'dvb_status': False,
+        status_PC1 = {'dvb_status': True,
                       'tellicast_status': True,
                       'fts_status': True}
         PC1_dvb_status = status_PC1['dvb_status']
