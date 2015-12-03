@@ -38,6 +38,7 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
         else:
             # Get list of all ACTIVE ingested/derived subproducts and associated mapsets
             product_mapsets_subproducts = querydb.get_enabled_ingest_derived_of_product(productcode=productcode, version=version)
+            print product_mapsets_subproducts
             if product_mapsets_subproducts.__len__() > 0:
                 request['productmapsets'] = []
                 mapset_dict = {}

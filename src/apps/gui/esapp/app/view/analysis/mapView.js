@@ -137,7 +137,7 @@ Ext.define("esapp.view.analysis.mapView",{
                                 //text: 'Administative level 0',
                                 name: 'admin0',
                                 level: 'admin0',
-                                geojsonfile: 'AFR_G2014_2013_0.geojson', // 'AFR_0_g2015_2014.geojson',  //
+                                geojsonfile: 'AFR_0_g2015_2014.geojson',  // 'AFR_G2014_2013_0.geojson', //
                                 checked: false,
                                 linecolor: '#319FD3',    // rgb(49, 159, 211)  or like in EMMA rgb(255, 0, 255)
                                 layerorderidx: 3,
@@ -151,7 +151,7 @@ Ext.define("esapp.view.analysis.mapView",{
                                 //text: 'Administative level 1',
                                 name: 'admin1',
                                 level: 'admin1',
-                                geojsonfile: 'AFR_G2014_2013_0.geojson',  // 'AFR_1_g2015_2014.geojson',  //
+                                geojsonfile: 'AFR_1_g2015_2014.geojson',  // 'AFR_G2014_2013_0.geojson',  //
                                 checked: false,
                                 linecolor: '#ffcc00',    // rgb(255, 204, 0)
                                 layerorderidx: 2,
@@ -323,7 +323,7 @@ Ext.define("esapp.view.analysis.mapView",{
                                 boxLabel: 'BDMS '+esapp.Utils.getTranslation('level2'), // level 0',
                                 name: 'bdms2',
                                 level: 'admin2',
-                                geojsonfile: 'RIC_BDMS_2_g2015_2014.geojson',
+                                geojsonfile: 'RIC_BDMS_2_G2014.geojson',    // 'RIC_BDMS_2_g2015_2014.geojson',
                                 checked: false,
                                 linecolor: '#ffcc99',
                                 layerorderidx: 1,
