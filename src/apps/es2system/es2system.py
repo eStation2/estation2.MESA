@@ -9,7 +9,7 @@ _author__ = "Marco Clerici"
 
 # source eStation2 base definitions
 import os, re, subprocess
-import shutil
+import shutil, string
 
 # import standard modules
 import time, datetime
@@ -108,59 +108,56 @@ def system_data_sync(source, target):
     else:
         return status
 
-def system_db_sync(list_syncs):
-#   Synchronize database contents from one instance to another (push)
-#   It checks that: bucardo is installed and running
-#                   the list of provided rsync are activated
-#                   all other rsyncs are deactivated
+def system_bucardo_service(action):
 
-    logger.debug("Entering routine %s" % 'system_db_sync')
+#   Synchronize database contents from one instance to another (push)
+#   It checks the status of bucardo and updates it according to the required action
+
+    logger.debug("Entering routine %s" % 'system_bucardo_service')
 
     # Check that bucardo is running
     command = ['bucardo','status']
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
-    if not re.search('PID', out):
-        logger.error("Bucardo is not running - DB sync not possible")
-        return 1
+    status_on = re.search('PID', out)
 
-    # Get list of active rsyncs
-    command = ['bucardo', 'list', 'sync']
+    if action == 'start':
+        if status_on:
+            logger.info('Bucardo already running. Continue')
+        else:
+            command = ['bucardo','start']
+            p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            out, err = p.communicate()
+
+    if action == 'stop':
+        if not status_on:
+            logger.info('Bucardo already stopped. Continue')
+        else:
+            command = ['bucardo','stop']
+            p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            out, err = p.communicate()
+
+    # Wait 3 seconds
+    time.sleep(3)
+
+    # Check the final status
+    command = ['bucardo','status']
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
+    status_on = re.search('PID', out)
 
-    list_active_syncs = []
-    # Active rsync are identified as: Sync "sync_pc2_analysis"  Relgroup "rel_analysis"        [Active]
-    for line in out.split('\n'):
-        found=re.match('Sync\s*\"(.+?)\".*\[Active\]', line)
-        if found:
-            list_active_syncs.append(found.group(1))
+    if action == 'start':
+        if status_on:
+            logger.info('Bucardo is properly running.')
+        else:
+            logger.warning('Error in starting Bucardo.')
 
-    # Activate the list of passed syncs (if any)
-    if len(list_syncs) > 0:
-        for sync in list_syncs:
-            if sync not in list_active_syncs:
-                logger.info("Activating bucardo sync: %s" % sync)
-                command = ['bucardo', 'activate', sync]
-                p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                out, err = p.communicate()
-                logger.info("Activating bucardo sync returned: %s" % out)
-                # Check error
-                if err:
-                    logger.warning('Bucardo activation returned err: %s' % err)
-                time.sleep(0.5)
-    # De-activate the active rsync, not in the passed list
-    if len(list_active_syncs) > 0:
-        for sync in list_active_syncs:
-            if sync not in list_syncs:
-                logger.info("De-activating bucardo sync: %s" % sync)
-                command = ['bucardo', 'deactivate', sync]
-                p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                out, err=p.communicate()
-                logger.info("De-activating bucardo sync returned: %s" % out)
-                # Check error
-                if err:
-                    logger.warning('Bucardo de-activation returned err: %s' % err)
+    if action == 'stop':
+        if not status_on:
+            logger.info('Bucardo is properly stopped.')
+        else:
+            logger.warning('Error in stopping Bucardo.')
+
 
 def system_db_sync_full(pc_role):
 
@@ -575,12 +572,13 @@ def loop_system(dry_run=False):
     # Loop to manage the 'cron-like' operations, i.e.:
 
     #   a. Data sync (not anymore, done by TPZF)
-    #   b. DB sync
+    #   b. DB sync: bucardo
     #   c. DB dump (create/manage)
     #   d. Spirits conversion
     #   e. Clean Temporary directory
 
-    while True:
+    execute_loop = True
+    while execute_loop:
 
         # Read the relevant info from system settings
         system_settings = functions.getSystemSettings()
@@ -591,7 +589,6 @@ def loop_system(dry_run=False):
         do_data_sync = False
         schemas_db_sync = []
         schemas_db_dump = []
-        #do_save_system = True
         do_convert_spirits = False
         do_clean_tmp= True
 
@@ -611,73 +608,65 @@ def loop_system(dry_run=False):
         if system_settings['type_installation'] == 'Full':
 
             if system_settings['role'] == 'PC2':
-                ip_target = system_settings['ip_pc3']
+                # ip_target = system_settings['ip_pc3']
                 if system_settings['mode'] == 'nominal':
                     schemas_db_sync = ['products']
                     schemas_db_dump = ['products', 'analysis']
                     do_convert_spirits = True
+                    bucardo_action = 'start'
 
                 if system_settings['mode'] == 'recovery':
                     schemas_db_sync = []
                     schemas_db_dump = ['products', 'analysis']
                     do_convert_spirits = True
+                    bucardo_action = 'stop'
 
                 if system_settings['mode'] == 'maintenance':
                     schemas_db_sync = []
                     schemas_db_dump = []
+                    bucardo_action = 'stop'
 
             if system_settings['role'] == 'PC3':
 
-                ip_target = system_settings['ip_pc2']
+                # ip_target = system_settings['ip_pc2']
                 if system_settings['mode'] == 'nominal':
                     schemas_db_sync = ['analysis']
                     schemas_db_dump = ['products', 'analysis']
+                    bucardo_action = 'start'
 
                 if system_settings['mode'] == 'recovery':
                     schemas_db_sync = []
                     schemas_db_dump = ['products', 'analysis']
+                    bucardo_action = 'stop'
 
                 if system_settings['mode'] == 'maintenance':
                     schemas_db_sync = []
                     schemas_db_dump = []
+                    bucardo_action = 'stop'
 
         if system_settings['type_installation'] == 'SinglePC':
             do_data_sync = False
             schemas_db_sync = []
             schemas_db_dump = ['products', 'analysis']
 
-        # Check for additional conditions (time delays, locks, connections) for each of the operations.
-        # Data sync: note that module [products] is now hard-coded (check wrt /etc/rsyncd.conf)
-
         # do_data_sync
-        operation = 'data_sync'
-        if do_data_sync:
-            check_time = check_delay_time(operation, delay_minutes=delay_data_sync_minutes)
-            if check_time:
-                logger.info("Executing data synchronization")
-                data_source = es_constants.es2globals['processing_dir']
-                data_target = ip_target+'::products'+es_constants.es2globals['processing_dir']
-                system_data_sync(data_source, data_target)
-                check_delay_time(operation,delay_minutes=delay_data_sync_minutes, write=True)
+        # operation = 'data_sync'
+        # if do_data_sync:
+        #     check_time = check_delay_time(operation, delay_minutes=delay_data_sync_minutes)
+        #     if check_time:
+        #         logger.info("Executing data synchronization")
+        #         data_source = es_constants.es2globals['processing_dir']
+        #         data_target = ip_target+'::products'+es_constants.es2globals['processing_dir']
+        #         system_data_sync(data_source, data_target)
+        #         check_delay_time(operation,delay_minutes=delay_data_sync_minutes, write=True)
 
         # DB sync: execute every cycle if in system_setting (no delay)
         operation = 'db_sync'
         if len(schemas_db_sync) > 0:
-            #check_time = check_delay_time(operation, delay_minutes=delay_db_sync_minutes)
             if do_db_sync:
                 logger.info("Executing db synchronization")
-                # Build the list of rsyncs to be activated
-                list_rsyncs = []
-                for schema in schemas_db_sync:
-                    new_sync = 'sync_'+system_settings['role'].lower()+'_'+schema
-                    list_rsyncs.append(new_sync)
                 # Call the function
-                system_db_sync(list_rsyncs)
-                # check_delay_time(operation, delay_minutes=delay_db_sync_minutes, write=True)
-
-        # De-activate all syncs
-        if (len(schemas_db_sync) > 0) or not do_db_sync:
-            system_db_sync([])
+                system_bucardo_service(bucardo_action)
 
         # DB dump
         operation = 'db_dump'
@@ -691,12 +680,6 @@ def loop_system(dry_run=False):
                 # Manage the file dumps (rotation)
                 logger.info("Executing manage dumps")
                 system_manage_dumps()
-
-        # Save System Status
-        # operation = 'save_status'
-        # if do_save_system:
-        #     logger.info("Saving the status of the machine")
-        #     save_status_local_machine()
 
         # Convert to spirits format
         operation = 'convert_spirits'
@@ -713,6 +696,10 @@ def loop_system(dry_run=False):
             logger.info("Cleaning Temporary dirs")
             clean_temp_dir()
 
+        # Exit in case of dry_run
+        if dry_run:
+            execute_loop=False
+
         # Sleep some time
         time.sleep(float(es_constants.es2globals['system_sleep_time_sec']))
 
@@ -722,23 +709,30 @@ def get_status_PC1():
 #   Tellicast
 #   FTS
 
-    logger.debug("Entering routine %s" % 'get_status_PC1')
 
-    # Get the local systems settings
-    systemsettings = functions.getSystemSettings()
+    status_PC1 = {'dvb_status': -1,
+                  'tellicast_status': -1,
+                  'fts_status': -1}
+    err = ''
+    try:
+        # Check the final status
+        command = [es_constants.es2globals['apps_dir']+'/tools/test_services_pc1.sh', ' 1>/dev/null' ]
+        #logger.info(command)
+        p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = p.communicate()
+        #logger.info(out)
+        tokens=string.split(out)
+        #logger.info(tokens[0])
+        #logger.info(tokens[1])
+        #logger.info(tokens[2])
 
-    # Get status of all services
-    status_services = functions.getStatusAllServices()
+        dvb_status=string.split(tokens[0],'=')[1]
+        tellicast_status=string.split(tokens[1],'=')[1]
+        fts_status=string.split(tokens[2],'=')[1]
 
-    tellicast_status = False
-    command_tellicast = ['ssh','adminuser@mesa-pc1', '/etc/init.d/tellicast-client status', 'status']
-    p = subprocess.Popen(command_tellicast, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = p.communicate()
-    if err == '':
-        if re.search('not running', out):
-            logger.error("Bucardo is not running - DB sync not possible")
-            return 1
-
+    except:
+        logger.error('Error in checking PC1: %s' % err)
+        return status_PC1
 
     status_PC1 = {'dvb_status': dvb_status,
                   'tellicast_status': tellicast_status,

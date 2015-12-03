@@ -192,7 +192,7 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                         tellicast_status:me.PC1_tellicast_status,
                         fts_status:me.PC1_fts_status
                     };
-console.info(PC1);
+
                     PC2 = {
                         xtype: 'dashboard-pc2',
                         name:'dashboardpc2',

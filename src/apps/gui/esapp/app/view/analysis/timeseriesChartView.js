@@ -118,7 +118,15 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
 
 	                //var title = Ext.String.htmlDecode(json.countryName) + ' - ' + Ext.String.htmlDecode(json.areaName);
                     var title = Ext.getCmp('selectedregionname').getValue();
-	                var subtitle = '';
+                    var subtitle = '';
+                    if (me.yearTS != '') {
+                        subtitle = me.yearTS;
+                    }
+	                else {
+                        subtitle = esapp.Utils.getTranslation('from') + ' ' + Ext.Date.format(me.tsFromPeriod, 'Y-m-d') + '  ' + esapp.Utils.getTranslation('to') + ' ' + Ext.Date.format(me.tsToPeriod, 'Y-m-d');
+                    }
+                    me.filename = title + '_' + subtitle.toString().replace(' ','_');
+
                     var plotBackgroundImage = '';
                     var categories = [];
                     //var categories = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -208,6 +216,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                     }
 
                     var Yaxes = [];
+                    var timeseries_names = '';
                     for (var yaxescount = 0; yaxescount < json.yaxes.length; yaxescount++) {
                         var opposite = false;
                         if (json.yaxes[yaxescount].opposite === 'true')
@@ -257,7 +266,9 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                             max:parseFloat(json.yaxes[yaxescount].max)
                         };
                         Yaxes.push(yaxe);
+                        timeseries_names += '_' + json.yaxes[yaxescount].title;
                     }
+                    me.filename += timeseries_names;
 
                     //var Yaxes = [{ // Primary yAxis
                     //    labels: {
@@ -357,6 +368,18 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                             //marginLeft:left,
                             plotBackgroundImage: plotBackgroundImage
                         },
+                        exporting: {
+                            enabled: false,
+                            buttons: {
+                                exportButton: {
+                                    enabled:false
+                                },
+                                printButton: {
+                                    enabled:false
+                                }
+
+                            }
+                        },
                         //exporting: {
                         //    //chartOptions: { // specific options for the exported image
                         //    //    plotOptions: {
@@ -418,7 +441,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                             //y: 65,
                             style:{
                                  color: '#666666',
-                                 font: 'bold 30px Arial, Verdana, Helvetica, sans-serif'
+                                 font: 'bold 24px Arial, Verdana, Helvetica, sans-serif'
                             }
                         },
                         xAxis: [{
@@ -534,12 +557,12 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                 text: esapp.Utils.getTranslation('downloadtimeseries'),    // 'Download timeseries',
                 iconCls: 'fa fa-download fa-2x',
                 scale: 'medium'
-                //,handler: 'tsDownload'
+                ,handler: 'tsDownload'
             },{
                 text: esapp.Utils.getTranslation('savechart'),    // 'Save chart',
                 iconCls: 'fa fa-floppy-o fa-2x',
                 scale: 'medium'
-                //,handler: 'saveChart'
+                ,handler: 'saveChart'
             }]
         });
 

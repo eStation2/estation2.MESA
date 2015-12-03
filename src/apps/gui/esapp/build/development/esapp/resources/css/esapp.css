@@ -1,4 +1,4 @@
-.ece31b46461ba9a7dc12f73486f34b221f45e6ff{display:block;}/*.x-grid-header-ct {*/
+.e467042de7222e8738a68dc31b2cb08e04d682c1{display:block;}/*.x-grid-header-ct {*/
     /*height: 70px !important;*/
 /*}*/
 
@@ -136,6 +136,11 @@ p {
 }
 .statusnotok {
     background-image:url(../img/icons/power-off_ff0000_24.png);
+    background-repeat: no-repeat;
+}
+
+.statuserror {
+    background-image:url(../img/icons/power-off_24_grey.png);
     background-repeat: no-repeat;
 }
 
