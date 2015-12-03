@@ -889,7 +889,7 @@ class GetDashboard:
         PC1_connection = functions.check_connection('mesa-pc1')
 
         # status_PC1 = es2system.get_status_PC1()
-        status_PC1 = {'dvb_status': False,
+        status_PC1 = {'dvb_status': True,
                       'tellicast_status': True,
                       'fts_status': True}
         PC1_dvb_status = status_PC1['dvb_status']
@@ -2103,7 +2103,7 @@ class SystemReport:
         filename = es2system.system_create_report()
         web.header('Content-Type', 'application/force-download')   # 'application/x-compressed')
         web.header('Content-transfer-encoding', 'binary')
-        web.header('Content-Disposition', 'attachment; filename=' + filename)  # force browser to show "Save as" dialog.
+        web.header('Content-Disposition', 'attachment; filename=' + os.path.basename(filename))  # force browser to show "Save as" dialog.
         f = open(filename, 'rb')
         while 1:
             buf = f.read(1024 * 8)
@@ -2118,19 +2118,19 @@ class InstallReport:
         self.lang = "eng"
 
     def POST(self):
-        filename = 'eStation-PS-Report_2015-05-13.tgz'
-        reportfile = es_constants.es2globals['base_tmp_dir']+'/'+filename
 
+        filename = es2system.system_install_report()
         web.header('Content-Type', 'application/force-download')   # 'application/x-compressed')
         web.header('Content-transfer-encoding', 'binary')
-        web.header('Content-Disposition', 'attachment; filename=' + filename)  # force browser to show "Save as" dialog.
-        f = open(reportfile, 'rb')
+        web.header('Content-Disposition', 'attachment; filename=' + os.path.basename(filename))  # force browser to show "Save as" dialog.
+        f = open(filename, 'rb')
         while 1:
             buf = f.read(1024 * 8)
             if not buf:
                 break
             yield buf
-        #return contents
+        os.remove(filename)
+
 
 
 class ResetUserSettings:
