@@ -144,3 +144,19 @@ class TestSystem(unittest.TestCase):
 
         # Should get here the role of my machine ...
         status = es2system.clean_temp_dir()
+
+    def test_bucardo_service(self):
+
+        # Should get here the role of my machine ...
+        status = es2system.system_bucardo_service('stop')
+
+    def test_system_loop(self):
+
+        # Should get here the role of my machine ...
+        status = es2system.loop_system(dry_run=True)
+
+    def test_status_PC1(self):
+
+        # Should get here the role of my machine ...
+        status = es2system.get_status_PC1()
+        print status
