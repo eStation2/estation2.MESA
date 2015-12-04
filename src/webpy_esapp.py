@@ -2917,7 +2917,7 @@ class ExecuteServiceTask:
             system_daemon = es2system.SystemDaemon(pid_file, dry_run=dryrun)
             #
             status = system_daemon.status()
-            system_service_script = es_constants.es2globals['status_system_dir']+os.sep+'service_system.py'
+            system_service_script = es_constants.es2globals['system_service_dir']+os.sep+'service_system.py'
             if getparams.task == 'stop':
                 if status:
                     os.system("python " + system_service_script + " stop")

@@ -154,7 +154,7 @@ EOF
         echo "`date +'%Y-%m-%d %H:%M '` Create estationdb Database" 
         su postgres -c psql << EOF
 ALTER ROLE estation WITH CREATEDB;
-CREATE DATABASE estationdb WITH OWNER estation;
+CREATE DATABASE estationdb WITH OWNER estation TEMPLATE template0 ENCODING 'UTF8';
 ALTER USER estation WITH ENCRYPTED PASSWORD 'mesadmin';
 EOF
     else
