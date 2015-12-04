@@ -2466,7 +2466,7 @@ class GetProductLayer:
         result_map_file = es_constants.apps_dir+'/analysis/MAP_result.map'
         # if os.path.isfile(result_map_file):
         #     os.remove(result_map_file)
-        productmap.save(result_map_file)
+        # productmap.save(result_map_file)
         image = productmap.draw()
         # image.save(es_constants.apps_dir+'/analysis/'+filenamenoextention+'.png')
 
