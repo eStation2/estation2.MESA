@@ -30,9 +30,9 @@ Ext.define("esapp.view.dashboard.PC1",{
     bodyPadding:0,
     flex:1,
 
-    dvb_status:false,
-    tellicast_status:false,
-    fts_status:false,
+    dvb_status:null,
+    tellicast_status:null,
+    fts_status:null,
 
     initComponent: function () {
         var me = this;
@@ -44,18 +44,24 @@ Ext.define("esapp.view.dashboard.PC1",{
             me.dvb_statusCls = 'statusok';
         else if (me.dvb_status == false || me.dvb_status == 'false')
             me.dvb_statusCls = 'statusnotok';
+        else if (me.dvb_status == null )
+            me.dvb_statusCls = 'statuserror';
 
         me.tellicast_statusCls = '';
         if (me.tellicast_status == true || me.tellicast_status == 'true')
             me.tellicast_statusCls = 'statusok';
         else if (me.tellicast_status == false || me.tellicast_status == 'false')
             me.tellicast_statusCls = 'statusnotok';
+        else if (me.tellicast_status == null )
+            me.tellicast_statusCls = 'statuserror';
 
         me.fts_statusCls = '';
         if (me.fts_status == true || me.fts_status == 'true')
             me.fts_statusCls = 'statusok';
         else if (me.fts_status == false || me.fts_status == 'false')
             me.fts_statusCls = 'statusnotok';
+        else if (me.fts_status == null )
+            me.fts_statusCls = 'statuserror';
 
 
         me.items = [{
