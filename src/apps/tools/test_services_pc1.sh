@@ -82,21 +82,26 @@ function check_a_service()
         cr=4
     # List of errors - else
     else
+        Running=0
         if [ -f ${tmp_file_log} ]
         then
           nb_lines=$(wc -l ${tmp_file_log} | awk '{ print $1 }')
           if [ ${nb_lines} -gt 2 ]
           then
-	    Token=$(tail -n $((${nb_lines} - 2)) ${tmp_file_log} | grep -vi "Password" | grep "Processes" | awk '{ print $2 }')
-	    if [[ "$Token" == 'running' ]]; then
-	       Running=1
-	    fi	
-	    echo ${Running}
+	            Token=$(tail -n 1 ${tmp_file_log} | grep "tas" | awk '{ print $3 }'| tr -d "\r")
+	            if [[ "${Token}" == 'running' ]]; then
+	                Running=1
+	            fi
+	            Token=$(tail -n 1 ${tmp_file_log} | grep "Processes" | awk '{ print $2 }'| tr -d "\r")
+	            if [[ "${Token}" == 'running' ]]; then
+	                Running=1
+	            fi
+	            echo ${Running}
           else
-	    echo -e "\r"
+	            echo -e "\r"
           fi
-        fi
-       cr=0
+     fi
+     cr=0
   fi
 
   return ${cr}
