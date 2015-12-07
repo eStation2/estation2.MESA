@@ -101,7 +101,7 @@ def system_data_sync(source, target):
     logger.debug("Entering routine %s" % 'system_data_sync')
     command = 'rsync -CavK '+source+' '+target+ ' >> '+logfile
     logger.debug("Executing %s" % command)
-    return
+    # return
     status = os.system(command)
     if status:
         logger.error("Error in executing %s" % command)
@@ -649,16 +649,20 @@ def loop_system(dry_run=False):
             schemas_db_sync = []
             schemas_db_dump = ['products', 'analysis']
 
+        logger.info("data_sync" + str(do_data_sync))
+
         # do_data_sync
-        # operation = 'data_sync'
-        # if do_data_sync:
-        #     check_time = check_delay_time(operation, delay_minutes=delay_data_sync_minutes)
-        #     if check_time:
-        #         logger.info("Executing data synchronization")
-        #         data_source = es_constants.es2globals['processing_dir']
-        #         data_target = ip_target+'::products'+es_constants.es2globals['processing_dir']
-        #         system_data_sync(data_source, data_target)
-        #         check_delay_time(operation,delay_minutes=delay_data_sync_minutes, write=True)
+        operation = 'data_sync'
+        if do_data_sync:
+            check_time = check_delay_time(operation, delay_minutes=delay_data_sync_minutes)
+            logger.info("check_time: " + str(check_time))
+            if check_time:
+                logger.info("Executing data synchronization")
+                data_source = es_constants.es2globals['processing_dir']
+                # data_target = ip_target+'::products'+es_constants.es2globals['processing_dir']
+                data_target = 'PC3::products'
+                system_data_sync(data_source, data_target)
+                check_delay_time(operation,delay_minutes=delay_data_sync_minutes, write=True)
 
         # DB sync: execute every cycle if in system_setting (no delay)
         operation = 'db_sync'
