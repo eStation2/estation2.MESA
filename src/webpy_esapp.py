@@ -889,27 +889,28 @@ class GetDashboard:
         PC1_connection = functions.check_connection('mesa-pc1')
 
         status_PC1 = es2system.get_status_PC1()
+        print status_PC1
         # status_PC1 = {'dvb_status': -1,
         #               'tellicast_status': 1,
         #               'fts_status': 0}
 
-        if status_PC1['dvb_status'] == -1:
+        if status_PC1['dvb_status'] == '-1':
             PC1_dvb_status = None
-        elif status_PC1['dvb_status'] == 1:
+        elif status_PC1['dvb_status'] == '1':
             PC1_dvb_status = True
         else:
             PC1_dvb_status = False
 
-        if status_PC1['tellicast_status'] == -1:
+        if status_PC1['tellicast_status'] == '-1':
             PC1_tellicast_status = None
-        elif status_PC1['tellicast_status'] == 1:
+        elif status_PC1['tellicast_status'] == '1':
             PC1_tellicast_status = True
         else:
             PC1_tellicast_status = False
 
-        if status_PC1['fts_status'] == -1:
+        if status_PC1['fts_status'] == '-1':
             PC1_fts_status = None
-        elif status_PC1['fts_status'] == 1:
+        elif status_PC1['fts_status'] == '1':
             PC1_fts_status = True
         else:
             PC1_fts_status = False
@@ -929,6 +930,7 @@ class GetDashboard:
                 PC2_DataAutoSync = systemsettings['data_sync']
                 PC2_postgresql_status = functions.getStatusPostgreSQL()
                 PC2_internet_status = functions.internet_on()
+                # print 'Ínternet: ' + str(PC2_internet_status)
                 PC2_service_eumetcast = status_services['eumetcast']
                 PC2_service_internet = status_services['internet']
                 PC2_service_ingest = status_services['ingest']
