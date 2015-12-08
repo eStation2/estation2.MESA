@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.3.4
 -- Dumped by pg_dump version 9.3.4
--- Started on 2015-11-26 15:38:10 CET
+-- Started on 2015-12-04 14:24:53 CET
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -1395,7 +1395,7 @@ $_$;
 ALTER FUNCTION products.update_insert_data_type(data_type_id character varying, description character varying) OWNER TO estation;
 
 --
--- TOC entry 236 (class 1255 OID 18606)
+-- TOC entry 235 (class 1255 OID 18606)
 -- Name: update_insert_datasource_description(character varying, character varying, character varying, character varying, character varying, character varying, character varying, integer, integer, character varying, character varying, integer, character varying, character varying, character varying, integer, character varying, boolean); Type: FUNCTION; Schema: products; Owner: estation
 --
 
@@ -1821,7 +1821,7 @@ $_$;
 ALTER FUNCTION products.update_insert_frequency(frequency_id character varying, time_unit character varying, frequency real, frequency_type character varying, description character varying) OWNER TO estation;
 
 --
--- TOC entry 233 (class 1255 OID 18603)
+-- TOC entry 239 (class 1255 OID 18603)
 -- Name: update_insert_ingestion(character varying, character varying, character varying, character varying, character varying, boolean, boolean, character varying, boolean, boolean); Type: FUNCTION; Schema: products; Owner: estation
 --
 
@@ -1862,8 +1862,8 @@ CREATE FUNCTION update_insert_ingestion(productcode character varying, subproduc
 				  AND i.mapsetcode = TRIM(_mapsetcode);
 			ELSE
 				UPDATE products.ingestion i 
-				SET input_to_process_re = TRIM(_input_to_process_re),
-					enabled = _enabled	
+				SET input_to_process_re = TRIM(_input_to_process_re)
+					-- ,enabled = _enabled	
 					-- ,defined_by = TRIM(_defined_by)
 					-- ,activated = _activated
 					-- ,wait_for_all_files = _wait_for_all_files
@@ -2141,7 +2141,7 @@ $_$;
 ALTER FUNCTION products.update_insert_mapset(mapsetcode character varying, defined_by character varying, descriptive_name character varying, description character varying, srs_wkt character varying, upper_left_long double precision, pixel_shift_long double precision, rotation_factor_long double precision, upper_left_lat double precision, pixel_shift_lat double precision, rotation_factor_lat double precision, pixel_size_x integer, pixel_size_y integer, footprint_image text, full_copy boolean) OWNER TO estation;
 
 --
--- TOC entry 238 (class 1255 OID 18608)
+-- TOC entry 237 (class 1255 OID 18608)
 -- Name: update_insert_process_product(integer, character varying, character varying, character varying, character varying, character varying, boolean, boolean, character varying, bigint, bigint, boolean); Type: FUNCTION; Schema: products; Owner: estation
 --
 
@@ -2235,7 +2235,7 @@ $_$;
 ALTER FUNCTION products.update_insert_process_product(process_id integer, productcode character varying, subproductcode character varying, version character varying, mapsetcode character varying, type character varying, activated boolean, final boolean, date_format character varying, start_date bigint, end_date bigint, full_copy boolean) OWNER TO estation;
 
 --
--- TOC entry 237 (class 1255 OID 18607)
+-- TOC entry 236 (class 1255 OID 18607)
 -- Name: update_insert_processing(integer, character varying, character varying, boolean, character varying, character varying, character varying, boolean, boolean); Type: FUNCTION; Schema: products; Owner: estation
 --
 
@@ -2274,8 +2274,8 @@ CREATE FUNCTION update_insert_processing(process_id integer, defined_by characte
 				SET output_mapsetcode = TRIM(_output_mapsetcode),
 					derivation_method = TRIM(_derivation_method),
 					algorithm = TRIM(_algorithm),
-					priority = TRIM(_priority),
-					enabled = _enabled
+					priority = TRIM(_priority)
+					-- ,enabled = _enabled
 					-- ,defined_by = _defined_by
 					-- ,activated = _activated
 				WHERE p.process_id = _process_id;
@@ -2310,7 +2310,7 @@ $_$;
 ALTER FUNCTION products.update_insert_processing(process_id integer, defined_by character varying, output_mapsetcode character varying, activated boolean, derivation_method character varying, algorithm character varying, priority character varying, enabled boolean, full_copy boolean) OWNER TO estation;
 
 --
--- TOC entry 239 (class 1255 OID 18609)
+-- TOC entry 238 (class 1255 OID 18609)
 -- Name: update_insert_product(character varying, character varying, character varying, character varying, boolean, character varying, character varying, character varying, character varying, character varying, character varying, character varying, double precision, double precision, bigint, double precision, double precision, character varying, character varying, boolean, character varying, boolean); Type: FUNCTION; Schema: products; Owner: estation
 --
 
@@ -2469,7 +2469,7 @@ $_$;
 ALTER FUNCTION products.update_insert_product(productcode character varying, subproductcode character varying, version character varying, defined_by character varying, activated boolean, category_id character varying, product_type character varying, descriptive_name character varying, description character varying, provider character varying, frequency_id character varying, date_format character varying, scale_factor double precision, scale_offset double precision, nodata bigint, mask_min double precision, mask_max double precision, unit character varying, data_type_id character varying, masked boolean, timeseries_role character varying, full_copy boolean) OWNER TO estation;
 
 --
--- TOC entry 235 (class 1255 OID 18605)
+-- TOC entry 234 (class 1255 OID 18605)
 -- Name: update_insert_product_acquisition_data_source(character varying, character varying, character varying, character varying, character varying, character varying, boolean, boolean, boolean); Type: FUNCTION; Schema: products; Owner: estation
 --
 
@@ -2658,7 +2658,7 @@ $_$;
 ALTER FUNCTION products.update_insert_spirits(productcode character varying, subproductcode character varying, version character varying, mapsetcode character varying, prod_values character varying, flags character varying, data_ignore_value integer, days integer, start_date integer, end_date integer, sensor_type character varying, comment character varying, sensor_filename_prefix character varying, frequency_filename_prefix character varying, product_anomaly_filename_prefix character varying, activated boolean) OWNER TO estation;
 
 --
--- TOC entry 234 (class 1255 OID 18604)
+-- TOC entry 233 (class 1255 OID 18604)
 -- Name: update_insert_sub_datasource_description(character varying, character varying, character varying, character varying, double precision, double precision, double precision, character varying, double precision, double precision, character varying, character varying, boolean); Type: FUNCTION; Schema: products; Owner: estation
 --
 
@@ -4218,7 +4218,7 @@ ALTER TABLE ONLY thema_product
     ADD CONSTRAINT thema_thema_product_fk FOREIGN KEY (thema_id) REFERENCES thema(thema_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
--- Completed on 2015-11-26 15:38:10 CET
+-- Completed on 2015-12-04 14:24:53 CET
 
 --
 -- PostgreSQL database dump complete

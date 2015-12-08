@@ -2,16 +2,16 @@
     "name": "link1",
     "title": "eStation2",
     "thumb": "estation2",
-    "url": "http://estation2.jrc.ec.europa.eu",
+    "url": "http://estation.jrc.ec.europa.eu",
     "type": "LIENS UTILES",
-    "description": "Site web eStation2..."
+    "description": "Ceci est le site eStation2..."
 },{
     "name": "link2",
     "title": "MESA",
     "thumb": "mesa",
     "url": "http://rea.au.int/mesa/",
     "type": "LIENS UTILES",
-    "description": "Site web MESA..."
+    "description": "Ceci est le site MESA..."
 },{
     "name": "link3",
     "title": "Copernicus",

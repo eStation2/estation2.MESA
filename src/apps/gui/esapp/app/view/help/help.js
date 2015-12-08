@@ -47,7 +47,7 @@ Ext.define("esapp.view.help.help",{
         itemSelector: 'div.thumb-wrap',
 
         listeners: {
-            itemclick: 'onDocumentClick'
+            //itemclick: 'onDocumentClick'
         },
 
         tpl: [
@@ -77,7 +77,7 @@ Ext.define("esapp.view.help.help",{
         itemSelector: 'div.thumb-wrap',
 
         listeners: {
-            itemclick: 'onDocumentClick'
+            //itemclick: 'onDocumentClick'
         },
 
         tpl: [
@@ -107,7 +107,7 @@ Ext.define("esapp.view.help.help",{
         itemSelector: 'div.thumb-wrap',
 
         listeners: {
-            itemclick: 'onDocumentClick'
+            //itemclick: 'onDocumentClick'
         },
 
         tpl: [

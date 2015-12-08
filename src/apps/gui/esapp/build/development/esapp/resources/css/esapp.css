@@ -1,4 +1,4 @@
-.c5f2d38f1091ce6a2cf8b833ff19b156f12a58ad{display:block;}/*.x-grid-header-ct {*/
+.e467042de7222e8738a68dc31b2cb08e04d682c1{display:block;}/*.x-grid-header-ct {*/
     /*height: 70px !important;*/
 /*}*/
 
@@ -128,6 +128,20 @@ p {
 
 .unlink {
     background-image:url(../img/link_break.png);
+}
+
+.statusok {
+    background-image:url(../img/icons/power-off_008000_24.png);
+    background-repeat: no-repeat;
+}
+.statusnotok {
+    background-image:url(../img/icons/power-off_ff0000_24.png);
+    background-repeat: no-repeat;
+}
+
+.statuserror {
+    background-image:url(../img/icons/power-off_24_grey.png);
+    background-repeat: no-repeat;
 }
 
 .connected {

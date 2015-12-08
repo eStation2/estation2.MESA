@@ -137,9 +137,9 @@ Ext.define("esapp.view.analysis.mapView",{
                                 //text: 'Administative level 0',
                                 name: 'admin0',
                                 level: 'admin0',
-                                geojsonfile: 'AFR_G2014_2013_0.geojson',
+                                geojsonfile: 'AFR_0_g2015_2014.geojson',  // 'AFR_G2014_2013_0.geojson', //
                                 checked: false,
-                                linecolor: '#319FD3',    // rgb(49, 159, 211)
+                                linecolor: '#319FD3',    // rgb(49, 159, 211)  or like in EMMA rgb(255, 0, 255)
                                 layerorderidx: 3,
                                 showSeparator: false,
                                 cls: "x-menu-no-icon",
@@ -151,7 +151,7 @@ Ext.define("esapp.view.analysis.mapView",{
                                 //text: 'Administative level 1',
                                 name: 'admin1',
                                 level: 'admin1',
-                                geojsonfile: 'AFR_G2014_2013_1.geojson',
+                                geojsonfile: 'AFR_1_g2015_2014.geojson',  // 'AFR_G2014_2013_0.geojson',  //
                                 checked: false,
                                 linecolor: '#ffcc00',    // rgb(255, 204, 0)
                                 layerorderidx: 2,
@@ -166,66 +166,66 @@ Ext.define("esapp.view.analysis.mapView",{
                             //    level: 'admin2',
                             //    geojsonfile: 'AFR_G2014_2013_2.geojson',
                             //    checked: false,
-                            //    linecolor: '#ffcc00',    // rgb(255, 204, 0)
-                            //    layerorderidx: 2,
+                            //    linecolor: '#ffcc99',    // rgb(255, 204, 153)
+                            //    layerorderidx: 1,
                             //    showSeparator: false,
                             //    cls: "x-menu-no-icon",
                             //    handler: 'addVectorLayer'
                             }]
                         }
-                    }, {
-                        text: 'ACMAD',
-                        name: 'acmad',
-                        //iconCls: 'layer-vector-add', // 'layers'
-                        scale: 'medium',
-                        floating: false,
-                        collapseDirection: 'left',
-                        menu: {
-                            hideOnClick: true,
-                            defaults: {
-                                hideOnClick: true
-                            },
-                            style: {
-                                'margin-left': '0px'
-                            },
-                            items: [{
-                                xtype: 'checkbox',
-                                boxLabel: 'ACMAD '+esapp.Utils.getTranslation('level0'), // level 0',
-                                name: 'acmad0',
-                                level: 'admin0',
-                                geojsonfile: 'RIC_ACMAD_0.geojson',
-                                checked: false,
-                                linecolor: '#319FD3',
-                                layerorderidx: 3,
-                                showSeparator: false,
-                                cls: "x-menu-no-icon",
-                                handler: 'addVectorLayer'
-                            }, {
-                                xtype: 'checkbox',
-                                boxLabel: 'ACMAD '+esapp.Utils.getTranslation('level1'), // level 0',
-                                name: 'acmad1',
-                                level: 'admin1',
-                                geojsonfile: 'RIC_ACMAD_1.geojson',
-                                checked: false,
-                                linecolor: '#319FD3',
-                                layerorderidx: 3,
-                                showSeparator: false,
-                                cls: "x-menu-no-icon",
-                                handler: 'addVectorLayer'
-                            }, {
-                                xtype: 'checkbox',
-                                boxLabel: 'ACMAD '+esapp.Utils.getTranslation('level2'), // level 0',
-                                name: 'acmad2',
-                                level: 'admin2',
-                                geojsonfile: 'RIC_ACMAD_2.geojson',
-                                checked: false,
-                                linecolor: '#319FD3',
-                                layerorderidx: 3,
-                                showSeparator: false,
-                                cls: "x-menu-no-icon",
-                                handler: 'addVectorLayer'
-                            }]
-                        }
+                    //}, {
+                    //    text: 'ACMAD',
+                    //    name: 'acmad',
+                    //    //iconCls: 'layer-vector-add', // 'layers'
+                    //    scale: 'medium',
+                    //    floating: false,
+                    //    collapseDirection: 'left',
+                    //    menu: {
+                    //        hideOnClick: true,
+                    //        defaults: {
+                    //            hideOnClick: true
+                    //        },
+                    //        style: {
+                    //            'margin-left': '0px'
+                    //        },
+                    //        items: [{
+                    //            xtype: 'checkbox',
+                    //            boxLabel: 'ACMAD '+esapp.Utils.getTranslation('level0'), // level 0',
+                    //            name: 'acmad0',
+                    //            level: 'admin0',
+                    //            geojsonfile: 'AFR_0_g2015_2014.geojson',
+                    //            checked: false,
+                    //            linecolor: '#319FD3',
+                    //            layerorderidx: 3,
+                    //            showSeparator: false,
+                    //            cls: "x-menu-no-icon",
+                    //            handler: 'addVectorLayer'
+                    //        }, {
+                    //            xtype: 'checkbox',
+                    //            boxLabel: 'ACMAD '+esapp.Utils.getTranslation('level1'), // level 0',
+                    //            name: 'acmad1',
+                    //            level: 'admin1',
+                    //            geojsonfile: 'AFR_1_g2015_2014.geojsonn',
+                    //            checked: false,
+                    //            linecolor: '#ffcc00',
+                    //            layerorderidx: 2,
+                    //            showSeparator: false,
+                    //            cls: "x-menu-no-icon",
+                    //            handler: 'addVectorLayer'
+                    //        }, {
+                    //            xtype: 'checkbox',
+                    //            boxLabel: 'ACMAD '+esapp.Utils.getTranslation('level2'), // level 0',
+                    //            name: 'acmad2',
+                    //            level: 'admin2',
+                    //            geojsonfile: 'AFR_2_g2015_2014.geojson',
+                    //            checked: false,
+                    //            linecolor: '#ffcc99',
+                    //            layerorderidx: 1,
+                    //            showSeparator: false,
+                    //            cls: "x-menu-no-icon",
+                    //            handler: 'addVectorLayer'
+                    //        }]
+                    //    }
                     }, {
                         text: 'AGRHYMET',
                         name: 'agrhymet',
@@ -246,7 +246,7 @@ Ext.define("esapp.view.analysis.mapView",{
                                 boxLabel: 'AGRHYMET '+esapp.Utils.getTranslation('level0'), // level 0',
                                 name: 'agrhymet0',
                                 level: 'admin0',
-                                geojsonfile: 'RIC_AGRHYMET_0.geojson',
+                                geojsonfile: 'RIC_CRA_0_g2015_2014.geojson',
                                 checked: false,
                                 linecolor: '#319FD3',
                                 layerorderidx: 3,
@@ -258,10 +258,10 @@ Ext.define("esapp.view.analysis.mapView",{
                                 boxLabel: 'AGRHYMET '+esapp.Utils.getTranslation('level1'), // level 0',
                                 name: 'agrhymet1',
                                 level: 'admin1',
-                                geojsonfile: 'RIC_AGRHYMET_1.geojson',
+                                geojsonfile: 'RIC_CRA_1_g2015_2014.geojson',
                                 checked: false,
-                                linecolor: '#319FD3',
-                                layerorderidx: 3,
+                                linecolor: '#ffcc00',
+                                layerorderidx: 2,
                                 showSeparator: false,
                                 cls: "x-menu-no-icon",
                                 handler: 'addVectorLayer'
@@ -270,10 +270,10 @@ Ext.define("esapp.view.analysis.mapView",{
                                 boxLabel: 'AGRHYMET '+esapp.Utils.getTranslation('level2'), // level 0',
                                 name: 'agrhymet2',
                                 level: 'admin2',
-                                geojsonfile: 'RIC_AGRHYMET_2.geojson',
+                                geojsonfile: 'RIC_CRA_2_g2015_2014.geojson',
                                 checked: false,
-                                linecolor: '#319FD3',
-                                layerorderidx: 3,
+                                linecolor: '#ffcc99',
+                                layerorderidx: 1,
                                 showSeparator: false,
                                 cls: "x-menu-no-icon",
                                 handler: 'addVectorLayer'
@@ -299,7 +299,7 @@ Ext.define("esapp.view.analysis.mapView",{
                                 boxLabel: 'BDMS '+esapp.Utils.getTranslation('level0'), // level 0',
                                 name: 'bdms0',
                                 level: 'admin0',
-                                geojsonfile: 'RIC_BDMS_0.geojson',
+                                geojsonfile: 'RIC_BDMS_0_g2015_2014.geojson',
                                 checked: false,
                                 linecolor: '#319FD3',
                                 layerorderidx: 3,
@@ -311,10 +311,10 @@ Ext.define("esapp.view.analysis.mapView",{
                                 boxLabel: 'BDMS '+esapp.Utils.getTranslation('level1'), // level 0',
                                 name: 'bdms1',
                                 level: 'admin1',
-                                geojsonfile: 'RIC_BDMS_1.geojson',
+                                geojsonfile: 'RIC_BDMS_1_g2015_2014.geojson',
                                 checked: false,
-                                linecolor: '#319FD3',
-                                layerorderidx: 3,
+                                linecolor: '#ffcc00',
+                                layerorderidx: 2,
                                 showSeparator: false,
                                 cls: "x-menu-no-icon",
                                 handler: 'addVectorLayer'
@@ -323,10 +323,10 @@ Ext.define("esapp.view.analysis.mapView",{
                                 boxLabel: 'BDMS '+esapp.Utils.getTranslation('level2'), // level 0',
                                 name: 'bdms2',
                                 level: 'admin2',
-                                geojsonfile: 'RIC_BDMS_2.geojson',
+                                geojsonfile: 'RIC_BDMS_2_G2014.geojson',    // 'RIC_BDMS_2_g2015_2014.geojson',
                                 checked: false,
-                                linecolor: '#319FD3',
-                                layerorderidx: 3,
+                                linecolor: '#ffcc99',
+                                layerorderidx: 1,
                                 showSeparator: false,
                                 cls: "x-menu-no-icon",
                                 handler: 'addVectorLayer'
@@ -352,7 +352,7 @@ Ext.define("esapp.view.analysis.mapView",{
                                 boxLabel: 'CICOS '+esapp.Utils.getTranslation('level0'), // level 0',
                                 name: 'cicos0',
                                 level: 'admin0',
-                                geojsonfile: 'RIC_CICOS_0.geojson',
+                                geojsonfile: 'RIC_CICOS_0_g2015_2014.geojson',
                                 checked: false,
                                 linecolor: '#319FD3',
                                 layerorderidx: 3,
@@ -364,10 +364,10 @@ Ext.define("esapp.view.analysis.mapView",{
                                 boxLabel: 'CICOS '+esapp.Utils.getTranslation('level1'), // level 0',
                                 name: 'cicos1',
                                 level: 'admin1',
-                                geojsonfile: 'RIC_CICOS_1.geojson',
+                                geojsonfile: 'RIC_CICOS_1_g2015_2014.geojson',
                                 checked: false,
-                                linecolor: '#319FD3',
-                                layerorderidx: 3,
+                                linecolor: '#ffcc00',
+                                layerorderidx: 2,
                                 showSeparator: false,
                                 cls: "x-menu-no-icon",
                                 handler: 'addVectorLayer'
@@ -376,10 +376,10 @@ Ext.define("esapp.view.analysis.mapView",{
                                 boxLabel: 'CICOS '+esapp.Utils.getTranslation('level2'), // level 0',
                                 name: 'cicos2',
                                 level: 'admin2',
-                                geojsonfile: 'RIC_CICOS_2.geojson',
+                                geojsonfile: 'RIC_CICOS_2_g2015_2014.geojson',
                                 checked: false,
-                                linecolor: '#319FD3',
-                                layerorderidx: 3,
+                                linecolor: '#ffcc99',
+                                layerorderidx: 1,
                                 showSeparator: false,
                                 cls: "x-menu-no-icon",
                                 handler: 'addVectorLayer'
@@ -405,7 +405,7 @@ Ext.define("esapp.view.analysis.mapView",{
                                 boxLabel: 'ICPAC '+esapp.Utils.getTranslation('level0'), // level 0',
                                 name: 'icpac0',
                                 level: 'admin0',
-                                geojsonfile: 'RIC_ICPAC_0.geojson',
+                                geojsonfile: 'RIC_ICPAC_0_g2015_2014.geojson',
                                 checked: false,
                                 linecolor: '#319FD3',
                                 layerorderidx: 3,
@@ -417,10 +417,10 @@ Ext.define("esapp.view.analysis.mapView",{
                                 boxLabel: 'ICPAC '+esapp.Utils.getTranslation('level1'), // level 0',
                                 name: 'icpac1',
                                 level: 'admin1',
-                                geojsonfile: 'RIC_ICPAC_1.geojson',
+                                geojsonfile: 'RIC_ICPAC_1_g2015_2014.geojson',
                                 checked: false,
-                                linecolor: '#319FD3',
-                                layerorderidx: 3,
+                                linecolor: '#ffcc00',
+                                layerorderidx: 2,
                                 showSeparator: false,
                                 cls: "x-menu-no-icon",
                                 handler: 'addVectorLayer'
@@ -429,10 +429,10 @@ Ext.define("esapp.view.analysis.mapView",{
                                 boxLabel: 'ICPAC '+esapp.Utils.getTranslation('level2'), // level 0',
                                 name: 'icpac2',
                                 level: 'admin2',
-                                geojsonfile: 'RIC_ICPAC_2.geojson',
+                                geojsonfile: 'RIC_ICPAC_2_g2015_2014.geojson',
                                 checked: false,
-                                linecolor: '#319FD3',
-                                layerorderidx: 3,
+                                linecolor: '#ffcc99',
+                                layerorderidx: 1,
                                 showSeparator: false,
                                 cls: "x-menu-no-icon",
                                 handler: 'addVectorLayer'
@@ -458,7 +458,7 @@ Ext.define("esapp.view.analysis.mapView",{
                                 boxLabel: 'MOI '+esapp.Utils.getTranslation('level0'), // level 0',
                                 name: 'moi0',
                                 level: 'admin0',
-                                geojsonfile: 'RIC_MOI_0.geojson',
+                                geojsonfile: 'RIC_MOI_0_g2015_2014.geojson',
                                 checked: false,
                                 linecolor: '#319FD3',
                                 layerorderidx: 3,
@@ -470,10 +470,10 @@ Ext.define("esapp.view.analysis.mapView",{
                                 boxLabel: 'MOI '+esapp.Utils.getTranslation('level1'), // level 0',
                                 name: 'moi1',
                                 level: 'admin1',
-                                geojsonfile: 'RIC_MOI_1.geojson',
+                                geojsonfile: 'RIC_MOI_1_g2015_2014.geojson',
                                 checked: false,
-                                linecolor: '#319FD3',
-                                layerorderidx: 3,
+                                linecolor: '#ffcc00',
+                                layerorderidx: 2,
                                 showSeparator: false,
                                 cls: "x-menu-no-icon",
                                 handler: 'addVectorLayer'
@@ -482,10 +482,10 @@ Ext.define("esapp.view.analysis.mapView",{
                                 boxLabel: 'MOI '+esapp.Utils.getTranslation('level2'), // level 0',
                                 name: 'moi2',
                                 level: 'admin2',
-                                geojsonfile: 'RIC_MOI_2.geojson',
+                                geojsonfile: 'RIC_MOI_2_g2015_2014.geojson',
                                 checked: false,
-                                linecolor: '#319FD3',
-                                layerorderidx: 3,
+                                linecolor: '#ffcc99',
+                                layerorderidx: 1,
                                 showSeparator: false,
                                 cls: "x-menu-no-icon",
                                 handler: 'addVectorLayer'
@@ -511,7 +511,7 @@ Ext.define("esapp.view.analysis.mapView",{
                                 boxLabel: 'UoG '+esapp.Utils.getTranslation('level0'), // level 0',
                                 name: 'UoG0',
                                 level: 'admin0',
-                                geojsonfile: 'RIC_UoG_0.geojson',
+                                geojsonfile: 'RIC_UOG_0_g2015_2014.geojson',
                                 checked: false,
                                 linecolor: '#319FD3',
                                 layerorderidx: 3,
@@ -523,10 +523,10 @@ Ext.define("esapp.view.analysis.mapView",{
                                 boxLabel: 'UoG '+esapp.Utils.getTranslation('level1'), // level 0',
                                 name: 'UoG1',
                                 level: 'admin1',
-                                geojsonfile: 'RIC_UoG_1.geojson',
+                                geojsonfile: 'RIC_UOG_1_g2015_2014.geojson',
                                 checked: false,
-                                linecolor: '#319FD3',
-                                layerorderidx: 3,
+                                linecolor: '#ffcc00',
+                                layerorderidx: 2,
                                 showSeparator: false,
                                 cls: "x-menu-no-icon",
                                 handler: 'addVectorLayer'
@@ -535,10 +535,10 @@ Ext.define("esapp.view.analysis.mapView",{
                                 boxLabel: 'UoG '+esapp.Utils.getTranslation('level2'), // level 0',
                                 name: 'UoG2',
                                 level: 'admin2',
-                                geojsonfile: 'RIC_UoG_2.geojson',
+                                geojsonfile: 'RIC_UOG_2_g2015_2014.geojson',
                                 checked: false,
-                                linecolor: '#319FD3',
-                                layerorderidx: 3,
+                                linecolor: '#ffcc99',
+                                layerorderidx: 1,
                                 showSeparator: false,
                                 cls: "x-menu-no-icon",
                                 handler: 'addVectorLayer'

@@ -125,9 +125,9 @@
         },{
             "path": "/eStation2/lib/js/Highstock/js/highstock-all.js",
             "remote": true
-//        },{
-//            "path": "/eStation2/lib/js/Highstock/js/modules/exporting.js",
-//            "remote": true
+        },{
+            "path": "/eStation2/lib/js/Highstock/js/modules/exporting.js",
+            "remote": true
 //        },{
 //            "path": "/eStation2/lib/js/Highstock/js/modules/canvas-tools.src.js",
 //            "remote": true
@@ -141,6 +141,15 @@
             // This module, after the dependencies
             "path": "/eStation2/lib/js/Highstock/js/modules/highcharts-export-clientside.js",
             "remote": true
+//        },{
+//            "path": "/eStation2/lib/js/canvg-master/rgbcolor.js",
+//            "remote": true
+//        },{
+//            "path": "/eStation2/lib/js/canvg-master/StackBlur.js",
+//            "remote": true
+//        },{
+//            "path": "/eStation2/lib/js/canvg-master/canvg.js",
+//            "remote": true
 //        },{
 //            "path": "/eStation2/lib/js/Highcharts/js/highcharts.js",
 //            "remote": true
