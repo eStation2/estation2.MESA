@@ -53,10 +53,10 @@ def get_status_PC1():
         response = urlopen(req)
     except URLError as e:
         if hasattr(e, 'reason'):
-            logger.warning('We failed to reach a server: %s' % server_address)
+            logger.warning('We failed to reach a server: %s' % url)
             logger.warning('Reason: %s' % e.reason)
         elif hasattr(e, 'code'):
-            logger.warning('The server %s couldn\'t fulfill the request.' % server_address)
+            logger.warning('The server %s couldn\'t fulfill the request.' % url)
             logger.warning('Error code: %s' % e.code)
         return status_remote_machine
     else:

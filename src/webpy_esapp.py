@@ -887,31 +887,35 @@ class GetDashboard:
         PC1_connection = functions.check_connection('mesa-pc1')
 
         status_PC1 = functions.get_status_PC1()
+	if len(status_PC1) == 0:
+		PC1_dvb_status = None
+		PC1_tellicast_status = None
+		PC1_fts_status = None
+	else:
+		dvb_status = status_PC1['services']['acquisition']['dvb']['status']
+		fts_status = status_PC1['services']['acquisition']['fts']['status']
+		tellicast_status = status_PC1['services']['acquisition']['tellicast']['status']
 
-        dvb_status = status_PC1['services']['acquisition']['dvb']['status']
-        fts_status = status_PC1['services']['acquisition']['fts']['status']
-        tellicast_status = status_PC1['services']['acquisition']['tellicast']['status']
+		if dvb_status == 'unknown':
+		    PC1_dvb_status = None
+		elif dvb_status == 'not running' or dvb_status == 'unlock':
+		    PC1_dvb_status = False
+		else:
+		    PC1_dvb_status = True
 
-        if dvb_status == 'unknown':
-            PC1_dvb_status = None
-        elif dvb_status == 'not running' or dvb_status == 'unlock':
-            PC1_dvb_status = False
-        else:
-            PC1_dvb_status = True
+		if tellicast_status == 'unknown':
+		    PC1_tellicast_status = None
+		elif tellicast_status == 'running':
+		    PC1_tellicast_status = True
+		else:
+		    PC1_tellicast_status = False
 
-        if tellicast_status == 'unknown':
-            PC1_tellicast_status = None
-        elif tellicast_status == 'running':
-            PC1_tellicast_status = True
-        else:
-            PC1_tellicast_status = False
-
-        if fts_status == 'unknown':
-            PC1_fts_status = None
-        elif fts_status == 'running':
-            PC1_fts_status = True
-        else:
-            PC1_fts_status = False
+		if fts_status == 'unknown':
+		    PC1_fts_status = None
+		elif fts_status == 'running':
+		    PC1_fts_status = True
+		else:
+		    PC1_fts_status = False
 
         if systemsettings['type_installation'].lower() == 'full':
             if systemsettings['role'].lower() == 'pc1':
