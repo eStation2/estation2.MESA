@@ -881,43 +881,37 @@ class GetDashboard:
         systemsettings = functions.getSystemSettings()
         status_services = functions.getStatusAllServices()
 
-        # TODO: Use port 80?
-        IP_port = ':22'
-
-        # IP_PC1 = '139.191.147.79:22'
+        # T o D o: Use port 80?
+        # IP_port = ':22'
         # PC1_connection = functions.check_connection(systemsettings['ip_pc1'] + IP_port)
         PC1_connection = functions.check_connection('mesa-pc1')
 
-        status_PC1 = es2system.get_status_PC1()
-        print status_PC1
-        # status_PC1 = {'dvb_status': -1,
-        #               'tellicast_status': 1,
-        #               'fts_status': 0}
+        status_PC1 = functions.get_status_PC1()
 
-        if status_PC1['dvb_status'] == '-1':
+        dvb_status = status_PC1['services']['acquisition']['dvb']['status']
+        fts_status = status_PC1['services']['acquisition']['fts']['status']
+        tellicast_status = status_PC1['services']['acquisition']['tellicast']['status']
+
+        if dvb_status == 'unknown':
             PC1_dvb_status = None
-        elif status_PC1['dvb_status'] == '1':
-            PC1_dvb_status = True
-        else:
+        elif dvb_status == 'not running' or dvb_status == 'unlock':
             PC1_dvb_status = False
+        else:
+            PC1_dvb_status = True
 
-        if status_PC1['tellicast_status'] == '-1':
+        if tellicast_status == 'unknown':
             PC1_tellicast_status = None
-        elif status_PC1['tellicast_status'] == '1':
+        elif tellicast_status == 'running':
             PC1_tellicast_status = True
         else:
             PC1_tellicast_status = False
 
-        if status_PC1['fts_status'] == '-1':
+        if fts_status == 'unknown':
             PC1_fts_status = None
-        elif status_PC1['fts_status'] == '1':
+        elif fts_status == 'running':
             PC1_fts_status = True
         else:
             PC1_fts_status = False
-
-        # PC1_dvb_status = status_PC1['dvb_status']
-        # PC1_tellicast_status = status_PC1['tellicast_status']
-        # PC1_fts_status = status_PC1['fts_status']
 
         if systemsettings['type_installation'].lower() == 'full':
             if systemsettings['role'].lower() == 'pc1':
@@ -1573,7 +1567,6 @@ class GetColorSchemes:
                 legend_dict['defaulticon'] = defaulticon
                 legend_dict['colorschemeHTML'] = colorschemeHTML
                 legendsHTML = generateLegendHTML.generateLegendHTML(legend_id)
-                # print "HALLOOOOOOOO"
                 # print legendsHTML['legendHTML']
                 legend_dict['legendHTML'] = legendsHTML['legendHTML']
                 legend_dict['legendHTMLVertical'] = legendsHTML['legendHTMLVertical']
@@ -1691,7 +1684,8 @@ class GetLogFile:
             if getparams['service'] == 'dbsync':
                 logfilename = '/var/log/bucardo/log.bucardo'
             if getparams['service'] == 'datasync':
-                logfilename = '/var/log/rsyncd.log'
+                # logfilename = '/var/log/rsyncd.log'
+                logfilename = es_constants.es2globals['log_dir']+'rsync.log'
 
         # logfilepath = es_constants.es2globals['log_dir']+logfilename
         # Display only latest (most recent file) - see #69-1

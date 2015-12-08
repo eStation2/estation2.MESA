@@ -90,20 +90,27 @@ function check_a_service()
 	    # Token=$(tail -n $((${nb_lines} - 2)) ${tmp_file_log} | grep -vi "Password" | grep "Processes" | awk '{ print $2 }')
 	    # echo $(tail -n $((${nb_lines} - 2)) ${tmp_file_log})
 	    Token=$(tail -n $((${nb_lines} - 2)) ${tmp_file_log} | grep "not running"| awk '{ print $2 }')
+	    cat ${tmp_file_log} >> /tmp/mylog
+
 	    # if [[ "$Token" == 'running' ]]; then
-	    if [[ "$Token" == '' ]]; then
+	    if [[ $Token == '' ]]; then
 	       Running=1
-	    fi	
+	    else
+	       Running=-1
+	    fi
 	    echo ${Running}
           else
 	    echo -e "\r"
           fi
         fi
        cr=0
+    rm -f ${tmp_file_log}
   fi
 
   return ${cr}
 }
+
+
 
 dvb=$(check_a_service '/etc/init.d/tas_dvbd status')
 tellicast=$(check_a_service '/etc/init.d/tas_tellicastd status')

@@ -16,6 +16,7 @@ import time, datetime
 import tempfile
 import glob
 import tarfile
+import shlex
 
 # import eStation2 modules
 from lib.python import functions
@@ -707,12 +708,21 @@ def loop_system(dry_run=False):
         # Sleep some time
         time.sleep(float(es_constants.es2globals['system_sleep_time_sec']))
 
+def cmd(acmd):
+    try:
+        logger.info(acmd)
+        logger.info(shlex.split(acmd))
+        return subprocess.check_output(shlex.split(acmd))
+    except subprocess.CalledProcessError as pe:
+        logger.error(pe)
+    return None
+
+
 def get_status_PC1():
 #   Get info on the status of the services on PC1:
 #   DVB
 #   Tellicast
 #   FTS
-
 
     status_PC1 = {'dvb_status': -1,
                   'tellicast_status': -1,
@@ -720,19 +730,28 @@ def get_status_PC1():
     err = ''
     try:
         # Check the final status
-        command = [es_constants.es2globals['apps_dir']+'/tools/test_services_pc1.sh', ' 1>/dev/null' ]
+        # command = [es_constants.es2globals['apps_dir']+'/tools/test_services_pc1.sh', ' 1>/dev/null' ]
+        command = es_constants.es2globals['apps_dir']+'/tools/test_services_pc1.sh'
+
         #logger.info(command)
-        p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        out, err = p.communicate()
-        #logger.info(out)
+        # p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # out, err = p.communicate()
+        out = cmd(command)
+        logger.info(out)
         tokens=string.split(out)
-        #logger.info(tokens[0])
-        #logger.info(tokens[1])
-        #logger.info(tokens[2])
+
+        logger.info(tokens[0])
+        logger.info(tokens[1])
+        logger.info(tokens[2])
 
         dvb_status=string.split(tokens[0],'=')[1]
         tellicast_status=string.split(tokens[1],'=')[1]
         fts_status=string.split(tokens[2],'=')[1]
+
+        logger.info(dvb_status)
+        logger.info(tellicast_status)
+        logger.info(fts_status)
+
 
     except:
         logger.error('Error in checking PC1: %s' % err)
