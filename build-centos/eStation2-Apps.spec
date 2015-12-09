@@ -58,7 +58,7 @@ getent passwd adminuser >/dev/null || useradd -c "eStation Administrator" -s /bi
 # Ajout du groupe estation
 echo "`date +'%Y-%m-%d %H:%M '` Checking/creating estation Group"
 getent group estation >/dev/null || groupadd estation
-# Association des utilisateurs aux groupes
+# Association des utilisateurs aux groupes
 echo "`date +'%Y-%m-%d %H:%M '` Checking/adding Users to Groups"
 awk -F':' '/estation/{print $4}' /etc/group | grep adminuser >/dev/null || usermod -a -G estation adminuser
 awk -F':' '/apache/{print $4}' /etc/group | grep analyst >/dev/null || usermod -a -G apache analyst
@@ -222,6 +222,7 @@ if [[ `su postgres -c "psql -c 'select datname from pg_database'"  2>/dev/null|g
 else
 	echo "$(date +'%Y-%m-%d %H:%M ') Bucardo package already installed. Continue"
 	bucardo set log_level=terse
+	bucardo set reason_file='/var/log/bucardo/bucardo.restart.reason'
 fi
 # Create log and run dir for Bucardo
 mkdir -p ${log_dir}
@@ -245,4 +246,5 @@ cp -r /var/www/eStation2-%{version}/* /var/www/eStation2-%{version}.bck/
 %postun
 rm -fr /var/www/eStation2-%{version}
 mv /var/www/eStation2-%{version}.bck /var/www/eStation2-%{version}
+
 
