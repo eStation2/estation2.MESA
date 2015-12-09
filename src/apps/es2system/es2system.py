@@ -189,7 +189,7 @@ def system_db_sync_full(pc_role):
 
     # Inject the data into the DB of the other PC
     sync_command = 'psql -h '+other_pc+' -p 5432 -U estation -d estationdb -f '+dump_filename+\
-                   '1>/dev/null 2>/eStation2/log/system_db_sync_full.log'
+                   ' 1>/dev/null 2>/eStation2/log/system_db_sync_full.log'
 
     status += os.system(sync_command)
 
@@ -612,8 +612,15 @@ def loop_system(dry_run=False):
 
 	    do_bucardo_config = True	
             if system_settings['role'] == 'PC2':
+		status_otherPC = functions.get_remote_system_status('mesa-pc3')
+		mode_otherPC = status_otherPC['mode']
+		
                 # ip_target = system_settings['ip_pc3']
                 if system_settings['mode'] == 'nominal':
+		    if mode_otherPC == 'recovery':
+			do_data_sync = False
+		        logger.info("Do not do data_sync because other PC is in Recovery Mode")
+
                     schemas_db_sync = ['products']
                     schemas_db_dump = ['products', 'analysis']
                     do_convert_spirits = True
@@ -631,9 +638,15 @@ def loop_system(dry_run=False):
                     bucardo_action = 'stop'
 
             if system_settings['role'] == 'PC3':
+		status_otherPC = functions.get_remote_system_status('mesa-pc2')
+		mode_otherPC = status_otherPC['mode']
 
                 # ip_target = system_settings['ip_pc2']
                 if system_settings['mode'] == 'nominal':
+		    if mode_otherPC == 'recovery':
+			do_data_sync = False
+		        logger.info("Do not do data_sync because other PC is in Recovery Mode")
+
                     schemas_db_sync = ['analysis']
                     schemas_db_dump = ['products', 'analysis']
                     bucardo_action = 'start'

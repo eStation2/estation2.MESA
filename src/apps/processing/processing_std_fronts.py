@@ -146,7 +146,7 @@ def processing_std_fronts(res_queue, pipeline_run_level=0, pipeline_printout_lev
         fwrite_id=None
 
     if pipeline_run_level > 0:
-        pipeline_run(verbose=pipeline_run_level, logger=spec_logger)
+        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, history_file='/eStation2/log/.ruffus_history.sqlite')
 
     if pipeline_printout_level > 0:
         pipeline_printout(verbose=pipeline_printout_level, output_stream=fwrite_id)

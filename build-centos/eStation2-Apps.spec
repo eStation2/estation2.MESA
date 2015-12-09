@@ -237,6 +237,11 @@ chmod 777 ${run_dir}
 my_role=$(hostname | cut -d '-' -f2)
 sed -i "s|.*role.=.*|role = ${my_role}|" /eStation2/settings/system_settings.ini
 
+# Check the link of libmapserver exist
+#if [[ ! -h /usr/lib64/libmapserver.so ]]; then ln -fs /usr/local/lib64/libmapserver.so /usr/lib64/; fi
+#if [[ ! -h /usr/lib64/libmapserver.so.1 ]]; then ln -fs /usr/local/lib64/libmapserver.so.1 /usr/lib64/; fi
+#if [[ ! -h /usr/lib64/libmapserver.so.6.4.1 ]]; then ln -fs /usr/local/lib64/libmapserver.so.6.4.1 /usr/lib64/; fi
+
 # Before uninstall: remove the link and copy all code into a bck dir
 %preun
 mkdir -p /var/www/eStation2-%{version}.bck
