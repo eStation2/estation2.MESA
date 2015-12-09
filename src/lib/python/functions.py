@@ -360,7 +360,7 @@ def tojson(queryresult):
 
 
 
-def internet_on():
+def _internet_on():
     import urllib2
     try:
         response = urllib2.urlopen('http://www.google.com', timeout=1)
@@ -369,6 +369,19 @@ def internet_on():
     return False
 
 
+def internet_on():
+    import os
+    command = 'ping -c 1 -W 2 8.8.8.8'
+    try:
+        response = os.system(command)
+    except: 
+        pass    #  ping error
+        return False
+    if response == 0:
+        return True
+    else:
+        return False
+	
 def is_connected():
     import socket
     REMOTE_SERVER = "www.google.com"
