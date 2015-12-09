@@ -129,7 +129,7 @@ def system_bucardo_service(action):
             command = ['bucardo','start']
             p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = p.communicate()
-
+            logger.info('Bucardo start message: %s' % err)
     if action == 'stop':
         if not status_on:
             logger.info('Bucardo already stopped. Continue')
@@ -569,9 +569,11 @@ def loop_system(dry_run=False):
     delay_data_sync_minutes = es_constants.es2globals['system_delay_data_sync_min']
     time_for_db_dump = es_constants.es2globals['system_time_db_dump_hhmm']
     time_for_spirits_conv = es_constants.es2globals['system_time_spirits_conv']
+    do_bucardo_config = False
 
     # Loop to manage the 'cron-like' operations, i.e.:
 
+    #   0. Check bucardo config	
     #   a. Data sync (not anymore, done by TPZF)
     #   b. DB sync: bucardo
     #   c. DB dump (create/manage)
@@ -608,6 +610,7 @@ def loop_system(dry_run=False):
         # Implement the logic of operations based on type/role/mode
         if system_settings['type_installation'] == 'Full':
 
+	    do_bucardo_config = True	
             if system_settings['role'] == 'PC2':
                 # ip_target = system_settings['ip_pc3']
                 if system_settings['mode'] == 'nominal':
@@ -652,6 +655,10 @@ def loop_system(dry_run=False):
 
         logger.info("data_sync" + str(do_data_sync))
 
+        # do_bucardo_config
+	if do_bucardo_config:
+            system_bucardo_config()
+	
         # do_data_sync
         operation = 'data_sync'
         if do_data_sync:
