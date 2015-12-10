@@ -613,13 +613,19 @@ def loop_system(dry_run=False):
 	    do_bucardo_config = True	
             if system_settings['role'] == 'PC2':
 		status_otherPC = functions.get_remote_system_status('mesa-pc3')
-		mode_otherPC = status_otherPC['mode']
-		
+		if len(status_otherPC) != 0:
+			mode_otherPC = status_otherPC['mode']
+		else:
+			mode_otherPC = 'unreachable'
+
                 # ip_target = system_settings['ip_pc3']
                 if system_settings['mode'] == 'nominal':
 		    if mode_otherPC == 'recovery':
 			do_data_sync = False
 		        logger.info("Do not do data_sync because other PC is in Recovery Mode")
+		    elif mode_otherPC == 'unreachable':
+			do_data_sync = False
+		        logger.info("Do not do data_sync because other PC is not reachable")
 
                     schemas_db_sync = ['products']
                     schemas_db_dump = ['products', 'analysis']
@@ -639,13 +645,20 @@ def loop_system(dry_run=False):
 
             if system_settings['role'] == 'PC3':
 		status_otherPC = functions.get_remote_system_status('mesa-pc2')
-		mode_otherPC = status_otherPC['mode']
+
+		if len(status_otherPC) != 0:
+			mode_otherPC = status_otherPC['mode']
+		else:
+			mode_otherPC = 'unreachable'
 
                 # ip_target = system_settings['ip_pc2']
                 if system_settings['mode'] == 'nominal':
 		    if mode_otherPC == 'recovery':
 			do_data_sync = False
 		        logger.info("Do not do data_sync because other PC is in Recovery Mode")
+		    elif mode_otherPC == 'unreachable':
+			do_data_sync = False
+		        logger.info("Do not do data_sync because other PC is not reachable")
 
                     schemas_db_sync = ['analysis']
                     schemas_db_dump = ['products', 'analysis']
