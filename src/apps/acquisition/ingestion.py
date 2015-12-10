@@ -359,7 +359,13 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
             my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
             # Move files to 'error/storage' directory
             for error_file in input_files:
-                shutil.move(error_file, ingest_error_dir)
+                if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
+                    shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
+                try: 
+                    shutil.move(error_file, ingest_error_dir)
+                except:
+                    my_logger.warning("Error in moving file: %s " % error_file)
+
             shutil.rmtree(tmpdir)
             return 1
         # Error occurred and was detected in pre_process routine
@@ -367,7 +373,14 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
             my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
             # Move files to 'error/storage' directory
             for error_file in input_files:
-                shutil.move(error_file, ingest_error_dir)
+                if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
+                    shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
+                try: 
+                    shutil.move(error_file, ingest_error_dir)
+                except:
+                    my_logger.warning("Error in moving file: %s " % error_file)
+
+
             shutil.rmtree(tmpdir)
             return 1
     else:
@@ -379,7 +392,13 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
         my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
         # Move files to 'error/storage' directory
         for error_file in input_files:
-            shutil.move(error_file, ingest_error_dir)
+            if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
+                shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
+            try:
+                shutil.move(error_file, ingest_error_dir)
+            except:
+                my_logger.warning("Error in moving file: %s " % error_file)
+
         shutil.rmtree(tmpdir)
         return 1
 
