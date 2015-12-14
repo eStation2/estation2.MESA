@@ -34,10 +34,41 @@ import ast
 # Import eStation2 modules
 from lib.python import es_logging as log
 from config import es_constants
-
+# from json import JSONEncoder
 logger = log.my_logger(__name__)
 
 dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'derived'}
+
+# class ObjectEncoder(JSONEncoder):
+#     def default(self, o):
+#         return o.__dict__
+
+def get_status_PC1():
+    from urllib2 import Request, urlopen, URLError
+    status_remote_machine = []
+    # Set "/esapp" in factorysettings.ini as webserver_root because on CentOS no /esapp is needed!
+    url = "http://mesa-pc1:5000/system-data"
+    req = Request(url)
+    try:
+        response = urlopen(req)
+    except URLError as e:
+        if hasattr(e, 'reason'):
+            logger.warning('We failed to reach a server: %s' % url)
+            logger.warning('Reason: %s' % e.reason)
+        elif hasattr(e, 'code'):
+            logger.warning('The server %s couldn\'t fulfill the request.' % url)
+            logger.warning('Error code: %s' % e.code)
+        return status_remote_machine
+    else:
+        # everything is fine
+        # response = urllib2.urlopen("http://" + server_address + "/esapp/dashboard/systemstatus")
+        result = response.read()
+        # status_remote_machine = ast.literal_eval(result)
+
+        status_remote_machine = json.loads(result)
+
+        response.close()  # best practice to close the file
+    return status_remote_machine
 
 
 def get_remote_system_status(server_address):
@@ -329,7 +360,7 @@ def tojson(queryresult):
 
 
 
-def internet_on():
+def _internet_on():
     import urllib2
     try:
         response = urllib2.urlopen('http://www.google.com', timeout=1)
@@ -338,6 +369,19 @@ def internet_on():
     return False
 
 
+def internet_on():
+    import os
+    command = 'ping -c 1 -W 2 8.8.8.8'
+    try:
+        response = os.system(command)
+    except: 
+        pass    #  ping error
+        return False
+    if response == 0:
+        return True
+    else:
+        return False
+	
 def is_connected():
     import socket
     REMOTE_SERVER = "www.google.com"

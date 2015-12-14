@@ -58,7 +58,7 @@ getent passwd adminuser >/dev/null || useradd -c "eStation Administrator" -s /bi
 # Ajout du groupe estation
 echo "`date +'%Y-%m-%d %H:%M '` Checking/creating estation Group"
 getent group estation >/dev/null || groupadd estation
-# Association des utilisateurs aux groupes
+# Association des utilisateurs aux groupes
 echo "`date +'%Y-%m-%d %H:%M '` Checking/adding Users to Groups"
 awk -F':' '/estation/{print $4}' /etc/group | grep adminuser >/dev/null || usermod -a -G estation adminuser
 awk -F':' '/apache/{print $4}' /etc/group | grep analyst >/dev/null || usermod -a -G apache analyst
@@ -154,7 +154,7 @@ EOF
         echo "`date +'%Y-%m-%d %H:%M '` Create estationdb Database" 
         su postgres -c psql << EOF
 ALTER ROLE estation WITH CREATEDB;
-CREATE DATABASE estationdb WITH OWNER estation;
+CREATE DATABASE estationdb WITH OWNER estation TEMPLATE template0 ENCODING 'UTF8';
 ALTER USER estation WITH ENCRYPTED PASSWORD 'mesadmin';
 EOF
     else
@@ -222,6 +222,7 @@ if [[ `su postgres -c "psql -c 'select datname from pg_database'"  2>/dev/null|g
 else
 	echo "$(date +'%Y-%m-%d %H:%M ') Bucardo package already installed. Continue"
 	bucardo set log_level=terse
+	bucardo set reason_file='/var/log/bucardo/bucardo.restart.reason'
 fi
 # Create log and run dir for Bucardo
 mkdir -p ${log_dir}
@@ -236,6 +237,11 @@ chmod 777 ${run_dir}
 my_role=$(hostname | cut -d '-' -f2)
 sed -i "s|.*role.=.*|role = ${my_role}|" /eStation2/settings/system_settings.ini
 
+# Check the link of libmapserver exist
+#if [[ ! -h /usr/lib64/libmapserver.so ]]; then ln -fs /usr/local/lib64/libmapserver.so /usr/lib64/; fi
+#if [[ ! -h /usr/lib64/libmapserver.so.1 ]]; then ln -fs /usr/local/lib64/libmapserver.so.1 /usr/lib64/; fi
+#if [[ ! -h /usr/lib64/libmapserver.so.6.4.1 ]]; then ln -fs /usr/local/lib64/libmapserver.so.6.4.1 /usr/lib64/; fi
+
 # Before uninstall: remove the link and copy all code into a bck dir
 %preun
 mkdir -p /var/www/eStation2-%{version}.bck
@@ -245,4 +251,5 @@ cp -r /var/www/eStation2-%{version}/* /var/www/eStation2-%{version}.bck/
 %postun
 rm -fr /var/www/eStation2-%{version}
 mv /var/www/eStation2-%{version}.bck /var/www/eStation2-%{version}
+
 

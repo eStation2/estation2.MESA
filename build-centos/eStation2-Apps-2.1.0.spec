@@ -236,6 +236,10 @@ chmod 777 ${run_dir}
 my_role=$(hostname | cut -d '-' -f2)
 sed -i "s|.*role.=.*|role = ${my_role}|" /eStation2/settings/system_settings.ini
 
+# Set the 'version' in system_settings
+my_version=%{version}
+sed -i "s|.*active_version.=.*|active_version = ${my_version}|" /eStation2/settings/system_settings.ini
+
 # Before uninstall: remove the link and copy all code into a bck dir
 %preun
 mkdir -p /var/www/eStation2-%{version}.bck

@@ -26,9 +26,9 @@ Ext.define('esapp.view.dashboard.DashboardController', {
             pc2Active = false,
             pc3Active = false,
             pc1Disabled = true,
-            pc2DisabledPartial = true,
+            pc2DisabledPartial = false,
             pc3DisabledPartial = true,
-            pc2DisabledAll = true,
+            pc2DisabledAll = false,
             pc3DisabledAll = true;
         if (reload){
 //            console.info('reloading dashboard...');
@@ -145,6 +145,7 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                     if (me.activePC == 'pc3') {
                         pc3Active = true;
                         pc3DisabledAll = false;
+			pc2DisabledPartial = true;
                         pc2DisabledAll = true;
 
                         if (me.PC3_mode == 'nominal') {
