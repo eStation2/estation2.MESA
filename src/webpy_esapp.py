@@ -2283,7 +2283,7 @@ class GetProductLayer:
         #import StringIO
         import mapscript
         getparams = web.input()
-
+        print mapscript.MS_VERSION
         p = Product(product_code=getparams['productcode'], version=getparams['productversion'])
         dataset = p.get_dataset(mapset=getparams['mapsetcode'], sub_product_code=getparams['subproductcode'])
         # print dataset.fullpath
@@ -2328,6 +2328,8 @@ class GetProductLayer:
         errorfile = es_constants.log_dir+"/mapserver_error.log"
         # imagepath = es_constants.apps_dir+"/analysis/ms_tmp/"
 
+        # print mapscript.MS_VERSION
+
         owsrequest = mapscript.OWSRequest()
 
         inputparams = web.input()
@@ -2359,10 +2361,10 @@ class GetProductLayer:
         productmap.units = mapscript.MS_DD
 
         coords = map(float, inputparams.BBOX.split(","))
-        llx = coords[0]
-        lly = coords[1]
-        urx = coords[2]
-        ury = coords[3]
+        lly = coords[0]
+        llx = coords[1]
+        ury = coords[2]
+        urx = coords[3]
         productmap.setExtent(llx, lly, urx, ury)   # -26, -35, 60, 38
 
         # epsg must be in lowercase because in unix/linux systems the proj filenames are lowercase!
@@ -2468,15 +2470,25 @@ class GetProductLayer:
         #     os.remove(result_map_file)
         productmap.save(result_map_file)
         image = productmap.draw()
-        # image.save(es_constants.apps_dir+'/analysis/'+filenamenoextention+'.png')
+        image.save(es_constants.apps_dir+'/analysis/'+filenamenoextention+'.png')
 
-        contents = productmap.OWSDispatch(owsrequest)
-        content_type = mapscript.msIO_stripStdoutBufferContentType()
-        content = mapscript.msIO_getStdoutBufferBytes()
-        #web.header = "Content-Type","%s; charset=utf-8"%content_type
+        filename = es_constants.apps_dir+'/analysis/'+filenamenoextention+'.png'
         web.header('Content-type', 'image/png')
-        #web.header('Content-transfer-encoding', 'binary')
-        return content
+        f = open(filename, 'rb')
+        while 1:
+            buf = f.read(1024 * 8)
+            if not buf:
+                break
+            yield buf
+        os.remove(filename)
+
+        # contents = productmap.OWSDispatch(owsrequest)
+        # content_type = mapscript.msIO_stripStdoutBufferContentType()
+        # content = mapscript.msIO_getStdoutBufferBytes()
+        # #web.header = "Content-Type","%s; charset=utf-8"%content_type
+        # web.header('Content-type', 'image/png')
+        # #web.header('Content-transfer-encoding', 'binary')
+        # return content
 
 
 class GetBackgroundLayer:

@@ -513,7 +513,7 @@ Ext.define("esapp.view.system.systemsettings",{
                    id: 'base_dir',
                    name: 'base_dir',
                    bind: '{system_setting.base_dir}',
-                   xtype: 'textfield',
+                   xtype: 'displayfield',
                    fieldLabel: me.form_fieldlabel_base_dir,
                    style:'font-weight: bold;',
                    allowBlank: false
@@ -521,7 +521,7 @@ Ext.define("esapp.view.system.systemsettings",{
                    id: 'base_tmp_dir',
                    name: 'base_tmp_dir',
                    bind: '{system_setting.base_tmp_dir}',
-                   xtype: 'textfield',
+                   xtype: 'displayfield',
                    fieldLabel: me.form_fieldlabel_base_tmp_dir,
                    style:'font-weight: bold;',
                    allowBlank: false
