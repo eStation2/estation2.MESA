@@ -497,7 +497,7 @@ def processing_std_precip(res_queue, pipeline_run_level=0,pipeline_printout_leve
 
     if pipeline_run_level > 0:
         spec_logger.info("Run the pipeline %s" % 'processing_std_precip')
-        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger)
+        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger, history_file='/eStation2/log/.ruffus_history.sqlite')
         tasks = pipeline_get_task_names()
         spec_logger.info("Run the pipeline %s" % tasks[0])
         spec_logger.info("After running the pipeline %s" % 'processing_std_precip')

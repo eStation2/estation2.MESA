@@ -34,3 +34,7 @@ class TestFunctions(TestCase):
             PC2_system_execution_time = status_remote_machine['system_execution_time']
 
         print "Done"
+
+    def test_get_status_PC1(self):
+        status_PC1 = functions.get_status_PC1()
+        print status_PC1

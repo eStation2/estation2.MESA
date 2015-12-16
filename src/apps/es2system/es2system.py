@@ -16,6 +16,7 @@ import time, datetime
 import tempfile
 import glob
 import tarfile
+import shlex
 
 # import eStation2 modules
 from lib.python import functions
@@ -101,7 +102,7 @@ def system_data_sync(source, target):
     logger.debug("Entering routine %s" % 'system_data_sync')
     command = 'rsync -CavK '+source+' '+target+ ' >> '+logfile
     logger.debug("Executing %s" % command)
-    return
+    # return
     status = os.system(command)
     if status:
         logger.error("Error in executing %s" % command)
@@ -128,7 +129,7 @@ def system_bucardo_service(action):
             command = ['bucardo','start']
             p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = p.communicate()
-
+            logger.info('Bucardo start message: %s' % err)
     if action == 'stop':
         if not status_on:
             logger.info('Bucardo already stopped. Continue')
@@ -188,7 +189,7 @@ def system_db_sync_full(pc_role):
 
     # Inject the data into the DB of the other PC
     sync_command = 'psql -h '+other_pc+' -p 5432 -U estation -d estationdb -f '+dump_filename+\
-                   '1>/dev/null 2>/eStation2/log/system_db_sync_full.log'
+                   ' 1>/dev/null 2>/eStation2/log/system_db_sync_full.log'
 
     status += os.system(sync_command)
 
@@ -568,9 +569,11 @@ def loop_system(dry_run=False):
     delay_data_sync_minutes = es_constants.es2globals['system_delay_data_sync_min']
     time_for_db_dump = es_constants.es2globals['system_time_db_dump_hhmm']
     time_for_spirits_conv = es_constants.es2globals['system_time_spirits_conv']
+    do_bucardo_config = False
 
     # Loop to manage the 'cron-like' operations, i.e.:
 
+    #   0. Check bucardo config	
     #   a. Data sync (not anymore, done by TPZF)
     #   b. DB sync: bucardo
     #   c. DB dump (create/manage)
@@ -607,9 +610,23 @@ def loop_system(dry_run=False):
         # Implement the logic of operations based on type/role/mode
         if system_settings['type_installation'] == 'Full':
 
+	    do_bucardo_config = True	
             if system_settings['role'] == 'PC2':
+		status_otherPC = functions.get_remote_system_status('mesa-pc3')
+		if len(status_otherPC) != 0:
+			mode_otherPC = status_otherPC['mode']
+		else:
+			mode_otherPC = 'unreachable'
+
                 # ip_target = system_settings['ip_pc3']
                 if system_settings['mode'] == 'nominal':
+		    if mode_otherPC == 'recovery':
+			do_data_sync = False
+		        logger.info("Do not do data_sync because other PC is in Recovery Mode")
+		    elif mode_otherPC == 'unreachable':
+			do_data_sync = False
+		        logger.info("Do not do data_sync because other PC is not reachable")
+
                     schemas_db_sync = ['products']
                     schemas_db_dump = ['products', 'analysis']
                     do_convert_spirits = True
@@ -627,9 +644,22 @@ def loop_system(dry_run=False):
                     bucardo_action = 'stop'
 
             if system_settings['role'] == 'PC3':
+		status_otherPC = functions.get_remote_system_status('mesa-pc2')
+
+		if len(status_otherPC) != 0:
+			mode_otherPC = status_otherPC['mode']
+		else:
+			mode_otherPC = 'unreachable'
 
                 # ip_target = system_settings['ip_pc2']
                 if system_settings['mode'] == 'nominal':
+		    if mode_otherPC == 'recovery':
+			do_data_sync = False
+		        logger.info("Do not do data_sync because other PC is in Recovery Mode")
+		    elif mode_otherPC == 'unreachable':
+			do_data_sync = False
+		        logger.info("Do not do data_sync because other PC is not reachable")
+
                     schemas_db_sync = ['analysis']
                     schemas_db_dump = ['products', 'analysis']
                     bucardo_action = 'start'
@@ -649,16 +679,24 @@ def loop_system(dry_run=False):
             schemas_db_sync = []
             schemas_db_dump = ['products', 'analysis']
 
+        logger.info("data_sync" + str(do_data_sync))
+
+        # do_bucardo_config
+	if do_bucardo_config:
+            system_bucardo_config()
+	
         # do_data_sync
-        # operation = 'data_sync'
-        # if do_data_sync:
-        #     check_time = check_delay_time(operation, delay_minutes=delay_data_sync_minutes)
-        #     if check_time:
-        #         logger.info("Executing data synchronization")
-        #         data_source = es_constants.es2globals['processing_dir']
-        #         data_target = ip_target+'::products'+es_constants.es2globals['processing_dir']
-        #         system_data_sync(data_source, data_target)
-        #         check_delay_time(operation,delay_minutes=delay_data_sync_minutes, write=True)
+        operation = 'data_sync'
+        if do_data_sync:
+            check_time = check_delay_time(operation, delay_minutes=delay_data_sync_minutes)
+            logger.info("check_time: " + str(check_time))
+            if check_time:
+                logger.info("Executing data synchronization")
+                data_source = es_constants.es2globals['processing_dir']
+                # data_target = ip_target+'::products'+es_constants.es2globals['processing_dir']
+                data_target = 'PC3::products'
+                system_data_sync(data_source, data_target)
+                check_delay_time(operation,delay_minutes=delay_data_sync_minutes, write=True)
 
         # DB sync: execute every cycle if in system_setting (no delay)
         operation = 'db_sync'
@@ -703,12 +741,21 @@ def loop_system(dry_run=False):
         # Sleep some time
         time.sleep(float(es_constants.es2globals['system_sleep_time_sec']))
 
+def cmd(acmd):
+    try:
+        logger.info(acmd)
+        logger.info(shlex.split(acmd))
+        return subprocess.check_output(shlex.split(acmd))
+    except subprocess.CalledProcessError as pe:
+        logger.error(pe)
+    return None
+
+
 def get_status_PC1():
 #   Get info on the status of the services on PC1:
 #   DVB
 #   Tellicast
 #   FTS
-
 
     status_PC1 = {'dvb_status': -1,
                   'tellicast_status': -1,
@@ -716,19 +763,28 @@ def get_status_PC1():
     err = ''
     try:
         # Check the final status
-        command = [es_constants.es2globals['apps_dir']+'/tools/test_services_pc1.sh', ' 1>/dev/null' ]
+        # command = [es_constants.es2globals['apps_dir']+'/tools/test_services_pc1.sh', ' 1>/dev/null' ]
+        command = es_constants.es2globals['apps_dir']+'/tools/test_services_pc1.sh'
+
         #logger.info(command)
-        p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        out, err = p.communicate()
-        #logger.info(out)
+        # p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # out, err = p.communicate()
+        out = cmd(command)
+        logger.info(out)
         tokens=string.split(out)
-        #logger.info(tokens[0])
-        #logger.info(tokens[1])
-        #logger.info(tokens[2])
+
+        logger.info(tokens[0])
+        logger.info(tokens[1])
+        logger.info(tokens[2])
 
         dvb_status=string.split(tokens[0],'=')[1]
         tellicast_status=string.split(tokens[1],'=')[1]
         fts_status=string.split(tokens[2],'=')[1]
+
+        logger.info(dvb_status)
+        logger.info(tellicast_status)
+        logger.info(fts_status)
+
 
     except:
         logger.error('Error in checking PC1: %s' % err)

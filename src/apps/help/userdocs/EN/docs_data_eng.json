@@ -2,28 +2,28 @@
     "name": "doc1",
     "title": "USER MANUAL",
     "thumb": "pdf",
-    "url": "help/getfile?lang=eng&file=eStation 2.0 User Manual D1.1.pdf",
+    "url": "help/getfile?lang=eng&file=eStation 2.0 User Manual V1.0.pdf",
     "type": "USER DOCUMENTATION",
-    "uploaded": "OCTOBER 30, 2015"
+    "uploaded": "OCTOBER 30, 2016"
 },{
     "name": "doc2",
     "title": "ADMINISTATION MANUAL",
     "thumb": "pdf",
-    "url": "help/getfile?lang=eng&file=eStation 2.0 Administration Manual D1.1.pdf",
+    "url": "help/getfile?lang=eng&file=eStation 2.0 Administration Manual V1.0.pdf",
     "type": "USER DOCUMENTATION",
-    "uploaded": "OCTOBER 30, 2015"
+    "uploaded": "OCTOBER 30, 2016"
 },{
     "name": "doc3",
     "title": "INSTALLATION MANUAL",
     "thumb": "pdf",
-    "url": "help/getfile?lang=eng&file=eStation 2.0 Installation Manual.pdf",
+    "url": "help/getfile?lang=eng&file=TASF-MESA-Software Installation Manual for MESA station-MIM-10-v1.00.pdf",
     "type": "USER DOCUMENTATION",
-    "uploaded": "OCTOBER 30, 2015"
+    "uploaded": "OCTOBER 30, 2016"
 },{
     "name": "doc4",
     "title": "PRODUCT REPORT",
     "thumb": "pdf",
-    "url": "help/getfile?lang=eng&file=eStation_2.0_ProductReport.pdf",
+    "url": "help/getfile?lang=eng&file=eStation 2.0 Product Report V1.0.pdf",
     "type": "USER DOCUMENTATION",
-    "uploaded": "OCTOBER 30, 2015"
+    "uploaded": "OCTOBER 30, 2016"
 }]

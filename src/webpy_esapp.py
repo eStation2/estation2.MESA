@@ -881,42 +881,41 @@ class GetDashboard:
         systemsettings = functions.getSystemSettings()
         status_services = functions.getStatusAllServices()
 
-        # TODO: Use port 80?
-        IP_port = ':22'
-
-        # IP_PC1 = '139.191.147.79:22'
+        # T o D o: Use port 80?
+        # IP_port = ':22'
         # PC1_connection = functions.check_connection(systemsettings['ip_pc1'] + IP_port)
         PC1_connection = functions.check_connection('mesa-pc1')
 
-        status_PC1 = es2system.get_status_PC1()
-        # status_PC1 = {'dvb_status': -1,
-        #               'tellicast_status': 1,
-        #               'fts_status': 0}
+        status_PC1 = functions.get_status_PC1()
+	if len(status_PC1) == 0:
+		PC1_dvb_status = None
+		PC1_tellicast_status = None
+		PC1_fts_status = None
+	else:
+		dvb_status = status_PC1['services']['acquisition']['dvb']['status']
+		fts_status = status_PC1['services']['acquisition']['fts']['status']
+		tellicast_status = status_PC1['services']['acquisition']['tellicast']['status']
 
-        if status_PC1['dvb_status'] == -1:
-            PC1_dvb_status = None
-        elif status_PC1['dvb_status'] == 1:
-            PC1_dvb_status = True
-        else:
-            PC1_dvb_status = False
+		if dvb_status == 'unknown':
+		    PC1_dvb_status = None
+		elif dvb_status == 'not running' or dvb_status == 'unlock':
+		    PC1_dvb_status = False
+		else:
+		    PC1_dvb_status = True
 
-        if status_PC1['tellicast_status'] == -1:
-            PC1_tellicast_status = None
-        elif status_PC1['tellicast_status'] == 1:
-            PC1_tellicast_status = True
-        else:
-            PC1_tellicast_status = False
+		if tellicast_status == 'unknown':
+		    PC1_tellicast_status = None
+		elif tellicast_status == 'running':
+		    PC1_tellicast_status = True
+		else:
+		    PC1_tellicast_status = False
 
-        if status_PC1['fts_status'] == -1:
-            PC1_fts_status = None
-        elif status_PC1['fts_status'] == 1:
-            PC1_fts_status = True
-        else:
-            PC1_fts_status = False
-
-        # PC1_dvb_status = status_PC1['dvb_status']
-        # PC1_tellicast_status = status_PC1['tellicast_status']
-        # PC1_fts_status = status_PC1['fts_status']
+		if fts_status == 'unknown':
+		    PC1_fts_status = None
+		elif fts_status == 'running':
+		    PC1_fts_status = True
+		else:
+		    PC1_fts_status = False
 
         if systemsettings['type_installation'].lower() == 'full':
             if systemsettings['role'].lower() == 'pc1':
@@ -1571,7 +1570,6 @@ class GetColorSchemes:
                 legend_dict['defaulticon'] = defaulticon
                 legend_dict['colorschemeHTML'] = colorschemeHTML
                 legendsHTML = generateLegendHTML.generateLegendHTML(legend_id)
-                # print "HALLOOOOOOOO"
                 # print legendsHTML['legendHTML']
                 legend_dict['legendHTML'] = legendsHTML['legendHTML']
                 legend_dict['legendHTMLVertical'] = legendsHTML['legendHTMLVertical']
@@ -1689,7 +1687,8 @@ class GetLogFile:
             if getparams['service'] == 'dbsync':
                 logfilename = '/var/log/bucardo/log.bucardo'
             if getparams['service'] == 'datasync':
-                logfilename = '/var/log/rsyncd.log'
+                # logfilename = '/var/log/rsyncd.log'
+                logfilename = es_constants.es2globals['log_dir']+'rsync.log'
 
         # logfilepath = es_constants.es2globals['log_dir']+logfilename
         # Display only latest (most recent file) - see #69-1
@@ -2283,7 +2282,7 @@ class GetProductLayer:
         #import StringIO
         import mapscript
         getparams = web.input()
-        print mapscript.MS_VERSION
+
         p = Product(product_code=getparams['productcode'], version=getparams['productversion'])
         dataset = p.get_dataset(mapset=getparams['mapsetcode'], sub_product_code=getparams['subproductcode'])
         # print dataset.fullpath
@@ -2319,8 +2318,21 @@ class GetProductLayer:
         #contents = buf.getvalue()
         #return contents
 
-        #logger.debug("MapServer: Installing stdout to buffer.")
-        mapscript.msIO_installStdoutToBuffer()
+        # #logger.debug("MapServer: Installing stdout to buffer.")
+        # mapscript.msIO_installStdoutToBuffer()
+        #
+        # owsrequest = mapscript.OWSRequest()
+        #
+        # inputparams = web.input()
+        # for k, v in inputparams.iteritems():
+        #     print k + ':' + v
+        #     if k not in ('productcode', 'subproductcode', 'mapsetcode', 'productversion', 'legendid', 'date' 'TRANSPARENT'):
+        #         # if k == 'CRS':
+        #         #     owsrequest.setParameter('SRS', v)
+        #         owsrequest.setParameter(k.upper(), v)
+        #
+        # #owsrequest.setParameter(k.upper(), v)
+
 
         # projlib = "/usr/share/proj/"
         projlib = es_constants.proj4_lib_dir
@@ -2328,14 +2340,7 @@ class GetProductLayer:
         errorfile = es_constants.log_dir+"/mapserver_error.log"
         # imagepath = es_constants.apps_dir+"/analysis/ms_tmp/"
 
-        # print mapscript.MS_VERSION
-
-        owsrequest = mapscript.OWSRequest()
-
         inputparams = web.input()
-        for k, v in inputparams.iteritems():
-            #print k + ':' + v
-            owsrequest.setParameter(k.upper(), v)
 
         filenamenoextention = functions.set_path_filename(filedate,
                                                getparams['productcode'],
@@ -2343,7 +2348,8 @@ class GetProductLayer:
                                                getparams['mapsetcode'],
                                                getparams['productversion'],
                                                '')
-        owsrequest.setParameter("LAYERS", filenamenoextention)
+        # owsrequest.setParameter("LAYERS", filenamenoextention)
+        # owsrequest.setParameter("UNIT", mapscript.MS_METERS)
 
         productmap = mapscript.mapObj(es_constants.template_mapfile)
         productmap.setConfigOption("PROJ_LIB", projlib)
@@ -2356,7 +2362,8 @@ class GetProductLayer:
         #outputformat_gd = mapscript.outputFormatObj('GD/GIF', 'gif')
         #productmap.appendOutputFormat(outputformat_gd)
         productmap.selectOutputFormat('png')
-        productmap.debug = mapscript.MS_TRUE
+        #productmap.debug = mapscript.MS_TRUE
+        productmap.debug = 5
         productmap.status = mapscript.MS_ON
         productmap.units = mapscript.MS_DD
 
@@ -2366,6 +2373,8 @@ class GetProductLayer:
         ury = coords[2]
         urx = coords[3]
         productmap.setExtent(llx, lly, urx, ury)   # -26, -35, 60, 38
+        # productmap.setExtent(lly, llx, ury, urx)   # -26, -35, 60, 38
+        # print llx, lly, urx, ury
 
         # epsg must be in lowercase because in unix/linux systems the proj filenames are lowercase!
         # epsg = "+init=epsg:3857"
@@ -2433,6 +2442,7 @@ class GetProductLayer:
             layer.type = mapscript.MS_LAYER_RASTER
             layer.status = mapscript.MS_ON     # MS_DEFAULT
             layer.data = productfile
+            layer.units = mapscript.MS_METERS
             # layer.setProjection("+init=epsg:4326")
             layer.setProjection("epsg:4326")
             layer.dump = mapscript.MS_TRUE
@@ -2465,23 +2475,25 @@ class GetProductLayer:
                     style = mapscript.styleObj(layerclass)
                     style.color.setRGB(colors[0], colors[1], colors[2])
 
-        result_map_file = es_constants.apps_dir+'/analysis/MAP_result.map'
+        # result_map_file = es_constants.apps_dir+'/analysis/MAP_result.map'
         # if os.path.isfile(result_map_file):
         #     os.remove(result_map_file)
-        productmap.save(result_map_file)
+        # productmap.save(result_map_file)
         image = productmap.draw()
-        image.save(es_constants.apps_dir+'/analysis/'+filenamenoextention+'.png')
+        filename_png = es_constants.base_tmp_dir+filenamenoextention+str(llx)+'_'+str(lly)+'_'+str(urx)+'_'+str(ury)+'.png'
+        image.save(filename_png)
 
-        filename = es_constants.apps_dir+'/analysis/'+filenamenoextention+'.png'
         web.header('Content-type', 'image/png')
-        f = open(filename, 'rb')
+        f = open(filename_png, 'rb')
         while 1:
             buf = f.read(1024 * 8)
             if not buf:
                 break
             yield buf
-        os.remove(filename)
+        os.remove(filename_png)
 
+        # #print owsrequest.getValueByName('BBOX')
+        # mapscript.msIO_installStdoutToBuffer()
         # contents = productmap.OWSDispatch(owsrequest)
         # content_type = mapscript.msIO_stripStdoutBufferContentType()
         # content = mapscript.msIO_getStdoutBufferBytes()
@@ -2929,7 +2941,7 @@ class ExecuteServiceTask:
             system_daemon = es2system.SystemDaemon(pid_file, dry_run=dryrun)
             #
             status = system_daemon.status()
-            system_service_script = es_constants.es2globals['status_system_dir']+os.sep+'service_system.py'
+            system_service_script = es_constants.es2globals['system_service_dir']+os.sep+'service_system.py'
             if getparams.task == 'stop':
                 if status:
                     os.system("python " + system_service_script + " stop")
