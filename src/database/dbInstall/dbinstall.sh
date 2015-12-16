@@ -14,8 +14,8 @@ if [ "$(nc -v -z localhost 5432 > /dev/null 2>&1;echo $?)" = 0 ]; then
         echo "Create User and Database" >> ${logfile}
         su postgres -c psql << EOF
             CREATE USER estation;
-            ALTER ROLE estation WITH CREATEDB;
-            CREATE DATABASE estationdb WITH OWNER estation;
+            ALTER ROLE estation WITH CREATEDB;            
+	    CREATE DATABASE estationdb WITH OWNER estation TEMPLATE template0 ENCODING 'UTF8';
             ALTER USER estation WITH ENCRYPTED PASSWORD 'mesadmin';
 EOF
     fi

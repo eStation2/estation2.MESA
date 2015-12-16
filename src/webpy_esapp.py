@@ -2319,8 +2319,21 @@ class GetProductLayer:
         #contents = buf.getvalue()
         #return contents
 
-        #logger.debug("MapServer: Installing stdout to buffer.")
-        mapscript.msIO_installStdoutToBuffer()
+        # #logger.debug("MapServer: Installing stdout to buffer.")
+        # mapscript.msIO_installStdoutToBuffer()
+        #
+        # owsrequest = mapscript.OWSRequest()
+        #
+        # inputparams = web.input()
+        # for k, v in inputparams.iteritems():
+        #     print k + ':' + v
+        #     if k not in ('productcode', 'subproductcode', 'mapsetcode', 'productversion', 'legendid', 'date' 'TRANSPARENT'):
+        #         # if k == 'CRS':
+        #         #     owsrequest.setParameter('SRS', v)
+        #         owsrequest.setParameter(k.upper(), v)
+        #
+        # #owsrequest.setParameter(k.upper(), v)
+
 
         # projlib = "/usr/share/proj/"
         projlib = es_constants.proj4_lib_dir
@@ -2328,12 +2341,7 @@ class GetProductLayer:
         errorfile = es_constants.log_dir+"/mapserver_error.log"
         # imagepath = es_constants.apps_dir+"/analysis/ms_tmp/"
 
-        owsrequest = mapscript.OWSRequest()
-
         inputparams = web.input()
-        for k, v in inputparams.iteritems():
-            #print k + ':' + v
-            owsrequest.setParameter(k.upper(), v)
 
         filenamenoextention = functions.set_path_filename(filedate,
                                                getparams['productcode'],
@@ -2341,7 +2349,8 @@ class GetProductLayer:
                                                getparams['mapsetcode'],
                                                getparams['productversion'],
                                                '')
-        owsrequest.setParameter("LAYERS", filenamenoextention)
+        # owsrequest.setParameter("LAYERS", filenamenoextention)
+        # owsrequest.setParameter("UNIT", mapscript.MS_METERS)
 
         productmap = mapscript.mapObj(es_constants.template_mapfile)
         productmap.setConfigOption("PROJ_LIB", projlib)
@@ -2354,16 +2363,19 @@ class GetProductLayer:
         #outputformat_gd = mapscript.outputFormatObj('GD/GIF', 'gif')
         #productmap.appendOutputFormat(outputformat_gd)
         productmap.selectOutputFormat('png')
-        productmap.debug = mapscript.MS_TRUE
+        #productmap.debug = mapscript.MS_TRUE
+        productmap.debug = 5
         productmap.status = mapscript.MS_ON
         productmap.units = mapscript.MS_DD
 
         coords = map(float, inputparams.BBOX.split(","))
-        llx = coords[0]
-        lly = coords[1]
-        urx = coords[2]
-        ury = coords[3]
+        lly = coords[0]
+        llx = coords[1]
+        ury = coords[2]
+        urx = coords[3]
         productmap.setExtent(llx, lly, urx, ury)   # -26, -35, 60, 38
+        # productmap.setExtent(lly, llx, ury, urx)   # -26, -35, 60, 38
+        # print llx, lly, urx, ury
 
         # epsg must be in lowercase because in unix/linux systems the proj filenames are lowercase!
         # epsg = "+init=epsg:3857"
@@ -2431,6 +2443,7 @@ class GetProductLayer:
             layer.type = mapscript.MS_LAYER_RASTER
             layer.status = mapscript.MS_ON     # MS_DEFAULT
             layer.data = productfile
+            layer.units = mapscript.MS_METERS
             # layer.setProjection("+init=epsg:4326")
             layer.setProjection("epsg:4326")
             layer.dump = mapscript.MS_TRUE
@@ -2463,20 +2476,32 @@ class GetProductLayer:
                     style = mapscript.styleObj(layerclass)
                     style.color.setRGB(colors[0], colors[1], colors[2])
 
-        result_map_file = es_constants.apps_dir+'/analysis/MAP_result.map'
+        # result_map_file = es_constants.apps_dir+'/analysis/MAP_result.map'
         # if os.path.isfile(result_map_file):
         #     os.remove(result_map_file)
         # productmap.save(result_map_file)
         image = productmap.draw()
-        # image.save(es_constants.apps_dir+'/analysis/'+filenamenoextention+'.png')
+        filename_png = es_constants.base_tmp_dir+filenamenoextention+str(llx)+'_'+str(lly)+'_'+str(urx)+'_'+str(ury)+'.png'
+        image.save(filename_png)
 
-        contents = productmap.OWSDispatch(owsrequest)
-        content_type = mapscript.msIO_stripStdoutBufferContentType()
-        content = mapscript.msIO_getStdoutBufferBytes()
-        #web.header = "Content-Type","%s; charset=utf-8"%content_type
         web.header('Content-type', 'image/png')
-        #web.header('Content-transfer-encoding', 'binary')
-        return content
+        f = open(filename_png, 'rb')
+        while 1:
+            buf = f.read(1024 * 8)
+            if not buf:
+                break
+            yield buf
+        os.remove(filename_png)
+
+        # #print owsrequest.getValueByName('BBOX')
+        # mapscript.msIO_installStdoutToBuffer()
+        # contents = productmap.OWSDispatch(owsrequest)
+        # content_type = mapscript.msIO_stripStdoutBufferContentType()
+        # content = mapscript.msIO_getStdoutBufferBytes()
+        # #web.header = "Content-Type","%s; charset=utf-8"%content_type
+        # web.header('Content-type', 'image/png')
+        # #web.header('Content-transfer-encoding', 'binary')
+        # return content
 
 
 class GetBackgroundLayer:
