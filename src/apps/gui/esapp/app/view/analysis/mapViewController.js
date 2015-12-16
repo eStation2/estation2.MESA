@@ -198,6 +198,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 legendid: this.getView().legendid,
                 date: this.getView().productdate,
                 'FORMAT': 'image/png'
+                //,REASPECT:'TRUE'
             };
         //}
         //console.info(params);

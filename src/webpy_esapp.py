@@ -97,6 +97,7 @@ urls = (
     "/systemsettings/changeversion", "ChangeVersion",
     "/systemsettings/getthemas", "GetThemas",
     "/systemsettings/changethema", "ChangeThema",
+    "/systemsettings/changethemafromotherpc", "ChangeThemaFromOtherPC",
     "/systemsettings/changeloglevel", "ChangeLogLevel",
     "/systemsettings/ipsettings", "IPSettings",
     "/systemsettings/ipsettings/update", "UpdateIPSettings",
@@ -887,35 +888,35 @@ class GetDashboard:
         PC1_connection = functions.check_connection('mesa-pc1')
 
         status_PC1 = functions.get_status_PC1()
-	if len(status_PC1) == 0:
-		PC1_dvb_status = None
-		PC1_tellicast_status = None
-		PC1_fts_status = None
-	else:
-		dvb_status = status_PC1['services']['acquisition']['dvb']['status']
-		fts_status = status_PC1['services']['acquisition']['fts']['status']
-		tellicast_status = status_PC1['services']['acquisition']['tellicast']['status']
+        if len(status_PC1) == 0:
+            PC1_dvb_status = None
+            PC1_tellicast_status = None
+            PC1_fts_status = None
+        else:
+            dvb_status = status_PC1['services']['acquisition']['dvb']['status']
+            fts_status = status_PC1['services']['acquisition']['fts']['status']
+            tellicast_status = status_PC1['services']['acquisition']['tellicast']['status']
 
-		if dvb_status == 'unknown':
-		    PC1_dvb_status = None
-		elif dvb_status == 'not running' or dvb_status == 'unlock':
-		    PC1_dvb_status = False
-		else:
-		    PC1_dvb_status = True
+            if dvb_status == 'unknown':
+                PC1_dvb_status = None
+            elif dvb_status == 'not running' or dvb_status == 'unlock':
+                PC1_dvb_status = False
+            else:
+                PC1_dvb_status = True
 
-		if tellicast_status == 'unknown':
-		    PC1_tellicast_status = None
-		elif tellicast_status == 'running':
-		    PC1_tellicast_status = True
-		else:
-		    PC1_tellicast_status = False
+            if tellicast_status == 'unknown':
+                PC1_tellicast_status = None
+            elif tellicast_status == 'running':
+                PC1_tellicast_status = True
+            else:
+                PC1_tellicast_status = False
 
-		if fts_status == 'unknown':
-		    PC1_fts_status = None
-		elif fts_status == 'running':
-		    PC1_fts_status = True
-		else:
-		    PC1_fts_status = False
+            if fts_status == 'unknown':
+                PC1_fts_status = None
+            elif fts_status == 'running':
+                PC1_fts_status = True
+            else:
+                PC1_fts_status = False
 
         if systemsettings['type_installation'].lower() == 'full':
             if systemsettings['role'].lower() == 'pc1':
@@ -1495,6 +1496,7 @@ class GetTimeLine:
             dateinmilisecond = functions.unix_time_millis(productdate)
             date_dict = {'datetime': dateinmilisecond, 'date': productdate.strftime("%Y%m%d"), 'present': present}
             timeline.append(date_dict)
+
         # missingdate = datetime.date(2003, 2, 1)
         # dateinmilisecond = functions.unix_time_millis(missingdate)
         # date_dict = {'datetime': dateinmilisecond, 'date': missingdate.strftime("%Y%m%d"), 'present': "false"}
@@ -1996,7 +1998,22 @@ class ChangeThema:
 
             # Set thema in database by activating the thema products, ingestion and processes.
             themaset = querydb.set_thema(getparams['thema'])
-            # print themaset
+
+            setThemaOtherPC = False
+            systemsettings = functions.getSystemSettings()
+            if systemsettings['type_installation'].lower() == 'full':
+                if systemsettings['role'].lower() == 'pc2':
+                    otherPC = 'mesa-pc3'
+                elif systemsettings['role'].lower() == 'pc3':
+                    otherPC = 'mesa-pc3'
+                else:
+                    otherPC = 'mesa-pc1'
+
+                PC23_connection = functions.check_connection(otherPC)
+                if PC23_connection:
+                    setThemaOtherPC = functions.setThemaOtherPC(otherPC, getparams['thema'])
+
+            # print 'setThemaOtherPC: ' + str(setThemaOtherPC)
             if themaset:
                 # print "thema changed"
                 changethema_json = '{"success":"true", "message":"Thema changed!"}'
@@ -2006,6 +2023,29 @@ class ChangeThema:
             changethema_json = '{"success":false, "error":"No thema given!"}'
 
         return changethema_json
+
+
+class ChangeThemaFromOtherPC:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        getparams = web.input()
+        if hasattr(getparams, "thema"):
+
+            functions.setSystemSetting('thema', getparams['thema'])
+
+            # Set thema in database by activating the thema products, ingestion and processes.
+            themaset = querydb.set_thema(getparams['thema'])
+            # print themaset
+            if themaset:
+                changethema = True
+            else:
+                changethema = False
+        else:
+            changethema = False
+
+        return changethema
 
 
 class ChangeLogLevel:
@@ -2132,11 +2172,12 @@ class UpdateUserSettings:
 
         getparams = json.loads(web.data())
         for setting in getparams['systemsettings']:
-            if config_factorysettings.has_option('FACTORY_SETTINGS', setting) \
-               and config_factorysettings.get('FACTORY_SETTINGS', setting, 0) == getparams['systemsettings'][setting]:
-                config_usersettings.set('USER_SETTINGS', setting, '')
-            elif config_usersettings.has_option('USER_SETTINGS', setting):
-                config_usersettings.set('USER_SETTINGS', setting, getparams['systemsettings'][setting])
+            if setting not in ('log_general_level', 'active_version', 'current_mode', 'thema', 'role', 'type_installation', 'default_language'):
+                if config_factorysettings.has_option('FACTORY_SETTINGS', setting) \
+                   and config_factorysettings.get('FACTORY_SETTINGS', setting, 0) == getparams['systemsettings'][setting]:
+                    config_usersettings.set('USER_SETTINGS', setting, '')
+                elif config_usersettings.has_option('USER_SETTINGS', setting):
+                    config_usersettings.set('USER_SETTINGS', setting, getparams['systemsettings'][setting])
 
         # Writing our configuration file to 'example.cfg' - COMMENTS ARE NOT PRESERVED!
         with open(usersettingsfilepath, 'wb') as configfile:
@@ -2281,7 +2322,7 @@ class GetProductLayer:
         #import StringIO
         import mapscript
         getparams = web.input()
-        print getparams
+
         p = Product(product_code=getparams['productcode'], version=getparams['productversion'])
         dataset = p.get_dataset(mapset=getparams['mapsetcode'], sub_product_code=getparams['subproductcode'])
         # print dataset.fullpath
@@ -2317,8 +2358,21 @@ class GetProductLayer:
         #contents = buf.getvalue()
         #return contents
 
-        #logger.debug("MapServer: Installing stdout to buffer.")
-        mapscript.msIO_installStdoutToBuffer()
+        # #logger.debug("MapServer: Installing stdout to buffer.")
+        # mapscript.msIO_installStdoutToBuffer()
+        #
+        # owsrequest = mapscript.OWSRequest()
+        #
+        # inputparams = web.input()
+        # for k, v in inputparams.iteritems():
+        #     print k + ':' + v
+        #     if k not in ('productcode', 'subproductcode', 'mapsetcode', 'productversion', 'legendid', 'date' 'TRANSPARENT'):
+        #         # if k == 'CRS':
+        #         #     owsrequest.setParameter('SRS', v)
+        #         owsrequest.setParameter(k.upper(), v)
+        #
+        # #owsrequest.setParameter(k.upper(), v)
+
 
         # projlib = "/usr/share/proj/"
         projlib = es_constants.proj4_lib_dir
@@ -2326,12 +2380,7 @@ class GetProductLayer:
         errorfile = es_constants.log_dir+"/mapserver_error.log"
         # imagepath = es_constants.apps_dir+"/analysis/ms_tmp/"
 
-        owsrequest = mapscript.OWSRequest()
-
         inputparams = web.input()
-        for k, v in inputparams.iteritems():
-            print k + ':' + v
-            owsrequest.setParameter(k.upper(), v)
 
         filenamenoextention = functions.set_path_filename(filedate,
                                                getparams['productcode'],
@@ -2339,7 +2388,8 @@ class GetProductLayer:
                                                getparams['mapsetcode'],
                                                getparams['productversion'],
                                                '')
-        owsrequest.setParameter("LAYERS", filenamenoextention)
+        # owsrequest.setParameter("LAYERS", filenamenoextention)
+        # owsrequest.setParameter("UNIT", mapscript.MS_METERS)
 
         productmap = mapscript.mapObj(es_constants.template_mapfile)
         productmap.setConfigOption("PROJ_LIB", projlib)
@@ -2352,18 +2402,19 @@ class GetProductLayer:
         #outputformat_gd = mapscript.outputFormatObj('GD/GIF', 'gif')
         #productmap.appendOutputFormat(outputformat_gd)
         productmap.selectOutputFormat('png')
-        productmap.debug = mapscript.MS_TRUE
+        #productmap.debug = mapscript.MS_TRUE
+        productmap.debug = 5
         productmap.status = mapscript.MS_ON
         productmap.units = mapscript.MS_DD
 
         coords = map(float, inputparams.BBOX.split(","))
-        print coords
-        llx = coords[0]
-        lly = coords[1]
-        urx = coords[2]
-        ury = coords[3]
-        print llx, lly, urx, ury
+        lly = coords[0]
+        llx = coords[1]
+        ury = coords[2]
+        urx = coords[3]
         productmap.setExtent(llx, lly, urx, ury)   # -26, -35, 60, 38
+        # productmap.setExtent(lly, llx, ury, urx)   # -26, -35, 60, 38
+        # print llx, lly, urx, ury
 
         # epsg must be in lowercase because in unix/linux systems the proj filenames are lowercase!
         # epsg = "+init=epsg:3857"
@@ -2431,6 +2482,7 @@ class GetProductLayer:
             layer.type = mapscript.MS_LAYER_RASTER
             layer.status = mapscript.MS_ON     # MS_DEFAULT
             layer.data = productfile
+            layer.units = mapscript.MS_METERS
             # layer.setProjection("+init=epsg:4326")
             layer.setProjection("epsg:4326")
             layer.dump = mapscript.MS_TRUE
@@ -2448,8 +2500,8 @@ class GetProductLayer:
                 stepcount = 0
                 for step in legend_steps:
                     stepcount += 1
-                    min_step = float((step.from_step - scale_offset)/scale_factor)
-                    max_step = float((step.to_step - scale_offset)/scale_factor)
+                    min_step = int((step.from_step - scale_offset)/scale_factor)
+                    max_step = int((step.to_step - scale_offset)/scale_factor)
                     colors = map(int, (color.strip() for color in step.color_rgb.split(" ") if color.strip()))
 
                     if stepcount == legend_steps.__len__():    # For the last step use <= max_step
@@ -2463,20 +2515,32 @@ class GetProductLayer:
                     style = mapscript.styleObj(layerclass)
                     style.color.setRGB(colors[0], colors[1], colors[2])
 
-        result_map_file = es_constants.apps_dir+'/analysis/MAP_result.map'
+        # result_map_file = es_constants.apps_dir+'/analysis/MAP_result.map'
         # if os.path.isfile(result_map_file):
         #     os.remove(result_map_file)
-        productmap.save(result_map_file)
+        # productmap.save(result_map_file)
         image = productmap.draw()
-        image.save(es_constants.apps_dir+'/analysis/'+filenamenoextention+'.png')
+        filename_png = es_constants.base_tmp_dir+filenamenoextention+str(llx)+'_'+str(lly)+'_'+str(urx)+'_'+str(ury)+'.png'
+        image.save(filename_png)
 
-        contents = productmap.OWSDispatch(owsrequest)
-        content_type = mapscript.msIO_stripStdoutBufferContentType()
-        content = mapscript.msIO_getStdoutBufferBytes()
-        #web.header = "Content-Type","%s; charset=utf-8"%content_type
         web.header('Content-type', 'image/png')
-        #web.header('Content-transfer-encoding', 'binary')
-        return content
+        f = open(filename_png, 'rb')
+        while 1:
+            buf = f.read(1024 * 8)
+            if not buf:
+                break
+            yield buf
+        os.remove(filename_png)
+
+        # #print owsrequest.getValueByName('BBOX')
+        # mapscript.msIO_installStdoutToBuffer()
+        # contents = productmap.OWSDispatch(owsrequest)
+        # content_type = mapscript.msIO_stripStdoutBufferContentType()
+        # content = mapscript.msIO_getStdoutBufferBytes()
+        # #web.header = "Content-Type","%s; charset=utf-8"%content_type
+        # web.header('Content-type', 'image/png')
+        # #web.header('Content-transfer-encoding', 'binary')
+        # return content
 
 
 class GetBackgroundLayer:

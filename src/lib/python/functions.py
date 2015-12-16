@@ -43,6 +43,31 @@ dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'der
 #     def default(self, o):
 #         return o.__dict__
 
+def setThemaOtherPC(server_address, thema):
+    from urllib2 import Request, urlopen, URLError
+    thema_is_changed = False
+    # Set "/esapp" in factorysettings.ini as webserver_root because on CentOS no /esapp is needed!
+    url = "http://" + server_address + es_constants.es2globals['webserver_root'] + "/systemsettings/changethemafromotherpc?thema="+thema
+    req = Request(url)
+    try:
+        response = urlopen(req)
+    except URLError as e:
+        if hasattr(e, 'reason'):
+            logger.warning('We failed to reach a server to change the thema: %s' % server_address)
+            logger.warning('Reason: %s' % e.reason)
+        elif hasattr(e, 'code'):
+            logger.warning('The server %s couldn\'t fulfill the request to change the thema.' % server_address)
+            logger.warning('Error code: %s' % e.code)
+        return thema_is_changed
+    else:
+        # everything is fine
+        # response = urllib2.urlopen("http://" + server_address + "/esapp/dashboard/systemstatus")
+        result = response.read()
+        thema_is_changed = ast.literal_eval(result)
+        response.close()  # best practice to close the file
+    return thema_is_changed
+
+
 def get_status_PC1():
     from urllib2 import Request, urlopen, URLError
     status_remote_machine = []
