@@ -16,6 +16,7 @@ import os
 import re
 import datetime
 import shutil
+import time
 
 from time import sleep
 
@@ -328,8 +329,8 @@ def loop_get_internet(dry_run=False):
 
             # Check internet connection (or die)
             if not functions.internet_on():
-                logger.fatal("The computer is not currently connected to the internet. Exit.")
-                exit(1)
+                logger.error("The computer is not currently connected to the internet. Wait 3 minutes.")
+                time.sleep(180)
 
             try:
                 time_sleep = user_def_sleep
