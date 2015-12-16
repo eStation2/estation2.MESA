@@ -323,7 +323,7 @@ Ext.define("esapp.view.analysis.mapView",{
                                 boxLabel: 'BDMS '+esapp.Utils.getTranslation('level2'), // level 0',
                                 name: 'bdms2',
                                 level: 'admin2',
-                                geojsonfile: 'RIC_BDMS_2_G2014.geojson',    // 'RIC_BDMS_2_g2015_2014.geojson',
+                                geojsonfile: 'RIC_BDMS_2_g2015_2014.geojson',    // 'RIC_BDMS_2_g2015_2014.geojson',
                                 checked: false,
                                 linecolor: '#ffcc99',
                                 layerorderidx: 1,

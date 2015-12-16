@@ -97,6 +97,7 @@ urls = (
     "/systemsettings/changeversion", "ChangeVersion",
     "/systemsettings/getthemas", "GetThemas",
     "/systemsettings/changethema", "ChangeThema",
+    "/systemsettings/changethemafromotherpc", "ChangeThemaFromOtherPC",
     "/systemsettings/changeloglevel", "ChangeLogLevel",
     "/systemsettings/ipsettings", "IPSettings",
     "/systemsettings/ipsettings/update", "UpdateIPSettings",
@@ -887,35 +888,35 @@ class GetDashboard:
         PC1_connection = functions.check_connection('mesa-pc1')
 
         status_PC1 = functions.get_status_PC1()
-	if len(status_PC1) == 0:
-		PC1_dvb_status = None
-		PC1_tellicast_status = None
-		PC1_fts_status = None
-	else:
-		dvb_status = status_PC1['services']['acquisition']['dvb']['status']
-		fts_status = status_PC1['services']['acquisition']['fts']['status']
-		tellicast_status = status_PC1['services']['acquisition']['tellicast']['status']
+        if len(status_PC1) == 0:
+            PC1_dvb_status = None
+            PC1_tellicast_status = None
+            PC1_fts_status = None
+        else:
+            dvb_status = status_PC1['services']['acquisition']['dvb']['status']
+            fts_status = status_PC1['services']['acquisition']['fts']['status']
+            tellicast_status = status_PC1['services']['acquisition']['tellicast']['status']
 
-		if dvb_status == 'unknown':
-		    PC1_dvb_status = None
-		elif dvb_status == 'not running' or dvb_status == 'unlock':
-		    PC1_dvb_status = False
-		else:
-		    PC1_dvb_status = True
+            if dvb_status == 'unknown':
+                PC1_dvb_status = None
+            elif dvb_status == 'not running' or dvb_status == 'unlock':
+                PC1_dvb_status = False
+            else:
+                PC1_dvb_status = True
 
-		if tellicast_status == 'unknown':
-		    PC1_tellicast_status = None
-		elif tellicast_status == 'running':
-		    PC1_tellicast_status = True
-		else:
-		    PC1_tellicast_status = False
+            if tellicast_status == 'unknown':
+                PC1_tellicast_status = None
+            elif tellicast_status == 'running':
+                PC1_tellicast_status = True
+            else:
+                PC1_tellicast_status = False
 
-		if fts_status == 'unknown':
-		    PC1_fts_status = None
-		elif fts_status == 'running':
-		    PC1_fts_status = True
-		else:
-		    PC1_fts_status = False
+            if fts_status == 'unknown':
+                PC1_fts_status = None
+            elif fts_status == 'running':
+                PC1_fts_status = True
+            else:
+                PC1_fts_status = False
 
         if systemsettings['type_installation'].lower() == 'full':
             if systemsettings['role'].lower() == 'pc1':
@@ -928,7 +929,6 @@ class GetDashboard:
                 PC2_DataAutoSync = systemsettings['data_sync']
                 PC2_postgresql_status = functions.getStatusPostgreSQL()
                 PC2_internet_status = functions.internet_on()
-                # print 'Ínternet: ' + str(PC2_internet_status)
                 PC2_service_eumetcast = status_services['eumetcast']
                 PC2_service_internet = status_services['internet']
                 PC2_service_ingest = status_services['ingest']
@@ -1998,7 +1998,22 @@ class ChangeThema:
 
             # Set thema in database by activating the thema products, ingestion and processes.
             themaset = querydb.set_thema(getparams['thema'])
-            # print themaset
+
+            setThemaOtherPC = False
+            systemsettings = functions.getSystemSettings()
+            if systemsettings['type_installation'].lower() == 'full':
+                if systemsettings['role'].lower() == 'pc2':
+                    otherPC = 'mesa-pc3'
+                elif systemsettings['role'].lower() == 'pc3':
+                    otherPC = 'mesa-pc3'
+                else:
+                    otherPC = 'mesa-pc1'
+
+                PC23_connection = functions.check_connection(otherPC)
+                if PC23_connection:
+                    setThemaOtherPC = functions.setThemaOtherPC(otherPC, getparams['thema'])
+
+            # print 'setThemaOtherPC: ' + str(setThemaOtherPC)
             if themaset:
                 # print "thema changed"
                 changethema_json = '{"success":"true", "message":"Thema changed!"}'
@@ -2008,6 +2023,29 @@ class ChangeThema:
             changethema_json = '{"success":false, "error":"No thema given!"}'
 
         return changethema_json
+
+
+class ChangeThemaFromOtherPC:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        getparams = web.input()
+        if hasattr(getparams, "thema"):
+
+            functions.setSystemSetting('thema', getparams['thema'])
+
+            # Set thema in database by activating the thema products, ingestion and processes.
+            themaset = querydb.set_thema(getparams['thema'])
+            # print themaset
+            if themaset:
+                changethema = True
+            else:
+                changethema = False
+        else:
+            changethema = False
+
+        return changethema
 
 
 class ChangeLogLevel:
@@ -2134,11 +2172,12 @@ class UpdateUserSettings:
 
         getparams = json.loads(web.data())
         for setting in getparams['systemsettings']:
-            if config_factorysettings.has_option('FACTORY_SETTINGS', setting) \
-               and config_factorysettings.get('FACTORY_SETTINGS', setting, 0) == getparams['systemsettings'][setting]:
-                config_usersettings.set('USER_SETTINGS', setting, '')
-            elif config_usersettings.has_option('USER_SETTINGS', setting):
-                config_usersettings.set('USER_SETTINGS', setting, getparams['systemsettings'][setting])
+            if setting not in ('log_general_level', 'active_version', 'current_mode', 'thema', 'role', 'type_installation', 'default_language'):
+                if config_factorysettings.has_option('FACTORY_SETTINGS', setting) \
+                   and config_factorysettings.get('FACTORY_SETTINGS', setting, 0) == getparams['systemsettings'][setting]:
+                    config_usersettings.set('USER_SETTINGS', setting, '')
+                elif config_usersettings.has_option('USER_SETTINGS', setting):
+                    config_usersettings.set('USER_SETTINGS', setting, getparams['systemsettings'][setting])
 
         # Writing our configuration file to 'example.cfg' - COMMENTS ARE NOT PRESERVED!
         with open(usersettingsfilepath, 'wb') as configfile:
