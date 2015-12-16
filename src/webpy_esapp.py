@@ -928,7 +928,6 @@ class GetDashboard:
                 PC2_DataAutoSync = systemsettings['data_sync']
                 PC2_postgresql_status = functions.getStatusPostgreSQL()
                 PC2_internet_status = functions.internet_on()
-                # print 'Ínternet: ' + str(PC2_internet_status)
                 PC2_service_eumetcast = status_services['eumetcast']
                 PC2_service_internet = status_services['internet']
                 PC2_service_ingest = status_services['ingest']
@@ -2282,7 +2281,7 @@ class GetProductLayer:
         #import StringIO
         import mapscript
         getparams = web.input()
-
+        print getparams
         p = Product(product_code=getparams['productcode'], version=getparams['productversion'])
         dataset = p.get_dataset(mapset=getparams['mapsetcode'], sub_product_code=getparams['subproductcode'])
         # print dataset.fullpath
@@ -2331,7 +2330,7 @@ class GetProductLayer:
 
         inputparams = web.input()
         for k, v in inputparams.iteritems():
-            #print k + ':' + v
+            print k + ':' + v
             owsrequest.setParameter(k.upper(), v)
 
         filenamenoextention = functions.set_path_filename(filedate,
@@ -2358,10 +2357,12 @@ class GetProductLayer:
         productmap.units = mapscript.MS_DD
 
         coords = map(float, inputparams.BBOX.split(","))
+        print coords
         llx = coords[0]
         lly = coords[1]
         urx = coords[2]
         ury = coords[3]
+        print llx, lly, urx, ury
         productmap.setExtent(llx, lly, urx, ury)   # -26, -35, 60, 38
 
         # epsg must be in lowercase because in unix/linux systems the proj filenames are lowercase!
@@ -2465,9 +2466,9 @@ class GetProductLayer:
         result_map_file = es_constants.apps_dir+'/analysis/MAP_result.map'
         # if os.path.isfile(result_map_file):
         #     os.remove(result_map_file)
-        # productmap.save(result_map_file)
+        productmap.save(result_map_file)
         image = productmap.draw()
-        # image.save(es_constants.apps_dir+'/analysis/'+filenamenoextention+'.png')
+        image.save(es_constants.apps_dir+'/analysis/'+filenamenoextention+'.png')
 
         contents = productmap.OWSDispatch(owsrequest)
         content_type = mapscript.msIO_stripStdoutBufferContentType()
