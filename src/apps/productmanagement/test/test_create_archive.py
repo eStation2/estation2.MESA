@@ -139,6 +139,21 @@ class TestCreate(unittest.TestCase):
         functions.check_output_dir(target_dir)
         create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
+    def TestCreateArchive_vgt_dmp(self):
+
+        base_target_dir='/data/archives/'
+        mapset='SPOTV-Africa-1km'
+        product='vgt-dmp'
+        version='V1.0'
+        start_date=datetime.date(2014, 6, 1)
+        end_date=None
+
+        # Only fapar subproduct
+        subproduct='dmp'
+        target_dir = base_target_dir + product+ os.path.sep + subproduct
+        functions.check_output_dir(target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
     def TestCreateArchive_fewsnet_rfe(self):
 
         base_target_dir='/data/archives/'
@@ -405,6 +420,7 @@ class TestCreate(unittest.TestCase):
         self.TestCreateArchive_vgt_fapar()
         self.TestCreateArchive_vgt_fcover()
         self.TestCreateArchive_vgt_lai()
+        self.TestCreateArchive_vgt_dmp()
         self.TestCreateArchive_fewsnet_rfe()
         self.TestCreateArchive_tamsat_rfe()
         self.TestCreateArchive_modis_chla()
