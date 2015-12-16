@@ -32,7 +32,8 @@ Ext.define('esapp.model.SystemSetting', {
         {name: 'current_mode'},
         {name: 'active_version'},
         {name: 'thema'},
-        {name: 'loglevel'}
+        {name: 'loglevel'},
+        {name: 'log_general_level'}
     ]
 
     ,autoLoad: false
