@@ -251,5 +251,6 @@ cp -r /var/www/eStation2-%{version}/* /var/www/eStation2-%{version}.bck/
 %postun
 rm -fr /var/www/eStation2-%{version}
 mv /var/www/eStation2-%{version}.bck /var/www/eStation2-%{version}
-
+chown adminuser:estation -R /var/www/eStation2-%{version}
+chmod 755 -R /var/www/eStation2-%{version}
 
