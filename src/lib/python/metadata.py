@@ -254,6 +254,11 @@ class SdsMetadata:
         sds_metadata['eStation2_nodata'] = str(nodata)
         sds_metadata['eStation2_unit'] = str(unit)
 
+    def assign_nodata(self, nodata):
+    #
+    #   Assign scaling
+        sds_metadata['eStation2_nodata'] = str(nodata)
+
     def get_item(self, itemname):
 
         value='metadata item not found'
