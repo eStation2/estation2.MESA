@@ -180,18 +180,22 @@ def convert_driver(output_dir=None):
             # Convert input products
             if len(available_files) > 0:
                 for input_file in available_files:
-                    functions.check_output_dir(output_dir+out_sub_dir)
-                    str_date = functions.get_date_from_path_filename(os.path.basename(input_file))
 
-                    # Check input file exists
-                    if os.path.isfile(input_file):
-                        if len(naming_spirits['frequency_filename_prefix']) > 1:
-                            my_str_date=naming_spirits['frequency_filename_prefix'][1:5]+str_date
-                            metadata_spirits['date'] = my_str_date
+                    # Check it is a .tif file (not .missing)
+                    path, ext=os.path.splitext(input_file)
+                    if ext == '.tif':
+                        functions.check_output_dir(output_dir+out_sub_dir)
+                        str_date = functions.get_date_from_path_filename(os.path.basename(input_file))
+
+                        # Check input file exists
+                        if os.path.isfile(input_file):
+                            if len(naming_spirits['frequency_filename_prefix']) > 1:
+                                my_str_date=naming_spirits['frequency_filename_prefix'][1:5]+str_date
+                                metadata_spirits['date'] = my_str_date
+                            else:
+                                metadata_spirits['date'] = str_date
+
+                            # Check output file exists
+                            convert_geotiff_file(input_file, output_dir+out_sub_dir, str_date, naming_spirits, metadata_spirits)
                         else:
-                            metadata_spirits['date'] = str_date
-
-                        # Check output file exists
-                        convert_geotiff_file(input_file, output_dir+out_sub_dir, str_date, naming_spirits, metadata_spirits)
-                    else:
-                        logger.debug('Input file does not exist: %s' % input_file)
+                            logger.debug('Input file does not exist: %s' % input_file)
