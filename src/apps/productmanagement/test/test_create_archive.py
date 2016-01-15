@@ -148,7 +148,7 @@ class TestCreate(unittest.TestCase):
         start_date=datetime.date(2014, 6, 1)
         end_date=None
 
-        # Only fapar subproduct
+        # Only dmp subproduct
         subproduct='dmp'
         target_dir = base_target_dir + product+ os.path.sep + subproduct
         functions.check_output_dir(target_dir)
