@@ -174,14 +174,14 @@ class TestGetInternet(unittest.TestCase):
     def TestRemoteHttp_FEWSNET(self):
 
         remote_url='http://earlywarning.usgs.gov/ftp2/raster/rf/a/'
-        from_date = datetime.date(2014,1,1)
-        to_date = datetime.date(2014,12,31)
+        from_date = datetime.date(2015,11,21)
+        to_date = datetime.date(2015,12,1)
         template='%Y/a%y%m%{dkm}rb.zip'         # Where are data for 2015 ??
         frequency = 'e1dekad'
 
         files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
 
-        file_to_check='2014/a14121rb.zip'
+        file_to_check='2015/a15121rb.zip'
         self.assertTrue(file_to_check in files_list)
 
     #   ---------------------------------------------------------------------------
