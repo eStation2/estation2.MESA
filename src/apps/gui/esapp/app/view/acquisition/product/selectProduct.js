@@ -221,8 +221,8 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                                 // Returns true if 'editable' is false (, null, or undefined)
                                 return false;    // !record.get('editable');
                             },
-                            handler: function(grid, rowIndex, colIndex) {
-                                var rec = grid.getStore().getAt(rowIndex),
+                            handler: function(grid, rowIndex, colIndex, icon, e, record) {
+                                var rec = record,   // grid.getStore().getAt(rowIndex),
                                     action = (rec.get('activated') ? 'deactivated' : 'activated');
                                 // Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
                                 rec.get('activated') ? rec.set('activated', false) : rec.set('activated', true);
@@ -271,7 +271,6 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
             var acqgridsstore = Ext.data.StoreManager.lookup('DataAcquisitionsStore');
             var ingestiongridstore = Ext.data.StoreManager.lookup('IngestionsStore');
             var acq_main = Ext.ComponentQuery.query('panel[name=acquisitionmain]');
-            acq_main[0].getController().renderHiddenColumnsWhenUnlocked();
 
             //if (Ext.getCmp('lockunlock').pressed) {
             //    var dataacquisitiongrids = Ext.ComponentQuery.query('dataacquisitiongrid');
@@ -306,6 +305,7 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                                                 //var view = btn.up().up().getView();
                                                 ////view.getFeature('productcategories').expandAll();
                                                 //view.refresh();
+                                                acq_main[0].getController().renderHiddenColumnsWhenUnlocked();
                                             }
                                         });
                                     }

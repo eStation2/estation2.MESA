@@ -126,12 +126,6 @@
             "path": "/eStation2/lib/js/Highstock/js/highstock-all.js",
             "remote": true
         },{
-            "path": "/eStation2/lib/js/Highstock/js/modules/exporting.js",
-            "remote": true
-//        },{
-//            "path": "/eStation2/lib/js/Highstock/js/modules/canvas-tools.src.js",
-//            "remote": true
-        },{
             "path": "/eStation2/lib/js/Highstock/js/modules/export-csv.js",
             "remote": true
         },{
@@ -141,6 +135,12 @@
             // This module, after the dependencies
             "path": "/eStation2/lib/js/Highstock/js/modules/highcharts-export-clientside.js",
             "remote": true
+        },{
+            "path": "/eStation2/lib/js/dom-to-image-master/dist/dom-to-image.min.js",
+            "remote": true
+//        },{
+//            "path": "/eStation2/lib/js/Highstock/js/modules/canvas-tools.src.js",
+//            "remote": true
 //        },{
 //            "path": "/eStation2/lib/js/canvg-master/rgbcolor.js",
 //            "remote": true

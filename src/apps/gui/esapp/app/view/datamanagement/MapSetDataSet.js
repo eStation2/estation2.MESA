@@ -144,6 +144,7 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
                         var biggest_intervalpercentage = 0;
                         var i_biggest = 1;
                         completeness.intervals.forEach(function (interval) {
+                            interval.intervalpercentage = Math.floor(interval.intervalpercentage);
                             if (interval.intervalpercentage < 0) {
                                 interval.intervalpercentage = interval.intervalpercentage * (-1);
                             }
@@ -174,13 +175,15 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
                             seriestitle = '<span style="color:'+color+'">' + esapp.Utils.getTranslation('from') + ' ' + interval.fromdate + ' ' + esapp.Utils.getTranslation('to') + ' ' + interval.todate + ' - ' + intervaltype + '</span></br>';
                             seriestitles.push(seriestitle);
                         });
+                        //console.info(tot_percentage);
 //                        console.info('------------------');
 //                        console.info('dataObj biggest before: ' +  dataObj["data" + i_biggest]);
                         var fill_to_onehunderd = 100 - tot_percentage;
+                        //console.info(fill_to_onehunderd);
                         if (fill_to_onehunderd > 0) // add to last data to fill up to 100%
                             dataObj["data" + i_biggest] = dataObj["data" + i_biggest] + fill_to_onehunderd;
                         else {
-                            dataObj["data" + i_biggest] = dataObj["data" + i_biggest] + (fill_to_onehunderd);
+                            //dataObj["data" + i_biggest] = dataObj["data" + i_biggest] - (fill_to_onehunderd);
                         }
                         datasetdata.push(dataObj);
 //                        console.info('tot_percentage: ' + tot_percentage);
@@ -195,6 +198,9 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
                         widgetchart.surfaceMap.chart[0].getItems()[1].setText(missingFilesText);
                         widgetchart.surfaceMap.chart[0].getItems()[2].setText(completeness.firstdate);
                         widgetchart.surfaceMap.chart[0].getItems()[3].setText(completeness.lastdate);
+                        //console.info(widgetchart.surfaceMap.chart[0].getItems()[3]);
+                        //if (completeness.lastdate.length < 6)
+                        //    widgetchart.surfaceMap.chart[0].getItems()[3].attr.textAlign = "right";
                     }
 
                     widget.tooltipintervals = seriestitles;
@@ -219,6 +225,7 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
                     //        }
                     //    });
                     //}
+                    //console.info(datasetdata);
 
                     var newstore = Ext.create('Ext.data.JsonStore', {
                         fields: storefields,

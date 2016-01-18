@@ -92,6 +92,7 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
             xtype: 'cartesian',
             width: '100%',
             height: 38,
+            minWidth : 340,
 
             //engine: Ext.draw.engine.Canvas,
             engine: Ext.draw.engine.Svg,
@@ -136,7 +137,8 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
                 type: 'text',
                 text: me.lastdate,
                 fontSize: fontsize,
-                x: 286,
+                textAlign: 'middle',
+                x: 286+25,
                 y: spriteY
             }],
 

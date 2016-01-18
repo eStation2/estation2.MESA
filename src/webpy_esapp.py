@@ -887,7 +887,10 @@ class GetDashboard:
         # PC1_connection = functions.check_connection(systemsettings['ip_pc1'] + IP_port)
         PC1_connection = functions.check_connection('mesa-pc1')
 
-        status_PC1 = functions.get_status_PC1()
+        status_PC1 = []
+        if PC1_connection:
+            status_PC1 = functions.get_status_PC1()
+
         if len(status_PC1) == 0:
             PC1_dvb_status = None
             PC1_tellicast_status = None
@@ -1948,7 +1951,15 @@ class ChangeVersion:
 
             functions.setSystemSetting('active_version', getparams['version'])
 
-            # Todo: call system service to change the version! PROBLEMS: answer back to browser!
+            # Todo: call system service to change the version! PROBLEMS: answer back to browser?
+            base = es_constants.es2globals['base_dir']  # +"-"
+
+            if os.path.exists(base):
+                if os.path.islink(base):
+                    os.unlink(base)
+                    os.symlink(base, base+"-"+getparams['version'])
+                elif os.path.isdir(base):
+                    error = 'The base is a directory and should be a symbolic link!'
 
             changeversion_json = '{"success":"true", "message":"Version changed!"}'
         else:

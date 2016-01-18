@@ -293,6 +293,7 @@ Ext.define("esapp.view.acquisition.Ingestion",{
                         var biggest_intervalpercentage = 0;
                         var i_biggest = 1;
                         completeness.intervals.forEach(function (interval) {
+                            interval.intervalpercentage = Math.floor(interval.intervalpercentage);
                             if (interval.intervalpercentage < 0) {
                                 interval.intervalpercentage = interval.intervalpercentage * (-1);
                             }
