@@ -6,7 +6,7 @@ from config import es_constants
 # from apps.acquisition import get_internet
 from apps.acquisition import acquisition
 from lib.python import es_logging as log
-logger = log.my_logger(__name__)
+logger = log.my_logger("apps.acquisition.get_internet")
 
 try:
     command = str(sys.argv[1])
@@ -23,10 +23,11 @@ if command == "status":
         print("Current status of the Service: %s" % status)
     
 if command == "start":
+        logger.info("Starting Get Internet service") 
         daemon.start()
         
 if command == "stop":
-        print "Stopping deamon getinternet"
+        logger.info("Stopping Get Internet service") 
         daemon.stop()
 
 
