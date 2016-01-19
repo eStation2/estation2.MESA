@@ -218,14 +218,25 @@ Ext.define("esapp.view.analysis.analysisMain",{
                                     '</tpl>',
                                     '</br>',
                                     '<b class="smalltext" style="color:darkgrey">{productcode} - {subproductcode}</b>',
-                                    '<tpl if="productmapsets.length === 1">',
-                                        '<tpl for="productmapsets">',
-                                            '<b class="smalltext" style="color:darkgrey"> - {descriptive_name}</b>',
-                                        '</tpl>',
-                                    '<tpl else>',
-                                        '<b class="smalltext" style="color:darkgrey"> - ' + esapp.Utils.getTranslation('mapsets') + ' {productmapsets.length}, ' + esapp.Utils.getTranslation('clicktochoose') + '</b>',
+                                    '<tpl for="productmapsets">',
+                                        '<b class="smalltext"> - {descriptive_name}</b>',
                                     '</tpl>'
                                 )
+                                //tpl:  new Ext.XTemplate(
+                                //    '<b>{prod_descriptive_name}</b>',
+                                //    '<tpl if="version != \'undefined\'">',
+                                //        '<b class="smalltext"> - {version}</b>',
+                                //    '</tpl>',
+                                //    '</br>',
+                                //    '<b class="smalltext" style="color:darkgrey">{productcode} - {subproductcode}</b>',
+                                //    '<tpl if="productmapsets.length === 1">',
+                                //        '<tpl for="productmapsets">',
+                                //            '<b class="smalltext" style="color:darkgrey"> - {descriptive_name}</b>',
+                                //        '</tpl>',
+                                //    '<tpl else>',
+                                //        '<b class="smalltext" style="color:darkgrey"> - ' + esapp.Utils.getTranslation('mapsets') + ' {productmapsets.length}, ' + esapp.Utils.getTranslation('clicktochoose') + '</b>',
+                                //    '</tpl>'
+                                //)
                             }
                         ]
                     }]
@@ -284,7 +295,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                             '<b class="smalltext"> - {version} </b>',
                             '</tpl>',
                             '</br>' +
-                            '<span class="smalltext"><b style="color:darkgrey">{productcode} - {subproductcode}</b>' +
+                            '<span class="smalltext"><b style="color:darkgrey">{productcode} - {subproductcode}</b> - <b>{mapsetcode}</b>' +
                             '</span>'
                         ),
                         width: 345,
