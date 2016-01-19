@@ -326,11 +326,15 @@ def loop_get_internet(dry_run=False):
             os.mkdir(es_constants.processed_list_int_dir)
 
         while 1:
-
-            # Check internet connection (or die)
-            if not functions.internet_on():
-                logger.error("The computer is not currently connected to the internet. Wait 3 minutes.")
-                time.sleep(180)
+            # Check installation type (Server)
+            sysSettings = functions.getSystemSettings()
+            if sysSettings['type_installation'] == 'Server':
+                logger.info("Skip the ping internet test.")
+            else:
+                # Check internet connection (or die)
+                if not functions.internet_on():
+                    logger.error("The computer is not currently connected to the internet. Wait 3 minutes.")
+                    time.sleep(180)
 
             try:
                 time_sleep = user_def_sleep

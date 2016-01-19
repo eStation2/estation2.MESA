@@ -31,28 +31,28 @@ from multiprocessing import Queue
 #   ---------------------------------------------------------------------
 # chirps-dekad
 #   ---------------------------------------------------------------------
-# from apps.processing.processing_std_precip import *
-# # Create the list of dates -> returns empty if start==end==None
-# start_date='20110101'
-# end_date='20150901'
-# starting_dates = proc_functions.get_list_dates_for_dataset('chirps-dekad', '10d', '2.0',
-#                                                                start_date=start_date, end_date=end_date)
-#
+# from apps.processing.processing_std_precip_monstats import *
+# # # Create the list of dates -> returns empty if start==end==None
+# # start_date='20110101'
+# # end_date='20150901'
+# # starting_dates = proc_functions.get_list_dates_for_dataset('chirps-dekad', '10d', '2.0',
+# #                                                                start_date=start_date, end_date=end_date)
+# #
 # request_queue = Queue()
-# args = {'pipeline_run_level':0, \
-#         'pipeline_printout_level':3, \
+# args = {'pipeline_run_level':3, \
+#         'pipeline_printout_level':0, \
 #         'pipeline_printout_graph_level': 0, \
 #         'prod': 'chirps-dekad',\
 #         'starting_sprod':'10d',\
-#         'starting_dates': starting_dates,\
+#         'starting_dates': None,\
 #         'mapset': 'CHIRP-Africa-5km',\
 #         'version':'2.0',
-#         'logfile':'ruffus-fewsnet'}
+#         'logfile':'ruffus-chirps'}
 #         #'write2file':'/tmp/eStation2/ruffus_chirps-dekad.txt'}
 #
-# proc_lists=processing_std_precip_prods_only(request_queue, **args)
-#print(proc_lists)
-#upsert_database(process_id, product_code, version, mapset, proc_lists, input_product_info)
+# proc_lists=processing_std_precip_all(request_queue, **args)
+# print(proc_lists)
+# #upsert_database(process_id, product_code, version, mapset, proc_lists, input_product_info)
 
 #from apps.processing.processing_modis_sst import *
 #   ---------------------------------------------------------------------
@@ -96,37 +96,11 @@ from multiprocessing import Queue
 #   ---------------------------------------------------------------------
 # lsasaf-et
 #   ---------------------------------------------------------------------
-from apps.processing.processing_std_lsasaf_et import *
-# Create the list of dates -> returns empty if start==end==None
-start_date='201510010000'
-end_date='201510102345'
-starting_dates = proc_functions.get_list_dates_for_dataset('lsasaf-et', 'et', 'undefined', start_date=start_date, end_date=end_date)
-starting_dates = None
-native_mapset='MSG-satellite-3km'
-target_mapset='SPOTV-CEMAC-1km'
-
-args = {'pipeline_run_level':3, \
-        'pipeline_printout_level':0, \
-        'pipeline_printout_graph_level': 0, \
-        'prod': 'lsasaf-et',\
-        'starting_sprod':'et',\
-        'starting_dates': starting_dates,\
-        'native_mapset': native_mapset,\
-        'mapset': target_mapset,\
-        'version':'undefined',
-        'logfile':'log-lsasaf-et.log'}
-
-res_queue = None
-proc_lists=processing_std_lsasaf_et(res_queue,**args)
-print(proc_lists)
-#   ---------------------------------------------------------------------
-# lsasaf-et
-#   ---------------------------------------------------------------------
-# from apps.processing.processing_std_lsasaf_lst import *
+# from apps.processing.processing_std_lsasaf_et import *
 # # Create the list of dates -> returns empty if start==end==None
 # start_date='201510010000'
 # end_date='201510102345'
-# starting_dates = proc_functions.get_list_dates_for_dataset('lsasaf-lst', 'lst', 'undefined', start_date=start_date, end_date=end_date)
+# starting_dates = proc_functions.get_list_dates_for_dataset('lsasaf-et', 'et', 'undefined', start_date=start_date, end_date=end_date)
 # starting_dates = None
 # native_mapset='MSG-satellite-3km'
 # target_mapset='SPOTV-CEMAC-1km'
@@ -134,14 +108,40 @@ print(proc_lists)
 # args = {'pipeline_run_level':3, \
 #         'pipeline_printout_level':0, \
 #         'pipeline_printout_graph_level': 0, \
-#         'prod': 'lsasaf-lst',\
-#         'starting_sprod':'lst',\
+#         'prod': 'lsasaf-et',\
+#         'starting_sprod':'et',\
 #         'starting_dates': starting_dates,\
 #         'native_mapset': native_mapset,\
-#         'target_mapset': target_mapset,\
+#         'mapset': target_mapset,\
 #         'version':'undefined',
-#         'logfile':'log-lsasaf-lst.log'}
+#         'logfile':'log-lsasaf-et.log'}
 #
 # res_queue = None
-# proc_lists=processing_std_lsasaf_lst(res_queue,**args)
+# proc_lists=processing_std_lsasaf_et(res_queue,**args)
 # print(proc_lists)
+#   ---------------------------------------------------------------------
+# lsasaf-lst
+#   ---------------------------------------------------------------------
+from apps.processing.processing_std_lsasaf_lst import *
+# Create the list of dates -> returns empty if start==end==None
+# start_date='201510010000'
+# end_date='201510102345'
+# starting_dates = proc_functions.get_list_dates_for_dataset('lsasaf-lst', 'lst', 'undefined', start_date=start_date, end_date=end_date)
+starting_dates = None
+native_mapset='MSG-satellite-3km'
+target_mapset='SPOTV-CEMAC-1km'
+
+args = {'pipeline_run_level':3, \
+        'pipeline_printout_level':0, \
+        'pipeline_printout_graph_level': 0, \
+        'prod': 'lsasaf-lst',\
+        'starting_sprod':'lst',\
+        'starting_dates': starting_dates,\
+        'native_mapset': native_mapset,\
+        'mapset': target_mapset,\
+        'version':'undefined',
+        'logfile':'log-lsasaf-lst.log'}
+
+res_queue = None
+proc_lists=processing_std_lsasaf_lst(res_queue,**args)
+print(proc_lists)
