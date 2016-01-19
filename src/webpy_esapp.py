@@ -1405,6 +1405,8 @@ class TimeseriesProducts:
         self.lang = "eng"
 
     def GET(self):
+        import copy
+
         db_products = querydb.get_timeseries_products()
 
         if hasattr(db_products, "__len__") and db_products.__len__() > 0:
@@ -1446,8 +1448,12 @@ class TimeseriesProducts:
                                 dataset_dict['mapsetcode'] = mapset
                                 mapset_dict['timeseriesmapsetdatasets'].append(dataset_dict)
 
-                        prod_dict['productmapsets'].append(mapset_dict)
-                    products_dict_all.append(prod_dict)
+                        # tmp_prod_dict = prod_dict.copy()
+                        tmp_prod_dict = copy.deepcopy(prod_dict)
+
+                        tmp_prod_dict['productmapsets'].append(mapset_dict)
+                        products_dict_all.append(tmp_prod_dict)
+                        tmp_prod_dict = []
 
             prod_json = json.dumps(products_dict_all,
                                    ensure_ascii=False,

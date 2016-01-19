@@ -297,12 +297,12 @@ Ext.define('esapp.view.analysis.mapViewController', {
         downloadlink.click();
         //downloadlink.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
 
-        if(typeof Promise !== "undefined" && Promise.toString().indexOf("[native code]") !== -1){
-           console.info('Browser supports Promise natively!');
-        }
-        else {
-           console.info('NOT SUPPORT OF Promise natively!');
-        }
+        //if(typeof Promise !== "undefined" && Promise.toString().indexOf("[native code]") !== -1){
+        //   console.info('Browser supports Promise natively!');
+        //}
+        //else {
+        //   console.info('NOT SUPPORT OF Promise natively!');
+        //}
 
         //var maplegendhtml = mapviewwin.lookupReference('product-legend' + mapviewwin.id);
         var maplegendpanel = mapviewwin.lookupReference('product-legend_panel_' + mapviewwin.id);
@@ -313,7 +313,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 .then(function (mapleggendimage_url) {
 
                     filename = 'legend_' + filename;
-                    console.info(filename);
+                    //console.info(mapleggendimage_url);
 
                     if (Ext.fly('downloadlegendlink')) {
                         Ext.fly('downloadlegendlink').destroy();

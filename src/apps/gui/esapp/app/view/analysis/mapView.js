@@ -666,6 +666,7 @@ Ext.define("esapp.view.analysis.mapView",{
                 frame: false,
                 frameHeader : false,
                 border: false,
+                shadow: false,
                 //bodyStyle:  'background:transparent;',
                 header: {
                     style: 'background:transparent;'
