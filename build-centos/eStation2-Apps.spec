@@ -120,7 +120,7 @@ mkdir -p -m 775 /data/spirits
 
 # Chown a vérifier si utile
 echo "`date +'%Y-%m-%d %H:%M '` Assign /data to analyst User"
-chown -R analyst:estation /data 
+chown -R analyst:estation /data/ 
 
 # Creation of the symlink on the /var/www/eStation2-%{version}
 echo "`date +'%Y-%m-%d %H:%M '` Create sym link /var/www/eStation2-%{version}"
