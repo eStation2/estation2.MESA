@@ -84,6 +84,7 @@ Ext.define('esapp.view.analysis.analysisMainController', {
         //var productmapset = record.get('productmapsets')[0];
         this.getStore('years').setData(yearsDataDict);
         this.getStore('timeseriesmapsetdatasets').setData(timeseriesmapsetdatasets);
+        //console.info(timeseriesmapsetdatasets);
 
         if (selectedTimeSeriesProducts.length == 0) {
             Ext.getCmp('timeseries-mapset-dataset-grid').hide();

@@ -148,17 +148,20 @@ def check_connection(server_info):
 
 
 def getStatusPostgreSQL():
-    # Get status of postgresql
-    command = [es_constants.es2globals['postgresql_executable'], 'status']  # /etc/init.d/postgresql-9.3  on CentOS
-    p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = p.communicate()
-    if re.search('online', out) or re.search('en cours', out):      # ToDo: Add Portuguese!
-        psql_status = True
-    else:
-        psql_status = False
+    try:
+        # Get status of postgresql
+        command = [es_constants.es2globals['postgresql_executable'], 'status']  # /etc/init.d/postgresql-9.3  on CentOS
+        print command
+        p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = p.communicate()
+        if re.search('online', out) or re.search('en cours', out):      # ToDo: Add Portuguese!
+            psql_status = True
+        else:
+            psql_status = False
 
-    return psql_status
-
+        return psql_status
+    except:
+        return False
 
 def system_status_filename():
     check_output_dir(es_constants.es2globals['status_system_dir'])

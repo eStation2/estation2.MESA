@@ -5,7 +5,7 @@ import sys
 from config import es_constants
 from apps.processing import processing
 from lib.python import es_logging as log
-logger = log.my_logger(__name__)
+logger = log.my_logger("apps.processing.processing")
 
 try:
     command = str(sys.argv[1])
@@ -22,7 +22,9 @@ if command == "status":
         print("Current status of the Service: %s" % status)
     
 if command == "start":
+        logger.info("Starting Processing service") 
         daemon.start()
         
 if command == "stop":
+        logger.info("Stopping Processing service") 
         daemon.stop()

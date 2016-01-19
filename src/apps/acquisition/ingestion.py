@@ -1893,9 +1893,10 @@ def mosaic_lsasaf_msg(in_files, output_file, format):
     regions_rois = {'Euro': [1550, 3250, 50, 700],
                     'NAfr': [1240, 3450, 700, 1850],
                     'SAfr': [2140, 3350, 1850, 3040],
-                    'Same': [40, 740, 1460, 2970]}
+                    'Same': [40, 740, 1460, 2970],
+                    'MSG-Disk': [1, 3712, 1, 3712]}
 
-    pattern = 'Euro|NAfr|SAfr|Same'
+    pattern = 'Euro|NAfr|SAfr|Same|MSG-Disk'
 
     roi_view = [1, 3712, 1, 3712]
     out_ns = roi_view[1] - roi_view[0] + 1

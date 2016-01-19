@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.3.4
 -- Dumped by pg_dump version 9.3.4
--- Started on 2015-12-04 14:24:53 CET
+-- Started on 2016-01-19 15:06:44 CET
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -1328,36 +1328,54 @@ BEGIN
             WHERE (pp.process_id) in (SELECT process_id FROM products.processing WHERE defined_by = 'JRC'); 
 
                                     
-            UPDATE products.product p
-            SET activated = TRUE 
-            WHERE p.product_type = 'Native'
-              AND (p.productcode, p.version) in (SELECT productcode, version FROM products.thema_product WHERE thema_id = themaid AND activated = TRUE);
-            
-            UPDATE products.ingestion i
-            SET activated = TRUE,
-                enabled = TRUE  
-            WHERE (i.productcode, i.version, i.mapsetcode) in (SELECT productcode, version, mapsetcode FROM products.thema_product WHERE thema_id = themaid AND activated = TRUE); 
+	    IF themaid != 'JRC' THEN
+		    UPDATE products.product p
+		    SET activated = TRUE 
+		    WHERE p.product_type = 'Native'
+		      AND (p.productcode, p.version) in (SELECT productcode, version FROM products.thema_product WHERE thema_id = themaid AND activated = TRUE);
+		    
+		    UPDATE products.ingestion i
+		    SET activated = TRUE,
+			enabled = TRUE  
+		    WHERE (i.productcode, i.version, i.mapsetcode) in (SELECT productcode, version, mapsetcode FROM products.thema_product WHERE thema_id = themaid AND activated = TRUE); 
 
-            UPDATE products.process_product pp
-            SET activated = TRUE 
-            WHERE (pp.productcode, pp.version, pp.mapsetcode) in (SELECT productcode, version, mapsetcode FROM products.thema_product WHERE thema_id = themaid AND activated = TRUE); 
+		    UPDATE products.process_product pp
+		    SET activated = TRUE 
+		    WHERE (pp.productcode, pp.version, pp.mapsetcode) in (SELECT productcode, version, mapsetcode FROM products.thema_product WHERE thema_id = themaid AND activated = TRUE); 
 
-            UPDATE products.processing p
-            SET activated = TRUE,
-                enabled = TRUE 
-            WHERE (p.process_id) in (SELECT process_id 
-                         FROM products.process_product pp
-                         WHERE pp.type = 'INPUT' 
-                           AND (pp.productcode, pp.version, pp.mapsetcode) in (SELECT productcode, version, mapsetcode FROM products.thema_product WHERE thema_id = themaid AND activated = TRUE)); 
+		    UPDATE products.processing p
+		    SET activated = TRUE,
+			enabled = TRUE 
+		    WHERE (p.process_id) in (SELECT process_id 
+				 FROM products.process_product pp
+				 WHERE pp.type = 'INPUT' 
+				   AND (pp.productcode, pp.version, pp.mapsetcode) in (SELECT productcode, version, mapsetcode FROM products.thema_product WHERE thema_id = themaid AND activated = TRUE)); 
+				   
+	    ELSE
+		    UPDATE products.product p
+		    SET activated = TRUE 
+		    WHERE p.product_type = 'Native'
+		      AND (p.productcode, p.version) in (SELECT productcode, version FROM products.thema_product WHERE thema_id != themaid AND activated = TRUE);
+		    
+		    UPDATE products.ingestion i
+		    SET activated = TRUE,
+			enabled = TRUE  
+		    WHERE (i.productcode, i.version, i.mapsetcode) in (SELECT productcode, version, mapsetcode FROM products.thema_product WHERE thema_id != themaid AND activated = TRUE); 
 
-            -- COMMIT;
-        
-        -- EXCEPTION WHEN data_exception THEN RETURN FALSE;
-                
+		    UPDATE products.process_product pp
+		    SET activated = TRUE 
+		    WHERE (pp.productcode, pp.version, pp.mapsetcode) in (SELECT productcode, version, mapsetcode FROM products.thema_product WHERE thema_id != themaid AND activated = TRUE); 
 
-            -- COMMIT;
+		    UPDATE products.processing p
+		    SET activated = TRUE,
+			enabled = TRUE 
+		    WHERE (p.process_id) in (SELECT process_id 
+				 FROM products.process_product pp
+				 WHERE pp.type = 'INPUT' 
+				   AND (pp.productcode, pp.version, pp.mapsetcode) in (SELECT productcode, version, mapsetcode FROM products.thema_product WHERE thema_id != themaid AND activated = TRUE)); 
+	    END IF;
+	    
             RETURN TRUE;    
-        -- END;
     
     ELSE
         RETURN FALSE;
@@ -4218,7 +4236,7 @@ ALTER TABLE ONLY thema_product
     ADD CONSTRAINT thema_thema_product_fk FOREIGN KEY (thema_id) REFERENCES thema(thema_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
--- Completed on 2015-12-04 14:24:53 CET
+-- Completed on 2016-01-19 15:06:44 CET
 
 --
 -- PostgreSQL database dump complete

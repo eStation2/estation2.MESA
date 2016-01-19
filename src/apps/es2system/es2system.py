@@ -333,6 +333,11 @@ def system_bucardo_config():
                       ' 1>/var/log/bucardo/bucardo_config.log'+ ' 2>/var/log/bucardo/bucardo_config.err'
 
             res_bucardo_config=os.system(command)
+
+            # Restart bucardo
+            command = 'bucardo restart'
+            res_bucardo_config+=os.system(command)
+
         else:
             logger.error('The other computer '+other_pc+' is not ready. Exit.')
 
@@ -583,9 +588,10 @@ def loop_system(dry_run=False):
     execute_loop = True
     while execute_loop:
 
+        logger.info("Starting the System Service loop")
+
         # Read the relevant info from system settings
         system_settings = functions.getSystemSettings()
-
         logger.info('System Settings Mode: %s ' % system_settings['mode'])
 
         # Initialize To Do flags
@@ -594,8 +600,6 @@ def loop_system(dry_run=False):
         schemas_db_dump = []
         do_convert_spirits = False
         do_clean_tmp= True
-
-        logger.info("Starting the System Service loop")
 
         if system_settings['data_sync'] in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
             do_data_sync = True
@@ -610,22 +614,22 @@ def loop_system(dry_run=False):
         # Implement the logic of operations based on type/role/mode
         if system_settings['type_installation'] == 'Full':
 
-	    do_bucardo_config = True	
+            do_bucardo_config = True
             if system_settings['role'] == 'PC2':
-		status_otherPC = functions.get_remote_system_status('mesa-pc3')
-		if len(status_otherPC) != 0:
-			mode_otherPC = status_otherPC['mode']
-		else:
-			mode_otherPC = 'unreachable'
+                status_otherPC = functions.get_remote_system_status('mesa-pc3')
+                if len(status_otherPC) != 0:
+                    mode_otherPC = status_otherPC['mode']
+                else:
+                    mode_otherPC = 'unreachable'
 
                 # ip_target = system_settings['ip_pc3']
                 if system_settings['mode'] == 'nominal':
-		    if mode_otherPC == 'recovery':
-			do_data_sync = False
-		        logger.info("Do not do data_sync because other PC is in Recovery Mode")
-		    elif mode_otherPC == 'unreachable':
-			do_data_sync = False
-		        logger.info("Do not do data_sync because other PC is not reachable")
+                    if mode_otherPC == 'recovery':
+                        do_data_sync = False
+                        logger.info("Do not do data_sync because other PC is in Recovery Mode")
+                    elif mode_otherPC == 'unreachable':
+                        do_data_sync = False
+                        logger.info("Do not do data_sync because other PC is not reachable")
 
                     schemas_db_sync = ['products']
                     schemas_db_dump = ['products', 'analysis']
@@ -644,21 +648,21 @@ def loop_system(dry_run=False):
                     bucardo_action = 'stop'
 
             if system_settings['role'] == 'PC3':
-		status_otherPC = functions.get_remote_system_status('mesa-pc2')
+                status_otherPC = functions.get_remote_system_status('mesa-pc2')
 
-		if len(status_otherPC) != 0:
-			mode_otherPC = status_otherPC['mode']
-		else:
-			mode_otherPC = 'unreachable'
+                if len(status_otherPC) != 0:
+                    mode_otherPC = status_otherPC['mode']
+                else:
+                    mode_otherPC = 'unreachable'
 
                 # ip_target = system_settings['ip_pc2']
                 if system_settings['mode'] == 'nominal':
-		    if mode_otherPC == 'recovery':
-			do_data_sync = False
-		        logger.info("Do not do data_sync because other PC is in Recovery Mode")
-		    elif mode_otherPC == 'unreachable':
-			do_data_sync = False
-		        logger.info("Do not do data_sync because other PC is not reachable")
+                    if mode_otherPC == 'recovery':
+                        do_data_sync = False
+                        logger.info("Do not do data_sync because other PC is in Recovery Mode")
+                    elif mode_otherPC == 'unreachable':
+                        do_data_sync = False
+                        logger.info("Do not do data_sync because other PC is not reachable")
 
                     schemas_db_sync = ['analysis']
                     schemas_db_dump = ['products', 'analysis']
@@ -679,12 +683,27 @@ def loop_system(dry_run=False):
             schemas_db_sync = []
             schemas_db_dump = ['products', 'analysis']
 
-        logger.info("data_sync" + str(do_data_sync))
+        if system_settings['type_installation'] == 'Server':
+            do_data_sync = False
+            do_db_sync = False
+            schemas_db_sync = []
+            schemas_db_dump = ['products', 'analysis']
+            do_convert_spirits = True
+
+        if es_constants.es2globals['do_spirits_conversion'] in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+            do_convert_spirits = True
+
+        # Report on the actions to be done
+        logger.info("\tBucardo config: " + str(do_bucardo_config))
+        logger.info("\tDo data sync  : " + str(do_data_sync))
+        logger.info("\tDo DB sync    : " + str(do_db_sync))
+        logger.info("\tNr schema dump: " + str(len(schemas_db_dump)))
+        logger.info("\tConv Spirits  : " + str(do_convert_spirits))
 
         # do_bucardo_config
-	if do_bucardo_config:
+        if do_bucardo_config:
             system_bucardo_config()
-	
+
         # do_data_sync
         operation = 'data_sync'
         if do_data_sync:
@@ -724,7 +743,7 @@ def loop_system(dry_run=False):
         if do_convert_spirits:
             check_time = check_delay_time(operation, time=time_for_spirits_conv)
             if check_time:
-                logger.info("Saving the status of the machine")
+                logger.info("Convert to SPIRITS format")
                 output_dir = es_constants.es2globals['spirits_output_dir']
                 conv.convert_driver(output_dir)
 

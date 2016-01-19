@@ -16,8 +16,23 @@ class TestGetProductLayer(unittest.TestCase):
         import mapscript
         # getparams = web.input()
 
-        # getparams = {'STYLES': u'', 'productcode': u'vgt-ndvi', 'legendid': u'7', 'SERVICE': u'WMS', 'subproductcode': u'ndv', 'CRS': u'EPSG:4326', 'FORMAT': u'image/png', 'REQUEST': u'GetMap', 'HEIGHT': u'1010', 'WIDTH': u'998', 'VERSION': u'1.3.0', 'productversion': u'sv2-pv2.1', 'date': u'20130221', 'mapsetcode': u'SPOTV-ECOWAS-1km', 'TRANSPARENT': u'false', 'BBOX': u'-17.583,14.61,-17.388,14.852'}
-        getparams = {'STYLES': u'', 'productcode': u'vgt-ndvi', 'legendid': u'7', 'SERVICE': u'WMS', 'subproductcode': u'ndv', 'CRS': u'EPSG:4326', 'FORMAT': u'image/png', 'REQUEST': u'GetMap', 'HEIGHT': u'1010', 'WIDTH': u'998', 'VERSION': u'1.3.0', 'productversion': u'sv2-pv2.1', 'date': u'20130221', 'mapsetcode': u'SPOTV-ECOWAS-1km', 'TRANSPARENT': u'false', 'BBOX': u'14.61,-17.583,14.852,-17.388'}
+        #getparams = {'STYLES': u'', 'productcode': u'vgt-ndvi', 'legendid': u'7', 'SERVICE': u'WMS', 'subproductcode': u'ndv', 'CRS': u'EPSG:4326', 'FORMAT': u'image/png', 'REQUEST': u'GetMap', 'HEIGHT': u'1010', 'WIDTH': u'998', 'VERSION': u'1.3.0', 'productversion': u'sv2-pv2.1', 'date': u'20130221', 'mapsetcode': u'SPOTV-Africa-1km', 'TRANSPARENT': u'false', 'BBOX': u'-16.17,16.17,-15.47,16.87'}
+        getparams = {'STYLES': u'',
+                     'productcode': u'vgt-fapar',
+                     'legendid': u'99',
+                     'SERVICE': u'WMS',
+                     'subproductcode': u'fapar',
+                     'CRS': u'EPSG:4326',
+                     'FORMAT': u'image/png',
+                     'REQUEST': u'GetMap',
+                     'HEIGHT': u'1010',
+                     'WIDTH': u'998',
+                     'VERSION': u'1.3.0',
+                     'productversion': u'V1.4',
+                     'date': u'20130221',
+                     'mapsetcode': u'SPOTV-Africa-1km',
+                     'TRANSPARENT': u'false',
+                     'BBOX': u'15.46875, -17.578125, 16.171875, -16.875'}
 
         #getparams = {'STYLES': u'', 'productcode': u'vgt-ndvi', 'legendid': u'7', 'SERVICE': u'WMS', 'subproductcode': u'ndv', 'CRS': u'EPSG:4326', 'FORMAT': u'image/png', 'REQUEST': u'GetMap', 'HEIGHT': u'1091', 'WIDTH': u'998', 'VERSION': u'1.3.0', 'productversion': u'sv2-pv2.1', 'date': u'20130221', 'mapsetcode': u'SPOTV-Africa-1km', 'TRANSPARENT': u'false', 'BBOX': u'-25.70957541665903,9.276714800828785,-13.723491432284028,20.021343707078785'}
         # getparams = [
@@ -120,6 +135,8 @@ class TestGetProductLayer(unittest.TestCase):
         lly = coords[1]
         urx = coords[2]
         ury = coords[3]
+        print llx, lly, urx, ury
+
         productmap.setExtent(llx, lly, urx, ury)   # -26, -35, 60, 38
         # productmap.setExtent(-26, -35, 60, 38)
 

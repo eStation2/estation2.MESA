@@ -161,7 +161,7 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
                     if mydekad_nbr == dekad:
                         file_list.append(input_file)
 
-                    output_file=es_constants.processing_dir+output_subdir_10dmax+os.path.sep+my_dekad_str+my_dekad_str+out_prod_ident_10dmax
+                    output_file=es_constants.processing_dir+output_subdir_10dmax+os.path.sep+my_dekad_str+out_prod_ident_10dmax
 
                 yield (file_list, output_file)
 
@@ -281,7 +281,7 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
     @follows(lsasaf_lst_10d15min)
     @active_if(activate_10dmin_comput)
     @collate(starting_files_10dmin, formatter(formatter_in),formatter_out)
-    def lsasaf_etp_10dmin(input_file, output_file):
+    def lsasaf_lst_10dmin(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         # Get the number of days of that dekad

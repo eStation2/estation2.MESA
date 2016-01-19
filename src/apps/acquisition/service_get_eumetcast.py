@@ -5,7 +5,7 @@ import sys
 from config import es_constants
 from apps.acquisition import acquisition
 from lib.python import es_logging as log
-logger = log.my_logger("apps.acquisition.service_get_eumetcast")
+logger = log.my_logger("apps.acquisition.get_eumetcast")
 
 try:
     command = str(sys.argv[1])
@@ -22,7 +22,9 @@ if command == "status":
         print("Current status of the Service: %s" % status)
     
 if command == "start":
+        logger.info("Starting Get EUMETCast service") 
         daemon.start()
         
 if command == "stop":
+        logger.info("Stopping Get EUMETCast service") 
         daemon.stop()
