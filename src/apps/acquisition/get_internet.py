@@ -1,9 +1,9 @@
 #
-#	purpose: Define the get_internet service
-#	author:  M.Clerici
-#	date:	 19.02.2014
-#   descr:	 Reads the definition from eStation DB and execute the copy to local disk
-#	history: 1.0
+#        purpose: Define the get_internet service
+#        author:  M.Clerici
+#        date:         19.02.2014
+#   descr:         Reads the definition from eStation DB and execute the copy to local disk
+#        history: 1.0
 
 # Import standard modules
 import pycurl
@@ -326,154 +326,151 @@ def loop_get_internet(dry_run=False):
             os.mkdir(es_constants.processed_list_int_dir)
 
         while 1:
-            # Check installation type (Server)
-            sysSettings = functions.getSystemSettings()
-            if sysSettings['type_installation'] == 'Server':
-                logger.info("Skip the ping internet test.")
-            else:
-                # Check internet connection (or die)
-                if not functions.internet_on():
-                    logger.error("The computer is not currently connected to the internet. Wait 3 minutes.")
-                    time.sleep(180)
 
-            try:
-                time_sleep = user_def_sleep
-                logger.debug("Sleep time set to : %s.", time_sleep)
-            except:
-                logger.warning("Sleep time not defined. Setting to default=1min. Continue.")
-                time_sleep = 60
+            # Check internet connection (or die)
+            if not functions.internet_on():
+                logger.error("The computer is not currently connected to the internet. Wait 1 minute.")
+                time.sleep(60)
 
-            logger.debug("Reading active INTERNET data sources from database")
-            internet_sources_list = querydb.get_active_internet_sources(echo=echo_query)
+            else:                
+                    try:
+                        time_sleep = user_def_sleep
+                        logger.debug("Sleep time set to : %s.", time_sleep)
+                    except:
+                        logger.warning("Sleep time not defined. Setting to default=1min. Continue.")
+                        time_sleep = 60
 
-            # Loop over active triggers
-            try:
-              for internet_source in internet_sources_list:
+                    logger.debug("Reading active INTERNET data sources from database")
+                    internet_sources_list = querydb.get_active_internet_sources(echo=echo_query)
 
-                execute_trigger = True
-                # Get this from the pads database table (move from internet_source 'pull_frequency' to the pads table,
-                # so that it can be exploited by eumetcast triggers as well). It is in minute
-                delay_time_source_minutes = internet_source.pull_frequency
+                    # Loop over active triggers
+                    try:
+                      for internet_source in internet_sources_list:
 
-                logger_spec = log.my_logger('apps.get_internet.'+internet_source.internet_id)
-                logger.debug("Processing internet source  %s.", internet_source.descriptive_name)
+                        execute_trigger = True
+                        # Get this from the pads database table (move from internet_source 'pull_frequency' to the pads table,
+                        # so that it can be exploited by eumetcast triggers as well). It is in minute
+                        delay_time_source_minutes = internet_source.pull_frequency
 
-                # Create objects for list and info
-                processed_info_filename = es_constants.get_internet_processed_list_prefix+str(internet_source.internet_id)+'.info'
+                        logger_spec = log.my_logger('apps.get_internet.'+internet_source.internet_id)
+                        logger.info("Processing internet source  %s.", internet_source.descriptive_name)
 
-                # Restore/Create Info
-                processed_info = None
-                processed_info=functions.restore_obj_from_pickle(processed_info, processed_info_filename)
-                if processed_info is not None:
-                    # Check the delay
-                    current_delta=datetime.datetime.now()-processed_info['time_latest_exec']
-                    current_delta_minutes=int(current_delta.seconds/60)
-                    if current_delta_minutes < delay_time_source_minutes:
-                        logger.debug("Still waiting up to %i minute - since latest execution.", delay_time_source_minutes)
-                        execute_trigger = False
-                else:
-                    # Create processed_info object
-                    processed_info = {'lenght_proc_list': 0,
-                                      'time_latest_exec': datetime.datetime.now(),
-                                      'time_latest_copy': datetime.datetime.now()}
-                    execute_trigger = True
+                        # Create objects for list and info
+                        processed_info_filename = es_constants.get_internet_processed_list_prefix+str(internet_source.internet_id)+'.info'
 
-                if execute_trigger:
-                    # Restore/Create List
-                    processed_list = []
-                    processed_list_filename = es_constants.get_internet_processed_list_prefix+str(internet_source.internet_id)+'.list'
-                    processed_list=functions.restore_obj_from_pickle(processed_list, processed_list_filename)
+                        # Restore/Create Info
+                        processed_info = None
+                        processed_info=functions.restore_obj_from_pickle(processed_info, processed_info_filename)
+                        if processed_info is not None:
+                            # Check the delay
+                            current_delta=datetime.datetime.now()-processed_info['time_latest_exec']
+                            current_delta_minutes=int(current_delta.seconds/60)
+                            if current_delta_minutes < delay_time_source_minutes:
+                                logger.debug("Still waiting up to %i minute - since latest execution.", delay_time_source_minutes)
+                                execute_trigger = False
+                        else:
+                            # Create processed_info object
+                            processed_info = {'lenght_proc_list': 0,
+                                              'time_latest_exec': datetime.datetime.now(),
+                                              'time_latest_copy': datetime.datetime.now()}
+                            execute_trigger = True
 
-                    processed_info['time_latest_exec']=datetime.datetime.now()
+                        if execute_trigger:
+                            # Restore/Create List
+                            processed_list = []
+                            processed_list_filename = es_constants.get_internet_processed_list_prefix+str(internet_source.internet_id)+'.list'
+                            processed_list=functions.restore_obj_from_pickle(processed_list, processed_list_filename)
 
-                    logger.debug("Create current list of file to process for source %s.", internet_source.internet_id)
-                    if internet_source.user_name is None:
-                        user_name = "anonymous"
-                    else:
-                        user_name = internet_source.user_name
+                            processed_info['time_latest_exec']=datetime.datetime.now()
 
-                    if internet_source.password is None:
-                        password = "anonymous"
-                    else:
-                        password = internet_source.password
-
-                    usr_pwd = str(user_name)+':'+str(password)
-
-                    logger_spec.debug("              Url is %s.", internet_source.url)
-                    logger_spec.debug("              usr/pwd is %s.", usr_pwd)
-                    logger_spec.debug("              regex   is %s.", internet_source.include_files_expression)
-
-                    internet_type = internet_source.type
-
-                    if internet_type == 'ftp':
-                        # Note that the following list might contain sub-dirs (it reflects full_regex)
-                        current_list = get_list_matching_files_dir_ftp(str(internet_source.url), str(usr_pwd), str(internet_source.include_files_expression))
-
-                    elif internet_type == 'http_tmpl':
-                        # Manage the dates:start_date is mandatory .. end_date replaced by 'today' if missing/wrong
-                        try:
-                          if functions.is_date_yyyymmdd(str(internet_source.start_date), silent=True):
-                            datetime_start=datetime.datetime.strptime(str(internet_source.start_date),'%Y%m%d')
-                          else:
-                            raise Exception("Start Date not valid")
-                        except:
-                            raise Exception("Start Date not valid")
-                        try:
-                          if functions.is_date_yyyymmdd(str(internet_source.end_date), silent=True):
-                            datetime_end=datetime.datetime.strptime(str(internet_source.end_date),'%Y%m%d')
-                          else:
-                            datetime_end=datetime.datetime.today()
-                        except:
-                            pass
-                        # Create the full filename from a 'template' which contains
-                        try:
-                            current_list = build_list_matching_for_http(str(internet_source.url),
-                                                                        str(internet_source.include_files_expression),
-                                                                        datetime_start,
-                                                                        datetime_end,
-                                                                        str(internet_source.frequency_id))
-                        except:
-                             logger.error("Error in creating date lists. Continue")
-
-                    logger_spec.debug("Number of files currently available for source %s is %i", internet_source.internet_id, len(current_list))
-                    if len(current_list) > 0:
-                        logger_spec.debug("Number of files already copied for trigger %s is %i", internet_source.internet_id, len(processed_list))
-                        listtoprocess = []
-                        for current_file in current_list:
-                            if len(processed_list) == 0:
-                                listtoprocess.append(current_file)
+                            logger.debug("Create current list of file to process for source %s.", internet_source.internet_id)
+                            if internet_source.user_name is None:
+                                user_name = "anonymous"
                             else:
-                                #if os.path.basename(current_file) not in processed_list: -> save in .list subdirs as well !!
-                                if current_file not in processed_list:
-                                    listtoprocess.append(current_file)
+                                user_name = internet_source.user_name
 
-                        logger_spec.debug("Number of files to be copied for trigger %s is %i", internet_source.internet_id, len(listtoprocess))
-                        if listtoprocess != set([]):
-                             logger_spec.debug("Loop on the found files.")
-                             if not dry_run:
-                                 for filename in list(listtoprocess):
-                                     logger_spec.debug("Processing file: "+str(internet_source.url)+os.path.sep+filename)
-                                     try:
-                                        result = get_file_from_url(str(internet_source.url)+os.path.sep+filename, target_file=os.path.basename(filename), target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
-                                        if not result:
-                                            logger_spec.info("File %s copied.", filename)
-                                            processed_list.append(filename)
-                                        else:
-                                            logger_spec.warning("File %s not copied: ", filename)
-                                     except:
-                                       logger_spec.warning("Problem while copying file: %s.", filename)
-                             else:
-                                 logger_spec.info('Dry_run is set: do not get files')
+                            if internet_source.password is None:
+                                password = "anonymous"
+                            else:
+                                password = internet_source.password
 
-                    if not dry_run:
-                        functions.dump_obj_to_pickle(processed_list, processed_list_filename)
-                        functions.dump_obj_to_pickle(processed_info, processed_info_filename)
+                            usr_pwd = str(user_name)+':'+str(password)
 
-              sleep(float(user_def_sleep))
-            # Loop over sources
-            except Exception as inst:
-              logger.error("Error while processing source %s. Continue" % internet_source.descriptive_name)
-              sleep(float(user_def_sleep))
+                            logger_spec.debug("              Url is %s.", internet_source.url)
+                            logger_spec.debug("              usr/pwd is %s.", usr_pwd)
+                            logger_spec.debug("              regex   is %s.", internet_source.include_files_expression)
+
+                            internet_type = internet_source.type
+
+                            if internet_type == 'ftp':
+                                # Note that the following list might contain sub-dirs (it reflects full_regex)
+                                current_list = get_list_matching_files_dir_ftp(str(internet_source.url), str(usr_pwd), str(internet_source.include_files_expression))
+
+                            elif internet_type == 'http_tmpl':
+                                # Manage the dates:start_date is mandatory .. end_date replaced by 'today' if missing/wrong
+                                try:
+                                  if functions.is_date_yyyymmdd(str(internet_source.start_date), silent=True):
+                                    datetime_start=datetime.datetime.strptime(str(internet_source.start_date),'%Y%m%d')
+                                  else:
+                                    raise Exception("Start Date not valid")
+                                except:
+                                    raise Exception("Start Date not valid")
+                                try:
+                                  if functions.is_date_yyyymmdd(str(internet_source.end_date), silent=True):
+                                    datetime_end=datetime.datetime.strptime(str(internet_source.end_date),'%Y%m%d')
+                                  else:
+                                    datetime_end=datetime.datetime.today()
+                                except:
+                                    pass
+                                # Create the full filename from a 'template' which contains
+                                try:
+                                    current_list = build_list_matching_for_http(str(internet_source.url),
+                                                                                str(internet_source.include_files_expression),
+                                                                                datetime_start,
+                                                                                datetime_end,
+                                                                                str(internet_source.frequency_id))
+                                except:
+                                     logger.error("Error in creating date lists. Continue")
+
+                            logger_spec.debug("Number of files currently available for source %s is %i", internet_source.internet_id, len(current_list))
+                            if len(current_list) > 0:
+                                logger_spec.debug("Number of files already copied for trigger %s is %i", internet_source.internet_id, len(processed_list))
+                                listtoprocess = []
+                                for current_file in current_list:
+                                    if len(processed_list) == 0:
+                                        listtoprocess.append(current_file)
+                                    else:
+                                        #if os.path.basename(current_file) not in processed_list: -> save in .list subdirs as well !!
+                                        if current_file not in processed_list:
+                                            listtoprocess.append(current_file)
+
+                                logger_spec.debug("Number of files to be copied for trigger %s is %i", internet_source.internet_id, len(listtoprocess))
+                                if listtoprocess != set([]):
+                                     logger_spec.debug("Loop on the found files.")
+                                     if not dry_run:
+                                         for filename in list(listtoprocess):
+                                             logger_spec.debug("Processing file: "+str(internet_source.url)+os.path.sep+filename)
+                                             try:
+                                                result = get_file_from_url(str(internet_source.url)+os.path.sep+filename, target_file=os.path.basename(filename), target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
+                                                if not result:
+                                                    logger_spec.info("File %s copied.", filename)
+                                                    processed_list.append(filename)
+                                                else:
+                                                    logger_spec.warning("File %s not copied: ", filename)
+                                             except:
+                                               logger_spec.warning("Problem while copying file: %s.", filename)
+                                     else:
+                                         logger_spec.info('Dry_run is set: do not get files')
+
+                            if not dry_run:
+                                functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+                                functions.dump_obj_to_pickle(processed_info, processed_info_filename)
+
+                      sleep(float(user_def_sleep))
+                    # Loop over sources
+                    except Exception as inst:
+                      logger.error("Error while processing source %s. Continue" % internet_source.descriptive_name)
+                      sleep(float(user_def_sleep))
 
     exit(0)
 

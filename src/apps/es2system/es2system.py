@@ -333,6 +333,11 @@ def system_bucardo_config():
                       ' 1>/var/log/bucardo/bucardo_config.log'+ ' 2>/var/log/bucardo/bucardo_config.err'
 
             res_bucardo_config=os.system(command)
+
+            # Restart bucardo
+            command = 'bucardo restart'
+            res_bucardo_config+=os.system(command)
+
         else:
             logger.error('The other computer '+other_pc+' is not ready. Exit.')
 

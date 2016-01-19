@@ -4,7 +4,7 @@ import sys
 from config import es_constants
 from apps.es2system import es2system
 from lib.python import es_logging as log
-logger = log.my_logger(__name__)
+logger = log.my_logger("apps.es2system.es2system")
 
 try:
     command = str(sys.argv[1])
@@ -21,7 +21,9 @@ if command == "status":
         print("Current status of the Service: %s" % status)
     
 if command == "start":
+        logger.info("Starting System service") 
         daemon.start()
         
 if command == "stop":
+        logger.info("Stopping System service") 
         daemon.stop()
