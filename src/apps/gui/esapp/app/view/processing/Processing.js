@@ -24,6 +24,7 @@ Ext.define("esapp.view.processing.Processing",{
     ],
 
     store: 'ProcessingStore',
+    bufferedRenderer: false,
 
     // title: 'Processing Dashboard',
     viewConfig: {
@@ -219,8 +220,8 @@ Ext.define("esapp.view.processing.Processing",{
                             return  esapp.Utils.getTranslation('activateprocess');   // 'Activate Process';
                         }
                     },
-                    handler: function(grid, rowIndex, colIndex) {
-                        var rec = grid.getStore().getAt(rowIndex),
+                    handler: function(grid, rowIndex, colIndex, icon, e, record) {
+                        var rec = record,   // grid.getStore().getAt(rowIndex),
                         action = (rec.get('process_activated') ? 'deactivated' : 'activated');
                         //console.info(rec);
                         rec.get('process_activated') ? rec.set('process_activated', false) : rec.set('process_activated', true);
@@ -243,9 +244,9 @@ Ext.define("esapp.view.processing.Processing",{
                     height:32,
                     tooltip: esapp.Utils.getTranslation('showprocessinglog'),     // 'Show log of this Ingestion',
                     scope: me,
-                    handler: function (grid, rowIndex, colIndex, icon) {
+                    handler: function (grid, rowIndex, colIndex, icon, e, record) {
 
-                        var rec = grid.getStore().getAt(rowIndex);
+                        //var rec = grid.getStore().getAt(rowIndex);
                         //console.info(grid.getStore());
                         //console.info(rec);
                         //console.info(rowIndex);
@@ -253,7 +254,7 @@ Ext.define("esapp.view.processing.Processing",{
                         var logViewWin = new esapp.view.acquisition.logviewer.LogView({
                             params: {
                                 logtype: 'processing',
-                                record: rec
+                                record: record
                             }
                         });
                         logViewWin.show();

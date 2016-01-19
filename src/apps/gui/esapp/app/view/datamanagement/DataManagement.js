@@ -22,6 +22,7 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
     ],
 
     store: 'DataSetsStore',
+    bufferedRenderer: false,
 
     // title: 'Data Management Dashboard',
     viewConfig: {
@@ -34,7 +35,6 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         trackOver:false
     },
 
-    bufferedRenderer: true,
     collapsible: false,
     enableColumnMove:false,
     enableColumnResize:false,
@@ -194,13 +194,13 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                     icon: 'resources/img/icons/download.png',
                     tooltip: esapp.Utils.getTranslation('tipcompletedatasetall'),    // 'Complete all product data sets (all mapsets and its subproducts).',
                     //scope: me,
-                    handler: function (grid, rowIndex) {
-                        var rec = grid.getStore().getAt(rowIndex);
+                    handler: function (grid, rowIndex, colIndex, icon, e, record) {
+                        //var rec = grid.getStore().getAt(rowIndex);
 
                         var sendRequestWin = new esapp.view.datamanagement.sendRequest({
                             params: {
                                 level: 'product',
-                                record: rec
+                                record: record
                             }
                         });
                         sendRequestWin.show();

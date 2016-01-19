@@ -68,7 +68,7 @@ Ext.define("esapp.view.acquisition.Acquisition",{
     rowLines: true,
     frame: false,
     border: false,
-    //bufferedRenderer: true,
+    bufferedRenderer: false,
 
     session:true,
 
@@ -496,11 +496,12 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                         // Returns true if 'editable' is false (, null, or undefined)
                         return false // !record.get('editable');
                     },
-                    handler: function(grid, rowIndex, colIndex) {
-                        var rec = grid.getStore().getAt(rowIndex),
+                    handler: function(grid, rowIndex, colIndex, icon, e, record) {
+                        var rec = record,   // grid.getStore().getAt(rowIndex),
                             action = (rec.get('activated') ? 'deactivated' : 'activated');
                         // Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
                         rec.get('activated') ? rec.set('activated', false) : rec.set('activated', true);
+                        me.getController().renderHiddenColumnsWhenUnlocked();
                     }
                 }]
 //            }, {
@@ -651,13 +652,13 @@ Ext.define("esapp.view.acquisition.Acquisition",{
         },{
             xtype: 'actioncolumn',
             text: esapp.Utils.getTranslation('log'),    // 'Log',
-            id: 'ingestionlogcolumn',
+            //id: 'ingestionlogcolumn',
             width: 70,
             height:40,
             menuDisabled: true,
             align:'center',
             stopSelection: false,
-            cls:'x-grid3-td-ingestionlogcolumn',
+            //cls:'x-grid3-td-ingestionlogcolumn',
             items: [{
                 //icon: 'resources/img/icons/file-extension-log-icon-32x32.png',
                 iconCls:'log-icon',
@@ -665,12 +666,17 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                 height:32,
                 tooltip: esapp.Utils.getTranslation('showingestionlog'),     // 'Show log of this Ingestion',
                 scope: me,
-                handler: function (grid, rowIndex, colIndex, icon) {
-                    var rec = grid.getStore().getAt(rowIndex);
+                handler: function (grid, rowIndex, colIndex, icon, e, record) {
+                    //console.info(record);
+                    //var recIndex = grid.getStore().indexOf(record);
+                    //console.info(recIndex);
+                    //console.info(rowIndex);
+                    //var rec = grid.getStore().getAt(rowIndex);
+                    //console.info(rec);
                     var logViewWin = new esapp.view.acquisition.logviewer.LogView({
                         params: {
                             logtype: 'ingest',
-                            record: rec
+                            record: record
                         }
                     });
                     logViewWin.show();

@@ -274,8 +274,10 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
         if (filename == null || filename.trim() == '')
             filename = 'estation2map.png'
-        else
+        else {
             filename = filename.replace(/<\/?[^>]+(>|$)/g, "");
+            filename = filename + '.png';
+        }
 
         mapviewwin.map.once('postcompose', function(event) {
           var canvas = event.context.canvas;
@@ -294,6 +296,41 @@ Ext.define('esapp.view.analysis.mapViewController', {
         downloadlink.setAttribute('href', mapimage_url);
         downloadlink.click();
         //downloadlink.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+
+        if(typeof Promise !== "undefined" && Promise.toString().indexOf("[native code]") !== -1){
+           console.info('Browser supports Promise natively!');
+        }
+        else {
+           console.info('NOT SUPPORT OF Promise natively!');
+        }
+
+        //var maplegendhtml = mapviewwin.lookupReference('product-legend' + mapviewwin.id);
+        var maplegendpanel = mapviewwin.lookupReference('product-legend_panel_' + mapviewwin.id);
+        //console.info(maplegendpanel);
+        if (maplegendpanel.hidden == false) {
+            var maplegendhtml = document.getElementById('product-legend' + mapviewwin.id);
+            domtoimage.toPng(maplegendhtml)
+                .then(function (mapleggendimage_url) {
+
+                    filename = 'legend_' + filename;
+                    console.info(filename);
+
+                    if (Ext.fly('downloadlegendlink')) {
+                        Ext.fly('downloadlegendlink').destroy();
+                    }
+                    var downloadlegendlink = document.createElement('a');
+                    downloadlegendlink.id = 'downloadlegendlink';
+                    downloadlegendlink.name = downloadlegendlink.id;
+                    downloadlegendlink.className = 'x-hidden';
+                    document.body.appendChild(downloadlegendlink);
+                    downloadlegendlink.setAttribute('download', filename);
+                    downloadlegendlink.setAttribute('href', mapleggendimage_url);
+                    downloadlegendlink.click();
+                });
+                //.catch(function (error) {
+                //    console.error('oops, something went wrong!', error);
+                //});
+        }
     }
 
     ,toggleLink: function(btn, event) {

@@ -25,17 +25,22 @@ req_dir=es_constants.es2globals['requests_dir']
 
 class TestRequests(unittest.TestCase):
 
-
     def test_requests_1(self):
 
-        test_json_dump=req_dir+'dump_my_json_1.req'
+        test_json_dump = req_dir+'dump_my_json_1.req'
         mapsetcode = None
         subproductcode = None
-        productcode = 'vgt-ndvi'
+        # productcode = 'vgt-ndvi'
         # version = 'sv2-pv2.1'
-        version = 'spot-v1'
+        # # version = 'spot-v1'
         # mapsetcode = 'SPOTV-Africa-1km'
         # subproductcode = 'ndv'
+
+        productcode = 'lsasaf-lst'
+        version = 'undefined'
+        # version = 'spot-v1'
+        # mapsetcode = 'SPOTV-CEMAC-1km'
+
         request = requests.create_request(productcode, version, mapsetcode=mapsetcode, subproductcode=subproductcode)
         request_json = json.dumps(request,
                                ensure_ascii=False,

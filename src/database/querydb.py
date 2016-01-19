@@ -74,7 +74,7 @@ def get_enabled_ingest_derived_of_product(productcode, version, mapsetcode=None,
                     "from products.product p " + \
                     "     inner join products.ingestion i on p.productcode = i.productcode and p.subproductcode = i.subproductcode and p.version = i.version " + \
                     "where p.productcode = '"+productcode+"' and p.version = '"+version+"' and p.product_type = 'Ingest' and i.enabled = true " + \
-                    "union " + \
+                    " union " + \
                     "select p.productcode, p.version, derived.mapsetcode, p.subproductcode, p.product_type " + \
                     "from products.product p " + \
                     "     inner join ( " + \
@@ -91,7 +91,7 @@ def get_enabled_ingest_derived_of_product(productcode, version, mapsetcode=None,
                     "     inner join products.ingestion i on p.productcode = i.productcode and p.subproductcode = i.subproductcode and p.version = i.version " + \
                     "where p.productcode = '"+productcode+"' and p.version = '"+version+"' and p.product_type = 'Ingest' and i.enabled = true " + \
                     " and i.mapsetcode = '"+mapsetcode+"'" + \
-                    "union " + \
+                    " union " + \
                     "select p.productcode, p.version, derived.mapsetcode, p.subproductcode, p.product_type " + \
                     "from products.product p " + \
                     "     inner join ( " + \
