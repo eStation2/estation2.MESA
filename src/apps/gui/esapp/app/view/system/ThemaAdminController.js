@@ -45,9 +45,9 @@ Ext.define('esapp.view.system.ThemaAdminController', {
             success: function(response, opts){
                 var result = Ext.JSON.decode(response.responseText);
                 if (result.success){
-                    Ext.toast({ html: esapp.Utils.getTranslation('systemthemasetto') + " " + newthema.thema,
+                    Ext.toast({ html: esapp.Utils.getTranslation('systemthemasetto') + " " + newthema.thema + "</BR>" + result.message,
                                 title: esapp.Utils.getTranslation('themachanged'),
-                                width: 200, align: 't' });
+                                width: 300, align: 't' });
                 }
                 var systemsettingsstore  = Ext.data.StoreManager.lookup('SystemSettingsStore');
                 var systemsettingsrecord = systemsettingsstore.getModel().load(0, {
@@ -66,6 +66,9 @@ Ext.define('esapp.view.system.ThemaAdminController', {
             },
             failure: function(response, opts) {
                 console.info(response.status);
+		    Ext.toast({ html: result.error,
+		                title: 'Error',
+		                width: 300, align: 't' });
             }
         });
     }
