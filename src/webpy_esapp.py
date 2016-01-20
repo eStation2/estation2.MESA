@@ -1963,7 +1963,8 @@ class ChangeVersion:
             if os.path.exists(base):
                 if os.path.islink(base):
                     os.unlink(base)
-                    os.symlink(base, base+"-"+getparams['version'])
+		    print base+"-"+getparams['version']
+                    os.symlink(base+"-"+getparams['version'], base)
                 elif os.path.isdir(base):
                     error = 'The base is a directory and should be a symbolic link!'
 
@@ -2016,24 +2017,29 @@ class ChangeThema:
             # Set thema in database by activating the thema products, ingestion and processes.
             themaset = querydb.set_thema(getparams['thema'])
 
-            setThemaOtherPC = False
+            message = 'Thema changed also on other pc!'
+	    setThemaOtherPC = False
             systemsettings = functions.getSystemSettings()
             if systemsettings['type_installation'].lower() == 'full':
                 if systemsettings['role'].lower() == 'pc2':
                     otherPC = 'mesa-pc3'
                 elif systemsettings['role'].lower() == 'pc3':
-                    otherPC = 'mesa-pc3'
+                    otherPC = 'mesa-pc2'
                 else:
                     otherPC = 'mesa-pc1'
 
                 PC23_connection = functions.check_connection(otherPC)
                 if PC23_connection:
                     setThemaOtherPC = functions.setThemaOtherPC(otherPC, getparams['thema'])
+		    if not setThemaOtherPC:
+		        message = '<B>Thema NOT set on other pc</B>, ' + otherPC + ' because of an error on the other pc. Please set the Thema manually on the other pc!'
+		else:
+		    message = '<B>Thema NOT set on other pc</B>, ' + otherPC + ' because there is no connection. Please set the Thema manually on the other pc!'
 
             # print 'setThemaOtherPC: ' + str(setThemaOtherPC)
             if themaset:
                 # print "thema changed"
-                changethema_json = '{"success":"true", "message":"Thema changed!"}'
+                changethema_json = '{"success":"true", "message":"Thema changed on this PC!</BR>' + message + '"}'
             else:
                 changethema_json = '{"success":false, "error":"Changing thema in database error!"}'
         else:

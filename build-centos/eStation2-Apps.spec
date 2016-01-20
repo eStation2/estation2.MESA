@@ -120,7 +120,10 @@ mkdir -p -m 775 /data/spirits
 
 # Chown a vérifier si utile
 echo "`date +'%Y-%m-%d %H:%M '` Assign /data to analyst User"
-chown -R analyst:estation /data 
+chown -R analyst:estation /data/ 
+
+# Change permissions /var/www (for allowing analyst to change version)
+chmod 777 /var/www
 
 # Creation of the symlink on the /var/www/eStation2-%{version}
 echo "`date +'%Y-%m-%d %H:%M '` Create sym link /var/www/eStation2-%{version}"
@@ -221,9 +224,10 @@ if [[ `su postgres -c "psql -c 'select datname from pg_database'"  2>/dev/null|g
 	echo "$(date +'%Y-%m-%d %H:%M ') Bucardo package installed"
 else
 	echo "$(date +'%Y-%m-%d %H:%M ') Bucardo package already installed. Continue"
-	bucardo set log_level=terse
-	bucardo set reason_file='/var/log/bucardo/bucardo.restart.reason'
 fi
+bucardo set log_level=terse
+bucardo set reason_file='/var/log/bucardo/bucardo.restart.reason'
+
 # Create log and run dir for Bucardo
 mkdir -p ${log_dir}
 chown adminuser:estation ${log_dir}
@@ -251,5 +255,6 @@ cp -r /var/www/eStation2-%{version}/* /var/www/eStation2-%{version}.bck/
 %postun
 rm -fr /var/www/eStation2-%{version}
 mv /var/www/eStation2-%{version}.bck /var/www/eStation2-%{version}
-
+chown adminuser:estation -R /var/www/eStation2-%{version}
+chmod 755 -R /var/www/eStation2-%{version}
 
