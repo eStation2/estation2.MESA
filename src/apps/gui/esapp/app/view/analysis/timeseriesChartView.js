@@ -30,7 +30,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
     collapsible: true,
     resizable: true,
 
-    width:1200,
+    width:900,
     height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-80 : 800,  // 600,
     minWidth:400,
     minHeight:350,
@@ -494,7 +494,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                             borderRadius: 3,
                             borderWidth: 0,
                             itemStyle: {
-                                 font: 'bold 28px Arial, Verdana, Helvetica, sans-serif',
+                                 font: 'bold 18px Arial, Verdana, Helvetica, sans-serif',
                                  color: 'black'
                             }
 
