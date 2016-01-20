@@ -88,7 +88,12 @@ class Frequency(object):
 
     def strip_year(self, date):
         if self.no_year():
-            return date[5:]
+            if len(date) > 8:
+                # String like: '1998-02-01' -> returns 02-01
+                return date[5:]
+            else:
+                # String like: '19980201'   -> returns 0201
+                return date[4:]
         return date
 
     def format_date(self, date):
