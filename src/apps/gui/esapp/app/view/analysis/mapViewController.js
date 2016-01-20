@@ -305,32 +305,55 @@ Ext.define('esapp.view.analysis.mapViewController', {
         //}
 
         //var maplegendhtml = mapviewwin.lookupReference('product-legend' + mapviewwin.id);
-        var maplegendpanel = mapviewwin.lookupReference('product-legend_panel_' + mapviewwin.id);
+        //var maplegendpanel = mapviewwin.lookupReference('product-legend_panel_' + mapviewwin.id);
         //console.info(maplegendpanel);
-        if (maplegendpanel.hidden == false) {
-            var maplegendhtml = document.getElementById('product-legend' + mapviewwin.id);
-            domtoimage.toPng(maplegendhtml)
-                .then(function (mapleggendimage_url) {
+        //if (maplegendpanel.hidden == false) {
+        //    var maplegendhtml = document.getElementById('product-legend' + mapviewwin.id);
+        //    console.info('<div>'+mapviewwin.legendHTML+'</div>');
+        //    console.info(maplegendhtml);
+        //
+        //    html2canvas(maplegendhtml, {
+        //                onrendered: function(canvas) {
+        //                    var image = canvas.toDataURL("image/png");
+        //                    filename = 'legend_' + filename;
+        //                    //console.info(mapleggendimage_url);
+        //
+        //                    if (Ext.fly('downloadlegendlink')) {
+        //                        Ext.fly('downloadlegendlink').destroy();
+        //                    }
+        //                    var downloadlegendlink = document.createElement('a');
+        //                    downloadlegendlink.id = 'downloadlegendlink';
+        //                    downloadlegendlink.name = downloadlegendlink.id;
+        //                    downloadlegendlink.className = 'x-hidden';
+        //                    document.body.appendChild(downloadlegendlink);
+        //                    downloadlegendlink.setAttribute('download', filename);
+        //                    downloadlegendlink.setAttribute('href', image);
+        //                    downloadlegendlink.click();
+        //                }
+        //            });
 
-                    filename = 'legend_' + filename;
-                    //console.info(mapleggendimage_url);
-
-                    if (Ext.fly('downloadlegendlink')) {
-                        Ext.fly('downloadlegendlink').destroy();
-                    }
-                    var downloadlegendlink = document.createElement('a');
-                    downloadlegendlink.id = 'downloadlegendlink';
-                    downloadlegendlink.name = downloadlegendlink.id;
-                    downloadlegendlink.className = 'x-hidden';
-                    document.body.appendChild(downloadlegendlink);
-                    downloadlegendlink.setAttribute('download', filename);
-                    downloadlegendlink.setAttribute('href', mapleggendimage_url);
-                    downloadlegendlink.click();
-                });
+            //domtoimage.toPng(maplegendhtml)
+            //    .then(function (mapleggendimage_url) {
+            //
+            //        filename = 'legend_' + filename;
+            //        //console.info(mapleggendimage_url);
+            //
+            //        if (Ext.fly('downloadlegendlink')) {
+            //            Ext.fly('downloadlegendlink').destroy();
+            //        }
+            //        var downloadlegendlink = document.createElement('a');
+            //        downloadlegendlink.id = 'downloadlegendlink';
+            //        downloadlegendlink.name = downloadlegendlink.id;
+            //        downloadlegendlink.className = 'x-hidden';
+            //        document.body.appendChild(downloadlegendlink);
+            //        downloadlegendlink.setAttribute('download', filename);
+            //        downloadlegendlink.setAttribute('href', mapleggendimage_url);
+            //        downloadlegendlink.click();
+            //    });
                 //.catch(function (error) {
                 //    console.error('oops, something went wrong!', error);
                 //});
-        }
+        //}
     }
 
     ,toggleLink: function(btn, event) {
