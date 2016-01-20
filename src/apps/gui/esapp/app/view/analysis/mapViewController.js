@@ -279,24 +279,6 @@ Ext.define('esapp.view.analysis.mapViewController', {
             filename = filename + '.png';
         }
 
-        mapviewwin.map.once('postcompose', function(event) {
-          var canvas = event.context.canvas;
-          mapimage_url = canvas.toDataURL('image/png');
-        });
-        mapviewwin.map.renderSync();
-        if (Ext.fly('downloadlink')) {
-            Ext.fly('downloadlink').destroy();
-        }
-        var downloadlink = document.createElement('a');
-        downloadlink.id = 'downloadlink';
-        downloadlink.name = downloadlink.id;
-        downloadlink.className = 'x-hidden';
-        document.body.appendChild(downloadlink);
-        downloadlink.setAttribute('download', filename);
-        downloadlink.setAttribute('href', mapimage_url);
-        downloadlink.click();
-        //downloadlink.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-
         //if(typeof Promise !== "undefined" && Promise.toString().indexOf("[native code]") !== -1){
         //   console.info('Browser supports Promise natively!');
         //}
@@ -305,32 +287,32 @@ Ext.define('esapp.view.analysis.mapViewController', {
         //}
 
         //var maplegendhtml = mapviewwin.lookupReference('product-legend' + mapviewwin.id);
-        //var maplegendpanel = mapviewwin.lookupReference('product-legend_panel_' + mapviewwin.id);
+        var maplegendpanel = mapviewwin.lookupReference('product-legend_panel_' + mapviewwin.id);
         //console.info(maplegendpanel);
-        //if (maplegendpanel.hidden == false) {
-        //    var maplegendhtml = document.getElementById('product-legend' + mapviewwin.id);
+        if (maplegendpanel.hidden == false) {
+            var maplegendhtml = document.getElementById('product-legend' + mapviewwin.id);
         //    console.info('<div>'+mapviewwin.legendHTML+'</div>');
         //    console.info(maplegendhtml);
-        //
-        //    html2canvas(maplegendhtml, {
-        //                onrendered: function(canvas) {
-        //                    var image = canvas.toDataURL("image/png");
-        //                    filename = 'legend_' + filename;
-        //                    //console.info(mapleggendimage_url);
-        //
-        //                    if (Ext.fly('downloadlegendlink')) {
-        //                        Ext.fly('downloadlegendlink').destroy();
-        //                    }
-        //                    var downloadlegendlink = document.createElement('a');
-        //                    downloadlegendlink.id = 'downloadlegendlink';
-        //                    downloadlegendlink.name = downloadlegendlink.id;
-        //                    downloadlegendlink.className = 'x-hidden';
-        //                    document.body.appendChild(downloadlegendlink);
-        //                    downloadlegendlink.setAttribute('download', filename);
-        //                    downloadlegendlink.setAttribute('href', image);
-        //                    downloadlegendlink.click();
-        //                }
-        //            });
+
+            html2canvas(maplegendhtml, {
+                        onrendered: function(canvas) {
+                            var image = canvas.toDataURL("image/png");
+                            filename = 'legend_' + filename;
+                            //console.info(mapleggendimage_url);
+
+                            if (Ext.fly('downloadlegendlink')) {
+                                Ext.fly('downloadlegendlink').destroy();
+                            }
+                            var downloadlegendlink = document.createElement('a');
+                            downloadlegendlink.id = 'downloadlegendlink';
+                            downloadlegendlink.name = downloadlegendlink.id;
+                            downloadlegendlink.className = 'x-hidden';
+                            document.body.appendChild(downloadlegendlink);
+                            downloadlegendlink.setAttribute('download', filename);
+                            downloadlegendlink.setAttribute('href', image);
+                            downloadlegendlink.click();
+                        }
+                    });
 
             //domtoimage.toPng(maplegendhtml)
             //    .then(function (mapleggendimage_url) {
@@ -349,11 +331,31 @@ Ext.define('esapp.view.analysis.mapViewController', {
             //        downloadlegendlink.setAttribute('download', filename);
             //        downloadlegendlink.setAttribute('href', mapleggendimage_url);
             //        downloadlegendlink.click();
+            //    })
+            //    .catch(function (error) {
+            //        console.error('oops, something went wrong!', error);
             //    });
-                //.catch(function (error) {
-                //    console.error('oops, something went wrong!', error);
-                //});
-        //}
+        }
+
+
+        mapviewwin.map.once('postcompose', function(event) {
+          var canvas = event.context.canvas;
+          mapimage_url = canvas.toDataURL('image/png');
+        });
+        mapviewwin.map.renderSync();
+        if (Ext.fly('downloadlink')) {
+            Ext.fly('downloadlink').destroy();
+        }
+        var downloadlink = document.createElement('a');
+        downloadlink.id = 'downloadlink';
+        downloadlink.name = downloadlink.id;
+        downloadlink.className = 'x-hidden';
+        document.body.appendChild(downloadlink);
+        downloadlink.setAttribute('download', filename);
+        downloadlink.setAttribute('href', mapimage_url);
+        downloadlink.click();
+        //downloadlink.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+
     }
 
     ,toggleLink: function(btn, event) {
