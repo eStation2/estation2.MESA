@@ -1963,7 +1963,7 @@ class ChangeVersion:
             if os.path.exists(base):
                 if os.path.islink(base):
                     os.unlink(base)
-                    os.symlink(base, base+"-"+getparams['version'])
+                    os.symlink(base+"-"+getparams['version'],base)
                 elif os.path.isdir(base):
                     error = 'The base is a directory and should be a symbolic link!'
 
