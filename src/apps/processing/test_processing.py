@@ -56,18 +56,97 @@ from multiprocessing import Queue
 
 #from apps.processing.processing_modis_sst import *
 #   ---------------------------------------------------------------------
+# pml-modis-sst
+#   ---------------------------------------------------------------------
+# from apps.processing.processing_std_fronts import *
+# args = {'pipeline_run_level':3, \
+#         'pipeline_printout_level':0, \
+#         'pipeline_printout_graph_level': 0, \
+#         'prod': 'pml-modis-sst',\
+#         'starting_sprod':'sst-3day',\
+#         'mapset': 'SPOTV-IOC-1km',\
+#         'version':'3.0',
+#         'logfile':'pml-modis-sst'
+#         }
+# res_queue = None
+# processing_std_fronts(res_queue, **args)
+#   ---------------------------------------------------------------------
 # modis-sst
 #   ---------------------------------------------------------------------
 # from apps.processing.processing_std_fronts import *
-# args = {'pipeline_run_level':5, \
+# args = {'pipeline_run_level':3, \
 #         'pipeline_printout_level':0, \
 #         'pipeline_printout_graph_level': 0, \
 #         'prod': 'modis-sst',\
 #         'starting_sprod':'sst-day',\
 #         'mapset': 'MODIS-Africa-4km',\
-#         'version':'v2013.1'
+#         'version':'v2013.1',
+#         'logfile':'modis-sst'
 #         }
-# processing_std_fronts(**args)
+# res_queue = None
+# processing_std_fronts(res_queue, **args)
+#   ---------------------------------------------------------------------
+# modis-chla
+#   ---------------------------------------------------------------------
+# from apps.processing.processing_std_modis_monavg import *
+# args = {'pipeline_run_level':7, \
+#         'pipeline_printout_level':0, \
+#         'pipeline_printout_graph_level': 0, \
+#         'prod': 'modis-chla',\
+#         'starting_sprod':'chla-day',\
+#         'mapset': 'MODIS-Africa-4km',\
+#         'version':'v2013.1',
+#         'logfile':'modis-chla'
+#         }
+# res_queue = None
+# processing_std_modis_monavg(res_queue, **args)
+
+#   ---------------------------------------------------------------------
+# modis-sst monavg
+#   ---------------------------------------------------------------------
+# from apps.processing.processing_std_modis_monavg import *
+# args = {'pipeline_run_level':3, \
+#         'pipeline_printout_level':0, \
+#         'pipeline_printout_graph_level': 0, \
+#         'prod': 'modis-sst',\
+#         'starting_sprod':'sst-day',\
+#         'mapset': 'MODIS-Africa-4km',\
+#         'version':'v2013.1',
+#         'logfile':'modis-sst'
+#         }
+# res_queue = None
+# processing_std_modis_monavg(res_queue, **args)
+#   ---------------------------------------------------------------------
+# modis-par monavg
+#   ---------------------------------------------------------------------
+from apps.processing.processing_std_modis_monavg import *
+args = {'pipeline_run_level':3, \
+        'pipeline_printout_level':3, \
+        'pipeline_printout_graph_level': 0, \
+        'prod': 'modis-par',\
+        'starting_sprod':'par-day',\
+        'mapset': 'MODIS-Africa-4km',\
+        'version':'v2012.0',
+        'logfile':'modis-par'
+        }
+res_queue = None
+processing_std_modis_monavg(res_queue, **args)
+#   ---------------------------------------------------------------------
+# modis-kd490 monavg
+#   ---------------------------------------------------------------------
+# from apps.processing.processing_std_modis_monavg import *
+# args = {'pipeline_run_level':3, \
+#         'pipeline_printout_level':3, \
+#         'pipeline_printout_graph_level': 0, \
+#         'prod': 'modis-kd490',\
+#         'starting_sprod':'kd490-day',\
+#         'mapset': 'MODIS-Africa-4km',\
+#         'version':'v2012.0',
+#         'logfile':'modis-kd490'
+#         }
+# res_queue = None
+# processing_std_modis_monavg(res_queue, **args)
+
 #   ---------------------------------------------------------------------
 # fewsnet-rfe
 #   ---------------------------------------------------------------------
@@ -119,29 +198,29 @@ from multiprocessing import Queue
 # res_queue = None
 # proc_lists=processing_std_lsasaf_et(res_queue,**args)
 # print(proc_lists)
-#   ---------------------------------------------------------------------
-# lsasaf-lst
-#   ---------------------------------------------------------------------
-from apps.processing.processing_std_lsasaf_lst import *
-# Create the list of dates -> returns empty if start==end==None
-# start_date='201510010000'
-# end_date='201510102345'
-# starting_dates = proc_functions.get_list_dates_for_dataset('lsasaf-lst', 'lst', 'undefined', start_date=start_date, end_date=end_date)
-starting_dates = None
-native_mapset='MSG-satellite-3km'
-target_mapset='SPOTV-CEMAC-1km'
-
-args = {'pipeline_run_level':3, \
-        'pipeline_printout_level':0, \
-        'pipeline_printout_graph_level': 0, \
-        'prod': 'lsasaf-lst',\
-        'starting_sprod':'lst',\
-        'starting_dates': starting_dates,\
-        'native_mapset': native_mapset,\
-        'mapset': target_mapset,\
-        'version':'undefined',
-        'logfile':'log-lsasaf-lst.log'}
-
-res_queue = None
-proc_lists=processing_std_lsasaf_lst(res_queue,**args)
-print(proc_lists)
+# #   ---------------------------------------------------------------------
+# # lsasaf-lst
+# #   ---------------------------------------------------------------------
+# from apps.processing.processing_std_lsasaf_lst import *
+# # Create the list of dates -> returns empty if start==end==None
+# # start_date='201510010000'
+# # end_date='201510102345'
+# # starting_dates = proc_functions.get_list_dates_for_dataset('lsasaf-lst', 'lst', 'undefined', start_date=start_date, end_date=end_date)
+# starting_dates = None
+# native_mapset='MSG-satellite-3km'
+# target_mapset='SPOTV-CEMAC-1km'
+#
+# args = {'pipeline_run_level':3, \
+#         'pipeline_printout_level':0, \
+#         'pipeline_printout_graph_level': 0, \
+#         'prod': 'lsasaf-lst',\
+#         'starting_sprod':'lst',\
+#         'starting_dates': starting_dates,\
+#         'native_mapset': native_mapset,\
+#         'mapset': target_mapset,\
+#         'version':'undefined',
+#         'logfile':'log-lsasaf-lst.log'}
+#
+# res_queue = None
+# proc_lists=processing_std_lsasaf_lst(res_queue,**args)
+# print(proc_lists)
