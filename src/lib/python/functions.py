@@ -886,6 +886,23 @@ def day_per_dekad(yyyymmdd):
     return days
 
 ######################################################################################
+#   day_per_dekad
+#   Purpose: Function returns the number of days per dekad (from 8 to 11)
+#   Author: M. Clerici
+#   Date: 2015/02/25
+#   Input: dekad in format YYYYMMDD
+#   Output: number of days
+#
+def get_number_days_month(yyyymmdd):
+
+    from calendar import monthrange
+    year = int(str(yyyymmdd)[0:4])
+    month = int(str(yyyymmdd)[4:6])
+    tot_days = monthrange(year,month)[1]
+
+    return tot_days
+
+######################################################################################
 #   conv_list_2_string
 #   Purpose: convert a list of strings in a single string (mainly for messages)
 #   Author: M. Clerici
