@@ -414,6 +414,21 @@ class TestCreate(unittest.TestCase):
         functions.check_output_dir(target_dir)
         create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
+    def TestCreateArchive_modis_firms(self):
+
+        base_target_dir='/data/archives/'
+        mapset='SPOTV-Africa-1km'
+        product='modis-firms'
+        version='v5.0'
+        start_date=datetime.date(2015, 1, 1)
+        end_date=None
+
+        # RFE from 2.0: since 01.01.2011
+        subproduct='1day'
+        target_dir = base_target_dir + product+ os.path.sep + subproduct
+        functions.check_output_dir(target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
     def TestCreateArchive_all(self):
 
         self.TestCreateArchive_vgt_ndvi()
