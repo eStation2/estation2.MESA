@@ -193,15 +193,15 @@ def loop_ingestion(dry_run=False):
                                             if os.path.isfile(file_to_move):
                                                 os.rename(file_to_move, new_location)
                                             else:
-                                                logger_spec.debug("     --> file to be archived cannot be found: %s" % file_to_remove)
+                                                logger_spec.debug("     --> file to be archived cannot be found: %s" % file_to_move)
                                         except:
-                                            logger_spec.debug("     --> error in archiving file: %s" % file_to_remove)
+                                            logger_spec.debug("     --> error in archiving file: %s" % file_to_move)
 
                                 else:
                                     for file_to_remove in date_fileslist:
                                         logger_spec.debug("     --> now deleting input files: %s" % file_to_remove)
                                         try:
-                                            if os.path.isfile(file_to_move):
+                                            if os.path.isfile(file_to_remove):
                                                 os.remove(file_to_remove)
                                             else:
                                                 logger_spec.debug("     --> file to be deleted cannot be found: %s" % file_to_remove)
