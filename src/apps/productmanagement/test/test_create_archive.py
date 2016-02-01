@@ -360,14 +360,21 @@ class TestCreate(unittest.TestCase):
         mapset='MODIS-Africa-4km'
         product='modis-chla'
         version='v2013.1'
-        start_date=datetime.date(2015, 1, 1)
+        start_date=datetime.date(2014, 1, 1)
         end_date=None
 
-        # RFE from 2.0: since 01.01.2011
-        subproduct='chla-day'
+        # MODIS Chla: since 01.01.2014
+        subproducts=['chla-day','monavg','monanom']
+        for subproduct in subproducts:
+            target_dir = base_target_dir + product+ os.path.sep + subproduct
+            functions.check_output_dir(target_dir)
+            create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+        # MODIS Chla stats
+        subproduct='monclim'
         target_dir = base_target_dir + product+ os.path.sep + subproduct
         functions.check_output_dir(target_dir)
-        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
     def TestCreateArchive_modis_sst(self):
 
@@ -375,14 +382,21 @@ class TestCreate(unittest.TestCase):
         mapset='MODIS-Africa-4km'
         product='modis-sst'
         version='v2013.1'
-        start_date=datetime.date(2015, 1, 1)
+        start_date=datetime.date(2014, 1, 1)
         end_date=None
 
-        # RFE from 2.0: since 01.01.2011
-        subproduct='sst-day'
+        # MODIS SST: since 01.01.2014
+        subproducts=['sst-day','monavg','monanom']
+        for subproduct in subproducts:
+            target_dir = base_target_dir + product+ os.path.sep + subproduct
+            functions.check_output_dir(target_dir)
+            create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+        # MODIS SST stats
+        subproduct='monclim'
         target_dir = base_target_dir + product+ os.path.sep + subproduct
         functions.check_output_dir(target_dir)
-        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
     def TestCreateArchive_modis_par(self):
 
@@ -390,14 +404,21 @@ class TestCreate(unittest.TestCase):
         mapset='MODIS-Africa-4km'
         product='modis-par'
         version='v2012.0'
-        start_date=datetime.date(2015, 1, 1)
+        start_date=datetime.date(2014, 1, 1)
         end_date=None
 
-        # RFE from 2.0: since 01.01.2011
-        subproduct='par-day'
+        # MODIS PAR: since 01.01.2014
+        subproducts=['par-day','monavg','monanom']
+        for subproduct in subproducts:
+            target_dir = base_target_dir + product+ os.path.sep + subproduct
+            functions.check_output_dir(target_dir)
+            create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+        # MODIS PAR stats
+        subproduct='monclim'
         target_dir = base_target_dir + product+ os.path.sep + subproduct
         functions.check_output_dir(target_dir)
-        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
     def TestCreateArchive_modis_kd490(self):
 
@@ -405,14 +426,21 @@ class TestCreate(unittest.TestCase):
         mapset='MODIS-Africa-4km'
         product='modis-kd490'
         version='v2012.0'
-        start_date=datetime.date(2015, 1, 1)
+        start_date=datetime.date(2014, 1, 1)
         end_date=None
 
-        # RFE from 2.0: since 01.01.2011
-        subproduct='kd490-day'
+        # MODIS KD490: since 01.01.2014
+        subproducts=['kd490-day','monavg','monanom']
+        for subproduct in subproducts:
+            target_dir = base_target_dir + product+ os.path.sep + subproduct
+            functions.check_output_dir(target_dir)
+            create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+        # MODIS KD490 stats
+        subproduct='monclim'
         target_dir = base_target_dir + product+ os.path.sep + subproduct
         functions.check_output_dir(target_dir)
-        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
     def TestCreateArchive_modis_firms(self):
 
