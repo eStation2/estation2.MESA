@@ -478,8 +478,8 @@ Ext.define("esapp.view.analysis.analysisMain",{
         me.commonMapView = new ol.View({
             projection:"EPSG:4326",
             displayProjection:"EPSG:4326",
-            center: [20, 4.5],   // ol.proj.transform([20, 4.5], 'EPSG:3857', 'EPSG:4326'),
-            zoom: 4
+            center: [20, -4.7],   // ol.proj.transform([20, 4.5], 'EPSG:3857', 'EPSG:4326'),
+            zoom: 3.5
         });
 
         me.listeners = {

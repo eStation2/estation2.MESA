@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.3.4
 -- Dumped by pg_dump version 9.3.4
--- Started on 2016-01-19 15:06:44 CET
+-- Started on 2016-01-20 16:52:00 CET
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -4236,7 +4236,7 @@ ALTER TABLE ONLY thema_product
     ADD CONSTRAINT thema_thema_product_fk FOREIGN KEY (thema_id) REFERENCES thema(thema_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
--- Completed on 2016-01-19 15:06:44 CET
+-- Completed on 2016-01-20 16:52:00 CET
 
 --
 -- PostgreSQL database dump complete

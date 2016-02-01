@@ -279,24 +279,6 @@ Ext.define('esapp.view.analysis.mapViewController', {
             filename = filename + '.png';
         }
 
-        mapviewwin.map.once('postcompose', function(event) {
-          var canvas = event.context.canvas;
-          mapimage_url = canvas.toDataURL('image/png');
-        });
-        mapviewwin.map.renderSync();
-        if (Ext.fly('downloadlink')) {
-            Ext.fly('downloadlink').destroy();
-        }
-        var downloadlink = document.createElement('a');
-        downloadlink.id = 'downloadlink';
-        downloadlink.name = downloadlink.id;
-        downloadlink.className = 'x-hidden';
-        document.body.appendChild(downloadlink);
-        downloadlink.setAttribute('download', filename);
-        downloadlink.setAttribute('href', mapimage_url);
-        downloadlink.click();
-        //downloadlink.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-
         //if(typeof Promise !== "undefined" && Promise.toString().indexOf("[native code]") !== -1){
         //   console.info('Browser supports Promise natively!');
         //}
@@ -305,32 +287,32 @@ Ext.define('esapp.view.analysis.mapViewController', {
         //}
 
         //var maplegendhtml = mapviewwin.lookupReference('product-legend' + mapviewwin.id);
-        //var maplegendpanel = mapviewwin.lookupReference('product-legend_panel_' + mapviewwin.id);
+        var maplegendpanel = mapviewwin.lookupReference('product-legend_panel_' + mapviewwin.id);
         //console.info(maplegendpanel);
-        //if (maplegendpanel.hidden == false) {
-        //    var maplegendhtml = document.getElementById('product-legend' + mapviewwin.id);
+        if (maplegendpanel.hidden == false) {
+            var maplegendhtml = document.getElementById('product-legend' + mapviewwin.id);
         //    console.info('<div>'+mapviewwin.legendHTML+'</div>');
         //    console.info(maplegendhtml);
-        //
-        //    html2canvas(maplegendhtml, {
-        //                onrendered: function(canvas) {
-        //                    var image = canvas.toDataURL("image/png");
-        //                    filename = 'legend_' + filename;
-        //                    //console.info(mapleggendimage_url);
-        //
-        //                    if (Ext.fly('downloadlegendlink')) {
-        //                        Ext.fly('downloadlegendlink').destroy();
-        //                    }
-        //                    var downloadlegendlink = document.createElement('a');
-        //                    downloadlegendlink.id = 'downloadlegendlink';
-        //                    downloadlegendlink.name = downloadlegendlink.id;
-        //                    downloadlegendlink.className = 'x-hidden';
-        //                    document.body.appendChild(downloadlegendlink);
-        //                    downloadlegendlink.setAttribute('download', filename);
-        //                    downloadlegendlink.setAttribute('href', image);
-        //                    downloadlegendlink.click();
-        //                }
-        //            });
+
+            html2canvas(maplegendhtml, {
+                        onrendered: function(canvas) {
+                            var image = canvas.toDataURL("image/png");
+                            filename = 'legend_' + filename;
+                            //console.info(mapleggendimage_url);
+
+                            if (Ext.fly('downloadlegendlink')) {
+                                Ext.fly('downloadlegendlink').destroy();
+                            }
+                            var downloadlegendlink = document.createElement('a');
+                            downloadlegendlink.id = 'downloadlegendlink';
+                            downloadlegendlink.name = downloadlegendlink.id;
+                            downloadlegendlink.className = 'x-hidden';
+                            document.body.appendChild(downloadlegendlink);
+                            downloadlegendlink.setAttribute('download', filename);
+                            downloadlegendlink.setAttribute('href', image);
+                            downloadlegendlink.click();
+                        }
+                    });
 
             //domtoimage.toPng(maplegendhtml)
             //    .then(function (mapleggendimage_url) {
@@ -349,11 +331,31 @@ Ext.define('esapp.view.analysis.mapViewController', {
             //        downloadlegendlink.setAttribute('download', filename);
             //        downloadlegendlink.setAttribute('href', mapleggendimage_url);
             //        downloadlegendlink.click();
+            //    })
+            //    .catch(function (error) {
+            //        console.error('oops, something went wrong!', error);
             //    });
-                //.catch(function (error) {
-                //    console.error('oops, something went wrong!', error);
-                //});
-        //}
+        }
+
+
+        mapviewwin.map.once('postcompose', function(event) {
+          var canvas = event.context.canvas;
+          mapimage_url = canvas.toDataURL('image/png');
+        });
+        mapviewwin.map.renderSync();
+        if (Ext.fly('downloadlink')) {
+            Ext.fly('downloadlink').destroy();
+        }
+        var downloadlink = document.createElement('a');
+        downloadlink.id = 'downloadlink';
+        downloadlink.name = downloadlink.id;
+        downloadlink.className = 'x-hidden';
+        document.body.appendChild(downloadlink);
+        downloadlink.setAttribute('download', filename);
+        downloadlink.setAttribute('href', mapimage_url);
+        downloadlink.click();
+        //downloadlink.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+
     }
 
     ,toggleLink: function(btn, event) {
@@ -595,6 +597,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
         var me = this.getView();
         var geojsonfile = menuitem.geojsonfile,
             namefield = '',
+            linewidth = 1,
             adminlevel = menuitem.level,
             vectorlayer_idx = -1,
             layertitle = menuitem.boxLabel,
@@ -602,14 +605,17 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
         var outmask_togglebtn = me.lookupReference('outmaskbtn_'+ me.id.replace(/-/g,'_')); //  + me.getView().id);
 
-        if (menuitem.name == 'admin0'){
+        if (menuitem.level == 'admin0'){
             namefield = 'ADM0_NAME';
+            linewidth = 2;
         }
-        else if (menuitem.name == 'admin1'){
+        else if (menuitem.level == 'admin1'){
             namefield = 'ADM1_NAME';
+            linewidth = 2;
         }
-        else if (menuitem.name == 'admin2'){
+        else if (menuitem.level == 'admin2'){
             namefield = 'ADM2_NAME';
+            linewidth = 1;
         }
 
         if (menuitem.checked) {
@@ -664,7 +670,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                             cursor: "pointer",
                             stroke: new ol.style.Stroke({
                                 color: linecolor, // '#319FD3',
-                                width: 1
+                                width: linewidth
                             })
                             //,text: new ol.style.Text({
                             //  font: '12px Calibri,sans-serif',
@@ -701,12 +707,10 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
             me.getController().addLayerSwitcher(me.map);
 
-
             if (me.getController().outmaskingPossible(me.map)){
                 outmask_togglebtn.show();
             }
             else outmask_togglebtn.hide();
-
 
 
             var highlightStyleCache = {};
@@ -748,11 +752,46 @@ Ext.define('esapp.view.analysis.mapViewController', {
               }
             });
 
-            var highlight;
+            var highlight = null;
             var displayFeatureInfo = function(pixel) {
 
+                var toplayer = null;
+                var topfeature = null;
+                var ignorefeature = true;
+                var toplayerindex = 4;
+                me.map.getLayers().getArray().forEach(function (layer, idx) {
+                    var this_layer_id = layer.get("layerorderidx")
+                    if (this_layer_id != 0 && layer.getVisible() && this_layer_id <= toplayerindex) {
+                        toplayerindex = idx;
+                    }
+                });
+                toplayer = me.map.getLayers().item(toplayerindex);
+
                 var feature = me.map.forEachFeatureAtPixel(pixel, function(feature, layer) {
-                    return feature;
+                    if (layer == toplayer){
+                        topfeature = feature;
+                    }
+                    //if (topfeature == null){
+                    //    toplayer = layer;
+                    //    topfeature = feature;
+                    //}
+                    //if (highlight != null){
+                    //    if (feature == highlight){
+                    //        console.info('ignore highlight!');
+                    //        ignorefeature = false;
+                    //    }
+                    //}
+                    //if (selectfeature != null){
+                    //    if (feature == selectfeature){
+                    //        console.info('ignore selectfeature!');
+                    //        ignorefeature = false;
+                    //    }
+                    //}
+                    //if (!ignorefeature && toplayer != null && layer != null && layer.get("layerorderidx") > toplayer.get("layerorderidx")){
+                    //    toplayer = layer;
+                    //    topfeature = feature;
+                    //}
+                    return topfeature;
                 });
 
                 //var featureTooltip = Ext.create('Ext.tip.ToolTip', {
@@ -786,8 +825,17 @@ Ext.define('esapp.view.analysis.mapViewController', {
                     else if (Ext.isDefined(feature.get('ADM1_NAME'))){
                         regionname.setHtml(feature.get('ADM0_NAME') + ' - ' + feature.get('ADM1_NAME'));
                     }
-                    else if (Ext.isDefined(feature.get('ADM0_NAME'))){
+                    else if (Ext.isDefined(feature.get('ADM0_NAME'))) {
                         regionname.setHtml(feature.get('ADM0_NAME'));
+                    }
+                    else if (Ext.isDefined(feature.get('AREANAME'))){
+                        regionname.setHtml(feature.get('COUNTRY') + ' - ' + feature.get('AREANAME') + ' (' + feature.get('DESIGNATE') + ')');
+                    }
+                    else if (Ext.isDefined(feature.get('F_LEVEL'))){
+                        regionname.setHtml(feature.get('F_LEVEL') + ' - ' + feature.get('F_CODE') + ' (' + feature.get('OCEAN') + ')');
+                    }
+                    else if (Ext.isDefined(feature.get('MarRegion'))){
+                        regionname.setHtml(feature.get('MarRegion'));
                     }
                     //if (adminlevel == 'admin0') {
                     //    regionname.setHtml(feature.get('ADM0_NAME'));
@@ -845,12 +893,13 @@ Ext.define('esapp.view.analysis.mapViewController', {
               }
             });
 
-            var selectfeature;
+            var selectfeature = null;
             var displaySelectedFeatureInfo = function(pixel,displaywkt) {
 
-                var feature = me.map.forEachFeatureAtPixel(pixel, function(feature, layer) {
-                    return feature;
-                });
+                //var feature = me.map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+                //    return feature;
+                //});
+                var feature = highlight;
 
                 var regionname = Ext.getCmp('regionname');
                 var admin0name = Ext.getCmp('admin0name');
@@ -880,6 +929,15 @@ Ext.define('esapp.view.analysis.mapViewController', {
                         admin1name.setValue('&nbsp;');
                         admin2name.setValue('&nbsp;');
                         selectedregion.setValue(feature.get('ADM0_NAME'));
+                    }
+                    else if (Ext.isDefined(feature.get('AREANAME'))){
+                        selectedregion.setValue(feature.get('COUNTRY') + ' - ' + feature.get('AREANAME') + ' (' + feature.get('DESIGNATE') + ')');
+                    }
+                    else if (Ext.isDefined(feature.get('F_LEVEL'))) {
+                        selectedregion.setValue(feature.get('F_LEVEL') + ' - ' + feature.get('F_CODE') + ' (' + feature.get('OCEAN') + ')');
+                    }
+                    else if (Ext.isDefined(feature.get('MarRegion'))){
+                        selectedregion.setValue(feature.get('MarRegion'));
                     }
 
                     //if (adminlevel == 'admin0') {
@@ -922,10 +980,11 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 }
 
                 if (feature !== selectfeature) {
-                    if (Ext.isDefined(selectfeature)) {
+                    //if (Ext.isDefined(selectfeature)) {
+                    if (selectfeature != null) {
                         selectedFeatureOverlay.getSource().removeFeature(selectfeature);
                     }
-                    if (Ext.isDefined(feature)) {
+                    if (feature != null) {
                         selectedFeatureOverlay.getSource().addFeature(feature);
                     }
                     selectfeature = feature;
@@ -999,20 +1058,14 @@ Ext.define('esapp.view.analysis.mapViewController', {
         }
 
 
-
-
-
         //me.mon(Ext.select('ol-viewport'), 'mousemove', function(evt){
         //    var pixel = me.map.getEventPixel(evt.originalEvent);
         //    displayFeatureInfo(pixel);
         //}, me);
-
         //(me.map.getViewport()).on('mousemove', function(evt) {
         //    var pixel = me.map.getEventPixel(evt.originalEvent);
         //    displayFeatureInfo(pixel);
         //});
-
-
         //var select = null;  // ref to currently selected interaction
         //
         //// select interaction working on "singleclick"

@@ -1963,6 +1963,7 @@ class ChangeVersion:
             if os.path.exists(base):
                 if os.path.islink(base):
                     os.unlink(base)
+                    # print base+"-"+getparams['version']
                     os.symlink(base+"-"+getparams['version'], base)
                 elif os.path.isdir(base):
                     error = 'The base is a directory and should be a symbolic link!'
@@ -2030,8 +2031,8 @@ class ChangeThema:
                 PC23_connection = functions.check_connection(otherPC)
                 if PC23_connection:
                     setThemaOtherPC = functions.setThemaOtherPC(otherPC, getparams['thema'])
-                if not setThemaOtherPC:
-                    message = '<B>Thema NOT set on other pc</B>, ' + otherPC + ' because of an error on the other pc. Please set the Thema manually on the other pc!'
+                    if not setThemaOtherPC:
+                        message = '<B>Thema NOT set on other pc</B>, ' + otherPC + ' because of an error on the other pc. Please set the Thema manually on the other pc!'
                 else:
                     message = '<B>Thema NOT set on other pc</B>, ' + otherPC + ' because there is no connection. Please set the Thema manually on the other pc!'
 
