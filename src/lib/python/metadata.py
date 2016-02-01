@@ -269,6 +269,11 @@ class SdsMetadata:
 
         return value
 
+    def assign_scl_factor(self, scl_factor):
+    #
+    #   Assign scaling
+        sds_metadata['eStation2_scaling_factor'] = str(scl_factor)
+
     def get_target_filepath(self, input_file):
 
     # Given a .GTiff file, reads its metadata and build-up the target fullpath
