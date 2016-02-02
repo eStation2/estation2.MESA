@@ -1096,7 +1096,7 @@ def do_mask_image(input_file='', mask_file='', output_file='',output_format=None
     #   Close outputs
     outDrv = None
     outDS = None
-    assign_metadata_processing(input_list, output_file)
+    #assign_metadata_processing(input_list, output_file)
 
 
 # _____________________________
@@ -1448,7 +1448,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
         histogramWindowSize=16
 
     if histogramWindowStride is None:
-        histogramWindowStride=2
+        histogramWindowStride=8
 
     if minTheta is None:
         minTheta=0.76
@@ -1621,7 +1621,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
     bufferedWindowStatusValues = numpy.zeros((rows, cols), dtype='float32')
 
     print ' Debug: Running histogramming and cohesion algorithm.'
-    timeStarted = time.clock()
+    timeStarted = time.time()
 
     # If we're only using one thread, invoke the C code directly.
 
@@ -1718,7 +1718,8 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
         bufferedWindowStatusCodes[(i+1) * blockHeight : , :] += bufferedWindowStatusCodesList[i+1][:,:]
         bufferedWindowStatusValues[(i+1) * blockHeight : , :] += bufferedWindowStatusValuesList[i+1][:,:]
 
-    print ' Debug: Histogram and cohesion algorithm complete. Elapsed time: %f seconds.'
+    timeEnded = time.time()
+    print ("Debug: Histogram and cohesion algorithm complete. Elapsed time is: %f seconds" % (timeEnded-timeStarted))
 
     # If the caller specified that the edges should wrap,
     # CandidateCounts and FrontCounts for the the cells on the
@@ -1760,6 +1761,11 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
         bufferedFrontCounts[bufferSize:bufferSize+image.shape[0], -(bufferSize*2):-bufferSize] += bufferedFrontCounts[bufferSize:bufferSize+image.shape[0], 0:bufferSize]
         bufferedFrontCounts[bufferSize:bufferSize+image.shape[0], bufferSize:bufferSize*2] += bufferedFrontCounts[bufferSize:bufferSize+image.shape[0], -bufferSize:]
 
+        timeEnded = time.time()
+        print ("Debug: Wrap Edges done. Elapsed time is: %f seconds" % (timeEnded-timeStarted))
+    else:
+        print ("Debug: No wrap edged.")
+
     # Return successfully.
 
     unbufferedImage = bufferedImage[bufferSize:bufferSize+image.shape[0], bufferSize:bufferSize+image.shape[1]]
@@ -1768,23 +1774,55 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
     unbufferedWindowStatusCodes = bufferedWindowStatusCodes[bufferSize:bufferSize+image.shape[0], bufferSize:bufferSize+image.shape[1]]
     unbufferedWindowStatusValues = bufferedWindowStatusValues[bufferSize:bufferSize+image.shape[0], bufferSize:bufferSize+image.shape[1]]
 
+    timeEnded = time.time()
+    print ("Debug: Return. Elapsed time is: %f seconds" % (timeEnded-timeStarted))
     return copy.deepcopy(unbufferedMask), copy.deepcopy(unbufferedImage), copy.deepcopy(unbufferedCandidateCounts), copy.deepcopy(unbufferedFrontCounts), copy.deepcopy(unbufferedWindowStatusCodes), copy.deepcopy(unbufferedWindowStatusValues)
 
 # _____________________________
 def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, parameters=None,
                           output_nodata=None, output_format=None, output_type=None, options=''):
 
-    # Arguments initialization -> to be Read from parameters !!!
-    histogramWindowStride = None
-    minTheta = None
-    minPopProp = None
-    minPopMeanDifference = None
-    minSinglePopCohesion = None
-    histogramWindowSize = None
-    minImageValue=None
-    minThreshold=1
+
+    # Parameters is expected to be None, or a dictionary
+    if parameters is not None:
+
+        if 'histogramWindowStride' in parameters.keys():
+            histogramWindowStride = parameters['histogramWindowStride']
+        else:
+            histogramWindowStride = None
+
+        if 'minTheta' in parameters.keys():
+            minTheta = parameters['minTheta']
+        else:
+            minTheta = None
+        if 'minPopProp' in parameters.keys():
+            minPopProp = parameters['minPopProp']
+        else:
+            minPopProp = None
+        if 'minPopMeanDifference' in parameters.keys():
+            minPopMeanDifference = parameters['minPopMeanDifference']
+        else:
+            minPopMeanDifference = None
+        if 'minSinglePopCohesion' in parameters.keys():
+            minSinglePopCohesion = parameters['minSinglePopCohesion']
+        else:
+            minSinglePopCohesion = None
+        if 'histogramWindowSize' in parameters.keys():
+            histogramWindowSize = parameters['histogramWindowSize']
+        else:
+            histogramWindowSize = None
+        if 'minImageValue' in parameters.keys():
+            minImageValue = parameters['minImageValue']
+        else:
+            minImageValue = None
+
+        minThreshold = 2
+        if 'minThreshold' in parameters.keys():
+            if parameters['minThreshold'] is not None:
+                minThreshold = parameters['minThreshold']
+
     rid = ''
-    debug = 1       ## TEMP !!!
+    debug = 0
 
     # Manage options
     options_list = [es_constants.ES2_OUTFILE_OPTIONS]
@@ -1838,6 +1876,8 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
     [uMask, uImage, uCandidateCounts, uFrontCounts,uWindowStatusCodes, uWindowStatusValues] = \
         DetectEdgesInSingleImage(inDataInt,histogramWindowStride,minTheta,histogramWindowSize,minPopProp, minPopMeanDifference,minSinglePopCohesion,minImageValue)
 
+    print ("Debug: Applying now Minimum threshold: %i" % minThreshold)
+
     # Apply minimum threshold (line by line)
     dataOut = N.empty([nl,ns],dtype=bool)
     for il in range(nl):
@@ -1847,9 +1887,11 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
         dataOut[il,:] = rowOut[:]
 
     # Apply thinning
+    print ("Debug: Applying now thinning")
     thin_output = pymorph.thin(dataOut)
 
     # Create and write output band
+    print ("Debug: Writing the output files")
     if debug:
         outband = outDS.GetRasterBand(1)
         outband.WriteArray(uFrontCounts,0,0)

@@ -7,7 +7,6 @@
 #
 
 # Import std modules
-import glob
 import os
 
 # Import eStation2 modules
@@ -31,14 +30,16 @@ ext=es_constants.ES2_OUTFILE_EXTENSION
 #   A list of 'final' (i.e. User selected) output products are defined (now hard-coded)
 #   According to the dependencies, if set, they force the various groups
 
-def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, proc_lists=None,
-                    update_stats=False, nrt_products=True):
+def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, proc_lists=None):
+
+
+    my_date='20160101'
 
     #   ---------------------------------------------------------------------
     #   Create lists
     if proc_lists is None:
         proc_lists = functions.ProcLists()
-    my_date='20150101'
+
     activate_front_detection = 1
     activate_shapefile_conversion = 1
 
@@ -46,22 +47,41 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     #   ---------------------------------------------------------------------
     #   Define input files (SST)
-    in_prod_ident = functions.set_path_filename_no_date(prod, starting_sprod,mapset, version, ext)
+    in_prod_ident = functions.set_path_filename_no_date(prod, starting_sprod, mapset, version, ext)
 
-    logger.debug('Base data directory is: %s' % es2_data_dir)
     input_dir = es2_data_dir+ functions.set_path_sub_directory(prod, starting_sprod, 'Ingest', version, mapset)
 
-    logger.debug('Input data directory is: %s' % input_dir)
     if my_date:
         starting_files = input_dir+my_date+"*"+in_prod_ident
     else:
         starting_files = input_dir+"*"+in_prod_ident
 
-    logger.debug('Starting files wild card is: %s' % starting_files)
+    #   ---------------------------------------------------------------------
+    #   1. Define and customize parameters
+    #   ---------------------------------------------------------------------
 
-    #   ---------------------------------------------------------------------
-    #   1.a Front Detection by using Cayula-Corneillon algo
-    #   ---------------------------------------------------------------------
+    # Default values are from the routine are used if None is passed
+    parameters = None
+
+    if prod == 'modis-sst':
+        parameters = {  'histogramWindowStride': None,
+                        'minTheta' : None,
+                        'minPopProp' : None,
+                        'minPopMeanDifference' : None,
+                        'minSinglePopCohesion' : None,
+                        'histogramWindowSize' : None,
+                        'minImageValue' : None,
+                        'minThreshold' : None }
+
+    if prod == 'pml-modis-sst':
+        parameters = {  'histogramWindowStride': None,
+                        'minTheta' : None,
+                        'minPopProp' : None,
+                        'minPopMeanDifference' : None,
+                        'minSinglePopCohesion' : None,
+                        'histogramWindowSize' : None,
+                        'minImageValue' : None,
+                        'minThreshold' : None }
 
     #   ---------------------------------------------------------------------
     #   SST Fronts (raster)
@@ -87,9 +107,11 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
-        print input_file
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw",
+                "parameters": parameters}
+
         raster_image_math.do_detect_sst_fronts(**args)
+        print 'Done with raster'
 
     #   ---------------------------------------------------------------------
     #   SST Fronts (shapefile)
@@ -121,9 +143,12 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        command=[es_constants.es2globals['gdal_polygonize'], input_file, output_file, '-nomask', '-f', 'ESRI Shapefile']
-        p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        out, err = p.communicate()
+        #command=[es_constants.es2globals['gdal_polygonize'], input_file, output_file, '-nomask', '-f', 'ESRI Shapefile']
+        #p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        #out, err = p.communicate()
+        command=es_constants.es2globals['gdal_polygonize']+' '+ input_file+' '+ output_file+' -nomask -f "ESRI Shapefile"'
+        print command
+        p = os.system(command)
 
     return proc_lists
 

@@ -7,60 +7,54 @@
 #
 
 # Source my definitions
-from config import es_constants
 import os
 
 # Import eStation2 modules
 
 from lib.python import functions
-from lib.python import metadata
 from lib.python.image_proc import raster_image_math
-from lib.python.image_proc import recode
-from database import crud
 from database import querydb
 from lib.python import es_logging as log
-
-# This is temporary .. to be replace with a DB call
-from apps.processing.processing_switches import *
+from config import es_constants
 
 # Import third-party modules
 from ruffus import *
 
 logger = log.my_logger(__name__)
 
-#   General definitions for this processing chain
-prod="modis-pp"
-mapset='MODIS-IOC-4km'
-ext='.tif'
-version='undefined'
-
 # Primary Production Monthly
 activate_pp_1mon_comput=1
 
+#   General definitions for this processing chain
+ext=es_constants.ES2_OUTFILE_EXTENSION
 
-def create_pipeline(starting_sprod):
+def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, proc_lists=None):
 
     #   ---------------------------------------------------------------------
-    #   Define input files: Chla is the 'driver', sst,kd and par 'ancillary inputs'
+    #   Create lists
 
-    chla_prod="modis-chla"
+    if proc_lists is None:
+        proc_lists = functions.ProcLists()
+
+    my_date='20160101'
+    es2_data_dir = es_constants.es2globals['processing_dir']+os.path.sep
+
+    chla_prod=prod
     chla_prod_ident = functions.set_path_filename_no_date(chla_prod, starting_sprod, mapset, version, ext)
-    chla_input_dir = es_constants.processing_dir+ \
+    chla_input_dir = es2_data_dir+ \
                 functions.set_path_sub_directory(chla_prod, starting_sprod, 'Derived', version, mapset)
                 
-    #chla_files = chla_input_dir+"2014*"+chla_prod_ident
-
     #   ---------------------------------------------------------------------
     sst_prod="modis-sst"
     sst_prod_ident = functions.set_path_filename_no_date(sst_prod, starting_sprod, mapset, version, ext)
-    sst_input_dir = es_constants.processing_dir+ \
+    sst_input_dir = es2_data_dir+ \
                 functions.set_path_sub_directory(sst_prod, starting_sprod, 'Derived', version, mapset)
 
     #   ---------------------------------------------------------------------
     kd_prod="modis-kd490"
     kd_prod_ident = functions.set_path_filename_no_date(kd_prod, starting_sprod, mapset, version, ext)
 
-    kd_input_dir = es_constants.processing_dir+ \
+    kd_input_dir = es2_data_dir+ \
                 functions.set_path_sub_directory(kd_prod, starting_sprod, 'Derived', version, mapset)
 
     kd_files = kd_input_dir+"*"+kd_prod_ident
@@ -69,7 +63,7 @@ def create_pipeline(starting_sprod):
     par_prod="modis-par"
     par_prod_ident = functions.set_path_filename_no_date(par_prod, starting_sprod, mapset, version, ext)
 
-    par_input_dir = es_constants.processing_dir+ \
+    par_input_dir = es2_data_dir+ \
                 functions.set_path_sub_directory(par_prod, starting_sprod, 'Derived', version, mapset)
 
     # Read input product nodata
@@ -120,10 +114,12 @@ def create_pipeline(starting_sprod):
 #   ---------------------------------------------------------------------
 #   Run the pipeline
 
-def processing_modis_primary_production(pipeline_run_level=0, pipeline_printout_level=0,
-                           pipeline_printout_graph_level=0):
+def processing_modis_primary_production(res_queue, pipeline_run_level=0, pipeline_printout_level=0,
+                        pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
+                        starting_dates=None, update_stats=False, nrt_products=True, write2file=None, logfile=None):
 
-    create_pipeline(starting_sprod='monavg')
+    starting_sprod = 'monavg'
+    create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, proc_lists=None)
 
     logger.info("Entering routine %s" % 'processing modis - Primary Production')
     if pipeline_run_level > 0:

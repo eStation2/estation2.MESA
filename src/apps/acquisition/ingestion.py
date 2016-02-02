@@ -189,11 +189,25 @@ def loop_ingestion(dry_run=False):
                                     for file_to_move in date_fileslist:
                                         logger_spec.debug("     --> now archiving input files: %s" % file_to_move)
                                         new_location=output_directory+os.path.basename(file_to_move)
-                                        os.rename(file_to_move, new_location)
+                                        try:
+                                            if os.path.isfile(file_to_move):
+                                                os.rename(file_to_move, new_location)
+                                            else:
+                                                logger_spec.debug("     --> file to be archived cannot be found: %s" % file_to_move)
+                                        except:
+                                            logger_spec.debug("     --> error in archiving file: %s" % file_to_move)
+
                                 else:
                                     for file_to_remove in date_fileslist:
                                         logger_spec.debug("     --> now deleting input files: %s" % file_to_remove)
-                                        os.remove(file_to_remove)
+                                        try:
+                                            if os.path.isfile(file_to_remove):
+                                                os.remove(file_to_remove)
+                                            else:
+                                                logger_spec.debug("     --> file to be deleted cannot be found: %s" % file_to_remove)
+                                        except:
+                                            logger_spec.debug("     --> error in deleting file: %s" % file_to_remove)
+
                         else:
                             time.sleep(10)
 
@@ -461,7 +475,7 @@ def pre_process_modis_hdf4_tile (subproducts, tmpdir , input_files, my_logger):
 #   Pre-process MODIS HDF4 tiled files
 #
 #   TODO-M.C.: add a mechanism to check input_files vs. mapsets ??
-#              Optimize by avoiding repetition of the gdaf_merge for the same sub_product, different mapset ?
+#              Optimize by avoiding repetition of the gdal_merge for the same sub_product, different mapset ?
 #
     # Prepare the output file list
     pre_processed_list = []
@@ -1417,6 +1431,22 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # Prepare output driver
         out_driver = gdal.GetDriverByName(es_constants.ES2_OUTFILE_FORMAT)
 
+        merge_existing_output = False
+        # Check if the output file already exists
+        if os.path.isfile(output_filename):
+
+            merge_existing_output = True
+
+            # Save the existing file as bck for merging at the end
+            old_filename, extension = os.path.splitext(output_filename)
+            bck_output_file = old_filename+'.bck'+extension
+            tmp_output_file = old_filename+'.tmp'+extension
+            os.rename(output_filename,bck_output_file)
+            sds_meta_old = metadata.SdsMetadata()
+            sds_meta_old.read_from_file(bck_output_file)
+            old_file_list = sds_meta_old.get_item('eStation2_input_files')
+            sds_meta_old = None
+
         # Do re-projection, or write to GTIFF file
         if reprojection == 1:
 
@@ -1491,11 +1521,38 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         sds_meta.assign_date(out_date_str_final)
         sds_meta.assign_subdir_from_fullpath(output_directory)
         sds_meta.assign_comput_time_now()
-        sds_meta.assign_input_files(in_files)
 
-        sds_meta.write_to_ds(trg_ds)
+        # Write metadata, if not merging is needed
+        if not merge_existing_output:
+            sds_meta.assign_input_files(in_files)
+            sds_meta.write_to_ds(trg_ds)
 
-        trg_ds = None
+            # Close output file
+            trg_ds = None
+
+        else:
+            # Close output file
+            trg_ds = None
+
+            # Merge the old and new output products into a 'tmp' file
+            try:
+                command = es_constants.gdal_merge + ' -n '+str(out_nodata)+' -co \"compress=lzw\" -o '
+                command += tmp_output_file
+                command += ' '+ bck_output_file+ ' '+output_filename
+                my_logger.debug('Command for merging is: ' + command)
+                os.system(command)
+            except:
+                pass
+
+            # Write metadata to output
+            in_files.append(old_file_list)
+            sds_meta.assign_input_files(in_files)
+            sds_meta.write_to_file(tmp_output_file)
+
+            # Save the .tmp as output and clean
+            os.rename(tmp_output_file,output_filename)
+            os.remove(bck_output_file)
+
 
         # -------------------------------------------------------------------------
         # Upsert into DB table 'products_data'

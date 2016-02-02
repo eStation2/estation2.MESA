@@ -32,7 +32,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     # 1. 10d prod stats
     activate_monavg_comput=1
     activate_monclim_comput=1
-    activate_monanom_comput=0
+    activate_monanom_comput=1
 
     es2_data_dir = es_constants.es2globals['processing_dir']+os.path.sep
 
@@ -53,7 +53,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     output_sprod_group=proc_lists.proc_add_subprod_group("monstats")
     output_sprod=proc_lists.proc_add_subprod("monavg", "monstats", final=False,
                                              descriptive_name='Monthly average',
-                                             description='Chla Monthly average',
+                                             description='Monthly average',
                                              frequency_id='',
                                              date_format='YYYMMMMDD',
                                              masked=False,
@@ -63,11 +63,11 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
     
     formatter_in="(?P<YYYYMM>[0-9]{6})[0-9]{2}"+in_prod_ident
-    formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYYMM[0]}"+out_prod_ident]
+    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYYMM[0]}"+'01'+out_prod_ident
    
     @active_if(activate_monavg_comput)
     @collate(starting_files, formatter(formatter_in),formatter_out)
-    def modis_chla_monavg(input_file, output_file):
+    def modis_monavg(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         out_filename=os.path.basename(output_file)
@@ -87,7 +87,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     output_sprod=proc_lists.proc_add_subprod("monclim", "monstats", final=False,
                                              descriptive_name='Monthly climatology',
-                                             description='Chla Monthly climatology',
+                                             description='Monthly climatology',
                                              frequency_id='',
                                              date_format='YYYMMMMDD',
                                              masked=False,
@@ -98,16 +98,16 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     new_in_prod_ident= functions.set_path_filename_no_date(prod, new_input_subprod, mapset, version, ext)
     new_input_dir = es2_data_dir+functions.set_path_sub_directory(prod, new_input_subprod, 'Derived', version, mapset)
 
-    new_starting_files = new_input_dir+"*"+new_in_prod_ident
+    #new_starting_files = new_input_dir+"*"+new_in_prod_ident
 
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
     
-    formatter_in="[0-9]{4}(?P<MM>[0-9]{2})"+new_in_prod_ident
-    formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MM[0]}"+out_prod_ident]
+    formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+new_in_prod_ident
+    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident
 
     @active_if(activate_monclim_comput)
-    @collate(new_starting_files, formatter(formatter_in),formatter_out)
+    @collate(modis_monavg, formatter(formatter_in),formatter_out)
     def modis_chla_monclim(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -115,13 +115,12 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', \
 	    "options": "compress=lzw"}
         raster_image_math.do_avg_image(**args)
-  
-    
+
    #   ---------------------------------------------------------------------
    #   Monthly Anomaly for a given monthly    
     output_sprod=proc_lists.proc_add_subprod("monanom", "monstats", final=False,
                                              descriptive_name='Monthly anomaly',
-                                             description='Chla Monthly anomaly',
+                                             description='Monthly anomaly',
                                              frequency_id='',
                                              date_format='YYYMMMMDD',
                                              masked=False,
@@ -132,16 +131,16 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)    
     
     #   Starting files + avg
-    formatter_in="(?P<YYYY>[0-9]{4})(?P<MM>[0-9]{2})"+new_in_prod_ident
-    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYY[0]}{MM[0]}"+out_prod_ident
+    formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+new_in_prod_ident
+    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
         
     ancillary_sprod = "monclim"
     ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset,version,ext)
     ancillary_subdir      = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived',version, mapset)
-    ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{MM[0]}"+ancillary_sprod_ident
+    ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
 
     @active_if(activate_monanom_comput)
-    @transform(new_starting_files, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
+    @transform(modis_monavg, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
     def modis_chla_mondiff(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -154,13 +153,13 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 #   ---------------------------------------------------------------------
 #   Run the pipeline
 
-def processing_modis_chla(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
+def processing_std_modis_monavg(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                            pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None, write2file=None, logfile=None):
 
 
     spec_logger = log.my_logger(logfile)
-    spec_logger.info("Entering routine %s" % 'processing_std_fronts')
+    spec_logger.info("Entering routine %s" % 'processing_std_modis_monavg')
 
     proc_lists = None
     proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
@@ -182,5 +181,3 @@ def processing_modis_chla(res_queue, pipeline_run_level=0,pipeline_printout_leve
     
     if pipeline_printout_graph_level > 0:
         pipeline_printout_graph('flowchart.jpg')
-
-    #return list_subprods, list_subprod_groups
