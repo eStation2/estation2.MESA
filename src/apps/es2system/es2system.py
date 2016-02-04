@@ -576,6 +576,14 @@ def loop_system(dry_run=False):
     time_for_spirits_conv = es_constants.es2globals['system_time_spirits_conv']
     do_bucardo_config = False
 
+    # Restart bucardo
+    command = 'bucardo restart'
+    res_bucardo_restart=os.system(command)
+    if res_bucardo_restart:
+        logger.warning("Error in restarting bucardo")
+    else:
+        logger.info("Bucardo restarted correctly")
+
     # Loop to manage the 'cron-like' operations, i.e.:
 
     #   0. Check bucardo config	
