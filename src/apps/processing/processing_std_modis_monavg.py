@@ -31,7 +31,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     # 1. 10d prod stats
     activate_monavg_comput=1
-    activate_monclim_comput=1
+    activate_monclim_comput=0
     activate_monanom_comput=1
 
     es2_data_dir = es_constants.es2globals['processing_dir']+os.path.sep
