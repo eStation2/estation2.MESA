@@ -108,45 +108,62 @@ class Product(object):
                     missings.append(self.get_missing_dataset_subproduct(mapset, sub_product_code, from_date, to_date))
         return missings
 
-    def get_missing_filenames(self, missing):
+    def get_missing_filenames(self, missing, existing_only=True):
+
+        # NOTE: it returns the existing filenames ONLY
         product = Product(missing['product'], version=missing['version'])
         version = missing['version']
         mapset = missing['mapset']
         subproduct = missing['subproduct']
         dataset = product.get_dataset(mapset=mapset, sub_product_code=missing['subproduct'])
-        dates = dataset.get_dates()
-        missing_dates = []
-        first_date = None
-        last_date = None
-        info = missing['info']
-        for interval in info['intervals']:
-            if first_date is None:
-                first_date = str_to_date(interval['fromdate'])
-            last_date = str_to_date(interval['todate'])
-            if interval['missing']:
-                missing_dates.extend(dataset.get_interval_dates(
-                    str_to_date(interval['fromdate']), str_to_date(interval['todate'])))
-        if len(info['intervals']) == 0:
-            missing_dates = dates[:]
-        else:
-            if missing['from_start']:
-                if first_date > dataset.get_first_date():
-                    missing_dates.extend(dataset.get_interval_dates(dataset.get_first_date(),
-                        first_date, last_included=False))
-            if missing['to_end']:
-                if last_date < dataset.get_last_date():
-                    missing_dates.extend(dataset.get_interval_dates(last_date,
-                        dataset.get_last_date(), first_included=False))
 
         missing_filenames=[]
-        for date in sorted(set(dates).intersection(set(missing_dates))):
-            date_str = dataset._frequency.format_date(date)
-            filename=dataset.fullpath+functions.set_path_filename(date_str, missing['product'], subproduct, mapset, version,'.tif')
-            missing_filenames.append(filename)
+
+        # Manage the specific case of 'singlefile', e.g. absol-min-linearx2
+        if dataset._db_product.frequency_id == 'singlefile':
+            # Check if the 'single' file was missing
+            info = missing['info']
+            if info['missingfiles']:
+                missing_filenames=dataset.get_filenames()
+        else:
+            dates = dataset.get_dates()
+            missing_dates = []
+            first_date = None
+            last_date = None
+            info = missing['info']
+            for interval in info['intervals']:
+                if first_date is None:
+                    first_date = str_to_date(interval['fromdate'])
+                last_date = str_to_date(interval['todate'])
+                if interval['missing']:
+                    missing_dates.extend(dataset.get_interval_dates(
+                        str_to_date(interval['fromdate']), str_to_date(interval['todate'])))
+            if len(info['intervals']) == 0:
+                missing_dates = dates[:]
+            else:
+                if missing['from_start']:
+                    if first_date > dataset.get_first_date():
+                        missing_dates.extend(dataset.get_interval_dates(dataset.get_first_date(),
+                            first_date, last_included=False))
+                if missing['to_end']:
+                    if last_date < dataset.get_last_date():
+                        missing_dates.extend(dataset.get_interval_dates(last_date,
+                            dataset.get_last_date(), first_included=False))
+
+            if existing_only:
+                dates_to_add = sorted(set(dates).intersection(set(missing_dates)))
+            else:
+                dates_to_add = sorted(set(missing_dates))
+
+            for date in dates_to_add:
+                date_str = dataset._frequency.format_date(date)
+                filename=dataset.fullpath+functions.set_path_filename(date_str, missing['product'], subproduct, mapset, version,'.tif')
+                missing_filenames.append(filename)
+
         return missing_filenames
 
     @staticmethod
-    def create_tar(missing_info, filetar=None, tgz=False):
+    def create_tar(missing_info, filetar=None, tgz=True):
     # Given a 'missing_info' object, creates a tar-file containing all required files
 
         result = {'status':0,            # 0 -> ok, all files copied, 1-> at least 1 file missing
@@ -154,18 +171,22 @@ class Product(object):
                   'n_file_missing':0,
                   }
 
+        # Check the target file name is passed (or define a temp one)
         if filetar is None:
             file_temp = tempfile.NamedTemporaryFile()
             filetar = file_temp.name
             file_temp.close()
         filenames = []
+
+        # Loop over missing objects
         for missing in missing_info:
             try:
                 product = Product(missing['product'], version=missing['version'])
-                filenames.extend(product.get_missing_filenames(missing))
+                filenames.extend(product.get_missing_filenames(missing,existing_only=False))
             except NoProductFound:
                 pass
-        # creare il tar contenente files
+
+        # Create .tar
         tar = tarfile.open(filetar, "w|gz" if tgz else "w|")
         for filename in filenames:
             if os.path.isfile(filename):
