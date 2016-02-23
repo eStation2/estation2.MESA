@@ -15,10 +15,12 @@ import glob
 import tarfile
 import shutil
 import tempfile
-
+import json
+import pprint
 from apps.productmanagement.products import *
 from lib.python import functions
 from database import querydb
+from config import es_constants
 
 from lib.python import es_logging as log
 logger = log.my_logger(__name__)
@@ -92,6 +94,48 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
     return request
     # Dump the request object to JSON
 
+def create_archive_from_request(request_file):
+
+    # Creates an archive from a 'json' request file
+
+    # Read the request
+    try:
+        with open(request_file) as json_req:
+            my_request = json.load(json_req)
+            json_req.close()
+    except:
+        logger.error('Error in reading the request. Exit')
+        return 1
+
+    my_product = my_request['product']
+    my_mapsets = my_request['productmapsets']
+    my_version = my_request['version']
+
+    # Define the archive filename
+    #archive_name=get_archive_name(my_product,my_version,'0001')
+    archive_name=request_file.replace('.req','.tgz')
+    print archive_name
+
+    n_mapsets = len(my_mapsets)
+    for my_mapset in my_mapsets:
+        mapsetcode = my_mapset['mapsetcode']
+        print mapsetcode
+        mapsetdatasets = my_mapset['mapsetdatasets']
+        for mapsetdataset in mapsetdatasets:
+            subproductcode =  mapsetdataset['subproductcode']
+            missing_info = mapsetdataset['missing']
+
+            # Create a product object
+            product = Product(product_code=my_product, version=my_version)
+            product.create_tar(missing_info, filetar=archive_name, tgz=True)
+
+    return
+
+def get_archive_name(productcode, version, id):
+
+    filename = es_constants.es2globals['base_tmp_dir']+os.path.sep
+    filename += 'archive_'+productcode+'_'+version+'_'+id+'.tgz'
+    return filename
 
 def _create_request(productcode, version, mapsetcode=None, subproductcode=None):
 
