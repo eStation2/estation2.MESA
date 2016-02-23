@@ -1536,7 +1536,9 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
             # Merge the old and new output products into a 'tmp' file
             try:
-                command = es_constants.gdal_merge + ' -n '+str(out_nodata)+' -co \"compress=lzw\" -o '
+                command = es_constants.gdal_merge + ' -n '+str(out_nodata)
+                command += ' -a_nodata '+str(out_nodata)
+                command += ' -co \"compress=lzw\" -o '
                 command += tmp_output_file
                 command += ' '+ bck_output_file+ ' '+output_filename
                 my_logger.debug('Command for merging is: ' + command)
