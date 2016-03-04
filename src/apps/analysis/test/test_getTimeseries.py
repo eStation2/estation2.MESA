@@ -135,5 +135,18 @@ class TestTS(unittest.TestCase):
 
         self.assertEquals(len(list_values), 75)
 
+    def test_values_wd_gee(self):
+
+        productcode="wd-gee"
+        subproductcode="occurr"
+        version="1.0"
+        mapsetcode="WD-GEE-ECOWAS"
+        from_date=date(2015,01,01)
+        to_date=date(2015,12,21)
+
+        list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_thies, from_date, to_date)
+        print(list_values)
+
+        self.assertEquals(len(list_values), 12)
 
 
