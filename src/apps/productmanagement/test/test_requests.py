@@ -9,10 +9,11 @@
 from __future__ import absolute_import
 
 import unittest
-import os
 import json
+import pprint
 
 from apps.productmanagement import requests
+from apps.productmanagement import products
 
 from config import es_constants
 # from lib.python import functions
@@ -53,19 +54,6 @@ class TestRequests(unittest.TestCase):
         f.close()
 
         print test_json_dump
-
-    # def test_create_archive_1(self):
-    #
-    #     test_json_dump=req_dir+'dump_my_json_1.req'
-    #
-    #     with open(test_json_dump,'r') as f:
-    #         request_json = f.read(test_json_dump)
-    #     f.close()
-    #
-    #     print test_json_dump
-    #
-
-
 
     def test_requests_2(self):
 
@@ -110,4 +98,19 @@ class TestRequests(unittest.TestCase):
         f.close()
 
         print request_json
+
+    def test_achive_creation_1(self):
+
+        # Read the request - type c.
+        file_req='/eStation2/requests/vgt-fapar_V1.4_SPOTV-ECOWAS-1km_fapar_2016-02-23 1458.req'
+        requests.create_archive_from_request(file_req)
+        return
+        # Read the request - type b.
+        file_req='/eStation2/requests/vgt-ndvi_sv2-pv2.1_SPOTV-Africa-1km_all_enabled_datasets_2016-02-23 1457.req'
+        requests.create_archive_from_request(file_req)
+        return
+
+        # Read the request - type a.
+        file_req='/eStation2/requests/vgt-fapar_V1.4_all_enabled_mapsets_2016-02-23 1457.req'
+        requests.create_archive_from_request(file_req)
 
