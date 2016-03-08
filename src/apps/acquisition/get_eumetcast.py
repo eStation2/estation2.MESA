@@ -268,11 +268,12 @@ def loop_eumetcast_ftp(dry_run=False):
                     current_list = get_list_matching_files_dir_ftp(ftp_eumetcast_url, ftp_eumetcast_userpwd, eumetcast_source.filter_expression_jrc)
                 except:
                     logger.error("Cannot connect to the PC1 via ftp. Wait 1 minute")
+                    current_list = []
                     time.sleep(60)
 
                 #logger.debug("Number of files currently on PC1 for trigger %s is %i", eumetcast_source.eumetcast_id, len(current_list))
-                logger_spec.info("Number of files currently on PC1 for trigger %s is %i", eumetcast_source.eumetcast_id, len(current_list))
                 if len(current_list) > 0:
+                    logger_spec.info("Number of files currently on PC1 for trigger %s is %i", eumetcast_source.eumetcast_id, len(current_list))
 
                     #logger.debug("Number of files already copied for trigger %s is %i", eumetcast_source.eumetcast_id, len(processed_list))
                     logger_spec.debug("Number of files already copied for trigger %s is %i", eumetcast_source.eumetcast_id, len(processed_list))
