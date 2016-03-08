@@ -1620,7 +1620,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             trg_ds.SetProjection(orig_ds.GetProjectionRef())
             trg_ds.SetGeoTransform(orig_geo_transform)
 
-            if mapset_id != 'WD-GEE-ECOWAS':
+            if mapset_id != 'WD-GEE-ECOWAS' and mapset_id != 'WD-GEE-ECOWAS-AVG':
                 # Apply rescale to data
                 scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
                                        out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger)
