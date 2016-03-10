@@ -197,12 +197,6 @@ class TestProducts(unittest.TestCase):
         dates = product.get_missing_filenames(missing[0])
         self.assertIsInstance(dates, list)
 
-    def test_tar_creation(self):
-        product = self.get_product()
-        mapsets = product.mapsets
-        missing = product.get_missing_datasets(mapset=mapsets[0])
-        filetar = Product.create_tar(missing)
-        #TODO check for file size
 
 #   Additional test to mimic/replicate what happens in webpy_esapp.py (M.C.)
 class TestProducts4UI(unittest.TestCase):
@@ -294,7 +288,7 @@ class TestProducts4UI(unittest.TestCase):
         dates.append('20150101')
         dates.append('20150111')
         dates.append('20150121')
-        self.hide_some_files(productcode, version, subproductcode, type, mapsets[0], dates)
+        #self.hide_some_files(productcode, version, subproductcode, type, mapsets[0], dates)
 
         # Create the 'missing' list
         missing = product.get_missing_datasets(mapset=mapsets[0],sub_product_code=subproductcode, from_date=None, to_date=to_date)

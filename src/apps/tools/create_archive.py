@@ -1,17 +1,14 @@
 from __future__ import absolute_import
 
-import unittest
 import datetime
 
 from apps.productmanagement.create_archive import *
 from lib.python import functions
 import os
-from database import connectdb
 
+class Create():
 
-class TestCreate(unittest.TestCase):
-
-    def TestCreateArchive(self):
+    def CreateArchive(self):
         product='vgt-ndvi'
         version='spot-v2'
         subproducts='ndv'
@@ -21,7 +18,7 @@ class TestCreate(unittest.TestCase):
         target_dir='/data/archives/'
         create_archive_eumetcast(product, version, subproducts, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
-    def TestCreateArchive_vgt_ndvi(self):
+    def CreateArchive_vgt_ndvi(self):
 
         base_target_dir='/data/archives/'
         mapset='SPOTV-Africa-1km'
@@ -94,7 +91,7 @@ class TestCreate(unittest.TestCase):
             functions.check_output_dir(target_dir)
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
-    def TestCreateArchive_vgt_fapar(self):
+    def CreateArchive_vgt_fapar(self):
 
         base_target_dir='/data/archives/'
         mapset='SPOTV-Africa-1km'
@@ -109,7 +106,7 @@ class TestCreate(unittest.TestCase):
         functions.check_output_dir(target_dir)
         create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
-    def TestCreateArchive_vgt_fcover(self):
+    def CreateArchive_vgt_fcover(self):
 
         base_target_dir='/data/archives/'
         mapset='SPOTV-Africa-1km'
@@ -124,7 +121,7 @@ class TestCreate(unittest.TestCase):
         functions.check_output_dir(target_dir)
         create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
-    def TestCreateArchive_vgt_lai(self):
+    def CreateArchive_vgt_lai(self):
 
         base_target_dir='/data/archives/'
         mapset='SPOTV-Africa-1km'
@@ -139,7 +136,7 @@ class TestCreate(unittest.TestCase):
         functions.check_output_dir(target_dir)
         create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
-    def TestCreateArchive_vgt_dmp(self):
+    def CreateArchive_vgt_dmp(self):
 
         base_target_dir='/data/archives/'
         mapset='SPOTV-Africa-1km'
@@ -154,7 +151,7 @@ class TestCreate(unittest.TestCase):
         functions.check_output_dir(target_dir)
         create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
-    def TestCreateArchive_fewsnet_rfe(self):
+    def CreateArchive_fewsnet_rfe(self):
 
         base_target_dir='/data/archives/'
         mapset='FEWSNET-Africa-8km'
@@ -204,7 +201,7 @@ class TestCreate(unittest.TestCase):
             functions.check_output_dir(target_dir)
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
-    def TestCreateArchive_tamsat_rfe(self):
+    def CreateArchive_tamsat_rfe(self):
 
         base_target_dir='/data/archives/'
         mapset='TAMSAT-Africa-4km'
@@ -254,7 +251,7 @@ class TestCreate(unittest.TestCase):
             functions.check_output_dir(target_dir)
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
-    def TestCreateArchive_chirps_dekad(self):
+    def CreateArchive_chirps_dekad(self):
 
         base_target_dir='/data/archives/'
         mapset='CHIRP-Africa-5km'
@@ -304,7 +301,22 @@ class TestCreate(unittest.TestCase):
             functions.check_output_dir(target_dir)
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
-    def TestCreateArchive_modis_chla(self):
+    def CreateArchive_modis_firms(self):
+
+        base_target_dir='/data/archives/'
+        mapset='SPOTV-Africa-1km'
+        product='modis-firms'
+        version='v5.0'
+        start_date=datetime.date(2015, 1, 1)
+        end_date=None
+
+        # RFE from 2.0: since 01.01.2011
+        subproduct='1day'
+        target_dir = base_target_dir + product+ os.path.sep + subproduct
+        functions.check_output_dir(target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+    def CreateArchive_modis_chla(self):
 
         base_target_dir='/data/archives/'
         mapset='MODIS-Africa-4km'
@@ -326,7 +338,7 @@ class TestCreate(unittest.TestCase):
         functions.check_output_dir(target_dir)
         create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
-    def TestCreateArchive_modis_sst(self):
+    def CreateArchive_modis_sst(self):
 
         base_target_dir='/data/archives/'
         mapset='MODIS-Africa-4km'
@@ -348,7 +360,7 @@ class TestCreate(unittest.TestCase):
         functions.check_output_dir(target_dir)
         create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
-    def TestCreateArchive_modis_par(self):
+    def CreateArchive_modis_par(self):
 
         base_target_dir='/data/archives/'
         mapset='MODIS-Africa-4km'
@@ -370,7 +382,7 @@ class TestCreate(unittest.TestCase):
         functions.check_output_dir(target_dir)
         create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
-    def TestCreateArchive_modis_kd490(self):
+    def CreateArchive_modis_kd490(self):
 
         base_target_dir='/data/archives/'
         mapset='MODIS-Africa-4km'
@@ -392,31 +404,23 @@ class TestCreate(unittest.TestCase):
         functions.check_output_dir(target_dir)
         create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
-    def TestCreateArchive_modis_firms(self):
+    def CreateArchive_all(self):
 
-        base_target_dir='/data/archives/'
-        mapset='SPOTV-Africa-1km'
-        product='modis-firms'
-        version='v5.0'
-        start_date=datetime.date(2015, 1, 1)
-        end_date=None
+        self.CreateArchive_vgt_ndvi()
+        self.CreateArchive_vgt_fapar()
+        self.CreateArchive_vgt_fcover()
+        self.CreateArchive_vgt_lai()
+        self.CreateArchive_vgt_dmp()
+        self.CreateArchive_fewsnet_rfe()
+        self.CreateArchive_tamsat_rfe()
+        self.CreateArchive_chirps_dekad()
+        self.CreateArchive_modis_firms()
+        self.CreateArchive_modis_chla()
+        self.CreateArchive_modis_sst()
+        self.CreateArchive_modis_par()
+        self.CreateArchive_modis_kd490()
 
-        # RFE from 2.0: since 01.01.2011
-        subproduct='1day'
-        target_dir = base_target_dir + product+ os.path.sep + subproduct
-        functions.check_output_dir(target_dir)
-        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+if __name__=='__main__':
 
-    def TestCreateArchive_all(self):
-
-        self.TestCreateArchive_vgt_ndvi()
-        self.TestCreateArchive_vgt_fapar()
-        self.TestCreateArchive_vgt_fcover()
-        self.TestCreateArchive_vgt_lai()
-        self.TestCreateArchive_vgt_dmp()
-        self.TestCreateArchive_fewsnet_rfe()
-        self.TestCreateArchive_tamsat_rfe()
-        self.TestCreateArchive_modis_chla()
-        self.TestCreateArchive_modis_sst()
-        self.TestCreateArchive_modis_par()
-        self.TestCreateArchive_modis_kd490()
+    tc = Create()
+    tc.CreateArchive_all()

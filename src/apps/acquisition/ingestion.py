@@ -78,7 +78,7 @@ def loop_ingestion(dry_run=False):
 
             # Get the list of acquisition sources that are defined for this ingestion 'trigger'
             # (i.e. prod/version)
-            # NOTE: the following implies there is 1 and only 1 '_native' subproduct associated to a 'subproduct';
+            # NOTE: the following implies there is 1 and only 1 '_native' subproduct associated to a 'product';
             native_product = {"productcode": productcode,
                               "subproductcode": productcode + "_native",
                               "version": productversion}
@@ -136,13 +136,18 @@ def loop_ingestion(dry_run=False):
                                 "datasource_descr_id": datasource_descr.datasource_descr_id,
                                 "version": product['version']}
                         product_in_info = querydb.get_product_in_info(echo=echo_query, **args)
-                        re_process = product_in_info.re_process
-                        re_extract = product_in_info.re_extract
-                        sprod = {'subproduct': ingest.subproductcode,
-                                 'mapsetcode': ingest.mapsetcode,
-                                 're_extract': re_extract,
-                                 're_process': re_process}
-                        subproducts.append(sprod)
+                        try:
+                            re_process = product_in_info.re_process
+                            re_extract = product_in_info.re_extract
+                            nodata_value=product_in_info.no_data
+                            sprod = {'subproduct': ingest.subproductcode,
+                                     'mapsetcode': ingest.mapsetcode,
+                                     're_extract': re_extract,
+                                     're_process': re_process,
+                                     'nodata': nodata_value}
+                            subproducts.append(sprod)
+                        except:
+                            logger.warning("Subproduct %s not defined for source %s" % (ingest.subproductcode,datasource_descr.datasource_descr_id))
 
 
                     # Get the list of unique dates by extracting the date from all files.
@@ -173,7 +178,7 @@ def loop_ingestion(dry_run=False):
                         # Pass list of files to ingestion routine
                         if (not dry_run):
                             try:
-                                result = ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger_spec, nodata_value=product_in_info.no_data, echo_query=echo_query)
+                                result = ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger_spec, echo_query=echo_query)
                             except:
                                 logger.error("Error in ingestion of file [%s] " % (functions.conv_list_2_string(date_fileslist)))
                                 result = 1
@@ -330,7 +335,7 @@ def ingest_archives_eumetcast_product(product_code, version, subproduct_code, ma
     #                 logger.warning("Error in ingesting file %s" % in_file)
 
 
-def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_logger, nodata_value=None, echo_query=False):
+def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_logger, echo_query=False):
 #   Manages ingestion of 1/more file/files for a given date
 #   Arguments:
 #       input_files: input file full names
@@ -367,7 +372,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
     if do_preprocess == 1:
         my_logger.debug("Calling routine %s" % 'preprocess_files')
         try:
-            composed_file_list = pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files, tmpdir, my_logger, nodata_value)
+            composed_file_list = pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files, tmpdir, my_logger)
         except:
             # Error occurred and was NOT detected in pre_process routine
             my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
@@ -399,6 +404,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
             return 1
     else:
         composed_file_list = input_files
+
     try:
         ingest_file(composed_file_list, in_date, product, subproducts, datasource_descr, my_logger, in_files=input_files,
                 echo_query=echo_query)
@@ -607,7 +613,7 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger):
     return pre_processed_files
 
 
-def pre_process_pml_netcdf(subproducts, tmpdir , input_files, my_logger, nodata_value):
+def pre_process_pml_netcdf(subproducts, tmpdir , input_files, my_logger):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process PML NETCDF files
 #
@@ -683,6 +689,7 @@ def pre_process_pml_netcdf(subproducts, tmpdir , input_files, my_logger, nodata_
         if sprod != 0:
             id_subproduct = sprod['re_extract']
             id_mapset = sprod['mapsetcode']
+            nodata_value = sprod['nodata']
             out_tmp_file_gtiff = tmpdir + os.path.sep + id_subproduct + '_' + id_mapset + '.tif.merged'
 
             # Take gdal_merge.py from es2globals
@@ -1097,7 +1104,105 @@ def pre_process_nasa_firms(subproducts, tmpdir, input_files, my_logger):
 
     return interm_files_list
 
-def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files, tmpdir, my_logger, nodata_value):
+def pre_process_wdb_gee(subproducts, tmpdir, input_files, my_logger):
+# -------------------------------------------------------------------------------------------------------
+#   Merges the various tiles of the .tif files retrieved from GEE application
+#
+
+    # Prepare the output as an empty list
+    interm_files_list = []
+
+    # Get the ID of the files associated to such subproduct
+    for sprod in subproducts:
+        match_regex = '*'+sprod['re_extract']+'*'
+
+    # Make sure it is a list (if only a string is returned, it loops over chars)
+    if isinstance(input_files, list):
+        list_input_files = input_files
+    else:
+        list_input_files=[]
+        list_input_files.append(input_files)
+
+    # Check if they match the regex
+    good_input_files = []
+    for file in list_input_files:
+        if fnmatch.fnmatch(os.path.basename(file), match_regex):
+            good_input_files.append(file)
+
+    if len(good_input_files) == 0:
+        return []
+    # Does check the number of files ?
+    output_file= tmpdir+os.path.sep + 'merge_output.tif'
+
+    # Merge all input products into a 'tmp' file
+    try:
+        command = es_constants.gdal_merge
+        command += ' -co \"compress=lzw\"'
+        command += ' -o ' + output_file
+        command += ' -ot BYTE '
+        for file in good_input_files:
+            command += ' '+file
+
+        my_logger.debug('Command for merging is: ' + command)
+        os.system(command)
+    except:
+        pass
+
+    # Assign output file
+    interm_files_list.append(output_file)
+
+    return interm_files_list
+
+def pre_process_ecmwf_mars(subproducts, tmpdir , input_files, my_logger):
+# -------------------------------------------------------------------------------------------------------
+#   Pre-process SPIRITS ECMWF files
+#
+    out_tmp_gtiff_file = []
+
+    #  Zipped files containing an .img and and .hdr file
+    if isinstance(input_files, list):
+        if len(input_files) > 1:
+            logger.error('Only 1 file expected. Exit')
+            raise Exception("Only 1 file expected. Exit")
+        else:
+            input_file = input_files[0]
+
+    logger.debug('Unzipping/processing: ecmwf case')
+
+    #  Extract .img and and .hdr file, and store .img name
+    img_ext='.*.img'
+    if zipfile.is_zipfile(input_file):
+        zip_file = zipfile.ZipFile(input_file)              # Create ZipFile object
+        zip_list = zip_file.namelist()                      # Get the list of its contents
+        for files in zip_list:
+            my_logger.debug('File in the .zip archive is: ' + files)
+            filename = os.path.basename(files)
+            data = zip_file.read(files)
+            myfile_path = os.path.join(tmpdir, filename)
+            myfile = open(myfile_path, "wb")
+            myfile.write(data)
+            myfile.close()
+            if re.match(img_ext, filename):
+               out_tmp_img_file = myfile_path
+        zip_file.close()
+
+    else:
+        my_logger.error("File %s is not a valid zipfile. Exit", input_files)
+        raise Exception("File %s is not a valid zipfile. Exit", input_files)
+
+    #  Convert from .img to GTIFF
+    if os.path.isfile(out_tmp_img_file):
+        output_file = out_tmp_img_file.replace('.img','.tif')
+        orig_ds = gdal.Open(out_tmp_img_file)
+        write_ds_to_geotiff(orig_ds,output_file)
+        orig_ds = None
+    else:
+        my_logger.error("No .img file found in zipfile. Exit")
+        raise Exception("No .img file found in zipfile. Exit")
+
+    return output_file
+
+def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files, tmpdir, my_logger):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process one or more input files by:
 #   1. Unzipping (optionally extracting one out of many layers - SDSs)
@@ -1145,7 +1250,7 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
             interm_files = pre_process_lsasaf_hdf5 (subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'PML_NETCDF':
-            interm_files = pre_process_pml_netcdf (subproducts, tmpdir, input_files, my_logger, nodata_value)
+            interm_files = pre_process_pml_netcdf (subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'UNZIP':
             interm_files = pre_process_unzip (subproducts, tmpdir, input_files, my_logger)
@@ -1171,6 +1276,12 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 
         elif preproc_type == 'NETCDF':
             interm_files = pre_process_netcdf (subproducts, tmpdir, input_files, my_logger)
+
+        elif preproc_type == 'JRC_WBD_GEE':
+            interm_files = pre_process_wdb_gee (subproducts, tmpdir, input_files, my_logger)
+
+        elif preproc_type == 'ECMWF_MARS':
+            interm_files = pre_process_ecmwf_mars(subproducts, tmpdir, input_files, my_logger)
 
         else:
             my_logger.error('Preproc_type not recognized:[%s] Check in DB table. Exit' % preproc_type)
@@ -1343,6 +1454,9 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             # The date (e.g. 20151103) is converted to the dekad it belongs to (e.g. 20151101)
             output_date_str = functions.conv_yyyymmdd_g2_2_yyyymmdd(in_date)
 
+        if datasource_descr.date_format == 'MMDD':
+            output_date_str = str(in_date)
+
         if output_date_str == -1:
             output_date_str = in_date+'_DATE_ERROR_'
         else:
@@ -1356,6 +1470,9 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
                     out_date_str_final = output_date_str
                 elif  functions.is_date_yyyymmddhhmm(output_date_str):
                     out_date_str_final = output_date_str[0:8]
+            elif out_date_format == 'MMDD':
+                if functions.is_date_mmdd(output_date_str):
+                    out_date_str_final = output_date_str
 
         # Get only the short_name for output file naming
         mapset_id = subproducts[ii]['mapsetcode']
@@ -1503,11 +1620,13 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             trg_ds.SetProjection(orig_ds.GetProjectionRef())
             trg_ds.SetGeoTransform(orig_geo_transform)
 
-            # Apply rescale to data
-            scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
+            if mapset_id != 'WD-GEE-ECOWAS':
+                # Apply rescale to data
+                scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
                                        out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger)
-
-            trg_ds.GetRasterBand(1).WriteArray(scaled_data)
+                trg_ds.GetRasterBand(1).WriteArray(scaled_data)
+            else:
+                trg_ds.GetRasterBand(1).WriteArray(out_data)
 
             orig_ds = None
 
@@ -1536,7 +1655,9 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
             # Merge the old and new output products into a 'tmp' file
             try:
-                command = es_constants.gdal_merge + ' -n '+str(out_nodata)+' -co \"compress=lzw\" -o '
+                command = es_constants.gdal_merge + ' -n '+str(out_nodata)
+                command += ' -a_nodata '+str(out_nodata)
+                command += ' -co \"compress=lzw\" -o '
                 command += tmp_output_file
                 command += ' '+ bck_output_file+ ' '+output_filename
                 my_logger.debug('Command for merging is: ' + command)
@@ -1545,7 +1666,8 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
                 pass
 
             # Write metadata to output
-            in_files.append(old_file_list)
+            if old_file_list is not None:
+                in_files.append(old_file_list)
             sds_meta.assign_input_files(in_files)
             sds_meta.write_to_file(tmp_output_file)
 

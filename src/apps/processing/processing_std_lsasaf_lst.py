@@ -16,7 +16,7 @@ import shutil
 # Import eStation2 modules
 from lib.python import functions
 from lib.python.image_proc import raster_image_math
-from apps.processing.proc_functions import reproject_output
+from apps.productmanagement.products import reproject_output
 from apps.processing.proc_functions import remove_old_files
 from lib.python import es_logging as log
 

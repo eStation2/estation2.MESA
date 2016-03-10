@@ -30,10 +30,12 @@ import subprocess
 from socket import socket
 import urllib2
 import ast
+from osgeo import gdal, osr
 
 # Import eStation2 modules
 from lib.python import es_logging as log
 from config import es_constants
+
 # from json import JSONEncoder
 logger = log.my_logger(__name__)
 

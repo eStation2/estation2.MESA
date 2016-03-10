@@ -186,3 +186,35 @@ class MapSet:
             result += 1
 
         return result
+
+    def get_larger_mapset(self, echo=False):
+
+        larger_mapset=None
+
+        # SPOTV case
+        if self.short_name == 'SPOTV-IOC-1km':
+            larger_mapset =  'SPOTV-Africa-1km'
+
+        if self.short_name == 'SPOTV-CEMAC-1km':
+            larger_mapset =  'SPOTV-Africa-1km'
+
+        if self.short_name == 'SPOTV-ECOWAS-1km':
+            larger_mapset =  'SPOTV-Africa-1km'
+
+        if self.short_name == 'SPOTV-IGAD-1km':
+            larger_mapset =  'SPOTV-Africa-1km'
+
+        if self.short_name == 'SPOTV-SADC-1km':
+            larger_mapset =  'SPOTV-Africa-1km'
+
+        if self.short_name == 'SPOTV-UoG-1km':
+            larger_mapset =  'SPOTV-Africa-1km'
+
+        # MODIS Africa case
+        if self.short_name == 'MODIS-IOC-4km':
+            larger_mapset =  'MODIS-Africa-4km'
+
+        if self.short_name == 'MODIS-UoG-4km':
+            larger_mapset =  'MODIS-Africa-4km'
+
+        return larger_mapset

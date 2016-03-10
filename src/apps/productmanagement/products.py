@@ -11,12 +11,14 @@ import glob
 import tarfile
 import shutil
 import tempfile
+from osgeo import gdal, osr
 
 from config import es_constants
 from lib.python import es_logging as log
 from lib.python import functions
 from lib.python import metadata
 from database import querydb
+from lib.python.mapset import MapSet
 
 from .exceptions import (NoProductFound, MissingMapset)
 from .datasets import Dataset
@@ -108,45 +110,85 @@ class Product(object):
                     missings.append(self.get_missing_dataset_subproduct(mapset, sub_product_code, from_date, to_date))
         return missings
 
-    def get_missing_filenames(self, missing):
+    def get_missing_filenames(self, missing, existing_only=True):
+
+        # NOTES:    by default, it returns the existing filenames ONLY
+        #           In case the requested mapset does not exist, but a larger one is available, returns the latter
+        #           -> the calling routine should perform the re-projection
+
         product = Product(missing['product'], version=missing['version'])
         version = missing['version']
         mapset = missing['mapset']
         subproduct = missing['subproduct']
         dataset = product.get_dataset(mapset=mapset, sub_product_code=missing['subproduct'])
-        dates = dataset.get_dates()
-        missing_dates = []
-        first_date = None
-        last_date = None
-        info = missing['info']
-        for interval in info['intervals']:
-            if first_date is None:
-                first_date = str_to_date(interval['fromdate'])
-            last_date = str_to_date(interval['todate'])
-            if interval['missing']:
-                missing_dates.extend(dataset.get_interval_dates(
-                    str_to_date(interval['fromdate']), str_to_date(interval['todate'])))
-        if len(info['intervals']) == 0:
-            missing_dates = dates[:]
-        else:
-            if missing['from_start']:
-                if first_date > dataset.get_first_date():
-                    missing_dates.extend(dataset.get_interval_dates(dataset.get_first_date(),
-                        first_date, last_included=False))
-            if missing['to_end']:
-                if last_date < dataset.get_last_date():
-                    missing_dates.extend(dataset.get_interval_dates(last_date,
-                        dataset.get_last_date(), first_included=False))
 
         missing_filenames=[]
-        for date in sorted(set(dates).intersection(set(missing_dates))):
-            date_str = dataset._frequency.format_date(date)
-            filename=dataset.fullpath+functions.set_path_filename(date_str, missing['product'], subproduct, mapset, version,'.tif')
-            missing_filenames.append(filename)
+
+        # Manage the mapset: if the required one does not exist, use a 'larger' one (if exists)
+        existing_files = dataset.get_filenames()
+        if len(existing_files) == 0:
+
+            logger.warning("No any file found for original mapset: %s. Return" % mapset)
+            my_mapset = MapSet()
+            my_mapset.assigndb(mapset)
+            larger_mapset = my_mapset.get_larger_mapset()
+            new_dataset = product.get_dataset(mapset=larger_mapset, sub_product_code=missing['subproduct'])
+            new_existing_files = new_dataset.get_filenames()
+
+            if len(new_existing_files) > 0:
+                use_mapset = larger_mapset
+                dataset = new_dataset
+            else:
+                logger.warning('No any file found for larger mapset: %s. Return' % larger_mapset)
+                return
+        else:
+                use_mapset = mapset
+
+        # Manage the specific case of 'singlefile', e.g. absol-min-linearx2
+        if dataset._db_product.frequency_id == 'singlefile':
+            # Check if the 'single' file was missing
+            info = missing['info']
+            if info['missingfiles']:
+                missing_filenames=dataset.get_filenames()
+        else:
+            dates = dataset.get_dates()
+            missing_dates = []
+            first_date = None
+            last_date = None
+            info = missing['info']
+            for interval in info['intervals']:
+                if first_date is None:
+                    first_date = str_to_date(interval['fromdate'])
+                last_date = str_to_date(interval['todate'])
+                if interval['missing']:
+                    missing_dates.extend(dataset.get_interval_dates(
+                        str_to_date(interval['fromdate']), str_to_date(interval['todate'])))
+            if len(info['intervals']) == 0:
+                missing_dates = dates[:]
+            else:
+                if missing['from_start']:
+                    if first_date > dataset.get_first_date():
+                        missing_dates.extend(dataset.get_interval_dates(dataset.get_first_date(),
+                            first_date, last_included=False))
+                if missing['to_end']:
+                    if last_date < dataset.get_last_date():
+                        missing_dates.extend(dataset.get_interval_dates(last_date,
+                            dataset.get_last_date(), first_included=False))
+
+            if existing_only:
+                dates_to_add = sorted(set(dates).intersection(set(missing_dates)))
+            else:
+                dates_to_add = sorted(set(missing_dates))
+
+            for date in dates_to_add:
+                date_str = dataset._frequency.format_date(date)
+                filename=dataset.fullpath+functions.set_path_filename(date_str, missing['product'], subproduct, use_mapset, version,'.tif')
+                missing_filenames.append(filename)
+
         return missing_filenames
 
     @staticmethod
-    def create_tar(missing_info, filetar=None, tgz=False):
+    def create_tar(missing_info, filetar=None, tgz=True):
     # Given a 'missing_info' object, creates a tar-file containing all required files
 
         result = {'status':0,            # 0 -> ok, all files copied, 1-> at least 1 file missing
@@ -154,27 +196,58 @@ class Product(object):
                   'n_file_missing':0,
                   }
 
+        tmp_dir = None
+        final_filenames = []
+
+        # Check the target file name is passed (or define a temp one)
         if filetar is None:
             file_temp = tempfile.NamedTemporaryFile()
             filetar = file_temp.name
             file_temp.close()
+
         filenames = []
+        # Loop over missing objects
         for missing in missing_info:
             try:
                 product = Product(missing['product'], version=missing['version'])
-                filenames.extend(product.get_missing_filenames(missing))
+                filenames.extend(product.get_missing_filenames(missing,existing_only=False))
             except NoProductFound:
                 pass
-        # creare il tar contenente files
+            orig_mapset = missing['mapset']
+
+            # The get_missing_filenames can return a 'larger' mapset.
+            # Manage here the re-projection
+            for filename in filenames:
+                [product_code, sub_product_code, version, str_date, my_mapset] = functions.get_all_from_path_full(filename)
+
+                if my_mapset == orig_mapset:
+                    final_filenames.append(filename)
+                else:
+                    if tmp_dir is None:
+                        tmp_dir = tempfile.mkdtemp(prefix=__name__, suffix='',dir=es_constants.base_tmp_dir)
+                    # Do reprojection to a /tmp dir (if the file exists)
+                    if os.path.isfile(filename):
+                        new_filename = reproject_output(filename, my_mapset, orig_mapset, output_dir=tmp_dir+os.path.sep)
+                        if os.path.isfile(new_filename):
+                            final_filenames.append(new_filename)
+
+        # Create .tar
         tar = tarfile.open(filetar, "w|gz" if tgz else "w|")
-        for filename in filenames:
+        for filename in final_filenames:
+            name = os.path.basename(filename)
+            subdir = functions.get_subdir_from_path_full(filename)
             if os.path.isfile(filename):
-                tar.add(filename)
+                tar.add(filename, arcname=subdir+name)
                 result['n_file_copied']+=1
             else:
                 result['n_file_missing']+=1
                 result['status']=1
         tar.close()
+
+        # Remove tmp_dir
+        if tmp_dir is not None:
+            shutil.rmtree(tmp_dir)
+
         return [filetar, result]
 
     @staticmethod
@@ -276,3 +349,149 @@ class Product(object):
                     list_ingested_and_derived_subproducts.append(my_tuple)
 
         return list_ingested_and_derived_subproducts
+
+######################################################################################
+#
+#   Purpose: reproject a file to a different mapset
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2015/05/15
+#   Inputs: input_file (an eStation 2.0 GTIFF file)
+#           target_mapset: the target mapset of reprojection
+#   Output: output_file
+#
+
+def reproject_output(input_file, native_mapset_id, target_mapset_id, output_dir=None, logger=None):
+
+    # Check logger
+    if logger is None:
+        logger = log.my_logger(__name__)
+
+    # Check output dir
+    if output_dir is None:
+        output_dir = es_constants.es2globals['processing_dir']
+
+    # Get the existing dates for the dataset
+    logger.info("Entering routine %s for file %s" % ('reproject_output', input_file))
+    ext=es_constants.ES2_OUTFILE_EXTENSION
+
+    # Test the file/files exists
+    if not os.path.isfile(input_file):
+        logger.error('Input file: %s does not exist' % input_file)
+        return 1
+
+    # Instance metadata object (for output_file)
+    sds_meta_out = metadata.SdsMetadata()
+
+    # Read metadata from input_file
+    sds_meta_in = metadata.SdsMetadata()
+    sds_meta_in.read_from_file(input_file)
+
+    # Extract info from input file
+    str_date = sds_meta_in.get_item('eStation2_date')
+    product_code = sds_meta_in.get_item('eStation2_product')
+    sub_product_code = sds_meta_in.get_item('eStation2_subProduct')
+    version = sds_meta_in.get_item('eStation2_product_version')
+
+    # Define output filename
+    sub_dir = sds_meta_in.get_item('eStation2_subdir')
+    product_type = functions.get_product_type_from_subdir(sub_dir)
+
+    out_prod_ident = functions.set_path_filename_no_date(product_code, sub_product_code, target_mapset_id, version, ext)
+    output_subdir  = functions.set_path_sub_directory   (product_code, sub_product_code, product_type, version, target_mapset_id)
+
+    output_file = output_dir+\
+                  output_subdir +\
+                  str_date +\
+                  out_prod_ident
+
+    # make sure output dir exists
+    output_dir = os.path.split(output_file)[0]
+    functions.check_output_dir(output_dir)
+
+    # -------------------------------------------------------------------------
+    # Manage the geo-referencing associated to input file
+    # -------------------------------------------------------------------------
+    orig_ds = gdal.Open(input_file, gdal.GA_Update)
+
+    # Read the data type
+    band = orig_ds.GetRasterBand(1)
+    out_data_type_gdal = band.DataType
+
+    if native_mapset_id != 'default':
+        native_mapset = MapSet()
+        native_mapset.assigndb(native_mapset_id)
+        orig_cs = osr.SpatialReference(wkt=native_mapset.spatial_ref.ExportToWkt())
+
+        # Complement orig_ds info (necessary to Re-project)
+        try:
+            #orig_ds.SetGeoTransform(native_mapset.geo_transform)
+            orig_ds.SetProjection(orig_cs.ExportToWkt())
+        except:
+            logger.debug('Cannot set the geo-projection .. Continue')
+    else:
+        try:
+            # Read geo-reference from input file
+            orig_cs = osr.SpatialReference()
+            orig_cs.ImportFromWkt(orig_ds.GetProjectionRef())
+        except:
+            logger.debug('Cannot read geo-reference from file .. Continue')
+
+    # TODO-M.C.: add a test on the mapset-id in DB table !
+    trg_mapset = MapSet()
+    trg_mapset.assigndb(target_mapset_id)
+    logger.debug('Target Mapset is: %s' % target_mapset_id)
+
+    # -------------------------------------------------------------------------
+    # Generate the output file
+    # -------------------------------------------------------------------------
+    # Prepare output driver
+    out_driver = gdal.GetDriverByName(es_constants.ES2_OUTFILE_FORMAT)
+
+    logger.debug('Doing re-projection to target mapset: %s' % trg_mapset.short_name)
+    # Get target SRS from mapset
+    out_cs = trg_mapset.spatial_ref
+    out_size_x = trg_mapset.size_x
+    out_size_y = trg_mapset.size_y
+
+    # Create target in memory
+    mem_driver = gdal.GetDriverByName('MEM')
+
+    # Assign mapset to dataset in memory
+    mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, out_data_type_gdal)
+
+    mem_ds.SetGeoTransform(trg_mapset.geo_transform)
+    mem_ds.SetProjection(out_cs.ExportToWkt())
+
+    # Apply Reproject-Image to the memory-driver
+    orig_wkt = orig_cs.ExportToWkt()
+    res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
+                                  es_constants.ES2_OUTFILE_INTERP_METHOD)
+
+    logger.debug('Re-projection to target done.')
+
+    # Read from the dataset in memory
+    out_data = mem_ds.ReadAsArray()
+
+    # Write to output_file
+    trg_ds = out_driver.CreateCopy(output_file, mem_ds, 0, [es_constants.ES2_OUTFILE_OPTIONS])
+    trg_ds.GetRasterBand(1).WriteArray(out_data)
+
+    # -------------------------------------------------------------------------
+    # Assign Metadata to the ingested file
+    # -------------------------------------------------------------------------
+    # Close dataset
+    trg_ds = None
+
+    sds_meta_out.assign_es2_version()
+    sds_meta_out.assign_mapset(target_mapset_id)
+    sds_meta_out.assign_from_product(product_code, sub_product_code, version)
+    sds_meta_out.assign_date(str_date)
+    sds_meta_out.assign_subdir_from_fullpath(output_dir)
+    sds_meta_out.assign_comput_time_now()
+    sds_meta_out.assign_input_files(input_file)
+
+    # Write metadata to file
+    sds_meta_out.write_to_file(output_file)
+
+    # Return the filename
+    return output_file

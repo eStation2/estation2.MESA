@@ -21,6 +21,14 @@ class TestMapSet(TestCase):
         self.assertEqual(my_mapset.size_x, 9633)
         self.assertEqual(my_mapset.size_y, 8177)
 
+    def test_get_larger(self):
+
+        mapsetcode = 'SPOTV-IGAD-1km'
+        mapset = MapSet()
+        mapset.assigndb(mapsetcode)
+        larger = mapset.get_larger_mapset()
+
+        self.assertEqual(larger,'SPOTV-Africa-1km')
     # def test_assign_ecowas(self):
     #     self.fail()
     #
