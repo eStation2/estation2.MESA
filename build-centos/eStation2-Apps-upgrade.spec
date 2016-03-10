@@ -1,7 +1,7 @@
 Summary: eStation 2.0 application from JRC
 Name: eStation2-Apps
-Version: 2.0.2
-Release: 2
+Version: 2.0.3
+Release: 1
 Group: eStation
 License: GPL
 Source: /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz
@@ -17,7 +17,7 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 %prep
 # Sync the git repository from github
 cd /home/adminuser/eStation2.git
-git pull origin 12.04-2.0
+git pull origin main
 # Create the .tgz
 cd src
 tar -cvzf /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz *
@@ -167,14 +167,18 @@ EOF
     if [[ ! `su postgres -c "psql -d estationdb -c 'select * from products.mapset'" 2> /dev/null` ]];then
         # First install from scratch data
         echo "`date +'%Y-%m-%d %H:%M '` Create database structure" 
-        # End automatically added section
+        # Create database initial version (2.0.2)
         psql -h localhost -U estation -d estationdb -f /var/www/eStation2/database/dbInstall/products_dump_structure_only.sql >/dev/null 2>&1
     else
         echo "`date +'%Y-%m-%d %H:%M '` Database structure already exists. Continue" 
     fi
+    # Update database structure to current release
+    echo "`date +'%Y-%m-%d %H:%M '` Update database structure" 
+    psql -h localhost -U estation -d estationdb -f /var/www/eStation2/database/dbInstall/update_db_structure.sql >/dev/null 2>&1
+
     # Update Tables (both for upgrade and installation from scratch)
-    echo "`date +'%Y-%m-%d %H:%M '` Populate tables" 
-    psql -h localhost -U estation -d estationdb -f /var/www/eStation2/database/dbInstall/products_dump_data_only.sql > /dev/null 2>&1
+    echo "`date +'%Y-%m-%d %H:%M '` Populate/update tables" 
+    psql -h localhost -U estation -d estationdb -f /var/www/eStation2/database/dbInstall/update_insert_jrc_data.sql > /dev/null 2>&1
 
 else
     echo "`date +'%Y-%m-%d %H:%M '` Postgresql is NOT running: DB not created !" 
@@ -240,6 +244,9 @@ chmod 777 ${run_dir}
 # Set the 'role' in system_settings
 my_role=$(hostname | cut -d '-' -f2)
 sed -i "s|.*role.=.*|role = ${my_role}|" /eStation2/settings/system_settings.ini
+
+# Set the 'version' in system_settings
+sed -i "s|.*version.=.*|version = %{version}|" /eStation2/settings/system_settings.ini
 
 # Check the link of libmapserver exist
 #if [[ ! -h /usr/lib64/libmapserver.so ]]; then ln -fs /usr/local/lib64/libmapserver.so /usr/lib64/; fi
