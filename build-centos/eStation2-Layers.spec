@@ -1,6 +1,6 @@
 Summary: eStation 2.0 reference Layers for visualization
 Name: eStation2-Layers
-Version: 2.0.1
+Version: 2.0.2
 Release: 1
 Group: eStation
 License: GPL
@@ -43,7 +43,7 @@ cp -r /eStation2/layers/* /eStation2/layers-%{version}.bck/
 
 # After uninstall: remove /tmp files, and move the .bck dir to 'old-version' place
 %postun
-mkdir -fr /eStation2/layers/
+mkdir -p /eStation2/layers/
 mv /eStation2/layers-%{version}.bck/* /eStation2/layers/
 rmdir /eStation2/layers-%{version}.bck
 
