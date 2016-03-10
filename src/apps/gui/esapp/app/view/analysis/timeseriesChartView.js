@@ -227,6 +227,15 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                             unit = ''
                         else unit = ' ('+unit+')'
 
+                        var min = json.yaxes[yaxescount].min;
+                        if (min != null)
+                            min = parseFloat(json.yaxes[yaxescount].min)
+
+                        var max = json.yaxes[yaxescount].max;
+                        if (max != null)
+                            max = parseFloat(json.yaxes[yaxescount].max)
+
+
                         var titlecolor = json.yaxes[yaxescount].title_color
                         if(titlecolor.charAt(0)!="#"){ // convert RBG to HEX if RGB value is given. Highcharts excepts only HEX.
                             var rgb_arr = [];
@@ -262,8 +271,8 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                                 }
                             },
                             opposite: opposite,
-                            min:parseFloat(json.yaxes[yaxescount].min),
-                            max:parseFloat(json.yaxes[yaxescount].max)
+                            min:min,
+                            max:max
                         };
                         Yaxes.push(yaxe);
                         timeseries_names += '_' + json.yaxes[yaxescount].title;

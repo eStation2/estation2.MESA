@@ -113,6 +113,8 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
             var dataacquisitiongrids = Ext.ComponentQuery.query('dataacquisitiongrid');
             var ingestiongrids = Ext.ComponentQuery.query('ingestiongrid');
 
+            //console.info('unlock status: ' + Ext.getCmp('lockunlock').pressed);
+
             Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
                 dataacquisitiongrid.columns[1].show();      // Edit Data Source
                 dataacquisitiongrid.columns[1].updateLayout();

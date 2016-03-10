@@ -41,11 +41,6 @@
 
 .not-dirty .x-grid3-dirty-cell {background: transparent;}
 
-
-.x-menu-no-icon {background-image: none;  left: 5px !important;}
-.x-menu-no-icon a.x-menu-item-link {padding-left: 3px;}
-.x-menu-no-icon .x-menu-item-icon {display: none;}
-
 p {
     margin:5px;
 }
@@ -74,7 +69,8 @@ p {
 }
 
 .layers {
-    background-image:url(../img/layers.png);
+    background-image:url(../img/layers_small.png);
+    /*background-size: 16px 16px;*/
 }
 
 .legends {
@@ -214,9 +210,23 @@ p {
     background-image: url(../img/edit16.png ) !important;
     background-repeat: no-repeat;
 }
+.edit16:hover{
+    opacity: 0.8;
+}
+
 .edit {
     background-image: url(../img/icons/edit.png ) !important;
 }
+
+.editvectordrawproperties {
+    background-image: url(../img/editvectordrawproperties.png ) !important;
+    background-size: 16px 16px;
+}
+
+.editvectordrawproperties16x16 {
+    background-image: url(../img/editvectordrawproperties16x16.png ) !important;
+}
+
 .dashboard-panel-body {
     background-image: url(../img/square.gif);
 }
@@ -725,3 +735,33 @@ p {
 	background: #d0dafd url('../img/table-images/gradhover.png') repeat-x;
 	color: #339;
 }
+
+
+.x-menu-no-icon {background-image: none;}
+.x-menu-no-icon a.x-menu-item-link {padding-left: 3px;}
+.x-menu-no-icon .x-menu-item-icon {display: none;}
+.x-menu-no-icon a.x-menu-item-link .x-menu-item-text {margin-left: 5px;}
+
+/*.x-menu-no-icon {background-image: none;  left: 5px !important;}*/
+/*.x-menu-no-icon a.x-menu-item-link {padding-left: 3px;}*/
+/*.x-menu-no-icon .x-menu-item-icon {display: none;}*/
+
+
+.over-item-cls {
+    background-color: #D3E5F3;
+    /*lightblue;*/
+}
+
+a.my-custom-button.x-btn-default-small {
+    background: none;
+    border: none;
+}
+
+a.my-custom-button.x-btn-default-small span {
+    color: black;
+}
+
+a.my-custom-button.x-btn-default-small:hover span {
+    color: #ababab;
+}
+
