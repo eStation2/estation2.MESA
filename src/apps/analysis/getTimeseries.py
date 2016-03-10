@@ -120,7 +120,7 @@ def getFilesList(productcode, subproductcode, version, mapsetcode, date_format, 
     return [list_files, dates_list]
 
 
-def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_date, end_date):
+def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_date, end_date, aggregate):
     #    Extract timeseries from a list of files and return as JSON object
     #    It applies to a single dataset (prod/sprod/version/mapset) and between 2 dates
     ogr.UseExceptions()
@@ -170,15 +170,36 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
                     merged_mask = ma.mask_or(ma.getmask(mx), ma.getmask(nodata_array_masked))
                     mxnodata = ma.masked_array(ma.getdata(mx), merged_mask)
 
-                    if mxnodata.count() == 0:
-                        meanResult = 0.0
-                    else:
-                        meanResult = mxnodata.mean()
+                    if aggregate['type'] == 'count' or aggregate['type'] == 'percent':
+                        min_val = aggregate['min_val']
+                        max_val = aggregate['max_val']
+                        # Scale threshold from physical to digital value
+                        min_val_scaled = (min_val-scale_offset)/scale_factor
+                        max_val_scaled = (max_val-scale_offset)/scale_factor
+                        mxrange = ma.masked_outside(mxnodata,min_val_scaled, max_val_scaled)
 
+                        if aggregate['type'] == 'percent':
+                            # Convert from number of pixels to ratio/percent
+                            meanResult = float(mxrange.count())/float(mxnodata.count()) * 100
+                        else:
+                            # Assign as number of pixels
+                            meanResult = mxrange.count()
+
+                        # Both results are equal
+                        finalvalue = meanResult
+
+                    elif aggregate['type'] == 'none':
+                        if mxnodata.count() == 0:
+                            meanResult = 0.0
+                        else:
+                            meanResult = mxnodata.mean()
+
+                        # Scale to physical value
+                        finalvalue = (meanResult*scale_factor+scale_offset)
+
+                    # Assign results
                     single_result['filename'] = infile
                     single_result['meanvalue_noscaling'] = meanResult
-                    # Scale to physical value
-                    finalvalue = (meanResult*scale_factor+scale_offset)
                     single_result['meanvalue'] = finalvalue
 
                 except Exception, e:
