@@ -127,6 +127,7 @@ chmod 777 /var/www
 
 # Creation of the symlink on the /var/www/eStation2-%{version}
 echo "`date +'%Y-%m-%d %H:%M '` Create sym link /var/www/eStation2-%{version}"
+rm /var/www/eStation2
 ln -fs /var/www/eStation2-%{version} /var/www/eStation2
 
 # Restart postgresql 
@@ -246,7 +247,7 @@ my_role=$(hostname | cut -d '-' -f2)
 sed -i "s|.*role.=.*|role = ${my_role}|" /eStation2/settings/system_settings.ini
 
 # Set the 'version' in system_settings
-sed -i "s|.*version.=.*|version = %{version}|" /eStation2/settings/system_settings.ini
+sed -i "s|.*active_version.=.*|active_version = %{version}|" /eStation2/settings/system_settings.ini
 
 # Check the link of libmapserver exist
 #if [[ ! -h /usr/lib64/libmapserver.so ]]; then ln -fs /usr/local/lib64/libmapserver.so /usr/lib64/; fi
