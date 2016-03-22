@@ -622,29 +622,23 @@ class UpdateEumetcastSource:
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
 
     def PUT(self):
-        import types
         getparams = json.loads(web.data())  # get PUT data
         if 'eumetcastsources' in getparams:
-            print getparams
 
             prod_id_position = None
-            if type(getparams['eumetcastsources']['prod_id_position']) is types.IntType:
+            if getparams['eumetcastsources']['prod_id_position'].isdigit():
                 prod_id_position = int(getparams['eumetcastsources']['prod_id_position'])
 
-            # prod_id_position = None
-            # if getparams['eumetcastsources']['prod_id_position'].isdigit():
-            #     prod_id_position = int(getparams['eumetcastsources']['prod_id_position'])
-
             prod_id_length = None
-            if type(getparams['eumetcastsources']['prod_id_length']) is types.IntType:
+            if getparams['eumetcastsources']['prod_id_length'].isdigit():
                 prod_id_length = int(getparams['eumetcastsources']['prod_id_length'])
 
             area_length = None
-            if type(getparams['eumetcastsources']['area_length']) is types.IntType:
+            if getparams['eumetcastsources']['area_length'].isdigit():
                 area_length = int(getparams['eumetcastsources']['area_length'])
 
             release_length = None
-            if type(getparams['eumetcastsources']['release_length']) is types.IntType:
+            if getparams['eumetcastsources']['release_length'].isdigit():
                 release_length = int(getparams['eumetcastsources']['release_length'])
 
             eumetcastsourceinfo = {'eumetcast_id': getparams['eumetcastsources']['eumetcast_id'],
@@ -753,32 +747,35 @@ class UpdateInternetSource:
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
 
     def PUT(self):
-        import types
         getparams = json.loads(web.data())  # get PUT data
         if 'internetsources' in getparams:
 
             startdate = None
-            if type(getparams['internetsources']['start_date']) is types.IntType:
+            if isinstance(getparams['internetsources']['start_date'],int):
+                startdate = getparams['internetsources']['start_date']
+            elif isinstance(getparams['internetsources']['start_date'],str) and getparams['internetsources']['start_date'].isdigit():
                 startdate = int(getparams['internetsources']['start_date'])
 
             enddate = None
-            if type(getparams['internetsources']['end_date']) is types.IntType:
+            if isinstance(getparams['internetsources']['end_date'],int):
+                enddate = getparams['internetsources']['end_date']
+            elif isinstance(getparams['internetsources']['end_date'],str) and getparams['internetsources']['end_date'].isdigit():
                 enddate = int(getparams['internetsources']['end_date'])
 
             prod_id_position = None
-            if type(getparams['internetsources']['prod_id_position']) is types.IntType:
+            if getparams['internetsources']['prod_id_position'].isdigit():
                 prod_id_position = int(getparams['internetsources']['prod_id_position'])
 
             prod_id_length = None
-            if type(getparams['internetsources']['prod_id_length']) is types.IntType:
+            if getparams['internetsources']['prod_id_length'].isdigit():
                 prod_id_length = int(getparams['internetsources']['prod_id_length'])
 
             area_length = None
-            if type(getparams['internetsources']['area_length']) is types.IntType:
+            if getparams['internetsources']['area_length'].isdigit():
                 area_length = int(getparams['internetsources']['area_length'])
 
             release_length = None
-            if type(getparams['internetsources']['release_length']) is types.IntType:
+            if getparams['internetsources']['release_length'].isdigit():
                 release_length = int(getparams['internetsources']['release_length'])
 
             internetsourceinfo = {'internet_id': getparams['internetsources']['internet_id'],
