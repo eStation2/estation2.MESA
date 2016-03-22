@@ -181,7 +181,7 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                     msgTarget: 'side',
                     emptyText: esapp.Utils.getTranslation('selectafrequency')    // 'Select a frequency...'
                 }, {
-                    xtype: 'textfield',
+                    xtype: 'numberfield',
                     fieldLabel: esapp.Utils.getTranslation('start_date'),    // 'Start date',
                     reference: 'start_date',
                     msgTarget: 'side',
