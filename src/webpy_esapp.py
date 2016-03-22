@@ -746,11 +746,15 @@ class UpdateInternetSource:
         if 'internetsources' in getparams:
 
             startdate = None
-            if getparams['internetsources']['start_date'].isdigit():
+            if isinstance(getparams['internetsources']['start_date'],int):
+                startdate = getparams['internetsources']['start_date']
+            elif isinstance(getparams['internetsources']['start_date'],str) and getparams['internetsources']['start_date'].isdigit():
                 startdate = int(getparams['internetsources']['start_date'])
 
             enddate = None
-            if getparams['internetsources']['end_date'].isdigit():
+            if isinstance(getparams['internetsources']['end_date'],int):
+                enddate = getparams['internetsources']['end_date']
+            elif isinstance(getparams['internetsources']['end_date'],str) and getparams['internetsources']['end_date'].isdigit():
                 enddate = int(getparams['internetsources']['end_date'])
 
             prod_id_position = None
