@@ -914,11 +914,14 @@ def get_number_days_month(yyyymmdd):
 #
 def conv_list_2_string(inlist):
     file_string = ''
-    if isinstance(inlist,basestring):
-        file_string+=inlist
-    else:
-        for ifile in inlist:
-            file_string+=ifile+';'
+    try:
+        if isinstance(inlist,basestring):
+            file_string+=inlist
+        else:
+            for ifile in inlist:
+                file_string+=ifile+';'
+    except:
+        pass
     return file_string
 
 ######################################################################################
