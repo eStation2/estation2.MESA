@@ -1,8 +1,5 @@
 TRUNCATE TABLE analysis.legend_step;
-<<<<<<< HEAD
-=======
 
->>>>>>> 838c5b5a81e08684531ba98a25e0ed680397e565
 SELECT products.update_insert_product_category(category_id := 'vegetation', order_index := 1, descriptive_name := 'Vegetation' );
 SELECT products.update_insert_product_category(category_id := 'rainfall', order_index := 2, descriptive_name := 'Rainfall' );
 SELECT products.update_insert_product_category(category_id := 'fire', order_index := 3, descriptive_name := 'Fire' );
