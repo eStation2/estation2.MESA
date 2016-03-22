@@ -33,8 +33,7 @@ ext=es_constants.ES2_OUTFILE_EXTENSION
 def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, proc_lists=None):
 
 
-    my_date='20160101'
-
+    my_date=None
     #   ---------------------------------------------------------------------
     #   Create lists
     if proc_lists is None:
@@ -163,7 +162,7 @@ def processing_std_fronts(res_queue, pipeline_run_level=0, pipeline_printout_lev
 
     proc_lists = None
     proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
-                                 starting_dates=starting_dates, update_stats=update_stats, nrt_products=nrt_products)
+                                 starting_dates=starting_dates)
 
     if write2file is not None:
         fwrite_id=open(write2file,'w')
