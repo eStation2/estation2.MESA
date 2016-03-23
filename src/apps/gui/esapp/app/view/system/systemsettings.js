@@ -91,6 +91,12 @@ Ext.define("esapp.view.system.systemsettings",{
                         formpanel.loadRecord(systemsettingsrecord);
                         formpanel.updateRecord();
 
+                        if (record.data.thema != ''){
+                            Ext.getCmp('modify-thema-btn').hide();
+                        }
+                        else {
+                            Ext.getCmp('modify-thema-btn').show();
+                        }
                         Ext.toast({ html: esapp.Utils.getTranslation('systemsettingsrefreshed'), title: esapp.Utils.getTranslation('systemsettingsrefreshed'), width: 200, align: 't' });
                     }
                 }
