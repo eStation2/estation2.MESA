@@ -339,8 +339,26 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
 
         mapviewwin.map.once('postcompose', function(event) {
-          var canvas = event.context.canvas;
-          mapimage_url = canvas.toDataURL('image/png');
+            var canvas = event.context.canvas;
+            //console.info(Ext.fly('ol-scale-line-inner'));
+
+            var scalewidth = parseInt(Ext.fly('ol-scale-line-inner').css('width'));
+            var scalenumber = Ext.fly('ol-scale-line-inner').text();
+            var ctx = event.context;
+            ctx.beginPath();
+
+            //Scale Text
+            ctx.lineWidth=1;
+            ctx.font = "20px Arial";
+            ctx.strokeText(scalenumber,10,canvas.height-25);
+
+            //Scale Dimensions
+            ctx.lineWidth=5;
+            ctx.moveTo(10,canvas.height-20);
+            ctx.lineTo(parseInt(scalewidth)+10,canvas.height-20);
+            ctx.stroke();
+
+            mapimage_url = canvas.toDataURL('image/png');
         });
         mapviewwin.map.renderSync();
         if (Ext.fly('downloadlink')) {
@@ -594,14 +612,25 @@ Ext.define('esapp.view.analysis.mapViewController', {
         Ext.ComponentQuery.query('button[name=vbtn-'+this.getView().id+']')[0].hideMenu();
         //this.getView().lookupReference('vbtn-'+this.getView().id).hideMenu();
 
+        //console.info(menuitem);
         var me = this.getView();
-        var geojsonfile = menuitem.geojsonfile,
-            namefield = '',
-            linewidth = 1,
-            adminlevel = menuitem.level,
+        var namefield = '',
             vectorlayer_idx = -1,
+            layerrecord = menuitem.layerrecord,
             layertitle = menuitem.boxLabel,
-            linecolor = menuitem.linecolor;
+
+            geojsonfile = layerrecord.get('filename'),
+            feature_display_column = layerrecord.get('feature_display_column'),
+            adminlevel = layerrecord.get('layerlevel'),
+            polygon_outlinewidth = layerrecord.get('polygon_outlinewidth'),   // 1,
+            polygon_outlinecolor = layerrecord.get('polygon_outlinecolor'),
+            feature_highlight_outlinecolor = layerrecord.get('feature_highlight_outlinecolor'),
+            feature_highlight_outlinewidth = layerrecord.get('feature_highlight_outlinewidth'),
+            feature_highlight_fillcolor    = layerrecord.get('feature_highlight_fillcolor'),
+            feature_highlight_fillopacity  = layerrecord.get('feature_highlight_fillopacity'),
+            feature_selected_outlinecolor  = layerrecord.get('feature_selected_outlinecolor'),
+            feature_selected_outlinewidth  = layerrecord.get('feature_selected_outlinewidth')
+            ;
 
         var outmask_togglebtn = me.lookupReference('outmaskbtn_'+ me.id.replace(/-/g,'_')); //  + me.getView().id);
 
@@ -619,11 +648,13 @@ Ext.define('esapp.view.analysis.mapViewController', {
         }
 
         if (menuitem.checked) {
-            //console.info(Ext.getCmp(me.id));
+            //console.info(menuitem);
             //var mapViewContainer = this.getView().lookupReference('mapcontainer_'+me.id);
             var myLoadMask = new Ext.LoadMask({
+                //floating: false,
+                alwaysOnTop: true,
                 msg    : esapp.Utils.getTranslation('loadingvectorlayer'),   // 'Loading vector layer...',
-                target : Ext.getCmp(me.id)
+                target : Ext.getCmp(me.id) // Ext.getCmp('mapcontainer_'+me.id)  //
             });
             myLoadMask.show();
 
@@ -669,8 +700,8 @@ Ext.define('esapp.view.analysis.mapViewController', {
                             //}),
                             cursor: "pointer",
                             stroke: new ol.style.Stroke({
-                                color: linecolor, // '#319FD3',
-                                width: linewidth
+                                color: polygon_outlinecolor, // '#319FD3',
+                                width: polygon_outlinewidth
                             })
                             //,text: new ol.style.Text({
                             //  font: '12px Calibri,sans-serif',
@@ -712,7 +743,8 @@ Ext.define('esapp.view.analysis.mapViewController', {
             }
             else outmask_togglebtn.hide();
 
-
+            var fillopacity = (feature_highlight_fillopacity/100).toString().replace(",", ".");
+            var highlight_fillcolor_opacity = 'rgba(' + esapp.Utils.HexToRGB(feature_highlight_fillcolor) + ',' + fillopacity + ')'
             var highlightStyleCache = {};
             var collectionFO = new ol.Collection();
             var featureOverlay = new ol.layer.Vector({      //new ol.FeatureOverlay({
@@ -729,11 +761,11 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 if (!highlightStyleCache[text]) {
                   highlightStyleCache[text] = [new ol.style.Style({
                     stroke: new ol.style.Stroke({
-                      color: '#319FD3',     //  '#FFFFFF',    // '#f00',
-                      width: 2
+                      color: feature_highlight_outlinecolor,    // '#319FD3',     //  '#FFFFFF',    // '#f00',
+                      width: feature_highlight_outlinewidth
                     })
                     ,fill: new ol.style.Fill({
-                      color: 'rgba(49,159,211,0.1)'    // 'rgba(255,255,255,1)'    // 'rgba(255,0,0,0.1)'
+                      color: highlight_fillcolor_opacity    // 'rgba(49,159,211,0.1)'    // 'rgba(255,255,255,1)'    // 'rgba(255,0,0,0.1)'
                     })
                     //,text: new ol.style.Text({
                     //  font: '12px Calibri,sans-serif',
@@ -837,6 +869,17 @@ Ext.define('esapp.view.analysis.mapViewController', {
                     else if (Ext.isDefined(feature.get('MarRegion'))){
                         regionname.setHtml(feature.get('MarRegion'));
                     }
+                    else {
+                        var feature_columns = feature_display_column.split(',');
+                        var regionname_html = '';
+                        for (var i = 0; i < feature_columns.length; i++) {
+                            regionname_html += feature.get(feature_columns[i].trim());
+                            if (i != feature_columns.length-1){
+                                regionname_html += ' - ';
+                            }
+                        }
+                        regionname.setHtml(regionname_html);
+                    }
                     //if (adminlevel == 'admin0') {
                     //    regionname.setHtml(feature.get('ADM0_NAME'));
                     //}
@@ -881,8 +924,8 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 if (!selectStyleCache[text]) {
                   selectStyleCache[text] = [new ol.style.Style({
                     stroke: new ol.style.Stroke({
-                      color: '#f00',
-                      width: 2
+                      color: feature_selected_outlinecolor,   // '#f00',
+                      width: feature_selected_outlinewidth
                     })
                     ,fill: new ol.style.Fill({
                       color:  'Transparent' // 'rgba(255,0,0,0.1)'
@@ -938,6 +981,17 @@ Ext.define('esapp.view.analysis.mapViewController', {
                     }
                     else if (Ext.isDefined(feature.get('MarRegion'))){
                         selectedregion.setValue(feature.get('MarRegion'));
+                    }
+                    else {
+                        var feature_columns = feature_display_column.split(',');
+                        var regionname_html = '';
+                        for (var i = 0; i < feature_columns.length; i++) {
+                            regionname_html += feature.get(feature_columns[i].trim());
+                            if (i != feature_columns.length-1){
+                                regionname_html += ' - ';
+                            }
+                        }
+                        selectedregion.setValue(regionname_html);
                     }
 
                     //if (adminlevel == 'admin0') {
@@ -1111,5 +1165,1525 @@ Ext.define('esapp.view.analysis.mapViewController', {
         //    me.map.addInteraction(select);
         //}
 
+    }
+
+    ,editLayerDrawProperties: function(callComponent){
+        //console.info(callComponent);
+        //console.info(callComponent.layerrecord);
+        var layerrecord = callComponent.layerrecord;
+        var myBorderDrawPropertiesWin = Ext.getCmp('BorderDrawPropertiesWin');
+        if (myBorderDrawPropertiesWin!=null && myBorderDrawPropertiesWin!='undefined' ) {
+            myBorderDrawPropertiesWin.close();
+        }
+
+        //var texteditor = new Ext.grid.GridEditor(new Ext.form.TextField({allowBlank: false,selectOnFocus: true}));
+        //var numbereditor = new Ext.grid.GridEditor(new Ext.form.NumberField({allowBlank: false,selectOnFocus: true}));
+        //
+        //var cedit = new Ext.grid.GridEditor(new Ext.ux.ColorField({allowBlank: false,selectOnFocus: true}));
+        var crenderer = function(color) {
+            renderTpl = color;
+
+            if (color.trim()==''){
+                renderTpl = 'transparent';
+            }
+            else {
+                renderTpl = '<span style="background:rgb('+esapp.Utils.HexToRGB(color)+'); color:'+esapp.Utils.invertHexToRGB(color)+';">'+esapp.Utils.HexToRGB(color)+'</span>';
+            }
+            return renderTpl;
+        };
+
+
+        var BorderDrawPropertiesWin = new Ext.Window({
+             id:'BorderDrawPropertiesWin'
+            ,title: esapp.Utils.getTranslation('Draw properties ') + esapp.Utils.getTranslation(layerrecord.get('submenu')) + (layerrecord.get('submenu') != '' ? ' ' : '') + esapp.Utils.getTranslation(layerrecord.get('layerlevel'))
+            ,width:420
+            //,height:180
+            ,plain: true
+            ,modal: true
+            ,resizable: true
+            //,shadow:false
+            //,stateful :false
+            ,closable:true
+            ,layout: {
+                 type: 'fit'
+            }
+            //,layout: {
+            //     type: 'hbox',
+            //     align:'stretch'
+            //}
+            //,tools:[{
+               //id:'refresh',
+               //qtip: esapp.Utils.getTranslation('qtip_reload_adminlevels_list'), // 'Reload Administrative levels',
+               //scope:this,
+               //handler:function() {
+               //    //Ext.getCmp('adminlevelslist').store.load();
+               //}
+            //}]
+            ,items:[{
+                //xtype: 'image',
+                //src: 'resources/img/adminleveldrawproperties.png'
+
+                xtype: 'propertygrid',
+                //nameField: 'Property',
+                //width: 400,
+                nameColumnWidth: 230,
+                sortableColumns: false,
+                source: {
+                    polygon_outlinecolor: layerrecord.get('polygon_outlinecolor'),
+                    polygon_outlinewidth: layerrecord.get('polygon_outlinewidth'),
+                    feature_highlight_outlinecolor: layerrecord.get('feature_highlight_outlinecolor'),
+                    feature_highlight_outlinewidth: layerrecord.get('feature_highlight_outlinewidth'),
+                    feature_highlight_fillcolor: layerrecord.get('feature_highlight_fillcolor'),
+                    feature_highlight_fillopacity: layerrecord.get('feature_highlight_fillopacity'),
+                    feature_selected_outlinecolor: layerrecord.get('feature_selected_outlinecolor'),
+                    feature_selected_outlinewidth: layerrecord.get('feature_selected_outlinewidth')
+                },
+                sourceConfig: {
+                    polygon_outlinecolor: {
+                        displayName: 'Outline colour',
+                        editor: {
+                            xtype: 'mycolorpicker'
+                            //,render_to: BorderDrawPropertiesWin
+                            //,trigger: 'foo'
+                            //listeners: {
+                            //    select: function(picker, selColor) {
+                            //        alert(selColor);
+                            //    }
+                            //}
+                            //,floating: false,
+                            //,constrain: true
+                        }
+                        ,renderer: crenderer
+                        //,renderer: function(v){
+                        //    var color = v ? 'green' : 'red';
+                        //    return '<span style="color: ' + color + ';">' + v + '</span>';
+                        //}
+                    },
+                    polygon_outlinewidth: {
+                        displayName: 'Outline width',
+                        type: 'number'
+                    },
+                    feature_highlight_outlinecolor: {
+                        displayName: 'Highlight outline colour',
+                        editor: {
+                            xtype: 'mycolorpicker'
+                            //,floating: false
+                        }
+                        ,renderer: crenderer
+                    },
+                    feature_highlight_outlinewidth: {
+                        displayName: 'Highlight outline width',
+                        type: 'number'
+                    },
+                    feature_highlight_fillcolor: {
+                        displayName: 'Highlight fill colour',
+                        editor: {
+                            xtype: 'mycolorpicker'
+                            //,floating: false
+                        }
+                        ,renderer: crenderer
+                    },
+                    feature_highlight_fillopacity: {
+                        displayName: 'Highlight fill opacity',
+                        editor: {
+                            xtype: 'combobox',
+                            store: [5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100],
+                            forceSelection: true
+                        }
+                    },
+                    feature_selected_outlinecolor: {
+                        displayName: 'Selected feature outline colour',
+                        editor: {
+                            xtype: 'mycolorpicker'
+                            //,floating: false
+                        }
+                        ,renderer: crenderer
+                    },
+                    feature_selected_outlinewidth: {
+                        displayName: 'Selected feature outline width',
+                        type: 'number'
+                    }
+                },
+                //customEditors: {
+                //    myProp: new Ext.grid.GridEditor(combo, {})
+                //},
+                //customRenders: {
+                //    myProp: function(value){
+                //        var record = combo.findRecord(combo.valueField, value);
+                //        return record ? record.get(combo.displayField) : combo.valueNotFoundText;
+                //    }
+                //},
+                listeners: {
+                    propertychange: function( source, recordId, value, oldValue, eOpts ){
+                        //console.info(source);
+                        //console.info(recordId);
+                        //console.info(value);
+                        //console.info(oldValue.toLowerCase());
+                        if (value != oldValue)
+                            layerrecord.set(recordId, value)
+                    }
+                }
+            }]
+
+        });
+        BorderDrawPropertiesWin.show();
+        BorderDrawPropertiesWin.alignTo(callComponent.getEl(),"l-tr", [-6, 0]);  // See: http://www.extjs.com/deploy/dev/docs/?class=Ext.Window&member=alignTo
+    }
+
+    ,createLayersMenuItems: function(mainmenuitem) {
+        var me = this.getView();
+
+        //console.info(this.getStore('layers'));
+        //this.getStore('layers').load({
+        //    callback:function(records, options, success){
+        //        console.info(this);
+        //        console.info(records);
+        //        console.info(this.find('layercode', 'africa'));
+        //
+        //        //records.forEach(function(layer) {
+        //        //    // layer.get('selected')
+        //        //    console.info(layer);
+        //        //  records.find('layercode', 'africa')
+        //        //});
+        //    }
+        //});
+
+        var layersStore = this.getStore('layers');
+
+        layersStore.clearFilter(true);
+        layersStore.filterBy(function (record, id) {
+            if (record.get("menu") == mainmenuitem) {
+                return true;
+            }
+            return false;
+        });
+
+        layersStore.setSorters([
+            {property: 'menu', direction: 'ASC'},
+            {property: 'submenu', direction: 'ASC', transform:  function (submenu) { return submenu.toLowerCase(); }},
+            {property: 'layerlevel', direction: 'ASC'}]);
+        layersStore.sort();
+        //console.info(layersStore);
+
+        var MainMenuItems = [];
+        var SubMenuItems = [];
+        var SubMenus = {};
+        var currentSubmenu = '';
+        var newSubMenu = {};
+        var MenuItem = {};
+        var counter = 0;
+
+        layersStore.each(function(layer) {
+            //console.info(layer);
+            counter +=1
+            if (layer.get('submenu')!= '' && layer.get('submenu') != currentSubmenu) {
+                currentSubmenu = layer.get('submenu');
+                if (SubMenuItems.length != 0){
+                    newSubMenu.menu.items = SubMenuItems;
+                    //SubMenus.push(newSubMenu);
+                    MainMenuItems.push(newSubMenu);
+                    SubMenuItems = [];
+                }
+                newSubMenu = {
+                    text: esapp.Utils.getTranslation(layer.get('submenu')),   //'Africa',
+                    name: layer.get('submenu'),      // 'africa',
+                    menu: {
+                        defaults: {
+                            checked: false,
+                            hideOnClick: false,
+                            showSeparator: false,
+                            cls: "x-menu-no-icon",
+                            style: {
+                                'margin-left': '5px'
+                            }
+                        },
+                        items: []
+                    }
+                }
+            }
+
+            var containerItems = [];
+            var checkboxCmp = Ext.create('Ext.form.field.Checkbox', {
+                //boxLabel: esapp.Utils.getTranslation(layer.get('submenu')) + (layer.get('submenu') != '' ? ' ' : '') + esapp.Utils.getTranslation(layer.get('layerlevel')),
+                boxLabel: esapp.Utils.getTranslation(layer.get('layername')),
+                flex: 1,
+                margin: '0 5 0 5',
+                layerrecord: layer,
+                name: layer.get('layername'),
+                level: layer.get('layerlevel'),
+                geojsonfile: layer.get('filename'),
+                checked: false,
+                linecolor: layer.get('polygon_outlinecolor'),
+                layerorderidx: layer.get('layerorderidx'),
+                handler: 'addVectorLayer'
+            });
+            containerItems.push(checkboxCmp);
+            containerItems.push({xtype: 'component', html: '<div style="border-left:1px solid #ababab;height:100%; display: inline-block;"></div>'});
+            containerItems.push({
+                xtype: 'button',
+                cls: 'my-custom-button',
+                layerrecord: layer,
+                level: layer.get('layerlevel'),
+                width: 30,
+                text: '',
+                tooltip: 'Edit layer draw properties.',
+                iconCls: 'edit16',
+                handler: 'editLayerDrawProperties'
+                //listeners: {click: function(){ console.info('open fishingareas layer')} }
+            });
+            MenuItem = {
+                xtype: 'container',
+                layout: {
+                    type: 'hbox',
+                    align: 'stretch'
+                },
+                overCls: 'over-item-cls',
+                items: containerItems
+            }
+
+
+            if (layer.get('submenu')== ''){
+                MainMenuItems.push(MenuItem);
+            }
+            else {
+                SubMenuItems.push(MenuItem);
+            }
+
+            if (layer.get('submenu')!= '' && layersStore.data.length == counter) {
+                if (SubMenuItems.length != 0) {
+                    newSubMenu.menu.items = SubMenuItems;
+                    //SubMenus.push(newSubMenu);
+                    MainMenuItems.push(newSubMenu);
+                }
+            }
+        });
+
+        layersStore.clearFilter(true);
+
+        return MainMenuItems;
+
+    }
+
+    ,createLayersMenu: function() {
+        var me = this.getView();
+
+        //var layersStore = this.getStore('layers');
+        //
+        //layersStore.clearFilter(true);
+        //layersStore.filterBy(function (record, id) {
+        //    if (record.get("menu") == 'border') {
+        //        return true;
+        //    }
+        //    return false;
+        //    // case-insensitive match of 'africa' in the layercode
+        //    //return record.get('layercode').toLowerCase().indexOf('africa') > -1;
+        //});
+        //console.info(layersStore);
+        //
+        //
+        //var marineVectorlayersMenuItems = [];
+        //var containerItems = [];
+        //var checkboxCmp = Ext.create('Ext.form.field.Checkbox', {
+        //    boxLabel: esapp.Utils.getTranslation('fishingareas'), // 'Fishing Areas',
+        //    flex: 1,
+        //    margin: '0 5 0 5',
+        //    name: 'fisharea',
+        //    level: 'fisharea',
+        //    geojsonfile: 'AFR_MARINE/AFR_FAO_FISH_AREA.geojson',
+        //    checked: false,
+        //    linecolor: '#000',
+        //    layerorderidx: 1,
+        //    handler: 'addVectorLayer'
+        //});
+        //containerItems.push(checkboxCmp);
+        ////containerItems.push({
+        ////    xtype: 'button',
+        ////    cls: 'my-custom-button',
+        ////    textAlign: 'left',
+        ////    checkboxCmp: checkboxCmp,
+        ////    name: 'fisharea',
+        ////    level: 'fisharea',
+        ////    geojsonfile: 'AFR_MARINE/AFR_FAO_FISH_AREA.geojson',
+        ////    checked: false,
+        ////    linecolor: '#000',
+        ////    layerorderidx: 1,
+        ////    flex: 1,
+        ////    margin: '0 0 0 0',
+        ////    padding: '0 0 0 0',
+        ////    text: esapp.Utils.getTranslation('fishingareas'),
+        ////    listeners: {
+        ////        click: function(button, event, eOpts){
+        ////            var checkboxCmp = button.checkboxCmp;
+        ////            if (checkboxCmp) {
+        ////                checkboxCmp.setValue(!checkboxCmp.getValue());
+        ////            }
+        ////            console.info('open fishingareas layer')
+        ////        }
+        ////    } // me.addVectorLayer}
+        ////});
+        //containerItems.push({xtype: 'component', html: '<div style="border-left:1px solid #ababab;height:100%; display: inline-block;"></div>'});
+        //containerItems.push({
+        //    xtype: 'button',
+        //    cls: 'my-custom-button',
+        //    level: 'fisharea',
+        //    width: 30,
+        //    text: '',
+        //    tooltip: 'Edit layer draw properties.',
+        //    iconCls: 'edit16',
+        //    handler: 'editDrawPropertiesAdminLevels'
+        //    //listeners: {click: function(){ console.info('open fishingareas layer')} }
+        //});  // me.editDrawPropertiesAdminLevels
+        //
+        //marineVectorlayersMenuItems.push({
+        //    xtype: 'container',
+        //    layout: {
+        //        type: 'hbox',
+        //        align: 'stretch'
+        //    },
+        //    overCls: 'over-item-cls',
+        //    items: containerItems
+        //});
+        //
+        //var containerItems2 = [];
+        //var checkboxCmp2 = Ext.create('Ext.form.field.Checkbox', {
+        //    boxLabel: esapp.Utils.getTranslation('sea_exclusive_economic_zone'), // 'Sea Exclusive economic zone (EEZ)',
+        //    flex: 1,
+        //    margin: '0 5 0 5',
+        //    name: 'eez',
+        //    level: 'eez',
+        //    geojsonfile: 'AFR_MARINE/AFR_EEZ_IHO_union_v2.geojson',
+        //    checked: false,
+        //    linecolor: '#000',
+        //    layerorderidx: 1,
+        //    handler: 'addVectorLayer'
+        //});
+        //containerItems2.push(checkboxCmp2);
+        //containerItems2.push({xtype: 'component', html: '<div style="border-left:1px solid #ababab;height:100%; display: inline-block;"></div>'});
+        //containerItems2.push({
+        //    xtype: 'button',
+        //    cls: 'my-custom-button',
+        //    level: 'eez',
+        //    width: 30,
+        //    text: '',
+        //    tooltip: 'Edit layer draw properties.',
+        //    iconCls: 'edit16',
+        //    handler: 'editDrawPropertiesAdminLevels'
+        //    //listeners: {click: function(){ console.info('open Sea Exclusive economic zone layer')} }
+        //});  // me.editDrawPropertiesAdminLevels
+        //
+        //marineVectorlayersMenuItems.push({
+        //    xtype: 'container',
+        //    layout: {
+        //        type: 'hbox',
+        //        align: 'stretch'
+        //    },
+        //    overCls: 'over-item-cls',
+        //    items: containerItems2
+        //});
+        //
+        //
+        //var containerItems3 = [];
+        //var checkboxCmp3 = Ext.create('Ext.form.field.Checkbox', {
+        //    boxLabel: esapp.Utils.getTranslation('protectedareas'), // 'Protected areas',
+        //    boxLabelAlign : 'before',
+        //    flex: 1,
+        //    margin: '0 5 0 5',
+        //    name: 'protectedareas',
+        //    level: 'protectedareas',
+        //    geojsonfile: 'AFR_PA/AFR_PA_ID.geojson',
+        //    checked: false,
+        //    linecolor: '#000',
+        //    layerorderidx: 1,
+        //    handler: 'addVectorLayer'
+        //});
+        ////containerItems3.push({xtype: 'component', html: '<div style="border-left:1px solid #ababab;height:100%; display: inline-block;"></div>'});
+        //containerItems3.push({
+        //    xtype: 'button',
+        //    cls: 'my-custom-button',
+        //    level: 'protectedareas',
+        //    width: 18,
+        //    margin: '0 0 0 0',
+        //    text: '',
+        //    tooltip: 'Edit layer draw properties.',
+        //    iconCls: 'edit16',
+        //    handler: 'editDrawPropertiesAdminLevels'
+        //    //listeners: {click: function(){ console.info('open Sea Exclusive economic zone layer')} }
+        //});  // me.editDrawPropertiesAdminLevels
+        //containerItems3.push(checkboxCmp3);
+        //
+        //var paVectorlayerMenuItem = {
+        //    xtype: 'container',
+        //    cls: "x-menu-no-icon",
+        //    margin: '0 0 0 2',
+        //    padding: '0 0 0 0',
+        //    layout: {
+        //        type: 'hbox',
+        //        align: 'stretch'
+        //    },
+        //    overCls: 'over-item-cls',
+        //    items: containerItems3
+        //};
+        //
+        //var borderlayerItems = [{
+        //    text: 'Africa',
+        //    name: 'africa',
+        //    menu: {
+        //        defaults: {
+        //            checked: false,
+        //            hideOnClick: false,
+        //            showSeparator: false,
+        //            cls: "x-menu-no-icon",
+        //            style: {
+        //                'margin-left': '5px'
+        //            }
+        //        },
+        //
+        //        items: AfricaMenuItems
+        //        //    [{
+        //        //    xtype: 'checkbox',
+        //        //    boxLabel: esapp.Utils.getTranslation('adminlevel0'), // 'Africa level 0',
+        //        //    //text: 'Administative level 0',
+        //        //    name: 'admin0',
+        //        //    level: 'admin0',
+        //        //    geojsonfile: 'AFR_0_g2015_2014.geojson',  // 'AFR_G2014_2013_0.geojson', //
+        //        //    linecolor: '#319FD3',    // rgb(49, 159, 211)  or like in EMMA rgb(255, 0, 255)
+        //        //    layerorderidx: 4,
+        //        //    handler: 'addVectorLayer'
+        //        //}, {
+        //        //    xtype: 'checkbox',
+        //        //    boxLabel: esapp.Utils.getTranslation('adminlevel1'), // 'Africa level 1',
+        //        //    //text: 'Administative level 1',
+        //        //    name: 'admin1',
+        //        //    level: 'admin1',
+        //        //    geojsonfile: 'AFR_1_g2015_2014.geojson',  // 'AFR_G2014_2013_0.geojson',  //
+        //        //    linecolor: '#ffcc00',   // '#9e9a9a',  // '#ffcc00',    // rgb(255, 204, 0)
+        //        //    layerorderidx: 3,
+        //        //    handler: 'addVectorLayer'
+        //        //}, {
+        //        //    xtype: 'checkbox',
+        //        //    boxLabel: esapp.Utils.getTranslation('adminlevel2'), // 'Africa level 2',
+        //        //    //text: 'Administative level 1',
+        //        //    name: 'admin2',
+        //        //    level: 'admin2',
+        //        //    geojsonfile: 'AFR_2_g2015_2014.geojson',    // 'AFR_2_g2015_2014_singlepart.geojson',       // 'AFR_G2014_2013_2.geojson',
+        //        //    linecolor: '#ffcc99',    // rgb(255, 204, 153)
+        //        //    layerorderidx: 1,
+        //        //    handler: 'addVectorLayer'
+        //        //}]
+        //    }
+        //}, {
+        //    text: 'AGRHYMET',
+        //    name: 'agrhymet',
+        //    menu: {
+        //        //hideOnClick: true,
+        //        defaults: {
+        //            checked: false,
+        //            hideOnClick: true,
+        //            showSeparator: false,
+        //            cls: "x-menu-no-icon",
+        //            style: {
+        //                'margin-left': '5px'
+        //            }
+        //        },
+        //        items: [{
+        //            xtype: 'checkbox',
+        //            boxLabel: 'AGRHYMET ' + esapp.Utils.getTranslation('level0'), // level 0',
+        //            name: 'agrhymet0',
+        //            level: 'admin0',
+        //            geojsonfile: 'RIC_CRA_0_g2015_2014.geojson',
+        //            //checked: false,
+        //            linecolor: '#319FD3',
+        //            layerorderidx: 4,
+        //            //showSeparator: false,
+        //            //cls: "x-menu-no-icon",
+        //            handler: 'addVectorLayer'
+        //        }, {
+        //            xtype: 'checkbox',
+        //            boxLabel: 'AGRHYMET ' + esapp.Utils.getTranslation('level1'), // level 0',
+        //            name: 'agrhymet1',
+        //            level: 'admin1',
+        //            geojsonfile: 'RIC_CRA_1_g2015_2014.geojson',
+        //            //checked: false,
+        //            linecolor: '#ffcc00',   // '#9e9a9a',  // '#ffcc00',
+        //            layerorderidx: 3,
+        //            //showSeparator: false,
+        //            //cls: "x-menu-no-icon",
+        //            handler: 'addVectorLayer'
+        //        }, {
+        //            xtype: 'checkbox',
+        //            boxLabel: 'AGRHYMET ' + esapp.Utils.getTranslation('level2'), // level 0',
+        //            name: 'agrhymet2',
+        //            level: 'admin2',
+        //            geojsonfile: 'RIC_CRA_2_g2015_2014.geojson',
+        //            //checked: false,
+        //            linecolor: '#000',   // '#ffcc99',
+        //            layerorderidx: 2,
+        //            //showSeparator: false,
+        //            //cls: "x-menu-no-icon",
+        //            handler: 'addVectorLayer'
+        //        }]
+        //    }
+        //}, {
+        //    text: 'BDMS',
+        //    name: 'bdms',
+        //    menu: {
+        //        //hideOnClick: true,
+        //        defaults: {
+        //            checked: false,
+        //            hideOnClick: true,
+        //            showSeparator: false,
+        //            cls: "x-menu-no-icon",
+        //            style: {
+        //                'margin-left': '5px'
+        //            }
+        //        },
+        //        items: [{
+        //            xtype: 'checkbox',
+        //            boxLabel: 'BDMS ' + esapp.Utils.getTranslation('level0'), // level 0',
+        //            name: 'bdms0',
+        //            level: 'admin0',
+        //            geojsonfile: 'RIC_BDMS_0_g2015_2014.geojson',
+        //            //checked: false,
+        //            linecolor: '#319FD3',
+        //            layerorderidx: 4,
+        //            //showSeparator: false,
+        //            //cls: "x-menu-no-icon",
+        //            handler: 'addVectorLayer'
+        //        }, {
+        //            xtype: 'checkbox',
+        //            boxLabel: 'BDMS ' + esapp.Utils.getTranslation('level1'), // level 0',
+        //            name: 'bdms1',
+        //            level: 'admin1',
+        //            geojsonfile: 'RIC_BDMS_1_g2015_2014.geojson',
+        //            //checked: false,
+        //            linecolor: '#ffcc00',   // '#9e9a9a',  // '#ffcc00',
+        //            layerorderidx: 3,
+        //            //showSeparator: false,
+        //            //cls: "x-menu-no-icon",
+        //            handler: 'addVectorLayer'
+        //        }, {
+        //            xtype: 'checkbox',
+        //            boxLabel: 'BDMS ' + esapp.Utils.getTranslation('level2'), // level 0',
+        //            name: 'bdms2',
+        //            level: 'admin2',
+        //            geojsonfile: 'RIC_BDMS_2_g2015_2014.geojson',    // 'RIC_BDMS_2_g2015_2014.geojson',
+        //            //checked: false,
+        //            linecolor: '#000',   // '#ffcc99',
+        //            layerorderidx: 2,
+        //            //showSeparator: false,
+        //            //cls: "x-menu-no-icon",
+        //            handler: 'addVectorLayer'
+        //        }]
+        //    }
+        //}, {
+        //    text: 'CICOS',
+        //    name: 'cicos',
+        //    menu: {
+        //        //hideOnClick: true,
+        //        defaults: {
+        //            checked: false,
+        //            hideOnClick: true,
+        //            showSeparator: false,
+        //            cls: "x-menu-no-icon",
+        //            style: {
+        //                'margin-left': '5px'
+        //            }
+        //        },
+        //        items: [{
+        //            xtype: 'checkbox',
+        //            boxLabel: 'CICOS ' + esapp.Utils.getTranslation('level0'), // level 0',
+        //            name: 'cicos0',
+        //            level: 'admin0',
+        //            geojsonfile: 'RIC_CICOS_0_g2015_2014.geojson',
+        //            //checked: false,
+        //            linecolor: '#319FD3',
+        //            layerorderidx: 4,
+        //            //showSeparator: false,
+        //            //cls: "x-menu-no-icon",
+        //            handler: 'addVectorLayer'
+        //        }, {
+        //            xtype: 'checkbox',
+        //            boxLabel: 'CICOS ' + esapp.Utils.getTranslation('level1'), // level 0',
+        //            name: 'cicos1',
+        //            level: 'admin1',
+        //            geojsonfile: 'RIC_CICOS_1_g2015_2014.geojson',
+        //            //checked: false,
+        //            linecolor: '#ffcc00',   // '#9e9a9a',  // '#ffcc00',
+        //            layerorderidx: 3,
+        //            //showSeparator: false,
+        //            //cls: "x-menu-no-icon",
+        //            handler: 'addVectorLayer'
+        //        }, {
+        //            xtype: 'checkbox',
+        //            boxLabel: 'CICOS ' + esapp.Utils.getTranslation('level2'), // level 0',
+        //            name: 'cicos2',
+        //            level: 'admin2',
+        //            geojsonfile: 'RIC_CICOS_2_g2015_2014.geojson',
+        //            //checked: false,
+        //            linecolor: '#000',   // '#ffcc99',
+        //            layerorderidx: 2,
+        //            //showSeparator: false,
+        //            //cls: "x-menu-no-icon",
+        //            handler: 'addVectorLayer'
+        //        }]
+        //    }
+        //}, {
+        //    text: 'ICPAC',
+        //    name: 'icpac',
+        //    menu: {
+        //        //hideOnClick: true,
+        //        defaults: {
+        //            checked: false,
+        //            hideOnClick: true,
+        //            showSeparator: false,
+        //            cls: "x-menu-no-icon",
+        //            style: {
+        //                'margin-left': '5px'
+        //            }
+        //        },
+        //        items: [{
+        //            xtype: 'checkbox',
+        //            boxLabel: 'ICPAC ' + esapp.Utils.getTranslation('level0'), // level 0',
+        //            name: 'icpac0',
+        //            level: 'admin0',
+        //            geojsonfile: 'RIC_ICPAC_0_g2015_2014.geojson',
+        //            //checked: false,
+        //            linecolor: '#319FD3',
+        //            layerorderidx: 4,
+        //            //showSeparator: false,
+        //            //cls: "x-menu-no-icon",
+        //            handler: 'addVectorLayer'
+        //        }, {
+        //            xtype: 'checkbox',
+        //            boxLabel: 'ICPAC ' + esapp.Utils.getTranslation('level1'), // level 0',
+        //            name: 'icpac1',
+        //            level: 'admin1',
+        //            geojsonfile: 'RIC_ICPAC_1_g2015_2014.geojson',
+        //            //checked: false,
+        //            linecolor: '#ffcc00',   // '#9e9a9a',  // '#ffcc00',
+        //            layerorderidx: 3,
+        //            //showSeparator: false,
+        //            //cls: "x-menu-no-icon",
+        //            handler: 'addVectorLayer'
+        //        }, {
+        //            xtype: 'checkbox',
+        //            boxLabel: 'ICPAC ' + esapp.Utils.getTranslation('level2'), // level 0',
+        //            name: 'icpac2',
+        //            level: 'admin2',
+        //            geojsonfile: 'RIC_ICPAC_2_g2015_2014.geojson',
+        //            //checked: false,
+        //            linecolor: '#000',   // '#ffcc99',
+        //            layerorderidx: 2,
+        //            //showSeparator: false,
+        //            //cls: "x-menu-no-icon",
+        //            handler: 'addVectorLayer'
+        //        }]
+        //    }
+        //}, {
+        //    text: 'MOI',
+        //    name: 'moi',
+        //    menu: {
+        //        //hideOnClick: true,
+        //        defaults: {
+        //            checked: false,
+        //            hideOnClick: true,
+        //            showSeparator: false,
+        //            cls: "x-menu-no-icon",
+        //            style: {
+        //                'margin-left': '5px'
+        //            }
+        //        },
+        //        items: [{
+        //            xtype: 'checkbox',
+        //            boxLabel: 'MOI ' + esapp.Utils.getTranslation('level0'), // level 0',
+        //            name: 'moi0',
+        //            level: 'admin0',
+        //            geojsonfile: 'RIC_MOI_0_g2015_2014.geojson',
+        //            //checked: false,
+        //            linecolor: '#319FD3',
+        //            layerorderidx: 4,
+        //            //showSeparator: false,
+        //            //cls: "x-menu-no-icon",
+        //            handler: 'addVectorLayer'
+        //        }, {
+        //            xtype: 'checkbox',
+        //            boxLabel: 'MOI ' + esapp.Utils.getTranslation('level1'), // level 0',
+        //            name: 'moi1',
+        //            level: 'admin1',
+        //            geojsonfile: 'RIC_MOI_1_g2015_2014.geojson',
+        //            //checked: false,
+        //            linecolor: '#ffcc00',   // '#9e9a9a',  // '#ffcc00',
+        //            layerorderidx: 3,
+        //            //showSeparator: false,
+        //            //cls: "x-menu-no-icon",
+        //            handler: 'addVectorLayer'
+        //        }, {
+        //            xtype: 'checkbox',
+        //            boxLabel: 'MOI ' + esapp.Utils.getTranslation('level2'), // level 0',
+        //            name: 'moi2',
+        //            level: 'admin2',
+        //            geojsonfile: 'RIC_MOI_2_g2015_2014.geojson',
+        //            //checked: false,
+        //            linecolor: '#000',   // '#ffcc99',
+        //            layerorderidx: 2,
+        //            //showSeparator: false,
+        //            //cls: "x-menu-no-icon",
+        //            handler: 'addVectorLayer'
+        //        }]
+        //    }
+        //}, {
+        //    text: 'University of Ghana',
+        //    name: 'UoG',
+        //    menu: {
+        //        //hideOnClick: true,
+        //        defaults: {
+        //            checked: false,
+        //            hideOnClick: true,
+        //            showSeparator: false,
+        //            cls: "x-menu-no-icon",
+        //            style: {
+        //                'margin-left': '5px'
+        //            }
+        //        },
+        //        items: [{
+        //            xtype: 'checkbox',
+        //            boxLabel: 'UoG ' + esapp.Utils.getTranslation('level0'), // level 0',
+        //            name: 'UoG0',
+        //            level: 'admin0',
+        //            geojsonfile: 'RIC_UOG_0_g2015_2014.geojson',
+        //            //checked: false,
+        //            linecolor: '#319FD3',
+        //            layerorderidx: 4,
+        //            //showSeparator: false,
+        //            //cls: "x-menu-no-icon",
+        //            handler: 'addVectorLayer'
+        //        }, {
+        //            xtype: 'checkbox',
+        //            boxLabel: 'UoG ' + esapp.Utils.getTranslation('level1'), // level 0',
+        //            name: 'UoG1',
+        //            level: 'admin1',
+        //            geojsonfile: 'RIC_UOG_1_g2015_2014.geojson',
+        //            //checked: false,
+        //            linecolor: '#ffcc00',   // '#9e9a9a',  // '#ffcc00',
+        //            layerorderidx: 3,
+        //            //showSeparator: false,
+        //            //cls: "x-menu-no-icon",
+        //            handler: 'addVectorLayer'
+        //        }, {
+        //            xtype: 'checkbox',
+        //            boxLabel: 'UoG ' + esapp.Utils.getTranslation('level2'), // level 0',
+        //            name: 'UoG2',
+        //            level: 'admin2',
+        //            geojsonfile: 'RIC_UOG_2_g2015_2014.geojson',
+        //            //checked: false,
+        //            linecolor: '#000',   // '#ffcc99',
+        //            layerorderidx: 2,
+        //            //showSeparator: false,
+        //            //cls: "x-menu-no-icon",
+        //            handler: 'addVectorLayer'
+        //        }]
+        //    }
+        //}];
+
+        var borderVectorLayerItems = this.createLayersMenuItems('border');
+        var marineVectorLayerMenuItems = this.createLayersMenuItems('marine');
+        var otherVectorLayerMenuItems = this.createLayersMenuItems('other');
+
+        var layersmenubutton = {
+            xtype: 'button',
+            //text: 'Add Layer',
+            name:'vbtn-'+me.id,
+            iconCls: 'layer-vector-add', // 'layers'
+            scale: 'medium',
+            floating: false,  // usually you want this set to True (default)
+            collapseDirection: 'left',
+            menu: {
+                hideOnClick: false,
+                iconAlign: '',
+                defaults: {
+                    hideOnClick: false,
+                    cls: "x-menu-no-icon",
+                    floating: false,
+                    collapseDirection: 'left'
+                },
+                items: [{
+                    text: esapp.Utils.getTranslation('borderlayers'),   // 'Border layers (FAO Gaul 2015)',
+                    name: 'gaul2015',
+                    //handler: 'editDrawPropertiesAdminLevels',
+                    menu: {
+                        defaults: {
+                            hideOnClick: false,
+                            cls: "x-menu-no-icon",
+                            //scale: 'medium',
+                            floating: false,
+                            collapseDirection: 'left'
+                        },
+                        plain: true,
+                        items: borderVectorLayerItems
+                    }
+                },{
+                    text: esapp.Utils.getTranslation('marinevectorlayers'),   // 'Marine vector layers',
+                    name: 'marine',
+                    menu: {
+                        defaults: {
+                            hideOnClick: false,
+                            cls: "x-menu-no-icon",
+                            //scale: 'medium',
+                            floating: false,
+                            collapseDirection: 'left'
+                        },
+                        plain: true,
+                        items: marineVectorLayerMenuItems
+                    }
+                },{
+                    text: esapp.Utils.getTranslation('otherlayers'),   // 'Other vector layers',
+                    name: 'other',
+                    menu: {
+                        defaults: {
+                            hideOnClick: false,
+                            cls: "x-menu-no-icon",
+                            //scale: 'medium',
+                            floating: false,
+                            collapseDirection: 'left'
+                        },
+                        plain: true,
+                        items: otherVectorLayerMenuItems
+                    }
+                }]
+            }
+        };
+
+
+        me.tbar = Ext.create('Ext.toolbar.Toolbar', {
+            dock: 'top',
+            autoShow: true,
+            alwaysOnTop: true,
+            floating: false,
+            hidden: false,
+            border: false,
+            shadow: false,
+            padding:0,
+            items: [{
+                text: '<div style="font-size: 11px;">' + esapp.Utils.getTranslation('productnavigator') + '</div>', // 'Product navigator',
+                iconCls: 'africa',
+                scale: 'medium',
+                //style: {
+                //    "font-size": '10px'
+                //},
+                handler: 'openProductNavigator'
+            }
+            ,layersmenubutton
+            ,{
+                xtype: 'container',
+                width: 300,
+                height: 38,
+                top: 0,
+                align:'left',
+                defaults: {
+                    style: {
+                        "font-size": '10px'
+                    }
+                },
+                items: [{
+                    xtype: 'box',
+                    height: 17,
+                    top:0,
+                    html: '<div id="region_name_' + me.id + '" style="text-align:left; font-size: 10px; font-weight: bold;"></div>'
+                },{
+                    xtype: 'box',
+                    height: 15,
+                    top:17,
+                    html: '<div id="mouse-position_' + me.id + '"></div>'
+                }]
+            },'->', {
+                //id: 'outmaskbtn_'+me.id,
+                reference: 'outmaskbtn_'+me.id.replace(/-/g,'_'),
+                hidden: true,
+                iconCls: 'africa-orange24',
+                scale: 'medium',
+                enableToggle: true,
+                handler: 'toggleOutmask'
+            },{
+                //id: 'legendbtn_'+me.id,
+                reference: 'legendbtn_'+me.id.replace(/-/g,'_'),
+                hidden: true,
+                iconCls: 'legends',
+                scale: 'medium',
+                enableToggle: true,
+                handler: 'toggleLegend'
+            },{
+                iconCls: 'fa fa-save fa-2x',
+                style: { color: 'lightblue' },
+                scale: 'medium',
+                handler: 'saveMap',
+                href: '',
+                download: 'estationmap.png'
+            },{
+                //text: 'Unlink',
+                enableToggle: true,
+                iconCls: 'unlink',
+                scale: 'medium',
+                handler: 'toggleLink'
+            }]
+        });
+
+        //var layersmenubutton = {
+        //        xtype: 'button',
+        //        //text: 'Add Layer',
+        //        name:'vbtn-'+me.id,
+        //        iconCls: 'layer-vector-add', // 'layers'
+        //        scale: 'medium',
+        //        //width: 100,
+        //        //margin: '0 0 10 0',
+        //        floating: false,  // usually you want this set to True (default)
+        //        collapseDirection: 'left',
+        //        menu: {
+        //            hideOnClick: true,
+        //            iconAlign: '',
+        //            defaults: {
+        //                hideOnClick: true,
+        //                iconAlign: ''
+        //            },
+        //            items: [{
+        //                text: esapp.Utils.getTranslation('borderlayers'),   // 'Border layers (FAO Gaul 2015)',
+        //                name: 'gaul2015',
+        //                iconCls: 'edit16',  // 'editvectordrawproperties', // 'layers'
+        //                tooltip: 'Edit draw properties of the administrative levels.',
+        //                scale: 'small',
+        //                floating: false,
+        //                collapseDirection: 'left',
+        //                handler: 'editDrawPropertiesAdminLevels',
+        //                menu: {
+        //                    //hideOnClick: true,
+        //                    //showSeparator : false,
+        //                    defaults: {
+        //                        hideOnClick: true,
+        //                        cls: "x-menu-no-icon",
+        //                        scale: 'medium',
+        //                        floating: false,
+        //                        collapseDirection: 'left'
+        //                    },
+        //                    //style: {
+        //                    //    'margin-left': '0px'
+        //                    //},
+        //                    items: [{
+        //                        text: 'Africa',
+        //                        name: 'africa',
+        //                        //cls: "x-menu-no-icon",
+        //                        //iconCls: 'layer-vector-add', // 'layers'
+        //                        //scale: 'medium',
+        //                        //floating: false,
+        //                        //collapseDirection: 'left',
+        //                        menu: {
+        //                            //hideOnClick: true,
+        //                            defaults: {
+        //                                checked: false,
+        //                                hideOnClick: true,
+        //                                showSeparator: false,
+        //                                cls: "x-menu-no-icon",
+        //                                style: {
+        //                                    'margin-left': '5px'
+        //                                }
+        //                            },
+        //
+        //                            items: [{
+        //                                xtype: 'checkbox',
+        //                                boxLabel: esapp.Utils.getTranslation('adminlevel0'), // 'Africa level 0',
+        //                                //text: 'Administative level 0',
+        //                                name: 'admin0',
+        //                                level: 'admin0',
+        //                                geojsonfile: 'AFR_0_g2015_2014.geojson',  // 'AFR_G2014_2013_0.geojson', //
+        //                                //checked: false,
+        //                                linecolor: '#319FD3',    // rgb(49, 159, 211)  or like in EMMA rgb(255, 0, 255)
+        //                                layerorderidx: 4,
+        //                                //showSeparator: false,
+        //                                //cls: "x-menu-no-icon",
+        //                                //hideOnClick: true,
+        //                                handler: 'addVectorLayer'
+        //                            }, {
+        //                                xtype: 'checkbox',
+        //                                boxLabel: esapp.Utils.getTranslation('adminlevel1'), // 'Africa level 1',
+        //                                //text: 'Administative level 1',
+        //                                name: 'admin1',
+        //                                level: 'admin1',
+        //                                geojsonfile: 'AFR_1_g2015_2014.geojson',  // 'AFR_G2014_2013_0.geojson',  //
+        //                                //checked: false,
+        //                                linecolor: '#ffcc00',   // '#9e9a9a',  // '#ffcc00',    // rgb(255, 204, 0)
+        //                                layerorderidx: 3,
+        //                                //showSeparator: false,
+        //                                //cls: "x-menu-no-icon",
+        //                                handler: 'addVectorLayer'
+        //                            }, {
+        //                                xtype: 'checkbox',
+        //                                boxLabel: esapp.Utils.getTranslation('adminlevel2'), // 'Africa level 2',
+        //                                //text: 'Administative level 1',
+        //                                name: 'admin2',
+        //                                level: 'admin2',
+        //                                geojsonfile: 'AFR_2_g2015_2014.geojson',    // 'AFR_2_g2015_2014_singlepart.geojson',       // 'AFR_G2014_2013_2.geojson',
+        //                                //checked: false,
+        //                                linecolor: '#ffcc99',    // rgb(255, 204, 153)
+        //                                layerorderidx: 1,
+        //                                //showSeparator: false,
+        //                                //cls: "x-menu-no-icon",
+        //                                handler: 'addVectorLayer'
+        //                            }]
+        //                        }
+        //                        //}, {
+        //                        //    text: 'ACMAD',
+        //                        //    name: 'acmad',
+        //                        //    //iconCls: 'layer-vector-add', // 'layers'
+        //                        //    scale: 'medium',
+        //                        //    floating: false,
+        //                        //    collapseDirection: 'left',
+        //                        //    menu: {
+        //                        //        hideOnClick: true,
+        //                        //        defaults: {
+        //                        //            hideOnClick: true
+        //                        //        },
+        //                        //        style: {
+        //                        //            'margin-left': '0px'
+        //                        //        },
+        //                        //        items: [{
+        //                        //            xtype: 'checkbox',
+        //                        //            boxLabel: 'ACMAD '+esapp.Utils.getTranslation('level0'), // level 0',
+        //                        //            name: 'acmad0',
+        //                        //            level: 'admin0',
+        //                        //            geojsonfile: 'AFR_0_g2015_2014.geojson',
+        //                        //            checked: false,
+        //                        //            linecolor: '#319FD3',
+        //                        //            layerorderidx: 3,
+        //                        //            showSeparator: false,
+        //                        //            cls: "x-menu-no-icon",
+        //                        //            handler: 'addVectorLayer'
+        //                        //        }, {
+        //                        //            xtype: 'checkbox',
+        //                        //            boxLabel: 'ACMAD '+esapp.Utils.getTranslation('level1'), // level 0',
+        //                        //            name: 'acmad1',
+        //                        //            level: 'admin1',
+        //                        //            geojsonfile: 'AFR_1_g2015_2014.geojsonn',
+        //                        //            checked: false,
+        //                        //            linecolor: '#ffcc00',
+        //                        //            layerorderidx: 2,
+        //                        //            showSeparator: false,
+        //                        //            cls: "x-menu-no-icon",
+        //                        //            handler: 'addVectorLayer'
+        //                        //        }, {
+        //                        //            xtype: 'checkbox',
+        //                        //            boxLabel: 'ACMAD '+esapp.Utils.getTranslation('level2'), // level 0',
+        //                        //            name: 'acmad2',
+        //                        //            level: 'admin2',
+        //                        //            geojsonfile: 'AFR_2_g2015_2014.geojson',
+        //                        //            checked: false,
+        //                        //            linecolor: '#ffcc99',
+        //                        //            layerorderidx: 1,
+        //                        //            showSeparator: false,
+        //                        //            cls: "x-menu-no-icon",
+        //                        //            handler: 'addVectorLayer'
+        //                        //        }]
+        //                        //    }
+        //                    }, {
+        //                        text: 'AGRHYMET',
+        //                        name: 'agrhymet',
+        //                        //iconCls: 'layer-vector-add', // 'layers'
+        //                        //scale: 'medium',
+        //                        //floating: false,
+        //                        //collapseDirection: 'left',
+        //                        menu: {
+        //                            //hideOnClick: true,
+        //                            defaults: {
+        //                                checked: false,
+        //                                hideOnClick: true,
+        //                                showSeparator: false,
+        //                                cls: "x-menu-no-icon",
+        //                                style: {
+        //                                    'margin-left': '5px'
+        //                                }
+        //                            },
+        //                            items: [{
+        //                                xtype: 'checkbox',
+        //                                boxLabel: 'AGRHYMET ' + esapp.Utils.getTranslation('level0'), // level 0',
+        //                                name: 'agrhymet0',
+        //                                level: 'admin0',
+        //                                geojsonfile: 'RIC_CRA_0_g2015_2014.geojson',
+        //                                //checked: false,
+        //                                linecolor: '#319FD3',
+        //                                layerorderidx: 4,
+        //                                //showSeparator: false,
+        //                                //cls: "x-menu-no-icon",
+        //                                handler: 'addVectorLayer'
+        //                            }, {
+        //                                xtype: 'checkbox',
+        //                                boxLabel: 'AGRHYMET ' + esapp.Utils.getTranslation('level1'), // level 0',
+        //                                name: 'agrhymet1',
+        //                                level: 'admin1',
+        //                                geojsonfile: 'RIC_CRA_1_g2015_2014.geojson',
+        //                                //checked: false,
+        //                                linecolor: '#ffcc00',   // '#9e9a9a',  // '#ffcc00',
+        //                                layerorderidx: 3,
+        //                                //showSeparator: false,
+        //                                //cls: "x-menu-no-icon",
+        //                                handler: 'addVectorLayer'
+        //                            }, {
+        //                                xtype: 'checkbox',
+        //                                boxLabel: 'AGRHYMET ' + esapp.Utils.getTranslation('level2'), // level 0',
+        //                                name: 'agrhymet2',
+        //                                level: 'admin2',
+        //                                geojsonfile: 'RIC_CRA_2_g2015_2014.geojson',
+        //                                //checked: false,
+        //                                linecolor: '#000',   // '#ffcc99',
+        //                                layerorderidx: 2,
+        //                                //showSeparator: false,
+        //                                //cls: "x-menu-no-icon",
+        //                                handler: 'addVectorLayer'
+        //                            }]
+        //                        }
+        //                    }, {
+        //                        text: 'BDMS',
+        //                        name: 'bdms',
+        //                        //iconCls: 'layer-vector-add', // 'layers'
+        //                        //scale: 'medium',
+        //                        //floating: false,
+        //                        //collapseDirection: 'left',
+        //                        menu: {
+        //                            //hideOnClick: true,
+        //                            defaults: {
+        //                                checked: false,
+        //                                hideOnClick: true,
+        //                                showSeparator: false,
+        //                                cls: "x-menu-no-icon",
+        //                                style: {
+        //                                    'margin-left': '5px'
+        //                                }
+        //                            },
+        //                            items: [{
+        //                                xtype: 'checkbox',
+        //                                boxLabel: 'BDMS ' + esapp.Utils.getTranslation('level0'), // level 0',
+        //                                name: 'bdms0',
+        //                                level: 'admin0',
+        //                                geojsonfile: 'RIC_BDMS_0_g2015_2014.geojson',
+        //                                //checked: false,
+        //                                linecolor: '#319FD3',
+        //                                layerorderidx: 4,
+        //                                //showSeparator: false,
+        //                                //cls: "x-menu-no-icon",
+        //                                handler: 'addVectorLayer'
+        //                            }, {
+        //                                xtype: 'checkbox',
+        //                                boxLabel: 'BDMS ' + esapp.Utils.getTranslation('level1'), // level 0',
+        //                                name: 'bdms1',
+        //                                level: 'admin1',
+        //                                geojsonfile: 'RIC_BDMS_1_g2015_2014.geojson',
+        //                                //checked: false,
+        //                                linecolor: '#ffcc00',   // '#9e9a9a',  // '#ffcc00',
+        //                                layerorderidx: 3,
+        //                                //showSeparator: false,
+        //                                //cls: "x-menu-no-icon",
+        //                                handler: 'addVectorLayer'
+        //                            }, {
+        //                                xtype: 'checkbox',
+        //                                boxLabel: 'BDMS ' + esapp.Utils.getTranslation('level2'), // level 0',
+        //                                name: 'bdms2',
+        //                                level: 'admin2',
+        //                                geojsonfile: 'RIC_BDMS_2_g2015_2014.geojson',    // 'RIC_BDMS_2_g2015_2014.geojson',
+        //                                //checked: false,
+        //                                linecolor: '#000',   // '#ffcc99',
+        //                                layerorderidx: 2,
+        //                                //showSeparator: false,
+        //                                //cls: "x-menu-no-icon",
+        //                                handler: 'addVectorLayer'
+        //                            }]
+        //                        }
+        //                    }, {
+        //                        text: 'CICOS',
+        //                        name: 'cicos',
+        //                        //iconCls: 'layer-vector-add', // 'layers'
+        //                        //scale: 'medium',
+        //                        //floating: false,
+        //                        //collapseDirection: 'left',
+        //                        menu: {
+        //                            //hideOnClick: true,
+        //                            defaults: {
+        //                                checked: false,
+        //                                hideOnClick: true,
+        //                                showSeparator: false,
+        //                                cls: "x-menu-no-icon",
+        //                                style: {
+        //                                    'margin-left': '5px'
+        //                                }
+        //                            },
+        //                            items: [{
+        //                                xtype: 'checkbox',
+        //                                boxLabel: 'CICOS ' + esapp.Utils.getTranslation('level0'), // level 0',
+        //                                name: 'cicos0',
+        //                                level: 'admin0',
+        //                                geojsonfile: 'RIC_CICOS_0_g2015_2014.geojson',
+        //                                //checked: false,
+        //                                linecolor: '#319FD3',
+        //                                layerorderidx: 4,
+        //                                //showSeparator: false,
+        //                                //cls: "x-menu-no-icon",
+        //                                handler: 'addVectorLayer'
+        //                            }, {
+        //                                xtype: 'checkbox',
+        //                                boxLabel: 'CICOS ' + esapp.Utils.getTranslation('level1'), // level 0',
+        //                                name: 'cicos1',
+        //                                level: 'admin1',
+        //                                geojsonfile: 'RIC_CICOS_1_g2015_2014.geojson',
+        //                                //checked: false,
+        //                                linecolor: '#ffcc00',   // '#9e9a9a',  // '#ffcc00',
+        //                                layerorderidx: 3,
+        //                                //showSeparator: false,
+        //                                //cls: "x-menu-no-icon",
+        //                                handler: 'addVectorLayer'
+        //                            }, {
+        //                                xtype: 'checkbox',
+        //                                boxLabel: 'CICOS ' + esapp.Utils.getTranslation('level2'), // level 0',
+        //                                name: 'cicos2',
+        //                                level: 'admin2',
+        //                                geojsonfile: 'RIC_CICOS_2_g2015_2014.geojson',
+        //                                //checked: false,
+        //                                linecolor: '#000',   // '#ffcc99',
+        //                                layerorderidx: 2,
+        //                                //showSeparator: false,
+        //                                //cls: "x-menu-no-icon",
+        //                                handler: 'addVectorLayer'
+        //                            }]
+        //                        }
+        //                    }, {
+        //                        text: 'ICPAC',
+        //                        name: 'icpac',
+        //                        //iconCls: 'layer-vector-add', // 'layers'
+        //                        //scale: 'medium',
+        //                        //floating: false,
+        //                        //collapseDirection: 'left',
+        //                        menu: {
+        //                            //hideOnClick: true,
+        //                            defaults: {
+        //                                checked: false,
+        //                                hideOnClick: true,
+        //                                showSeparator: false,
+        //                                cls: "x-menu-no-icon",
+        //                                style: {
+        //                                    'margin-left': '5px'
+        //                                }
+        //                            },
+        //                            items: [{
+        //                                xtype: 'checkbox',
+        //                                boxLabel: 'ICPAC ' + esapp.Utils.getTranslation('level0'), // level 0',
+        //                                name: 'icpac0',
+        //                                level: 'admin0',
+        //                                geojsonfile: 'RIC_ICPAC_0_g2015_2014.geojson',
+        //                                //checked: false,
+        //                                linecolor: '#319FD3',
+        //                                layerorderidx: 4,
+        //                                //showSeparator: false,
+        //                                //cls: "x-menu-no-icon",
+        //                                handler: 'addVectorLayer'
+        //                            }, {
+        //                                xtype: 'checkbox',
+        //                                boxLabel: 'ICPAC ' + esapp.Utils.getTranslation('level1'), // level 0',
+        //                                name: 'icpac1',
+        //                                level: 'admin1',
+        //                                geojsonfile: 'RIC_ICPAC_1_g2015_2014.geojson',
+        //                                //checked: false,
+        //                                linecolor: '#ffcc00',   // '#9e9a9a',  // '#ffcc00',
+        //                                layerorderidx: 3,
+        //                                //showSeparator: false,
+        //                                //cls: "x-menu-no-icon",
+        //                                handler: 'addVectorLayer'
+        //                            }, {
+        //                                xtype: 'checkbox',
+        //                                boxLabel: 'ICPAC ' + esapp.Utils.getTranslation('level2'), // level 0',
+        //                                name: 'icpac2',
+        //                                level: 'admin2',
+        //                                geojsonfile: 'RIC_ICPAC_2_g2015_2014.geojson',
+        //                                //checked: false,
+        //                                linecolor: '#000',   // '#ffcc99',
+        //                                layerorderidx: 2,
+        //                                //showSeparator: false,
+        //                                //cls: "x-menu-no-icon",
+        //                                handler: 'addVectorLayer'
+        //                            }]
+        //                        }
+        //                    }, {
+        //                        text: 'MOI',
+        //                        name: 'moi',
+        //                        //iconCls: 'layer-vector-add', // 'layers'
+        //                        //scale: 'medium',
+        //                        //floating: false,
+        //                        //collapseDirection: 'left',
+        //                        menu: {
+        //                            //hideOnClick: true,
+        //                            defaults: {
+        //                                checked: false,
+        //                                hideOnClick: true,
+        //                                showSeparator: false,
+        //                                cls: "x-menu-no-icon",
+        //                                style: {
+        //                                    'margin-left': '5px'
+        //                                }
+        //                            },
+        //                            items: [{
+        //                                xtype: 'checkbox',
+        //                                boxLabel: 'MOI ' + esapp.Utils.getTranslation('level0'), // level 0',
+        //                                name: 'moi0',
+        //                                level: 'admin0',
+        //                                geojsonfile: 'RIC_MOI_0_g2015_2014.geojson',
+        //                                //checked: false,
+        //                                linecolor: '#319FD3',
+        //                                layerorderidx: 4,
+        //                                //showSeparator: false,
+        //                                //cls: "x-menu-no-icon",
+        //                                handler: 'addVectorLayer'
+        //                            }, {
+        //                                xtype: 'checkbox',
+        //                                boxLabel: 'MOI ' + esapp.Utils.getTranslation('level1'), // level 0',
+        //                                name: 'moi1',
+        //                                level: 'admin1',
+        //                                geojsonfile: 'RIC_MOI_1_g2015_2014.geojson',
+        //                                //checked: false,
+        //                                linecolor: '#ffcc00',   // '#9e9a9a',  // '#ffcc00',
+        //                                layerorderidx: 3,
+        //                                //showSeparator: false,
+        //                                //cls: "x-menu-no-icon",
+        //                                handler: 'addVectorLayer'
+        //                            }, {
+        //                                xtype: 'checkbox',
+        //                                boxLabel: 'MOI ' + esapp.Utils.getTranslation('level2'), // level 0',
+        //                                name: 'moi2',
+        //                                level: 'admin2',
+        //                                geojsonfile: 'RIC_MOI_2_g2015_2014.geojson',
+        //                                //checked: false,
+        //                                linecolor: '#000',   // '#ffcc99',
+        //                                layerorderidx: 2,
+        //                                //showSeparator: false,
+        //                                //cls: "x-menu-no-icon",
+        //                                handler: 'addVectorLayer'
+        //                            }]
+        //                        }
+        //                    }, {
+        //                        text: 'University of Ghana',
+        //                        name: 'UoG',
+        //                        //iconCls: 'layer-vector-add', // 'layers'
+        //                        //scale: 'medium',
+        //                        //floating: false,
+        //                        //collapseDirection: 'left',
+        //                        menu: {
+        //                            //hideOnClick: true,
+        //                            defaults: {
+        //                                checked: false,
+        //                                hideOnClick: true,
+        //                                showSeparator: false,
+        //                                cls: "x-menu-no-icon",
+        //                                style: {
+        //                                    'margin-left': '5px'
+        //                                }
+        //                            },
+        //                            items: [{
+        //                                xtype: 'checkbox',
+        //                                boxLabel: 'UoG ' + esapp.Utils.getTranslation('level0'), // level 0',
+        //                                name: 'UoG0',
+        //                                level: 'admin0',
+        //                                geojsonfile: 'RIC_UOG_0_g2015_2014.geojson',
+        //                                //checked: false,
+        //                                linecolor: '#319FD3',
+        //                                layerorderidx: 4,
+        //                                //showSeparator: false,
+        //                                //cls: "x-menu-no-icon",
+        //                                handler: 'addVectorLayer'
+        //                            }, {
+        //                                xtype: 'checkbox',
+        //                                boxLabel: 'UoG ' + esapp.Utils.getTranslation('level1'), // level 0',
+        //                                name: 'UoG1',
+        //                                level: 'admin1',
+        //                                geojsonfile: 'RIC_UOG_1_g2015_2014.geojson',
+        //                                //checked: false,
+        //                                linecolor: '#ffcc00',   // '#9e9a9a',  // '#ffcc00',
+        //                                layerorderidx: 3,
+        //                                //showSeparator: false,
+        //                                //cls: "x-menu-no-icon",
+        //                                handler: 'addVectorLayer'
+        //                            }, {
+        //                                xtype: 'checkbox',
+        //                                boxLabel: 'UoG ' + esapp.Utils.getTranslation('level2'), // level 0',
+        //                                name: 'UoG2',
+        //                                level: 'admin2',
+        //                                geojsonfile: 'RIC_UOG_2_g2015_2014.geojson',
+        //                                //checked: false,
+        //                                linecolor: '#000',   // '#ffcc99',
+        //                                layerorderidx: 2,
+        //                                //showSeparator: false,
+        //                                //cls: "x-menu-no-icon",
+        //                                handler: 'addVectorLayer'
+        //                            }]
+        //                        }
+        //                    }]
+        //                }
+        //            },{
+        //                text: esapp.Utils.getTranslation('marinevectorlayers'),   // 'Marine vector layers',
+        //                name: 'marine',
+        //                //iconCls: 'layer-vector-add', // 'layers'
+        //                scale: 'medium',
+        //                floating: false,
+        //                collapseDirection: 'left',
+        //                menu: {
+        //                    //hideOnClick: true,
+        //                    defaults: {
+        //                        hideOnClick: true
+        //                    },
+        //                    //style: {
+        //                    //    'margin-left': '0px'
+        //                    //},
+        //                    plain: true,
+        //
+        //                    items: marineVectorlayersMenuItems
+        //
+        //                    //items: [
+        //                    //    {
+        //                    //    xtype: 'checkbox',
+        //                    //    boxLabel: esapp.Utils.getTranslation('fishingareas'), // 'Fishing Areas',
+        //                    //    name: 'fisharea',
+        //                    //    level: 'fisharea',
+        //                    //    geojsonfile: 'AFR_MARINE/AFR_FAO_FISH_AREA.geojson',
+        //                    //    checked: false,
+        //                    //    linecolor: '#000',
+        //                    //    layerorderidx: 1,
+        //                    //    showSeparator: false,
+        //                    //    cls: "x-menu-no-icon",
+        //                    //    hideOnClick: true,
+        //                    //    handler: 'addVectorLayer'
+        //                    //}, {
+        //                    //    xtype: 'checkbox',
+        //                    //    boxLabel: esapp.Utils.getTranslation('sea_exclusive_economic_zone'), // 'Sea Exclusive economic zone (EEZ)',
+        //                    //    name: 'eez',
+        //                    //    level: 'eez',
+        //                    //    geojsonfile: 'AFR_MARINE/AFR_EEZ_IHO_union_v2.geojson',
+        //                    //    checked: false,
+        //                    //    linecolor: '#000',
+        //                    //    layerorderidx: 1,
+        //                    //    showSeparator: false,
+        //                    //    cls: "x-menu-no-icon",
+        //                    //    hideOnClick: true,
+        //                    //    handler: 'addVectorLayer'
+        //                    //}]
+        //                }
+        //            }, paVectorlayerMenuItem
+        //            //{
+        //            //    xtype: 'checkbox',
+        //            //    boxLabel: esapp.Utils.getTranslation('protectedareas'), // 'Protected areas',
+        //            //    name: 'protectedareas',
+        //            //    level: 'protectedareas',
+        //            //    geojsonfile: 'AFR_PA/AFR_PA_ID.geojson',
+        //            //    checked: false,
+        //            //    linecolor: '#000',
+        //            //    layerorderidx: 1,
+        //            //    showSeparator: false,
+        //            //    cls: "x-menu-no-icon",
+        //            //    hideOnClick: true,
+        //            //    handler: 'addVectorLayer'
+        //            //}
+        //            ]
+        //        }
+        //};
     }
 });

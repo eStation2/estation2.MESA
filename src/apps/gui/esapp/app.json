@@ -38,6 +38,7 @@
      */
     "requires": [
         "sencha-charts"
+//        ,"ext-ux-colorpick"
 //        "ext-locale"
     ],
 

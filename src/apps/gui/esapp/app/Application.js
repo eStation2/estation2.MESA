@@ -50,6 +50,7 @@ Ext.define('esapp.Application', {
         ,'DataTypesStore'
         ,'EumetcastSourceStore'
         ,'InternetSourceStore'
+        ,'LayersStore'
 
         ,'ProductsActiveStore'
         ,'ProductsInactiveStore'

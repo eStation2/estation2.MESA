@@ -24,6 +24,25 @@ db = connectdb.ConnectDB().db
 dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
 
 
+def get_layers(echo=False):
+    global dbschema_analysis
+    try:
+        query = "SELECT * FROM analysis.layers order by menu asc, submenu asc, layerlevel asc"
+        result = db.execute(query)
+        result = result.fetchall()
+
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_layers: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
 def get_legend_totals(legendid, echo=False):
     global db
     try:

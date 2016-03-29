@@ -24,6 +24,7 @@ Ext.define('esapp.Utils', {
             }
             else return label;
         },
+
         download: function(config) {
             var form,
                 //removeNode = download.removeNode,
@@ -88,6 +89,151 @@ Ext.define('esapp.Utils', {
                     value: Ext.htmlEncode(value)
                 };
             }
+        },
+
+        fieldExists: function(o){return typeof o != 'undefined' && o != null },   // && o.trim()!='';
+
+        objectExists: function (o){return typeof o != 'undefined' && o != null;},
+
+
+        RGBtoHex: function (R,G,B) {return "#"+this.toHex(R)+this.toHex(G)+this.toHex(B)},
+        //function RGBToHex(rgb) {
+        //var char = "0123456789ABCDEF";
+        //return String(char.charAt(Math.floor(rgb / 16))) + String(char.charAt(rgb - (Math.floor(rgb / 16) * 16)));
+        //}
+
+        toHex: function (N) {
+             if (N==null) return "00";
+             N=parseInt(N); if (N==0 || isNaN(N)) return "00";
+             N=Math.max(0,N); N=Math.min(N,255); N=Math.round(N);
+             return "0123456789ABCDEF".charAt((N-N%16)/16)
+                  + "0123456789ABCDEF".charAt(N%16);
+        },
+
+        HexToRGB: function (hexvalue){
+            function HexToR(h) { return parseInt((cutHex(h)).substring(0,2),16) }
+            function HexToG(h) { return parseInt((cutHex(h)).substring(2,4),16) }
+            function HexToB(h) { return parseInt((cutHex(h)).substring(4,6),16) }
+            function cutHex(h) { return (h.charAt(0)=="#") ? h.substring(1,7) : h}
+
+            if(String(hexvalue).charAt(0)!="#")
+                return hexvalue;
+
+            var R=HexToR(hexvalue);
+            var G=HexToG(hexvalue);
+            var B=HexToB(hexvalue);
+            return R + ',' + G + ',' + B;
+        },
+
+
+        invertHexToRGB: function (hexvalue){
+            if(hexvalue.charAt(0)!="#")
+                var RGB = hexvalue.split(',');
+            else
+                var RGB = this.HexToRGB(hexvalue).split(',');
+
+            var R = RGB[0];
+            var G = RGB[1];
+            var B = RGB[2];
+            var Rinverse = (R ^ 128);
+            var Ginverse = (G ^ 128);
+            var Binverse = (B ^ 128);
+            return this.RGBtoHex(Rinverse,Ginverse,Binverse);
         }
     }
+});
+
+
+Ext.define('Ext.ux.ColorPicker', {
+    extend : 'Ext.form.field.Picker',
+    xtype: 'mycolorpicker',
+    render_to: '',
+
+    createPicker: function(){
+        var me = this;
+
+        me.picker = Ext.create('Ext.picker.Color', {
+            ownerCt: this,
+            renderTo:  this.up().up().up().getEl(),  //document.body,
+            floating: true,
+            hidden: false,
+            focusOnShow: true,
+            listeners: {
+                select: function(field, value){
+                    me.setValue('#' +value);
+                    me.collapse();
+                    me.picker.hide();
+                },
+                show: function(field,opts){
+                    field.getEl().monitorMouseLeave(500, field.hide, field);
+                }
+            },
+
+            // Workaround for EXTJS-14910 (5.0.1.1255)
+            initEvents: function(){
+                var me = this;
+                me.el.on({
+                    mousedown: function(e){e.preventDefault();}
+                });
+            }
+
+        });
+        me.picker.alignTo(me.inputEl, 'tl-bl?');
+        me.picker.show(me.inputEl);
+
+        return me.picker
+    }
+})
+
+
+Ext.define('Ext.ux.ColorPickerCombo', {
+        extend: 'Ext.form.field.Text', // 'Ext.form.field.Trigger',
+        alias: 'widget.colorcbo',
+        xtype: 'colorcbo',
+        triggerTip: 'Please select a color.',
+        picker: null,
+        triggers: {
+            foo: {
+                //cls: 'my-foo-trigger',
+                handler: this.onTriggerClick
+            }
+            //bar: {
+            //    cls: 'my-bar-trigger',
+            //    handler: function() {
+            //        console.log('bar trigger clicked');
+            //    }
+            //}
+        },
+        onTriggerClick: function() {
+                var me = this;
+                if(!me.picker || me.picker.hidden == true) {
+                        me.picker = Ext.create('Ext.picker.Color', {
+                                pickerField: this,
+                                ownerCt: this,
+                                renderTo: document.body,
+                                floating: true,
+                                hidden: false,
+                                focusOnShow: true,
+                                style: {
+                                        backgroundColor: "#fff"
+                                } ,
+                                listeners: {
+                                        scope:this,
+                                        select: function(field, value, opts){
+                                                me.setValue('#' + value);
+                                                me.inputEl.setStyle({backgroundColor:value});
+                                                me.picker.hide();
+                                        },
+                                        show: function(field,opts){
+                                                field.getEl().monitorMouseLeave(500, field.hide, field);
+                                        },
+                                }
+                        });
+                        me.picker.alignTo(me.inputEl, 'tl-bl?');
+                        me.picker.show(me.inputEl);
+                }
+                else {
+                        me.picker.hide();
+                }
+        },
 });

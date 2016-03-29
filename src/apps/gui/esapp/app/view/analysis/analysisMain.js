@@ -38,7 +38,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
         var me = this;
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
-            padding: 3,
+            padding: 1,
             style: {backgroundColor:'#ADD2ED'},
             items: [{
                 xtype: 'button',
@@ -48,6 +48,14 @@ Ext.define("esapp.view.analysis.analysisMain",{
                 style: { color: 'gray' },
                 scale: 'small',
                 handler: 'newMapView'
+            },{
+                xtype: 'button',
+                name: 'layersbtn',
+                text: esapp.Utils.getTranslation('layers'),  // 'Layers',
+                iconCls: 'layers',
+                style: { color: 'gray' },
+                scale: 'small',
+                handler: 'layerAdmin'
             },
             '->',
             {

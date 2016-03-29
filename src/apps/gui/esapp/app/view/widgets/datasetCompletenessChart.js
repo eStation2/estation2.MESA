@@ -83,6 +83,9 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
                     widgettooltip.html = me.tooltipintervals;
                     widgettooltip.enable();
                     widgettooltip.show();
+                    //console.info(me);
+                    //me.down('cartesian').updateLayout({defer: true, isRoot: true});
+                    //me.down('cartesian').redraw();
                 });
 
             }
@@ -93,9 +96,10 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
             width: '100%',
             height: 38,
             minWidth : 340,
+            //animation: false,
 
-            //engine: Ext.draw.engine.Canvas,
-            engine: Ext.draw.engine.Svg,
+            engine: Ext.draw.engine.Canvas,
+            //engine: Ext.draw.engine.Svg,
 
             colors: [
                 '#81AF34', // green
