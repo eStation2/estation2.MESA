@@ -242,3 +242,38 @@ class TestGetInternet(unittest.TestCase):
         #results = re.search(r'(type="hidden" name="([0-9a-f]{32})")', html).group(2)
 
         #self.assertTrue(file_to_check in results)
+
+    #   ---------------------------------------------------------------------------
+    #   Test download of WBD-JRC-GEE
+    #   ---------------------------------------------------------------------------
+    def TestRemoteHttp_WBD_JRC(self):
+
+        remote_url='https://drive.google.com/drive/folders/0B92vEFOyFC5BcHJ1TkxWWnhjMHM/'
+        from_date = datetime.date(2015,1,1)
+        to_date = datetime.date(2015,12,31)
+        template='%Y_%m/JRC_EXPORT*tif'
+        usr_pwd='clerici.marco:marcle13'
+        frequency = 'e1month'
+        target_dir = '/data/ingest/temp/'
+        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        files_list = [remote_url+'2015_01/JRC_EXPORT_20160225110837299-0000000000-0000065536']
+        get_file_from_url(files_list[0], target_dir, target_file=None,userpwd='')
+        print files_list
+   #   ---------------------------------------------------------------------------
+    #   Test remote http SPIRITS
+    #   ---------------------------------------------------------------------------
+    def TestRemoteHttp_SPIRITS(self):
+
+        # Retrieve a list of MODIS burndate file .. check only one present
+        remote_url='http://spirits.jrc.ec.europa.eu/files/ecmwf/ope/africa/rain/'
+
+        from_date = datetime.date(2015,1,1)
+        to_date = datetime.date(2015,12,31)
+        template='ope_africa_rain_%Y%m%d.zip'       # introduce non-standard placeholder
+        usr_pwd='anonymous:anonymous'
+        frequency = 'e1dekad'
+
+        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        print files_list
+        file_to_check='ope_africa_rain.20150221.zip'
+        self.assertTrue(file_to_check in files_list)

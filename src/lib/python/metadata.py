@@ -246,6 +246,20 @@ class SdsMetadata:
                 file_string+=ifile+';'
         sds_metadata['eStation2_input_files'] = file_string
 
+    def merge_input_file_lists(self, old_list, input_files):
+    #
+    #   Merge new list to the existing one (which is a string)
+
+        true_list = old_list.split(';')
+        true_list_not_empty = []
+        for elem in true_list:
+            if elem != '':
+                true_list_not_empty.append(elem)
+        for infile in input_files:
+            if not infile in true_list_not_empty:
+                true_list_not_empty.append(infile)
+        return true_list_not_empty
+
     def assign_scaling(self, scaling_factor, scaling_offset, nodata, unit):
     #
     #   Assign scaling

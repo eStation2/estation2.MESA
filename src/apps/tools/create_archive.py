@@ -404,6 +404,27 @@ class Create():
         functions.check_output_dir(target_dir)
         create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
+    def CreateArchive_wbd_gee(self):
+
+        base_target_dir='/data/archives/'
+        mapset='WD-GEE-ECOWAS-AVG'
+        product='wd-gee'
+        version='1.0'
+        start_date=datetime.date(2014, 1, 1)
+        end_date=None
+
+        # occurr: since 01.01.2014
+        subproduct='occurr'
+        target_dir = base_target_dir + product+ os.path.sep + subproduct
+        functions.check_output_dir(target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+        # LTA
+        subproduct='avg'
+        target_dir = base_target_dir + product+ os.path.sep + subproduct
+        functions.check_output_dir(target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
+
     def CreateArchive_all(self):
 
         self.CreateArchive_vgt_ndvi()
@@ -419,6 +440,7 @@ class Create():
         self.CreateArchive_modis_sst()
         self.CreateArchive_modis_par()
         self.CreateArchive_modis_kd490()
+        self.CreateArchive_wbd_gee()
 
 if __name__=='__main__':
 

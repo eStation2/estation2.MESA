@@ -1379,6 +1379,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
     for intermFile in interm_files_list:
 
         my_logger.info("Processing intermediate file: %s" % os.path.basename(intermFile))
+        tmp_dir = os.path.dirname(intermFile)
 
         # -------------------------------------------------------------------------
         # Collect info and prepare filenaming
@@ -1550,19 +1551,21 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         merge_existing_output = False
         # Check if the output file already exists
-        if os.path.isfile(output_filename):
+        if os.path.isfile(output_filename) and datasource_descr.area_type == 'tile':
 
             merge_existing_output = True
+            # In case of merge, output_filename is generated first in 'tmp_dir', otherwise in final dir
+            my_output_filename = tmp_dir + os.path.sep+os.path.basename(output_filename)
 
-            # Save the existing file as bck for merging at the end
-            old_filename, extension = os.path.splitext(output_filename)
-            bck_output_file = old_filename+'.bck'+extension
-            tmp_output_file = old_filename+'.tmp'+extension
-            os.rename(output_filename,bck_output_file)
+            # Prepare a tmp file in tmp_dir (for merging)
+            tmp_output_file = tmp_dir + os.path.sep+os.path.basename(output_filename)+'.tmp'
             sds_meta_old = metadata.SdsMetadata()
-            sds_meta_old.read_from_file(bck_output_file)
+            sds_meta_old.read_from_file(output_filename)
             old_file_list = sds_meta_old.get_item('eStation2_input_files')
             sds_meta_old = None
+        else:
+            my_output_filename = output_filename
+            old_file_list = None
 
         # Do re-projection, or write to GTIFF file
         if reprojection == 1:
@@ -1603,7 +1606,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
                                        out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger)
 
             # Create a copy to output_file
-            trg_ds = out_driver.CreateCopy(output_filename, out_ds, 0, [es_constants.ES2_OUTFILE_OPTIONS])
+            trg_ds = out_driver.CreateCopy(my_output_filename, out_ds, 0, [es_constants.ES2_OUTFILE_OPTIONS])
             trg_ds.GetRasterBand(1).WriteArray(scaled_data)
 
         else:
@@ -1615,12 +1618,12 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             out_data = band.ReadAsArray(0, 0, orig_size_x, orig_size_y)
 
             # No reprojection, only format-conversion
-            trg_ds = out_driver.Create(output_filename, orig_size_x, orig_size_y, 1, out_data_type_gdal,
+            trg_ds = out_driver.Create(my_output_filename, orig_size_x, orig_size_y, 1, out_data_type_gdal,
                                        [es_constants.ES2_OUTFILE_OPTIONS])
             trg_ds.SetProjection(orig_ds.GetProjectionRef())
             trg_ds.SetGeoTransform(orig_geo_transform)
 
-            if mapset_id != 'WD-GEE-ECOWAS':
+            if mapset_id != 'WD-GEE-ECOWAS' and mapset_id != 'WD-GEE-ECOWAS-AVG':
                 # Apply rescale to data
                 scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
                                        out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger)
@@ -1648,6 +1651,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
             # Close output file
             trg_ds = None
+            sds_meta.assign_input_files(in_files)
 
         else:
             # Close output file
@@ -1659,7 +1663,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
                 command += ' -a_nodata '+str(out_nodata)
                 command += ' -co \"compress=lzw\" -o '
                 command += tmp_output_file
-                command += ' '+ bck_output_file+ ' '+output_filename
+                command += ' '+ my_output_filename+ ' '+output_filename
                 my_logger.debug('Command for merging is: ' + command)
                 os.system(command)
             except:
@@ -1667,13 +1671,18 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
             # Write metadata to output
             if old_file_list is not None:
-                in_files.append(old_file_list)
-            sds_meta.assign_input_files(in_files)
+                # Merge the old and new file list (note that old list is a string !)
+                final_list = sds_meta.merge_input_file_lists(old_file_list, in_files)
+                sds_meta.assign_input_files(final_list)
+            else:
+                sds_meta.assign_input_files(in_files)
+
             sds_meta.write_to_file(tmp_output_file)
 
-            # Save the .tmp as output and clean
-            os.rename(tmp_output_file,output_filename)
-            os.remove(bck_output_file)
+            # Save the .tmp as output
+            if os.path.isfile(output_filename):
+                os.remove(output_filename)
+            shutil.move(tmp_output_file,output_filename)
 
 
         # -------------------------------------------------------------------------
