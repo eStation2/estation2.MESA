@@ -1,0 +1,40 @@
+#
+#   Release Note for 2.0.3
+#   Changes with respect to 2.0.2 - Unless specification, they refer to Apps.rpm package.
+#
+
+1. BUG FIXING
+-------------
+
+1.1 Processing
+
+- Modify processing.py to import std_modis_monavg module (The processing services was stopped for UoG/IOC - reported by TPZF).
+- Modify loop_eumetcast_ftp() in get_eumetcast, to update 'processed_list' (files copied continuously - found out at ToT Nairobi).
+- Do not recompute climatology for MODIS monthly products (std_modis_monavg processing chain).
+- In ingestion, do the merge to output files only for 'tile' type (e.g. PML) and work in tmp_dir (rather than output_dir).
+- Activate sst-fronts calculation on all dates.
+- Make more robust conv_list_2_string() for error check.
+- Avoid duplications in 'input_files' metadata tag - for ingestion of 'tile' products.
+
+1.2 Visualization
+
+- Correct GetProductLayer() in webpy_esapp.py to save legend steps as float, rather than int (problem with Chla legend=83 at ToT Nairobi)
+
+1.3 Configuration/DB
+
+- Enable the computation of SST Fronts for MODIS-SST and PML-MODIS-SST
+- Define a new Thema ('Training Centres') and associate both Land and Marine Products to it (from ToT Nairobi)
+
+1.4 Other packages
+
+- Correct the Docs.rpm to display the correct French documentation
+
+- Extend SPOTV-IGAD-1km mapset to -12. South, to include Tanzania (required by ICPAC at ToT Nairobi)
+
+2. NEW FEATURES
+---------------
+
+2.1 Processing
+
+
+2.2 Visualization

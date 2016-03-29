@@ -298,7 +298,7 @@ def loop_eumetcast_ftp(dry_run=False):
                         pass
 
                 for infile in processed_list:
-                       if not os.path.exists(infile):
+                       if not infile in current_list:
                            processed_list.remove(infile)
 
                 if not dry_run:

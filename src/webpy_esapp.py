@@ -746,11 +746,15 @@ class UpdateInternetSource:
         if 'internetsources' in getparams:
 
             startdate = None
-            if getparams['internetsources']['start_date'].isdigit():
+            if isinstance(getparams['internetsources']['start_date'],int):
+                startdate = getparams['internetsources']['start_date']
+            elif isinstance(getparams['internetsources']['start_date'],str) and getparams['internetsources']['start_date'].isdigit():
                 startdate = int(getparams['internetsources']['start_date'])
 
             enddate = None
-            if getparams['internetsources']['end_date'].isdigit():
+            if isinstance(getparams['internetsources']['end_date'],int):
+                enddate = getparams['internetsources']['end_date']
+            elif isinstance(getparams['internetsources']['end_date'],str) and getparams['internetsources']['end_date'].isdigit():
                 enddate = int(getparams['internetsources']['end_date'])
 
             prod_id_position = None
@@ -2523,8 +2527,8 @@ class GetProductLayer:
                 stepcount = 0
                 for step in legend_steps:
                     stepcount += 1
-                    min_step = int((step.from_step - scale_offset)/scale_factor)
-                    max_step = int((step.to_step - scale_offset)/scale_factor)
+                    min_step = float((step.from_step - scale_offset)/scale_factor)
+                    max_step = float((step.to_step - scale_offset)/scale_factor)
                     colors = map(int, (color.strip() for color in step.color_rgb.split(" ") if color.strip()))
 
                     if stepcount == legend_steps.__len__():    # For the last step use <= max_step
@@ -2538,10 +2542,11 @@ class GetProductLayer:
                     style = mapscript.styleObj(layerclass)
                     style.color.setRGB(colors[0], colors[1], colors[2])
 
-        # result_map_file = es_constants.apps_dir+'/analysis/MAP_result.map'
+        # result_map_file = '/tmp/eStation2/MAP_result.map'
         # if os.path.isfile(result_map_file):
         #     os.remove(result_map_file)
         # productmap.save(result_map_file)
+
         image = productmap.draw()
         filename_png = es_constants.base_tmp_dir+filenamenoextention+str(llx)+'_'+str(lly)+'_'+str(urx)+'_'+str(ury)+'.png'
         image.save(filename_png)
