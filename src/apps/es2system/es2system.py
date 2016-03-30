@@ -551,14 +551,14 @@ def clean_temp_dir():
 
     now = time.time()
 
-    for f in glob.glob(es_constants.es2globals['base_tmp_dir']+os.path.sep+'*'):
-        if os.stat(f).st_mtime < now - 3 * 86400:
-            if os.path.isdir(f):
-                logger.info('Deleting directory: %s' % f)
-                try:
+    for f in glob.glob(es_constants.es2globals['base_tmp_dir']+os.path.sep+'apps.*'):
+        try:
+            if os.stat(f).st_mtime < now - 3 * 86400:
+                if os.path.isdir(f):
+                    logger.info('Deleting directory: %s' % f)
                     shutil.rmtree(f)
-                except:
-                    logger.warning('Cannot delete directory: %s' % f)
+        except:
+            logger.warning('A directory was deleted by system: %s' % f)
     return 0
 
 def loop_system(dry_run=False):
