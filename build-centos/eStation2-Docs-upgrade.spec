@@ -1,10 +1,10 @@
 Summary: eStation 2.0 Documentation
 Name: eStation2-Docs
-Version: 2.1.0
+Version: 2.0.3
 Release: 1
 Group: eStation
 License: GPL
-Source: /home/adminuser/rpms/eStation-Docs-2.1.0/%{name}-%{version}-%{release}.tgz
+Source: /home/adminuser/rpms/eStation-Docs/%{name}-%{version}-%{release}.tgz
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 
 
@@ -16,8 +16,9 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 
 %prep
 # Get the sources from the JRC ftp and create .tgz
-lftp -e "mirror -Le /ftp/private/narma/eStation_2.0/Packages/eStation-Docs-2.1.0 /home/adminuser/rpms/; exit" -u narmauser:narma11 h05-ftp.jrc.it"" 
-cd /home/adminuser/rpms/eStation-Docs-2.1.0/
+lftp -e "mirror -Le /ftp/private/narma/eStation_2.0/Packages/eStation-Docs /home/adminuser/rpms/; exit" -u narmamaster:qwerty27 h05-ftp.jrc.it"" 
+cd /home/adminuser/rpms/eStation-Docs/
+rm -f %{name}-%{version}-%{release}.rpm
 tar -cvzf %{name}-%{version}-%{release}.tgz --exclude=*.tgz *
 
 # Prepare the Layers in BUILD_ROOT
@@ -34,6 +35,4 @@ rm -r -f $RPM_BUILD_ROOT
 
 %files
 /eStation2/docs/*
-
-
 

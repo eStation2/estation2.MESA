@@ -359,6 +359,8 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                     var productgridstore  = Ext.data.StoreManager.lookup('ProductsActiveStore');
                     var acqgridsstore = Ext.data.StoreManager.lookup('DataAcquisitionsStore');
                     var ingestiongridstore = Ext.data.StoreManager.lookup('IngestionsStore');
+                    var eumetcastsourcestore = Ext.data.StoreManager.lookup('EumetcastSourceStore');
+                    var internetsourcestore = Ext.data.StoreManager.lookup('InternetSourceStore');
 
                     if (productgridstore.isStore) {
                         productgridstore.load({
@@ -381,6 +383,9 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                             }
                         });
                     }
+
+                    eumetcastsourcestore.load();
+                    internetsourcestore.load();
 
                     me.getController().renderHiddenColumnsWhenUnlocked();
 

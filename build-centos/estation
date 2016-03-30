@@ -10,7 +10,7 @@
 # Functions
 ###########################################################################
 
-export LD_LIBRARY_PATH=/usr/local/src/tas/anaconda/lib
+export LD_LIBRARY_PATH=/usr/local/src/tas/anaconda/lib:/usr/local/lib64
 export PATH=/usr/local/src/tas/anaconda/bin:$PATH
 export PYTHONHOME=/usr/local/src/tas/anaconda
 

@@ -60,16 +60,23 @@ Ext.define('esapp.view.system.ThemaAdminController', {
 
                         systemsettingview.loadRecord(systemsettingsrecord);
                         systemsettingview.updateRecord();
+
+                        if (record.data.thema != ''){
+                            Ext.getCmp('modify-thema-btn').hide();
+                        }
+                        else {
+                            Ext.getCmp('modify-thema-btn').show();
+                        }
                         me.closeView();
                     }
                 });
             },
             failure: function(response, opts) {
                 console.info(response.status);
-		    Ext.toast({ html: result.error,
-		                title: 'Error',
-		                width: 300, align: 't' });
-            }
+                Ext.toast({ html: result.error,
+                            title: 'Error',
+                            width: 300, align: 't' });
+                }
         });
     }
     
