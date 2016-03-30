@@ -118,6 +118,11 @@ urls = (
     "/analysis/timeseriesproduct", "TimeseriesProducts",
     "/analysis/gettimeseries", "GetTimeseries",
 
+    "/layers", "GetLayers",
+    "/layers/create", "CreateLayer",
+    "/layers/update", "UpdateLayer",
+    "/layers/delete", "DeleteLayer",
+
     "/getmapsets", "GetMapsets",
     "/addingestmapset", "AddIngestMapset",
     "/deleteingestmapset", "DisableIngestMapset",
@@ -1361,7 +1366,17 @@ class GetTimeseries:
             version = timeserie['version']
             mapsetcode = timeserie['mapsetcode']
 
-            list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date)
+            product = {"productcode": productcode,
+                       "subproductcode": subproductcode,
+                       "version": version}
+
+            timeseries_drawproperties = querydb.get_timeseries_drawproperties(product)
+            for ts_drawprops in timeseries_drawproperties:
+                aggregate = { 'aggregation_type': ts_drawprops.aggregation_type,
+                              'aggregation_min': ts_drawprops.aggregation_min,
+                              'aggregation_max': ts_drawprops.aggregation_max}
+
+            list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
             data = []
             for val in list_values:
                 value = []
@@ -1372,11 +1387,6 @@ class GetTimeseries:
                 value.append(val['meanvalue'])
                 data.append(value)
 
-            product = {"productcode": productcode,
-                       "subproductcode": subproductcode,
-                       "version": version}
-
-            timeseries_drawproperties = querydb.get_timeseries_drawproperties(product)
             for ts_drawprops in timeseries_drawproperties:
                 ts = {'name': ts_drawprops.tsname_in_legend,
                       'type': ts_drawprops.charttype,
@@ -2098,6 +2108,94 @@ class ChangeLogLevel:
         return changethema_json
 
 
+class GetLayers:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        layers_dict_all = []
+        layers = querydb.get_layers()
+
+        if hasattr(layers, "__len__") and layers.__len__() > 0:
+            for row in layers:
+                row_dict = functions.row2dict(row)
+
+                layer = { 'layerid': row_dict['layerid'],
+                          'layerlevel': row_dict['layerlevel'],
+                          'layername': row_dict['layername'],
+                          'description': row_dict['description'],
+                          'layerpath': row_dict['layerpath'],
+                          'filename': row_dict['filename'],
+                          'layerorderidx': row_dict['layerorderidx'],
+                          'layertype': row_dict['layertype'],
+                          'polygon_outlinecolor': row_dict['polygon_outlinecolor'],
+                          'polygon_outlinewidth': row_dict['polygon_outlinewidth'],
+                          'polygon_fillcolor': row_dict['polygon_fillcolor'],
+                          'polygon_fillopacity': row_dict['polygon_fillopacity'],
+                          'feature_display_column': row_dict['feature_display_column'],
+                          'feature_highlight_outlinecolor': row_dict['feature_highlight_outlinecolor'],
+                          'feature_highlight_outlinewidth': row_dict['feature_highlight_outlinewidth'],
+                          'feature_highlight_fillcolor': row_dict['feature_highlight_fillcolor'],
+                          'feature_highlight_fillopacity': row_dict['feature_highlight_fillopacity'],
+                          'feature_selected_outlinecolor': row_dict['feature_selected_outlinecolor'],
+                          'feature_selected_outlinewidth': row_dict['feature_selected_outlinewidth'],
+                          'enabled': row_dict['enabled'],
+                          'deletable': row_dict['deletable'],
+                          'background_legend_image_filename': row_dict['background_legend_image_filename'],
+                          'projection': row_dict['projection'],
+                          'submenu': row_dict['submenu'],
+                          'menu': row_dict['menu']
+                        }
+
+                layers_dict_all.append(layer)
+
+            layers_json = json.dumps(layers_dict_all,
+                                              ensure_ascii=False,
+                                              encoding='utf-8',
+                                              sort_keys=True,
+                                              indent=4,
+                                              separators=(', ', ': '))
+
+            layers_json = '{"success":"true", "total":'\
+                                   + str(layers.__len__())\
+                                   + ',"layers":'+layers_json+'}'
+
+        else:
+            layers_json = '{"success":false, "error":"No Layers defined!"}'
+
+        return layers_json
+
+
+class UpdateLayer:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def PUT(self):
+        getparams = json.loads(web.data())  # get PUT data
+        if 'layer' in getparams:      # hasattr(getparams, "layer")
+            layerdrawprobs = {'layerid': getparams['layer']['layerid'],
+                              'polygon_outlinecolor': getparams['layer']['polygon_outlinecolor'],
+                              'polygon_outlinewidth': getparams['layer']['polygon_outlinewidth'],
+                              'feature_highlight_fillcolor': getparams['layer']['feature_highlight_fillcolor'],
+                              'feature_highlight_fillopacity': getparams['layer']['feature_highlight_fillopacity'],
+                              'feature_highlight_outlinecolor': getparams['layer']['feature_highlight_outlinecolor'],
+                              'feature_highlight_outlinewidth': getparams['layer']['feature_highlight_outlinewidth'],
+                              'feature_selected_outlinecolor': getparams['layer']['feature_selected_outlinecolor'],
+                              'feature_selected_outlinewidth': getparams['layer']['feature_selected_outlinewidth']
+                              }
+
+            if self.crud_db.update('layers', layerdrawprobs):
+                updatestatus = '{"success":"true", "message":"Layer updated!"}'
+            else:
+                updatestatus = '{"success":false, "message":"An error occured while updating the layer!"}'
+
+        else:
+            updatestatus = '{"success":false, "message":"No layer info passed!"}'
+
+        return updatestatus
+
+
 class GetVectorLayer:
     def __init__(self):
         self.lang = "eng"
@@ -2542,11 +2640,10 @@ class GetProductLayer:
                     style = mapscript.styleObj(layerclass)
                     style.color.setRGB(colors[0], colors[1], colors[2])
 
-        # result_map_file = '/tmp/eStation2/MAP_result.map'
+        # result_map_file = es_constants.apps_dir+'/analysis/MAP_result.map'
         # if os.path.isfile(result_map_file):
         #     os.remove(result_map_file)
         # productmap.save(result_map_file)
-
         image = productmap.draw()
         filename_png = es_constants.base_tmp_dir+filenamenoextention+str(llx)+'_'+str(lly)+'_'+str(urx)+'_'+str(ury)+'.png'
         image.save(filename_png)

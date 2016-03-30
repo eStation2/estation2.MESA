@@ -170,15 +170,15 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
                     merged_mask = ma.mask_or(ma.getmask(mx), ma.getmask(nodata_array_masked))
                     mxnodata = ma.masked_array(ma.getdata(mx), merged_mask)
 
-                    if aggregate['type'] == 'count' or aggregate['type'] == 'percent':
-                        min_val = aggregate['min_val']
-                        max_val = aggregate['max_val']
+                    if aggregate['aggregation_type'] == 'count' or aggregate['aggregation_type'] == 'percent':
+                        min_val = aggregate['aggregation_min']
+                        max_val = aggregate['aggregation_max']
                         # Scale threshold from physical to digital value
                         min_val_scaled = (min_val-scale_offset)/scale_factor
                         max_val_scaled = (max_val-scale_offset)/scale_factor
-                        mxrange = ma.masked_outside(mxnodata,min_val_scaled, max_val_scaled)
+                        mxrange = ma.masked_outside(mxnodata, min_val_scaled, max_val_scaled)
 
-                        if aggregate['type'] == 'percent':
+                        if aggregate['aggregation_type'] == 'percent':
                             # Convert from number of pixels to ratio/percent
                             meanResult = float(mxrange.count())/float(mxnodata.count()) * 100
                         else:
@@ -188,7 +188,7 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
                         # Both results are equal
                         finalvalue = meanResult
 
-                    elif aggregate['type'] == 'none':
+                    else:   #if aggregate['type'] == 'mean':
                         if mxnodata.count() == 0:
                             meanResult = 0.0
                         else:
