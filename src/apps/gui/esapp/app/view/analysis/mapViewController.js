@@ -203,7 +203,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 //,REASPECT:'TRUE'
             };
         //}
-        //console.info(params);
+        // console.info(params);
 
         this.getView().productlayer = new ol.layer.Tile({
             title: esapp.Utils.getTranslation('productlayer'),  // 'Product layer',

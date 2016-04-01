@@ -27,7 +27,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
     frame: false,
     border: false,
     bodyPadding: '5 0 0 0',
-    //suspendLayout : true,
+    // suspendLayout : true,
 
     layout: {
         type: 'border',
