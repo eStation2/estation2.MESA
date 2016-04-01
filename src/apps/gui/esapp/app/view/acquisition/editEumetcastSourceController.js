@@ -14,7 +14,8 @@ Ext.define('esapp.view.acquisition.editEumetcastSourceController', {
             if (Ext.data.StoreManager.lookup('EumetcastSourceStore').getUpdatedRecords() != []){
                 Ext.data.StoreManager.lookup('EumetcastSourceStore').sync();
                 //Ext.toast({html: esapp.Utils.getTranslation('saved'), title: esapp.Utils.getTranslation('saved'), width: 200, align: 't'});
-                this.onCancelClick();
+                Ext.destroy(this.getView());
+                //this.onCancelClick();
             }
             //if (dialog.getSession().getChanges() != null) {
             //    dialog.getSession().getSaveBatch().start();
@@ -25,6 +26,7 @@ Ext.define('esapp.view.acquisition.editEumetcastSourceController', {
     }
 
     ,onCancelClick: function () {
+        Ext.data.StoreManager.lookup('EumetcastSourceStore').rejectChanges();
         Ext.destroy(this.getView());
     }
 

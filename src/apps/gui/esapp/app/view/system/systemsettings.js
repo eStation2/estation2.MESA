@@ -91,6 +91,12 @@ Ext.define("esapp.view.system.systemsettings",{
                         formpanel.loadRecord(systemsettingsrecord);
                         formpanel.updateRecord();
 
+                        if (record.data.thema != ''){
+                            Ext.getCmp('modify-thema-btn').hide();
+                        }
+                        else {
+                            Ext.getCmp('modify-thema-btn').show();
+                        }
                         Ext.toast({ html: esapp.Utils.getTranslation('systemsettingsrefreshed'), title: esapp.Utils.getTranslation('systemsettingsrefreshed'), width: 200, align: 't' });
                     }
                 }
@@ -173,12 +179,18 @@ Ext.define("esapp.view.system.systemsettings",{
             success: function(record, operation) {
                 me.type_install = record.data.type_installation;
                 me.pcrole = record.data.role;
+                me.thema = record.data.thema;
 
                 if (me.pcrole == ''){
                     //console.info(Ext.getCmp('modify-role-btn'));
                     Ext.getCmp('modify-role-btn').show();
                     Ext.getCmp('modify-role-btn').fireHandler();
                 }
+
+                if (me.thema != ''){
+                    Ext.getCmp('modify-thema-btn').hide();
+                }
+
                 //var ipadresses_fieldset = Ext.getCmp('ipaddresses');
                 //if (me.type_install == 'Full'){
                 //    ipadresses_fieldset.add(ip_pc1);
@@ -436,15 +448,16 @@ Ext.define("esapp.view.system.systemsettings",{
                         }]
                     },{
                        items:[{
-                           id: 'thema',
-                           name: 'thema',
-                           bind: '{system_setting.thema}',
-                           xtype: 'displayfield',
-                           fieldLabel: me.form_fieldlabel_thema,
-                           fieldStyle:'font-weight: bold;',
-                           flex: 2.2
-                        },{
+                            id: 'thema',
+                            name: 'thema',
+                            bind: '{system_setting.thema}',
+                            xtype: 'displayfield',
+                            fieldLabel: me.form_fieldlabel_thema,
+                            fieldStyle:'font-weight: bold;',
+                            flex: 2.2
+                       },{
                             xtype: 'button',
+                            id: 'modify-thema-btn',
                             text: esapp.Utils.getTranslation('modify'),    // 'Modify',
                             flex: 0.8,
                             iconCls: 'fa fa-pencil-square-o',
