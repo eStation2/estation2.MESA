@@ -556,12 +556,12 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
             shadow: false,
             padding:0,
             items: [
-                //{
-                //text: esapp.Utils.getTranslation('chartproperties'),    // 'Chart properties',
-                //iconCls: 'chart-curve_edit',
-                //scale: 'medium'
-                ////,handler: 'openChartProperties'
-            //},
+                {
+                text: esapp.Utils.getTranslation('chartproperties'),    // 'Chart properties',
+                iconCls: 'chart-curve_edit',
+                scale: 'medium'
+                ,handler: 'openChartProperties'
+            },
             '->',{
                 text: esapp.Utils.getTranslation('downloadtimeseries'),    // 'Download timeseries',
                 iconCls: 'fa fa-download fa-2x',

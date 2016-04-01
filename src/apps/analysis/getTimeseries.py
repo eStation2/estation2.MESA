@@ -183,7 +183,7 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
                             meanResult = float(mxrange.count())/float(mxnodata.count()) * 100
                         else:
                             # Assign as number of pixels
-                            meanResult = mxrange.count()
+                            meanResult = float(mxrange.count()) * 0.0009
 
                         # Both results are equal
                         finalvalue = meanResult
