@@ -1,5 +1,5 @@
 ALTER TABLE analysis.timeseries_drawproperties
-  ADD COLUMN aggregation_type TYPE character varying DEFAULT 'mean';
+  ADD COLUMN aggregation_type character varying DEFAULT 'mean';
 
 ALTER TABLE analysis.timeseries_drawproperties
   ADD COLUMN aggregation_min double precision;
