@@ -1,7 +1,7 @@
 Summary: eStation 2.0 application from JRC
 Name: eStation2-Apps
 Version: 2.0.3
-Release: 2
+Release: 4
 Group: eStation
 License: GPL
 Source: /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz
@@ -120,7 +120,7 @@ mkdir -p -m 775 /data/spirits
 
 # Chown a vérifier si utile
 echo "`date +'%Y-%m-%d %H:%M '` Assign /data to analyst User"
-chown -R analyst:estation /data 
+chown -R analyst:estation /data/ 
 
 # Change permissions /var/www (for allowing analyst to change version)
 chmod 777 /var/www
