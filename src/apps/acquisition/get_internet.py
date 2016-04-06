@@ -306,6 +306,7 @@ def get_file_from_url(remote_url_file,  target_dir, target_file=None,userpwd='')
             return 0
     except:
         logger.warning('Output NOT downloaded: %s - error : %i' %(remote_url_file,c.getinfo(pycurl.HTTP_CODE)))
+        shutil.rmtree(tmpdir)
         return 1
     finally:
         c = None

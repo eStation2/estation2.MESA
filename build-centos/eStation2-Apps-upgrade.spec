@@ -1,7 +1,7 @@
 Summary: eStation 2.0 application from JRC
 Name: eStation2-Apps
 Version: 2.0.3
-Release: 6
+Release: 7
 Group: eStation
 License: GPL
 Source: /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz
@@ -92,6 +92,7 @@ chown -R analyst:estation /tmp/eStation2/
 
 # Creating temporary path in tmp after boot (in case of). Configuration of rc.local
 echo "`date +'%Y-%m-%d %H:%M '` Create temporary paths in rc.local"
+grep "rm -fr /tmp/eStation2/app" /etc/rc.local >/dev/null ||echo "rm -fr /tmp/eStation2/apps.*" >> /etc/rc.local
 grep "mkdir -p -m 775 /tmp/eStation2/" /etc/rc.local >/dev/null ||echo "mkdir -p -m 775 /tmp/eStation2/" >> /etc/rc.local
 grep "mkdir -p -m 775 /tmp/eStation2/services/" /etc/rc.local >/dev/null ||echo "mkdir -p -m 775 /tmp/eStation2/services/" >> /etc/rc.local
 grep "mkdir -p -m 775 /tmp/eStation2/processing/" /etc/rc.local >/dev/null ||echo "mkdir -p -m 775 /tmp/eStation2/processing/" >> /etc/rc.local
