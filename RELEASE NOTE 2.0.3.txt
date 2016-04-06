@@ -10,37 +10,49 @@
 
 - Modify processing.py to import std_modis_monavg module (The processing services was stopped for UoG/IOC - reported by TPZF).
 - Modify loop_eumetcast_ftp() in get_eumetcast, to update 'processed_list' (files copied continuously - found out at ToT Nairobi).
-- Do not recompute climatology for MODIS monthly products (std_modis_monavg processing chain).
 - In ingestion, do the merge to output files only for 'tile' type (e.g. PML) and work in tmp_dir (rather than output_dir).
-- Activate sst-fronts calculation on all dates.
 - Make more robust conv_list_2_string() for error check.
 - Avoid duplications in 'input_files' metadata tag - for ingestion of 'tile' products.
+- Modify get_internet/get_eumetcast.py to re-direct log output (2.0.3-6)
+- Modify get_internet to delete tmpdir in case of errors (2.0.3-8)
 
 1.2 Visualization
 
 - Correct GetProductLayer() in webpy_esapp.py to save legend steps as float, rather than int (problem with Chla legend=83 at ToT Nairobi)
 - Under the Acquisition page in unlocked situation, when editing a EUMETCAST but not saving, the edits remain in cache also when doing a refresh of the Acquisition page.
-  Resolved by disgarding changes when clicking on Cancel and adding the eumetcast and internet datasource stores to the refresh.
-- Under the Acquisition page in unlocked situation, when editing an Internet data source description, the changes are not saved in the DB on Save due too a datatype issue.
-- Once the THEMA is set the THEMA cannot be mofified anymore through the GUI. Edit the file /eStation/settings/system_settings.ini by putting the thema setting to nothing (e.g. thema = ).
+  (Resolved by disgarding changes when clicking on Cancel and adding the eumetcast and internet datasource stores to the refresh).
+- Under the Acquisition page in unlocked situation, when editing an Internet data source description, the changes are now saved in the DB on Save (there was a bug due to a datatype issue).
 
 1.3 Configuration/DB
 
-- Enable the computation of SST Fronts for MODIS-SST and PML-MODIS-SST
-- Define a new Thema ('Training Centres') and associate both Land and Marine Products to it (from ToT Nairobi)
-- Extend SPOTV-IGAD-1km mapset to -12. South, to include Tanzania (required by ICPAC at ToT Nairobi)
 - Assign write permissions on their desktop to adminuser and analyst. Changed in .rpm.
 - THEMA change updates also the table product_acquisition_datasource in the database.
 
-1.4 Other packages
+1.4 Packages (pre-post inst)
 
 - Correct the Docs.rpm to display the correct French documentation
-
+- Create /data/ with correct permissions (Apps.rpm rel. 2.0.3-6)
+- Stop/Start services during installation (Apps.rpm rel. 2.0.3-8)
+- Add a line to rc.local to delete all tmp dirs at reboot (Apps.rpm rel. 2.0.3-8)
 
 2. NEW FEATURES
 ---------------
 
 2.1 Processing
 
+- Do not recompute climatology for MODIS monthly products (std_modis_monavg processing chain).
+- Activate sst-fronts calculation on all dates.
 
 2.2 Visualization
+
+- Once the THEMA is set the THEMA cannot be mofified anymore through the GUI. Edit the file /eStation/settings/system_settings.ini by putting the thema setting to nothing (e.g. thema = ).
+
+2.3 Configuration/DB
+
+- Enable the computation of SST Fronts for MODIS-SST and PML-MODIS-SST
+- Extend SPOTV-IGAD-1km mapset to -12. South, to include Tanzania (required by ICPAC at ToT Nairobi)
+- Define a new Thema ('Training Centres') and associate both Land and Marine Products to it (from ToT Nairobi)
+
+2.4 Other packages
+
+- Make available the Product Report V 1.1 (including processing chain diagrams)
