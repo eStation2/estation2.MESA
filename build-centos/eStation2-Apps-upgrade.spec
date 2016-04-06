@@ -1,7 +1,7 @@
 Summary: eStation 2.0 application from JRC
 Name: eStation2-Apps
 Version: 2.0.3
-Release: 7
+Release: 8
 Group: eStation
 License: GPL
 Source: /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz
@@ -47,6 +47,10 @@ touch /var/log/eStation2/%{name}-%{version}-preinst.err
 
 exec 1>/var/log/eStation2/%{name}-%{version}-preinst.log
 exec 2>/var/log/eStation2/%{name}-%{version}-preinst.err
+
+# Stop the eStation Services (for upgrade)
+echo "`date +'%Y-%m-%d %H:%M '` Stopping all_servicesd"
+/etc/init.d/tas_all_servicesd stop
 
 # En preinst pas de script externe inclus dans le RPM car pas encore decompressé
 # Ajout du compte analyst
@@ -258,6 +262,10 @@ sed -i "s|.*active_version.=.*|active_version = %{version}|" /eStation2/settings
 #if [[ ! -h /usr/lib64/libmapserver.so ]]; then ln -fs /usr/local/lib64/libmapserver.so /usr/lib64/; fi
 #if [[ ! -h /usr/lib64/libmapserver.so.1 ]]; then ln -fs /usr/local/lib64/libmapserver.so.1 /usr/lib64/; fi
 #if [[ ! -h /usr/lib64/libmapserver.so.6.4.1 ]]; then ln -fs /usr/local/lib64/libmapserver.so.6.4.1 /usr/lib64/; fi
+
+# Start the eStation Services 
+echo "`date +'%Y-%m-%d %H:%M '` Starting all_servicesd"
+/etc/init.d/tas_all_servicesd start
 
 # Before uninstall: remove the link and copy all code into a bck dir
 %preun
