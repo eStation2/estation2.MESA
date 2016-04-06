@@ -105,7 +105,13 @@ def get_list_current_subdirs_ftp(remote_url, usr_pwd):
 #   Output: list of matched files
 #
 
-def get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex):
+def get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex, my_logger=None):
+
+
+    if my_logger is None:
+        use_logger = logger
+    else:
+        use_logger = my_logger
 
     # Check the arguments (remote_url must end with os.sep and full_regex should begin with os.sep)
     remote_url=functions.ensure_sep_present(remote_url,'end')
@@ -114,13 +120,14 @@ def get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex):
     # Get list from a remote ftp
     list_matches=[]
     init_level = 1
-    get_list_matching_files_subdir_ftp(list_matches, remote_url, usr_pwd, full_regex, init_level, '')
+    get_list_matching_files_subdir_ftp(list_matches, remote_url, usr_pwd, full_regex, init_level, '', my_logger=use_logger)
 
     # Debug
     toprint=''
     for elem in list_matches:
         toprint+=elem+','
-    logger.info('List in get_list_matching_files_dir_ftp: %s' % toprint)
+
+    use_logger.info('List in get_list_matching_files_dir_ftp: %s' % toprint)
 
     return list_matches
 
@@ -139,7 +146,13 @@ def get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex):
 #   Output: list of matched files (incremented)
 #   TODO-M.C.: check if the '/' has to be replaced by os.sep (?)
 
-def get_list_matching_files_subdir_ftp(list, remote_url, usr_pwd, full_regex, level, sub_dir):
+def get_list_matching_files_subdir_ftp(list, remote_url, usr_pwd, full_regex, level, sub_dir, my_logger=None):
+
+    # Use generic logger (logger) for get_internet or my_logger (from get_eumetcast)
+    if my_logger is None:
+        use_logger = logger
+    else:
+        use_logger = my_logger
 
     # split the regex
     tokens=full_regex.split('/')
@@ -148,7 +161,8 @@ def get_list_matching_files_subdir_ftp(list, remote_url, usr_pwd, full_regex, le
     max_level= len(re.findall("/",full_regex))
 
     my_list = get_list_current_subdirs_ftp(remote_url, usr_pwd)
-    logger.debug("Working on %s" % regex_my_level)
+
+    use_logger.info("Working on %s" % regex_my_level)
     for element in my_list:
         if re.match(regex_my_level,element) is not None:
             # Is it already the file ?
@@ -292,6 +306,7 @@ def get_file_from_url(remote_url_file,  target_dir, target_file=None,userpwd='')
             return 0
     except:
         logger.warning('Output NOT downloaded: %s - error : %i' %(remote_url_file,c.getinfo(pycurl.HTTP_CODE)))
+        shutil.rmtree(tmpdir)
         return 1
     finally:
         c = None
@@ -328,9 +343,9 @@ def loop_get_internet(dry_run=False):
         while 1:
 
             # Check internet connection (or die)
-            if not functions.internet_on():
+            if not functions._internet_on():
                 logger.error("The computer is not currently connected to the internet. Wait 1 minute.")
-                time.sleep(60)
+                time.sleep(1)
 
             else:                
                     try:

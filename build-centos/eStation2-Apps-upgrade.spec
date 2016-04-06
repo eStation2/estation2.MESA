@@ -1,7 +1,7 @@
 Summary: eStation 2.0 application from JRC
 Name: eStation2-Apps
 Version: 2.0.3
-Release: 2
+Release: 8
 Group: eStation
 License: GPL
 Source: /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz
@@ -48,6 +48,10 @@ touch /var/log/eStation2/%{name}-%{version}-preinst.err
 exec 1>/var/log/eStation2/%{name}-%{version}-preinst.log
 exec 2>/var/log/eStation2/%{name}-%{version}-preinst.err
 
+# Stop the eStation Services (for upgrade)
+echo "`date +'%Y-%m-%d %H:%M '` Stopping all_servicesd"
+/etc/init.d/tas_all_servicesd stop
+
 # En preinst pas de script externe inclus dans le RPM car pas encore decompressé
 # Ajout du compte analyst
 echo "`date +'%Y-%m-%d %H:%M '` Checking/creating analyst User"
@@ -92,6 +96,7 @@ chown -R analyst:estation /tmp/eStation2/
 
 # Creating temporary path in tmp after boot (in case of). Configuration of rc.local
 echo "`date +'%Y-%m-%d %H:%M '` Create temporary paths in rc.local"
+grep "rm -fr /tmp/eStation2/app" /etc/rc.local >/dev/null ||echo "rm -fr /tmp/eStation2/apps.*" >> /etc/rc.local
 grep "mkdir -p -m 775 /tmp/eStation2/" /etc/rc.local >/dev/null ||echo "mkdir -p -m 775 /tmp/eStation2/" >> /etc/rc.local
 grep "mkdir -p -m 775 /tmp/eStation2/services/" /etc/rc.local >/dev/null ||echo "mkdir -p -m 775 /tmp/eStation2/services/" >> /etc/rc.local
 grep "mkdir -p -m 775 /tmp/eStation2/processing/" /etc/rc.local >/dev/null ||echo "mkdir -p -m 775 /tmp/eStation2/processing/" >> /etc/rc.local
@@ -120,7 +125,7 @@ mkdir -p -m 775 /data/spirits
 
 # Chown a vérifier si utile
 echo "`date +'%Y-%m-%d %H:%M '` Assign /data to analyst User"
-chown -R analyst:estation /data 
+chown -R analyst:estation /data/ 
 
 # Change permissions /var/www (for allowing analyst to change version)
 chmod 777 /var/www
@@ -257,6 +262,10 @@ sed -i "s|.*active_version.=.*|active_version = %{version}|" /eStation2/settings
 #if [[ ! -h /usr/lib64/libmapserver.so ]]; then ln -fs /usr/local/lib64/libmapserver.so /usr/lib64/; fi
 #if [[ ! -h /usr/lib64/libmapserver.so.1 ]]; then ln -fs /usr/local/lib64/libmapserver.so.1 /usr/lib64/; fi
 #if [[ ! -h /usr/lib64/libmapserver.so.6.4.1 ]]; then ln -fs /usr/local/lib64/libmapserver.so.6.4.1 /usr/lib64/; fi
+
+# Start the eStation Services 
+echo "`date +'%Y-%m-%d %H:%M '` Starting all_servicesd"
+/etc/init.d/tas_all_servicesd start
 
 # Before uninstall: remove the link and copy all code into a bck dir
 %preun
