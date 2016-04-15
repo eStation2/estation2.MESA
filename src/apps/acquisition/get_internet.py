@@ -105,7 +105,7 @@ def get_list_current_subdirs_ftp(remote_url, usr_pwd):
 #   Output: list of matched files
 #
 
-def get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex, my_logger=None):
+def get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex, my_logger=None, end_date=None):
 
 
     if my_logger is None:
@@ -121,6 +121,16 @@ def get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex, my_logger=N
     list_matches=[]
     init_level = 1
     get_list_matching_files_subdir_ftp(list_matches, remote_url, usr_pwd, full_regex, init_level, '', my_logger=use_logger)
+
+    # Manage end_date
+    if end_date is not None:
+        if isinstance(end_date,int) or isinstance(end_date,long):
+            if (end_date < 0):
+                try:
+                    sorted_list = sorted(list_matches)
+                    list_matches = sorted_list[:end_date]
+                except:
+                    use_logger.warning('Error managing end_date: %i' % end_date)
 
     # Debug
     toprint=''
@@ -418,8 +428,13 @@ def loop_get_internet(dry_run=False):
                             internet_type = internet_source.type
 
                             if internet_type == 'ftp':
+                                # Manage the end_date (added for MODIS_FIRMS)
+                                if (internet_source.end_date != ''):
+                                    end_date = internet_source.end_date
+                                else:
+                                    end_date = None
                                 # Note that the following list might contain sub-dirs (it reflects full_regex)
-                                current_list = get_list_matching_files_dir_ftp(str(internet_source.url), str(usr_pwd), str(internet_source.include_files_expression))
+                                current_list = get_list_matching_files_dir_ftp(str(internet_source.url), str(usr_pwd), str(internet_source.include_files_expression), end_date=end_date)
 
                             elif internet_type == 'http_tmpl':
                                 # Manage the dates:start_date is mandatory .. end_date replaced by 'today' if missing/wrong
