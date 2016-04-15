@@ -6,6 +6,7 @@ from apps.acquisition import ingestion
 from database import querydb
 import unittest
 import os
+import glob
 # Overwrite Dirs
 from lib.python import es_logging as log
 logger = log.my_logger(__name__)
@@ -510,3 +511,41 @@ class TestIngestion(unittest.TestCase):
         # ingestion.ingest_file_archive(input_file, target_mapset, echo_query=False)()
 
         ingestion.ingest_archives_eumetcast()
+
+    def test_ingest_jrc_wbd(self):
+
+        date_fileslist = glob.glob('/data/ingest/JRC-WBD_*')
+        #date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
+        in_date = '20160101'
+        productcode = 'wd-gee'
+        productversion = '1.0'
+        subproductcode = 'occurr'
+        mapsetcode = 'WD-GEE-ECOWAS-AVG'
+        datasource_descrID='JRC:WBD:GEE'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
+                                                                              source_id=datasource_descrID):
+
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+            #self.assertEqual(1, 1)
