@@ -147,19 +147,23 @@ class Frequency(object):
 
     # In case of date_format='mmdd', it adds the current year
     def extract_date(self, filename):
-        if self.dateformat == self.DATEFORMAT.MONTHDAY:
-            date_parts = (datetime.date.today().year, int(filename[:2]), int(filename[2:4]))
-            date = datetime.date(*date_parts)
-        elif self.dateformat == self.DATEFORMAT.YYYY:
-            date_parts = (int(filename[:4]),1,1)
-            date = datetime.date(*date_parts)
-        else:
-            date_parts = (int(filename[:4]), int(filename[4:6]), int(filename[6:8]))
-            if self.dateformat == self.DATEFORMAT.DATE:
+        try:
+            if self.dateformat == self.DATEFORMAT.MONTHDAY:
+                date_parts = (datetime.date.today().year, int(filename[:2]), int(filename[2:4]))
+                date = datetime.date(*date_parts)
+            elif self.dateformat == self.DATEFORMAT.YYYY:
+                date_parts = (int(filename[:4]),1,1)
                 date = datetime.date(*date_parts)
             else:
-                date_parts += (int(filename[8:10]), int(filename[10:12]))
-                date = datetime.datetime(*date_parts)
+                date_parts = (int(filename[:4]), int(filename[4:6]), int(filename[6:8]))
+                if self.dateformat == self.DATEFORMAT.DATE:
+                    date = datetime.date(*date_parts)
+                else:
+                    date_parts += (int(filename[8:10]), int(filename[10:12]))
+                    date = datetime.datetime(*date_parts)
+        except:
+            logger.warning('Error in managing file: %s' % filename)
+
         return date
 
     # It is done for the case of date_format='mmdd': it returns list of existing 'mmdd'
