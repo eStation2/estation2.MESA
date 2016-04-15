@@ -45,10 +45,10 @@ class TestGetInternet(unittest.TestCase):
         # Retrieve a list of MODIS burndate file .. check only one present
         remote_url='ftp://nrt1.modaps.eosdis.nasa.gov/FIRMS/Global'
         usr_pwd='jrcMondeFires:FIRE@data1'
-        full_regex   ='Global_MCD14DL_201435..txt'
+        full_regex   ='Global_MCD14DL_201.*.txt'
         file_to_check='Global_MCD14DL_2014350.txt'
 
-        list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
+        list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex, end_date=-2)
 
         self.assertTrue(file_to_check in list)
 
