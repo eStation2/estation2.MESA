@@ -79,5 +79,17 @@ b. Run: /usr/bin/python /usr/local/lib/python2.7/dist-packages/ee/authenticate.p
 c. Get the code in the browser an copy to command line
 d. Get -> Successfully saved authorization to /home/esuser/.config/earthengine/credentials
 
+H Install Google Drive API on mesa-proc (for downloading GEE-WBD)
+------------------------------------------------------------------------------------------------
 
+1. Install the Python package:
+pip install -U google-api-python-client
+
+NOTE: possible issues to be solved:
+1.a: the pip file is not synced with python version ->  'sudo vi /usr/local/src/tas/anaconda/bin/pip' and correct version to anaconda-2.7
+1.b: the yum repo are not updated (copy from mesa-proc)
+1.c: permissions of /usr/local/src/tas/anaconda/bin and /usr/local/src/tas/anaconda/lib/python2.7/site-packages/ not OK -> change to adminuser
+
+2. Copy the credential file /home/adminuser/.credentials/drive-python-quickstart.json from a 'reference' machine.
+2.a You can re-create the file as described in http://wescpy.blogspot.it/2014/09/simple-google-api-access-from-python.html under 'Google API access'
 
