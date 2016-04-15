@@ -96,7 +96,8 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
 
 def create_archive_from_request(request_file):
 
-    # Creates an archive from a 'json' request file
+    # Creates an archive file (.tgz) from a 'json' request file
+    # Create a self-extracting archive (.bsx?) from a template script and the .tgz
 
     # Read the request
     try:
@@ -114,12 +115,12 @@ def create_archive_from_request(request_file):
     # Define the archive filename
     #archive_name=get_archive_name(my_product,my_version,'0001')
     archive_name=request_file.replace('.req','.tgz')
-    print archive_name
+    self_extracting_name=request_file.replace('.req','.bsx')
 
     n_mapsets = len(my_mapsets)
     for my_mapset in my_mapsets:
         mapsetcode = my_mapset['mapsetcode']
-        print mapsetcode
+
         mapsetdatasets = my_mapset['mapsetdatasets']
         for mapsetdataset in mapsetdatasets:
             subproductcode =  mapsetdataset['subproductcode']
@@ -128,6 +129,18 @@ def create_archive_from_request(request_file):
             # Create a product object
             product = Product(product_code=my_product, version=my_version)
             product.create_tar(missing_info, filetar=archive_name, tgz=True)
+
+    # Get the decompression script template
+    decompress_file = es_constants.decompress_script
+
+    target = open(self_extracting_name,'wb')
+    shutil.copyfileobj(open(decompress_file,'rb'),target)
+    shutil.copyfileobj(open(archive_name,'rb'),target)
+    target.close()
+    os.chmod(self_extracting_name,0775)
+
+    # Remove .tgz file
+    os.remove(archive_name)
 
     return
 
