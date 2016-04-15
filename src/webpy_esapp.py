@@ -322,7 +322,7 @@ class SaveRequest:
                                    separators=(', ', ': '))
 
             ts = time.time()
-            st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H%M')
+            st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H%M')
 
             requestfilename = requestfilename + '_' + st + '.req'
             with open(es_constants.es2globals['requests_dir']+requestfilename, 'w+') as f:
