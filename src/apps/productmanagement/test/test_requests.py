@@ -20,6 +20,8 @@ from config import es_constants
 # from database import connectdb
 # from database import querydb
 from lib.python import es_logging as log
+from apps.productmanagement import requests
+
 logger = log.my_logger(__name__)
 
 req_dir=es_constants.es2globals['requests_dir']
@@ -102,15 +104,7 @@ class TestRequests(unittest.TestCase):
     def test_achive_creation_1(self):
 
         # Read the request - type c.
-        file_req='/eStation2/requests/vgt-fapar_V1.4_SPOTV-ECOWAS-1km_fapar_2016-02-23 1458.req'
+        file_req='/eStation2/requests/fewsnet-rfe_2.0_FEWSNET-Africa-8km_all_enabled_datasets_2016-04-07_1213.req'
         requests.create_archive_from_request(file_req)
         return
-        # Read the request - type b.
-        file_req='/eStation2/requests/vgt-ndvi_sv2-pv2.1_SPOTV-Africa-1km_all_enabled_datasets_2016-02-23 1457.req'
-        requests.create_archive_from_request(file_req)
-        return
-
-        # Read the request - type a.
-        file_req='/eStation2/requests/vgt-fapar_V1.4_all_enabled_mapsets_2016-02-23 1457.req'
-        requests.create_archive_from_request(file_req)
 
