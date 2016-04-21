@@ -1,7 +1,7 @@
 Summary: eStation 2.0 application from JRC
 Name: eStation2-Apps
 Version: 2.0.3
-Release: 8
+Release: 10
 Group: eStation
 License: GPL
 Source: /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz
@@ -262,6 +262,11 @@ sed -i "s|.*active_version.=.*|active_version = %{version}|" /eStation2/settings
 #if [[ ! -h /usr/lib64/libmapserver.so ]]; then ln -fs /usr/local/lib64/libmapserver.so /usr/lib64/; fi
 #if [[ ! -h /usr/lib64/libmapserver.so.1 ]]; then ln -fs /usr/local/lib64/libmapserver.so.1 /usr/lib64/; fi
 #if [[ ! -h /usr/lib64/libmapserver.so.6.4.1 ]]; then ln -fs /usr/local/lib64/libmapserver.so.6.4.1 /usr/lib64/; fi
+
+# Specific to upgrade from 2.0.2 -> re-set the THEMA (for pads settings table)
+thema=`grep -i thema /eStation2/settings/system_settings.ini | sed 's/thema =//'| sed 's/ //g'`
+psql -U estation -d estationdb -c "select products.set_thema('$thema')"
+echo "`date +'%Y-%m-%d %H:%M '` Set again the Thema to $thema" 
 
 # Start the eStation Services 
 echo "`date +'%Y-%m-%d %H:%M '` Starting all_servicesd"

@@ -1,7 +1,7 @@
 #!/bin/bash
-yum remove eStation2-Docs.x86_64
-yum remove eStation2-Layers.x86_64
-yum remove eStation2-Apps.x86_64
+yum remove -y eStation2-Docs.x86_64
+yum remove -y eStation2-Layers.x86_64
+yum remove -y eStation2-Apps.x86_64
 
 rm -fr /var/www/eStation2*
 rm -fr /tmp/eStation2/*
