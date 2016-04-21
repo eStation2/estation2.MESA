@@ -91,10 +91,11 @@ Ext.define('esapp.Utils', {
             }
         },
 
-        fieldExists: function(o){return typeof o != 'undefined' && o != null },   // && o.trim()!='';
+        fieldExists: function(o){return typeof o != 'undefined' && o != null},   // && o.trim()!='';
 
         objectExists: function (o){return typeof o != 'undefined' && o != null;},
 
+        is_array: function (input){return typeof(input)=='object'&&(input instanceof Array);},
 
         RGBtoHex: function (R,G,B) {return "#"+this.toHex(R)+this.toHex(G)+this.toHex(B)},
         //function RGBToHex(rgb) {
@@ -125,6 +126,23 @@ Ext.define('esapp.Utils', {
             return R + ',' + G + ',' + B;
         },
 
+        convertRGBtoHex: function(color){
+            if (color.charAt(0) != "#") { // convert RBG to HEX if RGB value is given. Highcharts excepts only HEX.
+                var rgbarray = [];
+                if (this.is_array(color)) {
+                    rgbarray = color;
+                }
+                else {
+                    rgbarray = color.split(" "); // toString().replace(/,/g,' ');
+                }
+
+                var tsR = rgbarray[0];
+                var tsG = rgbarray[1];
+                var tsB = rgbarray[2];
+                color = this.RGBtoHex(tsR, tsG, tsB);
+            }
+            return color;
+        },
 
         invertHexToRGB: function (hexvalue){
             if(hexvalue.charAt(0)!="#")

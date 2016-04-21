@@ -90,23 +90,28 @@ Ext.define('esapp.view.analysis.analysisMainController', {
             Ext.getCmp('timeseries-mapset-dataset-grid').hide();
             Ext.getCmp('ts_timeframe').hide();
             Ext.getCmp('gettimeseries_btn').setDisabled(true);
+            Ext.getCmp('gettimeseries_btn2').setDisabled(true);
         }
         else {
             Ext.getCmp('timeseries-mapset-dataset-grid').show();
             Ext.getCmp('ts_timeframe').show();
             Ext.getCmp('gettimeseries_btn').setDisabled(false);
+            Ext.getCmp('gettimeseries_btn2').setDisabled(false);
         }
     },
 
-    getTimeseries: function(btn){
+    getTimeseriesSelections: function(){
         var timeseriesgrid = this.getView().lookupReference('timeseries-mapset-dataset-grid');
         var selectedTimeSeries = timeseriesgrid.getSelectionModel().selected.items;
         var wkt_polygon = this.getView().lookupReference('wkt_polygon');
+        var timeseriesselected = [];
+        var timeseriesselections = null;
         var yearTS = '';
         var tsFromPeriod = '';
         var tsToPeriod = '';
 
-        if (wkt_polygon.getValue() == '') {
+        //console.info(selectedTimeSeries);
+        if (wkt_polygon.getValue().trim() == '') {
             Ext.Msg.show({
                title: esapp.Utils.getTranslation('selectapolygon'),    // 'Select a polygon!',
                msg: esapp.Utils.getTranslation('pleaseselectapolygon'),    // 'Please select or draw a polygon in a MapView!',
@@ -115,7 +120,7 @@ Ext.define('esapp.view.analysis.analysisMainController', {
                animEl: '',
                icon: Ext.Msg.WARNING
             });
-            return;
+            return timeseriesselections;
         }
 
         if (selectedTimeSeries.length >0){
@@ -130,7 +135,7 @@ Ext.define('esapp.view.analysis.analysisMainController', {
                        animEl: '',
                        icon: Ext.Msg.WARNING
                     });
-                    return;
+                    return timeseriesselections;
                 }
                 yearTS = Ext.getCmp("YearTimeseries").getValue();
                 tsFromPeriod = '';
@@ -147,7 +152,7 @@ Ext.define('esapp.view.analysis.analysisMainController', {
                        animEl: '',
                        icon: Ext.Msg.WARNING
                     });
-                    return;
+                    return timeseriesselections;
                 }
                 if (Ext.getCmp("ts_to_period").getValue()== null || Ext.getCmp("ts_to_period").getValue() == '') {
                     Ext.getCmp("ts_to_period").validate();
@@ -159,7 +164,7 @@ Ext.define('esapp.view.analysis.analysisMainController', {
                        animEl: '',
                        icon: Ext.Msg.WARNING
                     });
-                    return;
+                    return timeseriesselections;
                 }
                 tsFromPeriod = Ext.getCmp("ts_from_period").getValue();
                 tsToPeriod = Ext.getCmp("ts_to_period").getValue();
@@ -174,10 +179,9 @@ Ext.define('esapp.view.analysis.analysisMainController', {
                    animEl: '',
                    icon: Ext.Msg.WARNING
                 });
-                return;
+                return timeseriesselections;
             }
 
-            var timeseriesselected = [];
             selectedTimeSeries.forEach(function(product) {
                 var productObj = {
                     "productcode": product.get('productcode'),
@@ -200,11 +204,10 @@ Ext.define('esapp.view.analysis.analysisMainController', {
                animEl: '',
                icon: Ext.Msg.WARNING
             });
-            return;
+            return timeseriesselections;
         }
 
-
-        var newTSChartWin = new esapp.view.analysis.timeseriesChartView({
+        timeseriesselections = {
             selectedTimeseries: timeseriesselected,
             yearTS: yearTS,
             tsFromPeriod: tsFromPeriod,
@@ -212,9 +215,28 @@ Ext.define('esapp.view.analysis.analysisMainController', {
             wkt:wkt_polygon.getValue(),
             country:'',
             region: ''
-        });
-        this.getView().add(newTSChartWin);
-        newTSChartWin.show();
+        };
+
+        return timeseriesselections
+    },
+    generateTimeseriesChart: function(btn){
+
+        var TSChartWinConfig = this.getTimeseriesSelections();
+        if (TSChartWinConfig != null){
+            var newTSChartWin = new esapp.view.analysis.timeseriesChartView(TSChartWinConfig);
+
+            //var newTSChartWin = new esapp.view.analysis.timeseriesChartView({
+            //    selectedTimeseries: timeseriesselected,
+            //    yearTS: yearTS,
+            //    tsFromPeriod: tsFromPeriod,
+            //    tsToPeriod: tsToPeriod,
+            //    wkt:wkt_polygon.getValue(),
+            //    country:'',
+            //    region: ''
+            //});
+            this.getView().add(newTSChartWin);
+            newTSChartWin.show();
+        }
     }
 
 });

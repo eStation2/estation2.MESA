@@ -653,10 +653,10 @@ Ext.define('esapp.view.analysis.mapViewController', {
             //console.info(menuitem);
             //var mapViewContainer = this.getView().lookupReference('mapcontainer_'+me.id);
             var myLoadMask = new Ext.LoadMask({
-                //floating: false,
-                alwaysOnTop: true,
                 msg    : esapp.Utils.getTranslation('loadingvectorlayer'),   // 'Loading vector layer...',
-                target : Ext.getCmp(me.id) // Ext.getCmp('mapcontainer_'+me.id)  //
+                target : Ext.getCmp('mapcontainer_'+me.id)  //  Ext.getCmp(me.id) //
+                ,toFrontOnShow: true
+                ,useTargetEl:true
             });
             myLoadMask.show();
 
@@ -1031,7 +1031,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                     admin0name.setValue('&nbsp;');
                     admin1name.setValue('&nbsp;');
                     admin2name.setValue('&nbsp;');
-                    wkt_polygon.setValue('&nbsp;');
+                    wkt_polygon.setValue('');
                     selectedregion.setValue('&nbsp;');
                     Ext.getCmp('fieldset_selectedregion').hide();
                 }
