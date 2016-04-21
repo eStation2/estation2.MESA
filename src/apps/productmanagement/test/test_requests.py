@@ -16,9 +16,6 @@ from apps.productmanagement import requests
 from apps.productmanagement import products
 
 from config import es_constants
-# from lib.python import functions
-# from database import connectdb
-# from database import querydb
 from lib.python import es_logging as log
 from apps.productmanagement import requests
 
