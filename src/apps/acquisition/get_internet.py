@@ -128,7 +128,8 @@ def get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex, my_logger=N
             if (end_date < 0):
                 try:
                     sorted_list = sorted(list_matches)
-                    list_matches = sorted_list[:end_date]
+                    if len(sorted_list) >= -end_date:
+                        list_matches = sorted_list[:end_date]
                 except:
                     use_logger.warning('Error managing end_date: %i' % end_date)
 
@@ -259,8 +260,36 @@ def build_list_matching_for_http(base_url, template, from_date, to_date, frequen
         logger.debug("Error in datasets.Dataset.get_frequency: %s" %inst.args[0])
         raise
 
+    # Manage the start_date (mandatory).
     try:
-        dates = frequency.get_dates(from_date, to_date)
+        # If it is a date, convert to datetime
+        if functions.is_date_yyyymmdd(str(from_date), silent=True):
+            datetime_start=datetime.datetime.strptime(str(from_date),'%Y%m%d')
+        else:
+            # If it is a negative number, subtract from current date
+            if isinstance(from_date,int) or isinstance(from_date,long):
+                if from_date < 0:
+                    datetime_start=datetime.datetime.today() - datetime.timedelta(days=-from_date)
+            else:
+                raise Exception("Start Date not valid")
+    except:
+        raise Exception("Start Date not valid")
+
+    # Manage the end_date (mandatory).
+    try:
+        if functions.is_date_yyyymmdd(str(to_date), silent=True):
+            datetime_end=datetime.datetime.strptime(str(to_date),'%Y%m%d')
+        # If it is a negative number, subtract from current date
+        elif isinstance(to_date,int) or isinstance(to_date,long):
+            if to_date < 0:
+                datetime_end=datetime.datetime.today() - datetime.timedelta(days=-to_date)
+        else:
+            datetime_end=datetime.datetime.today()
+    except:
+        pass
+
+    try:
+        dates = frequency.get_dates(datetime_start, datetime_end)
     except Exception as inst:
         logger.debug("Error in frequency.get_dates: %s" %inst.args[0])
         raise
@@ -365,7 +394,7 @@ def loop_get_internet(dry_run=False):
                         logger.warning("Sleep time not defined. Setting to default=1min. Continue.")
                         time_sleep = 60
 
-                    logger.debug("Reading active INTERNET data sources from database")
+                    logger.info("Reading active INTERNET data sources from database")
                     internet_sources_list = querydb.get_active_internet_sources(echo=echo_query)
 
                     # Loop over active triggers
@@ -437,32 +466,23 @@ def loop_get_internet(dry_run=False):
                                 current_list = get_list_matching_files_dir_ftp(str(internet_source.url), str(usr_pwd), str(internet_source.include_files_expression), end_date=end_date)
 
                             elif internet_type == 'http_tmpl':
-                                # Manage the dates:start_date is mandatory .. end_date replaced by 'today' if missing/wrong
-                                try:
-                                  if functions.is_date_yyyymmdd(str(internet_source.start_date), silent=True):
-                                    datetime_start=datetime.datetime.strptime(str(internet_source.start_date),'%Y%m%d')
-                                  else:
-                                    raise Exception("Start Date not valid")
-                                except:
-                                    raise Exception("Start Date not valid")
-                                try:
-                                  if functions.is_date_yyyymmdd(str(internet_source.end_date), silent=True):
-                                    datetime_end=datetime.datetime.strptime(str(internet_source.end_date),'%Y%m%d')
-                                  else:
-                                    datetime_end=datetime.datetime.today()
-                                except:
-                                    pass
                                 # Create the full filename from a 'template' which contains
                                 try:
                                     current_list = build_list_matching_for_http(str(internet_source.url),
                                                                                 str(internet_source.include_files_expression),
-                                                                                datetime_start,
-                                                                                datetime_end,
+                                                                                internet_source.start_date,
+                                                                                internet_source.end_date,
                                                                                 str(internet_source.frequency_id))
                                 except:
                                      logger.error("Error in creating date lists. Continue")
-
+                            elif internet_type == 'offline':
+                                     logger.info("This internet source is meant to work offline (GoogleDrive)")
+                                     current_list = []
+                            else:
+                                     logger.error("No correct type for this internet source type: %s" %internet_type)
+                                     current_list = []
                             logger_spec.debug("Number of files currently available for source %s is %i", internet_source.internet_id, len(current_list))
+
                             if len(current_list) > 0:
                                 logger_spec.debug("Number of files already copied for trigger %s is %i", internet_source.internet_id, len(processed_list))
                                 listtoprocess = []
