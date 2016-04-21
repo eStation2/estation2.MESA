@@ -185,9 +185,9 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                     fieldLabel: esapp.Utils.getTranslation('start_date'),    // 'Start date',
                     reference: 'start_date',
                     msgTarget: 'side',
-                    emptyText: 'YYYYMMDD',
+                    emptyText: '',
                     maxValue: 99999999,
-                    minValue: 0,
+                    minValue: -99999999,
                     allowDecimals: true,
                     hideTrigger: false,
                     bind: '{theInternetSource.start_date}'
@@ -196,9 +196,9 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                     fieldLabel: esapp.Utils.getTranslation('end_date'),    // 'End date',
                     reference: 'end_date',
                     msgTarget: 'side',
-                    emptyText: 'YYYYMMDD',
+                    emptyText: '',
                     maxValue: 99999999,
-                    minValue: 0,
+                    minValue: -99999999,
                     allowDecimals: true,
                     hideTrigger: false,
                     bind: '{theInternetSource.end_date}'
