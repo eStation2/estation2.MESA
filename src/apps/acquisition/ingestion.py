@@ -711,44 +711,59 @@ def pre_process_netcdf(subproducts, tmpdir , input_files, my_logger):
 # It receives in input the netcdf file (1 ONLY)
 # It does the extraction of relevant datasets
 #
+# Note: modified on 19.4.16 to return a list of files (one foreach subproduct-mapset)
+#
     # Prepare the output file list
     pre_processed_list = []
 
+    if isinstance(input_files, list):
+        if len(input_files) > 1:
+            raise Exception('More than 1 file passed: %i ' % len(input_files))
+    input_file = input_files[0]
     # Build a list of subdatasets to be extracted
     list_to_extr = []
+    geotiff_files = []
+    previous_id_subdataset = ''
+
     for sprod in subproducts:
         if sprod != 0:
-            list_to_extr.append(sprod['re_extract'])
+            subprod_to_extr = sprod['re_extract']
 
-    geotiff_files = []
-    # Loop over unzipped files and extract the relevant sds to tmp geotiffs
-    for input_file in input_files:
+            # Test the. nc file and read list of datasets
+            netcdf = gdal.Open(input_file)
+            sdslist = netcdf.GetSubDatasets()
 
-        # Test the. nc file and read list of datasets
-        netcdf = gdal.Open(input_file)
-        sdslist = netcdf.GetSubDatasets()
+            if len(sdslist) >= 1:
+                # Loop over datasets and extract the one from each unzipped
+                for subdataset in sdslist:
+                    netcdf_subdataset = subdataset[0]
+                    id_subdataset = netcdf_subdataset.split(':')[-1]
 
-        if len(sdslist) >= 1:
-            # Loop over datasets and extract the one from each unzipped
-            for subdataset in sdslist:
-                netcdf_subdataset = subdataset[0]
-                id_subdataset = netcdf_subdataset.split(':')[-1]
-
-                if id_subdataset in list_to_extr:
-                    selected_sds = 'NETCDF:' + input_file + ':' + id_subdataset
-                    sds_tmp = gdal.Open(selected_sds)
+                    if id_subdataset == subprod_to_extr:
+                        if id_subdataset == previous_id_subdataset:
+                            # Just append the last filename once again
+                            geotiff_files.append(myfile_path)
+                        else:
+                            selected_sds = 'NETCDF:' + input_file + ':' + id_subdataset
+                            sds_tmp = gdal.Open(selected_sds)
+                            filename = os.path.basename(input_file) + '.geotiff'
+                            myfile_path = os.path.join(tmpdir, filename)
+                            write_ds_to_geotiff(sds_tmp, myfile_path)
+                            sds_tmp = None
+                            geotiff_files.append(myfile_path)
+                            previous_id_subdataset = id_subdataset
+            else:
+                if id_subdataset == previous_id_subdataset:
+                    # Just append the last filename once again
+                    geotiff_files.append(myfile_path)
+                else:
+                    # No subdatasets: e.g. SST -> read directly the .nc
                     filename = os.path.basename(input_file) + '.geotiff'
                     myfile_path = os.path.join(tmpdir, filename)
-                    write_ds_to_geotiff(sds_tmp, myfile_path)
-                    sds_tmp = None
+                    write_ds_to_geotiff(netcdf, myfile_path)
                     geotiff_files.append(myfile_path)
-        else:
-          # No subdatasets: e.g. SST -> read directly the .nc
-            filename = os.path.basename(input_file) + '.geotiff'
-            myfile_path = os.path.join(tmpdir, filename)
-            write_ds_to_geotiff(netcdf, myfile_path)
-            geotiff_files.append(myfile_path)
-        netcdf = None
+                    previous_id_subdataset = id_subdataset
+            netcdf = None
 
     return geotiff_files
 
@@ -1150,7 +1165,6 @@ def pre_process_wdb_gee(subproducts, tmpdir, input_files, my_logger):
 
     # Assign output file
     interm_files_list.append(output_file)
-
     return interm_files_list
 
 def pre_process_ecmwf_mars(subproducts, tmpdir , input_files, my_logger):
@@ -1623,7 +1637,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             trg_ds.SetProjection(orig_ds.GetProjectionRef())
             trg_ds.SetGeoTransform(orig_geo_transform)
 
-            if mapset_id != 'WD-GEE-ECOWAS' and mapset_id != 'WD-GEE-ECOWAS-AVG':
+            if mapset_id != 'WD-GEE-ECOWAS-1' and mapset_id != 'WD-GEE-ECOWAS-AVG':
                 # Apply rescale to data
                 scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
                                        out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger)
