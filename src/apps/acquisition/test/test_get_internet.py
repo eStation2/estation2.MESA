@@ -171,12 +171,13 @@ class TestGetInternet(unittest.TestCase):
     #   Get list of files from FEWSNET HTTP (id: USGS:EARLWRN:FEWSNET)
     #   ---------------------------------------------------------------------------
 
+    # Original test
     def TestRemoteHttp_FEWSNET(self):
 
         remote_url='http://earlywarning.usgs.gov/ftp2/raster/rf/a/'
-        from_date = datetime.date(2015,11,21)
-        to_date = datetime.date(2015,12,1)
-        template='%Y/a%y%m%{dkm}rb.zip'         # Where are data for 2015 ??
+        from_date = '20151101'
+        to_date = '20160611'
+        template='%Y/a%y%m%{dkm}rb.zip'
         frequency = 'e1dekad'
 
         files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
@@ -184,15 +185,41 @@ class TestGetInternet(unittest.TestCase):
         file_to_check='2015/a15121rb.zip'
         self.assertTrue(file_to_check in files_list)
 
+    # Test new version (2.0.3-9)
+    def TestRemoteHttp_FEWSNET_1(self):
+
+        remote_url=''   # Not used
+        from_date = '20151101'
+        template='%Y/a%y%m%{dkm}rb.zip'
+        frequency = 'e1dekad'
+
+        # Check until current dekad (see output to terminal)
+        to_date = ''
+        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        print ("Current file: %s " % files_list[-1])
+
+        # Check until current dekad (see output to terminal)
+        to_date = -10
+        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        print ("Latest file: %s " % files_list[-1])
+
+        # Check from 6 months ago to now (should always be 18 files)
+        from_date = -180
+        to_date = ''
+        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        self.assertEqual(len(files_list),18)
+
     #   ---------------------------------------------------------------------------
     #   Test download of files from GSFC oceandata http site (id:GSFC:OCEAN:MODIS:SST:1D)
     #   ---------------------------------------------------------------------------
+
+    # Original test
     def TestRemoteHttp_MODIS_SST_1DAY(self):
 
         remote_url='http://oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Daily/4km/SST/'
         remote_url='http://oceandata.sci.gsfc.nasa.gov/cgi/getfile/'
-        from_date = datetime.date(2015,7,7)
-        to_date = datetime.date(2015,10,1)
+        from_date = '20150707'
+        to_date = '20151001'
         template='A%Y%j.L3m_DAY_SST_sst_4km.nc'
         usr_pwd='anonymous:anonymous'
         frequency = 'e1day'
@@ -202,14 +229,43 @@ class TestGetInternet(unittest.TestCase):
         file_to_check='A2015211.L3m_DAY_SST_sst_4km.nc'
         self.assertTrue(file_to_check in files_list)
 
+    # Test new version (2.0.3-9)
+
+    def TestRemoteHttp_MODIS_SST_1DAY_1(self):
+
+        remote_url='http://oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Daily/4km/SST/'
+        remote_url=''   # Not used
+        template='A%Y%j.L3m_DAY_SST_sst_4km.nc'
+        frequency = 'e1day'
+
+        # Check until current day (check output to terminal)
+        from_date = '20150707'
+        to_date = ''
+        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        print files_list[-1]
+
+        # Check until yesterday (check output to terminal)
+        from_date = '20150707'
+        to_date = -1
+        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        print files_list[-1]
+
+        # Check last 30 days (check list length = 31)
+        from_date = -30
+        to_date = ''
+        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        self.assertEqual(len(files_list),31)
+
+
     #   ---------------------------------------------------------------------------
     #   Test download of Kd daily data from GSFC oceandata http site (id:GSFC:OCEAN:MODIS:KD:1D)
     #   ---------------------------------------------------------------------------
+    # Original test
     def TestRemoteHttp_MODIS_KD_1DAY(self):
 
         remote_url='http://oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Daily/4km/Kd/'
-        from_date = datetime.date(2014,1,1)
-        to_date = datetime.date(2014,12,31)
+        from_date = '20140101'
+        to_date = '20141231'
         template='%Y/A%Y%j.L3m_DAY_KD490_Kd_490_4km.bz2'       # introduce non-standard placeholder
         usr_pwd='anonymous:anonymous'
         frequency = 'e1dekad'
@@ -222,6 +278,8 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #   Test download of MOD09 files from USGS http site (id:MOD09GA_Africa)
     #   ---------------------------------------------------------------------------
+
+    # Original test
     def TestRemoteHttp_MOD09_GQ_005(self):
 
         remote_url='http://e4ftl01.cr.usgs.gov/MOLT/MOD09GQ.005/2000.02.24/'
@@ -246,6 +304,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #   Test download of WBD-JRC-GEE
     #   ---------------------------------------------------------------------------
+    # Original test -> to be verified
     def TestRemoteHttp_WBD_JRC(self):
 
         remote_url='https://drive.google.com/drive/folders/0B92vEFOyFC5BcHJ1TkxWWnhjMHM/'
@@ -262,18 +321,45 @@ class TestGetInternet(unittest.TestCase):
    #   ---------------------------------------------------------------------------
     #   Test remote http SPIRITS
     #   ---------------------------------------------------------------------------
+    # Original test
     def TestRemoteHttp_SPIRITS(self):
 
         # Retrieve a list of MODIS burndate file .. check only one present
         remote_url='http://spirits.jrc.ec.europa.eu/files/ecmwf/ope/africa/rain/'
 
-        from_date = datetime.date(2015,1,1)
-        to_date = datetime.date(2015,12,31)
+        from_date = '20150101'
+        to_date = '20151231'
         template='ope_africa_rain_%Y%m%d.zip'       # introduce non-standard placeholder
         usr_pwd='anonymous:anonymous'
         frequency = 'e1dekad'
 
         files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
         print files_list
-        file_to_check='ope_africa_rain.20150221.zip'
+        file_to_check='ope_africa_rain_20150221.zip'
         self.assertTrue(file_to_check in files_list)
+
+    # Test new version (2.0.3-9)
+    def TestRemoteHttp_SPIRITS_1(self):
+
+        # Retrieve a list of MODIS burndate file .. check only one present
+        remote_url=''   # Not used
+        template='ope_africa_rain_%Y%m%{dkm2}.zip'       # introduce non-standard placeholder
+        frequency = 'e1dekad'
+
+        # Check until current day (check output to terminal)
+        from_date = '20150701'
+        to_date = ''
+        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        print files_list[-1]
+
+        # Check until 10 days ago (check output to terminal)
+        to_date = -10
+        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        print files_list[-1]
+
+        # Check last 90 days (check list length = 9)
+        from_date = -90
+        to_date = ''
+        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        self.assertEqual(len(files_list),9)
+
