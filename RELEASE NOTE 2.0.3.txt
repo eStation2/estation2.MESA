@@ -15,6 +15,7 @@
 - Avoid duplications in 'input_files' metadata tag - for ingestion of 'tile' products.
 - Modify get_internet/get_eumetcast.py to re-direct log output (2.0.3-6)
 - Modify get_internet to delete tmpdir in case of errors (2.0.3-8)
+- Modify get_internet to go to next source in case of error (2.0.3-10)
 
 1.2 Visualization
 
