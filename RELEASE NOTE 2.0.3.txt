@@ -42,6 +42,9 @@
 
 - Do not recompute climatology for MODIS monthly products (std_modis_monavg processing chain).
 - Activate sst-fronts calculation on all dates.
+- Manage netcdf files (MODIS 1D oceanography products) over 2 mapsets (IOC and UoG)
+- In get_internet sources, add the type ${dkm2} for http_tmpl type
+- Modify get_internet to better manage start_date (-10 means since 10 days ago) and end_date (2.0.3-9). Also in GUI
 
 2.2 Visualization
 
