@@ -362,7 +362,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
     try:
         tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_files[0]),
                                   dir=es_constants.base_tmp_dir)
-    except IOError:
+    except:
         my_logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
         return 1
 
