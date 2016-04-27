@@ -271,6 +271,7 @@ def build_list_matching_for_http(base_url, template, from_date, to_date, frequen
                 if from_date < 0:
                     datetime_start=datetime.datetime.today() - datetime.timedelta(days=-from_date)
             else:
+                logger.debug("Error in Start Date: must be YYYYMMDD or -Ndays")
                 raise Exception("Start Date not valid")
     except:
         raise Exception("Start Date not valid")
@@ -398,8 +399,8 @@ def loop_get_internet(dry_run=False):
                     internet_sources_list = querydb.get_active_internet_sources(echo=echo_query)
 
                     # Loop over active triggers
-                    try:
-                      for internet_source in internet_sources_list:
+                    for internet_source in internet_sources_list:
+                      try:
 
                         execute_trigger = True
                         # Get this from the pads database table (move from internet_source 'pull_frequency' to the pads table,
@@ -516,11 +517,11 @@ def loop_get_internet(dry_run=False):
                                 functions.dump_obj_to_pickle(processed_list, processed_list_filename)
                                 functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
-                      sleep(float(user_def_sleep))
-                    # Loop over sources
-                    except Exception as inst:
-                      logger.error("Error while processing source %s. Continue" % internet_source.descriptive_name)
-                      sleep(float(user_def_sleep))
+                        sleep(float(user_def_sleep))
+                      # Loop over sources
+                      except Exception as inst:
+                        logger.error("Error while processing source %s. Continue" % internet_source.descriptive_name)
+                    sleep(float(user_def_sleep))
 
     exit(0)
 
