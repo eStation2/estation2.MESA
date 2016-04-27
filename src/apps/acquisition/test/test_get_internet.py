@@ -171,6 +171,22 @@ class TestGetInternet(unittest.TestCase):
     #   Get list of files from FEWSNET HTTP (id: USGS:EARLWRN:FEWSNET)
     #   ---------------------------------------------------------------------------
 
+    # Test 2.0.3-9
+    def TestRemoteHttp_TAMSAT(self):
+
+        remote_url='http://tamsat.org.uk/public_data/'
+        from_date = '20151101'
+        to_date = '20160411'
+        template='%Y/%m/rfe%Y_%m-dk%{dkm}.nc'
+        frequency = 'e1dekad'
+
+        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+
+        #file_to_check='2015/a15121rb.zip'
+        #self.assertTrue(file_to_check in files_list)
+
+        status = get_file_from_url(remote_url+files_list[-1],  '/tmp/', target_file=None,userpwd='')
+
     # Original test
     def TestRemoteHttp_FEWSNET(self):
 
