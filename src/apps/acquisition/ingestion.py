@@ -155,7 +155,6 @@ def loop_ingestion(dry_run=False):
                     for filename in files:
                         date_position = int(datasource_descr.date_position)
                         if datasource_descr.format_type == 'delimited':
-                            # splitted_fn = re.split(r'[datasource_descr.delimiter\s]\s*', filename) ???? What is that for ?
                             splitted_fn = re.split(datasource_descr.delimiter, filename)
                             date_string = splitted_fn[date_position]
                             if len(date_string) > len(datasource_descr.date_format):
@@ -181,8 +180,7 @@ def loop_ingestion(dry_run=False):
                                 result = ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger_spec, echo_query=echo_query)
                             except:
                                 logger.error("Error in ingestion of file [%s] " % (functions.conv_list_2_string(date_fileslist)))
-                                result = 1
-                            if not result:
+                            else:
                                 if source.store_original_data:
                                 # Copy to 'Archive' directory
                                     output_directory = data_dir_out + functions.set_path_sub_directory(product['productcode'],
@@ -191,6 +189,7 @@ def loop_ingestion(dry_run=False):
                                                                                                    product['version'],
                                                                                                    'dummy_mapset_arg' )
                                     functions.check_output_dir(output_directory)
+                                    # Archive the files
                                     for file_to_move in date_fileslist:
                                         logger_spec.debug("     --> now archiving input files: %s" % file_to_move)
                                         new_location=output_directory+os.path.basename(file_to_move)
@@ -203,6 +202,7 @@ def loop_ingestion(dry_run=False):
                                             logger_spec.debug("     --> error in archiving file: %s" % file_to_move)
 
                                 else:
+                                    # Delete the files
                                     for file_to_remove in date_fileslist:
                                         logger_spec.debug("     --> now deleting input files: %s" % file_to_remove)
                                         try:
@@ -364,7 +364,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
                                   dir=es_constants.base_tmp_dir)
     except:
         my_logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
-        return 1
+        raise NameError('Error in creating tmpdir')
 
     if preproc_type != 'None':
         do_preprocess = 1
@@ -386,7 +386,8 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
                     my_logger.warning("Error in moving file: %s " % error_file)
 
             shutil.rmtree(tmpdir)
-            return 1
+            raise NameError('Error in preprocessing routine')
+
         # Error occurred and was detected in pre_process routine
         if str(composed_file_list)=='1':
             my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
@@ -401,7 +402,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
 
 
             shutil.rmtree(tmpdir)
-            return 1
+            raise NameError('Error in preprocessing routine')
     else:
         composed_file_list = input_files
 
@@ -420,7 +421,8 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
                 my_logger.warning("Error in moving file: %s " % error_file)
 
         shutil.rmtree(tmpdir)
-        return 1
+        raise NameError('Error in ingestion routine')
+
 
     # -------------------------------------------------------------------------
     # Remove the Temp working directory
@@ -429,6 +431,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
         shutil.rmtree(tmpdir)
     except:
         logger.error('Error in removing temporary directory. Continue')
+        raise NameError('Error in removing tmpdir')
 
     return 0
 
@@ -864,7 +867,7 @@ def pre_process_gzip (subproducts, tmpdir, input_files, my_logger):
     for input_file in list_input_files:
         my_logger.info('Unzipping/processing: .gzip case')
         gzipfile = gzip.open(input_file)                 # Create ZipFile object
-        data = gzipfile.read()                            # Get the list of its contents
+        data = gzipfile.read()                           # Get the list of its contents
         filename = os.path.basename(input_file)
         filename = filename.replace('.gz', '')
         myfile_path = os.path.join(tmpdir, filename)
