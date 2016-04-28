@@ -515,7 +515,9 @@ def pre_process_modis_hdf4_tile (subproducts, tmpdir , input_files, my_logger):
                 outputfile = tmpdir + os.path.sep + id_subdataset + '_' + str(index) + '.tif'
                 sds_tmp = gdal.Open(subdataset)
                 write_ds_to_geotiff(sds_tmp, outputfile)
-                # sds_tmp = None
+                sds_tmp = None
+
+        close_hdf_dataset(ifile)
 
     # Loop over the subproducts extracted and do the merging.
     for sprod in subproducts:
