@@ -1568,7 +1568,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         merge_existing_output = False
         # Check if the output file already exists
-        if os.path.isfile(output_filename) and datasource_descr.area_type == 'tile':
+        if os.path.isfile(output_filename) and datasource_descr.area_type in ['tile','region']:
 
             merge_existing_output = True
             # In case of merge, output_filename is generated first in 'tmp_dir', otherwise in final dir
