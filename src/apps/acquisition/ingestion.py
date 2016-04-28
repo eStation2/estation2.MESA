@@ -22,6 +22,7 @@ import numpy as N
 import time
 import shutil
 import gzip
+import psutil
 
 # import eStation2 modules
 from database import querydb
@@ -386,7 +387,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
                     my_logger.warning("Error in moving file: %s " % error_file)
 
             shutil.rmtree(tmpdir)
-            raise NameError('Error in preprocessing routine')
+            raise NameError('Caught Error in preprocessing routine')
 
         # Error occurred and was detected in pre_process routine
         if str(composed_file_list)=='1':
@@ -402,7 +403,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
 
 
             shutil.rmtree(tmpdir)
-            raise NameError('Error in preprocessing routine')
+            raise NameError('Detected Error in preprocessing routine')
     else:
         composed_file_list = input_files
 
@@ -557,18 +558,25 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger):
             raise Exception("Input file does not exist: %s" % ifile)
         # Unzip to tmpdir and add to list
         if re.match('.*\.bz2', ifile):
-            my_logger.debug('Decompressing bz2 file: ' + ifile)
-            bz2file = bz2.BZ2File(ifile)                    # Create ZipFile object
-            data = bz2file.read()                           # Get the list of its contents
-            filename = os.path.basename(ifile)
-            filename = filename.replace('.bz2', '')
-            myfile_path = os.path.join(tmpdir, filename)
-            myfile = open(myfile_path, "wb")
-            myfile.write(data)
-            myfile.close()
-            bz2file.close()
+            try:
+                my_logger.debug('Decompressing bz2 file: ' + ifile)
+                bz2file = bz2.BZ2File(ifile)                    # Create ZipFile object
+                data = bz2file.read()                           # Get the list of its contents
+                filename = os.path.basename(ifile)
+                filename = filename.replace('.bz2', '')
+                myfile_path = os.path.join(tmpdir, filename)
+                myfile = open(myfile_path, "wb")
+                myfile.write(data)
 
-            unzipped_input_files.append(myfile_path)
+                unzipped_input_files.append(myfile_path)
+            except:
+                my_logger.error('Error in unzipping file: ' + ifile)
+                myfile.close()
+                bz2file.close()
+                raise Exception ('Error in unzipping file')
+            else:
+                myfile.close()
+                bz2file.close()
 
     # Build a list of subdatasets to be extracted
     list_to_extr = []
@@ -577,7 +585,7 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger):
             list_to_extr.append(sprod['re_extract'])
 
     # Loop over unzipped files and extract relevant SDSs
-    for index, unzipped_file in enumerate(unzipped_input_files):
+    for unzipped_file in unzipped_input_files:
         my_logger.debug('Processing unzipped file: ' + unzipped_file)
         # Identify the region from filename
         region = unzipped_file.split('_')[-2]
@@ -588,19 +596,28 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger):
             raise Exception("Input file does not exist: %s" % unzipped_file)
 
         # Test the hdf file and read list of datasets
-        hdf = gdal.Open(unzipped_file)
-        sdsdict = hdf.GetMetadata('SUBDATASETS')
-        sdslist = [sdsdict[k] for k in sdsdict.keys() if '_NAME' in k]
+        try:
+            hdf = gdal.Open(unzipped_file)
+            sdsdict = hdf.GetMetadata('SUBDATASETS')
+            sdslist = [sdsdict[k] for k in sdsdict.keys() if '_NAME' in k]
 
-        # Loop over datasets and check if they have to be extracted
-        for subdataset in sdslist:
-            id_subdataset = subdataset.split(':')[-1]
-            id_subdataset = id_subdataset.replace('//', '')
-            if id_subdataset in list_to_extr:
-                outputfile = tmpdir + os.path.sep + id_subdataset + '_' + region + '.tif'
-                sds_tmp = gdal.Open(subdataset)
-                write_ds_to_geotiff(sds_tmp, outputfile)
-                sds_tmp = None
+            # Loop over datasets and check if they have to be extracted
+            for subdataset in sdslist:
+                id_subdataset = subdataset.split(':')[-1]
+                id_subdataset = id_subdataset.replace('//', '')
+                if id_subdataset in list_to_extr:
+                    outputfile = tmpdir + os.path.sep + id_subdataset + '_' + region + '.tif'
+                    sds_tmp = gdal.Open(subdataset)
+                    write_ds_to_geotiff(sds_tmp, outputfile)
+                    sds_tmp = None
+
+            close_hdf_dataset(unzipped_file)
+        except:
+            my_logger.error('Error in extracting SDS')
+            close_hdf_dataset(unzipped_file)
+            raise Exception('Error in extracting SDS')
+        else:
+            close_hdf_dataset(unzipped_file)
 
     # For each dataset, merge the files, by using the dedicated function
     for id_subdataset in list_to_extr:
@@ -610,7 +627,12 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger):
         # Ensure a file exist for each Mapsets as well
         pre_processed_files.append(output_file)
 
-    mosaic_lsasaf_msg(files_to_merge, output_file, '')
+    try:
+        mosaic_lsasaf_msg(files_to_merge, output_file, '')
+    except:
+        my_logger.error('Error in mosaicing')
+        raise Exception('Error in mosaicing')
+
     my_logger.debug('Output file generated: ' + output_file)
 
     return pre_processed_files
@@ -1304,7 +1326,7 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
             my_logger.error('Preproc_type not recognized:[%s] Check in DB table. Exit' % preproc_type)
     except:
         my_logger.error('Error in pre-processing routine. Exit')
-        return 1
+        raise NameError('Error in pre-processing routine')
 
     # Make sure it is a list (if only a string is returned, it loops over chars)
     if isinstance(interm_files, list):
@@ -2042,7 +2064,6 @@ def write_ds_to_geotiff(dataset, output_file):
     output_ds.GetRasterBand(1).WriteArray(data)
 
     output_ds = None
-    dataset = None
 
 
 def write_ds_and_mapset_to_geotiff(dataset, mapset, output_file):
@@ -2292,3 +2313,39 @@ def conv_data_type_to_gdal(type):
     else:
         return gdal.GDT_Int16
 
+#
+#   Closes hdf4/5 datasets (bug in gdal 1.9.2)
+#   Refs. see: http://trac.osgeo.org/gdal/ticket/5103
+#
+
+def close_hdf_dataset(filename):
+
+    # Get the list of open files
+    try:
+        p = psutil.Process(os.getpid())
+    except:
+        logger.error('Error in psutil. Exit')
+        raise
+
+    try:
+        open_files = p.get_open_files()
+    except:
+        logger.error('Error in getting fids. Exit')
+        raise
+
+    # Find the fid (convert tuple to dict, and look for the key)
+    try:
+        for open_file in open_files:
+            # Use regex, because open_files gets the /data-space/ prefix (simlynk)
+            if re.match('.*'+filename,open_file[0]):
+                my_fid=open_file[1]
+    except:
+        logger.error('Fid not found for file: %s' % filename)
+        raise
+
+    # Close the file
+    try:
+        os.close(my_fid)
+    except:
+        logger.error('Cannot close fid: %i' % my_fid)
+        raise
