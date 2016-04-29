@@ -117,7 +117,7 @@ Ext.define("esapp.view.analysis.mapView",{
                         iconAlign: ''
                     },
                     items: [{
-                        text: esapp.Utils.getTranslation('borderayers'),   // 'Border layers (FAO Gaul 2015)',
+                        text: esapp.Utils.getTranslation('borderlayers'),   // 'Border layers (FAO Gaul 2015)',
                         name: 'gaul2015',
                         //iconCls: 'layer-vector-add', // 'layers'
                         scale: 'medium',
