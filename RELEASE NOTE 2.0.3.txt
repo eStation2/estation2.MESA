@@ -19,6 +19,7 @@
 - Modified internet source for TAMSAT (tamsat.org.uk) (2.0.3-11)
 - Modified ingestion for check creating tmp_dir (2.0.3-11)
 - Make more robust ingestion service by raising more exceptions (2.0.3-11)
+- Fix the issue in ingestion of HDF5 files - GDAL 1.9.2 bug (2.0.3-12)
 
 1.2 Visualization
 
