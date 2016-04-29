@@ -23,6 +23,7 @@ import time
 import shutil
 import gzip
 import psutil
+from multiprocessing import *
 
 # import eStation2 modules
 from database import querydb
@@ -515,9 +516,7 @@ def pre_process_modis_hdf4_tile (subproducts, tmpdir , input_files, my_logger):
                 outputfile = tmpdir + os.path.sep + id_subdataset + '_' + str(index) + '.tif'
                 sds_tmp = gdal.Open(subdataset)
                 write_ds_to_geotiff(sds_tmp, outputfile)
-                sds_tmp = None
-
-        close_hdf_dataset(ifile)
+                # sds_tmp = None
 
     # Loop over the subproducts extracted and do the merging.
     for sprod in subproducts:
@@ -539,8 +538,36 @@ def pre_process_modis_hdf4_tile (subproducts, tmpdir , input_files, my_logger):
 
     return pre_processed_list
 
+def drive_pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger):
+# -------------------------------------------------------------------------------------------------------
+#   Drive the Pre-process LSASAF HDF5 files
+#
+    # This is a quick fix of the gdal 1.9.2 bug on closing HDF files (see http://trac.osgeo.org/gdal/ticket/5103)
+    # Since the files cannot be closed, and end up in reaching the max-number of open files (1024) we
+    # call the routine as a detached process
 
-def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger):
+    module_name = 'ingestion'
+    function_name = 'pre_process_lsasaf_hdf5'
+    proc_dir = __import__("apps.acquisition")
+    proc_pck = getattr(proc_dir, "acquisition")
+    proc_mod = getattr(proc_pck, module_name)
+    proc_func= getattr(proc_mod, function_name)
+    out_queue = Queue()
+
+    args = [subproducts, tmpdir, input_files, my_logger, out_queue]
+    try:
+        p = Process(target=proc_func, args=args)
+        p.start()
+        pre_processed_list = out_queue.get()
+        p.join()
+    except:
+        my_logger.error('Error in calling pre_process_lsasaf_hdf5 as detached process')
+        raise NameError('Error in calling pre_process_lsasaf_hdf5 as detached process')
+
+    return pre_processed_list
+
+
+def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger, out_queue):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process LSASAF HDF5 files
 #
@@ -602,7 +629,7 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger):
             hdf = gdal.Open(unzipped_file)
             sdsdict = hdf.GetMetadata('SUBDATASETS')
             sdslist = [sdsdict[k] for k in sdsdict.keys() if '_NAME' in k]
-
+            sdsdict = None
             # Loop over datasets and check if they have to be extracted
             for subdataset in sdslist:
                 id_subdataset = subdataset.split(':')[-1]
@@ -612,14 +639,13 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger):
                     sds_tmp = gdal.Open(subdataset)
                     write_ds_to_geotiff(sds_tmp, outputfile)
                     sds_tmp = None
-
-            close_hdf_dataset(unzipped_file)
+            hdf = None
+            #close_hdf_dataset(unzipped_file)
         except:
             my_logger.error('Error in extracting SDS')
-            close_hdf_dataset(unzipped_file)
+            hdf = None
+            #close_hdf_dataset(unzipped_file)
             raise Exception('Error in extracting SDS')
-        else:
-            close_hdf_dataset(unzipped_file)
 
     # For each dataset, merge the files, by using the dedicated function
     for id_subdataset in list_to_extr:
@@ -637,7 +663,8 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger):
 
     my_logger.debug('Output file generated: ' + output_file)
 
-    return pre_processed_files
+    out_queue.put(pre_processed_files)
+    return 0
 
 
 def pre_process_pml_netcdf(subproducts, tmpdir , input_files, my_logger):
@@ -1288,7 +1315,7 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
             interm_files = pre_process_modis_hdf4_tile (subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'LSASAF_HDF5':
-            interm_files = pre_process_lsasaf_hdf5 (subproducts, tmpdir, input_files, my_logger)
+            interm_files = drive_pre_process_lsasaf_hdf5 (subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'PML_NETCDF':
             interm_files = pre_process_pml_netcdf (subproducts, tmpdir, input_files, my_logger)
@@ -2315,39 +2342,3 @@ def conv_data_type_to_gdal(type):
     else:
         return gdal.GDT_Int16
 
-#
-#   Closes hdf4/5 datasets (bug in gdal 1.9.2)
-#   Refs. see: http://trac.osgeo.org/gdal/ticket/5103
-#
-
-def close_hdf_dataset(filename):
-
-    # Get the list of open files
-    try:
-        p = psutil.Process(os.getpid())
-    except:
-        logger.error('Error in psutil. Exit')
-        raise
-
-    try:
-        open_files = p.get_open_files()
-    except:
-        logger.error('Error in getting fids. Exit')
-        raise
-
-    # Find the fid (convert tuple to dict, and look for the key)
-    try:
-        for open_file in open_files:
-            # Use regex, because open_files gets the /data-space/ prefix (simlynk)
-            if re.match('.*'+filename,open_file[0]):
-                my_fid=open_file[1]
-    except:
-        logger.error('Fid not found for file: %s' % filename)
-        raise
-
-    # Close the file
-    try:
-        os.close(my_fid)
-    except:
-        logger.error('Cannot close fid: %i' % my_fid)
-        raise
