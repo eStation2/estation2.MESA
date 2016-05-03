@@ -27,7 +27,7 @@ cd $TMPDIR
 if [[ `find ./ -name *.tif -print | wc | awk {'print $1'} ` -gt 20 ]]; then
     find ./ -name *.tif -print | head -20 > message.txt
     echo "\n .... and additional files ..." >> message.txt
-else:
+else
     find ./ -name *.tif -print > message.txt
 fi
 
