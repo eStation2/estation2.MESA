@@ -166,7 +166,10 @@ class Product(object):
             if len(info['intervals']) == 0:
                 missing_dates = dates[:]
             else:
-                if missing['from_start']:
+                # NOTE: never consider 'from-start': on Server timeseries are longer then the ones delivered to Users.
+                # This is a quick fix for release 2.0.3
+                # if missing['from_start']:
+                if False:
                     if first_date > dataset.get_first_date():
                         missing_dates.extend(dataset.get_interval_dates(dataset.get_first_date(),
                             first_date, last_included=False))
@@ -209,7 +212,7 @@ class Product(object):
         # Loop over missing objects
         for missing in missing_info:
             try:
-                product = Product(missing['product'], version=missing['version'])
+                product = Product(missing['product'], version=missing['version'],)
                 filenames.extend(product.get_missing_filenames(missing,existing_only=False))
             except NoProductFound:
                 pass
