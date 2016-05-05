@@ -23,8 +23,15 @@ if __name__=='__main__':
     parser.add_argument('req_file', type=str, help='Name of the request file to process')
 
     args = parser.parse_args()
-
-    if os.path.isfile(args.req_file):
-        requests.create_archive_from_request(args.req_file)
+    req_file= args.req_file
+    if os.path.isfile(req_file):
+        requests.create_archive_from_request(req_file)
     else:
-        logger.error('Req. file does not exist: %s' % args.req_file)
+        logger.error('Req. file does not exist: %s' % req_file)
+
+    # # For debugging
+    # req_file= '/home/adminuser/fewsnet-rfe_2.0_FEWSNET-Africa-8km_1monnp_2016-05-02_1153.req'
+    # if os.path.isfile(req_file):
+    #     requests.create_archive_from_request(req_file)
+    # else:
+    #     logger.error('Req. file does not exist: %s' % req_file)
