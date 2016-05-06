@@ -1,7 +1,141 @@
+
+from config import es_constants
 from apps.acquisition.get_internet import *
 from apps.acquisition.get_eumetcast import *
 
 import unittest
+
+logger = log.my_logger(__name__)
+
+#
+#   Extracted from loo_get_internet to get a single source
+#
+
+def get_one_source(internet_source, target_dir=None):
+
+    output_dir = es_constants.get_internet_output_dir
+    logger.debug("Check if the Ingest Server input directory : %s exists.", output_dir)
+    if not os.path.exists(output_dir):
+        logger.fatal("The Ingest Server input directory : %s doesn't exists.", output_dir)
+        exit(1)
+
+    if not os.path.exists(es_constants.processed_list_int_dir):
+        os.mkdir(es_constants.processed_list_int_dir)
+
+
+    # Check internet connection (or die)
+    if not functions._internet_on():
+        logger.error("The computer is not currently connected to the internet. Wait 1 minute.")
+        time.sleep(1)
+
+    else:
+        execute_trigger = True
+
+        logger_spec = log.my_logger('apps.get_internet.'+internet_source['internet_id'])
+
+        # Create objects for list and info
+        processed_info_filename = es_constants.get_internet_processed_list_prefix+str(internet_source['internet_id'])+'.info'
+
+        # Restore/Create Info
+        processed_info = None
+        processed_info=functions.restore_obj_from_pickle(processed_info, processed_info_filename)
+        if processed_info is not None:
+            # Check the delay
+            current_delta=datetime.datetime.now()-processed_info['time_latest_exec']
+            current_delta_minutes=int(current_delta.seconds/60)
+            if current_delta_minutes < 0:
+                logger.debug("Still waiting up to %i minute - since latest execution.", 0)
+                execute_trigger = False
+        else:
+            # Create processed_info object
+            processed_info = {'lenght_proc_list': 0,
+                              'time_latest_exec': datetime.datetime.now(),
+                              'time_latest_copy': datetime.datetime.now()}
+            execute_trigger = True
+
+        # Force execution
+        execute_trigger = True
+        if execute_trigger:
+            # Restore/Create List
+            processed_list = []
+            processed_list_filename = es_constants.get_internet_processed_list_prefix+str(internet_source['internet_id'])+'.list'
+            processed_list=functions.restore_obj_from_pickle(processed_list, processed_list_filename)
+
+            processed_info['time_latest_exec']=datetime.datetime.now()
+
+            logger.debug("Create current list of file to process for source %s.", internet_source['internet_id'])
+            if internet_source['user_name'] is None:
+                user_name = "anonymous"
+            else:
+                user_name = internet_source['user_name']
+
+            if internet_source['password'] is None:
+                password = "anonymous"
+            else:
+                password = internet_source['password']
+
+            usr_pwd = str(user_name)+':'+str(password)
+
+            logger_spec.debug("              Url is %s.", internet_source['url'])
+            logger_spec.debug("              usr/pwd is %s.", usr_pwd)
+            logger_spec.debug("              regex   is %s.", internet_source['include_files_expression'])
+
+            internet_type = internet_source['type']
+
+            if internet_type == 'ftp':
+                # Manage the end_date (added for MODIS_FIRMS)
+                if (internet_source['end_date'] != ''):
+                    end_date = internet_source['end_date']
+                else:
+                    end_date = None
+                # Note that the following list might contain sub-dirs (it reflects full_regex)
+                current_list = get_list_matching_files_dir_ftp(str(internet_source['url']), str(usr_pwd), str(internet_source['include_files_expression']), end_date=end_date)
+
+            elif internet_type == 'http_tmpl':
+                # Create the full filename from a 'template' which contains
+                try:
+                    current_list = build_list_matching_for_http(str(internet_source['url']),
+                                                                str(internet_source['include_files_expression']),
+                                                                internet_source['start_date'],
+                                                                internet_source['end_date'],
+                                                                str(internet_source['frequency_id']))
+                except:
+                     logger.error("Error in creating date lists. Continue")
+            elif internet_type == 'offline':
+                     logger.info("This internet source is meant to work offline (GoogleDrive)")
+                     current_list = []
+            else:
+                     logger.error("No correct type for this internet source type: %s" %internet_type)
+                     current_list = []
+
+            if len(current_list) > 0:
+                listtoprocess = []
+                for current_file in current_list:
+                    if len(processed_list) == 0:
+                        listtoprocess.append(current_file)
+                    else:
+                        #if os.path.basename(current_file) not in processed_list: -> save in .list subdirs as well !!
+                        if current_file not in processed_list:
+                            listtoprocess.append(current_file)
+
+                if listtoprocess != set([]):
+                     logger_spec.debug("Loop on the found files.")
+                     for filename in list(listtoprocess):
+                         logger_spec.debug("Processing file: "+str(internet_source['url'])+os.path.sep+filename)
+                         try:
+                            result = get_file_from_url(str(internet_source['url'])+os.path.sep+filename, target_file=os.path.basename(filename), target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
+                            if not result:
+                                logger_spec.info("File %s copied.", filename)
+                                processed_list.append(filename)
+                            else:
+                                logger_spec.warning("File %s not copied: ", filename)
+                         except:
+                           logger_spec.warning("Problem while copying file: %s.", filename)
+
+            functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+            functions.dump_obj_to_pickle(processed_info, processed_info_filename)
+
+
 
 class TestGetInternet(unittest.TestCase):
 
@@ -379,3 +513,21 @@ class TestGetInternet(unittest.TestCase):
         files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
         self.assertEqual(len(files_list),9)
 
+
+    # Download LSASAF Orders
+    def TestRemoteHttp_Orders(self):
+
+        # Manually define relevant fields of internet source
+        internet_source = {'internet_id': 'LSASAF_Orders',
+                           'url': 'ftp://landsaf.ipma.pt/LSASAF-Dissemination/clerima/',
+                           'include_files_expression': 'order_.*',
+                           'pull_frequency': 1,
+                           'user_name':'clerima',
+                           'password':'qG926dCM',
+                           'start_date':None,
+                           'end_date':None,
+                           'type':'ftp'
+                           }
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(internet_source)
