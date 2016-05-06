@@ -414,6 +414,7 @@ class TestCreate(unittest.TestCase):
         self.TestCreateArchive_vgt_fcover()
         self.TestCreateArchive_vgt_lai()
         self.TestCreateArchive_vgt_dmp()
+        self.TestCreateArchive_chirps_dekad()
         self.TestCreateArchive_fewsnet_rfe()
         self.TestCreateArchive_tamsat_rfe()
         self.TestCreateArchive_modis_chla()
