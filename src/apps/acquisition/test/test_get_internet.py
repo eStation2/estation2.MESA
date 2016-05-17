@@ -522,8 +522,8 @@ class TestGetInternet(unittest.TestCase):
                            'url': 'ftp://landsaf.ipma.pt/LSASAF-Dissemination/clerima/',
                            'include_files_expression': 'order_.*',
                            'pull_frequency': 1,
-                           'user_name':'clerima',
-                           'password':'qG926dCM',
+                           'user_name':'',
+                           'password':'',
                            'start_date':None,
                            'end_date':None,
                            'type':'ftp'
