@@ -78,7 +78,8 @@ def get_list_current_subdirs_ftp(remote_url, usr_pwd):
     d = pycurl.Curl()
     response = cStringIO.StringIO()
     d.setopt(pycurl.URL, remote_url)
-    d.setopt(pycurl.USERPWD, usr_pwd)
+    if usr_pwd != ':':
+        d.setopt(pycurl.USERPWD, usr_pwd)
     d.setopt(pycurl.FOLLOWLOCATION, 1)
     d.setopt(pycurl.WRITEFUNCTION, response.write)
     d.perform()
@@ -332,7 +333,7 @@ def get_file_from_url(remote_url_file,  target_dir, target_file=None,userpwd='')
 
         c.setopt(c.URL,remote_url_file)
         c.setopt(c.WRITEFUNCTION,outputfile.write)
-        if userpwd is not '':
+        if userpwd is not ':':
             c.setopt(c.USERPWD,userpwd)
         c.perform()
         # Check the result (filter server/client errors http://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
