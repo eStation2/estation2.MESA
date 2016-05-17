@@ -1,7 +1,7 @@
 Summary: eStation 2.0 application from JRC
 Name: eStation2-Apps
 Version: 2.0.3
-Release: 1
+Release: 2
 Group: eStation
 License: GPL
 Source: /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz
@@ -125,8 +125,13 @@ chown -R analyst:estation /data
 # Change permissions /var/www (for allowing analyst to change version)
 chmod 777 /var/www
 
+# Change permissions for writing in Desktop
+chown -R adminuser:adminuser /home/adminuser/*
+chown -R analyst:analyst /home/analyst/*
+
 # Creation of the symlink on the /var/www/eStation2-%{version}
 echo "`date +'%Y-%m-%d %H:%M '` Create sym link /var/www/eStation2-%{version}"
+rm /var/www/eStation2
 ln -fs /var/www/eStation2-%{version} /var/www/eStation2
 
 # Restart postgresql 
@@ -246,7 +251,7 @@ my_role=$(hostname | cut -d '-' -f2)
 sed -i "s|.*role.=.*|role = ${my_role}|" /eStation2/settings/system_settings.ini
 
 # Set the 'version' in system_settings
-sed -i "s|.*version.=.*|version = %{version}|" /eStation2/settings/system_settings.ini
+sed -i "s|.*active_version.=.*|active_version = %{version}|" /eStation2/settings/system_settings.ini
 
 # Check the link of libmapserver exist
 #if [[ ! -h /usr/lib64/libmapserver.so ]]; then ln -fs /usr/local/lib64/libmapserver.so /usr/lib64/; fi

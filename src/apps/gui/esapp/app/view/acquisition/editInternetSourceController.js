@@ -14,7 +14,8 @@ Ext.define('esapp.view.acquisition.editInternetSourceController', {
             if (Ext.data.StoreManager.lookup('InternetSourceStore').getUpdatedRecords() != []){
                 Ext.data.StoreManager.lookup('InternetSourceStore').sync();
                 //Ext.toast({html: esapp.Utils.getTranslation('saved'), title: esapp.Utils.getTranslation('saved'), width: 200, align: 't'});
-                this.onCancelClick();
+                Ext.destroy(this.getView());
+                //this.onCancelClick();
             }
             //if (dialog.getSession().getChanges() != null) {
             //    dialog.getSession().getSaveBatch().start();
@@ -25,6 +26,7 @@ Ext.define('esapp.view.acquisition.editInternetSourceController', {
     }
 
     ,onCancelClick: function () {
+        Ext.data.StoreManager.lookup('InternetSourceStore').rejectChanges();
         Ext.destroy(this.getView());
     }
 });

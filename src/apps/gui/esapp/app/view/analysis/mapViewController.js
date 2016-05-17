@@ -119,6 +119,8 @@ Ext.define('esapp.view.analysis.mapViewController', {
             source: new ol.source.TileWMS({    // ImageWMS
                 url: 'analysis/getproductlayer',
                 type: 'base',
+                wrapX: false,
+                noWrap: true,
                 crossOrigin: '', // 'anonymous',
                 attributions: [new ol.Attribution({
                     html: '&copy; <a href="https://ec.europa.eu/jrc/">'+esapp.Utils.getTranslation('estation2')+'</a>'
@@ -201,7 +203,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 //,REASPECT:'TRUE'
             };
         //}
-        //console.info(params);
+        // console.info(params);
 
         this.getView().productlayer = new ol.layer.Tile({
             title: esapp.Utils.getTranslation('productlayer'),  // 'Product layer',
@@ -663,9 +665,10 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 //projection: 'EPSG:4326', // 'EPSG:3857',  //
                 //url: 'resources/geojson/countries.geojson'
                 //url: 'resources/geojson/' + geojsonfile,
-                url: 'analysis/getvectorlayer?file=' + geojsonfile
+                 url: 'analysis/getvectorlayer?file=' + geojsonfile
                 ,format: new ol.format.GeoJSON()
-                //,wrapX: false
+                ,wrapX: false   // no repeat of layer when
+                ,noWrap: true
             });
 
             var listenerKey = vectorSource.on('change', function(e) {

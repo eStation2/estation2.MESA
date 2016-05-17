@@ -27,7 +27,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
     frame: false,
     border: false,
     bodyPadding: '5 0 0 0',
-    //suspendLayout : true,
+    // suspendLayout : true,
 
     layout: {
         type: 'border',
@@ -503,7 +503,9 @@ Ext.define("esapp.view.analysis.analysisMain",{
                               params: {
                                   layername:'naturalearth',
                                   'LAYERS': 'HYP_HR_SR_OB_DR'       // 'ne:NE1_HR_LC_SR_W_DR'
-                              }
+                              },
+                              wrapX: false,
+                              noWrap: true
                         })
                       })
                     );

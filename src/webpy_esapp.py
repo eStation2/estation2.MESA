@@ -2640,10 +2640,11 @@ class GetProductLayer:
                     style = mapscript.styleObj(layerclass)
                     style.color.setRGB(colors[0], colors[1], colors[2])
 
-        # result_map_file = es_constants.apps_dir+'/analysis/MAP_result.map'
+        # result_map_file = '/tmp/eStation2/MAP_result.map'
         # if os.path.isfile(result_map_file):
         #     os.remove(result_map_file)
         # productmap.save(result_map_file)
+
         image = productmap.draw()
         filename_png = es_constants.base_tmp_dir+filenamenoextention+str(llx)+'_'+str(lly)+'_'+str(urx)+'_'+str(ury)+'.png'
         image.save(filename_png)
