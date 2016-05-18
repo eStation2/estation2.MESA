@@ -81,8 +81,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
                                              timeseries_role='10d',
                                              active_default=True)
 
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
+    out_prod_ident_10dcount = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
+    output_subdir_10dcount  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
     def generate_parameters_10dcount():
 
@@ -119,102 +119,101 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
                     if mydekad_nbr == dekad:
                         file_list.append(input_file)
 
-                    output_file=es_constants.processing_dir+output_subdir+os.path.sep+my_dekad_str+out_prod_ident
+                    output_file=es_constants.processing_dir+output_subdir_10dcount+os.path.sep+my_dekad_str+out_prod_ident_10dcount
 
                 yield (file_list, output_file)
-
-    formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
 
     @active_if(activate_10dcount_comput)
     @files(generate_parameters_10dcount)
     def std_precip_10dcount(input_file, output_file):
 
-        print input_file
-        print output_file
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_cumulate(**args)
 
-    # #   ---------------------------------------------------------------------
-    # #   10dcountavg
-    # output_sprod_group=proc_lists.proc_add_subprod_group("10dstats")
-    # output_sprod=proc_lists.proc_add_subprod("10dcountavg", "10dstats", final=False,
-    #                                          descriptive_name='10d Fire Average',
-    #                                          description='Average fire for dekad',
-    #                                          frequency_id='e1dekad',
-    #                                          date_format='MMDD',
-    #                                          masked=False,
-    #                                          timeseries_role='10d',
-    #                                          active_default=True)
-    #
-    # out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    # output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
-    #
-    # formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-    # formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
-    #
-    # @active_if(activate_10dstats_comput, activate_10dcountavg_comput)
-    # @collate(starting_files, formatter(formatter_in),formatter_out)
-    # def std_precip_10davg(input_file, output_file):
-    #
-    #     output_file = functions.list_to_element(output_file)
-    #     functions.check_output_dir(os.path.dirname(output_file))
-    #     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-    #     raster_image_math.do_avg_image(**args)
-    #
-    # #   ---------------------------------------------------------------------
-    # #   10dcountmin
-    # output_sprod=proc_lists.proc_add_subprod("10dcountmin", "10dstats", final=False,
-    #                                          descriptive_name='10d Fire Minimum',
-    #                                          description='Minimum Fire for dekad',
-    #                                          frequency_id='e1dekad',
-    #                                          date_format='MMDD',
-    #                                          masked=False,
-    #                                          timeseries_role='10d',
-    #                                          active_default=True)
-    #
-    # out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    # output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
-    #
-    # formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-    # formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
-    #
-    # @active_if(activate_10dstats_comput, activate_10dcountmin_comput)
-    # @collate(starting_files, formatter(formatter_in),formatter_out)
-    # def std_precip_10dmin(input_file, output_file):
-    #
-    #     output_file = functions.list_to_element(output_file)
-    #     functions.check_output_dir(os.path.dirname(output_file))
-    #     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-    #     raster_image_math.do_min_image(**args)
-    #
-    # #   ---------------------------------------------------------------------
-    # #   10dcountmax
-    # output_sprod=proc_lists.proc_add_subprod("10dcoubtmax", "10dstats", final=False,
-    #                                          descriptive_name='10d Maximum',
-    #                                          description='Maximum rainfall for dekad',
-    #                                          frequency_id='e1dekad',
-    #                                          date_format='MMDD',
-    #                                          masked=False,
-    #                                          timeseries_role='10d',
-    #                                          active_default=True)
-    # out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    # output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
-    #
-    # formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-    # formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
-    #
-    # @active_if(activate_10dstats_comput, activate_10dcountmax_comput)
-    # @collate(starting_files, formatter(formatter_in),formatter_out)
-    # def std_precip_10dmax(input_file, output_file):
-    #
-    #     output_file = functions.list_to_element(output_file)
-    #     functions.check_output_dir(os.path.dirname(output_file))
-    #     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-    #     raster_image_math.do_max_image(**args)
-    #
+    #   ---------------------------------------------------------------------
+    #   10dcountavg
+
+    starting_files_10dcount = es_constants.processing_dir+output_subdir_10dcount+"*"+out_prod_ident_10dcount
+
+    output_sprod_group=proc_lists.proc_add_subprod_group("10dstats")
+    output_sprod=proc_lists.proc_add_subprod("10dcountavg", "10dstats", final=False,
+                                             descriptive_name='10d Fire Average',
+                                             description='Average fire for dekad',
+                                             frequency_id='e1dekad',
+                                             date_format='MMDD',
+                                             masked=False,
+                                             timeseries_role='10d',
+                                             active_default=True)
+
+    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
+    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
+
+    formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+out_prod_ident_10dcount
+    formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+
+    @active_if(activate_10dstats_comput, activate_10dcountavg_comput)
+    @collate(starting_files_10dcount, formatter(formatter_in),formatter_out)
+    def std_precip_10davg(input_file, output_file):
+
+        output_file = functions.list_to_element(output_file)
+        functions.check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32767}
+        raster_image_math.do_avg_image(**args)
+
+    #   ---------------------------------------------------------------------
+    #   10dcountmin
+
+    output_sprod=proc_lists.proc_add_subprod("10dcountmin", "10dstats", final=False,
+                                             descriptive_name='10d Fire Minimum',
+                                             description='Minimum Fire for dekad',
+                                             frequency_id='e1dekad',
+                                             date_format='MMDD',
+                                             masked=False,
+                                             timeseries_role='10d',
+                                             active_default=True)
+
+    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
+    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
+
+    formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+out_prod_ident_10dcount
+    formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+
+    @active_if(activate_10dstats_comput, activate_10dcountmin_comput)
+    @collate(starting_files_10dcount, formatter(formatter_in),formatter_out)
+    def std_precip_10dmin(input_file, output_file):
+
+        output_file = functions.list_to_element(output_file)
+        functions.check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
+        raster_image_math.do_min_image(**args)
+
+    #   ---------------------------------------------------------------------
+    #   10dcountmax
+    output_sprod=proc_lists.proc_add_subprod("10dcountmax", "10dstats", final=False,
+                                             descriptive_name='10d Maximum',
+                                             description='Maximum rainfall for dekad',
+                                             frequency_id='e1dekad',
+                                             date_format='MMDD',
+                                             masked=False,
+                                             timeseries_role='10d',
+                                             active_default=True)
+    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
+    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
+
+    formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+out_prod_ident_10dcount
+    formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
+
+    @active_if(activate_10dstats_comput, activate_10dcountmax_comput)
+    @collate(starting_files_10dcount, formatter(formatter_in),formatter_out)
+    def std_precip_10dmax(input_file, output_file):
+
+        output_file = functions.list_to_element(output_file)
+        functions.check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
+        raster_image_math.do_max_image(**args)
+
     # #   ---------------------------------------------------------------------
     # #   10dDiff
     # output_sprod_group=proc_lists.proc_add_subprod_group("10danomalies")
@@ -272,8 +271,6 @@ def processing_modis_firms(res_queue, pipeline_run_level=0,pipeline_printout_lev
     if pipeline_run_level > 0:
         spec_logger.info("Run the pipeline %s" % 'processing_modis_firms')
         pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger, history_file='/eStation2/log/.ruffus_history.sqlite')
-        tasks = pipeline_get_task_names()
-        spec_logger.info("Run the pipeline %s" % tasks[0])
         spec_logger.info("After running the pipeline %s" % 'processing_modis_firms')
 
     if pipeline_printout_level > 0:
