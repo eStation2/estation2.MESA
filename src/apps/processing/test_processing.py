@@ -261,7 +261,8 @@ from processing_modis_firms import *
 starting_dates = None
 native_mapset=None
 target_mapset='SPOTV-Africa-1km'
-args = {'pipeline_run_level':7, \
+
+args = {'pipeline_run_level':4, \
         'pipeline_printout_level':0, \
         'pipeline_printout_graph_level': 0, \
         'prod': 'modis-firms',\
