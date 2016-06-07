@@ -79,6 +79,8 @@ b. Run: /usr/bin/python /usr/local/lib/python2.7/dist-packages/ee/authenticate.p
 c. Get the code in the browser an copy to command line
 d. Get -> Successfully saved authorization to /home/esuser/.config/earthengine/credentials
 
+Note: the GEE API Manager is accessible at: https://console.developers.google.com/apis/credentials?project=jrc-water-world-app
+
 H Install Google Drive API on mesa-proc (for downloading GEE-WBD)
 ------------------------------------------------------------------------------------------------
 
