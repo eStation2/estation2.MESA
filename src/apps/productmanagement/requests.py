@@ -112,12 +112,9 @@ def create_archive_from_request(request_file):
     my_mapsets = my_request['productmapsets']
     my_version = my_request['version']
 
-    # Define the archive filename
-    #archive_name=get_archive_name(my_product,my_version,'0001')
-    archive_name=request_file.replace('.req','.tgz')
-    self_extracting_name=request_file.replace('.req','.bsx')
-
     n_mapsets = len(my_mapsets)
+    incresing_number=1
+
     for my_mapset in my_mapsets:
         mapsetcode = my_mapset['mapsetcode']
 
@@ -125,23 +122,33 @@ def create_archive_from_request(request_file):
         for mapsetdataset in mapsetdatasets:
             subproductcode =  mapsetdataset['subproductcode']
             missing_info = mapsetdataset['missing']
-
+            archive_base_name=request_file.replace('.req','')
+            archive_name=archive_base_name+'_{0:04d}'.format(incresing_number)+'.tgz'
+            self_extracting_name=archive_name
+            self_extracting_name=self_extracting_name.replace('.tgz','.bsx')
+            print archive_name
+            print self_extracting_name
             # Create a product object
             product = Product(product_code=my_product, version=my_version)
-            product.create_tar(missing_info, filetar=archive_name, tgz=True)
+            [tarfile , results] = product.create_tar(missing_info, filetar=archive_name, tgz=True)
 
-    # Get the decompression script template
-    decompress_file = es_constants.decompress_script
+            # Test there at list a file missing
+            if results['n_file_copied'] > 0:
 
-    target = open(self_extracting_name,'wb')
-    shutil.copyfileobj(open(decompress_file,'rb'),target)
-    shutil.copyfileobj(open(archive_name,'rb'),target)
-    target.close()
-    os.chmod(self_extracting_name,0775)
+                # Get the decompression script template
+                decompress_file = es_constants.decompress_script
 
-    # Remove .tgz file
-    os.remove(archive_name)
+                target = open(self_extracting_name,'wb')
+                shutil.copyfileobj(open(decompress_file,'rb'),target)
+                shutil.copyfileobj(open(archive_name,'rb'),target)
+                target.close()
+                os.chmod(self_extracting_name,0775)
+                # Increase the counter
+                incresing_number+=1
 
+            # Remove .tgz file
+            os.remove(archive_name)
+            product = None
     return
 
 def get_archive_name(productcode, version, id):
