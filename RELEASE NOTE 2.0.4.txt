@@ -1,0 +1,35 @@
+#
+#   Release Note for 2.0.4
+#   Changes with respect to 2.0.3-12 - Unless specification, they refer to Apps.rpm package.
+#
+
+1. BUG FIXING
+-------------
+
+1.1 Processing
+
+1.2 Visualization
+
+1.3 Configuration/DB
+
+1.4 Packages (pre-post inst)
+
+
+2. NEW FEATURES
+---------------
+
+2.0 Acquisition
+
+- Modifications to manage a 'proxy': 1. Define functions._proxy_defined() to read definition from factory_settings.ini
+  2. In case of proxy, change the urllib2 options to test internet access.
+
+- Changes of get_internet: 1. In case of proxy, change the parsing of ftp-response. 2. Re-organize/rename/clean functions' naming.
+  3. Implement the management of type=http (similar to ftp, but for http servers)
+
+2.1 Processing
+
+2.2 Visualization
+
+2.3 Configuration/DB
+
+2.4 Other packages
