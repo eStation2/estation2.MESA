@@ -237,7 +237,7 @@ def processing_std_lsasaf_et(res_queue, pipeline_run_level=0,pipeline_printout_l
     target_mapset=mapset
 
     spec_logger = log.my_logger(logfile)
-    spec_logger.info("Entering routine %s" % 'processing_std_precip')
+    spec_logger.info("Entering routine %s" % 'processing_std_lsasaf_et')
 
     proc_lists = None
     proc_lists = create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
@@ -249,10 +249,9 @@ def processing_std_lsasaf_et(res_queue, pipeline_run_level=0,pipeline_printout_l
 
     if pipeline_run_level > 0:
         spec_logger.info("Run the pipeline %s" % 'processing_std_lsasaf_et')
-        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger, history_file='/eStation2/log/.ruffus_history.sqlite')
+        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger, history_file='/eStation2/log/.ruffus_history_lsasaf_et.sqlite', checksum_level=0)
         tasks = pipeline_get_task_names()
         spec_logger.info("After running the pipeline %s" % 'processing_std_lsasaf_et')
-
 
 
     if pipeline_printout_level > 0:
