@@ -51,3 +51,11 @@ class TestFunctions(TestCase):
         #args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw", "input_nodata":-32768}
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw", "input_nodata":-32768}
         raster_image_math.do_min_image(**args)
+
+    def test_DIFF(self):
+        input_file=['/data/processing/modis-firms/v5.0/SPOTV-Africa-1km/derived/10dcount/20160101_modis-firms_10dcount_SPOTV-Africa-1km_v5.0.tif',\
+                    '/data/processing/modis-firms/v5.0/SPOTV-Africa-1km/derived/10dcountavg/0101_modis-firms_10dcountavg_SPOTV-Africa-1km_v5.0.tif']
+
+        output_file='/data/temp/20160101_modis-firms_10dcountdiff_SPOTV-Africa-1km_v5.0.tif'
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw",'output_type':'Float32', 'input_nodata':-32767}
+        raster_image_math.do_oper_subtraction(**args)
