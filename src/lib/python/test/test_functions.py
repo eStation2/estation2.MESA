@@ -38,3 +38,7 @@ class TestFunctions(TestCase):
     def test_get_status_PC1(self):
         status_PC1 = functions.get_status_PC1()
         print status_PC1
+
+    def test_internet_connection(self):
+        status = functions._internet_on()
+        print status
