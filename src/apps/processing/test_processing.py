@@ -176,15 +176,15 @@ from multiprocessing import Queue
 # lsasaf-et
 #   ---------------------------------------------------------------------
 # from apps.processing.processing_std_lsasaf_et import *
-# # Create the list of dates -> returns empty if start==end==None
-# start_date='201510010000'
-# end_date='201510102345'
-# starting_dates = proc_functions.get_list_dates_for_dataset('lsasaf-et', 'et', 'undefined', start_date=start_date, end_date=end_date)
+# # # Create the list of dates -> returns empty if start==end==None
+# # start_date='201510010000'
+# # end_date='201510102345'
+# # starting_dates = proc_functions.get_list_dates_for_dataset('lsasaf-et', 'et', 'undefined', start_date=start_date, end_date=end_date)
 # starting_dates = None
 # native_mapset='MSG-satellite-3km'
 # target_mapset='SPOTV-CEMAC-1km'
 #
-# args = {'pipeline_run_level':3, \
+# args = {'pipeline_run_level':6, \
 #         'pipeline_printout_level':0, \
 #         'pipeline_printout_graph_level': 0, \
 #         'prod': 'lsasaf-et',\
@@ -198,9 +198,9 @@ from multiprocessing import Queue
 # res_queue = None
 # proc_lists=processing_std_lsasaf_et(res_queue,**args)
 # print(proc_lists)
-# #   ---------------------------------------------------------------------
-# # lsasaf-lst
-# #   ---------------------------------------------------------------------
+#   ---------------------------------------------------------------------
+# lsasaf-lst
+#   ---------------------------------------------------------------------
 # from apps.processing.processing_std_lsasaf_lst import *
 # # Create the list of dates -> returns empty if start==end==None
 # # start_date='201510010000'
@@ -231,22 +231,23 @@ from apps.processing.processing_modis_firms import *
 # Create the list of dates -> returns empty if start==end==None
 # start_date='201510010000'
 # end_date='201510102345'
-# starting_dates = proc_functions.get_list_dates_for_dataset('lsasaf-lst', 'lst', 'undefined', start_date=start_date, end_date=end_date)
 starting_dates = None
-native_mapset='MSG-satellite-3km'
-target_mapset='SPOTV-CEMAC-1km'
+# native_mapset='MSG-satellite-3km'
+target_mapset='SPOTV-Africa-1km'
 
-args = {'pipeline_run_level':3, \
-        'pipeline_printout_level':0, \
-        'pipeline_printout_graph_level': 0, \
-        'prod': 'lsasaf-lst',\
-        'starting_sprod':'lst',\
-        'starting_dates': starting_dates,\
-        'native_mapset': native_mapset,\
-        'mapset': target_mapset,\
-        'version':'undefined',
-        'logfile':'log-lsasaf-lst.log'}
+args = {'pipeline_run_level':5,
+        'pipeline_printout_level':0,
+        'pipeline_printout_graph_level': 0,
+        'prod': 'modis-firms',
+        'starting_sprod':'1day',
+        'starting_dates': starting_dates,
+        # 'native_mapset': native_mapset,
+        'mapset': target_mapset,
+        'version':'v5.0',
+        'logfile':'log-lsasaf-lst.log',
+        'update_stats' : True,
+        'nrt_products' :True }
 
 res_queue = None
-proc_lists=processing_std_lsasaf_lst(res_queue,**args)
+proc_lists=processing_modis_firms(res_queue,**args)
 print(proc_lists)
