@@ -4,7 +4,8 @@
 #	date:	 20150318
 #   	descr:	 Generate additional derived products / implements processing chains
 #	history: 1.0
-#
+#            1.1 31/05/2016: create a specific .sqlite history file
+#                            change the checksum_level = 0 (default is 1) so to check only output-files time.
 
 # Source my definitions
 from config import es_constants
@@ -124,8 +125,6 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
     starting_files_10dmax = input_dir_10dmax+"*"+in_prod_ident_10dmax
 
     #
-    # formatter_in_10dmax="(?P<YYYYMM>[0-9]{6})[0-9]{4}"+in_prod_ident
-    # formatter_out_10dmax="{subpath[0][5]}"+os.path.sep+output_subdir_1dmax+"{YYYYMMDD[0]}"+out_prod_ident_1dmax
     def generate_parameters_10dmax():
 
         #   Look for all input files in input_dir, and sort them
@@ -329,12 +328,13 @@ def processing_std_lsasaf_lst(res_queue, pipeline_run_level=0,pipeline_printout_
 
     if pipeline_run_level > 0:
         spec_logger.info("Run the pipeline %s" % 'processing_std_lsasaf_lst')
-        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger, history_file='/eStation2/log/.ruffus_history.sqlite')
+        # Option to be added to pipeline_run to force files to appear up-to-date: touch_files_only = True
+        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger, history_file='/eStation2/log/.ruffus_history_lsasaf_lst.sqlite', checksum_level=0)
         tasks = pipeline_get_task_names()
         spec_logger.info("After running the pipeline %s" % 'processing_std_lsasaf_lst')
 
     if pipeline_printout_level > 0:
-        pipeline_printout(verbose=pipeline_printout_level, output_stream=fwrite_id)
+        pipeline_printout(verbose=pipeline_printout_level, output_stream=fwrite_id, checksum_level=0)
     
     if pipeline_printout_graph_level > 0:
         pipeline_printout_graph('flowchart.jpg')
