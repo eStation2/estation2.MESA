@@ -1,10 +1,13 @@
 #
 #        purpose: Define the get_internet service
 #        author:  M.Clerici
-#        date:         19.02.2014
-#   descr:         Reads the definition from eStation DB and execute the copy to local disk
+#        date:    19.02.2014
+#        descr    Reads the definition from eStation DB and execute the copy to local disk
 #        history: 1.0
-
+#                 1.1 (7/6/16): create methods to manage an 'html-type' response in dir-listing and
+#                               - apply to http site where listing is possible (e.g. NASA-MODIS)
+#                               - apply to ftp when a proxy exists (e.g. JRC server)
+#
 # Import standard modules
 import pycurl
 import signal
@@ -66,7 +69,8 @@ def signal_handler(signal, frame):
 
 ######################################################################################
 #   get_list_current_subdirs_ftp
-#   Purpose: read a remote ftp directory and return contents
+#   Purpose: read a remote ftp directory and return contents.
+#            It works on an 'ftp-type' response (i.e. dir listing)
 #   Author: Marco Clerici, JRC, European Commission
 #   Date: 2014/09/01
 #   Inputs: output_dir, or list of dirs
@@ -94,10 +98,44 @@ def get_list_current_subdirs_ftp(remote_url, usr_pwd):
             current_list.append(line_dir)
     
     return current_list
+######################################################################################
+#   get_list_current_subdirs_http
+#   Purpose: read a remote http directory and return contents
+#            It works on an 'http-type' response (from http-sites or ftp through proxy)
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/09/01
+#   Inputs: output_dir, or list of dirs
+#   Output: list of dirs
+#
+
+def get_list_current_subdirs_http(remote_url, usr_pwd, internet_type, path=None):
+
+    if path is None:
+        path= "/"
+
+    if internet_type == 'http':
+        pattern = '<a href=./%s.*?.>(.*?)</a></td>' % path
+    elif internet_type == 'ftp':
+        pattern = '<A HREF=.*?>(.*?)</A>'
+
+    d = pycurl.Curl()
+    response = cStringIO.StringIO()
+    d.setopt(pycurl.URL, remote_url+path)
+    d.setopt(pycurl.USERPWD, usr_pwd)
+    d.setopt(pycurl.FOLLOWLOCATION, 1)
+    d.setopt(pycurl.WRITEFUNCTION, response.write)
+    d.perform()
+    d.close()
+    current_list = []
+    content=response.getvalue()
+    for filename in re.findall(pattern, content):
+        current_list.append(filename)
+    return current_list
 
 ######################################################################################
-#   get_list_matching_files_dir_ftp
-#   Purpose: get the files matching a full_regex on a remote ftp
+#   get_list_matching_files
+#   Purpose: get the files matching a full_regex on a remote ftp.
+#            It is the entry-point for 'ftp' type, and calls the recursive-method 'get_list_matching_files_subdirs'
 #   Author: Marco Clerici, JRC, European Commission
 #   Date: 2014/09/01
 #   Inputs: remote_url: ftp address (might incl. sub_dirs)
@@ -106,7 +144,7 @@ def get_list_current_subdirs_ftp(remote_url, usr_pwd):
 #   Output: list of matched files
 #
 
-def get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex, my_logger=None, end_date=None):
+def get_list_matching_files(remote_url, usr_pwd, full_regex, internet_type, my_logger=None, end_date=None):
 
 
     if my_logger is None:
@@ -121,8 +159,10 @@ def get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex, my_logger=N
     # Get list from a remote ftp
     list_matches=[]
     init_level = 1
-    get_list_matching_files_subdir_ftp(list_matches, remote_url, usr_pwd, full_regex, init_level, '', my_logger=use_logger)
 
+    # Get contents of the current folder
+    get_list_matching_files_subdirs(list_matches, remote_url, usr_pwd, full_regex, init_level, '', internet_type, my_logger=use_logger)
+        
     # Manage end_date
     if end_date is not None:
         if isinstance(end_date,int) or isinstance(end_date,long):
@@ -139,12 +179,12 @@ def get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex, my_logger=N
     for elem in list_matches:
         toprint+=elem+','
 
-    use_logger.info('List in get_list_matching_files_dir_ftp: %s' % toprint)
+    use_logger.info('List in get_list_matching_files: %s' % toprint)
 
     return list_matches
 
 ######################################################################################
-#   get_list_matching_files_subdir_ftp
+#   get_list_matching_files_subdirs
 #   Purpose: return the list of matching files, or iterate the search
 #   Author: Marco Clerici, JRC, European Commission
 #   Date: 2014/09/01
@@ -158,7 +198,7 @@ def get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex, my_logger=N
 #   Output: list of matched files (incremented)
 #   TODO-M.C.: check if the '/' has to be replaced by os.sep (?)
 
-def get_list_matching_files_subdir_ftp(list, remote_url, usr_pwd, full_regex, level, sub_dir, my_logger=None):
+def get_list_matching_files_subdirs(list, remote_url, usr_pwd, full_regex, level, sub_dir, internet_type, my_logger=None):
 
     # Use generic logger (logger) for get_internet or my_logger (from get_eumetcast)
     if my_logger is None:
@@ -172,7 +212,15 @@ def get_list_matching_files_subdir_ftp(list, remote_url, usr_pwd, full_regex, le
     regex_my_level=tokens[level]
     max_level= len(re.findall("/",full_regex))
 
-    my_list = get_list_current_subdirs_ftp(remote_url, usr_pwd)
+
+    # Determine if there is a proxy
+    proxy_exists = functions._proxy_defined()
+
+    # Call functions for ftp-type or http-type response
+    if internet_type == 'http' or proxy_exists:
+        my_list = get_list_current_subdirs_http(remote_url, usr_pwd, internet_type)
+    else:
+        my_list = get_list_current_subdirs_ftp(remote_url, usr_pwd)
 
     use_logger.info("Working on %s" % regex_my_level)
     for element in my_list:
@@ -185,66 +233,13 @@ def get_list_matching_files_subdir_ftp(list, remote_url, usr_pwd, full_regex, le
                 new_level=level+1
                 new_sub_dir=sub_dir+element+'/'
                 new_remote_url=remote_url+'/'+element+'/'
-                get_list_matching_files_subdir_ftp(list, new_remote_url, usr_pwd, full_regex, new_level, new_sub_dir)
+                get_list_matching_files_subdirs(list, new_remote_url, usr_pwd, full_regex, new_level, new_sub_dir, internet_type)
     return 0
 
 ######################################################################################
-#   get_list_matching_files_dir_local
-#   Purpose: return the list of matching files from the local filesystem
-#   Author: Marco Clerici, JRC, European Commission
-#   Date: 2014/09/01
-#   Inputs: local_dir: local directory (might incl. sub_dirs)
-#           full_regex: re including subdirs (e.g. 'Collection51/TIFF/Win1[01]/201[1-3]/MCD45monthly.A20.*burndate.tif.gz'
-#   Output: list of matched files
-
-def get_list_matching_files_dir_local(local_dir, full_regex):
-
-    # Local implementation (filesystem)
-    list_matches=[]
-    level = 1
-    max_level=len(full_regex.split('/'))
-    toprint=''
-    get_list_matching_files_subdir_local(list_matches, local_dir, full_regex, level, max_level,'')
-    for elem in list_matches:
-        toprint+=elem+','
-    logger.info(toprint)
-
-######################################################################################
-#   get_list_matching_files_subdir_local
-#   Purpose: return the list of matching files, or iterate the search
-#   Author: Marco Clerici, JRC, European Commission
-#   Date: 2014/09/01
-#   Inputs: list_matches: list of matching files, find so far
-#           local_dir: local directory
-#           full_regex: re including subdirs (e.g. 'Collection51/TIFF/Win1[01]/201[1-3]/MCD45monthly.A20.*burndate.tif.gz'
-#           level: position in the full_regex tree (increasing from 1 ON .. )
-#           sub_dir: current subdir searched on the site (appended to remote_url)
-#
-def get_list_matching_files_subdir_local(list, local_dir, regex, level, max_level, sub_dir):
-
-    # split the regex
-    tokens=regex.split(os.sep)
-    regex_my_level=''
-    # regex for this level
-    regex_my_level+=tokens[level-1]
-
-    my_list = os.listdir(local_dir)
-    for element in my_list:
-        if re.match(regex_my_level,element) is not None:
-            # Is it already the file ?
-            if max_level == level:
-                list.append(sub_dir+element)
-            else:
-                # Enter the subdir
-                new_level=level+1
-                new_sub_dir=sub_dir+element+os.sep
-                get_list_matching_files_subdir_local(list, local_dir+os.sep+element, regex, new_level, max_level, new_sub_dir)
-
-    return 0
-
-######################################################################################
-#   build_list_matching_for_http
+#   build_list_matching_files_tmpl
 #   Purpose: return the list of file names matching a 'template' with 'date' placeholders
+#            It is the entry point for the 'http_templ' source type
 #   Author: Marco Clerici, JRC, European Commission
 #   Date: 2015/02/18
 #   Inputs: template: regex including subdirs (e.g. 'Collection51/TIFF/Win1[01]/201[1-3]/MCD45monthly.A20.*burndate.tif.gz'
@@ -252,7 +247,7 @@ def get_list_matching_files_subdir_local(list, local_dir, regex, level, max_leve
 #           to_date: end date for the dataset (datetime.datetime object)
 #           frequency: dataset 'frequency' (see DB 'frequency' table)
 #
-def build_list_matching_for_http(base_url, template, from_date, to_date, frequency_id):
+def build_list_matching_files_tmpl(base_url, template, from_date, to_date, frequency_id):
 
     # Add a check on frequency
     try:
@@ -314,6 +309,7 @@ def build_list_matching_for_http(base_url, template, from_date, to_date, frequen
 #           target_file: target file name (by default 'test_output_file')
 #           target_dir: target directory (by default a tmp dir is created)
 #   Output: full pathname is returned (or positive number for error)
+#
 def get_file_from_url(remote_url_file,  target_dir, target_file=None,userpwd=''):
 
     # Create a tmp directory for download
@@ -347,7 +343,6 @@ def get_file_from_url(remote_url_file,  target_dir, target_file=None,userpwd='')
             return 0
     except:
         logger.warning('Output NOT downloaded: %s - error : %i' %(remote_url_file,c.getinfo(pycurl.HTTP_CODE)))
-        shutil.rmtree(tmpdir)
         return 1
     finally:
         c = None
@@ -458,19 +453,19 @@ def loop_get_internet(dry_run=False):
 
                             internet_type = internet_source.type
 
-                            if internet_type == 'ftp':
+                            if internet_type == 'ftp' or internet_type == 'http':
                                 # Manage the end_date (added for MODIS_FIRMS)
                                 if (internet_source.end_date != ''):
                                     end_date = internet_source.end_date
                                 else:
                                     end_date = None
                                 # Note that the following list might contain sub-dirs (it reflects full_regex)
-                                current_list = get_list_matching_files_dir_ftp(str(internet_source.url), str(usr_pwd), str(internet_source.include_files_expression), end_date=end_date)
+                                current_list = get_list_matching_files(str(internet_source.url), str(usr_pwd), str(internet_source.include_files_expression), internet_type, end_date=end_date)
 
                             elif internet_type == 'http_tmpl':
                                 # Create the full filename from a 'template' which contains
                                 try:
-                                    current_list = build_list_matching_for_http(str(internet_source.url),
+                                    current_list = build_list_matching_files_tmpl(str(internet_source.url),
                                                                                 str(internet_source.include_files_expression),
                                                                                 internet_source.start_date,
                                                                                 internet_source.end_date,
@@ -526,3 +521,56 @@ def loop_get_internet(dry_run=False):
 
     exit(0)
 
+######################################################################################
+#   get_list_matching_files_dir_local
+#   Purpose: return the list of matching files from the local filesystem ( ONLY used in test/development)
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/09/01
+#   Inputs: local_dir: local directory (might incl. sub_dirs)
+#           full_regex: re including subdirs (e.g. 'Collection51/TIFF/Win1[01]/201[1-3]/MCD45monthly.A20.*burndate.tif.gz'
+#   Output: list of matched files
+
+def get_list_matching_files_dir_local(local_dir, full_regex):
+
+    # Local implementation (filesystem)
+    list_matches=[]
+    level = 1
+    max_level=len(full_regex.split('/'))
+    toprint=''
+    get_list_matching_files_subdir_local(list_matches, local_dir, full_regex, level, max_level,'')
+    for elem in list_matches:
+        toprint+=elem+','
+    logger.info(toprint)
+
+######################################################################################
+#   get_list_matching_files_subdir_local
+#   Purpose: return the list of matching files, or iterate the search ( ONLY used in test/development)
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/09/01
+#   Inputs: list_matches: list of matching files, find so far
+#           local_dir: local directory
+#           full_regex: re including subdirs (e.g. 'Collection51/TIFF/Win1[01]/201[1-3]/MCD45monthly.A20.*burndate.tif.gz'
+#           level: position in the full_regex tree (increasing from 1 ON .. )
+#           sub_dir: current subdir searched on the site (appended to remote_url)
+#
+def get_list_matching_files_subdir_local(list, local_dir, regex, level, max_level, sub_dir):
+
+    # split the regex
+    tokens=regex.split(os.sep)
+    regex_my_level=''
+    # regex for this level
+    regex_my_level+=tokens[level-1]
+
+    my_list = os.listdir(local_dir)
+    for element in my_list:
+        if re.match(regex_my_level,element) is not None:
+            # Is it already the file ?
+            if max_level == level:
+                list.append(sub_dir+element)
+            else:
+                # Enter the subdir
+                new_level=level+1
+                new_sub_dir=sub_dir+element+os.sep
+                get_list_matching_files_subdir_local(list, local_dir+os.sep+element, regex, new_level, max_level, new_sub_dir)
+
+    return 0
