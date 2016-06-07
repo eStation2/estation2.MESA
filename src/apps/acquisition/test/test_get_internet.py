@@ -82,19 +82,19 @@ def get_one_source(internet_source, target_dir=None):
 
             internet_type = internet_source['type']
 
-            if internet_type == 'ftp':
+            if internet_type == 'ftp' or internet_type == 'http':
                 # Manage the end_date (added for MODIS_FIRMS)
                 if (internet_source['end_date'] != ''):
                     end_date = internet_source['end_date']
                 else:
                     end_date = None
                 # Note that the following list might contain sub-dirs (it reflects full_regex)
-                current_list = get_list_matching_files_dir_ftp(str(internet_source['url']), str(usr_pwd), str(internet_source['include_files_expression']), end_date=end_date)
+                current_list = get_list_matching_files(str(internet_source['url']), str(usr_pwd), str(internet_source['include_files_expression']), internet_type, end_date=end_date)
 
             elif internet_type == 'http_tmpl':
                 # Create the full filename from a 'template' which contains
                 try:
-                    current_list = build_list_matching_for_http(str(internet_source['url']),
+                    current_list = build_list_matching_files_tmpl(str(internet_source['url']),
                                                                 str(internet_source['include_files_expression']),
                                                                 internet_source['start_date'],
                                                                 internet_source['end_date'],
@@ -152,9 +152,9 @@ class TestGetInternet(unittest.TestCase):
         usr_pwd='user:burnt_data'
         full_regex   ='Win11/2011/MCD45monthly.*.burndate.tif.gz'
         file_to_check='Win11/2011/MCD45monthly.A2011001.Win11.051.burndate.tif.gz'
+        internet_type = 'ftp'
 
-
-        list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
+        list = get_list_matching_files(remote_url, usr_pwd, full_regex,internet_type)
         self.assertTrue(file_to_check in list)
 
     #   ---------------------------------------------------------------------------
@@ -166,8 +166,9 @@ class TestGetInternet(unittest.TestCase):
         #full_regex   ='20../.../MCD45A1.A.*.hdf'
         full_regex   ='2011/.../MCD45A1.A.*.hdf'
         file_to_check='2011/001/MCD45A1.A2011001.h05v10.051.2013067232210.hdf'
+        internet_type = 'ftp'
 
-        list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
+        list = get_list_matching_files(remote_url, usr_pwd, full_regex,internet_type)
         self.assertTrue(file_to_check in list)
 
 
@@ -177,12 +178,13 @@ class TestGetInternet(unittest.TestCase):
     def TestRemoteFtp_FIRMS_NASA(self):
 
         # Retrieve a list of MODIS burndate file .. check only one present
-        remote_url='ftp://nrt1.modaps.eosdis.nasa.gov/FIRMS/Global'
+        remote_url='ftp://nrt1.modaps.eosdis.nasa.gov/FIRMS/Global/'
         usr_pwd='jrcMondeFires:FIRE@data1'
         full_regex   ='Global_MCD14DL_201.*.txt'
-        file_to_check='Global_MCD14DL_2014350.txt'
+        file_to_check='Global_MCD14DL_2016100.txt'
+        internet_type = 'ftp'
 
-        list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex, end_date=-2)
+        list = get_list_matching_files(remote_url, usr_pwd, full_regex, internet_type)
 
         self.assertTrue(file_to_check in list)
 
@@ -195,8 +197,9 @@ class TestGetInternet(unittest.TestCase):
         usr_pwd='anonymous:anonymous'
         full_regex   ='CHIRP.2014.12.[1-3].tif'
         file_to_check='CHIRP.2014.12.1.tif'
+        internet_type = 'ftp'
 
-        list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
+        list = get_list_matching_files(remote_url, usr_pwd, full_regex,internet_type)
         self.assertTrue(file_to_check in list)
 
     #   ---------------------------------------------------------------------------
@@ -208,8 +211,9 @@ class TestGetInternet(unittest.TestCase):
         usr_pwd='anonymous:anonymous'
         full_regex   ='chirps-v2.0.*.tif'
         file_to_check='chirps-v2.0.2015.08.3.tif.gz'
+        internet_type = 'ftp'
 
-        list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
+        list = get_list_matching_files(remote_url, usr_pwd, full_regex,internet_type)
         self.assertTrue(file_to_check in list)
     #   ---------------------------------------------------------------------------
     #   Test iteration on ftp CHIRPS (id:  UCSB:CHIRPS:DEKAD:2.0)
@@ -220,9 +224,9 @@ class TestGetInternet(unittest.TestCase):
         usr_pwd='anonymous:anonymous'
         full_regex   ='chirps-v2.0.*.tif'
         file_to_check='chirps-v2.0.2015.07.3.tif.gz'
+        internet_type = 'ftp'
 
-        list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
-        print(list)
+        list = get_list_matching_files(remote_url, usr_pwd, full_regex,internet_type)
         self.assertTrue(file_to_check in list)
 
      #   ---------------------------------------------------------------------------
@@ -235,8 +239,9 @@ class TestGetInternet(unittest.TestCase):
         usr_pwd='anonymous:'
         full_regex   ='2011/997...-99999-2011.op.gz'
         file_to_check='2011/997286-99999-2011.op.gz'
+        internet_type = 'ftp'
 
-        list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
+        list = get_list_matching_files(remote_url, usr_pwd, full_regex,internet_type)
         print(list)
         self.assertTrue(file_to_check in list)
 
@@ -245,13 +250,14 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def TestRemoteFtp_JRC(self):
 
-        # Retrieve a list of MODIS burndate file .. check only one present
+        # Retrieve a list files from JRC ftp -> ftp-type contents (not through proxy)
         remote_url='ftp://h05-ftp.jrc.it/'
-        usr_pwd='narmauser:narma11'
-        full_regex   ='eumetcast/'
-        file_to_check='prod_descr_restore.txt'
+        usr_pwd='narmauser:2016mesa!'
+        full_regex   ='/eStation_2.0/Documents/DesignDocs/'
+        file_to_check='SRD_eStation_MESA_1.5.pdf'
+        internet_type = 'ftp'
 
-        list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
+        list = get_list_matching_files(remote_url, usr_pwd, full_regex,internet_type)
 
         self.assertTrue(file_to_check in list)
 
@@ -266,7 +272,7 @@ class TestGetInternet(unittest.TestCase):
     #     full_regex   ='africa_arc.2015.....tif.zip'
     #     file_to_check='africa_arc.20150121.tif.zip'
     #
-    #     list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
+    #     list = get_list_matching_files(remote_url, usr_pwd, full_regex)
     #
     #     self.assertTrue(file_to_check in list)
     #
@@ -281,7 +287,7 @@ class TestGetInternet(unittest.TestCase):
     #     full_regex   ='africa_arc.2015.....tif.zip'
     #     file_to_check='africa_arc.20150121.tif.zip'
     #
-    #     list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
+    #     list = get_list_matching_files(remote_url, usr_pwd, full_regex)
     #
     #     self.assertTrue(file_to_check in list)
 
@@ -296,7 +302,7 @@ class TestGetInternet(unittest.TestCase):
     #     full_regex   ='/^[A-Za-z0-9].*/^g2_BIOPAR_.*zip$'
     #     file_to_check=''
     #
-    #     list = get_list_matching_files_dir_ftp(remote_url, usr_pwd, full_regex)
+    #     list = get_list_matching_files(remote_url, usr_pwd, full_regex)
     #
     #     self.assertTrue(file_to_check in list)
 
@@ -314,12 +320,12 @@ class TestGetInternet(unittest.TestCase):
         template='%Y/%m/rfe%Y_%m-dk%{dkm}.nc'
         frequency = 'e1dekad'
 
-        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
 
         #file_to_check='2015/a15121rb.zip'
         #self.assertTrue(file_to_check in files_list)
 
-        status = get_file_from_url(remote_url+files_list[-1],  '/tmp/', target_file=None,userpwd='')
+        status = get_file_from_url(remote_url+files_list[-1],  '/tmp/', target_file=None, userpwd='')
 
     # Original test
     def TestRemoteHttp_FEWSNET(self):
@@ -330,7 +336,7 @@ class TestGetInternet(unittest.TestCase):
         template='%Y/a%y%m%{dkm}rb.zip'
         frequency = 'e1dekad'
 
-        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
 
         file_to_check='2015/a15121rb.zip'
         self.assertTrue(file_to_check in files_list)
@@ -345,18 +351,18 @@ class TestGetInternet(unittest.TestCase):
 
         # Check until current dekad (see output to terminal)
         to_date = ''
-        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
         print ("Current file: %s " % files_list[-1])
 
         # Check until current dekad (see output to terminal)
         to_date = -10
-        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
         print ("Latest file: %s " % files_list[-1])
 
         # Check from 6 months ago to now (should always be 18 files)
-        from_date = -180
+        from_date = -182
         to_date = ''
-        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
         self.assertEqual(len(files_list),18)
 
     #   ---------------------------------------------------------------------------
@@ -374,7 +380,7 @@ class TestGetInternet(unittest.TestCase):
         usr_pwd='anonymous:anonymous'
         frequency = 'e1day'
 
-        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
         print files_list
         file_to_check='A2015211.L3m_DAY_SST_sst_4km.nc'
         self.assertTrue(file_to_check in files_list)
@@ -391,19 +397,19 @@ class TestGetInternet(unittest.TestCase):
         # Check until current day (check output to terminal)
         from_date = '20150707'
         to_date = ''
-        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
         print files_list[-1]
 
         # Check until yesterday (check output to terminal)
         from_date = '20150707'
         to_date = -1
-        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
         print files_list[-1]
 
         # Check last 30 days (check list length = 31)
         from_date = -30
         to_date = ''
-        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
         self.assertEqual(len(files_list),31)
 
 
@@ -419,8 +425,8 @@ class TestGetInternet(unittest.TestCase):
         template='%Y/A%Y%j.L3m_DAY_KD490_Kd_490_4km.bz2'       # introduce non-standard placeholder
         usr_pwd='anonymous:anonymous'
         frequency = 'e1dekad'
-
-        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+    
+        files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
         print files_list
         file_to_check='2014/A2014001.L3m_DAY_KD490_Kd_490_4km.bz2'
         self.assertTrue(file_to_check in files_list)
@@ -464,7 +470,7 @@ class TestGetInternet(unittest.TestCase):
         usr_pwd='clerici.marco:marcle13'
         frequency = 'e1month'
         target_dir = '/data/ingest/temp/'
-        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
         files_list = [remote_url+'2015_01/JRC_EXPORT_20160225110837299-0000000000-0000065536']
         get_file_from_url(files_list[0], target_dir, target_file=None,userpwd='')
         print files_list
@@ -483,7 +489,7 @@ class TestGetInternet(unittest.TestCase):
         usr_pwd='anonymous:anonymous'
         frequency = 'e1dekad'
 
-        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
         print files_list
         file_to_check='ope_africa_rain_20150221.zip'
         self.assertTrue(file_to_check in files_list)
@@ -499,28 +505,46 @@ class TestGetInternet(unittest.TestCase):
         # Check until current day (check output to terminal)
         from_date = '20150701'
         to_date = ''
-        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
         print files_list[-1]
 
         # Check until 10 days ago (check output to terminal)
         to_date = -10
-        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
         print files_list[-1]
 
         # Check last 90 days (check list length = 9)
         from_date = -90
         to_date = ''
-        files_list = build_list_matching_for_http(remote_url, template, from_date, to_date, frequency)
+        files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
         self.assertEqual(len(files_list),9)
 
 
     # Download LSASAF Orders
-    def TestRemoteHttp_Orders(self):
+    def TestRemoteFtp_Orders(self):
 
         # Manually define relevant fields of internet source
         internet_source = {'internet_id': 'LSASAF_Orders',
                            'url': 'ftp://landsaf.ipma.pt/LSASAF-Dissemination/clerima/',
                            'include_files_expression': 'order_.*',
+                           'pull_frequency': 1,
+                           'user_name':'',
+                           'password':'',
+                           'start_date':None,
+                           'end_date':None,
+                           'type':'ftp'
+                           }
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(internet_source)
+
+    # Download LSASAF Orders
+    def TestRemoteFtp_CHIRPS_PREL(self):
+
+        # Manually define relevant fields of internet source
+        internet_source = {'internet_id': 'UCSB:CHIRPS:PREL:DEKAD',
+                           'url': 'ftp://chg-ftpout.geog.ucsb.edu/pub/org/chg/products/CHIRPS-2.0/prelim/global_dekad/tifs/',
+                           'include_files_expression': 'chirps-v2.0.201.*.tif.gz',
                            'pull_frequency': 1,
                            'user_name':'',
                            'password':'',
