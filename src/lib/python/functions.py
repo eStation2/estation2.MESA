@@ -388,16 +388,47 @@ def tojson(queryresult):
     jsonresult = jsonresult[:-2]
     return jsonresult
 
+def _proxy_defined():
 
+    proxy_def = True
+
+    # Check if proxy is defined
+    try:
+        proxy_def = es_constants.es2globals['proxy']
+    except:
+        proxy_def = False
+
+    if proxy_def:
+        if proxy_def == '':
+            proxy_def = False
+
+    return proxy_def
 
 def _internet_on():
     import urllib2
-    try:
-        response = urllib2.urlopen('http://www.google.com', timeout=1)
-        return True
-    except: pass    #  urllib2.URLError as err: pass
-    return False
 
+    test_url = 'http://google.com'
+    # Case 1: proxy
+    if _proxy_defined():
+        try:
+            proxy = urllib2.ProxyHandler({'http': _proxy_defined()})
+            opener = urllib2.build_opener(proxy)
+            response = opener.open(test_url)
+            return True
+        except:
+            pass
+        finally:
+            opener = None
+            proxy = None
+    # Case 2: no proxy
+    else:
+        try:
+            response = urllib2.urlopen(test_url, timeout=1)
+            return True
+        except:
+            pass
+
+    return False
 
 def internet_on():
     import os
