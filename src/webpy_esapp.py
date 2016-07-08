@@ -2348,6 +2348,10 @@ class GetProductLayer:
     def GET(self):
         #import StringIO
         import mapscript
+        # To solve issue with Chla Legends (Tuleap ticket #10905 - see http://trac.osgeo.org/mapserver/ticket/1762)
+        import locale
+        locale.setlocale(locale.LC_NUMERIC,'C')
+
         getparams = web.input()
 
         p = Product(product_code=getparams['productcode'], version=getparams['productversion'])
