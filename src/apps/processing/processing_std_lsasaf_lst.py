@@ -334,7 +334,7 @@ def processing_std_lsasaf_lst(res_queue, pipeline_run_level=0,pipeline_printout_
         spec_logger.info("After running the pipeline %s" % 'processing_std_lsasaf_lst')
 
     if pipeline_printout_level > 0:
-        pipeline_printout(verbose=pipeline_printout_level, output_stream=fwrite_id, checksum_level=0)
+        pipeline_printout(verbose=pipeline_printout_level, output_stream=fwrite_id, history_file='/eStation2/log/.ruffus_history_lsasaf_lst.sqlite', checksum_level=0)
     
     if pipeline_printout_graph_level > 0:
         pipeline_printout_graph('flowchart.jpg')
