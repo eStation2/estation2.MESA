@@ -119,18 +119,18 @@ from multiprocessing import Queue
 #   ---------------------------------------------------------------------
 # modis-par monavg
 #   ---------------------------------------------------------------------
-from apps.processing.processing_std_modis_monavg import *
-args = {'pipeline_run_level':3, \
-        'pipeline_printout_level':3, \
-        'pipeline_printout_graph_level': 0, \
-        'prod': 'modis-par',\
-        'starting_sprod':'par-day',\
-        'mapset': 'MODIS-Africa-4km',\
-        'version':'v2012.0',
-        'logfile':'modis-par'
-        }
-res_queue = None
-processing_std_modis_monavg(res_queue, **args)
+# from apps.processing.processing_std_modis_monavg import *
+# args = {'pipeline_run_level':3, \
+#         'pipeline_printout_level':3, \
+#         'pipeline_printout_graph_level': 0, \
+#         'prod': 'modis-par',\
+#         'starting_sprod':'par-day',\
+#         'mapset': 'MODIS-Africa-4km',\
+#         'version':'v2012.0',
+#         'logfile':'modis-par'
+#         }
+# res_queue = None
+# processing_std_modis_monavg(res_queue, **args)
 #   ---------------------------------------------------------------------
 # modis-kd490 monavg
 #   ---------------------------------------------------------------------
@@ -224,3 +224,56 @@ processing_std_modis_monavg(res_queue, **args)
 # res_queue = None
 # proc_lists=processing_std_lsasaf_lst(res_queue,**args)
 # print(proc_lists)
+#   ---------------------------------------------------------------------
+# lsasaf-et
+#   ---------------------------------------------------------------------
+# from apps.processing.processing_std_lsasaf_et import *
+# # Create the list of dates -> returns empty if start==end==None
+# start_date='201510010000'
+# end_date='201510102345'
+# starting_dates = proc_functions.get_list_dates_for_dataset('lsasaf-et', 'et', 'undefined', start_date=start_date, end_date=end_date)
+# starting_dates = None
+# native_mapset='MSG-satellite-3km'
+# target_mapset='SPOTV-CEMAC-1km'
+#
+# args = {'pipeline_run_level':3, \
+#         'pipeline_printout_level':0, \
+#         'pipeline_printout_graph_level': 0, \
+#         'prod': 'lsasaf-et',\
+#         'starting_sprod':'et',\
+#         'starting_dates': starting_dates,\
+#         'native_mapset': native_mapset,\
+#         'mapset': target_mapset,\
+#         'version':'undefined',
+#         'logfile':'log-lsasaf-et.log'}
+#
+# res_queue = None
+# proc_lists=processing_std_lsasaf_et(res_queue,**args)
+# print(proc_lists)
+#   ---------------------------------------------------------------------
+# modis_firms
+#   ---------------------------------------------------------------------
+from processing_modis_firms import *
+# Create the list of dates -> returns empty if start==end==None
+# start_date='201510010000'
+# end_date='201510102345'
+# starting_dates = proc_functions.get_list_dates_for_dataset('lsasaf-lst', 'lst', 'undefined', start_date=start_date, end_date=end_date)
+starting_dates = None
+native_mapset=None
+target_mapset='SPOTV-Africa-1km'
+
+args = {'pipeline_run_level':4, \
+        'pipeline_printout_level':0, \
+        'pipeline_printout_graph_level': 0, \
+        'prod': 'modis-firms',\
+        'starting_sprod':'1day',\
+        'starting_dates': starting_dates,\
+        'mapset': target_mapset,\
+        'version':'v5.0',
+        'logfile':'log-modis-firms.log,',
+        'update_stats':True,
+        'nrt_products':True}
+
+res_queue = None
+proc_lists=processing_modis_firms(res_queue,**args)
+print(proc_lists)
