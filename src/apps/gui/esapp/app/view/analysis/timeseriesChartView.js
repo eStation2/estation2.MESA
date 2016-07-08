@@ -34,6 +34,9 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
     height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-80 : 800,  // 600,
     minWidth:400,
     minHeight:350,
+    x: 50,
+    y: 5,
+
     // glyph : 'xf080@FontAwesome',
 
     margin: '0 0 0 0',
@@ -47,6 +50,9 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
     tsFromPeriod: null,
     tsToPeriod: null,
     wkt: null,
+    charttype: null,
+    timeseriesChart: {},
+    timeseriesGraph: {},
 
     tools: [
     {
@@ -100,7 +106,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
         var me = this;
 
         me.frame = false;
-        me.border= false;
+        me.border= true;
         me.bodyBorder = false;
 
         me.wkt = this.wkt;

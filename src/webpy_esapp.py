@@ -117,11 +117,20 @@ urls = (
     "/analysis/gettimeline", "GetTimeLine",
     "/analysis/timeseriesproduct", "TimeseriesProducts",
     "/analysis/gettimeseries", "GetTimeseries",
+    "/analysis/getchartproperties", "GetChartProperties",
+    "/analysis/getchartproperties/update", "UpdateChartProperties",
+    "/analysis/gettimeseriesdrawproperties", "GetTimeseriesDrawProperties",
+    "/analysis/gettimeseriesdrawproperties/update", "UpdateTimeseriesDrawProperties",
+    "/analysis/gettimeseriesdrawproperties/create", "CreateTimeseriesDrawProperties",
+    "/analysis/updateyaxe", "UpdateYaxe",
+
 
     "/layers", "GetLayers",
     "/layers/create", "CreateLayer",
     "/layers/update", "UpdateLayer",
     "/layers/delete", "DeleteLayer",
+    "/layers/import", "ImportLayer",
+    "/layers/serverlayerfiles", "GetServerLayerFileList",
 
     "/getmapsets", "GetMapsets",
     "/addingestmapset", "AddIngestMapset",
@@ -161,6 +170,213 @@ class EsApp:
             return render.index_fr()
         else:
             return render.index()
+
+
+class UpdateYaxe:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        yaxe = web.input()
+
+        if 'id' in yaxe: # to check if the file-object is created
+            try:
+                querydb.update_yaxe_timeseries_drawproperties(yaxe)
+                yaxeproperties_json = '{"success":true, "message":"Yaxe updated"}'
+            except:
+                yaxeproperties_json = '{"success":false, "error":"Error saving the Yaxe properties in the database!"}'
+        else:
+            yaxeproperties_json = '{"success":false, "error":"No Yaxe properties given!"}'
+
+        return yaxeproperties_json
+
+
+class CreateTimeseriesDrawProperties:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def POST(self):
+        # getparams = web.input()
+        getparams = json.loads(web.data())  # get PUT data
+
+        createstatus = '{"success":"false", "message":"An error occured while creating the Timeseries Draw Properties!"}'
+
+        # if hasattr(getparams['tsdrawproperties'], "yaxes_id"):
+        if 'tsdrawproperties' in getparams:
+            tsdrawproperties = getparams['tsdrawproperties']
+
+            if self.crud_db.create('timeseries_drawproperties', tsdrawproperties):
+                createstatus = '{"success":"true", "message":"Timeseries Draw Properties created!"}'
+        else:
+            createstatus = '{"success":"false", "message":"No Timeseries Draw Properties given!"}'
+
+        return createstatus
+
+
+class UpdateTimeseriesDrawProperties:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def PUT(self):
+        # getparams = web.input()
+        getparams = json.loads(web.data())  # get PUT data
+
+        updatestatus = '{"success":"false", "message":"An error occured while updating the Timeseries Draw Properties!"}'
+
+        if 'tsdrawproperties' in getparams:
+            tsdrawproperties = getparams['tsdrawproperties']
+
+            if self.crud_db.update('timeseries_drawproperties', tsdrawproperties):
+                updatestatus = '{"success":"true", "message":"Timeseries Draw Properties updated!"}'
+        else:
+            createstatus = '{"success":"false", "message":"No Timeseries Draw Properties given!"}'
+
+        return updatestatus
+
+
+class GetTimeseriesDrawProperties:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        getparams = web.input()
+
+        tsdrawproperties_dict_all = []
+        tsdrawproperties = querydb.get_timeseries_drawproperties()
+
+        if hasattr(tsdrawproperties, "__len__") and tsdrawproperties.__len__() > 0:
+            for row in tsdrawproperties:
+                # row_dict = functions.row2dict(row)
+                row_dict = row
+
+                tsdrawproperty = {
+                                  'productcode': row_dict['productcode'],
+                                  'subproductcode': row_dict['subproductcode'],
+                                  'version': row_dict['version'],
+                                  'title': row_dict['title'],
+                                  'unit': row_dict['unit'],
+                                  'min': row_dict['min'],
+                                  'max': row_dict['max'],
+                                  'oposite': row_dict['oposite'],
+                                  'tsname_in_legend': row_dict['tsname_in_legend'],
+                                  'charttype': row_dict['charttype'],
+                                  'linestyle': row_dict['linestyle'],
+                                  'linewidth': row_dict['linewidth'],
+                                  'color': row_dict['color'],
+                                  'yaxes_id': row_dict['yaxes_id'],
+                                  'title_color': row_dict['title_color'],
+                                  'aggregation_type': row_dict['aggregation_type'],
+                                  'aggregation_min': row_dict['aggregation_min'],
+                                  'aggregation_max': row_dict['aggregation_max']
+                                }
+
+                tsdrawproperties_dict_all.append(tsdrawproperty)
+
+            tsdrawproperties_json = json.dumps(tsdrawproperties_dict_all,
+                                              ensure_ascii=False,
+                                              encoding='utf-8',
+                                              sort_keys=True,
+                                              indent=4,
+                                              separators=(', ', ': '))
+
+            tsdrawproperties_json = '{"success":"true", "total":'\
+                                   + str(tsdrawproperties.__len__())\
+                                   + ',"tsdrawproperties":'+tsdrawproperties_json+'}'
+
+        else:
+            tsdrawproperties_json = '{"success":false, "error":"No timeseries draw properties defined!"}'
+
+        return tsdrawproperties_json
+
+
+class GetChartProperties:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        getparams = web.input()
+        charttype = 'default'
+        if hasattr(getparams, "charttype") and getparams['charttype'] != '':
+            charttype = getparams['charttype']
+
+        chartproperties_dict_all = []
+        chartproperties = querydb.get_chart_drawproperties(charttype)
+
+        if hasattr(chartproperties, "__len__") and chartproperties.__len__() > 0:
+            for row in chartproperties:
+                row_dict = functions.row2dict(row)
+
+                chartproperty = { 'chart_type': row_dict['chart_type'],
+                                  'chart_width': row_dict['chart_width'],
+                                  'chart_height': row_dict['chart_height'],
+                                  'chart_title_font_size': row_dict['chart_title_font_size'],
+                                  'chart_title_font_color': row_dict['chart_title_font_color'],
+                                  'chart_subtitle_font_size': row_dict['chart_subtitle_font_size'],
+                                  'chart_subtitle_font_color': row_dict['chart_subtitle_font_color'],
+                                  'yaxe1_font_size': row_dict['yaxe1_font_size'],
+                                  'yaxe2_font_size': row_dict['yaxe2_font_size'],
+                                  'yaxe3_font_size': row_dict['yaxe3_font_size'],
+                                  'legend_font_size': row_dict['legend_font_size'],
+                                  'legend_font_color': row_dict['legend_font_color'],
+                                  'xaxe_font_size': row_dict['xaxe_font_size'],
+                                  'xaxe_font_color': row_dict['xaxe_font_color']
+                                }
+
+                chartproperties_dict_all.append(chartproperty)
+
+            chartproperties_json = json.dumps(chartproperties_dict_all,
+                                              ensure_ascii=False,
+                                              encoding='utf-8',
+                                              sort_keys=True,
+                                              indent=4,
+                                              separators=(', ', ': '))
+
+            chartproperties_json = '{"success":"true", "total":'\
+                                   + str(chartproperties.__len__())\
+                                   + ',"chartproperties":'+chartproperties_json+'}'
+
+        else:
+            chartproperties_json = '{"success":false, "error":"No chart properties defined!"}'
+
+        return chartproperties_json
+
+
+class UpdateChartProperties:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def PUT(self):
+        getparams = json.loads(web.data())  # get PUT data
+        if 'chartproperty' in getparams:      # hasattr(getparams, "chartproperty")
+            chartdrawprobs = {  'chart_type': getparams['chartproperty']['chart_type'],
+                                'chart_width': getparams['chartproperty']['chart_width'],
+                                'chart_height': getparams['chartproperty']['chart_height'],
+                                'chart_title_font_size': getparams['chartproperty']['chart_title_font_size'],
+                                'chart_title_font_color': getparams['chartproperty']['chart_title_font_color'],
+                                'chart_subtitle_font_size': getparams['chartproperty']['chart_subtitle_font_size'],
+                                'chart_subtitle_font_color': getparams['chartproperty']['chart_subtitle_font_color'],
+                                'yaxe1_font_size': getparams['chartproperty']['yaxe1_font_size'],
+                                'yaxe2_font_size': getparams['chartproperty']['yaxe2_font_size'],
+                                'legend_font_size': getparams['chartproperty']['legend_font_size'],
+                                'legend_font_color': getparams['chartproperty']['legend_font_color'],
+                                'xaxe_font_size': getparams['chartproperty']['xaxe_font_size'],
+                                'xaxe_font_color': getparams['chartproperty']['xaxe_font_color'],
+                                'yaxe3_font_size': getparams['chartproperty']['yaxe3_font_size']
+                                }
+
+
+            if self.crud_db.update('chart_drawproperties', chartdrawprobs):
+                updatestatus = '{"success":"true", "message":"Chart draw properties updated!"}'
+            else:
+                updatestatus = '{"success":false, "message":"An error occured while updating the chart draw properties!"}'
+
+        else:
+            updatestatus = '{"success":false, "message":"No chart properties passed!"}'
+
+        return updatestatus
 
 
 class GetHelpFile:
@@ -421,8 +637,7 @@ class GetDateFormats:
         if hasattr(dateformats, "__len__") and dateformats.__len__() > 0:
             for row in dateformats:
                 row_dict = functions.row2dict(row)
-                # internetsource = {'category_id': row_dict['category_id'],
-                #                   'descriptive_name': row_dict['descriptive_name']}
+
                 dateformats_dict_all.append(row_dict)
 
             dateformats_json = json.dumps(dateformats_dict_all,
@@ -453,8 +668,7 @@ class GetDataTypes:
         if hasattr(datatypes, "__len__") and datatypes.__len__() > 0:
             for row in datatypes:
                 row_dict = functions.row2dict(row)
-                # internetsource = {'category_id': row_dict['category_id'],
-                #                   'descriptive_name': row_dict['descriptive_name']}
+
                 datatypes_dict_all.append(row_dict)
 
             datatypes_json = json.dumps(datatypes_dict_all,
@@ -930,6 +1144,7 @@ class GetDashboard:
             else:
                 PC1_fts_status = False
 
+
         if systemsettings['type_installation'].lower() == 'full':
             if systemsettings['role'].lower() == 'pc1':
                 PC1_mode = systemsettings['mode'].lower()
@@ -1018,6 +1233,26 @@ class GetDashboard:
                         PC2_system_execution_time = status_PC2['system_execution_time']
                     else:
                         PC2_Webserver_Status = False
+
+
+        if systemsettings['type_installation'].lower() == 'singlepc':
+            if systemsettings['role'].lower() == 'pc1':
+                PC1_mode = systemsettings['mode'].lower()
+
+            elif systemsettings['role'].lower() == 'pc2':
+                PC2_mode = systemsettings['mode'].lower()
+                PC2_version = systemsettings['active_version']
+                PC2_DBAutoSync = systemsettings['db_sync']
+                PC2_DataAutoSync = systemsettings['data_sync']
+                PC2_postgresql_status = functions.getStatusPostgreSQL()
+                PC2_internet_status = functions.internet_on()
+                # PC2_internet_status = functions.is_connected()
+                PC2_service_eumetcast = status_services['eumetcast']
+                PC2_service_internet = status_services['internet']
+                PC2_service_ingest = status_services['ingest']
+                PC2_service_processing = status_services['process']
+                PC2_service_system = status_services['system']
+
 
         if PC2_DBAutoSync in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
             PC2_DBAutoSync = True
@@ -1356,7 +1591,8 @@ class GetTimeseries:
                     opposite = "true"
             if axes == 1:
                 opposite = "false"
-            yaxe = {'id': yaxe.yaxes_id, 'title': yaxe.title, 'title_color': yaxe.title_color, 'unit': yaxe.unit, 'opposite': opposite, 'min': yaxe.min, 'max': yaxe.max}
+            yaxe = {'id': yaxe.yaxes_id, 'title': yaxe.title, 'title_color': yaxe.title_color, 'unit': yaxe.unit, 'opposite': opposite,
+                    'min': yaxe.min, 'max': yaxe.max, 'aggregation_type': yaxe.aggregation_type, 'aggregation_min': yaxe.aggregation_min, 'aggregation_max': yaxe.aggregation_max}
             yaxes.append(yaxe)
 
         timeseries = []
@@ -1370,7 +1606,7 @@ class GetTimeseries:
                        "subproductcode": subproductcode,
                        "version": version}
 
-            timeseries_drawproperties = querydb.get_timeseries_drawproperties(product)
+            timeseries_drawproperties = querydb.get_product_timeseries_drawproperties(product)
             for ts_drawprops in timeseries_drawproperties:
                 aggregate = { 'aggregation_type': ts_drawprops.aggregation_type,
                               'aggregation_min': ts_drawprops.aggregation_min,
@@ -1414,6 +1650,7 @@ class GetTimeseries:
         # timeline_json = '{"success":"true"}'
         return ts_json
 
+
 class TimeseriesProducts:
     def __init__(self):
         self.lang = "eng"
@@ -1452,12 +1689,19 @@ class TimeseriesProducts:
                                 dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
                                 dataset.get_filenames()
                                 all_present_product_dates = dataset.get_dates()
+
                                 distinctyears = []
                                 for product_date in all_present_product_dates:
                                     if product_date.year not in distinctyears:
                                         distinctyears.append(product_date.year)
 
                                 dataset_dict = functions.row2dict(subproduct)
+
+                                # if productcode == 'vgt-ndvi':
+                                #     print dataset.get_filenames()
+                                #     print all_present_product_dates
+                                #     print distinctyears
+
                                 dataset_dict['years'] = distinctyears
                                 dataset_dict['mapsetcode'] = mapset
                                 mapset_dict['timeseriesmapsetdatasets'].append(dataset_dict)
@@ -1716,30 +1960,30 @@ class GetLogFile:
 
         # logfilepath = es_constants.es2globals['log_dir']+logfilename
         # Display only latest (most recent file) - see #69-1
-        #logfilenames = sorted(glob.glob(logfilepath + "*"), key=str, reverse=False)
-        logfilenames = sorted(glob.glob(logfilename), key=str, reverse=False)
+        logfilenames = sorted(glob.glob(logfilename + "*"), key=str, reverse=False)
 
         # print sorted(logfilenames, key=str, reverse=False)
         if len(logfilenames) > 0:
-            logfilecontent_all = ''
             logfilecontent = ''
             for logfilepath in logfilenames:
                 if os.path.isfile(logfilepath):
-                    logfile = open(logfilepath, 'r')
-                    logfilecontent = logfile.read()
-                    logfilecontent = logfilecontent.replace('\'', '')
-                    logfilecontent = logfilecontent.replace(chr(10), '<br />')
-                    logfilecontent = logfilecontent.replace(' TRACE ', '<b style="color:gray"> TRACE </b>')
-                    logfilecontent = logfilecontent.replace(' DEBUG ', '<b style="color:gray"> DEBUG </b>')
-                    logfilecontent = logfilecontent.replace(' INFO ', '<b style="color:green"> INFO </b>')
-                    logfilecontent = logfilecontent.replace(' WARNING ', '<b style="color:orange"> WARN </b>')
-                    logfilecontent = logfilecontent.replace(' WARN ', '<b style="color:orange"> WARN </b>')
-                    logfilecontent = logfilecontent.replace(' ERROR ', '<b style="color:red"> ERROR </b>')
-                    logfilecontent = logfilecontent.replace(' CRITICAL ', '<b style="color:red"> FATAL </b>')
-                    logfilecontent = logfilecontent.replace(' FATAL ', '<b style="color:red"> FATAL </b>')
-                    logfilecontent = logfilecontent.replace(' CLOSED ', '<b style="color:brown"> CLOSED </b>')
+                    # logfile = open(logfilepath, 'r')
+                    # logfilecontent = logfile.read()
+                    for line in reversed(open(logfilepath).readlines()):
+                        logfilecontent += line
 
-                    logfilecontent_all += logfilecontent
+            logfilecontent = logfilecontent.replace('\'', '')
+            logfilecontent = logfilecontent.replace(chr(10), '<br />')
+            logfilecontent = logfilecontent.replace(' TRACE ', '<b style="color:gray"> TRACE </b>')
+            logfilecontent = logfilecontent.replace(' DEBUG ', '<b style="color:gray"> DEBUG </b>')
+            logfilecontent = logfilecontent.replace(' INFO ', '<b style="color:green"> INFO </b>')
+            logfilecontent = logfilecontent.replace(' WARNING ', '<b style="color:orange"> WARN </b>')
+            logfilecontent = logfilecontent.replace(' WARN ', '<b style="color:orange"> WARN </b>')
+            logfilecontent = logfilecontent.replace(' ERROR ', '<b style="color:red"> ERROR </b>')
+            logfilecontent = logfilecontent.replace(' CRITICAL ', '<b style="color:red"> FATAL </b>')
+            logfilecontent = logfilecontent.replace(' FATAL ', '<b style="color:red"> FATAL </b>')
+            logfilecontent = logfilecontent.replace(' CLOSED ', '<b style="color:brown"> CLOSED </b>')
+
         else:
             logfilecontent = 'NO LOG FILE PRESENT'
 
@@ -2124,7 +2368,6 @@ class GetLayers:
                           'layerlevel': row_dict['layerlevel'],
                           'layername': row_dict['layername'],
                           'description': row_dict['description'],
-                          'layerpath': row_dict['layerpath'],
                           'filename': row_dict['filename'],
                           'layerorderidx': row_dict['layerorderidx'],
                           'layertype': row_dict['layertype'],
@@ -2144,7 +2387,10 @@ class GetLayers:
                           'background_legend_image_filename': row_dict['background_legend_image_filename'],
                           'projection': row_dict['projection'],
                           'submenu': row_dict['submenu'],
-                          'menu': row_dict['menu']
+                          'menu': row_dict['menu'],
+                          'defined_by': row_dict['defined_by'],
+                          'open_in_mapview': row_dict['open_in_mapview'],
+                          'provider': row_dict['provider']
                         }
 
                 layers_dict_all.append(layer)
@@ -2166,6 +2412,165 @@ class GetLayers:
         return layers_json
 
 
+class GetServerLayerFileList:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        layerfiledir = '/eStation2/layers/'
+        layers_json = ''
+        layerfiles_dict = []
+        pattern = ""
+        alist_filter = ['geojson']
+        layerfiles_json = '{"success":false, "error":"No Layers defined!"}'
+
+        # Walk through all files in the directory that contains the files
+        for root, dirs, files in os.walk(layerfiledir):
+            for filename in files:
+                if filename[-7:] in alist_filter and pattern in filename:
+                    # print os.path.join(root,filename).replace(layerfiledir, "")
+                    layerfile = {'layerfilename': os.path.join(root,filename).replace(layerfiledir, ""),
+                                 'filesize': os.path.getsize(os.path.join(root,filename))}
+                    layerfiles_dict.append(layerfile)
+
+            layers_json = json.dumps(layerfiles_dict,
+                                     ensure_ascii=False,
+                                     encoding='utf-8',
+                                     sort_keys=True,
+                                     indent=4,
+                                     separators=(', ', ': '))
+
+            layerfiles_json = '{"success":"true",'\
+                                   + '"layerfiles":'+layers_json+'}'
+
+        return layerfiles_json
+
+
+class ImportLayer:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        # getparams = json.loads(web.data())  # get PUT data
+        getparams = web.input() # get POST data
+
+        layerfiledir = '/eStation2/layers/' # change this to the directory you want to store the file in.
+        if 'layerfilename' in getparams: # to check if the file-object is created
+            try:
+                filepath=getparams.layerfilename.replace('\\','/') # replaces the windows-style slashes with linux ones.
+                filename=filepath.split('/')[-1] # splits the and chooses the last part (the filename with extension)
+
+                # Separate base from extension
+                base, extension = os.path.splitext(filename)
+
+                # Initial new name
+                new_name = os.path.join(layerfiledir, filename)
+
+                if not os.path.exists(new_name):  # file does not exist in <layerfiledir>
+                    fout = open(new_name,'w') # creates the file where the uploaded file should be stored
+                    fout.write(getparams.layerfile) # .read()  writes the uploaded file to the newly created file.
+                    fout.close() # closes the file, upload complete.
+                else:  # file exists in <layerfiledir>
+                    ii = 1
+                    while True:
+                        new_name = os.path.join(layerfiledir, base + "_" + str(ii) + extension)
+                        if not os.path.exists(new_name):
+                            fout = open(new_name,'w') # creates the file where the uploaded file should be stored
+                            fout.write(getparams.layerfile) # .read()  writes the uploaded file to the newly created file.
+                            fout.close() # closes the file, upload complete.
+                            break
+                        ii += 1
+
+                finalfilename = new_name.split('/')[-1] # splits the and chooses the last part (the filename with extension)
+                success = True
+            except:
+                success = False
+        else:
+            success = False
+
+        if success:
+            status = '{"success":"true", "filename":"'+ finalfilename + '","message":"Layer imported!"}'
+        else:
+            status = '{"success":false, "message":"An error occured while importing the layer!"}'
+
+        return status
+
+
+class DeleteLayer:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def DELETE(self):
+        getparams = json.loads(web.data())  # get PUT data
+        # getparams = web.input() # get POST data
+        if 'layer' in getparams:      # hasattr(getparams, "layer")
+            layerdrawprobs = {
+                                'layerid': getparams['layer']['layerid'],
+                             }
+
+
+            if self.crud_db.delete('layers', **layerdrawprobs):
+                status = '{"success":"true", "message":"Layer deleted!"}'
+            else:
+                status = '{"success":false, "message":"An error occured while deleting the layer!"}'
+
+        else:
+            status = '{"success":false, "message":"No layer info passed!"}'
+
+        return status
+
+
+class CreateLayer:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def POST(self):
+        getparams = json.loads(web.data())  # get PUT data
+        # getparams = web.input() # get POST data
+        if 'layer' in getparams:      # hasattr(getparams, "layer")
+            layerdrawprobs = {
+                                # 'layerid': getparams['layer']['layerid'],
+                                # 'layerlevel': getparams['layer']['layerlevel'],
+                                'layername': getparams['layer']['layername'],
+                                'description': getparams['layer']['description'],
+                                'filename': getparams['layer']['filename'],
+                                'layerorderidx': getparams['layer']['layerorderidx'],
+                                'layertype': getparams['layer']['layertype'],
+                                'polygon_outlinecolor': getparams['layer']['polygon_outlinecolor'],
+                                'polygon_outlinewidth': getparams['layer']['polygon_outlinewidth'],
+                                # 'polygon_fillcolor': getparams['layer']['polygon_fillcolor'],
+                                # 'polygon_fillopacity': getparams['layer']['polygon_fillopacity'],
+                                'feature_display_column': getparams['layer']['feature_display_column'],
+                                'feature_highlight_fillcolor': getparams['layer']['feature_highlight_fillcolor'],
+                                'feature_highlight_fillopacity': getparams['layer']['feature_highlight_fillopacity'],
+                                'feature_highlight_outlinecolor': getparams['layer']['feature_highlight_outlinecolor'],
+                                'feature_highlight_outlinewidth': getparams['layer']['feature_highlight_outlinewidth'],
+                                'feature_selected_outlinecolor': getparams['layer']['feature_selected_outlinecolor'],
+                                'feature_selected_outlinewidth': getparams['layer']['feature_selected_outlinewidth'],
+                                'enabled': getparams['layer']['enabled'],
+                                'deletable': True,
+                                'background_legend_image_filename': '',
+                                # 'projection': getparams['layer']['projection'],
+                                'submenu': getparams['layer']['submenu'],
+                                'menu': getparams['layer']['menu'],
+                                'defined_by': 'USER',
+                                # 'open_in_mapview': getparams['layer']['open_in_mapview'],
+                                'provider': getparams['layer']['provider'] }
+
+
+            if self.crud_db.create('layers', layerdrawprobs):
+                status = '{"success":"true", "message":"Layer created!"}'
+            else:
+                status = '{"success":false, "message":"An error occured while creating the new layer!"}'
+
+        else:
+            status = '{"success":false, "message":"No layer info passed!"}'
+
+        return status
+
+
 class UpdateLayer:
     def __init__(self):
         self.lang = "eng"
@@ -2174,16 +2579,34 @@ class UpdateLayer:
     def PUT(self):
         getparams = json.loads(web.data())  # get PUT data
         if 'layer' in getparams:      # hasattr(getparams, "layer")
-            layerdrawprobs = {'layerid': getparams['layer']['layerid'],
-                              'polygon_outlinecolor': getparams['layer']['polygon_outlinecolor'],
-                              'polygon_outlinewidth': getparams['layer']['polygon_outlinewidth'],
-                              'feature_highlight_fillcolor': getparams['layer']['feature_highlight_fillcolor'],
-                              'feature_highlight_fillopacity': getparams['layer']['feature_highlight_fillopacity'],
-                              'feature_highlight_outlinecolor': getparams['layer']['feature_highlight_outlinecolor'],
-                              'feature_highlight_outlinewidth': getparams['layer']['feature_highlight_outlinewidth'],
-                              'feature_selected_outlinecolor': getparams['layer']['feature_selected_outlinecolor'],
-                              'feature_selected_outlinewidth': getparams['layer']['feature_selected_outlinewidth']
-                              }
+            layerdrawprobs = {  'layerid': getparams['layer']['layerid'],
+                                # 'layerlevel': getparams['layer']['layerlevel'],
+                                'layername': getparams['layer']['layername'],
+                                'description': getparams['layer']['description'],
+                                'filename': getparams['layer']['filename'],
+                                'layerorderidx': getparams['layer']['layerorderidx'],
+                                'layertype': getparams['layer']['layertype'],
+                                'polygon_outlinecolor': getparams['layer']['polygon_outlinecolor'],
+                                'polygon_outlinewidth': getparams['layer']['polygon_outlinewidth'],
+                                # 'polygon_fillcolor': getparams['layer']['polygon_fillcolor'],
+                                # 'polygon_fillopacity': getparams['layer']['polygon_fillopacity'],
+                                'feature_display_column': getparams['layer']['feature_display_column'],
+                                'feature_highlight_fillcolor': getparams['layer']['feature_highlight_fillcolor'],
+                                'feature_highlight_fillopacity': getparams['layer']['feature_highlight_fillopacity'],
+                                'feature_highlight_outlinecolor': getparams['layer']['feature_highlight_outlinecolor'],
+                                'feature_highlight_outlinewidth': getparams['layer']['feature_highlight_outlinewidth'],
+                                'feature_selected_outlinecolor': getparams['layer']['feature_selected_outlinecolor'],
+                                'feature_selected_outlinewidth': getparams['layer']['feature_selected_outlinewidth'],
+                                'enabled': getparams['layer']['enabled'],
+                                # 'deletable': getparams['layer']['deletable'],
+                                # 'background_legend_image_filename': getparams['layer']['background_legend_image_filename'],
+                                # 'projection': getparams['layer']['projection'],
+                                'submenu': getparams['layer']['submenu'],
+                                'menu': getparams['layer']['menu'],
+                                'defined_by': getparams['layer']['defined_by'],
+                                'open_in_mapview': getparams['layer']['open_in_mapview'],
+                                'provider': getparams['layer']['provider'] }
+
 
             if self.crud_db.update('layers', layerdrawprobs):
                 updatestatus = '{"success":"true", "message":"Layer updated!"}'
@@ -2247,7 +2670,6 @@ class InstallReport:
                 break
             yield buf
         os.remove(filename)
-
 
 
 class ResetUserSettings:
@@ -2444,9 +2866,37 @@ class GetProductLayer:
         self.lang = "eng"
 
     def GET(self):
+        getparams = web.input()
+        filename_png = self.getProductLayer(getparams)
+
+        web.header('Content-type', 'image/png')
+        f = open(filename_png, 'rb')
+        while 1:
+            buf = f.read(1024 * 8)
+            if not buf:
+                break
+            yield buf
+        os.remove(filename_png)
+
+    def POST(self):
+        getparams = web.input()
+        filename_png = self.getProductLayer(getparams)
+
+        web.header('Content-type', 'image/png')
+        f = open(filename_png, 'rb')
+        while 1:
+            buf = f.read(1024 * 8)
+            if not buf:
+                break
+            yield buf
+        os.remove(filename_png)
+
+
+    def getProductLayer(self, getparams):
         #import StringIO
         import mapscript
-        getparams = web.input()
+        # getparams = web.input()
+        # print getparams
 
         p = Product(product_code=getparams['productcode'], version=getparams['productversion'])
         dataset = p.get_dataset(mapset=getparams['mapsetcode'], sub_product_code=getparams['subproductcode'])
@@ -2472,6 +2922,44 @@ class GetProductLayer:
                                                '.tif')
         productfile = dataset.fullpath + filename
         # print productfile
+
+        if (hasattr(getparams, "outmask") and getparams['outmask'] == 'true'):
+            # print productfile
+            # print es_constants.base_tmp_dir
+            from greenwich import Raster, Geometry
+
+            # try:
+            #     from osgeo import gdal
+            #     from osgeo import gdal_array
+            #     from osgeo import ogr, osr
+            #     from osgeo import gdalconst
+            # except ImportError:
+            #     import gdal
+            #     import gdal_array
+            #     import ogr
+            #     import osr
+            #     import gdalconst
+
+            # try:
+
+            # ogr.UseExceptions()
+            wkt = getparams['selectedfeature']
+            theGeomWkt = ' '.join(wkt.strip().split())
+            # print wkt
+            geom = Geometry(wkt=str(theGeomWkt), srs=4326)
+            # print "wearehere"
+            with Raster(productfile) as img:
+                # Assign nodata from prod_info
+                # img._nodata = nodata
+                # print "nowwearehere"
+                with img.clip(geom) as clipped:
+                    # Save clipped image (for debug only)
+                    productfile = es_constants.base_tmp_dir + '/clipped_'+filename
+                    # print productfile
+                    clipped.save(productfile)
+
+            # except:
+            #     print 'errorrrrrrrrr!!!!!!'
 
         #web.header('Content-type', 'image/png')
         #web.header('Content-transfer-encoding', 'binary')
@@ -2640,22 +3128,25 @@ class GetProductLayer:
                     style = mapscript.styleObj(layerclass)
                     style.color.setRGB(colors[0], colors[1], colors[2])
 
-        # result_map_file = es_constants.apps_dir+'/analysis/MAP_result.map'
-        # if os.path.isfile(result_map_file):
-        #     os.remove(result_map_file)
-        # productmap.save(result_map_file)
+        result_map_file = '/tmp/eStation2/MAP_result.map'
+        if os.path.isfile(result_map_file):
+            os.remove(result_map_file)
+        productmap.save(result_map_file)
+
         image = productmap.draw()
         filename_png = es_constants.base_tmp_dir+filenamenoextention+str(llx)+'_'+str(lly)+'_'+str(urx)+'_'+str(ury)+'.png'
         image.save(filename_png)
 
-        web.header('Content-type', 'image/png')
-        f = open(filename_png, 'rb')
-        while 1:
-            buf = f.read(1024 * 8)
-            if not buf:
-                break
-            yield buf
-        os.remove(filename_png)
+        return filename_png
+
+        # web.header('Content-type', 'image/png')
+        # f = open(filename_png, 'rb')
+        # while 1:
+        #     buf = f.read(1024 * 8)
+        #     if not buf:
+        #         break
+        #     yield buf
+        # os.remove(filename_png)
 
         # #print owsrequest.getValueByName('BBOX')
         # mapscript.msIO_installStdoutToBuffer()

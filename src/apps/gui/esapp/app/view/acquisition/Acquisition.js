@@ -467,7 +467,9 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                             '<b class="smalltext"> - {version}</b>',
                         '</tpl>',
                         '</br>' +
-                        '<b class="smalltext" style="color:darkgrey">{productcode}</b>' +
+                        '<b class="smalltext" style="color:darkgrey">'+esapp.Utils.getTranslation('productcode')+': {productcode}</b>' +
+                        '</br>' +
+                        '<b class="smalltext" style="color:darkgrey">'+esapp.Utils.getTranslation('provider')+': {provider}</b>' +
                         // '<p>{description}</p>' +
                         '</br>'
                     ),

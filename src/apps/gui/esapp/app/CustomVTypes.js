@@ -28,10 +28,21 @@ Ext.apply(Ext.form.field.VTypes, {
 //Matches Win and Mac OS paths: x:\foo\bar\, \\foo\bar\, /foo/bar/
 Ext.form.VTypes["directory"]=function(v){
  return /^(([a-zA-Z]:){0,1}(\\|\/){1})(([-_.a-zA-Z0-9\\\/ ]+)(\\|\/){1})+$/.test(v);
-}
-Ext.form.VTypes["directoryText"]=esapp.Utils.getTranslation('vtypedirectory')  // "This must be a valid directory location."
+};
+Ext.form.VTypes["directoryText"]=esapp.Utils.getTranslation('vtypedirectory');  // "This must be a valid directory location."
 Ext.form.VTypes["directoryMask"]=/[-_.a-zA-Z0-9\\\/: ]/;
 
+
+//Ext.apply(Ext.form.VTypes, {
+//    GeoJSON:  function(v) {
+//		v = v.replace(/^\s|\s$/g, ""); //trims string
+//		if (v.match(/([^\/\\]+)\.(geojson)$/i) )
+//			return true;
+//		else
+//			return false;
+//    },
+//    GeoJSONText: esapp.Utils.getTranslation('vtype_geojson')    // 'Must be a .geojson file.'
+//});
 
 
 //Ext.apply(Ext.form.field.VTypes, {

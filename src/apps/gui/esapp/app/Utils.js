@@ -157,6 +157,23 @@ Ext.define('esapp.Utils', {
             var Ginverse = (G ^ 128);
             var Binverse = (B ^ 128);
             return this.RGBtoHex(Rinverse,Ginverse,Binverse);
+        },
+
+        colorrenderer: function(color) {
+            renderTpl = color;
+
+            if (color.trim()==''){
+                renderTpl = 'transparent';
+            }
+            else {
+                renderTpl = '<span style="background:rgb(' + this.HexToRGB(color) + '); color:' + this.invertHexToRGB(color) + ';">' + this.HexToRGB(color) + '</span>';
+            }
+            return renderTpl;
+        },
+
+        sleepFor: function(sleepDuration){
+            var now = new Date().getTime();
+            while(new Date().getTime() < now + sleepDuration){ /* do nothing */ }
         }
     }
 });
@@ -244,7 +261,7 @@ Ext.define('Ext.ux.ColorPickerCombo', {
                                         },
                                         show: function(field,opts){
                                                 field.getEl().monitorMouseLeave(500, field.hide, field);
-                                        },
+                                        }
                                 }
                         });
                         me.picker.alignTo(me.inputEl, 'tl-bl?');
@@ -253,5 +270,5 @@ Ext.define('Ext.ux.ColorPickerCombo', {
                 else {
                         me.picker.hide();
                 }
-        },
+        }
 });

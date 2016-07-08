@@ -13,8 +13,7 @@ Ext.define('esapp.view.dashboard.DashboardController', {
 
         var pcs_container = Ext.getCmp('pcs_container');
         var dashboard_panel = Ext.getCmp('dashboard-panel');
-
-        //pcs_container.removeAll();
+        var myMask = null;
 
         var PC1 = {},
             PC2 = {},
@@ -30,9 +29,9 @@ Ext.define('esapp.view.dashboard.DashboardController', {
             pc3DisabledPartial = true,
             pc2DisabledAll = false,
             pc3DisabledAll = true;
+
         if (reload){
-//            console.info('reloading dashboard...');
-            var myMask = new Ext.LoadMask({
+            myMask = new Ext.LoadMask({
                 msg    : esapp.Utils.getTranslation('loading'),
                 target : dashboard_panel
             });
@@ -145,7 +144,7 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                     if (me.activePC == 'pc3') {
                         pc3Active = true;
                         pc3DisabledAll = false;
-			pc2DisabledPartial = true;
+			            pc2DisabledPartial = true;
                         pc2DisabledAll = true;
 
                         if (me.PC3_mode == 'nominal') {
@@ -283,6 +282,9 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                     if (me.activePC == 'pc1') pc1Active = true;
                     if (me.activePC == 'pc2') pc2Active = true;
 
+                    me.PC2_modeText = esapp.Utils.getTranslation(me.PC2_mode);
+                    me.PC2_autosync_onoff = me.PC2_mode == 'recovery';
+
                     PC1 = {
                         xtype: 'dashboard-pc1',
                         setdisabled:pc1Disabled,
@@ -296,7 +298,7 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                         xtype: 'dashboard-pc2',
                         name:'dashboardpc2',
                         id: 'dashboardpc2',
-                        paneltitle: esapp.Utils.getTranslation('processing_pc2'),
+                        paneltitle: esapp.Utils.getTranslation('processing_analysis_pc2'),
                         setdisabledPartial:pc2DisabledPartial,
                         setdisabledAll:pc2DisabledAll,
                         activePC:pc2Active,
@@ -332,6 +334,5 @@ Ext.define('esapp.view.dashboard.DashboardController', {
 
             }
         });
-        //myMask.hide();
     }
 });

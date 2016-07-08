@@ -91,7 +91,7 @@ Ext.define("esapp.view.analysis.mapView",{
             projection:"EPSG:4326",
             displayProjection:"EPSG:4326",
             center: [20, -4.7],  // ol.proj.transform([21, 4], 'EPSG:4326', 'EPSG:3857'),
-            zoom: 3.5
+            zoom: 0.5
         });
 
         me.name ='mapviewwindow_' + me.id;
@@ -169,6 +169,7 @@ Ext.define("esapp.view.analysis.mapView",{
                         maplegend_togglebtn.toggle();
                     }
                 },
+                legendHTML_ImageObj: new Image(),
                 items: [{
                     xtype: 'container',
                     id: 'product-legend' + me.id,
@@ -253,6 +254,7 @@ Ext.define("esapp.view.analysis.mapView",{
                     projection: me.projection,
                     displayProjection:"EPSG:4326",
                     //interactions: ol.interaction.defaults().extend([select]),
+                    interactions : ol.interaction.defaults({doubleClickZoom :false}),
                     //layers: [blanklayer],
                     view: this.up().commonMapView,
                     controls: ol.control.defaults({
@@ -271,6 +273,21 @@ Ext.define("esapp.view.analysis.mapView",{
                     visible: false
                 });
                 this.map.getLayers().insertAt(0, this.productlayer);
+
+
+                // this.el is not created until after the Window is rendered so you need to add the mon after rendering:
+                this.mon(this.el, {
+                    mouseout: function() {
+                        //console.info(me);
+                        if (esapp.Utils.objectExists(me.featureOverlay) && esapp.Utils.objectExists(me.highlight)){
+                            me.featureOverlay.getSource().clear();
+                            me.highlight = null;
+                            //me.featureOverlay.getSource().removeFeature(me.highlight);
+                        }
+                    }
+                });
+
+                this.getController().loadDefaultLayers();
 
 
                 //var layerSwitcher = new ol.control.LayerSwitcher({
@@ -307,6 +324,7 @@ Ext.define("esapp.view.analysis.mapView",{
                 var maplegendpanel = me.lookupReference('product-legend_panel_' + this.id);
                 maplegendpanel.doConstrain();
             }
+
         };
 
         me.callParent();

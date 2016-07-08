@@ -1,0 +1,76 @@
+#
+#   Release Note for 2.0.4
+#   Changes with respect to 2.0.3-12 - Unless specification, they refer to Apps.rpm package.
+#
+
+1. BUG FIXING
+-------------
+
+1.1 Acquisition/Processing/DataManagement
+
+- Creation of archives from request: 1. a separate file (_0001.bsx) is created for each sub-products (before the same file was overwritten)
+  2. A directory can be passed to create_archive_from_request.py, so to iterate on all '.req' files contained.
+
+- Modify existing processing chains (lsasaf_et and _lst) to: 1. Save file checkpoints to a separate .sqlite and 2. change checksum_level = 0.
+  This is to avoid re-computations at every run.
+
+1.2 Visualization
+- When two or more mapviews have the same vector layers added, the Layer switcher disabled a layer in other Mapview when clicked.
+
+1.3 Configuration/DB
+
+1.4 Packages (pre-post inst)
+
+
+2. NEW FEATURES
+---------------
+
+2.0
+
+- Modifications to manage a 'proxy': 1. Define functions._proxy_defined() to read definition from factory_settings.ini
+  2. In case of proxy, change the urllib2 options to test internet access.
+
+- Changes of get_internet: 1. In case of proxy, change the parsing of ftp-response. 2. Re-organize/rename/clean functions' naming.
+  3. Implement the management of type=http (similar to ftp, but for http servers)
+
+- New processing chains for MODIS-FIRMS (with ICPAC), MSG-MPE (with SADC)
+
+- All log files viewable from the Dashboard, Acquisition and Processing pages are now shown in reversed order with the latest
+  date on top so that the user does not need to scroll down to see the latest log entries.
+  Also all the log files (.log, .log1, .log2, etc...) are concatenated to avoid that former messages are not displayed (because they are moved to .log1).
+
+
+2.1 Dashboard
+- Finished the dashboard information for installation type SinglePC.
+
+
+2.2 Acquisition/Processing/DataManagement
+- In the Acquisition page under the 'Product' column the source of each product is shown.
+
+
+2.3 Visualization/Analysis
+- Vector layer administration is added to the analysis tool.
+  The User can upload/import its own vector layers and change a layer's definition and draw properties like line color and thinkness.
+  Each layer can be enabled/disabled to be shown in the vector layer menu in a Mapview
+  Each layer can be activated to be openend automatically in a Mapview.
+- The source of each vector layer is shown in the add vector layer menu in a Mapview.
+- By default zoom to the max extent of the selected vector layer.
+- Added to the product legend, the legend name and unit. Ex: Rain (mm), Temperature (°C), Dry Matter (kg/ha), etc.
+- Outmasking a product in a Mapview over any selected multi-polygon.
+- Saving a map as .PNG now contains also the legend within the .PNG image.
+- Doubleclick on a feature (polygon) will zoom to its extent.
+- On Mapview mouseout the highlighted feature (polygon) is removed.
+- Time series graph draw properties management added.
+- Time series sum aggregation of for example Fire or Water occurences.
+
+
+2.4 Configuration/DB
+- Added one table called "layers" for layer registration and their draw properties, in the schema analysis.
+- Added one new table called "chart_drawproperties" for the time series chart draw properties, in the schema analysis.
+- Added new columns to the table "timeseries_drawproperties", in the schema analysis.
+- Updated the function "analysis.update_insert_timeseries_drawproperties" and created 2 new functions for the above mentioned new tables.
+  New functions are "analysis.update_insert_layers" and "analysis.update_insert_chart_drawproperties".
+
+
+2.5 Other packages
+- Layers package containing new gaul admin 00 layer for each RIC.

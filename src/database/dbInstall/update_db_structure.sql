@@ -12,10 +12,9 @@ ALTER TABLE analysis.timeseries_drawproperties
 CREATE TABLE analysis.layers
 (
   layerid bigserial NOT NULL,
-  layerlevel character varying(80) NOT NULL,
+  layerlevel character varying(80),
   layername character varying(80),
   description character varying(255),
-  layerpath character varying(255),
   filename character varying(80),
   layerorderidx integer DEFAULT 1,
   layertype character varying(80) DEFAULT 'polygon'::character varying,
@@ -36,6 +35,9 @@ CREATE TABLE analysis.layers
   projection character varying(80),
   submenu character varying(80),
   menu character varying(80),
+  defined_by character varying DEFAULT 'USER'::character varying,
+  open_in_mapview boolean DEFAULT false,
+  provider character varying,
   CONSTRAINT layers_pkey PRIMARY KEY (layerid)
 )
 WITH (
@@ -44,6 +46,256 @@ WITH (
 ALTER TABLE analysis.layers
   OWNER TO estation;
 
+
+
+CREATE TABLE analysis.chart_drawproperties
+(
+  chart_type character varying NOT NULL,
+  chart_width integer,
+  chart_height integer,
+  chart_title_font_size integer,
+  chart_title_font_color character varying,
+  chart_subtitle_font_size integer,
+  chart_subtitle_font_color character varying,
+  yaxe1_font_size integer,
+  yaxe2_font_size integer,
+  legend_font_size integer,
+  legend_font_color character varying,
+  xaxe_font_size integer,
+  xaxe_font_color character varying,
+  yaxe3_font_size integer,
+  CONSTRAINT chart_drawproperties_pk PRIMARY KEY (chart_type)
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE analysis.chart_drawproperties
+  OWNER TO estation;
+
+
+
+-- Function: analysis.update_insert_layers(integer, character varying, character varying, character varying, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, integer, boolean, boolean, character varying, character varying, character varying, character varying, character varying, boolean, character varying, boolean)
+
+-- DROP FUNCTION analysis.update_insert_layers(integer, character varying, character varying, character varying, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, integer, boolean, boolean, character varying, character varying, character varying, character varying, character varying, boolean, character varying, boolean);
+
+CREATE OR REPLACE FUNCTION analysis.update_insert_layers(layerid integer,
+							 layerlevel character varying,
+							 layername character varying,
+							 description character varying,
+							 filename character varying,
+							 layerorderidx integer,
+							 layertype character varying,
+							 polygon_outlinecolor character varying,
+							 polygon_outlinewidth integer,
+							 polygon_fillcolor character varying,
+							 polygon_fillopacity integer,
+							 feature_display_column character varying,
+							 feature_highlight_outlinecolor character varying,
+							 feature_highlight_outlinewidth integer,
+							 feature_highlight_fillcolor character varying,
+							 feature_highlight_fillopacity integer,
+							 feature_selected_outlinecolor character varying,
+							 feature_selected_outlinewidth integer,
+							 enabled boolean,
+							 deletable boolean,
+							 background_legend_image_filename character varying,
+							 projection character varying,
+							 submenu character varying,
+							 menu character varying,
+							 defined_by character varying,
+							 open_in_mapview boolean,
+							 provider character varying,
+							 full_copy boolean DEFAULT false
+							 )
+  RETURNS boolean AS
+$BODY$
+	DECLARE
+
+	  _layerid 				ALIAS FOR  $1;
+	  _layerlevel 				ALIAS FOR  $2;
+	  _layername 				ALIAS FOR  $3;
+	  _description 				ALIAS FOR  $4;
+	  _filename 				ALIAS FOR  $5;
+	  _layerorderidx 			ALIAS FOR  $6;
+	  _layertype 				ALIAS FOR  $7;
+	  _polygon_outlinecolor 		ALIAS FOR  $8;
+	  _polygon_outlinewidth 		ALIAS FOR  $9;
+	  _polygon_fillcolor 			ALIAS FOR  $10;
+	  _polygon_fillopacity 			ALIAS FOR  $11;
+	  _feature_display_column 		ALIAS FOR  $12;
+	  _feature_highlight_outlinecolor 	ALIAS FOR  $13;
+	  _feature_highlight_outlinewidth 	ALIAS FOR  $14;
+	  _feature_highlight_fillcolor	  	ALIAS FOR  $15;
+	  _feature_highlight_fillopacity  	ALIAS FOR  $16;
+	  _feature_selected_outlinecolor  	ALIAS FOR  $17;
+	  _feature_selected_outlinewidth  	ALIAS FOR  $18;
+	  _enabled 			  	ALIAS FOR  $19;
+	  _deletable 			  	ALIAS FOR  $20;
+	  _background_legend_image_filename 	ALIAS FOR  $21;
+	  _projection 				ALIAS FOR  $22;
+	  _submenu 				ALIAS FOR  $23;
+	  _menu 				ALIAS FOR  $24;
+	  _defined_by 				ALIAS FOR  $25;
+	  _open_in_mapview			ALIAS FOR  $26;
+	  _provider 				ALIAS FOR  $27;
+	  _full_copy 				ALIAS FOR  $28;
+
+	BEGIN
+		PERFORM * FROM analysis.layers l WHERE l.layerid = _layerid;
+		IF FOUND THEN
+			IF _full_copy THEN
+				UPDATE analysis.layers l
+				SET layerlevel = TRIM(_layerlevel),
+				    layername = TRIM(_layername),
+				    description = TRIM(_description),
+				    filename = TRIM(_filename),
+				    layerorderidx = _layerorderidx,
+				    layertype = TRIM(_layertype),
+				    polygon_outlinecolor = TRIM(_polygon_outlinecolor),
+				    polygon_outlinewidth = _polygon_outlinewidth,
+				    polygon_fillcolor = TRIM(_polygon_fillcolor),
+				    polygon_fillopacity = _polygon_fillopacity,
+				    feature_display_column = TRIM(_feature_display_column),
+				    feature_highlight_outlinecolor = TRIM(_feature_highlight_outlinecolor),
+				    feature_highlight_outlinewidth = _feature_highlight_outlinewidth,
+				    feature_highlight_fillcolor = TRIM(_feature_highlight_fillcolor),
+				    feature_highlight_fillopacity = _feature_highlight_fillopacity,
+				    feature_selected_outlinecolor = TRIM(_feature_selected_outlinecolor),
+				    feature_selected_outlinewidth = _feature_selected_outlinewidth,
+				    enabled = _enabled,
+				    deletable = _deletable,
+				    background_legend_image_filename = TRIM(_background_legend_image_filename),
+				    projection = TRIM(_projection),
+				    submenu = TRIM(_submenu),
+				    menu = TRIM(_menu),
+				    defined_by = TRIM(_defined_by),
+				    open_in_mapview = _open_in_mapview,
+				    provider = TRIM(_provider)
+				WHERE l.layerid = _layerid;
+			ELSE
+				UPDATE analysis.layers l
+				SET layerlevel = TRIM(_layerlevel),
+				    layername = TRIM(_layername),
+				    description = TRIM(_description),
+				    filename = TRIM(_filename),
+				    layerorderidx = _layerorderidx,
+				    layertype = TRIM(_layertype),
+				    -- polygon_outlinecolor = TRIM(_polygon_outlinecolor),
+				    -- polygon_outlinewidth = _polygon_outlinewidth,
+				    -- polygon_fillcolor = TRIM(_polygon_fillcolor),
+				    -- polygon_fillopacity = _polygon_fillopacity,
+				    -- feature_display_column = TRIM(_feature_display_column),
+				    -- feature_highlight_outlinecolor = TRIM(_feature_highlight_outlinecolor),
+				    -- feature_highlight_outlinewidth = _feature_highlight_outlinewidth,
+				    -- feature_highlight_fillcolor = TRIM(_feature_highlight_fillcolor),
+				    -- feature_highlight_fillopacity = _feature_highlight_fillopacity,
+				    -- feature_selected_outlinecolor = TRIM(_feature_selected_outlinecolor),
+				    -- feature_selected_outlinewidth = _feature_selected_outlinewidth,
+				    -- enabled = _enabled,
+				    deletable = _deletable,
+				    background_legend_image_filename = TRIM(_background_legend_image_filename),
+				    projection = TRIM(_projection),
+				    submenu = TRIM(_submenu),
+				    menu = TRIM(_menu),
+				    defined_by = TRIM(_defined_by),
+				    -- open_in_mapview = _open_in_mapview,
+				    provider = TRIM(_provider)
+				WHERE l.layerid = _layerid;
+			END IF;
+
+		ELSE
+			INSERT INTO analysis.layers (
+				layerlevel,
+				layername,
+				description,
+				filename,
+				layerorderidx,
+				layertype,
+				polygon_outlinecolor,
+				polygon_outlinewidth,
+				polygon_fillcolor,
+				polygon_fillopacity,
+				feature_display_column,
+				feature_highlight_outlinecolor,
+				feature_highlight_outlinewidth,
+				feature_highlight_fillcolor,
+				feature_highlight_fillopacity,
+				feature_selected_outlinecolor,
+				feature_selected_outlinewidth,
+				enabled,
+				deletable,
+				background_legend_image_filename,
+				projection,
+				submenu,
+				menu,
+				defined_by,
+				open_in_mapview,
+				provider
+			)
+			VALUES (
+			    TRIM(_layerlevel),
+			    TRIM(_layername),
+			    TRIM(_description),
+			    TRIM(_filename),
+			    _layerorderidx,
+			    TRIM(_layertype),
+			    TRIM(_polygon_outlinecolor),
+			    _polygon_outlinewidth,
+			    TRIM(_polygon_fillcolor),
+			    _polygon_fillopacity,
+			    TRIM(_feature_display_column),
+			    TRIM(_feature_highlight_outlinecolor),
+			    _feature_highlight_outlinewidth,
+			    TRIM(_feature_highlight_fillcolor),
+			    _feature_highlight_fillopacity,
+			    TRIM(_feature_selected_outlinecolor),
+			    _feature_selected_outlinewidth,
+			    _enabled,
+			    _deletable,
+			    TRIM(_background_legend_image_filename),
+			    TRIM(_projection),
+			    TRIM(_submenu),
+			    TRIM(_menu),
+			    TRIM(_defined_by),
+			    _open_in_mapview,
+			    TRIM(_provider)
+			);
+		END IF;
+		RETURN TRUE;
+	END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION analysis.update_insert_layers(	integer,
+						character varying,
+						character varying,
+						character varying,
+						character varying,
+						integer,
+						character varying,
+						character varying,
+						integer,
+						character varying,
+						integer,
+						character varying,
+						character varying,
+						integer,
+						character varying,
+						integer,
+						character varying,
+						integer,
+						boolean,
+						boolean,
+						character varying,
+						character varying,
+						character varying,
+						character varying,
+						character varying,
+						boolean,
+						character varying,
+						boolean
+					)
+  OWNER TO estation;
 
 
 -- Function: analysis.update_insert_timeseries_drawproperties(character varying, character varying, character varying, character varying, character varying, double precision, double precision, boolean, character varying, character varying, character varying, integer, character varying, character varying, character varying)
@@ -102,7 +354,7 @@ $BODY$
 			    max = _max,
 			    oposite = _oposite,
 			    tsname_in_legend = TRIM(_tsname_in_legend),
-    			    charttype = TRIM(_charttype),
+    			charttype = TRIM(_charttype),
 			    linestyle = TRIM(_linestyle),
 			    linewidth = _linewidth,
 			    color = TRIM(_color),
@@ -160,151 +412,80 @@ $BODY$
 ALTER FUNCTION analysis.update_insert_timeseries_drawproperties(character varying, character varying, character varying, character varying, character varying, double precision, double precision, boolean, character varying, character varying, character varying, integer, character varying, character varying, character varying)
   OWNER TO estation;
 
-  
 
 
+-- Function: analysis.update_insert_chart_drawproperties(character varying, integer, integer, integer, character varying, integer, character varying, integer, integer, integer, character varying, integer, character varying, integer)
 
-CREATE OR REPLACE FUNCTION analysis.update_insert_layers(layerid integer,
-							layerlevel character varying,
-							layername character varying,
-							description character varying,
-							layerpath character varying,
-							filename character varying,
-							layerorderidx integer,
-							layertype character varying,
-							polygon_outlinecolor character varying,
-							polygon_outlinewidth integer,
-							polygon_fillcolor character varying,
-							polygon_fillopacity integer,
-							feature_display_column character varying,
-							feature_highlight_outlinecolor character varying,
-							feature_highlight_outlinewidth integer,
-							feature_highlight_fillcolor character varying,
-							feature_highlight_fillopacity integer,
-							feature_selected_outlinecolor character varying,
-							feature_selected_outlinewidth integer,
-							enabled boolean,
-							deletable boolean,
-							background_legend_image_filename character varying,
-							projection character varying,
-							submenu character varying,
-							menu character varying
-							)
+-- DROP FUNCTION analysis.update_insert_chart_drawproperties(character varying, integer, integer, integer, character varying, integer, character varying, integer, integer, integer, character varying, integer, character varying, integer);
 
-
-
+CREATE OR REPLACE FUNCTION analysis.update_insert_chart_drawproperties(chart_type character varying, chart_width integer, chart_height integer, chart_title_font_size integer, chart_title_font_color character varying, chart_subtitle_font_size integer, chart_subtitle_font_color character varying, yaxe1_font_size integer, yaxe2_font_size integer, legend_font_size integer, legend_font_color character varying, xaxe_font_size integer, xaxe_font_color character varying, yaxe3_font_size integer)
   RETURNS boolean AS
 $BODY$
 	DECLARE
 
-	  _layerid 				ALIAS FOR  $1;
-	  _layerlevel 				ALIAS FOR  $2;
-	  _layername 				ALIAS FOR  $3;
-	  _description 				ALIAS FOR  $4;
-	  _layerpath 				ALIAS FOR  $5;
-	  _filename 				ALIAS FOR  $6;
-	  _layerorderidx 			ALIAS FOR  $7;
-	  _layertype 				ALIAS FOR  $8;
-	  _polygon_outlinecolor 		ALIAS FOR  $9;
-	  _polygon_outlinewidth 		ALIAS FOR  $10;
-	  _polygon_fillcolor 			ALIAS FOR  $11;
-	  _polygon_fillopacity 			ALIAS FOR  $12;
-	  _feature_display_column 		ALIAS FOR  $13;
-	  _feature_highlight_outlinecolor 	ALIAS FOR  $14;
-	  _feature_highlight_outlinewidth 	ALIAS FOR  $15;
-	  _feature_highlight_fillcolor	  	ALIAS FOR  $16;
-	  _feature_highlight_fillopacity  	ALIAS FOR  $17;
-	  _feature_selected_outlinecolor  	ALIAS FOR  $18;
-	  _feature_selected_outlinewidth  	ALIAS FOR  $19;
-	  _enabled 			  	ALIAS FOR  $20;
-	  _deletable 			  	ALIAS FOR  $21;
-	  _background_legend_image_filename 	ALIAS FOR  $22;
-	  _projection 				ALIAS FOR  $23;
-	  _submenu 				ALIAS FOR  $24;
-	  _menu 				ALIAS FOR  $25;
-
+	  _chart_type 			ALIAS FOR  $1;
+	  _chart_width 			ALIAS FOR  $2;
+	  _chart_height 		ALIAS FOR  $3;
+	  _chart_title_font_size 	ALIAS FOR  $4;
+	  _chart_title_font_color 	ALIAS FOR  $5;
+	  _chart_subtitle_font_size 	ALIAS FOR  $6;
+	  _chart_subtitle_font_color 	ALIAS FOR  $7;
+	  _yaxe1_font_size 		ALIAS FOR  $8;
+	  _yaxe2_font_size 		ALIAS FOR  $9;
+	  _legend_font_size 		ALIAS FOR  $10;
+	  _legend_font_color 		ALIAS FOR  $11;
+	  _xaxe_font_size 		ALIAS FOR  $12;
+	  _xaxe_font_color 		ALIAS FOR  $13;
+	  _yaxe3_font_size 		ALIAS FOR  $14;
 
 	BEGIN
-		PERFORM * FROM analysis.layers l WHERE l.layerid = _layerid;
+		PERFORM * FROM analysis.chart_drawproperties cd WHERE cd.chart_type = _chart_type;
 		IF FOUND THEN
-			UPDATE analysis.layers l
-			SET layerlevel = TRIM(_layerlevel),
-			    layername = TRIM(_layername),
-			    description = TRIM(_description),
-			    layerpath = TRIM(_layerpath),
-			    filename = TRIM(_filename),
-			    layerorderidx = _layerorderidx,
-			    layertype = TRIM(_layertype),
-			    polygon_outlinecolor = TRIM(_polygon_outlinecolor),
-			    polygon_outlinewidth = _polygon_outlinewidth,
-			    polygon_fillcolor = TRIM(_polygon_fillcolor),
-			    polygon_fillopacity = _polygon_fillopacity,
-			    feature_display_column = TRIM(_feature_display_column),
-			    feature_highlight_outlinecolor = TRIM(_feature_highlight_outlinecolor),
-			    feature_highlight_outlinewidth = _feature_highlight_outlinewidth,
-			    feature_highlight_fillcolor = TRIM(_feature_highlight_fillcolor),
-			    feature_highlight_fillopacity = _feature_highlight_fillopacity,
-			    feature_selected_outlinecolor = TRIM(_feature_selected_outlinecolor),
-			    feature_selected_outlinewidth = _feature_selected_outlinewidth,
-			    enabled = _enabled,
-			    deletable = _deletable,
-			    background_legend_image_filename = TRIM(_background_legend_image_filename),
-			    projection = TRIM(_projection),
-			    submenu = TRIM(_submenu),
-			    menu = TRIM(_menu)
-			WHERE l.layerid = _layerid;
+			UPDATE analysis.layers cd
+			SET chart_width = TRIM(_chart_width),
+			    chart_height = _chart_height,
+			    chart_title_font_size = _chart_title_font_size,
+			    chart_title_font_color = TRIM(_chart_title_font_color),
+			    chart_subtitle_font_size = _chart_subtitle_font_size,
+			    chart_subtitle_font_color = TRIM(_chart_subtitle_font_color),
+			    yaxe1_font_size = _yaxe1_font_size,
+			    yaxe2_font_size = _yaxe2_font_size,
+			    legend_font_size = _legend_font_size,
+			    legend_font_color = TRIM(_legend_font_color),
+			    xaxe_font_size = _xaxe_font_size,
+			    xaxe_font_color = TRIM(_xaxe_font_color),
+			    yaxe3_font_size = _yaxe3_font_size
+			WHERE cd.chart_type = _chart_type;
 		ELSE
-			INSERT INTO analysis.layers (
-				layerlevel,
-				layername,
-				description,
-				layerpath,
-				filename,
-				layerorderidx,
-				layertype,
-				polygon_outlinecolor,
-				polygon_outlinewidth,
-				polygon_fillcolor,
-				polygon_fillopacity,
-				feature_display_column,
-				feature_highlight_outlinecolor,
-				feature_highlight_outlinewidth,
-				feature_highlight_fillcolor,
-				feature_highlight_fillopacity,
-				feature_selected_outlinecolor,
-				feature_selected_outlinewidth,
-				enabled,
-				deletable,
-				background_legend_image_filename,
-				projection,
-				submenu,
-				menu
+			INSERT INTO analysis.chart_drawproperties (
+				chart_width,
+				chart_height,
+				chart_title_font_size,
+				chart_title_font_color,
+				chart_subtitle_font_size,
+				chart_subtitle_font_color,
+				yaxe1_font_size,
+				yaxe2_font_size,
+				legend_font_size,
+				legend_font_color,
+				xaxe_font_size,
+				xaxe_font_color,
+				yaxe3_font_size
 			)
 			VALUES (
-			    TRIM(_layerlevel),
-			    TRIM(_layername),
-			    TRIM(_description),
-			    TRIM(_layerpath),
-			    TRIM(_filename),
-			    _layerorderidx,
-			    TRIM(_layertype),
-			    TRIM(_polygon_outlinecolor),
-			    _polygon_outlinewidth,
-			    TRIM(_polygon_fillcolor),
-			    _polygon_fillopacity,
-			    TRIM(_feature_display_column),
-			    TRIM(_feature_highlight_outlinecolor),
-			    _feature_highlight_outlinewidth,
-			    TRIM(_feature_highlight_fillcolor),
-			    _feature_highlight_fillopacity,
-			    TRIM(_feature_selected_outlinecolor),
-			    _feature_selected_outlinewidth,
-			    _enabled,
-			    _deletable,
-			    TRIM(_background_legend_image_filename),
-			    TRIM(_projection),
-			    TRIM(_submenu),
-			    TRIM(_menu)
+			    TRIM(_chart_width),
+			    _chart_height,
+			    _chart_title_font_size,
+			    TRIM(_chart_title_font_color),
+			    _chart_subtitle_font_size,
+			    TRIM(_chart_subtitle_font_color),
+			    _yaxe1_font_size,
+			    _yaxe2_font_size,
+			    _legend_font_size,
+			    TRIM(_legend_font_color),
+			    _xaxe_font_size,
+			    TRIM(_xaxe_font_color),
+			    _yaxe3_font_size
 			);
 		END IF;
 		RETURN TRUE;
@@ -312,43 +493,15 @@ $BODY$
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION analysis.update_insert_layers(
-						integer,
-						character varying,
-						character varying,
-						character varying,
-						character varying,
-						character varying,
-						integer,
-						character varying,
-						character varying,
-						integer,
-						character varying,
-						integer,
-						character varying,
-						character varying,
-						integer,
-						character varying,
-						integer,
-						character varying,
-						integer,
-						boolean,
-						boolean,
-						character varying,
-						character varying,
-						character varying,
-						character varying
-					   )
+ALTER FUNCTION analysis.update_insert_chart_drawproperties(character varying, integer, integer, integer, character varying, integer, character varying, integer, integer, integer, character varying, integer, character varying, integer)
   OWNER TO estation;
-
-
-
 
 
 
 -- Function: products.export_jrc_data(boolean)
 
 -- DROP FUNCTION products.export_jrc_data(boolean);
+
 
 CREATE OR REPLACE FUNCTION products.export_jrc_data(full_copy boolean DEFAULT false)
   RETURNS SETOF text AS
@@ -716,7 +869,6 @@ BEGIN
 		|| ', layerlevel := ' || COALESCE('''' || layerlevel || '''', 'NULL')
 		|| ', layername := ' || COALESCE('''' || layername || '''', 'NULL')
 		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
-		|| ', layerpath := ' || COALESCE('''' || layerpath || '''', 'NULL')
 		|| ', filename := ' || COALESCE('''' || filename || '''', 'NULL')
 		|| ', layerorderidx := ' || layerorderidx
 		|| ', layertype := ' || COALESCE('''' || layertype || '''', 'NULL')
@@ -729,14 +881,18 @@ BEGIN
 		|| ', feature_highlight_outlinewidth := ' || feature_highlight_outlinewidth
 		|| ', feature_highlight_fillcolor := ' || COALESCE('''' || feature_highlight_fillcolor || '''', 'NULL')
 		|| ', feature_highlight_fillopacity := ' || feature_highlight_fillopacity
-		|| ', feature_selected_outlinecolor := ' || COALESCE('''' || polygon_fillcolor || '''', 'NULL')
-		|| ', feature_selected_outlinewidth := ' || polygon_fillopacity
+		|| ', feature_selected_outlinecolor := ' || COALESCE('''' || feature_selected_outlinecolor || '''', 'NULL')
+		|| ', feature_selected_outlinewidth := ' || feature_selected_outlinewidth
 		|| ', enabled := ' || enabled
 		|| ', deletable := ' || deletable
 		|| ', background_legend_image_filename := ' || COALESCE('''' || background_legend_image_filename || '''', 'NULL')
 		|| ', projection := ' || COALESCE('''' || projection || '''', 'NULL')
 		|| ', submenu := ' || COALESCE('''' || submenu || '''', 'NULL')
 		|| ', menu := ' || COALESCE('''' || menu || '''', 'NULL')
+		|| ', defined_by := ' || COALESCE('''' || defined_by || '''', 'NULL')
+		|| ', open_in_mapview := ' || open_in_mapview
+		|| ', provider := ' || COALESCE('''' || provider || '''', 'NULL')
+		|| ', full_copy := ' || _full_copy
 		|| ' );'  as inserts
 	FROM analysis.layers;
 
@@ -761,6 +917,26 @@ BEGIN
 		|| ', aggregation_type := ' || COALESCE('''' || aggregation_type || '''', 'NULL')
 		|| ', aggregation_min := ' || COALESCE(TRIM(to_char(aggregation_min, '99999999D999999')), 'NULL')
 		|| ', aggregation_max := ' || COALESCE(TRIM(to_char(aggregation_max, '99999999D999999')), 'NULL')
+		|| ' );'  as inserts
+	FROM analysis.timeseries_drawproperties;
+
+
+
+	RETURN QUERY SELECT 'SELECT analysis.update_insert_chart_drawproperties('
+		|| ' chart_type := ' || COALESCE('''' || chart_type || '''', 'NULL')
+		|| ', chart_width := ' || chart_width
+		|| ', chart_height := ' || chart_height
+		|| ', chart_title_font_size := ' || chart_title_font_size
+		|| ', chart_title_font_color := ' || COALESCE('''' || chart_title_font_color || '''', 'NULL')
+		|| ', chart_subtitle_font_size := ' || chart_subtitle_font_size
+		|| ', chart_subtitle_font_color := ' || COALESCE('''' || chart_subtitle_font_color || '''', 'NULL')
+		|| ', yaxe1_font_size := ' || yaxe1_font_size
+		|| ', yaxe2_font_size := ' || yaxe2_font_size
+		|| ', legend_font_size := ' || legend_font_size
+		|| ', legend_font_color := ' || COALESCE('''' || legend_font_color || '''', 'NULL')
+		|| ', xaxe_font_size := ' || xaxe_font_size
+		|| ', xaxe_font_color := ' || COALESCE('''' || xaxe_font_color || '''', 'NULL')
+		|| ', yaxe3_font_size := ' || yaxe3_font_size
 		|| ' );'  as inserts
 	FROM analysis.timeseries_drawproperties;
 
@@ -794,6 +970,7 @@ $BODY$
   ROWS 1000;
 ALTER FUNCTION products.export_jrc_data(boolean)
   OWNER TO estation;
+
 
 
 
@@ -1157,7 +1334,6 @@ BEGIN
 		|| ', layerlevel := ' || COALESCE('''' || layerlevel || '''', 'NULL')
 		|| ', layername := ' || COALESCE('''' || layername || '''', 'NULL')
 		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
-		|| ', layerpath := ' || COALESCE('''' || layerpath || '''', 'NULL')
 		|| ', filename := ' || COALESCE('''' || filename || '''', 'NULL')
 		|| ', layerorderidx := ' || layerorderidx
 		|| ', layertype := ' || COALESCE('''' || layertype || '''', 'NULL')
@@ -1178,6 +1354,10 @@ BEGIN
 		|| ', projection := ' || COALESCE('''' || projection || '''', 'NULL')
 		|| ', submenu := ' || COALESCE('''' || submenu || '''', 'NULL')
 		|| ', menu := ' || COALESCE('''' || menu || '''', 'NULL')
+		|| ', defined_by := ' || COALESCE('''' || defined_by || '''', 'NULL')
+		|| ', open_in_mapview := ' || open_in_mapview
+		|| ', provider := ' || COALESCE('''' || provider || '''', 'NULL')
+		|| ', full_copy := ' || _full_copy
 		|| ' );'  as inserts
 	FROM analysis.layers;
 
@@ -1202,6 +1382,26 @@ BEGIN
 		|| ', aggregation_type := ' || COALESCE('''' || aggregation_type || '''', 'NULL')
 		|| ', aggregation_min := ' || COALESCE(TRIM(to_char(aggregation_min, '99999999D999999')), 'NULL')
 		|| ', aggregation_max := ' || COALESCE(TRIM(to_char(aggregation_max, '99999999D999999')), 'NULL')
+		|| ' );'  as inserts
+	FROM analysis.timeseries_drawproperties;
+
+
+
+	RETURN QUERY SELECT 'SELECT analysis.update_insert_chart_drawproperties('
+		|| ' chart_type := ' || COALESCE('''' || chart_type || '''', 'NULL')
+		|| ', chart_width := ' || chart_width
+		|| ', chart_height := ' || chart_height
+		|| ', chart_title_font_size := ' || chart_title_font_size
+		|| ', chart_title_font_color := ' || COALESCE('''' || chart_title_font_color || '''', 'NULL')
+		|| ', chart_subtitle_font_size := ' || chart_subtitle_font_size
+		|| ', chart_subtitle_font_color := ' || COALESCE('''' || chart_subtitle_font_color || '''', 'NULL')
+		|| ', yaxe1_font_size := ' || yaxe1_font_size
+		|| ', yaxe2_font_size := ' || yaxe2_font_size
+		|| ', legend_font_size := ' || legend_font_size
+		|| ', legend_font_color := ' || COALESCE('''' || legend_font_color || '''', 'NULL')
+		|| ', xaxe_font_size := ' || xaxe_font_size
+		|| ', xaxe_font_color := ' || COALESCE('''' || xaxe_font_color || '''', 'NULL')
+		|| ', yaxe3_font_size := ' || yaxe3_font_size
 		|| ' );'  as inserts
 	FROM analysis.timeseries_drawproperties;
 
@@ -1236,3 +1436,109 @@ ALTER FUNCTION products.export_all_data(boolean)
   OWNER TO estation;
 
 
+
+
+CREATE OR REPLACE FUNCTION products.export_product_data(product_code character varying, full_copy boolean DEFAULT true)
+  RETURNS SETOF text AS
+$BODY$
+DECLARE
+	_productcode 			ALIAS FOR  $1;
+	_full_copy 			ALIAS FOR  $2;
+BEGIN
+
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_product('
+		|| '  productcode := ' || COALESCE('''' || productcode || '''', 'NULL')
+		|| ', subproductcode := ' || COALESCE('''' || subproductcode || '''', 'NULL')
+		|| ', version := ' || COALESCE('''' || version || '''', 'NULL')
+		|| ', defined_by := ' || COALESCE('''' || defined_by || '''', 'NULL')
+		|| ', activated := ' || activated
+		|| ', category_id := ' || COALESCE('''' || category_id || '''', 'NULL')
+		|| ', product_type := ' || COALESCE('''' || product_type || '''', 'NULL')
+		|| ', descriptive_name := ' || COALESCE('''' || replace(descriptive_name, '''', '"') || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(description, '''', '"') || '''', 'NULL')
+		|| ', provider := ' || COALESCE('''' || provider || '''', 'NULL')
+		|| ', frequency_id := ' || COALESCE('''' || frequency_id || '''', '''undefined''')
+		|| ', date_format := ' || COALESCE('''' || date_format || '''', '''undefined''')
+		|| ', scale_factor := ' || COALESCE(TRIM(to_char(scale_factor, '99999999D999999')), 'NULL')
+		|| ', scale_offset := ' || COALESCE(TRIM(to_char(scale_offset, '99999999D999999')), 'NULL')
+		|| ', nodata := ' || COALESCE(TRIM(to_char(nodata, '99999999')), 'NULL')
+		|| ', mask_min := ' || COALESCE(TRIM(to_char(mask_min, '99999999D999999')), 'NULL')
+		|| ', mask_max := ' || COALESCE(TRIM(to_char(mask_max, '99999999D999999')), 'NULL')
+		|| ', unit := ' || COALESCE('''' || unit || '''', 'NULL')
+		|| ', data_type_id := ' || COALESCE('''' || data_type_id || '''', '''undefined''')
+		|| ', masked := ' || masked
+		|| ', timeseries_role := ' || COALESCE('''' || timeseries_role || '''', 'NULL')
+		|| ', full_copy := ' || _full_copy
+		|| ' );'  as inserts
+	FROM products.product
+	WHERE products.product.productcode = _productcode;
+
+
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_processing('
+		|| ' process_id := ' || process_id
+		|| ', defined_by := ' || COALESCE('''' || defined_by || '''', 'NULL')
+		|| ', output_mapsetcode := ' || COALESCE('''' || output_mapsetcode || '''', 'NULL')
+		|| ', activated := ' || activated
+		|| ', derivation_method := ' || COALESCE('''' || derivation_method || '''', 'NULL')
+		|| ', algorithm := ' || COALESCE('''' || algorithm || '''', 'NULL')
+		|| ', priority := ' || COALESCE('''' || priority || '''', 'NULL')
+		|| ', enabled := ' || enabled
+		|| ', full_copy := ' || _full_copy
+		|| ' );'  as inserts
+	FROM products.processing
+	WHERE products.processing.process_id in (SELECT process_id FROM products.process_product WHERE products.process_product.productcode = _productcode);
+
+
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_process_product('
+		|| ' process_id := ' || process_id
+		|| ', productcode := ' || COALESCE('''' || productcode || '''', 'NULL')
+		|| ', subproductcode := ' || COALESCE('''' || subproductcode || '''', 'NULL')
+		|| ', version := ' || COALESCE('''' || version || '''', 'NULL')
+		|| ', mapsetcode := ' || COALESCE('''' || mapsetcode || '''', 'NULL')
+		|| ', type := ' || COALESCE('''' || type || '''', 'NULL')
+		|| ', activated := ' || activated
+		|| ', final := ' || final
+		|| ', date_format := ' || COALESCE('''' || date_format || '''', '''undefined''')
+		|| ', start_date:=   ' || COALESCE(TRIM(to_char(start_date, '999999999999')), 'NULL')
+		|| ', end_date:= ' || COALESCE(TRIM(to_char(end_date, '999999999999')), 'NULL')
+		|| ', full_copy := ' || _full_copy
+		|| ' );'  as inserts
+	FROM products.process_product
+	WHERE products.process_product.productcode = _productcode;
+
+
+
+	RETURN QUERY SELECT 'SELECT analysis.update_insert_timeseries_drawproperties('
+		|| ' productcode := ' || COALESCE('''' || productcode || '''', 'NULL')
+		|| ', subproductcode := ' || COALESCE('''' || subproductcode || '''', 'NULL')
+		|| ', version := ' || COALESCE('''' || version || '''', 'NULL')
+		|| ', title := ' || COALESCE('''' || title || '''', 'NULL')
+		|| ', unit := ' || COALESCE('''' || unit || '''', 'NULL')
+		|| ', min := ' || COALESCE(TRIM(to_char(min, '99999999D999999')), 'NULL')
+		|| ', max := ' || COALESCE(TRIM(to_char(max, '99999999D999999')), 'NULL')
+		|| ', oposite := ' || oposite
+		|| ', tsname_in_legend := ' || COALESCE('''' || tsname_in_legend || '''', 'NULL')
+		|| ', charttype := ' || COALESCE('''' || charttype || '''', 'NULL')
+		|| ', linestyle := ' || COALESCE('''' || linestyle || '''', 'NULL')
+		|| ', linewidth := ' || COALESCE(TRIM(to_char(linewidth, '99999999')), 'NULL')
+		|| ', color := ' || COALESCE('''' || color || '''', 'NULL')
+		|| ', yaxes_id := ' || COALESCE('''' || yaxes_id || '''', 'NULL')
+		|| ', title_color := ' || COALESCE('''' || title_color || '''', 'NULL')
+		|| ', aggregation_type := ' || COALESCE('''' || aggregation_type || '''', 'NULL')
+		|| ', aggregation_min := ' || COALESCE(TRIM(to_char(aggregation_min, '99999999D999999')), 'NULL')
+		|| ', aggregation_max := ' || COALESCE(TRIM(to_char(aggregation_max, '99999999D999999')), 'NULL')
+		|| ' );'  as inserts
+	FROM analysis.timeseries_drawproperties
+	WHERE analysis.timeseries_drawproperties.productcode = _productcode;
+
+
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100
+  ROWS 1000;
+ALTER FUNCTION products.export_product_data(character varying, boolean)
+  OWNER TO estation;

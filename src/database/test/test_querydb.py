@@ -12,6 +12,14 @@ from database import querydb
 from lib.python import functions
 
 class TestQuerydb(TestCase):
+
+    def Test_get_chart_drawproperties(self):
+        charttype = 'default'
+        chart_drawproperties = querydb.get_chart_drawproperties()
+        print chart_drawproperties
+
+        self.assertEqual(True, chart_drawproperties)
+
     def Test_get_spirits(self):
 
         spirits = querydb.get_spirits()
@@ -63,10 +71,10 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_timeseries_drawproperties(self):
+    def Test_get_product_timeseries_drawproperties(self):
 
         product = {"productcode":"fewsnet-rfe", "version":"2.0", "subproductcode":"10d"}
-        timeseries_drawproperties = querydb.get_timeseries_drawproperties(product)
+        timeseries_drawproperties = querydb.get_product_timeseries_drawproperties(product)
         logger.info("Time series draw properties are: %s", timeseries_drawproperties)
         for timeseries_product in timeseries_drawproperties:
             print timeseries_product.productcode

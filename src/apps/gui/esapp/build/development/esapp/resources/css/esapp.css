@@ -1,4 +1,4 @@
-.42671f82323898103639f6e18caa2d637260f7fa{display:block;}/*.x-grid-header-ct {*/
+.625ecc8fbfec4985ac84ce1103b7fe401753e01a{display:block;}/*.x-grid-header-ct {*/
     /*height: 70px !important;*/
 /*}*/
 
@@ -6,10 +6,24 @@
     /*height: 70px !important;*/
 /*}*/
 
+.red {
+    color: red;
+}
+
+.ts_selectedfeature_name_font {
+    font-weight: bold;
+    font-size: 16px
+}
+
 /* Remove grid cell focus border: https://www.sencha.com/blog/top-support-tips-september-2014/ */
 .x-grid-item-focused .x-grid-cell-inner:before {
     border: 0;
 }
+
+.highlightYaxe {
+    background-color: #C1DDF1 !important;
+}
+
 
 .cursorpointer {
     cursor: pointer !important;
@@ -83,10 +97,12 @@ p {
 
 .chart-curve_medium {
     background-image:url(../img/chart_curve_medium.png);
+    background-repeat: no-repeat;
 }
 
 .chart-curve_edit {
     background-image:url(../img/chart_curve_edit.png);
+    background-repeat: no-repeat;
 }
 
 .chart-curve_add {
@@ -177,7 +193,8 @@ p {
     background-image:url(../img/icons/folder_wrench.png);
 }
 .nav {
-    background-image:url(../img/icons/folder_go.png);
+    background-image:url(../img/icons/folder_go.png) !important;
+    background-repeat: no-repeat;
 }
 .info {
     background-image:url(../img/icons/information.png);
@@ -198,6 +215,13 @@ p {
     background-image: url(../img/add32.png ) !important;
     background-repeat: no-repeat;
 }
+
+.delete {
+    background-image: url(../img/icons/trash24.png ) !important;
+    background-repeat: no-repeat;
+    vertical-align: bottom;
+}
+
 .delete16 {
     background-image: url(../img/delete16.png ) !important;
     background-repeat: no-repeat;
@@ -216,6 +240,7 @@ p {
 
 .edit {
     background-image: url(../img/icons/edit.png ) !important;
+    background-repeat: no-repeat;
 }
 
 .editvectordrawproperties {

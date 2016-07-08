@@ -9240,6 +9240,38 @@ div.x-form-text-grow .x-form-textarea {
   bottom: 0;
 }
 
+/* line 1, ../../../../ext/packages/ext-theme-base/sass/src/form/field/File.scss */
+.x-form-file-btn {
+  overflow: hidden;
+  position: relative;
+}
+
+/* line 6, ../../../../ext/packages/ext-theme-base/sass/src/form/field/File.scss */
+.x-form-file-input {
+  border: 0;
+  position: absolute;
+  cursor: pointer;
+  top: -2px;
+  right: -2px;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
+  opacity: 0;
+  /* Yes, there's actually a good reason for this...
+   * If the configured buttonText is set to something longer than the default,
+   * then it will quickly exceed the width of the hidden file input's "Browse..."
+   * button, so part of the custom button's clickable area will be covered by
+   * the hidden file input's text box instead. This results in a text-selection
+   * mouse cursor over that part of the button, at least in Firefox, which is
+   * confusing to a user. Giving the hidden file input a huge font-size makes
+   * the native button part very large so it will cover the whole clickable area.
+   */
+  font-size: 1000px;
+}
+
+/* line 1, ../../../../ext/packages/ext-theme-base/sass/src/form/field/Hidden.scss */
+.x-form-item-hidden {
+  margin: 0;
+}
+
 /* line 1, ../../../../ext/packages/ext-theme-base/sass/src/picker/Color.scss */
 .x-color-picker-item {
   float: left;
@@ -28393,11 +28425,4 @@ a.x-color-picker-item:hover {
 /* line 383, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/frame.scss */
 .x-panel-header-light-framed-collapsed-left-bc {
   background-position: 0 -4px;
-}
-
-/* line 390, ../../../../ext/packages/ext-theme-base/sass/etc/mixins/frame.scss */
-.x-panel-header-light-framed-collapsed-left-tr,
-.x-panel-header-light-framed-collapsed-left-br,
-.x-panel-header-light-framed-collapsed-left-mr {
-  padding-right: 4px;
 }

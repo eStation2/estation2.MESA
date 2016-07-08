@@ -14,6 +14,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
         'esapp.view.analysis.mapView',
         'esapp.view.analysis.ProductNavigator',
         'esapp.view.analysis.timeseriesChartView',
+        'esapp.view.analysis.layerAdmin',
 
         'Ext.selection.CheckboxModel',
         'Ext.form.field.ComboBox',
@@ -50,7 +51,8 @@ Ext.define("esapp.view.analysis.analysisMain",{
                 handler: 'newMapView'
             },{
                 xtype: 'button',
-                name: 'layersbtn',
+                name: 'analysismain_layersbtn',
+                reference: 'analysismain_layersbtn',
                 text: esapp.Utils.getTranslation('layers'),  // 'Layers',
                 iconCls: 'layers',
                 style: { color: 'gray' },
@@ -83,9 +85,10 @@ Ext.define("esapp.view.analysis.analysisMain",{
         me.items = [{
             region: 'east',
             //title: esapp.Utils.getTranslation('timeseries'),  // 'Time series',
-            width: 420,
-            minWidth: 402,
-            maxWidth : 475,
+            width: 440,
+            minWidth: 440,
+            maxWidth : 500,
+            minTabWidth: 210,
             split: true,
             hideCollapseTool: true,
             header: false,
@@ -128,25 +131,24 @@ Ext.define("esapp.view.analysis.analysisMain",{
                     id: 'fieldset_selectedregion',
                     title: '<b style="font-size:16px; color:#0065A2; line-height: 18px;">' + esapp.Utils.getTranslation('selectedregion') + '</b>',
                     hidden: true,
-                    //autoWidth: true,
-                    //width: 395,
-                    height: 65,
+                    autoHeight: true,   // 65,
                     border: 3,
-                    //padding: 5,
+                    padding: 10,
                     style: {
                         borderColor: '#157FCC',
                         borderStyle: 'solid'
                     },
-                    //layout: 'vbox',
                     items: [{
                         xtype: 'displayfield',
                         id: 'selectedregionname',
                         reference: 'selectedregionname',
                         fieldLabel: '',
                         labelAlign : 'left',
-                        fieldStyle: {
-                            color:'darkgreen',
-                            fontWeight:'bold'
+                        fieldCls: 'ts_selectedfeature_name_font',
+                        style: {
+                            color: 'green'
+                            //"font-weight": 'bold',
+                            //"font-size": 24
                         },
                         value: ''
                     }]
@@ -154,10 +156,9 @@ Ext.define("esapp.view.analysis.analysisMain",{
                     title: esapp.Utils.getTranslation('products'),  // 'Products',
                     xtype : 'grid',
                     reference: 'TimeSeriesProductsGrid',
-                    region: 'center',
-                    //autoWidth: true,
+                    //region: 'center',
                     //width: 395,
-                    height: 250,
+                    height: 300,
                     bind: '{products}',
                     session:true,
                     viewConfig: {
@@ -165,10 +166,11 @@ Ext.define("esapp.view.analysis.analysisMain",{
                         enableTextSelection: true,
                         draggable:false,
                         markDirty: false,
-                        resizable:false,
+                        resizable:true,
                         disableSelection: false,
                         trackOver:true
                     },
+                    layout: 'fit',
                     hideHeaders: true,
 
                     selModel : {
@@ -185,6 +187,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                     frame: false,
                     border: true,
                     bodyBorder: false,
+                    forceFit:true,
 
                     tools:[{
                         type: 'refresh',
@@ -210,8 +213,8 @@ Ext.define("esapp.view.analysis.analysisMain",{
 
                     plugins: [{
                         ptype: 'rowexpander',
-                        cellWrap:true,
-                        layout:'fit',
+                        //cellWrap:true,
+                        //layout:'fit',
                         rowBodyTpl : new Ext.XTemplate(
                             '<span class="smalltext">' +
                             '<p>{description}</p>' +
@@ -231,14 +234,15 @@ Ext.define("esapp.view.analysis.analysisMain",{
                             sortable: false,
                             hideable: false,
                             variableRowHeight : true,
-                            menuDisabled:true
+                            menuDisabled:true,
+                            autoSize: true
                         },
                         columns: [
                             {
-                                //text: "Product",
                                 xtype: 'templatecolumn',
-                                //flex: 2,
-                                minWidth: 350,
+                                //width: "100%",
+                                minWidth: 380,
+                                cellWrap:true,
                                 tpl:  new Ext.XTemplate(
                                     '<b>{prod_descriptive_name}</b>',
                                     '<tpl if="version != \'undefined\'">',
@@ -250,21 +254,6 @@ Ext.define("esapp.view.analysis.analysisMain",{
                                         '<b class="smalltext"> - {descriptive_name}</b>',
                                     '</tpl>'
                                 )
-                                //tpl:  new Ext.XTemplate(
-                                //    '<b>{prod_descriptive_name}</b>',
-                                //    '<tpl if="version != \'undefined\'">',
-                                //        '<b class="smalltext"> - {version}</b>',
-                                //    '</tpl>',
-                                //    '</br>',
-                                //    '<b class="smalltext" style="color:darkgrey">{productcode} - {subproductcode}</b>',
-                                //    '<tpl if="productmapsets.length === 1">',
-                                //        '<tpl for="productmapsets">',
-                                //            '<b class="smalltext" style="color:darkgrey"> - {descriptive_name}</b>',
-                                //        '</tpl>',
-                                //    '<tpl else>',
-                                //        '<b class="smalltext" style="color:darkgrey"> - ' + esapp.Utils.getTranslation('mapsets') + ' {productmapsets.length}, ' + esapp.Utils.getTranslation('clicktochoose') + '</b>',
-                                //    '</tpl>'
-                                //)
                             }
                         ]
                     }]
@@ -276,7 +265,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                     //width: 395,
                     maxHeight: 250,
                     //margin:'10 0 10 0',
-                    autoScroll: true,
+                    autoScroll: false,
                     hidden: true,
                     bind: '{timeseriesmapsetdatasets}',
                     layout: 'fit',
@@ -294,17 +283,20 @@ Ext.define("esapp.view.analysis.analysisMain",{
                     selType: 'checkboxmodel',
                     selModel : {
                         allowDeselect : true,
+                        checkOnly: true,
                         mode:'SIMPLE'
+                        //,listeners: {}
                     },
                     collapsible: false,
                     enableColumnMove: false,
-                    enableColumnResize: false,
+                    enableColumnResize: true,
                     multiColumnSort: false,
-                    columnLines: true,
+                    columnLines: false,
                     rowLines: true,
                     frame: false,
                     border: true,
                     bodyBorder: false,
+                    forceFit:false,
 
                     listeners: {
                         //rowclick: 'mapsetDataSetGridRowClick'
@@ -326,9 +318,35 @@ Ext.define("esapp.view.analysis.analysisMain",{
                             '<span class="smalltext"><b style="color:darkgrey">{productcode} - {subproductcode}</b> - <b>{mapsetcode}</b>' +
                             '</span>'
                         ),
-                        minWidth: 350,
+                        minWidth: 345,
                         sortable: false,
-                        menuDisabled: true
+                        menuDisabled: true,
+                        cellWrap:true
+                    },{
+                        xtype: 'actioncolumn',
+                        //header: esapp.Utils.getTranslation('actions'),   // 'Edit draw properties',
+                        menuDisabled: true,
+                        sortable: true,
+                        variableRowHeight : true,
+                        draggable:false,
+                        groupable:false,
+                        hideable: false,
+                        width: 35,
+                        align: 'center',
+                        stopSelection: false,
+
+                        items: [{
+                            // scope: me,
+                            width:'35',
+                            disabled: false,
+                            getClass: function (v, meta, rec) {
+                                return 'chart-curve_edit';
+                            },
+                            getTip: function (v, meta, rec) {
+                                return esapp.Utils.getTranslation('edittimeseriesdrawproperties') + ' ' + rec.get('productcode') + ' - ' + rec.get('subproductcode');
+                            },
+                            handler: 'editTSDrawProperties'
+                        }]
                     }]
                 }, {
                     xtype: 'fieldset',
