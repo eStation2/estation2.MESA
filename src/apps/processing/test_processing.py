@@ -227,10 +227,9 @@ from multiprocessing import Queue
 #   ---------------------------------------------------------------------
 # modis-firms
 #   ---------------------------------------------------------------------
-from apps.processing.processing_modis_firms import *
+from apps.processing.processing_std_modis_firms import *
 # Create the list of dates -> returns empty if start==end==None
-# start_date='201510010000'
-# end_date='201510102345'
+
 starting_dates = None
 # native_mapset='MSG-satellite-3km'
 target_mapset='SPOTV-Africa-1km'
@@ -244,10 +243,10 @@ args = {'pipeline_run_level':5,
         # 'native_mapset': native_mapset,
         'mapset': target_mapset,
         'version':'v5.0',
-        'logfile':'log-lsasaf-lst.log',
+        'logfile':'log-modis-firms.log',
         'update_stats' : True,
-        'nrt_products' :True }
+        'nrt_products' : True }
 
 res_queue = None
-proc_lists=processing_modis_firms(res_queue,**args)
+proc_lists=processing_std_modis_firms(res_queue,**args)
 print(proc_lists)
