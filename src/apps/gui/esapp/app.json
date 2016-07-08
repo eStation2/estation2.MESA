@@ -38,6 +38,7 @@
      */
     "requires": [
         "sencha-charts"
+//        ,"ext-ux-colorpick"
 //        "ext-locale"
     ],
 
@@ -166,7 +167,33 @@
         {
             "path": "app/CustomVTypes.js",
             "includeInBundle": true
+//        },{
+//            "path": "/eStation2/lib/js/Ext.ux/extjs-upload-widget-master/lib/upload/"
+//            ,"remote": true
         }
+
+//        },{
+//            "path": "/eStation2/lib/js/Ext.ux/AwesomeUploader/Ext.ux.form.FileUploadField.js",
+//            "remote": true
+//        },{
+//            "path": "/eStation2/lib/js/Ext.ux/AwesomeUploader/Ext.ux.XHRUpload.js",
+//            "remote": true
+//        },{
+//            "path": "/eStation2/lib/js/Ext.ux/AwesomeUploader/swfupload.js",
+//            "remote": true
+//        },{
+//            "path": "/eStation2/lib/js/Ext.ux/AwesomeUploader/swfupload.swfobject.js",
+//            "remote": true
+//        },{
+//            "path": "/eStation2/lib/js/Ext.ux/AwesomeUploader/Ext.ux.AwesomeUploaderLocalization.js",
+//            "remote": true
+//        },{
+//            "path": "/eStation2/lib/js/Ext.ux/AwesomeUploader/Ext.ux.AwesomeUploader.js",
+//            "remote": true
+//        },{
+//            "path": "/eStation2/lib/js/Ext.ux/Ext.ux.StatusBar.js",
+//            "remote": true
+//        }
 //        ,{
 //            "path": "http://binoche:3000/inspector.js",
 //            "remote": true,
@@ -212,6 +239,16 @@
         },{
             "path": "/eStation2/lib/js/ol3-layerswitcher-master/src/ol3-layerswitcher.css",
             "remote": true
+
+//        },{
+//            "path": "/eStation2/lib/js/Ext.ux/AwesomeUploader/Ext.ux.form.FileUploadField.css",
+//            "remote": true
+//        },{
+//            "path": "/eStation2/lib/js/Ext.ux/AwesomeUploader/AwesomeUploader.css",
+//            "remote": true
+//        },{
+//            "path": "/eStation2/lib/js/Ext.ux/AwesomeUploader/AwesomeUploader Progress Bar.css",
+//            "remote": true
         },{
             "path": "resources/fonts/font-awesome-4.1.0/css/font-awesome.css"
 //        },{

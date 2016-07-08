@@ -153,7 +153,7 @@ def getStatusPostgreSQL():
     try:
         # Get status of postgresql
         command = [es_constants.es2globals['postgresql_executable'], 'status']  # /etc/init.d/postgresql-9.3  on CentOS
-        print command
+        # print command
         p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = p.communicate()
         if re.search('online', out) or re.search('en cours', out):      # ToDo: Add Portuguese!
@@ -404,7 +404,7 @@ def _proxy_defined():
 
     return proxy_def
 
-def _internet_on():
+def _proxy_internet_on():
     import urllib2
 
     test_url = 'http://google.com'
@@ -430,7 +430,7 @@ def _internet_on():
 
     return False
 
-def internet_on():
+def _internet_on():
     import os
     command = 'ping -c 1 -W 2 8.8.8.8'
     try:
@@ -442,8 +442,8 @@ def internet_on():
         return True
     else:
         return False
-	
-def is_connected():
+
+def internet_on():     # is_connected():
     import socket
     REMOTE_SERVER = "www.google.com"
     try:

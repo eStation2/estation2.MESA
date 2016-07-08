@@ -14,6 +14,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
         'esapp.view.analysis.mapView',
         'esapp.view.analysis.ProductNavigator',
         'esapp.view.analysis.timeseriesChartView',
+        'esapp.view.analysis.layerAdmin',
 
         'Ext.selection.CheckboxModel',
         'Ext.form.field.ComboBox',
@@ -27,7 +28,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
     frame: false,
     border: false,
     bodyPadding: '5 0 0 0',
-    //suspendLayout : true,
+    // suspendLayout : true,
 
     layout: {
         type: 'border',
@@ -38,7 +39,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
         var me = this;
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
-            padding: 3,
+            padding: 1,
             style: {backgroundColor:'#ADD2ED'},
             items: [{
                 xtype: 'button',
@@ -48,6 +49,15 @@ Ext.define("esapp.view.analysis.analysisMain",{
                 style: { color: 'gray' },
                 scale: 'small',
                 handler: 'newMapView'
+            },{
+                xtype: 'button',
+                name: 'analysismain_layersbtn',
+                reference: 'analysismain_layersbtn',
+                text: esapp.Utils.getTranslation('layers'),  // 'Layers',
+                iconCls: 'layers',
+                style: { color: 'gray' },
+                scale: 'small',
+                handler: 'layerAdmin'
             },
             '->',
             {
@@ -75,9 +85,10 @@ Ext.define("esapp.view.analysis.analysisMain",{
         me.items = [{
             region: 'east',
             //title: esapp.Utils.getTranslation('timeseries'),  // 'Time series',
-            width: 420,
-            minWidth: 402,
-            maxWidth : 475,
+            width: 440,
+            minWidth: 440,
+            maxWidth : 500,
+            minTabWidth: 210,
             split: true,
             hideCollapseTool: true,
             header: false,
@@ -94,33 +105,50 @@ Ext.define("esapp.view.analysis.analysisMain",{
                 //minHeight: 800,
                 autoHeight: true,
                 autoScroll:true,
-                layout:'vbox',
+                layout: {
+                    type: 'vbox'
+                    ,align: 'stretch'
+                },
                 defaults: {
                     margin: '5 0 15 0'
                 },
                 items: [{
+                    xtype: 'container',
+                    margin: '0 0 0 0',
+                    items: [{
+                        xtype: 'button',
+                        text: esapp.Utils.getTranslation('gettimeseries'),    // 'Get timeseries',
+                        id: 'gettimeseries_btn',
+                        reference: 'gettimeseries_bnt1',
+                        iconCls: 'chart-curve_medium',
+                        scale: 'medium',
+                        disabled: true,
+                        width: 200,
+                        handler: 'generateTimeseriesChart'
+                    }]
+                },{
                     xtype: 'fieldset',
                     id: 'fieldset_selectedregion',
                     title: '<b style="font-size:16px; color:#0065A2; line-height: 18px;">' + esapp.Utils.getTranslation('selectedregion') + '</b>',
                     hidden: true,
-                    width: 395,
-                    height: 65,
+                    autoHeight: true,   // 65,
                     border: 3,
-                    //padding: 5,
+                    padding: 10,
                     style: {
                         borderColor: '#157FCC',
                         borderStyle: 'solid'
                     },
-                    //layout: 'vbox',
                     items: [{
                         xtype: 'displayfield',
                         id: 'selectedregionname',
                         reference: 'selectedregionname',
                         fieldLabel: '',
                         labelAlign : 'left',
-                        fieldStyle: {
-                            color:'darkgreen',
-                            fontWeight:'bold'
+                        fieldCls: 'ts_selectedfeature_name_font',
+                        style: {
+                            color: 'green'
+                            //"font-weight": 'bold',
+                            //"font-size": 24
                         },
                         value: ''
                     }]
@@ -128,9 +156,9 @@ Ext.define("esapp.view.analysis.analysisMain",{
                     title: esapp.Utils.getTranslation('products'),  // 'Products',
                     xtype : 'grid',
                     reference: 'TimeSeriesProductsGrid',
-                    region: 'center',
-                    width: 395,
-                    height: 250,
+                    //region: 'center',
+                    //width: 395,
+                    height: 300,
                     bind: '{products}',
                     session:true,
                     viewConfig: {
@@ -138,10 +166,11 @@ Ext.define("esapp.view.analysis.analysisMain",{
                         enableTextSelection: true,
                         draggable:false,
                         markDirty: false,
-                        resizable:false,
+                        resizable:true,
                         disableSelection: false,
                         trackOver:true
                     },
+                    layout: 'fit',
                     hideHeaders: true,
 
                     selModel : {
@@ -151,13 +180,14 @@ Ext.define("esapp.view.analysis.analysisMain",{
 
                     collapsible: false,
                     enableColumnMove:false,
-                    enableColumnResize:false,
+                    enableColumnResize:true,
                     multiColumnSort: false,
                     columnLines: false,
                     rowLines: true,
                     frame: false,
                     border: true,
                     bodyBorder: false,
+                    forceFit:true,
 
                     tools:[{
                         type: 'refresh',
@@ -183,8 +213,8 @@ Ext.define("esapp.view.analysis.analysisMain",{
 
                     plugins: [{
                         ptype: 'rowexpander',
-                        cellWrap:true,
-                        layout:'fit',
+                        //cellWrap:true,
+                        //layout:'fit',
                         rowBodyTpl : new Ext.XTemplate(
                             '<span class="smalltext">' +
                             '<p>{description}</p>' +
@@ -204,13 +234,15 @@ Ext.define("esapp.view.analysis.analysisMain",{
                             sortable: false,
                             hideable: false,
                             variableRowHeight : true,
-                            menuDisabled:true
+                            menuDisabled:true,
+                            autoSize: true
                         },
                         columns: [
                             {
-                                //text: "Product",
                                 xtype: 'templatecolumn',
-                                width: 345,
+                                //width: "100%",
+                                minWidth: 380,
+                                cellWrap:true,
                                 tpl:  new Ext.XTemplate(
                                     '<b>{prod_descriptive_name}</b>',
                                     '<tpl if="version != \'undefined\'">',
@@ -222,21 +254,6 @@ Ext.define("esapp.view.analysis.analysisMain",{
                                         '<b class="smalltext"> - {descriptive_name}</b>',
                                     '</tpl>'
                                 )
-                                //tpl:  new Ext.XTemplate(
-                                //    '<b>{prod_descriptive_name}</b>',
-                                //    '<tpl if="version != \'undefined\'">',
-                                //        '<b class="smalltext"> - {version}</b>',
-                                //    '</tpl>',
-                                //    '</br>',
-                                //    '<b class="smalltext" style="color:darkgrey">{productcode} - {subproductcode}</b>',
-                                //    '<tpl if="productmapsets.length === 1">',
-                                //        '<tpl for="productmapsets">',
-                                //            '<b class="smalltext" style="color:darkgrey"> - {descriptive_name}</b>',
-                                //        '</tpl>',
-                                //    '<tpl else>',
-                                //        '<b class="smalltext" style="color:darkgrey"> - ' + esapp.Utils.getTranslation('mapsets') + ' {productmapsets.length}, ' + esapp.Utils.getTranslation('clicktochoose') + '</b>',
-                                //    '</tpl>'
-                                //)
                             }
                         ]
                     }]
@@ -244,11 +261,11 @@ Ext.define("esapp.view.analysis.analysisMain",{
                     xtype: 'grid',
                     id: 'timeseries-mapset-dataset-grid',
                     reference: 'timeseries-mapset-dataset-grid',
-                    autoWidth: true,
-                    width: 395,
+                    //autoWidth: true,
+                    //width: 395,
                     maxHeight: 250,
                     //margin:'10 0 10 0',
-                    autoScroll: true,
+                    autoScroll: false,
                     hidden: true,
                     bind: '{timeseriesmapsetdatasets}',
                     layout: 'fit',
@@ -266,17 +283,20 @@ Ext.define("esapp.view.analysis.analysisMain",{
                     selType: 'checkboxmodel',
                     selModel : {
                         allowDeselect : true,
+                        checkOnly: true,
                         mode:'SIMPLE'
+                        //,listeners: {}
                     },
                     collapsible: false,
                     enableColumnMove: false,
-                    enableColumnResize: false,
+                    enableColumnResize: true,
                     multiColumnSort: false,
-                    columnLines: true,
+                    columnLines: false,
                     rowLines: true,
                     frame: false,
                     border: true,
                     bodyBorder: false,
+                    forceFit:false,
 
                     listeners: {
                         //rowclick: 'mapsetDataSetGridRowClick'
@@ -298,16 +318,43 @@ Ext.define("esapp.view.analysis.analysisMain",{
                             '<span class="smalltext"><b style="color:darkgrey">{productcode} - {subproductcode}</b> - <b>{mapsetcode}</b>' +
                             '</span>'
                         ),
-                        width: 345,
+                        minWidth: 345,
                         sortable: false,
-                        menuDisabled: true
+                        menuDisabled: true,
+                        cellWrap:true
+                    },{
+                        xtype: 'actioncolumn',
+                        //header: esapp.Utils.getTranslation('actions'),   // 'Edit draw properties',
+                        menuDisabled: true,
+                        sortable: true,
+                        variableRowHeight : true,
+                        draggable:false,
+                        groupable:false,
+                        hideable: false,
+                        width: 35,
+                        align: 'center',
+                        stopSelection: false,
+
+                        items: [{
+                            // scope: me,
+                            width:'35',
+                            disabled: false,
+                            getClass: function (v, meta, rec) {
+                                return 'chart-curve_edit';
+                            },
+                            getTip: function (v, meta, rec) {
+                                return esapp.Utils.getTranslation('edittimeseriesdrawproperties') + ' ' + rec.get('productcode') + ' - ' + rec.get('subproductcode');
+                            },
+                            handler: 'editTSDrawProperties'
+                        }]
                     }]
                 }, {
                     xtype: 'fieldset',
                     id: 'ts_timeframe',
                     title: '<b style="font-size:16px; color:#0065A2; line-height: 18px;">' + esapp.Utils.getTranslation('timeframe') + '</b>',
                     hidden: true,
-                    width: 395,
+                    //autoWidth: true,
+                    //width: 395,
                     height: 175,
                     border: 3,
                     padding: 15,
@@ -327,7 +374,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                             inputValue: 'year',
                             style: {"margin-right": "5px"},
                             disabled: false
-                        },{
+                        }, {
                             xtype: 'datefield',
                             id: 'ts_from_period',
                             fieldLabel: esapp.Utils.getTranslation('from'),    // 'From',
@@ -335,15 +382,15 @@ Ext.define("esapp.view.analysis.analysisMain",{
                             style: {"margin-right": "10px"},
                             width: 150,
                             format: "d/m/Y",
-                            emptyText : 'dd/mm/yyyy ',
+                            emptyText: 'dd/mm/yyyy ',
                             allowBlank: true,
                             maxValue: new Date(),
                             listeners: {
-                                change: function() {
+                                change: function () {
                                     Ext.getCmp("radio-fromto").setValue(true);
                                 }
                             }
-                        },{
+                        }, {
                             xtype: 'datefield',
                             id: 'ts_to_period',
                             fieldLabel: esapp.Utils.getTranslation('to'),    // 'To',
@@ -351,17 +398,17 @@ Ext.define("esapp.view.analysis.analysisMain",{
                             style: {"margin-right": "10px"},
                             width: 150,
                             format: "d/m/Y",
-                            emptyText : 'dd/mm/yyyy ',
+                            emptyText: 'dd/mm/yyyy ',
                             allowBlank: true,
                             maxValue: new Date(),
                             //,value: new Date()
                             listeners: {
-                                change: function() {
+                                change: function () {
                                     Ext.getCmp("radio-fromto").setValue(true);
                                 }
                             }
                         }]
-                    },{
+                    }, {
                         layout: 'hbox',
                         layoutConfig: {columns: 2, rows: 1},
                         items: [{
@@ -392,21 +439,27 @@ Ext.define("esapp.view.analysis.analysisMain",{
                             queryMode: 'local',
                             emptyText: esapp.Utils.getTranslation('select'),    // 'Select...',
                             listeners: {
-                                select: function() {
+                                select: function () {
                                     Ext.getCmp("radio-year").setValue(true);
                                 }
                             }
                         }]
                     }]
                 },{
-                    xtype: 'button',
-                    text: esapp.Utils.getTranslation('gettimeseries'),    // 'Get timeseries',
-                    id: 'gettimeseries_btn',
-                    reference: 'gettimeseries',
-                    iconCls: 'chart-curve_medium',
-                    scale: 'medium',
-                    disabled: true,
-                    handler: 'getTimeseries'
+                    xtype: 'container',
+                    margin: '0 0 0 0',
+                    items: [{
+                        xtype: 'button',
+                        text: esapp.Utils.getTranslation('gettimeseries'),    // 'Get timeseries',
+                        id: 'gettimeseries_btn2',
+                        reference: 'gettimeseries_bnt2',
+                        iconCls: 'chart-curve_medium',
+                        scale: 'medium',
+                        disabled: true,
+                        width: 200,
+                        handler: 'generateTimeseriesChart'
+                    }]
+
                 }]
             },{
                 title: 'Debug info',
@@ -495,7 +548,9 @@ Ext.define("esapp.view.analysis.analysisMain",{
                               params: {
                                   layername:'naturalearth',
                                   'LAYERS': 'HYP_HR_SR_OB_DR'       // 'ne:NE1_HR_LC_SR_W_DR'
-                              }
+                              },
+                              wrapX: false,
+                              noWrap: true
                         })
                       })
                     );

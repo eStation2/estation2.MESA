@@ -1,4 +1,4 @@
-.1566960214023510ac449bd803522d2c87d29765{display:block;}/*.x-grid-header-ct {*/
+.625ecc8fbfec4985ac84ce1103b7fe401753e01a{display:block;}/*.x-grid-header-ct {*/
     /*height: 70px !important;*/
 /*}*/
 
@@ -6,10 +6,24 @@
     /*height: 70px !important;*/
 /*}*/
 
+.red {
+    color: red;
+}
+
+.ts_selectedfeature_name_font {
+    font-weight: bold;
+    font-size: 16px
+}
+
 /* Remove grid cell focus border: https://www.sencha.com/blog/top-support-tips-september-2014/ */
 .x-grid-item-focused .x-grid-cell-inner:before {
     border: 0;
 }
+
+.highlightYaxe {
+    background-color: #C1DDF1 !important;
+}
+
 
 .cursorpointer {
     cursor: pointer !important;
@@ -41,11 +55,6 @@
 
 .not-dirty .x-grid3-dirty-cell {background: transparent;}
 
-
-.x-menu-no-icon {background-image: none;  left: 5px !important;}
-.x-menu-no-icon a.x-menu-item-link {padding-left: 3px;}
-.x-menu-no-icon .x-menu-item-icon {display: none;}
-
 p {
     margin:5px;
 }
@@ -74,7 +83,8 @@ p {
 }
 
 .layers {
-    background-image:url(../img/layers.png);
+    background-image:url(../img/layers_small.png);
+    /*background-size: 16px 16px;*/
 }
 
 .legends {
@@ -87,10 +97,12 @@ p {
 
 .chart-curve_medium {
     background-image:url(../img/chart_curve_medium.png);
+    background-repeat: no-repeat;
 }
 
 .chart-curve_edit {
     background-image:url(../img/chart_curve_edit.png);
+    background-repeat: no-repeat;
 }
 
 .chart-curve_add {
@@ -181,7 +193,8 @@ p {
     background-image:url(../img/icons/folder_wrench.png);
 }
 .nav {
-    background-image:url(../img/icons/folder_go.png);
+    background-image:url(../img/icons/folder_go.png) !important;
+    background-repeat: no-repeat;
 }
 .info {
     background-image:url(../img/icons/information.png);
@@ -202,6 +215,13 @@ p {
     background-image: url(../img/add32.png ) !important;
     background-repeat: no-repeat;
 }
+
+.delete {
+    background-image: url(../img/icons/trash24.png ) !important;
+    background-repeat: no-repeat;
+    vertical-align: bottom;
+}
+
 .delete16 {
     background-image: url(../img/delete16.png ) !important;
     background-repeat: no-repeat;
@@ -214,9 +234,24 @@ p {
     background-image: url(../img/edit16.png ) !important;
     background-repeat: no-repeat;
 }
+.edit16:hover{
+    opacity: 0.8;
+}
+
 .edit {
     background-image: url(../img/icons/edit.png ) !important;
+    background-repeat: no-repeat;
 }
+
+.editvectordrawproperties {
+    background-image: url(../img/editvectordrawproperties.png ) !important;
+    background-size: 16px 16px;
+}
+
+.editvectordrawproperties16x16 {
+    background-image: url(../img/editvectordrawproperties16x16.png ) !important;
+}
+
 .dashboard-panel-body {
     background-image: url(../img/square.gif);
 }
@@ -725,3 +760,33 @@ p {
 	background: #d0dafd url('../img/table-images/gradhover.png') repeat-x;
 	color: #339;
 }
+
+
+.x-menu-no-icon {background-image: none;}
+.x-menu-no-icon a.x-menu-item-link {padding-left: 3px;}
+.x-menu-no-icon .x-menu-item-icon {display: none;}
+.x-menu-no-icon a.x-menu-item-link .x-menu-item-text {margin-left: 5px;}
+
+/*.x-menu-no-icon {background-image: none;  left: 5px !important;}*/
+/*.x-menu-no-icon a.x-menu-item-link {padding-left: 3px;}*/
+/*.x-menu-no-icon .x-menu-item-icon {display: none;}*/
+
+
+.over-item-cls {
+    background-color: #D3E5F3;
+    /*lightblue;*/
+}
+
+a.my-custom-button.x-btn-default-small {
+    background: none;
+    border: none;
+}
+
+a.my-custom-button.x-btn-default-small span {
+    color: black;
+}
+
+a.my-custom-button.x-btn-default-small:hover span {
+    color: #ababab;
+}
+

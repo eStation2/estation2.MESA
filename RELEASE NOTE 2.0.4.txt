@@ -33,6 +33,8 @@
 
 
 1.7 Packages (pre-post inst)
+1.2 Visualization
+- When two or more mapviews have the same vector layers added, the Layer switcher disabled a layer in other Mapview when clicked.
 
 
 2. NEW FEATURES
@@ -48,17 +50,42 @@
 
 - New processing chains for MODIS-FIRMS (with ICPAC), MSG-MPE (with SADC)
 
+- All log files viewable from the Dashboard, Acquisition and Processing pages are now shown in reversed order with the latest
+  date on top so that the user does not need to scroll down to see the latest log entries.
+  Also all the log files (.log, .log1, .log2, etc...) are concatenated to avoid that former messages are not displayed (because they are moved to .log1).
 
-2.1 Acquisition
 
-2.2 Processing
+2.1 Dashboard
+- Finished the dashboard information for installation type SinglePC.
 
-- Complete the MODIS-FIRMS processing chain in collaboration with ICPAC Staff.
 
-2.3 DataManagement
+2.2 Acquisition/Processing/DataManagement
+- In the Acquisition page under the 'Product' column the source of each product is shown.
 
-2.4 Visualization
 
-2.5 Configuration/DB
+2.3 Visualization/Analysis
+- Vector layer administration is added to the analysis tool.
+  The User can upload/import its own vector layers and change a layer's definition and draw properties like line color and thinkness.
+  Each layer can be enabled/disabled to be shown in the vector layer menu in a Mapview
+  Each layer can be activated to be openend automatically in a Mapview.
+- The source of each vector layer is shown in the add vector layer menu in a Mapview.
+- By default zoom to the max extent of the selected vector layer.
+- Added to the product legend, the legend name and unit. Ex: Rain (mm), Temperature (°C), Dry Matter (kg/ha), etc.
+- Outmasking a product in a Mapview over any selected multi-polygon.
+- Saving a map as .PNG now contains also the legend within the .PNG image.
+- Doubleclick on a feature (polygon) will zoom to its extent.
+- On Mapview mouseout the highlighted feature (polygon) is removed.
+- Time series graph draw properties management added.
+- Time series sum aggregation of for example Fire or Water occurences.
 
-2.6 Other packages
+
+2.4 Configuration/DB
+- Added one table called "layers" for layer registration and their draw properties, in the schema analysis.
+- Added one new table called "chart_drawproperties" for the time series chart draw properties, in the schema analysis.
+- Added new columns to the table "timeseries_drawproperties", in the schema analysis.
+- Updated the function "analysis.update_insert_timeseries_drawproperties" and created 2 new functions for the above mentioned new tables.
+  New functions are "analysis.update_insert_layers" and "analysis.update_insert_chart_drawproperties".
+
+
+2.5 Other packages
+- Layers package containing new gaul admin 00 layer for each RIC.

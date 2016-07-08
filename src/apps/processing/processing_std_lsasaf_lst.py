@@ -342,5 +342,4 @@ def processing_std_lsasaf_lst(res_queue, pipeline_run_level=0,pipeline_printout_
     if write2file is not None:
         fwrite_id.close()
 
-    #res_queue.put(proc_lists)
     return True

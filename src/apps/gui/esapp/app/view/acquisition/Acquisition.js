@@ -368,6 +368,8 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                                 if (acqgridsstore.isStore) {
                                     acqgridsstore.load({
                                         callback: function(records, options, success) {
+                                            me.getController().renderHiddenColumnsWhenUnlocked();
+
                                             if (ingestiongridstore.isStore) {
                                                 ingestiongridstore.load({
                                                     callback: function(records, options, success){
@@ -386,8 +388,6 @@ Ext.define("esapp.view.acquisition.Acquisition",{
 
                     eumetcastsourcestore.load();
                     internetsourcestore.load();
-
-                    me.getController().renderHiddenColumnsWhenUnlocked();
 
                     me.getController().checkStatusServices();
                 }
@@ -467,7 +467,9 @@ Ext.define("esapp.view.acquisition.Acquisition",{
                             '<b class="smalltext"> - {version}</b>',
                         '</tpl>',
                         '</br>' +
-                        '<b class="smalltext" style="color:darkgrey">{productcode}</b>' +
+                        '<b class="smalltext" style="color:darkgrey">'+esapp.Utils.getTranslation('productcode')+': {productcode}</b>' +
+                        '</br>' +
+                        '<b class="smalltext" style="color:darkgrey">'+esapp.Utils.getTranslation('provider')+': {provider}</b>' +
                         // '<p>{description}</p>' +
                         '</br>'
                     ),

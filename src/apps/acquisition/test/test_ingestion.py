@@ -7,6 +7,8 @@ from database import querydb
 import unittest
 import os
 import glob
+import tempfile
+
 # Overwrite Dirs
 from lib.python import es_logging as log
 logger = log.my_logger(__name__)
@@ -224,6 +226,43 @@ class TestIngestion(unittest.TestCase):
         subproductcode = 'sst-3day'
         mapsetcode = 'SPOTV-IOC-1km'
         datasource_descrID='EO:EUM:DAT:MULT:CPMAD:SST'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                                              source_id=datasource_descrID):
+
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1, nodata_value=-999)
+
+            self.assertEqual(1, 1)
+
+    def test_ingest_pml_modis_oc(self):
+
+        date_fileslist = ['/data/ingest/PML_CapeVerde_MODIS_oc_3daycomp_20160228_20160301.nc.bz2']
+        in_date = '20160228'
+        productcode = 'pml-modis-chl'
+        productversion = '3.0'
+        subproductcode = 'chl-3day'
+        mapsetcode = 'SPOTV-IOC-1km'
+        datasource_descrID='EO:EUM:DAT:MULT:CPMAD:OC'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -500,8 +539,160 @@ class TestIngestion(unittest.TestCase):
                                                                               source_id=datasource_descrID):
 
             ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+    def test_ingest_vgt_ndvi(self):
 
-            self.assertEqual(1, 1)
+        date_fileslist = ['/data/temp/proba-v/g2_BIOPAR_NDVI_201601110000_AFRI_PROBAV_V2.1.zip']
+        in_date = '201601110000'
+        productcode = 'vgt-ndvi'
+        productversion = 'proba-v2.1'
+        subproductcode = 'ndv'
+        mapsetcode = 'SPOTV-Africa-1km'
+        datasource_descrID='EO:EUM:DAT:PROBA-V2.1:NDVI'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                                              source_id=datasource_descrID):
+
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+    def test_ingest_chirps(self):
+
+        date_fileslist = ['/data/ingest/test/chirps-v2.0.2016.02.1.tif.gz']
+        in_date = '2016.02.1'
+        productcode = 'chirps-dekad'
+        productversion = '2.0'
+        subproductcode = '10d'
+        mapsetcode = 'CHIRP-Africa-5km'
+        datasource_descrID='UCSB:CHIRPS:PREL:DEKAD'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
+                                                                              source_id=datasource_descrID):
+
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+            #self.assertEqual(1, 1)
+
+    def test_ingest_jrc_wbd(self):
+
+        date_fileslist = glob.glob('/data/ingest/JRC-WBD_*')
+        #date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
+        in_date = '20140101'
+        productcode = 'wd-gee'
+        productversion = '1.0'
+        subproductcode = 'occurr'
+        mapsetcode = 'WD-GEE-ECOWAS-AVG'
+        datasource_descrID='JRC:WBD:GEE'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
+                                                                              source_id=datasource_descrID):
+
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+            #self.assertEqual(1, 1)
+    def test_preprocess_ecmwf_mars(self):
+
+        date_fileslist = ['/data/temp/ope_africa_rain_20160221.zip']
+        in_date = '20160221'
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(date_fileslist[0]),
+                                  dir=es_constants.base_tmp_dir)
+
+        ingestion.pre_process_ecmwf_mars(tmpdir, date_fileslist, logger)
+
+        self.assertEqual(1, 1)
+    def test_ingest_chirps(self):
+
+        date_fileslist = ['/data/ingest/test/ope_africa_rain_20160221.zip']
+        in_date = '20160221'
+        productcode = 'ecmwf-rain'
+        productversion = 'OPE'
+        subproductcode = '10d'
+        mapsetcode = 'ECMWF-Africa-25km'
+        datasource_descrID='ECMWF:MARS:RAIN:OPE'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
+                                                                              source_id=datasource_descrID):
+
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+            #self.assertEqual(1, 1)
 
     def test_ingest_eumetcast(self):
 

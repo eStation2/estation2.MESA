@@ -1,3 +1,8 @@
+//Ext.Loader.setPath({
+//    'Ext.ux.upload' : '/eStation2/lib/js/Ext.ux/extjs-upload-widget-master/lib/upload/'
+//});
+
+
 /**
  * The main application class. An instance of this class is created by app.js when it calls
  * Ext.application(). This is the ideal place to handle application launch and initialization
@@ -50,6 +55,7 @@ Ext.define('esapp.Application', {
         ,'DataTypesStore'
         ,'EumetcastSourceStore'
         ,'InternetSourceStore'
+        ,'LayersStore'
 
         ,'ProductsActiveStore'
         ,'ProductsInactiveStore'
@@ -111,6 +117,17 @@ Ext.define('esapp.Application', {
                     params:{lang:esapp.globals['selectedLanguage']},
                     callback: function(records, options, success){
 
+                        Ext.apply(Ext.form.VTypes, {
+                            GeoJSON:  function(v) {
+                                v = v.replace(/^\s|\s$/g, ""); //trims string
+                                if (v.match(/([^\/\\]+)\.(geojson)$/i) )
+                                    return true;
+                                else
+                                    return false;
+                            },
+                            GeoJSONText: esapp.Utils.getTranslation('vtype_geojson')    // 'Must be a .geojson file.'
+                        });
+
                         // start the mask on the body and get a reference to the mask
                         splashscreen = Ext.getBody().mask(esapp.Utils.getTranslation('splashscreenmessage'), 'splashscreen');
 
@@ -129,7 +146,7 @@ Ext.define('esapp.Application', {
 
                         });
 
-                        task.delay(4000);
+                        task.delay(3000);
 
                         Ext.data.StoreManager.lookup('ProductsActiveStore').load();
 //                        Ext.data.StoreManager.lookup('ProductsInactiveStore').load();

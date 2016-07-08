@@ -95,16 +95,16 @@ Ext.define('esapp.model.TimeserieProductMapSetDataSet', {
     extend : 'esapp.model.Base',
 
     fields: [
-       {name: 'mapsetcode', reference:'TimeserieProductMapSet'},
-       {name: 'productid'},
-       {name: 'productcode'},
-       {name: 'subproductcode'},
-       {name: 'version'},
-       {name: 'defined_by'},
-       {name: 'activated', type: 'boolean'},
-       {name: 'product_type'},
-       {name: 'prod_descriptive_name'},
-       {name: 'description'}
+        {name: 'mapsetcode', reference:'TimeserieProductMapSet'},
+        {name: 'productid'},
+        {name: 'productcode'},
+        {name: 'subproductcode'},
+        {name: 'version'},
+        {name: 'defined_by'},
+        {name: 'activated', type: 'boolean'},
+        {name: 'product_type'},
+        {name: 'prod_descriptive_name'},
+        {name: 'description'},
     ]
 });
 

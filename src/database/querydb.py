@@ -24,6 +24,162 @@ db = connectdb.ConnectDB().db
 dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
 
 
+def update_yaxe_timeseries_drawproperties(yaxe, echo=False):
+    global dbschema_analysis
+    status = False
+    try:
+        if yaxe['opposite'] == "false":
+            opposite = 'f'
+        else:
+            opposite = 't'
+
+        unit = "'" + yaxe['unit'] + "'"
+        if yaxe['unit'] == "":
+            unit = 'null'
+
+        max = yaxe['max']
+        if yaxe['max'] == "":
+            max = 'null'
+
+        min = yaxe['min']
+        if yaxe['min'] == "":
+            min = 'null'
+
+        aggregation_min = yaxe['aggregation_min']
+        if yaxe['aggregation_min'] == "":
+            aggregation_min = 'null'
+
+        aggregation_max = yaxe['aggregation_max']
+        if yaxe['aggregation_max'] == "":
+            aggregation_max = 'null'
+
+        query = " UPDATE analysis.timeseries_drawproperties " + \
+                " SET max = " + str(max) + \
+                "   ,min = " + str(min) + \
+                "   ,oposite = '" + opposite + "'" + \
+                "   ,unit = " + unit + \
+                "   ,title = '" + yaxe['title'] + "'" + \
+                "   ,title_color = '" + yaxe['title_color'] + "'" + \
+                "   ,aggregation_type = '" + yaxe['aggregation_type'] + "'" + \
+                "   ,aggregation_min = " + str(aggregation_min) + \
+                "   ,aggregation_max = " + str(aggregation_max) + \
+                " WHERE yaxes_id = '" + yaxe['id'] + "'"
+        # print query
+        result = db.execute(query)
+        db.commit()
+
+        status = True
+        return status
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("update_yaxe_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
+        return status
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def get_timeseries_drawproperties(echo=False):
+    global dbschema_analysis
+    try:
+        query = "SELECT * FROM analysis.timeseries_drawproperties order by productcode asc, subproductcode asc, version asc"
+        result = db.execute(query)
+        result = result.fetchall()
+        # print result
+        return result
+        # timeseries_drawproperties = []
+        #
+        # if dbschema_analysis.timeseries_drawproperties.count() >= 1:
+        #     timeseries_drawproperties = dbschema_analysis.timeseries_drawproperties.\
+        #         order_by(asc(dbschema_analysis.timeseries_drawproperties.productcode),
+        #                  asc(dbschema_analysis.timeseries_drawproperties.subproductcode),
+        #                  asc(dbschema_analysis.timeseries_drawproperties.version)).all()
+        #
+        # print timeseries_drawproperties
+        # return timeseries_drawproperties
+
+        # p = dbschema_analysis.timeseries_drawproperties._table
+        #
+        # s = select([p.c.productcode,
+        #             p.c.subproductcode,
+        #             p.c.version,
+        #             p.c.title,
+        #             p.c.unit,
+        #             p.c.max,
+        #             p.c.min,
+        #             p.c.oposite,
+        #             p.c.tsname_in_legend,
+        #             p.c.charttype,
+        #             p.c.linestyle,
+        #             p.c.linewidth,
+        #             p.c.color,
+        #             p.c.yaxes_id,
+        #             p.c.title_color,
+        #             p.c.aggregation_type,
+        #             p.c.aggregation_min,
+        #             p.c.aggregation_max
+        #             ])
+        #
+        # s = s.alias('pl')
+        # pl = db.map(s, primary_key=[s.c.productcode, s.c.subproductcode, s.c.version])
+        #
+        # tsdrawproperties = pl.order_by(asc(pl.c.productcode), asc(pl.c.subproductcode), asc(pl.c.version)).all()
+        #
+        # print tsdrawproperties
+        # return tsdrawproperties
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def get_chart_drawproperties(charttype='default', echo=False):
+    global dbschema_analysis
+    try:
+        query = "SELECT * FROM analysis.chart_drawproperties WHERE chart_type = '" + charttype + "'"
+        result = db.execute(query)
+        result = result.fetchall()
+
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_chart_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def get_layers(echo=False):
+    global dbschema_analysis
+    try:
+        query = "SELECT * FROM analysis.layers order by menu asc, submenu asc, layerlevel asc"
+        result = db.execute(query)
+        result = result.fetchall()
+
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_layers: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
 def get_legend_totals(legendid, echo=False):
     global db
     try:
@@ -403,7 +559,7 @@ def get_languages(echo=False):
 
 
 ######################################################################################
-#   get_timeseries_drawproperties(prodcut, echo=False)
+#   get_product_timeseries_drawproperties(prodcut, echo=False)
 #   Purpose: get the timeseries drawproperties for the subproduct passed
 #   Author: Jurriaan van 't Klooster
 #   Date: 2015/05/11
@@ -411,7 +567,7 @@ def get_languages(echo=False):
 #          product              - List of productcode, subproductcode, version
 #
 #   Output: Return all the timeseries drawproperties for the requested subproducts.
-def get_timeseries_drawproperties(product, echo=False):
+def get_product_timeseries_drawproperties(product, echo=False):
 
     global dbschema_analysis
 
@@ -433,7 +589,7 @@ def get_timeseries_drawproperties(product, echo=False):
         if echo:
             print traceback.format_exc()
         # Exit the script and print an error telling what happened.
-        logger.error("get_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
+        logger.error("get_product_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -456,7 +612,10 @@ def get_timeseries_yaxes(products, echo=False):
                                                   ts_drawprobs.min,
                                                   ts_drawprobs.max,
                                                   ts_drawprobs.oposite,
-                                                  ts_drawprobs.title_color)
+                                                  ts_drawprobs.title_color,
+                                                  ts_drawprobs.aggregation_type,
+                                                  ts_drawprobs.aggregation_min,
+                                                  ts_drawprobs.aggregation_max)
 
         whereall = ''
         count = 0
@@ -517,6 +676,7 @@ def get_timeseries_yaxes(products, echo=False):
 def get_timeseries_subproducts(echo=False,  productcode=None, version='undefined', subproductcode=None, masked=None):
 
     global db
+
     try:
         p = db.product._table
 
@@ -530,7 +690,8 @@ def get_timeseries_subproducts(echo=False,  productcode=None, version='undefined
                     p.c.descriptive_name.label('prod_descriptive_name'),
                     p.c.description,
                     p.c.masked,
-                    p.c.timeseries_role])
+                    p.c.timeseries_role
+                    ])
 
         s = s.alias('pl')
         pl = db.map(s, primary_key=[s.c.productcode, s.c.subproductcode, s.c.version])
@@ -831,10 +992,10 @@ def get_legend_info(legendid=None, echo=False):
                    ).select_from(l.outerjoin(ls, l.c.legend_id == ls.c.legend_id))
 
         s = s.alias('legend_info')
-        ls = dbschema_analysis.map(s, primary_key=[s.c.legend_id])
+        dbschema_analysis.legend_info = dbschema_analysis.map(s, primary_key=[s.c.legend_id])
 
-        where = and_(ls.c.legend_id == legendid)
-        legend_info = ls.filter(where).all()
+        where = and_(dbschema_analysis.legend_info.legend_id == legendid)
+        legend_info = dbschema_analysis.legend_info.filter(where).all()
 
         # if echo:
         #     for row in legend_info:

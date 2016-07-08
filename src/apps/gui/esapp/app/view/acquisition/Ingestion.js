@@ -230,7 +230,7 @@ Ext.define("esapp.view.acquisition.Ingestion",{
                 widgetattached: false
             },
             onWidgetAttach: function(widget, record) {
-                //console.info(widget);
+                //console.info(widget.widgetattached);
                 //if (!widget.widgetattached) {
                     var widgetchart = widget.down('cartesian');
                     var completeness = record.getAssociatedData().completeness;
@@ -388,6 +388,10 @@ Ext.define("esapp.view.acquisition.Ingestion",{
                     //widget.setTooltipintervals(seriestitles);
                     //console.info('ingest widgetattach');
                 //    widget.widgetattached = true;
+                //}
+                //else {
+                //    widget.down('cartesian').redraw();
+                //    //console.info('ingest widget redraw');
                 //}
             }
 

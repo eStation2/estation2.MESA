@@ -14,7 +14,9 @@ Ext.define("esapp.view.analysis.mapView",{
 
         'Ext.window.Window',
         'Ext.toolbar.Toolbar',
-        'Ext.slider.Single'
+        'Ext.slider.Single',
+        'Ext.grid.property.Grid',
+        'Ext.picker.Color'
     ],
 
     //title: '<span class="panel-title-style">MAP title</span>',
@@ -82,603 +84,14 @@ Ext.define("esapp.view.analysis.mapView",{
         me.border= true;
         me.bodyBorder = false;
 
-        me.tbar = Ext.create('Ext.toolbar.Toolbar', {
-            dock: 'top',
-            autoShow: true,
-            alwaysOnTop: true,
-            floating: false,
-            hidden: false,
-            border: false,
-            shadow: false,
-            padding:0,
-            items: [{
-                text: '<div style="font-size: 11px;">' + esapp.Utils.getTranslation('productnavigator') + '</div>', // 'Product navigator',
-                iconCls: 'africa',
-                scale: 'medium',
-                //style: {
-                //    "font-size": '10px'
-                //},
-                handler: 'openProductNavigator'
-            },{
-                xtype: 'button',
-                //text: 'Add Layer',
-                name:'vbtn-'+me.id,
-                iconCls: 'layer-vector-add', // 'layers'
-                scale: 'medium',
-                //width: 100,
-                //margin: '0 0 10 0',
-                floating: false,  // usually you want this set to True (default)
-                collapseDirection: 'left',
-                menu: {
-                    hideOnClick: true,
-                    iconAlign: '',
-                    defaults: {
-                        hideOnClick: true,
-                        iconAlign: ''
-                    },
-                    items: [{
-                        text: esapp.Utils.getTranslation('borderlayers'),   // 'Border layers (FAO Gaul 2015)',
-                        name: 'gaul2015',
-                        //iconCls: 'layer-vector-add', // 'layers'
-                        scale: 'medium',
-                        floating: false,
-                        collapseDirection: 'left',
-                        menu: {
-                            hideOnClick: true,
-                            defaults: {
-                                hideOnClick: true
-                            },
-                            style: {
-                                'margin-left': '0px'
-                            },
-                            items: [{
-                                text: 'Africa',
-                                name: 'africa',
-                                //iconCls: 'layer-vector-add', // 'layers'
-                                scale: 'medium',
-                                floating: false,
-                                collapseDirection: 'left',
-                                menu: {
-                                    hideOnClick: true,
-                                    defaults: {
-                                        hideOnClick: true
-                                    },
-                                    style: {
-                                        'margin-left': '0px'
-                                    },
-                                    items: [{
-                                        xtype: 'checkbox',
-                                        boxLabel: esapp.Utils.getTranslation('adminlevel0'), // 'Administative level 0',
-                                        //text: 'Administative level 0',
-                                        name: 'admin0',
-                                        level: 'admin0',
-                                        geojsonfile: 'AFR_0_g2015_2014.geojson',  // 'AFR_G2014_2013_0.geojson', //
-                                        checked: false,
-                                        linecolor: '#319FD3',    // rgb(49, 159, 211)  or like in EMMA rgb(255, 0, 255)
-                                        layerorderidx: 4,
-                                        showSeparator: false,
-                                        cls: "x-menu-no-icon",
-                                        hideOnClick: true,
-                                        handler: 'addVectorLayer'
-                                    }, {
-                                        xtype: 'checkbox',
-                                        boxLabel: esapp.Utils.getTranslation('adminlevel1'), // 'Administative level 1',
-                                        //text: 'Administative level 1',
-                                        name: 'admin1',
-                                        level: 'admin1',
-                                        geojsonfile: 'AFR_1_g2015_2014.geojson',  // 'AFR_G2014_2013_0.geojson',  //
-                                        checked: false,
-                                        linecolor: '#ffcc00',   // '#9e9a9a',  // '#ffcc00',    // rgb(255, 204, 0)
-                                        layerorderidx: 3,
-                                        showSeparator: false,
-                                        cls: "x-menu-no-icon",
-                                        handler: 'addVectorLayer'
-                                    }, {
-                                        xtype: 'checkbox',
-                                        boxLabel: esapp.Utils.getTranslation('adminlevel2'), // 'Administative level 1',
-                                        //text: 'Administative level 1',
-                                        name: 'admin2',
-                                        level: 'admin2',
-                                        geojsonfile: 'AFR_2_g2015_2014.geojson',    // 'AFR_2_g2015_2014_singlepart.geojson',       // 'AFR_G2014_2013_2.geojson',
-                                        checked: false,
-                                        linecolor: '#ffcc99',    // rgb(255, 204, 153)
-                                        layerorderidx: 1,
-                                        showSeparator: false,
-                                        cls: "x-menu-no-icon",
-                                        handler: 'addVectorLayer'
-                                    }]
-                                }
-                                //}, {
-                                //    text: 'ACMAD',
-                                //    name: 'acmad',
-                                //    //iconCls: 'layer-vector-add', // 'layers'
-                                //    scale: 'medium',
-                                //    floating: false,
-                                //    collapseDirection: 'left',
-                                //    menu: {
-                                //        hideOnClick: true,
-                                //        defaults: {
-                                //            hideOnClick: true
-                                //        },
-                                //        style: {
-                                //            'margin-left': '0px'
-                                //        },
-                                //        items: [{
-                                //            xtype: 'checkbox',
-                                //            boxLabel: 'ACMAD '+esapp.Utils.getTranslation('level0'), // level 0',
-                                //            name: 'acmad0',
-                                //            level: 'admin0',
-                                //            geojsonfile: 'AFR_0_g2015_2014.geojson',
-                                //            checked: false,
-                                //            linecolor: '#319FD3',
-                                //            layerorderidx: 3,
-                                //            showSeparator: false,
-                                //            cls: "x-menu-no-icon",
-                                //            handler: 'addVectorLayer'
-                                //        }, {
-                                //            xtype: 'checkbox',
-                                //            boxLabel: 'ACMAD '+esapp.Utils.getTranslation('level1'), // level 0',
-                                //            name: 'acmad1',
-                                //            level: 'admin1',
-                                //            geojsonfile: 'AFR_1_g2015_2014.geojsonn',
-                                //            checked: false,
-                                //            linecolor: '#ffcc00',
-                                //            layerorderidx: 2,
-                                //            showSeparator: false,
-                                //            cls: "x-menu-no-icon",
-                                //            handler: 'addVectorLayer'
-                                //        }, {
-                                //            xtype: 'checkbox',
-                                //            boxLabel: 'ACMAD '+esapp.Utils.getTranslation('level2'), // level 0',
-                                //            name: 'acmad2',
-                                //            level: 'admin2',
-                                //            geojsonfile: 'AFR_2_g2015_2014.geojson',
-                                //            checked: false,
-                                //            linecolor: '#ffcc99',
-                                //            layerorderidx: 1,
-                                //            showSeparator: false,
-                                //            cls: "x-menu-no-icon",
-                                //            handler: 'addVectorLayer'
-                                //        }]
-                                //    }
-                            }, {
-                                text: 'AGRHYMET',
-                                name: 'agrhymet',
-                                //iconCls: 'layer-vector-add', // 'layers'
-                                scale: 'medium',
-                                floating: false,
-                                collapseDirection: 'left',
-                                menu: {
-                                    hideOnClick: true,
-                                    defaults: {
-                                        hideOnClick: true
-                                    },
-                                    style: {
-                                        'margin-left': '0px'
-                                    },
-                                    items: [{
-                                        xtype: 'checkbox',
-                                        boxLabel: 'AGRHYMET ' + esapp.Utils.getTranslation('level0'), // level 0',
-                                        name: 'agrhymet0',
-                                        level: 'admin0',
-                                        geojsonfile: 'RIC_CRA_0_g2015_2014.geojson',
-                                        checked: false,
-                                        linecolor: '#319FD3',
-                                        layerorderidx: 4,
-                                        showSeparator: false,
-                                        cls: "x-menu-no-icon",
-                                        handler: 'addVectorLayer'
-                                    }, {
-                                        xtype: 'checkbox',
-                                        boxLabel: 'AGRHYMET ' + esapp.Utils.getTranslation('level1'), // level 0',
-                                        name: 'agrhymet1',
-                                        level: 'admin1',
-                                        geojsonfile: 'RIC_CRA_1_g2015_2014.geojson',
-                                        checked: false,
-                                        linecolor: '#ffcc00',   // '#9e9a9a',  // '#ffcc00',
-                                        layerorderidx: 3,
-                                        showSeparator: false,
-                                        cls: "x-menu-no-icon",
-                                        handler: 'addVectorLayer'
-                                    }, {
-                                        xtype: 'checkbox',
-                                        boxLabel: 'AGRHYMET ' + esapp.Utils.getTranslation('level2'), // level 0',
-                                        name: 'agrhymet2',
-                                        level: 'admin2',
-                                        geojsonfile: 'RIC_CRA_2_g2015_2014.geojson',
-                                        checked: false,
-                                        linecolor: '#000',   // '#ffcc99',
-                                        layerorderidx: 2,
-                                        showSeparator: false,
-                                        cls: "x-menu-no-icon",
-                                        handler: 'addVectorLayer'
-                                    }]
-                                }
-                            }, {
-                                text: 'BDMS',
-                                name: 'bdms',
-                                //iconCls: 'layer-vector-add', // 'layers'
-                                scale: 'medium',
-                                floating: false,
-                                collapseDirection: 'left',
-                                menu: {
-                                    hideOnClick: true,
-                                    defaults: {
-                                        hideOnClick: true
-                                    },
-                                    style: {
-                                        'margin-left': '0px'
-                                    },
-                                    items: [{
-                                        xtype: 'checkbox',
-                                        boxLabel: 'BDMS ' + esapp.Utils.getTranslation('level0'), // level 0',
-                                        name: 'bdms0',
-                                        level: 'admin0',
-                                        geojsonfile: 'RIC_BDMS_0_g2015_2014.geojson',
-                                        checked: false,
-                                        linecolor: '#319FD3',
-                                        layerorderidx: 4,
-                                        showSeparator: false,
-                                        cls: "x-menu-no-icon",
-                                        handler: 'addVectorLayer'
-                                    }, {
-                                        xtype: 'checkbox',
-                                        boxLabel: 'BDMS ' + esapp.Utils.getTranslation('level1'), // level 0',
-                                        name: 'bdms1',
-                                        level: 'admin1',
-                                        geojsonfile: 'RIC_BDMS_1_g2015_2014.geojson',
-                                        checked: false,
-                                        linecolor: '#ffcc00',   // '#9e9a9a',  // '#ffcc00',
-                                        layerorderidx: 3,
-                                        showSeparator: false,
-                                        cls: "x-menu-no-icon",
-                                        handler: 'addVectorLayer'
-                                    }, {
-                                        xtype: 'checkbox',
-                                        boxLabel: 'BDMS ' + esapp.Utils.getTranslation('level2'), // level 0',
-                                        name: 'bdms2',
-                                        level: 'admin2',
-                                        geojsonfile: 'RIC_BDMS_2_g2015_2014.geojson',    // 'RIC_BDMS_2_g2015_2014.geojson',
-                                        checked: false,
-                                        linecolor: '#000',   // '#ffcc99',
-                                        layerorderidx: 2,
-                                        showSeparator: false,
-                                        cls: "x-menu-no-icon",
-                                        handler: 'addVectorLayer'
-                                    }]
-                                }
-                            }, {
-                                text: 'CICOS',
-                                name: 'cicos',
-                                //iconCls: 'layer-vector-add', // 'layers'
-                                scale: 'medium',
-                                floating: false,
-                                collapseDirection: 'left',
-                                menu: {
-                                    hideOnClick: true,
-                                    defaults: {
-                                        hideOnClick: true
-                                    },
-                                    style: {
-                                        'margin-left': '0px'
-                                    },
-                                    items: [{
-                                        xtype: 'checkbox',
-                                        boxLabel: 'CICOS ' + esapp.Utils.getTranslation('level0'), // level 0',
-                                        name: 'cicos0',
-                                        level: 'admin0',
-                                        geojsonfile: 'RIC_CICOS_0_g2015_2014.geojson',
-                                        checked: false,
-                                        linecolor: '#319FD3',
-                                        layerorderidx: 4,
-                                        showSeparator: false,
-                                        cls: "x-menu-no-icon",
-                                        handler: 'addVectorLayer'
-                                    }, {
-                                        xtype: 'checkbox',
-                                        boxLabel: 'CICOS ' + esapp.Utils.getTranslation('level1'), // level 0',
-                                        name: 'cicos1',
-                                        level: 'admin1',
-                                        geojsonfile: 'RIC_CICOS_1_g2015_2014.geojson',
-                                        checked: false,
-                                        linecolor: '#ffcc00',   // '#9e9a9a',  // '#ffcc00',
-                                        layerorderidx: 3,
-                                        showSeparator: false,
-                                        cls: "x-menu-no-icon",
-                                        handler: 'addVectorLayer'
-                                    }, {
-                                        xtype: 'checkbox',
-                                        boxLabel: 'CICOS ' + esapp.Utils.getTranslation('level2'), // level 0',
-                                        name: 'cicos2',
-                                        level: 'admin2',
-                                        geojsonfile: 'RIC_CICOS_2_g2015_2014.geojson',
-                                        checked: false,
-                                        linecolor: '#000',   // '#ffcc99',
-                                        layerorderidx: 2,
-                                        showSeparator: false,
-                                        cls: "x-menu-no-icon",
-                                        handler: 'addVectorLayer'
-                                    }]
-                                }
-                            }, {
-                                text: 'ICPAC',
-                                name: 'icpac',
-                                //iconCls: 'layer-vector-add', // 'layers'
-                                scale: 'medium',
-                                floating: false,
-                                collapseDirection: 'left',
-                                menu: {
-                                    hideOnClick: true,
-                                    defaults: {
-                                        hideOnClick: true
-                                    },
-                                    style: {
-                                        'margin-left': '0px'
-                                    },
-                                    items: [{
-                                        xtype: 'checkbox',
-                                        boxLabel: 'ICPAC ' + esapp.Utils.getTranslation('level0'), // level 0',
-                                        name: 'icpac0',
-                                        level: 'admin0',
-                                        geojsonfile: 'RIC_ICPAC_0_g2015_2014.geojson',
-                                        checked: false,
-                                        linecolor: '#319FD3',
-                                        layerorderidx: 4,
-                                        showSeparator: false,
-                                        cls: "x-menu-no-icon",
-                                        handler: 'addVectorLayer'
-                                    }, {
-                                        xtype: 'checkbox',
-                                        boxLabel: 'ICPAC ' + esapp.Utils.getTranslation('level1'), // level 0',
-                                        name: 'icpac1',
-                                        level: 'admin1',
-                                        geojsonfile: 'RIC_ICPAC_1_g2015_2014.geojson',
-                                        checked: false,
-                                        linecolor: '#ffcc00',   // '#9e9a9a',  // '#ffcc00',
-                                        layerorderidx: 3,
-                                        showSeparator: false,
-                                        cls: "x-menu-no-icon",
-                                        handler: 'addVectorLayer'
-                                    }, {
-                                        xtype: 'checkbox',
-                                        boxLabel: 'ICPAC ' + esapp.Utils.getTranslation('level2'), // level 0',
-                                        name: 'icpac2',
-                                        level: 'admin2',
-                                        geojsonfile: 'RIC_ICPAC_2_g2015_2014.geojson',
-                                        checked: false,
-                                        linecolor: '#000',   // '#ffcc99',
-                                        layerorderidx: 2,
-                                        showSeparator: false,
-                                        cls: "x-menu-no-icon",
-                                        handler: 'addVectorLayer'
-                                    }]
-                                }
-                            }, {
-                                text: 'MOI',
-                                name: 'moi',
-                                //iconCls: 'layer-vector-add', // 'layers'
-                                scale: 'medium',
-                                floating: false,
-                                collapseDirection: 'left',
-                                menu: {
-                                    hideOnClick: true,
-                                    defaults: {
-                                        hideOnClick: true
-                                    },
-                                    style: {
-                                        'margin-left': '0px'
-                                    },
-                                    items: [{
-                                        xtype: 'checkbox',
-                                        boxLabel: 'MOI ' + esapp.Utils.getTranslation('level0'), // level 0',
-                                        name: 'moi0',
-                                        level: 'admin0',
-                                        geojsonfile: 'RIC_MOI_0_g2015_2014.geojson',
-                                        checked: false,
-                                        linecolor: '#319FD3',
-                                        layerorderidx: 4,
-                                        showSeparator: false,
-                                        cls: "x-menu-no-icon",
-                                        handler: 'addVectorLayer'
-                                    }, {
-                                        xtype: 'checkbox',
-                                        boxLabel: 'MOI ' + esapp.Utils.getTranslation('level1'), // level 0',
-                                        name: 'moi1',
-                                        level: 'admin1',
-                                        geojsonfile: 'RIC_MOI_1_g2015_2014.geojson',
-                                        checked: false,
-                                        linecolor: '#ffcc00',   // '#9e9a9a',  // '#ffcc00',
-                                        layerorderidx: 3,
-                                        showSeparator: false,
-                                        cls: "x-menu-no-icon",
-                                        handler: 'addVectorLayer'
-                                    }, {
-                                        xtype: 'checkbox',
-                                        boxLabel: 'MOI ' + esapp.Utils.getTranslation('level2'), // level 0',
-                                        name: 'moi2',
-                                        level: 'admin2',
-                                        geojsonfile: 'RIC_MOI_2_g2015_2014.geojson',
-                                        checked: false,
-                                        linecolor: '#000',   // '#ffcc99',
-                                        layerorderidx: 2,
-                                        showSeparator: false,
-                                        cls: "x-menu-no-icon",
-                                        handler: 'addVectorLayer'
-                                    }]
-                                }
-                            }, {
-                                text: 'University of Ghana',
-                                name: 'UoG',
-                                //iconCls: 'layer-vector-add', // 'layers'
-                                scale: 'medium',
-                                floating: false,
-                                collapseDirection: 'left',
-                                menu: {
-                                    hideOnClick: true,
-                                    defaults: {
-                                        hideOnClick: true
-                                    },
-                                    style: {
-                                        'margin-left': '0px'
-                                    },
-                                    items: [{
-                                        xtype: 'checkbox',
-                                        boxLabel: 'UoG ' + esapp.Utils.getTranslation('level0'), // level 0',
-                                        name: 'UoG0',
-                                        level: 'admin0',
-                                        geojsonfile: 'RIC_UOG_0_g2015_2014.geojson',
-                                        checked: false,
-                                        linecolor: '#319FD3',
-                                        layerorderidx: 4,
-                                        showSeparator: false,
-                                        cls: "x-menu-no-icon",
-                                        handler: 'addVectorLayer'
-                                    }, {
-                                        xtype: 'checkbox',
-                                        boxLabel: 'UoG ' + esapp.Utils.getTranslation('level1'), // level 0',
-                                        name: 'UoG1',
-                                        level: 'admin1',
-                                        geojsonfile: 'RIC_UOG_1_g2015_2014.geojson',
-                                        checked: false,
-                                        linecolor: '#ffcc00',   // '#9e9a9a',  // '#ffcc00',
-                                        layerorderidx: 3,
-                                        showSeparator: false,
-                                        cls: "x-menu-no-icon",
-                                        handler: 'addVectorLayer'
-                                    }, {
-                                        xtype: 'checkbox',
-                                        boxLabel: 'UoG ' + esapp.Utils.getTranslation('level2'), // level 0',
-                                        name: 'UoG2',
-                                        level: 'admin2',
-                                        geojsonfile: 'RIC_UOG_2_g2015_2014.geojson',
-                                        checked: false,
-                                        linecolor: '#000',   // '#ffcc99',
-                                        layerorderidx: 2,
-                                        showSeparator: false,
-                                        cls: "x-menu-no-icon",
-                                        handler: 'addVectorLayer'
-                                    }]
-                                }
-                            }]
-                        }
-                    },{
-                        text: esapp.Utils.getTranslation('marinevectorlayers'),   // 'Marine vector layers',
-                        name: 'marine',
-                        //iconCls: 'layer-vector-add', // 'layers'
-                        scale: 'medium',
-                        floating: false,
-                        collapseDirection: 'left',
-                        menu: {
-                            hideOnClick: true,
-                            defaults: {
-                                hideOnClick: true
-                            },
-                            style: {
-                                'margin-left': '0px'
-                            },
-                            items: [{
-                                xtype: 'checkbox',
-                                boxLabel: esapp.Utils.getTranslation('fishingareas'), // 'Fishing Areas',
-                                name: 'fisharea',
-                                level: 'fisharea',
-                                geojsonfile: 'AFR_MARINE/AFR_FAO_FISH_AREA.geojson',
-                                checked: false,
-                                linecolor: '#000',
-                                layerorderidx: 1,
-                                showSeparator: false,
-                                cls: "x-menu-no-icon",
-                                hideOnClick: true,
-                                handler: 'addVectorLayer'
-                            }, {
-                                xtype: 'checkbox',
-                                boxLabel: esapp.Utils.getTranslation('sea_exclusive_economic_zone'), // 'Sea Exclusive economic zone (EEZ)',
-                                name: 'eez',
-                                level: 'eez',
-                                geojsonfile: 'AFR_MARINE/AFR_EEZ_IHO_union_v2.geojson',
-                                checked: false,
-                                linecolor: '#000',
-                                layerorderidx: 1,
-                                showSeparator: false,
-                                cls: "x-menu-no-icon",
-                                hideOnClick: true,
-                                handler: 'addVectorLayer'
-                            }]
-                        }
-                    }, {
-                        xtype: 'checkbox',
-                        boxLabel: esapp.Utils.getTranslation('protectedareas'), // 'Protected areas',
-                        name: 'protectedareas',
-                        level: 'protectedareas',
-                        geojsonfile: 'AFR_PA/AFR_PA_ID.geojson',
-                        checked: false,
-                        linecolor: '#000',
-                        layerorderidx: 1,
-                        showSeparator: false,
-                        cls: "x-menu-no-icon",
-                        hideOnClick: true,
-                        handler: 'addVectorLayer'
-                    }]
-                }
+        me.controller.createLayersMenu();
 
-            },{
-                xtype: 'container',
-                width: 300,
-                height: 38,
-                top: 0,
-                align:'left',
-                defaults: {
-                    style: {
-                        "font-size": '10px'
-                    }
-                },
-                items: [{
-                    xtype: 'box',
-                    height: 17,
-                    top:0,
-                    html: '<div id="region_name_' + me.id + '" style="text-align:left; font-size: 10px; font-weight: bold;"></div>'
-                },{
-                    xtype: 'box',
-                    height: 15,
-                    top:17,
-                    html: '<div id="mouse-position_' + me.id + '"></div>'
-                }]
-            },'->', {
-                //id: 'outmaskbtn_'+me.id,
-                reference: 'outmaskbtn_'+me.id.replace(/-/g,'_'),
-                hidden: true,
-                iconCls: 'africa-orange24',
-                scale: 'medium',
-                enableToggle: true,
-                handler: 'toggleOutmask'
-            },{
-                //id: 'legendbtn_'+me.id,
-                reference: 'legendbtn_'+me.id.replace(/-/g,'_'),
-                hidden: true,
-                iconCls: 'legends',
-                scale: 'medium',
-                enableToggle: true,
-                handler: 'toggleLegend'
-            },{
-                iconCls: 'fa fa-save fa-2x',
-                style: { color: 'lightblue' },
-                scale: 'medium',
-                handler: 'saveMap',
-                href: '',
-                download: 'estationmap.png'
-            },{
-                //text: 'Unlink',
-                enableToggle: true,
-                iconCls: 'unlink',
-                scale: 'medium',
-                handler: 'toggleLink'
-            }]
-        });
 
         me.mapView = new ol.View({
             projection:"EPSG:4326",
             displayProjection:"EPSG:4326",
             center: [20, -4.7],  // ol.proj.transform([21, 4], 'EPSG:4326', 'EPSG:3857'),
-            zoom: 3.5
+            zoom: 0.5
         });
 
         me.name ='mapviewwindow_' + me.id;
@@ -688,6 +101,7 @@ Ext.define("esapp.view.analysis.mapView",{
             items: [{
                 xtype: 'container',
                 reference:'mapcontainer_'+me.id,
+                id:'mapcontainer_'+me.id,
                 html: '<div id="mapview_' + me.id + '"></div>'
             }, {
                 xtype: 'slider',
@@ -755,6 +169,7 @@ Ext.define("esapp.view.analysis.mapView",{
                         maplegend_togglebtn.toggle();
                     }
                 },
+                legendHTML_ImageObj: new Image(),
                 items: [{
                     xtype: 'container',
                     id: 'product-legend' + me.id,
@@ -830,11 +245,16 @@ Ext.define("esapp.view.analysis.mapView",{
                 //  wrapX: false
                 //});
 
+                this.scaleline = new ol.control.ScaleLine({
+                  units: 'metric'       // 'degrees'  'nautical mile'
+                });
+
                 this.map = new ol.Map({
                     target: 'mapview_'+ this.id,
                     projection: me.projection,
                     displayProjection:"EPSG:4326",
                     //interactions: ol.interaction.defaults().extend([select]),
+                    interactions : ol.interaction.defaults({doubleClickZoom :false}),
                     //layers: [blanklayer],
                     view: this.up().commonMapView,
                     controls: ol.control.defaults({
@@ -842,7 +262,7 @@ Ext.define("esapp.view.analysis.mapView",{
                         attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
                             collapsible: false // false to show always without the icon.
                         })
-                    }).extend([mousePositionControl])
+                    }).extend([mousePositionControl, this.scaleline])
                 });
 
 
@@ -853,6 +273,21 @@ Ext.define("esapp.view.analysis.mapView",{
                     visible: false
                 });
                 this.map.getLayers().insertAt(0, this.productlayer);
+
+
+                // this.el is not created until after the Window is rendered so you need to add the mon after rendering:
+                this.mon(this.el, {
+                    mouseout: function() {
+                        //console.info(me);
+                        if (esapp.Utils.objectExists(me.featureOverlay) && esapp.Utils.objectExists(me.highlight)){
+                            me.featureOverlay.getSource().clear();
+                            me.highlight = null;
+                            //me.featureOverlay.getSource().removeFeature(me.highlight);
+                        }
+                    }
+                });
+
+                this.getController().loadDefaultLayers();
 
 
                 //var layerSwitcher = new ol.control.LayerSwitcher({
@@ -889,6 +324,7 @@ Ext.define("esapp.view.analysis.mapView",{
                 var maplegendpanel = me.lookupReference('product-legend_panel_' + this.id);
                 maplegendpanel.doConstrain();
             }
+
         };
 
         me.callParent();

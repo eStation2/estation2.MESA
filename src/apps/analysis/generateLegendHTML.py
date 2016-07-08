@@ -192,7 +192,7 @@ def generateLegendHTML(legend_id):
 
         legendHTMLVertical += '<tr>' + legendColorColumn + legendColorLabelColumn + legendGroupLabelColumn + '</tr>'
 
-    legendHTMLVertical =  legendTableBegin + legendHTMLVertical + legendTableEnd
+    legendHTMLVertical = legendHeader + legendTableBegin + legendHTMLVertical + legendTableEnd
     # print legendHTMLVertical
     legends_HTML = {'legendHTML': legendHTML, 'legendHTMLVertical': legendHTMLVertical}
     return legends_HTML
