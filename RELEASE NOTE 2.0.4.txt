@@ -6,19 +6,33 @@
 1. BUG FIXING
 -------------
 
-1.1 Acquisition/Processing/DataManagement
+1.1 Acquisition
 
-- Creation of archives from request: 1. a separate file (_0001.bsx) is created for each sub-products (before the same file was overwritten)
-  2. A directory can be passed to create_archive_from_request.py, so to iterate on all '.req' files contained.
+- Correct the ingestion of product MPEG-MPEF, which failed - from time to time - resulting in files copied to /data/ingest.wrong (see Tuleap #11144)
+- Modify the eumetcast source description for MODIS Chla product from EUMETCast and ingest pre-processing type, following change from .hdf to .nc format (see Tuleap #10903)
+
+1.2 Processing
 
 - Modify existing processing chains (lsasaf_et and _lst) to: 1. Save file checkpoints to a separate .sqlite and 2. change checksum_level = 0.
   This is to avoid re-computations at every run.
 
-1.2 Visualization
+1.3 DataManagement
 
-1.3 Configuration/DB
+- Creation of archives from request (see Tuleap #11146): 1. a separate file (_0001.bsx) is created for each sub-products (before the same file was overwritten)
+  2. The file decompress.sh is added under apps/productmangement/installer
 
-1.4 Packages (pre-post inst)
+1.4 Visualization
+
+- For visualizing correctly Chla legends, define explicitly the decimal separator type in webpy_esapp:GetProductLayer() - see Tuleap #10904
+
+1.5 Service
+
+- Correct the DB dump in the System Service (see Tuleap #10905)
+
+1.6 Configuration/DB
+
+
+1.7 Packages (pre-post inst)
 
 
 2. NEW FEATURES
@@ -35,10 +49,16 @@
 - New processing chains for MODIS-FIRMS (with ICPAC), MSG-MPE (with SADC)
 
 
-2.1 Acquisition/Processing/DataManagement
+2.1 Acquisition
 
-2.2 Visualization
+2.2 Processing
 
-2.3 Configuration/DB
+- Complete the MODIS-FIRMS processing chain in collaboration with ICPAC Staff.
 
-2.4 Other packages
+2.3 DataManagement
+
+2.4 Visualization
+
+2.5 Configuration/DB
+
+2.6 Other packages
