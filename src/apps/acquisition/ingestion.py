@@ -18,6 +18,7 @@ import bz2
 import glob
 import ntpath
 import os
+import time, datetime
 import numpy as N
 import time
 import shutil
@@ -183,37 +184,39 @@ def loop_ingestion(dry_run=False):
                             except:
                                 logger.error("Error in ingestion of file [%s] " % (functions.conv_list_2_string(date_fileslist)))
                             else:
-                                if source.store_original_data:
-                                # Copy to 'Archive' directory
-                                    output_directory = data_dir_out + functions.set_path_sub_directory(product['productcode'],
-                                                                                                   sprod['subproduct'],
-                                                                                                   'Native',
-                                                                                                   product['version'],
-                                                                                                   'dummy_mapset_arg' )
-                                    functions.check_output_dir(output_directory)
-                                    # Archive the files
-                                    for file_to_move in date_fileslist:
-                                        logger_spec.debug("     --> now archiving input files: %s" % file_to_move)
-                                        new_location=output_directory+os.path.basename(file_to_move)
-                                        try:
-                                            if os.path.isfile(file_to_move):
-                                                os.rename(file_to_move, new_location)
-                                            else:
-                                                logger_spec.debug("     --> file to be archived cannot be found: %s" % file_to_move)
-                                        except:
-                                            logger_spec.debug("     --> error in archiving file: %s" % file_to_move)
+                                # Result is None means we are still waiting for some files to be received. Keep files in /data/ingest
+                                if result is not None:
+                                    if source.store_original_data:
+                                    # Copy to 'Archive' directory
+                                        output_directory = data_dir_out + functions.set_path_sub_directory(product['productcode'],
+                                                                                                       sprod['subproduct'],
+                                                                                                       'Native',
+                                                                                                       product['version'],
+                                                                                                       'dummy_mapset_arg' )
+                                        functions.check_output_dir(output_directory)
+                                        # Archive the files
+                                        for file_to_move in date_fileslist:
+                                            logger_spec.debug("     --> now archiving input files: %s" % file_to_move)
+                                            new_location=output_directory+os.path.basename(file_to_move)
+                                            try:
+                                                if os.path.isfile(file_to_move):
+                                                    os.rename(file_to_move, new_location)
+                                                else:
+                                                    logger_spec.debug("     --> file to be archived cannot be found: %s" % file_to_move)
+                                            except:
+                                                logger_spec.debug("     --> error in archiving file: %s" % file_to_move)
 
-                                else:
-                                    # Delete the files
-                                    for file_to_remove in date_fileslist:
-                                        logger_spec.debug("     --> now deleting input files: %s" % file_to_remove)
-                                        try:
-                                            if os.path.isfile(file_to_remove):
-                                                os.remove(file_to_remove)
-                                            else:
-                                                logger_spec.debug("     --> file to be deleted cannot be found: %s" % file_to_remove)
-                                        except:
-                                            logger_spec.debug("     --> error in deleting file: %s" % file_to_remove)
+                                    else:
+                                        # Delete the files
+                                        for file_to_remove in date_fileslist:
+                                            logger_spec.debug("     --> now deleting input files: %s" % file_to_remove)
+                                            try:
+                                                if os.path.isfile(file_to_remove):
+                                                    os.remove(file_to_remove)
+                                                else:
+                                                    logger_spec.debug("     --> file to be deleted cannot be found: %s" % file_to_remove)
+                                            except:
+                                                logger_spec.debug("     --> error in deleting file: %s" % file_to_remove)
 
                         else:
                             time.sleep(10)
@@ -352,13 +355,18 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
 #       datasource_descr: datasource description object (incl. native_mapset, compose_area_method, ..)
 #       my_logger: trigger-specific logger
 #
-
+#   Returns:
+#       0 -> ingestion OK; files to be removed/stored
+#       1 -> ingestion wrong; files to be copied to /data/ingest.wrong
+#       None -> some mandatory files are missing: wait and do not touch files
+#
     my_logger.info("Entering routine %s for prod: %s and date: %s" % ('ingestion', product['productcode'], in_date))
 
     preproc_type = datasource_descr.preproc_type
     native_mapset_code = datasource_descr.native_mapset
 
     do_preprocess = 0
+    composed_file_list = None
 
     # Create temp output dir
     try:
@@ -375,6 +383,10 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
         my_logger.debug("Calling routine %s" % 'preprocess_files')
         try:
             composed_file_list = pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files, tmpdir, my_logger)
+            # Pre-process returns None if there are not enough files for continuing
+            if composed_file_list is None:
+                logger.debug('Waiting for additional files to be received. Return')
+                return None
         except:
             # Error occurred and was NOT detected in pre_process routine
             my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
@@ -402,7 +414,6 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
                 except:
                     my_logger.warning("Error in moving file: %s " % error_file)
 
-
             shutil.rmtree(tmpdir)
             raise NameError('Detected Error in preprocessing routine')
     else:
@@ -425,7 +436,6 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
         shutil.rmtree(tmpdir)
         raise NameError('Error in ingestion routine')
 
-
     # -------------------------------------------------------------------------
     # Remove the Temp working directory
     # -------------------------------------------------------------------------
@@ -441,7 +451,10 @@ def pre_process_msg_mpe (subproducts, tmpdir, input_files, my_logger):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process msg_mpe files
 #   4 expected segments as input
-#
+#   Returns: pre_processed_list -> list of preprocessed files (to go on with ingestion)
+#            None: waiting for additional files (keep existing files in /data/ingest)
+#            Raise Exception: something went wrong (move existing files to /data/ingest.wrong)
+#                             This applies also when there are <4 files, older than 1 day)
 
     # Output list of pre-processed files
     pre_processed_list = []
@@ -451,6 +464,25 @@ def pre_process_msg_mpe (subproducts, tmpdir, input_files, my_logger):
         if not os.path.isfile(ifile):
             my_logger.error('Input file does not exist')
             raise Exception("Input file does not exist: %s" % ifile)
+
+    # Test the number of available files (must be 4 - see Tuleap ticket #10903)
+    if len(input_files) != 4:
+
+        # Check the datetime of input files: store the delta-days of the latest file
+        min_delta_days = 10
+        for ifile in input_files:
+            mod_time_delta =  datetime.datetime.today()- datetime.datetime.fromtimestamp(os.path.getmtime(ifile))
+            if mod_time_delta.days < min_delta_days:
+                min_delta_days = mod_time_delta.days
+        my_logger.debug('Min delta days found is {0}'.format(min_delta_days))
+
+        # Latest file older than 2 days -> error
+        if min_delta_days > 2:
+            my_logger.info('Incomplete reception: <4 files older than 2 days. Error')
+            raise Exception("Incomplete reception. Error")
+        else:
+            my_logger.info('Only {0} files present. Wait for the ingestion'.format(len(input_files)))
+            return None
 
     # Remove small header and concatenate to 'grib' output
     input_files.sort()
@@ -1356,6 +1388,11 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
     except:
         my_logger.error('Error in pre-processing routine. Exit')
         raise NameError('Error in pre-processing routine')
+
+    # Check if None is returned (i.e. waiting for remaining files)
+    if interm_files is None:
+        my_logger.info('Waiting for additional files to be received. Exit')
+        return None
 
     # Make sure it is a list (if only a string is returned, it loops over chars)
     if isinstance(interm_files, list):
