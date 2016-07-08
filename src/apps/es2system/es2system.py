@@ -203,19 +203,27 @@ def system_db_dump(list_dump):
     # Use db_dump
     dump_dir = es_constants.es2globals['db_dump_dir']
     db_dump = es_constants.es2globals['db_dump_exec']
-
+    status = False
     if len(list_dump) > 0:
         for dump_schema in list_dump:
-            dump_file = dump_dir+os.path.sep+'estationdb_'+dump_schema+'_'+now.strftime("%Y-%m-%d-%H:%M:%S")+'.sql'
-            command = db_dump+ ' -i '+  \
-                     ' -h localhost '+\
-                     ' -U estation ' +\
-                     ' -F p -a --column-inserts ' +\
-                     ' -f '+dump_file+ \
-                     ' -n '+dump_schema+' estationdb'
 
-            logger.info('Command is: %s' % command)
-            status =+ os.system(command)
+            # Check if there is one dump for the current day
+            # See Tuleap Ticket #10905 (VGF-MOI-wk1)
+            dump_dir = es_constants.es2globals['db_dump_dir']
+            existing_dumps = glob.glob(dump_dir + os.path.sep + 'estationdb_' + dump_schema + '_*')
+            match_name = '.*estationdb_'+dump_schema+'_'+now.strftime("%Y-%m-%d-")+'.*.sql'
+            matches = [ s for s in existing_dumps if re.match(match_name,s)]
+            if len(matches) == 0:
+                dump_file = dump_dir+os.path.sep+'estationdb_'+dump_schema+'_'+now.strftime("%Y-%m-%d-%H:%M:%S")+'.sql'
+                command = db_dump+ ' -i '+  \
+                         ' -h localhost '+\
+                         ' -U estation ' +\
+                         ' -F p -a --column-inserts ' +\
+                         ' -f '+dump_file+ \
+                         ' -n '+dump_schema+' estationdb'
+
+                logger.info('Command is: %s' % command)
+                status =+ os.system(command)
 
         return status
 
@@ -738,9 +746,9 @@ def loop_system(dry_run=False):
         if len(schemas_db_dump) > 0:
             check_time = check_delay_time(operation, time=time_for_db_dump)
             if check_time:
-                # Execute the dump of the schemas active on the machine
+                # Execute the dump of the schemas active on the machine - Correct Tuleap #10905
                 logger.info("Executing db dump")
-                system_db_dump(schemas_db_sync)
+                system_db_dump(schemas_db_dump)
 
                 # Manage the file dumps (rotation)
                 logger.info("Executing manage dumps")
