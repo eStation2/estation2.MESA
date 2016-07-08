@@ -23,10 +23,10 @@ def get_one_source(internet_source, target_dir=None):
         os.mkdir(es_constants.processed_list_int_dir)
 
 
-    # Check internet connection (or die)
-    if not functions._internet_on():
-        logger.error("The computer is not currently connected to the internet. Wait 1 minute.")
-        time.sleep(1)
+    # # Check internet connection (or die)
+    # if not functions._internet_on():
+    #     logger.error("The computer is not currently connected to the internet. Wait 1 minute.")
+    #     time.sleep(1)
 
     else:
         execute_trigger = True
@@ -100,7 +100,7 @@ def get_one_source(internet_source, target_dir=None):
                                                                 internet_source['end_date'],
                                                                 str(internet_source['frequency_id']))
                 except:
-                     logger.error("Error in creating date lists. Continue")
+                    logger.error("Error in creating date lists. Continue")
             elif internet_type == 'offline':
                      logger.info("This internet source is meant to work offline (GoogleDrive)")
                      current_list = []
@@ -134,7 +134,6 @@ def get_one_source(internet_source, target_dir=None):
 
             functions.dump_obj_to_pickle(processed_list, processed_list_filename)
             functions.dump_obj_to_pickle(processed_info, processed_info_filename)
-
 
 
 class TestGetInternet(unittest.TestCase):
@@ -179,7 +178,7 @@ class TestGetInternet(unittest.TestCase):
 
         # Retrieve a list of MODIS burndate file .. check only one present
         remote_url='ftp://nrt1.modaps.eosdis.nasa.gov/FIRMS/Global/'
-        usr_pwd='jrcMondeFires:FIRE@data1'
+        usr_pwd='user:burnt_data'
         full_regex   ='Global_MCD14DL_201.*.txt'
         file_to_check='Global_MCD14DL_2016100.txt'
         internet_type = 'ftp'
@@ -535,7 +534,6 @@ class TestGetInternet(unittest.TestCase):
                            'type':'ftp'
                            }
 
-        # Check last 90 days (check list length = 9)
         result = get_one_source(internet_source)
 
     # Download LSASAF Orders
@@ -555,3 +553,29 @@ class TestGetInternet(unittest.TestCase):
 
         # Check last 90 days (check list length = 9)
         result = get_one_source(internet_source)
+
+    def TestRemoteHttp_MODIS_CHL(self):
+
+        internet_id='GSFC:CGI:MODIS:CHLA:1D'
+
+
+        internet_sources = querydb.get_active_internet_sources(echo=False)
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':20150401,
+                         'end_date':20150406,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type}
+
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
