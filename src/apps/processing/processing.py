@@ -34,7 +34,8 @@ from apps.processing import processing_merge
 from apps.processing import processing_std_lsasaf_lst
 from apps.processing import processing_std_lsasaf_et
 from apps.processing import processing_std_modis_monavg
-
+from apps.processing import processing_std_modis_firms
+from apps.processing import processing_std_msg_mpe
 from lib.python.daemon import DaemonDryRunnable
 
 class ProcessingDaemon(DaemonDryRunnable):
