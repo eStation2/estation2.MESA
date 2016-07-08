@@ -493,6 +493,12 @@ def loop_get_internet(dry_run=False):
 
                                 logger_spec.debug("Number of files to be copied for trigger %s is %i", internet_source.internet_id, len(listtoprocess))
                                 if listtoprocess != set([]):
+                                     # # Debug
+                                     # toprint=''
+                                     # for elem in listtoprocess:
+                                     #    toprint+=elem+','
+                                     #    logger_spec.info('List in get_list_matching_files: %s' % toprint)
+
                                      logger_spec.debug("Loop on the found files.")
                                      if not dry_run:
                                          for filename in list(listtoprocess):
