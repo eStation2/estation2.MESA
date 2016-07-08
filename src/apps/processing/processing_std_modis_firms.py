@@ -7,7 +7,7 @@
 #
 
 # Source generic modules
-import os, time, sys
+import os
 import glob, datetime
 
 # Import eStation2 modules
@@ -26,9 +26,17 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
                     update_stats=False, nrt_products=True):
 
     #   ---------------------------------------------------------------------
-    #   Create lists
+    #   Create lists to store definition of the derived products, and their
+    #   groups
+    #   ---------------------------------------------------------------------
+
     if proc_lists is None:
         proc_lists = functions.ProcLists()
+
+    #   ---------------------------------------------------------------------
+    #   Define and assign the flags to control the individual derived products
+    #   and the groups. NOT to be changed by the User
+    #   ---------------------------------------------------------------------
 
     # Set DEFAULTS: all off
     activate_10dstats_comput=0              # 10d stats
@@ -54,7 +62,9 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     es2_data_dir = es_constants.es2globals['processing_dir']+os.path.sep
 
     #   ---------------------------------------------------------------------
-    #   Define input files
+    #   Define input files from the starting_sprod and starting_dates arguments
+    #   ---------------------------------------------------------------------
+
     in_prod_ident = functions.set_path_filename_no_date(prod, starting_sprod, mapset, version, ext)
 
     #logger.debug('Base data directory is: %s' % es2_data_dir)
@@ -69,7 +79,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         starting_files=input_dir+"*"+in_prod_ident
 
     #   ---------------------------------------------------------------------
-    #   10dcount
+    #   Derived product: 10dcount
+    #   ---------------------------------------------------------------------
 
     output_sprod_group=proc_lists.proc_add_subprod_group("10dcount")
     output_sprod=proc_lists.proc_add_subprod("10dcount", "10dcount", final=False,
@@ -133,7 +144,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         raster_image_math.do_cumulate(**args)
 
     #   ---------------------------------------------------------------------
-    #   10dcountavg
+    #   Derived product: 10dcountavg
+    #   ---------------------------------------------------------------------
 
     starting_files_10dcount = es_constants.processing_dir+output_subdir_10dcount+"*"+out_prod_ident_10dcount
 
@@ -163,7 +175,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         raster_image_math.do_avg_image(**args)
 
     #   ---------------------------------------------------------------------
-    #   10dcountmin
+    #   Derived product: 10dcountmin
+    #   ---------------------------------------------------------------------
 
     output_sprod=proc_lists.proc_add_subprod("10dcountmin", "10dstats", final=False,
                                              descriptive_name='10d Fire Minimum',
@@ -190,7 +203,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         raster_image_math.do_min_image(**args)
 
     #   ---------------------------------------------------------------------
-    #   10dcountmax
+    #   Derived product: 10dcountmax
+    #   ---------------------------------------------------------------------
     output_sprod=proc_lists.proc_add_subprod("10dcountmax", "10dstats", final=False,
                                              descriptive_name='10d Maximum',
                                              description='Maximum rainfall for dekad',
@@ -214,8 +228,10 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_max_image(**args)
 
-    # #   ---------------------------------------------------------------------
-    # #   10dDiff
+    #   ---------------------------------------------------------------------
+    #   Derived product: 10dDiff
+    #   ---------------------------------------------------------------------
+
     output_sprod_group=proc_lists.proc_add_subprod_group("10danomalies")
     output_sprod=proc_lists.proc_add_subprod("10dcountdiff", "10danomalies", final=False,
                                              descriptive_name='10d Absolute Difference',
@@ -244,15 +260,48 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw",'output_type':'Float32', 'input_nodata':-32767}
-        raster_image_math.do_oper_subtraction(**args)
 
+    # End of pipeline definition
     return proc_lists
+
 #   ---------------------------------------------------------------------
-#   Run the pipeline
+#   Drive the pipeline: 4 functions are defined, a main one:
+#
+#       processing_std_modis_firms -> create and run the pipeline
+#
+#   and 3 'wrappers' to call it with specific options:
+#
+#   processing_std_modis_firms_stats_only: -> compute/updates only 10dcount 'stats' (avg/min/max)
+#   processing_std_modis_firms_prods_only: -> compute/updates only 10dcount and anomalies (10dcountdiff)
+#   processing_std_modis_firms_all: -> compute/updates all derived products
+#
+#   NOTE: the rational for the 3 wrappers is to have a function for direct call from the 'Processing' Service
+#         In development/debug calling one of the wrapper or the main function (with the options set) is equivalent.
+#
+#   ---------------------------------------------------------------------
 
+#   ---------------------------------------------------------------------
+#
+#   Function:   processing_std_modis_firms
+#   Purpose:    create and run the pipeline
+#   Arguments: OUT: res_queue -> returns the list of derived products and their groups
+#              IN:  pipeline_run_level      -> set to >=1 to have the chain executed, with increasing level of verbosity
+#              IN:  pipeline_printout_level -> set to >=1 to have the 'dry-run' the chain, with increasing level of verbosity
+#              IN:  pipeline_printout_graph_level -> not used
+#              IN:  prod                    -> name of the product (modis-firms)
+#              IN:  mapset                  -> name of the mapset (e.g. SPOTV-Africa-1km)
+#              IN:  version                 -> name of the product-version (e.g. v5.0)
+#              IN:  starting_dates          -> list of dates to be considered for the input sub-product.
+#                                              If empty, all existing dates in the filesystem are considered
+#              IN:  update_stats            -> option (True/False) to update 10dcount stats (min/max/avg)
+#              IN:  nrt_products            -> option (True/False) to update the near-real time products (10dcount and 10dcountdiff)
+#              IN:  write2file              -> name of the file where to report the tasks to be executed
+#                                              Used only by pipeline_printout (dry-run)
+#              IN:  logfile                 -> Name of the logfile
+#
+#   ---------------------------------------------------------------------
 
-def processing_modis_firms(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
+def processing_std_modis_firms(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None, update_stats=False, nrt_products=True, write2file=None, logfile=None):
 
@@ -275,7 +324,8 @@ def processing_modis_firms(res_queue, pipeline_run_level=0,pipeline_printout_lev
         spec_logger.info("After running the pipeline %s" % 'processing_modis_firms')
 
     if pipeline_printout_level > 0:
-        pipeline_printout(verbose=pipeline_printout_level, output_stream=fwrite_id)
+        pipeline_printout(verbose=pipeline_printout_level, output_stream=fwrite_id, history_file='/eStation2/log/.ruffus_history_modis_firms.sqlite',\
+                     checksum_level=0)
 
     if pipeline_printout_graph_level > 0:
         pipeline_printout_graph('flowchart.jpg')
@@ -286,11 +336,22 @@ def processing_modis_firms(res_queue, pipeline_run_level=0,pipeline_printout_lev
     #res_queue.put(proc_lists)
     return True
 
-def processing_modis_firms_stats_only(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
+#   ---------------------------------------------------------------------
+#
+#   Function:   processing_std_modis_firms_stats_only
+#   Purpose:    call the processing chain with the options:
+#
+#               update_stats -> True
+#               nrt_products -> False
+#
+#   Arguments: see processing_std_modis_firms
+#
+#   ---------------------------------------------------------------------
+def processing_std_modis_firms_stats_only(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None,write2file=None, logfile=None):
 
-    result = processing_modis_firms(res_queue, pipeline_run_level=pipeline_run_level,
+    result = processing_std_modis_firms(res_queue, pipeline_run_level=pipeline_run_level,
                           pipeline_printout_level=pipeline_printout_level,
                           pipeline_printout_graph_level=pipeline_printout_graph_level,
                           prod=prod,
@@ -305,12 +366,22 @@ def processing_modis_firms_stats_only(res_queue, pipeline_run_level=0,pipeline_p
 
     return result
 
-
+#   ---------------------------------------------------------------------
+#
+#   Function:   processing_std_modis_firms_prods_only
+#   Purpose:    call the processing chain with the options:
+#
+#               update_stats -> False
+#               nrt_products -> True
+#
+#   Arguments: see processing_std_modis_firms
+#
+#   ---------------------------------------------------------------------
 def processing_modis_firms_prods_only(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None,write2file=None, logfile=None):
 
-    result = processing_modis_firms(res_queue, pipeline_run_level=pipeline_run_level,
+    result = processing_std_modis_firms(res_queue, pipeline_run_level=pipeline_run_level,
                           pipeline_printout_level=pipeline_printout_level,
                           pipeline_printout_graph_level=pipeline_printout_graph_level,
                           prod=prod,
@@ -326,11 +397,22 @@ def processing_modis_firms_prods_only(res_queue, pipeline_run_level=0,pipeline_p
     return result
 
 
-def processing_modis_firms_all(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
+#   ---------------------------------------------------------------------
+#
+#   Function:   processing_std_modis_firms_all
+#   Purpose:    call the processing chain with the options:
+#
+#               update_stats -> True
+#               nrt_products -> True
+#
+#   Arguments: see processing_std_modis_firms
+#
+#   ---------------------------------------------------------------------
+def processing_std_modis_firms_all(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None,write2file=None, logfile=None):
 
-    result = processing_modis_firms(res_queue, pipeline_run_level=pipeline_run_level,
+    result = processing_std_modis_firms(res_queue, pipeline_run_level=pipeline_run_level,
                           pipeline_printout_level=pipeline_printout_level,
                           pipeline_printout_graph_level=pipeline_printout_graph_level,
                           prod=prod,
