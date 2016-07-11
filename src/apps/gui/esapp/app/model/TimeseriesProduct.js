@@ -104,7 +104,7 @@ Ext.define('esapp.model.TimeserieProductMapSetDataSet', {
         {name: 'activated', type: 'boolean'},
         {name: 'product_type'},
         {name: 'prod_descriptive_name'},
-        {name: 'description'},
+        {name: 'description'}
     ]
 });
 

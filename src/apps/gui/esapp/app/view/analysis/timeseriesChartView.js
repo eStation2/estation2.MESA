@@ -11,6 +11,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
     requires: [
         'esapp.view.analysis.timeseriesChartViewModel',
         'esapp.view.analysis.timeseriesChartViewController',
+        'esapp.model.ChartProperties',
 
         'Ext.window.Window',
         'Ext.toolbar.Toolbar'

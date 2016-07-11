@@ -15,6 +15,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
         'esapp.view.analysis.ProductNavigator',
         'esapp.view.analysis.timeseriesChartView',
         'esapp.view.analysis.layerAdmin',
+        'esapp.model.TSDrawProperties',
 
         'Ext.selection.CheckboxModel',
         'Ext.form.field.ComboBox',

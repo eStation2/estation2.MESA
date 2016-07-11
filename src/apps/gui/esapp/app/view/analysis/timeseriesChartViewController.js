@@ -758,7 +758,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
 
 
                         yaxe1_id: {
-                            displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('id'),
+                            displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('id')
                             //type: null
                             //editor: null,
                             //editable: false,
@@ -1150,6 +1150,12 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                                     saveChartProperty(recordId, value);
                                     me.getController().createDefaultChart(me);
                                 }
+                            }
+                        },
+                        beforeedit: function( editor, e, opts ) {
+                            //console.info(e.record.get( 'name' ));
+                            if( e.record.get( 'name' )=='yaxe1_id' || e.record.get( 'name' )=='yaxe2_id' || e.record.get( 'name' )=='yaxe3_id') {
+                                return false;
                             }
                         }
                     }

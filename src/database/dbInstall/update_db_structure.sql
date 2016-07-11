@@ -1,5 +1,5 @@
 ALTER TABLE analysis.timeseries_drawproperties
-  ADD COLUMN aggregation_type TYPE character varying DEFAULT 'mean';
+  ADD COLUMN aggregation_type character varying DEFAULT 'mean';
 
 ALTER TABLE analysis.timeseries_drawproperties
   ADD COLUMN aggregation_min double precision;
@@ -78,7 +78,8 @@ ALTER TABLE analysis.chart_drawproperties
 
 -- DROP FUNCTION analysis.update_insert_layers(integer, character varying, character varying, character varying, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, integer, boolean, boolean, character varying, character varying, character varying, character varying, character varying, boolean, character varying, boolean);
 
-CREATE OR REPLACE FUNCTION analysis.update_insert_layers(layerid integer,
+CREATE OR REPLACE FUNCTION analysis.update_insert_layers(
+               layerid integer,
 							 layerlevel character varying,
 							 layername character varying,
 							 description character varying,
@@ -442,7 +443,7 @@ $BODY$
 		PERFORM * FROM analysis.chart_drawproperties cd WHERE cd.chart_type = _chart_type;
 		IF FOUND THEN
 			UPDATE analysis.layers cd
-			SET chart_width = TRIM(_chart_width),
+			SET chart_width = _chart_width,
 			    chart_height = _chart_height,
 			    chart_title_font_size = _chart_title_font_size,
 			    chart_title_font_color = TRIM(_chart_title_font_color),
@@ -458,6 +459,7 @@ $BODY$
 			WHERE cd.chart_type = _chart_type;
 		ELSE
 			INSERT INTO analysis.chart_drawproperties (
+				chart_type,
 				chart_width,
 				chart_height,
 				chart_title_font_size,
@@ -473,7 +475,8 @@ $BODY$
 				yaxe3_font_size
 			)
 			VALUES (
-			    TRIM(_chart_width),
+			    TRIM(_chart_type),
+			    _chart_width,
 			    _chart_height,
 			    _chart_title_font_size,
 			    TRIM(_chart_title_font_color),
@@ -938,7 +941,7 @@ BEGIN
 		|| ', xaxe_font_color := ' || COALESCE('''' || xaxe_font_color || '''', 'NULL')
 		|| ', yaxe3_font_size := ' || yaxe3_font_size
 		|| ' );'  as inserts
-	FROM analysis.timeseries_drawproperties;
+	FROM analysis.chart_drawproperties;
 
 
 
@@ -1403,7 +1406,7 @@ BEGIN
 		|| ', xaxe_font_color := ' || COALESCE('''' || xaxe_font_color || '''', 'NULL')
 		|| ', yaxe3_font_size := ' || yaxe3_font_size
 		|| ' );'  as inserts
-	FROM analysis.timeseries_drawproperties;
+	FROM analysis.chart_drawproperties;
 
 
 
