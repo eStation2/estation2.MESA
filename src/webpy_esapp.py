@@ -1706,12 +1706,13 @@ class TimeseriesProducts:
                                 dataset_dict['mapsetcode'] = mapset
                                 mapset_dict['timeseriesmapsetdatasets'].append(dataset_dict)
 
-                        # tmp_prod_dict = prod_dict.copy()
-                        tmp_prod_dict = copy.deepcopy(prod_dict)
+                        if dataset_dict['years'].__len__() > 0:
+                            # tmp_prod_dict = prod_dict.copy()
+                            tmp_prod_dict = copy.deepcopy(prod_dict)
 
-                        tmp_prod_dict['productmapsets'].append(mapset_dict)
-                        products_dict_all.append(tmp_prod_dict)
-                        tmp_prod_dict = []
+                            tmp_prod_dict['productmapsets'].append(mapset_dict)
+                            products_dict_all.append(tmp_prod_dict)
+                            tmp_prod_dict = []
 
             prod_json = json.dumps(products_dict_all,
                                    ensure_ascii=False,
@@ -1901,7 +1902,8 @@ class ProductNavigatorDataSets:
                                 # dataset_dict['datasetcompleteness'] = completeness
 
                                 mapset_dict['mapsetdatasets'].append(dataset_dict)
-                        prod_dict['productmapsets'].append(mapset_dict)
+                        if mapset_dict['mapsetdatasets'].__len__() > 0:
+                            prod_dict['productmapsets'].append(mapset_dict)
                     products_dict_all.append(prod_dict)
 
             prod_json = json.dumps(products_dict_all,

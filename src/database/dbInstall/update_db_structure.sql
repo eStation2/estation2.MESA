@@ -442,7 +442,7 @@ $BODY$
 	BEGIN
 		PERFORM * FROM analysis.chart_drawproperties cd WHERE cd.chart_type = _chart_type;
 		IF FOUND THEN
-			UPDATE analysis.layers cd
+			UPDATE analysis.chart_drawproperties cd
 			SET chart_width = _chart_width,
 			    chart_height = _chart_height,
 			    chart_title_font_size = _chart_title_font_size,

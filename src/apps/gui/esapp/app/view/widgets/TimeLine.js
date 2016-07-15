@@ -93,7 +93,8 @@ Ext.define("esapp.view.widgets.TimeLine",{
                         type: 'column',
                         name: 'Date',
                         data: [],
-                        yAxis: 0
+                        yAxis: 0,
+                        turboThreshold: 0
                         // ,dataGrouping: {
                         //     units: groupingUnits
                         // }

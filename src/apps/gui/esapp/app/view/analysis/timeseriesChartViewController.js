@@ -821,7 +821,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                             displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('aggregation_type'),   // 'Aggregation type',
                             editor: {
                                 xtype: 'combobox',
-                                store: ['mean', 'count'],
+                                store: ['mean', 'count', 'percent', 'cumulate', 'surface'],
                                 forceSelection: true
                             }
                         },
@@ -890,7 +890,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                             displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('aggregation_type'),   // 'Aggregation type',
                             editor: {
                                 xtype: 'combobox',
-                                store: ['mean', 'count'],
+                                store: ['mean', 'count', 'percent', 'cumulate', 'surface'],
                                 forceSelection: true
                             }
                         },
@@ -959,7 +959,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                             displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('aggregation_type'),   // 'Aggregation type',
                             editor: {
                                 xtype: 'combobox',
-                                store: ['mean', 'count'],
+                                store: ['mean', 'count', 'percent', 'cumulate', 'surface'],
                                 forceSelection: true
                             }
                         },
