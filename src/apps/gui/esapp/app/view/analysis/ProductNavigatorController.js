@@ -93,7 +93,7 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
         // here we do not use multiSelect so nodes is the record of the selected mapset!
         this.getStore('mapsetdatasets').setData(record.get('mapsetdatasets'));
         var sorters = [{
-            property: 'descriptive_name',
+            property: 'subproductcode',
             direction: 'ASC'
         }];
 

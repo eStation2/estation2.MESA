@@ -224,7 +224,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         handler: function(btn) {
                             //console.info(me.getViewModel().getStore('colorschemes'));
                             me.getViewModel().getStore('colorschemes').each(function(rec){
-                                if (rec.get('default_legend')=="true"){
+                                if (rec.get('default_legend')==true || rec.get('default_legend')=="true"){
                                     //console.info(rec);
                                     me.selectedproduct.legendid = rec.get('legend_id');
                                     me.selectedproduct.colorschemeHTML = rec.get('colorschemeHTML');
