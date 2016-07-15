@@ -31,10 +31,9 @@
 
 1.6 Configuration/DB
 
+- correct regular expressions for g2 NDVI, FAPAR, DMP, LAI, FCOVER products in order to exclude SOAM region
 
 1.7 Packages (pre-post inst)
-1.2 Visualization
-- When two or more mapviews have the same vector layers added, the Layer switcher disabled a layer in other Mapview when clicked.
 
 
 2. NEW FEATURES
