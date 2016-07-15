@@ -241,6 +241,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
                                              masked=False,
                                              timeseries_role='10d',
                                              active_default=True)
+
     out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
 
@@ -260,6 +261,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32767}
+        raster_image_math.do_oper_subtraction(**args)
 
     # End of pipeline definition
     return proc_lists
