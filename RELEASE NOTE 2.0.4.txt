@@ -10,6 +10,7 @@
 
 - Correct the ingestion of product MPEG-MPEF, which failed - from time to time - resulting in files copied to /data/ingest.wrong (see Tuleap #11144)
 - Modify the eumetcast source description for MODIS Chla product from EUMETCast and ingest pre-processing type, following change from .hdf to .nc format (see Tuleap #10903)
+- Correct get_eumetcast_ftp (reflecting modifications in get_internet)
 
 1.2 Processing
 
