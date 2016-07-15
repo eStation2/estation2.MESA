@@ -4,7 +4,7 @@ echo "Self Extracting Archive for eStation 2.0"
 echo ""
 
 if [[ `id -un` != 'analyst' ]]; then
-    zenity --error --title="Wrong User" --text="You must be analyst (Thematic user) to run the extraction"
+    zenity --error --title="Wrong User" --text="You must be analyst [Thematic user] to run the extraction"
     exit
 fi
 

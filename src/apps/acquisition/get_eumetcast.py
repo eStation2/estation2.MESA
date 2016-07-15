@@ -265,7 +265,7 @@ def loop_eumetcast_ftp(dry_run=False):
 
                 logger.debug("Create current list of file to process for trigger %s.", eumetcast_source.eumetcast_id)
                 try:
-                    current_list = get_list_matching_files_dir_ftp(ftp_eumetcast_url, ftp_eumetcast_userpwd, eumetcast_source.filter_expression_jrc, logger_spec)
+                    current_list = get_list_matching_files(ftp_eumetcast_url, ftp_eumetcast_userpwd, eumetcast_source.filter_expression_jrc, logger_spec)
                 except:
                     logger.error("Cannot connect to the PC1 via ftp. Wait 1 minute")
                     current_list = []

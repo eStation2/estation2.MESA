@@ -235,7 +235,7 @@ class Product(object):
                             final_filenames.append(new_filename)
 
         # Create .tar
-        tar = tarfile.open(filetar, "w|gz" if tgz else "w|")
+        tar = tarfile.open(filetar, "w|gz" if tgz else "w|",dereference=True)
         for filename in final_filenames:
             name = os.path.basename(filename)
             subdir = functions.get_subdir_from_path_full(filename)

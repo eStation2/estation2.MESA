@@ -4,6 +4,8 @@
 import datetime
 import os
 import glob
+import subprocess
+import fnmatch
 
 # import eStation2 modules
 from database import querydb
@@ -108,7 +110,7 @@ def upsert_database(product_code, version, proc_lists, input_product_info):
     product = products.Product(product_code,version=version)
     missing_filenames = product.get_missing_filenames({'product':product_code, 'version':version})
 
-    return status
+    return 1
 
 ######################################################################################
 #
@@ -152,3 +154,43 @@ def remove_old_files(productcode, subproductcode, version, mapsetcode, product_t
         if date_yyyy < year_now or (date_month + nmonths) <= month_now:
             logger.debug("Deleting file %s " % my_file)
             os.remove(my_file)
+
+######################################################################################
+#
+#   Purpose: Check a directory and remove corrupted files
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2017/07/13
+#   Inputs: directory to work on
+#   Output: none
+#
+
+def clean_corrupted_files(check_directory, logger=None, dry_run=False):
+
+    # Check logger
+    if logger is None:
+        logger = log.my_logger(__name__)
+
+    # Get the existing dates for the dataset
+    logger.info("Entering routine %s " % 'clean_corrupted_files')
+
+    # Get list of files
+    list_files = []
+    for root, dirnames, filenames in os.walk(check_directory):
+        for filename in fnmatch.filter(filenames, '*.tif'):
+            list_files.append(os.path.join(root, filename))
+
+    if len(list_files) > 0:
+        for my_file in list_files:
+            logger.debug('Checking file: {0}'.format(my_file))
+
+            # Check the file by using gdalinfo
+            command = ['gdalinfo',my_file]
+            status = subprocess.call(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if status:
+                logger.info('Error in file: {0}'.format(my_file))
+                if not dry_run:
+                    os.remove(my_file)
+                    logger.info('File removed: {0}'.format(my_file))
+
+                else:
+                    logger.info('Not removing file {0} - Dry Run'.format(my_file))

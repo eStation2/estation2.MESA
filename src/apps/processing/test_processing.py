@@ -89,7 +89,7 @@ from multiprocessing import Queue
 # modis-chla
 #   ---------------------------------------------------------------------
 # from apps.processing.processing_std_modis_monavg import *
-# args = {'pipeline_run_level':7, \
+# args = {'pipeline_run_level':3, \
 #         'pipeline_printout_level':0, \
 #         'pipeline_printout_graph_level': 0, \
 #         'prod': 'modis-chla',\
@@ -234,7 +234,7 @@ starting_dates = None
 # native_mapset='MSG-satellite-3km'
 target_mapset='SPOTV-Africa-1km'
 
-args = {'pipeline_run_level':5,
+args = {'pipeline_run_level':3,
         'pipeline_printout_level':0,
         'pipeline_printout_graph_level': 0,
         'prod': 'modis-firms',

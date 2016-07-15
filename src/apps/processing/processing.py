@@ -147,11 +147,22 @@ def loop_processing(dry_run=False, serialize=False):
                         'version':version,
                         'logfile':logfile}
 
+                logger.debug('RL:{pipeline_run_level}; PL:{pipeline_printout_level},prod:{prod}, sprod:{starting_sprod},mapset:{mapset},\
+                            dates:{starting_dates},version:{version}'.format(**args))
+
                 # Define an id from a combination of fields
                 processing_unique_lock=es_constants.processing_tasks_dir+processing_unique_id+'.lock'
 
                 # Check the processing chain is not locked
                 if not os.path.isfile(processing_unique_lock):
+
+                    # # Perform sanity check on the output files
+                    # processing_base_directory = es_constants.es2globals['processing_dir']+\
+                    #                             os.path.sep+product_code+\
+                    #                             os.path.sep+version+\
+                    #                             os.path.sep+mapset+os.path.sep+'derived'
+                    #
+                    # proc_functions.clean_corrupted_files(processing_base_directory, dry_run=True)
 
                     open(processing_unique_lock,'a').close()
                     logger.debug("Unique lock created: % s" % processing_unique_id)
@@ -193,10 +204,6 @@ def loop_processing(dry_run=False, serialize=False):
                         #proc_lists=results_queue.get()
                         p.join()
                         logger.debug("After join  .. %i", p.is_alive())
-                        #for spg in proc_lists.list_subprod_groups:
-                        #    print(spg.group)
-                        # Upsert database
-                        # upsert_database(process_id, product_code, version, mapset, proc_lists, input_product_info)
                         # Sleep time to be read from processing
                         time.sleep(float(sleep_time))
                         logger.debug("Execution finished - remove lock")
@@ -209,8 +216,6 @@ def loop_processing(dry_run=False, serialize=False):
                     else:
                         results_queue = Queue()
                         proc_lists = proc_func(results_queue, **args)
-                        # Upsert database
-                        # upsert_database(process_id, product_code, version, mapset, proc_lists, input_product_info)
                         os.remove(processing_unique_lock)
 
                         time.sleep(float(sleep_time))
@@ -245,8 +250,7 @@ def loop_processing(dry_run=False, serialize=False):
 
                     # Do NOT detach process (work in series)
                     proc_lists = proc_func(**args)
-                    # Upsert database
-                    # upsert_database(process_id, product_code, version, mapset, proc_lists, input_product_info)
+
                     time.sleep(float(sleep_time))
                     logger.info("Waking-up now, and removing the .lock")
                     os.remove(processing_unique_lock)

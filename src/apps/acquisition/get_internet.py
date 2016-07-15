@@ -217,7 +217,8 @@ def get_list_matching_files_subdirs(list, remote_url, usr_pwd, full_regex, level
     proxy_exists = functions._proxy_defined()
 
     # Call functions for ftp-type or http-type response
-    if internet_type == 'http' or proxy_exists:
+    if internet_type == 'http' or (internet_type == 'ftp' and proxy_exists):
+        #my_list = get_list_current_subdirs_ftp(remote_url, usr_pwd)
         my_list = get_list_current_subdirs_http(remote_url, usr_pwd, internet_type)
     else:
         my_list = get_list_current_subdirs_ftp(remote_url, usr_pwd)

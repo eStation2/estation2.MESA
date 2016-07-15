@@ -3,8 +3,10 @@ __author__ = "Marco Clerici"
 
 
 from unittest import TestCase
+import os
 from lib.python import es_logging as log
-
+from lib.python import functions
+from config import es_constants
 # Trivial change
 logger = log.my_logger(__name__)
 
@@ -39,3 +41,20 @@ class TestProcFunctions(TestCase):
 
         self.assertEqual(1, 1)
 
+
+    def Test_clean_corrupted_files(self):
+        productcode = 'lsasaf-lst'
+        version = 'undefined'
+
+        subprod = '10dmax'
+        type = 'Derived'
+        mapset = 'MSG-satellite-3km'
+        mapset = 'SPOTV-Africa-1km'
+
+        # Define the subdir to start from
+        prod_subdir = functions.set_path_sub_directory(productcode, subprod, type, version, mapset)
+        prod_dir = es_constants.es2globals['processing_dir'] + os.path.sep + prod_subdir
+
+        proc_functions.clean_corrupted_files(prod_dir,dry_run=False)
+
+        self.assertEqual(1, 1)

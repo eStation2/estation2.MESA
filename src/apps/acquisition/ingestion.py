@@ -386,6 +386,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
             # Pre-process returns None if there are not enough files for continuing
             if composed_file_list is None:
                 logger.debug('Waiting for additional files to be received. Return')
+                shutil.rmtree(tmpdir)
                 return None
         except:
             # Error occurred and was NOT detected in pre_process routine
