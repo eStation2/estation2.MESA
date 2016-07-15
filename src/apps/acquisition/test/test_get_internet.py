@@ -82,7 +82,8 @@ def get_one_source(internet_source, target_dir=None):
 
             internet_type = internet_source['type']
 
-            if internet_type == 'ftp' or internet_type == 'http':
+            # 'force_ftp' is for JRC only, for the h05-ftp.jrc.it (MCD14DL)
+            if internet_type == 'ftp' or internet_type == 'http' or internet_type == 'force_ftp':
                 # Manage the end_date (added for MODIS_FIRMS)
                 if (internet_source['end_date'] != ''):
                     end_date = internet_source['end_date']
@@ -579,3 +580,21 @@ class TestGetInternet(unittest.TestCase):
 
         # Check last 90 days (check list length = 9)
         result = get_one_source(my_source)
+
+    # Download MODIS-FIRMS from h05-ftp.jrc.it
+    def TestRemoteFtp_JRC_FIRMS(self):
+
+        # Manually define relevant fields of internet source
+        internet_source = {'internet_id': 'JRC:FTP:MCD14DL',
+                           'url': 'ftp://h05-ftp.jrc.it/data/MCD14DL/',
+                           'include_files_expression': 'Global_MCD14DL.*txt',
+                           'pull_frequency': 1,
+                           'user_name':'narmauser',
+                           'password':'2016mesa!',
+                           'start_date':None,
+                           'end_date':None,
+                           'type':'force_ftp'
+                           }
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(internet_source)
