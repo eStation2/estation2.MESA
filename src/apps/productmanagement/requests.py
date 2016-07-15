@@ -126,15 +126,15 @@ def create_archive_from_request(request_file):
             archive_name=archive_base_name+'_{0:04d}'.format(incresing_number)+'.tgz'
             self_extracting_name=archive_name
             self_extracting_name=self_extracting_name.replace('.tgz','.bsx')
-            print archive_name
-            print self_extracting_name
+            logger.debug( 'Archive file name: {0}'.format(archive_name))
             # Create a product object
             product = Product(product_code=my_product, version=my_version)
             [tarfile , results] = product.create_tar(missing_info, filetar=archive_name, tgz=True)
-
+            logger.debug('Files found for {0}: {1}'.format(subproductcode,results['n_file_copied']))
             # Test there at list a file missing
             if results['n_file_copied'] > 0:
 
+                logger.info('Creating file {0}'.format(self_extracting_name))
                 # Get the decompression script template
                 decompress_file = es_constants.decompress_script
 
