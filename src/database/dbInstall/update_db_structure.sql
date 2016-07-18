@@ -73,6 +73,167 @@ ALTER TABLE analysis.chart_drawproperties
   OWNER TO estation;
 
 
+-- Function: products.update_insert_product(character varying, character varying, character varying, character varying, boolean, character varying, character varying, character varying, character varying, character varying, character varying, character varying, double precision, double precision, bigint, double precision, double precision, character varying, character varying, boolean, character varying, boolean)
+
+-- DROP FUNCTION products.update_insert_product(character varying, character varying, character varying, character varying, boolean, character varying, character varying, character varying, character varying, character varying, character varying, character varying, double precision, double precision, bigint, double precision, double precision, character varying, character varying, boolean, character varying, boolean);
+
+CREATE OR REPLACE FUNCTION products.update_insert_product(productcode character varying, subproductcode character varying, version character varying, defined_by character varying, activated boolean, category_id character varying, product_type character varying, descriptive_name character varying, description character varying, provider character varying, frequency_id character varying, date_format character varying, scale_factor double precision, scale_offset double precision, nodata bigint, mask_min double precision, mask_max double precision, unit character varying, data_type_id character varying, masked boolean, timeseries_role character varying, full_copy boolean DEFAULT false)
+  RETURNS boolean AS
+$BODY$
+	DECLARE
+		_productcode 	  	ALIAS FOR  $1;
+		_subproductcode  	ALIAS FOR  $2;
+		_version 			ALIAS FOR  $3;
+		_defined_by   		ALIAS FOR  $4;
+		_activated 	  		ALIAS FOR  $5;
+		_category_id 	  	ALIAS FOR  $6;
+		_product_type  		ALIAS FOR  $7;
+		_descriptive_name 	ALIAS FOR  $8;
+		_description  		ALIAS FOR  $9;
+		_provider  			ALIAS FOR  $10;
+		_frequency_id		ALIAS FOR  $11;
+		_date_format  		ALIAS FOR  $12;
+		_scale_factor  		ALIAS FOR  $13;
+		_scale_offset  		ALIAS FOR  $14;
+		_nodata  			ALIAS FOR  $15;
+		_mask_min  			ALIAS FOR  $16;
+		_mask_max  			ALIAS FOR  $17;
+		_unit  				ALIAS FOR  $18;
+		_data_type_id  		ALIAS FOR  $19;
+		_masked  			ALIAS FOR  $20;
+		_timeseries_role  	ALIAS FOR  $21;
+		_full_copy	  		ALIAS FOR  $22;
+
+	BEGIN
+		PERFORM * FROM products.product p
+		WHERE p.productcode = TRIM(_productcode)
+		  AND p.subproductcode = TRIM(_subproductcode)
+		  AND p.version = TRIM(_version);
+		  -- AND p.defined_by = TRIM(_defined_by);
+
+		IF FOUND THEN
+			-- RAISE NOTICE 'START UPDATING Product';
+			IF _full_copy THEN
+				UPDATE products.product p
+				SET defined_by = TRIM(_defined_by),
+					activated = _activated,
+					category_id = TRIM(_category_id),
+					product_type = TRIM(_product_type),
+					descriptive_name = TRIM(_descriptive_name),
+					description = TRIM(_description),
+					provider = TRIM(_provider),
+					frequency_id = TRIM(_frequency_id),
+					date_format = TRIM(_date_format),
+					scale_factor = _scale_factor,
+					scale_offset = _scale_offset,
+					nodata = _nodata,
+					mask_min = _mask_min,
+					mask_max = _mask_max,
+					unit = TRIM(_unit),
+					data_type_id = TRIM(_data_type_id),
+					masked = _masked,
+					timeseries_role = TRIM(_timeseries_role)
+				WHERE p.productcode = TRIM(_productcode)
+				  AND p.subproductcode = TRIM(_subproductcode)
+				  AND p.version = TRIM(_version);
+			ELSE
+				UPDATE products.product p
+				SET defined_by = TRIM(_defined_by),
+					-- activated = _activated,
+					category_id = TRIM(_category_id),
+					product_type = TRIM(_product_type),
+					descriptive_name = TRIM(_descriptive_name),
+					description = TRIM(_description),
+					provider = TRIM(_provider),
+					frequency_id = TRIM(_frequency_id),
+					date_format = TRIM(_date_format),
+					scale_factor = _scale_factor,
+					scale_offset = _scale_offset,
+					nodata = _nodata,
+					mask_min = _mask_min,
+					mask_max = _mask_max,
+					unit = TRIM(_unit),
+					data_type_id = TRIM(_data_type_id),
+					masked = _masked,
+					timeseries_role = TRIM(_timeseries_role)
+				WHERE p.productcode = TRIM(_productcode)
+				  AND p.subproductcode = TRIM(_subproductcode)
+				  AND p.version = TRIM(_version);
+
+			END IF;
+			-- RAISE NOTICE 'Product updated';
+		ELSE
+			-- RAISE NOTICE 'START INSERTING Product';
+
+			INSERT INTO products.product (
+				productcode,
+				subproductcode,
+				version,
+				defined_by,
+				activated,
+				category_id,
+				product_type,
+				descriptive_name,
+				description,
+				provider,
+				frequency_id,
+				date_format,
+				scale_factor,
+				scale_offset,
+				nodata,
+				mask_min,
+				mask_max,
+				unit,
+				data_type_id,
+				masked,
+				timeseries_role
+			)
+			VALUES (
+			  TRIM(_productcode),
+			  TRIM(_subproductcode),
+			  TRIM(_version),
+			  TRIM(_defined_by),
+			  _activated,
+			  TRIM(_category_id),
+			  TRIM(_product_type),
+			  TRIM(_descriptive_name),
+			  TRIM(_description),
+			  TRIM(_provider),
+			  TRIM(_frequency_id),
+			  TRIM(_date_format),
+			  _scale_factor,
+			  _scale_offset,
+			  _nodata,
+			  _mask_min,
+			  _mask_max,
+			  TRIM(_unit),
+			  TRIM(_data_type_id),
+			  _masked,
+			  TRIM(_timeseries_role)
+			);
+
+			-- RAISE NOTICE 'Product inserted';
+		END IF;
+		RETURN TRUE;
+
+	EXCEPTION
+		WHEN numeric_value_out_of_range THEN
+			RAISE NOTICE 'ERROR: numeric_value_out_of_range.';
+			RETURN FALSE;
+
+		WHEN OTHERS THEN
+			RAISE NOTICE 'ERROR...';
+			RAISE NOTICE '% %', SQLERRM, SQLSTATE;
+			RETURN FALSE;
+	END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION products.update_insert_product(character varying, character varying, character varying, character varying, boolean, character varying, character varying, character varying, character varying, character varying, character varying, character varying, double precision, double precision, bigint, double precision, double precision, character varying, character varying, boolean, character varying, boolean)
+  OWNER TO estation;
+
+
+
 
 -- Function: analysis.update_insert_layers(integer, character varying, character varying, character varying, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, integer, boolean, boolean, character varying, character varying, character varying, character varying, character varying, boolean, character varying, boolean)
 

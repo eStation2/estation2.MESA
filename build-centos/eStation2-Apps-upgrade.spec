@@ -134,6 +134,15 @@ chmod 777 /var/www
 chown -R adminuser:adminuser /home/adminuser/*
 chown -R analyst:analyst /home/analyst/*
 
+# Change permissions of the Layers dir (2.0.4)
+echo "`date +'%Y-%m-%d %H:%M '` Change permissions of /eStation2/layers to 775"
+chmod 775 -R /eStation2/layers
+
+# Change settings of apache for layer size (2.0.4)
+echo "`date +'%Y-%m-%d %H:%M '` Change apache config LimitRequestBody to 300Mb"
+apache_config='/usr/local/src/tas/eStation_wsgi_srv/httpd.conf'
+sed -i "s|.*LimitRequestBody.*|LimitRequestBody 314572800|" ${apache_config}
+
 # Creation of the symlink on the /var/www/eStation2-%{version}
 echo "`date +'%Y-%m-%d %H:%M '` Create sym link /var/www/eStation2-%{version}"
 rm /var/www/eStation2
