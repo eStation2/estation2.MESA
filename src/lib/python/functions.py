@@ -430,6 +430,7 @@ def _proxy_internet_on():
 
     return False
 
+# Obsolete (to be deleted?)
 def _internet_on():
     import os
     command = 'ping -c 1 -W 2 8.8.8.8'
@@ -444,6 +445,12 @@ def _internet_on():
         return False
 
 def internet_on():     # is_connected():
+
+    # Add check for JRC server
+    system_settings = getSystemSettings()
+    if system_settings['type_installation'] == 'Server':
+        return _proxy_internet_on()
+
     import socket
     REMOTE_SERVER = "www.google.com"
     try:
