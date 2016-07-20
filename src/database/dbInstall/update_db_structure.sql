@@ -7,9 +7,7 @@ ALTER TABLE analysis.timeseries_drawproperties
 ALTER TABLE analysis.timeseries_drawproperties
   ADD COLUMN aggregation_max double precision;
 
-
-
-CREATE TABLE analysis.layers
+CREATE TABLE IF NOT EXISTS analysis.layers
 (
   layerid bigserial NOT NULL,
   layerlevel character varying(80),
