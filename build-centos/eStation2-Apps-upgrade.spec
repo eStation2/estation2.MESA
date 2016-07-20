@@ -1,7 +1,7 @@
 Summary: eStation 2.0 application from JRC
 Name: eStation2-Apps
-Version: 2.0.3
-Release: 10
+Version: 2.0.4
+Release: 3
 Group: eStation
 License: GPL
 Source: /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz
@@ -49,7 +49,7 @@ exec 1>/var/log/eStation2/%{name}-%{version}-preinst.log
 exec 2>/var/log/eStation2/%{name}-%{version}-preinst.err
 
 # Stop the eStation Services (for upgrade)
-echo "`date +'%Y-%m-%d %H:%M '` Stopping all_servicesd"
+echo "`date +'%Y-%m-%d %H:%M '` Stopping all services"
 /etc/init.d/tas_all_servicesd stop
 
 # En preinst pas de script externe inclus dans le RPM car pas encore decompressé
@@ -123,7 +123,7 @@ mkdir -p -m 775 /data/ingest.wrong
 mkdir -p -m 775 /data/processing
 mkdir -p -m 775 /data/spirits
 
-# Chown a vérifier si utile
+# Change owner of /data/
 echo "`date +'%Y-%m-%d %H:%M '` Assign /data to analyst User"
 chown -R analyst:estation /data/ 
 
@@ -278,7 +278,7 @@ psql -U estation -d estationdb -c "select products.set_thema('$thema')"
 echo "`date +'%Y-%m-%d %H:%M '` Set again the Thema to $thema" 
 
 # Start the eStation Services 
-echo "`date +'%Y-%m-%d %H:%M '` Starting all_servicesd"
+echo "`date +'%Y-%m-%d %H:%M '` Starting all services"
 /etc/init.d/tas_all_servicesd start
 
 # Before uninstall: remove the link and copy all code into a bck dir

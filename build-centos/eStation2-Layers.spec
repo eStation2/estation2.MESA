@@ -1,10 +1,10 @@
 Summary: eStation 2.0 reference Layers for visualization
 Name: eStation2-Layers
-Version: 2.0.2
+Version: 2.0.4
 Release: 1
 Group: eStation
 License: GPL
-Source: /home/adminuser/rpms/eStation-Layers/%{name}-%{version}-%{release}.tgz
+Source: /home/adminuser/rpms/eStation-Layers-%{version}/%{name}-%{version}-%{release}.tgz
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 
 
@@ -17,8 +17,8 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 
 %prep
 # Get the sources from the JRC ftp and create .tgz
-lftp -e "mirror -Le /ftp/private/narma/eStation_2.0/Packages/eStation-Layers/ /home/adminuser/rpms/; exit" -u narmauser:narma11 h05-ftp.jrc.it"" 
-cd /home/adminuser/rpms/eStation-Layers/
+lftp -e "mirror -Le /ftp/private/narma/eStation_2.0/Packages/eStation-Layers-%{version}/ /home/adminuser/rpms/eStation-Layers-%{version}/; exit" -u narmauser:2016mesa! h05-ftp.jrc.it"" 
+cd /home/adminuser/rpms/eStation-Layers-%{version}/
 rm -f %{name}-%{version}-%{release}.rpm
 tar -cvzf %{name}-%{version}-%{release}.tgz *
 
@@ -36,14 +36,12 @@ rm -r -f $RPM_BUILD_ROOT
 %files
 /eStation2/layers/*
 
-# Before uninstall: remove the link and copy all code into a bck dir
-%preun
-mkdir -p /eStation2/layers-%{version}.bck
-cp -r /eStation2/layers/* /eStation2/layers-%{version}.bck/
+%post
+# Change ownership and permissions of the layers
+chown -R analyst:estation /eStation2/layers
+chmod -R 775 /eStation2/layers
 
-# After uninstall: remove /tmp files, and move the .bck dir to 'old-version' place
-%postun
-mkdir -p /eStation2/layers/
-mv /eStation2/layers-%{version}.bck/* /eStation2/layers/
-rmdir /eStation2/layers-%{version}.bck
+# Before uninstall: remove the link and copy all code into a bck dir
+echo "`date +'%Y-%m-%d %H:%M '` Populate analysis.layers table" 
+psql -h localhost -U estation -d estationdb -f /eStation2/layers/insert_%{name}_%{version}.sql >/dev/null 2>&1
 
