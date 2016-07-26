@@ -1632,6 +1632,82 @@ def get_eumetcast_info(eumetcast_id):
     info = load_obj_from_pickle(filename)
     return info
 
+######################################################################################
+#
+#   Purpose: read from a netcdf SDS the scale_factor and scale offset and save in a txt file
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2016/07/26
+#   Inputs: sds           -> name of the netcdf SDS e.g.: 'NETCDF:/data/ingest/A2016201.L3m_DAY_SST_sst_4km.nc:sst'
+#           pre-proc file -> tmp dir where to save the .tmp file
+#   Output: none
+#
+def save_netcdf_scaling(sds, preproc_file):
+
+    # Define variable filename
+    var_file=os.path.dirname(preproc_file)+os.path.sep+'scaling.txt'
+
+    # Open SDS
+    try:
+        my_sds = gdal.Open(sds)
+    except:
+        logger.debug('Error in opening netcdf-SDS: $0'.format(sds))
+        raise Exception('Error in opening netcdf-SDS')
+
+    # Read all metadata
+    try:
+        metadata = my_sds.GetMetadata()
+    except:
+        logger.debug('Error in reading metadata')
+        raise Exception('Error in reading metadata')
+
+    # Get sst#scale_factor and sst#scale_offset
+    try:
+        variable = sds.split(':')[2]
+        scale_factor = metadata['{0}#scale_factor'.format(variable)]
+        scale_offset = metadata['{0}#add_offset'.format(variable)]
+    except:
+        logger.debug('Error in reading metadata')
+        raise Exception('Error in reading metadata')
+
+    # Save scale_factor and scale_offset to file
+    try:
+        fd = open(var_file,'w')
+        fd.write('Scale_factor = {0} \n'.format(scale_factor))
+        fd.write('Scale_offset = {0}'.format(scale_offset))
+        fd.close()
+    except:
+        logger.debug('Error in writing metadata')
+        raise Exception('Error in writing metadata')
+
+    return False
+
+######################################################################################
+#
+#   Purpose: read from a txt file scale/offset (see save_netcdf_scaling)
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2016/07/26
+#   Inputs: pre-proc file -> tmp dir where to save the .tmp file
+#   Output: none
+#
+def read_netcdf_scaling(preproc_file):
+
+    # Define variable filename
+    var_file=os.path.dirname(preproc_file)+os.path.sep+'scaling.txt'
+
+    # Save scale_factor and scale_offset to file
+    try:
+        my_file = open(var_file,'r')
+        for line in my_file:
+            if 'Scale_factor' in line:
+                scale_factor = float(line.split('=')[1])
+            if 'Scale_offset' in line:
+                scale_offset = float(line.split('=')[1])
+
+        return [scale_factor, scale_offset]
+    except:
+        logger.debug('Error in reading scaling')
+        raise Exception('Error in reading scaling')
+
 
 ######################################################################################
 #                            PROCESSING CHAINS
