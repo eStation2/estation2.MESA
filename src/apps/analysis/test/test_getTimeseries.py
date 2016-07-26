@@ -131,27 +131,30 @@ class TestTS(unittest.TestCase):
         #             'count' -> number of pixels in min-max range
         #             'percent' -> (number of pixels in min-max range) / (number of valid pixels) * 100
 
-        aggregate = {'type': 'percent',
+        aggregate = {'aggregation_type': 'mean',
                      'min_val': 20.0,
                      'max_val': 40.0}
 
         list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_dakar, from_date, to_date, aggregate)
 
         subproductcode="10davg"
-        list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_dakar, from_date, to_date)
+        list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_dakar, from_date, to_date, aggregate)
 
-        self.assertEquals(len(list_values), 75)
+        self.assertEquals(len(list_values), 36)
 
     def test_values_wd_gee(self):
 
         productcode="wd-gee"
         subproductcode="occurr"
         version="1.0"
-        mapsetcode="WD-GEE-ECOWAS"
+        mapsetcode="WD-GEE-ECOWAS-AVG"
         from_date=date(2015,01,01)
         to_date=date(2015,12,21)
+        aggregate = {'aggregation_type': 'surface',
+                     'aggregation_min': 1,
+                     'aggregation_max': 100}
 
-        list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_thies, from_date, to_date)
+        list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_thies, from_date, to_date, aggregate)
         print(list_values)
 
         self.assertEquals(len(list_values), 12)
