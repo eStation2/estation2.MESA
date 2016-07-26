@@ -199,7 +199,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
+        # The coded value (nodata=0) leads to the wrong result
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", "input_nodata":-1}
         raster_image_math.do_min_image(**args)
 
     #   ---------------------------------------------------------------------
