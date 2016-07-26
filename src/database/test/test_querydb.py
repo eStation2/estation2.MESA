@@ -205,8 +205,8 @@ class TestQuerydb(TestCase):
 
     def Test_get_mapset(self):
 
-        mapset = querydb.get_mapset(mapsetcode='WGS84_Africa_1km')
-        logger.info("Mapset: %s", mapset)
+        mapset = querydb.get_mapset(mapsetcode='SPOTV-Africa-1km')
+        logger.info("Mapset: %s", mapset.pixel_shift_lat)
 
         self.assertEqual(1, 1)
 
