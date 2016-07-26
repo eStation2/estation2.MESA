@@ -123,9 +123,24 @@ def getFilesList(productcode, subproductcode, version, mapsetcode, date_format, 
 def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_date, end_date, aggregate):
     #    Extract timeseries from a list of files and return as JSON object
     #    It applies to a single dataset (prod/sprod/version/mapset) and between 2 dates
+    #    Several types of aggregation foreseen:
+    #
+    #       mean :      Sum(Xi)/N(Xi)        -> min/max not considered          e.g. Rain
+    #       cumulate:   Sum(Xi)              -> min/max not considered          e.g. Fire
+    #
+    #       count:      N(Xi where min < Xi < max)                              e.g. Vegetation anomalies
+    #       surface:    count * PixelArea                                       e.g. Water Bodies
+    #       percent:    count/Ntot                                              e.g. Vegetation anomalies
+
     ogr.UseExceptions()
     theGeomWkt = ' '.join(wkt.strip().split())
     geom = Geometry(wkt=str(theGeomWkt), srs=4326)
+
+    # Get Mapset Info
+    mapset_info = querydb.get_mapset(mapsetcode=mapsetcode)
+
+    # Compute pixel area by converting degree to km
+    pixelArea = abs(mapset_info.pixel_shift_lat)*abs(mapset_info.pixel_shift_lat)*12544.0
 
     # Get Product Info
     product_info = querydb.get_product_out_info(productcode=productcode,
@@ -145,7 +160,7 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
 
         [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, start_date, end_date)
 
-        # Built a dictionary with filesnames/dates
+        # Built a dictionary with filenames/dates
         dates_to_files_dict = dict(zip(dates_list, list_files))
 
         # Generate unique list of files
@@ -170,7 +185,8 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
                     merged_mask = ma.mask_or(ma.getmask(mx), ma.getmask(nodata_array_masked))
                     mxnodata = ma.masked_array(ma.getdata(mx), merged_mask)
 
-                    if aggregate['aggregation_type'] == 'count' or aggregate['aggregation_type'] == 'percent':
+                    if aggregate['aggregation_type'] == 'count' or aggregate['aggregation_type'] == 'percent' or aggregate['aggregation_type'] == 'surface':
+
                         min_val = aggregate['aggregation_min']
                         max_val = aggregate['aggregation_max']
                         # Scale threshold from physical to digital value
@@ -181,18 +197,24 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
                         if aggregate['aggregation_type'] == 'percent':
                             # Convert from number of pixels to ratio/percent
                             meanResult = float(mxrange.count())/float(mxnodata.count()) * 100
+
+                        elif aggregate['aggregation_type'] == 'surface':
+                            meanResult = float(mxrange.count())* pixelArea
                         else:
                             # Assign as number of pixels
-                            meanResult = float(mxrange.count())     # * 0.0009
+                            meanResult = float(mxrange.count())
 
                         # Both results are equal
                         finalvalue = meanResult
 
-                    else:   #if aggregate['type'] == 'mean':
+                    else:   #if aggregate['type'] == 'mean' or if aggregate['type'] == 'cumulate':
                         if mxnodata.count() == 0:
                             meanResult = 0.0
                         else:
-                            meanResult = mxnodata.mean()
+                            if aggregate['aggregation_type'] == 'mean':
+                                meanResult = mxnodata.mean()
+                            else:  # aggregate['aggregation_type'] == 'cumulate':
+                                meanResult = mxnodata.sum()
 
                         # Scale to physical value
                         finalvalue = (meanResult*scale_factor+scale_offset)
