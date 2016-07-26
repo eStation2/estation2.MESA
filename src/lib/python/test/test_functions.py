@@ -42,3 +42,11 @@ class TestFunctions(TestCase):
     def test_internet_connection(self):
         status = functions._internet_on()
         print status
+
+    def test_manage_netcdf_scaling(self):
+
+        preproc_file = '/tmp/eStation2/apps.acquisition.ingestion4Losxu_A2016201.L3m_DAY_SST_sst_4km.nc/A2016201.L3m_DAY_SST_sst_4km.nc.geotiff'
+        sds          = 'NETCDF:/data/ingest/A2016201.L3m_DAY_SST_sst_4km.nc:sst'
+        status = functions.save_netcdf_scaling(sds, preproc_file)
+        [fact, off] = functions.read_netcdf_scaling(preproc_file)
+        print fact, off
