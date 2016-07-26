@@ -72,8 +72,8 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_modis_sst_netcdf(self):
 
-        date_fileslist = ['/data/ingest/A2015189.L3m_DAY_SST_sst_4km.nc']
-        in_date = '2015189'
+        date_fileslist = ['/data/ingest/A2016201.L3m_DAY_SST_sst_4km.nc']
+        in_date = '2016201'
         productcode = 'modis-sst'
         productversion = 'v2013.1'
         subproductcode = 'sst-day'
@@ -109,8 +109,8 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_modis_chlor_netcdf(self):
 
-        date_fileslist = ['/data/ingest/A2015189.L3m_DAY_CHL_chlor_a_4km.nc']
-        in_date = '2015189'
+        date_fileslist = ['/data/ingest/A2016207.L3m_DAY_CHL_chlor_a_4km.nc']
+        in_date = '2016207'
         productcode = 'modis-chla'
         productversion = 'v2013.1'
         subproductcode = 'chla-day'
