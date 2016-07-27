@@ -799,7 +799,9 @@ def pre_process_netcdf(subproducts, tmpdir , input_files, my_logger):
 # It does the extraction of relevant datasets
 #
 # Note: modified on 19.4.16 to return a list of files (one foreach subproduct-mapset)
-#
+# Note: modified on 26.7.16 to save in tmp_dir the scale factor and offset, to be re-used in ingestion
+#       This is related to the change in MODIS-Global Daily SST of the scale factor
+
     # Prepare the output file list
     pre_processed_list = []
 
@@ -839,6 +841,11 @@ def pre_process_netcdf(subproducts, tmpdir , input_files, my_logger):
                             sds_tmp = None
                             geotiff_files.append(myfile_path)
                             previous_id_subdataset = id_subdataset
+                            # MC 26.07.2016: read/store scaling
+                            try:
+                                status = functions.save_netcdf_scaling(selected_sds, myfile_path)
+                            except:
+                                logger.debug('Error in reading scaling')
             else:
                 if id_subdataset == previous_id_subdataset:
                     # Just append the last filename once again
@@ -850,6 +857,12 @@ def pre_process_netcdf(subproducts, tmpdir , input_files, my_logger):
                     write_ds_to_geotiff(netcdf, myfile_path)
                     geotiff_files.append(myfile_path)
                     previous_id_subdataset = id_subdataset
+                    # MC 26.07.2016: read/store scaling
+                    # try:
+                    #     status = functions.save_netcdf_scaling(sds_tmp, myfile_path)
+                    # except:
+                    #     logger.warning('Error in reading scaling')
+
             netcdf = None
 
     return geotiff_files
@@ -1500,8 +1513,14 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # Get information from sub_dataset_source table
         product_in_info = querydb.get_product_in_info(echo=echo_query, **args)
 
-        in_scale_factor = product_in_info.scale_factor
-        in_offset = product_in_info.scale_offset
+        # Check if the scaling has been read/save to .tmp dir (MC. 26.7.2016: Issue for MODIS SST .nc files)
+        try:
+            [in_scale_factor, in_offset] = functions.read_netcdf_scaling(intermFile)
+        except:
+            # Take from DB
+            in_scale_factor = product_in_info.scale_factor
+            in_offset = product_in_info.scale_offset
+
         in_nodata = product_in_info.no_data
         in_mask_min = product_in_info.mask_min
         in_mask_max = product_in_info.mask_max
