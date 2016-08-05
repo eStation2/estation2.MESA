@@ -117,7 +117,7 @@ Ext.define("esapp.view.analysis.mapView",{
                 autoShow: true,
                 floating: true,
                 // alignTarget : me,
-                defaultAlign: 'tl-tl',  // 'tr-c?',
+                //defaultAlign: 'tr-c?',  // 'tr-c?',
                 alwaysOnTop: true,
                 constrain: true,
                 width: 150,

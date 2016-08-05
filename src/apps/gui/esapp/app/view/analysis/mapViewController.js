@@ -1457,7 +1457,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
         layersStore.setSorters([
             {property: 'menu', direction: 'ASC'},
             {property: 'submenu', direction: 'ASC', transform:  function (submenu) { return submenu.toLowerCase(); }},
-            {property: 'layerlevel', direction: 'ASC'}]);
+            {property: 'layername', direction: 'ASC'}]);
         layersStore.sort();
         //console.info(layersStore);
 
@@ -1576,6 +1576,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             scale: 'medium',
             floating: false,  // usually you want this set to True (default)
             collapseDirection: 'left',
+            menuAlign: 'tl-tr',
             menu: {
                 hideOnClick: false,
                 iconAlign: '',
