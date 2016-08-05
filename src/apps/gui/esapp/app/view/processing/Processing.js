@@ -151,7 +151,8 @@ Ext.define("esapp.view.processing.Processing",{
                 '       </div>' +
                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 200px;  left: 410px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text"' + esapp.Utils.getTranslation('mapset') + '></span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('mapset') + '</span>' +
+                //'               <span data-ref="textEl" class="x-column-header-text"' + esapp.Utils.getTranslation('mapset') + '></span>' +
                 '           </div>' +
                 '       </div>',
                 listeners: {
@@ -280,7 +281,7 @@ Ext.define("esapp.view.processing.Processing",{
 
                 header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; left: 0px; tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('product') + '</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('subproductname') + '</span>' +
                 '           </div>' +
                 '       </div>' +
                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; right: auto; left: 200px; margin: 0px; top: 0px;" tabindex="-1">' +
@@ -290,7 +291,7 @@ Ext.define("esapp.view.processing.Processing",{
                 '       </div>' +
                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; right: auto; left: 400px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('subproduct') + '</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('subproductcode') + '</span>' +
                 '           </div>' +
                 //'       </div>' +
                 //'       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 600px; margin: 0px; top: 0px;" tabindex="-1">' +

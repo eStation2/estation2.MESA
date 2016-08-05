@@ -1235,7 +1235,7 @@ class GetDashboard:
                         PC2_Webserver_Status = False
 
 
-        if systemsettings['type_installation'].lower() == 'singlepc':
+        if systemsettings['type_installation'].lower() in ['singlepc', 'server']:
             if systemsettings['role'].lower() == 'pc1':
                 PC1_mode = systemsettings['mode'].lower()
 
@@ -1796,11 +1796,13 @@ class GetColorSchemes:
         if hasattr(product_legends, "__len__") and product_legends.__len__() > 0:
             legends_dict_all = []
             for legend in product_legends:
-                legend_dict = functions.row2dict(legend)
+                # legend_dict = functions.row2dict(legend)
                 # legend_dict = legend.__dict__
-                legend_id = legend_dict['legend_id']
-                legend_name = legend_dict['legend_name']
-                default_legend = legend_dict['default_legend']
+                legend_dict = {}
+                legend_id = legend['legend_id']
+                legend_name = legend['legend_name']
+                # legend_name = legend['colorbar']
+                default_legend = legend['default_legend']
 
                 if default_legend == 'True':
                     defaultlegend = 'true'
@@ -1831,10 +1833,13 @@ class GetColorSchemes:
                     b = color_rgb[2]
                     color_html = 'rgb('+r+','+g+','+b+')'
                     colorschemeHTML = colorschemeHTML + \
-                                      "<td height=10 style='padding:0; margin:0; background-color: " + \
-                                      color_html + ";'>&nbsp</td>"
+                                      "<td height=15 style='padding:0; margin:0; background-color: " + \
+                                      color_html + ";'></td>"
                 colorschemeHTML = colorschemeHTML + '</tr></table>'
 
+                legend_dict['legend_id'] = legend_id
+                legend_dict['legend_name'] = legend_name
+                legend_dict['colorbar'] = legend['colorbar']
                 legend_dict['default_legend'] = defaultlegend
                 legend_dict['defaulticon'] = defaulticon
                 legend_dict['colorschemeHTML'] = colorschemeHTML
