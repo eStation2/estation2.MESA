@@ -109,7 +109,7 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_modis_chlor_netcdf(self):
 
-        date_fileslist = ['/data/ingest/A2016207.L3m_DAY_CHL_chlor_a_4km.nc']
+        date_fileslist = ['/data/ingest/A2016225.L3m_DAY_CHL_chlor_a_4km.nc']
         in_date = '2016207'
         productcode = 'modis-chla'
         productversion = 'v2013.1'
@@ -433,8 +433,8 @@ class TestIngestion(unittest.TestCase):
             self.assertEqual(1, 1)
     def test_ingest_vgt_fcover(self):
 
-        date_fileslist = ['/data/ingest/test/g2_BIOPAR_FCOVER_201510240000_AFRI_PROBAV_V1.4.zip']
-        in_date = '201510240000'
+        date_fileslist = ['/data/ingest/g2_BIOPAR_FCOVER_201601130000_AFRI_PROBAV_V1.4.zip']
+        in_date = '201601130000'
         productcode = 'vgt-fcover'
         productversion = 'V1.4'
         subproductcode = 'fcover'

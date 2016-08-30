@@ -9,7 +9,7 @@
 1.1 Acquisition
 
 - Correct the ingestion of product MPEG-MPEF, which failed - from time to time - resulting in files copied to /data/ingest.wrong (see Tuleap #11144)
-- Modify the eumetcast source description for MODIS Chla product from EUMETCast and ingest pre-processing type, following change from .hdf to .nc format (see Tuleap #10903)
+- Modify the eumetcast source description for MODIS Chla product from EUMETCast and ingest pre-processing type, following change from .bz2 to .nc format (see Tuleap #10903)
 - Correct get_eumetcast_ftp (reflecting modifications in get_internet)
 
 1.2 Processing
@@ -34,13 +34,11 @@
 
 - correct regular expressions for g2 NDVI, FAPAR, DMP, LAI, FCOVER products in order to exclude SOAM region
 
-1.7 Packages (pre-post inst)
-
 
 2. NEW FEATURES
 ---------------
 
-2.0
+2.0 General
 
 - Modifications to manage a 'proxy': 1. Define functions._proxy_defined() to read definition from factory_settings.ini
   2. In case of proxy, change the urllib2 options to test internet access.
@@ -61,7 +59,9 @@
 
 2.2 Acquisition/Processing/DataManagement
 - In the Acquisition page under the 'Product' column the source of each product is shown.
-
+- The internet source for FEWSNET-RFE is modified
+- Small correction in the get_internet.py to manage the case of no-files found for a source.
+- Use shutil.move rather than os.rename to move files to 'archive' dir (safer)
 
 2.3 Visualization/Analysis
 - Vector layer administration is added to the analysis tool.
@@ -77,7 +77,7 @@
 - On Mapview mouseout the highlighted feature (polygon) is removed.
 - Time series graph draw properties management added.
 - Time series sum aggregation of for example Fire or Water occurences.
-
+- New Legends are added, and some modified, especially to have more coherent definitions across products.
 
 2.4 Configuration/DB
 - Added one table called "layers" for layer registration and their draw properties, in the schema analysis.
@@ -88,4 +88,13 @@
 
 
 2.5 Other packages
-- Layers package containing new gaul admin 00 layer for each RIC.
+- It is decided not to update the eStation2-Layers package, rather to create new ones for additional layers, namely:
+
+    eStation2-Layers-a0: Modified ICPAC levels 0/1/2
+    eStation2-Layers-a1: New CongoBasin0..3, AfricaBasin1..3
+    eStation2-Layers-a2: New IGAD levels 0/1/2
+    eStation2-Layers-a0: Level 00 for Africa and the seven RICS
+
+- eStation2-Docs package is updated to 2.0.4, by changing the Product Report to V.1.2
+
+
