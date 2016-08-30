@@ -109,14 +109,17 @@ class TestTS(unittest.TestCase):
     def test_values_rfe_10davg(self):
 
         productcode="fewsnet-rfe"
-        subproductcode="10davg"
+        subproductcode="6moncum"
         version="2.0"
         mapsetcode="FEWSNET-Africa-8km"
         from_date=date(2013,01,01)
         to_date=date(2015,12,21)
+        aggregate = {'aggregation_type': 'mean',
+                     'min_val': None,
+                     'max_val': None}
 
-        list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_Congo, from_date, to_date)
-
+        list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_Congo, from_date, to_date, aggregate)
+        print list_values
         self.assertEquals(len(list_values), 108)
 
     def test_values_chirps_10d(self):
