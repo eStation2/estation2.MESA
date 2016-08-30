@@ -433,7 +433,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         shrinkWrap: 0,
                         tpl: new Ext.XTemplate(
                                 '{colorschemeHTML}' +
-                                '<b>{legend_name}</b>'
+                                '<b>{colorbar}</b>'
                         )
                     }]
                 }]

@@ -28,11 +28,8 @@ def generateLegendHTML(legend_id):
         TotSteps = row['totsteps']
         TotColorLabels = row['totcolorlabels']
         TotGroupLabels = row['totgrouplabels']
-    # print "TotSteps: "+str(TotSteps)
-    # print "TotColorLabels: "+str(TotColorLabels)
-    # print "TotGroupLabels: "+str(TotGroupLabels)
 
-    if TotSteps > 20:
+    if TotSteps >= 25:
         legendWidth=750
         tableStyle = ' style="border-spacing:0px;"'
     else:
@@ -54,8 +51,8 @@ def generateLegendHTML(legend_id):
     # print "ColumnSpan: "+str(ColumnSpan)
 
     for row in legend_info:
-        legend_dict = functions.row2dict(row)
-        LegendName = legend_dict['legend_name']
+        # legend_dict = functions.row2dict(row)
+        LegendName = row['legend_name']
 
     legendHeader = '<b style="font-size:12px;">'+LegendName+'</b>'
 
@@ -98,11 +95,35 @@ def generateLegendHTML(legend_id):
     legendColors += '</tr>'
 
     legendColorLabels = '<tr>'
+    skipcolumns = 0
+    ColSpan = ColumnSpan
+    if ColumnSpan > 15:
+        ColSpan = 10
+    labelcounter = 0
+    rowcounter = 0
+    # ColSpan = 5
     for row in legend_steps:
-        legendstep_dict = functions.row2dict(row)
-        if legendstep_dict['color_label'].strip() != '':
-            # ColorLabel = '&nbsp;'+legendstep_dict['color_label']+'&nbsp;'
-            legendColorLabels += '<td colspan="' + str(ColumnSpan) + '" style="font-size:9px; line-height:10px; max-width:30px;" align="center">'+legendstep_dict['color_label']+'</td>'
+        rowcounter += 1
+        if row.color_label != None and row.color_label.strip() != '':
+            labelcounter += 1
+            if labelcounter == TotColorLabels:
+                ColSpan = TotSteps - rowcounter
+            legendColorLabels += '<td colspan="' + str(int(ColSpan)) + '" style="font-size:9px; line-height:10px; max-width:30px;" align="left">'+row.color_label+'</td>'
+            # legendColorLabels += '<td colspan="' + str(int(ColSpan)) + '" height=25px; valign="top" style="font-size:9px; ">'\
+            #                      + '<span style="top: 0; display: block; transform: rotate(90deg); -ms-transform: rotate(90deg);  -webkit-transform: rotate(90deg); white-space: nowrap;" >'\
+            #                      + row.color_label\
+            #                      + '</span>'\
+            #                      + '</td>'
+            skipcolumns = int(ColSpan-1)
+        elif skipcolumns > 0:
+            skipcolumns -= 1
+        else:
+            legendColorLabels += '<td width="1px;"></td>'
+
+        # legendstep_dict = functions.row2dict(row)
+        # if legendstep_dict['color_label'].strip() != '':
+        #     # ColorLabel = '&nbsp;'+legendstep_dict['color_label']+'&nbsp;'
+        #     legendColorLabels += '<td colspan="' + str(ColumnSpan) + '" style="font-size:9px; line-height:10px; max-width:30px;" align="left">'+legendstep_dict['color_label']+'</td>'
 
     legendColorLabels += '</tr>'
 
@@ -149,27 +170,35 @@ def generateLegendHTML(legend_id):
         # Add label column
         Counter += 1
         if ColumnSpan > 1:
-            if Counter == 1:
-                # print ColorLabelCounter
-                # print legend_steps[int((ColumnSpan * ColorLabelCounter)-1)]
-                legendstep_withlabel_dict = functions.row2dict(legend_steps[int((ColumnSpan * ColorLabelCounter)-1)])
-                if legendstep_withlabel_dict['color_label'] != '':
-                    legendColorLabelColumn = '<td rowspan="' + str(ColumnSpan-1) + '" style="font-size:9px; line-height:10px; " align="center">'+legendstep_withlabel_dict['color_label']+'</td>'
-                # if Counter > 1:
-                # ColorLabelCounter += 1
-            elif Counter == (ColumnSpan * ColorLabelCounter):
-                # print ColorLabelCounter
-                if TotColorLabels == ColorLabelCounter + 1:
-                    # print legend_steps[TotSteps-1]
-                    legendstep_withlabel_dict = functions.row2dict(legend_steps[TotSteps-1])
-                else:
-                    # print legend_steps[int((ColumnSpan * (ColorLabelCounter+1))-1)]
-                    legendstep_withlabel_dict = functions.row2dict(legend_steps[int((ColumnSpan * (ColorLabelCounter+1))-1)])
-                ColorLabelCounter += 1
-                if legendstep_withlabel_dict['color_label'] != '':
-                    legendColorLabelColumn = '<td rowspan="' + str(ColumnSpan) + '" style="font-size:9px; line-height:10px; " align="center">'+legendstep_withlabel_dict['color_label']+'</td>'
-            else:
-                legendColorLabelColumn = ''
+            legendColorLabelColumn = '<td height="1px;"></td>'
+            if row.color_label != None and row.color_label.strip() != '':
+                # legendColorLabelColumn = '<td rowspan="' + str(ColumnSpan) + '" style="font-size:9px; line-height:10px; " valign="top" align="center">'+row.color_label+'</td>'
+                legendColorLabelColumn = '<td rowspan=5 style="font-size:9px; line-height:10px; " valign="top" align="center">'+row.color_label+'</td>'
+
+            # if Counter == 1:
+            #     # print ColorLabelCounter
+            #     # print legend_steps[int((ColumnSpan * ColorLabelCounter)-1)]
+            #     legendstep_withlabel_dict = functions.row2dict(legend_steps[int((ColumnSpan * ColorLabelCounter)-1)])
+            #     if legendstep_withlabel_dict['color_label'] != '':
+            #         legendColorLabelColumn = '<td rowspan="' + str(ColumnSpan-1) + '" style="font-size:9px; line-height:10px; " align="center">'+legendstep_withlabel_dict['color_label']+'</td>'
+            #     # if Counter > 1:
+            #     # ColorLabelCounter += 1
+            # elif Counter == (int(ColumnSpan) * ColorLabelCounter):
+            #     # print 'Counter: ' + str(Counter)
+            #     # print 'ColumnSpan: ' + str(ColumnSpan)
+            #     # print 'ColorLabelCounter: ' + str(ColorLabelCounter)
+            #     # print '(int(ColumnSpan) * ColorLabelCounter): ' + str(int(ColumnSpan) * ColorLabelCounter)
+            #     if TotColorLabels == ColorLabelCounter + 1:
+            #         # print legend_steps[TotSteps-1]
+            #         legendstep_withlabel_dict = functions.row2dict(legend_steps[TotSteps-1])
+            #     else:
+            #         # print legend_steps[int((ColumnSpan * (ColorLabelCounter+1))-1)]
+            #         legendstep_withlabel_dict = functions.row2dict(legend_steps[int((ColumnSpan * (ColorLabelCounter+1))-1)])
+            #     ColorLabelCounter += 1
+            #     if legendstep_withlabel_dict['color_label'] != '':
+            #         legendColorLabelColumn = '<td rowspan="' + str(ColumnSpan) + '" style="font-size:9px; line-height:10px; " align="center">'+legendstep_withlabel_dict['color_label']+'</td>'
+            # else:
+            #     legendColorLabelColumn = ''
         else:
             legendstep_dict = functions.row2dict(row)
             if legendstep_dict['color_label'] != '':

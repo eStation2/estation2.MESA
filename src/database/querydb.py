@@ -828,25 +828,42 @@ def get_product_legends(productcode=None, subproductcode=None, version=None, ech
     global dbschema_analysis
     try:
 
-        legend = dbschema_analysis.legend._table
-        product_legend = dbschema_analysis.product_legend._table
+        query = "SELECT legend.legend_id,  " + \
+                "       legend.legend_name, " + \
+                "       legend.colorbar, " + \
+                "       product_legend.default_legend, " + \
+                "       product_legend.productcode, " + \
+                "       product_legend.subproductcode, " + \
+                "       product_legend.version " + \
+                "FROM analysis.legend JOIN analysis.product_legend ON legend.legend_id = product_legend.legend_id " + \
+                "WHERE product_legend.productcode = '" + productcode + "' " + \
+                "  AND product_legend.subproductcode = '" + subproductcode + "' " + \
+                "  AND product_legend.version = '" + version + "' "
 
-        productlegends = select([legend.c.legend_id,
-                                 legend.c.legend_name,
-                                 product_legend.c.default_legend,
-                                 product_legend.c.productcode,
-                                 product_legend.c.subproductcode,
-                                 product_legend.c.version
-                                ]).\
-            select_from(legend.outerjoin(product_legend, legend.c.legend_id == product_legend.c.legend_id))
+        result = db.execute(query)
+        productlegends = result.fetchall()
 
-        s = productlegends.alias('pl')
-        pl = dbschema_analysis.map(s, primary_key=[s.c.legend_id])
 
-        where = and_(pl.c.productcode == productcode,
-                     pl.c.subproductcode == subproductcode,
-                     pl.c.version == version)
-        productlegends = pl.filter(where).all()
+        # legend = dbschema_analysis.legend._table
+        # product_legend = dbschema_analysis.product_legend._table
+        #
+        # productlegends = select([legend.c.legend_id,
+        #                          legend.c.legend_name,
+        #                          legend.c.colorbar,
+        #                          product_legend.c.default_legend,
+        #                          product_legend.c.productcode,
+        #                          product_legend.c.subproductcode,
+        #                          product_legend.c.version
+        #                         ]).\
+        #     select_from(legend.outerjoin(product_legend, legend.c.legend_id == product_legend.c.legend_id))
+        #
+        # s = productlegends.alias('pl')
+        # pl = dbschema_analysis.map(s, primary_key=[s.c.legend_id])
+        #
+        # where = and_(pl.c.productcode == productcode,
+        #              pl.c.subproductcode == subproductcode,
+        #              pl.c.version == version)
+        # productlegends = pl.filter(where).all()
 
 
         # session = dbschema_analysis.session
@@ -961,45 +978,73 @@ def get_legend_info(legendid=None, echo=False):
     global dbschema_analysis
     try:
 
-        ls = dbschema_analysis.legend_step._table
-        l = dbschema_analysis.legend._table
+        query = " SELECT MIN(analysis.legend_step.from_step) AS realminstep, " + \
+                "       MAX(analysis.legend_step.to_step) AS realmaxstep, " + \
+                "       MIN(analysis.legend_step.to_step - analysis.legend_step.from_step) AS minstepwidth, " + \
+                "       MAX(analysis.legend_step.to_step - analysis.legend_step.from_step) AS maxstepwidth, " + \
+                "       MAX(analysis.legend_step.to_step) - MIN(analysis.legend_step.from_step) AS totwidth, " + \
+                "       COUNT(analysis.legend_step.legend_id) AS totsteps, " + \
+                "       analysis.legend_step.legend_id, " + \
+                "       analysis.legend.legend_id, " + \
+                "       analysis.legend.legend_name, " + \
+                "       analysis.legend.min_value, " + \
+                "       analysis.legend.max_value, " + \
+                "       analysis.legend.min_real_value, " + \
+                "       analysis.legend.max_real_value, " + \
+                "       analysis.legend.step_range_from, " + \
+                "       analysis.legend.step_range_to, " + \
+                "       analysis.legend.unit " + \
+                " FROM analysis.legend_step JOIN analysis.legend ON legend_step.legend_id = legend.legend_id " + \
+                " WHERE analysis.legend_step.legend_id = " + str(legendid) + \
+                " GROUP BY analysis.legend_step.legend_id, " + \
+                "       analysis.legend.legend_id, " + \
+                "       analysis.legend.legend_name, " + \
+                "       analysis.legend.min_value, " + \
+                "       analysis.legend.max_value, " + \
+                "       analysis.legend.min_real_value, " + \
+                "       analysis.legend.max_real_value, " + \
+                "       analysis.legend.step_range_from, " + \
+                "       analysis.legend.step_range_to, " + \
+                "       analysis.legend.unit "
 
-        s = select([func.MIN(ls.c.from_step).label('realminstep'),
-                    func.MAX(ls.c.to_step).label('realmaxstep'),
-                    func.MIN(ls.c.to_step-ls.c.from_step).label('minstepwidth'),
-                    func.MAX(ls.c.to_step-ls.c.from_step).label('maxstepwidth'),
-                    (func.MAX(ls.c.to_step)-func.MIN(ls.c.from_step)).label('totwidth'),
-                    func.COUNT(ls.c.legend_id).label('totsteps'),
-                    l.c.legend_id,
-                    l.c.legend_name,
-                    l.c.min_value,
-                    l.c.max_value,
-                    l.c.min_real_value,
-                    l.c.max_real_value,
-                    l.c.step_range_from,
-                    l.c.step_range_to,
-                    l.c.unit
-                    ],
-                    group_by=[l.c.legend_id,
-                              l.c.legend_name,
-                              l.c.min_value,
-                              l.c.max_value,
-                              l.c.min_real_value,
-                              l.c.max_real_value,
-                              l.c.step_range_from,
-                              l.c.step_range_to,
-                              l.c.unit]
-                   ).select_from(l.outerjoin(ls, l.c.legend_id == ls.c.legend_id))
+        result = db.execute(query)
+        legend_info = result.fetchall()
 
-        s = s.alias('legend_info')
-        dbschema_analysis.legend_info = dbschema_analysis.map(s, primary_key=[s.c.legend_id])
-
-        where = and_(dbschema_analysis.legend_info.legend_id == legendid)
-        legend_info = dbschema_analysis.legend_info.filter(where).all()
-
-        # if echo:
-        #     for row in legend_info:
-        #         print row
+        # ls = dbschema_analysis.legend_step._table
+        # l = dbschema_analysis.legend._table
+        #
+        # s = select([func.MIN(ls.c.from_step).label('realminstep'),
+        #             func.MAX(ls.c.to_step).label('realmaxstep'),
+        #             func.MIN(ls.c.to_step-ls.c.from_step).label('minstepwidth'),
+        #             func.MAX(ls.c.to_step-ls.c.from_step).label('maxstepwidth'),
+        #             (func.MAX(ls.c.to_step)-func.MIN(ls.c.from_step)).label('totwidth'),
+        #             func.COUNT(ls.c.legend_id).label('totsteps'),
+        #             l.c.legend_id,
+        #             l.c.legend_name,
+        #             l.c.min_value,
+        #             l.c.max_value,
+        #             l.c.min_real_value,
+        #             l.c.max_real_value,
+        #             l.c.step_range_from,
+        #             l.c.step_range_to,
+        #             l.c.unit
+        #             ],
+        #             group_by=[l.c.legend_id,
+        #                       l.c.legend_name,
+        #                       l.c.min_value,
+        #                       l.c.max_value,
+        #                       l.c.min_real_value,
+        #                       l.c.max_real_value,
+        #                       l.c.step_range_from,
+        #                       l.c.step_range_to,
+        #                       l.c.unit]
+        #            ).select_from(l.outerjoin(ls, l.c.legend_id == ls.c.legend_id))
+        #
+        # s = s.alias('legend_info')
+        # dbschema_analysis.legend_info = dbschema_analysis.map(s, primary_key=[s.c.legend_id])
+        #
+        # where = and_(dbschema_analysis.legend_info.legend_id == legendid)
+        # legend_info = dbschema_analysis.legend_info.filter(where).all()
 
         return legend_info
 
