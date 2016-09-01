@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS analysis.layers;
+
 CREATE TABLE IF NOT EXISTS analysis.layers
 (
   layerid bigserial NOT NULL,
@@ -35,36 +37,8 @@ WITH (
 ALTER TABLE analysis.layers
   OWNER TO estation;
 
-CREATE OR REPLACE FUNCTION analysis.update_insert_layers(
-               layerid integer,
-							 layerlevel character varying,
-							 layername character varying,
-							 description character varying,
-							 filename character varying,
-							 layerorderidx integer,
-							 layertype character varying,
-							 polygon_outlinecolor character varying,
-							 polygon_outlinewidth integer,
-							 polygon_fillcolor character varying,
-							 polygon_fillopacity integer,
-							 feature_display_column character varying,
-							 feature_highlight_outlinecolor character varying,
-							 feature_highlight_outlinewidth integer,
-							 feature_highlight_fillcolor character varying,
-							 feature_highlight_fillopacity integer,
-							 feature_selected_outlinecolor character varying,
-							 feature_selected_outlinewidth integer,
-							 enabled boolean,
-							 deletable boolean,
-							 background_legend_image_filename character varying,
-							 projection character varying,
-							 submenu character varying,
-							 menu character varying,
-							 defined_by character varying,
-							 open_in_mapview boolean,
-							 provider character varying,
-							 full_copy boolean DEFAULT false
-							 )
+
+CREATE OR REPLACE FUNCTION analysis.update_insert_layers(layerid integer, layerlevel character varying, layername character varying, description character varying, filename character varying, layerorderidx integer, layertype character varying, polygon_outlinecolor character varying, polygon_outlinewidth integer, polygon_fillcolor character varying, polygon_fillopacity integer, feature_display_column character varying, feature_highlight_outlinecolor character varying, feature_highlight_outlinewidth integer, feature_highlight_fillcolor character varying, feature_highlight_fillopacity integer, feature_selected_outlinecolor character varying, feature_selected_outlinewidth integer, enabled boolean, deletable boolean, background_legend_image_filename character varying, projection character varying, submenu character varying, menu character varying, defined_by character varying, open_in_mapview boolean, provider character varying, full_copy boolean DEFAULT false)
   RETURNS boolean AS
 $BODY$
 	DECLARE
@@ -163,6 +137,7 @@ $BODY$
 
 		ELSE
 			INSERT INTO analysis.layers (
+				layerid,
 				layerlevel,
 				layername,
 				description,
@@ -191,6 +166,7 @@ $BODY$
 				provider
 			)
 			VALUES (
+			    _layerid,
 			    TRIM(_layerlevel),
 			    TRIM(_layername),
 			    TRIM(_description),
@@ -224,46 +200,19 @@ $BODY$
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION analysis.update_insert_layers(	integer,
-						character varying,
-						character varying,
-						character varying,
-						character varying,
-						integer,
-						character varying,
-						character varying,
-						integer,
-						character varying,
-						integer,
-						character varying,
-						character varying,
-						integer,
-						character varying,
-						integer,
-						character varying,
-						integer,
-						boolean,
-						boolean,
-						character varying,
-						character varying,
-						character varying,
-						character varying,
-						character varying,
-						boolean,
-						character varying,
-						boolean
-					)
-  OWNER TO estation;
+ALTER FUNCTION analysis.update_insert_layers(integer, character varying, character varying, character varying, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, integer, boolean, boolean, character varying, character varying, character varying, character varying, character varying, boolean, character varying, boolean)
+  OWNER TO estation;  
+  
 
 ALTER SEQUENCE analysis.layers_layerid_seq RESTART WITH 11;
 
-SELECT analysis.update_insert_layers( layerid := 11, layerlevel := 'admin0', layername := 'IGAD level 00', description := 'IGAD level 00', filename := 'RIC_IGAD_00_g2015_2014.geojson', layerorderidx := 5, layertype := 'polygon', polygon_outlinecolor := '#319FD3', polygon_outlinewidth := 2, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'ADMN00NAME', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'IGAD MESA', menu := 'border', defined_by := 'JRC', open_in_mapview := false, provider := 'FAO Gaul 2015', full_copy := false );
-SELECT analysis.update_insert_layers( layerid := 12, layerlevel := 'admin00', layername := 'UoG level 00', description := 'UoG level 00', filename := 'RIC_UOG_00_g2015_2014.geojson', layerorderidx := 5, layertype := 'polygon', polygon_outlinecolor := '#319FD3', polygon_outlinewidth := 2, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'ADM00_NAME', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'UoG', menu := 'border', defined_by := 'JRC', open_in_mapview := false, provider := 'FAO Gaul 2015', full_copy := false );
-SELECT analysis.update_insert_layers( layerid := 13, layerlevel := 'admin00', layername := 'AGRHYMET level 00', description := 'AGRHYMET level 00', filename := 'RIC_CRA_00_g2015_2014.geojson', layerorderidx := 5, layertype := 'polygon', polygon_outlinecolor := '#003366', polygon_outlinewidth := 2, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'ADMIN00_NA', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'AGRHYMET', menu := 'border', defined_by := 'JRC', open_in_mapview := false, provider := 'FAO Gaul 2015', full_copy := false );
-SELECT analysis.update_insert_layers( layerid := 14, layerlevel := 'admin00', layername := 'Africa level 00', description := 'Africa level 00', filename := 'AFR_00_g2015_2014.geojson', layerorderidx := 5, layertype := 'polygon', polygon_outlinecolor := '#FF9900', polygon_outlinewidth := 2, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'ADM00_NAME', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#0000FF', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'Africa', menu := 'border', defined_by := 'JRC', open_in_mapview := false, provider := 'FAO Gaul 2015', full_copy := false );
-SELECT analysis.update_insert_layers( layerid := 15, layerlevel := 'admin00', layername := 'ICPAC level 00', description := 'ICPAC level 00', filename := 'RIC_ICPAC_00_g2015_2014.geojson', layerorderidx := 5, layertype := 'polygon', polygon_outlinecolor := '#000000', polygon_outlinewidth := 2, polygon_fillcolor := 'Transparent', polygon_fillopacity := 100, feature_display_column := 'ADM00_NAME', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := '', projection := NULL, submenu := 'ICPAC', menu := 'border', defined_by := 'JRC', open_in_mapview := false, provider := 'FAO Gaul 2015', full_copy := false );
-SELECT analysis.update_insert_layers( layerid := 16, layerlevel := 'admin00', layername := 'BDMS level 00', description := 'BDMS level 00', filename := 'RIC_BDMS_00_g2015_2014.geojson', layerorderidx := 5, layertype := 'polygon', polygon_outlinecolor := '#319FD3', polygon_outlinewidth := 2, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'ADM00_NAME', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'BDMS', menu := 'border', defined_by := 'JRC', open_in_mapview := false, provider := 'FAO Gaul 2015', full_copy := false );
-SELECT analysis.update_insert_layers( layerid := 17, layerlevel := 'admin00', layername := 'MOI level 00', description := 'MOI level 00', filename := 'RIC_MOI_00_g2015_2014.geojson', layerorderidx := 5, layertype := 'polygon', polygon_outlinecolor := '#319FD3', polygon_outlinewidth := 2, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'ADMIN00_NA', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'MOI', menu := 'border', defined_by := 'JRC', open_in_mapview := false, provider := 'FAO Gaul 2015', full_copy := false );
-SELECT analysis.update_insert_layers( layerid := 18, layerlevel := 'admin00', layername := 'CICOS level 00', description := 'CICOS level 00', filename := 'RIC_CICOS_00_g2015_2014.geojson', layerorderidx := 5, layertype := 'polygon', polygon_outlinecolor := '#319FD3', polygon_outlinewidth := 2, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'ADM00_NA', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'CICOS', menu := 'border', defined_by := 'JRC', open_in_mapview := false, provider := 'FAO Gaul 2015', full_copy := false );
+SELECT analysis.update_insert_layers( layerid := 11, layerlevel := 'admin00', layername := 'IGAD area', description := 'IGAD area', filename := 'RIC_IGAD_00_g2015_2014.geojson', layerorderidx := 5, layertype := 'polygon', polygon_outlinecolor := '#319FD3', polygon_outlinewidth := 2, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'ADMN00NAME', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'IGAD MESA', menu := 'border', defined_by := 'JRC', open_in_mapview := false, provider := 'FAO Gaul 2015', full_copy := false );
+SELECT analysis.update_insert_layers( layerid := 12, layerlevel := 'admin00', layername := 'UoG area', description := 'UoG area', filename := 'RIC_UOG_00_g2015_2014.geojson', layerorderidx := 5, layertype := 'polygon', polygon_outlinecolor := '#319FD3', polygon_outlinewidth := 2, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'ADM00_NAME', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'UoG', menu := 'border', defined_by := 'JRC', open_in_mapview := false, provider := 'FAO Gaul 2015', full_copy := false );
+SELECT analysis.update_insert_layers( layerid := 13, layerlevel := 'admin00', layername := 'AGRHYMET area', description := 'AGRHYMET area', filename := 'RIC_CRA_00_g2015_2014.geojson', layerorderidx := 5, layertype := 'polygon', polygon_outlinecolor := '#003366', polygon_outlinewidth := 2, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'ADMIN00_NA', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'AGRHYMET', menu := 'border', defined_by := 'JRC', open_in_mapview := false, provider := 'FAO Gaul 2015', full_copy := false );
+SELECT analysis.update_insert_layers( layerid := 14, layerlevel := 'admin00', layername := 'Africa area', description := 'Africa area', filename := 'AFR_00_g2015_2014.geojson', layerorderidx := 5, layertype := 'polygon', polygon_outlinecolor := '#FF9900', polygon_outlinewidth := 2, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'ADM00_NAME', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#0000FF', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'Africa', menu := 'border', defined_by := 'JRC', open_in_mapview := false, provider := 'FAO Gaul 2015', full_copy := false );
+SELECT analysis.update_insert_layers( layerid := 15, layerlevel := 'admin00', layername := 'ICPAC area', description := 'ICPAC area', filename := 'RIC_ICPAC_00_g2015_2014.geojson', layerorderidx := 5, layertype := 'polygon', polygon_outlinecolor := '#000000', polygon_outlinewidth := 2, polygon_fillcolor := 'Transparent', polygon_fillopacity := 100, feature_display_column := 'ADM00_NAME', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := '', projection := NULL, submenu := 'ICPAC', menu := 'border', defined_by := 'JRC', open_in_mapview := false, provider := 'FAO Gaul 2015', full_copy := false );
+SELECT analysis.update_insert_layers( layerid := 16, layerlevel := 'admin00', layername := 'BDMS area', description := 'BDMS area', filename := 'RIC_BDMS_00_g2015_2014.geojson', layerorderidx := 5, layertype := 'polygon', polygon_outlinecolor := '#319FD3', polygon_outlinewidth := 2, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'ADM00_NAME', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'BDMS', menu := 'border', defined_by := 'JRC', open_in_mapview := false, provider := 'FAO Gaul 2015', full_copy := false );
+SELECT analysis.update_insert_layers( layerid := 17, layerlevel := 'admin00', layername := 'MOI area', description := 'MOI area', filename := 'RIC_MOI_00_g2015_2014.geojson', layerorderidx := 5, layertype := 'polygon', polygon_outlinecolor := '#319FD3', polygon_outlinewidth := 2, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'ADMIN00_NA', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'MOI', menu := 'border', defined_by := 'JRC', open_in_mapview := false, provider := 'FAO Gaul 2015', full_copy := false );
+SELECT analysis.update_insert_layers( layerid := 18, layerlevel := 'admin00', layername := 'CICOS area', description := 'CICOS area', filename := 'RIC_CICOS_00_g2015_2014.geojson', layerorderidx := 5, layertype := 'polygon', polygon_outlinecolor := '#319FD3', polygon_outlinewidth := 2, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'ADM00_NA', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'CICOS', menu := 'border', defined_by := 'JRC', open_in_mapview := false, provider := 'FAO Gaul 2015', full_copy := false );
 
 ALTER SEQUENCE analysis.layers_layerid_seq RESTART WITH 100;
