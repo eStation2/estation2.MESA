@@ -299,7 +299,6 @@ ALTER TABLE analysis.timeseries_drawproperties
   ADD COLUMN aggregation_max double precision;
 
 
-DROP TABLE IF EXISTS analysis.layers;
 
 CREATE TABLE IF NOT EXISTS analysis.layers
 (
