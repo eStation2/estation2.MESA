@@ -1,3 +1,294 @@
+
+
+CREATE OR REPLACE FUNCTION analysis.update_insert_layers(layerid integer, layerlevel character varying, layername character varying, description character varying, filename character varying, layerorderidx integer, layertype character varying, polygon_outlinecolor character varying, polygon_outlinewidth integer, polygon_fillcolor character varying, polygon_fillopacity integer, feature_display_column character varying, feature_highlight_outlinecolor character varying, feature_highlight_outlinewidth integer, feature_highlight_fillcolor character varying, feature_highlight_fillopacity integer, feature_selected_outlinecolor character varying, feature_selected_outlinewidth integer, enabled boolean, deletable boolean, background_legend_image_filename character varying, projection character varying, submenu character varying, menu character varying, defined_by character varying, open_in_mapview boolean, provider character varying, full_copy boolean DEFAULT false)
+  RETURNS boolean AS
+$BODY$
+	DECLARE
+
+	  _layerid 				ALIAS FOR  $1;
+	  _layerlevel 				ALIAS FOR  $2;
+	  _layername 				ALIAS FOR  $3;
+	  _description 				ALIAS FOR  $4;
+	  _filename 				ALIAS FOR  $5;
+	  _layerorderidx 			ALIAS FOR  $6;
+	  _layertype 				ALIAS FOR  $7;
+	  _polygon_outlinecolor 		ALIAS FOR  $8;
+	  _polygon_outlinewidth 		ALIAS FOR  $9;
+	  _polygon_fillcolor 			ALIAS FOR  $10;
+	  _polygon_fillopacity 			ALIAS FOR  $11;
+	  _feature_display_column 		ALIAS FOR  $12;
+	  _feature_highlight_outlinecolor 	ALIAS FOR  $13;
+	  _feature_highlight_outlinewidth 	ALIAS FOR  $14;
+	  _feature_highlight_fillcolor	  	ALIAS FOR  $15;
+	  _feature_highlight_fillopacity  	ALIAS FOR  $16;
+	  _feature_selected_outlinecolor  	ALIAS FOR  $17;
+	  _feature_selected_outlinewidth  	ALIAS FOR  $18;
+	  _enabled 			  	ALIAS FOR  $19;
+	  _deletable 			  	ALIAS FOR  $20;
+	  _background_legend_image_filename 	ALIAS FOR  $21;
+	  _projection 				ALIAS FOR  $22;
+	  _submenu 				ALIAS FOR  $23;
+	  _menu 				ALIAS FOR  $24;
+	  _defined_by 				ALIAS FOR  $25;
+	  _open_in_mapview			ALIAS FOR  $26;
+	  _provider 				ALIAS FOR  $27;
+	  _full_copy 				ALIAS FOR  $28;
+
+	BEGIN
+		PERFORM * FROM analysis.layers l WHERE l.layerid = _layerid;
+		IF FOUND THEN
+			IF _full_copy THEN
+				UPDATE analysis.layers l
+				SET layerlevel = TRIM(_layerlevel),
+				    layername = TRIM(_layername),
+				    description = TRIM(_description),
+				    filename = TRIM(_filename),
+				    layerorderidx = _layerorderidx,
+				    layertype = TRIM(_layertype),
+				    polygon_outlinecolor = TRIM(_polygon_outlinecolor),
+				    polygon_outlinewidth = _polygon_outlinewidth,
+				    polygon_fillcolor = TRIM(_polygon_fillcolor),
+				    polygon_fillopacity = _polygon_fillopacity,
+				    feature_display_column = TRIM(_feature_display_column),
+				    feature_highlight_outlinecolor = TRIM(_feature_highlight_outlinecolor),
+				    feature_highlight_outlinewidth = _feature_highlight_outlinewidth,
+				    feature_highlight_fillcolor = TRIM(_feature_highlight_fillcolor),
+				    feature_highlight_fillopacity = _feature_highlight_fillopacity,
+				    feature_selected_outlinecolor = TRIM(_feature_selected_outlinecolor),
+				    feature_selected_outlinewidth = _feature_selected_outlinewidth,
+				    enabled = _enabled,
+				    deletable = _deletable,
+				    background_legend_image_filename = TRIM(_background_legend_image_filename),
+				    projection = TRIM(_projection),
+				    submenu = TRIM(_submenu),
+				    menu = TRIM(_menu),
+				    defined_by = TRIM(_defined_by),
+				    open_in_mapview = _open_in_mapview,
+				    provider = TRIM(_provider)
+				WHERE l.layerid = _layerid;
+			ELSE
+				UPDATE analysis.layers l
+				SET layerlevel = TRIM(_layerlevel),
+				    layername = TRIM(_layername),
+				    description = TRIM(_description),
+				    filename = TRIM(_filename),
+				    layerorderidx = _layerorderidx,
+				    layertype = TRIM(_layertype),
+				    -- polygon_outlinecolor = TRIM(_polygon_outlinecolor),
+				    -- polygon_outlinewidth = _polygon_outlinewidth,
+				    -- polygon_fillcolor = TRIM(_polygon_fillcolor),
+				    -- polygon_fillopacity = _polygon_fillopacity,
+				    -- feature_display_column = TRIM(_feature_display_column),
+				    -- feature_highlight_outlinecolor = TRIM(_feature_highlight_outlinecolor),
+				    -- feature_highlight_outlinewidth = _feature_highlight_outlinewidth,
+				    -- feature_highlight_fillcolor = TRIM(_feature_highlight_fillcolor),
+				    -- feature_highlight_fillopacity = _feature_highlight_fillopacity,
+				    -- feature_selected_outlinecolor = TRIM(_feature_selected_outlinecolor),
+				    -- feature_selected_outlinewidth = _feature_selected_outlinewidth,
+				    -- enabled = _enabled,
+				    deletable = _deletable,
+				    background_legend_image_filename = TRIM(_background_legend_image_filename),
+				    projection = TRIM(_projection),
+				    submenu = TRIM(_submenu),
+				    menu = TRIM(_menu),
+				    defined_by = TRIM(_defined_by),
+				    -- open_in_mapview = _open_in_mapview,
+				    provider = TRIM(_provider)
+				WHERE l.layerid = _layerid;
+			END IF;
+
+		ELSE
+			INSERT INTO analysis.layers (
+				layerid,
+				layerlevel,
+				layername,
+				description,
+				filename,
+				layerorderidx,
+				layertype,
+				polygon_outlinecolor,
+				polygon_outlinewidth,
+				polygon_fillcolor,
+				polygon_fillopacity,
+				feature_display_column,
+				feature_highlight_outlinecolor,
+				feature_highlight_outlinewidth,
+				feature_highlight_fillcolor,
+				feature_highlight_fillopacity,
+				feature_selected_outlinecolor,
+				feature_selected_outlinewidth,
+				enabled,
+				deletable,
+				background_legend_image_filename,
+				projection,
+				submenu,
+				menu,
+				defined_by,
+				open_in_mapview,
+				provider
+			)
+			VALUES (
+			    _layerid,
+			    TRIM(_layerlevel),
+			    TRIM(_layername),
+			    TRIM(_description),
+			    TRIM(_filename),
+			    _layerorderidx,
+			    TRIM(_layertype),
+			    TRIM(_polygon_outlinecolor),
+			    _polygon_outlinewidth,
+			    TRIM(_polygon_fillcolor),
+			    _polygon_fillopacity,
+			    TRIM(_feature_display_column),
+			    TRIM(_feature_highlight_outlinecolor),
+			    _feature_highlight_outlinewidth,
+			    TRIM(_feature_highlight_fillcolor),
+			    _feature_highlight_fillopacity,
+			    TRIM(_feature_selected_outlinecolor),
+			    _feature_selected_outlinewidth,
+			    _enabled,
+			    _deletable,
+			    TRIM(_background_legend_image_filename),
+			    TRIM(_projection),
+			    TRIM(_submenu),
+			    TRIM(_menu),
+			    TRIM(_defined_by),
+			    _open_in_mapview,
+			    TRIM(_provider)
+			);
+		END IF;
+		RETURN TRUE;
+	END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION analysis.update_insert_layers(integer, character varying, character varying, character varying, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, integer, boolean, boolean, character varying, character varying, character varying, character varying, character varying, boolean, character varying, boolean)
+  OWNER TO estation;
+
+
+
+
+CREATE OR REPLACE FUNCTION products.update_insert_internet_source(internet_id character varying, defined_by character varying, descriptive_name character varying, description character varying, modified_by character varying, update_datetime timestamp without time zone, url character varying, user_name character varying, password character varying, type character varying, include_files_expression character varying, files_filter_expression character varying, status boolean, pull_frequency integer, datasource_descr_id character varying, frequency_id character varying, start_date bigint, end_date bigint, full_copy boolean DEFAULT false)
+  RETURNS boolean AS
+$BODY$
+	DECLARE
+		_internet_id 	  			ALIAS FOR  $1;
+		_defined_by  				ALIAS FOR  $2;
+		_descriptive_name 			ALIAS FOR  $3;
+		_description   				ALIAS FOR  $4;
+		_modified_by 	  			ALIAS FOR  $5;
+		_update_datetime 	  		ALIAS FOR  $6;
+		_url  						ALIAS FOR  $7;
+		_user_name 					ALIAS FOR  $8;
+		_password  					ALIAS FOR  $9;
+		_type 	  					ALIAS FOR  $10;
+		_include_files_expression 	ALIAS FOR  $11;
+		_files_filter_expression  	ALIAS FOR  $12;
+		_status 	  				ALIAS FOR  $13;
+		_pull_frequency   			ALIAS FOR  $14;
+		_datasource_descr_id   		ALIAS FOR  $15;
+		_frequency_id   			ALIAS FOR  $16;
+		_start_date   				ALIAS FOR  $17;
+		_end_date   				ALIAS FOR  $18;
+
+		_full_copy   				ALIAS FOR  $19;
+	BEGIN
+		PERFORM * FROM products.internet_source i WHERE i.internet_id = TRIM(_internet_id) AND i.defined_by = 'JRC';
+
+		IF FOUND THEN
+			IF _full_copy THEN
+				UPDATE products.internet_source i
+				SET defined_by = TRIM(_defined_by),
+					descriptive_name = TRIM(_descriptive_name),
+					description = TRIM(_description),
+					modified_by = TRIM(_modified_by),
+					update_datetime = _update_datetime,
+					url = TRIM(_url),
+					user_name = TRIM(_user_name),
+					password = TRIM(_password),
+					type = TRIM(_type),
+					include_files_expression = TRIM(_include_files_expression),
+					files_filter_expression = TRIM(_files_filter_expression),
+					status = _status,
+					pull_frequency = _pull_frequency,
+					datasource_descr_id = TRIM(_datasource_descr_id),
+					frequency_id = TRIM(_frequency_id),
+					start_date = _start_date,
+					end_date = _end_date
+				WHERE i.internet_id = TRIM(_internet_id);
+			ELSE
+				UPDATE products.internet_source i
+				SET defined_by = TRIM(_defined_by),
+					-- descriptive_name = TRIM(_descriptive_name),
+					-- description = TRIM(_description),
+					modified_by = TRIM(_modified_by),
+					update_datetime = _update_datetime,
+					-- url = TRIM(_url),
+					-- user_name = TRIM(_user_name),
+					-- password = TRIM(_password),
+					type = TRIM(_type),
+					-- include_files_expression = TRIM(_include_files_expression),
+					-- files_filter_expression = TRIM(_files_filter_expression),
+					status = _status,
+					-- pull_frequency = _pull_frequency,
+					datasource_descr_id = TRIM(_datasource_descr_id),
+					frequency_id = TRIM(_frequency_id)
+					-- , start_date = _start_date
+					-- , end_date = _end_date
+				WHERE i.internet_id = TRIM(_internet_id);
+			END IF;
+		ELSE
+			INSERT INTO products.internet_source (
+				internet_id,
+				defined_by,
+				descriptive_name,
+				description,
+				modified_by,
+				update_datetime,
+				url,
+				user_name,
+				password,
+				type,
+				include_files_expression,
+				files_filter_expression,
+				status,
+				pull_frequency,
+				datasource_descr_id,
+				frequency_id,
+				start_date,
+				end_date
+			)
+			VALUES (
+				TRIM(_internet_id),
+				TRIM(_defined_by),
+				TRIM(_descriptive_name),
+				TRIM(_description),
+				TRIM(_modified_by),
+				_update_datetime,
+				TRIM(_url),
+				TRIM(_user_name),
+				TRIM(_password),
+				TRIM(_type),
+				TRIM(_include_files_expression),
+				TRIM(_files_filter_expression),
+				_status,
+				_pull_frequency,
+				TRIM(_datasource_descr_id),
+				TRIM(_frequency_id),
+				_start_date,
+				_end_date
+			);
+		END IF;
+		RETURN TRUE;
+	END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION products.update_insert_internet_source(character varying, character varying, character varying, character varying, character varying, timestamp without time zone, character varying, character varying, character varying, character varying, character varying, character varying, boolean, integer, character varying, character varying, bigint, bigint, boolean)
+  OWNER TO estation;
+
+
+
 ALTER TABLE analysis.timeseries_drawproperties
   ADD COLUMN aggregation_type character varying DEFAULT 'mean';
 
@@ -6,6 +297,8 @@ ALTER TABLE analysis.timeseries_drawproperties
 
 ALTER TABLE analysis.timeseries_drawproperties
   ADD COLUMN aggregation_max double precision;
+
+
 
 CREATE TABLE IF NOT EXISTS analysis.layers
 (

@@ -208,7 +208,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                         groupHeaderTpl: Ext.create('Ext.XTemplate', '<div class="group-header-style">{name} ({children.length})</div>'),
                         hideGroupedHeader: true,
                         enableGroupingMenu: false,
-                        startCollapsed : false,
+                        startCollapsed : true,
                         groupByText: esapp.Utils.getTranslation('productcategories')  // 'Product category'
                     }],
 

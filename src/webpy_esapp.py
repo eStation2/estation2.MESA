@@ -1804,7 +1804,7 @@ class GetColorSchemes:
                 # legend_name = legend['colorbar']
                 default_legend = legend['default_legend']
 
-                if default_legend == 'True':
+                if default_legend == True:
                     defaultlegend = 'true'
                 else:
                     defaultlegend = 'false'
@@ -3796,33 +3796,39 @@ class Ingestion:
     def GET(self):
         # return web.ctx
         ingestions = querydb.get_ingestions(echo=False)
+        # print ingestions
 
         if hasattr(ingestions, "__len__") and ingestions.__len__() > 0:
             ingest_dict_all = []
             for row in ingestions:
                 ingest_dict = functions.row2dict(row)
 
-                if row.frequency_id == 'e15minute' or row.frequency_id == 'e30minute':
-                    ingest_dict['nodisplay'] = 'no_minutes_display'
-                    # today = datetime.date.today()
-                    # # week_ago = today - datetime.timedelta(days=7)
-                    # week_ago = datetime.datetime(2015, 8, 27, 00, 00)   # .strftime('%Y%m%d%H%S')
-                    # # kwargs.update({'from_date': week_ago})  # datetime.date(2015, 08, 27)
-                    # kwargs = {'product_code': row.productcode,
-                    #           'sub_product_code': row.subproductcode,
-                    #           'version': row.version,
-                    #           'mapset': row.mapsetcode,
-                    #           'from_date': week_ago}
-                    # dataset = Dataset(**kwargs)
-                    # completeness = dataset.get_dataset_normalized_info()
+                if row.mapsetcode != None and row.mapsetcode != '':
+                    if row.frequency_id == 'e15minute' or row.frequency_id == 'e30minute':
+                        ingest_dict['nodisplay'] = 'no_minutes_display'
+                        # today = datetime.date.today()
+                        # # week_ago = today - datetime.timedelta(days=7)
+                        # week_ago = datetime.datetime(2015, 8, 27, 00, 00)   # .strftime('%Y%m%d%H%S')
+                        # # kwargs.update({'from_date': week_ago})  # datetime.date(2015, 08, 27)
+                        # kwargs = {'product_code': row.productcode,
+                        #           'sub_product_code': row.subproductcode,
+                        #           'version': row.version,
+                        #           'mapset': row.mapsetcode,
+                        #           'from_date': week_ago}
+                        # dataset = Dataset(**kwargs)
+                        # completeness = dataset.get_dataset_normalized_info()
+                    else:
+                        kwargs = {'product_code': row.productcode,
+                                  'sub_product_code': row.subproductcode,
+                                  'version': row.version,
+                                  'mapset': row.mapsetcode}
+                        # print kwargs
+                        dataset = Dataset(**kwargs)
+                        completeness = dataset.get_dataset_normalized_info()
+                        ingest_dict['completeness'] = completeness
+                        ingest_dict['nodisplay'] = 'false'
                 else:
-                    kwargs = {'product_code': row.productcode,
-                              'sub_product_code': row.subproductcode,
-                              'version': row.version,
-                              'mapset': row.mapsetcode}
-                    dataset = Dataset(**kwargs)
-                    completeness = dataset.get_dataset_normalized_info()
-                    ingest_dict['completeness'] = completeness
+                    ingest_dict['completeness'] = {}
                     ingest_dict['nodisplay'] = 'false'
 
                 ingest_dict_all.append(ingest_dict)
