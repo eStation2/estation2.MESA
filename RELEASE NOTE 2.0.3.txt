@@ -1,8 +1,11 @@
 #
 #   Release Note for 2.0.3
 #   Changes with respect to 2.0.2 - Unless specification, they refer to Apps.rpm package.
+#   The delivered packages for 2.0.3 are:
 #
-
+#       eStation2-Apps-2.0.3-12.x86_64.rpm
+#       eStation2-Docs-2.0.3-3.x86_64.rpm
+#
 1. BUG FIXING
 -------------
 

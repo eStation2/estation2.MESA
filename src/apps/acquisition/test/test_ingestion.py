@@ -657,7 +657,7 @@ class TestIngestion(unittest.TestCase):
         ingestion.pre_process_ecmwf_mars(tmpdir, date_fileslist, logger)
 
         self.assertEqual(1, 1)
-    def test_ingest_chirps(self):
+    def test_ingest_ecmwf_rain(self):
 
         date_fileslist = ['/data/ingest/test/ope_africa_rain_20160221.zip']
         in_date = '20160221'
@@ -740,3 +740,39 @@ class TestIngestion(unittest.TestCase):
             ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
 
             #self.assertEqual(1, 1)
+
+    def test_ingest_ecmwf_evtp(self):
+
+        date_fileslist = ['/data/ingest/ope_africa_evpt_20160801.zip']
+        in_date = '20160801'
+        productcode = 'ecmwf-evpt'
+        productversion = 'OPE'
+        subproductcode = '10d'
+        mapsetcode = 'ECMWF-Africa-25km'
+        datasource_descrID='ECMWF:MARS:EVPT:OPE'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
+                                                                              source_id=datasource_descrID):
+
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
