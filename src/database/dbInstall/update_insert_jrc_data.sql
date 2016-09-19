@@ -5987,3 +5987,6 @@ SELECT products.update_insert_spirits(  productcode := 'tamsat-rfe', subproductc
 
 
 ALTER SEQUENCE analysis.layers_layerid_seq RESTART WITH 100;
+
+
+SELECT * FROM products.populate_geoserver();

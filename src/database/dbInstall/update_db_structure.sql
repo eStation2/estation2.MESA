@@ -1,3 +1,135 @@
+DROP TABLE products.geoserver;
+
+CREATE TABLE products.geoserver
+(
+  geoserver_id serial NOT NULL,
+  productcode character varying NOT NULL,
+  subproductcode character varying NOT NULL,
+  version character varying NOT NULL,
+  defined_by character varying NOT NULL,
+  activated boolean NOT NULL DEFAULT false,
+  startdate bigint,
+  enddate bigint,
+  CONSTRAINT geoserver_pk PRIMARY KEY (geoserver_id),
+  CONSTRAINT product_geoserver_fk FOREIGN KEY (productcode, subproductcode, version)
+      REFERENCES products.product (productcode, subproductcode, version) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE CASCADE
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE products.geoserver
+  OWNER TO estation;
+COMMENT ON TABLE products.geoserver
+  IS 'Define which products/versions/subproducts have to be synchronized.';
+
+
+
+CREATE OR REPLACE FUNCTION products.populate_geoserver(full_copy boolean DEFAULT FALSE)
+RETURNS boolean AS
+$BODY$
+DECLARE
+
+	_full_copy	ALIAS FOR  $1;
+
+	prods CURSOR FOR SELECT productcode, subproductcode, version, defined_by, FALSE as activated, NULL as "startdate", NULL as "enddate"
+		     FROM products.product
+		     WHERE product_type != 'Native';
+
+	prods_row RECORD;
+
+	_productcode VARCHAR;
+	_subproductcode VARCHAR;
+	_version VARCHAR;
+	_defined_by VARCHAR;
+	_activated BOOLEAN;
+	_startdate BIGINT;
+	_enddate BIGINT;
+BEGIN
+	OPEN prods;
+
+	LOOP
+	FETCH prods INTO prods_row;
+		EXIT WHEN NOT FOUND;
+
+		_productcode = prods_row.productcode;
+		_subproductcode = prods_row.subproductcode;
+		_version  = prods_row.version;
+		_defined_by  = prods_row.defined_by;
+		_activated  = prods_row.activated;
+		_startdate  = prods_row.startdate;
+		_enddate = prods_row.enddate;
+
+		PERFORM * FROM products.geoserver g
+		WHERE g.productcode = TRIM(_productcode)
+		  AND g.subproductcode = TRIM(_subproductcode)
+		  AND g.version = TRIM(_version);
+
+		IF FOUND THEN
+			-- RAISE NOTICE 'START UPDATING Product';
+			IF _full_copy THEN
+				UPDATE products.geoserver g
+				SET defined_by = TRIM(_defined_by),
+				    activated = _activated,
+				    startdate = _startdate,
+				    enddate = _enddate
+				WHERE g.productcode = TRIM(_productcode)
+				  AND g.subproductcode = TRIM(_subproductcode)
+				  AND g.version = TRIM(_version);
+			ELSE
+				UPDATE products.geoserver g
+				SET defined_by = TRIM(_defined_by)
+				 -- activated = _activated,
+				 -- startdate = _startdate,
+				 -- enddate = _enddate
+				WHERE g.productcode = TRIM(_productcode)
+				  AND g.subproductcode = TRIM(_subproductcode)
+				  AND g.version = TRIM(_version);
+			END IF;
+			-- RAISE NOTICE 'Product updated';
+		ELSE
+			-- RAISE NOTICE 'START INSERTING Product';
+
+			INSERT INTO products.geoserver (
+				productcode,
+				subproductcode,
+				version,
+				defined_by,
+				activated,
+				startdate,
+				enddate
+			)
+			VALUES (
+			  TRIM(_productcode),
+			  TRIM(_subproductcode),
+			  TRIM(_version),
+			  TRIM(_defined_by),
+			  _activated,
+			  _startdate,
+			  _enddate
+			);
+
+			-- RAISE NOTICE 'Product inserted';
+		END IF;
+	END LOOP;
+	CLOSE prods;
+
+	RETURN TRUE;
+
+	EXCEPTION
+		WHEN numeric_value_out_of_range THEN
+			RAISE NOTICE 'ERROR: numeric_value_out_of_range.';
+			RETURN FALSE;
+
+		WHEN OTHERS THEN
+			RAISE NOTICE 'ERROR...';
+			RAISE NOTICE '% %', SQLERRM, SQLSTATE;
+			RETURN FALSE;
+
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE;
+
 
 
 CREATE OR REPLACE FUNCTION analysis.update_insert_layers(layerid integer, layerlevel character varying, layername character varying, description character varying, filename character varying, layerorderidx integer, layertype character varying, polygon_outlinecolor character varying, polygon_outlinewidth integer, polygon_fillcolor character varying, polygon_fillopacity integer, feature_display_column character varying, feature_highlight_outlinecolor character varying, feature_highlight_outlinewidth integer, feature_highlight_fillcolor character varying, feature_highlight_fillopacity integer, feature_selected_outlinecolor character varying, feature_selected_outlinewidth integer, enabled boolean, deletable boolean, background_legend_image_filename character varying, projection character varying, submenu character varying, menu character varying, defined_by character varying, open_in_mapview boolean, provider character varying, full_copy boolean DEFAULT false)

@@ -178,7 +178,7 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
                         img._nodata = nodata
                         with img.clip(geom) as clipped:
                             # Save clipped image (for debug only)
-                            # clipped.save(dataset.fullpath+'clipped_'+productfilename)
+                            # clipped.save('/data/processing/exchange/clipped_test.tif')
                             mx = clipped.array()
 
                     nodata_array_masked = ma.masked_equal(mx, nodata)
