@@ -235,11 +235,13 @@ def existsRemote(host, path, user=None):
 
     try:
         if geoserverREST.sshKeyAgentParam == '':
-            status = subprocess.call(
-                ['ssh', my_host, 'test -f {}'.format(pipes.quote(path))])
+            status = subprocess.call( '{} {} {} {} {} {}'.format(geoserverREST.sshKeyAgentParam,'ssh', my_host, 'test', '-f', pipes.quote(path)), shell=True )
+#            status = subprocess.call(
+#                ['ssh', my_host, 'test -f {}'.format(pipes.quote(path))])
         else:
-            status = subprocess.call(
-                 [geoserverREST.sshKeyAgentParam,'ssh', my_host, 'test', '-f', pipes.quote(path)], shell=True)
+            status = subprocess.call( '{} {} {} {} {} {}'.format(geoserverREST.sshKeyAgentParam,'ssh', my_host, 'test', '-f', pipes.quote(path)), shell=True )
+#            status = subprocess.call(
+#                 [geoserverREST.sshKeyAgentParam,'ssh', my_host, 'test', '-f', pipes.quote(path)], shell=True)
 
     except:
         logger.debug('SSH command failed')
@@ -266,8 +268,10 @@ def uploadRemote(host, local_path, target_path, user=None):
             thisCommand='{} ssh {} mkdir -p {}'.format(geoserverREST.sshKeyAgentParam, my_host, subdir)
             status = subprocess.call(thisCommand, shell=True)
         else:
-            status = subprocess.call(
-                [geoserverREST.sshKeyAgentParam,'ssh', my_host, 'mkdir -p {0}'.format(subdir)], shell=True)
+            thisCommand='{} ssh {} mkdir -p {}'.format(geoserverREST.sshKeyAgentParam, my_host, subdir)
+            status = subprocess.call(thisCommand, shell=True)
+#            status = subprocess.call(
+#                [geoserverREST.sshKeyAgentParam,'ssh', my_host, 'mkdir -p {0}'.format(subdir)], shell=True)
     except:
         logger.error('UploadRemote SSH command failed to create remote dir. Exit')
         return False
@@ -278,8 +282,10 @@ def uploadRemote(host, local_path, target_path, user=None):
             thisCommand='{} scp {} {}:{}'.format(geoserverREST.sshKeyAgentParam, local_path, my_host,target_path)
             status = subprocess.call(thisCommand, shell=True)
         else:
-            status = subprocess.call(
-                        [geoserverREST.sshKeyAgentParam,'scp', local_path, '{0}:{1}'.format(my_host,target_path)])
+            thisCommand='{} scp {} {}:{}'.format(geoserverREST.sshKeyAgentParam, local_path, my_host,target_path)
+            status = subprocess.call(thisCommand, shell=True)
+#            status = subprocess.call(
+#                        [geoserverREST.sshKeyAgentParam,'scp', local_path, '{0}:{1}'.format(my_host,target_path)])
     except:
         logger.error('UploadRemote SSH command failed to copy data. Exit')
         return True
@@ -315,6 +321,7 @@ def uploadAndRegisterRaster(service, product, subproduct, version, mapset, date,
     if not geoserverREST.isRaster(workspace, coverage):
         # Ensure file is uploaded
         if not existsRemote(geoserverREST.restHost,remoteFilepath, user=geoserverREST.sshUser):
+            print 'not exists remote'
             if uploadRemote(geoserverREST.restHost, localFilepath, remoteFilepath, user=geoserverREST.sshUser):
                 logger.error('Cannot upload file {0}.'.format(localFilepath))
                 status = True
