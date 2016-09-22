@@ -4,6 +4,8 @@
 Ext.define('Ext.event.gesture.EdgeSwipe', {
     extend: 'Ext.event.gesture.Swipe',
 
+    priority: 800,
+
     handledEvents: [
         'edgeswipe',
         'edgeswipestart',
@@ -12,6 +14,11 @@ Ext.define('Ext.event.gesture.EdgeSwipe', {
     ],
 
     inheritableStatics: {
+        /**
+         * @private
+         * @static
+         * @inheritable
+         */
         NOT_NEAR_EDGE: 'Not Near Edge'
     },
 
@@ -81,33 +88,33 @@ Ext.define('Ext.event.gesture.EdgeSwipe', {
             distance = deltaY;
         }
 
-        this.direction = this.direction || direction;
+        direction = this.direction || (this.direction = direction);
 
         // Invert the distance if we are going up or left so the distance is a positive number FROM the side
-        if (this.direction == 'up') {
+        if (direction === 'up') {
             distance = deltaY * -1;
-        } else if (this.direction == 'left') {
+        } else if (direction === 'left') {
             distance = deltaX * -1;
         }
 
         this.distance = distance;
 
-        if (distance == 0) {
+        if (!distance) {
             return this.fail(this.self.DISTANCE_NOT_ENOUGH);
         }
 
         if (!this.started) {
             // If this is the first move, check if we are close enough to the edge to begin
-            if (this.direction == 'right' && this.startX > minDistance) {
+            if (direction === 'right' && this.startX > minDistance) {
                 return this.fail(this.self.NOT_NEAR_EDGE);
             }
-            else if (this.direction == 'down' &&  this.startY > minDistance) {
+            else if (direction === 'down' &&  this.startY > minDistance) {
                 return this.fail(this.self.NOT_NEAR_EDGE);
             }
-            else if (this.direction == 'left' &&  (elementWidth - this.startX) > minDistance) {
+            else if (direction === 'left' &&  (elementWidth - this.startX) > minDistance) {
                 return this.fail(this.self.NOT_NEAR_EDGE);
             }
-            else if (this.direction == 'up' && (elementHeight - this.startY) > minDistance) {
+            else if (direction === 'up' && (elementHeight - this.startY) > minDistance) {
                 return this.fail(this.self.NOT_NEAR_EDGE);
             }
 
@@ -117,15 +124,15 @@ Ext.define('Ext.event.gesture.EdgeSwipe', {
 
             this.fire('edgeswipestart', e, {
                 touch: touch,
-                direction: this.direction,
-                distance: this.distance,
+                direction: direction,
+                distance: distance,
                 duration: duration
             });
         } else {
             this.fire('edgeswipe', e, {
                 touch: touch,
-                direction: this.direction,
-                distance: this.distance,
+                direction: direction,
+                distance: distance,
                 duration: duration
             });
         }
@@ -151,5 +158,15 @@ Ext.define('Ext.event.gesture.EdgeSwipe', {
             touch: e.changedTouches[0]
         });
         return false;
+    },
+
+    reset: function() {
+        var me = this;
+
+        me.started = me.direction = me.isHorizontal = me.isVertical = me.startX =
+            me.startY = me.startTime = me.distance = null;
     }
+}, function(EdgeSwipe) {
+    var gestures = Ext.manifest.gestures;
+    EdgeSwipe.instance = new EdgeSwipe(gestures && gestures.edgeSwipe);
 });

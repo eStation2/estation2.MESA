@@ -183,8 +183,12 @@ Ext.define('Ext.dd.DragDropManager', {
         me.init();
 
         Ext.getDoc().on({
-            //TODO delay: 1, // delay to let other mouseup events occur before us
-            mouseup: me.handleMouseUp,
+            // let other mouseup events occur before us
+            mouseup: {
+                fn: me.handleMouseUp,
+                capture: false,
+                priority: -1000
+            },
 
             // Mousemove events do not need to be captured because they do not contend
             // with scroll events - they're only processed when a drag has begun.
@@ -419,7 +423,7 @@ Ext.define('Ext.dd.DragDropManager', {
         var targets = this.getRelated(oDD, true),
             i, len;
         for (i=0, len=targets.length;i<len;++i) {
-            if (targets[i].id == oTargetDD.id) {
+            if (targets[i].id === oTargetDD.id) {
                 return true;
             }
         }
@@ -433,7 +437,7 @@ Ext.define('Ext.dd.DragDropManager', {
      * returns "object", oDD.constructor.toString() always returns
      * "DragDrop" and not the name of the subclass.  So for now it just
      * evaluates a well-known variable in DragDrop.
-     * @param {Object} the object to evaluate
+     * @param {Object} oDD the object to evaluate
      * @return {Boolean} true if typeof oDD = DragDrop
      */
     isTypeOfDD: function (oDD) {
@@ -534,11 +538,18 @@ Ext.define('Ext.dd.DragDropManager', {
         if (current) {
             current.b4StartDrag(x, y);
             current.startDrag(x, y);
-            dragEl = current.getDragEl();
+            
+            dragEl = Ext.fly(current.getDragEl());
 
             // Add current drag class to dragged element
             if (dragEl) {
-                Ext.fly(dragEl).addCls(me.dragCls);
+                dragEl.addCls(me.dragCls);
+                
+                // This will allow pointer events to bubble through the shim iframe
+                // to the parent document
+                if (dragEl.shim) {
+                    dragEl.shim.el.addCls(me.dragCls);
+                }
             }
         }
         me.dragThreshMet = true;
@@ -607,11 +618,15 @@ Ext.define('Ext.dd.DragDropManager', {
         // Fire the drag end event for the item that was dragged
         if (current) {
             if (me.dragThreshMet) {
-
                 // Remove current drag class from dragged element
-                dragEl = current.getDragEl();
+                dragEl = Ext.fly(current.getDragEl());
+                
                 if (dragEl) {
-                    Ext.fly(dragEl).removeCls(me.dragCls);
+                    dragEl.removeCls(me.dragCls);
+                    
+                    if (dragEl.shim) {
+                        dragEl.shim.el.removeCls(me.dragCls);
+                    }
                 }
 
                 current.b4EndDrag(e);
@@ -689,22 +704,13 @@ Ext.define('Ext.dd.DragDropManager', {
             mousePoint = me.currentPoint,
             currentX = mousePoint.x,
             currentY = mousePoint.y,
-            dragEl,
-            oldDragElTop,
-            overTarget,
-            overTargetEl,
             allTargets = [],
             oldOvers  = [],  // cache the previous dragOver array
             outEvts   = [],
             overEvts  = [],
             dropEvts  = [],
             enterEvts = [],
-            needsSort,
-            i,
-            len,
-            sGroup,
-            zoom = isTouch ? document.documentElement.clientWidth / window.innerWidth : 1,
-            overDragEl;
+            dragEl, overTarget, overTargetEl, needsSort, i, len, sGroup, overDragEl;
 
         // If the user did the mouse up outside of the window, we could
         // get here even though we have ended the drag.
@@ -729,7 +735,9 @@ Ext.define('Ext.dd.DragDropManager', {
             if (overDragEl) {
                 dragEl.style.visibility = 'hidden';
             }
-            e.target = document.elementFromPoint(currentX / zoom, currentY/ zoom);
+            // In Win10, dragging outside the browser window will cause elementFromPoint to
+            // return null. In these cases, default to the document.
+            e.target = me.elementFromPoint(currentX, currentY) || document.documentElement;
             if (overDragEl) {
                 dragEl.style.visibility = 'visible';
             }
@@ -767,8 +775,7 @@ Ext.define('Ext.dd.DragDropManager', {
         // This is preparatory to seeing which one(s) we are currently over
         // Begin by iterating through the ddGroups of which the dragCurrent is a member
         for (sGroup in dragCurrent.groups) {
-
-            if ("string" != typeof sGroup) {
+            if ("string" !== typeof sGroup) {
                 continue;
             }
 
@@ -787,7 +794,7 @@ Ext.define('Ext.dd.DragDropManager', {
                     (overTarget.isTarget) &&
                     (!overTarget.isLocked()) &&
                     (Ext.fly(overTargetEl).isVisible(true)) &&
-                    ((overTarget != dragCurrent) || (dragCurrent.ignoreSelf === false))) {
+                    ((overTarget !== dragCurrent) || (dragCurrent.ignoreSelf === false))) {
 
                     // If notifyOccluded set, we use mouse position
                     if (me.notifyOccluded) {
@@ -900,6 +907,21 @@ Ext.define('Ext.dd.DragDropManager', {
 
     /**
      * @private
+     * Wrap Ext.Element.fromPagePoint.
+     *
+     * This is because in RTL mode we need to reverse any RTLification of the X coordinate
+     * because document.elementFromPoint uses LTR.
+     */
+    elementFromPoint: function(x, y) {
+        if (Ext.rootInheritedState.rtl) {
+            x = Ext.Element.getViewportWidth() - x;
+        }
+
+        return Ext.Element.fromPagePoint(x, y, true);
+    },
+
+    /**
+     * @private
      * Collects the z-index of the passed element, looking up the parentNode axis to find an absolutely positioned ancestor
      * which is able to yield a z-index. If found to be not absolutely positionedm returns -1.
      *
@@ -952,7 +974,7 @@ Ext.define('Ext.dd.DragDropManager', {
         //} else if (dds.length == 1) {
 
 
-        if (len == 1) {
+        if (len === 1) {
             winner = dds[0];
         } else {
             // Loop through the targeted items
@@ -997,7 +1019,7 @@ Ext.define('Ext.dd.DragDropManager', {
     refreshCache: function(groups) {
         var sGroup, i, oDD, loc;
         for (sGroup in groups) {
-            if ("string" != typeof sGroup) {
+            if ("string" !== typeof sGroup) {
                 continue;
             }
             for (i in this.ids[sGroup]) {
@@ -1278,9 +1300,9 @@ Ext.define('Ext.dd.DragDropManager', {
             var p = n2.parentNode,
                 s = n2.nextSibling;
 
-            if (s == n1) {
+            if (s === n1) {
                 p.insertBefore(n1, n2);
-            } else if (n2 == n1.nextSibling) {
+            } else if (n2 === n1.nextSibling) {
                 p.insertBefore(n2, n1);
             } else {
                 n1.parentNode.replaceChild(n2, n1);
@@ -1355,7 +1377,7 @@ Ext.define('Ext.dd.DragDropManager', {
      * Numeric array sort function
      * @param {Number} a
      * @param {Number} b
-     * @returns {Number} positive, negative or 0
+     * @return {Number} positive, negative or 0
      */
     numericSort: function(a, b) {
         return (a - b);
@@ -1386,7 +1408,7 @@ Ext.define('Ext.dd.DragDropManager', {
         return false;
     }
 }, function(DragDropManager) {
-    Ext.onReady(function() {
+    Ext.onInternalReady(function() {
         DragDropManager.addListeners();
     });
 });

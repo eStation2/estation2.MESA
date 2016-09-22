@@ -6,17 +6,18 @@ Ext.define('esapp.view.analysis.analysisMainModel', {
         products: {
             model: 'esapp.model.TimeseriesProduct'
             ,session: true
-            ,autoLoad:false
+            ,autoLoad: true
             ,loadMask: true
 
             ,sorters: {property: 'order_index', direction: 'DESC'}
 
             ,grouper:{
-                     // property: 'cat_descr_name',
                      groupFn : function (item) {
-                         return "<span style='display: none;'>" + item.get('order_index') + "</span>" + esapp.Utils.getTranslation(item.get('category_id'))
+                         return esapp.Utils.getTranslation(item.get('category_id'));
+                         //return "<span style='display: none;'>" + item.get('order_index') + "</span>" + esapp.Utils.getTranslation(item.get('category_id'))
                          //return item.get('cat_descr_name')
                      },
+                     property: 'order_index',
                      sortProperty: 'order_index'
             }
             ,listeners: {

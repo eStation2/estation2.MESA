@@ -35,6 +35,7 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
     totfiles:0,
     missingfiles:0,
     tooltipintervals: '',
+    spriteXposition: 100,
 
     margin:0,
     bodyPadding:0,
@@ -59,9 +60,17 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
             //    widgettooltip.show();
             //},
             afterrender: function () {
+
                 Ext.create('Ext.tip.ToolTip', {
                     id: me.getId() + '_tooltip',
                     target: me.getId(),
+                    //floating: true,
+                    //constrain: true,
+                    //constrainTo: me,
+                    //alwaysOnTop: false,
+                    //toFrontOnShow: false,
+                    maxHeight: 400,
+                    autoScroll: true,
                     disabled: true,
                     trackMouse: false,
                     autoHide: false,
@@ -74,20 +83,22 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
                     listeners: {
                         close: function() {
                             this.disable();
+                            // Ext.util.Observable.capture(this, function(e){console.log(this.id + ': ' + e);});
                         }
                     }
                 });
 
                 this.getEl().on('click', function() {
-                    var widgettooltip = Ext.getCmp(me.getId() + '_tooltip');
-                    widgettooltip.html = me.tooltipintervals;
-                    widgettooltip.enable();
-                    widgettooltip.show();
-                    //console.info(me);
-                    //me.down('cartesian').updateLayout({defer: true, isRoot: true});
-                    //me.down('cartesian').redraw();
+                    if (me.tooltipintervals != ''){
+                        var widgettooltip = Ext.getCmp(me.getId() + '_tooltip');
+                        widgettooltip.html = me.tooltipintervals;
+                        widgettooltip.enable();
+                        widgettooltip.show();
+                        //console.info(me);
+                        //me.down('cartesian').updateLayout({defer: true, isRoot: true});
+                        //me.down('cartesian').redraw();
+                    }
                 });
-
             }
         };
 
@@ -120,8 +131,9 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
             sprites:  [{
                 type: 'text',
                 text: esapp.Utils.getTranslation('files') + ': ' + me.totfiles,
-                fontSize: fontsize,
-                x: 120,
+                fontSize: fontsize+1,
+                fontWeight: 'bold',
+                x: me.spriteXposition,
                 y: spriteY
             },{
                 type: 'text',
@@ -135,12 +147,14 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
                 type: 'text',
                 text: me.firstdate,
                 fontSize: fontsize,
+                fontWeight: 'bold',
                 x: 0,
                 y: spriteY
             },{
                 type: 'text',
                 text: me.lastdate,
                 fontSize: fontsize,
+                fontWeight: 'bold',
                 textAlign: 'middle',
                 x: 286+25,
                 y: spriteY

@@ -46,18 +46,11 @@ Ext.define('Ext.plugin.Viewport', {
 
     alias: 'plugin.viewport',
 
-    /**
-     * @cfg {Number} [maxUserScale=1]
-     * The maximum zoom scale. Only applicable for touch devices. Set this to 1 to
-     * disable zooming.  Setting this to any value other than "1" will disable all
-     * multi-touch gestures.
-     */
-
     setCmp: function (cmp) {
         this.cmp = cmp;
 
         if (cmp && !cmp.isViewport) {
-            this.apply(cmp);
+            this.decorate(cmp);
             if (cmp.renderConfigs) {
                 cmp.flushRenderConfigs();
             }
@@ -66,7 +59,7 @@ Ext.define('Ext.plugin.Viewport', {
     },
 
     statics: {
-        apply: function (target) {
+        decorate: function (target) {
             Ext.applyIf(target.prototype || target, {
                 ariaRole: 'application',
 
@@ -83,41 +76,75 @@ Ext.define('Ext.plugin.Viewport', {
                     this.setupViewport();
                 },
 
+                // Because we don't stamp the size until onRender, our size model
+                // won't return correctly. As we're always going to be configured,
+                // just return the value here
+                getSizeModel: function() {
+                    var configured = Ext.layout.SizeModel.configured;
+                    return configured.pairsByHeightOrdinal[configured.ordinal];
+                },
+
                 handleViewportResize: function () {
                     var me = this,
                         Element = Ext.dom.Element,
                         width = Element.getViewportWidth(),
                         height = Element.getViewportHeight();
 
-                    if (width != me.width || height != me.height) {
+                    if (width !== me.width || height !== me.height) {
                         me.setSize(width, height);
                     }
                 },
 
                 setupViewport : function() {
                     var me = this,
-                        html = document.body.parentNode,
-                        el = me.el = Ext.getBody();
+                        el = document.body,
+                        DomScroller = Ext.scroll.DomScroller;
+
+                    // By default document.body is monitored by a special DomScroller singleton so that
+                    // the global scroll event fires when the document scrolls.
+                    // A Viewport's Scroller will take over from this one.
+                    if (DomScroller.document) {
+                        DomScroller.document = DomScroller.document.destroy();
+                    }
+
+                    // Here in the (perhaps unlikely) case that the body dom el doesn't yet have an id,
+                    // we want to give it the same id as the viewport component so getCmp lookups will
+                    // be able to find the owner component.
+                    //
+                    // Note that nothing says that components that use configured elements have to have
+                    // matching ids (they probably won't), but this is at least making the attempt so that
+                    // getCmp *may* be able to find the component. However, in these cases, it's really
+                    // better to use Component#fromElement to find the owner component.
+                    if (!el.id) {
+                        el.id = me.id;
+                    }
+
+                    // In addition, let's stamp on the componentIdAttribute so lookups using Component's
+                    // fromElement will work.
+                    el.setAttribute(Ext.Component.componentIdAttribute, me.id);
+
+                    el = me.el = Ext.getBody();
+
+                    Ext.fly(document.documentElement).addCls(me.viewportCls);
+                    el.setHeight = el.setWidth = Ext.emptyFn;
+                    el.dom.scroll = 'no';
+                    me.allowDomMove = false;
+                    me.renderTo = el;
+
+                    if (Ext.supports.Touch) {
+                        me.addMeta('apple-mobile-web-app-capable', 'yes');
+                    }
 
                     // Get the DOM disruption over with before the Viewport renders and begins a layout
                     Ext.getScrollbarSize();
 
-                    // Clear any dimensions, we will size later on
+                    // Clear any dimensions, we will size later on in onRender
                     me.width = me.height = undefined;
-
-                    Ext.fly(html).addCls(me.viewportCls);
-                    if (me.autoScroll) {
-                        Ext.fly(html).setStyle(me.getOverflowStyle());
-                        delete me.autoScroll;
-                    }
-                    el.setHeight = el.setWidth = Ext.emptyFn;
-                    el.dom.scroll = 'no';
-                    me.allowDomMove = false;
-                    me.renderTo = me.el;
-
-                    if (Ext.supports.Touch) {
-                        me.initMeta();
-                    }
+                    
+                    // ... but take the measurements now because doing that in onRender
+                    // will cause a costly reflow which we just forced with getScrollbarSize()
+                    me.initialViewportHeight = Ext.Element.getViewportHeight();
+                    me.initialViewportWidth  = Ext.Element.getViewportWidth();
                 },
 
                 afterLayout: function(layout) {
@@ -133,9 +160,13 @@ Ext.define('Ext.plugin.Viewport', {
                     me.callParent(arguments);
 
                     // Important to start life as the proper size (to avoid extra layouts)
-                    // But after render so that the size is not stamped into the body
-                    me.width = Ext.Element.getViewportWidth();
-                    me.height = Ext.Element.getViewportHeight();
+                    // But after render so that the size is not stamped into the body,
+                    // although measurement has to take place before render to avoid
+                    // causing a reflow.
+                    me.width  = me.initialViewportWidth;
+                    me.height = me.initialViewportHeight;
+                    
+                    me.initialViewportWidth = me.initialViewportHeight = null;
 
                     // prevent touchmove from panning the viewport in mobile safari
                     if (Ext.supports.TouchEvents) {
@@ -159,12 +190,23 @@ Ext.define('Ext.plugin.Viewport', {
                         me.initInheritedState(me.inheritedState = root,
                             me.inheritedStateInner = Ext.Object.chain(root));
                     } else {
-                        me.callParent([ inheritedState, inheritedStateInner ]);
+                        me.callParent([inheritedState, inheritedStateInner]);
                     }
                 },
 
                 beforeDestroy: function(){
-                    var me = this;
+                    var me = this,
+                        root = Ext.rootInheritedState,
+                        key;
+
+                    // Clear any properties from the inheritedState so we don't pollute the
+                    // global namespace. If we have a rtl flag set, leave it alone because it's
+                    // likely we didn't write it
+                    for (key in root) {
+                        if (key !== 'rtl') {
+                            delete root[key];
+                        }
+                    }
 
                     me.removeUIFromElement();
                     me.el.removeCls(me.baseCls);
@@ -180,19 +222,15 @@ Ext.define('Ext.plugin.Viewport', {
                     Ext.getHead().appendChild(meta);
                 },
 
-                initMeta: function() {
-                    var me = this,
-                        maxScale = me.maxUserScale || 1;
-
-                    me.addMeta('viewport', 'width=device-width, initial-scale=1, maximum-scale=' +
-                           maxScale + ', user-scalable=' + (maxScale !== 1 ? 'yes' : 'no'));
-                    me.addMeta('apple-mobile-web-app-capable', 'yes');
-                },
-
                 privates: {
                     // override here to prevent an extraneous warning
                     applyTargetCls: function (targetCls) {
-                        this.el.addCls(targetCls);
+                        var el = this.el;
+                        if (el === this.getTargetEl()) {
+                            this.el.addCls(targetCls);
+                        } else {
+                            this.callParent([targetCls]);
+                        }
                     },
                     
                     // Override here to prevent tabIndex set/reset on the body
@@ -210,6 +248,10 @@ Ext.define('Ext.plugin.Viewport', {
                         if (el) {
                             el.restoreChildrenTabbableState();
                         }
+                    },
+
+                    getOverflowEl: function() {
+                        return Ext.get(document.documentElement);
                     }
                 }
             });
@@ -231,5 +273,5 @@ Ext.define('Ext.plugin.Viewport', {
     }
 },
 function (Viewport) {
-    Viewport.prototype.apply = Viewport.apply;
+    Viewport.prototype.decorate = Viewport.decorate;
 });

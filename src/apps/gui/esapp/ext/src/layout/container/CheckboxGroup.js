@@ -25,7 +25,7 @@ Ext.define('Ext.layout.container.CheckboxGroup', {
     ],
 
     renderTpl: [
-        '<table id="{ownerId}-innerCt" data-ref="innerCt" class="' + Ext.plainTableCls + '" cellpadding="0"',
+        '<table id="{ownerId}-innerCt" data-ref="innerCt" class="' + Ext.baseCSSPrefix + 'table-plain" cellpadding="0"',
             'role="presentation" style="{tableStyle}"><tr role="presentation">',
             '<tpl for="columns">',
                 '<td class="{parent.colCls}" valign="top" style="{style}" role="presentation">',
@@ -85,9 +85,7 @@ Ext.define('Ext.layout.container.CheckboxGroup', {
                     // autoFlex: true will automatically calculate % widths
                     // autoFlex: false allows the table to decide (shrinkWrap, in effect)
                     // on a per-column basis
-                    cwidth = autoFlex
-                        ? (1 / numCols * 100) + '%'
-                        : '';
+                    cwidth = autoFlex ? (1 / numCols * 100) + '%' : '';
                     columns[i].style.width = cwidth;
                     flexedCols++;
                 }

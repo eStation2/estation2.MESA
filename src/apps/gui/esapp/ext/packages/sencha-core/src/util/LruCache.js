@@ -17,36 +17,25 @@ Ext.define('Ext.util.LruCache', {
        maxSize: null
    },
 
-    /*
-     * @inheritdoc
-     */
     add: function(key, newValue) {
         var me = this,
-            existingKey = me.findKey(newValue),
-            entry;
+            entry, last;
 
-        // "new" value is in the list.
-        if (existingKey) {
-            me.unlinkEntry(entry = me.map[existingKey]);
-            entry.prev = me.last;
-            entry.next = null;
-        }
-        // Genuinely new: create an entry for it.
-        else {
-            entry = {
-                prev: me.last,
-                next: null,
-                key: key,
-                value: newValue
-            };
-        }
+        me.removeAtKey(key);
+        last = me.last;
+        entry = {
+            prev: last,
+            next: null,
+            key: key,
+            value: newValue
+        };
 
-        // If the list is not empty, update the last entry
-        if (me.last) {
-            me.last.next = entry;
-        }
-        // List is empty
-        else {
+        
+        if (last) {
+            // If the list is not empty, update the last entry
+            last.next = entry;
+        } else {
+            // List is empty
             me.first = entry;
         }
         me.last = entry;
@@ -55,7 +44,9 @@ Ext.define('Ext.util.LruCache', {
         return newValue;
     },
 
-    // @private
+    /**
+     * @private
+     */
     insertBefore: function(key, newValue, sibling) {
         var me = this,
             existingKey,
@@ -96,9 +87,6 @@ Ext.define('Ext.util.LruCache', {
         }
     },
 
-    /*
-     * @inheritdoc
-     */
     get: function(key) {
         var entry = this.map[key];
         if (entry) {
@@ -111,7 +99,7 @@ Ext.define('Ext.util.LruCache', {
         }
     },
 
-    /*
+    /**
      * @private
      */
     removeAtKey: function(key) {
@@ -119,15 +107,15 @@ Ext.define('Ext.util.LruCache', {
         return this.callParent(arguments);
     },
 
-    /*
-     * @inheritdoc
-     */
     clear: function(/* private */ initial) {
         this.first = this.last = null;
         return this.callParent(arguments);
     },
 
-    // private. Only used by internal methods.
+    /**
+     * @private
+     * Only used by internal methods.
+     */
     unlinkEntry: function(entry) {
         // Stitch the list back up.
         if (entry) {
@@ -145,7 +133,10 @@ Ext.define('Ext.util.LruCache', {
         }
     },
 
-    // private. Only used by internal methods.
+    /**
+     * @private
+     * Only used by internal methods.
+     */
     moveToEnd: function(entry) {
         this.unlinkEntry(entry);
 
@@ -161,7 +152,7 @@ Ext.define('Ext.util.LruCache', {
         this.last = entry;
     },
 
-    /*
+    /**
      * @private
      */
     getArray: function(isKey) {

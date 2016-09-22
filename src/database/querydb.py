@@ -24,6 +24,24 @@ db = connectdb.ConnectDB().db
 dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
 
 
+def checklogin(login=None, echo=False):
+    global dbschema_analysis
+    try:
+        query = "SELECT * FROM analysis.users WHERE userid = '" + login.username + "' AND password = '" + login.password + "'"
+        result = db.execute(query)
+        result = result.fetchall()
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("checklogin: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
 def update_yaxe_timeseries_drawproperties(yaxe, echo=False):
     global dbschema_analysis
     status = False
@@ -1077,35 +1095,58 @@ def get_ingestions(echo=False):
 
     global db
     try:
-        i = db.ingestion._table
-        m = db.mapset._table
-        p = db.product._table
+        query = " SELECT p.productcode || '_' || p.version as productid, " + \
+                "        p.productcode, " + \
+                "        p.subproductcode, " + \
+                "        p.version, " + \
+                "        p.frequency_id, " + \
+                "        i.mapsetcode, " + \
+                "        i.defined_by, " + \
+                "        i.activated, " + \
+                "        i.enabled, " + \
+                "        m.descriptive_name as mapsetname " + \
+                " FROM products.product p " + \
+                "      LEFT OUTER JOIN (SELECT * FROM products.ingestion i WHERE i.enabled) i ON  " + \
+                "           (p.productcode = i.productcode AND  " + \
+                "            p.subproductcode = i.subproductcode AND " + \
+                "            p.version = i.version) " + \
+                "     LEFT OUTER JOIN products.mapset m ON i.mapsetcode = m.mapsetcode " + \
+                " WHERE p.product_type = 'Ingest' "
 
-        s = select([func.CONCAT(i.c.productcode, '_', i.c.version).label('productid'),
-                    i.c.productcode,
-                    i.c.subproductcode,
-                    i.c.version,
-                    i.c.mapsetcode,
-                    p.c.frequency_id,
-                    i.c.defined_by,
-                    i.c.activated,
-                    i.c.enabled,
-                    m.c.descriptive_name.label('mapsetname')]).\
-            select_from(i.outerjoin(m, i.c.mapsetcode == m.c.mapsetcode).outerjoin(p, and_(i.c.productcode == p.c.productcode,
-                                            i.c.subproductcode == p.c.subproductcode,
-                                            i.c.version == p.c.version)))
+        result = db.execute(query)
+        ingestions = result.fetchall()
 
-        s = s.alias('ingest')
-        i = db.map(s, primary_key=[s.c.productid, i.c.subproductcode, i.c.mapsetcode])
-
-        # where = and_(i.c.defined_by != 'Test_JRC')
-        where = and_(i.c.enabled)
-        ingestions = i.filter(where).order_by(desc(i.productcode)).all()
-        #ingestions = i.order_by(desc(i.productcode)).all()
-
-        # if echo:
-        #     for row in ingestions:
-        #         print row
+        # i = db.ingestion._table
+        # m = db.mapset._table
+        # p = db.product._table
+        #
+        # s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productid'),
+        #             p.c.productcode,
+        #             p.c.subproductcode,
+        #             p.c.version,
+        #             i.c.mapsetcode,
+        #             p.c.frequency_id,
+        #             i.c.defined_by,
+        #             i.c.activated,
+        #             i.c.enabled,
+        #             m.c.descriptive_name.label('mapsetname')]).\
+        #     select_from(i.outerjoin(m, i.c.mapsetcode == m.c.mapsetcode).
+        #                 outerjoin(p, and_(i.c.productcode == p.c.productcode,
+        #                                   i.c.subproductcode == p.c.subproductcode,
+        #                                   i.c.version == p.c.version)))
+        #
+        #     # select_from(p.outerjoin(i, and_(p.c.productcode == i.c.productcode,
+        #     #                                 p.c.subproductcode == i.c.subproductcode,
+        #     #                                 p.c.version == i.c.version)).outerjoin(m, i.c.mapsetcode == m.c.mapsetcode))
+        #
+        # s = s.alias('ingest')
+        # i = db.map(s, primary_key=[s.c.productid, i.c.subproductcode, i.c.mapsetcode])
+        #
+        # # where = and_(i.c.defined_by != 'Test_JRC')
+        # # where = and_(p.c.product_type == 'Ingest', i.c.enabled)
+        # where = and_(i.c.enabled)
+        # ingestions = i.filter(where).order_by(desc(i.productcode)).all()
+        # #ingestions = i.order_by(desc(i.productcode)).all()
 
         return ingestions
 

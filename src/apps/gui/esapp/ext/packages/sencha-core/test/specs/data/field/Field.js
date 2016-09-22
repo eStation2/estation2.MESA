@@ -52,10 +52,6 @@ describe("Ext.data.field.Field", function() {
             expect(field.getPersist()).toBe(true);    
         });
         
-        it("should have sortDir: 'ASC'", function() {
-            expect(field.getSortDir()).toBe('ASC');
-        });
-        
         it("should have sortType: none", function() {
             expect(field.getSortType()).toBe(stypes.none);    
         });
@@ -147,14 +143,14 @@ describe("Ext.data.field.Field", function() {
                 expect(field.getDefaultValue()).toBe(true);
             });
             
-            it("should run the through the converter if it exists", function() {
+            it("should not pass the value through the converter", function() {
+                var spy = jasmine.createSpy().andReturn(8);
                 make({
                     defaultValue: 7,
-                    convert: function(v) {
-                        return v + 1;
-                    }
+                    convert: spy
                 });
-                expect(field.getDefaultValue()).toBe(8);
+                expect(field.getDefaultValue()).toBe(7);
+                expect(spy).not.toHaveBeenCalled();
             });
         });
         
@@ -171,7 +167,67 @@ describe("Ext.data.field.Field", function() {
                     depends: ['foo', 'bar', 'baz']
                 });    
                 expect(field.getDepends()).toEqual(['foo', 'bar', 'baz']);
-            });    
+            });  
+
+            describe("auto detection", function() {
+                it("should detect dot property names", function() {
+                    make({
+                        calculate: function(data) {
+                            return data.foo + data.bar;
+                        }
+                    });
+                    expect(field.getDepends()).toEqual(['foo', 'bar']);
+                });
+
+                it("should not repeat", function() {
+                    make({
+                        calculate: function(data) {
+                            return data.foo + data.foo + data.foo;
+                        }
+                    });
+                    expect(field.getDepends()).toEqual(['foo']);
+                });
+
+                it("should match any argument name", function() {
+                    make({
+                        calculate: function(asdf) {
+                            return asdf.foo + asdf.bar;
+                        }
+                    });
+                    expect(field.getDepends()).toEqual(['foo', 'bar']);
+                });
+
+                it("should ignore properties that are from other objects", function() {
+                    var o = {
+                        foo2: 1
+                    };
+                    make({
+                        calculate: function(data) {
+                            return data.foo1 + o.foo2 + data.foo3;
+                        }
+                    });
+                    expect(field.getDepends()).toEqual(['foo1', 'foo3']);
+                });
+
+                it("should match fields with numbers", function() {
+                    make({
+                        calculate: function(data) {
+                            return data.foo1 + data.foo2;
+                        }
+                    });
+                    expect(field.getDepends()).toEqual(['foo1', 'foo2']);
+                });
+
+                it("should not auto detect when explicitly specified", function() {
+                    make({
+                        depends: 'foo3',
+                        calculate: function(data) {
+                            return data.foo1 + data.foo2;
+                        }
+                    });
+                    expect(field.getDepends()).toEqual(['foo3']);
+                });
+            });
         });
         
         it("should configure the mapping", function() {
@@ -196,29 +252,90 @@ describe("Ext.data.field.Field", function() {
                 expect(field.getPersist()).toBe(false);
             });
             
-            it("should configure persist: false if it's a calculated field", function() {
-                make({
-                    convert: function(a, b){}
-                });    
-                expect(field.getPersist()).toBe(false);
+            describe("with a convert method", function() {
+                describe("single arg", function() {
+                    function fn(v) {}
+
+                    it("should default to true", function() {
+                        make({
+                            convert: fn
+                        });
+                        expect(field.getPersist()).toBe(true);
+                    });
+
+                    it("should configure a true value", function() {
+                        make({
+                            persist: true,
+                            convert: fn
+                        });
+                        expect(field.getPersist()).toBe(true);
+                    });
+
+                    it("should configure a false value", function() {
+                        make({
+                            persist: false,
+                            convert: fn
+                        });
+                        expect(field.getPersist()).toBe(false);
+                    });
+                });
+
+                describe("multi arg", function() {
+                    function fn(v, rec) {}
+
+                    it("should default to true", function() {
+                        make({
+                            convert: fn
+                        });
+                        expect(field.getPersist()).toBe(true);
+                    });
+
+                    it("should configure a true value", function() {
+                        make({
+                            persist: true,
+                            convert: fn
+                        });
+                        expect(field.getPersist()).toBe(true);
+                    });
+
+                    it("should configure a false value", function() {
+                        make({
+                            persist: false,
+                            convert: fn
+                        });
+                        expect(field.getPersist()).toBe(false);
+                    });
+                });
             });
-            
-            it("should always favour a persist config over calculated", function() {
-                make({
-                    persist: true,
-                    convert: function(){}
-                });    
-                expect(field.getPersist()).toBe(true);
+
+            describe("with a calculate method", function() {
+                function fn() {}
+
+                it("should default to false", function() {
+                    make({
+                        calculate: fn
+                    });
+                    expect(field.getPersist()).toBe(false);
+                });
+
+                it("should configure a true value", function() {
+                    make({
+                        persist: true,
+                        calculate: fn
+                    });
+                    expect(field.getPersist()).toBe(true);
+                });
+
+                it("should configure a false value", function() {
+                    make({
+                        persist: false,
+                        calculate: fn
+                    });
+                    expect(field.getPersist()).toBe(false);
+                });
             });
         });
-        
-        it("should configure sortDir", function() {
-            make({
-                sortDir: 'DESC'
-            });    
-            expect(field.getSortDir()).toBe('DESC');
-        });
-        
+
         describe("sortType", function() {
             it("should accept a string from Ext.data.SortTypes", function() {
                 make({

@@ -1,3 +1,4 @@
+/** */
 Ext.define('Ext.overrides.event.Event', {
     override: 'Ext.event.Event',
 
@@ -177,7 +178,7 @@ Ext.define('Ext.overrides.event.Event', {
         // MouseEvents
 
         function createMouseEventDispatcher (type, detail) {
-            var cancelable = (type != 'mousemove');
+            var cancelable = (type !== 'mousemove');
             return function (targetEl, srcEvent) {
                 var xy = srcEvent.getXY(),
                     e = API.createMouseEvent(targetEl.ownerDocument, type, true, cancelable,
@@ -237,16 +238,44 @@ Ext.define('Ext.overrides.event.Event', {
 
     preventDefault: function() {
         var me = this,
-            event = me.browserEvent;
+            event = me.browserEvent,
+            parentEvent = me.parentEvent,
+            unselectable, target;
 
 
         // This check is for IE8/9. The event object may have been
         // invalidated, so we can't delve into the details of it. If so,
         // just fall out gracefully and don't attempt to do anything.
         if (typeof event.type !== 'unknown') {
+            me.defaultPrevented = true;
+
+            // if the event was created by prototype-chaining a new object to an existing event
+            // instance, we need to make sure the parent event is defaultPrevented as well.
+            if (parentEvent) {
+                parentEvent.defaultPrevented = true;
+            }
+
             if (event.preventDefault) {
                 event.preventDefault();
             } else {
+                // The purpose of the code below is for preventDefault to stop focus from
+                // occurring like it does in other modern browsers. This only happens in
+                // IE8/9 when using attachEvent. The use of unselectable seems the most reliable
+                // way to prevent this from happening. We need to use a timeout to restore the
+                // unselectable state because if we don't setting it has no effect. It's important
+                // to set the atrribute to 'on' as opposed to just setting the property on the DOM element.
+                // See the link below for a discussion on the issue:
+                // http://bugs.jquery.com/ticket/10345
+                if (event.type === 'mousedown') {
+                    target = event.target;
+                    unselectable = target.getAttribute('unselectable');
+                    if (unselectable !== 'on') {
+                        target.setAttribute('unselectable', 'on');
+                        Ext.defer(function() {
+                            target.setAttribute('unselectable', unselectable);
+                        }, 1);
+                    }
+                }
                 // IE9 and earlier do not support preventDefault
                 event.returnValue = false;
                 // Some keys events require setting the keyCode to -1 to be prevented
@@ -311,6 +340,7 @@ Ext.define('Ext.overrides.event.Event', {
 //<feature legacyBrowser>
     if (Ext.isIE9m) {
         btnMap = {
+            0: 0,
             1: 0,
             4: 1,
             2: 2
@@ -319,6 +349,7 @@ Ext.define('Ext.overrides.event.Event', {
         Event.override({
             statics: {
                 /**
+                 * @member Ext.event.Event
                  * When events are attached using IE's attachEvent API instead of
                  * addEventListener accessing any members of an event object asynchronously
                  * results in "Member not found" error.  To work around this we fabricate
@@ -344,6 +375,10 @@ Ext.define('Ext.overrides.event.Event', {
                 me.callParent([event, info, touchesMap, identifiers]);
                 me.button = btnMap[event.button];
 
+                if (event.type === 'contextmenu') {
+                    me.button = 2; // IE8/9 reports click as 0, so we can at least attempt to infer here
+                }   
+
                 // IE8 can throw an error when trying to access properties on a browserEvent
                 // object when the event has been buffered or delayed.  Cache them here
                 // so we can access them later.
@@ -355,6 +390,7 @@ Ext.define('Ext.overrides.event.Event', {
             mouseEnterRe: /(mouseover|mouseenter)/,
 
             /**
+             * @member Ext.event.Event
              * @inheritdoc Ext.event.Event#static-enableIEAsync
              * @private
              */

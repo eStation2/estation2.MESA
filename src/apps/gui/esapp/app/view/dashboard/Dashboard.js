@@ -13,11 +13,12 @@ Ext.define("esapp.view.dashboard.Dashboard",{
     requires: [
         'esapp.view.dashboard.DashboardController',
         'esapp.view.dashboard.DashboardModel',
+        'esapp.model.Dashboard',
 
-        'esapp.view.dashboard.PC1',
-        'esapp.view.dashboard.PC2',
-        //'esapp.view.dashboard.PC3',
-        'esapp.view.dashboard.Connection',
+        //'esapp.view.dashboard.PC1',
+        //'esapp.view.dashboard.PC2',
+        ////'esapp.view.dashboard.PC3',
+        //'esapp.view.dashboard.Connection',
 
         'Ext.layout.container.HBox',
         'Ext.layout.container.VBox',
@@ -55,6 +56,8 @@ Ext.define("esapp.view.dashboard.Dashboard",{
         var pcs_container;
         var ups_status;
         var me = this;
+
+        me.title = '<span class="dashboard-header-title-style">' + esapp.Utils.getTranslation('mesa_full_estation') + '</span>';
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             items: [

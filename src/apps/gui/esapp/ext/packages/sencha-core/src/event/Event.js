@@ -6,30 +6,24 @@
  * Here is a simple example of how you use it:
  *
  *     @example preview
- *     Ext.Viewport.add({
+ *     var container = Ext.create('Ext.Container', {
  *         layout: 'fit',
- *         items: [
- *             {
- *                 docked: 'top',
- *                 xtype: 'toolbar',
- *                 title: 'Ext.event.Event example!'
- *             },
- *             {
- *                 id: 'logger',
- *                 styleHtmlContent: true,
- *                 html: 'Tap somewhere!',
- *                 padding: 5
- *             }
- *         ]
+ *         renderTo: Ext.getBody(),
+ *         items: [{
+ *             id: 'logger',
+ *             styleHtmlContent: true,
+ *             html: 'Click somewhere!',
+ *             padding: 5
+ *         }]
  *     });
  *
- *     Ext.Viewport.element.on({
- *         tap: function(e, node) {
+ *     container.getEl().on({
+ *         click: function(e, node) {
  *             var string = '';
  *
- *             string += 'You tapped at: <strong>{ x: ' + e.pageX + ', y: ' + e.pageY + ' }</strong> <i>(e.pageX & e.pageY)</i>';
+ *             string += 'You clicked at: <strong>{ x: ' + e.pageX + ', y: ' + e.pageY + ' }</strong> <i>(e.pageX & e.pageY)</i>';
  *             string += '<hr />';
- *             string += 'The HTMLElement you tapped has the className of: <strong>' + e.target.className + '</strong> <i>(e.target)</i>';
+ *             string += 'The HTMLElement you clicked has the className of: <strong>' + e.target.className + '</strong> <i>(e.target)</i>';
  *             string += '<hr />';
  *             string += 'The HTMLElement which has the listener has a className of: <strong>' + e.currentTarget.className + '</strong> <i>(e.currentTarget)</i>';
  *
@@ -39,7 +33,7 @@
  *
  * ## Recognizers
  *
- * Sencha Touch includes a bunch of default event recognizers to know when a user taps, swipes, etc.
+ * Ext JS includes many default event recognizers to know when a user interacts with the application.
  *
  * For a full list of default recognizers, and more information, please view the {@link Ext.event.gesture.Recognizer} documentation.
  * 
@@ -90,6 +84,17 @@ Ext.define('Ext.event.Event', {
      * Same as `currentTarget`
      * @deprecated 5.0.0 use {@link #currentTarget} instead.
      */
+    
+    /**
+     * @property {Number} button
+     * Indicates which mouse button caused the event for mouse events, for example
+     * `mousedown`, `click`, `mouseup`:
+     * - `0` for left button.
+     * - `1` for middle button.
+     * - `2` for right button.
+     *
+     * *Note*: In IE8 & IE9, the `click` event does not provide the button.
+     */
 
     /**
      * @property {Number} pageX The browsers x coordinate of the event.
@@ -125,6 +130,12 @@ Ext.define('Ext.event.Event', {
      */
 
     isStopped: false,
+
+    /**
+     * @property {Boolean}
+     * Indicates whether or not {@link #preventDefault preventDefault()} was called on the event.
+     */
+    defaultPrevented: false,
 
     isEvent: true,
 
@@ -162,6 +173,16 @@ Ext.define('Ext.event.Event', {
             mouseout: 1,
             mouseenter: 1,
             mouseleave: 1
+        },
+
+        // private.
+        // These are tracked separately from mouseEvents because the mouseEvents map
+        // is used by Dom publisher to eliminate duplicate events on devices that fire
+        // multiple kinds of events (mouse, touch, pointer).  Adding click events to the
+        // mouse events map can cause click events to be blocked from firing in some cases.
+        clickEvents: {
+            click: 1,
+            dblclick: 1
         },
 
         // private
@@ -226,14 +247,25 @@ Ext.define('Ext.event.Event', {
         // mac metaKey behaves like ctrlKey
         me.ctrlKey = event.ctrlKey || event.metaKey || false;
         me.altKey = event.altKey;
-        me.charCode = event.charCode;
+        // IE8 will default charCode to undefined, force it to 0.
+        me.charCode = event.charCode || 0;
         me.keyCode = event.keyCode;
+
+        me.buttons = event.buttons;
+        // When invoking synthetic events, current APIs do not
+        // have the ability to specify the buttons config, which
+        // defaults to button. For buttons, 0 means no button
+        // is pressed, whereas for button, 0 means left click.
+        // Normalize that here
+        if (me.button === 0 && me.buttons === 0) {
+            me.buttons = 1;
+        }
         
         if (self.forwardTab !== undefined && self.focusEvents[type]) {
             me.forwardTab = self.forwardTab;
         }
 
-        if (self.mouseEvents[type]) {
+        if (self.mouseEvents[type] || self.clickEvents[type]) {
             pointerType = 'mouse';
         } else if (self.pointerEvents[type]) {
             pointerType = self.pointerTypes[event.pointerType];
@@ -318,7 +350,10 @@ Ext.define('Ext.event.Event', {
         var relatedTarget = this.relatedTarget,
             target = null;
 
-        if (relatedTarget) {
+        // In some cases in IE10/11, when the mouse is leaving the document over a scrollbar
+        // the relatedTarget will be an empty object literal. So just check we have an element
+        // looking object here before we proceed.
+        if (relatedTarget && relatedTarget.nodeType) {
             if (selector) {
                 target = Ext.fly(relatedTarget).findParent(selector, maxDepth, returnEl);
             } else {
@@ -475,16 +510,22 @@ Ext.define('Ext.event.Event', {
      *  - Tab
      *  - Esc
      *
+     * @param {Boolean} [scrollableOnly] Only check navigation keys that can cause
+     * element scrolling by their default action.
+     *
      * @return {Boolean} `true` if the press is a navigation keypress
      */
-    isNavKeyPress: function(){
+    isNavKeyPress: function(scrollableOnly) {
         var me = this,
-            k = me.keyCode;
+            k = me.keyCode,
+            isKeyPress = me.type === 'keypress';
 
-       return (k >= 33 && k <= 40) ||  // Page Up/Down, End, Home, Left, Up, Right, Down
-       k === me.RETURN ||
-       k === me.TAB ||
-       k === me.ESC;
+        // See specs for description of behaviour
+        return ((!isKeyPress || Ext.isGecko) && k >= 33 && k <= 40) ||  // Page Up/Down, End, Home, Left, Up, Right, Down
+               (!scrollableOnly &&
+               (k === me.RETURN ||
+                k === me.TAB ||
+                k === me.ESC));
     },
 
     /**
@@ -512,15 +553,21 @@ Ext.define('Ext.event.Event', {
      *  - Print Screen
      *  - Insert
      *
-     * @return {Boolean} `true` if the press is a special keypress
+     * @return {Boolean} `true` if the key for this event is special
      */
-    isSpecialKey: function(){
-        var k = this.keyCode;
-        return (this.type === 'keypress' && this.ctrlKey) ||
-        this.isNavKeyPress() ||
-        (k === this.BACKSPACE) || // Backspace
-        (k >= 16 && k <= 20) ||   // Shift, Ctrl, Alt, Pause, Caps Lock
-        (k >= 44 && k <= 46);     // Print Screen, Insert, Delete
+    isSpecialKey: function() {
+        var me = this,
+            k = me.keyCode,
+            isGecko = Ext.isGecko,
+            isKeyPress = me.type === 'keypress';
+        
+        // See specs for description of behaviour
+        return (isGecko && isKeyPress && me.charCode === 0) ||
+               (this.isNavKeyPress()) ||
+               (k === me.BACKSPACE) ||
+               (k === me.ENTER) ||
+               (k >= 16 && k <= 20) ||              // Shift, Ctrl, Alt, Pause, Caps Lock
+               ((!isKeyPress || isGecko) && k >= 44 && k <= 46); // Print Screen, Insert, Delete
     },
 
     makeUnpreventable: function() {
@@ -532,8 +579,20 @@ Ext.define('Ext.event.Event', {
      * @chainable
      */
     preventDefault: function() {
-        this.browserEvent.preventDefault();
-        return this;
+        var me = this,
+            parentEvent = me.parentEvent;
+
+        me.defaultPrevented = true;
+
+        // if the event was created by prototype-chaining a new object to an existing event
+        // instance, we need to make sure the parent event is defaultPrevented as well.
+        if (parentEvent) {
+            parentEvent.defaultPrevented = true;
+        }
+
+        me.browserEvent.preventDefault();
+
+        return me;
     },
 
     setCurrentTarget: function(target) {
@@ -617,8 +676,9 @@ Ext.define('Ext.event.Event', {
      * @return {Boolean}
      */
     within: function(el, related, allowEl){
+        var t;
         if (el) {
-            var t = related ? this.getRelatedTarget() : this.getTarget();
+            t = related ? this.getRelatedTarget() : this.getTarget();
         }
 
         return t ? Ext.fly(el).contains(t) || !!(allowEl && t === Ext.getDom(el)) : false;

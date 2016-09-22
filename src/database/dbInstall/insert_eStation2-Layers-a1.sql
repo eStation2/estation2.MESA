@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS analysis.layers;
+
 CREATE TABLE IF NOT EXISTS analysis.layers
 (
   layerid bigserial NOT NULL,
@@ -35,36 +37,8 @@ WITH (
 ALTER TABLE analysis.layers
   OWNER TO estation;
 
-CREATE OR REPLACE FUNCTION analysis.update_insert_layers(
-               layerid integer,
-							 layerlevel character varying,
-							 layername character varying,
-							 description character varying,
-							 filename character varying,
-							 layerorderidx integer,
-							 layertype character varying,
-							 polygon_outlinecolor character varying,
-							 polygon_outlinewidth integer,
-							 polygon_fillcolor character varying,
-							 polygon_fillopacity integer,
-							 feature_display_column character varying,
-							 feature_highlight_outlinecolor character varying,
-							 feature_highlight_outlinewidth integer,
-							 feature_highlight_fillcolor character varying,
-							 feature_highlight_fillopacity integer,
-							 feature_selected_outlinecolor character varying,
-							 feature_selected_outlinewidth integer,
-							 enabled boolean,
-							 deletable boolean,
-							 background_legend_image_filename character varying,
-							 projection character varying,
-							 submenu character varying,
-							 menu character varying,
-							 defined_by character varying,
-							 open_in_mapview boolean,
-							 provider character varying,
-							 full_copy boolean DEFAULT false
-							 )
+
+CREATE OR REPLACE FUNCTION analysis.update_insert_layers(layerid integer, layerlevel character varying, layername character varying, description character varying, filename character varying, layerorderidx integer, layertype character varying, polygon_outlinecolor character varying, polygon_outlinewidth integer, polygon_fillcolor character varying, polygon_fillopacity integer, feature_display_column character varying, feature_highlight_outlinecolor character varying, feature_highlight_outlinewidth integer, feature_highlight_fillcolor character varying, feature_highlight_fillopacity integer, feature_selected_outlinecolor character varying, feature_selected_outlinewidth integer, enabled boolean, deletable boolean, background_legend_image_filename character varying, projection character varying, submenu character varying, menu character varying, defined_by character varying, open_in_mapview boolean, provider character varying, full_copy boolean DEFAULT false)
   RETURNS boolean AS
 $BODY$
 	DECLARE
@@ -163,6 +137,7 @@ $BODY$
 
 		ELSE
 			INSERT INTO analysis.layers (
+				layerid,
 				layerlevel,
 				layername,
 				description,
@@ -191,6 +166,7 @@ $BODY$
 				provider
 			)
 			VALUES (
+			    _layerid,
 			    TRIM(_layerlevel),
 			    TRIM(_layername),
 			    TRIM(_description),
@@ -224,36 +200,9 @@ $BODY$
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION analysis.update_insert_layers(	integer,
-						character varying,
-						character varying,
-						character varying,
-						character varying,
-						integer,
-						character varying,
-						character varying,
-						integer,
-						character varying,
-						integer,
-						character varying,
-						character varying,
-						integer,
-						character varying,
-						integer,
-						character varying,
-						integer,
-						boolean,
-						boolean,
-						character varying,
-						character varying,
-						character varying,
-						character varying,
-						character varying,
-						boolean,
-						character varying,
-						boolean
-					)
-  OWNER TO estation;
+ALTER FUNCTION analysis.update_insert_layers(integer, character varying, character varying, character varying, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, integer, boolean, boolean, character varying, character varying, character varying, character varying, character varying, boolean, character varying, boolean)
+  OWNER TO estation;  
+  
 
 ALTER SEQUENCE analysis.layers_layerid_seq RESTART WITH 1;
 
@@ -261,8 +210,8 @@ SELECT analysis.update_insert_layers( layerid := 1, layerlevel := 'congobasin0',
 SELECT analysis.update_insert_layers( layerid := 2, layerlevel := 'congobasin1', layername := 'Large basin', description := 'Large basin', filename := 'waterbasins/CICOS_bassin_1.geojson', layerorderidx := 3, layertype := 'polygon', polygon_outlinecolor := '#000000', polygon_outlinewidth := 1, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'NOM', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'Congo Oubangui Sangha basin', menu := 'other', defined_by := 'JRC', open_in_mapview := false, provider := NULL, full_copy := false );
 SELECT analysis.update_insert_layers( layerid := 3, layerlevel := 'congobasin2', layername := 'Sub basin', description := 'Sub basin', filename := 'waterbasins/CICOS_bassin_2.geojson', layerorderidx := 2, layertype := 'polygon', polygon_outlinecolor := '#000000', polygon_outlinewidth := 1, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'MAJ_NAME, BASIN, SUB_NAME', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'Congo Oubangui Sangha basin', menu := 'other', defined_by := 'JRC', open_in_mapview := false, provider := NULL, full_copy := false );
 SELECT analysis.update_insert_layers( layerid := 4, layerlevel := 'congobasin3', layername := 'Sub sub basin', description := 'Sub sub basin', filename := 'waterbasins/CICOS_bassin_3.geojson', layerorderidx := 1, layertype := 'polygon', polygon_outlinecolor := '#000000', polygon_outlinewidth := 1, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'AF_BAS_ID', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'Congo Oubangui Sangha basin', menu := 'other', defined_by := 'JRC', open_in_mapview := false, provider := NULL, full_copy := false );
-SELECT analysis.update_insert_layers( layerid := 5, layerlevel := 'africabasin2', layername := 'Africa basin level 2', description := 'Africa basin level 2', filename := 'hydrosheds/h1k_lev2.geojson', layerorderidx := 1, layertype := 'polygon', polygon_outlinecolor := '#000000', polygon_outlinewidth := 1, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'LEVEL_2', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'HydroSHEDS', menu := 'other', defined_by := 'JRC', open_in_mapview := false, provider := NULL, full_copy := false );
-SELECT analysis.update_insert_layers( layerid := 6, layerlevel := 'africabasin1', layername := 'Africa basin level 1', description := 'Africa basin level 1', filename := 'hydrosheds/h1k_lev1.geojson', layerorderidx := 1, layertype := 'polygon', polygon_outlinecolor := '#000000', polygon_outlinewidth := 1, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'LEVEL_1', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'HydroSHEDS', menu := 'other', defined_by := 'JRC', open_in_mapview := false, provider := NULL, full_copy := false );
-SELECT analysis.update_insert_layers( layerid := 7, layerlevel := 'africabasin3', layername := 'Africa basin level 3', description := 'Africa basin level 3', filename := 'hydrosheds/h1k_lev3.geojson', layerorderidx := 1, layertype := 'polygon', polygon_outlinecolor := '#000000', polygon_outlinewidth := 1, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'LEVEL_3', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'HydroSHEDS', menu := 'other', defined_by := 'JRC', open_in_mapview := false, provider := NULL, full_copy := false );
+SELECT analysis.update_insert_layers( layerid := 5, layerlevel := 'africabasin2', layername := 'Africa basin level 2', description := 'Africa basin level 2', filename := 'hydrosheds/h1k_lev2.geojson', layerorderidx := 1, layertype := 'polygon', polygon_outlinecolor := '#000000', polygon_outlinewidth := 1, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'LEVEL2', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'HydroSHEDS', menu := 'other', defined_by := 'JRC', open_in_mapview := false, provider := NULL, full_copy := false );
+SELECT analysis.update_insert_layers( layerid := 6, layerlevel := 'africabasin1', layername := 'Africa basin level 1', description := 'Africa basin level 1', filename := 'hydrosheds/h1k_lev1.geojson', layerorderidx := 1, layertype := 'polygon', polygon_outlinecolor := '#000000', polygon_outlinewidth := 1, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'LEVEL1', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'HydroSHEDS', menu := 'other', defined_by := 'JRC', open_in_mapview := false, provider := NULL, full_copy := false );
+SELECT analysis.update_insert_layers( layerid := 7, layerlevel := 'africabasin3', layername := 'Africa basin level 3', description := 'Africa basin level 3', filename := 'hydrosheds/h1k_lev3.geojson', layerorderidx := 1, layertype := 'polygon', polygon_outlinecolor := '#000000', polygon_outlinewidth := 1, polygon_fillcolor := 'Transparent', polygon_fillopacity := 1, feature_display_column := 'LEVEL3', feature_highlight_outlinecolor := '#319FD3', feature_highlight_outlinewidth := 2, feature_highlight_fillcolor := '#319FD3', feature_highlight_fillopacity := 10, feature_selected_outlinecolor := '#FF0000', feature_selected_outlinewidth := 2, enabled := true, deletable := false, background_legend_image_filename := NULL, projection := NULL, submenu := 'HydroSHEDS', menu := 'other', defined_by := 'JRC', open_in_mapview := false, provider := NULL, full_copy := false );
 
 ALTER SEQUENCE analysis.layers_layerid_seq RESTART WITH 100;

@@ -44,10 +44,11 @@ Ext.define('Ext.button.Split', {
     isSplitButton: true,
     
     /**
-     * @cfg {Function} arrowHandler
+     * @cfg {Function/String} arrowHandler
      * A function called when the arrow button is clicked (can be used instead of click event)
      * @cfg {Ext.button.Split} arrowHandler.this
      * @cfg {Event} arrowHandler.e The click event.
+     * @declarativeHandler
      */
     /**
      * @cfg {String} arrowTooltip
@@ -85,7 +86,7 @@ Ext.define('Ext.button.Split', {
                 // Force prevent default here, if we click on the arrow part
                 // we want to trigger the menu, not any link if we have it
                 e.preventDefault();
-                me.maybeShowMenu();
+                me.maybeShowMenu(e);
                 me.fireEvent("arrowclick", me, e);
                 if (me.arrowHandler) {
                     me.arrowHandler.call(me.scope || me, me, e);

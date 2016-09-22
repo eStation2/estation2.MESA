@@ -1,3 +1,449 @@
+-- Table: analysis.users
+
+-- DROP TABLE analysis.users;
+
+CREATE TABLE analysis.users
+(
+  username character varying(30) NOT NULL,
+  password character varying(32),
+  userid character varying(32),
+  userlevel numeric(1,0) NOT NULL,
+  email character varying(50),
+  "timestamp" numeric(11,0) NOT NULL,
+  CONSTRAINT users_pkey1 PRIMARY KEY (username)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE analysis.users
+  OWNER TO estation;
+
+
+
+
+DROP TABLE products.geoserver;
+
+CREATE TABLE products.geoserver
+(
+  geoserver_id serial NOT NULL,
+  productcode character varying NOT NULL,
+  subproductcode character varying NOT NULL,
+  version character varying NOT NULL,
+  defined_by character varying NOT NULL,
+  activated boolean NOT NULL DEFAULT false,
+  startdate bigint,
+  enddate bigint,
+  CONSTRAINT geoserver_pk PRIMARY KEY (geoserver_id),
+  CONSTRAINT product_geoserver_fk FOREIGN KEY (productcode, subproductcode, version)
+      REFERENCES products.product (productcode, subproductcode, version) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE CASCADE
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE products.geoserver
+  OWNER TO estation;
+COMMENT ON TABLE products.geoserver
+  IS 'Define which products/versions/subproducts have to be synchronized.';
+
+
+
+CREATE OR REPLACE FUNCTION products.populate_geoserver(full_copy boolean DEFAULT FALSE)
+RETURNS boolean AS
+$BODY$
+DECLARE
+
+	_full_copy	ALIAS FOR  $1;
+
+	prods CURSOR FOR SELECT productcode, subproductcode, version, defined_by, FALSE as activated, NULL as "startdate", NULL as "enddate"
+		     FROM products.product
+		     WHERE product_type != 'Native';
+
+	prods_row RECORD;
+
+	_productcode VARCHAR;
+	_subproductcode VARCHAR;
+	_version VARCHAR;
+	_defined_by VARCHAR;
+	_activated BOOLEAN;
+	_startdate BIGINT;
+	_enddate BIGINT;
+BEGIN
+	OPEN prods;
+
+	LOOP
+	FETCH prods INTO prods_row;
+		EXIT WHEN NOT FOUND;
+
+		_productcode = prods_row.productcode;
+		_subproductcode = prods_row.subproductcode;
+		_version  = prods_row.version;
+		_defined_by  = prods_row.defined_by;
+		_activated  = prods_row.activated;
+		_startdate  = prods_row.startdate;
+		_enddate = prods_row.enddate;
+
+		PERFORM * FROM products.geoserver g
+		WHERE g.productcode = TRIM(_productcode)
+		  AND g.subproductcode = TRIM(_subproductcode)
+		  AND g.version = TRIM(_version);
+
+		IF FOUND THEN
+			-- RAISE NOTICE 'START UPDATING Product';
+			IF _full_copy THEN
+				UPDATE products.geoserver g
+				SET defined_by = TRIM(_defined_by),
+				    activated = _activated,
+				    startdate = _startdate,
+				    enddate = _enddate
+				WHERE g.productcode = TRIM(_productcode)
+				  AND g.subproductcode = TRIM(_subproductcode)
+				  AND g.version = TRIM(_version);
+			ELSE
+				UPDATE products.geoserver g
+				SET defined_by = TRIM(_defined_by)
+				 -- activated = _activated,
+				 -- startdate = _startdate,
+				 -- enddate = _enddate
+				WHERE g.productcode = TRIM(_productcode)
+				  AND g.subproductcode = TRIM(_subproductcode)
+				  AND g.version = TRIM(_version);
+			END IF;
+			-- RAISE NOTICE 'Product updated';
+		ELSE
+			-- RAISE NOTICE 'START INSERTING Product';
+
+			INSERT INTO products.geoserver (
+				productcode,
+				subproductcode,
+				version,
+				defined_by,
+				activated,
+				startdate,
+				enddate
+			)
+			VALUES (
+			  TRIM(_productcode),
+			  TRIM(_subproductcode),
+			  TRIM(_version),
+			  TRIM(_defined_by),
+			  _activated,
+			  _startdate,
+			  _enddate
+			);
+
+			-- RAISE NOTICE 'Product inserted';
+		END IF;
+	END LOOP;
+	CLOSE prods;
+
+	RETURN TRUE;
+
+	EXCEPTION
+		WHEN numeric_value_out_of_range THEN
+			RAISE NOTICE 'ERROR: numeric_value_out_of_range.';
+			RETURN FALSE;
+
+		WHEN OTHERS THEN
+			RAISE NOTICE 'ERROR...';
+			RAISE NOTICE '% %', SQLERRM, SQLSTATE;
+			RETURN FALSE;
+
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE;
+
+
+
+CREATE OR REPLACE FUNCTION analysis.update_insert_layers(layerid integer, layerlevel character varying, layername character varying, description character varying, filename character varying, layerorderidx integer, layertype character varying, polygon_outlinecolor character varying, polygon_outlinewidth integer, polygon_fillcolor character varying, polygon_fillopacity integer, feature_display_column character varying, feature_highlight_outlinecolor character varying, feature_highlight_outlinewidth integer, feature_highlight_fillcolor character varying, feature_highlight_fillopacity integer, feature_selected_outlinecolor character varying, feature_selected_outlinewidth integer, enabled boolean, deletable boolean, background_legend_image_filename character varying, projection character varying, submenu character varying, menu character varying, defined_by character varying, open_in_mapview boolean, provider character varying, full_copy boolean DEFAULT false)
+  RETURNS boolean AS
+$BODY$
+	DECLARE
+
+	  _layerid 				ALIAS FOR  $1;
+	  _layerlevel 				ALIAS FOR  $2;
+	  _layername 				ALIAS FOR  $3;
+	  _description 				ALIAS FOR  $4;
+	  _filename 				ALIAS FOR  $5;
+	  _layerorderidx 			ALIAS FOR  $6;
+	  _layertype 				ALIAS FOR  $7;
+	  _polygon_outlinecolor 		ALIAS FOR  $8;
+	  _polygon_outlinewidth 		ALIAS FOR  $9;
+	  _polygon_fillcolor 			ALIAS FOR  $10;
+	  _polygon_fillopacity 			ALIAS FOR  $11;
+	  _feature_display_column 		ALIAS FOR  $12;
+	  _feature_highlight_outlinecolor 	ALIAS FOR  $13;
+	  _feature_highlight_outlinewidth 	ALIAS FOR  $14;
+	  _feature_highlight_fillcolor	  	ALIAS FOR  $15;
+	  _feature_highlight_fillopacity  	ALIAS FOR  $16;
+	  _feature_selected_outlinecolor  	ALIAS FOR  $17;
+	  _feature_selected_outlinewidth  	ALIAS FOR  $18;
+	  _enabled 			  	ALIAS FOR  $19;
+	  _deletable 			  	ALIAS FOR  $20;
+	  _background_legend_image_filename 	ALIAS FOR  $21;
+	  _projection 				ALIAS FOR  $22;
+	  _submenu 				ALIAS FOR  $23;
+	  _menu 				ALIAS FOR  $24;
+	  _defined_by 				ALIAS FOR  $25;
+	  _open_in_mapview			ALIAS FOR  $26;
+	  _provider 				ALIAS FOR  $27;
+	  _full_copy 				ALIAS FOR  $28;
+
+	BEGIN
+		PERFORM * FROM analysis.layers l WHERE l.layerid = _layerid;
+		IF FOUND THEN
+			IF _full_copy THEN
+				UPDATE analysis.layers l
+				SET layerlevel = TRIM(_layerlevel),
+				    layername = TRIM(_layername),
+				    description = TRIM(_description),
+				    filename = TRIM(_filename),
+				    layerorderidx = _layerorderidx,
+				    layertype = TRIM(_layertype),
+				    polygon_outlinecolor = TRIM(_polygon_outlinecolor),
+				    polygon_outlinewidth = _polygon_outlinewidth,
+				    polygon_fillcolor = TRIM(_polygon_fillcolor),
+				    polygon_fillopacity = _polygon_fillopacity,
+				    feature_display_column = TRIM(_feature_display_column),
+				    feature_highlight_outlinecolor = TRIM(_feature_highlight_outlinecolor),
+				    feature_highlight_outlinewidth = _feature_highlight_outlinewidth,
+				    feature_highlight_fillcolor = TRIM(_feature_highlight_fillcolor),
+				    feature_highlight_fillopacity = _feature_highlight_fillopacity,
+				    feature_selected_outlinecolor = TRIM(_feature_selected_outlinecolor),
+				    feature_selected_outlinewidth = _feature_selected_outlinewidth,
+				    enabled = _enabled,
+				    deletable = _deletable,
+				    background_legend_image_filename = TRIM(_background_legend_image_filename),
+				    projection = TRIM(_projection),
+				    submenu = TRIM(_submenu),
+				    menu = TRIM(_menu),
+				    defined_by = TRIM(_defined_by),
+				    open_in_mapview = _open_in_mapview,
+				    provider = TRIM(_provider)
+				WHERE l.layerid = _layerid;
+			ELSE
+				UPDATE analysis.layers l
+				SET layerlevel = TRIM(_layerlevel),
+				    layername = TRIM(_layername),
+				    description = TRIM(_description),
+				    filename = TRIM(_filename),
+				    layerorderidx = _layerorderidx,
+				    layertype = TRIM(_layertype),
+				    -- polygon_outlinecolor = TRIM(_polygon_outlinecolor),
+				    -- polygon_outlinewidth = _polygon_outlinewidth,
+				    -- polygon_fillcolor = TRIM(_polygon_fillcolor),
+				    -- polygon_fillopacity = _polygon_fillopacity,
+				    -- feature_display_column = TRIM(_feature_display_column),
+				    -- feature_highlight_outlinecolor = TRIM(_feature_highlight_outlinecolor),
+				    -- feature_highlight_outlinewidth = _feature_highlight_outlinewidth,
+				    -- feature_highlight_fillcolor = TRIM(_feature_highlight_fillcolor),
+				    -- feature_highlight_fillopacity = _feature_highlight_fillopacity,
+				    -- feature_selected_outlinecolor = TRIM(_feature_selected_outlinecolor),
+				    -- feature_selected_outlinewidth = _feature_selected_outlinewidth,
+				    -- enabled = _enabled,
+				    deletable = _deletable,
+				    background_legend_image_filename = TRIM(_background_legend_image_filename),
+				    projection = TRIM(_projection),
+				    submenu = TRIM(_submenu),
+				    menu = TRIM(_menu),
+				    defined_by = TRIM(_defined_by),
+				    -- open_in_mapview = _open_in_mapview,
+				    provider = TRIM(_provider)
+				WHERE l.layerid = _layerid;
+			END IF;
+
+		ELSE
+			INSERT INTO analysis.layers (
+				layerid,
+				layerlevel,
+				layername,
+				description,
+				filename,
+				layerorderidx,
+				layertype,
+				polygon_outlinecolor,
+				polygon_outlinewidth,
+				polygon_fillcolor,
+				polygon_fillopacity,
+				feature_display_column,
+				feature_highlight_outlinecolor,
+				feature_highlight_outlinewidth,
+				feature_highlight_fillcolor,
+				feature_highlight_fillopacity,
+				feature_selected_outlinecolor,
+				feature_selected_outlinewidth,
+				enabled,
+				deletable,
+				background_legend_image_filename,
+				projection,
+				submenu,
+				menu,
+				defined_by,
+				open_in_mapview,
+				provider
+			)
+			VALUES (
+			    _layerid,
+			    TRIM(_layerlevel),
+			    TRIM(_layername),
+			    TRIM(_description),
+			    TRIM(_filename),
+			    _layerorderidx,
+			    TRIM(_layertype),
+			    TRIM(_polygon_outlinecolor),
+			    _polygon_outlinewidth,
+			    TRIM(_polygon_fillcolor),
+			    _polygon_fillopacity,
+			    TRIM(_feature_display_column),
+			    TRIM(_feature_highlight_outlinecolor),
+			    _feature_highlight_outlinewidth,
+			    TRIM(_feature_highlight_fillcolor),
+			    _feature_highlight_fillopacity,
+			    TRIM(_feature_selected_outlinecolor),
+			    _feature_selected_outlinewidth,
+			    _enabled,
+			    _deletable,
+			    TRIM(_background_legend_image_filename),
+			    TRIM(_projection),
+			    TRIM(_submenu),
+			    TRIM(_menu),
+			    TRIM(_defined_by),
+			    _open_in_mapview,
+			    TRIM(_provider)
+			);
+		END IF;
+		RETURN TRUE;
+	END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION analysis.update_insert_layers(integer, character varying, character varying, character varying, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, integer, boolean, boolean, character varying, character varying, character varying, character varying, character varying, boolean, character varying, boolean)
+  OWNER TO estation;
+
+
+
+
+CREATE OR REPLACE FUNCTION products.update_insert_internet_source(internet_id character varying, defined_by character varying, descriptive_name character varying, description character varying, modified_by character varying, update_datetime timestamp without time zone, url character varying, user_name character varying, password character varying, type character varying, include_files_expression character varying, files_filter_expression character varying, status boolean, pull_frequency integer, datasource_descr_id character varying, frequency_id character varying, start_date bigint, end_date bigint, full_copy boolean DEFAULT false)
+  RETURNS boolean AS
+$BODY$
+	DECLARE
+		_internet_id 	  			ALIAS FOR  $1;
+		_defined_by  				ALIAS FOR  $2;
+		_descriptive_name 			ALIAS FOR  $3;
+		_description   				ALIAS FOR  $4;
+		_modified_by 	  			ALIAS FOR  $5;
+		_update_datetime 	  		ALIAS FOR  $6;
+		_url  						ALIAS FOR  $7;
+		_user_name 					ALIAS FOR  $8;
+		_password  					ALIAS FOR  $9;
+		_type 	  					ALIAS FOR  $10;
+		_include_files_expression 	ALIAS FOR  $11;
+		_files_filter_expression  	ALIAS FOR  $12;
+		_status 	  				ALIAS FOR  $13;
+		_pull_frequency   			ALIAS FOR  $14;
+		_datasource_descr_id   		ALIAS FOR  $15;
+		_frequency_id   			ALIAS FOR  $16;
+		_start_date   				ALIAS FOR  $17;
+		_end_date   				ALIAS FOR  $18;
+
+		_full_copy   				ALIAS FOR  $19;
+	BEGIN
+		PERFORM * FROM products.internet_source i WHERE i.internet_id = TRIM(_internet_id) AND i.defined_by = 'JRC';
+
+		IF FOUND THEN
+			IF _full_copy THEN
+				UPDATE products.internet_source i
+				SET defined_by = TRIM(_defined_by),
+					descriptive_name = TRIM(_descriptive_name),
+					description = TRIM(_description),
+					modified_by = TRIM(_modified_by),
+					update_datetime = _update_datetime,
+					url = TRIM(_url),
+					user_name = TRIM(_user_name),
+					password = TRIM(_password),
+					type = TRIM(_type),
+					include_files_expression = TRIM(_include_files_expression),
+					files_filter_expression = TRIM(_files_filter_expression),
+					status = _status,
+					pull_frequency = _pull_frequency,
+					datasource_descr_id = TRIM(_datasource_descr_id),
+					frequency_id = TRIM(_frequency_id),
+					start_date = _start_date,
+					end_date = _end_date
+				WHERE i.internet_id = TRIM(_internet_id);
+			ELSE
+				UPDATE products.internet_source i
+				SET defined_by = TRIM(_defined_by),
+					-- descriptive_name = TRIM(_descriptive_name),
+					-- description = TRIM(_description),
+					modified_by = TRIM(_modified_by),
+					update_datetime = _update_datetime,
+					-- url = TRIM(_url),
+					-- user_name = TRIM(_user_name),
+					-- password = TRIM(_password),
+					type = TRIM(_type),
+					-- include_files_expression = TRIM(_include_files_expression),
+					-- files_filter_expression = TRIM(_files_filter_expression),
+					status = _status,
+					-- pull_frequency = _pull_frequency,
+					datasource_descr_id = TRIM(_datasource_descr_id),
+					frequency_id = TRIM(_frequency_id)
+					-- , start_date = _start_date
+					-- , end_date = _end_date
+				WHERE i.internet_id = TRIM(_internet_id);
+			END IF;
+		ELSE
+			INSERT INTO products.internet_source (
+				internet_id,
+				defined_by,
+				descriptive_name,
+				description,
+				modified_by,
+				update_datetime,
+				url,
+				user_name,
+				password,
+				type,
+				include_files_expression,
+				files_filter_expression,
+				status,
+				pull_frequency,
+				datasource_descr_id,
+				frequency_id,
+				start_date,
+				end_date
+			)
+			VALUES (
+				TRIM(_internet_id),
+				TRIM(_defined_by),
+				TRIM(_descriptive_name),
+				TRIM(_description),
+				TRIM(_modified_by),
+				_update_datetime,
+				TRIM(_url),
+				TRIM(_user_name),
+				TRIM(_password),
+				TRIM(_type),
+				TRIM(_include_files_expression),
+				TRIM(_files_filter_expression),
+				_status,
+				_pull_frequency,
+				TRIM(_datasource_descr_id),
+				TRIM(_frequency_id),
+				_start_date,
+				_end_date
+			);
+		END IF;
+		RETURN TRUE;
+	END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION products.update_insert_internet_source(character varying, character varying, character varying, character varying, character varying, timestamp without time zone, character varying, character varying, character varying, character varying, character varying, character varying, boolean, integer, character varying, character varying, bigint, bigint, boolean)
+  OWNER TO estation;
+
+
+
 ALTER TABLE analysis.timeseries_drawproperties
   ADD COLUMN aggregation_type character varying DEFAULT 'mean';
 
@@ -6,6 +452,8 @@ ALTER TABLE analysis.timeseries_drawproperties
 
 ALTER TABLE analysis.timeseries_drawproperties
   ADD COLUMN aggregation_max double precision;
+
+
 
 CREATE TABLE IF NOT EXISTS analysis.layers
 (
@@ -664,7 +1112,6 @@ ALTER FUNCTION analysis.update_insert_chart_drawproperties(character varying, in
 
 -- DROP FUNCTION products.export_jrc_data(boolean);
 
-
 CREATE OR REPLACE FUNCTION products.export_jrc_data(full_copy boolean DEFAULT false)
   RETURNS SETOF text AS
 $BODY$
@@ -742,8 +1189,8 @@ BEGIN
 		|| ', activated := ' || activated
 		|| ', category_id := ' || COALESCE('''' || category_id || '''', 'NULL')
 		|| ', product_type := ' || COALESCE('''' || product_type || '''', 'NULL')
-		|| ', descriptive_name := ' || COALESCE('''' || replace(descriptive_name, '''', '"') || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || replace(description, '''', '"') || '''', 'NULL')
+		|| ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', provider := ' || COALESCE('''' || provider || '''', 'NULL')
 		|| ', frequency_id := ' || COALESCE('''' || frequency_id || '''', '''undefined''')
 		|| ', date_format := ' || COALESCE('''' || date_format || '''', '''undefined''')
@@ -811,7 +1258,7 @@ BEGIN
 		|| ', internal_identifier := ' || COALESCE('''' || internal_identifier || '''', 'NULL')
 		|| ', collection_reference := ' || COALESCE('''' || collection_reference || '''', 'NULL')
 		|| ', acronym := ' || COALESCE('''' || acronym || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || replace(description, '''', '"') || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', product_status := ' || COALESCE('''' || product_status || '''', 'NULL')
 		|| ', date_creation := ' || COALESCE('''' || to_char(date_creation, 'YYYY-MM-DD') || '''', 'NULL')
 		|| ', date_revision := ' || COALESCE('''' || to_char(date_revision, 'YYYY-MM-DD') || '''', 'NULL')
@@ -831,10 +1278,10 @@ BEGIN
 		|| ', instrument := ' || COALESCE('''' || instrument || '''', 'NULL')
 		|| ', spatial_coverage := ' || COALESCE('''' || spatial_coverage || '''', 'NULL')
 		|| ', thumbnails := ' || COALESCE('''' || thumbnails || '''', 'NULL')
-		|| ', online_resources := ' || COALESCE('''' || replace(online_resources, '''', '"') || '''', 'NULL')
+		|| ', online_resources := ' || COALESCE('''' || replace(replace(online_resources,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', distribution := ' || COALESCE('''' || distribution || '''', 'NULL')
 		|| ', channels := ' || COALESCE('''' || channels || '''', 'NULL')
-		|| ', data_access := ' || COALESCE('''' || replace(data_access, '''', '"') || '''', 'NULL')
+		|| ', data_access := ' || COALESCE('''' || replace(replace(data_access,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', available_format := ' || COALESCE('''' || available_format || '''', 'NULL')
 		|| ', version := ' || COALESCE('''' || version || '''', 'NULL')
 		|| ', typical_file_name := ' || COALESCE('''' || typical_file_name || '''', 'NULL')
@@ -966,12 +1413,12 @@ BEGIN
 
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_i18n('
 		|| ' label := ' || COALESCE('''' || label || '''', 'NULL')
-		|| ', eng := ''' || COALESCE(replace(eng, '''', '"'), 'NULL') || ''''
-		|| ', fra := ''' || COALESCE(replace(fra, '''', '"'), 'NULL') || ''''
-		|| ', por := ''' || COALESCE(replace(por, '''', '"'), 'NULL') || ''''
-		|| ', lang1 := ''' || COALESCE(replace(lang1, '''', '"'), 'NULL') || ''''
-		|| ', lang2 := ''' || COALESCE(replace(lang2, '''', '"'), 'NULL') || ''''
-		|| ', lang3 := ''' || COALESCE(replace(lang3, '''', '"'), 'NULL') || ''''
+		|| ', eng := ''' || COALESCE(replace(replace(eng,'"',''''), '''', ''''''), 'NULL') || ''''
+		|| ', fra := ''' || COALESCE(replace(replace(fra,'"',''''), '''', ''''''), 'NULL') || ''''
+		|| ', por := ''' || COALESCE(replace(replace(por,'"',''''), '''', ''''''), 'NULL') || ''''
+		|| ', lang1 := ''' || COALESCE(replace(replace(lang1,'"',''''), '''', ''''''), 'NULL') || ''''
+		|| ', lang2 := ''' || COALESCE(replace(replace(lang2,'"',''''), '''', ''''''), 'NULL') || ''''
+		|| ', lang3 := ''' || COALESCE(replace(replace(lang3,'"',''''), '''', ''''''), 'NULL') || ''''
 		|| ' );'  as inserts
 	FROM analysis.i18n;
 
@@ -1137,6 +1584,7 @@ ALTER FUNCTION products.export_jrc_data(boolean)
 
 
 
+
 -- Function: products.export_all_data(boolean)
 
 -- DROP FUNCTION products.export_all_data(boolean);
@@ -1216,8 +1664,8 @@ BEGIN
 		|| ', activated := ' || activated
 		|| ', category_id := ' || COALESCE('''' || category_id || '''', 'NULL')
 		|| ', product_type := ' || COALESCE('''' || product_type || '''', 'NULL')
-		|| ', descriptive_name := ' || COALESCE('''' || replace(descriptive_name, '''', '"') || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || replace(description, '''', '"') || '''', 'NULL')
+		|| ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', provider := ' || COALESCE('''' || provider || '''', 'NULL')
 		|| ', frequency_id := ' || COALESCE('''' || frequency_id || '''', '''undefined''')
 		|| ', date_format := ' || COALESCE('''' || date_format || '''', '''undefined''')
@@ -1282,7 +1730,7 @@ BEGIN
 		|| ', internal_identifier := ' || COALESCE('''' || internal_identifier || '''', 'NULL')
 		|| ', collection_reference := ' || COALESCE('''' || collection_reference || '''', 'NULL')
 		|| ', acronym := ' || COALESCE('''' || acronym || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || replace(description, '''', '"') || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', product_status := ' || COALESCE('''' || product_status || '''', 'NULL')
 		|| ', date_creation := ' || COALESCE('''' || to_char(date_creation, 'YYYY-MM-DD') || '''', 'NULL')
 		|| ', date_revision := ' || COALESCE('''' || to_char(date_revision, 'YYYY-MM-DD') || '''', 'NULL')
@@ -1302,10 +1750,10 @@ BEGIN
 		|| ', instrument := ' || COALESCE('''' || instrument || '''', 'NULL')
 		|| ', spatial_coverage := ' || COALESCE('''' || spatial_coverage || '''', 'NULL')
 		|| ', thumbnails := ' || COALESCE('''' || thumbnails || '''', 'NULL')
-		|| ', online_resources := ' || COALESCE('''' || replace(online_resources, '''', '"') || '''', 'NULL')
+		|| ', online_resources := ' || COALESCE('''' || replace(replace(online_resources,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', distribution := ' || COALESCE('''' || distribution || '''', 'NULL')
 		|| ', channels := ' || COALESCE('''' || channels || '''', 'NULL')
-		|| ', data_access := ' || COALESCE('''' || replace(data_access, '''', '"') || '''', 'NULL')
+		|| ', data_access := ' || COALESCE('''' || replace(replace(data_access,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', available_format := ' || COALESCE('''' || available_format || '''', 'NULL')
 		|| ', version := ' || COALESCE('''' || version || '''', 'NULL')
 		|| ', typical_file_name := ' || COALESCE('''' || typical_file_name || '''', 'NULL')
@@ -1431,12 +1879,12 @@ BEGIN
 
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_i18n('
 		|| ' label := ' || COALESCE('''' || label || '''', 'NULL')
-		|| ', eng := ''' || COALESCE(replace(eng, '''', '"'), 'NULL') || ''''
-		|| ', fra := ''' || COALESCE(replace(fra, '''', '"'), 'NULL') || ''''
-		|| ', por := ''' || COALESCE(replace(por, '''', '"'), 'NULL') || ''''
-		|| ', lang1 := ''' || COALESCE(replace(lang1, '''', '"'), 'NULL') || ''''
-		|| ', lang2 := ''' || COALESCE(replace(lang2, '''', '"'), 'NULL') || ''''
-		|| ', lang3 := ''' || COALESCE(replace(lang3, '''', '"'), 'NULL') || ''''
+		|| ', eng := ''' || COALESCE(replace(replace(eng,'"',''''), '''', ''''''), 'NULL') || ''''
+		|| ', fra := ''' || COALESCE(replace(replace(fra,'"',''''), '''', ''''''), 'NULL') || ''''
+		|| ', por := ''' || COALESCE(replace(replace(por,'"',''''), '''', ''''''), 'NULL') || ''''
+		|| ', lang1 := ''' || COALESCE(replace(replace(lang1,'"',''''), '''', ''''''), 'NULL') || ''''
+		|| ', lang2 := ''' || COALESCE(replace(replace(lang2,'"',''''), '''', ''''''), 'NULL') || ''''
+		|| ', lang3 := ''' || COALESCE(replace(replace(lang3,'"',''''), '''', ''''''), 'NULL') || ''''
 		|| ' );'  as inserts
 	FROM analysis.i18n;
 
@@ -1617,8 +2065,8 @@ BEGIN
 		|| ', activated := ' || activated
 		|| ', category_id := ' || COALESCE('''' || category_id || '''', 'NULL')
 		|| ', product_type := ' || COALESCE('''' || product_type || '''', 'NULL')
-		|| ', descriptive_name := ' || COALESCE('''' || replace(descriptive_name, '''', '"') || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || replace(description, '''', '"') || '''', 'NULL')
+		|| ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', provider := ' || COALESCE('''' || provider || '''', 'NULL')
 		|| ', frequency_id := ' || COALESCE('''' || frequency_id || '''', '''undefined''')
 		|| ', date_format := ' || COALESCE('''' || date_format || '''', '''undefined''')

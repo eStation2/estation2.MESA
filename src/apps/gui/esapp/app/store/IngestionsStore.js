@@ -10,7 +10,7 @@ Ext.define('esapp.store.IngestionsStore', {
 
     storeId : 'IngestionsStore'
 
-    ,autoLoad: false
+    ,autoLoad: true
     ,autoSync: true
     ,remoteSort: false
 

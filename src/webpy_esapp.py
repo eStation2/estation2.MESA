@@ -49,6 +49,8 @@ urls = (
     "/product/updateproductinfo", "UpdateProductInfo",
     "/product/unassigndatasource", "UnassignProductDataSource",
 
+    "/login", "Login",
+
     "/help", "GetHelp",
     "/help/getfile", "GetHelpFile",
 
@@ -161,15 +163,62 @@ class EsApp:
             es_constants.es2globals['default_language'] = getparams['lang']
 
         render = web.template.render(es_constants.es2globals['base_dir']+'/apps/gui/esapp')
-        # print 'default_language: ' + es_constants.es2globals['default_language']
-        if es_constants.es2globals['default_language'] == 'eng':
-            # print 'rendering index'
-            return render.index()
-        elif es_constants.es2globals['default_language'] == 'fra':
-            # print 'rendering index_fr'
-            return render.index_fr()
+
+        return render.index()
+
+        # # print 'default_language: ' + es_constants.es2globals['default_language']
+        # if es_constants.es2globals['default_language'] == 'eng':
+        #     # print 'rendering index'
+        #     return render.index()
+        # elif es_constants.es2globals['default_language'] == 'fra':
+        #     # print 'rendering index_fr'
+        #     return render.index_fr()
+        # else:
+        #     return render.index()
+
+
+class Login:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        login = web.input()
+
+        if 'username' in login:
+            try:
+                userinfo = querydb.checklogin(login)
+
+                if hasattr(userinfo, "__len__") and userinfo.__len__() > 0:
+                    for row in userinfo:
+                        # row_dict = functions.row2dict(row)
+                        row_dict = row
+                        user_info = {
+                            'username': row_dict['username'],
+                            'password': row_dict['password'],
+                            'userid': row_dict['userid'],
+                            # 'userlevel': row_dict['userlevel'],
+                            'email': row_dict['email']
+                            # 'timestamp': row_dict['timestamp']
+                        }
+
+                    user_info_json = json.dumps(user_info,
+                                                ensure_ascii=False,
+                                                encoding='utf-8',
+                                                sort_keys=True,
+                                                indent=4,
+                                                separators=(', ', ': '))
+                    # print user_info_json
+                    login_json = '{"success":true, "user":'+ user_info_json + '}'
+                    # print login_json
+                else:
+                    login_json = '{"success":false, "error":"Username or password incorrect!"}'
+
+            except:
+                login_json = '{"success":false, "error":"Error reading login data in DB!"}'
         else:
-            return render.index()
+            login_json = '{"success":false, "error":"No user name given!"}'
+
+        return login_json
 
 
 class UpdateYaxe:
@@ -436,6 +485,9 @@ class GetHelp:
         docs_dir = es_constants.es2globals['docs_dir']
         if not os.path.isdir(es_constants.es2globals['docs_dir']):
             docs_dir = es_constants.es2globals['base_dir'] + '/apps/help/userdocs/'
+
+        if getparams['lang'] == '':
+            getparams['lang'] = es_constants.es2globals['default_language'];
 
         if getparams['lang'] == 'eng':
             lang_dir = 'EN/'
@@ -1309,6 +1361,40 @@ class GetDashboard:
                           'PC3_internet_status': PC3_internet_status,
                           'PC3_disk_status': PC3_disk_status}
 
+        # dashboard_dict = {
+        #     "PC1_connection": True,
+        #     "PC1_dvb_status": True,
+        #     "PC1_fts_status": True,
+        #     "PC1_tellicast_status": True,
+        #     "PC23_connection": True,
+        #     "PC2_DBAutoSync": True,
+        #     "PC2_DataAutoSync": True,
+        #     "PC2_disk_status": True,
+        #     "PC2_internet_status": True,
+        #     "PC2_mode": "nominal",
+        #     "PC2_postgresql_status": True,
+        #     "PC2_service_eumetcast": "true",
+        #     "PC2_service_ingest": "true",
+        #     "PC2_service_internet": "true",
+        #     "PC2_service_processing": "true",
+        #     "PC2_service_system": "true",
+        #     "PC2_version": "2.0.4",
+        #     "PC3_DBAutoSync": False,
+        #     "PC3_DataAutoSync": False,
+        #     "PC3_disk_status": "true",
+        #     "PC3_internet_status": "true",
+        #     "PC3_mode": "nominal",
+        #     "PC3_postgresql_status": "true",
+        #     "PC3_service_eumetcast": "false",
+        #     "PC3_service_ingest": "false",
+        #     "PC3_service_internet": "false",
+        #     "PC3_service_processing": "false",
+        #     "PC3_service_system": "true",
+        #     "PC3_version": "2.0.4",
+        #     "activePC": "pc3",
+        #     "type_installation": "full"
+        # }
+
         # print dashboard_dict
         dashboard_json = json.dumps(dashboard_dict,
                                     ensure_ascii=False,
@@ -1804,7 +1890,7 @@ class GetColorSchemes:
                 # legend_name = legend['colorbar']
                 default_legend = legend['default_legend']
 
-                if default_legend == 'True':
+                if default_legend == True:
                     defaultlegend = 'true'
                 else:
                     defaultlegend = 'false'
@@ -1979,17 +2065,29 @@ class GetLogFile:
                     for line in reversed(open(logfilepath).readlines()):
                         logfilecontent += line
 
+            # logfilecontent = logfilecontent.replace('\'', '')
+            # logfilecontent = logfilecontent.replace(chr(10), '<br />')
+            # logfilecontent = logfilecontent.replace(' TRACE ', '<b style="color:gray"> TRACE </b>')
+            # logfilecontent = logfilecontent.replace(' DEBUG ', '<b style="color:gray"> DEBUG </b>')
+            # logfilecontent = logfilecontent.replace(' INFO ', '<b style="color:green"> INFO </b>')
+            # logfilecontent = logfilecontent.replace(' WARNING ', '<b style="color:orange"> WARN </b>')
+            # logfilecontent = logfilecontent.replace(' WARN ', '<b style="color:orange"> WARN </b>')
+            # logfilecontent = logfilecontent.replace(' ERROR ', '<b style="color:red"> ERROR </b>')
+            # logfilecontent = logfilecontent.replace(' CRITICAL ', '<b style="color:red"> FATAL </b>')
+            # logfilecontent = logfilecontent.replace(' FATAL ', '<b style="color:red"> FATAL </b>')
+            # logfilecontent = logfilecontent.replace(' CLOSED ', '<b style="color:brown"> CLOSED </b>')
+
             logfilecontent = logfilecontent.replace('\'', '')
             logfilecontent = logfilecontent.replace(chr(10), '<br />')
-            logfilecontent = logfilecontent.replace(' TRACE ', '<b style="color:gray"> TRACE </b>')
-            logfilecontent = logfilecontent.replace(' DEBUG ', '<b style="color:gray"> DEBUG </b>')
-            logfilecontent = logfilecontent.replace(' INFO ', '<b style="color:green"> INFO </b>')
-            logfilecontent = logfilecontent.replace(' WARNING ', '<b style="color:orange"> WARN </b>')
-            logfilecontent = logfilecontent.replace(' WARN ', '<b style="color:orange"> WARN </b>')
-            logfilecontent = logfilecontent.replace(' ERROR ', '<b style="color:red"> ERROR </b>')
-            logfilecontent = logfilecontent.replace(' CRITICAL ', '<b style="color:red"> FATAL </b>')
-            logfilecontent = logfilecontent.replace(' FATAL ', '<b style="color:red"> FATAL </b>')
-            logfilecontent = logfilecontent.replace(' CLOSED ', '<b style="color:brown"> CLOSED </b>')
+            logfilecontent = logfilecontent.replace(' TRACE ', "<b style='color:gray'> TRACE </b>")
+            logfilecontent = logfilecontent.replace(' DEBUG ', "<b style='color:gray'> DEBUG </b>")
+            logfilecontent = logfilecontent.replace(' INFO ', "<b style='color:green'> INFO </b>")
+            logfilecontent = logfilecontent.replace(' WARNING ', "<b style='color:orange'> WARN </b>")
+            logfilecontent = logfilecontent.replace(' WARN ', "<b style='color:orange'> WARN </b>")
+            logfilecontent = logfilecontent.replace(' ERROR ', "<b style='color:red'> ERROR </b>")
+            logfilecontent = logfilecontent.replace(' CRITICAL ', "<b style='color:red'> FATAL </b>")
+            logfilecontent = logfilecontent.replace(' FATAL ', "<b style='color:red'> FATAL </b>")
+            logfilecontent = logfilecontent.replace(' CLOSED ', "<b style='color:brown'> CLOSED </b>")
 
         else:
             logfilecontent = 'NO LOG FILE PRESENT'
@@ -2000,7 +2098,8 @@ class GetLogFile:
                                          indent=4,
                                          separators=(', ', ': '))
 
-        logfile_json = '{"success":"true", "filename":\'' + logfilename + '\',"logfilecontent":\''+logfilecontent+'\'}'
+        # logfile_json = '{"success":"true", "filename":\'' + logfilename + '\',"logfilecontent":\''+logfilecontent+'\'}'
+        logfile_json = '{"success":"true","filename":"' + logfilename + '","logfilecontent":"'+logfilecontent+'"}'
 
         return logfile_json
 
@@ -2635,9 +2734,11 @@ class GetVectorLayer:
         filename = getparams['file']
         # layerfilepath = '/srv/www/eStation2_Layers/'+filename
         layerfilepath = es_constants.estation2_layers_dir + os.path.sep + filename
-
+        # if isFile(layerfilepath):
         layerfile = open(layerfilepath, 'r')
         layerfilecontent = layerfile.read()
+        # else:
+        #   layerfilecontent = '{"success":false, "message":"Layerfile not found!"}'
         return layerfilecontent
 
 
@@ -3796,33 +3897,39 @@ class Ingestion:
     def GET(self):
         # return web.ctx
         ingestions = querydb.get_ingestions(echo=False)
+        # print ingestions
 
         if hasattr(ingestions, "__len__") and ingestions.__len__() > 0:
             ingest_dict_all = []
             for row in ingestions:
                 ingest_dict = functions.row2dict(row)
 
-                if row.frequency_id == 'e15minute' or row.frequency_id == 'e30minute':
-                    ingest_dict['nodisplay'] = 'no_minutes_display'
-                    # today = datetime.date.today()
-                    # # week_ago = today - datetime.timedelta(days=7)
-                    # week_ago = datetime.datetime(2015, 8, 27, 00, 00)   # .strftime('%Y%m%d%H%S')
-                    # # kwargs.update({'from_date': week_ago})  # datetime.date(2015, 08, 27)
-                    # kwargs = {'product_code': row.productcode,
-                    #           'sub_product_code': row.subproductcode,
-                    #           'version': row.version,
-                    #           'mapset': row.mapsetcode,
-                    #           'from_date': week_ago}
-                    # dataset = Dataset(**kwargs)
-                    # completeness = dataset.get_dataset_normalized_info()
+                if row.mapsetcode != None and row.mapsetcode != '':
+                    if row.frequency_id == 'e15minute' or row.frequency_id == 'e30minute':
+                        ingest_dict['nodisplay'] = 'no_minutes_display'
+                        # today = datetime.date.today()
+                        # # week_ago = today - datetime.timedelta(days=7)
+                        # week_ago = datetime.datetime(2015, 8, 27, 00, 00)   # .strftime('%Y%m%d%H%S')
+                        # # kwargs.update({'from_date': week_ago})  # datetime.date(2015, 08, 27)
+                        # kwargs = {'product_code': row.productcode,
+                        #           'sub_product_code': row.subproductcode,
+                        #           'version': row.version,
+                        #           'mapset': row.mapsetcode,
+                        #           'from_date': week_ago}
+                        # dataset = Dataset(**kwargs)
+                        # completeness = dataset.get_dataset_normalized_info()
+                    else:
+                        kwargs = {'product_code': row.productcode,
+                                  'sub_product_code': row.subproductcode,
+                                  'version': row.version,
+                                  'mapset': row.mapsetcode}
+                        # print kwargs
+                        dataset = Dataset(**kwargs)
+                        completeness = dataset.get_dataset_normalized_info()
+                        ingest_dict['completeness'] = completeness
+                        ingest_dict['nodisplay'] = 'false'
                 else:
-                    kwargs = {'product_code': row.productcode,
-                              'sub_product_code': row.subproductcode,
-                              'version': row.version,
-                              'mapset': row.mapsetcode}
-                    dataset = Dataset(**kwargs)
-                    completeness = dataset.get_dataset_normalized_info()
-                    ingest_dict['completeness'] = completeness
+                    ingest_dict['completeness'] = {}
                     ingest_dict['nodisplay'] = 'false'
 
                 ingest_dict_all.append(ingest_dict)

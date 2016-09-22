@@ -12,7 +12,7 @@ Ext.define('esapp.store.DataSetsStore', {
 
     storeId : 'DataSetsStore'
 
-    ,autoLoad: false
+    ,autoLoad: true
     ,autoSync: true
     ,remoteSort: false
     ,remoteGroup: false
@@ -55,12 +55,13 @@ Ext.define('esapp.store.DataSetsStore', {
         }
     }
     ,grouper:{
-             // property: 'cat_descr_name',
-             groupFn : function (item) {
-                 return "<span style='display: none;'>" + item.get('order_index') + "</span>" + esapp.Utils.getTranslation(item.get('category_id'))
-                 //return item.get('cat_descr_name')
-             },
-             sortProperty: 'order_index'
+        groupFn : function (item) {
+            return esapp.Utils.getTranslation(item.get('category_id'));
+            //return "<span style='display: none;'>" + item.get('order_index') + "</span>" + esapp.Utils.getTranslation(item.get('category_id'))
+            //return item.get('cat_descr_name')
+        },
+        property: 'order_index',
+        sortProperty: 'order_index'
     }
     ,listeners: {
         write: function(store, operation){

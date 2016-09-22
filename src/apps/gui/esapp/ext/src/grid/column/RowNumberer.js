@@ -20,6 +20,12 @@ Ext.define('Ext.grid.column.RowNumberer', {
     alias: 'widget.rownumberer',
 
     /**
+     * @property {Boolean} isRowNumberer
+     * `true` in this class to identify an object as an instantiated RowNumberer, or subclass thereof.
+     */
+    isRowNumberer: true,
+
+    /**
      * @cfg {String} text
      * Any valid text or HTML fragment to display in the header cell for the row number column.
      */
@@ -51,6 +57,10 @@ Ext.define('Ext.grid.column.RowNumberer', {
 
     align: 'right',
 
+    /**
+     * @cfg {Boolean} producesHTML
+     * @inheritdoc
+     */
     producesHTML: false,
 
     constructor: function (config) {

@@ -47,6 +47,8 @@ Ext.define('Ext.window.Toast', {
     extend: 'Ext.window.Window',
 
     xtype: 'toast',
+    
+    isToast: true,
 
     cls: Ext.baseCSSPrefix + 'toast',
 
@@ -55,6 +57,8 @@ Ext.define('Ext.window.Toast', {
     plain: false,
     draggable: false,
     resizable: false,
+    closable: false,
+    focusable: false,
     shadow: false,
     focus: Ext.emptyFn,
 
@@ -74,9 +78,21 @@ Ext.define('Ext.window.Toast', {
 
     /**
      * @cfg {"br"/"bl"/"tr"/"tl"/"t"/"l"/"b"/"r"} [align="br"]
-     * Specifies the basic alignment of the toast message with its `anchor`. This controls
-     * many aspects of the toast animation as well. For fine grain control of the final
-     * placement of the toast and its `anchor` you may set `anchorAlign` *as well*.
+     * Specifies the basic alignment of the toast message with its {@link #anchor}. This 
+     * controls many aspects of the toast animation as well. For fine grain control of 
+     * the final placement of the toast and its `anchor` you may set 
+     * {@link #anchorAlign} as well.
+     * 
+     * Possible values:
+     * 
+     *  - br - bottom-right
+     *  - bl - bottom-left
+     *  - tr - top-right
+     *  - tl - top-left
+     *  - t  - top
+     *  - l  - left
+     *  - b  - bottom
+     *  - r  - right
      */
     align: 'br',
 
@@ -86,6 +102,12 @@ Ext.define('Ext.window.Toast', {
      * its `anchor`. This is set to a reasonable value based on `align` but the `align`
      * also sets defaults for various other properties. This config controls only the
      * final position of the toast.
+     */
+    
+    /**
+     * @cfg {Boolean} [animate=true]
+     * Set this to `false` to make toasts appear and disappear without animation.
+     * This is helpful with applications' unit and integration testing.
      */
 
     // Pixels between each notification
@@ -100,11 +122,17 @@ Ext.define('Ext.window.Toast', {
 
     slideInAnimation: 'easeIn',
     slideBackAnimation: 'bounceOut',
-    slideInDuration: 1500,
-    slideBackDuration: 1000,
+    slideInDuration: 500,
+    slideBackDuration: 500,
     hideDuration: 500,
     autoCloseDelay: 3000,
-    stickOnClick: true,
+
+    /**
+     * @cfg {Boolean} [stickOnClick]
+     * This config will prevent the Toast from closing when you click on it. If this is set to `true`,
+     * closing the Toast will have to be handled some other way (e.g., Setting `closable: true`).
+     */
+    stickOnClick: false,
     stickWhileHover: true,
     closeOnMouseDown: false,
 
@@ -118,12 +146,30 @@ Ext.define('Ext.window.Toast', {
     xPos: 0,
     yPos: 0,
 
+    constructor: function(config) {
+        config = config || {};
+        if (config.animate === undefined) {
+            config.animate = Ext.isBoolean(this.animate) ? this.animate : Ext.enableFx;
+        }
+        this.enableAnimations = config.animate;
+        delete config.animate;
+
+        this.callParent([config]);
+    },
+
     initComponent: function() {
         var me = this;
 
+        // Close tool is not really helpful to sight impaired users
+        // when Toast window is set to auto-close on timeout; however
+        // if it's forced, respect that.
+        if (me.autoClose && me.closable == null) {
+            me.closable = false;
+        }
+        
         me.updateAlignment(me.align);
         me.setAnchor(me.anchor);
-        me.callParent(arguments);
+        me.callParent();
     },
 
     onRender: function() {
@@ -135,7 +181,7 @@ Ext.define('Ext.window.Toast', {
 
         // Mousedown outside of this, when visible, hides it immediately
         if (me.closeOnMouseDown) {
-            me.mon(Ext, 'mousedown', me.onDocumentMousedown, me);
+            Ext.getDoc().on('mousedown', me.onDocumentMousedown, me);
         }
     },
 
@@ -363,7 +409,6 @@ Ext.define('Ext.window.Toast', {
             if (!me.closeTask) {
                 me.closeTask = new Ext.util.DelayedTask(me.doAutoClose, me);
             }
-            me.closeTask.delay(me.autoCloseDelay);
         }
 
         // Shunting offscreen to avoid flicker
@@ -387,7 +432,8 @@ Ext.define('Ext.window.Toast', {
 
             me.xPos = me.getXposAlignedToSibling(sibling);
             me.yPos = me.getYposAlignedToSibling(sibling);
-        } else {
+        }
+        else {
             el.alignTo(me.anchor.el, me.anchorAlign,
                             [ (me.paddingX * me.paddingFactorX),
                               (me.paddingY * me.paddingFactorY) ], false);
@@ -398,23 +444,37 @@ Ext.define('Ext.window.Toast', {
 
         Ext.Array.include(activeToasts, me);
 
-        // Repeating from coordinates makes sure the windows does not flicker into the
-        // center of the viewport during animation
-        xy = el.getXY();
-        el.animate({
-            from: {
-                x: xy[0],
-                y: xy[1]
-            },
-            to: {
-                x: me.xPos,
-                y: me.yPos,
-                opacity: 1
-            },
-            easing: me.slideInAnimation,
-            duration: me.slideInDuration,
-            dynamic: true
-        });
+        if (me.enableAnimations) {
+            // Repeating from coordinates makes sure the windows does not flicker
+            // into the center of the viewport during animation
+            xy = el.getXY();
+            el.animate({
+                from: {
+                    x: xy[0],
+                    y: xy[1]
+                },
+                to: {
+                    x: me.xPos,
+                    y: me.yPos,
+                    opacity: 1
+                },
+                easing: me.slideInAnimation,
+                duration: me.slideInDuration,
+                dynamic: true,
+                callback: me.afterPositioned,
+                scope: me
+            });
+        }
+        else {
+            me.setLocalXY(me.xPos, me.yPos);
+            me.afterPositioned();
+        }
+    },
+
+    afterPositioned: function() {
+        if (this.autoClose) {
+            this.closeTask.delay(this.autoCloseDelay);
+        }
     },
 
     onDocumentMousedown: function(e) {
@@ -436,22 +496,25 @@ Ext.define('Ext.window.Toast', {
             if (index) {
                 me.xPos = me.getXposAlignedToSibling(activeToasts[index - 1]);
                 me.yPos = me.getYposAlignedToSibling(activeToasts[index - 1]);
-            } else {
+            }
+            else {
                 me.xPos = me.getXposAlignedToAnchor();
                 me.yPos = me.getYposAlignedToAnchor();
             }
 
             me.stopAnimation();
-
-            el.animate({
-                to: {
-                    x: me.xPos,
-                    y: me.yPos
-                },
-                easing: me.slideBackAnimation,
-                duration: me.slideBackDuration,
-                dynamic: true
-            });
+            
+            if (me.enableAnimations) {
+                el.animate({
+                    to: {
+                        x: me.xPos,
+                        y: me.yPos
+                    },
+                    easing: me.slideBackAnimation,
+                    duration: me.slideBackDuration,
+                    dynamic: true
+                });
+            }
         }
     },
 
@@ -522,6 +585,8 @@ Ext.define('Ext.window.Toast', {
         }
     },
 
+    getFocusEl: Ext.emptyFn,
+
     hide: function () {
         var me = this,
             el = me.el;
@@ -535,7 +600,8 @@ Ext.define('Ext.window.Toast', {
                 me.removeFromAnchor();
                 me.isHiding = false;
             }
-        } else {
+        }
+        else {
             // Must be set right away in case of double clicks on the close button
             me.isHiding = true;
             me.isFading = true;
@@ -543,17 +609,23 @@ Ext.define('Ext.window.Toast', {
             me.cancelAutoClose();
 
             if (el) {
-                el.fadeOut({
-                    opacity: 0,
-                    easing: 'easeIn',
-                    duration: me.hideDuration,
-                    listeners: {
-                        afteranimate: function () {
-                            me.isFading = false;
-                            me.hide(me.animateTarget, me.doClose, me);
+                if (me.enableAnimations) {
+                    el.fadeOut({
+                        opacity: 0,
+                        easing: 'easeIn',
+                        duration: me.hideDuration,
+                        listeners: {
+                            afteranimate: function () {
+                                me.isFading = false;
+                                me.hide(me.animateTarget, me.doClose, me);
+                            }
                         }
-                    }
-                });
+                    });
+                }
+                else {
+                    me.isFading = false;
+                    me.hide(me.animateTarget, me.doClose, me);
+                }
             }
         }
 
@@ -579,5 +651,5 @@ function (Toast) {
         toast = new Toast(config);
         toast.show();
         return toast;
-    }
+    };
 });

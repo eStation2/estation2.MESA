@@ -16,7 +16,9 @@ Ext.define("esapp.view.analysis.addEditLayer",{
         'Ext.form.field.File',
         'Ext.form.FieldSet',
         'Ext.form.field.Number',
-        'Ext.Action'
+        'Ext.Action',
+
+        'Ext.ux.colorpick.Field'
     ],
 
     session:true,
@@ -52,7 +54,6 @@ Ext.define("esapp.view.analysis.addEditLayer",{
         layerrecord: null
     },
 
-
     initComponent: function () {
         var me = this;
 
@@ -74,6 +75,25 @@ Ext.define("esapp.view.analysis.addEditLayer",{
         else {
             me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('newlayer') + '</span>');
         }
+
+        me.listeners = {
+            afterrender: function(){
+                //console.info(me.getViewModel());
+                //console.info(me.getViewModel().getData().layertypes);
+                var layermenudata = [
+                    {menu: 'border', menuname: esapp.Utils.getTranslation('borderlayers')},
+                    {menu: 'marine', menuname: esapp.Utils.getTranslation('marinelayers')},
+                    {menu: 'other', menuname: esapp.Utils.getTranslation('otherlayers')}
+                ];
+                var layertypesdata = [
+                    {layertype: 'polygon', layertypename: 'Polygon'},
+                    {layertype: 'line', layertypename: 'Line'},
+                    {layertype: 'point', layertypename: 'Point'}
+                ];
+                me.getViewModel().getData().layertypes.setData(layertypesdata);
+                me.getViewModel().getData().layermenu.setData(layermenudata);
+            }
+        };
 
         me.bbar = ['->',{
             xtype: 'button',
@@ -189,7 +209,7 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                     //bind: '{me.params.layerrecord.layertype}',
                     xtype: 'combobox',
                     fieldLabel: esapp.Utils.getTranslation('layertype'),
-                    width: 120+150,
+                    width: 120+120,
                     allowBlank: true,
                     bind: {
                         store: '{layertypes}'
@@ -216,7 +236,7 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                     //bind: '{me.params.layerrecord.menu}',
                     xtype: 'combobox',
                     fieldLabel: esapp.Utils.getTranslation('layermenu'),
-                    width: 120+150,
+                    width: 120+185,
                     allowBlank: false,
                     bind: {
                         store: '{layermenu}'
@@ -274,6 +294,7 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                     //width: 400,
                     nameColumnWidth: 230,
                     sortableColumns: false,
+                    forceFit: true,
                     source: {
                         polygon_outlinecolor: esapp.Utils.convertRGBtoHex(me.params.layerrecord.get('polygon_outlinecolor')),
                         polygon_outlinewidth: me.params.layerrecord.get('polygon_outlinewidth'),
@@ -286,9 +307,12 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                     },
                     sourceConfig: {
                         polygon_outlinecolor: {
+                            //type: 'colorfield',
                             displayName: esapp.Utils.getTranslation('outline_colour'),     // 'Outline colour',
                             editor: {
                                 xtype: 'mycolorpicker'
+                                //xtype: 'colorfield',
+                                //format: '#HEX6'
                             }
                             ,renderer: colorrenderer
                         },
@@ -300,7 +324,8 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                             displayName: esapp.Utils.getTranslation('highlight_outline_colour'),     // 'Highlight outline colour',
                             editor: {
                                 xtype: 'mycolorpicker'
-                                //,floating: false
+                                //xtype: 'colorfield',
+                                //format: '#HEX6'
                             }
                             ,renderer: colorrenderer
                         },
@@ -312,7 +337,8 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                             displayName: esapp.Utils.getTranslation('highlight_fill_colour'),     // 'Highlight fill colour',
                             editor: {
                                 xtype: 'mycolorpicker'
-                                //,floating: false
+                                //xtype: 'colorfield',
+                                //format: '#HEX6'
                             }
                             ,renderer: colorrenderer
                         },
@@ -328,7 +354,8 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                             displayName: esapp.Utils.getTranslation('selected_feature_outline_colour'),     // 'Selected feature outline colour',
                             editor: {
                                 xtype: 'mycolorpicker'
-                                //,floating: false
+                                //xtype: 'colorfield',
+                                //format: '#HEX6'
                             }
                             ,renderer: colorrenderer
                         },

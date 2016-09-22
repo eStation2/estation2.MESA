@@ -31,11 +31,21 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
         disableSelection: true,
         trackOver: false
     },
+    //selType: 'cellmodel',
+    //selModel: {listeners:{}},
+
+    //listeners: {
+    //    cellclick : function(view, cell, cellIndex, record, row, rowIndex, e) {
+    //        //e.stopPropagation();
+    //        return false;
+    //    }
+    //},
+
+    bufferedRenderer: true,
 
     hideHeaders: true,
     columnLines: false,
     rowLines:false,
-    bufferedRenderer: true,
 
     initComponent: function () {
         var me = this;
@@ -61,26 +71,17 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
                 height:40,
                 widgetattached: false
             },
-            onWidgetAttach: function(widget, record) {
-                //console.info(record.getData());
-                //if (!widget.widgetattached) {
-                    // console.info(record.getAssociatedData()); // get all associated data, including deep nested
-                    var widgetchart = widget.down('cartesian');
-                    var completeness = record.getData().datasetcompleteness;  // get completeness model!
+            onWidgetAttach: function(col, widget, record) {
+                //console.info('DM - completeness widget.widgetattached');
+                //console.info(widget.widgetattached);
 
+                var widgetchart = widget.down('cartesian');
+                if (!widget.widgetattached) {
+                    //console.info('DM - create completeness widget');
+                    // console.info(record.getAssociatedData()); // get all associated data, including deep nested
+                    var completeness = record.getData().datasetcompleteness;  // get completeness model!
                     var storefields = ['dataset'];
                     var series_yField = [];
-                    if (record.get('nodisplay') == 'no_minutes_display' || record.getData().frequency_id=='singlefile'){
-                        storefields.push('data1');
-                        series_yField.push('data1');
-                    }
-                    else {
-                        for (var index = 1; index <= completeness.intervals.length; ++index) {
-                            storefields.push('data' + index);
-                            series_yField.push('data' + index);
-                        }
-                    }
-
                     var datasetdata = [];
                     var dataObj = {dataset: ''};
                     var seriestitles = [];
@@ -94,8 +95,21 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
                         record.get('mapset_descriptive_name') + ' - ' +
                         record.get('subproductcode') + '</b></br></br>';
 
+
+                    if (record.get('nodisplay') == 'no_minutes_display' || record.getData().frequency_id=='singlefile'){
+                        storefields.push('data1');
+                        series_yField.push('data1');
+                    }
+                    else {
+                        for (var index = 1; index <= completeness.intervals.length; ++index) {
+                            storefields.push('data' + index);
+                            series_yField.push('data' + index);
+                        }
+                    }
+
                     seriestitles.push(datasetForTipText);
 
+                    widget.spriteXposition = 100;
                     if (record.get('nodisplay')  == 'no_minutes_display'){
                         dataObj["data1"] = '100'; // 100%
                         datasetdata.push(dataObj);
@@ -108,6 +122,7 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
                         widgetchart.surfaceMap.chart[0].getItems()[1].setText('');
                         widgetchart.surfaceMap.chart[0].getItems()[2].setText('');
                         widgetchart.surfaceMap.chart[0].getItems()[3].setText('');
+                        widget.spriteXposition = 30;
                     }
                     else if (record.getData().frequency_id=='singlefile' && completeness.totfiles == 1 && completeness.missingfiles == 0){
 
@@ -175,20 +190,14 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
                             seriestitle = '<span style="color:'+color+'">' + esapp.Utils.getTranslation('from') + ' ' + interval.fromdate + ' ' + esapp.Utils.getTranslation('to') + ' ' + interval.todate + ' - ' + intervaltype + '</span></br>';
                             seriestitles.push(seriestitle);
                         });
-                        //console.info(tot_percentage);
-//                        console.info('------------------');
-//                        console.info('dataObj biggest before: ' +  dataObj["data" + i_biggest]);
                         var fill_to_onehunderd = 100 - tot_percentage;
-                        //console.info(fill_to_onehunderd);
                         if (fill_to_onehunderd > 0) // add to last data to fill up to 100%
                             dataObj["data" + i_biggest] = dataObj["data" + i_biggest] + fill_to_onehunderd;
                         else {
-                            //dataObj["data" + i_biggest] = dataObj["data" + i_biggest] - (fill_to_onehunderd);
+                            dataObj["data" + i_biggest] = dataObj["data" + i_biggest] - (-fill_to_onehunderd);
+                            dataObj["data" + i_biggest] = -dataObj["data" + i_biggest]>0 ? -dataObj["data" + i_biggest] : dataObj["data" + i_biggest];
                         }
                         datasetdata.push(dataObj);
-//                        console.info('tot_percentage: ' + tot_percentage);
-//                        console.info('fill_to_onehunderd: ' + fill_to_onehunderd);
-//                        console.info('dataObj biggest after: ' +  dataObj["data" + i_biggest]);
 
                         // Update the 4 sprites (these are not reachable through getSprites() on the chart)
                         widgetchart.surfaceMap.chart[0].getItems()[0].setText(esapp.Utils.getTranslation('files') + ': ' + completeness.totfiles);
@@ -198,10 +207,12 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
                         widgetchart.surfaceMap.chart[0].getItems()[1].setText(missingFilesText);
                         widgetchart.surfaceMap.chart[0].getItems()[2].setText(completeness.firstdate);
                         widgetchart.surfaceMap.chart[0].getItems()[3].setText(completeness.lastdate);
-                        //console.info(widgetchart.surfaceMap.chart[0].getItems()[3]);
                         //if (completeness.lastdate.length < 6)
                         //    widgetchart.surfaceMap.chart[0].getItems()[3].attr.textAlign = "right";
                     }
+
+                    widgetchart.surfaceMap.chart[0].getItems()[0].x = widget.spriteXposition;
+                    widgetchart.surfaceMap.chart[0].getItems()[0].attr.x = widget.spriteXposition;
 
                     widget.tooltipintervals = seriestitles;
 
@@ -243,18 +254,23 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
 
                     // update legendStore with new series, otherwise setTitles,
                     // which updates also the legend names will go in error.
-                    widgetchart.refreshLegendStore();
-                    widgetchart.redraw();
+                    //widgetchart.refreshLegendStore();
+                    //widgetchart.redraw();
                     //widgetchartseries[0].setTitle(seriestitles);
                     //widget.setTooltipintervals(seriestitles);
 
-                //    widget.widgetattached = true;
-                //}
+                    widget.widgetattached = true;
+                }
+
+                //widgetchart.redraw();
+                //me.updateLayout();
             }
         },{
             xtype: 'actioncolumn',
             width: 65,
             align:'center',
+            menuDisabled: true,
+            stopSelection: false,
             items: [{
                 icon: 'resources/img/icons/download.png',
                 tooltip: esapp.Utils.getTranslation('tipcompletedataset'),    // 'Complete data set',

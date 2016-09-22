@@ -221,7 +221,7 @@
     });
 })();
 
-/*
+/**
  * Create a function that will throw an error if called (in debug mode) with a message that
  * indicates the method has been removed.
  * @param {String} suggestion Optional text to include in the message (a workaround perhaps).

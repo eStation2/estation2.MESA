@@ -68,9 +68,14 @@ Ext.define('Ext.draw.ContainerBase', {
         this.renderFrame();
     },
 
-    onResize: function () {
-        var box = this.body.lastBox;
-        this.onBodyResize(box.width, box.height);
+    onResize: function (width, height, oldWidth, oldHeight) {
+        var me = this;
+
+        me.callParent([width, height, oldWidth, oldHeight]);
+        me.setBodySize({
+            width: width,
+            height: height
+        });
     },
 
     preview: function () {

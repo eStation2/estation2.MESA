@@ -4,6 +4,8 @@
 Ext.define('Ext.event.gesture.Swipe', {
     extend: 'Ext.event.gesture.SingleTouch',
 
+    priority: 500,
+
     handledEvents: ['swipestart', 'swipe', 'swipecancel'],
 
     /**
@@ -38,8 +40,23 @@ Ext.define('Ext.event.gesture.Swipe', {
      */
 
     inheritableStatics: {
+        /**
+         * @private
+         * @static
+         * @inheritable
+         */
         MAX_OFFSET_EXCEEDED: 'Max Offset Exceeded',
+        /**
+         * @private
+         * @static
+         * @inheritable
+         */
         MAX_DURATION_EXCEEDED: 'Max Duration Exceeded',
+        /**
+         * @private
+         * @static
+         * @inheritable
+         */
         DISTANCE_NOT_ENOUGH: 'Distance Not Enough'
     },
 
@@ -166,5 +183,14 @@ Ext.define('Ext.event.gesture.Swipe', {
     onTouchCancel: function(e) {
         this.fire('swipecancel', e);
         return false;
+    },
+
+    reset: function() {
+        var me = this;
+
+        me.startTime = me.isHorizontal = me.isVertical = me.startX = me.startY = null;
     }
+}, function(Swipe) {
+    var gestures = Ext.manifest.gestures;
+    Swipe.instance = new Swipe(gestures && gestures.swipe);
 });

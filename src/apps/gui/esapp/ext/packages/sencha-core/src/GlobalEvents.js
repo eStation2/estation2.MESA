@@ -108,6 +108,16 @@ Ext.define('Ext.GlobalEvents', {
      * Fires when a Component is shown.
      * @param {Ext.Component} component
      */
+    
+    /**
+     * @event beforebindnotify
+     * Fires before a scheduled set of bindings are fired. This allows interested parties
+     * to react and do any required work.
+     * @param {Ext.util.Scheduler} scheduler The scheduler triggering the bindings.
+     * 
+     * @private
+     * @since 5.1.0
+     */
 
     /**
      * @property {Object} idleEventMask
@@ -129,7 +139,7 @@ Ext.define('Ext.GlobalEvents', {
 
         me.callParent();
 
-        Ext.onReady(function() {
+        Ext.onInternalReady(function() {
             // using a closure here instead of attaching the event directly to the
             // attachListeners method gives us a chance to override the method
             me.attachListeners();

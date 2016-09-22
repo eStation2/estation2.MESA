@@ -11,9 +11,9 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
     requires: [
         'esapp.view.datamanagement.DataManagementModel',
         'esapp.view.datamanagement.DataManagementController',
-        'esapp.view.datamanagement.ProductMapSet',
-        'esapp.view.datamanagement.MapSetDataSet',
-        'esapp.view.datamanagement.sendRequest',
+        //'esapp.view.datamanagement.ProductMapSet',
+        //'esapp.view.datamanagement.MapSetDataSet',
+        //'esapp.view.datamanagement.sendRequest',
 
         'Ext.grid.column.Widget',
         'Ext.grid.column.Action',
@@ -22,22 +22,27 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
     ],
 
     store: 'DataSetsStore',
-    bufferedRenderer: false,
 
     // title: 'Data Management Dashboard',
     viewConfig: {
         stripeRows: false,
         enableTextSelection: true,
-        draggable:false,
+        draggable :false,
         markDirty: false,
-        resizable:false,
+        resizable: false,
         disableSelection: true,
-        trackOver:false
+        trackOver: false
     },
+    //selType: 'cellmodel',
+    //selModel: {
+    //    listeners:{}
+    //},
+
+    bufferedRenderer: true,
 
     collapsible: false,
-    enableColumnMove:false,
-    enableColumnResize:false,
+    enableColumnMove: false,
+    enableColumnResize: false,
     multiColumnSort: false,
     columnLines: false,
     rowLines: true,
@@ -54,6 +59,12 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         groupByText: esapp.Utils.getTranslation('productcategories')  // 'Product category'
     }],
 
+    //listeners: {
+    //    cellclick : function(view, cell, cellIndex, record, row, rowIndex, e) {
+    //        //e.stopPropagation();
+    //        return false;
+    //    }
+    //},
     //listeners: {
     //    viewready: function (){
     //        //this.suspendEvents(true);
@@ -190,10 +201,12 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                 header: esapp.Utils.getTranslation('actions'),    // 'Actions',
                 width: 70,
                 align:'center',
+                menuDisabled: true,
+                stopSelection: false,
                 items: [{
                     icon: 'resources/img/icons/download.png',
                     tooltip: esapp.Utils.getTranslation('tipcompletedatasetall'),    // 'Complete all product data sets (all mapsets and its subproducts).',
-                    //scope: me,
+                    scope: me,
                     handler: function (grid, rowIndex, colIndex, icon, e, record) {
                         //var rec = grid.getStore().getAt(rowIndex);
 
@@ -254,7 +267,7 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                       column.titleEl.removeCls('x-column-header-inner');
                   }
                 },
-                onWidgetAttach: function(widget, record) {
+                onWidgetAttach: function(col,widget, record) {
                     Ext.suspendLayouts();
                     var productmapsets = record.getData().productmapsets;
                     var newstore = Ext.create('Ext.data.JsonStore', {
@@ -272,19 +285,19 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
 
         me.callParent();
 
-        me.groupingFeature = me.view.getFeature('prodcat');
-
-        me.mon(me, 'afterrender', me.onAfterRender, me);
+        //me.groupingFeature = me.view.getFeature('prodcat');
+        //
+        //me.mon(me, 'afterrender', me.onAfterRender, me);
     }
 
-    ,onAfterRender: function() {
-        var me = this;
-        me.getStore().load({
-            callback:function(){
-                me.firstGroupKey = me.getStore().getGroups().items[0].getGroupKey();
-                //console.info(me.firstGroupKey);
-                //me.view.getFeature('prodcat').expand(me.firstGroupKey, true);
-            }
-        });
-    }
+    //,onAfterRender: function() {
+    //    var me = this;
+    //    me.getStore().load({
+    //        callback:function(){
+    //            me.firstGroupKey = me.getStore().getGroups().items[0].getGroupKey();
+    //            //console.info(me.firstGroupKey);
+    //            //me.view.getFeature('prodcat').expand(me.firstGroupKey, true);
+    //        }
+    //    });
+    //}
 });

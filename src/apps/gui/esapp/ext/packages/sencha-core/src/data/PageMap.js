@@ -8,6 +8,8 @@ Ext.define('Ext.data.PageMap', {
     extend: 'Ext.util.LruCache',
 
     config: {
+        store: null,
+
         /**
          * @cfg {Number} pageSize
          * The size of pages in this map.
@@ -28,8 +30,20 @@ Ext.define('Ext.data.PageMap', {
     clear: function(initial) {
         var me = this;
         me.pageMapGeneration = (me.pageMapGeneration || 0) + 1;
-        me.callParent(arguments);
+
+        // Map of internalId to recordIndex
+        me.indexMap = {};
+
+        me.callParent([initial]);
     },
+
+    //<debug>
+    updatePageSize: function(value, oldValue) {
+        if (oldValue != null) {
+            throw "pageMap page size may not be changed";
+        }
+    },
+    //</debug>
 
     forEach: function(fn, scope) {
         var me = this,
@@ -42,9 +56,9 @@ Ext.define('Ext.data.PageMap', {
             len;
 
         for (i = 0; i < pageCount; i++) {
-            pageNumbers[i] = Number(pageNumbers[i]);
+            pageNumbers[i] = +pageNumbers[i];
         }
-        Ext.Array.sort(pageNumbers);
+        Ext.Array.sort(pageNumbers, Ext.Array.numericSortFn);
         scope = scope || me;
         for (i = 0; i < pageCount; i++) {
             pageNumber = pageNumbers[i];
@@ -167,15 +181,21 @@ Ext.define('Ext.data.PageMap', {
         var me = this,
             pageSize = me.getPageSize(),
             lastPage = pageNumber + Math.floor((records.length - 1) / pageSize),
-            startIdx,
-            page;
+            storeIndex = (pageNumber - 1) * pageSize,
+            indexMap = me.indexMap,
+            page, i, len, startIdx;
 
         // Account for being handed a block of records spanning several pages.
         // This can happen when loading from a MemoryProxy before a viewSize has been determined.
         for (startIdx = 0; pageNumber <= lastPage; pageNumber++, startIdx += pageSize) {
             page = Ext.Array.slice(records, startIdx, startIdx + pageSize);
+
+            // Maintain the indexMap so that we can implement indexOf(record)
+            for (i = 0, len = page.length; i < len; i++) {
+                indexMap[page[i].internalId] = storeIndex++;
+            }
             me.add(pageNumber, page);
-            me.fireEvent('pageadded', pageNumber, page);
+            me.fireEvent('pageadd', me, pageNumber, page);
         }
     },
 
@@ -187,8 +207,22 @@ Ext.define('Ext.data.PageMap', {
         return result;
     },
 
+    getByInternalId: function(internalId) {
+        var index = this.indexMap[internalId];
+        if (index != null) {
+            return this.getAt(index);
+        }
+    },
+
     indexOf: function(record) {
-        return record ? record.index : -1;
+        var result = -1;
+        if (record) {
+            result = this.indexMap[record.internalId];
+            if (result == null) {
+                result = -1;
+            }
+        }
+        return result;
     },
 
     insert: function() {
@@ -210,12 +244,27 @@ Ext.define('Ext.data.PageMap', {
     },
 
     removeAtKey: function (page) {
-        var thePage = this.getPage(page);
+        // Allow observers to veto
+        var me = this,
+            thePage = me.getPage(page),
+            len,
+            i,
+            result;
 
-        if (thePage && thePage.value) {
-            thePage.value.length = 0;
+        if (thePage) {
+            if (me.fireEvent('beforepageremove', me, page, thePage) !== false) {
+                len = thePage.length;
+                for (i = 0; i < len; i++) {
+                    delete me.indexMap[thePage[i].internalId];
+                }
+                result = me.callParent(arguments);
+                me.fireEvent('pageremove', me, page, thePage);
+
+                // Empty the page array *after* informing observers that the records have exited.
+                thePage.length = 0;
+            }
         }
-        return this.callParent(arguments);
+        return result;
     },
 
     getPage: function(pageNumber) {
@@ -223,20 +272,26 @@ Ext.define('Ext.data.PageMap', {
     },
 
     hasRange: function(start, end) {
-        var pageNumber = this.getPageFromRecordIndex(start),
-            endPageNumber = this.getPageFromRecordIndex(end);
+        var me = this,
+            pageNumber = me.getPageFromRecordIndex(start),
+            endPageNumber = me.getPageFromRecordIndex(end);
 
         for (; pageNumber <= endPageNumber; pageNumber++) {
-            if (!this.hasPage(pageNumber)) {
+            if (!me.hasPage(pageNumber)) {
                 return false;
             }
         }
-        return true;
+        // Check that the last page is filled enough to encapsulate the range.
+        return (endPageNumber - 1) * me._pageSize + me.getPage(endPageNumber).length > end;
     },
 
     hasPage: function(pageNumber) {
         // We must use this.get to trigger an access so that the page which is checked for presence is not eligible for pruning
         return !!this.get(pageNumber);
+    },
+
+    peekPage: function(pageNumber) {
+        return this.map[pageNumber];
     },
 
     getAt: function(index) {
@@ -252,6 +307,7 @@ Ext.define('Ext.data.PageMap', {
             Ext.Error.raise('PageMap asked for range which it does not have');
         }
         var me = this,
+            Array = Ext.Array,
             pageSize = me.getPageSize(),
             startPageNumber = me.getPageFromRecordIndex(start),
             endPageNumber = me.getPageFromRecordIndex(end),
@@ -259,36 +315,36 @@ Ext.define('Ext.data.PageMap', {
             dataEnd = (endPageNumber * pageSize) - 1,
             pageNumber = startPageNumber,
             result = [],
-            sliceBegin, sliceEnd, doSlice,
-            i = 0, len;
+            sliceBegin, sliceEnd, doSlice;
 
         for (; pageNumber <= endPageNumber; pageNumber++) {
 
-            // First and last pages will need slicing to cut into the actual wanted records
+            // First and last pages *may* need slicing to cut into the actual wanted records
             if (pageNumber === startPageNumber) {
                 sliceBegin = start - dataStart;
-                doSlice = true;
+                doSlice = sliceBegin > 0;
             } else {
                 sliceBegin = 0;
                 doSlice = false;
             }
             if (pageNumber === endPageNumber) {
                 sliceEnd = pageSize - (dataEnd - end);
-                doSlice = true;
+                doSlice = doSlice || sliceEnd < pageSize;
             }
 
             // First and last pages will need slicing
             if (doSlice) {
-                Ext.Array.push(result, Ext.Array.slice(me.getPage(pageNumber), sliceBegin, sliceEnd));
+                Array.push(result, Array.slice(me.getPage(pageNumber), sliceBegin, sliceEnd));
             } else {
-                Ext.Array.push(result, me.getPage(pageNumber));
+                Array.push(result, me.getPage(pageNumber));
             }
         }
-
-        // Inject the dataset ordinal position into the record as the index
-        for (len = result.length; i < len; i++) {
-            result[i].index = start++;
-        }
         return result;
+    },
+
+    destroy: function() {
+        this.callParent();
+        this.indexMap = {};
+
     }
 });

@@ -2,7 +2,7 @@
  * @private
  * Implements buffered rendering of a grid, allowing users to scroll
  * through thousands of records without the performance penalties of
- * renderering all the records into the DOM at once.
+ * rendering all the records into the DOM at once.
  *
  * The number of rows rendered outside the visible area can be controlled by configuring the plugin.
  *
@@ -69,9 +69,14 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
      */
     scrollToLoadBuffer: 200,
 
-    // private. Initial value of 100.
+    /**
+     * @private
+     */
     viewSize: 100,
-    // private. Start at default value
+
+    /**
+     * @private
+     */
     rowHeight: 21,
     /**
      * @property {Number} position
@@ -81,6 +86,7 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
     lastScrollDirection: 1,
     bodyTop: 0,
     scrollHeight: 0,
+    loadId: 0,
 
     // Initialize this as a plugin
     init: function(grid) {
@@ -88,9 +94,9 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
             view = grid.view,
             viewListeners = {
                 scroll: me.onViewScroll,
-                resize: me.onViewResize,
                 refresh: me.onViewRefresh,
                 columnschanged: me.checkVariableRowHeight,
+                boxready: me.onViewBoxReady,
                 scope: me,
                 destroyable: true
             },
@@ -111,6 +117,15 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
             viewListeners.refresh = me.onViewRefresh;
         }
 
+        // Only play the pointer-events;none trick on the platform it is needed on.
+        // Only needed when using DOM scrolling on WebKit.
+        // WebKit does a browser layout when you change the pointer-events style.
+        if (Ext.isWebKit && Ext.supports.touchScroll !== 2) {
+            me.needsPointerEventsFix = true;
+            viewListeners.scrollEnd = me.onViewScrollEnd;
+            viewListeners.itemmousedown = me.onViewItemMouseDown;
+        }
+
         me.grid = grid;
         me.view = view;
         me.isRTL = view.getInherited().rtl;
@@ -118,6 +133,8 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
         view.preserveScrollOnRefresh = true;
         view.animate = false;
 
+        // It doesn't matter if it's a FeatureStore or a DataStore. The important thing is to only bind the same Type of
+        // store in future operations!
         me.bindStore(view.dataSource);
 
         // Use a configured rowHeight in the view
@@ -127,67 +144,86 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
 
         me.position = 0;
 
-        me.gridListeners = grid.on('reconfigure', me.onReconfigure, me);
         me.viewListeners = view.on(viewListeners);
     },
 
-    // Keep the variableRowHeight and any Lockable's syncRowHeight property correct WRT variable row heights being possible.
+    // Keep the variableRowHeight property correct WRT variable row heights being possible.
     checkVariableRowHeight: function() {
-        var me = this,
-            grid = me.grid;
-
-        me.variableRowHeight = me.view.hasVariableRowHeight();
-        if (grid.ownerLockable) {
-            grid.ownerLockable.syncRowHeight = me.variableRowHeight;
-        }
+        this.variableRowHeight = this.view.hasVariableRowHeight();
     },
 
-    bindStore: function (store) {
+    bindStore: function (newStore) {
         var me = this,
-            view = me.view,
-            dataSource = view.dataSource,
-            hasFeatureStore = dataSource && dataSource.isFeatureStore;
+            currentStore = me.store,
+            view = me.view;
 
-        // Don't bind the new store if it's not the same type of store as what the plugin was initialized with.
-        // For example, the plugin is initialized with a GroupStore if it has a grouping feature. Then,
-        // grid.reconfigure() is called, passing in a new data store here. This would be a problem, so if the
-        // store to bind isn't the same type as the currently bound store, then don't allow it.
+        // If the grid was configured with a feature such as Grouping that binds a FeatureStore (GroupStore, in its case) as
+        // the view's dataSource, we must continue to use the same Type of store.
         //
-        // Note that the feature should have a reconfigure listener that will bind and process the new store so
-        // skipping this doesn't mean that the new store isn't processed, it just happens elsewhere.
-        if (hasFeatureStore === store.isFeatureStore) {
-            if (me.store) {
-                me.unbindStore();
-            }
-            me.storeListeners = store.on({
-                scope: me,
-                groupchange: me.onStoreGroupChange,
-                clear: me.onStoreClear,
-                destroyable: true
-            });
-            me.store = store;
+        // Note that reconfiguring the grid can call into here.
+        if (currentStore && currentStore.isFeatureStore) {
+            return;
         }
+
+        if (currentStore) {
+            me.unbindStore();
+        }
+
+        me.storeListeners = newStore.on({
+            scope: me,
+            groupchange: me.onStoreGroupChange,
+            clear: me.onStoreClear,
+            beforeload: me.onBeforeStoreLoad,
+            load: me.onStoreLoad,
+            destroyable: true
+        });
+
+        me.store = newStore;
 
         // If the view has acquired a size, calculate a new view size and scroll range when the store changes.
-        if (me.view.componentLayout.layoutCount) {
+        if (view.componentLayout.layoutCount) {
             // Delete whatever our last viewSize might have been, and fall back to the prototype's default.
             delete me.viewSize;
-            if (store.isBufferedStore) {
-                store.setViewSize(me.viewSize);
-            }
-            me.onViewResize(me.view, 0, me.view.getHeight());
-        }
-    },
 
-    onReconfigure: function(grid, store){
-        if (store && store !== this.store) {
-            this.bindStore(store);
+            if (newStore.isBufferedStore) {
+                newStore.setViewSize(me.viewSize);
+            }
+
+            me.onViewResize(view, 0, view.getHeight());
         }
     },
 
     unbindStore: function() {
         this.storeListeners.destroy();
-        this.store = null;
+        this.storeListeners = this.store = null;
+    },
+
+    // Disable handling of scroll events until the load is finished
+    onBeforeStoreLoad: function(store) {
+        var me = this,
+            view = me.view;
+
+        if (view && view.refreshCounter) {
+            // Unless we are loading tree nodes, or have preserveScrollOnReload, set scroll position and row range back to zero.
+            if (store.isTreeStore || view.preserveScrollOnReload) {
+                me.nextRefreshStartIndex = view.all.startIndex;
+            }
+            else {
+                if (me.scrollTop !== 0) {
+                    // Zero position tracker so that next scroll event will not trigger any action
+                    me.setBodyTop(me.bodyTop = me.scrollTop = me.position = me.scrollHeight = me.nextRefreshStartIndex = 0);
+                    view.setScrollY(0);
+                }
+            }
+
+            me.lastScrollDirection = me.scrollOffset = null;
+        }
+        me.disable();
+    },
+
+    // Re-enable scroll event handling on load.
+    onStoreLoad: function() {
+        this.enable();
     },
 
     onStoreClear: function() {
@@ -200,33 +236,31 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
             if (me.scrollTop !== 0) {
                 // Zero position tracker so that next scroll event will not trigger any action
                 me.bodyTop = me.scrollTop = me.position = me.scrollHeight = 0;
-                me.view.setScrollY(0);
+                me.nextRefreshStartIndex = null;
+                view.setScrollY(0);
             }
+
+            // TableView does not add a Store Clear listener if there's a BufferedRenderer
+            // We handle that here.
+            view.refresh();
 
             me.lastScrollDirection = me.scrollOffset = null;
-
-            // MUST delete, not null out because the calculation checks hasOwnProperty.
-            // Unless we have a configured rowHeight
-            if (!view.hasOwnProperty('rowHeight')) {
-                delete me.rowHeight;
-            }
         }
     },
 
     // If the store is not grouped, we can switch to fixed row height mode
     onStoreGroupChange: function(store) {
-        var me = this;
+        this.refreshSize();
+    },
 
-        delete me.rowHeight;
-        me.stretchView(me.view, me.getScrollHeight());
+    onViewBoxReady: function(view) {
+        this.refreshScroller(view, this.scrollHeight);
     },
 
     onViewRefresh: function(view, records) {
         var me = this,
             rows = view.all,
-            oldScrollHeight = me.scrollHeight,
-            height,
-            scrollHeight;
+            height;
 
         // Recheck the variability of row height in the view.
         me.checkVariableRowHeight();
@@ -234,40 +268,28 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
         // The first refresh on the leading edge of the initial layout will mean that the
         // View has not had the sizes of flexed columns calculated and flushed yet.
         // So measurement of DOM height for calculation of an approximation of the variableRowHeight would be premature.
-        if (me.variableRowHeight && !view.componentLayoutCounter) {
+        // And measurement of the body width would be premature because of uncalculated flexes.
+        if (!view.componentLayoutCounter && (view.headerCt.down('{flex}') || me.variableRowHeight)) {
             view.on({
-                boxready: me.onViewRefresh,
-                scope: me,
+                boxready: Ext.Function.pass(me.onViewRefresh, [view, records], me),
                 single: true
             });
             return;
         }
 
-        // View has rows, delete the rowHeight property to trigger a recalculation when scrollRange is calculated
-        if (!view.hasOwnProperty('rowHeight') && rows.getCount()) {
-            // We need to calculate the table size based upon the new viewport size and current row height
-            // It tests hasOwnProperty so must delete the property to make it recalculate.
-            delete me.rowHeight;
-        }
-
-        // Calculates scroll range. Also calculates rowHeight if we do not have an own rowHeight property.
-        // That will be the case if the view contains some rows.
-        scrollHeight = me.getScrollHeight();
-
-        if (scrollHeight != oldScrollHeight) {
-            me.stretchView(view, scrollHeight);
-        }
-
-        // If we are instigating the refresh, we must only update the stretcher.
+        // If we are instigating the refresh, we will have already called refreshSize in doRefreshView
         if (me.refreshing) {
             return;
         }
+
+        me.refreshSize();
 
         if (me.scrollTop !== view.getScrollY()) {
             // The view may have refreshed and scrolled to the top, for example
             // on a sort. If so, it's as if we scrolled to the top, so we'll simulate
             // it here.
             me.onViewScroll();
+            me.onViewScrollEnd();
         } else {
             if (!me.hasOwnProperty('bodyTop')) {
                 me.bodyTop = rows.startIndex * me.rowHeight;
@@ -283,7 +305,7 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
 
                 // If we repaired the view by adding or removing records, then keep the records array
                 // consistent with what is there for subsequent listeners.
-                // For example the WidgetColumn listener which postprocesses all rows: https://sencha.jira.com/browse/EXTJS-13942
+                // For example the WidgetColumn listener which post-processes all rows: https://sencha.jira.com/browse/EXTJS-13942
                 if (records && (rows.getCount() !== records.length)) {
                     records.length = 0;
                     records.push.apply(records, me.store.getRange(rows.startIndex, rows.endIndex));
@@ -292,12 +314,85 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
         }
     },
 
+    /**
+     * @private
+     * @param {Ext.layout.ContextItem} ownerContext The view's layout context
+     * Called before the start of a view's layout run
+     */
+    beforeTableLayout: function(ownerContext) {
+        if (this.view.body.dom) {
+            ownerContext.bodyHeight = this.view.body.dom.offsetHeight;
+        }
+    },
+
+    /**
+     * @private
+     * @param {Ext.layout.ContextItem} ownerContext The view's layout context
+     * Called when a view's layout run is complete.
+     */
+    afterTableLayout: function(ownerContext) {
+        var me = this,
+            view = me.view,
+            renderedBlockHeight;
+
+        // The rendered block has changed height.
+        // This could happen if a cellWrap: true column has changed width.
+        // We need to recalculate row height and scroll range
+        if (ownerContext.bodyHeight && view.body.dom) {
+            me.refreshSize();
+            renderedBlockHeight = view.body.dom.offsetHeight;
+            if (renderedBlockHeight !== ownerContext.bodyHeight) {
+                me.onViewResize(view, null, view.el.lastBox.height);
+
+                // The layout has caused the rendered block to shrink in height.
+                // This could happen if a cellWrap: true column has increased in width.
+                // It could cause the bottom of the rendered view to zoom upwards
+                // out of sight.
+                if (renderedBlockHeight < ownerContext.bodyHeight) {
+                    if (me.viewSize >= me.store.getCount()) {
+                        me.setBodyTop(0);
+                    }
+
+                    // Column got wider causing scroll range to shrink, leaving the view stranded above the fold.
+                    // Scroll up to bring it into view.
+                    else if (me.bodyTop > me.scrollTop || me.bodyTop + renderedBlockHeight < me.scrollTop + me.viewClientHeight) {
+                        me.setBodyTop(me.scrollTop - me.trailingBufferZone * me.rowHeight);
+                    }
+                }
+
+                // If the rendered block is the last lines in the dataset,
+                // ensure the scroll range exactly encapsuates it.
+                if (view.all.endIndex === (view.dataSource.getCount()) - 1) {
+                    me.stretchView(view, me.scrollHeight = me.bodyTop + renderedBlockHeight - 1);
+                }
+            }
+        }
+    },
+
+    refreshSize: function() {
+        var me = this,
+            view = me.view;
+        
+        // Calculates scroll range.
+        // Also calculates rowHeight if we do not have an own rowHeight property.
+        me.scrollHeight = me.getScrollHeight();
+
+        me.stretchView(view, me.scrollHeight);
+    },
+
+    /**
+     * Called directly from {@link Ext.view.Table#onResize}. Reacts to View changing height by
+     * recalculating the size of the rendered block, and either trimming it or adding to it.
+     * @param {Ext.view.Table} view The Table view.
+     * @param {Number} width The new Width.
+     * @param {Number} height The new height.
+     * @param {Number} oldWidth The old width.
+     * @param {Number} oldHeight The old height.
+     * @private
+     */
     onViewResize: function(view, width, height, oldWidth, oldHeight) {
         var me = this,
             newViewSize;
-
-        // So we can set correct top position to position the data rows regardless of any top border
-        me.tableTopBorderWidth = view.body.getBorderWidth('t');
 
         // Only process first layout (the boxready event) or height resizes.
         if (!oldHeight || height !== oldHeight) {
@@ -309,113 +404,48 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
         }
     },
 
-    onWrappedColumnWidthChange: function(oldWidth, newWidth) {
-        var me = this,
-            view = me.view;
-
-        // If we are part way down the dataset, then 
-        if (me.store.getCount() && me.bodyTop) {
-
-            // MUST delete the property. The getScrollHeight method tests hasOwnProperty('rowHeight')
-            delete me.rowHeight;
-            // Ensure the scroll range stretcher is updated to reflect new data height
-            me.stretchView(view, me.getScrollHeight(true));
-
-            // Calculate new viewSize - number of rows to render.
-            me.setViewSize (Math.ceil(view.getHeight() / me.rowHeight) + me.trailingBufferZone + me.leadingBufferZone);
-
-            // ViewSize now encompasses all data; move to the top
-            if (me.viewSize >= me.store.getCount()) {
-                me.setBodyTop(0);
-            }
-
-            // Column got wider causing scroll range to shrink, leaving the view stranded past the end of the scroll range, position it back
-            else if (newWidth > oldWidth && me.bodyTop + view.body.dom.offsetHeight - 1 > me.scrollHeight) {
-                me.setBodyTop(Math.max(0, me.scrollHeight - view.body.dom.offsetHeight));
-            }
-
-            // The bodyTop calculated by renderRange left the body outside the viewport; center it on the viewport.
-            else if (me.bodyTop > me.scrollTop || me.bodyTop + view.body.dom.offsetHeight < me.scrollTop + view.getHeight(true)) {
-                me.setBodyTop(me.scrollTop - me.trailingBufferZone * me.rowHeight);
-            }
-        }
-    },
-
     stretchView: function(view, scrollRange) {
-        var me = this,
-            recordCount = me.store.getCount(),
-            el = view.getTargetEl(),
-            stretcherSpec;
+        var me = this;
 
         // Ensure that both the scroll range AND the positioned view body are in the viewable area.
         if (me.scrollTop > scrollRange) {
-            me.position = me.scrollTop = scrollRange - view.body.dom.offsetHeight;
-            me.view.setScrollY(me.scrollTop);
+            me.position = me.scrollTop = Math.max(scrollRange - view.body.dom.offsetHeight, 0);
+            view.setScrollY(me.scrollTop);
         }
         if (me.bodyTop > scrollRange) {
             view.body.translate(null, me.bodyTop = me.position);
         }
 
-        // Touch scrolling: tell the scroller what the scroll size is.
-        // This can be called before the view has had its Scroller attached.
-        // If that is the case, update the scroller on boxready
-        if (view.touchScroll) {
-            if (view.scrollManager) {
-                me.refreshScroller(view, scrollRange);
-            } else if (!me.pendingScrollerRefresh) {
-                view.on({
-                    boxready: function() {
-                        me.refreshScroller(view, scrollRange);
-                        me.pendingScrollerRefresh = false;
-                    },
-                    single: true
-                });
-                me.pendingScrollerRefresh = true;
-            }
-        }
-
-        // If this system shows scrollbars, create a stretcher element
-        if (!Ext.supports.touchScroll || Ext.supports.touchScroll === 1) {
-            if (!me.stretcher) {
-                el = view.getTargetEl();
-
-                // If the view has already been refreshed by the time we get here (eg, the grid, has undergone a reconfigure operation - which performs a refresh),
-                // keep it informed of fixed nodes which it must leave alone on refresh.
-                if (view.refreshCounter) {
-                    view.fixedNodes++;
-                }
-                stretcherSpec = {
-                    style: {
-                        width: '1px',
-                        height: '1px',
-                        'marginTop': (scrollRange - 1) + 'px',
-                        position: 'absolute'
-                    }
-                };
-                stretcherSpec.style[me.isRTL ? 'right' : 'left'] = 0;
-                me.stretcher = el.createChild(stretcherSpec, el.dom.firstChild);
-
-            }
-
-            // If the view size has been set on this instance, and the rendered view size does not exceed it, hide the stretcher
-            if (me.hasOwnProperty('viewSize') && recordCount <= me.viewSize) {
-                me.stretcher.dom.style.display = 'none';
-            } else {
-                me.stretcher.dom.style.marginTop = (scrollRange - 1) + 'px';
-                me.stretcher.dom.style.display = '';
-            }
+        // Tell the scroller what the scroll size is.
+        if (view.getScrollable()) {
+            me.refreshScroller(view, scrollRange);
         }
     },
 
     refreshScroller: function(view, scrollRange) {
-        view.scrollManager.scroller.setSize({
-            x: view.headerCt.getTableWidth(),
-            y: scrollRange
-        });
-        view.scrollManager.refresh();
+        var scroller = view.getScrollable();
+
+        if (scroller) {
+            // Ensure the scroller viewport element size is up to date if it needs to be told (touch scroller)
+            if (scroller.setElementSize) {
+                scroller.setElementSize();
+            }
+
+            // Ensure the scroller knows about content size
+            scroller.setSize({
+                x: view.headerCt.getTableWidth(),
+                y: scrollRange
+            });
+
+            // We must undertake to keep the scroller's range up to date.
+            // The scroller must not refresh itself on idle using the DOM's size.
+            if (view.touchScroll === 2) {
+                scroller.setRefreshOnIdle(false);
+            }
+        }
     },
 
-    setViewSize: function(viewSize) {
+    setViewSize: function(viewSize, fromLockingPartner) {
         var me = this,
             store = me.store,
             view = me.view,
@@ -426,13 +456,26 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
             diff = elCount - viewSize,
             i, j,
             records,
+            oldRows,
             newRows,
-            storeCount;
+            storeCount = store.getCount(),
+            maxIndex = Math.max(0, storeCount - 1);
 
+        // Exchange largest view size as long as the partner has been laid out (and thereby calculated a true view size)
+        if (lockingPartner && !fromLockingPartner && lockingPartner.view.componentLayoutCounter) {
+            if (lockingPartner.viewSize > viewSize) {
+                viewSize = lockingPartner.viewSize;
+            }
+            else {
+                lockingPartner.setViewSize(viewSize, true);
+            }
+        }
+
+        diff = elCount - viewSize;
         if (diff) {
 
             // Must be set for getFirstVisibleRowIndex to work
-            me.scrollTop = me.view.getScrollY();
+            me.scrollTop = view.getScrollY();
 
             me.viewSize = viewSize;
             if (store.isBufferedStore) {
@@ -442,47 +485,62 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
             // If a store loads before we have calculated a viewSize, it loads me.defaultViewSize records.
             // This may be larger or smaller than the final viewSize so the store needs adjusting when the view size is calculated.
             if (elCount) {
-                storeCount = store.getCount();
-                start = rows.startIndex;
-                    end = Math.min(start + viewSize - 1, storeCount - 1);
+                // New start index should be current start index unless that's now too close to the end of the store
+                // to yield a full view, in which case work back from the end of the store.
+                // Ensure we don't go negative.
+                start = Math.max(0, Math.min(rows.startIndex, maxIndex - viewSize + 1));
+
+                // New end index works forward from the new start index ensuring we don't walk off the end
+                end = Math.min(start + viewSize - 1, maxIndex);
 
                 // Only do expensive adding or removal if range is not already correct
-                if (!(start === rows.startIndex && end === rows.endIndex)) {
+                if (start === rows.startIndex && end === rows.endIndex) {
+                    // Needs rows adding to top
+                    if (diff < 0) {
+                        me.handleViewScroll(-1);
+                    }
+                } else {
                     // While changing our visible range, the locking partner must not sync
                     if (lockingPartner) {
                         lockingPartner.disable();
                     }
-                    
+
                     // View must expand: add rows at end if possible
                     if (diff < 0) {
 
                         // If it's *possible* to add rows to the end...
-                        if (storeCount > elCount) {
+                        if (storeCount > viewSize && storeCount > elCount) {
 
                             // Store's getRange API always has been inclusive of endIndex.
                             store.getRange(rows.endIndex + 1, end, {
                                 callback: function(records, start) {
                                     newRows = view.doAdd(records, start);
                                     view.fireEvent('itemadd', records, start, newRows);
+                                    me.setBodyTop(me.bodyTop);
                                 }
                             });
                         }
+                        // If not possible just refresh
+                        else {
+                            me.refreshView(0);
+                        }
                     }
-                    
+
                     // View is shrinking: remove rows from end
                     else {
                         // Remove the DOM rows
                         start = rows.endIndex - (diff - 1);
                         end = rows.endIndex;
+                        oldRows = rows.slice(start, end + 1);
                         rows.removeRange(start, end, true);
 
-                        // Inform listeners about item removal
                         if (view.hasListeners.itemremove) {
                             records = store.getRange(start, end);
                             for (i = end, j = records.length - 1; j >= 0; --i, --j) {
-                                view.fireEvent('itemremove', records[j], i, me);
+                                view.fireEvent('itemremove', records[j], i, oldRows[j]);
                             }
                         }
+                        me.setBodyTop(me.bodyTop);
                     }
                     if (lockingPartner) {
                         lockingPartner.enable();
@@ -493,36 +551,49 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
         return viewSize;
     },
 
-    // @private
-    // TableView's getViewRange delegates the operation to this method if buffered rendering is present.
+    /**
+     * @private
+     * TableView's getViewRange delegates the operation to this method if buffered rendering is present.
+     */
     getViewRange: function() {
         var me = this,
-            rows = me.view.all,
+            view = me.view,
+            rows = view.all,
+            rowCount = rows.getCount(),
+            lockingPartnerRows = view.lockingPartner && view.lockingPartner.all,
             store = me.store,
-            startIndex = 0;
+            startIndex = 0,
+            endIndex;
 
-        // If there already is a view range, then the startIndex from that
-        if (rows.getCount()) {
-            startIndex = rows.startIndex;
-        }
-        // Otherwise use start index of current page.
-        // https://sencha.jira.com/browse/EXTJSIV-10724
-        // Buffered store may be primed with loadPage(n) call rather than autoLoad which starts at index 0.
-        else if (store.isBufferedStore) {
-            if (!store.currentPage) {
-                store.currentPage = 1;
-            }
-            startIndex = rows.startIndex = (store.currentPage - 1) * (store.pageSize || 1);
-
-            // The RowNumberer uses the current page to offset the record index, so when buffered, it must always be on page 1
-            store.currentPage = 1;
-        }
-
-        if (store.data.getCount()) {
-            return store.getRange(startIndex, startIndex + me.viewSize - 1);
-        } else {
+        if (!store.data.getCount()) {
             return [];
         }
+
+        // We're starting from nothing, but there's a locking partner with the range info, so match that
+        if (!rowCount && lockingPartnerRows && lockingPartnerRows.getCount()) {
+            startIndex = lockingPartnerRows.startIndex;
+            endIndex = Math.min(lockingPartnerRows.endIndex, startIndex + me.viewSize - 1, store.getCount() - 1);
+        } else {
+            // If there already is a view range, then the startIndex from that
+            if (rowCount) {
+                startIndex = rows.startIndex;
+            }
+            // Otherwise use start index of current page.
+            // https://sencha.jira.com/browse/EXTJSIV-10724
+            // Buffered store may be primed with loadPage(n) call rather than autoLoad which starts at index 0.
+            else if (store.isBufferedStore) {
+                if (!store.currentPage) {
+                    store.currentPage = 1;
+                }
+                startIndex = rows.startIndex = (store.currentPage - 1) * (store.pageSize || 1);
+
+                // The RowNumberer uses the current page to offset the record index, so when buffered, it must always be on page 1
+                store.currentPage = 1;
+            }
+            endIndex = startIndex + (me.viewSize || store.defaultViewSize) - 1;
+        }
+
+        return store.getRange(startIndex, endIndex);
     },
 
     /**
@@ -533,131 +604,281 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
         var me = this,
             view = me.view,
             rows = view.all,
+            oldStartIndex,
             renderedSize = rows.getCount(),
-            storeSize = store.getCount(),
-            // Cache top row. If we add rows above it, we'll need to know the height added.
-            oldTop = rows.first(true);
+            lastAffectedIndex = startIndex + oldRecords.length - 1,
+            recordIncrement = newRecords.length - oldRecords.length,
+            scrollIncrement = recordIncrement * me.rowHeight;
 
-        // Only need to change display if the view is currently empty, or
-        // change zone was NOT after the end of rendered view or
-        // it's an add and the rendered view is not full size yet.
-        if (!renderedSize || startIndex <= me.getLastVisibleRowIndex() + me.leadingBufferZone || (renderedSize < me.viewSize && newRecords.length > oldRecords.length) || storeSize < renderedSize) {
-            me.refreshView();
-            renderedSize = rows.getCount();
+        // All replacement activity is past the end of a full-sized rendered block; do nothing except update scroll range
+        if (startIndex >= rows.startIndex + me.viewSize) {
+            me.refreshSize();
+            return;
+        }
 
-            // If it was a removal, we may need to adjust the view
-            if (newRecords.length < oldRecords.length) {
+        // If the change is all above the rendered block and the rendered block is its maximum size, update the scroll range and
+        // ensure the buffer zone above is filled if possible.
+        if (renderedSize && lastAffectedIndex < rows.startIndex && rows.getCount() >= me.viewSize) {
 
-                // If we had to render less than viewSize because the dataset shrinkage pulled the last record to be the
-                // last rendered row, "repair" the viewSize by adding records at the top.
-                if (rows.endIndex === storeSize - 1 && renderedSize < me.viewSize && renderedSize < storeSize) {
-                    rows.scroll(store.getRange(Math.max(0, storeSize - me.viewSize), rows.startIndex - 1), -1, 0);
-                    if (storeSize > me.viewSize) {
-                        me.setBodyTop(me.bodyTop - oldTop.offsetTop);
-                    }
-                }
+            // Move the index-based NodeCache up or down depending on whether it's a net adding or removal above.
+            rows.moveBlock(recordIncrement);
+            me.refreshSize();
 
-                // Total is so small, there's no need for a stretcher any more and view is fixed at the top.
-                if (storeSize <= me.viewSize) {
-                    if (me.stretcher) {
-                        me.setBodyTop(0);
-                        me.stretcher.dom.style.display = 'none';
-                    }
-                }
+            // If the change above us was an addition, pretend that we just scrolled upwards
+            // which will ensure that there is at least this.numFromEdge rows above the fold.
+            oldStartIndex = rows.startIndex;
+            if (recordIncrement > 0) {
 
-                // The view was stranded out of the end of the scroll range, position it back
-                else if (me.bodyTop + view.body.dom.offsetHeight - 1 > me.scrollHeight) {
-                    me.setBodyTop(me.scrollHeight - (view.body.dom.offsetHeight - 1));
+                // Do not allow this operation to mirror to the partner side.
+                me.doNotMirror = true;
+                me.handleViewScroll(-1);
+                me.doNotMirror = false;
+            }
+
+            // If the handleViewScroll did nothing, we just have to ensure the rendered block is the correct
+            // amount down the scroll range, and then readjust the top of the rendered block to keep the visuals the same.
+            if (rows.startIndex === oldStartIndex) {
+                // If inserting or removing invisible records above the start of the rendered block, the visible
+                // block must then be moved up or down the scroll range.
+                if (rows.startIndex) {
+                    me.setBodyTop(me.bodyTop += scrollIncrement);
+                    view.suspendEvent('scroll');
+                    view.scrollBy(0, scrollIncrement);
+                    view.resumeEvent('scroll');
+                    me.position = me.scrollTop = view.getScrollY();
                 }
             }
+            // The handleViewScroll added rows, so we must scroll to keep the visuals the same;
+            else {
+                view.suspendEvent('scroll');
+                view.scrollBy(0, (oldStartIndex  - rows.startIndex) * me.rowHeight);
+                view.resumeEvent('scroll');
+            }
+            view.refreshSize(rows.getCount() !== renderedSize);
+
+            return;
         }
-        // Even if we do not refresh, the scroll range has to be kept up to date by the refresh handler.
-        else {
-            me.refreshing = true;
-            me.onViewRefresh(view);
-            me.refreshing = false;
+
+        // If the change is all below the rendered block, update the scroll range
+        // and ensure the buffer zone below us is filled if possible.
+        if (renderedSize && startIndex > rows.endIndex) {
+            me.refreshSize();
+
+            // If the change below us was an addition, ask for <viewSize>
+            // rows to be rendered starting from the current startIndex.
+            // If more rows need to be scrolled onto the bottom of the rendered
+            // block to achieve this, that will do it.
+            if (recordIncrement > 0) {
+                me.onRangeFetched(null, rows.startIndex, Math.min(store.getCount(), rows.startIndex + me.viewSize) - 1, null, true);
+            }
+            view.refreshSize(rows.getCount() !== renderedSize);
+
+            return;
         }
+
+        // Cut into rendered block from above
+        if (startIndex < rows.startIndex && lastAffectedIndex <= rows.endIndex) {
+            me.refreshView(rows.startIndex - oldRecords.length + newRecords.length);
+            return;
+        }
+
+        if (startIndex < rows.startIndex && lastAffectedIndex <= rows.endIndex && scrollIncrement) {
+            view.suspendEvent('scroll');
+            view.setScrollY(me.position = me.scrollTop += scrollIncrement);
+            view.resumeEvent('scroll');
+        }
+
+        // Only need to change display if the view is currently empty, or
+        // change intersects the rendered view.
+        me.refreshView();
     },
 
     /**
-     * Scrolls to and optionlly selects the specified row index **in the total dataset**.
+     * @private
+     * Scrolls to and optionally selects the specified row index **in the total dataset**.
      *
-     * @param {Number} recordIdx The zero-based position in the dataset to scroll to.
-     * @param {Boolean} doSelect Pass as `true` to select the specified row.
-     * @param {Function} callback A function to call when the row has been scrolled to.
-     * @param {Number} callback.recordIdx The resulting record index (may have changed if the passed index was outside the valid range).
-     * @param {Ext.data.Model} callback.record The resulting record from the store.
-     * @param {Object} scope The scope (`this` reference) in which to execute the callback. Defaults to this BufferedRenderer.
+     * This is a private method for internal usage by the framework.
+     *
+     * Use the grid's {@link Ext.panel.Table#ensureVisible ensureVisible} method to scroll a particular
+     * record or record index into view.
+     *
+     * @param {Number/Ext.data.Model} record The record, or the zero-based position in the dataset to scroll to.
+     * @param {Object}          [options] An object containing options to modify the operation.
+     * @param {Boolean}         [options.animate] Pass `true` to animate the row into view.
+     * @param {Boolean}         [options.highlight] Pass `true` to highlight the row with a glow animation when it is in view.
+     * @param {Boolean}         [options.select] Pass as `true` to select the specified row.
+     * @param {Boolean}         [options.focus] Pass as `true` to focus the specified row.
+     * @param {Function}        [options.callback] A function to call when the row has been scrolled to.
+     * @param {Number}          options.callback.recordIdx The resulting record index (may have changed if the passed index was outside the valid range).
+     * @param {Ext.data.Model}  options.callback.record The resulting record from the store.
+     * @param {HTMLElement}     options.callback.node The resulting view row element.
+     * @param {Object}          [options.scope] The scope (`this` reference) in which to execute the callback. Defaults to this BufferedRenderer.
+     * @param {Ext.grid.column.Column/Number} [options.column] The column, or column index to scroll into view.
      *
      */
-    scrollTo: function(recordIdx, doSelect, callback, scope) {
-        var me = this,
+    scrollTo: function(recordIdx, options) {
+        var args = arguments,
+            me = this,
             view = me.view,
-            viewDom = view.el.dom,
+            lockingPartner = view.lockingPartner && view.lockingPartner.grid.isVisible() && view.lockingPartner.bufferedRenderer,
             store = me.store,
             total = store.getCount(),
             startIdx, endIdx,
-            targetRec,
             targetRow,
             tableTop,
             groupingFeature,
-            group,
-            record;
+            metaGroup,
+            record,
+            direction;
+
+        // New option object API
+        if (options !== undefined && !(options instanceof Object)) {
+            options = {
+                select : args[1],
+                callback: args[2],
+                scope: args[3]
+            };
+        }
 
         // If we have a grouping summary feature rendering the view in groups,
         // first, ensure that the record's group is expanded,
         // then work out which record in the groupStore the record is at.
-        if ((groupingFeature = view.dataSource.groupingFeature) && (groupingFeature.collapsible !== false)) {
-
-            // Sanitize the requested record
-            recordIdx = Math.min(Math.max(recordIdx, 0), view.store.getCount() - 1);
-            record = view.store.getAt(recordIdx);
-            group = groupingFeature.getGroup(record);
-
-            if (group.isCollapsed) {
-                groupingFeature.expand(group.getGroupKey());
-                total = store.getCount();
+        if ((groupingFeature = view.dataSource.groupingFeature) && (groupingFeature.collapsible)) {
+            if (recordIdx.isEntity) {
+                record = recordIdx;
+            } else {
+                record = view.store.getAt(Math.min(Math.max(recordIdx, 0), view.store.getCount() - 1));
             }
 
-            // Get the index in the GroupStore
-            recordIdx = groupingFeature.indexOf(record);
+            metaGroup = groupingFeature.getMetaGroup(record);
+
+            if (metaGroup && metaGroup.isCollapsed) {
+                if (!groupingFeature.isExpandingOrCollapsing) {
+                    groupingFeature.expand(groupingFeature.getGroup(record).getGroupKey());
+                    total = store.getCount();
+                    recordIdx = groupingFeature.indexOf(record);
+                } else {
+                    // If we've just been collapsed, then the only record we have is
+                    // the wrapped placeholder
+                    record = metaGroup.placeholder;
+                    recordIdx = groupingFeature.indexOfPlaceholder(record);
+                }
+            } else {
+                recordIdx = groupingFeature.indexOf(record);
+            }
 
         } else {
 
-            // Sanitize the requested record
-            recordIdx = Math.min(Math.max(recordIdx, 0), total - 1);
+            if (recordIdx.isEntity) {
+                record = recordIdx;
+                recordIdx = store.indexOf(record);
+
+                // Currently loaded pages do not contain the passed record, we cannot proceed.
+                if (recordIdx === -1) {
+                    //<debug>
+                    Ext.Error.raise('Unknown record passed to BufferedRenderer#scrollTo');
+                    //</debug>
+                    return;
+                }
+            } else {
+                // Sanitize the requested record index
+                recordIdx = Math.min(Math.max(recordIdx, 0), total - 1);
+                record = store.getAt(recordIdx);
+            }
         }
 
-        // Calculate view start index
-        startIdx = Math.max(Math.min(recordIdx - (Math.floor((me.leadingBufferZone + me.trailingBufferZone) / 2)), total - me.viewSize + 1), 0);
-        tableTop = Math.max(startIdx * me.rowHeight - me.tableTopBorderWidth, 0);
-        endIdx = Math.min(startIdx + me.viewSize - 1, total - 1);
+        // See if the required row for that record happens to be within the rendered range.
+        if (record && (targetRow = view.getNode(record))) {
+            view.grid.ensureVisible(record,options);
+
+            // Keep the view immediately replenished when we scroll an existing element into view.
+            // DOM scroll events fire asynchronously, and we must not leave subsequent code without a valid buffered row block.
+            me.onViewScroll();
+            me.onViewScrollEnd();
+
+            return;
+        }
+
+        // Calculate view start index.
+        // If the required record is above the fold...
+        if (recordIdx < view.all.startIndex) {
+            // The startIndex of the new rendered range is a little less than the target record index.
+            direction = -1;
+            startIdx = Math.max(Math.min(recordIdx - (Math.floor((me.leadingBufferZone + me.trailingBufferZone) / 2)), total - me.viewSize + 1), 0);
+            endIdx = Math.min(startIdx + me.viewSize - 1, total - 1);
+        }
+        // If the required record is below the fold...
+        else {
+            // The endIndex of the new rendered range is a little greater than the target record index.
+            direction = 1;
+            endIdx = Math.min(recordIdx + (Math.floor((me.leadingBufferZone + me.trailingBufferZone) / 2)), total - 1);
+            startIdx = Math.max(endIdx - (me.viewSize - 1), 0);
+        }
+        tableTop = Math.max(startIdx * me.rowHeight, 0);
 
         store.getRange(startIdx, endIdx, {
             callback: function(range, start, end) {
+                // Render the range.
+                // Pass synchronous flag so that it does it inline, not on a timer.
+                // Pass fromLockingPartner flag so that it does not inform the lockingPartner.
+                me.renderRange(start, end, true, true);
+                record = store.data.getRange(recordIdx, recordIdx + 1)[0];
+                targetRow = view.getNode(record);
 
-                me.renderRange(start, end, true);
-
-                targetRec = store.data.getRange(recordIdx, recordIdx + 1)[0];
-                targetRow = view.getNode(targetRec);
-                
-                // tableTop property must track the translated position of the body
+                // bodyTop property must track the translated position of the body
                 view.body.translate(null, me.bodyTop = tableTop);
-                me.position = me.scrollTop = tableTop = Math.min(Math.max(0, tableTop - view.body.getOffsetsTo(targetRow)[1]), viewDom.scrollHeight - viewDom.clientHeight);
-                view.setScrollY(tableTop);
 
-                // https://sencha.jira.com/browse/EXTJSIV-7166 IE 6, 7 and 8 won't scroll all the way down first time
-                if (Ext.isIE) {
-                    view.setScrollY(tableTop);
+                // Ensure the scroller knows about the range if we're going down
+                if (direction === 1) {
+                    me.refreshSize();
                 }
-                if (doSelect) {
-                    view.selModel.select(targetRec);
+
+                // Locking partner must render the same range
+                if (lockingPartner) {
+                    lockingPartner.renderRange(start, end, true, true);
+
+                    // Sync all row heights
+                    me.syncRowHeights();
+
+                    // bodyTop property must track the translated position of the body
+                    lockingPartner.view.body.translate(null, lockingPartner.bodyTop = tableTop);
+
+                    // Ensure the scroller knows about the range if we're going down
+                    if (direction === 1) {
+                        lockingPartner.refreshSize();
+                    }
                 }
-                if (callback) {
-                    callback.call(scope||me, recordIdx, targetRec);
+
+                // The target does not map to a view node.
+                // Cannot scroll to it.
+                if (!targetRow) {
+                    return;
+                }
+                view.grid.ensureVisible(record,options);
+
+                me.scrollTop = me.position = me.view.getScrollY();
+
+                if (lockingPartner) {
+                    lockingPartner.position = lockingPartner.scrollTop = me.scrollTop;
                 }
             }
         });
+    },
+
+    onViewItemMouseDown: function () {
+        var me = this;
+
+        Ext.getDoc().on({
+            mouseup: me.onDocumentMouseUp,
+            scope: me,
+            single: true
+        });
+        
+        me.preservePointerEvents = true;
+    },
+
+    onDocumentMouseUp: function () {
+        this.preservePointerEvents = false;
     },
 
     onViewScroll: function() {
@@ -666,9 +887,17 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
             totalCount = (store.getCount()),
             vscrollDistance,
             scrollDirection,
-            scrollTop = me.scrollTop = me.view.getScrollY(),
-            scrollHandled = false,
-            lockingPartner = me.view.lockingPartner && me.view.lockingPartner.bufferedRenderer;
+            scrollTop = me.scrollTop = me.view.getScrollY();
+
+        // Only play the pointer-events;none trick on the platform it is needed on.
+        // WebKit does a browser layout when you change the pointer-events style.
+        // Stops the jagging DOM scrolling when mouse is over data rows.
+        // But only clear pointner-events if another event hasn't flagged these as necessary
+        // When we click on a partially-visible row, the mousedown will trigger the scroll
+        // but the mouseup/click won't be processed since pointer events are cleared, so no selection will occur
+        if (me.needsPointerEventsFix && !me.preservePointerEvents) {
+            me.view.body.dom.style.pointerEvents = 'none';
+        }
 
         // Only check for nearing the edge if we are enabled, and if there is overflow beyond our view bounds.
         // If there is no paging to be done (Store's dataset is all in memory) we will be disabled.
@@ -677,28 +906,32 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
             vscrollDistance = scrollTop - me.position;
             scrollDirection = vscrollDistance > 0 ? 1 : -1;
 
-            // Moved at leat 20 pixels, or changed direction, so test whether the numFromEdge is triggered
+            // Moved at least 20 pixels, or changed direction, so test whether the numFromEdge is triggered
             if (Math.abs(vscrollDistance) >= 20 || (scrollDirection !== me.lastScrollDirection)) {
                 me.lastScrollDirection = scrollDirection;
-                scrollHandled = me.handleViewScroll(me.lastScrollDirection);
-            }
-        }
-
-        // Keep other side synced immediately if there was no rendering work to do.
-        if (!scrollHandled) {
-            if (lockingPartner && lockingPartner.scrollTop !== scrollTop) {
-                // Set the lockingPartner's position so that it sees no work to do on receipt of the subsequent scroll event
-                lockingPartner.view.setScrollY(lockingPartner.position = scrollTop);
+                me.handleViewScroll(me.lastScrollDirection, vscrollDistance);
             }
         }
     },
 
-    handleViewScroll: function(direction) {
+    onViewScrollEnd: function() {
+        // Only play the pointer-events;none trick on the platform it is needed on.
+        // WebKit does a browser layout when you change the pointer-events style.
+        // Stops the jagging DOM scrolling when mouse is over data rows.
+        if (this.needsPointerEventsFix) {
+            this.view.body.dom.style.pointerEvents = '';
+            this.preservePointerEvents = false;
+        }
+    },
+
+    handleViewScroll: function(direction, vscrollDistance) {
         var me              = this,
             rows            = me.view.all,
             store           = me.store,
+            storeCount      = store.getCount(),
             viewSize        = me.viewSize,
-            lastItemIndex   = (store.getCount()) - 1,
+            lastItemIndex   = storeCount - 1,
+            maxRequestStart  = Math.max(0, storeCount - viewSize),
             requestStart,
             requestEnd;
 
@@ -709,6 +942,16 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
             if (rows.startIndex) {
                 if (me.topOfViewCloseToEdge()) {
                     requestStart = Math.max(0, me.getLastVisibleRowIndex() + me.trailingBufferZone - viewSize);
+
+                    // If, having scrolled up, a variableRowHeight calculation based
+                    // upon scrolTop/rowHeight yields an obviously wrong value,
+                    // then constrain it to a calculated value.
+                    // We CANNOT just Math.min it with maxRequestStart, because we may already
+                    // be at maxRequestStart, and asking to render the same block will have no effect.
+                    // We calculate a start value a few rows above the current startIndex.
+                    if (requestStart > rows.startIndex) {
+                        requestStart = rows.startIndex + Math.floor(vscrollDistance / me.rowHeight); 
+                    }
                 }
             }
         }
@@ -718,26 +961,28 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
             // If table ends at last record, we have nothing to do
             if (rows.endIndex < lastItemIndex) {
                 if (me.bottomOfViewCloseToEdge()) {
-                    requestStart = Math.max(0, me.getFirstVisibleRowIndex() - me.trailingBufferZone);
+                    requestStart = Math.max(0, Math.min(me.getFirstVisibleRowIndex() - me.trailingBufferZone, maxRequestStart));
                 }
             }
         }
 
+        // View is OK at this scroll. Advance loadId so that any load requests in flight do not
+        // result in rendering upon their return.
+        if (requestStart == null) {
+            // View is still valid at this scroll position.
+            // Do not trigger a handleViewScroll call until *ANOTHER* 20 pixels have scrolled by.
+            me.position = me.scrollTop;
+            me.loadId++;
+        }
         // We scrolled close to the edge and the Store needs reloading
-        if (requestStart != null) {
+        else {
             requestEnd = Math.min(requestStart + viewSize - 1, lastItemIndex);
 
             // viewSize was calculated too small due to small sample row count with some skewed
-            // item height in there such as a tall group header item. Extend the view size in this case.
+            // item height in there such as a tall group header item. Bump range down by one in this case.
             if (me.variableRowHeight && requestEnd === rows.endIndex && requestEnd < lastItemIndex) {
                 requestEnd++;
-
-                // Do NOT call setViewSize - that rerenders the view at the new size,
-                // and we are just about to scroll it to correct it.
-                me.viewSize = viewSize++;
-                if (store.isBufferedStore) {
-                    store.setViewSize(me.viewSize);
-                }
+                requestStart++;
             }
 
             // If calculated view range has moved, then render it and return the fact that the scroll was handled.
@@ -772,86 +1017,181 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
     /**
      * @private
      * Refreshes the current rendered range if possible.
-     * Optinally refreshes starting at the specified index.
+     * Optionally refreshes starting at the specified index.
      */
     refreshView: function(startIndex) {
         var me = this,
-            rows = me.view.all,
+            viewSize = me.viewSize,
+            view = me.view,
+            rows = view.all,
             store = me.store,
-            maxIndex = (store.getCount()) - 1,
-            endIndex,
-            containedFocus = me.view.grid.containsFocus;
+            storeCount = store.getCount(),
+            maxIndex = Math.max(0, storeCount - 1),
+            lockingPartnerRows = view.lockingPartner && view.lockingPartner.all,
+            endIndex;
 
-        // New start index should be current start index unless that's now too close to the end of the store
-        // to yield a full view, in which case work back from the end of the store. If working back from the end, the leading buffer zone
-        // cannot be rendered, so subtract it from the view size.
-        // Ensure we don't go negative.
-        startIndex = Math.max(0, Math.min(startIndex == null ? rows.startIndex : startIndex, maxIndex - (me.viewSize - me.leadingBufferZone) + 1));
+        // Empty Store is simple, don't even ask the store
+        if (!storeCount) {
+            return me.doRefreshView([], 0, 0);
+        }
+        // Store doesn't fill the required view size. Simple start/end calcs.
+        else if (storeCount < viewSize) {
+            startIndex = 0;
+            endIndex = maxIndex;
+        }
+        // We're starting from nothing, but there's a locking partner with the range info, so match that
+        else if (startIndex == null && !rows.getCount() && lockingPartnerRows && lockingPartnerRows.getCount()) {
+            startIndex = lockingPartnerRows.startIndex;
+            endIndex = lockingPartnerRows.endIndex;
+        }
+        // Work out range to refresh
+        else {
+            if (startIndex == null) {
+                // Use a nextRefreshStartIndex as set by a load operation in which we are maintaining scroll position
+                if (me.nextRefreshStartIndex != null) {
+                    startIndex = me.nextRefreshStartIndex;
+                    me.nextRefreshStartIndex = null;
+                } else {
+                    startIndex = rows.startIndex;
+                }
+            }
+            // New start index should be current start index unless that's now too close to the end of the store
+            // to yield a full view, in which case work back from the end of the store.
+            // Ensure we don't go negative.
+            startIndex = Math.max(0, Math.min(startIndex, maxIndex - viewSize + 1));
 
-        // New end index works forward from the new start index ensuring we don't walk off the end    
-        endIndex = Math.min(Math.max(rows.startIndex + me.viewSize - 1, me.getLastVisibleRowIndex() + me.leadingBufferZone), maxIndex);
-        
-        if (endIndex - startIndex + 1 > me.viewSize) {
-            startIndex = endIndex - me.viewSize + 1;
+            // New end index works forward from the new start index ensuring we don't walk off the end    
+            endIndex = Math.min(startIndex + viewSize - 1, maxIndex);
+
+            if (endIndex - startIndex + 1 > viewSize) {
+                startIndex = endIndex - viewSize + 1;
+            }
         }
 
-        store.getRange(startIndex, endIndex, {
-            callback: me.doRefreshView,
-            scope: me,
-            containedFocus: containedFocus
-        });
+        if (startIndex === 0 && endIndex === -1) {
+            me.doRefreshView([], 0, 0);
+        } else {
+            store.getRange(startIndex, endIndex, {
+                callback: me.doRefreshView,
+                scope: me
+            });
+        }
     },
 
     doRefreshView: function(range, startIndex, endIndex, options) {
         var me = this,
             view = me.view,
             navModel = view.getNavigationModel(),
+            focusPosition = navModel.getPosition(),
             rows = view.all,
+            previousStartIndex = rows.startIndex,
+            previousEndIndex = rows.endIndex,
+            previousFirstItem,
+            previousLastItem,
             prevRowCount = rows.getCount(),
             newNodes,
             viewMoved = startIndex !== rows.startIndex,
-            calculatedTop;
+            calculatedTop,
+            scrollIncrement;
+
+        // So that listeners to the itemremove events know that its because of a refresh.
+        // And so that this class's refresh listener knows to ignore it.
+        view.refreshing = me.refreshing = true;
 
         if (view.refreshCounter) {
-            // So that listeners to the itemremove events know that its because of a refresh.
-            // And so that this class's refresh listener knows to ignore it.
-            view.refreshing = me.refreshing = true;
+
+            // Clone position to restore to (if position was in this view - locking!)
+            // because the blur caused by refresh will null the NavModel's position object.	
+            if (focusPosition && focusPosition.view === view) {
+                // If we are refreshing in a completely different record zone, we cannot restore focus because
+                // NavigationModel would scroll back to where it last focused which is not desirable
+                // if a user has grabbed the scrollbar, scrolled and then triggered a refresh in some way.
+                if (focusPosition.rowIdx < startIndex || focusPosition.rowIdx > endIndex) {
+                    focusPosition = null;
+                } else {
+                    focusPosition = focusPosition.clone();
+                }
+                navModel.setPosition();
+            } else {
+                focusPosition = null;
+            }
 
             view.clearViewEl(true);
+            view.refreshCounter++;
             if (range.length) {
                 newNodes = view.doAdd(range, startIndex);
-                view.refreshSize(rows.getCount() !== prevRowCount);
 
                 if (viewMoved) {
-                    if (startIndex > rows.startIndex) {
-                        calculatedTop += rows.item(startIndex, true).offsetTop;
-                    } else {
-                        // To position rows, remove table's top border
-                        if (me.variableRowHeight) {
-                            calculatedTop = me.scrollTop - me.rowHeight * (me.scrollTop < me.position ? me.leadingBufferZone : me.trailingBufferZone);
-                        } else {
-                            calculatedTop = startIndex * me.rowHeight - me.tableTopBorderWidth;
-                        }
+                    // Try to find overlap between newly rendered block and old block
+                    previousFirstItem = rows.item(previousStartIndex, true);
+                    previousLastItem = rows.item(previousEndIndex, true);
+
+                    // Work out where to move the view top if there is overlap
+                    if (previousFirstItem) {
+                        scrollIncrement = -previousFirstItem.offsetTop;
+                    } else if (previousLastItem) {
+                        scrollIncrement = rows.last(true).offsetTop - previousLastItem.offsetTop;
                     }
-                    me.setBodyTop(calculatedTop);
+
+                    // If there was an overlap, we know exactly where to move the view
+                    if (scrollIncrement) {
+                        me.bodyTop = Math.max(me.bodyTop + scrollIncrement, 0);
+                        me.scrollTop = me.bodyTop ? me.scrollTop + scrollIncrement : 0;
+                    }
+                    // No overlap: calculate the a new body top and scrollTop.
+                    else {
+                        // To position rows, remove table's top border
+                        me.bodyTop  = calculatedTop = startIndex * me.rowHeight;
+                        me.scrollTop = Math.max(calculatedTop - me.rowHeight * (calculatedTop < me.bodyTop ? me.leadingBufferZone : me.trailingBufferZone, 0));
+                    }
                 }
-                view.fireEvent('refresh', view, range);
             }
 
-            // If the grid contained focus before the refresh, it will have been lost to the document body
+            // Clearing the view.
+            // Ensure we jump to top.
+            // Apply empty text.
+            else {
+                if (me.scrollTop) {
+                    me.bodyTop = me.scrollTop = 0;
+                }
+                view.addEmptyText();
+            }
+
+            // Keep scroll and rendered block positions synched.
+            if (viewMoved) {
+                me.setBodyTop(me.bodyTop);
+                view.suspendEvent('scroll');
+                view.setScrollY(me.position = me.scrollTop);
+                view.resumeEvent('scroll');
+            }
+
+            // Correct scroll range
+            me.refreshSize();
+            view.refreshSize(rows.getCount() !== prevRowCount);
+            view.fireEvent('refresh', view, range);
+
+            // If the grid contained focus before the refresh, it will have been lost to the document body		
             // Restore focus to the last focused position after refresh.
-            // Pass "fromSelectionModel" as true so that that does not cause selection.
-            if (options.containedFocus) {
-                navModel.setPosition(navModel.getLastFocused(), null, null, null, true);
+            // Pass "preventNavigation" as true so that that does not cause selection.
+            if (focusPosition) {
+                view.cellFocused = true;
+                navModel.setPosition(focusPosition, null, null, null, true);
             }
             view.headerCt.setSortState();
-            view.refreshNeeded = view.refreshing = me.refreshing = false;
         } else {
             view.refresh();
         }
+        //<debug>
+        // If there are columns to trigger rendering, and the rendered block os not either the view size
+        // or, if store count less than view size, the store count, then there's a bug.
+        if (view.getVisibleColumnManager().getColumns().length && rows.getCount() !== Math.min(me.store.getCount(), me.viewSize)) {
+            Ext.Error.raise('rendered block refreshed at ' + rows.getCount() + ' rows while BufferedRenderer view size is ' + me.viewSize);
+        }
+        //</debug>
+        view.refreshNeeded = view.refreshing = me.refreshing = false;
     },
 
-    renderRange: function(start, end, forceSynchronous) {
+    renderRange: function(start, end, forceSynchronous, fromLockingPartner) {
         var me = this,
             rows = me.view.all,
             store = me.store;
@@ -861,12 +1201,12 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
         // but the calculated size ends up the same.
         if (!(start === rows.startIndex && end === rows.endIndex)) {
 
-            // If range is avaliable synchronously, process it now.
+            // If range is available synchronously, process it now.
             if (store.rangeCached(start, end)) {
                 me.cancelLoad();
 
                 if (me.synchronousRender || forceSynchronous) {
-                    me.onRangeFetched(null, start, end);
+                    me.onRangeFetched(null, start, end, null, fromLockingPartner);
                 } else {
                     if (!me.renderTask) {
                         me.renderTask = new Ext.util.DelayedTask(me.onRangeFetched, me, null, false);
@@ -875,13 +1215,13 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
                     // If scrolling very quickly, a few more scroll events may fire before
                     // the render takes place. Each one will just *update* the arguments with which
                     // the pending invocation is called.
-                    me.renderTask.delay(1, null, null, [null, start, end]);
+                    me.renderTask.delay(1, null, null, [null, start, end, null, fromLockingPartner]);
                 }
             }
 
             // Required range is not in the prefetch buffer. Ask the store to prefetch it.
             else {
-                me.attemptLoad(start, end);
+                me.attemptLoad(start, end, me.scrollTop);
             }
         }
     },
@@ -895,11 +1235,14 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
             increment = 0,
             calculatedTop,
             newTop,
-            lockingPartner = me.view.lockingPartner && me.view.lockingPartner.bufferedRenderer,
+            lockingPartner = (view.lockingPartner && !fromLockingPartner && !me.doNotMirror) && view.lockingPartner.bufferedRenderer,
             newRows,
+            partnerNewRows,
             topAdditionSize,
+            topBufferZone,
             i,
-            variableRowHeight = me.variableRowHeight;
+            variableRowHeight = me.variableRowHeight,
+            noOverlap;
 
         // View may have been destroyed since the DelayedTask was kicked off.
         if (view.isDestroyed) {
@@ -908,8 +1251,10 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
 
         // If called as a callback from the Store, the range will be passed, if called from renderRange, it won't
         if (range) {
-            // Re-cache the scrollTop if there has been an asynchronous call to the server.
-            me.scrollTop = me.view.getScrollY();
+            if (!fromLockingPartner) {
+                // Re-cache the scrollTop if there has been an asynchronous call to the server.
+                me.scrollTop = me.view.getScrollY();
+            }
         } else {
             range = me.store.getRange(start, end);
 
@@ -919,12 +1264,8 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
             }
         }
 
-        // To position rows, remove table's top border
-        if (variableRowHeight) {
-            calculatedTop = me.scrollTop - me.rowHeight * (me.scrollTop < me.position ? me.leadingBufferZone : me.trailingBufferZone);
-        } else {
-            calculatedTop = start * me.rowHeight - me.tableTopBorderWidth;
-        }
+        // Best guess rendered block position is start row index * row height.
+        calculatedTop = start * me.rowHeight;
 
         // The new range encompasses the current range. Refresh and keep the scroll position stable
         if (start < rows.startIndex && end > rows.endIndex) {
@@ -941,80 +1282,85 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
             }
 
             // We've just added a bunch of rows to the top of our range, so move upwards to keep the row appearance stable
-            me.setBodyTop(me.bodyTop + increment);
-            return;
+           newTop = me.bodyTop + increment;
         }
-
-        // No overlapping nodes, we'll need to render the whole range
-        // teleported flag is set in getFirstVisibleRowIndex/getLastVisibleRowIndex if
-        // the table body has moved outside the viewport bounds
-        if (me.teleported || start > rows.endIndex || end < rows.startIndex) {
-
-            // MUST use View method so that itemremove events are fired so widgets can be recycled.
-            view.clearViewEl(true);
-            newTop = calculatedTop;
-            me.teleported = false;
-        }
-
-        if (!rows.getCount()) {
-            newRows = view.doAdd(range, start);
-            view.fireEvent('itemadd', range, start, newRows);
-        }
-        // Moved down the dataset (content moved up): remove rows from top, add to end
-        else if (end > rows.endIndex) {
-            removeCount = Math.max(start - rows.startIndex, 0);
-
-            // We only have to bump the table down by the height of removed rows if rows are not a standard size
-            if (variableRowHeight) {
-                increment = rows.item(rows.startIndex + removeCount, true).offsetTop;
-            }
-            rows.scroll(Ext.Array.slice(range, rows.endIndex + 1 - start), 1, removeCount, start, end);
-
-            // We only have to bump the table down by the height of removed rows if rows are not a standard size
-            if (variableRowHeight) {
-                // Bump the table downwards by the height scraped off the top
-                newTop = me.bodyTop + increment;
-            } else {
-                newTop = calculatedTop;
-            }
-        }
-        // Moved up the dataset: remove rows from end, add to top
         else {
-            removeCount = Math.max(rows.endIndex - end, 0);
-            oldStart = rows.startIndex;
-            rows.scroll(Ext.Array.slice(range, 0, rows.startIndex - start), -1, removeCount, start, end);
-
-            // We only have to bump the table up by the height of top-added rows if rows are not a standard size
-            if (variableRowHeight) {
-                // Bump the table upwards by the height added to the top
-                newTop = me.bodyTop - rows.item(oldStart, true).offsetTop;
-
-                // We've arrived at row zero...
-                if (!rows.startIndex) {
-                    // But the calculated top position is out. It must be zero at this point
-                    // We adjust the scroll position to keep visual position of table the same.
-                    if (newTop) {
-                        view.setScrollY(me.position = (me.scrollTop -= newTop));
-                        newTop = 0;
-                    }
-                }
-                
-                // Not at zero yet, but the position has moved into negative range
-                else if (newTop < 0) {
-                    increment = rows.startIndex * me.rowHeight;
-                    view.setScrollY(me.position = (me.scrollTop += increment));
-                    newTop = me.bodyTop + increment;
-                }
-            } else {
-                newTop = calculatedTop;
+            // No overlapping nodes; we'll need to render the whole range.
+            // teleported flag is set in getFirstVisibleRowIndex/getLastVisibleRowIndex if
+            // the table body has moved outside the viewport bounds
+            noOverlap = me.teleported || start > rows.endIndex || end < rows.startIndex;
+            if (noOverlap) {
+                view.clearViewEl(true);
+                me.teleported = false;
             }
-        }
-        // The position property is the scrollTop value *at which the table was last correct*
-        // MUST be set at table render/adjustment time
-        me.position = me.scrollTop;
 
-        // Position the table element. top will be undefined if fixed row height, so table position will
-        // be calculated.
+            if (!rows.getCount()) {
+                newRows = view.doAdd(range, start);
+                view.fireEvent('itemadd', range, start, newRows);
+                newTop = calculatedTop;
+
+                // Adjust the bodyTop to place the data correctly around the scroll vieport
+                if (noOverlap && variableRowHeight) {
+                    topBufferZone = me.scrollTop < me.position ? me.leadingBufferZone : me.trailingBufferZone;
+                    newTop = Math.max(me.scrollTop - rows.item(rows.startIndex + topBufferZone - 1, true).offsetTop, 0);
+                }
+            }
+            // Moved down the dataset (content moved up): remove rows from top, add to end
+            else if (end > rows.endIndex) {
+                removeCount = Math.max(start - rows.startIndex, 0);
+
+                // We only have to bump the table down by the height of removed rows if rows are not a standard size
+                if (variableRowHeight) {
+                    increment = rows.item(rows.startIndex + removeCount, true).offsetTop;
+                }
+                newRows = rows.scroll(Ext.Array.slice(range, rows.endIndex + 1 - start), 1, removeCount);
+
+                // We only have to bump the table down by the height of removed rows if rows are not a standard size
+                if (variableRowHeight) {
+                    // Bump the table downwards by the height scraped off the top
+                    newTop = me.bodyTop + increment;
+                } else {
+                    newTop = calculatedTop;
+                }
+            }
+            // Moved up the dataset: remove rows from end, add to top
+            else {
+                removeCount = Math.max(rows.endIndex - end, 0);
+                oldStart = rows.startIndex;
+                newRows = rows.scroll(Ext.Array.slice(range, 0, rows.startIndex - start), -1, removeCount);
+
+                // We only have to bump the table up by the height of top-added rows if rows are not a standard size
+                if (variableRowHeight) {
+                    // Bump the table upwards by the height added to the top
+                    newTop = me.bodyTop - rows.item(oldStart, true).offsetTop;
+
+                    // We've arrived at row zero...
+                    if (!rows.startIndex) {
+                        // But the calculated top position is out. It must be zero at this point
+                        // We adjust the scroll position to keep visual position of table the same.
+                        if (newTop) {
+                            view.setScrollY(me.position = (me.scrollTop -= newTop));
+                            newTop = 0;
+                        }
+                    }
+
+                    // Not at zero yet, but the position has moved into negative range
+                    else if (newTop < 0) {
+                        increment = rows.startIndex * me.rowHeight;
+                        view.setScrollY(me.position = (me.scrollTop += increment));
+                        newTop = me.bodyTop + increment;
+                    }
+                } else {
+                    newTop = calculatedTop;
+                }
+            }
+
+            // The position property is the scrollTop value *at which the table was last correct*
+            // MUST be set at table render/adjustment time
+            me.position = me.scrollTop;
+        }
+
+        // Position the item container.
         newTop = Math.max(Math.floor(newTop), 0);
         if (view.positionBody) {
             me.setBodyTop(newTop);
@@ -1022,38 +1368,133 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
 
         // Sync the other side to exactly the same range from the dataset.
         // Then ensure that we are still at exactly the same scroll position.
-        if (lockingPartner && !lockingPartner.disabled && !fromLockingPartner) {
-            lockingPartner.onRangeFetched(null, start, end, options, true);
+        if (newRows && lockingPartner && !lockingPartner.disabled) {
+            // Set the pointers of the partner so that its onRangeFetched believes it is at the correct position.
+            lockingPartner.scrollTop = lockingPartner.position = me.scrollTop;
+            if (lockingPartner.view.ownerCt.isVisible()) {
+                partnerNewRows = lockingPartner.onRangeFetched(range, start, end, options, true);
+
+                // Sync the row heights if configured to do so, or if one side has variableRowHeight but the other doesn't.
+                // variableRowHeight is just a flag for the buffered rendering to know how to measure row height and
+                // calculate firstVisibleRow and lastVisibleRow. It does not *necessarily* mean that row heights are going
+                // to be asymmetric between sides. For example grouping causes variableRowHeight. But the row heights
+                // each side will be symmetric.
+                // But if one side has variableRowHeight (eg, a cellWrap: true column), and the other does not, that
+                // means there could be asymmetric row heights.
+                if (view.ownerGrid.syncRowHeight || (lockingPartner.variableRowHeight !== variableRowHeight)) {
+                    me.syncRowHeights(newRows, partnerNewRows);
+                }
+            }
             if (lockingPartner.bodyTop !== newTop) {
                 lockingPartner.setBodyTop(newTop);
             }
-            if (lockingPartner.scrollTop !== me.scrollTop) {
-                lockingPartner.view.setScrollY(lockingPartner.scrollTop = lockingPartner.position = me.scrollTop);
+            // Set the real scrollY position after the correct data has been rendered there.
+            // It will not handle a scroll because the scrollTop and position have been preset.
+            lockingPartner.view.setScrollY(me.scrollTop);
+        }
+        //<debug>
+        // If there are columns to trigger rendering, and the rendered block os not either the view size
+        // or, if store count less than view size, the store count, then there's a bug.
+        if (view.getVisibleColumnManager().getColumns().length && rows.getCount() !== Math.min(me.store.getCount(), me.viewSize)) {
+            Ext.Error.raise('rendered block refreshed at ' + rows.getCount() + ' rows while BufferedRenderer view size is ' + me.viewSize);
+        }
+        //</debug>
+        return newRows;
+    },
+
+    syncRowHeights: function(itemEls, partnerItemEls) {
+        var me = this,
+            ln = 0, otherLn = 1, // Different initial values so that all items are synched
+            mySynchronizer = [],
+            otherSynchronizer = [],
+            RowSynchronizer = Ext.grid.locking.RowSynchronizer,
+            i, rowSync;
+
+        if (itemEls && partnerItemEls) {
+            ln = itemEls.length;
+            otherLn = partnerItemEls.length;
+        }
+
+        // The other side might not quite by in scroll sync with us, in which case
+        // it may have gone a different path way and rolled some rows into
+        // the rendered block where we may have re-rendered the whole thing.
+        // If this has happened, fall back to syncing all rows.
+        if (ln !== otherLn) {
+            itemEls = me.view.all.slice();
+            partnerItemEls = me.view.lockingPartner.all.slice();
+            ln = otherLn = itemEls.length;
+        }
+        for (i = 0; i < ln; i++) {
+            mySynchronizer[i] = rowSync = new RowSynchronizer(me.view, itemEls[i]);
+            rowSync.measure();
+        }
+        for (i = 0; i < otherLn; i++) {
+            otherSynchronizer[i] = rowSync = new RowSynchronizer(me.view.lockingPartner, partnerItemEls[i]);
+            rowSync.measure();
+        }
+        for (i = 0; i < ln; i++) {
+            mySynchronizer[i].finish(otherSynchronizer[i]);
+            otherSynchronizer[i].finish(mySynchronizer[i]);
+        }
+
+        // Ensure that both BufferedRenderers have the same idea about scroll range and row height
+        me.syncRowHeightsFinish();
+    },
+
+    syncRowHeightsFinish: function () {
+        var me = this,
+            view = me.view,
+            lockingPartner = view.lockingPartner.bufferedRenderer;
+
+        // Now that row heights have potentially changed, both BufferedRenderers
+        // have to re-evaluate what they think the average rowHeight is
+        // based on the synchronized-height rows.
+        //
+        // If the view has not been layed out, then the upcoming first resize event
+        // will trigger the needed refreshSize call.
+        if (view.componentLayoutCounter) {
+            delete me.rowHeight;
+            me.refreshSize();
+            if (lockingPartner.rowHeight !== me.rowHeight) {
+                delete lockingPartner.rowHeight;
+                lockingPartner.refreshSize();
             }
         }
+        // body height might have changed with change of rows, and possible syncRowHeights call.
+        me.bodyHeight = lockingPartner.bodyHeight = view.body.dom.offsetHeight;
     },
 
     setBodyTop: function(bodyTop) {
         var me = this,
             view = me.view,
+            rows = view.all,
             store = me.store,
             body = view.body;
 
-        body.translate((me.isRTL && Ext.supports.xOriginBug && view.scrollFlags.y) ? Ext.getScrollbarSize().width : null, me.bodyTop = bodyTop);
+        if (!body.dom) {
+            // The view may be rendered, but the body element not attached.
+            return;
+        }
+
+        me.translateBody(body, bodyTop);
 
         // If this is the last page, correct the scroll range to be just enough to fit.
         if (me.variableRowHeight) {
 
             // We are displaying the last row, so ensure the scroll range finishes exactly at the bottom of the view body
-            if (view.all.endIndex === (store.getCount()) - 1) {
-                me.stretchView(view, me.bodyTop + body.dom.offsetHeight - 1);
+            if (rows.endIndex === store.getCount() - 1) {
+                me.scrollHeight = me.bodyTop + body.dom.offsetHeight - 1;
             }
-
-            // Scroll range not enough - add what we think will be enough to accommodate the final rows. Will be chopped when we get to the end. See above.
-            else if (me.bodyTop + body.dom.offsetHeight - 1 > me.scrollHeight) {
-                me.stretchView(view, me.scrollHeight += ((store.getCount()) - view.all.endIndex) * me.rowHeight);
+            // Not last row - recalculate scroll range
+            else {
+                me.scrollHeight = me.getScrollHeight();
             }
+            me.stretchView(view, me.scrollHeight);
         }
+    },
+
+    translateBody: function(body, bodyTop) {
+        body.translate(null, this.bodyTop = bodyTop);
     },
 
     getFirstVisibleRowIndex: function(startRow, endRow, viewportTop, viewportBottom) {
@@ -1080,7 +1521,7 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
                     return Math.floor(me.scrollTop / me.rowHeight);
                 }
 
-                // In first, non-recursive call, begin targetting the most likely first row
+                // In first, non-recursive call, begin targeting the most likely first row
                 target = startRow + Math.min(me.numFromEdge + ((me.lastScrollDirection === -1) ? me.leadingBufferZone : me.trailingBufferZone), Math.floor((endRow - startRow) / 2));
             } else {
                 target = startRow + Math.floor((endRow - startRow) / 2);
@@ -1088,7 +1529,7 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
             targetTop = bodyTop + elements[target].offsetTop;
 
             // If target is entirely above the viewport, chop downwards
-            if (targetTop + elements[target].offsetHeight < viewportTop) {
+            if (targetTop + elements[target].offsetHeight <= viewportTop) {
                 return me.getFirstVisibleRowIndex(target + 1, endRow, viewportTop, viewportBottom);
             }
 
@@ -1103,7 +1544,12 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
         }
         return Math.floor(me.scrollTop / me.rowHeight);
     },
-
+    
+    /**
+     * Returns the index of the last row in your table view deemed to be visible.
+     * @return {Number}
+     * @private
+     */
     getLastVisibleRowIndex: function(startRow, endRow, viewportTop, viewportBottom) {
         var me = this,
             view = me.view,
@@ -1128,7 +1574,7 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
                     return Math.floor(me.scrollTop / me.rowHeight) + Math.ceil(clientHeight / me.rowHeight);
                 }
 
-                // In first, non-recursive call, begin targetting the most likely last row
+                // In first, non-recursive call, begin targeting the most likely last row
                 target = endRow - Math.min(me.numFromEdge + ((me.lastScrollDirection === 1) ? me.leadingBufferZone : me.trailingBufferZone), Math.floor((endRow - startRow) / 2));
             } else {
                 target = startRow + Math.floor((endRow - startRow) / 2);
@@ -1153,50 +1599,78 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
         return me.getFirstVisibleRowIndex() + Math.ceil(clientHeight / me.rowHeight);
     },
 
-    getScrollHeight: function(calculatedOnly) {
+    getScrollHeight: function() {
         var me = this,
             view   = me.view,
             rows   = view.all,
             store  = me.store,
             recCount = store.getCount(),
-            rowCount,
-            scrollHeight;
+            rowCount = rows.getCount(),
+            row, rowHeight, borderWidth, scrollHeight;
 
         if (!recCount) {
             return 0;
         }
-        if (!me.hasOwnProperty('rowHeight')) {
-            if (rowCount = rows.getCount()) {
-                me.rowHeight = me.variableRowHeight ? Math.floor(view.body.dom.clientHeight / rowCount) : rows.first(true).offsetHeight;
+        
+        if (!view.hasOwnProperty('rowHeight')) {
+            if (rowCount) {
+                if (me.variableRowHeight) {
+                    me.rowHeight = Math.floor(view.body.dom.offsetHeight / rowCount);
+                }
+                else {
+                    row = rows.first();
+                    rowHeight = row.getHeight();
+                    
+                    // In IE8 we're adding bottom border on all the rows to work around
+                    // the lack of :last-child selector, and we compensate that by setting
+                    // a negative top margin that equals the border width, so that top and
+                    // bottom borders overlap on adjacent rows. Negative margin does not
+                    // affect the row's reported height though so we have to compensate
+                    // for that effectively invisible additional border width here.
+                    if (Ext.isIE8) {
+                        borderWidth = row.getBorderWidth('b');
+                        
+                        if (borderWidth > 0) {
+                            rowHeight -= borderWidth;
+                        }
+                    }
+                    
+                    me.rowHeight = rowHeight;
+                }
+            } else {
+                delete me.rowHeight;
             }
         }
-        scrollHeight = Math.floor(recCount * me.rowHeight);
 
-        // Allow to be overridden by the reality of where the view is.
-        if (!calculatedOnly) {
-            // If this is the last page, correct the scroll range to be just enough to fit.
-            if (scrollHeight && (rows.endIndex === recCount - 1)) {
-                scrollHeight = Math.max(scrollHeight, me.bodyTop + view.body.dom.offsetHeight - 1);
+        if (me.variableRowHeight) {
+            // If this is the last page, ensure the scroll range is exactly enough to scroll to the end of the rendered block.
+            if (rows.endIndex === recCount - 1) {
+                scrollHeight = me.bodyTop + view.body.dom.offsetHeight - 1;
             }
+            // Calculate the scroll range based upon measured row height and our scrollPosition.
+            else {
+                scrollHeight = Math.floor((recCount - rowCount) * me.rowHeight) + view.body.dom.offsetHeight;
+
+                // If there's a discrepancy between the boy position we have scrolled to, and the calculated position,
+                // account for that in the scroll range so that we have enough range to scroll all the data into view.
+                scrollHeight += me.bodyTop - rows.startIndex * me.rowHeight;
+            }
+        } else {
+            scrollHeight = Math.floor(recCount * me.rowHeight);
         }
 
-        return me.scrollHeight = scrollHeight;
-
+        return (me.scrollHeight = scrollHeight); // jshint ignore:line
     },
 
-    attemptLoad: function(start, end) {
+    attemptLoad: function(start, end, loadScrollPosition) {
         var me = this;
         if (me.scrollToLoadBuffer) {
             if (!me.loadTask) {
-                me.loadTask = new Ext.util.DelayedTask(me.doAttemptLoad, me, []);
+                me.loadTask = new Ext.util.DelayedTask();
             }
-            me.loadTask.delay(me.scrollToLoadBuffer, me.doAttemptLoad, me, [start, end]);
+            me.loadTask.delay(me.scrollToLoadBuffer, me.doAttemptLoad, me, [start, end, loadScrollPosition]);
         } else {
-            me.store.getRange(start, end, {
-                callback: me.onRangeFetched,
-                scope: me,
-                fireEvent: false
-            });
+            me.doAttemptLoad(start, end, loadScrollPosition);
         }
     },
 
@@ -1206,24 +1680,39 @@ Ext.define('Ext.grid.plugin.BufferedRenderer', {
         }
     },
 
-    doAttemptLoad:  function(start, end) {
-        this.store.getRange(start, end, {
-            callback: this.onRangeFetched,
-            scope: this,
-            fireEvent: false
-        });
+    doAttemptLoad:  function(start, end, loadScrollPosition) {
+        var me = this;
+
+        // If we were called on a delay, check for destruction
+        if (!me.destroyed) {
+            me.store.getRange(start, end, {
+                loadId: ++me.loadId,
+                callback: function(range, start, end, options) {
+                    // If our loadId position has not changed since the getRange request started, we can continue to render.
+                    // If the scroll position is different to the scroll position which triggered the load, ignore it -
+                    // we don't need the data any more.
+                    if (options.loadId === me.loadId && me.scrollTop === loadScrollPosition) {
+                        me.onRangeFetched(range, start, end, options);
+                    }
+                },
+                fireEvent: false
+            });
+        }
     },
 
     destroy: function() {
         var me = this,
             view = me.view;
 
+        me.cancelLoad();
+
         if (view && view.el) {
             view.un('scroll', me.onViewScroll, me);
         }
 
-        // Remove listeners from old grid, view and store
-        Ext.destroy(me.viewListeners, me.storeListeners, me.gridListeners);
+        Ext.destroy(me.viewListeners, me.storeListeners);
+        me.viewListeners = me.storeListeners = null;
+        me.callParent();
     }
 }, function(cls) {
     // Minimal leading and trailing zones are best on mobile.

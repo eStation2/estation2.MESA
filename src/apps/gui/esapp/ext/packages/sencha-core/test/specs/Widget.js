@@ -153,8 +153,8 @@ describe("Ext.Widget", function() {
                 expect(widget.element.id).toBe(id);
             });
 
-            itFiresMouseEvents("should add a listener to the main element", function() {
-                var scope;
+            it("should add a listener to the main element", function() {
+                var onClick = jasmine.createSpy();
 
                 defineWidget(first, {
                     element: {
@@ -163,26 +163,27 @@ describe("Ext.Widget", function() {
                             click: 'onClick'
                         }
                     },
-                    onClick: function() {
-                        scope = this;
-                    }
+                    onClick: onClick
                 });
 
                 widget = new spec.Widget();
                 // must be in the document to receive events
                 Ext.getBody().appendChild(widget.element);
-                spyOn(widget, 'onClick').andCallThrough();
 
                 jasmine.fireMouseEvent(widget.element, 'click');
 
-                expect(widget.onClick).toHaveBeenCalled();
-                expect(scope).toBe(widget);
+                expect(onClick).toHaveBeenCalled();
+                expect(onClick.mostRecentCall.object).toBe(widget);
 
                 widget.destroy();
             });
 
-            itFiresMouseEvents("should add listeners to child elements", function() {
-                var fooScope, barScope, bazScope, jazzScope;
+            it("should add listeners to child elements", function() {
+                var fooScope, barScope, bazScope, jazzScope,
+                    fooClick = jasmine.createSpy(),
+                    barClick = jasmine.createSpy(),
+                    bazClick = jasmine.createSpy(),
+                    jazzClick = jasmine.createSpy();
 
                 defineWidget(first, {
                     element: {
@@ -219,47 +220,34 @@ describe("Ext.Widget", function() {
                         }]
                     },
 
-                    fooClick: function() {
-                        fooScope = this;
-                    },
+                    fooClick: fooClick,
 
-                    barClick: function() {
-                        barScope = this;
-                    },
+                    barClick: barClick,
 
-                    bazClick: function() {
-                        bazScope = this;
-                    },
+                    bazClick: bazClick,
 
-                    jazzClick: function() {
-                        jazzScope = this;
-                    }
+                    jazzClick: jazzClick
                 });
 
                 widget = new spec.Widget();
                 // must be in the document to receive events
                 Ext.getBody().appendChild(widget.element);
 
-                spyOn(widget, 'fooClick').andCallThrough();
-                spyOn(widget, 'barClick').andCallThrough();
-                spyOn(widget, 'bazClick').andCallThrough();
-                spyOn(widget, 'jazzClick').andCallThrough();
-
                 jasmine.fireMouseEvent(widget.foo, 'click');
-                expect(widget.fooClick).toHaveBeenCalled();
-                expect(fooScope).toBe(widget);
+                expect(fooClick).toHaveBeenCalled();
+                expect(fooClick.mostRecentCall.object).toBe(widget);
 
                 jasmine.fireMouseEvent(widget.bar, 'click');
-                expect(widget.barClick).toHaveBeenCalled();
-                expect(barScope).toBe(widget);
+                expect(barClick).toHaveBeenCalled();
+                expect(barClick.mostRecentCall.object).toBe(widget);
 
                 jasmine.fireMouseEvent(widget.baz, 'click');
-                expect(widget.bazClick).toHaveBeenCalled();
-                expect(bazScope).toBe(widget);
+                expect(bazClick).toHaveBeenCalled();
+                expect(bazClick.mostRecentCall.object).toBe(widget);
 
                 jasmine.fireMouseEvent(widget.jazz, 'click');
-                expect(widget.jazzClick).toHaveBeenCalled();
-                expect(jazzScope).toBe(widget);
+                expect(jazzClick).toHaveBeenCalled();
+                expect(jazzClick.mostRecentCall.object).toBe(widget);
 
                 widget.destroy();
             });
@@ -268,6 +256,685 @@ describe("Ext.Widget", function() {
 
     makeSuite(true);
     makeSuite(false);
+
+    describe("element listener merging", function() {
+        var SuperWidget, SubWidget, superWidget, subWidget;
+
+        it("should not allow listeners declared in a subclass to pollute the superclass cache (no listeners on superclass)", function() {
+            // https://sencha.jira.com/browse/EXTJS-16984
+            SuperWidget = Ext.define(null, {
+                extend: Ext.Widget
+            });
+
+            SubWidget = Ext.define(null, {
+                extend: SuperWidget,
+                element: {
+                    reference: 'element',
+                    listeners: {
+                        click: 'onClick'
+                    }
+                },
+                onClick: Ext.emptyFn
+            });
+
+            // create an instance of SuperWidget first so that its listener cache gets created
+            superWidget = new SuperWidget();
+
+            // SubWidget should create its own listener cache
+            subWidget = new SubWidget();
+
+            // SubWidget's listeners should not invade SuperWidget's cache
+            expect(SuperWidget.prototype._elementListeners).toEqual({});
+            // SubWidget should have its own cache
+            expect(SubWidget.prototype.hasOwnProperty('_elementListeners')).toBe(true);
+        });
+
+        it("should not allow listeners declared in a subclass to pollute the superclass cache (with listeners on superclass)", function() {
+            // https://sencha.jira.com/browse/EXTJS-16984
+            SuperWidget = Ext.define(null, {
+                extend: Ext.Widget,
+                element: {
+                    reference: 'element',
+                    listeners: {
+                        mousedown: 'onMouseDown'
+                    }
+                },
+                onMouseDown: Ext.emptyFn
+            });
+
+            SubWidget = Ext.define(null, {
+                extend: SuperWidget,
+                element: {
+                    reference: 'element',
+                    listeners: {
+                        click: 'onClick'
+                    }
+                },
+                onClick: Ext.emptyFn
+            });
+
+            // create an instance of SuperWidget first so that its listener cache gets created
+            superWidget = new SuperWidget();
+
+            // SubWidget should create its own listener cache
+            subWidget = new SubWidget();
+
+            // SubWidget's listeners should not invade SuperWidget's cache
+            expect(SuperWidget.prototype._elementListeners).toEqual({
+                element: {
+                    mousedown: 'onMouseDown'
+                }
+            });
+            // SubWidget should have its own cache
+            expect(SubWidget.prototype.hasOwnProperty('_elementListeners')).toBe(true);
+        });
+
+        describe("when first instance of superclass has already been created", function() {
+            var superMouseDownSpy, superMouseUpSpy, superClickSpy,
+                subMouseDownSpy, subMouseUpSpy, subClickSpy;
+
+            beforeEach(function() {
+                superMouseDownSpy = jasmine.createSpy();
+                superMouseUpSpy = jasmine.createSpy();
+                superClickSpy = jasmine.createSpy();
+
+                subMouseDownSpy = jasmine.createSpy();
+                subMouseUpSpy = jasmine.createSpy();
+                subClickSpy = jasmine.createSpy();
+            });
+
+            afterEach(function() {
+                if (superWidget) {
+                    superWidget.destroy();
+                }
+                if (subWidget) {
+                    subWidget.destroy();
+                }
+            });
+
+            it("should merge subclass element listeners with superclass element listeners", function() {
+                SuperWidget = Ext.define(null, {
+                    extend: Ext.Widget,
+                    element: {
+                        reference: 'element',
+                        listeners: {
+                            click: 'superOnClick',
+                            mousedown: 'superOnMouseDown'
+                        }
+                    },
+                    superOnClick: superClickSpy,
+                    superOnMouseDown: superMouseDownSpy
+                });
+
+                SubWidget = Ext.define(null, {
+                    extend: SuperWidget,
+                    element: {
+                        reference: 'element',
+                        listeners: {
+                            // inherits mousedown, overrides click, and adds mouseup
+                            click: 'subOnClick',
+                            mouseup: 'subOnMouseUp'
+                        }
+                    },
+                    subOnClick: subClickSpy,
+                    subOnMouseUp: subMouseUpSpy
+                });
+
+                // create an instance of SuperWidget first so that its listener cache gets created
+                superWidget = new SuperWidget();
+
+                subWidget = new SubWidget();
+
+                Ext.getBody().appendChild(subWidget.element);
+
+                jasmine.fireMouseEvent(subWidget.element, 'click');
+
+                expect(superMouseDownSpy.callCount).toBe(1);
+                expect(superClickSpy).not.toHaveBeenCalled();
+                expect(subClickSpy.callCount).toBe(1);
+                expect(subMouseUpSpy.callCount).toBe(1);
+            });
+
+            it("should inherit element listeners from superclass", function() {
+                SuperWidget = Ext.define(null, {
+                    extend: Ext.Widget,
+                    element: {
+                        reference: 'element',
+                        listeners: {
+                            click: 'superOnClick'
+                        }
+                    },
+                    superOnClick: superClickSpy
+                });
+
+                SubWidget = Ext.define(null, {
+                    extend: SuperWidget
+                });
+
+                // create an instance of SuperWidget first so that its listener cache gets created
+                superWidget = new SuperWidget();
+
+                subWidget = new SubWidget();
+
+                Ext.getBody().appendChild(subWidget.element);
+
+                jasmine.fireMouseEvent(subWidget.element, 'click');
+
+                expect(superClickSpy.callCount).toBe(1);
+            });
+
+            it("should merge subclass child element listeners with superclass child element listeners", function() {
+                SuperWidget = Ext.define(null, {
+                    extend: Ext.Widget,
+                    element: {
+                        reference: 'element',
+                        children: [{
+                            reference: 'foo',
+                            listeners: {
+                                click: 'superOnClick',
+                                mousedown: 'superOnMouseDown'
+                            }
+                        }]
+                    },
+                    superOnClick: superClickSpy,
+                    superOnMouseDown: superMouseDownSpy
+                });
+
+                SubWidget = Ext.define(null, {
+                    extend: SuperWidget,
+                    element: {
+                        reference: 'element',
+                        children: [{
+                            reference: 'foo',
+                            listeners: {
+                                // inherits mousedown, overrides click, and adds mouseup
+                                click: 'subOnClick',
+                                mouseup: 'subOnMouseUp'
+                            }
+                        }]
+                    },
+                    subOnClick: subClickSpy,
+                    subOnMouseUp: subMouseUpSpy
+                });
+
+                // create an instance of SuperWidget first so that its listener cache gets created
+                superWidget = new SuperWidget();
+
+                subWidget = new SubWidget();
+
+                Ext.getBody().appendChild(subWidget.element);
+
+                jasmine.fireMouseEvent(subWidget.foo, 'click');
+
+                expect(superMouseDownSpy.callCount).toBe(1);
+                expect(superClickSpy).not.toHaveBeenCalled();
+                expect(subClickSpy.callCount).toBe(1);
+                expect(subMouseUpSpy.callCount).toBe(1);
+            });
+
+            it("should inherit child element listeners from superclass", function() {
+                SuperWidget = Ext.define(null, {
+                    extend: Ext.Widget,
+                    element: {
+                        reference: 'element',
+                        children: [{
+                            reference: 'foo',
+                            listeners: {
+                                click: 'superOnClick'
+                            }
+                        }]
+                    },
+                    superOnClick: superClickSpy
+                });
+
+                SubWidget = Ext.define(null, {
+                    extend: SuperWidget
+                });
+
+                // create an instance of SuperWidget first so that its listener cache gets created
+                superWidget = new SuperWidget();
+
+                subWidget = new SubWidget();
+
+                Ext.getBody().appendChild(subWidget.element);
+
+                jasmine.fireMouseEvent(subWidget.foo, 'click');
+
+                expect(superClickSpy.callCount).toBe(1);
+            });
+
+            it("should add listeners to subclass child elements that do not have a corresponding reference in the superclass template", function() {
+                SuperWidget = Ext.define(null, {
+                    extend: Ext.Widget,
+                    element: {
+                        reference: 'element',
+                        children: [{
+                            reference: 'foo',
+                            listeners: {
+                                click: 'superOnClick'
+                            }
+                        }]
+                    },
+                    superOnClick: superClickSpy
+                });
+
+                SubWidget = Ext.define(null, {
+                    extend: SuperWidget,
+                    element: {
+                        reference: 'element',
+                        children: [{
+                            reference: 'bar',
+                            listeners: {
+                                click: 'subOnClick'
+                            }
+                        }]
+                    },
+                    subOnClick: subClickSpy
+                });
+
+                // create an instance of SuperWidget first so that its listener cache gets created
+                superWidget = new SuperWidget();
+
+                subWidget = new SubWidget();
+
+                Ext.getBody().appendChild(subWidget.element);
+
+                jasmine.fireMouseEvent(subWidget.bar, 'click');
+
+                expect(superClickSpy.callCount).toBe(0);
+                expect(subClickSpy.callCount).toBe(1);
+            });
+
+            it("should merge subclass element listeners with superclass element listeners (multiple levels of inheritance)", function() {
+                var mouseUpSpy = jasmine.createSpy(),
+                    Widget;
+
+                SuperWidget = Ext.define(null, {
+                    extend: Ext.Widget,
+                    element: {
+                        reference: 'element',
+                        listeners: {
+                            click: 'superOnClick',
+                            mousedown: 'superOnMouseDown'
+                        }
+                    },
+                    superOnClick: superClickSpy,
+                    superOnMouseDown: superMouseDownSpy
+                });
+
+                SubWidget = Ext.define(null, {
+                    extend: SuperWidget,
+                    element: {
+                        reference: 'element',
+                        listeners: {
+                            // inherits mousedown, overrides click, and adds mouseup
+                            click: 'subOnClick',
+                            mouseup: 'subOnMouseUp'
+                        }
+                    },
+                    subOnClick: subClickSpy,
+                    subOnMouseUp: subMouseUpSpy
+                });
+
+                Widget = Ext.define(null, {
+                    extend: SubWidget,
+                    element: {
+                        reference: 'element',
+                        listeners: {
+                            // overrides mouseup, inherits click/mousedown
+                            mouseup: 'onMouseUp'
+                        }
+                    },
+                    onMouseUp: mouseUpSpy
+                });
+
+                // create an instance of SuperWidget/SubWidget first so that their listener caches get created
+                superWidget = new SuperWidget();
+                subWidget = new SubWidget();
+                widget = new Widget();
+
+                Ext.getBody().appendChild(widget.element);
+
+                jasmine.fireMouseEvent(widget.element, 'click');
+
+                expect(superMouseDownSpy.callCount).toBe(1);
+                expect(superClickSpy).not.toHaveBeenCalled();
+                expect(subClickSpy.callCount).toBe(1);
+                expect(subMouseUpSpy).not.toHaveBeenCalled();
+                expect(mouseUpSpy.callCount).toBe(1);
+            });
+
+            it("should inherit child element listeners from superclass over multiple inheritance levels", function() {
+                var Widget;
+
+                SuperWidget = Ext.define(null, {
+                    extend: Ext.Widget,
+                    element: {
+                        reference: 'element',
+                        children: [{
+                            reference: 'foo',
+                            listeners: {
+                                click: 'superOnClick'
+                            }
+                        }]
+                    },
+                    superOnClick: superClickSpy
+                });
+
+                SubWidget = Ext.define(null, {
+                    extend: SuperWidget
+                });
+
+                Widget = Ext.define(null, {
+                    extend: SubWidget
+                });
+
+                // create an instance of SuperWidget/SubWidget first so that their listener caches get created
+                superWidget = new SuperWidget();
+                subWidget = new SubWidget();
+
+                widget = new Widget();
+
+                Ext.getBody().appendChild(widget.element);
+
+                jasmine.fireMouseEvent(widget.foo, 'click');
+
+                expect(superClickSpy.callCount).toBe(1);
+            });
+        });
+
+        describe("when first instance of superclass has not yet been created", function() {
+            var superMouseDownSpy, superMouseUpSpy, superClickSpy,
+                subMouseDownSpy, subMouseUpSpy, subClickSpy;
+
+            beforeEach(function() {
+                superMouseDownSpy = jasmine.createSpy();
+                superMouseUpSpy = jasmine.createSpy();
+                superClickSpy = jasmine.createSpy();
+
+                subMouseDownSpy = jasmine.createSpy();
+                subMouseUpSpy = jasmine.createSpy();
+                subClickSpy = jasmine.createSpy();
+            });
+
+            afterEach(function() {
+                if (superWidget) {
+                    superWidget.destroy();
+                }
+                if (subWidget) {
+                    subWidget.destroy();
+                }
+            });
+
+            it("should merge subclass element listeners with superclass element listeners", function() {
+                SuperWidget = Ext.define(null, {
+                    extend: Ext.Widget,
+                    element: {
+                        reference: 'element',
+                        listeners: {
+                            click: 'superOnClick',
+                            mousedown: 'superOnMouseDown'
+                        }
+                    },
+                    superOnClick: superClickSpy,
+                    superOnMouseDown: superMouseDownSpy
+                });
+
+                SubWidget = Ext.define(null, {
+                    extend: SuperWidget,
+                    element: {
+                        reference: 'element',
+                        listeners: {
+                            // inherits mousedown, overrides click, and adds mouseup
+                            click: 'subOnClick',
+                            mouseup: 'subOnMouseUp'
+                        }
+                    },
+                    subOnClick: subClickSpy,
+                    subOnMouseUp: subMouseUpSpy
+                });
+
+                subWidget = new SubWidget();
+
+                Ext.getBody().appendChild(subWidget.element);
+
+                jasmine.fireMouseEvent(subWidget.element, 'click');
+
+                expect(superMouseDownSpy.callCount).toBe(1);
+                expect(superClickSpy).not.toHaveBeenCalled();
+                expect(subClickSpy.callCount).toBe(1);
+                expect(subMouseUpSpy.callCount).toBe(1);
+            });
+
+            it("should inherit element listeners from superclass", function() {
+                SuperWidget = Ext.define(null, {
+                    extend: Ext.Widget,
+                    element: {
+                        reference: 'element',
+                        listeners: {
+                            click: 'superOnClick'
+                        }
+                    },
+                    superOnClick: superClickSpy
+                });
+
+                SubWidget = Ext.define(null, {
+                    extend: SuperWidget
+                });
+
+                subWidget = new SubWidget();
+
+                Ext.getBody().appendChild(subWidget.element);
+
+                jasmine.fireMouseEvent(subWidget.element, 'click');
+
+                expect(superClickSpy.callCount).toBe(1);
+            });
+
+            it("should merge subclass child element listeners with superclass child element listeners", function() {
+                SuperWidget = Ext.define(null, {
+                    extend: Ext.Widget,
+                    element: {
+                        reference: 'element',
+                        children: [{
+                            reference: 'foo',
+                            listeners: {
+                                click: 'superOnClick',
+                                mousedown: 'superOnMouseDown'
+                            }
+                        }]
+                    },
+                    superOnClick: superClickSpy,
+                    superOnMouseDown: superMouseDownSpy
+                });
+
+                SubWidget = Ext.define(null, {
+                    extend: SuperWidget,
+                    element: {
+                        reference: 'element',
+                        children: [{
+                            reference: 'foo',
+                            listeners: {
+                                // inherits mousedown, overrides click, and adds mouseup
+                                click: 'subOnClick',
+                                mouseup: 'subOnMouseUp'
+                            }
+                        }]
+                    },
+                    subOnClick: subClickSpy,
+                    subOnMouseUp: subMouseUpSpy
+                });
+
+                subWidget = new SubWidget();
+
+                Ext.getBody().appendChild(subWidget.element);
+
+                jasmine.fireMouseEvent(subWidget.foo, 'click');
+
+                expect(superMouseDownSpy.callCount).toBe(1);
+                expect(superClickSpy).not.toHaveBeenCalled();
+                expect(subClickSpy.callCount).toBe(1);
+                expect(subMouseUpSpy.callCount).toBe(1);
+            });
+
+            it("should inherit child element listeners from superclass", function() {
+                SuperWidget = Ext.define(null, {
+                    extend: Ext.Widget,
+                    element: {
+                        reference: 'element',
+                        children: [{
+                            reference: 'foo',
+                            listeners: {
+                                click: 'superOnClick'
+                            }
+                        }]
+                    },
+                    superOnClick: superClickSpy
+                });
+
+                SubWidget = Ext.define(null, {
+                    extend: SuperWidget
+                });
+
+                subWidget = new SubWidget();
+
+                Ext.getBody().appendChild(subWidget.element);
+
+                jasmine.fireMouseEvent(subWidget.foo, 'click');
+
+                expect(superClickSpy.callCount).toBe(1);
+            });
+
+            it("should add listeners to subclass child elements that do not have a corresponding reference in the superclass template", function() {
+                SuperWidget = Ext.define(null, {
+                    extend: Ext.Widget,
+                    element: {
+                        reference: 'element',
+                        children: [{
+                            reference: 'foo',
+                            listeners: {
+                                click: 'superOnClick'
+                            }
+                        }]
+                    },
+                    superOnClick: superClickSpy
+                });
+
+                SubWidget = Ext.define(null, {
+                    extend: SuperWidget,
+                    element: {
+                        reference: 'element',
+                        children: [{
+                            reference: 'bar',
+                            listeners: {
+                                click: 'subOnClick'
+                            }
+                        }]
+                    },
+                    subOnClick: subClickSpy
+                });
+
+                subWidget = new SubWidget();
+
+                Ext.getBody().appendChild(subWidget.element);
+
+                jasmine.fireMouseEvent(subWidget.bar, 'click');
+
+                expect(superClickSpy.callCount).toBe(0);
+                expect(subClickSpy.callCount).toBe(1);
+            });
+
+            it("should merge subclass element listeners with superclass element listeners (multiple levels of inheritance)", function() {
+                var mouseUpSpy = jasmine.createSpy(),
+                    Widget;
+
+                SuperWidget = Ext.define(null, {
+                    extend: Ext.Widget,
+                    element: {
+                        reference: 'element',
+                        listeners: {
+                            click: 'superOnClick',
+                            mousedown: 'superOnMouseDown'
+                        }
+                    },
+                    superOnClick: superClickSpy,
+                    superOnMouseDown: superMouseDownSpy
+                });
+
+                SubWidget = Ext.define(null, {
+                    extend: SuperWidget,
+                    element: {
+                        reference: 'element',
+                        listeners: {
+                            // inherits mousedown, overrides click, and adds mouseup
+                            click: 'subOnClick',
+                            mouseup: 'subOnMouseUp'
+                        }
+                    },
+                    subOnClick: subClickSpy,
+                    subOnMouseUp: subMouseUpSpy
+                });
+
+                Widget = Ext.define(null, {
+                    extend: SubWidget,
+                    element: {
+                        reference: 'element',
+                        listeners: {
+                            // overrides mouseup, inherits click/mousedown
+                            mouseup: 'onMouseUp'
+                        }
+                    },
+                    onMouseUp: mouseUpSpy
+                });
+
+                widget = new Widget();
+
+                Ext.getBody().appendChild(widget.element);
+
+                jasmine.fireMouseEvent(widget.element, 'click');
+
+                expect(superMouseDownSpy.callCount).toBe(1);
+                expect(superClickSpy).not.toHaveBeenCalled();
+                expect(subClickSpy.callCount).toBe(1);
+                expect(subMouseUpSpy).not.toHaveBeenCalled();
+                expect(mouseUpSpy.callCount).toBe(1);
+            });
+
+            it("should inherit child element listeners from superclass over multiple inheritance levels", function() {
+                var Widget;
+
+                SuperWidget = Ext.define(null, {
+                    extend: Ext.Widget,
+                    element: {
+                        reference: 'element',
+                        children: [{
+                            reference: 'foo',
+                            listeners: {
+                                click: 'superOnClick'
+                            }
+                        }]
+                    },
+                    superOnClick: superClickSpy
+                });
+
+                SubWidget = Ext.define(null, {
+                    extend: SuperWidget
+                });
+
+                Widget = Ext.define(null, {
+                    extend: SubWidget
+                });
+
+                widget = new Widget();
+
+                Ext.getBody().appendChild(widget.element);
+
+                jasmine.fireMouseEvent(widget.foo, 'click');
+
+                expect(superClickSpy.callCount).toBe(1);
+            });
+        });
+    });
 
     describe("listener scope resolution", function() {
         var spies, scopes, Widget, widget, Parent, parent, Grandparent, grandparent,
@@ -1150,74 +1817,74 @@ describe("Ext.Widget", function() {
             });
 
             describe("with handler declared as a function reference", function() {
-                var handler;
+                var handler, scope;
 
-                beforeEach(function() {
-                    handler = jasmine.createSpy();
-                });
-
-                it("should use the component as the default scope", function() {
-                    defineWidget({
+                function defineWidget(cfg, setScope) {
+                    cfg = Ext.merge({
+                        extend: 'Ext.Widget',
                         listeners: {
                             foo: handler
                         }
+                    }, cfg);
+                    if (setScope) {
+                        cfg.listeners.scope = setScope;
+                    }
+
+                    Widget = Ext.define(null, cfg);
+                }
+
+                beforeEach(function() {
+                    handler = jasmine.createSpy();
+                    handler.andCallFake(function() {
+                        scope = this;
                     });
+                });
+
+                afterEach(function() {
+                    scope = null;
+                });
+
+                it("should use the widget as the default scope", function() {
+                    defineWidget();
                     widget = new Widget();
                     widget.fireEvent('foo');
                     expect(handler).toHaveBeenCalled();
                     expect(handler.mostRecentCall.object).toBe(widget);
                 });
 
-                // Can't use an object as the scope of a listener declared on the class body
-                // because the config system will fork the listeners object so it can apply
-                // the instanceConfig without mutating the class config
-                xit("should use an arbitrary object as the scope", function() {
-                    var scope = {};
+                it("should use an arbitrary object as the scope", function() {
+                    var obj = {};
 
-                    Widget = Ext.define(null, {
-                        extend: 'Ext.Widget',
-                        listeners: {
-                            foo: handler,
-                            scope: scope
-                        }
-                    });
+                    defineWidget({}, obj);
                     widget = new Widget();
                     widget.fireEvent('foo');
-                    expect(handler).toHaveBeenCalled();
-                    expect(handler.mostRecentCall.object).toBe(scope);
+                    expect(scope).toBe(obj);
                 });
 
-                it("should use the component with scope:'this'", function() {
+                it("should use the widget with scope:'this'", function() {
                     defineWidget({
                         listeners: {
-                            foo: handler,
                             scope: 'this'
                         }
                     });
                     widget = new Widget();
                     widget.fireEvent('foo');
-                    expect(handler).toHaveBeenCalled();
-                    expect(handler.mostRecentCall.object).toBe(widget);
+                    expect(scope).toBe(widget);
                 });
 
                 it("should fail with scope:'controller'", function() {
                     defineWidget({
                         listeners: {
-                            foo: handler,
                             scope: 'controller'
                         }
                     });
+                    widget = new Widget();
                     expect(function() {
-                        widget = new Widget({
-                            id: 'myWidget'
-                        });
-                    }).toThrow("Cannot resolve scope 'controller' for 'foo' listener declared on Observable: 'myWidget'");
-
-                    // error thrown during widget construction, must clean dom manually
-                    Ext.get('myWidget').destroy();
+                        widget.fireEvent('foo');
+                    }).toThrow();
                 });
 
-                it("should use the component with scope:'this' specified on an inner object", function() {
+                it("should use the widget with scope:'this' specified on an inner object", function() {
                     defineWidget({
                         listeners: {
                             foo: {
@@ -1228,8 +1895,7 @@ describe("Ext.Widget", function() {
                     });
                     widget = new Widget();
                     widget.fireEvent('foo');
-                    expect(handler).toHaveBeenCalled();
-                    expect(handler.mostRecentCall.object).toBe(widget);
+                    expect(scope).toBe(widget);
                 });
 
                 it("should fail with scope:'controller' specified on an inner object", function() {
@@ -1241,14 +1907,212 @@ describe("Ext.Widget", function() {
                             }
                         }
                     });
+                    widget = new Widget();
                     expect(function() {
-                        widget = new Widget({
-                            id: 'myWidget'
-                        });
-                    }).toThrow("Cannot resolve scope 'controller' for 'foo' listener declared on Observable: 'myWidget'");
+                        widget.fireEvent('foo');
+                    }).toThrow();
+                });
 
-                    // error thrown during widget construction, must clean dom manually
-                    Ext.get('myWidget').destroy();
+                describe("with view controller", function() {
+                    it("should resolve to the widget with unspecified scope", function() {
+                        defineWidget({
+                            controller: new Controller()
+                        });
+                        widget = new Widget();
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(widget);
+                    });
+
+                    it("should resolve to the view controller with scope:'controller'", function() {
+                        defineWidget({
+                            controller: new Controller(),
+                            listeners: {
+                                scope: 'controller'
+                            }
+                        });
+                        widget = new Widget();
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(widget.getController());
+                    });
+
+                    it("should resolve to the widget with scope:'this'", function() {
+                        defineWidget({
+                            controller: new Controller(),
+                            listeners: {
+                                scope: 'this'
+                            }
+                        });
+                        widget = new Widget();
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(widget);
+                    });
+                });
+
+                describe("with defaultListenerScope", function() {
+                    it("should resolve to the widget with unspecified scope", function() {
+                        defineWidget({
+                            defaultListenerScope: true
+                        });
+                        widget = new Widget();
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(widget);
+                    });
+
+                    it("should fail with scope:'controller'", function() {
+                        defineWidget({
+                            defaultListenerScope: true,
+                            listeners: {
+                                scope: 'controller'
+                            }
+                        });
+                        widget = new Widget();
+                        expect(function() {
+                            widget.fireEvent('foo');
+                        }).toThrow();
+                    });
+
+                    it("should resolve to the widget with scope:'this'", function() {
+                        defineWidget({
+                            defaultListenerScope: true,
+                            listeners: {
+                                scope: 'this'
+                            }
+                        });
+                        widget = new Widget();
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(widget);
+                    });
+                });
+
+                describe("with view controller and defaultListenerScope", function() {
+                    it("should resolve to the widget with unspecified scope", function() {
+                        defineWidget({
+                            controller: new Controller(),
+                            defaultListenerScope: true
+                        });
+                        widget = new Widget();
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(widget);
+                    });
+
+                    it("should resolve to the view controller with scope:'controller'", function() {
+                        defineWidget({
+                            controller: new Controller(),
+                            defaultListenerScope: true,
+                            listeners: {
+                                scope: 'controller'
+                            }
+                        });
+                        widget = new Widget();
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(widget.getController());
+                    });
+
+                    it("should resolve to the widget with scope:'this'", function() {
+                        defineWidget({
+                            controller: new Controller(),
+                            defaultListenerScope: true,
+                            listeners: {
+                                scope: 'this'
+                            }
+                        });
+                        widget = new Widget();
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(widget);
+                    });
+                });
+
+                describe("with defaultListenerScope on parent", function() {
+                    beforeEach(function() {
+                        defineParent({
+                            defaultListenerScope: true
+                        });
+                    });
+
+                    it("should resolve to the widget with unspecified scope", function() {
+                        defineWidget();
+                        widget = new Widget();
+                        parent = new Parent({
+                            items: widget
+                        });
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(widget);
+                    });
+
+                    it("should fail with scope:'controller'", function() {
+                        defineWidget({
+                            listeners: {
+                                scope: 'controller'
+                            }
+                        });
+                        widget = new Widget();
+                        parent = new Parent({
+                            items: widget
+                        });
+                        expect(function() {
+                            widget.fireEvent('foo');
+                        }).toThrow();
+                    });
+
+                    it("should resolve to the widget with scope:'this'", function() {
+                        defineWidget({
+                            listeners: {
+                                scope: 'this'
+                            }
+                        });
+                        widget = new Widget();
+                        parent = new Parent({
+                            items: widget
+                        });
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(widget);
+                    });
+                });
+
+                describe("with view controller on parent", function() {
+                    beforeEach(function() {
+                        defineParent({
+                            controller: new ParentController()
+                        });
+                    });
+
+                    it("should resolve to the widget with unspecified scope", function() {
+                        defineWidget();
+                        widget = new Widget();
+                        parent = new Parent({
+                            items: widget
+                        });
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(widget);
+                    });
+
+                    it("should resolve to the parent view controller with scope:'controller'", function() {
+                        defineWidget({
+                            listeners: {
+                                scope: 'controller'
+                            }
+                        });
+                        widget = new Widget();
+                        parent = new Parent({
+                            items: widget
+                        });
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(parent.getController());
+                    });
+
+                    it("should resolve to the widget with scope:'this'", function() {
+                        defineWidget({
+                            listeners: {
+                                scope: 'this'
+                            }
+                        });
+                        widget = new Widget();
+                        parent = new Parent({
+                            items: widget
+                        });
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(widget);
+                    });
                 });
             });
         });
@@ -2082,39 +2946,52 @@ describe("Ext.Widget", function() {
             });
 
             describe("with handler declared as a function reference", function() {
-                var handler;
+                var handler, scope;
+
+                function defineWidget(cfg) {
+                    Widget = Ext.define(null, Ext.merge({
+                        extend: 'Ext.Widget'
+                    }, cfg));
+                }
 
                 beforeEach(function() {
-                    defineWidget();
                     handler = jasmine.createSpy();
+                    handler.andCallFake(function() {
+                        scope = this;
+                    });
                 });
 
-                it("should use the component as the default scope", function() {
+                afterEach(function() {
+                    scope = null;
+                });
+
+                it("should use the widget as the default scope", function() {
+                    defineWidget();
                     widget = new Widget({
                         listeners: {
                             foo: handler
                         }
                     });
                     widget.fireEvent('foo');
-                    expect(handler).toHaveBeenCalled();
-                    expect(handler.mostRecentCall.object).toBe(widget);
+                    expect(scope).toBe(widget);
                 });
 
                 it("should use an arbitrary object as the scope", function() {
-                    var scope = {};
+                    defineWidget();
+                    var obj = {};
 
                     widget = new Widget({
                         listeners: {
                             foo: handler,
-                            scope: scope
+                            scope: obj
                         }
                     });
                     widget.fireEvent('foo');
-                    expect(handler).toHaveBeenCalled();
-                    expect(handler.mostRecentCall.object).toBe(scope);
+                    expect(scope).toBe(obj);
                 });
 
-                it("should use the component with scope:'this'", function() {
+                it("should use the widget with scope:'this'", function() {
+                    defineWidget();
                     widget = new Widget({
                         listeners: {
                             foo: handler,
@@ -2122,26 +2999,24 @@ describe("Ext.Widget", function() {
                         }
                     });
                     widget.fireEvent('foo');
-                    expect(handler).toHaveBeenCalled();
-                    expect(handler.mostRecentCall.object).toBe(widget);
+                    expect(scope).toBe(widget);
                 });
 
                 it("should fail with scope:'controller'", function() {
+                    defineWidget();
+                    widget = new Widget({
+                        listeners: {
+                            foo: handler,
+                            scope: 'controller'
+                        }
+                    });
                     expect(function() {
-                        widget = new Widget({
-                            id: 'myWidget',
-                            listeners: {
-                                foo: handler,
-                                scope: 'controller'
-                            }
-                        });
-                    }).toThrow("Cannot resolve scope 'controller' for 'foo' listener declared on Observable: 'myWidget'");
-
-                    // error thrown during widget construction, must clean dom manually
-                    Ext.get('myWidget').destroy();
+                        widget.fireEvent('foo');
+                    }).toThrow();
                 });
 
-                it("should use the component with scope:'this' specified on an inner object", function() {
+                it("should use the widget with scope:'this' specified on an inner object", function() {
+                    defineWidget();
                     widget = new Widget({
                         listeners: {
                             foo: {
@@ -2151,25 +3026,205 @@ describe("Ext.Widget", function() {
                         }
                     });
                     widget.fireEvent('foo');
-                    expect(handler).toHaveBeenCalled();
-                    expect(handler.mostRecentCall.object).toBe(widget);
+                    expect(scope).toBe(widget);
                 });
 
                 it("should fail with scope:'controller' specified on an inner object", function() {
+                    defineWidget();
+                    widget = new Widget({
+                        listeners: {
+                            foo: {
+                                fn: handler,
+                                scope: 'controller'
+                            }
+                        }
+                    });
                     expect(function() {
+                        widget.fireEvent('foo');
+                    }).toThrow();
+                });
+
+                describe("with view controller", function() {
+                    beforeEach(function() {
+                        defineWidget({
+                            controller: new Controller()
+                        });
+                    });
+
+                    it("should resolve to the widget with unspecified scope", function() {
                         widget = new Widget({
-                            id: 'myWidget',
                             listeners: {
-                                foo: {
-                                    fn: handler,
-                                    scope: 'controller'
-                                }
+                                foo: handler
                             }
                         });
-                    }).toThrow("Cannot resolve scope 'controller' for 'foo' listener declared on Observable: 'myWidget'");
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(widget);
+                    });
 
-                    // error thrown during widget construction, must clean dom manually
-                    Ext.get('myWidget').destroy();
+                    it("should fail with scope:'controller'", function() {
+                        widget = new Widget({
+                            listeners: {
+                                foo: handler,
+                                scope: 'controller'
+                            }
+                        });
+                        expect(function() {
+                            widget.fireEvent('foo');
+                        }).toThrow();
+                    });
+
+                    it("should resolve to the widget with scope:'this'", function() {
+                        widget = new Widget({
+                            listeners: {
+                                foo: handler,
+                                scope: 'this'
+                            }
+                        });
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(widget);
+                    });
+                });
+
+                describe("with defaultListenerScope", function() {
+                    beforeEach(function() {
+                        defineWidget({
+                            defaultListenerScope: true
+                        });
+                    });
+
+                    it("should resolve to the widget with unspecified scope", function() {
+                        widget = new Widget({
+                            listeners: {
+                                foo: handler
+                            }
+                        });
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(widget);
+                    });
+
+                    it("should fail with scope:'controller'", function() {
+                        widget = new Widget({
+                            listeners: {
+                                foo: handler,
+                                scope: 'controller'
+                            }
+                        });
+                        expect(function() {
+                            widget.fireEvent('foo');
+                        }).toThrow();
+                    });
+
+                    it("should resolve to the widget with scope:'this'", function() {
+                        widget = new Widget({
+                            listeners: {
+                                foo: handler,
+                                scope: 'this'
+                            }
+                        });
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(widget);
+                    });
+                });
+
+                describe("with defaultListenerScope on parent", function() {
+                    beforeEach(function() {
+                        defineParent({
+                            defaultListenerScope: true
+                        });
+                        defineWidget();
+                    });
+
+                    it("should resolve to the widget with unspecified scope", function() {
+                        widget = new Widget({
+                            listeners: {
+                                foo: handler
+                            }
+                        });
+                        parent = new Parent({
+                            items: widget
+                        });
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(widget);
+                    });
+
+                    it("should fail with scope:'controller'", function() {
+                        widget = new Widget({
+                            listeners: {
+                                foo: handler,
+                                scope: 'controller'
+                            }
+                        });
+                        parent = new Parent({
+                            items: widget
+                        });
+                        expect(function() {
+                            widget.fireEvent('foo');
+                        }).toThrow();
+                    });
+
+                    it("should resolve to the widget with scope:'this'", function() {
+                        widget = new Widget({
+                            listeners: {
+                                foo: handler,
+                                scope: 'this'
+                            }
+                        });
+                        parent = new Parent({
+                            items: widget
+                        });
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(widget);
+                    });
+                });
+
+                describe("with view controller on parent", function() {
+                    beforeEach(function() {
+                        defineParent({
+                            controller: new ParentController()
+                        });
+                        defineWidget();
+                    });
+
+                    it("should resolve to the widget with unspecified scope", function() {
+                        widget = new Widget({
+                            listeners: {
+                                foo: handler
+                            }
+                        });
+                        parent = new Parent({
+                            items: widget
+                        });
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(widget);
+                    });
+
+                    it("should resolve to the parent view controller with scope:'controller'", function() {
+                        widget = new Widget({
+                            listeners: {
+                                foo: handler,
+                                scope: 'controller'
+                            }
+                        });
+                        parent = new Parent({
+                            items: widget
+                        });
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(parent.getController());
+                    });
+
+                    it("should resolve to the widget with scope:'this'", function() {
+                        widget = new Widget({
+                            listeners: {
+                                foo: handler,
+                                scope: 'this'
+                            }
+                        });
+                        parent = new Parent({
+                            items: widget
+                        });
+                        widget.fireEvent('foo');
+                        expect(scope).toBe(widget);
+                    });
                 });
             });
         });

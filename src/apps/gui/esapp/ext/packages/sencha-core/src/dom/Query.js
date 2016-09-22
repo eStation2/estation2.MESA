@@ -776,8 +776,6 @@ Ext.define('Ext.dom.Query', function() {
          * Uses [document.querySelectorAll][0] if browser supports that, otherwise falls back to
          * {@link Ext.dom.Query#jsSelect} to do the work.
          *
-         * Aliased as {@link Ext#query}.
-         *
          * [0]: https://developer.mozilla.org/en/DOM/document.querySelectorAll
          *
          * @param {String} path The selector/xpath query
@@ -849,12 +847,12 @@ Ext.define('Ext.dom.Query', function() {
             }
 
             n = query(root);
-            return DQ.getNodeValue(n[0] ? n[0] : n);
+            return DQ.getNodeValue(n[0] ? n[0] : n) || defaultValue;
         },
 
         /**
          * Get the text value for a node, optionally replacing null with the defaultValue.
-         * @param {Object} The node
+         * @param {Object} node The node
          * @param {String} [defaultValue] When specified, this is return as empty value.
          * @return {String} The value
          */

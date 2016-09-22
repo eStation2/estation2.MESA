@@ -119,7 +119,7 @@ Ext.define('Ext.Action', {
         this.items = [];
     },
 
-    /*
+    /**
      * @property {Boolean} isAction
      * `true` in this class to identify an object as an instantiated Action, or subclass thereof.
      */

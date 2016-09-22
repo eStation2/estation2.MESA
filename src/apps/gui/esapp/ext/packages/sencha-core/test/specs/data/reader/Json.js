@@ -26,12 +26,125 @@ describe("Ext.data.reader.Json", function() {
         Ext.data.Model.schema.clear(true);
     });
     
-    it('should set a reference to the raw data in the .raw property on the record', function () {
-        var o = {
-            inter: 1
-        };
+    describe("raw data", function() {
+        var data, rec;
+        
+        beforeEach(function() {
+            data = {
+                inter: 1
+            };
+        });
+        
+        afterEach(function() {
+            rec = null;
+        });
+        
+        it("should not set raw data reference by default", function() {
+            rec = reader.readRecords([data]).getRecords()[0];
+            
+            expect(rec.raw).not.toBeDefined();
+        });
+        
+        it('should set raw data reference for a TreeStore record', function () {
+            // Simulate TreeStore node
+            spec.JsonReader.prototype.isNode = true;
+            
+            rec = reader.readRecords([data]).getRecords()[0];
+            
+            expect(rec.raw).toBe(data);
+        });
+    });
 
-        expect(reader.readRecords([o]).getRecords()[0].raw).toBe(o);
+    describe("copyFrom", function() {
+        var Model = Ext.define(null, {
+            extend: 'Ext.data.Model'
+        });
+
+        it("should copy the model", function() {
+            var reader = new Ext.data.reader.Json({
+                model: Model
+            });
+            var copy = new Ext.data.reader.Json();
+            copy.copyFrom(reader);
+            expect(copy.getModel()).toBe(Model);
+        });
+
+        it("should copy the record", function() {
+            var reader = new Ext.data.reader.Json({
+                model: Model,
+                record: 'foo'
+            });
+            var copy = new Ext.data.reader.Json();
+            copy.copyFrom(reader);
+            expect(copy.getRecord()).toBe('foo');
+
+            var result = reader.read([{
+                foo: {
+                    x: 1
+                }
+            }]);
+            expect(result.getRecords()[0].get('x')).toBe(1);
+        });
+
+        it("should copy the totalProperty", function() {
+            var reader = new Ext.data.reader.Json({
+                model: Model,
+                totalProperty: 'aTotal'
+            });
+            var copy = new Ext.data.reader.Json();
+            copy.copyFrom(reader);
+            expect(copy.getTotalProperty()).toBe('aTotal');
+
+            var result = reader.read({
+                aTotal: 1000
+            });
+            expect(result.getTotal()).toBe(1000);
+        });
+
+        it("should copy the successProperty", function() {
+            var reader = new Ext.data.reader.Json({
+                model: Model,
+                successProperty: 'aSuccess'
+            });
+            var copy = new Ext.data.reader.Json();
+            copy.copyFrom(reader);
+            expect(copy.getSuccessProperty()).toBe('aSuccess');
+
+            var result = reader.read({
+                aSuccess: false
+            });
+            expect(result.getSuccess()).toBe(false);
+        });
+
+        it("should copy the messageProperty", function() {
+            var reader = new Ext.data.reader.Json({
+                model: Model,
+                messageProperty: 'aMessage'
+            });
+            var copy = new Ext.data.reader.Json();
+            copy.copyFrom(reader);
+            expect(copy.getMessageProperty()).toBe('aMessage');
+
+            var result = reader.read({
+                aMessage: 'Some Message'
+            });
+            expect(result.getMessage()).toBe('Some Message');
+        });
+
+        it("should copy the rootProperty", function() {
+            var reader = new Ext.data.reader.Json({
+                model: Model,
+                rootProperty: 'aRoot'
+            });
+            var copy = new Ext.data.reader.Json();
+            copy.copyFrom(reader);
+            expect(copy.getRootProperty()).toBe('aRoot');
+
+            var result = reader.read({
+                aRoot: [{}, {}, {}, {}]
+            });
+            expect(result.getCount()).toBe(4);
+        });
     });
 
     describe("preserveRawData", function() {
@@ -573,6 +686,20 @@ describe("Ext.data.reader.Json", function() {
                 var result2 = reader.readRecords([['T']], rawOptions).getRecords()[0];
                 expect(result1.field).toBe('woo');
                 expect(result2.field).toBe('T');
+            });
+
+            it("should not include a mapping where the value doesn't exist", function() {
+                createReader([{
+                    name: 'field',
+                    mapping: 'foo'
+                }]);
+                var result = reader.readRecords([{
+                    notFoo: 'x'
+                }], rawOptions).getRecords()[0];
+                expect(result).toEqual({
+                    notFoo: 'x'
+                });
+                expect(result.hasOwnProperty('field')).toBe(false);
             });
 
             describe("JSON", function(){
@@ -1504,6 +1631,19 @@ describe("Ext.data.reader.Json", function() {
     
                 it("should return any empty dataset", function() {
                     expect(doRead(badResponse).getRecords().length).toBe(0);
+                });
+
+                it("should fire the exception event", function() {
+                    var spy = jasmine.createSpy();
+                    reader.on('exception', spy);
+                    doRead(badResponse);
+                    expect(spy.callCount).toBe(1);
+                });
+            });
+
+            describe("if the responseText is empty", function() {
+                it("should return the null result set", function() {
+                    expect(doRead({responseText: ''})).toBe(reader.getNullResultSet());
                 });
             });
         });

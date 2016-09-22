@@ -13,11 +13,13 @@ Ext.define('esapp.view.analysis.layerAdminController', {
         if (layersgridstore.isStore) {
             layersgridstore.load({
                 callback: function(records, options, success) {
-                    me.lookupReference('layersGrid').doLayout();
-                    me.doLayout();
+                    me.lookupReference('layersGrid').updateLayout();
+                    me.updateLayout();
                 }
             });
         }
+        me.lookupReference('layersGrid').updateLayout();
+        me.updateLayout();
     }
 
     ,addLayer: function(){

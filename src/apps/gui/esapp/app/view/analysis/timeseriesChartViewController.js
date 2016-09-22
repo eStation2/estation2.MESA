@@ -1214,7 +1214,8 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 var data = canvas.toDataURL("image/png");
                 download(data, me.filename + '.png');
             };
-        image.src = 'data:image/svg+xml;base64,' + window.btoa(svg);
+        //image.src = 'data:image/svg+xml;base64,' + window.btoa(svg);
+        image.src = 'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent(svg)));
 
 
         //console.info(data);

@@ -332,7 +332,7 @@ class TestGetInternet(unittest.TestCase):
 
         remote_url='http://earlywarning.usgs.gov/ftp2/raster/rf/a/'
         from_date = '20151101'
-        to_date = '20160611'
+        to_date = None
         template='%Y/a%y%m%{dkm}rb.zip'
         frequency = 'e1dekad'
 
@@ -598,3 +598,29 @@ class TestGetInternet(unittest.TestCase):
 
         # Check last 90 days (check list length = 9)
         result = get_one_source(internet_source)
+
+    def TestRemoteFtp_FEWSNET(self):
+
+        internet_id='USGS:EARLWRN:FEWSNET'
+
+
+        internet_sources = querydb.get_active_internet_sources(echo=False)
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':20160401,
+                         'end_date':20160801,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type}
+
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)

@@ -11,11 +11,11 @@ Ext.define("esapp.view.analysis.analysisMain",{
     requires: [
         'esapp.view.analysis.analysisMainModel',
         'esapp.view.analysis.analysisMainController',
-        'esapp.view.analysis.mapView',
-        'esapp.view.analysis.ProductNavigator',
-        'esapp.view.analysis.timeseriesChartView',
-        'esapp.view.analysis.layerAdmin',
-        'esapp.model.TSDrawProperties',
+        //'esapp.view.analysis.mapView',
+        //'esapp.view.analysis.ProductNavigator',
+        //'esapp.view.analysis.timeseriesChartView',
+        //'esapp.view.analysis.layerAdmin',
+        //'esapp.model.TSDrawProperties',
 
         'Ext.selection.CheckboxModel',
         'Ext.form.field.ComboBox',
@@ -85,6 +85,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
         };
         me.items = [{
             region: 'east',
+            id: 'tools_tabpanel_'+me.id,
             //title: esapp.Utils.getTranslation('timeseries'),  // 'Time series',
             width: 440,
             minWidth: 440,
@@ -102,6 +103,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
             border: false,
             items: [{
                 title: esapp.Utils.getTranslation('timeseries'),  // 'Timeseries',
+                id: 'timeseries_tab_'+me.id,
                 margin:3,
                 //minHeight: 800,
                 autoHeight: true,
@@ -208,7 +210,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                         groupHeaderTpl: Ext.create('Ext.XTemplate', '<div class="group-header-style">{name} ({children.length})</div>'),
                         hideGroupedHeader: true,
                         enableGroupingMenu: false,
-                        startCollapsed : false,
+                        startCollapsed : true,
                         groupByText: esapp.Utils.getTranslation('productcategories')  // 'Product category'
                     }],
 
@@ -224,7 +226,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                     }],
 
                     listeners: {
-                        afterrender: 'loadTimeseriesProductsGrid',
+                        //afterrender: 'loadTimeseriesProductsGrid',
                         rowclick: 'TimeseriesProductsGridRowClick'
                     },
 
@@ -284,7 +286,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                     selType: 'checkboxmodel',
                     selModel : {
                         allowDeselect : true,
-                        checkOnly: true,
+                        checkOnly: false,
                         mode:'SIMPLE'
                         //,listeners: {}
                     },
@@ -299,9 +301,9 @@ Ext.define("esapp.view.analysis.analysisMain",{
                     bodyBorder: false,
                     forceFit:false,
 
-                    listeners: {
-                        //rowclick: 'mapsetDataSetGridRowClick'
-                    },
+                    //listeners: {
+                    //    //rowclick: 'mapsetDataSetGridRowClick'
+                    //},
                     defaults: {
                         sortable: false,
                         hideable: false,
@@ -401,7 +403,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                             format: "d/m/Y",
                             emptyText: 'dd/mm/yyyy ',
                             allowBlank: true,
-                            maxValue: new Date(),
+                            //maxValue: new Date(),
                             //,value: new Date()
                             listeners: {
                                 change: function () {
@@ -464,6 +466,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                 }]
             },{
                 title: 'Debug info',
+                id: 'debug_info_tab_'+me.id,
                 hidden: true,
                 items: [{
                     xtype: 'displayfield',
@@ -508,24 +511,31 @@ Ext.define("esapp.view.analysis.analysisMain",{
                 expand: function () {
                     //var size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight];
                     var size = [document.getElementById('backgroundmap_'+ me.id).offsetWidth, document.getElementById('backgroundmap_'+ me.id).offsetHeight];
-                    me.map.setSize(size);
+                    if (esapp.Utils.objectExists(me.map)) {
+                        me.map.setSize(size);
+                    }
                     this.header =  false;
                     this.setTitle('');
                 },
                 collapse: function () {
                     //var size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight];
                     var size = [document.getElementById('backgroundmap_'+ me.id).offsetWidth, document.getElementById('backgroundmap_'+ me.id).offsetHeight];
-                    me.map.setSize(size);
+                    if (esapp.Utils.objectExists(me.map)) {
+                        me.map.setSize(size);
+                    }
                     this.header =  true;
                     this.setTitle('<span class="panel-title-style">'+esapp.Utils.getTranslation('timeseries')+'</span>');
                 }
             }
         }, {
             region: 'center',
+            xtype: 'container',
+            id: 'box_backgroundmap_'+ me.id,
             autoScroll:true,
             layout: {
                 type: 'fit'
             },
+            style: { "background-color": 'white' },
             html : '<div id="backgroundmap_' + me.id + '" style="width: 100%; height: 100%;"></div>'
         }];
 
@@ -533,12 +543,13 @@ Ext.define("esapp.view.analysis.analysisMain",{
             projection:"EPSG:4326",
             displayProjection:"EPSG:4326",
             center: [20, -4.7],   // ol.proj.transform([20, 4.5], 'EPSG:3857', 'EPSG:4326'),
-            zoom: 3.5
+            zoom: 6,
+            zoomFactor: 1.5
         });
 
         me.listeners = {
             afterrender: function() {
-                if (window.navigator.onLine){
+                //if (window.navigator.onLine){
                     me.backgroundLayers = [];
                     me.backgroundLayers.push(
                       new ol.layer.Tile({
@@ -566,23 +577,23 @@ Ext.define("esapp.view.analysis.analysisMain",{
                       units: 'metric'       // 'degrees'  'nautical mile'
                     });
 
-                    me.map = new ol.Map({
-                        layers: me.backgroundLayers,
-                        // renderer: _getRendererFromQueryString(),
-                        projection:"EPSG:4326",
-                        displayProjection:"EPSG:4326",
-                        target: 'backgroundmap_'+ me.id,
-                        //overlays: [overlay],
-                        view: me.commonMapView,
-                        controls: ol.control.defaults({
-                            zoom: false,
-                            attribution:false,
-                            attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
-                              collapsible: true // false to show always without the icon.
-                            })
-                        }).extend([me.scaleline])   // me.mousePositionControl,
-                    });
-
+                    //me.map = new ol.Map({
+                    //    layers: me.backgroundLayers,
+                    //    // renderer: _getRendererFromQueryString(),
+                    //    projection:"EPSG:4326",
+                    //    displayProjection:"EPSG:4326",
+                    //    target: 'backgroundmap_'+ me.id,
+                    //    //overlays: [overlay],
+                    //    view: me.commonMapView,
+                    //    controls: ol.control.defaults({
+                    //        zoom: false,
+                    //        attribution:false,
+                    //        attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
+                    //          collapsible: true // false to show always without the icon.
+                    //        })
+                    //    }).extend([me.scaleline])   // me.mousePositionControl,
+                    //});
+                    //
                     // http://services.arcgisonline.com/arcgis/rest/services/ESRI_StreetMap_World_2D/MapServer
                     // http://services.arcgisonline.com/arcgis/rest/services/ESRI_Imagery_World_2D/MapServer
                     //
@@ -663,13 +674,15 @@ Ext.define("esapp.view.analysis.analysisMain",{
                     //    })
                     //  })
                     //);
-                }
-            }
+                //}
+            },
             // The resize handle is necessary to set the map!
-            ,resize: function () {
+            resize: function () {
                 //var size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight];
                 var size = [document.getElementById('backgroundmap_'+ me.id).offsetWidth, document.getElementById('backgroundmap_'+ me.id).offsetHeight];
-                me.map.setSize(size);
+                if (esapp.Utils.objectExists(me.map)) {
+                    me.map.setSize(size);
+                }
             }
 
             //show: function(){

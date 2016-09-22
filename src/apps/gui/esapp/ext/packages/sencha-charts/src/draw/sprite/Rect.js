@@ -5,22 +5,19 @@
  * A sprite that represents a rectangle.
  *
  *     @example
- *     Ext.create('Ext.Container', {
- *         renderTo: Ext.getBody(),
- *         width: 600,
- *         height: 400,
- *         layout: 'fit',
- *         items: {
- *             xtype: 'draw',
- *             sprites: [{
- *                 type: 'rect',
- *                 x: 50,
- *                 y: 50,
- *                 width: 50,
- *                 height: 50,
- *                 fillStyle: 'blue'
- *             }]
- *         }
+ *     Ext.create({
+ *        xtype: 'draw', 
+ *        renderTo: document.body,
+ *        width: 600,
+ *        height: 400,
+ *        sprites: [{
+ *            type: 'rect',
+ *            x: 50,
+ *            y: 50,
+ *            width: 100,
+ *            height: 100,
+ *            fillStyle: '#1F6D91'
+ *        }]
  *     });
  */
 Ext.define('Ext.draw.sprite.Rect', {
@@ -41,12 +38,12 @@ Ext.define('Ext.draw.sprite.Rect', {
                 y: 'number',
 
                 /**
-                 * @cfg {Number} [width=1] The width of the sprite.
+                 * @cfg {Number} [width=8] The width of the sprite.
                  */
                 width: 'number',
 
                 /**
-                 * @cfg {Number} [height=1] The height of the sprite.
+                 * @cfg {Number} [height=8] The height of the sprite.
                  */
                 height: 'number',
 
@@ -58,7 +55,7 @@ Ext.define('Ext.draw.sprite.Rect', {
             aliases: {
 
             },
-            dirtyTriggers: {
+            triggers: {
                 x: 'path',
                 y: 'path',
                 width: 'path',
@@ -68,8 +65,8 @@ Ext.define('Ext.draw.sprite.Rect', {
             defaults: {
                 x: 0,
                 y: 0,
-                width: 1,
-                height: 1,
+                width: 8,
+                height: 8,
                 radius: 0
             }
         }

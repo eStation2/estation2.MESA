@@ -7,6 +7,7 @@
 Ext.define('Ext.chart.axis.layout.Discrete', {
     extend: 'Ext.chart.axis.layout.Layout',
     alias: 'axisLayout.discrete',
+    isDiscrete: true,
 
     processData: function () {
         var me = this,
@@ -35,22 +36,26 @@ Ext.define('Ext.chart.axis.layout.Discrete', {
         // So now the question is: how are the labels transferred from the axis.layout to the axis.layoutContext?
         // The easy response is: it's in calculateLayout() below. The issue is to call calculateLayout() because
         // it takes in an axis.layoutContext that can only be created in axis.sprite.Axis.doLayout(), which is 
-        // a private "updater" function that is called by all the sprite's "dirtyTriggers". Of course, we don't 
+        // a private "updater" function that is called by all the sprite's "triggers". Of course, we don't
         // want to call doLayout() directly from here, so instead we update the sprite's data attribute, which 
-        // sets the dirtyTrigger which calls doLayout() which calls calculateLayout() etc...
+        // sets the trigger which calls doLayout() which calls calculateLayout() etc...
         // Note that the sprite's data attribute could be set to any value and it would still result in the  
-        // dirtyTrigger we need. For consistency, however, it is set to the labels.
+        // trigger we need. For consistency, however, it is set to the labels.
         axis.getSprites()[0].setAttributes({data: this.labels});
         this.fireEvent('datachange', this.labels);
     },
 
-    // @inheritdoc
+    /**
+     * @inheritdoc
+     */
     calculateLayout: function (context) {
         context.data = this.labels;
         this.callParent([context]);
     },
 
-    //@inheritdoc
+    /**
+     * @inheritdoc
+     */
     calculateMajorTicks: function (context) {
         var me = this,
             attr = context.attr,
@@ -68,7 +73,9 @@ Ext.define('Ext.chart.axis.layout.Discrete', {
         }
     },
 
-    // @inheritdoc
+    /**
+     * @inheritdoc
+     */
     snapEnds: function (context, min, max, estStepSize) {
         estStepSize = Math.ceil(estStepSize);
         var steps = Math.floor((max - min) / estStepSize),
@@ -90,7 +97,9 @@ Ext.define('Ext.chart.axis.layout.Discrete', {
         };
     },
 
-    // @inheritdoc
+    /**
+     * @inheritdoc
+     */
     trimByRange: function (context, out, trimMin, trimMax) {
         var unit = out.unit,
             beginIdx = Math.ceil((trimMin - out.from) / unit) * unit,

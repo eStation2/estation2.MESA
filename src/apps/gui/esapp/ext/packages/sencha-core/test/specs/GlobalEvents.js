@@ -17,7 +17,7 @@ describe("Ext.GlobalEvents", function() {
             Ext.un('idle', onIdle);
         });
 
-        itFiresMouseEvents("should fire after DOM event handler are invoked, but before control is returned to the browser", function() {
+        it("should fire after DOM event handler are invoked, but before control is returned to the browser", function() {
             var element = Ext.getBody().createChild(),
                 handledCount = 0;
 
@@ -26,14 +26,14 @@ describe("Ext.GlobalEvents", function() {
                 handledCount ++;
             }
 
-            // attach a couple click listeners, the idle event should fire after both
+            // attach a couple mousedown listeners, the idle event should fire after both
             // handlers have fired
-            element.on('click', expectFalse);
-            element.on('click', function() {
+            element.on('mousedown', expectFalse);
+            element.on('mousedown', function() {
                 expectFalse();
             });
 
-            jasmine.fireMouseEvent(element, 'click');
+            jasmine.fireMouseEvent(element, 'mousedown');
 
             expect(handledCount).toBe(2);
             expect(idleFired).toBe(true);
@@ -124,6 +124,75 @@ describe("Ext.GlobalEvents", function() {
                     expect(idleFired).toBe(true);
                 });
             });
+        });
+    });
+    
+    describe('scroll event', function() {
+        var stretcher,
+            scrollingPanel,
+            scrolledElements = [],
+            DomScroller = Ext.scroll.DomScroller,
+            runIt = Ext.supports.touchScroll ? xit : it;
+
+        beforeEach(function() {
+            // Gets destroyed by viewports, so restore to initial conditions for tests
+            if (!DomScroller.document) {
+                DomScroller.document = new DomScroller({
+                    x: true,
+                    y: true,
+                    element: document.documentElement
+                });
+            }
+        });
+
+        afterEach(function() {
+            stretcher.destroy();
+            scrollingPanel.destroy();
+        });
+
+        function onGlobalScroll(scroller) {
+            scrolledElements.push(scroller.getElement());
+        }
+
+        runIt('should fire the global scroll event whenever anything scrolls', function() {
+            stretcher = Ext.getBody().createChild({
+                style: 'height:10000px'
+            });
+            scrollingPanel = new Ext.panel.Panel({
+                renderTo: document.body,
+                floating: true,
+                x: 0,
+                y: 0,
+                width: 300,
+                height: 300,
+                scrollable: true,
+                items: {
+                    xtype: 'component',
+                    style: 'height:1000px'
+                }
+            });
+
+            // Record all scroll events
+            Ext.on({
+                scroll: onGlobalScroll
+            });
+            Ext.scroll.DomScroller.document.scrollBy(null, 100);
+
+            // Wait for scroll events to fire (may be async)
+            waitsFor(function() {
+                return scrolledElements.length === 1 &&
+                       scrolledElements[0] === Ext.scroll.DomScroller.document.getElement();
+            }, 'document scroller to scroll');
+            
+            runs(function() {
+                scrollingPanel.getScrollable().scrollBy(null, 100);
+            });
+            
+            // Wait for scroll events to fire (may be async)
+            waitsFor(function() {
+                return scrolledElements.length === 2 &&
+                       scrolledElements[1] === scrollingPanel.getScrollable().getElement();
+            }, 'panel scroller to scroll');
         });
     });
 });

@@ -109,10 +109,10 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
 
 
     ,renderHiddenColumnsWhenUnlocked: function(){
-        if (Ext.getCmp('lockunlock').pressed) {
-            var dataacquisitiongrids = Ext.ComponentQuery.query('dataacquisitiongrid');
-            var ingestiongrids = Ext.ComponentQuery.query('ingestiongrid');
+        var dataacquisitiongrids = Ext.ComponentQuery.query('dataacquisitiongrid');
+        var ingestiongrids = Ext.ComponentQuery.query('ingestiongrid');
 
+        if (Ext.getCmp('lockunlock').pressed) {
             //console.info('unlock status: ' + Ext.getCmp('lockunlock').pressed);
 
             Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
@@ -125,12 +125,20 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
             });
 
             Ext.Object.each(ingestiongrids, function(id, ingestiongrid, myself) {
-                ingestiongrid.columns[1].show();    // Add Mapset
-                ingestiongrid.columns[1].updateLayout();
+                ingestiongrid.columns[0].show();    // Add Mapset
+                ingestiongrid.columns[0].updateLayout();
                 ingestiongrid.columns[3].show();    // Delete Mapset
                 ingestiongrid.columns[3].updateLayout();
             });
         }
+        //else {
+        //    Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
+        //        dataacquisitiongrid.updateLayout();
+        //    });
+        //    Ext.Object.each(ingestiongrids, function(id, ingestiongrid, myself) {
+        //        ingestiongrid.updateLayout();
+        //    });
+        //}
     }
 
 

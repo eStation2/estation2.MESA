@@ -29,10 +29,22 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
         disableSelection: true,
         trackOver: false
     },
+
+    //selType: 'cellmodel',
+    //selModel: {listeners:{}},
+
+    //listeners: {
+    //    cellclick : function(view, cell, cellIndex, record, row, rowIndex, e) {
+    //        //e.stopPropagation();
+    //        return false;
+    //    }
+    //},
+
+    bufferedRenderer: true,
+
     hideHeaders: true,
     columnLines: false,
-    rowLines:false,
-    bufferedRenderer: true,
+    rowLines: false,
     minHeight: 60,
 
     //listeners: {
@@ -72,10 +84,12 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
             xtype: 'actioncolumn',
             width: 65,
             align:'center',
+            menuDisabled: true,
+            stopSelection: false,
             items: [{
                 icon: 'resources/img/icons/download.png',
                 tooltip: esapp.Utils.getTranslation('tipcompletedatasetmapset'),    // 'Complete all data sets for this product\'s mapset',
-                //scope: me,
+                scope: me,
                 handler: function (grid, rowIndex) {
                     var rec = grid.getStore().getAt(rowIndex);
 
@@ -96,7 +110,7 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
                 xtype: 'mapsetdatasetgrid'
                 // ,height:80
             },
-            onWidgetAttach: function(widget, record) {
+            onWidgetAttach: function(col, widget, record) {
                 Ext.suspendLayouts();
                 var mapsetdatasets = record.getData().mapsetdatasets;
                 // console.info(mapsetdatasets);

@@ -1,4 +1,9 @@
 // @define Ext.draw.engine.excanvas
+/**
+ * @class Ext.draw.engine.excanvas
+ * @private
+ * @define Ext.draw.engine.excanvas
+ */
 Ext.draw || (Ext.draw = {});
 Ext.draw.engine || (Ext.draw.engine = {});
 Ext.draw.engine.excanvas = true;
@@ -56,7 +61,7 @@ if (!document.createElement('canvas').getContext) {
   var IE_VERSION = +navigator.userAgent.match(/MSIE ([\d.]+)?/)[1];
 
   /**
-   * This funtion is assigned to the <canvas> elements as element.getContext().
+   * This funtion is assigned to the <canvas></canvas> elements as element.getContext().
    * @this {HTMLElement}
    * @return {CanvasRenderingContext2D_}
    */
@@ -246,6 +251,7 @@ if (!document.createElement('canvas').getContext) {
     o2.fillStyle     = o1.fillStyle;
     o2.lineCap       = o1.lineCap;
     o2.lineJoin      = o1.lineJoin;
+    o2.lineDash      = o1.lineDash;
     o2.lineWidth     = o1.lineWidth;
     o2.miterLimit    = o1.miterLimit;
     o2.shadowBlur    = o1.shadowBlur;
@@ -568,11 +574,15 @@ if (!document.createElement('canvas').getContext) {
   }
 
   /**
+   * @class CanvasRenderingContext2D_
    * This class implements CanvasRenderingContext2D interface as described by
    * the WHATWG.
    * @param {HTMLElement} canvasElement The element that the 2D context should
    * be associated with
+   * @private
    */
+  //
+
   function CanvasRenderingContext2D_(canvasElement) {
     this.m_ = createMatrixIdentity();
 
@@ -586,6 +596,7 @@ if (!document.createElement('canvas').getContext) {
 
     this.lineWidth = 1;
     this.lineJoin = 'miter';
+    this.lineDash = [];
     this.lineCap = 'butt';
     this.miterLimit = Z * 1;
     this.globalAlpha = 1;
@@ -847,6 +858,18 @@ if (!document.createElement('canvas').getContext) {
     this.element_.insertAdjacentHTML('BeforeEnd', vmlStr.join(''));
   };
 
+  contextPrototype.setLineDash = function (lineDash) {
+      if (lineDash.length === 1) {
+          lineDash = lineDash.slice();
+          lineDash[1] = lineDash[0];
+      }
+      this.lineDash = lineDash;
+  };
+
+  contextPrototype.getLineDash = function () {
+      return this.lineDash;
+  };
+
   contextPrototype.stroke = function(aFill) {
     var lineStr = [];
     var W = 10;
@@ -947,6 +970,7 @@ if (!document.createElement('canvas').getContext) {
       '<g_vml_:stroke',
       ' opacity="', opacity, '"',
       ' joinstyle="', ctx.lineJoin, '"',
+      ' dashstyle="', ctx.lineDash.join(' '), '"',
       ' miterlimit="', ctx.miterLimit, '"',
       ' endcap="', processLineCap(ctx.lineCap), '"',
       ' weight="', lineWidth, 'px"',

@@ -1,4 +1,4 @@
-.625ecc8fbfec4985ac84ce1103b7fe401753e01a{display:block;}/*.x-grid-header-ct {*/
+/*.x-grid-header-ct {*/
     /*height: 70px !important;*/
 /*}*/
 
@@ -8,6 +8,13 @@
 
 .red {
     color: red;
+}
+
+.text-white {
+    /*font-weight:bold;*/
+    color:#FFFFFF;
+    font-size:12px;
+    height: 20px;
 }
 
 .ts_selectedfeature_name_font {

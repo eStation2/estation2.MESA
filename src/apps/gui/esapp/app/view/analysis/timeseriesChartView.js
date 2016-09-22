@@ -55,32 +55,6 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
     timeseriesChart: {},
     timeseriesGraph: {},
 
-    tools: [
-    {
-        type: 'gear',
-        tooltip: esapp.Utils.getTranslation('tiptimeserieschartshowhidetools'),  // 'Show/hide time series chart tools menu',
-        callback: function (tswin) {
-            // toggle hide/show toolbar and adjust map size.
-            var winBodyWidth = tswin.getWidth()-5;
-            var winBodyHeight = tswin.getHeight()-45;
-            var tsToolbar = tswin.getDockedItems('toolbar[dock="top"]')[0];
-            var widthToolbar = tsToolbar.getWidth();
-            var heightToolbar = tsToolbar.getHeight();
-            if (tsToolbar.hidden == false) {
-                tsToolbar.setHidden(true);
-                winBodyWidth = document.getElementById(tswin.id + "-body").offsetWidth;
-                winBodyHeight =  document.getElementById(tswin.id + "-body").offsetHeight; //+heightToolbar;
-            }
-            else {
-                tsToolbar.setHidden(false);
-                winBodyWidth = document.getElementById(tswin.id + "-body").offsetWidth;
-                winBodyHeight = document.getElementById(tswin.id + "-body").offsetHeight-heightToolbar;
-            }
-            tswin.tschart.setSize(winBodyWidth, winBodyHeight);
-            tswin.tschart.redraw();
-        }
-    }],
-
     listeners: {
         afterrender: function () {
             var me = this;
@@ -106,11 +80,38 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
     initComponent: function () {
         var me = this;
 
+        me.title = '<span class="panel-title-style">'+esapp.Utils.getTranslation('timeseries')+'</span>';
         me.frame = false;
         me.border= true;
         me.bodyBorder = false;
 
         me.wkt = this.wkt;
+
+        me.tools = [
+        {
+            type: 'gear',
+            tooltip: esapp.Utils.getTranslation('tiptimeserieschartshowhidetools'),  // 'Show/hide time series chart tools menu',
+            callback: function (tswin) {
+                // toggle hide/show toolbar and adjust map size.
+                var winBodyWidth = tswin.getWidth()-5;
+                var winBodyHeight = tswin.getHeight()-45;
+                var tsToolbar = tswin.getDockedItems('toolbar[dock="top"]')[0];
+                var widthToolbar = tsToolbar.getWidth();
+                var heightToolbar = tsToolbar.getHeight();
+                if (tsToolbar.hidden == false) {
+                    tsToolbar.setHidden(true);
+                    winBodyWidth = document.getElementById(tswin.id + "-body").offsetWidth;
+                    winBodyHeight =  document.getElementById(tswin.id + "-body").offsetHeight; //+heightToolbar;
+                }
+                else {
+                    tsToolbar.setHidden(false);
+                    winBodyWidth = document.getElementById(tswin.id + "-body").offsetWidth;
+                    winBodyHeight = document.getElementById(tswin.id + "-body").offsetHeight-heightToolbar;
+                }
+                tswin.tschart.setSize(winBodyWidth, winBodyHeight);
+                tswin.tschart.redraw();
+            }
+        }];
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             id: 'tbar_'+me.id,

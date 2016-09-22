@@ -5,7 +5,11 @@ Ext.define('Ext.view.BoundList', {
     extend: 'Ext.view.View',
     alias: 'widget.boundlist',
     alternateClassName: 'Ext.BoundList',
-    requires: ['Ext.layout.component.BoundList', 'Ext.toolbar.Paging'],
+    requires: [
+        'Ext.view.BoundListKeyNav',
+        'Ext.layout.component.BoundList', 
+        'Ext.toolbar.Paging'
+    ],
 
     mixins: [
         'Ext.mixin.Queryable'
@@ -37,19 +41,15 @@ Ext.define('Ext.view.BoundList', {
     shadow: false,
     trackOver: true,
 
-    // This flag indicates to any floaters shown above it that they should focus themselves when taking over topmost position.
-    // ZIndexManager#onCollectionSort decides whether to focus the new front component depending on whether the oldFront
-    // had focusOnToFront set. Even though this class is in fact not focusable.
-    //focusOnToFront: true,
-
     preserveScrollOnRefresh: true,
     enableInitialSelection: false,
+    refreshSelmodelOnRefresh: true,
 
     componentLayout: 'boundlist',
 
     navigationModel: 'boundlist',
 
-    autoScroll: true,
+    scrollable: true,
 
     childEls: [
         'listWrap', 'listEl'
@@ -57,7 +57,7 @@ Ext.define('Ext.view.BoundList', {
 
     renderTpl: [
         '<div id="{id}-listWrap" data-ref="listWrap" role="presentation" class="{baseCls}-list-ct ', Ext.dom.Element.unselectableCls, '">',
-            '<ul id="{id}-listEl" data-ref="listEl" class="' + Ext.plainListCls + '">',
+            '<ul id="{id}-listEl" data-ref="listEl" class="' + Ext.baseCSSPrefix + 'list-plain">',
             '</ul>',
         '</div>',
         '{%',
@@ -75,8 +75,9 @@ Ext.define('Ext.view.BoundList', {
      * @cfg {String/Ext.XTemplate} tpl
      * A String or Ext.XTemplate instance to apply to inner template.
      *
-     * {@link Ext.view.BoundList} is used for the dropdown list of {@link Ext.form.field.ComboBox}.
-     * To customize the template you can do this:
+     * {@link Ext.view.BoundList} is used for the dropdown list of 
+     * {@link Ext.form.field.ComboBox}. To customize the template you can set the tpl on 
+     * the combobox config object:
      *
      *     Ext.create('Ext.form.field.ComboBox', {
      *         fieldLabel   : 'State',
@@ -92,9 +93,14 @@ Ext.define('Ext.view.BoundList', {
      *                 //...
      *             ]
      *         }),
-     *         listConfig : {
-     *             tpl : '<tpl for="."><div class="x-boundlist-item">{abbr}</div></tpl>'
-     *         }
+     *         // Template for the dropdown menu.
+     *         // Note the use of the "x-list-plain" and "x-boundlist-item" class,
+     *         // this is required to make the items selectable.
+     *         tpl: Ext.create('Ext.XTemplate',
+     *             '<ul class="x-list-plain"><tpl for=".">',
+     *                 '<li role="option" class="x-boundlist-item">{abbr} - {name}</li>',
+     *             '</tpl></ul>'
+     *         ),
      *     });
      *
      * Defaults to:
@@ -107,7 +113,11 @@ Ext.define('Ext.view.BoundList', {
      *
      */
 
-    focusable: false,
+     // Override because on non-touch devices, the bound field
+     // retains focus so that typing may narrow the list.
+     // Only when the show is triggered by a touch does the BoundList
+     // get explicitly focused so that the keyboard does not appear.
+    focusOnToFront: false,
 
     initComponent: function() {
         var me = this,
@@ -119,7 +129,7 @@ Ext.define('Ext.view.BoundList', {
             me.overItemCls = baseCls + '-item-over';
         }
         me.itemSelector = "." + itemCls;
-        me.scrollerSelector = 'ul.' + Ext.plainListCls;
+        me.scrollerSelector = 'ul.' + Ext.baseCSSPrefix + 'list-plain';
 
         if (me.floating) {
             me.addCls(baseCls + '-floating');
@@ -128,11 +138,7 @@ Ext.define('Ext.view.BoundList', {
         if (!me.tpl) {
             // should be setting aria-posinset based on entire set of data
             // not filtered set
-            me.tpl = new Ext.XTemplate(
-                '<tpl for=".">',
-                    '<li role="option" unselectable="on" class="' + itemCls + '">' + me.getInnerTpl(me.displayField) + '</li>',
-                '</tpl>'
-            );
+            me.generateTpl();
         } else if (!me.tpl.isTemplate) {
             me.tpl = new Ext.XTemplate(me.tpl);
         }
@@ -142,9 +148,30 @@ Ext.define('Ext.view.BoundList', {
         }
 
         me.callParent();
+    },
 
-        // The dropdown is never focused. Key navigation events flow through the input field.
-        me.getSelectionModel().preventFocus = true;
+    /**
+     * Allow tpl to be generated programmatically to respond to changes in displayField
+     * @private
+     */
+    generateTpl: function () {
+        var me = this;
+
+        me.tpl = new Ext.XTemplate(
+            '<tpl for=".">',
+                '<li role="option" unselectable="on" class="' + me.itemCls + '">' + me.getInnerTpl(me.displayField) + '</li>',
+            '</tpl>'
+        );
+    },
+
+    /**
+     * Updates the display field for this view. This will automatically trigger
+     * an regeneration of the tpl so that the updated displayField can be used
+     * @param {String} displayField
+     */
+    setDisplayField: function (displayField) {
+        this.displayField = displayField;
+        this.generateTpl();
     },
 
     getRefOwner: function() {
@@ -178,9 +205,7 @@ Ext.define('Ext.view.BoundList', {
 
     refresh: function(){
         var me = this,
-            tpl = me.tpl,
-            toolbar = me.pagingToolbar,
-            rendered = me.rendered;
+            tpl = me.tpl;
 
         // Allow access to the context for XTemplate scriptlets
         tpl.field = me.pickerField;
@@ -188,11 +213,8 @@ Ext.define('Ext.view.BoundList', {
         me.callParent();
         tpl.field =  tpl.store = null;
 
-        // The view removes the targetEl from the DOM before updating the template
-        // Ensure the toolbar goes to the end
-        if (rendered && toolbar && toolbar.rendered && !me.preserveScrollOnRefresh) {
-            me.el.appendChild(toolbar.el, true);
-        }
+        // The view selectively removes item nodes, so the toolbar
+        // will be preserves in the DOM
     },
 
     bindStore : function(store, initial) {
@@ -224,10 +246,76 @@ Ext.define('Ext.view.BoundList', {
     getInnerTpl: function(displayField) {
         return '{' + displayField + '}';
     },
+    
+    onShow: function() {
+        var field = this.pickerField;
+        this.callParent();
+
+        // If the input field is not focused, then focus it.
+        if (field && field.rendered && !field.hasFocus) {
+            field.focus();
+        }
+    },
+
+    afterComponentLayout: function(width, height, oldWidth, oldHeight) {
+        var field = this.pickerField;
+
+        this.callParent([width, height, oldWidth, oldHeight]);
+
+        // Bound list may change size, so realign on layout
+        // **if the field is an Ext.form.field.Picker which has alignPicker!**
+        if (field && field.alignPicker) {
+            field.alignPicker();
+        }
+    },
+
+    // Clicking on an already selected item collapses the picker
+    onItemClick: function(record) {
+        // The selection change events won't fire when clicking on the selected element. Detect it here.
+        var me = this,
+            field = me.pickerField,
+            valueField, selected;
+
+        if (!field) {
+            return;
+        }
+
+        valueField = field.valueField;
+        selected = me.getSelectionModel().getSelection();
+
+        if (!field.multiSelect && selected.length) {
+            selected = selected[0];
+            // Not all pickerField's have a collapse API, i.e. Ext.ux.form.MultiSelect.
+            if (selected && field.isEqual(record.get(valueField), selected.get(valueField)) && field.collapse) {
+                field.collapse();
+            }
+        }
+    },
+
+    onContainerClick: function(e) {
+        var toolbar = this.pagingToolbar,
+            clientRegion;
+        
+        // Ext.view.View template method
+        // Do not continue to process the event as a container click if it is within the pagingToolbar
+        if (toolbar && toolbar.rendered && e.within(toolbar.el)) {
+            return false;
+        }
+        
+        // IE10 and IE11 will fire pointer events when user drags listWrap scrollbars,
+        // which may result in selection being reset.
+        if (Ext.isIE10 || Ext.isIE11) {
+            clientRegion = this.listWrap.getClientRegion();
+            
+            if (!e.getPoint().isContainedBy(clientRegion)) {
+                return false;
+            }
+        }
+    },
 
     onDestroy: function() {
+        this.pagingToolbar = Ext.destroy(this.pagingToolbar);
         this.callParent();
-        Ext.destroyMembers(this, 'pagingToolbar', 'listWrap', 'listEl');
     },
 
     privates: {

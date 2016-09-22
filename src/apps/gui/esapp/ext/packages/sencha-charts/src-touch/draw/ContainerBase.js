@@ -2,6 +2,11 @@ Ext.define('Ext.draw.ContainerBase', {
     extend: 'Ext.Container',
 
     inheritableStatics: {
+        /**
+         * @private
+         * @static
+         * @inheritable
+         */
         WATERMARK: 'Powered by <span style="color:#22E962; font-weight: 900">Sencha Touch</span> <span style="color:#75cdff; font-weight: 900">GPLv3</span>'
     },
 
@@ -12,12 +17,7 @@ Ext.define('Ext.draw.ContainerBase', {
 
     initialize: function () {
         this.callParent();
-        this.element.on('resize', 'onElementResize', this);
-    },
-
-    onElementResize: function () {
-        // TODO: get body element size here
-        this.onBodyResize(width, height);
+        this.element.on('resize', 'onBodyResize', this);
     },
 
     getElementConfig: function () {

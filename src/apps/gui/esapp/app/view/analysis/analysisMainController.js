@@ -21,6 +21,27 @@ Ext.define('esapp.view.analysis.analysisMainController', {
     ,toggleBackgroundlayer: function(btn, event) {
         var analysismain = btn.up().up();
         var i, ii;
+        var me = this.getView();
+
+        if (!esapp.Utils.objectExists(analysismain.map)){
+            me.map = new ol.Map({
+                layers: me.backgroundLayers,
+                // renderer: _getRendererFromQueryString(),
+                projection:"EPSG:4326",
+                displayProjection:"EPSG:4326",
+                target: 'backgroundmap_'+ me.id,
+                //overlays: [overlay],
+                view: me.commonMapView,
+                controls: ol.control.defaults({
+                    zoom: false,
+                    attribution:false,
+                    attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
+                      collapsible: true // false to show always without the icon.
+                    })
+                }).extend([me.scaleline])   // me.mousePositionControl,
+            });
+        }
+
         if (btn.pressed){
             btn.setText(esapp.Utils.getTranslation('hidebackgroundlayer'));
             analysismain.map.addControl(analysismain.mousePositionControl);

@@ -18,31 +18,6 @@ Ext.define('Ext.app.bind.Stub', {
 
     validationKey: 'validation',
 
-    statics: {
-        populateValues: function(value, owner, path, stub) {
-            var children = stub && stub.children,
-                child, key, hadValue;
-
-            // Keep track of the fact that we've had a value set. We may get set
-            // to undefined in the future, we only need to know whether we
-            // are initially in an undefined state
-            hadValue = value !== undefined;
-            if (!owner.hadValue[path]) {
-                owner.hadValue[path] = hadValue;
-            }
-
-            if (stub) {
-                stub.hadValue = hadValue;
-            }
-
-            if (value && value.constructor === Object) {
-                for (key in value) {
-                    Ext.app.bind.Stub.populateValues(value[key], owner, path + '.' + key, children && children[key]);
-                }
-            }
-        }
-    },
-
     constructor: function (owner, name, parent) {
         var me = this,
             path = name;
@@ -54,8 +29,8 @@ Ext.define('Ext.app.bind.Stub', {
             if (!parent.isRootStub) {
                 path = parent.path + '.' + name;
             }
+            me.checkHadValue();
         }
-        me.hadValue = owner.hadValue[path];
         me.path = path;
     },
     
@@ -96,9 +71,9 @@ Ext.define('Ext.app.bind.Stub', {
                     field = value.getField(name);
                 }
                 if (lateBound) {
-                    scope[callback](field, null, this);
+                    scope[callback](field, value, this);
                 } else {
-                    callback.call(scope, field, null, this);
+                    callback.call(scope, field, value, this);
                 }
             });
         }
@@ -151,15 +126,21 @@ Ext.define('Ext.app.bind.Stub', {
         var me = this,
             parentData = me.parent.getDataObject(), // RootStub does not get here
             name = me.name,
-            ret = parentData ? parentData[name] : null;
+            ret = parentData ? parentData[name] : null,
+            associations, association;
+
+        if (!ret && parentData && parentData.isEntity) {
+            // Check if the item is an association, if it is, grab it but don't load it.
+            associations = parentData.associations;
+            if (associations && name in associations) {
+                ret = parentData[associations[name].getterName]();
+            }
+        }
 
         if (!ret || !(ret.$className || Ext.isObject(ret))) {
-            if (ret) {
-                //TODO - we probably need to schedule ourselves here
-            }
             parentData[name] = ret = {};
             // We're implicitly setting a value on the object here
-            me.hadValue = me.owner.hadValue[me.path] = true;
+            me.hadValue = true;
             // If we're creating the parent data object, invalidate the dirty
             // flag on our children.
             me.invalidate(true, true);
@@ -194,6 +175,8 @@ Ext.define('Ext.app.bind.Stub', {
         }
 
         me.children = null;
+
+        replacement.checkHadValue();
 
         return me.callParent([ replacement ]);
     },
@@ -237,6 +220,8 @@ Ext.define('Ext.app.bind.Stub', {
             children = me.children,
             name;
 
+        me.checkHadValue();
+
         me.dirty = true;
         if (!dirtyOnly && !me.isLoading()) {
             if (!me.scheduled) {
@@ -252,19 +237,46 @@ Ext.define('Ext.app.bind.Stub', {
         }
     },
 
+    isReadOnly: function() {
+        var formula = this.formula;
+        return !!(formula && !formula.set);
+    },
+
     set: function (value) {
         var me = this,
             parent = me.parent,
             name = me.name,
-            // To set a child property, the parent must be an object...
-            parentData = parent.getDataObject(),
-            associations;
+            formula = me.formula,
+            parentData, associations, association, formulaStub;
+
+        if (formula && !formula.settingValue && formula.set) {
+            formula.setValue(value);
+            return;
+        } else if (me.isLinkStub) {
+            formulaStub = me.getLinkFormulaStub();
+            formula = formulaStub ? formulaStub.formula : null;
+            if (formula) {
+                //<debug>
+                if (formulaStub.isReadOnly()) {
+                    Ext.Error.raise('Cannot setValue on a readonly formula');
+                }
+                //</debug>
+                formula.setValue(value);
+                return;
+            }
+        }
+
+        // To set a child property, the parent must be an object...
+        parentData = parent.getDataObject();
 
         if (parentData.isEntity) {
             associations = parentData.associations;
 
             if (associations && (name in associations)) {
-                //TODO - handle FK type setters
+                association = associations[name];
+                parentData[association.setterName](value);
+                // We may be setting a record here, force the value to recalculate
+                me.invalidate(true);
             } else {
                 // If not an association then it is a data field
                 parentData.set(name, value);
@@ -278,7 +290,6 @@ Ext.define('Ext.app.bind.Stub', {
                     delete parentData[name];
                 } else {
                     parentData[name] = value;
-                    Ext.app.bind.Stub.populateValues(value, me.owner, me.path, me);
                 }
 
                 me.inspectValue(parentData);
@@ -335,6 +346,15 @@ Ext.define('Ext.app.bind.Stub', {
     afterReject: function(record) {
         // Essentially the same as an edit, but we don't know what changed.
         this.afterEdit(record, null);
+    },
+
+    afterAssociatedRecordSet: function(record, associated, role) {
+        var children = this.children,
+            key = role.role;
+
+        if (children && key in children) {
+            children[key].invalidate(true);
+        }
     },
 
     setByLink: function (value) {
@@ -418,6 +438,12 @@ Ext.define('Ext.app.bind.Stub', {
     },
 
     privates: {
+        checkHadValue: function() {
+            if (!this.hadValue) {
+                this.hadValue = this.getRawValue() !== undefined;
+            }
+        },
+
         collect: function() {
             var me = this,
                 result = me.callParent(),
@@ -425,6 +451,17 @@ Ext.define('Ext.app.bind.Stub', {
                 formula = me.formula ? 1 : 0;
             
             return result + storeBinding + formula;
+        },
+
+        getLinkFormulaStub: function() {
+            // Setting the value on a link backed by a formula should set the
+            // formula. So we climb the hierarchy until we find the rootStub
+            // and set it there if it be a formula.
+            var stub = this;
+            while (stub.isLinkStub) {
+                stub = stub.binding.stub;
+            }
+            return stub.formula ? stub : null;
         },
         
         getParentValue: function() {
@@ -447,13 +484,12 @@ Ext.define('Ext.app.bind.Stub', {
                 name = me.name,
                 current = me.boundValue,
                 boundValue = null,
-                associations, association, raw, changed;
+                associations, raw, changed, associatedEntity;
 
             if (parentData && parentData.isEntity) {
                 associations = parentData.associations;
                 if (associations && (name in associations)) {
-                    association = associations[name];
-                    boundValue = parentData[association.getterName]();
+                    boundValue = parentData[associations[name].getterName]();
                     if (boundValue && boundValue.isStore) {
                         boundValue.$associatedStore = true;
                     }
@@ -483,7 +519,8 @@ Ext.define('Ext.app.bind.Stub', {
                     } else {
                         // Only want to trigger automatic loading if we've come from an association. Otherwise leave
                         // the user in charge of that.
-                        if (boundValue.$associatedStore && !boundValue.complete && !boundValue.hasPendingLoad()) {
+                        associatedEntity = boundValue.associatedEntity;
+                        if (associatedEntity && !boundValue.complete && !boundValue.hasPendingLoad()) {
                             boundValue.load();
                         }
                         // We only want to listen for the first load, since the actual

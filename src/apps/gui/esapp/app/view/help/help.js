@@ -2,15 +2,15 @@
 Ext.define("esapp.view.help.help",{
     "extend": "Ext.panel.Panel",
     "controller": "help-help",
-    "viewModel": {
-        "type": "help-help"
-    },
+    //"viewModel": {
+    //    "type": "help-help"
+    //},
 
     xtype  : 'help',
 
     requires: [
         'esapp.view.help.helpController',
-        'esapp.view.help.helpModel',
+        //'esapp.view.help.helpModel',
 
         'Ext.layout.container.HBox',
         'Ext.layout.container.VBox',
@@ -38,95 +38,107 @@ Ext.define("esapp.view.help.help",{
 
     bodyCls: 'help-main',
 
-    items: [{
-        xtype: 'dataview',
-        cls: 'help-dataview',
+    initComponent: function () {
+        var me = this;
 
-        bind: '{documentation}',
+        me.setViewModel({
+            "type": "help-help"
+        });
 
-        itemSelector: 'div.thumb-wrap',
+        me.title = '<span class="dashboard-header-title-style">'+esapp.Utils.getTranslation('helptitle')+'</span>';
 
-        listeners: {
-            //itemclick: 'onDocumentClick'
-        },
+        me.items = [{
+            xtype: 'dataview',
+            cls: 'help-dataview',
 
-        tpl: [
-            '<tpl for=".">',
-            // Break every four dataviews
-            '<tpl if="xindex % 10 === 1">',
-            '<div class="statement-type">{type}</div>',
-            '</tpl>',
-            '<div class="thumb-wrap">',
-            '<a class="thumb" href="{url}" target="_blank">',
-            '<div class="thumb-{thumb}"></div>',
-            '<div class="thumb-title-container">',
-            '<div class="thumb-title">{title}</div>',
-            '<div class="thumb-title-small">'+esapp.Utils.getTranslation('uploaded')+': {uploaded}</div>',
-            '</div>',
-            '<div class="thumb-download"></div>',
-            '</a>',
-            '</div>',
-            '</tpl>'
-        ]
-    },{
-        xtype: 'dataview',
-        cls: 'help-dataview',
+            bind: '{documentation}',
 
-        bind: '{weblinks}',
+            itemSelector: 'div.thumb-wrap',
 
-        itemSelector: 'div.thumb-wrap',
+            listeners: {
+                //itemclick: 'onDocumentClick'
+            },
 
-        listeners: {
-            //itemclick: 'onDocumentClick'
-        },
+            tpl: [
+                '<tpl for=".">',
+                // Break every four dataviews
+                '<tpl if="xindex % 10 === 1">',
+                '<div class="statement-type">{type}</div>',
+                '</tpl>',
+                '<div class="thumb-wrap">',
+                '<a class="thumb" href="{url}" target="_blank">',
+                '<div class="thumb-{thumb}"></div>',
+                '<div class="thumb-title-container">',
+                '<div class="thumb-title">{title}</div>',
+                '<div class="thumb-title-small">'+esapp.Utils.getTranslation('uploaded')+': {uploaded}</div>',
+                '</div>',
+                '<div class="thumb-download"></div>',
+                '</a>',
+                '</div>',
+                '</tpl>'
+            ]
+        },{
+            xtype: 'dataview',
+            cls: 'help-dataview',
 
-        tpl: [
-            '<tpl for=".">',
-            // Break every four dataviews
-            '<tpl if="xindex % 10 === 1">',
-            '<div class="statement-type">{type}</div>',
-            '</tpl>',
-            '<div class="thumb-wrap">',
-            '<a class="thumb" href="{url}" target="_blank">',
-            '<div class="thumb-{thumb}"></div>',
-            '<div class="thumb-title-container">',
-            '<div class="thumb-title">{title}</div>',
-            '<div class="thumb-title-small">'+esapp.Utils.getTranslation('description')+': {description}</div>',
-            '</div>',
-            '<div class="thumb-gotolink"></div>',
-            '</a>',
-            '</div>',
-            '</tpl>'
-        ]
-    },{
-        xtype: 'dataview',
-        cls: 'help-dataview',
+            bind: '{weblinks}',
 
-        bind: '{notes}',
+            itemSelector: 'div.thumb-wrap',
 
-        itemSelector: 'div.thumb-wrap',
+            listeners: {
+                //itemclick: 'onDocumentClick'
+            },
 
-        listeners: {
-            //itemclick: 'onDocumentClick'
-        },
+            tpl: [
+                '<tpl for=".">',
+                // Break every four dataviews
+                '<tpl if="xindex % 10 === 1">',
+                '<div class="statement-type">{type}</div>',
+                '</tpl>',
+                '<div class="thumb-wrap">',
+                '<a class="thumb" href="{url}" target="_blank">',
+                '<div class="thumb-{thumb}"></div>',
+                '<div class="thumb-title-container">',
+                '<div class="thumb-title">{title}</div>',
+                '<div class="thumb-title-small">'+esapp.Utils.getTranslation('description')+': {description}</div>',
+                '</div>',
+                '<div class="thumb-gotolink"></div>',
+                '</a>',
+                '</div>',
+                '</tpl>'
+            ]
+        },{
+            xtype: 'dataview',
+            cls: 'help-dataview',
 
-        tpl: [
-            '<tpl for=".">',
-            // Break every four dataviews
-            '<tpl if="xindex % 10 === 1">',
-            '<div class="statement-type">{type}</div>',
-            '</tpl>',
-            '<div class="thumb-wrap">',
-            '<a class="thumb" href="{url}" target="_blank">',
-            '<div class="thumb-{thumb}"></div>',
-            '<div class="thumb-title-container">',
-            '<div class="thumb-title">{title}</div>',
-            '<div class="thumb-title-small">'+esapp.Utils.getTranslation('uploaded')+': {uploaded}</div>',
-            '</div>',
-            '<div class="thumb-download"></div>',
-            '</a>',
-            '</div>',
-            '</tpl>'
-        ]
-    }]
+            bind: '{notes}',
+
+            itemSelector: 'div.thumb-wrap',
+
+            listeners: {
+                //itemclick: 'onDocumentClick'
+            },
+
+            tpl: [
+                '<tpl for=".">',
+                // Break every four dataviews
+                '<tpl if="xindex % 10 === 1">',
+                '<div class="statement-type">{type}</div>',
+                '</tpl>',
+                '<div class="thumb-wrap">',
+                '<a class="thumb" href="{url}" target="_blank">',
+                '<div class="thumb-{thumb}"></div>',
+                '<div class="thumb-title-container">',
+                '<div class="thumb-title">{title}</div>',
+                '<div class="thumb-title-small">'+esapp.Utils.getTranslation('uploaded')+': {uploaded}</div>',
+                '</div>',
+                '<div class="thumb-download"></div>',
+                '</a>',
+                '</div>',
+                '</tpl>'
+            ]
+        }];
+
+        me.callParent();
+    }
 });

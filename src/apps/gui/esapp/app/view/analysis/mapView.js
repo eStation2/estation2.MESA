@@ -49,28 +49,6 @@ Ext.define("esapp.view.analysis.mapView",{
     projection: 'EPSG:4326',
     productdate: null,
 
-    tools: [
-    {
-        type: 'gear',
-        tooltip: esapp.Utils.getTranslation('maptoolsmenu'), // 'Map tools menu',
-        callback: function (mapwin) {
-            // toggle hide/show toolbar and adjust map size.
-            var sizeWinBody = [];
-            var mapToolbar = mapwin.getDockedItems('toolbar[dock="top"]')[0];
-            var widthToolbar = mapToolbar.getWidth();
-            var heightToolbar = mapToolbar.getHeight();
-            if (mapToolbar.hidden == false) {
-                mapToolbar.setHidden(true);
-                sizeWinBody = [document.getElementById(mapwin.id + "-body").offsetWidth, document.getElementById(mapwin.id + "-body").offsetHeight+heightToolbar];
-            }
-            else {
-                mapToolbar.setHidden(false);
-                sizeWinBody = [document.getElementById(mapwin.id + "-body").offsetWidth, document.getElementById(mapwin.id + "-body").offsetHeight-heightToolbar];
-            }
-            mapwin.map.setSize(sizeWinBody);
-        }
-    }],
-
     //listeners:{
     //  beforerender: function(){
     //      var me = this;
@@ -86,12 +64,34 @@ Ext.define("esapp.view.analysis.mapView",{
 
         me.controller.createLayersMenu();
 
+        me.tools = [
+        {
+            type: 'gear',
+            tooltip: esapp.Utils.getTranslation('maptoolsmenu'), // 'Map tools menu',
+            callback: function (mapwin) {
+                // toggle hide/show toolbar and adjust map size.
+                var sizeWinBody = [];
+                var mapToolbar = mapwin.getDockedItems('toolbar[dock="top"]')[0];
+                var widthToolbar = mapToolbar.getWidth();
+                var heightToolbar = mapToolbar.getHeight();
+                if (mapToolbar.hidden == false) {
+                    mapToolbar.setHidden(true);
+                    sizeWinBody = [document.getElementById(mapwin.id + "-body").offsetWidth, document.getElementById(mapwin.id + "-body").offsetHeight+heightToolbar];
+                }
+                else {
+                    mapToolbar.setHidden(false);
+                    sizeWinBody = [document.getElementById(mapwin.id + "-body").offsetWidth, document.getElementById(mapwin.id + "-body").offsetHeight-heightToolbar];
+                }
+                mapwin.map.setSize(sizeWinBody);
+            }
+        }];
 
         me.mapView = new ol.View({
             projection:"EPSG:4326",
             displayProjection:"EPSG:4326",
             center: [20, -4.7],  // ol.proj.transform([21, 4], 'EPSG:4326', 'EPSG:3857'),
-            zoom: 0.5
+            zoom: 6,
+            zoomFactor: 1.5
         });
 
         me.name ='mapviewwindow_' + me.id;
@@ -116,8 +116,9 @@ Ext.define("esapp.view.analysis.mapView",{
                 border: false,
                 autoShow: true,
                 floating: true,
+                shadow: false,
                 // alignTarget : me,
-                //defaultAlign: 'tr-c?',  // 'tr-c?',
+                defaultAlign: 'tl-tl',  // 'tr-c?',
                 alwaysOnTop: true,
                 constrain: true,
                 width: 150,
@@ -135,14 +136,14 @@ Ext.define("esapp.view.analysis.mapView",{
                     }
                 }
             }, {
-                title: "",
+                title: '',
                 id: 'product-legend_panel_' + me.id,
                 reference: 'product-legend_panel_' + me.id,
                 //x:10,
                 autoWidth: true,
                 autoHeight: true,
                 layout: 'fit',
-                hidden: true,
+                hidden: false,
                 floating: true,
                 defaultAlign: 'bl-bl',
                 closable: true,
@@ -150,7 +151,7 @@ Ext.define("esapp.view.analysis.mapView",{
                 draggable: true,
                 constrain: true,
                 alwaysOnTop: true,
-                autoShow: false,
+                autoShow: true,
                 frame: false,
                 frameHeader : false,
                 border: false,
@@ -176,6 +177,7 @@ Ext.define("esapp.view.analysis.mapView",{
                     reference: 'product-legend' + me.id,
                     //minWidth: 400,
                     layout: 'fit',
+                    style: 'background: white;',
                     html: ''
                 }]
             }]
@@ -224,7 +226,7 @@ Ext.define("esapp.view.analysis.mapView",{
 
         me.listeners = {
             afterrender: function () {
-
+                //Ext.util.Observable.capture(me, function(e){console.log('mapView - ' + me.id + ': ' + e);});
                 var mousePositionControl = new ol.control.MousePosition({
                     coordinateFormat: function(coord) {
                         var stringifyFunc = ol.coordinate.createStringXY(3);

@@ -16,8 +16,10 @@ Ext.define('Ext.form.field.FileButton', {
     preventDefault: false,
     
     // Button element *looks* focused but it should never really receive focus itself,
-    // and with it being a <div> we don't need to render tabindex attribute at all
+    // and with it being a <div></div> we don't need to render tabindex attribute at all
     tabIndex: null,
+
+    promptCalled: false,
 
     autoEl: {
         tag: 'div',
@@ -43,15 +45,20 @@ Ext.define('Ext.form.field.FileButton', {
         return this.getTpl('afterTpl').apply(values);
     },
     
-    getTemplateArgs: function(){
-        var args = this.callParent();
-        args.inputCls = this.inputCls;
-        args.inputName = this.inputName;
-        args.tabIndex = this.ownerCt.tabIndex;
+    getTemplateArgs: function() {
+        var me = this,
+            args;
+        
+        args = me.callParent();
+        
+        args.inputCls = me.inputCls;
+        args.inputName = me.inputName || me.id;
+        args.tabIndex = me.ownerCt.tabIndex != null ? me.ownerCt.tabIndex : null;
+        
         return args;
     },
     
-    afterRender: function(){
+    afterRender: function() {
         var me = this;
         
         me.callParent(arguments);
@@ -60,13 +67,15 @@ Ext.define('Ext.form.field.FileButton', {
         // focus and blur style treatment
         me.fileInputEl.on({
             scope: me,
+            mousedown: me.handlePrompt,
+            keydown: me.handlePrompt,
             change: me.fireChange,
-            focus: me.onFocus,
-            blur: me.onBlur
+            focus: me.onFileFocus,
+            blur: me.onFileBlur
         });
     },
     
-    fireChange: function(e){
+    fireChange: function(e) {
         this.fireEvent('change', this, e, this.fileInputEl.dom.value);
     },
     
@@ -76,40 +85,97 @@ Ext.define('Ext.form.field.FileButton', {
      * invisible, and floated on top of the button's other content so that it will receive the
      * button's clicks.
      */
-    createFileInput : function(isTemporary) {
-        var me = this;
-        me.fileInputEl = me.el.createChild({
-            name: me.inputName,
+    createFileInput: function(isTemporary) {
+        var me = this,
+            fileInputEl;
+        
+        fileInputEl = me.fileInputEl = me.el.createChild({
+            name: me.inputName || me.id,
             id: !isTemporary ? me.id + '-fileInputEl' : undefined,
-            cls: me.inputCls,
+            cls: me.inputCls + (me.getInherited().rtl ? ' ' + Ext.baseCSSPrefix + 'rtl' : ''),
             tag: 'input',
             type: 'file',
             size: 1,
             role: 'button'
         });
+
+        // This is our focusEl
+        fileInputEl.dom.setAttribute(Ext.Component.componentIdAttribute, me.id);
         
         // We place focus and blur listeners on fileInputEl to activate Button's
         // focus and blur style treatment
-        me.fileInputEl.on({
+        fileInputEl.on({
             scope: me,
+            mousedown: me.handlePrompt,
+            keydown: me.handlePrompt,
             change: me.fireChange,
-            focus: me.onFocus,
-            blur: me.onBlur
+            focus: me.onFileFocus,
+            blur: me.onFileBlur
         });
     },
-    
-    reset: function(remove){
-        if (remove) {
-            this.fileInputEl.destroy();
+
+    handlePrompt: function(e) {
+        var key;
+
+        if (e.type == 'keydown') {
+            key = e.getKey();
+            // We need this conditional here because IE doesn't open the prompt on ENTER
+            this.promptCalled = ((!Ext.isIE && key === e.ENTER) || key === e.SPACE) ? true : false;
+        } else {
+            this.promptCalled = true;
         }
-        this.createFileInput(!remove);
+    },
+
+    onFileFocus: function(e) {
+        var ownerCt = this.ownerCt;
+        
+        if (!this.hasFocus) {
+            this.onFocus(e);
+        }
+        
+        if (ownerCt && !ownerCt.hasFocus) {
+            ownerCt.onFocus(e);
+        }
+    },
+
+    onFileBlur: function(e) {
+        var ownerCt = this.ownerCt;
+
+        // We should not go ahead with blur if this was called because
+        // the fileInput was clicked and the upload window is causing this event
+        if (this.promptCalled) {
+            this.promptCalled = false;
+            e.preventDefault();
+            return;
+        }
+
+        if (this.hasFocus) {
+            this.onBlur(e);
+        }
+        
+        if (ownerCt && ownerCt.hasFocus) {
+            ownerCt.onBlur(e);
+        }
     },
     
-    restoreInput: function(el){
-        this.fileInputEl.destroy();
+    reset: function(remove) {
+        // We do not add listeners to focusEls now.
+        // The Focus event publisher calls into Components on focus and blur
+        var me = this;
+        if (remove) {
+            me.fileInputEl.destroy();
+        }
+        me.createFileInput(!remove);
+    },
+    
+    restoreInput: function(el) {
+        // We do not add listeners to focusEls now.
+        // The Focus event publisher calls into Components on focus and blur
+        var me = this;
+        me.fileInputEl.destroy();
         el = Ext.get(el);
-        this.el.appendChild(el);
-        this.fileInputEl = el;
+        me.el.appendChild(el);
+        me.fileInputEl = el;
     },
     
     onDisable: function(){

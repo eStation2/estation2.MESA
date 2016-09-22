@@ -11,7 +11,7 @@ Ext.define('esapp.store.DataAcquisitionsStore', {
     storeId : 'DataAcquisitionsStore'
 
 //    session: true,
-    ,autoLoad: false
+    ,autoLoad: true
     ,autoSync: true
     ,remoteSort: false
 
@@ -56,31 +56,8 @@ Ext.define('esapp.store.DataAcquisitionsStore', {
     ,listeners: {
         write: function(store, operation){
             Ext.toast({ html: operation.getResultSet().message,
-                        title: esapp.Utils.getTranslation('getupdated'),  // "Get updated",  "Obtenir mise � jour"
+                        title: esapp.Utils.getTranslation('getupdated'),  // "Get updated",
                         width: 300, align: 't' });
         }
     }
 });
-
-
-
-
-
-
-//var data = {
-//    "success": true,
-//    "DataAcquisition": [{
-//         "productid": "vgt_ndvi_vgt_ndvi_native_undefined",
-//         "productcode": "vgt_ndvi",
-//         "subproductcode": "vgt_ndvi_native",
-//         "version": "undefined",
-//         "data_source_id": "EO:EUM:DAT:SPOT:S10NDVI",
-//         "defined_by": "JRC",
-//         "type": "EUMETCAST",
-//         "activated": true,
-//         "store_original_data": false,
-//         "latest": "05/06/2014"
-//    }]
-//};
-//
-//esapp.store.DataAcquisitionsStore.loadData(data);

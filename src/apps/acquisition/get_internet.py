@@ -461,7 +461,11 @@ def loop_get_internet(dry_run=False):
                                 else:
                                     end_date = None
                                 # Note that the following list might contain sub-dirs (it reflects full_regex)
-                                current_list = get_list_matching_files(str(internet_source.url), str(usr_pwd), str(internet_source.include_files_expression), internet_type, end_date=end_date)
+                                try:
+                                    current_list = get_list_matching_files(str(internet_source.url), str(usr_pwd), str(internet_source.include_files_expression), internet_type, end_date=end_date)
+                                except:
+                                    logger.error("Error in creating file lists. Continue")
+                                    continue
 
                             elif internet_type == 'http_tmpl':
                                 # Create the full filename from a 'template' which contains
@@ -472,7 +476,9 @@ def loop_get_internet(dry_run=False):
                                                                                 internet_source.end_date,
                                                                                 str(internet_source.frequency_id))
                                 except:
-                                     logger.error("Error in creating date lists. Continue")
+                                    logger.error("Error in creating date lists. Continue")
+                                    continue
+
                             elif internet_type == 'offline':
                                      logger.info("This internet source is meant to work offline (GoogleDrive)")
                                      current_list = []

@@ -19,7 +19,7 @@ Ext.define('Ext.overrides.GlobalEvents', {
      * document regardless of whether some other handler tried to stop it.  An
      * example where this is useful is a menu that needs to be hidden whenever
      * there is a mousedown event on the document.
-     * @param {Ext.event.Event} The event object
+     * @param {Ext.event.Event} e The event object
      */
 
     attachListeners: function() {
@@ -34,7 +34,7 @@ Ext.define('Ext.overrides.GlobalEvents', {
     deprecated: {
         5: {
             methods: {
-                addListener: function(ename, fn, scope, options) {
+                addListener: function(ename, fn, scope, options, order, caller, eventOptions) {
                     var name,
                         readyFn;
 
@@ -58,7 +58,7 @@ Ext.define('Ext.overrides.GlobalEvents', {
                         Ext.onReady(readyFn);
                     }
 
-                    this.callParent([ename, fn, scope, options]);
+                    this.callParent([ename, fn, scope, options, order, caller, eventOptions]);
                 }
             }
         }

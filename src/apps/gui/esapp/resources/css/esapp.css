@@ -10,6 +10,13 @@
     color: red;
 }
 
+.text-white {
+    /*font-weight:bold;*/
+    color:#FFFFFF;
+    font-size:12px;
+    height: 20px;
+}
+
 .ts_selectedfeature_name_font {
     font-weight: bold;
     font-size: 16px

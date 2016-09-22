@@ -200,7 +200,7 @@ def loop_ingestion(dry_run=False):
                                             new_location=output_directory+os.path.basename(file_to_move)
                                             try:
                                                 if os.path.isfile(file_to_move):
-                                                    os.rename(file_to_move, new_location)
+                                                    shutil.move(file_to_move, new_location)
                                                 else:
                                                     logger_spec.debug("     --> file to be archived cannot be found: %s" % file_to_move)
                                             except:

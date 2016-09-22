@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS analysis.layers;
+
 CREATE TABLE IF NOT EXISTS analysis.layers
 (
   layerid bigserial NOT NULL,
@@ -35,36 +37,8 @@ WITH (
 ALTER TABLE analysis.layers
   OWNER TO estation;
 
-CREATE OR REPLACE FUNCTION analysis.update_insert_layers(
-               layerid integer,
-							 layerlevel character varying,
-							 layername character varying,
-							 description character varying,
-							 filename character varying,
-							 layerorderidx integer,
-							 layertype character varying,
-							 polygon_outlinecolor character varying,
-							 polygon_outlinewidth integer,
-							 polygon_fillcolor character varying,
-							 polygon_fillopacity integer,
-							 feature_display_column character varying,
-							 feature_highlight_outlinecolor character varying,
-							 feature_highlight_outlinewidth integer,
-							 feature_highlight_fillcolor character varying,
-							 feature_highlight_fillopacity integer,
-							 feature_selected_outlinecolor character varying,
-							 feature_selected_outlinewidth integer,
-							 enabled boolean,
-							 deletable boolean,
-							 background_legend_image_filename character varying,
-							 projection character varying,
-							 submenu character varying,
-							 menu character varying,
-							 defined_by character varying,
-							 open_in_mapview boolean,
-							 provider character varying,
-							 full_copy boolean DEFAULT false
-							 )
+
+CREATE OR REPLACE FUNCTION analysis.update_insert_layers(layerid integer, layerlevel character varying, layername character varying, description character varying, filename character varying, layerorderidx integer, layertype character varying, polygon_outlinecolor character varying, polygon_outlinewidth integer, polygon_fillcolor character varying, polygon_fillopacity integer, feature_display_column character varying, feature_highlight_outlinecolor character varying, feature_highlight_outlinewidth integer, feature_highlight_fillcolor character varying, feature_highlight_fillopacity integer, feature_selected_outlinecolor character varying, feature_selected_outlinewidth integer, enabled boolean, deletable boolean, background_legend_image_filename character varying, projection character varying, submenu character varying, menu character varying, defined_by character varying, open_in_mapview boolean, provider character varying, full_copy boolean DEFAULT false)
   RETURNS boolean AS
 $BODY$
 	DECLARE
@@ -163,6 +137,7 @@ $BODY$
 
 		ELSE
 			INSERT INTO analysis.layers (
+				layerid,
 				layerlevel,
 				layername,
 				description,
@@ -191,6 +166,7 @@ $BODY$
 				provider
 			)
 			VALUES (
+			    _layerid,
 			    TRIM(_layerlevel),
 			    TRIM(_layername),
 			    TRIM(_description),
@@ -224,36 +200,9 @@ $BODY$
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION analysis.update_insert_layers(	integer,
-						character varying,
-						character varying,
-						character varying,
-						character varying,
-						integer,
-						character varying,
-						character varying,
-						integer,
-						character varying,
-						integer,
-						character varying,
-						character varying,
-						integer,
-						character varying,
-						integer,
-						character varying,
-						integer,
-						boolean,
-						boolean,
-						character varying,
-						character varying,
-						character varying,
-						character varying,
-						character varying,
-						boolean,
-						character varying,
-						boolean
-					)
-  OWNER TO estation;
+ALTER FUNCTION analysis.update_insert_layers(integer, character varying, character varying, character varying, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, integer, boolean, boolean, character varying, character varying, character varying, character varying, character varying, boolean, character varying, boolean)
+  OWNER TO estation;  
+  
 
 ALTER SEQUENCE analysis.layers_layerid_seq RESTART WITH 8;
 

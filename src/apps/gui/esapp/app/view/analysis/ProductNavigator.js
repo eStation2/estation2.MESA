@@ -39,10 +39,11 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
     maximizable: false,
     resizable: true,
     resizeHandles: 'n,s',
-    autoScroll: false,
+    scrollable: false,
     width: 565,
+    //minWidth: 1000,
     height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-10 : 830,  // 600,
-    minHeight:750,
+    minHeight: 775,
 
     border:false,
     frame: false,
@@ -50,14 +51,6 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
         type  : 'border',
         padding: 5
     },
-
-    tools: [
-    {
-        type: 'refresh',
-        align: 'c-c',
-        tooltip: esapp.Utils.getTranslation('refreshproductlist'),    // 'Refresh product list',
-        callback: 'loadProductsGrid'
-    }],
 
     productselected:false,
     mapviewid:null,
@@ -76,10 +69,19 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
 
         Ext.apply(cfg, {
             id: me.mapviewid+'-productnavigator',
+            title: '<div class="panel-title-style-16">' + esapp.Utils.getTranslation('productnavigator') + '</div>',
 
             border:false,
             frame: false,
             bodyBorder: false,
+
+            tools: [
+            {
+                type: 'refresh',
+                align: 'c-c',
+                tooltip: esapp.Utils.getTranslation('refreshproductlist'),    // 'Refresh product list',
+                callback: 'loadProductsGrid'
+            }],
 
             listeners: {
                 close: me.onClose
@@ -125,7 +127,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     groupHeaderTpl: Ext.create('Ext.XTemplate', '<div class="group-header-style">{name} ({children.length})</div>'),
                     hideGroupedHeader: true,
                     enableGroupingMenu: false,
-                    startCollapsed : false,
+                    startCollapsed : true,
                     groupByText: esapp.Utils.getTranslation('productcategories')  // 'Product categories'
                 }],
 
@@ -186,7 +188,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     //,style: {backgroundColor:'#ADD2ED'}
                 },
                 autoWidth:true,
-                autoScroll:true,
+                scrollable:false,
                 split: true,
                 collapsible: true,
                 collapsed: true,
@@ -206,7 +208,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         this.setWidth(550);
                         me.center();
                         this.up().setPosition(200,10);
-                        this.up().setWidth(1100);
+                        this.up().setWidth(1060);
                     },
                     collapse: function(){
                         //this.up().down('grid').setWidth(485)
@@ -282,7 +284,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         overItemCls: 'mapset-hover',
                         itemSelector: 'div.mapset',
                         emptyText: esapp.Utils.getTranslation('nomapsetstodisplay'),    // 'No mapsets to display. Please select a product to view its mapsets',
-                        autoScroll: true,
+                        scrollable: true,
                         listeners: {
                             itemclick: 'mapsetItemClick'
                         }
@@ -294,7 +296,9 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     //flex: 1,
                     //width: 530,
                     maxHeight: 250,
-                    autoScroll: true,
+                    autoScroll: false,
+                    scrollable: 'vertical',
+                    //reserveScrollbar: true,
                     hidden: true,
                     bind: '{mapsetdatasets}',
                     layout: 'fit',
@@ -307,12 +311,26 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         resizable: false,
                         disableSelection: false,
                         trackOver: true
+                        //preserveScrollOnRefresh: true,
+                        //preserveScrollOnReload: true
                     },
 
                     selModel: {
-                        allowDeselect: true
+                        allowDeselect : true,
+                        listeners: {
+                            focuschange: function(rowModel, oldFocused , newFocused , eOpts){
+                                //console.info(rowModel);
+                                //console.info(oldFocused);
+                                //console.info(newFocused);
+                                //if (oldFocused == 'undefined'){
+                                //    rowModel.selectByPosition(newFocused.id);
+                                //}
+                                //else {
+                                //    rowModel.selectByPosition(oldFocused.id);
+                                //}
+                            }
+                        }
                     },
-
                     collapsible: false,
                     enableColumnMove: false,
                     enableColumnResize: false,
@@ -336,6 +354,17 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
 
                     listeners: {
                         rowclick: 'mapsetDataSetGridRowClick'
+                        //scrollend: function(x,y,z){
+                        //    console.info(x);
+                        //    console.info(y);
+                        //    console.info(z);
+                        //}
+                        //,itemclick: function(record, item, index, e, eOpts){
+                        //    this.getView().focusRow(index);
+                        //}
+
+                        //itemclick scroll
+
                         //,afterrender: function (grid) {
                         //    var viewEl = grid.getView().getEl();
                         //    if (viewEl.getStyle('overflowY') === 'hidden') {
@@ -362,7 +391,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                             '<span class="smalltext"><b style="color:darkgrey">{subproductcode}</b>' +
                             '</span>'
                         ),
-                        width: 475,
+                        width: 425,
                         sortable: true,
                         menuDisabled: true
                     }]
@@ -373,7 +402,8 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     //flex: 1,
                     //width: 530,
                     //height: 150,
-                    autoScroll: true,
+                    maxHeight: 165,
+                    scrollable: 'vertical',
                     hidden: true,
                     bind: '{colorschemes}',
                     layout: 'fit',
@@ -385,7 +415,8 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         markDirty: false,
                         resizable: false,
                         disableSelection: true,
-                        trackOver: true
+                        trackOver: false,
+                        scrollable: 'vertical'
                     },
 
                     selModel: {

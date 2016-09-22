@@ -47,9 +47,9 @@ Ext.define('esapp.view.analysis.addEditLayerController', {
             }
             layerstore.resumeAutoSync(true);
 
-            Ext.toast({html: esapp.Utils.getTranslation('layer_settings_saved'), title: esapp.Utils.getTranslation('saved'), width: 200, align: 't'});
-
             //if (!me.params.edit){
+            //    Ext.getCmp('layeradministration').toFront();
+                Ext.toast({html: esapp.Utils.getTranslation('layer_settings_saved'), title: esapp.Utils.getTranslation('saved'), width: 200, align: 't'});
                 Ext.getCmp('layeradministration').getController().loadLayersStore();
                 Ext.destroy(me);
             //}

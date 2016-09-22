@@ -138,6 +138,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             })
         });
 
+
         var productlayer_idx = me.getView().getController().findlayer(me.getView().map, 'productlayer');
         if (productlayer_idx != -1)
             me.getView().map.getLayers().removeAt(productlayer_idx);
@@ -273,6 +274,8 @@ Ext.define('esapp.view.analysis.mapViewController', {
             source: new ol.source.TileWMS({
                 url: 'analysis/getproductlayer',
                 crossOrigin: '',  // 'anonymous',
+                wrapX: false,
+                noWrap: true,
                 attributions: [new ol.Attribution({
                     html: '&copy; <a href="https://ec.europa.eu/jrc/">'+esapp.Utils.getTranslation('estation2')+'</a>'
                 })],
@@ -330,12 +333,16 @@ Ext.define('esapp.view.analysis.mapViewController', {
     ,redrawTimeLine: function (mapview) {
         var mapviewtimeline = mapview.lookupReference('product-time-line_' + mapview.id);
         var mapview_timelinechart_container = mapview.lookupReference('time-line-chart' + mapview.id);
-        var timeline_container_size = mapviewtimeline.getSize();
-        mapview_timelinechart_container.timelinechart.container.width = timeline_container_size.width;
-        mapview_timelinechart_container.timelinechart.setSize(timeline_container_size.width-15, timeline_container_size.height, false);
-        //mapview_timelinechart_container.timelinechart.reflow();
-        mapview_timelinechart_container.timelinechart.redraw();
-        mapview_timelinechart_container.doLayout();
+        //var timeline_container_size = mapviewtimeline.getSize();
+
+        if (mapviewtimeline.hidden == false){
+            //console.info('redrawTimeLine');
+            mapview_timelinechart_container.timelinechart.container.width = mapviewtimeline.getSize().width;
+            mapview_timelinechart_container.timelinechart.setSize(mapviewtimeline.getSize().width-15, mapviewtimeline.getSize().height, false);
+            //mapview_timelinechart_container.timelinechart.reflow();
+            mapview_timelinechart_container.timelinechart.redraw();
+            mapview_timelinechart_container.doLayout();
+        }
     }
 
     ,saveMap: function(btn, event) {
@@ -364,7 +371,6 @@ Ext.define('esapp.view.analysis.mapViewController', {
         var maplegendpanel = mapviewwin.lookupReference('product-legend_panel_' + mapviewwin.id);
         if (maplegendpanel.hidden == false) {
             var maplegendhtml = document.getElementById('product-legend' + mapviewwin.id);
-            //console.info('<div>'+mapviewwin.legendHTML+'</div>');
             html2canvas(maplegendhtml, {
                 onrendered: function(canvas) {
                     addlegend = true;
@@ -1486,7 +1492,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                     menu: {
                         defaults: {
                             checked: false,
-                            hideOnClick: false,
+                            //hideOnClick: false,
                             showSeparator: false,
                             cls: "x-menu-no-icon",
                             style: {
@@ -1566,7 +1572,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
         var marineVectorLayerMenuItems = this.createLayersMenuItems('marine');
         var otherVectorLayerMenuItems = this.createLayersMenuItems('other');
 
-        Ext.data.StoreManager.lookup('LayersStore').load();
+        //Ext.data.StoreManager.lookup('LayersStore').load();
 
         var layersmenubutton = {
             xtype: 'button',
@@ -1633,6 +1639,18 @@ Ext.define('esapp.view.analysis.mapViewController', {
             }
         };
 
+
+        //layersmenubutton = {
+        //    xtype: 'button',
+        //    text: 'Small',
+        //    menu: [{
+        //        text:'Menu Item 1'
+        //    },{
+        //        text:'Menu Item 2'
+        //    },{
+        //        text:'Menu Item 3'
+        //    }]
+        //};
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             dock: 'top',
