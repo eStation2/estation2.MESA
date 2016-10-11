@@ -500,10 +500,13 @@ def pre_process_msg_mpe (subproducts, tmpdir, input_files, my_logger):
         infid.close()
     outfid.close()
 
-    # Read the .grb and convert to gtiff (GDAL dose not do it properly)
+    # Read the .grb and convert to gtiff (GDAL does not do it properly)
     grbs = pygrib.open(out_tmp_grib_file)
     grb = grbs.select(name='Instantaneous rain rate')[0]
     data = grb.values
+    # Rotate 180 (i.e. flip both horiz/vertically) - bug from UFA12 Forum/SADC
+    rev_data = N.fliplr(data)
+    data = N.flipud(rev_data)
     output_driver = gdal.GetDriverByName(es_constants.ES2_OUTFILE_FORMAT)
     output_ds = output_driver.Create(out_tmp_tiff_file, 3712, 3712, 1, gdal.GDT_Float64)
     output_ds.GetRasterBand(1).WriteArray(data)
