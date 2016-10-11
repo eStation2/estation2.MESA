@@ -1,7 +1,7 @@
 Summary: eStation 2.0 application from JRC
 Name: eStation2-Apps
 Version: 2.0.5
-Release: 1
+Release: 5
 Group: eStation
 License: GPL
 Source: /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz
@@ -36,6 +36,7 @@ rm -r -f $RPM_BUILD_ROOT
 
 %files
 /var/www/eStation2-%{version}/*
+%config /var/www/eStation2-%{version}/apps/es2system/GeoPortal/geoportal.conf
 
 ####%config(noreplace) /var/www/eStation2-%{version}/*
 

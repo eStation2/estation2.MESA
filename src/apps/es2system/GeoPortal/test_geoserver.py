@@ -19,6 +19,7 @@ case='tamsat'
 case='vgt-ndvi'
 case='vgt-dmp'
 case='modis-firms'
+case='modis-chla'
 
 if case == 'fewsnet':
     #service = 'precipitation'  # 'drought' #'agriculture'
@@ -62,13 +63,23 @@ elif case == 'vgt-dmp':
 
 elif case == 'modis-firms':
 
-    service = 'vegetation'  # 'drought' #'agriculture'
+    service = 'fire'  # 'drought' #'agriculture'
     product='modis-firms'
     subproduct='10dcount'
     productType = 'Derived'
     mapset='SPOTV-Africa-1km'
     version = 'v5.0'
-    date = '20140801'
+    date = '20160701'
+
+elif case == 'modis-chla':
+
+    service = 'oceanography'  # 'drought' #'agriculture'
+    product='modis-chla'
+    subproduct='monavg'
+    productType = 'Derived'
+    mapset='MODIS-Africa-4km'
+    version = 'v2013.1'
+    date = '20160701'
 
 
 logger = log.my_logger(__name__)

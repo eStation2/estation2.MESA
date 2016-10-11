@@ -114,15 +114,16 @@ def createSLD(product, version, subproduct, output_file=None):
     # Get scale factor
     product_info = querydb.get_product_out_info(productcode=product,subproductcode=subproduct,version=version)
     scale_factor = product_info[0].scale_factor
-
+    legend_steps = []
+    legend_name = ''
     if hasattr(product_legends, "__len__") and product_legends.__len__() > 0:
 
         for legend in product_legends:
-
-            legend_dict = functions.row2dict(legend)
+            legend_dict = legend
+            # legend_dict = functions.row2dict(legend)
             default_legend = legend_dict['default_legend']
 
-            if default_legend == 'True':
+            if default_legend:
                 defaultlegend = True
             else:
                 defaultlegend = False
