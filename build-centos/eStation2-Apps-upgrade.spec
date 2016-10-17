@@ -1,7 +1,7 @@
 Summary: eStation 2.0 application from JRC
 Name: eStation2-Apps
-Version: 2.0.5
-Release: 5
+Version: 2.0.4
+Release: 12
 Group: eStation
 License: GPL
 Source: /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz
@@ -51,8 +51,9 @@ exec 2>/var/log/eStation2/%{name}-%{version}-preinst.err
 
 # Stop the eStation Services (for upgrade)
 echo "`date +'%Y-%m-%d %H:%M '` Stopping all services"
+if [[ -d /var/www/eStation2 ]]; then 
 /etc/init.d/tas_all_servicesd stop
-
+fi
 # En preinst pas de script externe inclus dans le RPM car pas encore decompressé
 # Ajout du compte analyst
 echo "`date +'%Y-%m-%d %H:%M '` Checking/creating analyst User"
@@ -132,22 +133,28 @@ chown -R analyst:estation /data/
 chmod 777 /var/www
 
 # Change permissions for writing in Desktop
-chown -R adminuser:adminuser /home/adminuser/*
-chown -R analyst:analyst /home/analyst/*
+#chown -R adminuser:adminuser /home/adminuser/*
+#chown -R analyst:analyst /home/analyst/*
 
 # Change permissions of the Layers dir (2.0.4)
 echo "`date +'%Y-%m-%d %H:%M '` Change permissions of /eStation2/layers to 775"
 chmod 775 -R /eStation2/layers
 
+# Creation of the symlink on the /var/www/eStation2-%{version}
+echo "`date +'%Y-%m-%d %H:%M '` Create sym link /var/www/eStation2-%{version}"
+is_an_upgrade=0
+if [[ -d /var/www/eStation2 ]]; then 
+rm /var/www/eStation2
+is_an_upgrade=1
+fi
+ln -fs /var/www/eStation2-%{version} /var/www/eStation2
+
 # Change settings of apache for layer size (2.0.4)
+if [[ ${is_an_upgrade} == 1 ]]; then
 echo "`date +'%Y-%m-%d %H:%M '` Change apache config LimitRequestBody to 300Mb"
 apache_config='/usr/local/src/tas/eStation_wsgi_srv/httpd.conf'
 sed -i "s|.*LimitRequestBody.*|LimitRequestBody 314572800|" ${apache_config}
-
-# Creation of the symlink on the /var/www/eStation2-%{version}
-echo "`date +'%Y-%m-%d %H:%M '` Create sym link /var/www/eStation2-%{version}"
-rm /var/www/eStation2
-ln -fs /var/www/eStation2-%{version} /var/www/eStation2
+fi
 
 # Restart postgresql 
 echo "`date +'%Y-%m-%d %H:%M '` Restart postgresql-9.3"
@@ -280,7 +287,9 @@ echo "`date +'%Y-%m-%d %H:%M '` Set again the Thema to $thema"
 
 # Start the eStation Services 
 echo "`date +'%Y-%m-%d %H:%M '` Starting all services"
+if [[ ${is_an_upgrade} == 1 ]]; then
 /etc/init.d/tas_all_servicesd start
+fi
 
 # Before uninstall: remove the link and copy all code into a bck dir
 %preun
