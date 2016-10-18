@@ -12,7 +12,7 @@ import unittest
 import datetime
 import sys
 from apps.productmanagement.helpers import INTERVAL_TYPE
-from apps.productmanagement.datasets import Dataset
+from apps.productmanagement.datasets import Dataset, Frequency
 from apps.productmanagement.exceptions import (WrongDateType, NoProductFound)
 
 from lib.python import functions
@@ -73,6 +73,11 @@ class TestDatasets(unittest.TestCase):
         kwargs.update({'from_date': '2014-10-01'})
         self.assertRaisesRegexp(WrongDateType, "(?i).*wrong.*date.*type.*",
                 Dataset, **kwargs)
+
+    def test_frequency_8days(self):
+        freq8 = Frequency(1, '8days', 'e', dateformat=None)
+        print freq8.today()
+        print freq8.get_next_date(freq8.today(),'8days',1)
 
     def test_intervals(self):
         kwargs = self.kwargs.copy()

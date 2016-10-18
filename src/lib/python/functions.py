@@ -651,6 +651,28 @@ def conv_date_2_dekad(year_month_day):
 
     return dekad_no
 
+######################################################################################
+#   conv_date_2_8days
+#   Purpose: Function that returns the first day of an 8day 'MODIS-like' period.
+#            Periods start every year on Jday=001, 009 ... 361 (or 360 for leap year)
+#            (see https://veroandreo.wordpress.com/2016/01/25/how-to-aggregate-daily-data-into-modis-like-8-day-aggregation-pattern/)
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2016/10/06
+#   Input: date in the format YYYYMMDD
+#   Output: 8-day period of the year, in range 1 .. 45
+#
+def conv_date_2_8days(year_month_day):
+
+    period_no = -1
+    # check the format of year_month_day. It must be a valid YYYYMMDD format.
+    if is_date_yyyymmdd(year_month_day):
+        dt_current = datetime.date(int(year_month_day[0:4]),int(year_month_day[4:6]),int(year_month_day[6:8]))
+        dt_first   = datetime.date(int(year_month_day[0:4]),1,1)
+        delta = dt_current - dt_first
+        delta_days = delta.days
+        period_no = 1 + int(delta_days/8)
+
+    return period_no
 
 ######################################################################################
 #   conv_date_2_month
@@ -902,6 +924,42 @@ def conv_yyyymmdd_g2_2_yyyymmdd(yymmk):
 
     date_yyyymmdd = str(year)+month+day
     return date_yyyymmdd
+
+######################################################################################
+#   conv_date_2_quarter
+#   Purpose: Convert a date YYYYMMDD to quarter-date (i.e. YYYY0101/YYYY0401/YYYY0701/YYYY1001)
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2016/08/25
+#   Input: date in format YYYYMMDD (string)
+#   Output: YYYY0101/YYYY0401/YYYY0701/YYYY1001
+#
+def conv_date_2_quarter(date):
+
+    quarter_date = -1
+    if is_date_yyyymmdd(date):
+        year = str(date[0:4])
+        month = str(date[4:6])
+        quarter = ((int(month)-1)/3)*3+1
+        quarter_date = '{0}'.format(year)+'{:02d}'.format(quarter)+'01'
+    return str(quarter_date)
+
+######################################################################################
+#   conv_date_2_semester
+#   Purpose: Convert a date YYYYMMDD to semester-date (i.e. YYYY0101 or YYYY0701)
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2016/08/25
+#   Input: date in format YYYYMMDD (string)
+#   Output: YYYY0101 or YYYY0601
+#
+def conv_date_2_semester(date):
+
+    semester_date = -1
+    if is_date_yyyymmdd(date):
+        year = str(date[0:4])
+        month = str(date[4:6])
+        semester = '01' if int(month) <= 6 else '07'
+        semester_date = '{0}'.format(year)+semester+'01'
+    return str(semester_date)
 
 ######################################################################################
 #   day_per_dekad

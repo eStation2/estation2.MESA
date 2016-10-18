@@ -56,5 +56,38 @@ class TestFunctionsDate(TestCase):
         self.assertEqual(f.conv_yyyymmdd_g2_2_yyyymmdd('20151105'), '20151101')
         self.assertEqual(f.conv_yyyymmdd_g2_2_yyyymmdd('20151109'), '20151101')
 
-#
+    def test_convert_date_2_quarter(self):
+        self.assertEqual(f.conv_date_2_quarter('20150123'), '20150101')
+        self.assertEqual(f.conv_date_2_quarter('20150323'), '20150101')
 
+        self.assertEqual(f.conv_date_2_quarter('20150423'), '20150401')
+        self.assertEqual(f.conv_date_2_quarter('20150629'), '20150401')
+
+        self.assertEqual(f.conv_date_2_quarter('20150723'), '20150701')
+        self.assertEqual(f.conv_date_2_quarter('20150930'), '20150701')
+
+        self.assertEqual(f.conv_date_2_quarter('20151029'), '20151001')
+        self.assertEqual(f.conv_date_2_quarter('20151229'), '20151001')
+
+    def test_convert_date_8days(self):
+
+        # Non-leap year
+        self.assertEqual(f.conv_date_2_8days('20110101'),1)
+        self.assertEqual(f.conv_date_2_8days('20110108'),1)
+        self.assertEqual(f.conv_date_2_8days('20110109'),2)
+        self.assertEqual(f.conv_date_2_8days('20110225'),7)
+        self.assertEqual(f.conv_date_2_8days('20110226'),8)
+        self.assertEqual(f.conv_date_2_8days('20110305'),8)
+        self.assertEqual(f.conv_date_2_8days('20110306'),9)
+
+        self.assertEqual(f.conv_date_2_8days('20111226'),45)
+        self.assertEqual(f.conv_date_2_8days('20111227'),46)
+        self.assertEqual(f.conv_date_2_8days('20111231'),46)
+
+
+        # Leap year
+        self.assertEqual(f.conv_date_2_8days('20120304'),8)
+        self.assertEqual(f.conv_date_2_8days('20120305'),9)
+        self.assertEqual(f.conv_date_2_8days('20121225'),45)
+        self.assertEqual(f.conv_date_2_8days('20121226'),46)
+        self.assertEqual(f.conv_date_2_8days('20121231'),46)

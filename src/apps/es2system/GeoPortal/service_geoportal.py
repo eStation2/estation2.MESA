@@ -14,7 +14,7 @@ except:
     exit(1)
 
 # Define pid file and create daemon
-pid_file = es_constants.system_pid_filename
+pid_file = es_constants.geoportal_pid_filename
 daemon = system_geoserver.SystemDaemon(pid_file, dry_run=0)
 
 if command == "status":
@@ -23,9 +23,9 @@ if command == "status":
         print("Current status of the Service: %s" % status)
     
 if command == "start":
-        logger.info("Starting System service")
+        logger.info("Starting GeoPortal service")
         daemon.start()
         
 if command == "stop":
-        logger.info("Stopping System service") 
+        logger.info("Stopping Geoportal service")
         daemon.stop()

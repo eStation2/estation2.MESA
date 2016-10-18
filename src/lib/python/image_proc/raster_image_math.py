@@ -1462,7 +1462,7 @@ def do_compute_primary_production(chla_file='', sst_file='', kd_file='', par_fil
             data_par   = N.ravel(par_fileID.ReadAsArray(0, il, XSize, 1))
             data_kd   = N.ravel(kd_fileID.ReadAsArray(0, il, XSize, 1))
             data_sst = data_sst*0.01
-
+            data_kd_rescal = data_kd*0.001
 
             valid = (data_chl !=  chla_nodata) * (data_sst != sst_nodata) * (data_par != par_nodata) *(data_kd != kd_nodata)
 
@@ -1472,11 +1472,11 @@ def do_compute_primary_production(chla_file='', sst_file='', kd_file='', par_fil
                 F_ratio[valid] = (0.66125*data_par[valid])/(data_par[valid] + 4.1)
 
                 # Calculate Pb_opt from SST
-                Pb_opt[valid] = -3.27e-8*data_sst[valid]**7 + 3.4132e-6*data_sst[valid]**6 - 1.348e-4*data_sst[valid]**5 + \
-                          2.462e-3*data_sst[valid]**4 - 0.0205*data_sst[valid]**3 + 0.0617*data_sst[valid]**2 + \
-                          0.2749*data_sst[valid] + 1.2956
+                Pb_opt[valid] = -3.27e-8*data_sst_rescal[valid]**7 + 3.4132e-6*data_sst_rescal[valid]**6 - 1.348e-4*data_sst_rescal[valid]**5 + \
+                          2.462e-3*data_sst_rescal[valid]**4 - 0.0205*data_sst_rescal[valid]**3 + 0.0617*data_sst_rescal[valid]**2 + \
+                          0.2749*data_sst_rescal[valid] + 1.2956
 
-                data_pp[valid] = data_chl[valid]*(4.6/data_kd[valid])*F_ratio[valid]*Pb_opt[valid]*dl
+                data_pp[valid] = data_chl[valid]*(4.6/data_kd_rescal[valid])*F_ratio[valid]*Pb_opt[valid]*dl
 
             data_pp.shape = (1,-1)
 
