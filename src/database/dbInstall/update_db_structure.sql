@@ -1089,7 +1089,6 @@ ALTER FUNCTION analysis.update_insert_chart_drawproperties(character varying, in
 
 -- DROP FUNCTION products.export_jrc_data(boolean);
 
-
 CREATE OR REPLACE FUNCTION products.export_jrc_data(full_copy boolean DEFAULT false)
   RETURNS SETOF text AS
 $BODY$
@@ -1167,8 +1166,8 @@ BEGIN
 		|| ', activated := ' || activated
 		|| ', category_id := ' || COALESCE('''' || category_id || '''', 'NULL')
 		|| ', product_type := ' || COALESCE('''' || product_type || '''', 'NULL')
-		|| ', descriptive_name := ' || COALESCE('''' || replace(descriptive_name, '''', '"') || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || replace(description, '''', '"') || '''', 'NULL')
+		|| ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', provider := ' || COALESCE('''' || provider || '''', 'NULL')
 		|| ', frequency_id := ' || COALESCE('''' || frequency_id || '''', '''undefined''')
 		|| ', date_format := ' || COALESCE('''' || date_format || '''', '''undefined''')
@@ -1236,7 +1235,7 @@ BEGIN
 		|| ', internal_identifier := ' || COALESCE('''' || internal_identifier || '''', 'NULL')
 		|| ', collection_reference := ' || COALESCE('''' || collection_reference || '''', 'NULL')
 		|| ', acronym := ' || COALESCE('''' || acronym || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || replace(description, '''', '"') || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', product_status := ' || COALESCE('''' || product_status || '''', 'NULL')
 		|| ', date_creation := ' || COALESCE('''' || to_char(date_creation, 'YYYY-MM-DD') || '''', 'NULL')
 		|| ', date_revision := ' || COALESCE('''' || to_char(date_revision, 'YYYY-MM-DD') || '''', 'NULL')
@@ -1256,10 +1255,10 @@ BEGIN
 		|| ', instrument := ' || COALESCE('''' || instrument || '''', 'NULL')
 		|| ', spatial_coverage := ' || COALESCE('''' || spatial_coverage || '''', 'NULL')
 		|| ', thumbnails := ' || COALESCE('''' || thumbnails || '''', 'NULL')
-		|| ', online_resources := ' || COALESCE('''' || replace(online_resources, '''', '"') || '''', 'NULL')
+		|| ', online_resources := ' || COALESCE('''' || replace(replace(online_resources,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', distribution := ' || COALESCE('''' || distribution || '''', 'NULL')
 		|| ', channels := ' || COALESCE('''' || channels || '''', 'NULL')
-		|| ', data_access := ' || COALESCE('''' || replace(data_access, '''', '"') || '''', 'NULL')
+		|| ', data_access := ' || COALESCE('''' || replace(replace(data_access,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', available_format := ' || COALESCE('''' || available_format || '''', 'NULL')
 		|| ', version := ' || COALESCE('''' || version || '''', 'NULL')
 		|| ', typical_file_name := ' || COALESCE('''' || typical_file_name || '''', 'NULL')
@@ -1391,12 +1390,12 @@ BEGIN
 
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_i18n('
 		|| ' label := ' || COALESCE('''' || label || '''', 'NULL')
-		|| ', eng := ''' || COALESCE(replace(eng, '''', '"'), 'NULL') || ''''
-		|| ', fra := ''' || COALESCE(replace(fra, '''', '"'), 'NULL') || ''''
-		|| ', por := ''' || COALESCE(replace(por, '''', '"'), 'NULL') || ''''
-		|| ', lang1 := ''' || COALESCE(replace(lang1, '''', '"'), 'NULL') || ''''
-		|| ', lang2 := ''' || COALESCE(replace(lang2, '''', '"'), 'NULL') || ''''
-		|| ', lang3 := ''' || COALESCE(replace(lang3, '''', '"'), 'NULL') || ''''
+		|| ', eng := ''' || COALESCE(replace(replace(eng,'"',''''), '''', ''''''), 'NULL') || ''''
+		|| ', fra := ''' || COALESCE(replace(replace(fra,'"',''''), '''', ''''''), 'NULL') || ''''
+		|| ', por := ''' || COALESCE(replace(replace(por,'"',''''), '''', ''''''), 'NULL') || ''''
+		|| ', lang1 := ''' || COALESCE(replace(replace(lang1,'"',''''), '''', ''''''), 'NULL') || ''''
+		|| ', lang2 := ''' || COALESCE(replace(replace(lang2,'"',''''), '''', ''''''), 'NULL') || ''''
+		|| ', lang3 := ''' || COALESCE(replace(replace(lang3,'"',''''), '''', ''''''), 'NULL') || ''''
 		|| ' );'  as inserts
 	FROM analysis.i18n;
 
@@ -1562,6 +1561,7 @@ ALTER FUNCTION products.export_jrc_data(boolean)
 
 
 
+
 -- Function: products.export_all_data(boolean)
 
 -- DROP FUNCTION products.export_all_data(boolean);
@@ -1641,8 +1641,8 @@ BEGIN
 		|| ', activated := ' || activated
 		|| ', category_id := ' || COALESCE('''' || category_id || '''', 'NULL')
 		|| ', product_type := ' || COALESCE('''' || product_type || '''', 'NULL')
-		|| ', descriptive_name := ' || COALESCE('''' || replace(descriptive_name, '''', '"') || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || replace(description, '''', '"') || '''', 'NULL')
+		|| ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', provider := ' || COALESCE('''' || provider || '''', 'NULL')
 		|| ', frequency_id := ' || COALESCE('''' || frequency_id || '''', '''undefined''')
 		|| ', date_format := ' || COALESCE('''' || date_format || '''', '''undefined''')
@@ -1707,7 +1707,7 @@ BEGIN
 		|| ', internal_identifier := ' || COALESCE('''' || internal_identifier || '''', 'NULL')
 		|| ', collection_reference := ' || COALESCE('''' || collection_reference || '''', 'NULL')
 		|| ', acronym := ' || COALESCE('''' || acronym || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || replace(description, '''', '"') || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', product_status := ' || COALESCE('''' || product_status || '''', 'NULL')
 		|| ', date_creation := ' || COALESCE('''' || to_char(date_creation, 'YYYY-MM-DD') || '''', 'NULL')
 		|| ', date_revision := ' || COALESCE('''' || to_char(date_revision, 'YYYY-MM-DD') || '''', 'NULL')
@@ -1727,10 +1727,10 @@ BEGIN
 		|| ', instrument := ' || COALESCE('''' || instrument || '''', 'NULL')
 		|| ', spatial_coverage := ' || COALESCE('''' || spatial_coverage || '''', 'NULL')
 		|| ', thumbnails := ' || COALESCE('''' || thumbnails || '''', 'NULL')
-		|| ', online_resources := ' || COALESCE('''' || replace(online_resources, '''', '"') || '''', 'NULL')
+		|| ', online_resources := ' || COALESCE('''' || replace(replace(online_resources,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', distribution := ' || COALESCE('''' || distribution || '''', 'NULL')
 		|| ', channels := ' || COALESCE('''' || channels || '''', 'NULL')
-		|| ', data_access := ' || COALESCE('''' || replace(data_access, '''', '"') || '''', 'NULL')
+		|| ', data_access := ' || COALESCE('''' || replace(replace(data_access,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', available_format := ' || COALESCE('''' || available_format || '''', 'NULL')
 		|| ', version := ' || COALESCE('''' || version || '''', 'NULL')
 		|| ', typical_file_name := ' || COALESCE('''' || typical_file_name || '''', 'NULL')
@@ -1856,12 +1856,12 @@ BEGIN
 
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_i18n('
 		|| ' label := ' || COALESCE('''' || label || '''', 'NULL')
-		|| ', eng := ''' || COALESCE(replace(eng, '''', '"'), 'NULL') || ''''
-		|| ', fra := ''' || COALESCE(replace(fra, '''', '"'), 'NULL') || ''''
-		|| ', por := ''' || COALESCE(replace(por, '''', '"'), 'NULL') || ''''
-		|| ', lang1 := ''' || COALESCE(replace(lang1, '''', '"'), 'NULL') || ''''
-		|| ', lang2 := ''' || COALESCE(replace(lang2, '''', '"'), 'NULL') || ''''
-		|| ', lang3 := ''' || COALESCE(replace(lang3, '''', '"'), 'NULL') || ''''
+		|| ', eng := ''' || COALESCE(replace(replace(eng,'"',''''), '''', ''''''), 'NULL') || ''''
+		|| ', fra := ''' || COALESCE(replace(replace(fra,'"',''''), '''', ''''''), 'NULL') || ''''
+		|| ', por := ''' || COALESCE(replace(replace(por,'"',''''), '''', ''''''), 'NULL') || ''''
+		|| ', lang1 := ''' || COALESCE(replace(replace(lang1,'"',''''), '''', ''''''), 'NULL') || ''''
+		|| ', lang2 := ''' || COALESCE(replace(replace(lang2,'"',''''), '''', ''''''), 'NULL') || ''''
+		|| ', lang3 := ''' || COALESCE(replace(replace(lang3,'"',''''), '''', ''''''), 'NULL') || ''''
 		|| ' );'  as inserts
 	FROM analysis.i18n;
 
@@ -2042,8 +2042,8 @@ BEGIN
 		|| ', activated := ' || activated
 		|| ', category_id := ' || COALESCE('''' || category_id || '''', 'NULL')
 		|| ', product_type := ' || COALESCE('''' || product_type || '''', 'NULL')
-		|| ', descriptive_name := ' || COALESCE('''' || replace(descriptive_name, '''', '"') || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || replace(description, '''', '"') || '''', 'NULL')
+		|| ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', provider := ' || COALESCE('''' || provider || '''', 'NULL')
 		|| ', frequency_id := ' || COALESCE('''' || frequency_id || '''', '''undefined''')
 		|| ', date_format := ' || COALESCE('''' || date_format || '''', '''undefined''')

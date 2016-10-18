@@ -3,7 +3,7 @@
 #	author:  B. Motah [& E. Martial]
 #	date:	 25.03.2015
 #   descr:	 Generate additional derived products / implements processing chains
-#	history: 1.0
+#	history: 1.0 - Initial Version
 #
 
 # Source my definitions
@@ -20,8 +20,6 @@ from config import es_constants
 # Import third-party modules
 from ruffus import *
 
-logger = log.my_logger(__name__)
-
 # Primary Production Monthly
 activate_pp_1mon_comput=1
 
@@ -36,68 +34,77 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     if proc_lists is None:
         proc_lists = functions.ProcLists()
 
-    my_date='20160101'
+    #my_date='20160601'
+    my_date = ''
     es2_data_dir = es_constants.es2globals['processing_dir']+os.path.sep
 
+   #   ---------------------------------------------------------------------
+   #   Primary Productivity from chl-a, sst, kd490 and par data
+
+   # Define inputs
     chla_prod=prod
-    chla_prod_ident = functions.set_path_filename_no_date(chla_prod, starting_sprod, mapset, version, ext)
+    chla_version = 'v2013.1'
+    chla_prod_ident = functions.set_path_filename_no_date(chla_prod, starting_sprod, mapset, chla_version, ext)
     chla_input_dir = es2_data_dir+ \
-                functions.set_path_sub_directory(chla_prod, starting_sprod, 'Derived', version, mapset)
+                functions.set_path_sub_directory(chla_prod, starting_sprod, 'Derived', chla_version, mapset)
                 
     #   ---------------------------------------------------------------------
     sst_prod="modis-sst"
-    sst_prod_ident = functions.set_path_filename_no_date(sst_prod, starting_sprod, mapset, version, ext)
+    sst_version = 'v2013.1'
+    sst_prod_ident = functions.set_path_filename_no_date(sst_prod, starting_sprod, mapset, sst_version, ext)
     sst_input_dir = es2_data_dir+ \
-                functions.set_path_sub_directory(sst_prod, starting_sprod, 'Derived', version, mapset)
+                functions.set_path_sub_directory(sst_prod, starting_sprod, 'Derived', sst_version, mapset)
 
     #   ---------------------------------------------------------------------
     kd_prod="modis-kd490"
-    kd_prod_ident = functions.set_path_filename_no_date(kd_prod, starting_sprod, mapset, version, ext)
+    kd_version = 'v2012.0'
+    kd_prod_ident = functions.set_path_filename_no_date(kd_prod, starting_sprod, mapset, kd_version, ext)
 
     kd_input_dir = es2_data_dir+ \
-                functions.set_path_sub_directory(kd_prod, starting_sprod, 'Derived', version, mapset)
+                functions.set_path_sub_directory(kd_prod, starting_sprod, 'Derived', kd_version, mapset)
 
-    kd_files = kd_input_dir+"*"+kd_prod_ident
+    kd_files = kd_input_dir+my_date+"*"+kd_prod_ident
 
     #   ---------------------------------------------------------------------
     par_prod="modis-par"
-    par_prod_ident = functions.set_path_filename_no_date(par_prod, starting_sprod, mapset, version, ext)
+    par_version = 'v2012.0'
+    par_prod_ident = functions.set_path_filename_no_date(par_prod, starting_sprod, mapset, par_version, ext)
 
     par_input_dir = es2_data_dir+ \
-                functions.set_path_sub_directory(par_prod, starting_sprod, 'Derived', version, mapset)
+                functions.set_path_sub_directory(par_prod, starting_sprod, 'Derived', par_version, mapset)
 
     # Read input product nodata
 
-    chla_prod_info = querydb.get_product_out_info(productcode=chla_prod, subproductcode="chla-day", version=version)
+    chla_prod_info = querydb.get_product_out_info(productcode=chla_prod, subproductcode="monavg", version=chla_version)
     chla_product_info = functions.list_to_element(chla_prod_info)
     chla_nodata = chla_product_info.nodata
 
-    sst_prod_info = querydb.get_product_out_info(productcode=sst_prod, subproductcode="sst-day", version=version)
+    sst_prod_info = querydb.get_product_out_info(productcode=sst_prod, subproductcode="monavg", version=sst_version)
     sst_product_info = functions.list_to_element(sst_prod_info)
     sst_nodata = sst_product_info.nodata
 
-    kd_prod_info = querydb.get_product_out_info(productcode=kd_prod, subproductcode="kd490-day", version=version)
+    kd_prod_info = querydb.get_product_out_info(productcode=kd_prod, subproductcode="monavg", version=kd_version)
     kd_product_info = functions.list_to_element(kd_prod_info)
     kd_nodata = kd_product_info.nodata
 
-    par_prod_info = querydb.get_product_out_info(productcode=par_prod, subproductcode="par-day", version=version)
+    par_prod_info = querydb.get_product_out_info(productcode=par_prod, subproductcode="monavg", version=par_version)
     par_product_info = functions.list_to_element(par_prod_info)
     par_nodata = par_product_info.nodata
 
-   #   ---------------------------------------------------------------------
-   #   Monthly Primary Productivity from chl-a, sst, kd490 and par monthly data
+   #   Define outputs
 
-    output_sprod="1mon"
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset,version, ext)
-    output_subdir  = functions.set_path_sub_directory (prod, output_sprod, 'Derived', version, mapset)
+    output_prod="modis-pp"
+    output_sprod=starting_sprod
+    out_prod_ident = functions.set_path_filename_no_date(output_prod, output_sprod, mapset,version, ext)
+    output_subdir  = functions.set_path_sub_directory (output_prod, output_sprod, 'Derived', version, mapset)
 
     #   Starting files monthly composites
-    formatter_kd="(?P<YYYYMM>[0-9]{6})"+kd_prod_ident
-    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYYMM[0]}"+out_prod_ident
+    formatter_kd="(?P<YYYYMMDD>[0-9]{8})"+kd_prod_ident
+    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYYMMDD[0]}"+out_prod_ident
 
-    ancillary_sst = sst_input_dir+"{YYYYMM[0]}"+sst_prod_ident
-    ancillary_par = par_input_dir+"{YYYYMM[0]}"+par_prod_ident
-    ancillary_chla  = chla_input_dir+"{YYYYMM[0]}"+chla_prod_ident
+    ancillary_sst = sst_input_dir+"{YYYYMMDD[0]}"+sst_prod_ident
+    ancillary_par = par_input_dir+"{YYYYMMDD[0]}"+par_prod_ident
+    ancillary_chla  = chla_input_dir+"{YYYYMMDD[0]}"+chla_prod_ident
 
     @active_if(activate_pp_1mon_comput)
     @transform(kd_files, formatter(formatter_kd), add_inputs(ancillary_chla, ancillary_par, ancillary_sst), formatter_out)
@@ -106,7 +113,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"chla_file": input_file[1], "sst_file": input_file[3], "kd_file": input_file[0],"par_file": input_file[2], \
-                "sst_nodata": sst_nodata, "kd_nodata": kd_nodata,\
+                "sst_nodata": sst_nodata, "kd_nodata": kd_nodata, "chla_nodata": chla_nodata,\
                 "par_nodata": par_nodata, "output_file": output_file, "output_nodata": -9999, "output_format": 'GTIFF',\
                 "output_type": None, "options": "compress=lzw"}
         raster_image_math.do_compute_primary_production(**args)
@@ -114,20 +121,21 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 #   ---------------------------------------------------------------------
 #   Run the pipeline
 
-def processing_modis_primary_production(res_queue, pipeline_run_level=0, pipeline_printout_level=0,
+def processing_std_modis_pp(res_queue, pipeline_run_level=0, pipeline_printout_level=0,
                         pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                        starting_dates=None, update_stats=False, nrt_products=True, write2file=None, logfile=None):
+                        starting_dates=None, write2file=None, logfile=None):
 
-    starting_sprod = 'monavg'
+    spec_logger = log.my_logger(logfile)
+    spec_logger.info("Entering routine %s" % 'processing_std_msg_mpe')
+
     create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, proc_lists=None)
 
-    logger.info("Entering routine %s" % 'processing modis - Primary Production')
+    spec_logger.info("Entering routine %s" % 'processing modis - Primary Production')
     if pipeline_run_level > 0:
-        logger.info("Now calling pipeline_run")
-        pipeline_run(verbose=pipeline_run_level)
+        spec_logger.info("Now calling pipeline_run")
+        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger, history_file='/eStation2/log/.ruffus_history_modis_pp.sqlite', checksum_level=0)
     
     if pipeline_printout_level > 0:
-        
         pipeline_printout(verbose=pipeline_printout_level)
     
     if pipeline_printout_graph_level > 0:

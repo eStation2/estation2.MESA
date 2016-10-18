@@ -776,3 +776,37 @@ class TestIngestion(unittest.TestCase):
 
             ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
 
+    def test_ingest_msg_mpe(self):
+
+        date_fileslist = glob.glob('/data/ingest/L-000-MSG3__-MPEF________-MPEG_____-00000?___-201609301200-__')
+        in_date = '201609301200'
+        productcode = 'msg-mpe'
+        productversion = 'undefined'
+        subproductcode = 'mpe'
+        mapsetcode = 'MSG-satellite-3km'
+        datasource_descrID='EO:EUM:DAT:MSG:MPE-GRIB'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                                              source_id=datasource_descrID):
+
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
