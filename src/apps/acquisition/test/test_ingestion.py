@@ -8,6 +8,9 @@ import unittest
 import os
 import glob
 import tempfile
+import shutil
+import numpy as N
+from osgeo import gdal
 
 # Overwrite Dirs
 from lib.python import es_logging as log
@@ -810,3 +813,98 @@ class TestIngestion(unittest.TestCase):
                                                                               source_id=datasource_descrID):
 
             ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+    def test_ingest_arc2_rain(self):
+
+        date_fileslist = glob.glob('/data/ingest/africa_arc.20160501.tif.zip')
+        in_date = '20160501'
+        productcode = 'arc2-rain'
+        productversion = '2.0'
+        subproductcode = '1day'
+        mapsetcode = 'ARC2-Africa-11km'
+        datasource_descrID='CPC:NOAA:RAIN:ARC2'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
+                                                                              source_id=datasource_descrID):
+
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+    # def test_ingest_cpc_soilmoisture(self):
+    #
+    #     file = '/data/processing/exchange/w.201609.mon'
+    #     out_tmp_tiff_file = '/data/processing/exchange/w.201609.mon.tif'
+    #
+    #     in_date = '20160901'
+    #
+    #     # Rotate 180 (i.e. flip both horiz/vertically) - bug from UFA12 Forum/SADC
+    #     fid = open(file,"r")
+    #     data = N.fromfile(fid,dtype=N.float32)
+    #     data2 = data.byteswap().reshape(360,720)
+    #     data = N.flipud(data2)
+    #     #data2 = N.fliplr(data)
+    #
+    #     print data.shape
+    #     output_driver = gdal.GetDriverByName(es_constants.ES2_OUTFILE_FORMAT)
+    #     output_ds = output_driver.Create(out_tmp_tiff_file, 720, 360, 1, gdal.GDT_Float32)
+    #     output_ds.GetRasterBand(1).WriteArray(data)
+    #     output_ds = None
+    #     fid.close()
+
+    def test_ingest_cpc_soilmoisture(self):
+
+        filename='w.201609.mon'
+        shutil.copy('/data/processing/exchange/'+filename,'/data/ingest/'+filename)
+        date_fileslist = glob.glob('/data/ingest/w.201609.mon')
+        in_date = '201201'
+        productcode = 'cpc-sm'
+        productversion = '1.0'
+        subproductcode = 'sm'
+        mapsetcode = 'CPC-Africa-50km'
+        #mapsetcode = 'CPC-Global-50km'
+        datasource_descrID='CPC:NCEP:NOAA:SM'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
+                                                                              source_id=datasource_descrID):
+
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
