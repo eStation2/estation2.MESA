@@ -1274,7 +1274,6 @@ def pre_process_ecmwf_mars(subproducts, tmpdir , input_files, my_logger):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process SPIRITS ECMWF files
 #
-    out_tmp_gtiff_file = []
 
     #  Zipped files containing an .img and and .hdr file
     if isinstance(input_files, list):
@@ -1319,6 +1318,50 @@ def pre_process_ecmwf_mars(subproducts, tmpdir , input_files, my_logger):
 
     return output_file
 
+# -------------------------------------------------------------------------------------------------------
+#   Pre-process CPC files TYPE (binary, 720 x 360, global at 0.5 degree resolution)
+#   See: http://www.cpc.ncep.noaa.gov/soilmst/leaky_glb.htm
+
+def pre_process_cpc_binary(subproducts, tmpdir , input_files, my_logger):
+
+    logger.debug('Unzipping/processing: CPC_BINARY case')
+
+    n_lines = 360
+    n_cols = 720
+    if isinstance(input_files, list):
+        if len(input_files) > 1:
+            logger.error('Only 1 file expected. Exit')
+            raise Exception("Only 1 file expected. Exit")
+        else:
+            input_file = input_files[0]
+    else:
+        input_file = input_files
+
+    if os.path.isfile(input_file):
+
+        # Open and read the file as float32
+
+        fid = open(input_file,"r")
+        data = N.fromfile(fid,dtype=N.float32)
+
+        # Byte swap (big -> little endian) + flip UD
+        data2 = data.byteswap().reshape(n_lines,n_cols)
+        data = N.flipud(data2)
+        data_180=N.concatenate((data[...,360:720],data[...,0:360]),axis=1)
+
+        # Re-arrange from -180 to 180 longitude
+
+
+        # Write output
+        output_file = os.path.join(tmpdir, os.path.basename(input_file))
+        output_driver = gdal.GetDriverByName(es_constants.ES2_OUTFILE_FORMAT)
+        output_ds = output_driver.Create(output_file, n_cols, n_lines, 1, gdal.GDT_Float32)
+        output_ds.GetRasterBand(1).WriteArray(data_180)
+        output_ds = None
+        fid.close()
+
+    return output_file
+
 def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files, tmpdir, my_logger):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process one or more input files by:
@@ -1344,6 +1387,8 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 #           HDF5_UNZIP: zipped files containing HDF5 (see g2_BIOPAR)
 #           NASA_FIRMS: convert from csv to GTiff
 #           NETCDF: netcdf datasets (e.g. MODIS Ocean products)
+#           ECMWF: zipped file containing an .img and .hdr
+#           CPC_BINARY: binary file in big-endian
 #
 #       native_mapset_code: id code of the native mapset (from datasource_descr)
 #       subproducts: list of subproducts to be extracted from the file. Contains dictionaries such as:
@@ -1399,6 +1444,10 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 
         elif preproc_type == 'ECMWF_MARS':
             interm_files = pre_process_ecmwf_mars(subproducts, tmpdir, input_files, my_logger)
+
+        elif preproc_type == 'CPC_BINARY':
+            interm_files = pre_process_cpc_binary(subproducts, tmpdir, input_files, my_logger)
+
 
         else:
             my_logger.error('Preproc_type not recognized:[%s] Check in DB table. Exit' % preproc_type)
@@ -1545,6 +1594,9 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         out_data_type_gdal = conv_data_type_to_gdal(out_data_type)
         out_data_type_numpy = conv_data_type_to_numpy(out_data_type)
 
+        # Initialize to error value
+        output_date_str = -1
+
         # Convert the in_date format into a convenient one for DB and file naming
         # (i.e YYYYMMDD or YYYYMMDDHHMM)
         if datasource_descr.date_format == 'YYYYMMDD':
@@ -1585,6 +1637,10 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         if datasource_descr.date_format == 'MMDD':
             output_date_str = str(in_date)
+
+        if datasource_descr.date_format == 'YYYYMM':
+            # Convert from YYYYMM -> YYYYMMDD
+            output_date_str = str(in_date)+'01'
 
         if output_date_str == -1:
             output_date_str = in_date+'_DATE_ERROR_'
