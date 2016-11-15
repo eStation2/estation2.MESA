@@ -722,6 +722,27 @@ def conv_dekad_2_date(dekad):
 
     return str(dekad_date)
 
+######################################################################################
+#   dekad_nbr_in_season
+#   Purpose: Returns the position of a dekad_date after start_season
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2016/11/07
+#   Input: dekad (e.g. '0901')
+#          start_season (e.g. '0401')
+#   Output: number from 1 to 36
+#
+def dekad_nbr_in_season(dekad, start_season):
+
+    year='2000'
+    if int(dekad) >= int(start_season):
+        year2='2000'
+    else:
+        year2='2001'
+
+    dekad_start = conv_date_2_dekad(year+start_season)
+    dekad_curr = conv_date_2_dekad(year2+dekad)
+
+    return dekad_curr-dekad_start+1
 
 ######################################################################################
 #   conv_month_2_date
@@ -1670,6 +1691,57 @@ def files_temp_ajacent(file_t0, step='dekad', extension='.tif'):
     else:
         logger.warning('Time step (%s) not yet foreseen. Exit. ' % step)
         return None
+
+######################################################################################
+#
+#   Purpose: given a file (t0), returns the two previous ones (if they exist) or at least the
+#            previous one
+#            It also checks files exists (single file or empty list)
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/07/09
+#   Inputs:
+#   Output: none
+#
+def previous_files(file_t0, step='dekad', extension='.tif'):
+
+    file_list = []
+
+    # Extract dir input file
+    dir, filename = os.path.split(file_t0)
+
+    # Extract all info from full path
+    product_code, sub_product_code, version, date_t0, mapset = get_all_from_path_full(file_t0)
+
+    if step == 'dekad':
+
+        dekad_t0 = conv_date_2_dekad(date_t0)
+        # Compute/Check file before
+        dekad_m = dekad_t0 - 1
+        date_m = conv_dekad_2_date(dekad_m)
+        file_m = dir + os.path.sep + set_path_filename(str(date_m), product_code, sub_product_code, mapset, version,
+                                                       extension)
+#        if os.path.isfile(file_m):
+        file_list.append(file_m)
+#        else:
+#            logger.error('File t0-1 does not exist: %s ' % file_m)
+
+        # Compute/Check file after
+        dekad_m2 = dekad_t0 -2
+        date_m2 = conv_dekad_2_date(dekad_m2)
+        file_m2 = dir + os.path.sep + set_path_filename(str(date_m2), product_code, sub_product_code, mapset, version,
+                                                       extension)
+
+        if os.path.isfile(file_m2):
+            file_list.append(file_m2)
+        else:
+            logger.info('File t0-2 does not exist: %s ' % file_m2)
+
+        return file_list
+
+    else:
+        logger.warning('Time step (%s) not yet foreseen. Exit. ' % step)
+        return None
+
 
 ######################################################################################
 #
