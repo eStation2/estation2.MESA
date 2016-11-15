@@ -699,3 +699,28 @@ class TestGetInternet(unittest.TestCase):
 
         # Check last 90 days (check list length = 9)
         result = get_one_source(my_source)
+
+    def TestRemoteFtp_GSOD(self):
+
+        internet_id='NOAA:GSOD'
+
+        internet_sources = querydb.get_active_internet_sources(echo=False)
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':None,
+                         'end_date':None,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type}
+
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
