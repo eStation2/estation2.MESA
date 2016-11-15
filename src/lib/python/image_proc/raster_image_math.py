@@ -35,12 +35,13 @@ __author__ = 'clerima'
 # Import eStation lib modules
 from lib.python import es_logging as log
 from lib.python import metadata
+from lib.python import mapset
 from lib.python import functions
 from config import es_constants
 
 # Import third-party modules
 from osgeo.gdalconst import *
-from osgeo import gdal
+from osgeo import gdal, osr
 import numpy as N
 import copy
 import os, re, os.path, time, sys
@@ -1146,6 +1147,8 @@ def do_mask_image(input_file='', mask_file='', output_file='',output_format=None
     except:
         logger.warning('Error in do_mask_image. Remove outputs')
         if os.path.isfile(output_file):
+            outDrv = None
+            outDS = None
             os.remove(output_file)
 
 # _____________________________
@@ -2073,6 +2076,119 @@ def do_ts_linear_filter(input_file='', before_file='', after_file='', output_fil
 
     assign_metadata_processing(input_list, output_file)
 
+def do_rain_onset(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
+                output_type=None, options='', current_dekad = None):
+
+    try:
+        # Manage options
+        options_list = [es_constants.ES2_OUTFILE_OPTIONS]
+        options_list.append(options)
+
+        # Determines if it is the first dekad of the season
+        if len(input_file) == 2:
+            first_dekad = True
+            fid_t0 = gdal.Open(input_file[0], GA_ReadOnly)
+            fid_m1 = gdal.Open(input_file[1], GA_ReadOnly)
+        else:
+            first_dekad = False
+            fid_t0 = gdal.Open(input_file[0], GA_ReadOnly)
+            fid_m1 = gdal.Open(input_file[1], GA_ReadOnly)
+            fid_m2 = gdal.Open(input_file[2], GA_ReadOnly)
+            fid_prev = gdal.Open(input_file[3], GA_ReadOnly)
+
+        # Read info from file
+        nb = fid_t0.RasterCount
+        ns = fid_t0.RasterXSize
+        nl = fid_t0.RasterYSize
+        dataType = fid_t0.GetRasterBand(1).DataType
+        geoTransform = fid_t0.GetGeoTransform()
+        projection = fid_t0.GetProjection()
+        driver_type = fid_t0.GetDriver().ShortName
+        rangenl = range(nl)
+
+        # Try and assign input_nodata if it is UNDEF
+        if input_nodata is None:
+            sds_meta = metadata.SdsMetadata()
+            if os.path.exists(input_file[0]):
+                input_nodata = float(sds_meta.get_nodata_value(input_file[0]))
+            else:
+                logger.info('Test file not existing: do not assign metadata')
+
+        # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
+        if output_nodata is None and input_nodata is not None:
+            output_nodata = input_nodata
+
+        # Manage out_type (take the input one as default)
+        if output_type is None:
+            outType = dataType
+        else:
+            outType = ParseType(output_type)
+
+        # manage out_format (take the input one as default)
+        if output_format is None:
+            outFormat = driver_type
+        else:
+            outFormat = output_format
+
+        # instantiate outputs
+        outDrv = gdal.GetDriverByName(outFormat)
+        outDS = outDrv.Create(output_file, ns, nl, nb, outType, options_list)
+        outDS.SetProjection(projection)
+        outDS.SetGeoTransform(geoTransform)
+        outband = outDS.GetRasterBand(1)
+
+        # First dekad of season -> 2 inputs, no previous output
+        if first_dekad:
+            # parse image by line
+            for il in rangenl:
+                outData = N.zeros(ns)
+                data1 = N.ravel(fid_m1.GetRasterBand(1).ReadAsArray(0, il, ns, 1).astype(float))
+                data2 = N.ravel(fid_t0.GetRasterBand(1).ReadAsArray(0, il, ns, 1).astype(float))
+
+                meet = ((data1 >= 25) & ((data2) >= 20))
+                # set elements matching mask to dekad number
+                outData[meet] = current_dekad-1
+
+                # reshape before writing
+                outData.shape = (1, -1)
+                outband.WriteArray(N.array(outData), 0, il)
+        else:
+            # Case of 3 inputs and the previous output
+            # parse image by line
+            for il in rangenl:
+                outData = N.zeros(ns)
+                data1 = N.ravel(fid_m2.GetRasterBand(1).ReadAsArray(0, il, ns, 1).astype(float))
+                data2 = N.ravel(fid_m1.GetRasterBand(1).ReadAsArray(0, il, ns, 1).astype(float))
+                data3 = N.ravel(fid_t0.GetRasterBand(1).ReadAsArray(0, il, ns, 1).astype(float))
+                prev_out = N.ravel(fid_prev.GetRasterBand(1).ReadAsArray(0, il, ns, 1).astype(float))
+
+                meet_1 = ((data1 >= 25) & ((data2 + data3) >= 20))
+                meet_2 = ((data2 >= 25) & (data3 >= 20))
+
+                notdone = (prev_out == 0)
+                already_done = (prev_out > 0)
+                mask_1 = (notdone & meet_1)
+                mask_2 = (notdone & meet_2)
+                # set elements matching mask to dekad number
+                outData[mask_2] = current_dekad-1
+                outData[mask_1] = current_dekad-2
+                outData[already_done] = prev_out[already_done]
+
+                # reshape before writing
+                outData.shape = (1, -1)
+                outband.WriteArray(N.array(outData), 0, il)
+
+        # ----------------------------------------------------------------------------------------------------
+        #   Close outputs
+        outDrv = None
+        outDS = None
+        #   Writes metadata to output
+        assign_metadata_processing(input_file, output_file)
+    except:
+        logger.warning('Error in rain-onset. Remove outputs')
+        if os.path.isfile(output_file):
+            os.remove(output_file)
+
 # _____________________________
 #   Merge/move wrt processing.py functions
 def ParseType(type):
@@ -2139,6 +2255,62 @@ def return_as_list(input_args):
         for item in input_args:
             my_list.append(item)
     return my_list
+
+
+def do_reproject(inputfile, output_file, native_mapset_name, target_mapset_name):
+
+    native_mapset = mapset.MapSet()
+    native_mapset.assigndb(native_mapset_name)
+
+    # Define the Native mapset
+    target_mapset = mapset.MapSet()
+    target_mapset.assigndb(target_mapset_name)
+
+    # Open the input file
+    orig_ds = gdal.Open(inputfile)
+
+    orig_cs = osr.SpatialReference(wkt=native_mapset.spatial_ref.ExportToWkt())
+    orig_geo_transform = native_mapset.geo_transform
+    orig_size_x = native_mapset.size_x
+    orig_size_y = native_mapset.size_y
+    orig_band = orig_ds.GetRasterBand(1)
+    orig_ds.SetGeoTransform(native_mapset.geo_transform)
+    orig_ds.SetProjection(orig_cs.ExportToWkt())
+
+    in_data_type = orig_band.DataType
+
+    # Get the Target mapset
+    trg_mapset = mapset.MapSet()
+    trg_mapset.assigndb(target_mapset_name)
+    out_cs = trg_mapset.spatial_ref
+    out_size_x = trg_mapset.size_x
+    out_size_y = trg_mapset.size_y
+
+    # Create target in memory
+    mem_driver = gdal.GetDriverByName('MEM')
+
+    # Assign mapset to dataset in memory
+    out_data_type_gdal = 2
+    mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, out_data_type_gdal)
+    mem_ds.SetGeoTransform(trg_mapset.geo_transform)
+    mem_ds.SetProjection(out_cs.ExportToWkt())
+
+    # Do the Re-projection
+    orig_wkt = orig_cs.ExportToWkt()
+    res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
+                              es_constants.ES2_OUTFILE_INTERP_METHOD)
+
+    out_data = mem_ds.ReadAsArray()
+
+    output_driver = gdal.GetDriverByName('GTiff')
+    output_ds = output_driver.Create(output_file, out_size_x, out_size_y, 1, in_data_type)
+    output_ds.SetGeoTransform(trg_mapset.geo_transform)
+    output_ds.SetProjection(out_cs.ExportToWkt())
+    output_ds.GetRasterBand(1).WriteArray(out_data)
+
+    trg_ds = None
+    mem_ds = None
+    orig_ds = None
 
 # _____________________________
 #   Write to an output file the metadata
