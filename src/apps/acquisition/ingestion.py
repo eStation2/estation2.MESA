@@ -1501,6 +1501,77 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 
     return list_interm_files
 
+def pre_process_gsod(subproducts, tmpdir, input_files, my_logger):
+# -------------------------------------------------------------------------------------------------------
+#   Pre-process the GSOD yearly ftp://ftp.ncdc.noaa.gov/pub/data/gsod/
+#   The file contains measurements from a single gauge station, with all available dates for the year
+#   Typical file name is like 998499-99999-2016.op.gz, and contains columns:
+# STN--- WBAN   YEARMODA    TEMP       DEWP      SLP        STP       VISIB      WDSP     MXSPD   GUST    MAX     MIN   PRCP   SNDP   FRSHTT
+# 998499 99999  20160101    25.2 24  9999.9  0  9999.9  0  9999.9  0  999.9  0   10.2 24   15.9  999.9    30.0    20.1*  0.00I 999.9  000000
+
+
+#   NOTE: being the 'rasterization' a two-step process (here, w/o knowing the target-mapset, and in ingest-file)
+#         during the tests a 'shift has been seen (due to the re-projection in ingest_file). We therefore ensure here
+#         the global raster to be 'aligned' with the WGS84_Africa_1km (i.e. the SPOT-VGT grid)
+#
+
+    # prepare the output as an empty list
+    interm_files_list = []
+    # Definitions
+
+    file_mcd14dl = input_files[0]
+    logger.debug('Pre-processing file: %s' % file_mcd14dl)
+    pix_size = '0.008928571428571'
+    file_vrt = tmpdir+os.path.sep+"firms_file.vrt"
+    file_csv = tmpdir+os.path.sep+"firms_file.csv"
+    file_tif = tmpdir+os.path.sep+"firms_file.tif"
+    out_layer= "firms_file"
+    file_shp = tmpdir+os.path.sep+out_layer+".shp"
+
+    # Write the 'vrt' file
+    with open(file_vrt,'w') as outFile:
+        outFile.write('<OGRVRTDataSource>\n')
+        outFile.write('    <OGRVRTLayer name="firms_file">\n')
+        outFile.write('        <SrcDataSource>'+file_csv+'</SrcDataSource>\n')
+        outFile.write('        <OGRVRTLayer name="firms_file" />\n')
+        outFile.write('        <GeometryType>wkbPoint</GeometryType>\n')
+        outFile.write('        <LayerSRS>WGS84</LayerSRS>\n')
+        outFile.write('        <GeometryField encoding="PointFromColumns" x="longitude" y="latitude" />\n')
+        outFile.write('    </OGRVRTLayer>\n')
+        outFile.write('</OGRVRTDataSource>\n')
+
+    # Generate the csv file with header
+    with open(file_csv,'w') as outFile:
+        #outFile.write('latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp')
+        with open(file_mcd14dl, 'r') as input_file:
+            outFile.write(input_file.read())
+
+    # Execute the ogr2ogr command
+    command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' '+file_vrt
+    my_logger.debug('Command is: '+command)
+    try:
+        os.system(command)
+    except:
+        my_logger.error('Error in executing ogr2ogr')
+        return 1
+
+    # Convert from shapefile to rasterfile
+    command = 'gdal_rasterize  -l ' + out_layer + ' -burn 1 '\
+            + ' -tr ' + str(pix_size) + ' ' + str(pix_size) \
+            + ' -co "compress=LZW" -of GTiff -ot Byte '     \
+            + ' -te -179.995535714286 -89.995535714286 179.995535714286 89.995535714286 ' \
+            +file_shp+' '+file_tif
+
+    my_logger.debug('Command is: '+command)
+    try:
+        os.system(command)
+    except:
+        my_logger.error('Error in executing ogr2ogr')
+        return 1
+
+    interm_files_list.append(file_tif)
+
+    return interm_files_list
 
 def ingest_file(interm_files_list, in_date, product, subproducts, datasource_descr, my_logger, in_files='', echo_query=False):
 # -------------------------------------------------------------------------------------------------------
