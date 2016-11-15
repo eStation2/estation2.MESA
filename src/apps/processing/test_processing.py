@@ -124,18 +124,18 @@ from multiprocessing import Queue
 #   ---------------------------------------------------------------------
 # modis-pp computation
 #   ---------------------------------------------------------------------
-from apps.processing.processing_std_modis_pp import *
-args = {'pipeline_run_level':3, \
-        'pipeline_printout_level':0, \
-        'pipeline_printout_graph_level': 0, \
-        'prod': 'modis-chla',\
-        'starting_sprod':'monavg',\
-        'mapset': 'MODIS-Africa-4km',\
-        'version':'v2013.1',
-        'logfile':'modis-pp'
-        }
-res_queue = None
-processing_std_modis_pp(res_queue, **args)
+# from apps.processing.processing_std_modis_pp import *
+# args = {'pipeline_run_level':3, \
+#         'pipeline_printout_level':0, \
+#         'pipeline_printout_graph_level': 0, \
+#         'prod': 'modis-chla',\
+#         'starting_sprod':'monavg',\
+#         'mapset': 'MODIS-Africa-4km',\
+#         'version':'v2013.1',
+#         'logfile':'modis-pp'
+#         }
+# res_queue = None
+# processing_std_modis_pp(res_queue, **args)
 #
 #   ---------------------------------------------------------------------
 # fewsnet-rfe
@@ -284,4 +284,55 @@ processing_std_modis_pp(res_queue, **args)
 #
 # res_queue = None
 # proc_lists=processing_std_msg_mpe(res_queue,**args)
+# print(proc_lists)
+#   ---------------------------------------------------------------------
+# arc2-rain cumulate
+#   ---------------------------------------------------------------------
+from apps.processing.processing_std_precip_1day import *
+# # # # # Create the list of dates -> returns empty if start==end==None
+# #
+# start_date='19830301'
+# end_date = '19831231'
+#starting_dates = proc_functions.get_list_dates_for_dataset('arc2-rain','1day', '2.0', start_date=start_date, end_date=end_date)
+starting_dates = None
+mapset='ARC2-Africa-11km'
+# #
+args = {'pipeline_run_level':3, \
+        'pipeline_printout_level':0, \
+        'pipeline_printout_graph_level': 0, \
+        'prod': 'arc2-rain',\
+        'starting_sprod':'1day',\
+        'starting_dates': starting_dates,\
+        'mapset': mapset,\
+        'version':'2.0',
+        'logfile':'log-arc2-rain.log'}
+
+res_queue = None
+proc_lists=processing_std_precip_1day(res_queue,**args)
+print(proc_lists)
+
+#   ---------------------------------------------------------------------
+# arc2-rain SPI
+#   ---------------------------------------------------------------------
+# from apps.processing.processing_std_spi_monthly import *
+# # # # # Create the list of dates -> returns empty if start==end==None
+# #
+# #start_date='19830301'
+# #end_date = '19830310'
+# #starting_dates = proc_functions.get_list_dates_for_dataset('arc2-rain','1day', '2.0', start_date=start_date, end_date=end_date)
+# starting_dates = None
+# mapset='ARC2-Africa-11km'
+# # #
+# args = {'pipeline_run_level':3, \
+#         'pipeline_printout_level':0, \
+#         'pipeline_printout_graph_level': 0, \
+#         'prod': 'arc2-rain',\
+#         'starting_sprod':'1mon',\
+#         'starting_dates': starting_dates,\
+#         'mapset': mapset,\
+#         'version':'2.0',
+#         'logfile':'log-arc2-rain.log'}
+#
+# res_queue = None
+# proc_lists=processing_std_spi_monthly(res_queue,**args)
 # print(proc_lists)
