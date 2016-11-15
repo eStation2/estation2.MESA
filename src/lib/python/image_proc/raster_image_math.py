@@ -1281,6 +1281,7 @@ def do_cumulate(input_file='', output_file='', input_nodata=None, output_nodata=
         outDrv = None
         outDS = None
         #   Writes metadata to output
+
         assign_metadata_processing(input_file, output_file)
     except:
         logger.warning('Error in do_cumulate. Remove outputs')
@@ -2154,25 +2155,29 @@ def assign_metadata_processing(input_file_list, output_file):
     else:
         first_input = input_file_list
 
-    # Open and read data
-    sds_meta.read_from_file(first_input)
+    try:
+        # Open and read data
+        sds_meta.read_from_file(first_input)
 
-    # Modify/Assign some to the ingested file
-    sds_meta.assign_comput_time_now()
-    str_date, productcode, subproductcode, mapset, version = functions.get_all_from_filename(os.path.basename(output_file))
-    # [productcode, subproductcode, version, str_date, mapset] = functions.get_all_from_path_full(output_file)
+        # Modify/Assign some to the ingested file
+        sds_meta.assign_comput_time_now()
+        str_date, productcode, subproductcode, mapset, version = functions.get_all_from_filename(os.path.basename(output_file))
+        # [productcode, subproductcode, version, str_date, mapset] = functions.get_all_from_path_full(output_file)
 
-    #   TODO-M.C.: cannot read metadata from database for a newly created product ! Copy from input file ?
-    #
-    sds_meta.assign_from_product(productcode, subproductcode, version)
-    #sds_meta.assign_product_elemets(productcode, subproductcode, version)
+        #   TODO-M.C.: cannot read metadata from database for a newly created product ! Copy from input file ?
+        #
+        sds_meta.assign_from_product(productcode, subproductcode, version)
+        #sds_meta.assign_product_elemets(productcode, subproductcode, version)
 
-    sds_meta.assign_date(str_date)
-    sds_meta.assign_input_files(input_file_list)
+        sds_meta.assign_date(str_date)
+        sds_meta.assign_input_files(input_file_list)
 
-    # Define subdirectory
-    sub_directory = functions.set_path_sub_directory(productcode,subproductcode,'Derived',version,mapset)
-    sds_meta.assign_subdir(sub_directory)
+        # Define subdirectory
+        sub_directory = functions.set_path_sub_directory(productcode,subproductcode,'Derived',version,mapset)
+        sds_meta.assign_subdir(sub_directory)
 
-    # Write Metadata
-    sds_meta.write_to_file(output_file)
+        # Write Metadata
+        sds_meta.write_to_file(output_file)
+    except:
+        logger.error('Error in assign metadata. Check product defined in DB!')
+        raise Exception('Error in assign metadata')
