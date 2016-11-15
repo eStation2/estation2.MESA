@@ -77,3 +77,38 @@ class TestFunctions(TestCase):
 
         args = {"input_file": input_files, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw",'output_type':'Float32', 'input_nodata':-32767}
         raster_image_math.do_cumulate(**args)
+
+    def test_rain_onset(self):
+
+        input_file = [
+            '/data/processing/fewsnet-rfe/2.0/FEWSNET-Africa-8km/tif/10d/20160911_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif', \
+            '/data/processing/fewsnet-rfe/2.0/FEWSNET-Africa-8km/tif/10d/20160901_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif']
+
+        output_file = '/data/temp/20160911_fewsnet-rfe_rain-onset_FEWSNET-Africa-8km_2.0.tif'
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw",
+                'output_type': 'Int16', 'input_nodata': -32767, 'current_dekad':2}
+        raster_image_math.do_rain_onset(**args)
+
+
+    def test_rain_onset_1(self):
+        input_file = [
+            '/data/processing/fewsnet-rfe/2.0/FEWSNET-Africa-8km/tif/10d/20160921_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif', \
+            '/data/processing/fewsnet-rfe/2.0/FEWSNET-Africa-8km/tif/10d/20160911_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif', \
+            '/data/processing/fewsnet-rfe/2.0/FEWSNET-Africa-8km/tif/10d/20160901_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif', \
+            '/data/temp/20160911_fewsnet-rfe_rain-onset_FEWSNET-Africa-8km_2.0.tif']
+
+        output_file = '/data/temp/20160921_fewsnet-rfe_rain-onset_FEWSNET-Africa-8km_2.0.tif'
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw",
+                'output_type': 'Int16', 'input_nodata': -32767, 'current_dekad':3}
+        raster_image_math.do_rain_onset(**args)
+
+    def test_reprojection(self):
+
+        # Define the Native mapset
+        native_mapset_name ='SPOTV-SADC-1km'
+        target_mapset_name = 'FEWSNET-Africa-8km'
+
+        inputfile='/data/temp/AGRIC_MASK.tif'
+        output_file='/data/temp/AGRIC_MASK-'+target_mapset_name+'.tif'
+
+        raster_image_math.do_reproject(inputfile, output_file,native_mapset_name,target_mapset_name)
