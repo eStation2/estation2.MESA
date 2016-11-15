@@ -121,9 +121,9 @@ from multiprocessing import Queue
 #         }
 # res_queue = None
 # processing_std_modis_monavg(res_queue, **args)
-#   ---------------------------------------------------------------------
-# modis-pp computation
-#   ---------------------------------------------------------------------
+# #   ---------------------------------------------------------------------
+# # modis-pp computation
+# #   ---------------------------------------------------------------------
 # from apps.processing.processing_std_modis_pp import *
 # args = {'pipeline_run_level':3, \
 #         'pipeline_printout_level':0, \
@@ -286,6 +286,29 @@ from multiprocessing import Queue
 # proc_lists=processing_std_msg_mpe(res_queue,**args)
 # print(proc_lists)
 #   ---------------------------------------------------------------------
+# onset computation
+#   ---------------------------------------------------------------------
+# from apps.processing.processing_std_rain_onset import *
+# start_date='20160901'
+# end_date = '20161011'
+# starting_dates = proc_functions.get_list_dates_for_dataset('fewsnet-rfe', '10d', '2.0',
+#                                                            start_date=start_date, end_date=end_date)
+#
+# args = {'pipeline_run_level':3, \
+#         'pipeline_printout_level':0, \
+#         'pipeline_printout_graph_level': 0, \
+#         'prod': 'fewsnet-rfe',\
+#         'starting_sprod':'10d',\
+#         'mapset': 'FEWSNET-Africa-8km',\
+#         'version':'2.0',
+#         'logfile':'rain-onset',
+#         'starting_dates':starting_dates
+#         }
+# res_queue = None
+# processing_std_rain_onset(res_queue, **args)
+
+
+#   ---------------------------------------------------------------------
 # arc2-rain cumulate
 #   ---------------------------------------------------------------------
 from apps.processing.processing_std_precip_1day import *
@@ -336,3 +359,25 @@ print(proc_lists)
 # res_queue = None
 # proc_lists=processing_std_spi_monthly(res_queue,**args)
 # print(proc_lists)
+#   ---------------------------------------------------------------------
+# seas cumulation computation
+#   ---------------------------------------------------------------------
+from apps.processing.processing_std_seas_cum import *
+# start_date='20150901'
+# end_date = '20160621'
+# starting_dates = proc_functions.get_list_dates_for_dataset('fewsnet-rfe', '10d', '2.0',
+#                                                            start_date=start_date, end_date=end_date)
+starting_dates=None
+args = {'pipeline_run_level':3, \
+        'pipeline_printout_level':0, \
+        'pipeline_printout_graph_level': 0, \
+        'prod': 'fewsnet-rfe',\
+        'starting_sprod':'10d',\
+        'mapset': 'FEWSNET-Africa-8km',\
+        'version':'2.0',
+        'logfile':'cum.log',
+        'trg_mapset': 'SPOTV-SADC-1km',\
+        'starting_dates':starting_dates
+        }
+res_queue = None
+processing_std_seas_cum(res_queue, **args)
