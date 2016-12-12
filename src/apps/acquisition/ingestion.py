@@ -24,6 +24,8 @@ import time
 import shutil
 import gzip
 import psutil
+import csv
+
 from multiprocessing import *
 
 # import eStation2 modules
@@ -33,6 +35,9 @@ from lib.python import es_logging as log
 from lib.python import mapset
 from lib.python import metadata
 from config import es_constants
+from apps.processing import proc_functions
+from apps.productmanagement import products
+from apps.productmanagement import datasets
 
 import pygrib
 import fnmatch
@@ -128,11 +133,11 @@ def loop_ingestion(dry_run=False):
                     # Loop over ingestion triggers
                     subproducts = list()
                     for ingest in ingestions:
-                        # Create an identifier for the log file
-                        #log_file_id = functions.set_path_filename_no_date(product['productcode'],
-                        #                                               ingest.subproductcode,
-                        #                                               ingest.mapsetcode, ext)
-                        ### To be done logger = log.my_logger(__name__+log_file_id)
+
+                        dates_not_in_filename = False
+                        if ingest.input_to_process_re == 'dates_not_in_filename':
+                            dates_not_in_filename = True
+
                         logger.debug(" --> processing subproduct: %s" % ingest.subproductcode)
                         args = {"productcode": product['productcode'],
                                 "subproductcode": ingest.subproductcode,
@@ -155,28 +160,69 @@ def loop_ingestion(dry_run=False):
 
                     # Get the list of unique dates by extracting the date from all files.
                     dates_list = []
-                    for filename in files:
-                        date_position = int(datasource_descr.date_position)
-                        if datasource_descr.format_type == 'delimited':
-                            splitted_fn = re.split(datasource_descr.delimiter, filename)
-                            date_string = splitted_fn[date_position]
-                            if len(date_string) > len(datasource_descr.date_format):
-                                date_string=date_string[0:len(datasource_descr.date_format)]
-                            dates_list.append(date_string)
-                        else:
-                            dates_list.append(filename[date_position:date_position + len(datasource_descr.date_format)])
 
-                    dates_list = set(dates_list)
-                    dates_list = sorted(dates_list, reverse=False)
+                    #   Check the case 'dates_not_in_filename' (e.g. GSOD -> yearly files continuously updated)
+                    if dates_not_in_filename:
+
+                        # Build the list of dates from datasource description
+                        start_datetime=datetime.datetime.strptime(str(internet_filter.start_date),"%Y%m%d")
+                        if internet_filter.end_date is None:
+                            end_datetime = datetime.date.today()
+                        else:
+                            end_datetime=datetime.datetime.strptime(str(internet_filter.end_date),"%Y%m%d")
+
+                        all_starting_dates = proc_functions.get_list_dates_for_dataset(product_in_info.productcode,\
+                                                                                   product_in_info.subproductcode,\
+                                                                                   product_in_info.version,\
+                                                                                   start_date=internet_filter.start_date,
+                                                                                   end_date=internet_filter.end_date)
+
+                        my_dataset = products.Dataset(product_in_info.productcode,
+                                                      product_in_info.subproductcode,
+                                                      ingest.mapsetcode,
+                                                      version=product_in_info.version,
+                                                      from_date=start_datetime,
+                                                      to_date=end_datetime)
+                        my_dates = my_dataset.get_dates()
+
+                        my_formatted_dates = []
+                        for my_date in my_dates:
+                            my_formatted_dates.append(my_dataset._frequency.format_date(my_date))
+
+                        my_missing_dates = []
+                        for curr_date in all_starting_dates:
+                            if curr_date not in my_formatted_dates:
+                                my_missing_dates.append(curr_date)
+
+                        dates_list = sorted(my_missing_dates, reverse=False)
+
+                    else:
+                        # Build the list of dates from filenames
+                        for filename in files:
+                            date_position = int(datasource_descr.date_position)
+                            if datasource_descr.format_type == 'delimited':
+                                splitted_fn = re.split(datasource_descr.delimiter, filename)
+                                date_string = splitted_fn[date_position]
+                                if len(date_string) > len(datasource_descr.date_format):
+                                    date_string=date_string[0:len(datasource_descr.date_format)]
+                                dates_list.append(date_string)
+                            else:
+                                dates_list.append(filename[date_position:date_position + len(datasource_descr.date_format)])
+
+                        dates_list = set(dates_list)
+                        dates_list = sorted(dates_list, reverse=False)
 
                     # Loop over dates and get list of files
                     for in_date in dates_list:
-                        # Refresh the files list (some files have been deleted)
-                        files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(my_filter_expr, os.path.basename(f))]
-                        logger_spec.debug("     --> processing date, in native format: %s" % in_date)
-                        # Get the list of existing files for that date
-                        regex = re.compile(".*(" + in_date + ").*")
-                        date_fileslist = [ingest_dir_in + m.group(0) for l in files for m in [regex.search(l)] if m]
+                        if dates_not_in_filename:
+                            date_fileslist = [ingest_dir_in + l for l in files]
+                        else:
+                            # Refresh the files list (some files have been deleted)
+                            files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(my_filter_expr, os.path.basename(f))]
+                            logger_spec.debug("     --> processing date, in native format: %s" % in_date)
+                            # Get the list of existing files for that date
+                            regex = re.compile(".*(" + in_date + ").*")
+                            date_fileslist = [ingest_dir_in + m.group(0) for l in files for m in [regex.search(l)] if m]
                         # Pass list of files to ingestion routine
                         if (not dry_run):
                             try:
@@ -185,7 +231,8 @@ def loop_ingestion(dry_run=False):
                                 logger.error("Error in ingestion of file [%s] " % (functions.conv_list_2_string(date_fileslist)))
                             else:
                                 # Result is None means we are still waiting for some files to be received. Keep files in /data/ingest
-                                if result is not None:
+                                # dates_not_in_filename means the input files contains many dates (e.g. GSOD precip)
+                                if result is not None and not dates_not_in_filename:
                                     if source.store_original_data:
                                     # Copy to 'Archive' directory
                                         output_directory = data_dir_out + functions.set_path_sub_directory(product['productcode'],
@@ -382,7 +429,8 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
     if do_preprocess == 1:
         my_logger.debug("Calling routine %s" % 'preprocess_files')
         try:
-            composed_file_list = pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files, tmpdir, my_logger)
+            composed_file_list = pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files, tmpdir,
+                                                    my_logger, in_date=in_date)
             # Pre-process returns None if there are not enough files for continuing
             if composed_file_list is None:
                 logger.debug('Waiting for additional files to be received. Return')
@@ -1222,9 +1270,10 @@ def pre_process_nasa_firms(subproducts, tmpdir, input_files, my_logger):
 
     return interm_files_list
 
-def pre_process_wdb_gee(subproducts, tmpdir, input_files, my_logger):
+def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my_logger):
 # -------------------------------------------------------------------------------------------------------
 #   Merges the various tiles of the .tif files retrieved from GEE application
+#   Additionally, writes to the 'standard' mapset 'WD-GEE-ECOWAS-AVG'
 #
 
     # Prepare the output as an empty list
@@ -1250,7 +1299,8 @@ def pre_process_wdb_gee(subproducts, tmpdir, input_files, my_logger):
     if len(good_input_files) == 0:
         return []
     # Does check the number of files ?
-    output_file= tmpdir+os.path.sep + 'merge_output.tif'
+    output_file         = tmpdir+os.path.sep + 'merge_output.tif'
+    output_file_mapset  = tmpdir+os.path.sep + 'merge_output_WD-GEE-ECOWAS-AVG.tif'
 
     # Merge all input products into a 'tmp' file
     try:
@@ -1266,8 +1316,50 @@ def pre_process_wdb_gee(subproducts, tmpdir, input_files, my_logger):
     except:
         pass
 
-    # Assign output file
-    interm_files_list.append(output_file)
+
+    # Check if re-projection has to be done
+    trg_mapset_id=sprod['mapsetcode']
+
+    if trg_mapset_id != native_mapset_code:
+
+        trg_mapset = mapset.MapSet()
+        trg_mapset.assigndb(trg_mapset_id)
+        trg_xsize = trg_mapset.size_x
+        trg_ysize = trg_mapset.size_y
+
+        # Original mapset (from datasource_description -> subproduct)
+        orig_mapset = mapset.MapSet()
+        orig_mapset.assigndb(native_mapset_code)
+
+        # Do some checks on mapsets compatibility
+        if trg_mapset.geo_transform[0] != orig_mapset.geo_transform[0] or \
+           trg_mapset.geo_transform[1] != orig_mapset.geo_transform[1] or \
+           trg_mapset.geo_transform[3] != orig_mapset.geo_transform[3] or \
+           trg_mapset.geo_transform[5] != orig_mapset.geo_transform[5]:
+
+            # Raise error and exit
+            my_logger.debug('Warping cannot be done from orig to target mapset')
+            return None
+
+        try:
+            command = es_constants.gdal_translate
+            command += ' -co \"compress=lzw\"'
+            command += ' -ot BYTE '
+            command += ' -outsize '+str(trg_xsize)+' '+str(trg_ysize)
+            command += ' '+output_file
+            command += ' '+output_file_mapset
+
+            my_logger.debug('Command for re-project is: ' + command)
+            os.system(command)
+            interm_files_list.append(output_file_mapset)
+
+        except:
+            pass
+
+    else:
+        # Assign output file
+        interm_files_list.append(output_file)
+
     return interm_files_list
 
 def pre_process_ecmwf_mars(subproducts, tmpdir , input_files, my_logger):
@@ -1362,7 +1454,7 @@ def pre_process_cpc_binary(subproducts, tmpdir , input_files, my_logger):
 
     return output_file
 
-def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files, tmpdir, my_logger):
+def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files, tmpdir, my_logger, in_date=None):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process one or more input files by:
 #   1. Unzipping (optionally extracting one out of many layers - SDSs)
@@ -1389,6 +1481,7 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 #           NETCDF: netcdf datasets (e.g. MODIS Ocean products)
 #           ECMWF: zipped file containing an .img and .hdr
 #           CPC_BINARY: binary file in big-endian
+#           BINARY: .bil product (e.g. GEOWRSI)
 #
 #       native_mapset_code: id code of the native mapset (from datasource_descr)
 #       subproducts: list of subproducts to be extracted from the file. Contains dictionaries such as:
@@ -1440,7 +1533,8 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
             interm_files = pre_process_netcdf (subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'JRC_WBD_GEE':
-            interm_files = pre_process_wdb_gee (subproducts, tmpdir, input_files, my_logger)
+            interm_files = pre_process_wdb_gee (subproducts, native_mapset_code, tmpdir, input_files, my_logger)
+            georef_already_done = True
 
         elif preproc_type == 'ECMWF_MARS':
             interm_files = pre_process_ecmwf_mars(subproducts, tmpdir, input_files, my_logger)
@@ -1448,6 +1542,8 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
         elif preproc_type == 'CPC_BINARY':
             interm_files = pre_process_cpc_binary(subproducts, tmpdir, input_files, my_logger)
 
+        elif preproc_type == 'GSOD':
+            interm_files = pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
 
         else:
             my_logger.error('Preproc_type not recognized:[%s] Check in DB table. Exit' % preproc_type)
@@ -1501,52 +1597,164 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 
     return list_interm_files
 
-def pre_process_gsod(subproducts, tmpdir, input_files, my_logger):
+def pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=None):
 # -------------------------------------------------------------------------------------------------------
-#   Pre-process the GSOD yearly ftp://ftp.ncdc.noaa.gov/pub/data/gsod/
+#   Pre-process the GSOD yearly files (from ftp://ftp.ncdc.noaa.gov/pub/data/gsod/)
 #   The file contains measurements from a single gauge station, with all available dates for the year
 #   Typical file name is like 998499-99999-2016.op.gz, and contains columns:
-# STN--- WBAN   YEARMODA    TEMP       DEWP      SLP        STP       VISIB      WDSP     MXSPD   GUST    MAX     MIN   PRCP   SNDP   FRSHTT
-# 998499 99999  20160101    25.2 24  9999.9  0  9999.9  0  9999.9  0  999.9  0   10.2 24   15.9  999.9    30.0    20.1*  0.00I 999.9  000000
-
-
-#   NOTE: being the 'rasterization' a two-step process (here, w/o knowing the target-mapset, and in ingest-file)
-#         during the tests a 'shift has been seen (due to the re-projection in ingest_file). We therefore ensure here
-#         the global raster to be 'aligned' with the WGS84_Africa_1km (i.e. the SPOT-VGT grid)
+#   STN--- WBAN   YEARMODA    TEMP       DEWP      SLP        STP       VISIB      WDSP     MXSPD   GUST    MAX     MIN   PRCP   SNDP   FRSHTT
+#   998499 99999  20160101    25.2 24  9999.9  0  9999.9  0  9999.9  0  999.9  0   10.2 24   15.9  999.9    30.0    20.1*  0.00I 999.9  000000
+#
+#   The precipitation value is in inches and hundredths, followed by a flag, as below:
+#
+#      A = 1 report of 6-hour precipitation amount.
+#      B = Summation of 2 reports of 6-hour precipitation amount.
+#      C = Summation of 3 reports of 6-hour precipitation amount.
+#      D = Summation of 4 reports of 6-hour precipitation amount.
+#      E = 1 report of 12-hour precipitation amount.
+#      F = Summation of 2 reports of 12-hour precipitation amount.
+#      G = 1 report of 24-hour precipitation amount.
+#      H = Station reported '0' as the amount for the day (eg, from 6-hour reports),
+#          but also reported at least one occurrence of precipitation in hourly
+#          observations--this could indicate a trace occurred, but should be considered
+#          as incomplete data for the day.
+#      I = Station did not report any precip data for the day and did not report any
+#          occurrences of precipitation in its hourly observations--it's still possible that
+#          precip occurred but was not reported.
 #
 
-    # prepare the output as an empty list
+    # Definitions: use 1km pixel size and global coverage
+    pixel_size = '0.008928571428571'
+    te_global = ' -179.995535714286 -89.995535714286 179.995535714286 89.995535714286 '
     interm_files_list = []
-    # Definitions
 
-    file_mcd14dl = input_files[0]
-    logger.debug('Pre-processing file: %s' % file_mcd14dl)
-    pix_size = '0.008928571428571'
-    file_vrt = tmpdir+os.path.sep+"firms_file.vrt"
-    file_csv = tmpdir+os.path.sep+"firms_file.csv"
-    file_tif = tmpdir+os.path.sep+"firms_file.tif"
-    out_layer= "firms_file"
+    # Arrange to create the .shp file as well
+    es2_data_dir = es_constants.es2globals['processing_dir']+os.path.sep
+    ext=es_constants.ES2_OUTFILE_EXTENSION
+
+    shp_prod_ident_noext = functions.set_path_filename_no_date('gsod-rain', \
+                                                         subproducts[0]['subproduct'],\
+                                                         subproducts[0]['mapsetcode'],
+                                                         '1.0', '')
+    shp_prod_ident = shp_prod_ident_noext + '.shp'
+    shp_output_dir = es2_data_dir+functions.set_path_sub_directory('gsod-rain',\
+                                                                    subproducts[0]['subproduct'],
+                                                                    'Ingest',
+                                                                    '1.0',
+                                                                     subproducts[0]['mapsetcode'])
+
+
+    shp_output_file = shp_output_dir+os.path.sep+str(in_date)+shp_prod_ident
+
+    logger.debug('First pre-processing file: %s' % input_files[0])
+    # Local definitions
+    f_stations = '/eStation2/static/sadc_regional_stations.csv'      # TEMP ?????? -> move to a variable/argument
+    file_csv = tmpdir+os.path.sep+"gsod_file.csv"
+    file_out = tmpdir+os.path.sep+"gsod_raster.tif"
+    out_layer= "gsod_file"
+
     file_shp = tmpdir+os.path.sep+out_layer+".shp"
 
     # Write the 'vrt' file
+    file_vrt = tmpdir+os.path.sep+"gsod_file.vrt"
     with open(file_vrt,'w') as outFile:
         outFile.write('<OGRVRTDataSource>\n')
-        outFile.write('    <OGRVRTLayer name="firms_file">\n')
+        outFile.write('    <OGRVRTLayer name="gsod_file">\n')
         outFile.write('        <SrcDataSource>'+file_csv+'</SrcDataSource>\n')
-        outFile.write('        <OGRVRTLayer name="firms_file" />\n')
+        outFile.write('        <OGRVRTLayer name="gsod_file" />\n')
         outFile.write('        <GeometryType>wkbPoint</GeometryType>\n')
         outFile.write('        <LayerSRS>WGS84</LayerSRS>\n')
         outFile.write('        <GeometryField encoding="PointFromColumns" x="longitude" y="latitude" />\n')
         outFile.write('    </OGRVRTLayer>\n')
         outFile.write('</OGRVRTDataSource>\n')
 
-    # Generate the csv file with header
-    with open(file_csv,'w') as outFile:
-        #outFile.write('latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp')
-        with open(file_mcd14dl, 'r') as input_file:
-            outFile.write(input_file.read())
+    # Unzip all input files in tmpdir
+    for infile in input_files:
+        command='gunzip -c '+infile+' > '+tmpdir+os.path.sep+os.path.basename(infile)
+        try:
+            os.system(command)
+        except:
+            my_logger.error('Error in unzipping file: '+infile)
+            pass
 
-    # Execute the ogr2ogr command
+    # Define the dates to consider (format YYYYMMDD) -> Should consider existing dates !!
+    list_dates = []
+    list_dates.append(in_date)
+
+    # Loop over dates
+    for mydate in list_dates:
+
+        # Create a .txt file for each date
+        outfile=tmpdir+os.path.sep+str(mydate)+'.gsod.all.stations.txt'
+        command='grep -h '+mydate+' '+tmpdir+os.path.sep+'*.op* >>'+outfile
+        try:
+            os.system(command)
+        except:
+            my_logger.error('Error in creating outfile: '+outfile)
+            pass
+
+        f_meas=outfile
+
+        # Read co-ordinates of all stations
+        stations_list=[]
+        f = open(f_stations,'rt')
+        reader = csv.reader(f, delimiter=',')
+        for row in reader:
+            stations_list.append(row)
+        f.close
+
+        # Create dictionary for translating station -> Lat/Lon
+        dict_latlon = {'empty_key':'empty_value'}
+        # File downloaded from GBOC
+        # for station in stations_list:
+        #     #USAF   WBAN  STATION NAME                  CTRY ST CALL  LAT     LON      ELEV(M) BEGIN    END
+        #     station_id = station[0][0:6]
+        #     if station[0][58:65].strip() != '':
+        #         station_lat = float(station[0][58:65])
+        #     else:
+        #         pass
+        #     if station[0][66:73].strip() != '':
+        #         station_lon = float(station[0][66:73])
+        #     else:
+        #         pass
+        #     dict_latlon[station_id]=str(station_lat)+','+str(station_lon)
+
+        # File received from Thembani
+        for station in stations_list:
+            #USAF   WBAN  STATION NAME                  CTRY ST CALL  LAT     LON      ELEV(M) BEGIN    END
+            station_id = station[0]
+            try:
+                station_lat = float(station[1])
+            except:
+                station_lat = None
+            try:
+                station_lon = float(station[2])
+            except:
+                station_lon = None
+
+            if station_lat is not None and station_lon is not None:
+                dict_latlon[station_id]=str(station_lat)+','+str(station_lon)
+
+        # Read measures file, and convert to csv file
+        f = open(f_meas,'rt')
+        fout = open(file_csv,'w')
+        fout.write('latitude,longitude,precipitation,flag \n')
+
+        reader = csv.reader(f)
+        for measure in reader:
+            station_id = measure[0][0:6]
+            precipitation = measure[0][118:123]
+            flag = measure[0][123:124]
+            if float(precipitation) != 99.99:
+                try:
+                    lat_lon = dict_latlon[station_id]
+                    fout.write('%16s,%8s \n' % (lat_lon,precipitation))
+                except:
+                    pass
+        f.close()
+        fout.close()
+
+    # Convert from csv to Shape (ogr2ogr command)
     command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' '+file_vrt
     my_logger.debug('Command is: '+command)
     try:
@@ -1555,12 +1763,26 @@ def pre_process_gsod(subproducts, tmpdir, input_files, my_logger):
         my_logger.error('Error in executing ogr2ogr')
         return 1
 
+    # Copy .shp to output_dir
+    extensions = []
+    extensions.append('.dbf')
+    extensions.append('.prj')
+    extensions.append('.shp')
+    extensions.append('.shx')
+
+    for ext in  range(len(extensions)):
+        extension = extensions[ext]
+        print tmpdir+os.path.sep+"gsod_file"+extension
+        print shp_output_dir+os.path.sep+str(in_date)+shp_prod_ident_noext+extension
+        shutil.copyfile(tmpdir+os.path.sep+"gsod_file"+extension,\
+                        shp_output_dir+os.path.sep+str(in_date)+shp_prod_ident_noext+extension)
+
     # Convert from shapefile to rasterfile
-    command = 'gdal_rasterize  -l ' + out_layer + ' -burn 1 '\
-            + ' -tr ' + str(pix_size) + ' ' + str(pix_size) \
-            + ' -co "compress=LZW" -of GTiff -ot Byte '     \
-            + ' -te -179.995535714286 -89.995535714286 179.995535714286 89.995535714286 ' \
-            +file_shp+' '+file_tif
+    command = 'gdal_rasterize  -l ' + out_layer + ' -a precipitat '\
+            + ' -tr ' + str(pixel_size) + ' ' + str(pixel_size) \
+            + ' -co "compress=LZW" -of GTiff -ot Float32 '     \
+            + ' -te  ' + te_global \
+            +file_shp+' '+file_out
 
     my_logger.debug('Command is: '+command)
     try:
@@ -1569,7 +1791,7 @@ def pre_process_gsod(subproducts, tmpdir, input_files, my_logger):
         my_logger.error('Error in executing ogr2ogr')
         return 1
 
-    interm_files_list.append(file_tif)
+    interm_files_list.append(file_out)
 
     return interm_files_list
 
@@ -1761,10 +1983,11 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         native_mapset_code = datasource_descr.native_mapset
         orig_ds = gdal.Open(intermFile, gdal.GA_ReadOnly)           # Why in ROnly !??? it generates an error below
-        
-        if native_mapset_code != 'default':
-            native_mapset = mapset.MapSet()
-            native_mapset.assigndb(native_mapset_code)
+        native_mapset = mapset.MapSet()
+        native_mapset.assigndb(native_mapset_code)
+
+        if not native_mapset.is_wbd():
+          if native_mapset_code != 'default':
             orig_cs = osr.SpatialReference(wkt=native_mapset.spatial_ref.ExportToWkt())
             #orig_cs.ImportFromWkt(native_mapset.spatial_ref)                     # ???
             orig_geo_transform = native_mapset.geo_transform
@@ -1777,7 +2000,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
                 orig_ds.SetProjection(orig_cs.ExportToWkt())
             except:
                 my_logger.debug('Cannot set the geo-projection .. Continue')
-        else:
+          else:
             try:
                 # Read geo-reference from input file
                 orig_cs = osr.SpatialReference()
@@ -1792,7 +2015,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         trg_mapset = mapset.MapSet()
         trg_mapset.assigndb(mapset_id)
         logger.debug('Target Mapset is: %s' % mapset_id)
-        native_mapset_code = datasource_descr.native_mapset
+
         if trg_mapset.short_name == native_mapset_code:
             reprojection = 0
         else:
@@ -1823,7 +2046,8 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             old_file_list = None
 
         # Do re-projection, or write to GTIFF file
-        if reprojection == 1:
+        if not native_mapset.is_wbd():
+          if reprojection == 1:
 
             my_logger.debug('Doing re-projection to target mapset: %s' % trg_mapset.short_name)
             # Get target SRS from mapset
@@ -1864,7 +2088,8 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             trg_ds = out_driver.CreateCopy(my_output_filename, out_ds, 0, [es_constants.ES2_OUTFILE_OPTIONS])
             trg_ds.GetRasterBand(1).WriteArray(scaled_data)
 
-        else:
+          else:
+
             my_logger.debug('Doing only rescaling/format conversion')
 
             # Read from input file
@@ -1878,15 +2103,16 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             trg_ds.SetProjection(orig_ds.GetProjectionRef())
             trg_ds.SetGeoTransform(orig_geo_transform)
 
-            if mapset_id != 'WD-GEE-ECOWAS-1' and mapset_id != 'WD-GEE-ECOWAS-AVG':
-                # Apply rescale to data
-                scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
-                                       out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger)
-                trg_ds.GetRasterBand(1).WriteArray(scaled_data)
-            else:
-                trg_ds.GetRasterBand(1).WriteArray(out_data)
+            # Apply rescale to data
+            scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
+                                   out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger)
+            trg_ds.GetRasterBand(1).WriteArray(scaled_data)
 
             orig_ds = None
+
+        else:
+            # Do only renaming
+            shutil.copy(intermFile,output_filename)
 
         # -------------------------------------------------------------------------
         # Assign Metadata to the ingested file
@@ -1899,8 +2125,10 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         sds_meta.assign_subdir_from_fullpath(output_directory)
         sds_meta.assign_comput_time_now()
 
-        # Write metadata, if not merging is needed
-        if not merge_existing_output:
+        # Check not WD-GEE
+        if not trg_mapset.is_wbd():
+          # Write metadata, if not merging is needed
+          if not merge_existing_output:
             sds_meta.assign_input_files(in_files)
             sds_meta.write_to_ds(trg_ds)
 
@@ -1908,7 +2136,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             trg_ds = None
             sds_meta.assign_input_files(in_files)
 
-        else:
+          else:
             # Close output file
             trg_ds = None
 
@@ -1939,6 +2167,10 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
                 os.remove(output_filename)
             shutil.move(tmp_output_file,output_filename)
 
+        # WD-GEE case
+        else:
+            sds_meta.assign_input_files(in_files)
+            sds_meta.write_to_file(output_filename)
 
         # -------------------------------------------------------------------------
         # Upsert into DB table 'products_data'
