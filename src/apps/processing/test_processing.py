@@ -239,7 +239,12 @@ from multiprocessing import Queue
 # # Create the list of dates -> returns empty if start==end==None
 #
 # starting_dates = None
-# # native_mapset='MSG-satellite-3km'
+#
+# # start_date='20161001'
+# # end_date = '20161010'
+# # starting_dates = proc_functions.get_list_dates_for_dataset('modis-firms', '1day', 'v5.0', start_date=start_date, end_date=end_date)
+#
+# native_mapset='MSG-satellite-3km'
 # target_mapset='SPOTV-Africa-1km'
 #
 # args = {'pipeline_run_level':3,
@@ -252,7 +257,7 @@ from multiprocessing import Queue
 #         'mapset': target_mapset,
 #         'version':'v5.0',
 #         'logfile':'log-modis-firms.log',
-#         'update_stats' : True,
+#         'update_stats' : False,
 #         'nrt_products' : True }
 #
 # res_queue = None
@@ -311,28 +316,28 @@ from multiprocessing import Queue
 #   ---------------------------------------------------------------------
 # arc2-rain cumulate
 #   ---------------------------------------------------------------------
-from apps.processing.processing_std_precip_1day import *
-# # # # # Create the list of dates -> returns empty if start==end==None
-# #
-# start_date='19830301'
-# end_date = '19831231'
-#starting_dates = proc_functions.get_list_dates_for_dataset('arc2-rain','1day', '2.0', start_date=start_date, end_date=end_date)
-starting_dates = None
-mapset='ARC2-Africa-11km'
-# #
-args = {'pipeline_run_level':3, \
-        'pipeline_printout_level':0, \
-        'pipeline_printout_graph_level': 0, \
-        'prod': 'arc2-rain',\
-        'starting_sprod':'1day',\
-        'starting_dates': starting_dates,\
-        'mapset': mapset,\
-        'version':'2.0',
-        'logfile':'log-arc2-rain.log'}
-
-res_queue = None
-proc_lists=processing_std_precip_1day(res_queue,**args)
-print(proc_lists)
+# from apps.processing.processing_std_precip_1day import *
+# # # # # # Create the list of dates -> returns empty if start==end==None
+# # #
+# # start_date='19830301'
+# # end_date = '19831231'
+# #starting_dates = proc_functions.get_list_dates_for_dataset('arc2-rain','1day', '2.0', start_date=start_date, end_date=end_date)
+# starting_dates = None
+# mapset='ARC2-Africa-11km'
+# # #
+# args = {'pipeline_run_level':3, \
+#         'pipeline_printout_level':0, \
+#         'pipeline_printout_graph_level': 0, \
+#         'prod': 'arc2-rain',\
+#         'starting_sprod':'1day',\
+#         'starting_dates': starting_dates,\
+#         'mapset': mapset,\
+#         'version':'2.0',
+#         'logfile':'log-arc2-rain.log'}
+#
+# res_queue = None
+# proc_lists=processing_std_precip_1day(res_queue,**args)
+# print(proc_lists)
 
 #   ---------------------------------------------------------------------
 # arc2-rain SPI
@@ -362,22 +367,42 @@ print(proc_lists)
 #   ---------------------------------------------------------------------
 # seas cumulation computation
 #   ---------------------------------------------------------------------
-from apps.processing.processing_std_seas_cum import *
-# start_date='20150901'
-# end_date = '20160621'
-# starting_dates = proc_functions.get_list_dates_for_dataset('fewsnet-rfe', '10d', '2.0',
-#                                                            start_date=start_date, end_date=end_date)
-starting_dates=None
-args = {'pipeline_run_level':3, \
+# from apps.processing.processing_std_seas_cum import *
+# # start_date='20150901'
+# # end_date = '20160621'
+# # starting_dates = proc_functions.get_list_dates_for_dataset('fewsnet-rfe', '10d', '2.0',
+# #                                                            start_date=start_date, end_date=end_date)
+# starting_dates=None
+# args = {'pipeline_run_level':3, \
+#         'pipeline_printout_level':0, \
+#         'pipeline_printout_graph_level': 0, \
+#         'prod': 'fewsnet-rfe',\
+#         'starting_sprod':'10d',\
+#         'mapset': 'FEWSNET-Africa-8km',\
+#         'version':'2.0',
+#         'logfile':'cum.log',
+#         'trg_mapset': 'SPOTV-SADC-1km',\
+#         'starting_dates':starting_dates
+#         }
+# res_queue = None
+# processing_std_seas_cum(res_queue, **args)
+#   ---------------------------------------------------------------------
+#   GSOD
+#   ---------------------------------------------------------------------
+from apps.processing.processing_std_gsod import *
+start_date='20160503'
+end_date = '20160505'
+starting_dates = proc_functions.get_list_dates_for_dataset('gsod-rain', '1dmeas', '1.0',
+                                                            start_date=start_date, end_date=end_date)
+args = {'pipeline_run_level':6, \
         'pipeline_printout_level':0, \
         'pipeline_printout_graph_level': 0, \
-        'prod': 'fewsnet-rfe',\
-        'starting_sprod':'10d',\
-        'mapset': 'FEWSNET-Africa-8km',\
-        'version':'2.0',
-        'logfile':'cum.log',
-        'trg_mapset': 'SPOTV-SADC-1km',\
+        'prod': 'gsod-rain',\
+        'starting_sprod':'1dmeas',\
+        'mapset': 'SPOTV-SADC-1km',\
+        'version':'1.0',
+        'logfile':'gsod.log',
         'starting_dates':starting_dates
         }
 res_queue = None
-processing_std_seas_cum(res_queue, **args)
+processing_std_gsod(res_queue, **args)
