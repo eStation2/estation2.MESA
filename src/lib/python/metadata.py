@@ -107,7 +107,12 @@ class SdsMetadata:
         else:
             # Go through the metadata list and write to sds
             for key, value in sds_metadata.iteritems():
-                dataset.SetMetadataItem(key, str(value))
+                # Check length of value
+                if len(str(value)) > 1000:
+                    wrt_value=str(value)[0:1000]+' + others ...'
+                else:
+                    wrt_value=str(value)
+                dataset.SetMetadataItem(key, wrt_value)
 
     def write_to_file(self, filepath):
     #
