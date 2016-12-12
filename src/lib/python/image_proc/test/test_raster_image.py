@@ -112,3 +112,22 @@ class TestFunctions(TestCase):
         output_file='/data/temp/AGRIC_MASK-'+target_mapset_name+'.tif'
 
         raster_image_math.do_reproject(inputfile, output_file,native_mapset_name,target_mapset_name)
+
+    def test_stats_4_raster(self):
+
+        # Define the Native mapset
+        input_mapset_name ='SPOTV-Africa-1km'
+        grid_mapset_name = 'SPOTV-Africa-1km'
+
+        grid_file='/eStation2/layers/Mask_Africa_SPOTV_10km.tif'
+
+        input_file='/data/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/tif/ndv/20160101_vgt-ndvi_ndv_SPOTV-Africa-1km_sv2-pv2.1.tif'
+        output_file='/data/temp/20160101_vgt-ndvi_ndv_SPOTV-Africa-1km_sv2-pv2.1_grid_stats.tif'
+        operation='avg'
+
+        input_file='/data/processing/modis-firms/v5.0/SPOTV-Africa-1km/derived/10dcount/20160101_modis-firms_10dcount_SPOTV-Africa-1km_v5.0.tif'
+        output_file='/data/temp/20160101_modis-firms_10dcount_SPOTV-Africa-1km_v5.0_grid_stats.tif'
+        operation='sum'
+
+        raster_image_math.do_stats_4_raster(input_file, grid_file, output_file, operation, input_mapset_name, grid_mapset_name,
+                                            output_format=None, nodata=None, outType=None, options=None )
