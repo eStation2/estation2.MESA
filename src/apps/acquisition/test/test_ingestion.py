@@ -9,6 +9,7 @@ import os
 import glob
 import tempfile
 import shutil
+import csv
 import numpy as N
 from osgeo import gdal
 
@@ -31,7 +32,9 @@ class TestIngestion(unittest.TestCase):
         # having columns as: latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp
 
         # Definitions
-        file_mcd14dl = es_constants.es2globals['ingest_dir'] + 'Global_MCD14DL_2015042.txt'
+        myfile='Global_MCD14DL_2015042.txt'
+        file_mcd14dl = es_constants.es2globals['ingest_dir'] + myfile
+        shutil.copy('/data/processing/modis-firms/v5.0/archive/'+myfile, file_mcd14dl)
         pix_size = '0.008928571428571'
         # Create a temporary working dir
         tmpdir='/tmp/eStation2/test_ingest_firms_nasa/'
@@ -615,9 +618,9 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_jrc_wbd(self):
 
-        date_fileslist = glob.glob('/data/ingest/JRC-WBD_*')
+        date_fileslist = glob.glob('/data/processing/wd-gee/1.0/for_ingest/JRC-WBD_20160501*')
         #date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
-        in_date = '20140101'
+        in_date = '20160501'
         productcode = 'wd-gee'
         productversion = '1.0'
         subproductcode = 'occurr'
@@ -649,7 +652,7 @@ class TestIngestion(unittest.TestCase):
 
             ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
 
-            #self.assertEqual(1, 1)
+            self.assertEqual(1, 1)
     def test_preprocess_ecmwf_mars(self):
 
         date_fileslist = ['/data/temp/ope_africa_rain_20160221.zip']
@@ -706,42 +709,42 @@ class TestIngestion(unittest.TestCase):
 
         ingestion.ingest_archives_eumetcast()
 
-    def test_ingest_jrc_wbd(self):
-
-        date_fileslist = glob.glob('/data/ingest/JRC-WBD_*')
-        #date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
-        in_date = '20160101'
-        productcode = 'wd-gee'
-        productversion = '1.0'
-        subproductcode = 'occurr'
-        mapsetcode = 'WD-GEE-ECOWAS-AVG'
-        datasource_descrID='JRC:WBD:GEE'
-
-        product = {"productcode": productcode,
-                   "version": productversion}
-        args = {"productcode": productcode,
-                "subproductcode": subproductcode,
-                "datasource_descr_id": datasource_descrID,
-                "version": productversion}
-
-        product_in_info = querydb.get_product_in_info(echo=1, **args)
-
-        re_process = product_in_info.re_process
-        re_extract = product_in_info.re_extract
-
-        sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
-
-        subproducts=[]
-        subproducts.append(sprod)
-
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
-                                                                              source_id=datasource_descrID):
-
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
-
+    # def test_ingest_jrc_wbd(self):
+    #
+    #     date_fileslist = glob.glob('/data/ingest/JRC-WBD_*')
+    #     #date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
+    #     in_date = '20160101'
+    #     productcode = 'wd-gee'
+    #     productversion = '1.0'
+    #     subproductcode = 'occurr'
+    #     mapsetcode = 'WD-GEE-ECOWAS-AVG'
+    #     datasource_descrID='JRC:WBD:GEE'
+    #
+    #     product = {"productcode": productcode,
+    #                "version": productversion}
+    #     args = {"productcode": productcode,
+    #             "subproductcode": subproductcode,
+    #             "datasource_descr_id": datasource_descrID,
+    #             "version": productversion}
+    #
+    #     product_in_info = querydb.get_product_in_info(echo=1, **args)
+    #
+    #     re_process = product_in_info.re_process
+    #     re_extract = product_in_info.re_extract
+    #
+    #     sprod = {'subproduct': subproductcode,
+    #                          'mapsetcode': mapsetcode,
+    #                          're_extract': re_extract,
+    #                          're_process': re_process}
+    #
+    #     subproducts=[]
+    #     subproducts.append(sprod)
+    #
+    #     for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
+    #                                                                           source_id=datasource_descrID):
+    #
+    #         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+    #
             #self.assertEqual(1, 1)
 
     def test_ingest_ecmwf_evtp(self):
@@ -870,6 +873,48 @@ class TestIngestion(unittest.TestCase):
     #     output_ds = None
     #     fid.close()
 
+    def test_ingest_gsod_rain(self):
+
+        filename='*-99999-2016.op.gz'
+        os.system('cp /data/temp/Data/GSOD/'+filename+' /data/ingest/')
+        date_fileslist = glob.glob('/data/ingest/'+filename)
+        in_date='20160501'
+        productcode = 'gsod-rain'
+        productversion = '1.0'
+        subproductcode = '1dmeas'
+        mapsetcode = 'SPOTV-SADC-1km'
+        datasource_descrID='NOAA:GSOD'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
+                                                                              source_id=datasource_descrID):
+
+            ingestion.ingestion(date_fileslist, '20160503', product, subproducts, datasource_descr, logger, echo_query=1)
+            ingestion.ingestion(date_fileslist, '20160504', product, subproducts, datasource_descr, logger, echo_query=1)
+            ingestion.ingestion(date_fileslist, '20160505', product, subproducts, datasource_descr, logger, echo_query=1)
+            ingestion.ingestion(date_fileslist, '20160506', product, subproducts, datasource_descr, logger, echo_query=1)
+            ingestion.ingestion(date_fileslist, '20160507', product, subproducts, datasource_descr, logger, echo_query=1)
+            ingestion.ingestion(date_fileslist, '20160508', product, subproducts, datasource_descr, logger, echo_query=1)
+
     def test_ingest_cpc_soilmoisture(self):
 
         filename='w.201609.mon'
@@ -908,3 +953,39 @@ class TestIngestion(unittest.TestCase):
 
             ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
 
+    def test_ingest_sadc_wrsi(self):
+
+        filename='WRSI2016*'
+        os.system('cp /data/processing/exchange/WRSI/'+filename+' /data/ingest/')
+        date_fileslist = glob.glob('/data/ingest/'+filename+'.bil')
+        in_date = '201632'
+        productcode = 'wrsi-sadc'
+        productversion = '1.0'
+        subproductcode = 'wrsi'
+        mapsetcode = 'GEOWRSI-SADC-11km'
+        datasource_descrID='BDMS:SADC:GEOWRSI:WRSI'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
+                                                                              source_id=datasource_descrID):
+
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
