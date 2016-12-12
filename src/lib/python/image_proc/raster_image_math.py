@@ -31,7 +31,7 @@ __author__ = 'clerima'
 #
 
 # import standard modules
-
+import math
 # Import eStation lib modules
 from lib.python import es_logging as log
 from lib.python import metadata
@@ -2311,6 +2311,268 @@ def do_reproject(inputfile, output_file, native_mapset_name, target_mapset_name)
     trg_ds = None
     mem_ds = None
     orig_ds = None
+
+#   -------------------------------------------------------------------------------------------
+def getRasterBox(fid, xstart, xend, ystart, yend, band):
+#
+#   Analyzes the RasterFile (fid) in the CROI area (identified by xstart, xend, ystart, yend)
+#   and returns the range of polygons IDs (minValGrid, maxValGrid) to be considered by doStats.
+#   Used by do_stats_4_raster()
+#   Arguments:
+#
+#       fid: file identifier of the 'grid' raster file (already open)
+#       xstart,xend,ystart,yend: x-y coords of the BB to be considered in the grid file
+#
+
+    # Initialise with 'extreme' values, to be updated in the loop
+    minValGrid = None
+    maxValGrid = None
+
+    ns = int(xend - xstart + 1)
+    nl = int(yend - ystart + 1)
+
+    indexRef = N.arange(ns)
+
+    for il in range(int(ystart), int(yend+1) ):
+        data = N.ravel( fid.GetRasterBand(band).ReadAsArray(int(xstart), il, ns, 1) )
+        wts = (data != 0)
+
+        if wts.any():
+
+            thisMinValGrid = data[wts].min()
+            thisMaxValGrid = data[wts].max()
+
+            if minValGrid is None:
+                minValGrid = thisMinValGrid
+            elif thisMinValGrid < minValGrid:
+                minValGrid = thisMinValGrid
+
+            if maxValGrid is None:
+                maxValGrid = thisMaxValGrid
+            elif thisMaxValGrid > maxValGrid:
+                maxValGrid = thisMaxValGrid
+
+    return [minValGrid, maxValGrid]
+
+#   -------------------------------------------------------------------------------------------
+def do_raster_stats(fid, fidID, outDS, iband, roi, minId, maxId, nodata, operation, args=None):
+#
+#   Perform the 'operation' in inputfile (fid), according the 'grid' defined in fidID, and write to fidOut
+#   Used by do_stats_4_raster()
+#   Arguments:
+#
+#       fid:    input file identifier
+#       fidID:  file identifier of the 'grid' raster file
+#       fidout: file identifier of the output raster file. file has same size as fin
+#       iband:  number of band to consider (default is 1)
+#       roi:    as returned from common_area
+#               contains all info about offsets (firstX/YOffset -> file (fid), secondX/YOffset -> raster(fidID))
+#       minId, maxID:   range of IDs to consider in fidID
+#       nodata:         value to disregard in comps
+#       operation:      operation to apply
+#       args:           list of additional arguments (FTTB only 1, used for density)
+#
+
+    # Check arguments
+    if operation=='density' and args is None:
+        logger.error('Operation density requires an addtional argument')
+        return 1
+
+    # output file (fidOut) has the same size as file (fid)
+    numIDs = maxId-minId+1
+
+    # store: sum, N, min, max, nPixId
+    statsData = N.zeros((5,(numIDs)))
+    minmaxInit= N.zeros((numIDs))
+
+    # let's parse the common window
+    ns=roi['xSize']
+    nl=roi['ySize']
+
+    # Npixels in Rasterfile
+    nsiD = fidID.RasterXSize
+
+    # Prepare a matrix to store idValues
+    MatrixidData=N.zeros((nl,ns))
+    outband = outDS.GetRasterBand(iband+1)
+
+    # print ' Identifying IDs of polygons and computing stats'
+    for il in range(0, nl-1):
+        # read 1 full line from image
+        data   = N.ravel(fid.GetRasterBand(1).ReadAsArray( 0, il, ns, 1 ))
+        # read 1 full line from idRaster
+        idDataTmp = N.ravel( fidID.GetRasterBand(iband+1).ReadAsArray( 0, il+roi['secondYOff'], nsiD, 1 ) )
+
+        # reduce data set, for raster file
+        idData = idDataTmp[roi['secondXOff']:roi['secondXOff']+ns]
+        MatrixidData[il] = idDataTmp[roi['secondXOff']:roi['secondXOff']+ns]
+
+        # accumulate values in the vector
+        # wtadd is an image index (where position)
+        if (nodata is None):
+            wtadd=(idData >= minId) * (idData <= maxId)
+        else:
+            wtadd = (data != nodata) * (idData >= minId) * (idData <= maxId)
+
+        if wtadd.any():
+            idPos = idData[wtadd] - minId
+            dataSelect = data[wtadd]
+
+            # sum up the value
+            for ii in range(len(idPos)):
+                statsData[0, idPos[ii]] = statsData[0, idPos[ii]] + dataSelect[ii]
+            # counter ++
+                statsData[1, idPos[ii]] = statsData[1, idPos[ii]] + 1
+
+            # update min and max
+            for ii in range(len(idPos)):
+                if (minmaxInit[ idPos[ii] ] == 0):
+                    statsData[2, idPos[ii] ] = dataSelect[ii]
+                    statsData[3, idPos[ii] ] = dataSelect[ii]
+                    minmaxInit[idPos[ii] ] = 1
+                else:
+                    if dataSelect[ii] < statsData[2, idPos[ii] ]:
+                        # reset min
+                        statsData[2, idPos[ii] ] = dataSelect[ii]
+                    if dataSelect[ii] > statsData[3, idPos[ii] ]:
+                        # reset max
+                        statsData[3, idPos[ii] ] = dataSelect[ii]
+
+    # On the basis of the iDMatrix, assign the output
+    outdata=N.zeros((nl,ns))
+    if nodata is not None:
+        outdata+=nodata
+
+    # Do the test first, to optimize loop ...
+    if operation=='count':
+      for il in range(0,nl-1):
+         for ip in range(0,ns-1):
+            outdata[il,ip]=statsData[1,MatrixidData[il,ip]-minId]
+    elif operation=='sum':
+      for il in range(0,nl-1):
+         for ip in range(0,ns-1):
+            outdata[il,ip]=statsData[0,MatrixidData[il,ip]-minId]
+    elif operation=='min':
+      for il in range(0,nl-1):
+         for ip in range(0,ns-1):
+            outdata[il,ip]=statsData[2,MatrixidData[il,ip]-minId]
+    elif operation=='max':
+      for il in range(0,nl-1):
+         for ip in range(0,ns-1):
+            outdata[il,ip]=statsData[3,MatrixidData[il,ip]-minId]
+    elif operation=='avg':
+      for il in range(0,nl-1):
+         for ip in range(0,ns-1):
+            if statsData[1,MatrixidData[il,ip]-minId] != 0:
+                outdata[il,ip]=float(statsData[0,MatrixidData[il,ip]-minId])/float(statsData[1,MatrixidData[il,ip]-minId])
+
+    elif operation=='density':
+       for il in range(0,nl-1):
+         for ip in range(0,ns-1):
+            outdata[il,ip]=float(statsData[0,MatrixidData[il,ip]-minId])/args[0]
+
+    outband.WriteArray(N.array(outdata), 0, 0)
+
+    return 0
+#   -------------------------------------------------------------------------------------------
+#   Computes statistics over polygons. The operation is defined by -op option.
+#   Polygons are defined by a raster of polygon ids
+#   The foreseen operations are:
+#       count, sum, min, max, avg : no additional arguments
+#       density: 1 argument -> scaling factor
+#   Argument:
+#       inputfile:      input file
+#       grid_file:      file with grid/polygons IDs
+#       output_file:    output file name
+#       operation:      see above
+#       output_format:  output format (GTIFF by default)
+#       nodata:         nodata value - in input_file
+#       output_type:    output type (by default the same as in the input file
+#       options:        additional options (e.g. compression)
+#       args:           list of additional arguments (FTTB only 1, used for density)
+#
+def do_stats_4_raster(input_file, grid_file, output_file, operation, input_mapset_name, grid_mapset_name,
+                      output_format=None, nodata=None, outType=None, options=None, args=None ):
+
+    # Manage input arguments
+    if output_format is None:
+        output_format='GTiff'
+
+    # Manage options
+    options_list = [es_constants.ES2_OUTFILE_OPTIONS]
+    if options is not None:
+        options_list.append(options)
+
+    try:
+        # Open input file
+        fidIn = gdal.Open(input_file, GA_ReadOnly)
+        if fidIn is None:
+            logger.error('Could not open input file $0'.format(input_file))
+            return 1
+        # Read info from input file
+        nsIn = fidIn.RasterXSize
+        nlIn = fidIn.RasterYSize
+        inGeo = fidIn.GetGeoTransform()
+        inProj = fidIn.GetProjection()
+        dataType=fidIn.GetRasterBand(1).DataType
+
+        if nodata is None:
+            metadata_input = metadata.SdsMetadata()
+            metadata_input.read_from_ds(fidIn)
+            nodata_output = float(metadata_input.get_item('eStation2_nodata'))
+        else:
+            nodata_output = nodata
+
+        # Assign outType (Int16 by default)
+        if outType is None:
+            outType=dataType
+
+        # Open idRaster
+        fidRaster = gdal.Open(grid_file, GA_ReadOnly)
+        if fidRaster is None:
+            logger.error('Could not open grid file $0'.format(grid_file))
+            return 1
+
+        nlevel = fidRaster.RasterCount
+
+        # Instantiate output
+        nb=1
+        outDrv=gdal.GetDriverByName(output_format)
+        outDS=outDrv.Create(output_file, nsIn, nlIn, nb, outType, options_list)
+        outDS.SetProjection(inProj)
+        outDS.SetGeoTransform(inGeo)
+
+        # Determine common area, considering the two Mapsets
+        mapset_1 = mapset.MapSet()
+        mapset_1.assigndb(input_mapset_name)
+        mapset_2 = mapset.MapSet()
+        mapset_2.assigndb(grid_mapset_name)
+
+        common_roi =  mapset_1.compute_common_area(mapset_2)
+
+        if common_roi['isCommon'] != True:
+            logger.warning('Images do not have common ROIs')
+            return 1
+
+        # Get the min/maxId value from raster file, in common ROI
+        [minId, maxId]=getRasterBox(fidRaster,
+                                    common_roi['secondXOff'], common_roi['xSize'] - 1 + common_roi['secondXOff'],
+                                    common_roi['secondYOff'], common_roi['ySize'] - 1 + common_roi['secondYOff'],
+                                    1)
+        # parse bands
+        for iband in range(nlevel):
+            # compute stats and write to output file
+            statsData = do_raster_stats(fidIn, fidRaster, outDS, iband, common_roi, minId, maxId, nodata_output, operation, args=args)
+
+
+        trg_ds = None
+        mem_ds = None
+        orig_ds = None
+
+    except:
+        logger.warning('Error in do_stats_4_raster. Remove outputs')
+        if os.path.isfile(output_file):
+            os.remove(output_file)
 
 # _____________________________
 #   Write to an output file the metadata
