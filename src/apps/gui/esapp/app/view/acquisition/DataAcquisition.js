@@ -65,8 +65,8 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
     rowLines: false,
     collapsible: false,
     variableRowHeight : true,
+    bufferedRenderer: true,
 
-    //bufferedRenderer: true,
 
     //listeners: {
         //cellclick: function (x, y) {
@@ -234,7 +234,7 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
             xtype: 'actioncolumn',
             // header: 'Active',
             hideable: false,
-            hidden: true,
+            hidden: Ext.getCmp('lockunlock').pressed ? false : true,
             width: 35,
             align: 'center',
             stopSelection: false,
@@ -290,7 +290,7 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
             xtype: 'actioncolumn',
             // header: 'Store Native',
             hideable: true,
-            hidden:true,
+            hidden: Ext.getCmp('lockunlock').pressed ? false : true,
             width: 100,
             align: 'center',
             stopSelection: false,

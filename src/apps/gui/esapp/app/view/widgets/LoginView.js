@@ -79,11 +79,21 @@ Ext.define("esapp.view.widgets.LoginView",{
                 , margin: '4 5 0 5'
                 , width: 100
             }, {
-                xtype: 'button'
+                xtype: 'splitbutton'
                 , text: 'Login'
                 , margin: '4 10 0 5'
-                , formBind: true
+                , formBind: false
                 , handler: 'onLoginClick'
+                , menu: {
+                    items: [{
+                        text: 'Forgot password?'
+                        //, iconCls: 'fa fa-lock'
+                        , glyph: 'xf023@FontAwesome'
+                        , cls:'menu-glyph-color-red'
+                        // style: { color: 'orange' },
+                        , handler: 'resetPassword'
+                    }]
+                }
             }, {
                 xtype: 'box'
                 , html: 'or'
@@ -142,10 +152,8 @@ Ext.define("esapp.view.widgets.LoginView",{
         var  me = this
             ,data = me.getViewModel().linkData
         ;
-        //data.password = hex_md5(data.password);
+        //data.password = SparkMD5.hash(data.password);
         esapp.login(data);
-
-        //me.close();
 
     } // eo function onLoginClick
 
@@ -163,8 +171,7 @@ Ext.define("esapp.view.widgets.LoginView",{
         me.removeAll();
         me.add(me.loginItems);
         //esapp.setUser(null);
-        //console.info(esapp.getUser());
-        //me.close();
+        me.toggleUserFunctionality();
 
     } // eo function onLoginClick
 
@@ -179,8 +186,18 @@ Ext.define("esapp.view.widgets.LoginView",{
         me.add(me.logoutItems);
         me.lookupReference('UserLoggedIn').setHtml('Hello ' + esapp.getUser().username);
 
+        me.toggleUserFunctionality();
+
     } // eo function setupLogout
 
+
+    /**
+     * Register button click handler
+     * @private
+     */
+    ,onRegisterClick:function() {
+        new esapp.view.widgets.Register();
+    } // eo function onRegisterClick
 
     /**
      * Handles login fail and shows message
@@ -213,4 +230,26 @@ Ext.define("esapp.view.widgets.LoginView",{
         }
 
     } // eo function onKeyPress
+
+    ,toggleUserFunctionality:function() {
+        var  me = this;
+        var mapTemplateBtn = Ext.getCmp('analysismain').lookupReference('analysismain_maptemplatebtn');
+        var mapViewWindows = Ext.ComponentQuery.query('mapview-window');
+
+        if (esapp.getUser() != null && esapp.getUser() != 'undefined'){
+            mapTemplateBtn.show();
+
+            Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
+                mapview_window.lookupReference('saveMapTemplate_'+mapview_window.id.replace(/-/g,'_')).show();
+            });
+        }
+        else {
+            mapTemplateBtn.hide();
+
+            Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
+                mapview_window.lookupReference('saveMapTemplate_'+mapview_window.id.replace(/-/g,'_')).hide();
+            });
+        }
+
+    } // eo function failLogin
 });

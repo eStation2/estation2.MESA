@@ -240,10 +240,11 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                                                                                      me.selectedproduct.mapsetcode,
                                                                                      me.selectedproduct.subproductcode,
                                                                                      me.selectedproduct.legendid,
-                                                                                     me.selectedproduct.colorschemeHTML,
+                                                                                     //me.selectedproduct.colorschemeHTML,
                                                                                      me.selectedproduct.legendHTML,
                                                                                      me.selectedproduct.legendHTMLVertical,
-                                                                                     me.selectedproduct.productname
+                                                                                     me.selectedproduct.productname,
+                                                                                     me.selectedproduct.date_format
                             );
                             me.close();
                         }

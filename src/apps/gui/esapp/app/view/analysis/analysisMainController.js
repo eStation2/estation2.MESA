@@ -2,8 +2,88 @@ Ext.define('esapp.view.analysis.analysisMainController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.analysis-analysismain'
 
-    ,newMapView: function() {
+    ,loadUserMapTemplatesStore: function(btn){
+        //console.info(btn.down().down());
 
+        btn.down().down().getStore('usermaptemplates').load({
+            extraParams: {
+                userid: esapp.getUser().userid
+            },
+            callback:function(){
+
+            }
+        });
+        btn.down().down().show();
+
+        //var mapTemplate = {
+        //    userid: 'jurvtk',
+        //    isTemplate: true,
+        //    templatename: '',
+        //    mapviewPosition: [10, 5],
+        //    mapviewSize: [1000, 900],
+        //    productcode: 'vgt-fapar',
+        //    subproductcode: 'fapar',
+        //    productversion: 'V2.0',
+        //    mapsetcode: 'SPOTV-Africa-1km',
+        //    legendid: 99,
+        //    legendlayout: 'vertical',
+        //    legendObjPosition: [5, 210],
+        //    showlegend: true,
+        //    titleObjPosition: [35, 20],
+        //    titleObjContent: '<font size="3" style="color: rgb(0, 0, 0);"><b>{selected_area}</b></font><div><font size="3" style="color: rgb(0, 0, 0);"><b>{product_name}&nbsp;</b></font><div><font size="3"><b>Decade of <font color="#3366ff">{product_date}</font></b></font></div></div>',
+        //    disclaimerObjPosition: [330, 695],
+        //    disclaimerObjContent: '<font size="1">​Geographical map, WGS 84 - Resolution 5km</font><div><font size="1">Sources: 1) Image NDVI &nbsp;2) Vectors FAO GAUL 2015</font></div>',
+        //    logosObjPosition: [585, 677],
+        //    logosObjContent: [
+        //        { src:'resources/img/logo/MESA_logo.png', width:'65', height:'50' },
+        //        { src:'resources/img/logo/AfricanUnion_logo.jpg', width:'65', height:'50' },
+        //        { src:'resources/img/logo/logo_en.gif', width:'65', height:'50' }
+        //    ],
+        //    showObjects: true,
+        //    scalelineObjPosition: [0, 710],
+        //    vectorLayers: '',
+        //    outmask: false,
+        //    outmaskFeature: ''
+        //}
+        //var newMapViewWin = new esapp.view.analysis.mapView(mapTemplate);
+        //
+        //this.getView().add(newMapViewWin);
+        //newMapViewWin.show();
+
+
+        //var mapTemplate2 = {
+        //    userid: 'jurvtk',
+        //    isTemplate: true,
+        //    templatename: '',
+        //    mapviewPosition: [868, 10],
+        //    mapviewSize: [1000, 900],
+        //    productcode: 'vgt-fapar',
+        //    subproductcode: 'fapar',
+        //    productversion: 'V1.4',
+        //    mapsetcode: 'SPOTV-Africa-1km',
+        //    legendid: 99,
+        //    legendlayout: 'horizontal',
+        //    legendObjPosition: [5, 230],
+        //    showlegend: false,
+        //    titleObjPosition: [5, 150],
+        //    titleObjContent: '<font size="3" style="color: rgb(0, 0, 0);"><b>{selected_area} - {product_name}&nbsp;</b></font><div><font size="3"><b>Decade of <font color="#3366ff">{product_date}</font></b></font></div>',
+        //    disclaimerObjPosition: [5, 550],
+        //    disclaimerObjContent: '<font size="1">​Geographical map, WGS 84 - Resolution 5km</font><div><font size="1">Sources: 1) Image NDVI &nbsp;2) Vectors FAO GAUL 2015</font></div>',
+        //    logosObjPosition: [300, 560],
+        //    logosObjContent: '',
+        //    showObjects: false,
+        //    scalelineObjPosition: [100, 560],
+        //    vectorLayers: '',
+        //    outmask: false,
+        //    outmaskFeature: ''
+        //}
+        //var newMapViewWin2 = new esapp.view.analysis.mapView(mapTemplate2);
+        //
+        //this.getView().add(newMapViewWin2);
+        //newMapViewWin2.show();
+    }
+
+    ,newMapView: function() {
         var newMapViewWin = new esapp.view.analysis.mapView({
             epsg: 'EPSG:4326'
         });
@@ -16,6 +96,12 @@ Ext.define('esapp.view.analysis.analysisMainController', {
         this.getView().add(newLayerAdminWin);
         newLayerAdminWin.show();
         this.getView().lookupReference('analysismain_layersbtn').disable();
+    }
+
+    ,showTimeseriesChartSelection: function(){
+        var timeseriesChartSelectionWindow = this.getView().lookupReference('timeserieschartselection');
+        timeseriesChartSelectionWindow.show();
+        timeseriesChartSelectionWindow.fireEvent('align');
     }
 
     ,toggleBackgroundlayer: function(btn, event) {
@@ -59,7 +145,7 @@ Ext.define('esapp.view.analysis.analysisMainController', {
         }
     }
 
-    ,loadTimeseriesProductsGrid: function() {
+    ,_loadTimeseriesProductsGrid: function() {
 
         var prodgrid = this.getView().lookupReference('TimeSeriesProductsGrid');
         var myLoadMask = new Ext.LoadMask({
@@ -75,7 +161,7 @@ Ext.define('esapp.view.analysis.analysisMainController', {
         });
     }
 
-    ,TimeseriesProductsGridRowClick: function(gridview, record){
+    ,_TimeseriesProductsGridRowClick: function(gridview, record){
         var selectedTimeSeriesProducts = gridview.getSelectionModel().selected.items;
         var timeseriesmapsetdatasets = [];
         var yearsData = [];
@@ -128,7 +214,7 @@ Ext.define('esapp.view.analysis.analysisMainController', {
         }
     }
 
-    ,getTimeseriesSelections: function(){
+    ,_getTimeseriesSelections: function(){
         var timeseriesgrid = this.getView().lookupReference('timeseries-mapset-dataset-grid');
         var selectedTimeSeries = timeseriesgrid.getSelectionModel().selected.items;
         var wkt_polygon = this.getView().lookupReference('wkt_polygon');
@@ -249,7 +335,7 @@ Ext.define('esapp.view.analysis.analysisMainController', {
         return timeseriesselections
     }
 
-    ,generateTimeseriesChart: function(btn){
+    ,_generateTimeseriesChart: function(btn){
 
         var TSChartWinConfig = this.getTimeseriesSelections();
         if (TSChartWinConfig != null){
@@ -260,7 +346,7 @@ Ext.define('esapp.view.analysis.analysisMainController', {
         }
     }
 
-    ,editTSDrawProperties: function(gridview, recordID){
+    ,_editTSDrawProperties: function(gridview, recordID){
         var source = {};
         var myNewRecord = null;
         var TSrecord = gridview.store.getAt(recordID);

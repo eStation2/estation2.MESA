@@ -52,7 +52,7 @@ Ext.define('esapp.LoginSetup', {
                 else {
                     // save received user data
                     user = o.user;
-                    Ext.util.Cookies.set('estation2_sessid', user);
+                    //Ext.util.Cookies.set('estation2_sessid', user);
                     me.fireEvent('setupready')
                 }
             } // eo function success
@@ -144,6 +144,7 @@ Ext.define('esapp.LoginSetup', {
 
         // install global error handler
         Ext.Error.handle = function(err) {
+            console.info(err);
             Ext.Msg.show({
                  title:'Error'
                 ,msg:[

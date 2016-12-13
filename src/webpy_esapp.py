@@ -49,7 +49,9 @@ urls = (
     "/product/updateproductinfo", "UpdateProductInfo",
     "/product/unassigndatasource", "UnassignProductDataSource",
 
+    "/users", "Users",
     "/login", "Login",
+    "/register", "Register",
 
     "/help", "GetHelp",
     "/help/getfile", "GetHelpFile",
@@ -115,7 +117,8 @@ urls = (
     "/analysis/getvectorlayer", "GetVectorLayer",
     "/analysis/getbackgroundlayer", "GetBackgroundLayer",
     "/analysis/productnavigator", "ProductNavigatorDataSets",
-    "/analysis/getcolorschemes", "GetColorSchemes",
+    "/analysis/getcolorschemes", "GetAllColorSchemes",
+    "/analysis/getproductcolorschemes", "GetProductColorSchemes",
     "/analysis/gettimeline", "GetTimeLine",
     "/analysis/timeseriesproduct", "TimeseriesProducts",
     "/analysis/gettimeseries", "GetTimeseries",
@@ -125,7 +128,9 @@ urls = (
     "/analysis/gettimeseriesdrawproperties/update", "UpdateTimeseriesDrawProperties",
     "/analysis/gettimeseriesdrawproperties/create", "CreateTimeseriesDrawProperties",
     "/analysis/updateyaxe", "UpdateYaxe",
-
+    "/analysis/savemaptemplate", "SaveMapTemplate",
+    "/analysis/usermaptemplates", "GetMapTemplates",
+    "/analysis/usermaptemplates/delete", "DeleteMapTemplate",
 
     "/layers", "GetLayers",
     "/layers/create", "CreateLayer",
@@ -133,6 +138,7 @@ urls = (
     "/layers/delete", "DeleteLayer",
     "/layers/import", "ImportLayer",
     "/layers/serverlayerfiles", "GetServerLayerFileList",
+    "/layers/savedrawnlayer", "SaveDrawnVectorLayer",
 
     "/getmapsets", "GetMapsets",
     "/addingestmapset", "AddIngestMapset",
@@ -175,6 +181,214 @@ class EsApp:
         #     return render.index_fr()
         # else:
         #     return render.index()
+
+
+class GetMapTemplates:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        maptemplate_dict_all = []
+        getparams = web.input()
+
+        if 'userid' in getparams:
+            usermaptemplates = querydb.get_user_map_templates(getparams['userid'])
+            if hasattr(usermaptemplates, "__len__") and usermaptemplates.__len__() > 0:
+                for row_dict in usermaptemplates:
+                    # row_dict = functions.row2dict(row)
+
+                    mapTemplate = {
+                        'userid': row_dict['userid'],
+                        'templatename': row_dict['templatename'],
+                        'mapviewposition': row_dict['mapviewposition'],
+                        'mapviewsize': row_dict['mapviewsize'],
+                        'productcode': row_dict['productcode'],
+                        'subproductcode': row_dict['subproductcode'],
+                        'productversion': row_dict['productversion'],
+                        'mapsetcode': row_dict['mapsetcode'],
+                        'legendid': row_dict['legendid'],
+                        'legendlayout': row_dict['legendlayout'],
+                        'legendobjposition': row_dict['legendobjposition'],
+                        'showlegend': row_dict['showlegend'],
+                        'titleobjposition': row_dict['titleobjposition'],
+                        'titleobjcontent': row_dict['titleobjcontent'],
+                        'disclaimerobjposition': row_dict['disclaimerobjposition'],
+                        'disclaimerobjcontent': row_dict['disclaimerobjcontent'],
+                        'logosobjposition': row_dict['logosobjposition'],
+                        'logosobjcontent': row_dict['logosobjcontent'],
+                        'showobjects': row_dict['showobjects'],
+                        'scalelineobjposition': row_dict['scalelineobjposition'],
+                        'vectorlayers': row_dict['vectorlayers'],
+                        'outmaskfeature': row_dict['outmaskfeature'],
+                        'auto_open': row_dict['auto_open']
+                    }
+
+                    maptemplate_dict_all.append(mapTemplate)
+
+                maptemplates_json = json.dumps(maptemplate_dict_all,
+                                                  ensure_ascii=False,
+                                                  encoding='utf-8',
+                                                  sort_keys=True,
+                                                  indent=4,
+                                                  separators=(', ', ': '))
+
+                maptemplates_json = '{"success":"true", "total":'\
+                                       + str(usermaptemplates.__len__())\
+                                       + ',"usermaptemplates":'+maptemplates_json+'}'
+
+            else:
+                maptemplates_json = '{"success":false, "error":"No Map Templates defined for user!"}'   # OR RETURN A DEFAULT MAP TEMPLATE?????
+
+        else:
+            maptemplates_json = '{"success":false, "error":"Userid not given!"}'
+
+        return maptemplates_json
+
+
+class DeleteMapTemplate:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def DELETE(self):
+        getparams = json.loads(web.data())  # get PUT data
+        # getparams = web.input() # get POST data
+        if 'usermaptemplate' in getparams:      # hasattr(getparams, "layer")
+            maptemplatePK = {
+                'userid': getparams['usermaptemplate']['userid'],
+                'templatename': getparams['usermaptemplate']['templatename'],
+             }
+
+            if self.crud_db.delete('map_templates', **maptemplatePK):
+                status = '{"success":"true", "message":"Map Template deleted!"}'
+            else:
+                status = '{"success":false, "message":"An error occured while deleting the Map Template!"}'
+
+        else:
+            status = '{"success":false, "message":"No Map Template info passed!"}'
+
+        return status
+
+
+class SaveMapTemplate:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def POST(self):
+        getparams = web.input()
+        # getparams = json.loads(web.data())  # get PUT data
+
+        createstatus = '{"success":"false", "message":"An error occured while saving the Map Template!"}'
+
+        if 'userid' in getparams and 'templatename' in getparams:
+            legendid = getparams['legendid']
+            if getparams['legendid'] == '':
+                legendid = None
+
+            mapTemplate = {
+                'userid': getparams['userid'],
+                'templatename': getparams['templatename'],
+                'mapviewposition': getparams['mapviewPosition'],
+                'mapviewsize': getparams['mapviewSize'],
+                'productcode': getparams['productcode'],
+                'subproductcode': getparams['subproductcode'],
+                'productversion': getparams['productversion'],
+                'mapsetcode': getparams['mapsetcode'],
+                'legendid': legendid,
+                'legendlayout': getparams['legendlayout'],
+                'legendobjposition': getparams['legendObjPosition'],
+                'showlegend': getparams['showlegend'],
+                'titleobjposition': getparams['titleObjPosition'],
+                'titleobjcontent': getparams['titleObjContent'],
+                'disclaimerobjposition': getparams['disclaimerObjPosition'],
+                'disclaimerobjcontent': getparams['disclaimerObjContent'],
+                'logosobjposition': getparams['logosObjPosition'],
+                'logosobjcontent': getparams['logosObjContent'],
+                'showobjects': getparams['showObjects'],
+                'scalelineobjposition': getparams['scalelineObjPosition'],
+                'vectorlayers': getparams['vectorLayers'],
+                'outmaskfeature': getparams['outmaskFeature'],
+                'auto_open': getparams['auto_open']
+            }
+
+            # print getparams
+            if getparams['newtemplate'] == 'true':
+                if self.crud_db.create('map_templates', mapTemplate):
+                    createstatus = '{"success":"true", "message":"Map Template created!"}'
+            else:
+                if self.crud_db.update('map_templates', mapTemplate):
+                    createstatus = '{"success":"true", "message":"Map Template updated!"}'
+
+        else:
+            createstatus = '{"success":"false", "message":"No Map Template data given!"}'
+
+        return createstatus
+
+
+class Register:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def POST(self):
+        getparams = web.input()
+        # getparams = json.loads(web.data())  # get PUT data
+
+        createstatus = '{"success":"false", "message":"An error occured while registering the user!"}'
+
+        if 'user' in getparams:
+            user = {
+                'username': getparams['fullname'],
+                'password': getparams['pass'],
+                'userid': getparams['user'],
+                'userlevel': 1,
+                'email': getparams['email']
+            }
+
+            if self.crud_db.create('users', user):
+                createstatus = '{"success":"true", "message":"User created!"}'
+        else:
+            createstatus = '{"success":"false", "message":"No user data given!"}'
+
+        return createstatus
+
+
+class Users:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        # inputObj = web.input()
+        try:
+            users = querydb.getusers()
+
+            users_dict_all = []
+            if hasattr(users, "__len__") and users.__len__() > 0:
+                for row in users:
+                    user_info = {
+                        'username': row['username'],
+                        'userid': row['userid'],
+                        'userlevel': row['userlevel'],
+                        'email': row['email']
+                    }
+                    users_dict_all.append(user_info)
+
+                user_info_json = json.dumps(users_dict_all,
+                                            ensure_ascii=False,
+                                            encoding='utf-8',
+                                            sort_keys=False,
+                                            indent=4,
+                                            separators=(', ', ': '))
+
+                users_json = '{"success":true, "users":'+ user_info_json + '}'
+            else:
+                users_json = '{"success":true, "message":"No users defined in the DB!"}'
+
+        except:
+            users_json = '{"success":false, "error":"Error reading users data from DB!"}'
+
+        return users_json
 
 
 class Login:
@@ -1692,6 +1906,10 @@ class GetTimeseries:
                        "subproductcode": subproductcode,
                        "version": version}
 
+            # Set defaults in case no entry exists in the DB
+            aggregate = { 'aggregation_type': 'mean',
+                          'aggregation_min': None,
+                          'aggregation_max': None}
             timeseries_drawproperties = querydb.get_product_timeseries_drawproperties(product)
             for ts_drawprops in timeseries_drawproperties:
                 aggregate = { 'aggregation_type': ts_drawprops.aggregation_type,
@@ -1708,7 +1926,20 @@ class GetTimeseries:
                 value.append(valdate)
                 value.append(val['meanvalue'])
                 data.append(value)
+            # tsdata = {
+            #     'data': data
+            # }
+            # timeseries.append(tsdata)
 
+            # Set defaults in case no entry exists in the DB
+            ts = {'name': productcode + '-' + version + '-' + subproductcode,
+                  'type': 'line',
+                  'dashStyle': 'Solid',
+                  'lineWidth': 2,
+                  'color': '#000000',
+                  'yAxis': productcode + ' - ' + version,
+                  'data': data
+                  }
             for ts_drawprops in timeseries_drawproperties:
                 ts = {'name': ts_drawprops.tsname_in_legend,
                       'type': ts_drawprops.charttype,
@@ -1716,8 +1947,9 @@ class GetTimeseries:
                       'lineWidth': ts_drawprops.linewidth,
                       'color': ts_drawprops.color,
                       'yAxis': ts_drawprops.yaxes_id,
-                      'data': data}
-                timeseries.append(ts)
+                      'data': data
+                      }
+            timeseries.append(ts)
 
         ts_json = {"data_available": "true",
                    "showYearInTicks": showYearInTicks,
@@ -1738,6 +1970,135 @@ class GetTimeseries:
 
 
 class TimeseriesProducts:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        import copy
+
+        db_products = querydb.get_timeseries_products()
+
+        if hasattr(db_products, "__len__") and db_products.__len__() > 0:
+            products_dict_all = []
+            # loop the products list
+            for row in db_products:
+                prod_dict = {}
+                prod_record = functions.row2dict(row)
+                productcode = prod_record['productcode']
+                subproductcode = prod_record['subproductcode']
+                version = prod_record['version']
+
+                # prod_dict['itemtype'] = "TimeseriesProduct"
+                prod_dict['cat_descr_name'] = prod_record['cat_descr_name']
+                prod_dict['category_id'] = prod_record['category_id']
+                prod_dict['order_index'] = prod_record['order_index']
+                prod_dict['productid'] = prod_record['productid']
+                prod_dict['productcode'] = prod_record['productcode']
+                prod_dict['version'] = prod_record['version']
+                prod_dict['subproductcode'] = prod_record['subproductcode']
+                # prod_dict['mapsetcode'] = ""
+                prod_dict['descriptive_name'] = prod_record['descriptive_name']
+                prod_dict['description'] = prod_record['description']
+                # prod_dict['years'] = []
+                # prod_dict['parentId'] = 'root'
+                # prod_dict['leaf'] = False
+
+                # does the product have mapsets?
+                p = Product(product_code=productcode, version=version)
+                all_prod_mapsets = p.mapsets
+                # print all_prod_mapsets
+
+                if hasattr(all_prod_mapsets, "__len__") and all_prod_mapsets.__len__() > 0:
+                    prod_dict['productmapsets'] = []
+                    # prod_dict['children'] = []
+                    for mapset in all_prod_mapsets:
+                        mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
+                        if mapset_info:
+                            mapset_record = functions.row2dict(mapset_info)
+                            # print mapset_record
+                            mapset_dict = {}
+                            # mapset_dict['itemtype'] = "TimeseriesMapset"
+                            # mapset_dict['cat_descr_name'] = prod_record['cat_descr_name']
+                            # mapset_dict['category_id'] = prod_record['category_id']
+                            # mapset_dict['order_index'] = prod_record['order_index']
+                            # mapset_dict['productid'] = prod_record['productid']
+                            # mapset_dict['productcode'] = prod_record['productcode']
+                            # mapset_dict['version'] = prod_record['version']
+                            # mapset_dict['subproductcode'] = prod_record['subproductcode']
+                            mapset_dict['productmapsetid'] = prod_record['productid'] + '_' + mapset_record['mapsetcode']
+                            mapset_dict['mapsetcode'] = mapset_record['mapsetcode']
+                            mapset_dict['descriptive_name'] = mapset_record['descriptive_name']
+                            mapset_dict['description'] = mapset_record['description']
+                            mapset_dict['timeseriesmapsetdatasets'] = []
+                            # mapset_dict['years'] = []
+                            # mapset_dict['parentId'] = prod_record['productid']
+                            # mapset_dict['leaf'] = False
+                            # mapset_dict['children'] = []
+                            timeseries_mapset_datasets = querydb.get_timeseries_subproducts(productcode=productcode,
+                                                                                            version=version,
+                                                                                            subproductcode=subproductcode)
+                            for subproduct in timeseries_mapset_datasets:
+                                if subproduct is not None:
+                                    dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+                                    dataset.get_filenames()
+                                    all_present_product_dates = dataset.get_dates()
+
+                                    distinctyears = []
+                                    for product_date in all_present_product_dates:
+                                        if product_date.year not in distinctyears:
+                                            distinctyears.append(product_date.year)
+
+                                    dataset_record = functions.row2dict(subproduct)
+                                    dataset_dict = {}
+                                    # dataset_dict['itemtype'] = "TimeseriesSubproduct"
+                                    # dataset_dict['cat_descr_name'] = prod_record['cat_descr_name']
+                                    # dataset_dict['category_id'] = prod_record['category_id']
+                                    # dataset_dict['order_index'] = prod_record['order_index']
+                                    dataset_dict['subproductid'] = dataset_record['productid']
+                                    dataset_dict['productcode'] = dataset_record['productcode']
+                                    dataset_dict['version'] = dataset_record['version']
+                                    dataset_dict['subproductcode'] = dataset_record['subproductcode']
+                                    dataset_dict['mapsetcode'] = mapset_record['mapsetcode']
+                                    dataset_dict['descriptive_name'] = dataset_record['descriptive_name']
+                                    dataset_dict['description'] = dataset_record['description']
+                                    dataset_dict['years'] = distinctyears
+                                    # dataset_dict['leaf'] = True
+                                    # dataset_dict['checked'] = False
+                                    # dataset_dict['parentId'] = mapset_dict['productmapsetid']
+
+                                    # dataset_dict['mapsetcode'] = mapset
+                                    mapset_dict['timeseriesmapsetdatasets'].append(dataset_dict)
+                                    # mapset_dict['children'].append(dataset_dict)
+
+                            if dataset_dict['years'].__len__() > 0:
+                                # tmp_prod_dict = prod_dict.copy()
+                                tmp_prod_dict = copy.deepcopy(prod_dict)
+
+                                tmp_prod_dict['productmapsets'].append(mapset_dict)
+                                # tmp_prod_dict['children'].append(mapset_dict)
+                                products_dict_all.append(tmp_prod_dict)
+                                tmp_prod_dict = []
+
+            prod_json = json.dumps(products_dict_all,
+                                   ensure_ascii=False,
+                                   sort_keys=True,
+                                   indent=4,
+                                   separators=(', ', ': '))
+
+            # datamanagement_json = '{"products":'+prod_json+'}'
+            # datamanagement_json = '{"descriptive_name": "", "productid": "root", "parentId": null, "leaf": false, "children": '+prod_json+'}'
+
+            datamanagement_json = '{"success":"true", "total":'\
+                                  + str(db_products.__len__())\
+                                  + ',"products":'+prod_json+'}'
+
+        else:
+            datamanagement_json = '{"success":false, "error":"No data sets defined!"}'
+
+        return datamanagement_json
+
+
+class __TimeseriesProducts:
     def __init__(self):
         self.lang = "eng"
 
@@ -1867,8 +2228,66 @@ class GetTimeLine:
         # print timeline_json
         return timeline_json
 
+class GetAllColorSchemes:
+    def __init__(self):
+        self.lang = "eng"
 
-class GetColorSchemes:
+    def GET(self):
+        getparams = web.input()
+
+        all_legends = querydb.get_all_legends()
+
+        if hasattr(all_legends, "__len__") and all_legends.__len__() > 0:
+            legends_dict_all = []
+            for legend in all_legends:
+                # legend_dict = functions.row2dict(legend)
+                # legend_dict = legend.__dict__
+                legend_dict = {}
+                legend_id = legend['legend_id']
+                legend_name = legend['legend_name']
+                # legend_name = legend['colorbar']
+
+                legend_steps = querydb.get_legend_steps(legendid=legend_id)
+
+                colorschemeHTML = '<table cellspacing=0 cellpadding=0 width=100%><tr>'
+                for step in legend_steps:
+                    # convert step['color_rgb'] from RGB to html color
+                    color_rgb = step.color_rgb.split(' ')
+                    color_html = functions.rgb2html(color_rgb)
+                    r = color_rgb[0]
+                    g = color_rgb[1]
+                    b = color_rgb[2]
+                    color_html = 'rgb('+r+','+g+','+b+')'
+                    colorschemeHTML = colorschemeHTML + \
+                                      "<td height=15 style='padding:0; margin:0; background-color: " + \
+                                      color_html + ";'></td>"
+                colorschemeHTML = colorschemeHTML + '</tr></table>'
+
+                legend_dict['legend_id'] = legend_id
+                legend_dict['legend_name'] = legend_name
+                legend_dict['colorbar'] = legend['colorbar']
+                legend_dict['colorschemeHTML'] = colorschemeHTML
+                legendsHTML = generateLegendHTML.generateLegendHTML(legend_id)
+                # print legendsHTML['legendHTML']
+                legend_dict['legendHTML'] = legendsHTML['legendHTML']
+                legend_dict['legendHTMLVertical'] = legendsHTML['legendHTMLVertical']
+
+                legends_dict_all.append(legend_dict)
+
+            legends_json = json.dumps(legends_dict_all,
+                                      ensure_ascii=False,
+                                      sort_keys=True,
+                                      indent=4,
+                                      separators=(', ', ': '))
+
+            colorschemes = '{"success":"true", "total":' + str(all_legends.__len__()) + ',"legends":'+legends_json+'}'
+        else:
+            colorschemes = '{"success":"true", "message":"No legends defined!"}'
+
+        return colorschemes
+
+
+class GetProductColorSchemes:
     def __init__(self):
         self.lang = "eng"
 
@@ -2552,6 +2971,99 @@ class GetServerLayerFileList:
         return layerfiles_json
 
 
+class SaveDrawnVectorLayer:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def GET(self):
+        getparams = web.input()
+
+        # layerfiledir = '/eStation2/layers/' # change this to the directory you want to store the file in.
+        layerfiledir = es_constants.es2globals['estation2_layers_dir']
+        if 'layerfilename' in getparams: # to check if the file-object is created
+            try:
+                filepath=getparams.layerfilename.replace('\\','/') # replaces the windows-style slashes with linux ones.
+                filename=filepath.split('/')[-1] # splits the and chooses the last part (the filename with extension)
+
+                # Separate base from extension
+                base, extension = os.path.splitext(filename)
+
+                # Initial new name
+                new_name = os.path.join(layerfiledir, filename)
+
+                if not os.path.exists(new_name):  # file does not exist in <layerfiledir>
+                    fout = open(new_name,'w') # creates the file where the uploaded file should be stored
+                    fout.write(getparams.drawnlayerfeaturesGEOSON) # .read()  writes the uploaded file to the newly created file.
+                    fout.close() # closes the file, upload complete.
+                else:  # file exists in <layerfiledir>
+                    ii = 1
+                    while True:
+                        new_name = os.path.join(layerfiledir, base + "_" + str(ii) + extension)
+                        if not os.path.exists(new_name):
+                            fout = open(new_name,'w') # creates the file where the uploaded file should be stored
+                            fout.write(getparams.drawnlayerfeaturesGEOSON) # .read()  writes the uploaded file to the newly created file.
+                            fout.close() # closes the file, upload complete.
+                            break
+                        ii += 1
+
+                finalfilename = new_name.split('/')[-1] # splits the and chooses the last part (the filename with extension)
+                success = True
+            except:
+                success = False
+        else:
+            success = False
+
+        if success:
+            layerdrawprobs = {
+                                # 'layerid': getparams['layer']['layerid'],
+                                # 'layerlevel': getparams['layer']['layerlevel'],
+                                'layername': finalfilename,
+                                'description': '',
+                                'filename': finalfilename,
+                                'layerorderidx': 1,
+                                'layertype': 'polygon',
+                                'polygon_outlinecolor': '#0000FF',
+                                'polygon_outlinewidth': 1,
+                                'polygon_fillcolor': 'Transparent',
+                                # 'polygon_fillopacity': '',
+                                'feature_display_column': 'NAME',
+                                'feature_highlight_fillcolor': '#FF9900',
+                                'feature_highlight_fillopacity': 10,
+                                'feature_highlight_outlinecolor': '#33CCCC',
+                                'feature_highlight_outlinewidth': 2,
+                                'feature_selected_outlinecolor': '#FF0000',
+                                'feature_selected_outlinewidth': 2,
+                                'enabled': True,
+                                'deletable': True,
+                                'background_legend_image_filename': '',
+                                # 'projection': '',
+                                'submenu': '',
+                                'menu': 'other',
+                                'defined_by': 'USER',
+                                # 'open_in_mapview': '',
+                                'provider': 'User'}
+
+
+            if self.crud_db.create('layers', layerdrawprobs):
+                status = '{"success":"true", "message":"Layer created!"}'
+            else:
+                status = '{"success":false, "message":"An error occured while saving the settings in the database for the drawn layer!"}'
+
+
+            web.header('Content-Type', 'text/html')   # 'application/x-compressed'  'application/force-download'
+            web.header('Content-transfer-encoding', 'binary')
+            web.header('Content-Disposition', 'attachment; filename=' + finalfilename)  # force browser to show "Save as" dialog.
+            f = open(layerfiledir+'/'+finalfilename, 'rb')
+            while 1:
+                buf = f.read(1024 * 8)
+                if not buf:
+                    break
+                yield buf
+        else:
+            status = '{"success":false, "message":"An error occured while saving the drawn layer!"}'
+            # return status
+
 class ImportLayer:
     def __init__(self):
         self.lang = "eng"
@@ -2560,7 +3072,8 @@ class ImportLayer:
         # getparams = json.loads(web.data())  # get PUT data
         getparams = web.input() # get POST data
 
-        layerfiledir = '/eStation2/layers/' # change this to the directory you want to store the file in.
+        # layerfiledir = '/eStation2/layers/' # change this to the directory you want to store the file in.
+        layerfiledir = es_constants.es2globals['estation2_layers_dir']
         if 'layerfilename' in getparams: # to check if the file-object is created
             try:
                 filepath=getparams.layerfilename.replace('\\','/') # replaces the windows-style slashes with linux ones.

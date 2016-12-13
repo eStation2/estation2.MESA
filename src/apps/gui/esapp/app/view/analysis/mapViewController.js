@@ -2,7 +2,176 @@ Ext.define('esapp.view.analysis.mapViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.analysis-mapview'
 
-    ,addProductLayer: function(productcode, productversion, mapsetcode, subproductcode, legendid, colorschemeHTML, legendHTML, legendHTMLVertical, productname) {
+    ,setMapTemplateName: function(){
+        var me = this;
+        var newMapTemplateName = '';
+
+        if (me.getView().isNewTemplate){
+            // open dialog asking to give a unique map template name
+            // If Save as... then the mapView has a templatename which will be proposed
+            // Ext.MessageBox.prompt( title , message , [fn] , [scope] , [multiline] , [value] )
+            if (esapp.Utils.objectExists(me.getView().templatename) && me.getView().templatename != ''){
+                newMapTemplateName = me.getView().templatename + ' - copy';
+            }
+            Ext.MessageBox.prompt('Map Template Name', 'Please give a unique name for the new map template:', function(btn, text){
+                if (btn == 'ok'){
+                    // process text value and close...
+                    me.getView().templatename = text;
+                    me.saveMapTemplate();
+                    if (me.getView().getTitle() != null){
+                        Ext.fly('mapview_title_templatename_' + me.getView().id).dom.innerHTML = text;
+                        //me.getView().setTitle('<div class="map-templatename">' + text + '</div>' + me.getView().getTitle());
+                    }
+                    me.getView().isTemplate = true;
+                }
+            }, this, false, newMapTemplateName);
+        }
+        else {
+            me.saveMapTemplate();
+        }
+    }
+
+    ,saveMapTemplate: function(){
+        var me = this.getView(),
+            mapLegendObj = me.lookupReference('product-legend_' + me.id),
+            titleObj = me.lookupReference('title_obj_' + me.id),
+            disclaimerObj = me.lookupReference('disclaimer_obj_' + me.id),
+            logoObj = me.lookupReference('logo_obj_' + me.id),
+            scalelineObj = me.lookupReference('scale-line_' + me.id),
+            mapObjectToggleBtn = me.lookupReference('objectsbtn_'+ me.id.replace(/-/g,'_')),
+            mapLegendToggleBtn = me.lookupReference('legendbtn_' + me.id.replace(/-/g, '_')),
+            mapviewSize = me.getSize().width + "," + me.getSize().height;
+
+        var mapTemplate = {
+            newtemplate: me.isNewTemplate,
+            userid: esapp.getUser().userid,
+            //isTemplate: true,
+            templatename: me.templatename,
+            mapviewPosition: me.getPosition(true).toString(),
+            mapviewSize: mapviewSize,
+            productcode: me.productcode,
+            subproductcode: me.subproductcode,
+            productversion: me.productversion,
+            mapsetcode: me.mapsetcode,
+            legendid: me.legendid,
+            legendlayout: mapLegendObj.legendLayout,
+            legendObjPosition: mapLegendObj.legendPosition.toString(),
+            showlegend: mapLegendToggleBtn.pressed,
+            titleObjPosition: titleObj.titlePosition.toString(),
+            titleObjContent: titleObj.tpl.html,
+            disclaimerObjPosition: disclaimerObj.disclaimerPosition.toString(),
+            disclaimerObjContent: disclaimerObj.getContent(),
+            logosObjPosition: logoObj.logoPosition.toString(),
+            logosObjContent: Ext.encode(logoObj.getLogoData()),
+            showObjects: mapObjectToggleBtn.pressed,
+            scalelineObjPosition: scalelineObj.getPosition(true).toString(),
+            vectorLayers: '',
+            outmaskFeature: '',
+            auto_open: false
+        }
+        //console.info(mapTemplate);
+
+        Ext.Ajax.request({
+            method: 'POST',
+            url: 'analysis/savemaptemplate',
+            params: mapTemplate,
+            scope: me,
+            success: function (response, request) {
+                var responseJSON = Ext.util.JSON.decode(response.responseText);
+                Ext.toast({html: responseJSON.message, title: "Save Map template", width: 300, align: 't'});
+            },
+            //callback: function ( callinfo,responseOK,response ) {},
+            failure: function (result, request) {
+                Ext.toast({html: responseJSON.message, title: "ERROR - Save Map template", width: 300, align: 't'});
+            }
+        });
+
+        me.isNewTemplate = false;
+    }
+
+    ,play: function(){
+        var me = this.getView();
+        var dates = [];
+        var addDate = false;
+        var timelinechart = me.lookupReference('time-line-chart' + me.id).timelinechart;
+        // Get from and to dates from timeline rangeSelector input fields
+        var startDate = Highcharts.dateFormat('%Y%m%d', timelinechart.rangeSelector.minInput.HCTime);
+        var endDate = Highcharts.dateFormat('%Y%m%d', timelinechart.rangeSelector.maxInput.HCTime);
+        //var zoomStartEpochTime = chart.xAxis[0].getExtremes().min;
+        //var zoomEndEpochTime = chart.xAxis[0].getExtremes().max;
+        //me.task = null;
+
+        Ext.getCmp('playBtn_' + me.id).hide();
+        Ext.getCmp('stopBtn_' + me.id).show();
+
+        // Get all the dates in the range
+        for (var i = 0; i < me.timeline.length; i += 1) {
+            if (me.timeline[i]['date'] >= String(startDate)) addDate = true;
+            if (me.timeline[i]['date'] >= String(endDate)) addDate = false;
+            if (addDate) {
+                dates.push(
+                    me.timeline[i]['date']
+                );
+            }
+        }
+        //console.info(dates);
+        var counter = 0,
+            runner = new Ext.util.TaskRunner(),
+            interval = Ext.getCmp('playInterval_' + me.id).getValue() || 2500;
+
+        me.task = runner.newTask({
+            run: function() {
+                //console.info('refreshing product layer with new date');
+                me.productdate = dates[counter];
+                if (counter == dates.length -1) counter = 0;
+                else counter +=1;
+                me.getController().updateProductLayer();
+                me.productdate_linked = null;
+                me.getController().updateProductInOtherMapViews();
+
+            },
+            interval: interval
+        });
+        me.task.start();
+    }
+
+    ,pause: function(){
+        var me = this;
+    }
+
+    ,stop: function(){
+        var me = this.getView();
+        // Stop the while loop in the play function
+        Ext.getCmp('playBtn_' + me.id).show();
+        Ext.getCmp('stopBtn_' + me.id).hide();
+        //me.task.stop();
+        me.task.destroy();
+        me.task = null;
+    }
+
+    ,refreshTitleData: function(){
+        var me = this.getView();
+        var pattern = /(\d{4})(\d{2})(\d{2})/;
+        var mydate = me.productdate.replace(pattern,'$3-$2-$1');
+        var mapTitleObj = Ext.getCmp('title_obj_' + me.id);
+
+        if (me.date_format == 'MMDD') {
+            mydate = new Date(me.productdate.replace(pattern,'$2/$3/$1'));
+            mydate.setHours(mydate.getHours()+5);   // add some hours so otherwise Highcharts.dateFormat assigns a day before if the hour is 00:00.
+            mydate = Highcharts.dateFormat('%d %b', mydate, true);
+        }
+
+        me.setTitleData({
+            'selected_area': me.selectedarea,
+            'product_name': me.productname,
+            'product_date': mydate
+        });
+
+        mapTitleObj.changesmade =true;
+        mapTitleObj.fireEvent('refreshimage');
+    }
+
+    ,addProductLayer: function(productcode, productversion, mapsetcode, subproductcode, legendid, legendHTML, legendHTMLVertical, productname, date_format) {
         var me = this;
         var params = {
                productcode:productcode,
@@ -16,8 +185,9 @@ Ext.define('esapp.view.analysis.mapViewController', {
         me.getView().subproductcode = subproductcode;
         me.getView().legendid = legendid;
         me.getView().productname = productname;
-        me.getView().legendHTML = legendHTML;
-        me.getView().legendHTMLVertical = legendHTMLVertical;
+        //me.getView().legendHTML = legendHTML;
+        //me.getView().legendHTMLVertical = legendHTMLVertical;
+        me.getView().date_format = date_format;
 
 
         Ext.Ajax.request({
@@ -32,6 +202,12 @@ Ext.define('esapp.view.analysis.mapViewController', {
                     data = [],
                     i = 0,
                     color = '#ff0000';
+
+                me.getView().timeline = responseJSON.timeline;
+
+                //console.info(me.lookupReference('time-line-chart' + me.getView().id));
+                me.lookupReference('time-line-chart' + me.getView().id).product_date_format = date_format;
+                me.lookupReference('time-line-chart' + me.getView().id).createTimeLineChart();
 
                 for (i; i < dataLength; i += 1) {
                     if (i == dataLength-1) {
@@ -48,18 +224,13 @@ Ext.define('esapp.view.analysis.mapViewController', {
                             events: {
                                 click: function () {
                                     me.getView().productdate = this.date;
+                                    me.getView().productdate_linked = null;
                                     me.getView().getController().updateProductLayer();
+                                    me.getView().getController().updateProductInOtherMapViews();
                                     //var outmask = me.lookupReference('outmaskbtn_'+ me.getView().id.replace(/-/g,'_')).pressed;
                                     //if (outmask){
                                     //    me.getView().getController().outmaskFeature();
                                     //}
-
-                                    //me.getView().getController().updateProductLayer(productcode,
-                                    //    productversion,
-                                    //    mapsetcode,
-                                    //    subproductcode,
-                                    //    legendid,
-                                    //    this.date);
                                 }
                             }
                         });
@@ -87,17 +258,27 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 var pattern = /(\d{4})(\d{2})(\d{2})/;
                 //me.getView().productdate = me.getView().productdate.replace(pattern,'$3-$2-$1');
                 //var dt = new Date(me.getView().productdate.replace(pattern,'$3-$2-$1'));
-                var productdateHTML = ' - <b class="smalltext">' + me.getView().productdate.replace(pattern,'$3-$2-$1') + '</b>';
+                var productdateHTML = ' - <b class="" style="color: mediumspringgreen;">' + me.getView().productdate.replace(pattern,'$3-$2-$1') + '</b>';
+                if (date_format == 'MMDD') {
+                    var mydate = new Date(me.getView().productdate.replace(pattern,'$2/$3/$1'));
+                    mydate.setHours(mydate.getHours()+5);   // add some hours so otherwise Highcharts.dateFormat assigns a day before if the hour is 00:00.
+                    productdateHTML = ' - <b class="" style="color: mediumspringgreen;">' + Highcharts.dateFormat('%d %b', mydate, true) + '</b>';
+                }
                 var mapviewTitle = productname + versiontitle + mapsetcodeHTML + productdateHTML;
-                me.getView().setTitle(mapviewTitle);
+
+                Ext.fly('mapview_title_productname_' + me.getView().id).dom.innerHTML = mapviewTitle;
+                //me.getView().setTitle(mapviewTitle);
 
                 // Show product time line
                 var mapviewtimeline = me.lookupReference('product-time-line_' + me.getView().id);
-                mapviewtimeline.setHidden(false);
-                mapviewtimeline.expand();
-                me.getView().getController().redrawTimeLine(me.getView());
+                //mapviewtimeline.setHidden(false);
+                //if (me.getView().showTimeline) {
+                    mapviewtimeline.show();
+                    me.getView().getController().redrawTimeLine(me.getView());
+                //}
                 //me.getView().center();
 
+                me.getView().getController().refreshTitleData();
             },
             //callback: function ( callinfo,responseOK,response ) {},
             failure: function ( result, request) {}
@@ -110,14 +291,14 @@ Ext.define('esapp.view.analysis.mapViewController', {
         //mapviewtimeline.setHidden(false);
         //mapviewtimeline.expand();
 
-        me.getView().productlayer = new ol.layer.Tile({       // Image
+        me.getView().productlayer = new ol.layer.Tile({       // ol.layer.Tile   or  ol.layer.Image
             title: esapp.Utils.getTranslation('productlayer'),  // 'Product layer',
             layer_id: 'productlayer',
             layerorderidx: 0,
             layertype: 'raster',
             type: 'base',
             visible: true,
-            source: new ol.source.TileWMS({    // ImageWMS
+            source: new ol.source.TileWMS({    // ol.source.TileWMS or ol.source.ImageWMS
                 url: 'analysis/getproductlayer',
                 type: 'base',
                 wrapX: false,
@@ -149,60 +330,94 @@ Ext.define('esapp.view.analysis.mapViewController', {
         me.getView().getController().addLayerSwitcher(me.getView().map);
 
         // Show legend panel with selected legend and show view legend toggle button.
-        var maplegendhtml = me.lookupReference('product-legend' + me.getView().id);
-        maplegendhtml.setHtml(legendHTMLVertical);
+        var mapLegendObj = me.lookupReference('product-legend_' + me.getView().id);
+        mapLegendObj.legendHTML = legendHTML;
+        mapLegendObj.legendHTMLVertical = legendHTMLVertical;
+        mapLegendObj.hide();    // Hide first to always trigger the show event!
+        mapLegendObj.show();
 
-        var maplegendpanel = me.lookupReference('product-legend_panel_' + me.getView().id);
-        maplegendpanel.show();
-
-        var maplegend_togglebtn = me.lookupReference('legendbtn_'+ me.getView().id.replace(/-/g,'_')); //  + me.getView().id);
+        var maplegend_togglebtn = me.lookupReference('legendbtn_' + me.getView().id.replace(/-/g, '_')); //  + me.getView().id);
         maplegend_togglebtn.show();
-        maplegend_togglebtn.toggle();
 
-        var outmask_togglebtn = me.lookupReference('outmaskbtn_'+ me.getView().id.replace(/-/g,'_')); //  + me.getView().id);
-        if (me.getView().getController().outmaskingPossible(me.getView().map)){
-            outmask_togglebtn.show();
+        if (mapLegendObj.showlegend ) {
+            //maplegend_togglebtn.toggle();
+            maplegend_togglebtn.setPressed(true);
         }
-        else outmask_togglebtn.hide();
+
+        this.outmaskingPossible();
+        //var outmask_togglebtn = me.lookupReference('outmaskbtn_'+ me.getView().id.replace(/-/g,'_')); //  + me.getView().id);
+        //if (me.getView().getController().outmaskingPossible(me.getView().map)){
+        //    outmask_togglebtn.show();
+        //}
+        //else outmask_togglebtn.hide();
+
     }
 
     ,updateProductLayer: function() {
+        var me = this.getView();
         var params = {};
-        var outmask = false; // this.lookupReference('outmaskbtn_'+ this.getView().id.replace(/-/g,'_')).pressed;
-        //console.info(this.lookupReference('outmaskbtn_'+ this.getView().id.replace(/-/g,'_')));
-        //console.info(outmask);
-        //console.info(this.getView().selectedfeature);
 
-        // Does not work passing the WKT. Gives error: 414 Request-URI Too Long
-        // The requested URL's length exceeds the capacity limit for this server.
-        if (outmask && this.getView().selectedfeature){
-            var wkt = new ol.format.WKT();
-            var wktstr = wkt.writeFeature(this.getView().selectedfeature);
-            wktstr = wktstr.replace(/,/g, ', ');  // not a good idea in general
-            params = {
-                productcode: this.getView().productcode,
-                productversion: this.getView().productversion,
-                subproductcode: this.getView().subproductcode,
-                mapsetcode: this.getView().mapsetcode,
-                legendid: this.getView().legendid,
-                date: this.getView().productdate,
-                outmask:true,
-                selectedfeature: wktstr,
-                'FORMAT': 'image/png'
-            };
+        //var outmask = false; // this.lookupReference('outmaskbtn_'+ me.id.replace(/-/g,'_')).pressed;
+        //console.info(this.lookupReference('outmaskbtn_'+ me.id.replace(/-/g,'_')));
+        //console.info(outmask);
+        //console.info(me.selectedfeature);
+        //
+        //// Does not work passing the WKT. Gives error: 414 Request-URI Too Long
+        //// The requested URL's length exceeds the capacity limit for this server.
+        //if (outmask && me.selectedfeature){
+        //    var wkt = new ol.format.WKT();
+        //    var wktstr = wkt.writeFeature(me.selectedfeature);
+        //    wktstr = wktstr.replace(/,/g, ', ');  // not a good idea in general
+        //    params = {
+        //        productcode: me.productcode,
+        //        productversion: me.productversion,
+        //        subproductcode: me.subproductcode,
+        //        mapsetcode: me.mapsetcode,
+        //        legendid: me.legendid,
+        //        date: me.productdate,
+        //        outmask:true,
+        //        selectedfeature: wktstr,
+        //        'FORMAT': 'image/png'
+        //    };
+        //}
+
+        if (esapp.Utils.objectExists(me.productdate_linked)){
+            var pattern = /(\d{4})(\d{2})(\d{2})/;
+            //if (me.date_format == 'MMDD') {
+            //    me.productdate_linked = me.productdate_linked.replace(pattern, '$2$3');
+            //}
+
+            me.productdate = null;
+            for (var i = 0; i < me.timeline.length; i += 1) {
+                if (me.timeline[i]['present'] == 'true') {
+                    if (me.date_format == 'MMDD') {
+                        if (me.timeline[i]['date'].replace(pattern, '$2$3') >= me.productdate_linked.replace(pattern, '$2$3')) {
+                            me.productdate = me.timeline[i]['date'];
+                            break;
+                        }
+                    }
+                    else if (me.timeline[i]['date'] >= me.productdate_linked) {
+                        me.productdate = me.timeline[i]['date'];
+                        break;
+                    }
+                    else if (i == me.timeline.length-1) {
+                        me.productdate = me.timeline[i]['date'];
+                        break;
+                    }
+                }
+            }
         }
-        else {
-            params = {
-                productcode: this.getView().productcode,
-                productversion: this.getView().productversion,
-                subproductcode: this.getView().subproductcode,
-                mapsetcode: this.getView().mapsetcode,
-                legendid: this.getView().legendid,
-                date: this.getView().productdate,
-                'FORMAT': 'image/png'
-                //,REASPECT:'TRUE'
-            };
-        }
+
+        params = {
+            productcode: me.productcode,
+            productversion: me.productversion,
+            subproductcode: me.subproductcode,
+            mapsetcode: me.mapsetcode,
+            legendid: me.legendid,
+            date: me.productdate,
+            'FORMAT': 'image/png'
+            //,REASPECT:'TRUE'
+        };
 
         //function geoserverWms(method, url, params) {
         //    var options = {
@@ -214,120 +429,142 @@ Ext.define('esapp.view.analysis.mapViewController', {
         //    console.log('Content:', result.content);
         //    return result.content.toString('base64');
         //}
+        //
+        //function imagePostFunction(image, src) {
+        //    var img = image.getImage();
+        //    if (typeof window.btoa === 'function') {
+        //      var xhr = new XMLHttpRequest();
+        //      //console.log("src",src);
+        //      //GET ALL THE PARAMETERS OUT OF THE SOURCE URL
+        //      var dataEntries = src.split("&");
+        //      var url;
+        //      var params = "";
+        //      for (var i = 0 ; i< dataEntries.length ; i++){
+        //          //console.log("dataEntries[i]",dataEntries[i]);
+        //          if (i===0){
+        //          url = dataEntries[i];
+        //          }
+        //          else{
+        //          params = params + "&"+dataEntries[i];
+        //          }
+        //      }
+        //      //console.log("params",params);
+        //      xhr.open('POST', url, true);
+        //
+        //      xhr.responseType = 'arraybuffer';
+        //      xhr.onload = function(e) {
+        //        if (this.status === 200) {
+        //          //console.log("this.response",this.response);
+        //          var uInt8Array = new Uint8Array(this.response);
+        //          var i = uInt8Array.length;
+        //          var binaryString = new Array(i);
+        //          while (i--) {
+        //            binaryString[i] = String.fromCharCode(uInt8Array[i]);
+        //          }
+        //          var data = binaryString.join('');
+        //          var type = xhr.getResponseHeader('content-type');
+        //          if (type.indexOf('image') === 0) {
+        //            img.src = 'data:' + type + ';base64,' + window.btoa(data);
+        //          }
+        //        }
+        //      };
+        //      //SET THE PROPER HEADERS AND FINALLY SEND THE PARAMETERS
+        //      xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        //      //xhr.setRequestHeader("Content-length", params.length);
+        //      //xhr.setRequestHeader("Connection", "close");
+        //      xhr.send(params);
+        //    } else {
+        //      img.src = src;
+        //    }
+        //}
+        if (me.productdate != null){
+            me.productlayer = new ol.layer.Tile({       // ol.layer.Tile   or  ol.layer.Image
+                title: esapp.Utils.getTranslation('productlayer'),  // 'Product layer',
+                layer_id: 'productlayer',
+                layerorderidx: 0,
+                layertype: 'raster',
+                type: 'base',
+                visible: true,
+                //maxGetUrlProperty: 10,
+                source: new ol.source.TileWMS({     // ol.source.TileWMS or ol.source.ImageWMS
+                    url: 'analysis/getproductlayer',
+                    crossOrigin: '',  // 'anonymous',
+                    wrapX: false,
+                    noWrap: true,
+                    attributions: [new ol.Attribution({
+                        html: '&copy; <a href="https://ec.europa.eu/jrc/">'+esapp.Utils.getTranslation('estation2')+'</a>'
+                    })],
+                    params: params,
+                    serverType: 'mapserver' /** @type {ol.source.wms.ServerType}  ('mapserver') */
+                    //,tileLoadFunction: function(image, src) {
+                    //   imagePostFunction(image, src);
+                    //}
+                    //,tileLoadFunction: function (image, src) {
+                    //    var img = image.getImage();
+                    //    var query = src.replace(url + '?', '');
+                    //    var params = getQueryParams(query); // A separate function to decode the query string into a JSON object.
+                    //    if (typeof window.btoa === 'function') {
+                    //        Meteor.call('geoserverWms', 'POST', url, params, function(err, result) {
+                    //            if (err) {
+                    //                return console.error('err:', err);
+                    //            }
+                    //            // console.log(result);
+                    //            var type = 'image/png';
+                    //            img.src = 'data:' + type + ';base64,' + result;
+                    //        });
+                    //    } else {
+                    //      img.src = src;
+                    //    }
+                    //}
+                })
+            });
 
-        function imagePostFunction(image, src) {
-            var img = image.getImage();
-            if (typeof window.btoa === 'function') {
-              var xhr = new XMLHttpRequest();
-              //console.log("src",src);
-              //GET ALL THE PARAMETERS OUT OF THE SOURCE URL
-              var dataEntries = src.split("&");
-              var url;
-              var params = "";
-              for (var i = 0 ; i< dataEntries.length ; i++){
-                  //console.log("dataEntries[i]",dataEntries[i]);
-                  if (i===0){
-                  url = dataEntries[i];
-                  }
-                  else{
-                  params = params + "&"+dataEntries[i];
-                  }
-              }
-              //console.log("params",params);
-              xhr.open('POST', url, true);
 
-              xhr.responseType = 'arraybuffer';
-              xhr.onload = function(e) {
-                if (this.status === 200) {
-                  //console.log("this.response",this.response);
-                  var uInt8Array = new Uint8Array(this.response);
-                  var i = uInt8Array.length;
-                  var binaryString = new Array(i);
-                  while (i--) {
-                    binaryString[i] = String.fromCharCode(uInt8Array[i]);
-                  }
-                  var data = binaryString.join('');
-                  var type = xhr.getResponseHeader('content-type');
-                  if (type.indexOf('image') === 0) {
-                    img.src = 'data:' + type + ';base64,' + window.btoa(data);
-                  }
-                }
-              };
-              //SET THE PROPER HEADERS AND FINALLY SEND THE PARAMETERS
-              xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-              //xhr.setRequestHeader("Content-length", params.length);
-              //xhr.setRequestHeader("Connection", "close");
-              xhr.send(params);
-            } else {
-              img.src = src;
+            var productlayer_idx = me.getController().findlayer(me.map, 'productlayer');
+            if (productlayer_idx != -1)
+                me.map.getLayers().removeAt(productlayer_idx);
+            //me.map.removeLayer(me.map.getLayers().a[0]);
+            //me.map.addLayer(me.productlayer);
+            me.map.getLayers().insertAt(0, me.productlayer);
+
+            var versiontitle = '';
+            if (me.productversion !== 'undefined'){
+                versiontitle = ' <b class="smalltext">' + me.productversion + '</b>';
             }
+
+            var mapsetcodeHTML = ' - <b class="smalltext">' + me.mapsetcode + '</b>';
+
+            var pattern = /(\d{4})(\d{2})(\d{2})/;
+            //me.productdate = clickeddate.replace(pattern,'$3-$2-$1');
+            var productdateHTML = ' - <b class="" style="color: mediumspringgreen;">' + me.productdate.replace(pattern,'$3-$2-$1') + '</b>';
+            if (me.date_format == 'MMDD') {
+                var mydate = new Date(me.productdate.replace(pattern,'$2/$3/$1'));
+                mydate.setHours(mydate.getHours()+5);   // add some hours so otherwise Highcharts.dateFormat assigns a day before if the hour is 00:00.
+                productdateHTML = ' - <b class="" style="color: mediumspringgreen;">' + Highcharts.dateFormat('%d %b', mydate, true) + '</b>';
+            }
+            //var mapviewTitle = me.productname + versiontitle + ' - <b class="smalltext">' + me.productdate + '</b>';
+            var mapviewTitle = me.productname + versiontitle + mapsetcodeHTML + productdateHTML;
+            Ext.fly('mapview_title_productname_' + me.id).dom.innerHTML = mapviewTitle;
+            //me.setTitle(mapviewTitle);
+
+            me.getController().refreshTitleData();
         }
+    }
 
-        this.getView().productlayer = new ol.layer.Tile({
-            title: esapp.Utils.getTranslation('productlayer'),  // 'Product layer',
-            layer_id: 'productlayer',
-            layerorderidx: 0,
-            layertype: 'raster',
-            type: 'base',
-            visible: true,
-            //maxGetUrlProperty: 10,
-            source: new ol.source.TileWMS({
-                url: 'analysis/getproductlayer',
-                crossOrigin: '',  // 'anonymous',
-                wrapX: false,
-                noWrap: true,
-                attributions: [new ol.Attribution({
-                    html: '&copy; <a href="https://ec.europa.eu/jrc/">'+esapp.Utils.getTranslation('estation2')+'</a>'
-                })],
-                params: params,
-                serverType: 'mapserver' /** @type {ol.source.wms.ServerType}  ('mapserver') */
-                //,tileLoadFunction: function(image, src) {
-                //   imagePostFunction(image, src);
-                //}
-                //,tileLoadFunction: function (image, src) {
-                //    var img = image.getImage();
-                //    var query = src.replace(url + '?', '');
-                //    var params = getQueryParams(query); // A separate function to decode the query string into a JSON object.
-                //    if (typeof window.btoa === 'function') {
-                //        Meteor.call('geoserverWms', 'POST', url, params, function(err, result) {
-                //            if (err) {
-                //                return console.error('err:', err);
-                //            }
-                //            // console.log(result);
-                //            var type = 'image/png';
-                //            img.src = 'data:' + type + ';base64,' + result;
-                //        });
-                //    } else {
-                //      img.src = src;
-                //    }
-                //}
-            })
-        });
+    ,updateProductInOtherMapViews: function () {
+        var me = this.getView();
+        var mapViewWindows = Ext.ComponentQuery.query('mapview-window');
+        me.productdate_linked = null;
 
-
-        var productlayer_idx = this.getView().getController().findlayer(this.getView().map, 'productlayer');
-        if (productlayer_idx != -1)
-            this.getView().map.getLayers().removeAt(productlayer_idx);
-        //this.getView().map.removeLayer(this.getView().map.getLayers().a[0]);
-        //this.getView().map.addLayer(this.getView().productlayer);
-        this.getView().map.getLayers().insertAt(0, this.getView().productlayer);
-
-        var versiontitle = '';
-        if (this.getView().productversion !== 'undefined'){
-            versiontitle = ' <b class="smalltext">' + this.getView().productversion + '</b>';
+        if (me.link_product_layer){
+            Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
+                //if (me == mapview_window) console.info('this mapview skip');
+                if (me != mapview_window && mapview_window.link_product_layer && esapp.Utils.objectExists(mapview_window.productcode)){
+                    mapview_window.productdate_linked = me.productdate;
+                    mapview_window.getController().updateProductLayer();
+                }
+            });
         }
-
-        var mapsetcodeHTML = ' - <b class="smalltext">' + this.getView().mapsetcode + '</b>';
-
-        var pattern = /(\d{4})(\d{2})(\d{2})/;
-        //this.getView().productdate = clickeddate.replace(pattern,'$3-$2-$1');
-        var productdateHTML = ' - <b class="smalltext">' + this.getView().productdate.replace(pattern,'$3-$2-$1') + '</b>';
-
-        //var mapviewTitle = this.getView().productname + versiontitle + ' - <b class="smalltext">' + this.getView().productdate + '</b>';
-        var mapviewTitle = this.getView().productname + versiontitle + mapsetcodeHTML + productdateHTML;
-
-        this.getView().setTitle(mapviewTitle);
-
     }
 
     ,redrawTimeLine: function (mapview) {
@@ -336,104 +573,77 @@ Ext.define('esapp.view.analysis.mapViewController', {
         //var timeline_container_size = mapviewtimeline.getSize();
 
         if (mapviewtimeline.hidden == false){
-            //console.info('redrawTimeLine');
             mapview_timelinechart_container.timelinechart.container.width = mapviewtimeline.getSize().width;
-            mapview_timelinechart_container.timelinechart.setSize(mapviewtimeline.getSize().width-15, mapviewtimeline.getSize().height, false);
+            mapview_timelinechart_container.timelinechart.setSize(mapviewtimeline.getSize().width-35, mapviewtimeline.getSize().height, false);
             //mapview_timelinechart_container.timelinechart.reflow();
             mapview_timelinechart_container.timelinechart.redraw();
-            mapview_timelinechart_container.doLayout();
+            mapview_timelinechart_container.updateLayout();
         }
     }
 
     ,saveMap: function(btn, event) {
-        var me = this.getView();
-        var filename = me.getTitle();
-        var mapviewwin = btn.up().up();
-        //var mapimage_url = '';
-        var addlegend = false;
+        var me = this.getView(),
+            filename = '',
+            mapviewwin = btn.up().up(),
+            mapimage_url = '',
 
+            ObjectToggleBtn = mapviewwin.lookupReference('objectsbtn_'+me.id.replace(/-/g,'_')),
+
+            legendObj = mapviewwin.lookupReference('product-legend_' + mapviewwin.id),
+            titleObj = mapviewwin.lookupReference('title_obj_' + mapviewwin.id),
+            disclaimerObj = mapviewwin.lookupReference('disclaimer_obj_' + mapviewwin.id),
+            logosObj = mapviewwin.lookupReference('logo_obj_' + mapviewwin.id),
+            scalelineObj = mapviewwin.lookupReference('scale-line_' + mapviewwin.id),
+
+            legendObjPosition = [],
+            titleObjPosition = [],
+            disclaimerObjPosition = [],
+            logosObjPosition = [],
+            scalelineObjPosition = []
+            //titleObjDomClone = Ext.clone(titleObj.getEl().dom),
+            //disclaimerObjDomClone = Ext.clone(disclaimerObj.getEl().dom),
+            //logosObjDomClone = Ext.clone(logosObj.getEl().dom)
+        ;
+
+        scalelineObj.fireEvent('refreshimage');
+        scalelineObjPosition = scalelineObj.getPosition(true);
+
+        filename = me.productname + " " + me.productversion + " " + me.mapsetcode + " " + me.productdate
         if (filename == null || filename.trim() == '')
-            filename = 'estation2map.png'
+            filename = 'eStation2map.png'
         else {
             filename = filename.replace(/<\/?[^>]+(>|$)/g, "");
             filename = filename + '.png';
         }
 
-        //if(typeof Promise !== "undefined" && Promise.toString().indexOf("[native code]") !== -1){
-        //   console.info('Browser supports Promise natively!');
-        //}
-        //else {
-        //   console.info('NOT SUPPORT OF Promise natively!');
-        //}
-
-
-        //var maplegendhtml = mapviewwin.lookupReference('product-legend' + mapviewwin.id);
-        var maplegendpanel = mapviewwin.lookupReference('product-legend_panel_' + mapviewwin.id);
-        if (maplegendpanel.hidden == false) {
-            var maplegendhtml = document.getElementById('product-legend' + mapviewwin.id);
-            html2canvas(maplegendhtml, {
-                onrendered: function(canvas) {
-                    addlegend = true;
-                    //maplegendimage = canvas.toDataURL("image/png");
-                    maplegendpanel.legendHTML_ImageObj.src = canvas.toDataURL("image/png");
-                    createDownloadMapImage(addlegend);
-
-                    //var image = canvas.toDataURL("image/png");
-                    //filename = 'legend_' + filename;
-                    ////console.info(mapleggendimage_url);
-                    //
-                    //if (Ext.fly('downloadlegendlink')) {
-                    //    Ext.fly('downloadlegendlink').destroy();
-                    //}
-                    //var downloadlegendlink = document.createElement('a');
-                    //downloadlegendlink.id = 'downloadlegendlink';
-                    //downloadlegendlink.name = downloadlegendlink.id;
-                    //downloadlegendlink.className = 'x-hidden';
-                    //document.body.appendChild(downloadlegendlink);
-                    //downloadlegendlink.setAttribute('download', filename);
-                    //downloadlegendlink.setAttribute('href', image);
-                    //downloadlegendlink.click();
-                }
-            });
-
-            //domtoimage.toPng(maplegendhtml)
-            //    .then(function (mapleggendimage_url) {
-            //
-            //        filename = 'legend_' + filename;
-            //        //console.info(mapleggendimage_url);
-            //
-            //        if (Ext.fly('downloadlegendlink')) {
-            //            Ext.fly('downloadlegendlink').destroy();
-            //        }
-            //        var downloadlegendlink = document.createElement('a');
-            //        downloadlegendlink.id = 'downloadlegendlink';
-            //        downloadlegendlink.name = downloadlegendlink.id;
-            //        downloadlegendlink.className = 'x-hidden';
-            //        document.body.appendChild(downloadlegendlink);
-            //        downloadlegendlink.setAttribute('download', filename);
-            //        downloadlegendlink.setAttribute('href', mapleggendimage_url);
-            //        downloadlegendlink.click();
-            //    })
-            //    .catch(function (error) {
-            //        console.error('oops, something went wrong!', error);
-            //    });
+        if (!legendObj.hidden) {
+            legendObj.fireEvent('refreshimage');
+            legendObjPosition = legendObj.getPosition(true);
         }
-        else {
-            createDownloadMapImage(addlegend);
+        if (ObjectToggleBtn.pressed) {
+            titleObjPosition = titleObj.getPosition(true);
+            disclaimerObjPosition = disclaimerObj.getPosition(true);
+            logosObjPosition = logosObj.getPosition(true);
         }
 
-        function createDownloadMapImage(addlegend){
-            var mapimage_url = '';
-
+        var task = new Ext.util.DelayedTask(function() {
             mapviewwin.map.once('postcompose', function(event) {
-                var canvas = event.context.canvas;
-                //console.info(addlegend);
-                if (addlegend) {
-                    //console.info(maplegendpanel.legendHTML_ImageObj);
-                    var legendposition = maplegendpanel.getPosition(true);
-                    var context = canvas.getContext('2d');
-                    context.drawImage(maplegendpanel.legendHTML_ImageObj, legendposition[0], legendposition[1]+15);
+                var canvas = event.context.canvas,
+                    context = canvas.getContext('2d');
+                if (!legendObj.hidden) {
+                    context.drawImage(legendObj.legendHTML_ImageObj, legendObjPosition[0], legendObjPosition[1]);
                 }
+
+                if (ObjectToggleBtn.pressed) {
+                    context.drawImage(titleObj.title_ImageObj, titleObjPosition[0], titleObjPosition[1]);
+                    context.drawImage(disclaimerObj.disclaimer_ImageObj, disclaimerObjPosition[0], disclaimerObjPosition[1]);
+                    context.drawImage(logosObj.logos_ImageObj, logosObjPosition[0], logosObjPosition[1]);
+                }
+
+                context.drawImage(scalelineObj.scaleline_ImageObj, scalelineObjPosition[0], scalelineObjPosition[1]);
+
+                mapimage_url = canvas.toDataURL('image/png');
+
                 //console.info(Ext.fly('ol-scale-line-inner'));
                 //
                 //var scalewidth = parseInt(Ext.fly('ol-scale-line-inner').css('width'));
@@ -452,10 +662,10 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 //ctx.lineTo(parseInt(scalewidth)+10,canvas.height-20);
                 //ctx.stroke();
 
-                mapimage_url = canvas.toDataURL('image/png');
             });
-
             mapviewwin.map.renderSync();
+
+
             if (Ext.fly('downloadlink')) {
                 Ext.fly('downloadlink').destroy();
             }
@@ -467,9 +677,50 @@ Ext.define('esapp.view.analysis.mapViewController', {
             downloadlink.setAttribute('download', filename);
             downloadlink.setAttribute('href', mapimage_url);
             downloadlink.click();
-            //downloadlink.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-        }
 
+        });
+        task.delay(1000);
+
+        //if(typeof Promise !== "undefined" && Promise.toString().indexOf("[native code]") !== -1){
+        //   console.info('Browser supports Promise natively!');
+        //}
+        //else {
+        //   console.info('NOT SUPPORT OF Promise natively!');
+        //}
+        //domtoimage.toPng(maplegendhtml)
+        //    .then(function (mapleggendimage_url) {
+        //
+        //        filename = 'legend_' + filename;
+        //        //console.info(mapleggendimage_url);
+        //
+        //        if (Ext.fly('downloadlegendlink')) {
+        //            Ext.fly('downloadlegendlink').destroy();
+        //        }
+        //        var downloadlegendlink = document.createElement('a');
+        //        downloadlegendlink.id = 'downloadlegendlink';
+        //        downloadlegendlink.name = downloadlegendlink.id;
+        //        downloadlegendlink.className = 'x-hidden';
+        //        document.body.appendChild(downloadlegendlink);
+        //        downloadlegendlink.setAttribute('download', filename);
+        //        downloadlegendlink.setAttribute('href', mapleggendimage_url);
+        //        downloadlegendlink.click();
+        //    })
+        //    .catch(function (error) {
+        //        console.error('oops, something went wrong!', error);
+        //    });
+    }
+
+    ,toggleDateLink: function(btn, event) {
+        var mapviewwin = this.getView();
+
+        if (btn.pressed) {
+            mapviewwin.link_product_layer = false;
+            btn.setIconCls('calendar_unlinked');
+        }
+        else {
+            mapviewwin.link_product_layer = true;
+            btn.setIconCls('calendar_linked');
+        }
     }
 
     ,toggleLink: function(btn, event) {
@@ -478,31 +729,53 @@ Ext.define('esapp.view.analysis.mapViewController', {
         if (btn.pressed) {
             mapviewwin.map.setView(mapviewwin.mapView);
             //btn.setText('Link');
-            btn.setIconCls('link');
+            //btn.setIconCls('link');
+            btn.setIconCls('fa fa-chain-broken fa-2x red');
         }
         else {
             mapviewwin.map.setView(mapviewwin.up().commonMapView);
             //btn.setText('Unlink');
-            btn.setIconCls('unlink');
+            //btn.setIconCls('unlink');
+            btn.setIconCls('fa fa-link fa-2x gray');
         }
     }
 
     ,toggleLegend: function(btn, event) {
         var mapviewwin = btn.up().up();
-        var maplegendpanel = mapviewwin.lookupReference('product-legend_panel_' + mapviewwin.id);
-        var maplegendhtml = mapviewwin.lookupReference('product-legend' + mapviewwin.id);
+        //var maplegendpanel = mapviewwin.lookupReference('product-legend_panel_' + mapviewwin.id);
+        var mapLegendObj = mapviewwin.lookupReference('product-legend_' + mapviewwin.id);
 
         if (btn.pressed) {
-            //console.info(mapviewwin.legendHTMLVertical);
-            maplegendhtml.setHtml(mapviewwin.legendHTMLVertical);
-            //maplegendpanel.doConstrain();
-            maplegendpanel.show();
+            mapLegendObj.showlegend = true;
+            mapLegendObj.show();
         }
         else {
-            maplegendhtml.setHtml(mapviewwin.legendHTML);
-            //maplegendpanel.doConstrain();
-            maplegendpanel.show();
-            //maplegendpanel.hide();
+            mapLegendObj.legendPosition = mapLegendObj.getPosition(true);
+            mapLegendObj.showlegend = false;
+            mapLegendObj.hide();
+        }
+    }
+
+    ,toggleObjects: function(btn, event) {
+        var mapviewwin = btn.up().up(),
+            titleObj = mapviewwin.lookupReference('title_obj_' + mapviewwin.id),
+            disclaimerObj = mapviewwin.lookupReference('disclaimer_obj_' + mapviewwin.id),
+            logoObj = mapviewwin.lookupReference('logo_obj_' + mapviewwin.id);
+
+        if (btn.pressed) {
+            titleObj.show();
+            disclaimerObj.show();
+            logoObj.show();
+            btn.setStyle({ color: 'green' });
+        }
+        else {
+            titleObj.titlePosition = titleObj.getPosition(true);
+            disclaimerObj.disclaimerPosition = disclaimerObj.getPosition(true);
+            logoObj.logoPosition = logoObj.getPosition(true);
+            titleObj.hide();
+            disclaimerObj.hide();
+            logoObj.hide();
+            btn.setStyle({ color: 'black' });
         }
     }
 
@@ -519,6 +792,170 @@ Ext.define('esapp.view.analysis.mapViewController', {
             //mapviewwin.map.removeLayer("Outmask");
             mapviewwin.getController().removeOutmaskLayer();
             mapviewwin.getController().updateProductLayer();
+        }
+    }
+
+    ,toggleDrawGeometry: function(btn, event) {
+        var mapviewwin = btn.up().up();
+
+        if (btn.pressed) {
+            mapviewwin.map.removeInteraction(mapviewwin.draw);
+            mapviewwin.getController().addDrawInteraction();
+            btn.setIconCls('polygon');
+        }
+        else {
+            mapviewwin.map.removeInteraction(mapviewwin.draw);
+            btn.setIconCls('polygon-gray');
+            btn.hideMenu();
+        }
+        mapviewwin.getController().outmaskingPossible();
+    }
+
+    ,addDrawInteraction: function(geometrytype){
+        var me = this.getView();
+        var value = Ext.getCmp('geometrytypes' + me.id).value;
+        me.draw = null;
+
+        //var source = new ol.source.Vector({wrapX: false});
+        //
+        //var drawvectorlayer = new ol.layer.Vector({
+        //    source: source,
+        //    layer_id: 'drawvectorlayer',
+        //    style: new ol.style.Style({
+        //      fill: new ol.style.Fill({
+        //        color: 'rgba(255, 255, 255, 0.2)'
+        //      }),
+        //      stroke: new ol.style.Stroke({
+        //        color: '#ffcc33',
+        //        width: 2
+        //      }),
+        //      image: new ol.style.Circle({
+        //        radius: 7,
+        //        fill: new ol.style.Fill({
+        //          color: '#ffcc33'
+        //        })
+        //      })
+        //    })
+        //});
+        //
+        //var productlayer_idx = me.getController().findlayer(me.map, 'drawvectorlayer');
+        //if (productlayer_idx != -1)
+        //    me.map.getLayers().removeAt(productlayer_idx);
+        //me.map.getLayers().insertAt(10, drawvectorlayer);
+
+        if (value !== 'None') {
+            var geometryFunction, maxPoints;
+            if (value === 'Square') {
+                value = 'Circle';
+                geometryFunction = ol.interaction.Draw.createRegularPolygon(4);
+            } else if (value === 'Box') {
+                value = 'LineString';
+                maxPoints = 2;
+                geometryFunction = function(coordinates, geometry) {
+                    if (!geometry) {
+                        geometry = new ol.geom.Polygon(null);
+                    }
+                    var start = coordinates[0];
+                    var end = coordinates[1];
+                    geometry.setCoordinates([
+                        [start, [start[0], end[1]], end, [end[0], start[1]], start]
+                    ]);
+                    return geometry;
+                };
+            }
+            me.draw = new ol.interaction.Draw({
+                source: me.drawvectorlayer_source,
+                //features: me.drawfeatures,
+                type: /** @type {ol.geom.GeometryType} */ (value),
+            geometryFunction: geometryFunction,
+                maxPoints: maxPoints
+            });
+            me.map.addInteraction(me.draw);
+
+
+
+            //var overlayStyle = (function() {
+            //    var styles = {};
+            //    styles['Polygon'] = [
+            //      new ol.style.Style({
+            //        fill: new ol.style.Fill({
+            //          color: 'Transparent'  // [255, 255, 255, 0.5]
+            //        })
+            //      }),
+            //      new ol.style.Style({
+            //        stroke: new ol.style.Stroke({
+            //          color: [255, 0, 0, 1],
+            //          width: 3
+            //        })
+            //      }),
+            //      new ol.style.Style({
+            //        stroke: new ol.style.Stroke({
+            //          color: [0, 153, 255, 1],
+            //          width: 3
+            //        })
+            //      })
+            //    ];
+            //    styles['MultiPolygon'] = styles['Polygon'];
+            //
+            //    styles['LineString'] = [
+            //      new ol.style.Style({
+            //        stroke: new ol.style.Stroke({
+            //          color: [255, 0, 0, 1],
+            //          width: 3
+            //        })
+            //      }),
+            //      new ol.style.Style({
+            //        stroke: new ol.style.Stroke({
+            //          color: [0, 153, 255, 1],
+            //          width: 3
+            //        })
+            //      })
+            //    ];
+            //    styles['MultiLineString'] = styles['LineString'];
+            //
+            //    styles['Point'] = [
+            //      new ol.style.Style({
+            //        image: new ol.style.Circle({
+            //          radius: 7,
+            //          fill: new ol.style.Fill({
+            //            color: [0, 153, 255, 1]
+            //          }),
+            //          stroke: new ol.style.Stroke({
+            //            color: [255, 0, 0, 0.75],
+            //            width: 1.5
+            //          })
+            //        }),
+            //        zIndex: 100000
+            //      })
+            //    ];
+            //    styles['MultiPoint'] = styles['Point'];
+            //
+            //    styles['GeometryCollection'] = styles['Polygon'].concat(styles['Point']);
+            //
+            //    return function(feature) {
+            //      return styles[feature.getGeometry().getType()];
+            //    };
+            //})();
+
+            //var selectDrawfeatures = new ol.interaction.Select({
+            //    wrapX: false,
+            //    style: overlayStyle
+            //});
+            //this.map.addInteraction(selectDrawfeatures);
+
+            //var modifyDrawfeatures = new ol.interaction.Modify({
+            //    //features: this.drawfeatures,
+            //    features: me.drawvectorlayer_source.getFeatures(),
+            //    style: overlayStyle,
+            //    // the SHIFT key must be pressed to delete vertices, so
+            //    // that new vertices can be drawn at the same position
+            //    // of existing vertices
+            //    deleteCondition: function(event) {
+            //      return ol.events.condition.shiftKeyOnly(event) &&
+            //          ol.events.condition.singleClick(event);
+            //    }
+            //});
+            //me.map.addInteraction(modifyDrawfeatures);
         }
     }
 
@@ -547,24 +984,41 @@ Ext.define('esapp.view.analysis.mapViewController', {
         return layer_idx;
     }
 
-    ,outmaskingPossible: function (map){
-        var possible = false,
+    ,outmaskingPossible: function (){
+        var me = this.getView(),
+            possible = false,
             productlayerexists = false,
-            vectorlayerexists = false;
+            vectorlayerexists = false,
+            outmask_togglebtn = me.lookupReference('outmaskbtn_'+ me.id.replace(/-/g,'_')) //  + me.getView().id);
+        ;
 
-        map.getLayers().getArray().forEach(function (layer,idx){
-            var layer_type = layer.get("layertype")
+        me.map.getLayers().getArray().forEach(function (layer,idx){
+            var layer_type = layer.get("layertype");
+            //console.info(layer.get("layer_id"));
+            //console.info(layer.get("layertype"));
+            //console.info(layer);
             if(layer_type == 'raster'){
               productlayerexists = true;
             }
             else if(layer_type == 'vector'){
               vectorlayerexists = true;
             }
+            else if(layer_type == 'drawvector' && me.drawvectorlayer.getSource().getFeatures().length > 0){
+              vectorlayerexists = true;
+            }
         });
         if (productlayerexists && vectorlayerexists)
             possible = true;
 
-        return possible;
+        //return possible;
+
+        if (possible){
+            outmask_togglebtn.show();
+        }
+        else {
+            outmask_togglebtn.hide();
+            this.removeOutmaskLayer();
+        }
     }
 
     ,removeOutmaskLayer: function (){
@@ -578,20 +1032,22 @@ Ext.define('esapp.view.analysis.mapViewController', {
     }
 
     ,outmaskFeature: function(){
-        var me = this;
+        var me = this.getView();
 
         function isFunction(possibleFunction) {
           return typeof(possibleFunction) === typeof(Function);
         }
 
-        if ( Ext.isDefined(me.getView().selectedfeature) && me.getView().selectedfeature !== null){
-            var selectedFeatureToOutmask = me.getView().selectedfeature;
+        if ( Ext.isDefined(me.selectedfeature) && me.selectedfeature !== null && !me.selectedfeature.getGeometry().getType().match("Point|LineString")){
+            var selectedFeatureToOutmask = me.selectedfeature;
             var linearRing = null;
 
-            //me.getView().map.removeLayer("Outmask");
-            me.getView().getController().removeOutmaskLayer();
+            this.removeOutmaskLayer();
 
-            var vecSource = new ol.source.Vector({});
+            var vecSource = new ol.source.Vector({
+                wrapX: false,
+                noWrap: true
+            });
             var outmaskStyle = new ol.style.Style({
                 stroke: new ol.style.Stroke({
                     color: 'rgba(255, 255, 255, 0.95)',
@@ -608,11 +1064,10 @@ Ext.define('esapp.view.analysis.mapViewController', {
                     style: outmaskStyle
                 });
 
-            //me.getView().map.removeLayer(vectorLayer);
-
             //var extentEGAD = [20.99, -6.00, 52.00, 24.00];
-            var extentAfrica = [-27,-36,61,39];
-            var outmaskPolygon = ol.geom.Polygon.fromExtent(extentAfrica);
+            //var extentAfrica = [-27,-36,61,39];
+            var extentWorld = [-165,-60,165,60];
+            var outmaskPolygon = ol.geom.Polygon.fromExtent(extentWorld);
 
             if (isFunction(selectedFeatureToOutmask.getGeometry().getPolygons)){
                 selectedFeatureToOutmask.getGeometry().getPolygons().forEach(function (polygon, idx) {
@@ -628,7 +1083,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
             vectorLayer.getSource().addFeature(new ol.Feature(outmaskPolygon));
 
-            me.getView().map.addLayer(vectorLayer);
+            me.map.addLayer(vectorLayer);
 
         }
     }
@@ -779,349 +1234,26 @@ Ext.define('esapp.view.analysis.mapViewController', {
             if (vectorlayer_idx != -1)
                 me.map.getLayers().removeAt(vectorlayer_idx);
 
-            if (me.getController().outmaskingPossible(me.map)){
-                outmask_togglebtn.show();
-            }
-            else outmask_togglebtn.hide();
+            //if (me.getController().outmaskingPossible(me.map)){
+            //    outmask_togglebtn.show();
+            //}
+            //else outmask_togglebtn.hide();
         }
     }
 
     ,addVectorLayerToMapView: function(layerrecord){
         var me = this.getView();
-        var namefield = '',
-            vectorlayer_idx = -1,
-            //layerrecord = layerrec,
-            layertitle = esapp.Utils.getTranslation(layerrecord.get('layername')) + '</BR><b class="smalltext" style="color:darkgrey">' + esapp.Utils.getTranslation(layerrecord.get('provider')) +'</b>'
+        var namefield = layerrecord.get('feature_display_column').split(',')[0]
+            ,vectorlayer_idx = -1
+            ,layertitle = esapp.Utils.getTranslation(layerrecord.get('layername')) + '</BR><b class="smalltext" style="color:darkgrey">' + esapp.Utils.getTranslation(layerrecord.get('provider')) +'</b>';
+            //,outmask_togglebtn = me.lookupReference('outmaskbtn_'+ me.id.replace(/-/g,'_'));
 
+            //,fillopacity = (layerrecord.get('feature_highlight_fillopacity')/100).toString().replace(",", ".")
+            //,highlight_fillcolor_opacity = 'rgba(' + esapp.Utils.HexToRGB(layerrecord.get('feature_highlight_fillcolor')) + ',' + fillopacity + ')';
+            //namefield = layerrecord.get('feature_display_column').split(',')[0];
             //geojsonfile = layerrecord.get('filename'),
             //feature_display_column = layerrecord.get('feature_display_column'),
             //adminlevel = layerrecord.get('layerlevel'),
-            //polygon_outlinewidth = layerrecord.get('polygon_outlinewidth'),   // 1,
-            //polygon_outlinecolor = layerrecord.get('polygon_outlinecolor'),
-            //feature_highlight_outlinecolor = layerrecord.get('feature_highlight_outlinecolor'),
-            //feature_highlight_outlinewidth = layerrecord.get('feature_highlight_outlinewidth'),
-            //feature_highlight_fillcolor    = layerrecord.get('feature_highlight_fillcolor'),
-            //feature_highlight_fillopacity  = layerrecord.get('feature_highlight_fillopacity'),
-            //feature_selected_outlinecolor  = layerrecord.get('feature_selected_outlinecolor'),
-            //feature_selected_outlinewidth  = layerrecord.get('feature_selected_outlinewidth'),
-
-            outmask_togglebtn = me.lookupReference('outmaskbtn_'+ me.id.replace(/-/g,'_')); //  + me.getView().id);
-
-        namefield = layerrecord.get('feature_display_column').split(',')[0];
-
-        var fillopacity = (layerrecord.get('feature_highlight_fillopacity')/100).toString().replace(",", ".");
-        var highlight_fillcolor_opacity = 'rgba(' + esapp.Utils.HexToRGB(layerrecord.get('feature_highlight_fillcolor')) + ',' + fillopacity + ')'
-        var highlightStyleCache = {};
-        var collectionFO = new ol.Collection();
-        me.featureOverlay = new ol.layer.Vector({      //new ol.FeatureOverlay({
-                name: 'highlightfeatureOverlay_'+layerrecord.get('layername'),
-                source: new ol.source.Vector({
-                  features: collectionFO,
-                  useSpatialIndex: false // optional, might improve performance
-                }),
-                updateWhileAnimating: true, // optional, for instant visual feedback
-                updateWhileInteracting: true, // optional, for instant visual feedback
-
-                map: me.map,
-                style: function(feature, resolution) {
-                    var text = resolution < 5000 ? feature.get(namefield) : '';
-                    if (!highlightStyleCache[text]) {
-                      highlightStyleCache[text] = [new ol.style.Style({
-                          stroke: new ol.style.Stroke({
-                              color: layerrecord.get('feature_highlight_outlinecolor'),    // '#319FD3',
-                              width: layerrecord.get('feature_highlight_outlinewidth')
-                          })
-                          ,fill: new ol.style.Fill({
-                            color: highlight_fillcolor_opacity    // 'rgba(49,159,211,0.1)'
-                          })
-                        //,text: new ol.style.Text({
-                        //  font: '12px Calibri,sans-serif',
-                        //  text: text,
-                        //  fill: new ol.style.Fill({
-                        //    color: '#000'
-                        //  }),
-                        //  stroke: new ol.style.Stroke({
-                        //    color: '#f00',
-                        //    width: 3
-                        //  })
-                        //})
-                      })];
-                }
-                return highlightStyleCache[text];
-                }
-            });
-
-        me.highlight = null;
-        me.toplayer = null;
-        var displayFeatureInfo = function(pixel) {
-
-            //var toplayer = null;
-            //var topfeature = null;
-            //var ignorefeature = true;
-            var toplayerindex = 6;
-            //me.map.getLayers().getArray().forEach(function (layer, idx) {
-            //    var this_layer_id = layer.get("layerorderidx")
-            //    if (this_layer_id != 0 && layer.getVisible() && this_layer_id <= toplayerindex) {
-            //        toplayerindex = idx;
-            //    }
-            //});
-            //toplayer = me.map.getLayers().item(toplayerindex);
-
-            //var topfeaturefound = false;
-            var topFeatureLayerIdx = me.map.forEachFeatureAtPixel(pixel, function(feature, layer) {
-                if (layer != null){
-                    var this_layer_idx = layer.get("layerorderidx");
-                    if (this_layer_idx != 0 && layer.getVisible() && this_layer_idx <= toplayerindex) {
-                        toplayerindex = this_layer_idx;
-                    }
-                }
-            });
-
-            var feature = me.map.forEachFeatureAtPixel(pixel, function(feature, layer) {
-                if (layer != null){
-                    var this_layer_idx = layer.get("layerorderidx");
-                    if (this_layer_idx != 0 && layer.getVisible() && this_layer_idx == toplayerindex) {
-                        me.toplayer = layer;
-                        return feature;
-                    }
-                }
-            });
-
-            //var featureTooltip = Ext.create('Ext.tip.ToolTip', {
-            //    //target: Ext.getCmp(me.id), // feature,
-            //    alwaysOnTop: true,
-            //    anchor: 'right',
-            //    trackMouse: true,
-            //    html: 'Tracking while you move the mouse'
-            //});
-            //featureTooltip.setTarget(feature);
-            ///** Create an overlay to anchor the popup to the map. */
-            //var overlay = new ol.Overlay({
-            //  element: featureTooltip.getEl()  // undefined!!!!!!
-            //});
-            //
-            ////me.map.overlays.push(overlay);
-            //me.map.addOverlay(overlay);
-            //overlay.setPosition(pixel);
-
-            var regionname = Ext.get('region_name_' + me.id);
-
-            if (esapp.Utils.objectExists(feature)) {
-
-                //if (Ext.isDefined(feature.get('ADM2_NAME'))){
-                //    regionname.setHtml(feature.get('ADM0_NAME') + ' - ' +
-                //                       feature.get('ADM1_NAME') + ' - ' +
-                //                       feature.get('ADM2_NAME'));
-                //}
-                //else if (Ext.isDefined(feature.get('ADM1_NAME'))){
-                //    regionname.setHtml(feature.get('ADM0_NAME') + ' - ' + feature.get('ADM1_NAME'));
-                //}
-                //else if (Ext.isDefined(feature.get('ADM0_NAME'))) {
-                //    regionname.setHtml(feature.get('ADM0_NAME'));
-                //}
-                //else if (Ext.isDefined(feature.get('AREANAME'))){
-                //    regionname.setHtml(feature.get('COUNTRY') + ' - ' + feature.get('AREANAME') + ' (' + feature.get('DESIGNATE') + ')');
-                //}
-                //else if (Ext.isDefined(feature.get('F_LEVEL'))){
-                //    regionname.setHtml(feature.get('F_LEVEL') + ' - ' + feature.get('F_CODE') + ' (' + feature.get('OCEAN') + ')');
-                //}
-                //else if (Ext.isDefined(feature.get('MarRegion'))){
-                //    regionname.setHtml(feature.get('MarRegion'));
-                //}
-                //else {
-                    var feature_columns = me.toplayer.get('feature_display_column').split(',');
-                    var regionname_html = '';
-                    for (var i = 0; i < feature_columns.length; i++) {
-                        regionname_html += feature.get(feature_columns[i].trim());
-                        if (i != feature_columns.length-1){
-                            regionname_html += ' - ';
-                        }
-                    }
-                    regionname.setHtml(regionname_html);
-                //}
-
-                //featureTooltip.html = feature.getId() + ': ' + feature.get(namefield);
-            } else {
-                regionname.setHtml('&nbsp;');
-                //featureTooltip.html = '&nbsp;';
-            }
-
-            if (me.featureOverlay.getSource().getFeatures() == [] && esapp.Utils.objectExists(feature)) {
-                me.featureOverlay.getSource().addFeature(feature);
-            }
-            if (feature !== me.highlight) {
-                if (esapp.Utils.objectExists(me.highlight)) {
-                    me.featureOverlay.getSource().removeFeature(me.highlight);
-                }
-                if (esapp.Utils.objectExists(feature)) {
-                    me.featureOverlay.getSource().addFeature(feature);
-                }
-                me.highlight = feature;
-            }
-        };
-
-
-        selectStyleCache = {};
-        var collectionSFO = new ol.Collection();
-        var selectedFeatureOverlay = new ol.layer.Vector({      //new ol.FeatureOverlay({
-          name: 'selectedfeatureOverlay_'+layerrecord.get('layername'),
-          source: new ol.source.Vector({
-              features: collectionSFO,
-              useSpatialIndex: false // optional, might improve performance
-          }),
-          updateWhileAnimating: true, // optional, for instant visual feedback
-          updateWhileInteracting: true, // optional, for instant visual feedback
-
-          map: me.map,
-          style: function(feature, resolution) {
-            var text = resolution < 5000 ? feature.get(namefield) : '';
-            if (!selectStyleCache[text]) {
-              selectStyleCache[text] = [new ol.style.Style({
-                stroke: new ol.style.Stroke({
-                  color: layerrecord.get('feature_selected_outlinecolor'),   // '#f00',
-                  width: layerrecord.get('feature_selected_outlinewidth')
-                })
-                ,fill: new ol.style.Fill({
-                  color:  'Transparent' // 'rgba(255,0,0,0.1)'
-                })
-              })];
-            }
-            return selectStyleCache[text];
-          }
-        });
-
-        var selectfeature = null;
-        var displaySelectedFeatureInfo = function(pixel,displaywkt) {
-
-            //var feature = me.map.forEachFeatureAtPixel(pixel, function(feature, layer) {
-            //    return feature;
-            //});
-            var feature = me.highlight;
-
-            //var regionname = Ext.getCmp('regionname');
-            //var admin0name = Ext.getCmp('admin0name');
-            //var admin1name = Ext.getCmp('admin1name');
-            //var admin2name = Ext.getCmp('admin2name');
-            var selectedregion = Ext.getCmp('selectedregionname');
-
-            var wkt_polygon = Ext.getCmp('wkt_polygon');
-
-            if (Ext.isDefined(feature)) {
-                //regionname.setValue(feature.get(namefield));
-
-                //if (Ext.isDefined(feature.get('ADM2_NAME'))){
-                //    admin0name.setValue(feature.get('ADM0_NAME'));
-                //    admin1name.setValue(feature.get('ADM1_NAME'));
-                //    admin2name.setValue(feature.get('ADM2_NAME'));
-                //    selectedregion.setValue(feature.get('ADM0_NAME') + ' - ' + feature.get('ADM1_NAME') + ' - ' + feature.get('ADM2_NAME'));
-                //}
-                //else if (Ext.isDefined(feature.get('ADM1_NAME'))){
-                //    admin0name.setValue(feature.get('ADM0_NAME'));
-                //    admin1name.setValue(feature.get('ADM1_NAME'));
-                //    admin2name.setValue('&nbsp;');
-                //    selectedregion.setValue(feature.get('ADM0_NAME') + ' - ' + feature.get('ADM1_NAME'));
-                //}
-                //else if (Ext.isDefined(feature.get('ADM0_NAME'))){
-                //    admin0name.setValue(feature.get('ADM0_NAME'));
-                //    admin1name.setValue('&nbsp;');
-                //    admin2name.setValue('&nbsp;');
-                //    selectedregion.setValue(feature.get('ADM0_NAME'));
-                //}
-                //else if (Ext.isDefined(feature.get('AREANAME'))){
-                //    selectedregion.setValue(feature.get('COUNTRY') + ' - ' + feature.get('AREANAME') + ' (' + feature.get('DESIGNATE') + ')');
-                //}
-                //else if (Ext.isDefined(feature.get('F_LEVEL'))) {
-                //    selectedregion.setValue(feature.get('F_LEVEL') + ' - ' + feature.get('F_CODE') + ' (' + feature.get('OCEAN') + ')');
-                //}
-                //else if (Ext.isDefined(feature.get('MarRegion'))){
-                //    selectedregion.setValue(feature.get('MarRegion'));
-                //}
-                //else {
-                    var feature_columns = me.toplayer.get('feature_display_column').split(',');
-                    var regionname_html = '';
-                    for (var i = 0; i < feature_columns.length; i++) {
-                        regionname_html += feature.get(feature_columns[i].trim());
-                        if (i != feature_columns.length-1){
-                            regionname_html += ' - ';
-                        }
-                    }
-                    selectedregion.setValue(regionname_html);
-                //}
-
-                if (displaywkt) {
-                    var wkt = new ol.format.WKT();
-                    var wktstr = wkt.writeFeature(feature);
-                    // not a good idea in general
-                    wktstr = wktstr.replace(/,/g, ', ');
-                    wkt_polygon.setValue(wktstr);
-                }
-
-                Ext.getCmp('fieldset_selectedregion').show();
-
-            } else {
-                //regionname.setValue('&nbsp;');
-                //admin0name.setValue('&nbsp;');
-                //admin1name.setValue('&nbsp;');
-                //admin2name.setValue('&nbsp;');
-                wkt_polygon.setValue('');
-                selectedregion.setValue('&nbsp;');
-                Ext.getCmp('fieldset_selectedregion').hide();
-            }
-
-            if (feature !== selectfeature) {
-                if (selectfeature != null) {
-                    selectedFeatureOverlay.getSource().removeFeature(selectfeature);
-                }
-                if (feature != null) {
-                    selectedFeatureOverlay.getSource().addFeature(feature);
-                }
-                selectfeature = feature;
-            }
-
-            if (Ext.isDefined(feature)) {
-                me.selectedfeature = feature;
-
-                var outmask = me.lookupReference('outmaskbtn_'+ me.id.replace(/-/g,'_')).pressed;
-                if (outmask){
-                    me.getController().outmaskFeature();
-                    //me.getController().updateProductLayer();
-                }
-            }
-            else {
-                me.selectedfeature = null;
-            }
-        };
-
-
-        me.map.on('pointermove', function(evt) {
-          if (evt.dragging) {
-            return;
-          }
-          var pixel = me.map.getEventPixel(evt.originalEvent);
-          displayFeatureInfo(pixel,false);
-        });
-
-        me.map.on('click', function(evt) {
-            //var coordinate = evt.coordinate;
-            //overlay.setPosition(coordinate);
-            displaySelectedFeatureInfo(evt.pixel, true);
-        });
-
-        me.map.on('dblclick', function(evt) {
-            if (Ext.isDefined(me.selectedfeature)) {
-                // Zoom to and center the selected feature
-                var polygon = /** @type {ol.geom.SimpleGeometry} */ (me.selectedfeature.getGeometry());
-                var size = /** @type {ol.Size} */ (me.map.getSize());
-                me.map.getView().fit(
-                    polygon,
-                    size,
-                    {
-                        padding: [50, 50, 50, 50],
-                        constrainResolution: false
-                    }
-                );
-            }
-        });
 
 
         var myLoadMask = new Ext.LoadMask({
@@ -1160,13 +1292,74 @@ Ext.define('esapp.view.analysis.mapViewController', {
               // Unregister the "change" listener
               ol.Observable.unByKey(listenerKey);
               // or vectorSource.unByKey(listenerKey) if you don't use the current master branch of ol3
-
-              //layerloaded = true;
           }
           else {
             myLoadMask.hide();
           }
         });
+
+        var layerStyle = (function() {
+            var styles = {};
+            styles['Polygon'] = [
+              new ol.style.Style({
+                fill: new ol.style.Fill({
+                  color: layerrecord.get('polygon_fillcolor')   // 'Transparent'  // [255, 255, 255, 0.5]
+                })
+              }),
+              new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                  color: layerrecord.get('polygon_outlinecolor'), // [255, 0, 0, 1],
+                  width: layerrecord.get('polygon_outlinewidth')
+                })
+              })
+              //,new ol.style.Style({
+              //  stroke: new ol.style.Stroke({
+              //    color: [0, 153, 255, 1],
+              //    width: 3
+              //  })
+              //})
+            ];
+            styles['MultiPolygon'] = styles['Polygon'];
+
+            styles['LineString'] = [
+              new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                  color: layerrecord.get('polygon_outlinecolor'), // [255, 0, 0, 1],
+                  width: layerrecord.get('polygon_outlinewidth')
+                })
+              })
+              //,new ol.style.Style({
+              //  stroke: new ol.style.Stroke({
+              //    color: [0, 153, 255, 1],
+              //    width: 3
+              //  })
+              //})
+            ];
+            styles['MultiLineString'] = styles['LineString'];
+
+            styles['Point'] = [
+              new ol.style.Style({
+                image: new ol.style.Circle({
+                  radius: 5,
+                  fill: new ol.style.Fill({
+                    color: layerrecord.get('polygon_fillcolor')  // [0, 153, 255, 1]
+                  }),
+                  stroke: new ol.style.Stroke({
+                    color: layerrecord.get('polygon_outlinecolor'),   //[255, 0, 0, 0.75],
+                    width: layerrecord.get('polygon_outlinewidth')
+                  })
+                }),
+                zIndex: 100000
+              })
+            ];
+            styles['MultiPoint'] = styles['Point'];
+
+            styles['GeometryCollection'] = styles['Polygon'].concat(styles['Point']);
+
+            return function(feature) {
+              return styles[feature.getGeometry().getType()];
+            };
+        })();
 
         var styleCache = {};
         var vectorLayer = new ol.layer.Vector({
@@ -1177,33 +1370,35 @@ Ext.define('esapp.view.analysis.mapViewController', {
             layertype: 'vector',
             visible: true,
             source: vectorSource,
-            style: function (feature, resolution) {
-                var text = resolution < 5000 ? feature.get(namefield) : '';
-                if (!styleCache[text]) {
-                    styleCache[text] = [new ol.style.Style({
-                        //fill: new ol.style.Fill({
-                        //  color: 'rgba(255, 255, 255, 0.6)'
-                        //}),
-                        cursor: "pointer",
-                        stroke: new ol.style.Stroke({
-                            color: layerrecord.get('polygon_outlinecolor'), // '#319FD3',
-                            width: layerrecord.get('polygon_outlinewidth')
-                        })
-                        //,text: new ol.style.Text({
-                        //  font: '12px Calibri,sans-serif',
-                        //  text: text,
-                        //  fill: new ol.style.Fill({
-                        //    color: '#000'
-                        //  }),
-                        //  stroke: new ol.style.Stroke({
-                        //    color: '#fff',
-                        //    width: 3
-                        //  })
-                        //})
-                    })];
-                }
-                return styleCache[text];
-            }
+            style: layerStyle
+            //style: function (feature, resolution) {
+            //    var text = resolution < 5000 ? feature.get(namefield) : '';
+            //    //var styleCache = {};
+            //    if (!styleCache[text]) {
+            //        styleCache[text] = [new ol.style.Style({
+            //            //fill: new ol.style.Fill({
+            //            //  color: 'rgba(255, 255, 255, 0.6)'
+            //            //}),
+            //            cursor: "pointer",
+            //            stroke: new ol.style.Stroke({
+            //                color: layerrecord.get('polygon_outlinecolor'), // '#319FD3',
+            //                width: layerrecord.get('polygon_outlinewidth')
+            //            })
+            //            //,text: new ol.style.Text({
+            //            //  font: '12px Calibri,sans-serif',
+            //            //  text: text,
+            //            //  fill: new ol.style.Fill({
+            //            //    color: '#000'
+            //            //  }),
+            //            //  stroke: new ol.style.Stroke({
+            //            //    color: '#fff',
+            //            //    width: 3
+            //            //  })
+            //            //})
+            //        })];
+            //    }
+            //    return styleCache[text];
+            //}
         });
 
 
@@ -1229,10 +1424,11 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
         me.getController().addLayerSwitcher(me.map);
 
-        if (me.getController().outmaskingPossible(me.map)){
-            outmask_togglebtn.show();
-        }
-        else outmask_togglebtn.hide();
+        this.outmaskingPossible();
+        //if (me.getController().outmaskingPossible(me.map)){
+        //    outmask_togglebtn.show();
+        //}
+        //else outmask_togglebtn.hide();
 
 
         //me.mon(Ext.select('ol-viewport'), 'mousemove', function(evt){
@@ -1287,6 +1483,133 @@ Ext.define('esapp.view.analysis.mapViewController', {
         //if (select !== null) {
         //    me.map.addInteraction(select);
         //}
+    }
+
+    ,displayFeatureInfo: function(pixel) {
+        var me = this.getView();
+        var toplayeridx = 10;
+        var topfeature;
+
+        me.map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+            if (layer != null){
+                var this_layer_idx = layer.get("layerorderidx");
+                if (this_layer_idx != 100 && layer.getVisible()  && this_layer_idx < toplayeridx) {
+                    toplayeridx = this_layer_idx;
+                    me.toplayer = layer;
+                    topfeature = feature
+                }
+            }
+        });
+
+        var regionname = Ext.get('region_name_' + me.id);
+
+        if (esapp.Utils.objectExists(topfeature)) {
+            if (topfeature !== me.highlight) {
+                var feature_columns = me.toplayer.get('feature_display_column').split(',');
+                var regionname_html = '';
+                for (var i = 0; i < feature_columns.length; i++) {
+                    regionname_html += topfeature.get(feature_columns[i].trim());
+                    if (i != feature_columns.length - 1) {
+                        regionname_html += ' - ';
+                    }
+                }
+                if (regionname_html == 'undefined' && me.toplayer.get('layer_id') == 'drawvectorlayer'){
+                    regionname_html = "Drawn " + topfeature.getGeometry().getType();
+                }
+                regionname.setHtml(regionname_html);
+
+                me.featureOverlay.getSource().clear();
+                me.featureOverlay.getSource().addFeature(topfeature);
+                me.highlight = topfeature;
+            }
+        } else {
+             me.featureOverlay.getSource().clear();
+             regionname.setHtml('&nbsp;');
+             me.highlight = null;
+        }
+
+        //var featureTooltip = Ext.create('Ext.tip.ToolTip', {
+        //    //target: Ext.getCmp(me.id), // feature,
+        //    alwaysOnTop: true,
+        //    anchor: 'right',
+        //    trackMouse: true,
+        //    html: 'Tracking while you move the mouse'
+        //});
+        //featureTooltip.setTarget(feature);
+        ///** Create an overlay to anchor the popup to the map. */
+        //var overlay = new ol.Overlay({
+        //  element: featureTooltip.getEl()  // undefined!!!!!!
+        //});
+        //
+        ////me.map.overlays.push(overlay);
+        //me.map.addOverlay(overlay);
+        //overlay.setPosition(pixel);
+    }
+
+    ,displaySelectedFeatureInfo: function(pixel,displaywkt) {
+        var me = this.getView();
+        var feature = me.highlight;
+        var selectedregion = Ext.getCmp('selectedregionname');
+        var wkt_polygon = Ext.getCmp('wkt_polygon');
+        //var regionname = Ext.getCmp('regionname');
+        //var admin0name = Ext.getCmp('admin0name');
+        //var admin1name = Ext.getCmp('admin1name');
+        //var admin2name = Ext.getCmp('admin2name');
+
+        if (esapp.Utils.objectExists(feature)) {
+            if (feature !== me.selectedfeature) {
+                var feature_columns = me.toplayer.get('feature_display_column').split(',');
+                var regionname_html = '';
+                for (var i = 0; i < feature_columns.length; i++) {
+                    regionname_html += feature.get(feature_columns[i].trim());
+                    if (i != feature_columns.length-1){
+                        regionname_html += ' - ';
+                    }
+                }
+                me.selectedFeatureFromDrawLayer = false;
+                if (regionname_html == 'undefined' && me.toplayer.get('layer_id') == 'drawvectorlayer'){
+                    me.selectedFeatureFromDrawLayer = true;
+                    regionname_html = "Drawn " + feature.getGeometry().getType();
+                }
+                selectedregion.setValue(regionname_html);
+
+                me.selectedarea = regionname_html;
+                me.getController().refreshTitleData();
+
+                if (displaywkt) {
+                    var wkt = new ol.format.WKT();
+                    var wktstr = wkt.writeFeature(feature);
+                    //var wktstr = wkt.writeGeometry(feature);
+                    // not a good idea in general
+                    wktstr = wktstr.replace(/,/g, ', ');
+                    wkt_polygon.setValue(wktstr);
+                }
+
+                Ext.getCmp('fieldset_selectedregion').show();
+
+                me.selectedFeatureOverlay.getSource().clear();
+                me.selectedFeatureOverlay.getSource().addFeature(feature);
+                me.selectedfeature = feature;
+                //if (me.selectedfeature != null) {
+                //    me.selectedFeatureOverlay.getSource().removeFeature(me.selectedfeature);
+                //}
+
+                var outmask = me.lookupReference('outmaskbtn_' + me.id.replace(/-/g, '_')).pressed;
+                if (outmask) {
+                    me.getController().outmaskFeature();
+                }
+            }
+        } else {
+            //regionname.setValue('&nbsp;');
+            //admin0name.setValue('&nbsp;');
+            //admin1name.setValue('&nbsp;');
+            //admin2name.setValue('&nbsp;');
+            wkt_polygon.setValue('');
+            selectedregion.setValue('&nbsp;');
+            Ext.getCmp('fieldset_selectedregion').hide();
+            me.selectedFeatureOverlay.getSource().clear();
+            me.selectedfeature = null;
+        }
     }
 
     ,editLayerDrawProperties: function(callComponent){
@@ -1565,14 +1888,12 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
     }
 
-    ,createLayersMenu: function() {
+    ,createToolBar: function() {
         var me = this.getView();
 
         var borderVectorLayerItems = this.createLayersMenuItems('border');
         var marineVectorLayerMenuItems = this.createLayersMenuItems('marine');
         var otherVectorLayerMenuItems = this.createLayersMenuItems('other');
-
-        //Ext.data.StoreManager.lookup('LayersStore').load();
 
         var layersmenubutton = {
             xtype: 'button',
@@ -1583,9 +1904,12 @@ Ext.define('esapp.view.analysis.mapViewController', {
             floating: false,  // usually you want this set to True (default)
             collapseDirection: 'left',
             menuAlign: 'tl-tr',
+            arrowVisible: false,
+            alwaysOnTop: true,
             menu: {
                 hideOnClick: false,
                 iconAlign: '',
+                alwaysOnTop: true,
                 defaults: {
                     hideOnClick: false,
                     cls: "x-menu-no-icon",
@@ -1639,18 +1963,42 @@ Ext.define('esapp.view.analysis.mapViewController', {
             }
         };
 
+        var geometrytypes = Ext.create('Ext.data.ArrayStore', {
+            fields: ['geometrytype','geometryname'],
+            data: [
+                ['Polygon', 'Polygon'],
+                ['LineString', 'LineString'],
+                ['Point', 'Point'],
+                //['Circle', 'Circle'],
+                ['Square', 'Square'],
+                ['Box', 'Box'],
+                ['None', 'None']
+            ]
+        });
 
-        //layersmenubutton = {
-        //    xtype: 'button',
-        //    text: 'Small',
-        //    menu: [{
-        //        text:'Menu Item 1'
-        //    },{
-        //        text:'Menu Item 2'
-        //    },{
-        //        text:'Menu Item 3'
-        //    }]
-        //};
+        var geometrytypescombo = Ext.create('Ext.form.field.ComboBox', {
+            id: 'geometrytypes' + me.id,
+            hideLabel: true,
+            store: geometrytypes,
+            displayField: 'geometryname',
+            valueField: 'geometrytype',
+            value: 'Polygon',
+            typeAhead: true,
+            queryMode: 'local',
+            triggerAction: 'all',
+            emptyText: 'Select a geometry...',
+            selectOnFocus: false,
+            width: 100,
+            indent: true,
+            cls: "x-menu-no-icon",
+            listeners: {
+                change: function(newValue , oldValue , eOpts ){
+                    me.map.removeInteraction(me.draw);
+                    me.getController().addDrawInteraction(newValue);
+                }
+            }
+        });
+
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             dock: 'top',
@@ -1660,18 +2008,46 @@ Ext.define('esapp.view.analysis.mapViewController', {
             hidden: false,
             border: false,
             shadow: false,
-            padding:0,
+            padding: 0,
             items: [{
                 text: '<div style="font-size: 11px;">' + esapp.Utils.getTranslation('productnavigator') + '</div>', // 'Product navigator',
                 iconCls: 'africa',
                 scale: 'medium',
-                //style: {
-                //    "font-size": '10px'
-                //},
                 handler: 'openProductNavigator'
             }
             ,layersmenubutton
             ,{
+                xtype: 'splitbutton',
+                reference: 'saveMapTemplate_'+me.id.replace(/-/g,'_'),
+                iconCls: 'fa fa-save fa-2x',
+                style: {color: 'lightblue'},
+                scale: 'medium',
+                hidden:  (esapp.getUser() == 'undefined' || esapp.getUser() == null ? true : false),
+                handler: 'setMapTemplateName',
+                menu: {
+                    hideOnClick: false,
+                    alwaysOnTop: true,
+                    //iconAlign: '',
+                    width: 125,
+                    defaults: {
+                        hideOnClick: true,
+                        //cls: "x-menu-no-icon",
+                        padding: 2
+                    },
+                    items: [{
+                            //xtype: 'button',
+                            text: 'Save as...',
+                            iconCls: 'fa fa-save fa-lg lightblue',
+                            style: { color: 'lightblue' },
+                            //cls: 'x-menu-no-icon button-gray',
+                            width: 60,
+                            handler: function(){
+                                me.isNewTemplate = true;
+                                me.getController().setMapTemplateName();
+                            }
+                    }]
+                }
+            },{
                 xtype: 'container',
                 width: 300,
                 height: 38,
@@ -1694,6 +2070,95 @@ Ext.define('esapp.view.analysis.mapViewController', {
                     html: '<div id="mouse-position_' + me.id + '"></div>'
                 }]
             },'->', {
+                xtype: 'button',
+                reference: 'drawgeometry_'+me.id.replace(/-/g,'_'),
+                hidden: false,
+                iconCls: 'polygon-gray',
+                scale: 'medium',
+                floating: false,  // usually you want this set to True (default)
+                enableToggle: true,
+                arrowVisible: false,
+                arrowAlign: 'right',
+                collapseDirection: 'left',
+                menuAlign: 'tr-tl',
+                handler: 'toggleDrawGeometry',
+                listeners: {
+                    mouseover: function(btn , y , x ){
+                        if (btn.pressed) {
+                            btn.showMenu();
+                        }
+                        else {
+                            btn.hideMenu();
+                        }
+                    }
+                },
+                menu: {
+                    hideOnClick: false,
+                    alwaysOnTop: true,
+                    //iconAlign: '',
+                    width: 125,
+                    defaults: {
+                        hideOnClick: false,
+                        //cls: "x-menu-no-icon",
+                        padding: 2
+                    },
+                    items: [
+                        geometrytypescombo,
+                        {
+                            //xtype: 'button',
+                            text: 'Save as layer...',
+                            iconCls: 'fa fa-save fa-lg lightblue',
+                            style: { color: 'lightblue' },
+                            //cls: 'x-menu-no-icon button-gray',
+                            width: 60,
+                            handler: function(){
+                                // Open a small modal panel asking to name the layer file
+                                var writer = new ol.format.GeoJSON();
+                                var geojsonStr = '';
+                                var drawnLayerName = 'Drawn layer';
+
+                                me.drawvectorlayer.getSource().getFeatures().forEach(function (feat,idx){
+                                    feat.setProperties({NAME: feat.getGeometry().getType()});
+                                });
+                                geojsonStr =  writer.writeFeatures(me.drawvectorlayer.getSource().getFeatures());
+
+
+                                //console.info(me.drawvectorlayer.getSource().getFeatures());
+                                if (me.drawvectorlayer.getSource().getFeatures().length == 0){
+                                    Ext.toast({html: 'Please draw at least one geometry to save as a layer.', title: "No geometries drawn!", width: 300, align: 't'});
+                                }
+                                else {
+                                    Ext.MessageBox.prompt('Map Template Name', 'Please give a name drawn layer:', function(btn, text){
+                                        if (btn == 'ok'){
+                                            //alert(geojsonStr)
+                                            params = {
+                                                layerfilename: text + '.geojson',
+                                                drawnlayerfeaturesGEOSON: geojsonStr
+                                            };
+
+                                            esapp.Utils.download({
+                                                method: 'GET',
+                                                url: 'layers/savedrawnlayer',
+                                                params: params
+                                            });
+                                        }
+                                    }, this, false, drawnLayerName);
+                                }
+                            }
+                        },{
+                            //xtype: 'button',
+                            text: 'Reset',
+                            iconCls: 'fa fa-undo fa-lg red',
+                            //style: { color: 'red' },
+                            //cls: 'x-menu-no-icon button-gray',
+                            width: 60,
+                            handler: function(){
+                                me.drawvectorlayer.getSource().clear();
+                            }
+                        }
+                    ]
+                }
+            },{
                 //id: 'outmaskbtn_'+me.id,
                 reference: 'outmaskbtn_'+me.id.replace(/-/g,'_'),
                 hidden: true,
@@ -1701,6 +2166,16 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 scale: 'medium',
                 enableToggle: true,
                 handler: 'toggleOutmask'
+            },{
+                reference: 'objectsbtn_'+me.id.replace(/-/g,'_'),
+                hidden: false,
+                iconCls: 'fa fa-object-group',
+                style: {
+                    "font-size": '1.70em'
+                },
+                scale: 'medium',
+                enableToggle: true,
+                handler: 'toggleObjects'
             },{
                 //id: 'legendbtn_'+me.id,
                 reference: 'legendbtn_'+me.id.replace(/-/g,'_'),
@@ -1710,8 +2185,8 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 enableToggle: true,
                 handler: 'toggleLegend'
             },{
-                iconCls: 'fa fa-save fa-2x',
-                style: { color: 'lightblue' },
+                iconCls: 'download_png',
+                //style: { color: 'lightblue' },
                 scale: 'medium',
                 handler: 'saveMap',
                 href: '',
@@ -1719,7 +2194,9 @@ Ext.define('esapp.view.analysis.mapViewController', {
             },{
                 //text: 'Unlink',
                 enableToggle: true,
-                iconCls: 'unlink',
+                iconCls: 'fa fa-link fa-2x',
+                style: {color: 'gray'},
+                //iconCls: 'unlink',
                 scale: 'medium',
                 handler: 'toggleLink'
             }]

@@ -124,7 +124,8 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
             productversion:record.get('version'),
             mapsetcode:record.get('mapsetcode'),
             subproductcode:record.get('subproductcode'),
-            productname:record.get('descriptive_name')
+            productname:record.get('descriptive_name'),
+            date_format:record.get('date_format')
         };
 
         //colorschemesgrid.hide();

@@ -70,6 +70,10 @@ Ext.define("esapp.view.analysis.layerAdmin",{
                 // glyph: 'xf055@FontAwesome',
                 scale: 'medium',
                 handler: 'addLayer'
+            },{
+                xtype: 'container',
+                html: '<div id="boundaries_disclaimer' + me.id + '" style="text-align:left; font-size: 14px; font-weight: bold;">'+esapp.Utils.getTranslation('boundaries_disclaimer')+'</div>',
+                margin: '0 0 0 40'
             }]
         });
 

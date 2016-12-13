@@ -1,16 +1,65 @@
+ALTER TABLE analysis.layers
+   ALTER COLUMN polygon_fillcolor SET DEFAULT 'Transparent'::character varying;
+ALTER TABLE analysis.layers
+   ALTER COLUMN feature_highlight_fillcolor SET DEFAULT 'Transparent'::character varying;
+
+
+
+-- Table: analysis.map_templates
+
+-- DROP TABLE analysis.map_templates;
+
+CREATE TABLE analysis.map_templates
+(
+  templatename character varying(80) NOT NULL,
+  userid character varying(50) NOT NULL,
+  mapviewposition character varying(10),
+  mapviewsize character varying(10),
+  productcode character varying,
+  subproductcode character varying,
+  productversion character varying,
+  mapsetcode character varying,
+  legendid integer,
+  legendlayout character varying(15) DEFAULT 'vertical'::character varying,
+  legendobjposition character varying(10),
+  showlegend boolean NOT NULL DEFAULT false,
+  titleobjposition character varying(10),
+  titleobjcontent text,
+  disclaimerobjposition character varying(10),
+  disclaimerobjcontent text,
+  logosobjposition character varying(10),
+  logosobjcontent text,
+  showobjects boolean NOT NULL DEFAULT false,
+  scalelineobjposition character varying(10),
+  vectorlayers character varying(20),
+  outmask boolean NOT NULL DEFAULT false,
+  outmaskfeature text,
+  auto_open boolean DEFAULT false,
+  CONSTRAINT map_templates_pkey PRIMARY KEY (templatename, userid),
+  CONSTRAINT user_map_templates_fkey FOREIGN KEY (userid)
+      REFERENCES analysis.users (userid) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE CASCADE
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE analysis.map_templates
+  OWNER TO estation;
+
+
 -- Table: analysis.users
 
 -- DROP TABLE analysis.users;
 
 CREATE TABLE analysis.users
 (
-  username character varying(30) NOT NULL,
+  userid character varying(50) NOT NULL,
+  username character varying(80) NOT NULL,
   password character varying(32),
-  userid character varying(32),
-  userlevel numeric(1,0) NOT NULL,
+  userlevel integer NOT NULL,
   email character varying(50),
-  "timestamp" numeric(11,0) NOT NULL,
-  CONSTRAINT users_pkey1 PRIMARY KEY (username)
+  "timestamp" numeric(11,0),
+  CONSTRAINT users_pkey PRIMARY KEY (userid)
 )
 WITH (
   OIDS=FALSE

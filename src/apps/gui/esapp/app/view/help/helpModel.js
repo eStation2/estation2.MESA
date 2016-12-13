@@ -29,7 +29,7 @@ Ext.define('esapp.view.help.helpModel', {
                 url: 'help',
                 extraParams: {
                     type: 'links',
-                    lang: esapp.globals['selectedLanguage']
+                    lang:  esapp.globals['selectedLanguage']
                 },
                 reader: {
                     type: 'json'
@@ -46,7 +46,7 @@ Ext.define('esapp.view.help.helpModel', {
                 url: 'help',
                 extraParams: {
                     type: 'notes',
-                    lang: esapp.globals['selectedLanguage']
+                    lang:  esapp.globals['selectedLanguage']
                 },
                 reader: {
                     type: 'json'

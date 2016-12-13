@@ -42,7 +42,7 @@ Ext.define('esapp.view.analysis.ProductNavigatorModel', {
             session: true
         },
         colorschemes: {
-            model: 'esapp.model.ColorScheme'
+            model: 'esapp.model.ProductNavigatorDatasetColorScheme'
             ,session: true
         }
     }

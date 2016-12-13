@@ -74,7 +74,7 @@ Ext.define('esapp.view.main.Main', {
                 layoutOnTabChange: true,
                 activeTab: 'dashboardtab',     // first tab initially active
 
-                defaults:{hideMode: 'offsets'}, // For performance resons to pre-render in the background.
+                // defaults:{hideMode: 'offsets'}, // For performance resons to pre-render in the background.
 
                 listeners: {
                     afterrender: function(tabpanel) {
@@ -226,8 +226,7 @@ Ext.define('esapp.view.main.Main', {
                            var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
                            headerlogos.setHidden(true);
                            //analysistab.down().render();
-                           analysistab.down().updateLayout();
-                           //analysistab.down().show();
+                           //analysistab.down().fireEvent('focusenter');
                            //analysistab.down().controller.newMapView();
                        }
                     }

@@ -1,16 +1,16 @@
 Ext.define("esapp.view.datamanagement.DataManagement",{
     "extend": "Ext.grid.Panel",
-    "controller": "datamanagement-datamanagement",
-    "viewModel": {
-        "type": "datamanagement-datamanagement"
-    },
+    //"controller": "datamanagement-datamanagement",
+    //"viewModel": {
+    //    "type": "datamanagement-datamanagement"
+    //},
     xtype  : 'datamanagement-main',
 
     name:'datamanagementmain',
 
     requires: [
-        'esapp.view.datamanagement.DataManagementModel',
-        'esapp.view.datamanagement.DataManagementController',
+        //'esapp.view.datamanagement.DataManagementModel',
+        //'esapp.view.datamanagement.DataManagementController',
         //'esapp.view.datamanagement.ProductMapSet',
         //'esapp.view.datamanagement.MapSetDataSet',
         //'esapp.view.datamanagement.sendRequest',
@@ -22,8 +22,8 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
     ],
 
     store: 'DataSetsStore',
+    session: false,
 
-    // title: 'Data Management Dashboard',
     viewConfig: {
         stripeRows: false,
         enableTextSelection: true,
@@ -234,6 +234,7 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
             }
             ,columns: [{
                 xtype: 'widgetcolumn',
+                //dataIndex: 'productmapsets',
                 width: 1015,
                 bodyPadding:0,
 
@@ -264,21 +265,27 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                 '       </div>',
                 listeners: {
                   render: function(column){
-                      column.titleEl.removeCls('x-column-header-inner');
+                      //column.titleEl.removeCls('x-column-header-inner');
                   }
                 },
-                onWidgetAttach: function(col,widget, record) {
-                    Ext.suspendLayouts();
-                    var productmapsets = record.getData().productmapsets;
-                    var newstore = Ext.create('Ext.data.JsonStore', {
-                        model: 'ProductMapSet',
-                        data: productmapsets
-                    });
-                    widget.setStore(newstore);
-                    Ext.resumeLayouts(true);
-                },
                 widget: {
-                    xtype: 'productmapsetgrid'
+                    xtype: 'productmapsetgrid',
+                    widgetattached: false
+                }
+                ,onWidgetAttach: function(col,widget, record) {
+                    Ext.suspendLayouts();
+                    if (!widget.widgetattached) {
+                        widget.getStore().setData(record.getData().productmapsets);
+                        widget.widgetattached = true;
+                    }
+                    //me.updateLayout();
+                    //var productmapsets = record.getData().productmapsets;
+                    //var newstore = Ext.create('Ext.data.JsonStore', {
+                    //    model: 'ProductMapSet',
+                    //    data: productmapsets
+                    //});
+                    //widget.setStore(newstore);
+                    //Ext.resumeLayouts(true);
                 }
             }]
         }];

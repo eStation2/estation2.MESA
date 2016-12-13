@@ -24,6 +24,43 @@ db = connectdb.ConnectDB().db
 dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
 
 
+def get_user_map_templates(userid, echo=False):
+    global dbschema_analysis
+    try:
+        query = "SELECT * FROM analysis.map_templates WHERE userid = '" + userid + "'"
+
+        result = db.execute(query)
+        result = result.fetchall()
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_user_map_templates: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def getusers(echo=False):
+    global dbschema_analysis
+    try:
+        query = "SELECT * FROM analysis.users"
+        result = db.execute(query)
+        result = result.fetchall()
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("getusers: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
 def checklogin(login=None, echo=False):
     global dbschema_analysis
     try:
@@ -702,10 +739,10 @@ def get_timeseries_subproducts(echo=False,  productcode=None, version='undefined
                     p.c.productcode,
                     p.c.subproductcode,
                     p.c.version,
-                    p.c.defined_by,
-                    p.c.activated,
-                    p.c.product_type,
-                    p.c.descriptive_name.label('prod_descriptive_name'),
+                    # p.c.defined_by,
+                    # p.c.activated,
+                    # p.c.product_type,
+                    p.c.descriptive_name.label('descriptive_name'),        # prod_descriptive_name
                     p.c.description,
                     p.c.masked,
                     p.c.timeseries_role
@@ -781,10 +818,10 @@ def get_timeseries_products(echo=False,  masked=None):
                     p.c.productcode,
                     p.c.subproductcode,
                     p.c.version,
-                    p.c.defined_by,
-                    p.c.activated,
+                    # p.c.defined_by,
+                    # p.c.activated,
                     p.c.product_type,
-                    p.c.descriptive_name.label('prod_descriptive_name'),
+                    p.c.descriptive_name.label('descriptive_name'),        # prod_descriptive_name
                     p.c.description,
                     p.c.masked,
                     p.c.timeseries_role,
@@ -824,13 +861,51 @@ def get_timeseries_products(echo=False,  masked=None):
 
 
 ######################################################################################
-#   get_legend_steps(legendid, echo=False)
-#   Purpose: Query the database to get the legend info needed for mapserver mapfile SCALE_BUCKETS setting.
+#   get_all_legends(echo=False)
+#   Purpose: Query the database to get all the difined legends.
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/07/31
 #   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
 #
-#   Output: Return legend steps of the given legendid, needed for mapserver mapfile LAYER CLASS settings.
+#   Output: Return all the difined legends.
+#
+#   SELECT * FROM analysis.product_legend
+#
+def get_all_legends(echo=False):
+
+    global dbschema_analysis
+    try:
+
+        query = "SELECT legend.legend_id,  " + \
+                "       legend.legend_name, " + \
+                "       legend.colorbar " + \
+                "FROM analysis.legend "
+
+        result = db.execute(query)
+        legends = result.fetchall()
+
+        return legends
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and log the error telling what happened.
+        logger.error("get_all_legends: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+        #dbschema_analysis = None
+
+
+######################################################################################
+#   get_product_legends(productcode=None, subproductcode=None, version=None, echo=False)
+#   Purpose: Query the database to get the legends assigned the given sub product.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2014/07/31
+#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
+#
+#   Output: Return legends assigned the given sub product.
 #
 #   SELECT pl.default_legend,
 #          pl.legend_id,
@@ -1106,7 +1181,7 @@ def get_ingestions(echo=False):
                 "        i.enabled, " + \
                 "        m.descriptive_name as mapsetname " + \
                 " FROM products.product p " + \
-                "      LEFT OUTER JOIN (SELECT * FROM products.ingestion i WHERE i.enabled) i ON  " + \
+                "      JOIN (SELECT * FROM products.ingestion i WHERE i.enabled) i ON  " + \
                 "           (p.productcode = i.productcode AND  " + \
                 "            p.subproductcode = i.subproductcode AND " + \
                 "            p.version = i.version) " + \

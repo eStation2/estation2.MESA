@@ -476,7 +476,8 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
     refreshChart: function(){
         var me = this.getView();
         var chartpropertiesStore = this.getStore('chartproperties');
-        var timeseriesselections = Ext.getCmp('analysismain').getController().getTimeseriesSelections();
+        //var timeseriesselections = Ext.getCmp('analysismain').getController().getTimeseriesSelections();
+        var timeseriesselections = Ext.getCmp('timeserieschartselection').getController().getTimeseriesSelections();
         var chartdrawpropertiespanel = this.lookupReference('chart_draw_properties_'+me.id);
 
         if (chartdrawpropertiespanel != null){

@@ -21,7 +21,7 @@ Ext.define("esapp.view.header.Header",{
     initComponent: function () {
         var me = this;
 
-        me.emptyText = esapp.Utils.getTranslation('noimagesavailable');  // 'No images available'
+        //me.emptyText = esapp.Utils.getTranslation('noimagesavailable');  // 'No images available'
 
         var imageTpl = new Ext.XTemplate(
             '<div id="logo">',

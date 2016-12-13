@@ -141,7 +141,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
 
     listeners: {
         groupclick: function( view, node, group, eOpts ) {
-            this.getController().renderHiddenColumnsWhenUnlocked();
+            //this.getController().renderHiddenColumnsWhenUnlocked();
         }
         //,afterrender: function (view) {
         //    //this.getView().getFeature('productcategories').collapseAll();
@@ -193,22 +193,24 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                 enableToggle: true,
                 scale: 'medium',
                 handler:  function(btn) {
-
                     //Ext.suspendLayouts();
-
-                    var acq_main = Ext.ComponentQuery.query('panel[name=acquisitionmain]');
-                    var dataacquisitiongrids = Ext.ComponentQuery.query('dataacquisitiongrid');
-                    var ingestiongrids = Ext.ComponentQuery.query('ingestiongrid');
-                    var addproductbtn = Ext.ComponentQuery.query('panel[name=acquisitionmain] > toolbar > button[name=addproduct]');
+                    //var acq_main = Ext.ComponentQuery.query('panel[name=acquisitionmain]');
+                    //var dataacquisitiongrids = Ext.ComponentQuery.query('dataacquisitiongrid');
+                    //var ingestiongrids = Ext.ComponentQuery.query('ingestiongrid');
+                    //var addproductbtn = Ext.ComponentQuery.query('panel[name=acquisitionmain] > toolbar > button[name=addproduct]');
                     //var checkColumns = Ext.ComponentQuery.query('panel[name=acquisitionmain] checkcolumn, dataacquisitiongrid checkcolumn, ingestiongrid checkcolumn');
-                    var actionColumns = Ext.ComponentQuery.query('panel[name=acquisitionmain] actioncolumn, dataacquisitiongrid actioncolumn, ingestiongrid actioncolumn');
+                    //var actionColumns = Ext.ComponentQuery.query('panel[name=acquisitionmain] actioncolumn, dataacquisitiongrid actioncolumn, ingestiongrid actioncolumn');
 
                     if (btn.pressed){
 
                         btn.setIconCls('fa fa-unlock fa-2x');
+                        Ext.getCmp('addproduct').show();
+                        //addproductbtn[0].show();
+                        //me.getColumns()[0].show();  // Edit product action column
+                        me.getColumns()[1].show();    // Activate Product column
 
-                        acq_main[0].columns[2].setWidth(500);   // GET
-                        acq_main[0].columns[2].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 265px; left: 0px; tabindex="-1">' +
+                        me.getColumns()[2].setWidth(500);   // GET
+                        me.getColumns()[2].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 265px; left: 0px; tabindex="-1">' +
                         '           <div data-ref="titleEl" class="x-column-header-inner">' +
                         '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('type') + '</span>' +
                         '           </div>' +
@@ -239,8 +241,8 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                         '           </div>' +
                         '       </div>');
 
-                        acq_main[0].columns[3].setWidth(785+70);   // INGESTION
-                        acq_main[0].columns[3].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 195px; right: auto; left: 0px; margin: 0px; top: 0px;" tabindex="-1">' +
+                        me.getColumns()[3].setWidth(785+70);   // INGESTION
+                        me.getColumns()[3].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 195px; right: auto; left: 0px; margin: 0px; top: 0px;" tabindex="-1">' +
                         '           <div data-ref="titleEl" class="x-column-header-inner">' +
                         '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('subproduct') + '</span>' +
                         '           </div>' +
@@ -266,26 +268,22 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                         //'           </div>' +
                         '       </div>');
 
-                        addproductbtn[0].show();
-                        //acq_main[0].columns[0].show();  // Edit product action column
-                        acq_main[0].columns[1].show();    // Activate Product column
-                        //acq_main[0].columns[3].show();
 
-                        Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
-                            dataacquisitiongrid.columns[1].show();      // Edit Data Source
-                            //dataacquisitiongrid.columns[1].updateLayout();
-                            dataacquisitiongrid.columns[2].show();      // Store Native
-                            //dataacquisitiongrid.columns[2].updateLayout();
-                            //dataacquisitiongrid.columns[2].show();   // Last executed
-                            //dataacquisitiongrid.columns[3].show();   // Store Native
-                        });
-
-                        Ext.Object.each(ingestiongrids, function(id, ingestiongrid, myself) {
-                            ingestiongrid.columns[0].show();    // Add Mapset
-                            //ingestiongrid.columns[0].updateLayout();
-                            ingestiongrid.columns[3].show();    // Delete Mapset
-                            //ingestiongrid.columns[3].updateLayout();
-                        });
+                        //Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
+                        //    dataacquisitiongrid.columns[1].show();      // Edit Data Source
+                        //    dataacquisitiongrid.columns[1].updateLayout();
+                        //    dataacquisitiongrid.columns[2].show();      // Store Native
+                        //    dataacquisitiongrid.columns[2].updateLayout();
+                        //    //dataacquisitiongrid.columns[2].show();   // Last executed
+                        //    //dataacquisitiongrid.columns[3].show();   // Store Native
+                        //});
+                        //
+                        //Ext.Object.each(ingestiongrids, function(id, ingestiongrid, myself) {
+                        //    ingestiongrid.columns[0].show();    // Add Mapset
+                        //    ingestiongrid.columns[0].updateLayout();
+                        //    ingestiongrid.columns[3].show();    // Delete Mapset
+                        //    ingestiongrid.columns[3].updateLayout();
+                        //});
 
                         //Ext.Object.each(checkColumns, function(id, chkCol, myself) {
                         //    chkCol.enable();
@@ -300,9 +298,13 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                     }
                     else {
                         btn.setIconCls('fa fa-lock fa-2x');
+                        Ext.getCmp('addproduct').hide();
+                        //addproductbtn[0].hide();
+                        //me.getColumns()[0].hide();
+                        me.getColumns()[1].hide();
 
-                        acq_main[0].columns[2].setWidth(360);   // GET
-                        acq_main[0].columns[2].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 230px; left: 0px; tabindex="-1">' +
+                        me.getColumns()[2].setWidth(360);   // GET
+                        me.getColumns()[2].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 230px; left: 0px; tabindex="-1">' +
                                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                                 '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('type') + '</span>' +
                                 '           </div>' +
@@ -318,8 +320,8 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                                 '           </div>' +
                                 '       </div>');
 
-                        acq_main[0].columns[3].setWidth(785);   // INGESTION
-                        acq_main[0].columns[3].setText('<div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 160px; right: auto; left: 0px; margin: 0px; top: 0px;" tabindex="-1">' +
+                        //me.getColumns()[3].setWidth(785);   // INGESTION      CREATES AN ERROR WHEN RESET BACK TO ORIGINAL WIDTH!!!
+                        me.getColumns()[3].setText('<div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 160px; right: auto; left: 0px; margin: 0px; top: 0px;" tabindex="-1">' +
                                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                                 '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('subproduct') + '</span>' +
                                 '           </div>' +
@@ -345,25 +347,24 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                                 //'           </div>' +
                                 '       </div>');
 
-                        addproductbtn[0].hide();
-                        //acq_main[0].columns[0].hide();
-                        acq_main[0].columns[1].hide();
-                        //acq_main[0].columns[3].hide();
-                        Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
-                            dataacquisitiongrid.columns[1].hide();  // Edit Data Source
-                            dataacquisitiongrid.columns[2].hide();  // Store Native
-                            //dataacquisitiongrid.columns[3].hide();
-                        });
-                        Ext.Object.each(ingestiongrids, function(id, ingestiongrid, myself) {
-                            ingestiongrid.columns[0].hide();    // Add Mapset
-                            //ingestiongrid.columns[0].updateLayout();
-                            ingestiongrid.columns[3].hide();    // Delete Mapset
-                            //ingestiongrid.columns[3].updateLayout();
-                        });
+
+                        //Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
+                        //    dataacquisitiongrid.columns[1].hide();  // Edit Data Source
+                        //    dataacquisitiongrid.columns[2].hide();  // Store Native
+                        //    //dataacquisitiongrid.columns[3].hide();
+                        //});
+                        //Ext.Object.each(ingestiongrids, function(id, ingestiongrid, myself) {
+                        //    ingestiongrid.columns[0].hide();    // Add Mapset
+                        //    //ingestiongrid.columns[0].updateLayout();
+                        //    ingestiongrid.columns[3].hide();    // Delete Mapset
+                        //    //ingestiongrid.columns[3].updateLayout();
+                        //});
                     }
 
-                    //Ext.resumeLayouts(true);
+                    me.updateLayout();
+                    //me.getController().renderHiddenColumnsWhenUnlocked();
 
+                    //Ext.resumeLayouts(true);
                     // acq_main.updateLayout();
                     //var toggleFn = newValue ? 'disable' : 'enable';
                     //Ext.each(this.query('button'), function(item) {
@@ -373,6 +374,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
             }, {
                 xtype: 'button',
                 text: esapp.Utils.getTranslation('addproduct'),    // 'Add Product',
+                id: 'addproduct',
                 name: 'addproduct',
                 iconCls: 'fa fa-plus-circle fa-2x',
                 style: { color: 'green' },
@@ -449,8 +451,11 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                     var ingestiongridstore = Ext.data.StoreManager.lookup('IngestionsStore');
                     var eumetcastsourcestore = Ext.data.StoreManager.lookup('EumetcastSourceStore');
                     var internetsourcestore = Ext.data.StoreManager.lookup('InternetSourceStore');
+                    //var view = btn.up().up().getView();
 
+                    me.getView().getFeature('productcategories').collapseAll();
                     if (productgridstore.isStore) {
+                        //Ext.suspendLayouts();
                         productgridstore.load({
                             callback: function(records, options, success) {
                                 if (acqgridsstore.isStore) {
@@ -461,6 +466,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                                             if (ingestiongridstore.isStore) {
                                                 ingestiongridstore.load({
                                                     callback: function(records, options, success){
+                                                        //Ext.resumeLayouts(true);
                                                         //var view = btn.up().up().getView();
                                                         ////view.getFeature('productcategories').expandAll();
                                                         //view.refresh();
@@ -474,10 +480,13 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                         });
                     }
 
+                    //Ext.resumeLayouts(true);
+
                     eumetcastsourcestore.load();
                     internetsourcestore.load();
 
                     me.getController().checkStatusServices();
+                    //me.getController().renderHiddenColumnsWhenUnlocked();
                 }
             }]
         });
@@ -567,7 +576,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                 xtype: 'actioncolumn',
                 header: esapp.Utils.getTranslation('active'),   // 'Active',
                 hideable: true,
-                hidden:true,
+                hidden: Ext.getCmp('lockunlock').pressed ? false : true,
                 width: 65,
                 align: 'center',
                 //stopSelection: false,
@@ -642,7 +651,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
             },
             columns: [{
                 xtype: 'widgetcolumn',
-                width: 360,
+                width: Ext.getCmp('lockunlock').pressed ? 500 : 360,
                 variableRowHeight:true,
 
                 header: ' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 230px; left: 0px; tabindex="-1">' +
@@ -663,24 +672,28 @@ Ext.define('esapp.view.acquisition.Acquisition',{
 
                 listeners: {
                     render: function(column){
-                        column.titleEl.removeCls('x-column-header-inner');
+                        //column.titleEl.removeCls('x-column-header-inner');
                     }
+                },
+                widget: {
+                    xtype: 'dataacquisitiongrid',
+                    widgetattached: false
                 },
                 onWidgetAttach: function(col, widget, record) {
                     //console.info(widget.lookupViewModel());
                     var daStore = widget.getViewModel().get('productdatasources');
-                    //if (daStore.getFilters().items.length == 0) {
-                    //    Ext.suspendLayouts();
+                    //Ext.suspendLayouts();
+                    if (!widget.widgetattached) {
+                        //if (daStore.getFilters().items.length == 0) {
                         daStore.setFilters({
                             property: 'productid'
                             , value: record.id
                             , anyMatch: true
                         });
                         //Ext.resumeLayouts(true);
-                    //}
-                },
-                widget: {
-                    xtype: 'dataacquisitiongrid'
+                        //}
+                        widget.widgetattached = true;
+                    }
                 }
             }]
         }, {
@@ -697,7 +710,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
             }
             ,columns: [{
                 xtype: 'widgetcolumn',
-                width: 785,
+                width: Ext.getCmp('lockunlock').pressed ? 785+70 : 785,
                 bodyPadding:5,
                 variableRowHeight:true,
 
@@ -729,23 +742,27 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                 '       </div>',
                 listeners: {
                     render: function(column){
-                        column.titleEl.removeCls('x-column-header-inner');
+                        //column.titleEl.removeCls('x-column-header-inner');
                     }
                 },
                 widget: {
-                    xtype: 'ingestiongrid'
+                    xtype: 'ingestiongrid',
+                    widgetattached: false
                 },
                 onWidgetAttach: function(col, widget, record) {
                     var daStore = widget.getViewModel().get('productingestions');
-                    //if (daStore.getFilters().items.length == 0) {
-                    //    Ext.suspendLayouts();
+                    //Ext.suspendLayouts();
+                    if (!widget.widgetattached) {
+                        //if (daStore.getFilters().items.length == 0) {
                         daStore.setFilters({
                             property: 'productid'
                             , value: record.id
                             , anyMatch: true
                         });
                         //Ext.resumeLayouts(true);
-                    //}
+                        //}
+                        widget.widgetattached = true;
+                    }
                 }
             }]
         },{

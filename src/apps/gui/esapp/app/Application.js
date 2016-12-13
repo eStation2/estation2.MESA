@@ -82,17 +82,18 @@ Ext.define('esapp.Application', {
         ,'EumetcastSourceStore'
         ,'InternetSourceStore'
         ,'LayersStore'
-
+        ,"ColorSchemesStore"
         ,'ProductsActiveStore'
         ,'ProductsInactiveStore'
         ,'DataAcquisitionsStore'
         ,'IngestionsStore'
         ,'DataSetsStore'
         ,'ProcessingStore'
-
-//        ,'IPSettingsStore'
-        //,'ProductNavigatorStore'  // using viewmodel model binding, which is loaded onAfterRender
         ,'SystemSettingsStore'
+        ,'LogosMapView'
+        //,'TimeseriesProductsTreeStore'
+        //,'IPSettingsStore'
+        //,'ProductNavigatorStore'  // using viewmodel model binding, which is loaded onAfterRender
         //,'TimeLineStore'
     ],
 
@@ -116,7 +117,7 @@ Ext.define('esapp.Application', {
 
     //init: function () {
     onBeforeLaunch: function () {
-        console.info('onBeforeLaunch');
+        //console.info('onBeforeLaunch');
         var me = this;
         //console.info(me);
 
@@ -143,7 +144,7 @@ Ext.define('esapp.Application', {
                 //else Ext.require('Ext.locale.en');
 
                 //Ext.getCmp("languageCombo").setValue(esapp.globals['selectedLanguage']);
-                console.info(esapp.globals['selectedLanguage']);
+                //console.info(esapp.globals['selectedLanguage']);
 
                 if (esapp.globals['selectedLanguage'] == 'fra') {
 
@@ -180,22 +181,29 @@ Ext.define('esapp.Application', {
                     });
                 }
 
-                console.info(esapp.Utils);
+                //console.info(esapp.Utils);
 
                 Ext.data.StoreManager.lookup('i18nStore').load({
                     params:{lang:esapp.globals['selectedLanguage']},
                     callback: function(records, options, success){
 
-                        Ext.apply(Ext.form.VTypes, {
-                            GeoJSON:  function(v) {
-                                v = v.replace(/^\s|\s$/g, ""); //trims string
-                                if (v.match(/([^\/\\]+)\.(geojson)$/i) )
-                                    return true;
-                                else
-                                    return false;
-                            },
-                            GeoJSONText: esapp.Utils.getTranslation('vtype_geojson')    // 'Must be a .geojson file.'
+                        Ext.Loader.loadScript({
+                            url: 'app/CustomVTypes.js',
+                            onLoad: function (options) {
+                                console.info('CustomVTypes');
+                            }
                         });
+
+                        //Ext.apply(Ext.form.VTypes, {
+                        //    GeoJSON:  function(v) {
+                        //        v = v.replace(/^\s|\s$/g, ""); //trims string
+                        //        if (v.match(/([^\/\\]+)\.(geojson)$/i) )
+                        //            return true;
+                        //        else
+                        //            return false;
+                        //    },
+                        //    GeoJSONText: esapp.Utils.getTranslation('vtype_geojson')    // 'Must be a .geojson file.'
+                        //});
 
                         //Ext.create('esapp.view.main.Main');
 
@@ -209,7 +217,7 @@ Ext.define('esapp.Application', {
     },
 
     launch: function () {
-        console.info('launch');
+        //console.info('launch');
         // Ext.getBody().addCls('graybgcolor');
 
 
@@ -227,18 +235,12 @@ Ext.define('esapp.Application', {
         var task = new Ext.util.DelayedTask(function() {
             // fade out the body mask
             splashscreen.fadeOut({
-                duration: 500,
+                duration: 250,
                 remove: true
             });
 
-            //// fade out the message
-            //splashscreen.fadeOut({
-            //    duration: 500,
-            //    remove: true
-            //});
-
         });
-        task.delay(2000);
+        task.delay(1500);
 
         Ext.data.StoreManager.lookup('ProductsActiveStore').load();
 ////                        Ext.data.StoreManager.lookup('ProductsInactiveStore').load();

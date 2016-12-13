@@ -98,6 +98,20 @@ Ext.define('esapp.Utils', {
 
         is_array: function (input){return typeof(input)=='object'&&(input instanceof Array);},
 
+        union_arrays: function (x, y) {
+          var obj = {};
+          for (var i = x.length-1; i >= 0; -- i)
+             obj[x[i]] = x[i];
+          for (var i = y.length-1; i >= 0; -- i)
+             obj[y[i]] = y[i];
+          var res = []
+          for (var k in obj) {
+            if (obj.hasOwnProperty(k))  // <-- optional
+              res.push(obj[k]);
+          }
+          return res;
+        },
+
         RGBtoHex: function (R,G,B) {return "#"+this.toHex(R)+this.toHex(G)+this.toHex(B)},
         //function RGBToHex(rgb) {
         //var char = "0123456789ABCDEF";
@@ -175,8 +189,22 @@ Ext.define('esapp.Utils', {
         sleepFor: function(sleepDuration){
             var now = new Date().getTime();
             while(new Date().getTime() < now + sleepDuration){ /* do nothing */ }
-        }
+        },
 
+        hasClass: function (ele,cls) {
+            return ele.className.match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
+        },
+
+        addClass: function (ele,cls) {
+            if (!this.hasClass(ele,cls)) ele.className += " "+cls;
+        },
+
+        removeClass: function (ele,cls) {
+            if (this.hasClass(ele,cls)) {
+                var reg = new RegExp('(\\s|^)'+cls+'(\\s|$)');
+                ele.className=ele.className.replace(reg,' ');
+            }
+        }
 
         //,md5cycle: function (x, k) {
         //    var a = x[0], b = x[1], c = x[2], d = x[3];
