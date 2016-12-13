@@ -421,3 +421,4 @@ class TestCreate(unittest.TestCase):
         self.TestCreateArchive_modis_sst()
         self.TestCreateArchive_modis_par()
         self.TestCreateArchive_modis_kd490()
+        self.TestCreateArchive_modis_firms()

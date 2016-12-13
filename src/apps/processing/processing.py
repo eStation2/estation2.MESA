@@ -36,6 +36,9 @@ from apps.processing import processing_std_lsasaf_et
 from apps.processing import processing_std_modis_monavg
 from apps.processing import processing_std_modis_firms
 from apps.processing import processing_std_msg_mpe
+from apps.processing import processing_std_rain_onset
+from apps.processing import processing_std_seas_cum
+
 from lib.python.daemon import DaemonDryRunnable
 
 class ProcessingDaemon(DaemonDryRunnable):
@@ -113,6 +116,7 @@ def loop_processing(dry_run=False, serialize=False):
             product_code = input_products[0].productcode
             sub_product_code = input_products[0].subproductcode
             version = input_products[0].version
+            native_mapset=input_products[0].mapsetcode
 
             logger.info("Processing product: %s" % str(product_code))
 
@@ -145,7 +149,8 @@ def loop_processing(dry_run=False, serialize=False):
                         'mapset':mapset,\
                         'starting_dates': list_dates,\
                         'version':version,
-                        'logfile':logfile}
+                        'logfile':logfile,
+                        'native_mapset':native_mapset}
 
                 logger.debug('RL:{pipeline_run_level}; PL:{pipeline_printout_level},prod:{prod}, sprod:{starting_sprod},mapset:{mapset},\
                             dates:{starting_dates},version:{version}'.format(**args))

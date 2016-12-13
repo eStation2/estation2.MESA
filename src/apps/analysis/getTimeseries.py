@@ -195,13 +195,14 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
                         mxrange = ma.masked_outside(mxnodata, min_val_scaled, max_val_scaled)
 
                         if aggregate['aggregation_type'] == 'percent':
-                            # Convert from number of pixels to ratio/percent
+                            # 'percent'
                             meanResult = float(mxrange.count())/float(mxnodata.count()) * 100
 
                         elif aggregate['aggregation_type'] == 'surface':
+                            # 'surface'
                             meanResult = float(mxrange.count())* pixelArea
                         else:
-                            # Assign as number of pixels
+                            # 'count'
                             meanResult = float(mxrange.count())
 
                         # Both results are equal
@@ -212,8 +213,10 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
                             meanResult = 0.0
                         else:
                             if aggregate['aggregation_type'] == 'mean':
+                                # 'mean'
                                 meanResult = mxnodata.mean()
-                            else:  # aggregate['aggregation_type'] == 'cumulate':
+                            else:
+                                # 'cumulate'
                                 meanResult = mxnodata.sum()
 
                         # Scale to physical value

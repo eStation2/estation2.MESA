@@ -7,6 +7,11 @@
 #   TODO-M.C.: Define methods to assess relationships between mapsets (e.g. included)
 #
 
+# Import std modules
+import pygrib
+import numpy as N
+import math
+
 # Import eStation lib modules
 from database import querydb
 
@@ -14,8 +19,6 @@ from database import querydb
 from osgeo import gdalconst
 from osgeo import gdal
 from osgeo import osr
-import pygrib
-import numpy as N
 
 
 class MapSet:
@@ -218,3 +221,88 @@ class MapSet:
             larger_mapset =  'MODIS-Africa-4km'
 
         return larger_mapset
+
+    def compute_common_area(self, second_mapset):
+
+    #   Computes the common area of two mapset, ONLY if they have same resolution
+    #   It returns shift to apply to each image and the common roi dimensions
+    #   Arguments:
+    #
+    #       second_mapset: mapset to compare with
+    #
+
+        roi = {'isCommon': None,            # two ROIs have same pixelsize AND area in common
+               'xSize': 0,                  # x-dim of common area
+               'ySize': 0,                  # y-dim of common area
+               'firstXOff': 0,              # x-offset of the common area in ROI-1
+               'firstYOff': 0,              # y-offset of the common area in ROI-1
+               'secondXOff': 0,             # x-offset of the common area in ROI-2
+               'secondYOff': 0,             # y-offset of the common area in ROI-2
+               }
+
+        # Accuracy in degrees (0.1 km)
+        accuracy = (1.0/112.0)/10.0
+
+        # Assign Geo-transform and image-sizes from mapsets
+        firstGeo = self.geo_transform
+        firstNs=self.size_x
+        firstNl=self.size_y
+        secondGeo = second_mapset.geo_transform
+        secondNs=second_mapset.size_x
+        secondNl=second_mapset.size_y
+
+        flag=1
+        for ii in range(len(firstGeo)):
+            if firstGeo[ii] != secondGeo[ii]:
+                flag=0
+
+        if flag == 1:
+            # ROIs are identical: return trivial parameters
+            roi['isCommon']=True
+            roi['xSize']=firstNs
+            roi['ySize']=firstNl
+        else:
+            # they are not the same, compute offset
+            # they must have same pixel size, otherwise return 'No common ROIs'
+            if math.fabs(firstGeo[1] - secondGeo[1]) > accuracy or math.fabs(firstGeo[5] - secondGeo[5]) > accuracy:
+                roi['isCommon']=False
+            else:
+                xshift = int( (secondGeo[0]-firstGeo[0])/math.fabs(firstGeo[1]) )
+                if xshift >0:
+                    firstXOff   = xshift
+                    secondXOff  = int(0)
+                    xSize  = min(int(firstNs - xshift), secondNs)
+                else:
+                    firstXOff = 0
+                    secondXOff= int(abs(xshift))
+                    xSize  = min((secondNs - abs(xshift)), firstNs)
+
+                yshift  = int( (firstGeo[3]-secondGeo[3])/math.fabs(firstGeo[5]) )
+                if yshift > 0:
+                    firstYOff = yshift
+                    secondYOff= int(0)
+                    ySize = min(int(firstNl - yshift), secondNl)
+                else:
+                    firstYOff = 0
+                    secondYOff = int(abs(yshift))
+                    ySize = min(int(secondNl - abs(yshift)), firstNl)
+
+                # once every thing is defined, set isCommon to True
+                isCommon = True
+
+            roi['isCommon']=isCommon
+            roi['xSize']=xSize
+            roi['ySize']=ySize
+            roi['firstXOff']=firstXOff
+            roi['firstYOff']=firstYOff
+            roi['secondXOff']=secondXOff
+            roi['secondYOff']=secondYOff
+
+        return roi
+
+    def is_wbd(self):
+
+        if self.short_name[:6] == 'WD-GEE':
+            return True
+        else:
+            return False

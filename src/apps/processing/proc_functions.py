@@ -48,7 +48,11 @@ def get_list_dates_for_dataset(product_code, sub_product_code, version, start_da
         else:
             date_end = datetime.date.today()
 
-        list_dates = cFrequency.get_internet_dates(cFrequency.get_dates(date_start, date_end),'%Y%m%d')
+        if dateformat == 'YYYYMMDDHHMM':
+            list_dates = cFrequency.get_internet_dates(cFrequency.get_dates(date_start, date_end),'%Y%m%d%H%M')
+        else:
+            list_dates = cFrequency.get_internet_dates(cFrequency.get_dates(date_start, date_end),'%Y%m%d')
+
     else:
         list_dates = None
 

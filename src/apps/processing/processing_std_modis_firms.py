@@ -41,14 +41,20 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     # Set DEFAULTS: all off
     activate_10dstats_comput=0              # 10d stats
     activate_10danomalies_comput=0          # 10d anomalies
+    activate_10d_grid_comput=0              # 10d gridded on 10m cells
+    activate_10d_grid_stats_comput=0        # 10d gridded statistics
+    activate_10d_grid_anom_comput=0         # 10d gridded anomalies
 
     #   switch wrt groups - according to options
     if nrt_products:
         activate_10dcount_comput=1          # 10d anomalies
         activate_10danomalies_comput=1      # monthly anomalies
+        activate_10d_grid_comput=1          # 10d gridded on 10m cells
+        activate_10d_grid_anom_comput=1     # 10d gridded anomalies
 
     if update_stats:
         activate_10dstats_comput= 1         # 10d stats
+        activate_10d_grid_stats_comput=1    # 10d gridded statistics
 
     #   switch wrt single products: not to be changed !!
     activate_10dcount_comput=1              # 10d count
@@ -58,6 +64,9 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     activate_10dcountmax_comput=1
 
     activate_10ddiff_comput=1
+
+    activate_10dcount_grid_comput=1         # 10dcount gridded on 10m cells
+
 
     es2_data_dir = es_constants.es2globals['processing_dir']+os.path.sep
 
@@ -76,7 +85,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         for my_date in starting_dates:
             starting_files.append(input_dir+my_date+in_prod_ident)
     else:
-        starting_files=input_dir+"*"+in_prod_ident
+        starting_files=glob.glob(input_dir+"*"+in_prod_ident)
 
     #   ---------------------------------------------------------------------
     #   Derived product: 10dcount
@@ -98,7 +107,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     def generate_parameters_10dcount():
 
         #   Look for all input files in input_dir, and sort them
-        input_files = glob.glob(starting_files)
+        input_files = starting_files
         dekad_list = []
 
         # Create unique list of all dekads (as 'Julian' number)
@@ -264,6 +273,46 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32767}
         raster_image_math.do_oper_subtraction(**args)
+
+
+    #   ---------------------------------------------------------------------
+    #   Derived product: 10d-grid
+    #   ---------------------------------------------------------------------
+
+    output_sprod_group=proc_lists.proc_add_subprod_group("10d-grid")
+    output_sprod=proc_lists.proc_add_subprod("10d-grid", "10d-grid", final=False,
+                                             descriptive_name='10d Gridded at 10 km',
+                                             description='10d Count Gridded at 10 km',
+                                             frequency_id='e1dekad',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='10d',
+                                             active_default=True)
+
+    out_prod_ident_10dgrid = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
+    output_subdir_10dgrid  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
+
+    #   Starting files + avg
+    formatter_in="(?P<YYYYMMDD>[0-9]{8})"+out_prod_ident_10dcount
+    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir_10dgrid+"{YYYYMMDD[0]}"+out_prod_ident_10dgrid
+
+    @follows(std_fire_10dcount)
+    @active_if(activate_10d_grid_comput, activate_10dcount_grid_comput)
+    @transform(std_fire_10dcount, formatter(formatter_in),formatter_out)
+    def std_fire_10dcount_grid(input_file, output_file):
+
+        output_file = functions.list_to_element(output_file)
+        functions.check_output_dir(os.path.dirname(output_file))
+        grid_file='/eStation2/layers/Mask_Africa_SPOTV_10km.tif'
+        grid_mapset_name='SPOTV-Africa-1km'
+        input_mapset_name=mapset
+
+        operation='sum'
+        args = {"input_file": input_file, "grid_file":grid_file, "output_file": output_file,
+                "operation":operation, "input_mapset_name":input_mapset_name, "grid_mapset_name":grid_mapset_name,
+                "output_format": 'GTIFF', "options": "compress=lzw"}
+
+        raster_image_math.do_stats_4_raster(**args)
 
     # End of pipeline definition
     return proc_lists

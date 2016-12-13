@@ -1,0 +1,76 @@
+#
+# NOTE of the geoportal implementation as a service (mainly for Training sessions)
+#
+________________________________________________
+1. Script to start/stop/check the service (as adminuser)
+________________________________________________
+
+service_geoportal.sh start/stop/restart/status
+
+Examples of a session:
+
+[adminuser@MESA-PC3 GeoPortal]$ service_geoportal.sh status
+Current status of the Service: False
+[adminuser@MESA-PC3 GeoPortal]$ service_geoportal.sh start
+2016-08-23 17:01:46 - eStation2.apps.es2system.geoportal - INFO - Starting System service
+INFO:eStation2.apps.es2system.geoportal:Starting System service
+[adminuser@MESA-PC3 GeoPortal]$ service_geoportal.sh status
+Current status of the Service: True
+[adminuser@MESA-PC3 GeoPortal]$ service_geoportal.sh start
+2016-08-23 17:01:54 - eStation2.apps.es2system.geoportal - INFO - Starting System service
+INFO:eStation2.apps.es2system.geoportal:Starting System service
+pidfile /tmp/eStation2/services/system.pid already exist and process running. Daemon already running?
+[adminuser@MESA-PC3 GeoPortal]$ service_geoportal.sh stop
+2016-08-23 17:01:59 - eStation2.apps.es2system.geoportal - INFO - Stopping System service
+INFO:eStation2.apps.es2system.geoportal:Stopping System service
+[adminuser@MESA-PC3 GeoPortal]$ service_geoportal.sh status
+Current status of the Service: False
+
+________________________________________________
+2. Logfiles to monitor
+________________________________________________
+
+Three main files can be used to monitor the service execution:
+
+/eStation2/log/apps.es2system.GeoPortal.service_geoportal.log -> start/stop/restart info. Example below: 
+
+2016-08-23 17:54:27 - eStation2.apps.es2system.GeoPortal.service_geoportal - INFO - Starting System service
+2016-08-23 17:55:10 - eStation2.apps.es2system.GeoPortal.service_geoportal - INFO - Stopping System service
+2016-08-23 17:55:11 - eStation2.apps.es2system.GeoPortal.service_geoportal - INFO - Starting System service
+2016-08-23 17:55:53 - eStation2.apps.es2system.GeoPortal.service_geoportal - INFO - Stopping System service
+2016-08-23 17:55:54 - eStation2.apps.es2system.GeoPortal.service_geoportal - INFO - Starting System service
+2016-08-23 17:56:17 - eStation2.apps.es2system.GeoPortal.service_geoportal - INFO - Stopping System service
+2016-08-23 18:17:46 - eStation2.apps.es2system.GeoPortal.service_geoportal - INFO - Starting System service
+
+/eStation2/log/apps.es2system.GeoPortal.system_geoserver.log -> output of the main loop. Example below: 
+
+2016-08-23 17:54:27 - eStation2.apps.es2system.GeoPortal.system_geoserver - INFO - Entering routine loop_geoserver
+2016-08-23 17:54:27 - eStation2.apps.es2system.GeoPortal.system_geoserver - INFO - Calling syncGeoserver
+2016-08-23 17:54:27 - eStation2.apps.es2system.GeoPortal.system_geoserver - INFO - Working on Product/Subproduct/Version: modis-chla/chla-day/v2013.1
+2016-08-23 17:54:30 - eStation2.apps.es2system.GeoPortal.system_geoserver - INFO - Working on Product/Subproduct/Version: modis-chla/monclim/v2013.1
+2016-08-23 17:54:30 - eStation2.apps.es2system.GeoPortal.system_geoserver - INFO - Working on Product/Subproduct/Version: modis-chla/monavg/v2013.1
+2016-08-23 17:54:31 - eStation2.apps.es2system.GeoPortal.system_geoserver - INFO - Working on Product/Subproduct/Version: fewsnet-rfe/10d/2.0
+2016-08-23 17:54:31 - eStation2.apps.es2system.GeoPortal.system_geoserver - INFO - Working on Product/Subproduct/Version: vgt-ndvi/ndvi-linearx2/sv2-pv2.1
+2016-08-23 17:54:32 - eStation2.apps.es2system.GeoPortal.system_geoserver - INFO - Working on Product/Subproduct/Version: vgt-dmp/dmp/V1.0
+2016-08-23 17:54:32 - eStation2.apps.es2system.GeoPortal.system_geoserver - INFO - Working on Product/Subproduct/Version: modis-firms/10dcount/v5.0
+2016-08-23 17:54:33 - eStation2.apps.es2system.GeoPortal.system_geoserver - INFO - Working on Product/Subproduct/Version: modis-firms/10dcountavg/v5.0
+2016-08-23 17:54:34 - eStation2.apps.es2system.GeoPortal.system_geoserver - INFO - Working on Product/Subproduct/Version: modis-firms/10dcountdiff/v5.0
+2016-08-23 17:54:35 - eStation2.apps.es2system.GeoPortal.system_geoserver - INFO - Working on Product/Subproduct/Version: tamsat-rfe/10davg/2.0
+2016-08-23 17:54:37 - eStation2.apps.es2system.GeoPortal.system_geoserver - INFO - Working on Product/Subproduct/Version: tamsat-rfe/10d/2.0
+2016-08-23 17:54:37 - eStation2.apps.es2system.GeoPortal.system_geoserver - INFO - Working on Product/Subproduct/Version: fewsnet-rfe/10davg/2.0
+2016-08-23 17:54:39 - eStation2.apps.es2system.GeoPortal.system_geoserver - INFO - Waiting 5 minute
+2016-08-23 17:55:11 - eStation2.apps.es2system.GeoPortal.system_geoserver - INFO - Entering routine loop_geoserver
+2016-08-23 17:55:11 - eStation2.apps.es2system.GeoPortal.system_geoserver - INFO - Calling syncGeoserver
+2016-08-23 17:55:11 - eStation2.apps.es2system.GeoPortal.system_geoserver - INFO - Working on Product/Subproduct/Version: modis-chla/chla-day/v2013.1
+
+/eStation2/log/apps.es2system.GeoPortal.eStationTools.log -> output from the lower level functions (in eStationTools). Example below: 
+
+2016-08-23 17:55:54 - eStation2.apps.es2system.GeoPortal.eStationTools - INFO - File /data/processing//modis-chla/v2013.1/MODIS-IOC-4km/tif/chla-day//20160503_modis-chla_chla-day_MODIS-IOC-4km_v2013.1.tif uploaded to remote server
+2016-08-23 17:55:55 - eStation2.apps.es2system.GeoPortal.eStationTools - INFO - File /data/processing//modis-chla/v2013.1/MODIS-IOC-4km/tif/chla-day//20160708_modis-chla_chla-day_MODIS-IOC-4km_v2013.1.tif uploaded to remote server
+2016-08-23 17:55:55 - eStation2.apps.es2system.GeoPortal.eStationTools - INFO - File /data/processing//modis-chla/v2013.1/MODIS-IOC-4km/tif/chla-day//20160527_modis-chla_chla-day_MODIS-IOC-4km_v2013.1.tif uploaded to remote server
+2016-08-23 17:55:55 - eStation2.apps.es2system.GeoPortal.eStationTools - INFO - File /data/processing//modis-chla/v2013.1/MODIS-IOC-4km/tif/chla-day//20160701_modis-chla_chla-day_MODIS-IOC-4km_v2013.1.tif uploaded to remote server
+2016-08-23 17:55:56 - eStation2.apps.es2system.GeoPortal.eStationTools - INFO - File /data/processing//modis-chla/v2013.1/MODIS-IOC-4km/tif/chla-day//20160519_modis-chla_chla-day_MODIS-IOC-4km_v2013.1.tif uploaded to remote server
+2016-08-23 17:55:56 - eStation2.apps.es2system.GeoPortal.eStationTools - INFO - File /data/processing//modis-chla/v2013.1/MODIS-IOC-4km/tif/chla-day//20160524_modis-chla_chla-day_MODIS-IOC-4km_v2013.1.tif uploaded to remote server
+2016-08-23 17:55:56 - eStation2.apps.es2system.GeoPortal.eStationTools - INFO - File /data/processing//modis-chla/v2013.1/MODIS-IOC-4km/tif/chla-day//20160526_modis-chla_chla-day_MODIS-IOC-4km_v2013.1.tif uploaded to remote server
+
+
