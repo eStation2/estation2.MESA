@@ -401,7 +401,8 @@ def get_mapsets_for_ingest(productcode, version, subproductcode, echo=False):
 def get_categories(echo=False):
     global db
     try:
-        query = "SELECT * FROM products.product_category ORDER BY category_id"
+        # query = "SELECT * FROM products.product_category ORDER BY category_id"
+        query = "select * from products.product_category where category_id in (select distinct category_id from products.product where activated = true)"
         categories = db.execute(query)
         categories = categories.fetchall()
 
@@ -741,7 +742,8 @@ def get_timeseries_subproducts(echo=False,  productcode=None, version='undefined
                     p.c.version,
                     # p.c.defined_by,
                     # p.c.activated,
-                    # p.c.product_type,
+                    p.c.date_format,
+                    p.c.frequency_id,
                     p.c.descriptive_name.label('descriptive_name'),        # prod_descriptive_name
                     p.c.description,
                     p.c.masked,
@@ -754,18 +756,21 @@ def get_timeseries_subproducts(echo=False,  productcode=None, version='undefined
         if masked is None:
             where = and_(pl.c.productcode == productcode,
                          pl.c.version == version,
-                         or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
+                         pl.c.timeseries_role == subproductcode)
+                         # or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
         else:
             if not masked:
                 where = and_(pl.c.masked == 'f',
                              pl.c.productcode == productcode,
                              pl.c.version == version,
-                             or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
+                             pl.c.timeseries_role == subproductcode)
+                             # or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
             else:
                 where = and_(pl.c.masked == 't',
                              pl.c.productcode == productcode,
                              pl.c.version == version,
-                             or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
+                             pl.c.timeseries_role == subproductcode)
+                             # or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
 
         productslist = pl.filter(where).order_by(asc(pl.c.productcode), asc(pl.c.subproductcode)).all()
 
@@ -819,10 +824,11 @@ def get_timeseries_products(echo=False,  masked=None):
                     p.c.subproductcode,
                     p.c.version,
                     # p.c.defined_by,
-                    # p.c.activated,
+                    p.c.date_format,
                     p.c.product_type,
                     p.c.descriptive_name.label('descriptive_name'),        # prod_descriptive_name
                     p.c.description,
+                    p.c.frequency_id,
                     p.c.masked,
                     p.c.timeseries_role,
                     pc.c.category_id,

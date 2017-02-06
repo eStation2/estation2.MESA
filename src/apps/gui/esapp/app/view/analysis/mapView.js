@@ -86,7 +86,7 @@ Ext.define("esapp.view.analysis.mapView",{
         me.selectedFeatureFromDrawLayer = false;
 
         me.title = '<span id="mapview_title_templatename_' + me.id + '" class="map-templatename"></span><span id="mapview_title_productname_' + me.id + '"></span>';
-
+        me.height = Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-80 : 950;
 
         me.controller.createToolBar();
 
@@ -211,7 +211,7 @@ Ext.define("esapp.view.analysis.mapView",{
             height: 135,
             maxHeight: 135,
             hidden: true,
-            hideMode : 'display',
+            hideMode : 'visibility',    //'display',
             frame:  false,
             shadow: false,
             border: false,
@@ -223,7 +223,7 @@ Ext.define("esapp.view.analysis.mapView",{
             header : false,
             collapsible: false,
             collapsed: false,
-            collapseFirst: true,
+            collapseFirst: false,
             collapseDirection: 'top',
             collapseMode : "mini",  // The Panel collapses without a visible header.
             //headerPosition: 'left',
@@ -775,10 +775,17 @@ Ext.define("esapp.view.analysis.mapView",{
             }
             // The resize handle is necessary to set the map!
             ,resize: function () {
-                var size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight-135];
+                var size = [];
+                if (this.productname == '' && this.productdate == '') {
+                    size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight];
+                }
+                else {
+                    size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight - 135];
+                }
                 this.map.setSize(size);
 
                 this.getController().redrawTimeLine(this);
+
                 this.updateLayout();
                 this.lookupReference('opacityslider_' + this.id.replace(/-/g,'_')).setPosition(this.getWidth()-165, 5);
                 //this.lookupReference('opacityslider_' + this.id.replace(/-/g,'_')).doConstrain();

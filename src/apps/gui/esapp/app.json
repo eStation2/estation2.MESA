@@ -131,29 +131,47 @@
             "path": "/eStation2/lib/js/ol3-layerswitcher-master/src/ol3-layerswitcher.js",
             "remote": true
         },{
-            "path": "/eStation2/lib/js/Highstock/js/highstock-all.js",
+            "path": "/eStation2/lib/js/Highstock-5.0.6/code/highstock.js",
             "remote": true
         },{
-            "path": "/eStation2/lib/js/Highstock/js/modules/export-csv.js",
+            "path": "/eStation2/lib/js/Highstock-5.0.6/code/modules/exporting.js",
             "remote": true
         },{
-            "path": "/eStation2/lib/js/Highstock/js/modules/jspdf.min.js",
+            "path": "/eStation2/lib/js/Highstock-5.0.6/code/modules/offline-exporting.js",
+            "remote": true
+        },{
+            "path": "/eStation2/lib/js/Highstock-5.0.6/code/modules/export-csv-1.1.4.js",
             "remote": true
         },{
             // This module, after the dependencies
-            "path": "/eStation2/lib/js/Highstock/js/modules/highcharts-export-clientside.js",
+            "path": "/eStation2/lib/js/Highstock-5.0.6/code/modules/highcharts-export-clientside-1.4.3.js",
             "remote": true
+
+
 //        },{
-//            "path": "/eStation2/lib/js/es6-promise.min.js",
+//            "path": "/eStation2/lib/js/Highstock/js/highstock-all.js",
+//            "remote": true
+//        },{
+//            "path": "/eStation2/lib/js/Highstock/js/modules/export-csv.js",
+//            "remote": true
+//        },{
+//            // This module, after the dependencies
+//            "path": "/eStation2/lib/js/Highstock/js/modules/highcharts-export-clientside.js",
 //            "remote": true
         },{
             "path": "/eStation2/lib/js/html2canvas-0.5.0-alpha1/dist/html2canvas.min.js",
             "remote": true
-        },{
-            "path": "/eStation2/lib/js/js-spark-md5-master/spark-md5.js",
-            "remote": true
         }],
 
+//        },{
+//            "path": "/eStation2/lib/js/es6-promise.min.js",
+//            "remote": true
+//        },{
+//            "path": "/eStation2/lib/js/js-spark-md5-master/spark-md5.js",
+//            "remote": true
+//        },{
+//            "path": "/eStation2/lib/js/Highstock/js/modules/jspdf.min.js",
+//            "remote": true
 //        },{
 //            "path": "/eStation2/lib/js/md5.js",
 //            "remote": true

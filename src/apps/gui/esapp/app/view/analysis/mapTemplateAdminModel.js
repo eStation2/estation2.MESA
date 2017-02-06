@@ -13,9 +13,9 @@ Ext.define('esapp.view.analysis.mapTemplateAdminModel', {
 
                 appendId: false,
 
-                extraParams: {
-                    userid: 'jurvtk'
-                },
+                //extraParams: {
+                //    userid: null    //esapp.getUser().userid  // 'jurvtk'
+                //},
 
                 api: {
                     read: 'analysis/usermaptemplates',

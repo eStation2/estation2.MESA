@@ -91,7 +91,8 @@ Ext.define('esapp.Application', {
         ,'ProcessingStore'
         ,'SystemSettingsStore'
         ,'LogosMapView'
-        //,'TimeseriesProductsTreeStore'
+        ,'TimeseriesProductsStore'
+        ,'TSDrawPropertiesStore'
         //,'IPSettingsStore'
         //,'ProductNavigatorStore'  // using viewmodel model binding, which is loaded onAfterRender
         //,'TimeLineStore'
@@ -194,6 +195,15 @@ Ext.define('esapp.Application', {
                             }
                         });
 
+                        //// start the mask on the body and get a reference to the mask
+                        //var splashscreen = Ext.getBody().mask(esapp.Utils.getTranslation('splashscreenmessage'), 'splashscreen');
+                        //
+                        //// fade out the body mask
+                        //splashscreen.fadeOut({
+                        //    duration: 7000,
+                        //    remove: true
+                        //});
+
                         //Ext.apply(Ext.form.VTypes, {
                         //    GeoJSON:  function(v) {
                         //        v = v.replace(/^\s|\s$/g, ""); //trims string
@@ -220,7 +230,6 @@ Ext.define('esapp.Application', {
         //console.info('launch');
         // Ext.getBody().addCls('graybgcolor');
 
-
         //var link = '<link rel="icon" href="resources/img/africa.ico" type="image/gif" sizes="16x16">'
         var link = document.createElement('link');
         link.type = 'image/gif';  // 'image/ico';
@@ -229,27 +238,33 @@ Ext.define('esapp.Application', {
         link.sizes = '16x16';
         document.getElementsByTagName('head')[0].appendChild(link);
 
+        var delay = 1500;
+        if (!Ext.data.StoreManager.lookup('TimeseriesProductsStore').isLoaded()){
+            delay = 5000;
+        }
+
         // start the mask on the body and get a reference to the mask
-        splashscreen = Ext.getBody().mask(esapp.Utils.getTranslation('splashscreenmessage'), 'splashscreen');
+        var splashscreen = Ext.getBody().mask(esapp.Utils.getTranslation('splashscreenmessage'), 'splashscreen');
+
+        // fade out the body mask
+        splashscreen.fadeOut({
+            duration: delay+3000,
+            remove: true
+        });
 
         var task = new Ext.util.DelayedTask(function() {
-            // fade out the body mask
-            splashscreen.fadeOut({
-                duration: 250,
-                remove: true
-            });
-
+            Ext.create('esapp.view.main.Main');
         });
-        task.delay(1500);
+        task.delay(delay);
+
 
         Ext.data.StoreManager.lookup('ProductsActiveStore').load();
-////                        Ext.data.StoreManager.lookup('ProductsInactiveStore').load();
-//        Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
-//        Ext.data.StoreManager.lookup('IngestionsStore').load();
-////                        Ext.data.StoreManager.lookup('DataSetsStore').load();
-//        Ext.data.StoreManager.lookup('ProcessingStore').load();
-
-        Ext.create('esapp.view.main.Main');
+        //Ext.data.StoreManager.lookup('TimeseriesProductsStore').load();
+        //Ext.data.StoreManager.lookup('ProductsInactiveStore').load();
+        //Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
+        //Ext.data.StoreManager.lookup('IngestionsStore').load();
+        //Ext.data.StoreManager.lookup('DataSetsStore').load();
+        //Ext.data.StoreManager.lookup('ProcessingStore').load();
 
         this.callParent();
     }

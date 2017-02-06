@@ -32,7 +32,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
     resizable: true,
 
     width:900,
-    height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-80 : 800,  // 600,
+    //height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-80 : 800,  // 600,
     minWidth:400,
     minHeight:350,
     x: 50,
@@ -50,6 +50,11 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
     yearTS: null,
     tsFromPeriod: null,
     tsToPeriod: null,
+    yearsToCompare: null,
+    tsFromSeason: null,
+    tsToSeason: null,
+    //tsYear1Season: null,
+    //tsYear2Season: null,
     wkt: null,
     charttype: null,
     timeseriesChart: {},
@@ -81,6 +86,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
         var me = this;
 
         me.title = '<span class="panel-title-style">'+esapp.Utils.getTranslation('timeseries')+'</span>';
+        //me.height = Ext.getBody().getViewSize().height-80;
         me.frame = false;
         me.border= true;
         me.bodyBorder = false;

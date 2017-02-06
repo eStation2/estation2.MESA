@@ -1856,24 +1856,152 @@ class GetTimeseries:
     def __init__(self):
         self.lang = "eng"
 
+
     def POST(self):
+        getparams = web.input()
+        if getparams.charttype == 'ranking':
+            return self.rankTimeseries()
+        else:
+            return self.classicTimeseries()
+
+
+    def rankTimeseries(self):
         from apps.analysis.getTimeseries import getTimeseries
+
         getparams = web.input()
         yearts = getparams.yearTS
         wkt = getparams.WKT
         requestedtimeseries = json.loads(getparams.selectedTimeseries)
         tsFromPeriod = getparams.tsFromPeriod
         tsToPeriod = getparams.tsToPeriod
+        yearsToCompare = json.loads(getparams.yearsToCompare)
+        tsFromSeason = getparams.tsFromSeason
+        tsToSeason = getparams.tsToSeason
         showYearInTicks = True
-        # print tsFromPeriod
+        data_available = False
 
-        if getparams.yearTS != '':
-            from_date = datetime.date(int(yearts), 01, 01)
-            to_date = datetime.date(int(yearts), 12, 31)
-            showYearInTicks = False
-        elif tsFromPeriod != '' and tsToPeriod != '':
-            from_date = datetime.datetime.strptime(tsFromPeriod, '%Y-%m-%d').date()
-            to_date = datetime.datetime.strptime(tsToPeriod, '%Y-%m-%d').date()
+        timeseries = []
+        for timeserie in requestedtimeseries:
+            productcode = timeserie['productcode']
+            subproductcode = timeserie['subproductcode']
+            version = timeserie['version']
+            mapsetcode = timeserie['mapsetcode']
+            date_format = timeserie['date_format']
+
+            product = {"productcode": productcode,
+                       "subproductcode": subproductcode,
+                       "version": version}
+
+            # Set defaults in case no entry exists in the DB
+            aggregate = { 'aggregation_type': 'mean',
+                          'aggregation_min': None,
+                          'aggregation_max': None }
+            timeseries_drawproperties = querydb.get_product_timeseries_drawproperties(product)
+            for ts_drawprops in timeseries_drawproperties:
+                aggregate = { 'aggregation_type': ts_drawprops.aggregation_type,
+                              'aggregation_min': ts_drawprops.aggregation_min,
+                              'aggregation_max': ts_drawprops.aggregation_max}
+                tscolor = ts_drawprops.color
+
+            if date_format == 'MMDD' and len(yearsToCompare) > 1:
+                year = yearsToCompare[0]
+                showYearInTicks = False
+                from_date = datetime.date(year, 01, 01)
+                to_date = datetime.date(year, 12, 31)
+
+                if tsFromSeason != '' and tsToSeason != '':
+                    from_date = datetime.date(int(year), int(tsFromSeason[:2]), int(tsFromSeason[3:]))  # year month day
+                    to_date = datetime.date(int(year), int(tsToSeason[:2]), int(tsToSeason[3:]))
+                    if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
+                        to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
+
+                list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
+                data = []
+                for val in list_values:
+                    value = []
+                    # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ',' + str(val['date'].day) + ')'
+                    valdate = functions.unix_time_millis(val['date'])
+                    # valdate = str(val['date'].year) + str(val['date'].month) + str(val['date'].day)
+                    value.append(valdate)
+                    value.append(val['meanvalue'])
+                    data.append(value)
+                if len(list_values) > 1:
+                    data_available = True
+
+                # Set defaults in case no entry exists in the DB
+                ts = {'name': productcode + '-' + version + '-' + subproductcode,
+                      'type': 'column',
+                      'color': '#000000',
+                      'yAxis': productcode + ' - ' + version,
+                      'data': data,
+                      'visible': True
+                      }
+                for ts_drawprops in timeseries_drawproperties:
+                    ts = {'name': ts_drawprops.tsname_in_legend,
+                          'type': 'column',     # ts_drawprops.charttype,
+                          'color': ts_drawprops.color,
+                          'yAxis': ts_drawprops.yaxes_id,
+                          'data': data,
+                          'visible': True
+                          }
+                timeseries.append(ts)
+
+            elif len(yearsToCompare) > 1:
+                data = []
+                print yearsToCompare
+                for year in yearsToCompare:
+                    showYearInTicks = False
+                    print year
+                    from_date = datetime.date(int(year), 01, 01)
+                    to_date = datetime.date(int(year), 12, 31)
+
+                    if tsFromSeason != '' and tsToSeason != '':
+                        from_date = datetime.date(int(year), int(tsFromSeason[:2]), int(tsFromSeason[3:]))  # year month day
+                        to_date = datetime.date(int(year), int(tsToSeason[:2]), int(tsToSeason[3:]))
+                        if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
+                            to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
+
+                    list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
+
+                    if len(list_values) > 1:
+                        data_available = True
+
+                    cumulatedValue = 0
+                    for val in list_values:
+                        cumulatedValue += val['meanvalue']
+
+                    yearData = {
+                        'name': str(year),
+                        'color': tscolor,   # '#0065a2',
+                        'y': cumulatedValue
+                    }
+                    data.append(yearData)
+
+                data = sorted(data, key=lambda k:k['y'], reverse=False)
+                data[0]['color'] = '#ff0000'
+                # from operator import itemgetter, attrgetter
+                # data = sorted(data, key=attrgetter('y'), reverse=False)
+                # data = sorted(data, key=itemgetter(2), reverse=False)
+
+
+                # Set defaults in case no entry exists in the DB
+                ts = {'name': productcode + '-' + version + '-' + subproductcode,
+                      'type': 'column',
+                      'color': '#000000',
+                      'yAxis': productcode + ' - ' + version,
+                      'data': data,
+                      'visible': True
+                      }
+                for ts_drawprops in timeseries_drawproperties:
+                    ts = {'name': ts_drawprops.tsname_in_legend,
+                          'type': 'column', # ts_drawprops.charttype,
+                          'color': ts_drawprops.color,
+                          'yAxis': ts_drawprops.yaxes_id,
+                          'data': data,
+                          'visible': True
+                          }
+                timeseries.append(ts)
+
 
         yaxes = []
         count = 0
@@ -1891,16 +2019,95 @@ class GetTimeseries:
                     opposite = "true"
             if axes == 1:
                 opposite = "false"
+
+            min = ''    # yaxe.min
+            max = ''    # yaxe.max
+
             yaxe = {'id': yaxe.yaxes_id, 'title': yaxe.title, 'title_color': yaxe.title_color, 'unit': yaxe.unit, 'opposite': opposite,
-                    'min': yaxe.min, 'max': yaxe.max, 'aggregation_type': yaxe.aggregation_type, 'aggregation_min': yaxe.aggregation_min, 'aggregation_max': yaxe.aggregation_max}
+                    'min': min, 'max': max, 'aggregation_type': yaxe.aggregation_type, 'aggregation_min': yaxe.aggregation_min, 'aggregation_max': yaxe.aggregation_max}
             yaxes.append(yaxe)
 
+
+        ts_json = {"data_available": data_available,
+                   "showYearInTicks": showYearInTicks,
+                   "showYearInToolTip": "true",
+                   "yaxes": yaxes,
+                   "timeseries": timeseries}
+
+        ts_json = json.dumps(ts_json,
+                             ensure_ascii=False,
+                             sort_keys=True,
+                             separators=(', ', ': '))
+        return ts_json
+
+
+    def classicTimeseries(self):
+        from apps.analysis.getTimeseries import getTimeseries
+
+        getparams = web.input()
+        yearts = getparams.yearTS
+        wkt = getparams.WKT
+        requestedtimeseries = json.loads(getparams.selectedTimeseries)
+        tsFromPeriod = getparams.tsFromPeriod
+        tsToPeriod = getparams.tsToPeriod
+        yearsToCompare = getparams.yearsToCompare
+        tsFromSeason = getparams.tsFromSeason
+        tsToSeason = getparams.tsToSeason
+        showYearInTicks = True
+        data_available = False
+
+        # if isinstance(yearsToCompare, basestring):  # One year passed but is not a list so make it a list.
+        #     # yearsToCompare = list(yearsToCompare)
+        #     yearsToCompare = []
+        #     yearsToCompare.append(getparams.yearsToCompare)
+
+        if tsFromSeason != '' and tsToSeason != '' and yearsToCompare != '':
+            yearsToCompare = json.loads(yearsToCompare)
+            showYearInTicks = False
+            if len(yearsToCompare) == 1:
+                for year in yearsToCompare:
+                    from_date = datetime.date(int(year), int(tsFromSeason[:2]), int(tsFromSeason[3:]))  # year month day
+                    to_date = datetime.date(int(year), int(tsToSeason[:2]), int(tsToSeason[3:]))
+                    if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
+                        to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
+
+        elif yearsToCompare != '':
+            yearsToCompare = json.loads(yearsToCompare)
+            showYearInTicks = False
+            if len(yearsToCompare) == 1:
+                for year in yearsToCompare:
+                    from_date = datetime.date(int(year), 01, 01)
+                    to_date = datetime.date(int(year), 12, 31)
+
+        elif getparams.yearTS != '':
+            if tsFromSeason != '' and tsToSeason != '':
+                if tsToSeason != '':
+                    from_date = datetime.date(int(getparams.yearTS), int(tsFromSeason[:2]), int(tsFromSeason[3:]))
+                    to_date = datetime.date(int(getparams.yearTS), int(tsToSeason[:2]), int(tsToSeason[3:]))
+                    if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
+                        to_date = datetime.date(int(getparams.yearTS)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
+                else:
+                    from_date = datetime.date(int(getparams.yearTS), int(tsFromSeason[:2]), int(tsFromSeason[3:]))
+                    to_date = datetime.date(int(getparams.yearTS), 12, 31)
+            else:
+                from_date = datetime.date(int(getparams.yearTS), 01, 01)
+                to_date = datetime.date(int(getparams.yearTS), 12, 31)
+            showYearInTicks = False
+
+        elif tsFromPeriod != '' and tsToPeriod != '':
+            from_date = datetime.datetime.strptime(tsFromPeriod, '%Y-%m-%d').date()
+            to_date = datetime.datetime.strptime(tsToPeriod, '%Y-%m-%d').date()
+
+
+
+        cum_yaxe = []
         timeseries = []
         for timeserie in requestedtimeseries:
             productcode = timeserie['productcode']
             subproductcode = timeserie['subproductcode']
             version = timeserie['version']
             mapsetcode = timeserie['mapsetcode']
+            date_format = timeserie['date_format']
 
             product = {"productcode": productcode,
                        "subproductcode": subproductcode,
@@ -1909,49 +2116,216 @@ class GetTimeseries:
             # Set defaults in case no entry exists in the DB
             aggregate = { 'aggregation_type': 'mean',
                           'aggregation_min': None,
-                          'aggregation_max': None}
+                          'aggregation_max': None }
             timeseries_drawproperties = querydb.get_product_timeseries_drawproperties(product)
             for ts_drawprops in timeseries_drawproperties:
                 aggregate = { 'aggregation_type': ts_drawprops.aggregation_type,
                               'aggregation_min': ts_drawprops.aggregation_min,
                               'aggregation_max': ts_drawprops.aggregation_max}
 
-            list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
-            data = []
-            for val in list_values:
-                value = []
-                # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ',' + str(val['date'].day) + ')'
-                valdate = functions.unix_time_millis(val['date'])
-                # valdate = str(val['date'].year) + str(val['date'].month) + str(val['date'].day)
-                value.append(valdate)
-                value.append(val['meanvalue'])
-                data.append(value)
-            # tsdata = {
-            #     'data': data
-            # }
-            # timeseries.append(tsdata)
+                if timeserie['cumulative']:
+                    cum_yaxe.append(ts_drawprops.yaxes_id)
 
-            # Set defaults in case no entry exists in the DB
-            ts = {'name': productcode + '-' + version + '-' + subproductcode,
-                  'type': 'line',
-                  'dashStyle': 'Solid',
-                  'lineWidth': 2,
-                  'color': '#000000',
-                  'yAxis': productcode + ' - ' + version,
-                  'data': data
-                  }
-            for ts_drawprops in timeseries_drawproperties:
-                ts = {'name': ts_drawprops.tsname_in_legend,
-                      'type': ts_drawprops.charttype,
-                      'dashStyle': ts_drawprops.linestyle,
-                      'lineWidth': ts_drawprops.linewidth,
-                      'color': ts_drawprops.color,
-                      'yAxis': ts_drawprops.yaxes_id,
-                      'data': data
+
+            if date_format == 'MMDD' and len(yearsToCompare) > 1:
+                year = yearsToCompare[0]
+                showYearInTicks = False
+                from_date = datetime.date(year, 01, 01)
+                to_date = datetime.date(year, 12, 31)
+
+                if tsFromSeason != '' and tsToSeason != '':
+                    from_date = datetime.date(int(year), int(tsFromSeason[:2]), int(tsFromSeason[3:]))  # year month day
+                    to_date = datetime.date(int(year), int(tsToSeason[:2]), int(tsToSeason[3:]))
+                    if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
+                        to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
+
+                list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
+                data = []
+                for val in list_values:
+                    value = []
+                    # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ',' + str(val['date'].day) + ')'
+                    valdate = functions.unix_time_millis(val['date'])
+                    # valdate = str(val['date'].year) + str(val['date'].month) + str(val['date'].day)
+                    value.append(valdate)
+                    value.append(val['meanvalue'])
+                    data.append(value)
+                if len(list_values) > 1:
+                    data_available = True
+
+                # Set defaults in case no entry exists in the DB
+                ts = {'name': productcode + '-' + version + '-' + subproductcode,
+                      'type': 'line',
+                      'dashStyle': 'Solid',
+                      'lineWidth': 2,
+                      'color': '#000000',
+                      # 'xAxis': str(year),
+                      'yAxis': productcode + ' - ' + version,
+                      'data': data,
+                      'visible': True,
+                      'cumulative': timeserie['cumulative'],
+                      'difference': timeserie['difference'],
+                      'reference': timeserie['reference']
                       }
-            timeseries.append(ts)
+                for ts_drawprops in timeseries_drawproperties:
+                    ts = {'name': ts_drawprops.tsname_in_legend,
+                          'type': ts_drawprops.charttype,
+                          'dashStyle': ts_drawprops.linestyle,
+                          'lineWidth': ts_drawprops.linewidth,
+                          'color': ts_drawprops.color,
+                          # 'xAxis': str(year),
+                          'yAxis': ts_drawprops.yaxes_id,
+                          'data': data,
+                          'visible': True,
+                          'cumulative': timeserie['cumulative'],
+                          'difference': timeserie['difference'],
+                          'reference': timeserie['reference']
+                          }
+                timeseries.append(ts)
 
-        ts_json = {"data_available": "true",
+            elif len(yearsToCompare) > 1:     # yearsToCompare != '' or
+                # yearsToCompare = json.loads(yearsToCompare)
+                colorAdd = 0
+                colorSubstract = 0
+                for year in yearsToCompare:
+                    showYearInTicks = False
+                    from_date = datetime.date(int(year), 01, 01)
+                    to_date = datetime.date(int(year), 12, 31)
+
+                    if tsFromSeason != '' and tsToSeason != '':
+                        from_date = datetime.date(int(year), int(tsFromSeason[:2]), int(tsFromSeason[3:]))  # year month day
+                        to_date = datetime.date(int(year), int(tsToSeason[:2]), int(tsToSeason[3:]))
+                        if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
+                            to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
+
+                    if ts_drawprops.color[0] == '#':        # Transform HTML HEX color code to RGB
+                        h = ts_drawprops.color.lstrip('#')
+                        rgb = tuple(int(h[i:i+2], 16) for i in (0, 2 ,4))
+                        rgb = list(rgb)
+                    else:
+                        rgb = ts_drawprops.color.split(' ')
+                    rgb = map(int,rgb)
+                    rgb[-1] = rgb[-1]+colorAdd
+                    rgb[-2] = rgb[-2]+colorAdd
+                    rgb[-3] = rgb[-3]-colorSubstract
+                    tsColor = ' '.join([str(i) for i in rgb])
+                    colorAdd += 65
+                    colorSubstract += 50
+
+                    list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
+                    data = []
+                    for val in list_values:
+                        value = []
+                        # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ',' + str(val['date'].day) + ')'
+                        valdate = functions.unix_time_millis(val['date'])
+                        # valdate = str(val['date'].year) + str(val['date'].month) + str(val['date'].day)
+                        value.append(valdate)
+                        value.append(val['meanvalue'])
+                        data.append(value)
+                    if len(list_values) > 1:
+                        data_available = True
+
+                    # Set defaults in case no entry exists in the DB
+                    ts = {'name': str(year) + ' ' + productcode + '-' + version + '-' + subproductcode,
+                          'type': 'line',
+                          'dashStyle': 'Solid',
+                          'lineWidth': 2,
+                          'color': '#000000',
+                          'xAxis': str(year),
+                          'yAxis': productcode + ' - ' + version,
+                          'data': data,
+                          'visible': True,
+                          'cumulative': timeserie['cumulative'],
+                          'difference': timeserie['difference'],
+                          'reference': timeserie['reference']
+                          }
+                    for ts_drawprops in timeseries_drawproperties:
+                        ts = {'name': str(year) + ' ' + ts_drawprops.tsname_in_legend,
+                              'type': ts_drawprops.charttype,
+                              'dashStyle': ts_drawprops.linestyle,
+                              'lineWidth': ts_drawprops.linewidth,
+                              'color': tsColor,
+                              'xAxis': str(year),
+                              'yAxis': ts_drawprops.yaxes_id,
+                              'data': data,
+                              'visible': True,
+                              'cumulative': timeserie['cumulative'],
+                              'difference': timeserie['difference'],
+                              'reference': timeserie['reference']
+                              }
+                    timeseries.append(ts)
+
+            else:
+                list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
+                data = []
+                for val in list_values:
+                    value = []
+                    # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ',' + str(val['date'].day) + ')'
+                    valdate = functions.unix_time_millis(val['date'])
+                    # valdate = str(val['date'].year) + str(val['date'].month) + str(val['date'].day)
+                    value.append(valdate)
+                    value.append(val['meanvalue'])
+                    data.append(value)
+
+                if len(list_values) > 1:
+                    data_available = True
+
+                # Set defaults in case no entry exists in the DB
+                ts = {'name': productcode + '-' + version + '-' + subproductcode,
+                      'type': 'line',
+                      'dashStyle': 'Solid',
+                      'lineWidth': 2,
+                      'color': '#000000',
+                      'yAxis': productcode + ' - ' + version,
+                      'data': data,
+                      'cumulative': timeserie['cumulative'],
+                      'difference': timeserie['difference'],
+                      'reference': timeserie['reference']
+                      }
+                for ts_drawprops in timeseries_drawproperties:
+                    ts = {'name': ts_drawprops.tsname_in_legend,
+                          'type': ts_drawprops.charttype,
+                          'dashStyle': ts_drawprops.linestyle,
+                          'lineWidth': ts_drawprops.linewidth,
+                          'color': ts_drawprops.color,
+                          'yAxis': ts_drawprops.yaxes_id,
+                          'data': data,
+                          'cumulative': timeserie['cumulative'],
+                          'difference': timeserie['difference'],
+                          'reference': timeserie['reference']
+                          }
+                timeseries.append(ts)
+
+
+        yaxes = []
+        count = 0
+        timeseries_yaxes = querydb.get_timeseries_yaxes(requestedtimeseries)
+        axes = len(timeseries_yaxes)
+        for yaxe in timeseries_yaxes:
+            count += 1
+            opposite = "false"
+            # if axes >= 2 and count % 2 == 0:   # and yaxe.oposite == "f"
+            #     opposite = "false"
+            # if axes >= 2 and count % 2 != 0:   # and yaxe.oposite == "t"
+            #     opposite = "true"
+            if axes >= 2:
+                if yaxe.oposite:
+                    opposite = "true"
+            if axes == 1:
+                opposite = "false"
+
+            if yaxe.yaxes_id in cum_yaxe:
+                min = ''
+                max = ''
+            else:
+                min = yaxe.min
+                max = yaxe.max
+            yaxe = {'id': yaxe.yaxes_id, 'title': yaxe.title, 'title_color': yaxe.title_color, 'unit': yaxe.unit, 'opposite': opposite,
+                    'min': min, 'max': max, 'aggregation_type': yaxe.aggregation_type, 'aggregation_min': yaxe.aggregation_min, 'aggregation_max': yaxe.aggregation_max}
+            yaxes.append(yaxe)
+
+
+
+        ts_json = {"data_available": data_available,
                    "showYearInTicks": showYearInTicks,
                    "showYearInToolTip": "true",
                    "yaxes": yaxes,
@@ -1970,6 +2344,161 @@ class GetTimeseries:
 
 
 class TimeseriesProducts:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        import copy
+        # import time
+        # t0 = time.time()
+        db_products = querydb.get_timeseries_products()
+        # totalget_dataset = 0
+        if hasattr(db_products, "__len__") and db_products.__len__() > 0:
+            products_dict_all = []
+            for row in db_products:
+                prod_dict = {}
+                prod_record = functions.row2dict(row)
+                productcode = prod_record['productcode']
+                subproductcode = prod_record['subproductcode']
+                version = prod_record['version']
+
+                prod_dict['category_id'] = prod_record['category_id']
+                prod_dict['cat_descr_name'] = prod_record['cat_descr_name']
+                prod_dict['order_index'] = prod_record['order_index']
+                prod_dict['productid'] = prod_record['productid']
+                prod_dict['productcode'] = prod_record['productcode']
+                prod_dict['version'] = prod_record['version']
+                prod_dict['subproductcode'] = prod_record['subproductcode']
+                # prod_dict['mapsetcode'] = ""
+                # prod_dict['mapset_name'] = ""
+                prod_dict['group_product_descriptive_name'] = prod_record['descriptive_name']
+                prod_dict['product_descriptive_name'] = prod_record['descriptive_name']
+                prod_dict['product_description'] = prod_record['description']
+                prod_dict['frequency_id'] = prod_record['frequency_id']
+                prod_dict['date_format'] = prod_record['date_format']
+                prod_dict['timeseries_role'] = prod_record['timeseries_role']
+                prod_dict['selected'] = False
+                prod_dict['cumulative'] = False
+                prod_dict['difference'] = False
+                prod_dict['reference'] = False
+                # prod_dict['years'] = []
+
+                # does the product have mapsets?
+                p = Product(product_code=productcode, version=version)
+                all_prod_mapsets = p.mapsets
+                if hasattr(all_prod_mapsets, "__len__") and all_prod_mapsets.__len__() > 0:
+                    for mapset in all_prod_mapsets:
+                        mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
+                        if mapset_info:
+                            mapset_record = functions.row2dict(mapset_info)
+
+                            prod_dict['productmapsetid'] = prod_record['productid'] + '_' + mapset_record['mapsetcode']
+                            prod_dict['mapsetcode'] = mapset_record['mapsetcode']
+                            prod_dict['mapset_name'] = mapset_record['descriptive_name']
+
+                            # t4 = time.time()
+
+                            dataset = p.get_dataset(mapset=mapset, sub_product_code=prod_dict['subproductcode'])
+                            dataset.get_filenames()
+                            all_present_product_dates = dataset.get_dates()
+
+                            # t5 = time.time()
+                            # tot_get_dataset = t5-t4
+                            # totalget_dataset = totalget_dataset + tot_get_dataset
+                            # print 'get_dataset: ' + str(total)
+
+
+                            # t6 = time.time()
+
+                            distinctyears = []
+                            for product_date in all_present_product_dates:
+                                if product_date.year not in distinctyears:
+                                    distinctyears.append(product_date.year)
+                            prod_dict['years'] = distinctyears
+
+                            if prod_dict['years'].__len__() > 0:
+                                tmp_prod_dict = copy.deepcopy(prod_dict)
+
+                                products_dict_all.append(tmp_prod_dict)
+                                tmp_prod_dict = []
+
+                            # t7 = time.time()
+                            # total = t7-t6
+                            # print 'years: ' + str(total)
+
+                            timeseries_mapset_datasets = querydb.get_timeseries_subproducts(productcode=productcode,
+                                                                                            version=version,
+                                                                                            subproductcode=subproductcode)
+                            # t8 = time.time()
+                            for subproduct in timeseries_mapset_datasets:
+                                if subproduct is not None:
+
+                                    dataset_record = functions.row2dict(subproduct)
+                                    dataset = p.get_dataset(mapset=mapset, sub_product_code=dataset_record['subproductcode'])
+                                    dataset.get_filenames()
+                                    all_present_product_dates = dataset.get_dates()
+
+                                    distinctyears = []
+                                    for product_date in all_present_product_dates:
+                                        if product_date.year not in distinctyears:
+                                            distinctyears.append(product_date.year)
+
+                                    dataset_dict = {}
+                                    dataset_dict['category_id'] = prod_record['category_id']
+                                    dataset_dict['cat_descr_name'] = prod_record['cat_descr_name']
+                                    dataset_dict['order_index'] = prod_record['order_index']
+                                    dataset_dict['productid'] = dataset_record['productid']
+                                    dataset_dict['productcode'] = dataset_record['productcode']
+                                    dataset_dict['version'] = dataset_record['version']
+                                    dataset_dict['subproductcode'] = dataset_record['subproductcode']
+                                    dataset_dict['productmapsetid'] = prod_dict['productmapsetid']
+                                    dataset_dict['mapsetcode'] = mapset_record['mapsetcode']
+                                    dataset_dict['mapset_name'] = mapset_record['descriptive_name']
+                                    dataset_dict['group_product_descriptive_name'] = prod_record['descriptive_name']
+                                    dataset_dict['product_descriptive_name'] = dataset_record['descriptive_name']
+                                    dataset_dict['product_description'] = dataset_record['description']
+                                    dataset_dict['frequency_id'] = dataset_record['frequency_id']
+                                    dataset_dict['date_format'] = dataset_record['date_format']
+                                    dataset_dict['timeseries_role'] = dataset_record['timeseries_role']
+                                    dataset_dict['years'] = distinctyears
+                                    dataset_dict['selected'] = False
+                                    dataset_dict['cumulative'] = False
+                                    dataset_dict['difference'] = False
+                                    dataset_dict['reference'] = False
+
+                                    if dataset_dict['years'].__len__() > 0:
+                                        # tmp_prod_dict = prod_dict.copy()
+                                        tmp_prod_dict = copy.deepcopy(dataset_dict)
+
+                                        products_dict_all.append(tmp_prod_dict)
+                                        tmp_prod_dict = []
+
+            #                 t9 = time.time()
+            #                 totals_subproduct = t9-t8
+            #         print 'totals subproduct: ' + str(totals_subproduct)
+            # print 'get_dataset: ' + str(totalget_dataset)
+
+            prod_json = json.dumps(products_dict_all,
+                                   ensure_ascii=False,
+                                   sort_keys=True,
+                                   indent=4,
+                                   separators=(', ', ': '))
+
+            datamanagement_json = '{"success":"true", "total":'\
+                                  + str(db_products.__len__())\
+                                  + ',"products":'+prod_json+'}'
+
+        else:
+            datamanagement_json = '{"success":false, "error":"No data sets defined!"}'
+
+        # t1 = time.time()
+        # total = t1-t0
+        # print 'Total time: ' + str(total)
+
+        return datamanagement_json
+
+
+class __TimeseriesProductsTree:
     def __init__(self):
         self.lang = "eng"
 
@@ -3063,6 +3592,7 @@ class SaveDrawnVectorLayer:
         else:
             status = '{"success":false, "message":"An error occured while saving the drawn layer!"}'
             # return status
+
 
 class ImportLayer:
     def __init__(self):

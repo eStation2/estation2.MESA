@@ -2,62 +2,6 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.analysis-timeseriesproductselection'
 
-    ,TimeseriesProductsGridRowClick: function(gridview, record){
-        var selectedTimeSeriesProducts = gridview.getSelectionModel().selected.items;
-        var alltimeseriesmapsetdatasets = [];
-        var yearsData = [];
-
-        //function union_arrays (x, y) {
-        //  var obj = {};
-        //  for (var i = x.length-1; i >= 0; -- i)
-        //     obj[x[i]] = x[i];
-        //  for (var i = y.length-1; i >= 0; -- i)
-        //     obj[y[i]] = y[i];
-        //  var res = []
-        //  for (var k in obj) {
-        //    if (obj.hasOwnProperty(k))  // <-- optional
-        //      res.push(obj[k]);
-        //  }
-        //  return res;
-        //}
-
-        selectedTimeSeriesProducts.forEach(function(product) {
-            // ToDO: First loop the mapsets to get the by the user selected mapset if the product has > 1 mapsets.
-            var datasets = product.get('productmapsets')[0].timeseriesmapsetdatasets;
-            //var datasets = product.get(children)[0].children;
-            datasets.forEach(function(datasetObj) {
-                //yearsData = Ext.Object.merge(yearsData, datasetObj.years);
-                yearsData = esapp.Utils.union_arrays(yearsData, datasetObj.years);
-                //console.info(yearsData);
-                alltimeseriesmapsetdatasets.push(datasetObj);
-            });
-            //console.info(product.get('productmapsets')[0].timeseriesmapsetdatasets);
-        });
-        var yearsDataDict = [];
-        yearsData.forEach(function(year) {
-            yearsDataDict.push({'year': year});
-        });
-        Ext.getCmp('timeserieschartselection').getViewModel().getStore('years').setData(yearsDataDict);
-        //this.getStore('years').setData(yearsDataDict);
-
-        //var productmapset = record.get('productmapsets')[0];
-        this.getStore('timeseriesmapsetdatasets').setData(alltimeseriesmapsetdatasets); // NOTE: Works only if Model does not have idProperty defined, otherwise only the last element is added.
-
-        if (selectedTimeSeriesProducts.length == 0) {
-            Ext.getCmp('timeseries-mapset-dataset-grid').hide();
-            Ext.getCmp('ts_timeframe').hide();
-            Ext.getCmp('gettimeseries_btn').setDisabled(true);
-            //Ext.getCmp('gettimeseries_btn2').setDisabled(true);
-        }
-        else {
-            Ext.getCmp('timeseries-mapset-dataset-grid').show();
-            Ext.getCmp('ts_timeframe').show();
-            Ext.getCmp('gettimeseries_btn').setDisabled(false);
-            //Ext.getCmp('gettimeseries_btn2').setDisabled(false);
-        }
-    }
-
-
     ,editTSDrawProperties: function(gridview, recordID){
         var source = {};
         var myNewRecord = null;
@@ -297,4 +241,67 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
             TSDrawPropertiesWin.alignTo(gridview.getEl(),"r-tr", [-6, 0]);  // See: http://www.extjs.com/deploy/dev/docs/?class=Ext.Window&member=alignTo
         }
     }
+
+    //,__TimeseriesProductsGridRowClick: function(gridview, record){
+    //    //var selectedTimeSeriesProducts = gridview.getSelectionModel().selected.items;
+    //    //var alltimeseriesmapsetdatasets = [];
+    //
+    //    //var selectedTimeseriesStore = Ext.getCmp('selected-timeseries-mapset-dataset-grid').getStore();
+    //    //var me = this.getView();
+    //    //console.info(gridview);
+    //    //console.info(record);
+    //    var gridSelectedTS = 'selected-timeseries-mapset-dataset-grid_xy';
+    //    if (gridview.up().charttype == 'cumulative'){
+    //        gridSelectedTS = 'selected-timeseries-mapset-dataset-grid_cum';
+    //    }
+    //    var selectedTimeseriesStore = Ext.getCmp(gridSelectedTS).getStore();
+    //    //var selectedTimeseriesStore = gridview.up().up().up().lookupReference(gridSelectedTS).getStore();
+    //    var yearsData = [];
+    //
+    //    record.get('selected') ? record.set('selected', false) : record.set('selected', true);
+    //    record.get('selected') ? selectedTimeseriesStore.add(record) : selectedTimeseriesStore.remove(record);
+    //
+    //    selectedTimeseriesStore.getData().each(function(product) {
+    //        yearsData = esapp.Utils.union_arrays(yearsData, product.get('years'));
+    //
+    //        //alltimeseriesmapsetdatasets.push(product);
+    //        //// First loop the mapsets to get the by the user selected mapset if the product has > 1 mapsets.
+    //        //var datasets = product.get('productmapsets')[0].timeseriesmapsetdatasets;
+    //        ////var datasets = product.get(children)[0].children;
+    //        //datasets.forEach(function(datasetObj) {
+    //        //    //yearsData = Ext.Object.merge(yearsData, datasetObj.years);
+    //        //    yearsData = esapp.Utils.union_arrays(yearsData, datasetObj.years);
+    //        //    alltimeseriesmapsetdatasets.push(datasetObj);
+    //        //});
+    //    });
+    //    var yearsDataDict = [];
+    //    yearsData.forEach(function(year) {
+    //        yearsDataDict.push({'year': year});
+    //    });
+    //
+    //    if (!record.get('selected') && Ext.isObject(Ext.getCmp('ts_selectyearstocompare').searchPopup)){
+    //        Ext.getCmp('ts_selectyearstocompare').searchPopup.lookupReference('searchGrid').getSelectionModel().deselectAll();
+    //    }
+    //    Ext.getCmp('timeserieschartselection').getViewModel().getStore('years').setData(yearsDataDict);
+    //
+    //    //this.getStore('years').setData(yearsDataDict);
+    //    //var productmapset = record.get('productmapsets')[0];
+    //    //this.getStore('selectedtimeseriesmapsetdatasets').setData(alltimeseriesmapsetdatasets); // NOTE: Works only if Model does not have idProperty defined, otherwise only the last element is added.
+    //    //Ext.getCmp('selected-timeseries-mapset-dataset-grid').getStore().setData(alltimeseriesmapsetdatasets);
+    //
+    //    //if (selectedTimeseriesStore.length == 0) {
+    //    //    //Ext.getCmp('selected-timeseries-mapset-dataset-grid').hide();
+    //    //    gridview.up().up().up().lookupReference('selected-timeseries-mapset-dataset-grid').hide();
+    //    //    Ext.getCmp('ts_timeframe').hide();
+    //    //    Ext.getCmp('gettimeseries_btn').setDisabled(true);
+    //    //    //Ext.getCmp('gettimeseries_btn2').setDisabled(true);
+    //    //}
+    //    //else {
+    //    //    //Ext.getCmp('selected-timeseries-mapset-dataset-grid').show();
+    //    //    gridview.up().up().up().lookupReference('selected-timeseries-mapset-dataset-grid').show();
+    //    //    Ext.getCmp('ts_timeframe').show();
+    //    //    Ext.getCmp('gettimeseries_btn').setDisabled(false);
+    //    //    //Ext.getCmp('gettimeseries_btn2').setDisabled(false);
+    //    //}
+    //}
 });

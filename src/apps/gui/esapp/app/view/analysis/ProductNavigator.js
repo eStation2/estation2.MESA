@@ -70,7 +70,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
         Ext.apply(cfg, {
             id: me.mapviewid+'-productnavigator',
             title: '<div class="panel-title-style-16">' + esapp.Utils.getTranslation('productnavigator') + '</div>',
-
+            height: Ext.getBody().getViewSize().height-80,
             border:false,
             frame: false,
             bodyBorder: false,

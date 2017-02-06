@@ -50,6 +50,7 @@ Ext.define("esapp.view.analysis.layerAdmin",{
         var me = this;
 
         me.title = '<div class="panel-title-style-16">' + esapp.Utils.getTranslation('layeradministration') + '</div>';
+        me.height = Ext.getBody().getViewSize().height-80;
 
         me.tools = [
         {

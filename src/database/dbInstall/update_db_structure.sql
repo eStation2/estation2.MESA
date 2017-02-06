@@ -1,3 +1,72 @@
+ALTER TABLE analysis.timeseries_drawproperties
+  ADD COLUMN aggregation_type character varying DEFAULT 'mean';
+
+ALTER TABLE analysis.timeseries_drawproperties
+  ADD COLUMN aggregation_min double precision;
+
+ALTER TABLE analysis.timeseries_drawproperties
+  ADD COLUMN aggregation_max double precision;
+
+
+-- Table: analysis.users
+-- DROP TABLE analysis.users;
+
+CREATE TABLE IF NOT EXISTS analysis.users
+(
+  userid character varying(50) NOT NULL,
+  username character varying(80) NOT NULL,
+  password character varying(32),
+  userlevel integer NOT NULL,
+  email character varying(50),
+  "timestamp" numeric(11,0),
+  CONSTRAINT users_pkey PRIMARY KEY (userid)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE analysis.users
+  OWNER TO estation;
+
+
+
+CREATE TABLE IF NOT EXISTS analysis.layers
+(
+  layerid bigserial NOT NULL,
+  layerlevel character varying(80),
+  layername character varying(80),
+  description character varying(255),
+  filename character varying(80),
+  layerorderidx integer DEFAULT 1,
+  layertype character varying(80) DEFAULT 'polygon'::character varying,
+  polygon_outlinecolor character varying(11) DEFAULT '0 0 0'::character varying,
+  polygon_outlinewidth integer DEFAULT 1,
+  polygon_fillcolor character varying(11) DEFAULT '0 0 0'::character varying,
+  polygon_fillopacity integer DEFAULT 100,
+  feature_display_column character varying(255),
+  feature_highlight_outlinecolor character varying(11) DEFAULT '0 0 0'::character varying,
+  feature_highlight_outlinewidth integer DEFAULT 1,
+  feature_highlight_fillcolor character varying(11) DEFAULT '0 0 0'::character varying,
+  feature_highlight_fillopacity integer DEFAULT 100,
+  feature_selected_outlinecolor character varying(11) DEFAULT '0 0 0'::character varying,
+  feature_selected_outlinewidth integer DEFAULT 1,
+  enabled boolean DEFAULT true,
+  deletable boolean DEFAULT true,
+  background_legend_image_filename character varying(80),
+  projection character varying(80),
+  submenu character varying(80),
+  menu character varying(80),
+  defined_by character varying DEFAULT 'USER'::character varying,
+  open_in_mapview boolean DEFAULT false,
+  provider character varying,
+  CONSTRAINT layers_pkey PRIMARY KEY (layerid)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE analysis.layers
+  OWNER TO estation;
+
+
 ALTER TABLE analysis.layers
    ALTER COLUMN polygon_fillcolor SET DEFAULT 'Transparent'::character varying;
 ALTER TABLE analysis.layers
@@ -5,11 +74,37 @@ ALTER TABLE analysis.layers
 
 
 
+CREATE TABLE IF NOT EXISTS analysis.chart_drawproperties
+(
+  chart_type character varying NOT NULL,
+  chart_width integer,
+  chart_height integer,
+  chart_title_font_size integer,
+  chart_title_font_color character varying,
+  chart_subtitle_font_size integer,
+  chart_subtitle_font_color character varying,
+  yaxe1_font_size integer,
+  yaxe2_font_size integer,
+  legend_font_size integer,
+  legend_font_color character varying,
+  xaxe_font_size integer,
+  xaxe_font_color character varying,
+  yaxe3_font_size integer,
+  CONSTRAINT chart_drawproperties_pk PRIMARY KEY (chart_type)
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE analysis.chart_drawproperties
+  OWNER TO estation;
+
+
+
 -- Table: analysis.map_templates
 
 -- DROP TABLE analysis.map_templates;
 
-CREATE TABLE analysis.map_templates
+CREATE TABLE IF NOT EXISTS analysis.map_templates
 (
   templatename character varying(80) NOT NULL,
   userid character varying(50) NOT NULL,
@@ -47,32 +142,11 @@ ALTER TABLE analysis.map_templates
   OWNER TO estation;
 
 
--- Table: analysis.users
-
--- DROP TABLE analysis.users;
-
-CREATE TABLE analysis.users
-(
-  userid character varying(50) NOT NULL,
-  username character varying(80) NOT NULL,
-  password character varying(32),
-  userlevel integer NOT NULL,
-  email character varying(50),
-  "timestamp" numeric(11,0),
-  CONSTRAINT users_pkey PRIMARY KEY (userid)
-)
-WITH (
-  OIDS=FALSE
-);
-ALTER TABLE analysis.users
-  OWNER TO estation;
 
 
+-- DROP TABLE products.geoserver;
 
-
-DROP TABLE products.geoserver;
-
-CREATE TABLE products.geoserver
+CREATE TABLE IF NOT EXISTS products.geoserver
 (
   geoserver_id serial NOT NULL,
   productcode character varying NOT NULL,
@@ -493,80 +567,6 @@ ALTER FUNCTION products.update_insert_internet_source(character varying, charact
 
 
 
-ALTER TABLE analysis.timeseries_drawproperties
-  ADD COLUMN aggregation_type character varying DEFAULT 'mean';
-
-ALTER TABLE analysis.timeseries_drawproperties
-  ADD COLUMN aggregation_min double precision;
-
-ALTER TABLE analysis.timeseries_drawproperties
-  ADD COLUMN aggregation_max double precision;
-
-
-
-CREATE TABLE IF NOT EXISTS analysis.layers
-(
-  layerid bigserial NOT NULL,
-  layerlevel character varying(80),
-  layername character varying(80),
-  description character varying(255),
-  filename character varying(80),
-  layerorderidx integer DEFAULT 1,
-  layertype character varying(80) DEFAULT 'polygon'::character varying,
-  polygon_outlinecolor character varying(11) DEFAULT '0 0 0'::character varying,
-  polygon_outlinewidth integer DEFAULT 1,
-  polygon_fillcolor character varying(11) DEFAULT '0 0 0'::character varying,
-  polygon_fillopacity integer DEFAULT 100,
-  feature_display_column character varying(255),
-  feature_highlight_outlinecolor character varying(11) DEFAULT '0 0 0'::character varying,
-  feature_highlight_outlinewidth integer DEFAULT 1,
-  feature_highlight_fillcolor character varying(11) DEFAULT '0 0 0'::character varying,
-  feature_highlight_fillopacity integer DEFAULT 100,
-  feature_selected_outlinecolor character varying(11) DEFAULT '0 0 0'::character varying,
-  feature_selected_outlinewidth integer DEFAULT 1,
-  enabled boolean DEFAULT true,
-  deletable boolean DEFAULT true,
-  background_legend_image_filename character varying(80),
-  projection character varying(80),
-  submenu character varying(80),
-  menu character varying(80),
-  defined_by character varying DEFAULT 'USER'::character varying,
-  open_in_mapview boolean DEFAULT false,
-  provider character varying,
-  CONSTRAINT layers_pkey PRIMARY KEY (layerid)
-)
-WITH (
-  OIDS=FALSE
-);
-ALTER TABLE analysis.layers
-  OWNER TO estation;
-
-
-
-CREATE TABLE analysis.chart_drawproperties
-(
-  chart_type character varying NOT NULL,
-  chart_width integer,
-  chart_height integer,
-  chart_title_font_size integer,
-  chart_title_font_color character varying,
-  chart_subtitle_font_size integer,
-  chart_subtitle_font_color character varying,
-  yaxe1_font_size integer,
-  yaxe2_font_size integer,
-  legend_font_size integer,
-  legend_font_color character varying,
-  xaxe_font_size integer,
-  xaxe_font_color character varying,
-  yaxe3_font_size integer,
-  CONSTRAINT chart_drawproperties_pk PRIMARY KEY (chart_type)
-)
-WITH (
-  OIDS=TRUE
-);
-ALTER TABLE analysis.chart_drawproperties
-  OWNER TO estation;
-
 
 -- Function: products.update_insert_product(character varying, character varying, character varying, character varying, boolean, character varying, character varying, character varying, character varying, character varying, character varying, character varying, double precision, double precision, bigint, double precision, double precision, character varying, character varying, boolean, character varying, boolean)
 
@@ -735,7 +735,7 @@ ALTER FUNCTION products.update_insert_product(character varying, character varyi
 -- DROP FUNCTION analysis.update_insert_layers(integer, character varying, character varying, character varying, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, integer, boolean, boolean, character varying, character varying, character varying, character varying, character varying, boolean, character varying, boolean);
 
 CREATE OR REPLACE FUNCTION analysis.update_insert_layers(
-               layerid integer,
+							 layerid integer,
 							 layerlevel character varying,
 							 layername character varying,
 							 description character varying,

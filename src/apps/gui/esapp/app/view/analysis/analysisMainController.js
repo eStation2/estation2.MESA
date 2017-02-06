@@ -4,15 +4,20 @@ Ext.define('esapp.view.analysis.analysisMainController', {
 
     ,loadUserMapTemplatesStore: function(btn){
         //console.info(btn.down().down());
-
-        btn.down().down().getStore('usermaptemplates').load({
-            extraParams: {
-                userid: esapp.getUser().userid
-            },
-            callback:function(){
-
-            }
-        });
+        var userMapTemplatesStore = btn.down().down().getStore('usermaptemplates');
+        userMapTemplatesStore.proxy.extraParams = {userid: esapp.getUser().userid};
+        //console.info(userMapTemplatesStore.proxy);
+        userMapTemplatesStore.reload();
+        //userMapTemplatesStore.load({
+        //    //proxy: {
+        //    //    extraParams: {
+        //    //        userid: esapp.getUser().userid
+        //    //    }
+        //    //},
+        //    callback:function(){
+        //
+        //    }
+        //});
         btn.down().down().show();
 
         //var mapTemplate = {
@@ -101,7 +106,7 @@ Ext.define('esapp.view.analysis.analysisMainController', {
     ,showTimeseriesChartSelection: function(){
         var timeseriesChartSelectionWindow = this.getView().lookupReference('timeserieschartselection');
         timeseriesChartSelectionWindow.show();
-        timeseriesChartSelectionWindow.fireEvent('align');
+        //timeseriesChartSelectionWindow.fireEvent('align');
     }
 
     ,toggleBackgroundlayer: function(btn, event) {

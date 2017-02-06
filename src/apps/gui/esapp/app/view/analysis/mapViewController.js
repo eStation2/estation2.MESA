@@ -573,11 +573,14 @@ Ext.define('esapp.view.analysis.mapViewController', {
         //var timeline_container_size = mapviewtimeline.getSize();
 
         if (mapviewtimeline.hidden == false){
+            mapviewtimeline.setHeight(135);
             mapview_timelinechart_container.timelinechart.container.width = mapviewtimeline.getSize().width;
             mapview_timelinechart_container.timelinechart.setSize(mapviewtimeline.getSize().width-35, mapviewtimeline.getSize().height, false);
             //mapview_timelinechart_container.timelinechart.reflow();
             mapview_timelinechart_container.timelinechart.redraw();
             mapview_timelinechart_container.updateLayout();
+
+            mapview.map.setSize([document.getElementById(mapview.id + "-body").offsetWidth, document.getElementById(mapview.id + "-body").offsetHeight - 135]);
         }
     }
 
@@ -1050,11 +1053,11 @@ Ext.define('esapp.view.analysis.mapViewController', {
             });
             var outmaskStyle = new ol.style.Style({
                 stroke: new ol.style.Stroke({
-                    color: 'rgba(255, 255, 255, 0.95)',
+                    color: 'rgba(255, 255, 255, 1)',
                     width: 2
                 }),
                 fill: new ol.style.Fill({
-                    color: 'rgba(255, 255, 255, 0.95)'
+                    color: 'rgba(255, 255, 255, 1)'
                 })
             });
 

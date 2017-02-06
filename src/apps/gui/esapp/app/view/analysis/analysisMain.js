@@ -632,6 +632,16 @@ Ext.define("esapp.view.analysis.analysisMain",{
                       units: 'metric'       // 'degrees'  'nautical mile'
                     });
 
+                    var taskOpenTimeseriesChartSelection = new Ext.util.DelayedTask(function() {
+                        //me.lookupReference('analysismain_timeseriesbtn').fireEvent('click');
+                        var timeseriesChartSelectionWindow = me.lookupReference('timeserieschartselection');
+                        timeseriesChartSelectionWindow.show();
+                        timeseriesChartSelectionWindow.fireEvent('align');
+                    });
+                    taskOpenTimeseriesChartSelection.delay(0);
+
+
+
                     //me.map = new ol.Map({
                     //    layers: me.backgroundLayers,
                     //    // renderer: _getRendererFromQueryString(),
