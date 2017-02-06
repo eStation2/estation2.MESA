@@ -2,23 +2,25 @@
 Ext.define("esapp.view.datamanagement.ProductMapSet",{
     "extend": "Ext.grid.Panel",
 
-    "controller": "datamanagement-productmapset",
-
-    "viewModel": {
-        "type": "datamanagement-productmapset"
-    },
+    //"controller": "datamanagement-productmapset",
+    //
+    //"viewModel": {
+    //    "type": "datamanagement-productmapset"
+    //},
 
     "xtype"  : 'productmapsetgrid',
 
     requires: [
-        'esapp.view.datamanagement.ProductMapSetModel',
-        'esapp.view.datamanagement.ProductMapSetController'
+        //'esapp.view.datamanagement.ProductMapSetModel',
+        //'esapp.view.datamanagement.ProductMapSetController'
 
         ,'Ext.grid.column.Widget'
         ,'Ext.grid.column.Action'
     ],
-
-    store : null,
+    store : {
+        model: 'ProductMapSet'
+    },
+    session: false,
 
     viewConfig: {
         stripeRows: false,
@@ -29,10 +31,22 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
         disableSelection: true,
         trackOver: false
     },
+
+    //selType: 'cellmodel',
+    //selModel: {listeners:{}},
+
+    //listeners: {
+    //    cellclick : function(view, cell, cellIndex, record, row, rowIndex, e) {
+    //        //e.stopPropagation();
+    //        return false;
+    //    }
+    //},
+
+    bufferedRenderer: true,
+
     hideHeaders: true,
     columnLines: false,
-    rowLines:false,
-    bufferedRenderer: true,
+    rowLines: false,
     minHeight: 60,
 
     //listeners: {
@@ -72,10 +86,12 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
             xtype: 'actioncolumn',
             width: 65,
             align:'center',
+            menuDisabled: true,
+            stopSelection: false,
             items: [{
                 icon: 'resources/img/icons/download.png',
                 tooltip: esapp.Utils.getTranslation('tipcompletedatasetmapset'),    // 'Complete all data sets for this product\'s mapset',
-                //scope: me,
+                scope: me,
                 handler: function (grid, rowIndex) {
                     var rec = grid.getStore().getAt(rowIndex);
 
@@ -93,19 +109,25 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
             xtype: 'widgetcolumn',
             width: 725,
             widget: {
-                xtype: 'mapsetdatasetgrid'
-                // ,height:80
+                xtype: 'mapsetdatasetgrid',
+                widgetattached: false
             },
-            onWidgetAttach: function(widget, record) {
-                Ext.suspendLayouts();
-                var mapsetdatasets = record.getData().mapsetdatasets;
-                // console.info(mapsetdatasets);
-                var newstore = Ext.create('Ext.data.JsonStore', {
-                    model: 'MapSetDataSet',
-                    data: mapsetdatasets
-                });
-                widget.setStore(newstore);
+            onWidgetAttach: function(col, widget, record) {
+                if (!widget.widgetattached) {
+                    widget.getStore().setData(record.getData().mapsetdatasets);
+                    widget.widgetattached = true;
+                }
                 Ext.resumeLayouts(true);
+                //me.updateLayout();
+
+                //Ext.suspendLayouts();
+                //var mapsetdatasets = record.getData().mapsetdatasets;
+                //var newstore = Ext.create('Ext.data.JsonStore', {
+                //    model: 'MapSetDataSet',
+                //    data: mapsetdatasets
+                //});
+                //widget.setStore(newstore);
+
             }
         }];
 

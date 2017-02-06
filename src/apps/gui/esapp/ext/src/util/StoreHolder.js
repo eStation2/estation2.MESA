@@ -9,8 +9,11 @@
  * @private
  */
 Ext.define('Ext.util.StoreHolder', {
+    requires: [
+        'Ext.data.StoreManager'
+    ],
     mixinId: 'storeholder',
-    
+
     /**
      * Binds a store to this instance.
      * @param {Ext.data.AbstractStore/String} [store] The store to bind or ID of the store.
@@ -23,28 +26,30 @@ Ext.define('Ext.util.StoreHolder', {
         propertyName = propertyName || 'store';
 
         var me = this,
-            oldStore = me[propertyName];
+            oldStore = initial ? null : me[propertyName];
 
-        if (!initial && oldStore) {
-            // Perform implementation-specific unbinding operations *before* possible Store destruction.
-            me.onUnbindStore(oldStore, initial, propertyName);
+        if (store !== oldStore) {
+            if (oldStore) {
+                // Perform implementation-specific unbinding operations *before* possible Store destruction.
+                me.onUnbindStore(oldStore, initial, propertyName);
 
-            if (store !== oldStore) {
-                if (propertyName === 'store' && oldStore.autoDestroy) {
+                // autoDestroy is only intended for when it is unbound from a component
+                if (me.isComponent && propertyName === 'store' && oldStore.autoDestroy) {
                     oldStore.destroy();
                 } else {
                     me.unbindStoreListeners(oldStore);
                 }
             }
+
+            if (store) {
+                me[propertyName] = store = Ext.data.StoreManager.lookup(store);
+                me.bindStoreListeners(store);
+                me.onBindStore(store, oldStore, initial);
+            } else {
+                me[propertyName] = null;
+            }
         }
 
-        if (store) {
-            me[propertyName] = store = Ext.data.StoreManager.lookup(store);
-            me.bindStoreListeners(store);
-            me.onBindStore(store, initial, propertyName, oldStore);
-        } else {
-            me[propertyName] = null;
-        }
         return me;
     },
 
@@ -69,7 +74,7 @@ Ext.define('Ext.util.StoreHolder', {
      * Unbinds listeners from this component to the store. By default it will remove
      * anything bound by the bindStoreListeners method, however it can be overridden
      * in a subclass to provide any more complicated handling.
-     * @protected 
+     * @protected
      * @param {Ext.data.AbstractStore} store The store to unbind from
      */
     unbindStoreListeners: function(store) {
@@ -84,7 +89,7 @@ Ext.define('Ext.util.StoreHolder', {
      * Binds listeners for this component to the store. By default it will add
      * anything bound by the getStoreListeners method, however it can be overridden
      * in a subclass to provide any more complicated handling.
-     * @protected 
+     * @protected
      * @param {Ext.data.AbstractStore} store The store to bind to
      */
     bindStoreListeners: function(store) {
@@ -126,5 +131,5 @@ Ext.define('Ext.util.StoreHolder', {
      * @param {Ext.data.AbstractStore} store The store being bound
      * @param {Boolean} initial True if this store is being bound as initialization of the instance.
      */
-    onBindStore: Ext.emptyFn    
+    onBindStore: Ext.emptyFn
 });

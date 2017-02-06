@@ -267,7 +267,7 @@ Ext.define('Ext.grid.property.Grid', {
         }));
 
         me.selModel = {
-            selType: 'cellmodel',
+            type: 'cellmodel',
             onCellSelect: function(position) {
                 // We are only allowed to select the value column.
                 position.column = me.valueColumn;
@@ -324,7 +324,7 @@ Ext.define('Ext.grid.property.Grid', {
             for (; i < len; ++i) {
                 rec = store.getAt(i);
                 name = rec.get(nameField);
-                if (!me.getConfig(name, 'type')) {
+                if (!me.getConfigProp(name, 'type')) {
                     value = rec.get(valueField);
                     if (Ext.isDate(value)) {
                         type = 'date';
@@ -335,13 +335,13 @@ Ext.define('Ext.grid.property.Grid', {
                     } else {
                         type = 'string';
                     }
-                    me.setConfig(name, 'type', type);
+                    me.setConfigProp(name, 'type', type);
                 }
             }
         }
     },
 
-    getConfig: function(fieldName, key, defaultValue) {
+    getConfigProp: function(fieldName, key, defaultValue) {
         var config = this.sourceConfig[fieldName],
             out;
 
@@ -351,7 +351,7 @@ Ext.define('Ext.grid.property.Grid', {
         return out || defaultValue;
     },
 
-    setConfig: function(fieldName, key, value) {
+    setConfigProp: function(fieldName, key, value) {
         var sourceCfg = this.sourceConfig,
             o = sourceCfg[fieldName];
 
@@ -405,7 +405,7 @@ Ext.define('Ext.grid.property.Grid', {
         var me = this,
             v, oldValue;
 
-        if (me.rendered && operation == Ext.data.Model.EDIT) {
+        if (me.rendered && operation === Ext.data.Model.EDIT) {
             v = record.get(me.valueField);
             oldValue = record.modified.value;
             if (me.fireEvent('beforepropertychange', me.source, record.getId(), v, oldValue) !== false) {
@@ -426,9 +426,9 @@ Ext.define('Ext.grid.property.Grid', {
         var me = this,
             valueColumn = me.ownerCt.valueColumn;
 
-        if (direction == 'left') {
+        if (direction === 'left') {
             direction = 'up';
-        } else if (direction == 'right') {
+        } else if (direction === 'right') {
             direction = 'down';
         }
         pos = Ext.view.Table.prototype.walkCells.call(me, pos, direction, e, preventWrap, verifierFn, scope);
@@ -445,9 +445,10 @@ Ext.define('Ext.grid.property.Grid', {
         var me = this,
             propName = record.get(me.nameField),
             val = record.get(me.valueField),
-            editor = me.getConfig(propName, 'editor'),
-            type = me.getConfig(propName, 'type'),
-            editors = me.editors;
+            editor = me.getConfigProp(propName, 'editor'),
+            type = me.getConfigProp(propName, 'type'),
+            editors = me.editors,
+            field;
 
         // A custom editor was found. If not already wrapped with a CellEditor, wrap it, and stash it back
         // If it's not even a Field, just a config object, instantiate it before wrapping it.
@@ -456,7 +457,7 @@ Ext.define('Ext.grid.property.Grid', {
                 if (!(editor instanceof Ext.form.field.Base)) {
                     editor = Ext.ComponentManager.create(editor, 'textfield');
                 }
-                editor = me.setConfig(propName, 'editor', new Ext.grid.CellEditor({ field: editor }));
+                editor = me.setConfigProp(propName, 'editor', new Ext.grid.CellEditor({ field: editor }));
             }
         } else if (type) {
             switch (type) {
@@ -467,7 +468,8 @@ Ext.define('Ext.grid.property.Grid', {
                     editor = editors.number;
                     break;
                 case 'boolean':
-                    editor = me.editors['boolean'];
+                    // Cannot be ".boolean" - YUI hates using reserved words like that
+                    editor = me.editors['boolean']; // jshint ignore:line
                     break;
                 default:
                     editor = editors.string;
@@ -477,9 +479,16 @@ Ext.define('Ext.grid.property.Grid', {
         } else if (Ext.isNumber(val)) {
             editor = editors.number;
         } else if (Ext.isBoolean(val)) {
-            editor = editors['boolean'];
+            // Cannot be ".boolean" - YUI hates using reserved words like that
+            editor = editors['boolean']; // jshint ignore:line
         } else {
             editor = editors.string;
+        }
+
+        field = editor.field;
+
+        if (field && field.ui === 'default' && !field.hasOwnProperty('ui')) {
+            field.ui = me.editingPlugin.defaultFieldUI;
         }
 
         // Give the editor a unique ID because the CellEditing plugin caches them
@@ -541,6 +550,17 @@ Ext.define('Ext.grid.property.Grid', {
      */
     getSource: function() {
         return this.propStore.getSource();
+    },
+
+    /**
+     * Gets the value of a property.
+     * @param {String} prop The name of the property.
+     * @return {Object} The property value. `null` if there is no value.
+     *
+     * @since 5.1.1
+     */
+    getProperty: function(prop) {
+        return this.propStore.getProperty(prop);
     },
 
     /**

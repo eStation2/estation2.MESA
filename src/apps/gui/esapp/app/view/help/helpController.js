@@ -3,7 +3,6 @@ Ext.define('esapp.view.help.helpController', {
     alias: 'controller.help-help',
 
     onDocumentClick: function(dv, record, item, idx, e, eOpts) {
-//        console.info('clicked to open doc');
         window.open(record.get('url'), '_helpdoc');
     }
     

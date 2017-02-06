@@ -24,12 +24,23 @@ Ext.define('Ext.chart.series.sprite.Scatter', {
             dx = matrix.getDX(),
             dy = matrix.getDY(),
             markerCfg = {}, changes,
-            left = clipRect[0] - xx,
-            right = clipRect[0] + clipRect[2] + xx,
-            top = clipRect[1] - yy,
-            bottom = clipRect[1] + clipRect[3] + yy,
-            x, y;
-        for (var i = 0; i < dataX.length; i++) {
+            xScalingDirection = surface.getInherited().rtl && !attr.flipXY ? -1 : 1,
+            left, right, top, bottom,
+            x, y, i;
+
+        if (attr.flipXY) {
+            left = clipRect[1] - xx * xScalingDirection;
+            right = clipRect[1] + clipRect[3] + xx * xScalingDirection;
+            top = clipRect[0] - yy;
+            bottom = clipRect[0] + clipRect[2] + yy;
+        } else {
+            left = clipRect[0] - xx * xScalingDirection;
+            right = clipRect[0] + clipRect[2] + xx * xScalingDirection;
+            top = clipRect[1] - yy;
+            bottom = clipRect[1] + clipRect[3] + yy;
+        }
+
+        for (i = 0; i < dataX.length; i++) {
             x = dataX[i];
             y = dataY[i];
             x = x * xx + dx;

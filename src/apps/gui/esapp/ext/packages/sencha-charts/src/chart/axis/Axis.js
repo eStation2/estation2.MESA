@@ -69,6 +69,20 @@ Ext.define('Ext.chart.axis.Axis', {
         'Ext.chart.axis.layout.*'
     ],
 
+    /**
+     * @event rangechange
+     * Fires when the {@link Ext.chart.axis.Axis#range range} of the axis changes.
+     * @param {Ext.chart.axis.Axis} axis
+     * @param {Array} range
+     */
+
+    /**
+     * @event visiblerangechange
+     * Fires when the {@link #visibleRange} of the axis changes.
+     * @param {Ext.chart.axis.Axis} axis
+     * @param {Array} visibleRange
+     */
+
     config: {
         /**
          * @cfg {String} position
@@ -132,7 +146,7 @@ Ext.define('Ext.chart.axis.Axis', {
         limits: null,
 
         /**
-         * @cfg {Function} renderer Allows direct customisation of rendered axis sprites.
+         * @cfg {Function} renderer Allows direct customization of rendered axis sprites.
          * @param {String} label The label.
          * @param {Object|Ext.chart.axis.layout.Layout} layout The layout configuration used by the axis.
          * @param {String} lastLabel The last label.
@@ -206,7 +220,7 @@ Ext.define('Ext.chart.axis.Axis', {
 
         /**
          * @cfg {Number} maxZoom
-         * The maximum zooming level for axis
+         * The maximum zooming level for axis.
          */
         maxZoom: 10000,
 
@@ -315,7 +329,7 @@ Ext.define('Ext.chart.axis.Axis', {
         /**
          * @cfg {Array} visibleRange
          * Specify the proportion of the axis to be rendered. The series bound to
-         * this axis will be synchronized and transformed.
+         * this axis will be synchronized and transformed accordingly.
          */
         visibleRange: [0, 1],
 
@@ -384,8 +398,9 @@ Ext.define('Ext.chart.axis.Axis', {
 
     /**
      * @private
-     * @property {Array} The full data range of the axis. Should not be set directly, clear it to `null` and use
-     * `getRange` to update.
+     * @property {Array} range
+     * The full data range of the axis. Should not be set directly.  Clear it to `null` 
+     * and use `getRange` to update.
      */
     range: null,
 
@@ -458,9 +473,9 @@ Ext.define('Ext.chart.axis.Axis', {
         // Maps IDs of the axes that float along this axis to their floating values.
         me.floatingAxes = {};
 
+        config = config || {};
         if (config.position === 'angular') {
             config.style = config.style || {};
-            // TODO: try to get rid of the estStepSize
             config.style.estStepSize = 1;
         }
         if ('id' in config) {
@@ -474,7 +489,6 @@ Ext.define('Ext.chart.axis.Axis', {
         me.setId(id);
         me.mixins.observable.constructor.apply(me, arguments);
         Ext.ComponentManager.register(me);
-        this.initConfig(config);
     },
 
     /**
@@ -531,7 +545,8 @@ Ext.define('Ext.chart.axis.Axis', {
             gridSurface.waitFor(surface);
             me.getGrid();
 
-            if (me.getLimits()) {
+            if (me.getLimits() && gridAlignment) {
+                gridAlignment = gridAlignment.replace('3d', '');
                 me.limits = {
                     surface: chart.getSurface('overlay'),
                     lines: new Ext.chart.Markers(),
@@ -552,6 +567,15 @@ Ext.define('Ext.chart.axis.Axis', {
         return me.surface;
     },
 
+    applyGrid: function (grid) {
+        // Returning an empty object here if grid was set to 'true' so that
+        // config merging in the theme works properly.
+        if (grid === true) {
+            return {};
+        }
+        return grid;
+    },
+
     updateGrid: function (grid) {
         var me = this,
             chart = me.getChart();
@@ -565,19 +589,18 @@ Ext.define('Ext.chart.axis.Axis', {
         }
 
         var gridSurface = me.gridSurface,
+            axisSprite = me.getSprites()[0],
+            gridAlignment = me.getGridAlignment(),
             gridSprite;
-
-        var axisSprite = me.getSprites()[0],
-            gridAlignment = me.getGridAlignment();
 
         if (grid) {
             gridSprite = me.gridSpriteEven;
             if (!gridSprite) {
                 gridSprite = me.gridSpriteEven = new Ext.chart.Markers();
+                gridSprite.setTemplate({xclass: 'grid.' + gridAlignment});
                 gridSurface.add(gridSprite);
                 axisSprite.bindMarker(gridAlignment + '-even', gridSprite);
             }
-            gridSprite.setTemplate({xclass: 'grid.' + gridAlignment});
             if (Ext.isObject(grid)) {
                 gridSprite.getTemplate().setAttributes(grid);
                 if (Ext.isObject(grid.even)) {
@@ -588,10 +611,10 @@ Ext.define('Ext.chart.axis.Axis', {
             gridSprite = me.gridSpriteOdd;
             if (!gridSprite) {
                 gridSprite = me.gridSpriteOdd = new Ext.chart.Markers();
+                gridSprite.setTemplate({xclass: 'grid.' + gridAlignment});
                 gridSurface.add(gridSprite);
                 axisSprite.bindMarker(gridAlignment + '-odd', gridSprite);
             }
-            gridSprite.setTemplate({xclass: 'grid.' + gridAlignment});
             if (Ext.isObject(grid)) {
                 gridSprite.getTemplate().setAttributes(grid);
                 if (Ext.isObject(grid.odd)) {
@@ -642,14 +665,12 @@ Ext.define('Ext.chart.axis.Axis', {
     },
 
     applyLayout: function (layout, oldLayout) {
-        // TODO: finish this
         layout = Ext.factory(layout, null, oldLayout, 'axisLayout');
         layout.setAxis(this);
         return layout;
     },
 
     applySegmenter: function (segmenter, oldSegmenter) {
-        // TODO: finish this
         segmenter = Ext.factory(segmenter, null, oldSegmenter, 'segmenter');
         segmenter.setAxis(this);
         return segmenter;
@@ -754,7 +775,7 @@ Ext.define('Ext.chart.axis.Axis', {
     },
 
     updateVisibleRange: function (visibleRange) {
-        this.fireEvent('transformed', this, visibleRange);
+        this.fireEvent('visiblerangechange', this, visibleRange);
     },
 
     onSeriesChange: function (chart) {
@@ -773,7 +794,7 @@ Ext.define('Ext.chart.axis.Axis', {
         me.boundSeries = boundSeries;
 
         linkedTo = me.getLinkedTo();
-        masterAxis = linkedTo && chart.getAxis(linkedTo);
+        masterAxis = !Ext.isEmpty(linkedTo) && chart.getAxis(linkedTo);
         if (masterAxis) {
             me.linkAxis(masterAxis);
         } else {
@@ -785,7 +806,7 @@ Ext.define('Ext.chart.axis.Axis', {
         var me = this;
         function link(action, slave, master) {
             master.getLayout()[action]('datachange', 'onDataChange', slave);
-            master[action]('rangechange', 'onRangeChange', slave);
+            master[action]('rangechange', 'onMasterAxisRangeChange', slave);
         }
         if (me.masterAxis) {
             link('un', me, me.masterAxis);
@@ -797,7 +818,7 @@ Ext.define('Ext.chart.axis.Axis', {
             }
             link('on', me, masterAxis);
             me.onDataChange(masterAxis.getLayout().labels);
-            me.onRangeChange(masterAxis.range);
+            me.onMasterAxisRangeChange(masterAxis, masterAxis.range);
             me.setStyle(Ext.apply({}, me.config.style, masterAxis.config.style));
             me.setTitle(Ext.apply({}, me.config.title, masterAxis.config.title));
             me.setLabel(Ext.apply({}, me.config.label, masterAxis.config.label));
@@ -809,7 +830,7 @@ Ext.define('Ext.chart.axis.Axis', {
         this.getLayout().labels = data;
     },
 
-    onRangeChange: function (range) {
+    onMasterAxisRangeChange: function (masterAxis, range) {
         this.range = range;
     },
 
@@ -887,7 +908,13 @@ Ext.define('Ext.chart.axis.Axis', {
             me.prevMax = max;
         }
 
-        me.range = [min, max];
+        // When series `fullStack` config is used, the values may add up to
+        // slightly more than the value of the `fullStackTotal` config
+        // because of a precision error.
+        me.range = [
+            Ext.Number.correctFloat(min),
+            Ext.Number.correctFloat(max)
+        ];
 
         // It's important to call 'me.reconcileRange' after me.range
         // has been assigned to avoid circular calls.
@@ -937,7 +964,10 @@ Ext.define('Ext.chart.axis.Axis', {
             }
         }
 
-        me.fireEvent('rangechange', me.range);
+        if (!Ext.Array.equals(me.range, me.oldRange || []) ) {
+            me.fireEvent('rangechange', me, me.range);
+            me.oldRange = me.range;
+        }
         return me.range;
     },
 
@@ -984,6 +1014,10 @@ Ext.define('Ext.chart.axis.Axis', {
         return oldStyle;
     },
 
+    themeOnlyIfConfigured: {
+        grid: true
+    },
+
     updateTheme: function (theme) {
         var me = this,
             axisTheme = theme.getAxis(),
@@ -993,7 +1027,8 @@ Ext.define('Ext.chart.axis.Axis', {
             configs = me.getConfigurator().configs,
             genericAxisTheme = axisTheme.defaults,
             specificAxisTheme = axisTheme[position],
-            key, value, isObjValue, initialValue, cfg;
+            themeOnlyIfConfigured = me.themeOnlyIfConfigured,
+            key, value, isObjValue, isUnusedConfig, initialValue, cfg;
 
         axisTheme = Ext.merge({}, genericAxisTheme, specificAxisTheme);
         for (key in axisTheme) {
@@ -1002,10 +1037,14 @@ Ext.define('Ext.chart.axis.Axis', {
             if (value !== null && value !== undefined && cfg) {
                 initialValue = initialConfig[key];
                 isObjValue = Ext.isObject(value);
-                if (initialValue === defaultConfig[key] || isObjValue) {
-                    if (isObjValue) {
-                        value = Ext.merge({}, value, initialValue);
+                isUnusedConfig = initialValue === defaultConfig[key];
+                if (isObjValue) {
+                    if (isUnusedConfig && themeOnlyIfConfigured[key]) {
+                        continue;
                     }
+                    value = Ext.merge({}, value, initialValue);
+                }
+                if (isUnusedConfig || isObjValue) {
                     me[cfg.names.set](value);
                 }
             }
@@ -1051,7 +1090,8 @@ Ext.define('Ext.chart.axis.Axis', {
             chart = me.getChart(),
             animation = chart.getAnimation(),
             baseSprite, style,
-            length = me.getLength();
+            length = me.getLength(),
+            axisClass = me.superclass;
 
         // If animation is false, then stop animation.
         if (animation === false) {
@@ -1077,7 +1117,10 @@ Ext.define('Ext.chart.axis.Axis', {
 
             // If the sprites are not created.
             if (!me.sprites.length) {
-                baseSprite = new Ext.chart.axis.sprite.Axis(style);
+                while (!axisClass.xtype) {
+                    axisClass = axisClass.superclass;
+                }
+                baseSprite = Ext.create('sprite.' + axisClass.xtype, style);
                 baseSprite.fx.setCustomDurations({
                     baseRotation: 0
                 });
@@ -1182,14 +1225,14 @@ Ext.define('Ext.chart.axis.Axis', {
     onAnimationStart: function () {
         this.animating++;
         if (this.animating === 1) {
-            this.fireEvent('animationstart');
+            this.fireEvent('animationstart', this);
         }
     },
 
     onAnimationEnd: function () {
         this.animating--;
         if (this.animating === 0) {
-            this.fireEvent('animationend');
+            this.fireEvent('animationend', this);
         }
     },
 
@@ -1204,6 +1247,31 @@ Ext.define('Ext.chart.axis.Axis', {
 
     isXType: function (xtype) {
         return xtype === 'axis';
+    },
+
+    // Override the Observable's method to redirect listener scope
+    // resolution to the chart.
+    resolveListenerScope: function (defaultScope) {
+        var me = this,
+            namedScope = Ext._namedScopes[defaultScope],
+            chart = me.getChart(),
+            scope;
+
+        if (!namedScope) {
+            scope = chart ? chart.resolveListenerScope(defaultScope, false) : (defaultScope || me);
+        } else if (namedScope.isThis) {
+            scope = me;
+        } else if (namedScope.isController) {
+            scope = chart ? chart.resolveListenerScope(defaultScope, false) : me;
+        } else if (namedScope.isSelf) {
+            scope = chart ? chart.resolveListenerScope(defaultScope, false) : me;
+            // Class body listener. No chart controller, nor chart container controller.
+            if (scope === chart && !chart.getInheritedConfig('defaultListenerScope')) {
+                scope = me;
+            }
+        }
+
+        return scope;
     },
 
     destroy: function () {

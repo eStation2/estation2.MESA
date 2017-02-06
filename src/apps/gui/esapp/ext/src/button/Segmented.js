@@ -1,10 +1,40 @@
 /**
- * SegmentedButton is a container for a group of {@link Ext.button.Button Button}s.
+ * SegmentedButton is a container for a group of {@link Ext.button.Button Button}s.  You 
+ * may populate the segmented button's children by adding buttons to the items config.  The segmented 
+ * button's children enjoy the same customizations as regular buttons, such as 
+ * menu, tooltip, etc.  You can see usages of the various configuration
+ * possibilities in the example below.
+ *
+ *     @example @preview 
+ *     Ext.create('Ext.button.Segmented', {            
+ *          renderTo: Ext.getBody(),
+ *          allowMultiple: true,
+ *          items: [{
+ *               text: 'Segment Item 1',
+ *               menu: [{
+ *                   text: 'Menu Item 1'
+ *               }]
+ *          },{
+ *               text: 'Segment Item 2',
+ *               tooltip: 'My custom tooltip'
+ *          },{
+ *               text: 'Segment Item 3'
+ *          }],
+ *          listeners: {
+ *               toggle: function(container, button, pressed) {
+ *                    console.log("User toggled the '" + button.text + "' button: " + (pressed ? 'on' : 'off'));
+ *               }
+ *          }
+ *     });
+ * 
  */
 Ext.define('Ext.button.Segmented', {
     extend: 'Ext.container.Container',
     xtype: 'segmentedbutton',
-    requires: [ 'Ext.button.Button' ],
+    requires: [ 
+        'Ext.button.Button' ,
+        'Ext.layout.container.SegmentedButton'
+    ],
 
     config: {
         /**
@@ -43,6 +73,7 @@ Ext.define('Ext.button.Segmented', {
     beforeRenderConfig: {
         /**
          * @cfg {String/Number/String[]/Number[]}
+         * @accessor
          * The value of this button.  When {@link #allowMultiple} is `false`, value is a
          * String or Number.  When {@link #allowMultiple is `true`, value is an array
          * of values.  A value corresponds to a child button's {@link Ext.button.Button#value
@@ -99,6 +130,11 @@ Ext.define('Ext.button.Segmented', {
          */
         value: undefined
     },
+
+    /**
+     * @inheritdoc
+     */
+    defaultBindProperty: 'value',
 
     publishes: ['value'],
     twoWayBindable: ['value'],
@@ -288,7 +324,7 @@ Ext.define('Ext.button.Segmented', {
             //    });
             //
             // reading offsetWidth corrects the issue.
-            this.el.dom.offsetWidth;
+            this.el.dom.offsetWidth; // jshint ignore:line
         }
         this.callParent();
     },
@@ -407,6 +443,8 @@ Ext.define('Ext.button.Segmented', {
             if (pressed) {
                 if (allowMultiple) {
                     if (valueIndex === -1) {
+                        // We must not mutate our value property here
+                        value = Array.slice(value);
                         value.push(buttonValue);
                     }
                 } else {
@@ -415,6 +453,8 @@ Ext.define('Ext.button.Segmented', {
             } else {
                 if (allowMultiple) {
                     if (valueIndex > -1) {
+                        // We must not mutate our value property here
+                        value = Array.slice(value);
                         value.splice(valueIndex, 1);
                     }
                 } else if (value === buttonValue) {

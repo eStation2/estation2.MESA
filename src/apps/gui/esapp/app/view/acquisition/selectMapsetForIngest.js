@@ -58,6 +58,8 @@ Ext.define("esapp.view.acquisition.selectMapsetForIngest",{
     initComponent: function () {
         var me = this;
 
+        me.title = '<div class="panel-title-style-16">' + esapp.Utils.getTranslation('selectmapset') + '</div>';
+
         //me.listeners =  {
         //    close: 'onClose',
         //    beforerender: 'loadMapsetStore'

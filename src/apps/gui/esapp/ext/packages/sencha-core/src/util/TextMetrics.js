@@ -1,16 +1,134 @@
 /**
- * Provides precise pixel measurements for blocks of text so that you can determine exactly how high and
- * wide, in pixels, a given block of text will be. Note that when measuring text, it should be plain text and
- * should not contain any HTML, otherwise it may not be measured correctly.
+ * Provides precise pixel measurements for blocks of text so that you can determine 
+ * the exact pixel height and width of a block of text. 
+ * 
+ * **Note:** The TextMetrics tool should only be utilized to measure plain text. Attempting to 
+ * measure text that includes HTML may return inaccurate results.
  *
- * The measurement works by copying the relevant CSS styles that can affect the font related display, 
- * then checking the size of an element that is auto-sized. Note that if the text is multi-lined, you must 
- * provide a **fixed width** when doing the measurement.
+ * This measurement works by copying the relevant font-related CSS styles from the element  
+ * param to the TextMetrics' cached measurement element.  This returns the dimensions of the cached
+ * element wrapping the text.  By default, the wrapping element is auto-sized.  
+ * You must provide a **fixed width** if the passed text is multi-lined.
  *
- * If multiple measurements are being done on the same element, you create a new instance to initialize 
- * to avoid the overhead of copying the styles to the element repeatedly.
+ * When multiple measurements are being done with the same element styling, you should 
+ * create a single, reusable TextMetrics instance.  This is more efficient than using the 
+ * static {@link #measure} method.  The element styles are copied to the cached 
+ * TextMetrics element once during instantiation versus repeated copying using 
+ * _measure()_.
+ *
+ * The following example demonstrates the recommended use of TextMetrics where the custom 
+ * textfield class sets up a reusable TextMetrics instance used to measure the label 
+ * width. This example assumes that all instances of _mytextfield_ have the same 
+ * {@link Ext.form.Labelable#labelClsExtra labelClsExtra} and 
+ * {@link Ext.form.Labelable#labelStyle labelStyle} configs.
+ *
+ *     Ext.define('MyApp.view.MyTextField', {
+ *         extend: 'Ext.form.field.Text',
+ *         xtype: 'mytextfield',
+ *     
+ *         initComponent: function () {
+ *             var me = this,
+ *                 tm = me.getTextMetrics();
+ *      
+ *             me.labelWidth = tm.getWidth(me.fieldLabel + me.labelSeparator);
+ *             me.callParent();
+ *         },
+ *     
+ *         getTextMetrics: function () {
+ *             var me = this,
+ *                 // Using me.self allows labelCls etc. to vary by derived
+ *                 // class, but not by instance.
+ *                 cls = me.self,
+ *                 tm = cls.measurer,
+ *                 el;
+ *     
+ *             if (!tm) {
+ *                 el = Ext.getBody().createChild();
+ *                 el.addCls(me.labelCls + ' ' + me.labelClsExtra).
+ *                     applyStyles(me.labelStyle);
+ *     
+ *                 cls.measurer = tm = new Ext.util.TextMetrics(el);
+ *             }
+ *     
+ *             return tm;
+ *         }
+ *     });
+ *
+ *     Ext.create('Ext.form.Panel', {
+ *         title: 'Contact Info',
+ *         width: 600,
+ *         bodyPadding: 10,
+ *         renderTo: Ext.getBody(),
+ *         items: [{
+ *             xtype: 'mytextfield',
+ *             fieldLabel: 'Name',
+ *             labelStyle: 'font-size: 10px;'
+ *         }, {
+ *             xtype: 'mytextfield',
+ *             fieldLabel: 'Email Address',
+ *             labelStyle: 'font-size: 10px;'
+ *         }]
+ *     });
+ *
+ * While less efficient than the preceding example, this example allows each instance of 
+ * _mytextfield2_ to have unique labelClsExtra and labelStyle configs.  Each custom 
+ * textfield instance uses the static TextMetrics measure method which will copy the 
+ * label styles repeatedly, thus being less efficient but more versatile.
+ *
+ *     Ext.define('MyApp.view.MyTextField2', {
+ *         extend: 'Ext.form.field.Text',
+ *         xtype: 'mytextfield2',
+ *     
+ *         initComponent: function () {
+ *             var me = this,
+ *                 el = me.getMeasurementEl(),
+ *                 tm = Ext.util.TextMetrics;
+ *     
+ *             me.labelWidth = tm.measure(el, me.fieldLabel + me.labelSeparator).width;
+ *             me.callParent();
+ *         },
+ *        
+ *         getMeasurementEl: function () {
+ *             var me = this,
+ *                 cls = MyApp.view.MyTextField2,
+ *                 el = cls.measureEl;
+ *     
+ *             if (!el) {
+ *                 cls.measureEl = el = Ext.getBody().createChild();
+ *             }
+ *     
+ *             el.dom.removeAttribute('style');
+ *             el.removeCls(el.dom.className).
+ *                 addCls(me.labelCls + ' ' + me.labelClsExtra).
+ *                 applyStyles(me.labelStyle);
+ *     
+ *             return el;
+ *         }
+ *     });
+ *     
+ *     Ext.create('Ext.form.Panel', {
+ *         title: 'Contact Info',
+ *         width: 600,
+ *         bodyPadding: 10,
+ *         renderTo: Ext.getBody(),
+ *         items: [{
+ *             xtype: 'mytextfield2',
+ *             fieldLabel: 'Name',
+ *             labelStyle: 'font-size: 14px;font-weight: bold;',
+ *             labelClsExtra: 'nameLabel'
+ *         }, {
+ *             xtype: 'mytextfield2',
+ *             fieldLabel: 'Email Address',
+ *             labelStyle: 'font-size: 10px;',
+ *             labelClsExtra: 'emailLabel'
+ *         }]
+ *     });
  */
 Ext.define('Ext.util.TextMetrics', {
+    requires: [
+        'Ext.dom.Element'
+    ],
+
     statics: {
         shared: null,
         /**

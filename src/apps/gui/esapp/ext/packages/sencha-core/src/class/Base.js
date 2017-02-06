@@ -268,7 +268,7 @@ var noArgs = [],
                                     member.$owner = me;
                                     member.$name = oldName;
                                     //<debug>
-                                    member.displayName = displayName + oldName;
+                                    member.name = displayName + oldName;
                                     //</debug>
                                     if (existing) {
                                         member.$previous = existing;
@@ -440,10 +440,11 @@ var noArgs = [],
          * @param {Object} members
          */
         addInheritableStatics: function(members) {
-            var inheritableStatics,
+            var me = this,
+                prototype = me.prototype,
+                inheritableStatics,
                 hasInheritableStatics,
-                prototype = this.prototype,
-                name, member;
+                name, member, current;
 
             inheritableStatics = prototype.$inheritableStatics;
             hasInheritableStatics = prototype.$hasInheritableStatics;
@@ -454,18 +455,22 @@ var noArgs = [],
             }
 
             //<debug>
-            var className = Ext.getClassName(this) + '.';
+            var className = Ext.getClassName(me) + '.';
             //</debug>
 
             for (name in members) {
                 if (members.hasOwnProperty(name)) {
                     member = members[name];
+                    current = me[name];
                     //<debug>
                     if (typeof member == 'function') {
-                        member.displayName = className + name;
+                        member.name = className + name;
                     }
                     //</debug>
-                    this[name] = member;
+                    if (typeof current === 'function' && !current.$isClass && !current.$nullFn) {
+                        member.$previous = current;
+                    }
+                    me[name] = member;
 
                     if (!hasInheritableStatics[name]) {
                         hasInheritableStatics[name] = true;
@@ -474,7 +479,7 @@ var noArgs = [],
                 }
             }
 
-            return this;
+            return me;
         },
 
         /**
@@ -539,6 +544,9 @@ var noArgs = [],
                     member = members[name];
 
                     //<debug>
+                    if (privacy === true) {
+                        privacy = 'framework';
+                    }
                     if (member && member.$nullFn && privacy !== member.$privacy) {
                         Ext.Error.raise('Cannot use stock function for private method ' +
                             (me.$className ? me.$className + '#' : '') + name);
@@ -560,15 +568,11 @@ var noArgs = [],
                         member.$name = name;
 
                         //<debug>
-                        member.displayName = displayName + name;
+                        member.name = displayName + name;
 
                         var existing = target[name];
 
                         if (privacy) {
-                            if (privacy === true) {
-                                privacy = 'framework';
-                            }
-
                             member.$privacy = privacy;
 
                             // The general idea here is that an existing, non-private
@@ -616,7 +620,7 @@ var noArgs = [],
                             member.$owner = me;
                             member.$name = name;
                             //<debug>
-                            member.displayName = displayName + name;
+                            member.name = displayName + name;
                             //</debug>
 
                             if (target.hasOwnProperty(name)) {
@@ -820,7 +824,9 @@ var noArgs = [],
          */
         mixin: function(name, mixinClass) {
             var me = this,
-                mixin, prototype, key, statics, i, ln, staticName, mixinValue, mixins;
+                mixin, prototype, key, statics, i, ln, 
+                mixinName, staticName, mixinValue, mixins,
+                mixinStatics;
 
             if (typeof name !== 'string') {
                 mixins = name;
@@ -834,7 +840,7 @@ var noArgs = [],
                     // mixins: {
                     //     foo: ...
                     // }
-                    for (var mixinName in mixins) {
+                    for (mixinName in mixins) {
                         me.mixin(mixinName, mixins[mixinName]);
                     }
                 }
@@ -872,7 +878,7 @@ var noArgs = [],
                     // mixin's methods win, we also want its reference to be preserved.
                     Ext.applyIf(prototype.mixins, mixinValue);
                 }
-                else if (!(key === 'mixinId' || key === 'config') && (prototype[key] === undefined)) {
+                else if (!(key === 'mixinId' || key === 'config' || key === '$inheritableStatics') && (prototype[key] === undefined)) {
                     prototype[key] = mixinValue;
                 }
             }
@@ -882,13 +888,15 @@ var noArgs = [],
             statics = mixin.$inheritableStatics;
 
             if (statics) {
+                mixinStatics = {};
                 for (i = 0, ln = statics.length; i < ln; i++) {
                     staticName = statics[i];
 
                     if (!me.hasOwnProperty(staticName)) {
-                        me[staticName] = mixinClass[staticName];
+                        mixinStatics[staticName] = mixinClass[staticName];
                     }
                 }
+                me.addInheritableStatics(mixinStatics);
             }
             //</feature>
 
@@ -915,7 +923,7 @@ var noArgs = [],
          * overrides defined that target the class.
          * 
          * @param {Object} config
-         * @param {Class} [mixinClass] The mixin class if the configs are from a mixin.
+         * @param {Ext.Class} [mixinClass] The mixin class if the configs are from a mixin.
          * @private
          * @static
          * @inheritable
@@ -1036,7 +1044,7 @@ var noArgs = [],
         isInstance: true,
 
         /**
-         * @property {Boolean} [$configPrefixed=false]
+         * @property {Boolean} [$configPrefixed]
          * The value `true` causes `config` values to be stored on instances using a
          * property name prefixed with an underscore ("_") character. A value of `false`
          * stores `config` values as properties using their exact name (no prefix).
@@ -1046,7 +1054,7 @@ var noArgs = [],
         $configPrefixed: true,
         
         /**
-         * @property {Boolean} [$configStrict=true]
+         * @property {Boolean} [$configStrict]
          * The value `true` instructs the `initConfig` method to only honor values for
          * properties declared in the `config` block of a class. When `false`, properties
          * that are not declared in a `config` block will be placed on the instance.
@@ -1183,11 +1191,12 @@ var noArgs = [],
          *
          *      alert(obj.x);  // now alerts 42
          *
-         * This also works with static methods.
+         * This also works with static and private methods.
          *
          *      Ext.define('My.Derived2', {
          *          extend: 'My.Base',
          *
+         *          // privates: {
          *          statics: {
          *              method: function (x) {
          *                  return this.callParent([x*2]); // calls My.Base.method
@@ -1203,6 +1212,7 @@ var noArgs = [],
          *      Ext.define('My.Derived2Override', {
          *          override: 'My.Derived2',
          *
+         *          // privates: {
          *          statics: {
          *              method: function (x) {
          *                  return this.callParent([x*2]); // calls My.Derived2.method
@@ -1213,7 +1223,7 @@ var noArgs = [],
          *      alert(My.Derived2.method(10); // now alerts 40
          *
          * To override a method and replace it and also call the superclass method, use
-         * {@link #callSuper}. This is often done to patch a method to fix a bug.
+         * {@link #method-callSuper}. This is often done to patch a method to fix a bug.
          *
          * @protected
          * @param {Array/Arguments} args The arguments, either an array or the `arguments` object
@@ -1230,7 +1240,7 @@ var noArgs = [],
                         ((method = method.$owner ? method : method.caller) &&
                                 method.$owner.superclass[method.$name]));
 
-            //<debug error>
+            //<debug>
             if (!superMethod) {
                 method = this.callParent.caller;
                 var parentClass, methodName;
@@ -1257,9 +1267,9 @@ var noArgs = [],
         },
 
         /**
-         * This method is used by an override to call the superclass method but bypass any
-         * overridden method. This is often done to "patch" a method that contains a bug
-         * but for whatever reason cannot be fixed directly.
+         * This method is used by an **override** to call the superclass method but 
+         * bypass any overridden method. This is often done to "patch" a method that 
+         * contains a bug but for whatever reason cannot be fixed directly.
          * 
          * Consider:
          * 
@@ -1296,10 +1306,11 @@ var noArgs = [],
          *          }
          *      });
          * 
-         * The patch method cannot use `callParent` to call the superclass `method` since
-         * that would call the overridden method containing the bug. In other words, the
-         * above patch would only produce "Fixed" then "Good" in the console log, whereas,
-         * using `callParent` would produce "Fixed" then "Bad" then "Good".
+         * The patch method cannot use {@link #method-callParent} to call the superclass 
+         * `method` since that would call the overridden method containing the bug. In 
+         * other words, the above patch would only produce "Fixed" then "Good" in the 
+         * console log, whereas, using `callParent` would produce "Fixed" then "Bad" 
+         * then "Good".
          *
          * @protected
          * @param {Array/Arguments} args The arguments, either an array or the `arguments` object
@@ -1316,7 +1327,7 @@ var noArgs = [],
                         ((method = method.$owner ? method : method.caller) &&
                           method.$owner.superclass[method.$name]);
 
-            //<debug error>
+            //<debug>
             if (!superMethod) {
                 method = this.callSuper.caller;
                 var parentClass, methodName;
@@ -1487,8 +1498,34 @@ var noArgs = [],
         },
 
         /**
-         * Returns the initial configuration passed to constructor when instantiating
-         * this class.
+         * Returns the initial configuration passed to the constructor when 
+         * instantiating this class.
+         * 
+         * Given this example Ext.button.Button definition and instance:
+         * 
+         *     Ext.define('MyApp.view.Button', {
+         *         extend: 'Ext.button.Button',
+         *         xtype: 'mybutton',
+         *     
+         *         scale: 'large',
+         *         enableToggle: true
+         *     });
+         *     
+         *     var btn = Ext.create({
+         *         xtype: 'mybutton',
+         *         renderTo: Ext.getBody(),
+         *         text: 'Test Button'
+         *     });
+         * 
+         * Calling `btn.getInitialConfig()` would return an object including the config 
+         * options passed to the `create` method:
+         * 
+         *     xtype: 'mybutton',
+         *     renderTo: // The document body itself
+         *     text: 'Test Button'
+         * 
+         * Calling `btn.getInitialConfig('text')`returns **'Test Button'**.
+         * 
          * @param {String} [name] Name of the config option to return.
          * @return {Object/Mixed} The full config object or a single config value
          * when `name` parameter specified.

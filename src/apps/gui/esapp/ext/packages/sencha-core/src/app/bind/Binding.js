@@ -1,6 +1,6 @@
 /**
- * This class is created to manage a direct bind. Both `Ext.data.Session`
- * and `Ext.app.ViewModel` return these objects from their `bind` method.
+ * This class is created to manage a direct bind.  `Ext.app.ViewModel` returns this from 
+ * its {@link Ext.app.ViewModel#method-bind bind} method.
  */
 Ext.define('Ext.app.bind.Binding', {
     extend: 'Ext.app.bind.BaseBinding',
@@ -122,8 +122,9 @@ Ext.define('Ext.app.bind.Binding', {
      * Returns `true` if the bound property is loading. In the general case this means
      * that the value is just not available yet. In specific cases, when the bound property
      * is an `Ext.data.Model` it means that a request to the server is in progress to get
-     * the record. For an `Ext.data.Store` it means that `{@link Ext.data.Store#load load}`
-     * has been called on the store but it is still in progress.
+     * the record. For an `Ext.data.Store` it means that
+     * `{@link Ext.data.Store#method-load load}` has been called on the store but it is
+     * still in progress.
      * @return {Boolean}
      * @since 5.0.0
      */
@@ -136,25 +137,21 @@ Ext.define('Ext.app.bind.Binding', {
      * This method returns `true` if this binding can only be read. If this method returns
      * `false` then the binding can be set using `setValue` (meaning this binding can be
      * a two-way binding).
-     * @return {boolean}
+     * @return {Boolean}
      * @since 5.0.0
      */
     isReadOnly: function () {
         var stub = this.stub,
             options = this.options,
-            formula;
+            ret = true;
 
-        // Not all Stubs can be set
-        if (stub && stub.set && !(options && options.twoWay === false)) {
-            formula = stub.formula;
-            // Having a normal formula means readOnly, but if that formula defines a
-            // "set" method than we are good.
-            if (!formula || formula.set) {
-                return false; // not readOnly so can be two-way
+        if (!(options && options.twoWay === false)) {
+            if (stub) {
+                ret = stub.isReadOnly();
             }
         }
 
-        return true; // readOnly so just one-way
+        return ret;
     },
 
     /**
@@ -179,16 +176,7 @@ Ext.define('Ext.app.bind.Binding', {
             Ext.Error.raise('Cannot setValue on a readonly binding');
         }
         //</debug>
-
-        var stub = this.stub,
-            formula = stub.formula;
-
-        if (formula) {
-            // Formulas receive the ViewModel as their this pointer
-            formula.set.call(stub.owner, value);
-        } else {
-            stub.set(value);
-        }
+        this.stub.set(value);
     },
 
     privates: {

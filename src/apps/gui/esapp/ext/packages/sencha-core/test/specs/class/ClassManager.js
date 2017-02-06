@@ -35,20 +35,6 @@ describe("Ext.ClassManager", function() {
         manager.enableNamespaceParseCache = true;
     });
 
-    describe("parseNamespace", function() {
-        it("should return the broken-down namespace", function() {
-            var parts = manager.parseNamespace('Some.strange.alien.Namespace');
-
-            expect(parts).toEqual([Ext.global, 'Some', 'strange', 'alien', 'Namespace']);
-        });
-
-        it("should return the broken-down namespace with object rewrites", function() {
-            var parts = manager.parseNamespace('Ext.some.Namespace');
-
-            expect(parts).toEqual([Ext, 'some', 'Namespace']);
-        });
-    });
-
     describe("exist", function() {
         it("should return whether a single class exists", function() {
             expect(manager.isCreated('My.notexisting.Class')).toBe(false);
@@ -474,105 +460,81 @@ describe("Ext.ClassManager", function() {
         });
     });
 
-    describe("createNamespaces", function() {
+    describe("Ext.namespace", function() {
         var w = window;
 
-        it("should have an alias Ext.namespace", function() {
-            spyOn(Ext.ClassManager, 'createNamespaces');
-            Ext.namespace('a', 'b', 'c');
-            expect(Ext.ClassManager.createNamespaces).toHaveBeenCalledWith('a', 'b', 'c');
-        });
+        function undo(name) {
+            if (Ext.isIE8) {
+                w[name] = undefined;
+            }
+            else {
+                delete w[name];
+            }
+        }
 
         it("should create a single top level namespace", function() {
-            Ext.ClassManager.createNamespaces('FooTest1');
+            Ext.namespace('FooTest1');
 
             expect(w.FooTest1).toBeDefined();
 
-            if (Ext.isIE8) {
-                w.FooTest1 = undefined;
-            } else {
-                delete w.FooTest1;
-            }
+            undo('FooTest1');
         });
 
         it("should create multiple top level namespace", function() {
-            Ext.ClassManager.createNamespaces('FooTest2', 'FooTest3', 'FooTest4');
+            Ext.namespace('FooTest2', 'FooTest3', 'FooTest4');
 
             expect(w.FooTest2).toBeDefined();
             expect(w.FooTest3).toBeDefined();
             expect(w.FooTest4).toBeDefined();
 
-            if (Ext.isIE8) {
-                w.FooTest2 = undefined;
-                w.FooTest3 = undefined;
-                w.FooTest4 = undefined;
-            } else {
-                delete w.FooTest2;
-                delete w.FooTest3;
-                delete w.FooTest4;
-            }
+            undo('FooTest2');
+            undo('FooTest3');
+            undo('FooTest4');
         });
 
         it("should create a chain of namespaces, starting from a top level", function() {
-            Ext.ClassManager.createNamespaces('FooTest5', 'FooTest5.ns1', 'FooTest5.ns1.ns2', 'FooTest5.ns1.ns2.ns3');
+            Ext.namespace('FooTest5', 'FooTest5.ns1', 'FooTest5.ns1.ns2', 'FooTest5.ns1.ns2.ns3');
 
             expect(w.FooTest5).toBeDefined();
             expect(w.FooTest5.ns1).toBeDefined();
             expect(w.FooTest5.ns1.ns2).toBeDefined();
             expect(w.FooTest5.ns1.ns2.ns3).toBeDefined();
 
-            if (Ext.isIE8) {
-                w.FooTest5 = undefined;
-            } else {
-                delete w.FooTest5;
-            }
+            undo('FooTest5');
         });
 
         it("should create lower level namespaces without first defining the top level", function() {
-            Ext.ClassManager.createNamespaces('FooTest6.ns1', 'FooTest7.ns2');
+            Ext.namespace('FooTest6.ns1', 'FooTest7.ns2');
 
             expect(w.FooTest6).toBeDefined();
             expect(w.FooTest6.ns1).toBeDefined();
             expect(w.FooTest7).toBeDefined();
             expect(w.FooTest7.ns2).toBeDefined();
 
-            if (Ext.isIE8) {
-                w.FooTest6 = undefined;
-                w.FooTest7 = undefined;
-            } else {
-                delete w.FooTest6;
-                delete w.FooTest7;
-            }
+            undo('FooTest6');
+            undo('FooTest7');
         });
 
         it("should create a lower level namespace without defining the middle level", function() {
-            Ext.ClassManager.createNamespaces('FooTest8', 'FooTest8.ns1.ns2');
+            Ext.namespace('FooTest8', 'FooTest8.ns1.ns2');
 
             expect(w.FooTest8).toBeDefined();
             expect(w.FooTest8.ns1).toBeDefined();
             expect(w.FooTest8.ns1.ns2).toBeDefined();
 
-            if (Ext.isIE8) {
-                w.FooTest8 = undefined;
-            } else {
-                delete w.FooTest8;
-            }
+            undo('FooTest8');
         });
 
         it ("should not overwritte existing namespace", function() {
-            Ext.ClassManager.createNamespaces('FooTest9');
+            Ext.namespace('FooTest9');
 
             FooTest9.prop1 = 'foo';
 
-            Ext.ClassManager.createNamespaces('FooTest9');
+            Ext.namespace('FooTest9');
 
             expect(FooTest9.prop1).toEqual("foo");
 
-            if (Ext.isIE8) {
-                w.FooTest9 = undefined;
-            } else {
-                delete w.FooTest9;
-            }
+            undo('FooTest9');
         });
     });
 });

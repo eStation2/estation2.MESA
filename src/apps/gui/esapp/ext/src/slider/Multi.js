@@ -151,8 +151,13 @@ Ext.define('Ext.slider.Multi', {
     clickToChange : true,
 
     /**
-     * @cfg {Boolean} animate
-     * Turn on or off animation.
+     * @cfg {Object/Boolean} animate
+     * Turn on or off animation. May be an animation configuration object:
+     *
+     *     animate: {
+     *         duration: 3000,
+     *         easing: 'easeIn'
+     *     }
      */
     animate: true,
 
@@ -187,6 +192,11 @@ Ext.define('Ext.slider.Multi', {
     tipText : null,
 
     ariaRole: 'slider',
+
+    /**
+     * @inheritdoc
+     */
+    defaultBindProperty: 'values',
 
     /**
      * @event beforechange
@@ -452,8 +462,14 @@ Ext.define('Ext.slider.Multi', {
 
         //see if the click was on any of the thumbs
         for (; !thumbClicked && i < len; i++) {
-            thumbClicked = thumbClicked || e.target == thumbs[i].el.dom;
+            thumbClicked = thumbClicked || e.target === thumbs[i].el.dom;
         }
+
+        // Focus ourselves before setting the value. This allows other
+        // fields that have blur handlers (for example, date/number field)
+        // to take care of themselves first. This is important for
+        // databinding.
+        me.focus();
 
         if (me.clickToChange && !thumbClicked) {
             trackPoint = me.getTrackpoint(e.getXY());
@@ -461,7 +477,6 @@ Ext.define('Ext.slider.Multi', {
                 me.onClickChange(trackPoint);
             }
         }
-        me.focus();
     },
 
     /**
@@ -509,6 +524,10 @@ Ext.define('Ext.slider.Multi', {
             dist  = Math.abs(value - clickValue);
 
             if (Math.abs(dist) <= nearestDistance) {
+                // this makes sure that thumbs will stay in order
+                if (nearest && nearest.value == value && value > clickValue && thumb.index > nearest.index) {
+                    continue;
+                }
                 nearest = thumb;
                 nearestDistance = dist;
             }
@@ -522,21 +541,25 @@ Ext.define('Ext.slider.Multi', {
      * by this.keyIncrement. If DOWN or LEFT it is moved left. Pressing CTRL moves the slider to the end in either direction
      * @param {Ext.event.Event} e The Event object
      */
-    onKeyDown : function(e) {
+    onKeyDown: function(e) {
+        var me = this,
+            k, val;
+        
+        k = e.getKey();
+        
         /*
          * The behaviour for keyboard handling with multiple thumbs is currently undefined.
          * There's no real sane default for it, so leave it like this until we come up
          * with a better way of doing it.
          */
-        var me = this,
-            k,
-            val;
-
-        if(me.disabled || me.thumbs.length !== 1) {
-            e.preventDefault();
+        if (me.disabled || me.thumbs.length !== 1) {
+            // Must not mingle with the Tab key!
+            if (k !== e.TAB) {
+                e.preventDefault();
+            }
+            
             return;
         }
-        k = e.getKey();
 
         switch(k) {
             case e.UP:
@@ -618,18 +641,20 @@ Ext.define('Ext.slider.Multi', {
      * Programmatically sets the value of the Slider. Ensures that the value is constrained within the minValue and
      * maxValue.
      *
-     * Setting a single value:
-     *     // Set the second slider value, don't animate
+     * Setting the second slider's value without animation:
+     *
      *     mySlider.setValue(1, 50, false);
      *
-     * Setting multiple values at once
-     *     // Set 3 thumb values, animate
+     * Setting multiple values with animation:
+     *
      *     mySlider.setValue([20, 40, 60], true);
      *
      * @param {Number/Number[]} index Index of the thumb to move. Alternatively, it can be an array of values to set
      * for each thumb in the slider.
      * @param {Number} value The value to set the slider to. (This will be constrained within minValue and maxValue)
-     * @param {Boolean} [animate=true] Turn on or off animation
+     * @param {Object/Boolean} [animate] `false` to not animate. `true` to use the default animation. This may also be an
+     * animate configuration object, see {@link #cfg-animate}. If this configuration is omitted, the {@link #cfg-animate} configuration
+     * will be used.
      * @return {Ext.slider.Multi} this
      */
     setValue : function(index, value, animate, changeComplete) {
@@ -657,7 +682,12 @@ Ext.define('Ext.slider.Multi', {
         if (value !== thumb.value && me.fireEvent('beforechange', me, value, thumb.value, thumb) !== false) {
             thumb.value = value;
             if (me.rendered) {
-                thumb.move(me.calculateThumbPosition(value), Ext.isDefined(animate) ? animate !== false : me.animate);
+                if (Ext.isDefined(animate)) {
+                    animate = animate === false ? false : animate;
+                } else {
+                    animate = me.animate;
+                }
+                thumb.move(me.calculateThumbPosition(value), animate);
 
                 me.fireEvent('change', me, value, thumb);
                 me.checkDirty();

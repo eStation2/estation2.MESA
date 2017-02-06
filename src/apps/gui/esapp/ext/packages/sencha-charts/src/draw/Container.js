@@ -1,37 +1,27 @@
 /**
- * The Draw Container is a surface in which sprites can be rendered. The Draw Container
- * manages and holds a `Surface` instance: an interface that has
- * an SVG or Canvas implementation depending on the browser capabilities and where
- * Sprites can be appended.
+ * The container that holds and manages instances of the {@link Ext.draw.Surface}
+ * in which sprites are rendered.
+ *
  * One way to create a draw container is:
  *
- *     var drawContainer = new Ext.draw.Container({
- *         items: [{
- *             type: 'circle',
- *             fill: '#79BB3F',
- *             radius: 100,
- *             x: 100,
- *             y: 100
- *         }]
- *     });
- *
- *     new Ext.Panel({
- *         fullscreen: true,
- *         items: [drawContainer]
- *     });
+ *      var drawContainer = Ext.create('Ext.draw.Container', {
+ *           renderTo: Ext.getBody(),
+ *           width:200,
+ *           height:200,
+ *           sprites: [{
+ *                type: 'circle',
+ *                fillStyle: '#79BB3F',
+ *                r: 100,
+ *                x: 100,
+ *                y: 100
+ *           }]
+ *      });
  *
  * In this case we created a draw container and added a sprite to it.
- * The *type* of the sprite is *circle*, so if you run this code you'll see a yellow-ish circle.
+ * The *type* of the sprite is *circle*, so if you run this code you'll see a green circle.
  *
- * You can also add sprites by using the surface's add method:
- *
- *     drawContainer.getSurface('main').add({
- *         type: 'circle',
- *         fill: '#79BB3F',
- *         radius: 100,
- *         x: 100,
- *         y: 100
- *     });
+ * One can attach sprite event listeners to the draw container with the help of the
+ * {@link Ext.draw.plugin.SpriteEvents} plugin.
  *
  * For more information on Sprites, the core elements added to a draw container's surface,
  * refer to the {@link Ext.draw.sprite.Sprite} documentation.
@@ -48,21 +38,102 @@ Ext.define('Ext.draw.Container', {
         'Ext.draw.engine.Canvas',
         'Ext.draw.gradient.GradientDefinition'
     ],
+    /**
+     * @cfg {String} [engine="Ext.draw.engine.Canvas"]
+     * Defines the engine (type of surface) used to render draw container contents.  
+     * 
+     * The render engine is selected automatically depending on the platform used. Priority 
+     * is given to the {@link Ext.draw.engine.Canvas} engine due to its performance advantage.
+     *
+     * You may also set the engine config to be `Ext.draw.engine.Svg` if so desired.
+     */    
     engine: 'Ext.draw.engine.Canvas',
+
+    /**
+     * @event spritemousemove
+     * Fires when the mouse is moved on a sprite.
+     * @param {Object} sprite
+     * @param {Event} event
+     */
+
+    /**
+     * @event spritemouseup
+     * Fires when a mouseup event occurs on a sprite.
+     * @param {Object} sprite
+     * @param {Event} event
+     */
+
+    /**
+     * @event spritemousedown
+     * Fires when a mousedown event occurs on a sprite.
+     * @param {Object} sprite
+     * @param {Event} event
+     */
+
+    /**
+     * @event spritemouseover
+     * Fires when the mouse enters a sprite.
+     * @param {Object} sprite
+     * @param {Event} event
+     */
+
+    /**
+     * @event spritemouseout
+     * Fires when the mouse exits a sprite.
+     * @param {Object} sprite
+     * @param {Event} event
+     */
+
+    /**
+     * @event spriteclick
+     * Fires when a click event occurs on a sprite.
+     * @param {Object} sprite
+     * @param {Event} event
+     */
+
+    /**
+     * @event spritedblclick
+     * Fires when a double click event occurs on a sprite.
+     * @param {Object} sprite
+     * @param {Event} event
+     */
+
+    /**
+     * @event spritetap
+     * Fires when a tap event occurs on a sprite.
+     * @param {Object} sprite
+     * @param {Event} event
+     */
 
     config: {
         cls: Ext.baseCSSPrefix + 'draw-container',
 
         /**
-         * @cfg {Function} [resizeHandler] The resize function that can be configured to have a behavior.
+         * @cfg {Function} [resizeHandler]
+         * The resize function that can be configured to have a behavior,
+         * e.g. resize draw surfaces based on new draw container dimensions.
          *
          * __Note:__ since resize events trigger {@link #renderFrame} calls automatically,
-         * return `false` from the resize function, if it also calls `renderFrame`, to prevent double rendering.
+         * return `false` from the resize function, if it also calls `renderFrame`,
+         * to prevent double rendering.
          */
         resizeHandler: null,
 
-        background: null,
-
+        /**
+         * @cfg {Object[]} sprites
+         * Defines a set of sprites to be added to the drawContainer surface.
+         *
+         * For example:
+         *
+         *      sprites: [{
+         *           type: 'circle',
+         *           fillStyle: '#79BB3F',
+         *           r: 100,
+         *           x: 100,
+         *           y: 100
+         *      }]
+         * 
+         */
         sprites: null,
 
         /**
@@ -210,10 +281,19 @@ Ext.define('Ext.draw.Container', {
     onPlaceWatermark: Ext.emptyFn,
 
     onBodyResize: function () {
+        var el = this.element;
+
+        if (!el) {
+            return;
+        }
+        this.setBodySize(el.getSize());
+    },
+
+    setBodySize: function(size) {
         var me = this,
-            size = me.element.getSize(),
-            resizeHandler = me.getResizeHandler() || me.resizeHandler,
+            resizeHandler = me.getResizeHandler(),
             result;
+
         me.fireEvent('resize', me, size);
         result = resizeHandler.call(me, size);
         if (result !== false) {
@@ -240,7 +320,7 @@ Ext.define('Ext.draw.Container', {
             surface = surfaces.get(id);
         if (!surface) {
             surface = me.add({xclass: me.engine, id: id});
-            surface.renderFrame();
+            me.onBodyResize();
         }
         return surface;
     },
@@ -262,10 +342,10 @@ Ext.define('Ext.draw.Container', {
     },
 
     /**
-     * Produces an image of the chart.
-     * @param {String} [format] Possible options are 'image' (the method will return an Image object)
-     *                          and 'stream' (the method will return the image as a byte stream).
-     *                          If missing, the DataURL of the chart's image will be returned.
+     * Produces an image of the chart / drawing.
+     * @param {String} [format] Possible options are 'image' (the method will return an 
+     * Image object) and 'stream' (the method will return the image as a byte stream).  
+     * If missing, the DataURL of the drawing's (or chart's) image will be returned.
      * @return {Object}
      * @return {String} return.data Image element, byte stream or DataURL.
      * @return {String} return.type The type of the data (e.g. 'png' or 'svg').
@@ -305,18 +385,20 @@ Ext.define('Ext.draw.Container', {
     },
 
     /**
-     * Downloads an image or PDF of the chart or opens it in a separate browser tab/window
-     * if the download can't be triggered. The exact behavior is platform and browser
-     * specific. For more consistent results on mobile devices use the {@link #preview}
-     * method instead.
+     * Downloads an image or PDF of the chart / drawing or opens it in a separate 
+     * browser tab/window if the download can't be triggered. The exact behavior is 
+     * platform and browser specific. For more consistent results on mobile devices use 
+     * the {@link #preview} method instead.
      *
      * @param {Object} [config] The following config options are supported:
      *
      * @param {String} config.url The url to post the data to. Defaults to
-     * the {@link #defaultUrl} configuration on the class.
+     * the {@link #defaultDownloadServerUrl} configuration on the class.
      *
      * @param {String} config.format The format of image to export. See the
      * {@link #supportedFormats}. Defaults to 'png' on the Sencha IO server.
+     * Note that you can't export to 'svg' format if the {@link Ext.draw.engine.Canvas Canvas}
+     * {@link Ext.draw.Container#engine engine} is used.
      *
      * @param {Number} config.width A width to send to the server for
      * configuring the image width. Defaults to natural image width on
@@ -331,7 +413,16 @@ Ext.define('Ext.draw.Container', {
      * as a filename extension.
      *
      * @param {Number} config.scale The scaling of the downloaded image.
-     * Defaults to the value of window.devicePixelRatio on the client.
+     * Defaults to 1 on the Sencha IO server. The server will try to determine the natural
+     * size of the image unless the width/height configs have been set. If the
+     * {@link Ext.draw.engine.Canvas Canvas} {@link Ext.draw.Container#engine engine} is
+     * used the natural image size will depend on the value of the window.devicePixelRatio.
+     * For example, for devices with devicePixelRatio of 2 the produced image will be
+     * two times larger than for devices with devicePixelRatio of 1 for the same drawing.
+     * This is done so that the users with devices with HiDPI screens get a downloaded
+     * image that looks as crisp on their device as the original drawing.
+     * If you want image size to be consistent across devices with different device
+     * pixel ratios, you can set the value of this config to 1/devicePixelRatio.
      * This parameter is ignored by the Sencha IO server if config.format is set to 'svg'.
      *
      * @param {Object} config.pdf PDF specific options.

@@ -6,25 +6,30 @@
 
 Ext.define('esapp.view.main.Main', {
     extend: 'Ext.container.Viewport',
+    //extend: 'Ext.container.Container',
 
     xtype: 'app-main',
     requires: [
         'esapp.view.main.MainModel',
         'esapp.view.main.MainController',
 
-        'esapp.view.header.Header',
-        'esapp.view.dashboard.Dashboard',
-        'esapp.view.acquisition.Acquisition',
-        'esapp.view.processing.Processing',
-        'esapp.view.datamanagement.DataManagement',
-        'esapp.view.analysis.analysisMain',
-        'esapp.view.system.systemsettings',
-        'esapp.view.help.help',
+        //'esapp.view.header.Header',
+        //'esapp.view.dashboard.Dashboard',
+        //'esapp.view.acquisition.Acquisition',
+        //'esapp.view.processing.Processing',
+        //'esapp.view.datamanagement.DataManagement',
+        //'esapp.view.analysis.analysisMain',
+        //'esapp.view.system.systemsettings',
+        //'esapp.view.help.help',
+        //'esapp.view.widgets.LoginView',
 
         'Ext.layout.container.Center',
         'Ext.form.field.ComboBox'
     ],
     controller: 'app-main',
+
+    //plugins: 'viewport',
+
     viewModel: {
         type: 'app-main'
     },
@@ -33,7 +38,7 @@ Ext.define('esapp.view.main.Main', {
     layout: {
         type: 'border'
     },
-    ptype:'lazyitems',
+    //ptype:'lazyitems',
 
     initComponent: function () {
         var me = this;
@@ -69,7 +74,7 @@ Ext.define('esapp.view.main.Main', {
                 layoutOnTabChange: true,
                 activeTab: 'dashboardtab',     // first tab initially active
 
-                defaults:{hideMode: 'offsets'}, // For performance resons to pre-render in the background.
+                // defaults:{hideMode: 'offsets'}, // For performance resons to pre-render in the background.
 
                 listeners: {
                     afterrender: function(tabpanel) {
@@ -77,6 +82,8 @@ Ext.define('esapp.view.main.Main', {
                         bar.insert(tabpanel.tabBar.items.length, [{
                             xtype: 'component',
                             flex: 1
+                        }, {
+                            xtype: 'loginview'
                         }, {
                             xtype: 'combo',
                             id:'languageCombo',
@@ -145,8 +152,16 @@ Ext.define('esapp.view.main.Main', {
                            var acquisitionmain = acquisitiontab.down('panel[name=acquisitionmain]');
                            acquisitionmain.getController().checkStatusServices();
 
+                           //Ext.util.Observable.capture(acquisitionmain, function(e){console.log(e);});
+
                            //acquisitionmain.getView().getFeature('productcategories').expandAll();
                            //acquisitionmain.getView().refresh();
+                       },
+                       beforedeactivate: function (acquisitiontab) {
+                           var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("datasetchart-") != -1}');
+                           Ext.each(completenessTooltips, function(item) {
+                               item.hide();
+                           });
                        }
                     }
                 }, {
@@ -185,6 +200,12 @@ Ext.define('esapp.view.main.Main', {
                            //
                            ////datamanagementmain.getView().getFeature('prodcat').expandAll();
                            //datamanagementmain.getView().refresh();
+                       },
+                       beforedeactivate: function (acquisitiontab) {
+                           var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("datasetchart-") != -1}');
+                           Ext.each(completenessTooltips, function(item) {
+                               item.hide();
+                           });
                        }
                     }
                 }, {
@@ -205,8 +226,7 @@ Ext.define('esapp.view.main.Main', {
                            var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
                            headerlogos.setHidden(true);
                            //analysistab.down().render();
-                           //analysistab.down().updateLayout();
-                           //analysistab.down().show();
+                           //analysistab.down().fireEvent('focusenter');
                            //analysistab.down().controller.newMapView();
                        }
                     }

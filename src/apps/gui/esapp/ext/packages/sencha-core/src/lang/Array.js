@@ -5,7 +5,7 @@
  * A set of useful static methods to deal with arrays; provide missing methods for
  * older browsers.
  */
-Ext.Array = new (function() {
+Ext.Array = (function() {
 // @define Ext.lang.Array
 // @define Ext.Array
 // @require Ext
@@ -48,7 +48,6 @@ Ext.Array = new (function() {
     function stableSort(array, userComparator) {
         var len = array.length,
             indices = new Array(len),
-            result = new Array(len),
             i;
 
         // generate 0-n index map from original array
@@ -63,12 +62,12 @@ Ext.Array = new (function() {
 
         // Reconsitute a sorted array using the array that the indices have been sorted into
         for (i = 0; i < len; i++) {
-            result[i] = array[indices[i]];
+            indices[i] = array[indices[i]];
         }
 
         // Rebuild the original array
         for (i = 0; i < len; i++) {
-            array[i] = result[i];
+            array[i] = indices[i];
         }
 
         return array;
@@ -282,7 +281,7 @@ Ext.Array = new (function() {
             return (lhs < rhs) ? -1 : ((lhs > rhs) ? 1 : 0);
         },
 
-        // Default comparatyor to use when no comparator is specified for the sort method.
+        // Default comparator to use when no comparator is specified for the sort method.
         // Javascript sort does LEXICAL comparison.
         lexicalCompare: function (lhs, rhs) {
             lhs = String(lhs);
@@ -312,7 +311,9 @@ Ext.Array = new (function() {
          *
          *     sum(1, 2, 3); // returns 6
          *
-         * The iteration can be stopped by returning false in the function callback.
+         * The iteration can be stopped by returning `false` from the callback function.  
+         * Returning `undefined` (i.e `return;`) will only exit the callback function and 
+         * proceed with the next iteration of the loop.
          *
          *     Ext.Array.each(countries, function(name, index, countriesItSelf) {
          *         if (name === 'Singapore') {
@@ -325,12 +326,14 @@ Ext.Array = new (function() {
          * @param {Array/NodeList/Object} iterable The value to be iterated. If this
          * argument is not iterable, the callback function is called once.
          * @param {Function} fn The callback function. If it returns `false`, the iteration
-         * stops and this method returns the current `index`.
+         * stops and this method returns the current `index`. Returning `undefined` (i.e 
+         * `return;`) will only exit the callback function and proceed with the next iteration 
+         * in the loop.
          * @param {Object} fn.item The item at the current `index` in the passed `array`
          * @param {Number} fn.index The current `index` within the `array`
          * @param {Array} fn.allItems The `array` itself which was passed as the first argument
-         * @param {Boolean} fn.return Return false to stop iteration.
-         * @param {Object} scope (Optional) The scope (`this` reference) in which the specified function is executed.
+         * @param {Boolean} fn.return Return `false` to stop iteration.
+         * @param {Object} [scope] The scope (`this` reference) in which the specified function is executed.
          * @param {Boolean} [reverse=false] Reverse the iteration order (loop from the end to the beginning).
          * @return {Boolean} See description for the `fn` parameter.
          */
@@ -686,7 +689,7 @@ Ext.Array = new (function() {
 
         /**
          * Creates a new array with all of the elements of this array for which
-         * the provided filtering function returns true.
+         * the provided filtering function returns a truthy value.
          *
          * @param {Array} array
          * @param {Function} fn Callback function for each item.
@@ -728,7 +731,7 @@ Ext.Array = new (function() {
          * @param {Array} array The array to search
          * @param {Function} fn The selection function to execute for each item.
          * @param {Mixed} fn.item The array item.
-         * @param {String} fn.index The index of the array item.
+         * @param {Number} fn.index The index of the array item.
          * @param {Object} scope (optional) The scope (<code>this</code> reference) in which the
          * function is executed. Defaults to the array
          * @return {Object} The first item in the array which returned true from the selection
@@ -778,11 +781,11 @@ Ext.Array = new (function() {
         },
 
         /**
-         * Removes the specified item from the array if it exists
+         * Removes the specified item from the array if it exists.
          *
-         * @param {Array} array The array
-         * @param {Object} item The item to remove
-         * @return {Array} The passed array itself
+         * @param {Array} array The array.
+         * @param {Object} item The item to remove.
+         * @return {Array} The passed array.
          */
         remove: function(array, item) {
             var index = ExtArray.indexOf(array, item);
@@ -791,6 +794,24 @@ Ext.Array = new (function() {
                 erase(array, index, 1);
             }
 
+            return array;
+        },
+
+        /**
+         * Removes item/s at the specified index.
+         * 
+         * @param {Array} array The array.
+         * @param {Number} index The index of the item to be removed.
+         * @param {Number} [count=1] The number of items to be removed.
+         * @return {Array} The passed array.
+         */
+        removeAt: function(array, index, count) {
+            var len = array.length;
+            if (index >= 0 && index < len) {
+                count = count || 1;
+                count = Math.min(count, len - index);
+                erase(array, index, count);
+            }
             return array;
         },
 
@@ -1137,7 +1158,7 @@ Ext.Array = new (function() {
          * @param {Array} array The Array to create the map from.
          * @param {String/Function} [getKey] Name of the object property to use
          * as a key or a function to extract the key.
-         * @param {Object} [scope] Value of this inside callback.
+         * @param {Object} [scope] Value of `this` inside callback specified for `getKey`.
          * @return {Object} The resulting map.
          */
         toMap: function(array, getKey, scope) {
@@ -1165,13 +1186,13 @@ Ext.Array = new (function() {
          * Creates a map (object) keyed by a property of elements of the given array. The values in
          * the map are the array element. For example:
          * 
-         *      var map = Ext.Array.toMap(['a','b','c']);
+         *      var map = Ext.Array.toValueMap(['a','b','c']);
          *
          *      // map = { a: 'a', b: 'b', c: 'c' };
          * 
          * Or a key property can be specified:
          * 
-         *      var map = Ext.Array.toMap([
+         *      var map = Ext.Array.toValueMap([
          *              { name: 'a' },
          *              { name: 'b' },
          *              { name: 'c' }
@@ -1181,7 +1202,7 @@ Ext.Array = new (function() {
          * 
          * Lastly, a key extractor can be provided:
          * 
-         *      var map = Ext.Array.toMap([
+         *      var map = Ext.Array.toValueMap([
          *              { name: 'a' },
          *              { name: 'b' },
          *              { name: 'c' }
@@ -1443,4 +1464,4 @@ Ext.Array = new (function() {
     };
 
     return ExtArray;
-});
+}());

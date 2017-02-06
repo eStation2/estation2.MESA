@@ -6,8 +6,7 @@
  * Access the global instance stored in {@link Ext.browser} instead.
  * @private
  */
-Ext.env || (Ext.env = {});
-Ext.env.Browser = function (userAgent, publish) {
+(Ext.env || (Ext.env = {})).Browser = function (userAgent, publish) {
 // @define Ext.env.Browser
 // @define Ext.browser
 // @require Ext.Object
@@ -36,6 +35,12 @@ Ext.env.Browser = function (userAgent, publish) {
      */
     me.userAgent = userAgent;
 
+    // Edge has a userAgent with All browsers so we manage it separately
+    // "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.10240"
+    if (/Edge\//.test(userAgent)) {
+        browserMatch = userAgent.match(/(Edge\/)([\w.]+)/);
+    }
+    
     if (browserMatch) {
         browserName = browserNames[Ext.Object.getKey(browserPrefixes, browserMatch[1])];
         //<feature legacyBrowser>
@@ -52,7 +57,7 @@ Ext.env.Browser = function (userAgent, publish) {
         engineVersion = new Ext.Version(engineMatch[2]);
     }
 
-    if (engineName == 'Trident' && browserName != 'IE') {
+    if (engineName === 'Trident' && browserName !== 'IE') {
         browserName = 'IE';
         var version = userAgent.match(/.*rv:(\d+.\d+)/);
         if (version && version.length) {
@@ -61,9 +66,238 @@ Ext.env.Browser = function (userAgent, publish) {
         }
     }
 
+    /**
+     * @property chromeVersion
+     * The current version of Chrome (0 if the browser is not Chrome).
+     * @readonly
+     * @type Number
+     * @member Ext
+     */
+
+    /**
+     * @property firefoxVersion
+     * The current version of Firefox (0 if the browser is not Firefox).
+     * @readonly
+     * @type Number
+     * @member Ext
+     */
+
+    /**
+     * @property ieVersion
+     * The current version of IE (0 if the browser is not IE). This does not account
+     * for the documentMode of the current page, which is factored into {@link #isIE8}
+     * and {@link #isIE9}. Thus this is not always true:
+     *
+     *     Ext.isIE8 == (Ext.ieVersion == 8)
+     *
+     * @readonly
+     * @type Number
+     * @member Ext
+     */
+
+    /**
+     * @property isChrome
+     * True if the detected browser is Chrome.
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property isGecko
+     * True if the detected browser uses the Gecko layout engine (e.g. Mozilla, Firefox).
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property isIE
+     * True if the detected browser is Internet Explorer.
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property isIE8
+     * True if the detected browser is Internet Explorer 8.x.
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property isIE8m
+     * True if the detected browser is Internet Explorer 8.x or lower.
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property isIE8p
+     * True if the detected browser is Internet Explorer 8.x or higher.
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property isIE9
+     * True if the detected browser is Internet Explorer 9.x.
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property isIE9m
+     * True if the detected browser is Internet Explorer 9.x or lower.
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property isIE9p
+     * True if the detected browser is Internet Explorer 9.x or higher.
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property isIE10
+     * True if the detected browser is Internet Explorer 10.x.
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property isIE10m
+     * True if the detected browser is Internet Explorer 10.x or lower.
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property isIE10p
+     * True if the detected browser is Internet Explorer 10.x or higher.
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property isIE11
+     * True if the detected browser is Internet Explorer 11.x.
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property isIE11m
+     * True if the detected browser is Internet Explorer 11.x or lower.
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property isIE11p
+     * True if the detected browser is Internet Explorer 11.x or higher.
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property isEdge
+     * True if the detected browser is Edge.
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property isLinux
+     * True if the detected platform is Linux.
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property isMac
+     * True if the detected platform is Mac OS.
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property isOpera
+     * True if the detected browser is Opera.
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property isSafari
+     * True if the detected browser is Safari.
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property isWebKit
+     * True if the detected browser uses WebKit.
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property isWindows
+     * True if the detected platform is Windows.
+     * @readonly
+     * @type Boolean
+     * @member Ext
+     */
+
+    /**
+     * @property operaVersion
+     * The current version of Opera (0 if the browser is not Opera).
+     * @readonly
+     * @type Number
+     * @member Ext
+     */
+
+    /**
+     * @property safariVersion
+     * The current version of Safari (0 if the browser is not Safari).
+     * @readonly
+     * @type Number
+     * @member Ext
+     */
+
+    /**
+     * @property webKitVersion
+     * The current version of WebKit (0 if the browser does not use WebKit).
+     * @readonly
+     * @type Number
+     * @member Ext
+     */
+
     // Facebook changes the userAgent when you view a website within their iOS app. For some reason, the strip out information
     // about the browser, so we have to detect that and fake it...
-    if (userAgent.match(/FB/) && browserName == "Other") {
+    if (userAgent.match(/FB/) && browserName === "Other") {
         browserName = browserNames.safari;
         engineName = engineNames.webkit;
     }
@@ -100,15 +334,15 @@ Ext.env.Browser = function (userAgent, publish) {
             // getting the proper "version" determined. That value is always 5 when in
             // Quirks Mode.
 
-            if (mode == 7 || (majorVer == 7 && mode != 8 && mode != 9 && mode != 10)) {
+            if (mode === 7 || (majorVer === 7 && mode !== 8 && mode !== 9 && mode !== 10)) {
                 majorVer = 7;
-            } else if (mode == 8 || (majorVer == 8 && mode != 8 && mode != 9 && mode != 10)) {
+            } else if (mode === 8 || (majorVer === 8 && mode !== 8 && mode !== 9 && mode !== 10)) {
                 majorVer = 8;
-            } else if (mode == 9 || (majorVer == 9 && mode != 7 && mode != 8 && mode != 10)) {
+            } else if (mode === 9 || (majorVer === 9 && mode !== 7 && mode !== 8 && mode !== 10)) {
                 majorVer = 9;
-            } else if (mode == 10 || (majorVer == 10 && mode != 7 && mode != 8 && mode != 9)) {
+            } else if (mode === 10 || (majorVer === 10 && mode !== 7 && mode !== 8 && mode !== 9)) {
                 majorVer = 10;
-            } else if (mode == 11 || (majorVer == 11 && mode != 7 && mode != 8 && mode != 9 && mode != 10)) {
+            } else if (mode === 11 || (majorVer === 11 && mode !== 7 && mode !== 8 && mode !== 9 && mode !== 10)) {
                 majorVer = 11;
             }
 
@@ -173,18 +407,10 @@ Ext.env.Browser = function (userAgent, publish) {
     this.setFlag('Ripple', !!document.getElementById("tinyhippos-injected") && !Ext.isEmpty(window.top.ripple));
     this.setFlag('WebWorks', !!window.blackberry);
 
-    if (typeof window.PhoneGap != 'undefined' || typeof window.Cordova != 'undefined' || typeof window.cordova != 'undefined') {
+    if (window.PhoneGap !== undefined || window.Cordova !== undefined || window.cordova !== undefined) {
         isWebView = true;
         this.setFlag('PhoneGap');
         this.setFlag('Cordova');
-    }
-    else if (!!window.isNK) {
-        isWebView = true;
-        this.setFlag('Sencha');
-    }
-
-    if (/(Glass)/i.test(userAgent)) {
-        this.setFlag('GoogleGlass');
     }
 
     // Check if running in UIWebView
@@ -199,13 +425,13 @@ Ext.env.Browser = function (userAgent, publish) {
      * @property {Boolean}
      * `true` if browser is using strict mode.
      */
-    this.isStrict = Ext.isStrict = document.compatMode == "CSS1Compat";
+    this.isStrict = Ext.isStrict = document.compatMode === "CSS1Compat";
 
     /**
      * @property {Boolean}
      * `true` if page is running over SSL.
      */
-    this.isSecure = /^https/i.test(window.location.protocol);
+    this.isSecure = Ext.isSecure;
 
     // IE10Quirks, Chrome26Strict, etc.
     this.identity = browserName + majorVer + (this.isStrict ? 'Strict' : 'Quirks');
@@ -221,6 +447,7 @@ Ext.env.Browser.prototype = {
         chrome: 'Chrome',
         opera: 'Opera',
         dolfin: 'Dolfin',
+        edge : 'Edge',
         webosbrowser: 'webOSBrowser',
         chromeMobile: 'ChromeMobile',
         chromeiOS: 'ChromeiOS',
@@ -242,6 +469,7 @@ Ext.env.Browser.prototype = {
     },
     browserPrefixes: {
         ie: 'MSIE ',
+        edge: 'Edge/',
         firefox: 'Firefox/',
         chrome: 'Chrome/',
         safari: 'Version/',
@@ -366,7 +594,7 @@ Ext.env.Browser.prototype = {
     engineVersion: null,
 
     setFlag: function(name, value, publish) {
-        if (typeof value == 'undefined') {
+        if (value === undefined) {
             value = true;
         }
 
@@ -398,15 +626,10 @@ Ext.env.Browser.prototype = {
     },
 
     getPreferredTranslationMethod: function(config) {
-        if (typeof config == 'object' && 'translationMethod' in config && config.translationMethod !== 'auto') {
+        if (typeof config === 'object' && 'translationMethod' in config && config.translationMethod !== 'auto') {
             return config.translationMethod;
         } else {
-            if (this.is.AndroidStock2 || this.is.IE) {
-                return 'scrollposition';
-            }
-            else {
-                return 'csstransform';
-            }
+            return 'csstransform';
         }
     }
 
@@ -432,10 +655,17 @@ Ext.env.Browser.prototype = {
  *
  * For a full list of supported values, refer to {@link #is} property/method.
  *
- * @aside guide environment_package
  */
 (function (userAgent) {
     Ext.browser = new Ext.env.Browser(userAgent, true);
     Ext.userAgent = userAgent.toLowerCase();
 
+    /**
+     * @property {String} SSL_SECURE_URL
+     * URL to a blank file used by Ext when in secure mode for iframe src and onReady src
+     * to prevent the IE insecure content warning (`'about:blank'`, except for IE
+     * in secure mode, which is `'javascript:""'`).
+     * @member Ext
+     */
+    Ext.SSL_SECURE_URL = Ext.isSecure && Ext.isIE ? 'javascript:\'\'' : 'about:blank'; // jshint ignore:line
 }(Ext.global.navigator.userAgent));

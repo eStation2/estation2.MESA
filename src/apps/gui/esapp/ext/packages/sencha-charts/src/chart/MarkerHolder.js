@@ -9,6 +9,9 @@ Ext.define('Ext.chart.MarkerHolder', {
         after: {
             constructor: 'constructor',
             preRender: 'preRender'
+        },
+        before: {
+            destroy: 'destroy'
         }
     },
 
@@ -38,14 +41,23 @@ Ext.define('Ext.chart.MarkerHolder', {
     },
 
     preRender: function () {
-        var boundMarkers = this.boundMarkers, boundMarkersItem,
-            name, i, ln, id = this.getId(),
-            parent = this.getParent(),
-            matrix = this.surfaceMatrix ? this.surfaceMatrix.set(1, 0, 0, 1, 0, 0) : (this.surfaceMatrix = new Ext.draw.Matrix());
+        var me = this,
+            id = me.getId(),
+            boundMarkers = me.boundMarkers,
+            parent = me.getParent(),
+            boundMarkersItem,
+            name, i, ln,
+            matrix;
 
-        this.cleanRedraw = !this.attr.dirty;
-        if (!this.cleanRedraw) {
-            for (name in this.boundMarkers) {
+        if (me.surfaceMatrix) {
+            matrix = me.surfaceMatrix.set(1, 0, 0, 1, 0, 0);
+        } else {
+            matrix = me.surfaceMatrix = new Ext.draw.Matrix();
+        }
+
+        me.cleanRedraw = !this.attr.dirty;
+        if (!me.cleanRedraw) {
+            for (name in me.boundMarkers) {
                 if (boundMarkers[name]) {
                     for (boundMarkersItem = boundMarkers[name], i = 0, ln = boundMarkersItem.length; i < ln; i++) {
                         boundMarkersItem[i].clear(id);
@@ -59,15 +71,15 @@ Ext.define('Ext.chart.MarkerHolder', {
             parent = parent.getParent();
         }
         matrix.prependMatrix(parent.matrix);
-        this.surfaceMatrix = matrix;
-        this.inverseSurfaceMatrix = matrix.inverse(this.inverseSurfaceMatrix);
+        me.surfaceMatrix = matrix;
+        me.inverseSurfaceMatrix = matrix.inverse(me.inverseSurfaceMatrix);
     },
 
-    putMarker: function (name, attr, index, canonical, keepRevision) {
+    putMarker: function (name, attr, index, bypassNormalization, keepRevision) {
         var boundMarkersItem, i, ln, id = this.getId();
         if (this.boundMarkers[name]) {
             for (boundMarkersItem = this.boundMarkers[name], i = 0, ln = boundMarkersItem.length; i < ln; i++) {
-                boundMarkersItem[i].putMarkerFor(id, attr, index, canonical, keepRevision);
+                boundMarkersItem[i].putMarkerFor(id, attr, index, bypassNormalization, keepRevision);
             }
         }
     },
@@ -77,6 +89,19 @@ Ext.define('Ext.chart.MarkerHolder', {
             id = this.getId();
         if (boundMarker) {
             return boundMarker[0].getMarkerBBoxFor(id, index, isWithoutTransform);
+        }
+    },
+
+    destroy: function () {
+        var boundMarkers = this.boundMarkers,
+            name, markers, i, marker;
+
+        for (name in boundMarkers) {
+            markers = boundMarkers[name];
+            for (i = 0; i < markers.length; i++) {
+                marker = markers[i];
+                marker.clear(this.getId());
+            }
         }
     }
 

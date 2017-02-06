@@ -309,13 +309,14 @@ describe("Ext.Element.insertion", function() {
     describe("wrap", function() {
         it("should wrap the element", function() {
             var parent = Ext.getDom(child1).parentNode;
-            
-            child1.wrap({
+
+            var wrap = child1.wrap({
                 cls: 'wrapper'
             });
             
             expect(Ext.getDom(child1).parentNode.parentNode).toEqual(parent);
             expect(Ext.getDom(child1).parentNode.className).toEqual('wrapper');
+            wrap.destroy();
         });
         
         it("return the el", function() {
@@ -324,6 +325,7 @@ describe("Ext.Element.insertion", function() {
             });
             
             expect(Ext.isElement(node)).toBeFalsy();
+            node.destroy();
         });
         
         it("return the dom", function() {
@@ -386,6 +388,52 @@ describe("Ext.Element.insertion", function() {
             var node = child1.insertHtml('afterEnd', '<div></div>', true);
 
             expect(Ext.isElement(node)).toBeFalsy();
+            node.destroy();
+        });
+    });
+
+    describe('Wrapping a Component', function() {
+        var container,
+            cmp,
+            newEl;
+
+        afterEach(function() {
+            container.destroy();
+            newEl.destroy();
+        });
+        it('should not call onFocusLeave on a Component which is wrapped', function() {
+            container = new Ext.Container({
+                items: {
+                    xtype: 'textfield'
+                },
+                renderTo: document.body
+            }),
+            cmp = container.child(),
+            newEl;
+
+            spyOn(container, 'onFocusLeave').andCallThrough();
+
+            cmp.focus();
+
+            waitsFor(function() {
+                return container.containsFocus;
+            });
+
+            runs(function() {
+                expect(Ext.Element.getActiveElement() === cmp.inputEl.dom).toBe(true);
+                newEl = container.el.wrap();
+            });
+
+            // Wait for a possible (it would be a bug) focus leave of the component
+            // we can't wait for anything, because we want NOTHING to happen.
+            waits(10);
+
+            // The Component must have retained focus
+            runs(function() {
+                expect(container.onFocusLeave).not.toHaveBeenCalled();
+                expect(container.containsFocus).toBe(true);
+                expect(Ext.Element.getActiveElement() === cmp.inputEl.dom).toBe(true);
+            });
         });
     });
 }, "/src/dom/Element.insertion.js");

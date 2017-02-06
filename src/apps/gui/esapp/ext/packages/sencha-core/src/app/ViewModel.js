@@ -173,7 +173,7 @@
  *
  * #### Models, Stores and Associations
  *
- * A {@link Ext.data.Session `Session`} manages model instances and their associations. 
+ * A {@link Ext.data.Session Session} manages model instances and their associations.
  * The `ViewModel` may be used with or without a `Session`. When a `Session` is attached, the
  * `ViewModel` will always consult the `Session` to ask about records and stores. The `Session`
  * ensures that only a single instance of each model Type/Id combination is created. This is 
@@ -199,7 +199,7 @@
  *         name: 'Foo'
  *     });
  *     
- *     var viewModel new Ext.app.ViewModel({
+ *     var viewModel = new Ext.app.ViewModel({
  *         links: {
  *             theUser: {
  *                 type: 'User',
@@ -231,7 +231,7 @@
  *         links: {
  *             theUser: {
  *                 type: 'User',
- *                 type: 22
+ *                 id: 22
  *             }
  *         }
  *     });
@@ -296,6 +296,10 @@
  *
  * Stores can be created as part of the `ViewModel` definition. The definitions are processed
  * like bindings which allows for very powerful dynamic functionality.
+ *
+ * It is important to ensure that you name viewModel's data keys uniquely. If data is not named  
+ * uniquely, binds and formulas may receive information from an unintended data source.  
+ * This applies to keys in the viewModel's data block, stores, and links configs.
  *
  *     var viewModel = new Ext.app.ViewModel({
  *         stores: {
@@ -417,12 +421,24 @@ Ext.define('Ext.app.ViewModel', {
          * id but passing `create: true` as part of the descriptor. This is often useful when
          * creating a new record for a child session.
          *
-         *    links: {
-         *        newUser: {
-         *            type: 'User',
-         *            create: true
-         *        }
-         *    } 
+         *     links: {
+         *         newUser: {
+         *             type: 'User',
+         *             create: true
+         *         }
+         *     } 
+         *
+         * `create` can also be an object containing initial data for the record.
+         *
+         *     links: {
+         *         newUser: {
+         *             type: 'User',
+         *             create: {
+         *                 firstName: 'John',
+         *                 lastName: 'Smith'
+         *             }
+         *         }
+         *     } 
          *
          * While that is the typical use, the value of each property in `links` may also be
          * a bind descriptor (see `{@link #method-bind}` for the various forms of bind
@@ -544,7 +560,8 @@ Ext.define('Ext.app.ViewModel', {
     },
 
     constructor: function (config) {
-        this.hadValue = {};
+        // Used to track non-stub bindings
+        this.bindings = {};
         /*
          *  me.data = {
          *      foo: {
@@ -577,14 +594,24 @@ Ext.define('Ext.app.ViewModel', {
             stores = me.storeInfo,
             parent = me.getParent(),
             task = me.collectTask,
+            children = me.children,
+            bindings = me.bindings,
             key, store, autoDestroy;
-
-        me.destroy = Ext.emptyFn;
 
         me.destroying = true;
         if (task) {
             task.cancel();
             me.collectTask = null;
+        }
+
+        // When used with components, they are destroyed bottom up
+        // so this scenario is only likely to happen in the case where
+        // we're using the VM without any component attachment, in which case
+        // we need to clean up here.
+        if (children) {
+            for (key in children) {
+                children[key].destroy();
+            }
         }
 
         if (stores) {
@@ -601,19 +628,22 @@ Ext.define('Ext.app.ViewModel', {
         if (parent) {
             parent.unregisterChild(me);
         }
-
         
         me.getRoot().destroy();
+
+        for (key in bindings) {
+            bindings[key].destroy();
+        }
 
         if (scheduler && scheduler.$owner === me) {
             scheduler.$owner = null;
             scheduler.destroy();
         }
 
-        me.hadValue = me.children = me.storeInfo = me._session = me._view = me._scheduler =
-                      me._root = me._parent = me.formulaFn = me.$formulaData = null;
+        me.children = me.storeInfo = me._session = me._view = me._scheduler =
+                      me.bindings = me._root = me._parent = me.formulaFn = me.$formulaData = null;
 
-        me.destroying = false;
+        me.callParent();
     },
 
     /**
@@ -621,16 +651,40 @@ Ext.define('Ext.app.ViewModel', {
      * `callback`. The data desired is given in a "bind descriptor" which is the first
      * argument.
      *
+     * A simple call might look like this:
+     *
+     *     var binding = vm.bind('{foo}', this.onFoo, this);
+     * 
+     *     binding.destroy();  // when done with the binding
+     *
+     * Options for the binding can be provided in the last argument:
+     *
+     *     var binding = vm.bind('{foo}', this.onFoo, this, {
+     *         deep: true
+     *     });
+     * 
+     * Alternatively, bind options can be combined with the bind descriptor using only
+     * the first argument:
+     *
+     *     var binding = vm.bind({
+     *         bindTo: '{foo}',  // the presence of bindTo identifies this form
+     *         deep: true
+     *     }, this.onFoo, this);
+     * 
+     * See the class documentation for more details on Bind Descriptors and options.
+     *
      * @param {String/Object/Array} descriptor The bind descriptor. See class description
      * for details.
      * @param {Function} callback The function to call with the value of the bound property.
-     * @param {Object} [scope] The scope (`this` pointer) for the callback.
-     * @param {Object} [options]
+     * @param {Object} [scope] The scope (`this` pointer) for the `callback`.
+     * @param {Object} [options] Additional options to configure the {@link Ext.app.bind.Binding binding}.
+     * If this parameter is provided, the `bindTo` form of combining options and bind descriptor is not
+     * recognized.
      * @return {Ext.app.bind.BaseBinding/Ext.app.bind.Binding} The binding.
      */
     bind: function (descriptor, callback, scope, options) {
         var me = this,
-            binding;
+            binding, track;
 
         scope = scope || me;
 
@@ -641,14 +695,18 @@ Ext.define('Ext.app.ViewModel', {
 
         if (!Ext.isString(descriptor)) {
             binding = new Ext.app.bind.Multi(descriptor, me, callback, scope, options);
-        }
-        else if (me.expressionRe.test(descriptor)) {
+            track = true;
+        } else if (me.expressionRe.test(descriptor)) {
             // If we have '{foo}' alone it is a literal
             descriptor = descriptor.substring(1, descriptor.length - 1);
             binding = me.bindExpression(descriptor, callback, scope, options);
-        }
-        else {
+        } else {
             binding = new Ext.app.bind.TemplateBinding(descriptor, me, callback, scope, options);
+            track = true;
+        }
+
+        if (track) {
+            me.bindings[binding.id] = binding;
         }
 
         return binding;
@@ -684,6 +742,11 @@ Ext.define('Ext.app.ViewModel', {
         }
         return store || null;
     },
+    
+    /**
+     * @method getStores
+     * @ignore
+     */
 
     /**
      * Create a link to a reference. See the {@link #links} configuration.
@@ -692,12 +755,11 @@ Ext.define('Ext.app.ViewModel', {
      */
     linkTo: function (key, reference) {
         var me = this,
-            stub = me.getStub(key),
-            id, modelType, linkStub;
+            stub, create, id, modelType, linkStub, rec;
 
         //<debug>
-        if (stub.depth - me.getRoot().depth > 1) {
-            Ext.Error.raise('Links can only be at the top-level: "' + key + '"');
+        if (key.indexOf('.') > -1) {
+            Ext.raise('Links can only be at the top-level: "' + key + '"');
         }
         //</debug>
 
@@ -709,19 +771,30 @@ Ext.define('Ext.app.ViewModel', {
         }
         // reference is backwards compat, type is preferred.
         modelType = reference.type || reference.reference;
+        create = reference.create;
         if (modelType) {
             // It's a record
             id = reference.id;
             //<debug>
             if (!reference.create && Ext.isEmpty(id)) {
-                Ext.Error.raise('No id specified. To create a phantom model, specify "create: true" as part of the reference.');
+                Ext.raise('No id specified. To create a phantom model, specify "create: true" as part of the reference.');
             }
             //</debug>
-            if (reference.create) {
+            if (create) {
                 id = undefined;
             }
-            stub.set(me.getRecord(modelType, id));
+            rec = me.getRecord(modelType, id);
+            if (Ext.isObject(create)) {
+                rec.set(create);
+                rec.commit();
+                rec.phantom = true;
+            }
+            // Force creation at the root level. If an existing stub is there
+            // it will be grafted in place here.
+            stub = me.getRoot().createStubChild(key);
+            stub.set(rec);
         } else {
+            stub = me.getStub(key);
             if (!stub.isLinkStub) {
                 // Pass parent=null since we will graft in this new stub to replace us:
                 linkStub = new Ext.app.bind.LinkStub(me, stub.name);
@@ -732,7 +805,10 @@ Ext.define('Ext.app.ViewModel', {
         }
     },
 
-
+    /**
+     * Forces all bindings in this ViewModel hierarchy to evaluate immediately. Use this to do a synchronous flush
+     * of all bindings.
+     */
     notify: function () {
         this.getScheduler().notify();
     },
@@ -753,21 +829,21 @@ Ext.define('Ext.app.ViewModel', {
      * Set  a value in the data for this viewmodel.
      * @param {Object/String} path The path of the value to set, or an object literal to set
      * at the root of the viewmodel.
-     * @param {Object} The data to set at the value. If the value is an object literal,
+     * @param {Object} value The data to set at the value. If the value is an object literal,
      * any required paths will be created.
      *
-     *    // Set a single property at the root level
-     *    viewModel.set('expiry', Ext.Date.add(new Date(), Ext.Date.DAY, 7));
-     *    console.log(viewModel.get('expiry'));
-     *    // Sets a single property in user.address, does not overwrite any hierarchy.
-     *    viewModel.set('user.address.city', 'London');
-     *    console.log(viewModel.get('user.address.city'));
-     *    // Sets 2 properties of "user". Overwrites any existing hierarchy.
-     *    viewModel.set('user', {firstName: 'Foo', lastName: 'Bar'});
-     *    console.log(viewModel.get('user.firstName'));
-     *    // Sets a single property at the root level. Overwrites any existing hierarchy.
-     *    viewModel.set({rootKey: 1});
-     *    console.log(viewModel.get('rootKey'));
+     *     // Set a single property at the root level
+     *     viewModel.set('expiry', Ext.Date.add(new Date(), Ext.Date.DAY, 7));
+     *     console.log(viewModel.get('expiry'));
+     *     // Sets a single property in user.address, does not overwrite any hierarchy.
+     *     viewModel.set('user.address.city', 'London');
+     *     console.log(viewModel.get('user.address.city'));
+     *     // Sets 2 properties of "user". Overwrites any existing hierarchy.
+     *     viewModel.set('user', {firstName: 'Foo', lastName: 'Bar'});
+     *     console.log(viewModel.get('user.firstName'));
+     *     // Sets a single property at the root level. Overwrites any existing hierarchy.
+     *     viewModel.set({rootKey: 1});
+     *     console.log(viewModel.get('rootKey'));
      */
     set: function (path, value) {
         var me = this,
@@ -803,7 +879,9 @@ Ext.define('Ext.app.ViewModel', {
         
         unregisterChild: function(child) {
             var children = this.children;
-            if (children) {
+            // If we're destroying we'll be wiping this collection shortly, so
+            // just ignore it here
+            if (!this.destroying && children) {
                 delete children[child.getId()];
             }
         },
@@ -944,7 +1022,7 @@ Ext.define('Ext.app.ViewModel', {
             this.getRoot().collect();
         },
 
-        onBindDestroy: function() {
+        onBindDestroy: function(binding, fromChild) {
             var me = this,
                 parent;
 
@@ -952,9 +1030,13 @@ Ext.define('Ext.app.ViewModel', {
                 return;
             }
 
+            if (!fromChild) {
+                delete me.bindings[binding.id];
+            }
+
             parent = me.getParent();
             if (parent) {
-                parent.onBindDestroy();
+                parent.onBindDestroy(me, true);
             } else {
                 me.collect();
             }
@@ -1033,7 +1115,7 @@ Ext.define('Ext.app.ViewModel', {
                 // Get rid of listeners so they don't get considered as a bind
                 listeners = cfg.listeners;
                 delete cfg.listeners;
-                storeBind = me.bind(cfg, me.onStoreBind, me);
+                storeBind = me.bind(cfg, me.onStoreBind, me, {trackStatics: true});
                 if (storeBind.isStatic()) {
                     // Everything is static, we don't need to wait, so remove the
                     // binding because it will only fire the first time.
@@ -1057,7 +1139,7 @@ Ext.define('Ext.app.ViewModel', {
             if (!store) {
                 this.createStore(key, cfg, binding.$listeners, binding);
             } else {
-                cfg = Ext.merge({}, cfg);
+                cfg = Ext.merge({}, binding.pruneStaticKeys());
                 proxy = cfg.proxy;
                 delete cfg.type;
                 delete cfg.model;
@@ -1072,7 +1154,9 @@ Ext.define('Ext.app.ViewModel', {
                     delete proxy.writer;
                     store.getProxy().setConfig(proxy);
                 }
+                store.blockLoad();
                 store.setConfig(cfg);
+                store.unblockLoad(true);
             }
         },
 

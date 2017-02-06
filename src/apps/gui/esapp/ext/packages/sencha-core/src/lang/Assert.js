@@ -10,7 +10,7 @@
  *
  *          debugHooks: {
  *              method: function (a) {
- *                  Ext.Assert.truthy(a, 'Expected "a" to be truthy");
+ *                  Ext.Assert.truthy(a, 'Expected "a" to be truthy');
  *              },
  *
  *              foo: function (object) {

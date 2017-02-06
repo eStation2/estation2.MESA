@@ -8,6 +8,7 @@
 
 Ext.define('Ext.chart.axis.sprite.Axis', {
     extend: 'Ext.draw.sprite.Sprite',
+    alias: 'sprite.axis',
     type: 'axis',
     mixins: {
         markerHolder: 'Ext.chart.MarkerHolder'
@@ -152,7 +153,7 @@ Ext.define('Ext.chart.axis.sprite.Axis', {
                 totalAngle: 'number',
 
                 /**
-                 * @cfg {Number} The starting rotation of the angular axis.
+                 * @cfg {Number} baseRotation The starting rotation of the angular axis.
                  */
                 baseRotation: 'number',
 
@@ -201,7 +202,7 @@ Ext.define('Ext.chart.axis.sprite.Axis', {
                 enlargeEstStepSizeByText: false
             },
 
-            dirtyTriggers: {
+            triggers: {
                 minorTickSize: 'bbox',
                 majorTickSize: 'bbox',
                 position: 'bbox,layout',
@@ -480,7 +481,9 @@ Ext.define('Ext.chart.axis.sprite.Axis', {
             renderer = me.getRenderer(),
             title = me.getAxis().getTitle(),
             titleBBox = title && title.attr.text !== '' && title.getBBox(),
-            labelInverseMatrix, lastBBox = null, bbox, fly, text, titlePadding;
+            labelInverseMatrix, lastBBox = null, bbox, fly, text, titlePadding,
+            translation;
+
         if (majorTicks && label && !label.attr.hidden) {
             font = label.attr.font;
             if (ctx.font !== font) {
@@ -492,14 +495,34 @@ Ext.define('Ext.chart.axis.sprite.Axis', {
             switch (docked) {
                 case 'left':
                     titlePadding = titleBBox ? titleBBox.x + titleBBox.width : 0;
+                    switch (label.attr.textAlign) {
+                        case 'start':
+                            translation = surface.roundPixel(titlePadding + dx) - halfLineWidth;
+                            break;
+                        case 'end':
+                            translation = surface.roundPixel(clipRect[2] - tickPadding + dx) - halfLineWidth;
+                            break;
+                        default: // 'center'
+                            translation = surface.roundPixel(titlePadding + (clipRect[2] - titlePadding - tickPadding) / 2 + dx) - halfLineWidth;
+                    }
                     label.setAttributes({
-                        translationX: surface.roundPixel(titlePadding + (clipRect[2] - titlePadding - tickPadding) / 2 + dx) - halfLineWidth
+                        translationX: translation
                     }, true, true);
                     break;
                 case 'right':
                     titlePadding = titleBBox ? clipRect[2] - titleBBox.x : 0;
+                    switch (label.attr.textAlign) {
+                        case 'start':
+                            translation = surface.roundPixel(tickPadding + dx) + halfLineWidth;
+                            break;
+                        case 'end':
+                            translation = surface.roundPixel(clipRect[2] - titlePadding + dx) + halfLineWidth;
+                            break;
+                        default: // 'center'
+                            translation = surface.roundPixel(tickPadding + (clipRect[2] - tickPadding - titlePadding) / 2 + dx) + halfLineWidth;
+                    }
                     label.setAttributes({
-                        translationX: surface.roundPixel(tickPadding + (clipRect[2] - tickPadding - titlePadding) / 2 + dx) + halfLineWidth
+                        translationX: translation
                     }, true, true);
                     break;
                 case 'top':
@@ -562,23 +585,6 @@ Ext.define('Ext.chart.axis.sprite.Axis', {
                     if (labelText === undefined) {
                         return;
                     }
-                    // TODO: When a custom renderer is used, the labels don't go through the segmenter.renderer
-                    // TODO: and so if they are numbers they don't get rounded, we have to take care of it in our
-                    // TODO: custom renderer. It may appear that they have the precision we want already, so
-                    // TODO: for our custom renderer we could just use function (v) { return v + '%'; }, but this is
-                    // TODO: deceiving, as the min/max values are not aligned by the Numeric (or Time) segmenter
-                    // TODO: (see layout.Continuous#snapEnds) since segmenter.from simply returns the passed value.
-                    // TODO: So what we get is sever jittering during axis range animation because the min/max
-                    // TODO: labels (typically max, since min is often 0) will have varying mantissa during animation.
-                    // TODO: The min/max should always be aligned as well as intermidiate ticks, because who really
-                    // TODO: wants to have axis with values like this [-13.5233, -10, -5, 0, 5, 10, 12.2352]?
-                    // TODO: Granted, it will only look this way if we defined our own custom render and don't do
-                    // TODO: the rounding there, like in the example above. But even without a custom renderer
-                    // TODO: the labels will look like this [-13, -10, -5, 0, 5, 10, 12]. The spacing between the
-                    // TODO: ticks and the grid lines is still inconsistent, which doesn't look right to most everybody.
-                    // TODO: Alternatively, alignMaximum/MinimumByMajorUnit configs should be implemented
-                    // TODO: and set to 'true' by default.
-                    // TODO: For now taking care of rounding in custom renderers is the way to go.
                     text = renderer ? renderer.call(this, labelText, layout, lastLabelText) : segmenter.renderer(labelText, layout, lastLabelText);
                     lastLabelText = labelText;
                     label.setAttributes({
@@ -756,6 +762,7 @@ Ext.define('Ext.chart.axis.sprite.Axis', {
 
     renderGridLines: function (surface, ctx, layout, clipRect) {
         var me = this,
+            axis = me.getAxis(),
             attr = me.attr,
             matrix = attr.matrix,
             startGap = attr.startGap,
@@ -765,15 +772,17 @@ Ext.define('Ext.chart.axis.sprite.Axis', {
             dx = matrix.getDX(),
             dy = matrix.getDY(),
             position = attr.position,
+            alignment = axis.getGridAlignment(),
             majorTicks = layout.majorTicks,
             anchor, j, lastAnchor;
+
         if (attr.grid) {
             if (majorTicks) {
                 if (position === 'left' || position === 'right') {
                     lastAnchor = attr.min * yy + dy + endGap + startGap;
                     me.iterate(majorTicks, function (position, labelText, i) {
                         anchor = position * yy + dy + endGap;
-                        me.putMarker('horizontal-' + (i % 2 ? 'odd' : 'even'), {
+                        me.putMarker(alignment + '-' + (i % 2 ? 'odd' : 'even'), {
                             y: anchor,
                             height: lastAnchor - anchor
                         }, j = i, true);
@@ -781,21 +790,21 @@ Ext.define('Ext.chart.axis.sprite.Axis', {
                     });
                     j++;
                     anchor = 0;
-                    me.putMarker('horizontal-' + (j % 2 ? 'odd' : 'even'), {
+                    me.putMarker(alignment + '-' + (j % 2 ? 'odd' : 'even'), {
                         y: anchor,
                         height: lastAnchor - anchor
                     }, j, true);
                 } else if (position === 'top' || position === 'bottom') {
                     lastAnchor = attr.min * xx + dx + startGap;
                     if (startGap) {
-                        me.putMarker('vertical-even', {
+                        me.putMarker(alignment + '-even', {
                             x: 0,
                             width: lastAnchor
                         }, -1, true);
                     }
                     me.iterate(majorTicks, function (position, labelText, i) {
                         anchor = position * xx + dx + startGap;
-                        me.putMarker('vertical-' + (i % 2 ? 'odd' : 'even'), {
+                        me.putMarker(alignment + '-' + (i % 2 ? 'odd' : 'even'), {
                             x: anchor,
                             width: lastAnchor - anchor
                         }, j = i, true);
@@ -803,7 +812,7 @@ Ext.define('Ext.chart.axis.sprite.Axis', {
                     });
                     j++;
                     anchor = attr.length + attr.startGap + attr.endGap;
-                    me.putMarker('vertical-' + (j % 2 ? 'odd' : 'even'), {
+                    me.putMarker(alignment + '-' + (j % 2 ? 'odd' : 'even'), {
                         x: anchor,
                         width: lastAnchor - anchor
                     }, j, true);
@@ -813,7 +822,7 @@ Ext.define('Ext.chart.axis.sprite.Axis', {
                             return;
                         }
                         anchor = position / attr.max * attr.length;
-                        me.putMarker('circular-' + (i % 2 ? 'odd' : 'even'), {
+                        me.putMarker(alignment + '-' + (i % 2 ? 'odd' : 'even'), {
                             scalingX: anchor,
                             scalingY: anchor
                         }, i, true);
@@ -825,7 +834,7 @@ Ext.define('Ext.chart.axis.sprite.Axis', {
                             return;
                         }
                         anchor = position / (attr.max + 1) * Math.PI * 2 + attr.baseRotation;
-                        me.putMarker('radial-' + (i % 2 ? 'odd' : 'even'), {
+                        me.putMarker(alignment + '-' + (i % 2 ? 'odd' : 'even'), {
                             rotationRads: anchor,
                             rotationCenterX: 0,
                             rotationCenterY: 0,
@@ -839,9 +848,11 @@ Ext.define('Ext.chart.axis.sprite.Axis', {
         }
     },
 
-    renderLimits: function () {
+    renderLimits: function (clipRect) {
         var me = this,
             axis = me.getAxis(),
+            chart = axis.getChart(),
+            innerPadding = chart.getInnerPadding(),
             limits = Ext.Array.from(axis.getLimits());
 
         if (!limits.length) {
@@ -867,7 +878,8 @@ Ext.define('Ext.chart.axis.sprite.Axis', {
                 !limit.line && (limit.line = {});
                 value = Ext.isString(limit.value) ? axis.getCoordFor(limit.value) : limit.value;
                 value = value * matrix.getYY() + matrix.getDY();
-                limit.line.y = value;
+                limit.line.y = value + innerPadding.top;
+                limit.line.strokeStyle = limit.line.strokeStyle || attr.strokeStyle;
                 me.putMarker('horizontal-limit-lines', limit.line, i, true);
                 if (limit.line.title) {
                     titles.createInstance(limit.line.title);
@@ -886,7 +898,7 @@ Ext.define('Ext.chart.axis.sprite.Axis', {
                     }
                     titles.setAttributesFor(titles.position - 1, {
                         x: x,
-                        y: value - titleBBox.height / 2,
+                        y: limit.line.y - titleBBox.height / 2,
                         textAlign: titlePosition,
                         fillStyle: limit.line.title.fillStyle || limit.line.strokeStyle
                     });
@@ -898,7 +910,8 @@ Ext.define('Ext.chart.axis.sprite.Axis', {
                 !limit.line && (limit.line = {});
                 value = Ext.isString(limit.value) ? axis.getCoordFor(limit.value) : limit.value;
                 value = value * matrix.getXX() + matrix.getDX();
-                limit.line.x = value;
+                limit.line.x = value + innerPadding.left;
+                limit.line.strokeStyle = limit.line.strokeStyle || attr.strokeStyle;
                 me.putMarker('vertical-limit-lines', limit.line, i, true);
                 if (limit.line.title) {
                     titles.createInstance(limit.line.title);
@@ -916,7 +929,7 @@ Ext.define('Ext.chart.axis.sprite.Axis', {
                             break;
                     }
                     titles.setAttributesFor(titles.position - 1, {
-                        x: value + titleBBox.height / 2,
+                        x: limit.line.x + titleBBox.height / 2,
                         y: y,
                         fillStyle: limit.line.title.fillStyle || limit.line.strokeStyle,
                         rotationRads: Math.PI / 2
@@ -936,6 +949,7 @@ Ext.define('Ext.chart.axis.sprite.Axis', {
                 limit.line.cy = attr.centerY;
                 limit.line.scalingX = value;
                 limit.line.scalingY = value;
+                limit.line.strokeStyle = limit.line.strokeStyle || attr.strokeStyle;
                 me.putMarker('circular-limit-lines', limit.line, i, true);
                 if (limit.line.title) {
                     titles.createInstance(limit.line.title);
@@ -960,6 +974,7 @@ Ext.define('Ext.chart.axis.sprite.Axis', {
                 limit.line.rotationCenterY = 0;
                 limit.line.scalingX = attr.length;
                 limit.line.scalingY = attr.length;
+                limit.line.strokeStyle = limit.line.strokeStyle || attr.strokeStyle;
                 me.putMarker('radial-limit-lines', limit.line, i, true);
                 if (limit.line.title) {
                     titles.createInstance(limit.line.title);
@@ -996,7 +1011,7 @@ Ext.define('Ext.chart.axis.sprite.Axis', {
             me.renderTicks(surface, ctx, layout, clipRect);
             me.renderAxisLine(surface, ctx, layout, clipRect);
             me.renderGridLines(surface, ctx, layout, clipRect);
-            me.renderLimits();
+            me.renderLimits(clipRect);
             ctx.stroke();
         }
     }

@@ -14,6 +14,11 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
         });
         myLoadMask.show();
 
+        //console.info(me.yearsToCompare);
+        var selectedYears = me.yearsToCompare;
+        if (me.yearsToCompare != '')
+            selectedYears = Ext.util.JSON.encode(me.yearsToCompare);
+
         Ext.Ajax.request({
             url:"analysis/gettimeseries",
             timeout : 300000,
@@ -23,6 +28,10 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 yearTS: me.yearTS,
                 tsFromPeriod: Ext.Date.format(me.tsFromPeriod, 'Y-m-d'),
                 tsToPeriod: Ext.Date.format(me.tsToPeriod, 'Y-m-d'),
+                yearsToCompare: selectedYears,
+                //yearsToCompare: me.yearsToCompare,
+                tsFromSeason: Ext.Date.format(me.tsFromSeason, 'm-d'),
+                tsToSeason: Ext.Date.format(me.tsToSeason, 'm-d'),
                 WKT:me.wkt,
                 charttype: me.charttype
             },
@@ -41,7 +50,6 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 //        callback(me);
                 //    }
                 //});
-
             },
             failure: function ( result, request) {
                myLoadMask.hide();
@@ -53,15 +61,36 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
         var me = this.getView();
         var chartpropertiesStore = this.getStore('chartproperties');
         me.timeseriesChart = {};
+        me.timeseriesChart.localRefresh = false;
 
         me.timeseriesChart.title = Ext.getCmp('selectedregionname').getValue();
         me.timeseriesChart.subtitle = '';
+        //if (Ext.isObject(Ext.getCmp('radio-year')) &&  Ext.getCmp('radio-year').getValue() && me.yearTS != '') {
         if (me.yearTS != '') {
             me.timeseriesChart.subtitle = me.yearTS;
         }
-        else {
+        //else if (Ext.getCmp('radio-compareyears').getValue() && me.yearsToCompare != '') {
+        else if (me.yearsToCompare != '') {
+            //me.yearsToCompare = Ext.util.JSON.decode(me.yearsToCompare);
+            if (me.yearsToCompare.length == 1){
+                me.yearsToCompare.forEach(function(year){
+                    me.timeseriesChart.subtitle = year;
+                })
+                if ( me.tsFromSeason != null && me.tsToSeason != null){
+                    me.timeseriesChart.subtitle = 'Season ' +  Ext.Date.format(me.tsFromSeason, 'm/d') + ' - ' + Ext.Date.format(me.tsToSeason, 'm/d') + ' of ' + me.timeseriesChart.subtitle;
+                }
+            }
+        }
+        //else if ( Ext.getCmp('radio-fromto').getValue() ){
+        else if ( me.tsFromPeriod != '' && me.tsToPeriod != ''){
+
             me.timeseriesChart.subtitle = esapp.Utils.getTranslation('from') + ' ' + Ext.Date.format(me.tsFromPeriod, 'Y-m-d') + '  ' + esapp.Utils.getTranslation('to') + ' ' + Ext.Date.format(me.tsToPeriod, 'Y-m-d');
         }
+        else if ( me.tsFromSeason != null && me.tsToSeason != null){
+            me.timeseriesChart.subtitle = 'Season ' +  Ext.Date.format(me.tsFromSeason, 'm/d') + ' - ' + Ext.Date.format(me.tsToSeason, 'm/d');
+        }
+
+
         me.timeseriesChart.filename = me.timeseriesChart.title + '_' + me.timeseriesChart.subtitle.toString().replace(' ', '_');
 
         chartpropertiesStore.each(function(chartproperties) {   // Should always be 1 record!!
@@ -113,18 +142,14 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             plotBackgroundImage = 'resources/img/no_data.gif';
         }
 
-        //var xaxis_labelstyle = {
-        //        color: '#000',
-        //        font: 'bold 20px Arial, Verdana, Helvetica, sans-serif',
-        //        margin: '0 0 0 0'
-        //    }
         var xAxisLabels = {};
         if (me.timeseriesGraph.showYearInTicks) {      //  === 'true'
             xAxisLabels = {
                 enabled: 1,
-                autoRotation: [-3, -5],
-                autoRotationLimit: -5,
+                //autoRotation: [-3, -5],
+                autoRotationLimit: -40,
                 //step: 2,
+                //autoRotation: [0,-90],
                 y: 34,
                 padding: 10,
                 //useHTML: false,
@@ -138,7 +163,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                     ,margin: '0 0 0 0'
                 },
                 formatter: function () {
-                    return Highcharts.dateFormat('%b', this.value) + '</BR>' + Highcharts.dateFormat('\'%y', this.value);
+                    return Highcharts.dateFormat('%b', this.value) + '<br/>' + Highcharts.dateFormat('\'%y', this.value);
                 }
             };
         } else {
@@ -159,48 +184,234 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             };
         }
 
-        for (var tscount = 0; tscount < me.timeseriesGraph.timeseries.length; tscount++) {
+        var xAxis = [];
+        if (me.yearsToCompare != '' && me.yearsToCompare.length > 1) {
+            var xAxe = {};
+            var xaxeVisible = true;
+            var minPeriod =  '/01/01';    //      Ext.Date.format(me.tsFromSeason, 'm-d');
+            var maxPeriod = '/12/31';     //      Ext.Date.format(me.tsToSeason, 'm-d');
 
-            var tscolor = me.timeseriesGraph.timeseries[tscount].color;
-            var tstype = me.timeseriesGraph.timeseries[tscount].type;
-            var tsname = me.timeseriesGraph.timeseries[tscount].name;
-
-            if (tsname.indexOf('transparent') == -1) { // Not a transparent timeseries
-                if (tstype == 'area') {
-                    tscolor = me.timeseriesGraph.timeseries[tscount].fillColor;
-                }
-                tscolor = esapp.Utils.convertRGBtoHex(tscolor);
-
-                if (tstype == 'area') {
-                    me.timeseriesGraph.timeseries[tscount].fillColor = tscolor;
+            me.yearsToCompare.forEach(function(year){
+                if (me.tsFromSeason != null && me.tsToSeason != null){
+                    minPeriod = new Date(year + Ext.Date.format(me.tsFromSeason, '/m/d')).getTime();
+                    maxPeriod = new Date(year + Ext.Date.format(me.tsToSeason, '/m/d')).getTime();
+                    if (Ext.Date.format(me.tsToSeason, 'm') < Ext.Date.format(me.tsFromSeason, 'm')){
+                        maxPeriod = new Date(year+1 + Ext.Date.format(me.tsToSeason, '/m/d')).getTime();
+                    }
                 }
                 else {
-                    me.timeseriesGraph.timeseries[tscount].color = tscolor;
+                    minPeriod = new Date(year + '/01/01').getTime();
+                    maxPeriod = new Date(year + '/12/31').getTime();
                 }
 
-                //if (tscolor.charAt(0) != "#") { // convert RBG to HEX if RGB value is given. Highcharts excepts only HEX.
-                //    var rgbarr = [];
-                //    if (esapp.Utils.is_array(tscolor)) {
-                //        rgbarr = tscolor;
-                //    }
-                //    else {
-                //        rgbarr = tscolor.split(" "); // toString().replace(/,/g,' ');
-                //    }
-                //
-                //    var tsR = rgbarr[0];
-                //    var tsG = rgbarr[1];
-                //    var tsB = rgbarr[2];
-                //    tscolor = esapp.Utils.RGBtoHex(tsR, tsG, tsB);
-                //
-                //    if (tstype == 'area') {
-                //        me.timeseriesGraph.timeseries[tscount].fillColor = tscolor;
-                //    }
-                //    else {
-                //        me.timeseriesGraph.timeseries[tscount].color = tscolor;
+                xAxe = {
+                    id: year.toString(),
+                    visible: xaxeVisible,
+                    type: 'datetime',
+                    startOnTick: false,
+                    endOnTick: true,
+                    //offset: 25,
+                    lineWidth: 2,
+                    labels: xAxisLabels,
+                    tickInterval: 30 * 24 * 3600 * 1000,
+                    min: minPeriod,
+                    max: maxPeriod
+                };
+                xaxeVisible = false;
+                xAxis.push(xAxe);
+            })
+            //console.info(xAxis);
+        }
+        else {
+            xAxis = [{
+                type: 'datetime',
+                //tickmarkPlacement: 'on',      // on between  - For categorized axes only!
+                startOnTick: false,
+                lineWidth: 2,
+                labels: xAxisLabels,
+                tickInterval: 30 * 24 * 3600 * 1000
+
+                //labels: {
+                //    enabled: 1,
+                //    y:28,
+                //    //step: 1,
+                //    style: xaxis_labelstyle,
+                //    formatter: function() {
+                //        return Highcharts.dateFormat('%b', this.value);
                 //    }
                 //}
+                //,minorTickInterval: 3
+                //dateTimeLabelFormats: {
+                //    day: '%e %b'
+                //},
+                //categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            }]
+        }
+
+        if (!me.timeseriesChart.localRefresh) {
+            var TimeseriesCumulatedAverages = null;
+            var TimeseriesCumulatedData = null;
+            var aboveAvgColor = '#0000ff';
+            me.timeseriesGraph.timeseries.forEach(function (timeserie) {
+                if (timeserie.cumulative) {
+                    //me.timeseriesGraph.cumulative = true;
+                    timeserie.type = 'line';
+                    timeserie.dashStyle = 'Solid';
+                    timeserie.lineWidth = 2;
+
+                    var cumulated = 0;
+                    timeserie.data.forEach(function (datarecord) {
+                        datarecord[1] += cumulated;
+                        cumulated = datarecord[1];
+                    })
+
+                    //TimeseriesCumulatedData = Ext.clone(timeserie.data);
+                    //aboveAvgColor = timeserie.color;
+                    //
+                    //me.timeseriesGraph.timeseries.forEach(function (AVGtimeserie) {
+                    //    if (AVGtimeserie.cumulative && AVGtimeserie.yAxis == timeserie.yAxis && AVGtimeserie.average == true) {
+                    //        AVGtimeserie.type = 'line';
+                    //        AVGtimeserie.dashStyle = 'Solid';
+                    //        AVGtimeserie.lineWidth = 1;
+                    //        var cumulated = 0;
+                    //        AVGtimeserie.data.forEach(function (datarecord) {
+                    //            datarecord[1] += cumulated;
+                    //            cumulated = datarecord[1];
+                    //        })
+                    //        TimeseriesCumulatedAverages = Ext.clone(AVGtimeserie.data);
+                    //    }
+                    //});
+
+                    if (timeserie.difference == true) {
+                        TimeseriesCumulatedAverages = Ext.clone(timeserie.data);
+                    }
+                    else if (timeserie.reference == true){
+                        //console.info(timeserie);
+                        TimeseriesCumulatedData = Ext.clone(timeserie.data);
+                        aboveAvgColor = timeserie.color;
+                    }
+                }
+            });
+
+
+            if (TimeseriesCumulatedData != null && TimeseriesCumulatedAverages != null) {
+                var i = 0, cumulatedPositive = [], cumulatedNegative = [], cumulatedMinValue = [], newDataValue = [];
+
+                for (i = 0; i < TimeseriesCumulatedData.length; i++) {
+                    newDataValue = Ext.clone(TimeseriesCumulatedData[i]);
+                    newDataValue[1] = TimeseriesCumulatedAverages[i][1] - TimeseriesCumulatedData[i][1];
+                    if (newDataValue[1] > 0) newDataValue[1] = 0;
+                    else newDataValue[1] = newDataValue[1] * -1;
+                    cumulatedPositive.push(newDataValue);
+                    //newDataValue = [];
+                }
+                //console.info(aboveAvgColor);
+                aboveAvgColor = esapp.Utils.convertRGBtoHex(aboveAvgColor);
+                var aboveAvg = {
+                    data: cumulatedPositive,
+                    fillColor: aboveAvgColor,
+                    color: aboveAvgColor,
+                    id: "Above",
+                    name: "Above",
+                    type: "area",
+                    showInLegend: true,
+                    enableMouseTracking: false
+                }
+
+                //newDataValue = [];
+                for (i = 0; i < TimeseriesCumulatedData.length; i++) {
+                    newDataValue = Ext.clone(TimeseriesCumulatedData[i]);
+                    newDataValue[1] = TimeseriesCumulatedAverages[i][1] - TimeseriesCumulatedData[i][1];
+                    if (newDataValue[1] < 0) newDataValue[1] = 0;
+                    cumulatedNegative.push(newDataValue);
+                    //newDataValue = [];
+                }
+
+                var belowAvg = {
+                    data: cumulatedNegative,
+                    fillColor: "#ff0000",
+                    color: "#ff0000",
+                    id: "Below",
+                    name: "Below",
+                    type: "area",
+                    showInLegend: true,
+                    enableMouseTracking: false
+                }
+
+                //newDataValue = [];
+                for (i = 0; i < TimeseriesCumulatedData.length; i++) {
+                    newDataValue = Ext.clone(TimeseriesCumulatedAverages[i]);
+                    if (TimeseriesCumulatedData[i][1] < TimeseriesCumulatedAverages[i][1]) {
+                        newDataValue = TimeseriesCumulatedData[i];
+                    }
+                    cumulatedMinValue.push(newDataValue);
+                    //newDataValue = [];
+                }
+                //console.info(cumulatedMinValue);
+
+                var transparentAvg = {
+                    data: cumulatedMinValue,
+                    fillColor: "rgba(255,255,255,0)",
+                    color: "#ffffff",
+                    id: "Cum transparent",
+                    name: "Cum transparent",
+                    type: "area",
+                    showInLegend: false,
+                    enableMouseTracking: false
+                }
+
+                me.timeseriesGraph.timeseries.push(aboveAvg);
+                me.timeseriesGraph.timeseries.push(belowAvg);
+                me.timeseriesGraph.timeseries.push(transparentAvg);
+                //console.info(me.timeseriesGraph.timeseries);
             }
         }
+
+        me.timeseriesGraph.timeseries.forEach(function (timeserie) {
+            timeserie.color = esapp.Utils.convertRGBtoHex(timeserie.color);
+        });
+
+        //for (var tscount = 0; tscount < me.timeseriesGraph.timeseries.length; tscount++) {
+        //    var tscolor = me.timeseriesGraph.timeseries[tscount].color;
+        //    var tstype = me.timeseriesGraph.timeseries[tscount].type;
+        //    var tsname = me.timeseriesGraph.timeseries[tscount].name;
+        //
+        //    if (tsname.indexOf('transparent') == -1) { // Not a transparent timeseries
+        //        if (tstype == 'area') {
+        //            tscolor = me.timeseriesGraph.timeseries[tscount].fillColor;
+        //        }
+        //        tscolor = esapp.Utils.convertRGBtoHex(tscolor);
+        //
+        //        if (tstype == 'area') {
+        //            me.timeseriesGraph.timeseries[tscount].fillColor = tscolor;
+        //        }
+        //        else {
+        //            me.timeseriesGraph.timeseries[tscount].color = tscolor;
+        //        }
+        //
+        //        //if (tscolor.charAt(0) != "#") { // convert RBG to HEX if RGB value is given. Highcharts excepts only HEX.
+        //        //    var rgbarr = [];
+        //        //    if (esapp.Utils.is_array(tscolor)) {
+        //        //        rgbarr = tscolor;
+        //        //    }
+        //        //    else {
+        //        //        rgbarr = tscolor.split(" "); // toString().replace(/,/g,' ');
+        //        //    }
+        //        //
+        //        //    var tsR = rgbarr[0];
+        //        //    var tsG = rgbarr[1];
+        //        //    var tsB = rgbarr[2];
+        //        //    tscolor = esapp.Utils.RGBtoHex(tsR, tsG, tsB);
+        //        //
+        //        //    if (tstype == 'area') {
+        //        //        me.timeseriesGraph.timeseries[tscount].fillColor = tscolor;
+        //        //    }
+        //        //    else {
+        //        //        me.timeseriesGraph.timeseries[tscount].color = tscolor;
+        //        //    }
+        //        //}
+        //    }
+        //}
 
         var Yaxes = [];
         var timeseries_names = '';
@@ -231,6 +442,11 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 max = parseFloat(me.timeseriesGraph.yaxes[yaxescount].max)
             }
 
+            //if (me.timeseriesGraph.cumulative){
+            //    min = null;
+            //    max = null;
+            //}
+
             me.timeseriesGraph.yaxes[yaxescount].title_color = esapp.Utils.convertRGBtoHex(me.timeseriesGraph.yaxes[yaxescount].title_color);
 
             if (yaxescount == 0) me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size = me.timeseriesChart.yaxe1_font_size;
@@ -257,6 +473,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 id: me.timeseriesGraph.yaxes[yaxescount].id,
                 //tickAmount: 8,
                 gridLineWidth: 1,
+                offset: 10,
                 labels: {
                     format: '{value} ',
                     style: {
@@ -286,6 +503,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
         me.filename = timeseries_names + me.timeseriesChart.title.replace(' ', '_') + '_' + me.timeseriesChart.subtitle.toString().replace(' ', '_');
 
         var timeseries = me.timeseriesGraph.timeseries;
+        //console.info(timeseries);
 
         var spacingRight = 10;
         if (me.timeseriesGraph.yaxes.length == 1) {
@@ -364,6 +582,10 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                     borderWidth: 0,
                     groupPadding: 0,
                     shadow: false
+                },
+                area: {
+                    stacking: 'normal',
+                    lineWidth: 1
                 }
             },
             title: {
@@ -388,31 +610,33 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                     "fontSize": me.timeseriesChart.chart_subtitle_font_size + 'px'
                 }
             },
-            xAxis: [{
-                type: 'datetime',
-                //tickmarkPlacement: 'on', // on between  - For categorized axes only!
-                startOnTick: false,
-                labels: xAxisLabels,
-                tickInterval: 30 * 24 * 3600 * 1000
-
-                //labels: {
-                //    enabled: 1,
-                //    y:28,
-                //    //step: 1,
-                //    style: xaxis_labelstyle,
-                //    formatter: function() {
-                //        return Highcharts.dateFormat('%b', this.value);
-                //    }
-                //}
-                //,minorTickInterval: 3
-                //dateTimeLabelFormats: {
-                //    day: '%e %b'
-                //},
-                //categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            }],
+            xAxis: xAxis,
+            //xAxis: [{
+            //    type: 'datetime',
+            //    //tickmarkPlacement: 'on', // on between  - For categorized axes only!
+            //    startOnTick: false,
+            //    labels: xAxisLabels,
+            //    tickInterval: 30 * 24 * 3600 * 1000
+            //
+            //    //labels: {
+            //    //    enabled: 1,
+            //    //    y:28,
+            //    //    //step: 1,
+            //    //    style: xaxis_labelstyle,
+            //    //    formatter: function() {
+            //    //        return Highcharts.dateFormat('%b', this.value);
+            //    //    }
+            //    //}
+            //    //,minorTickInterval: 3
+            //    //dateTimeLabelFormats: {
+            //    //    day: '%e %b'
+            //    //},
+            //    //categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            //}],
             yAxis: Yaxes,
             tooltip: {
                 shared: true,
+                split: true,
                 dateTimeLabelFormats: {
                     millisecond: '',
                     second: '',
@@ -451,13 +675,295 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
 
         me.tschart.setSize(document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight);
         me.tschart.redraw();
+        //console.info(me.tschart);
+    },
+
+    createRankingChart: function(mecallback) {
+        var me = mecallback;
+        var plotBackgroundImage = '';
+        var categories = [];
+
+        if (!me.timeseriesGraph.data_available) {
+            plotBackgroundImage = 'resources/img/no_data.gif';
+        }
+
+        var xAxisLabels = {
+            enabled: 1,
+            y: 34,
+            style: {
+                color: me.timeseriesChart.xaxe_font_color,
+                "font-family": 'Arial, Verdana, Helvetica, sans-serif',
+                "fontWeight": 'bold',
+                "fontSize": me.timeseriesChart.xaxe_font_size + 'px',
+                margin: '0 0 0 0'
+            }
+        };
+
+        var xAxis = [{
+                type: 'category',
+                tickmarkPlacement: 'between',      // on between  - For categorized axes only!
+                startOnTick: true,
+                //lineWidth: 2,
+                labels: xAxisLabels
+            }]
+
+        me.timeseriesGraph.timeseries.forEach(function (timeserie) {
+            timeserie.data.forEach(function (dataItem){
+                dataItem.color = esapp.Utils.convertRGBtoHex(dataItem.color);
+            })
+            timeserie.color = esapp.Utils.convertRGBtoHex(timeserie.color);
+        });
+
+
+        var Yaxes = [];
+        var timeseries_names = '';
+        for (var yaxescount = 0; yaxescount < me.timeseriesGraph.yaxes.length; yaxescount++) {
+            var opposite = false;
+            if (me.timeseriesGraph.yaxes[yaxescount].opposite === 'true' ||
+                me.timeseriesGraph.yaxes[yaxescount].opposite == true ||
+                me.timeseriesGraph.yaxes[yaxescount].opposite == 'true')
+                opposite = true;
+
+            var unit = me.timeseriesGraph.yaxes[yaxescount].unit;
+            if (unit == null || unit.trim() == '')
+                unit = ''
+            else unit = ' (' + unit + ')'
+
+            var min = me.timeseriesGraph.yaxes[yaxescount].min;
+            if (min == null || min == '' || min == 'null'){
+                min = null
+            }
+            else {
+                min =  parseFloat(me.timeseriesGraph.yaxes[yaxescount].min)
+            }
+            var max = me.timeseriesGraph.yaxes[yaxescount].max;
+            if (max == null || max == '' || max == 'null') {
+                max = null
+            }
+            else {
+                max = parseFloat(me.timeseriesGraph.yaxes[yaxescount].max)
+            }
+
+            me.timeseriesGraph.yaxes[yaxescount].title_color = esapp.Utils.convertRGBtoHex(me.timeseriesGraph.yaxes[yaxescount].title_color);
+
+            if (yaxescount == 0) me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size = me.timeseriesChart.yaxe1_font_size;
+            if (yaxescount == 1) me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size = me.timeseriesChart.yaxe2_font_size;
+            if (yaxescount == 2) me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size = me.timeseriesChart.yaxe3_font_size;
+
+            var yaxe = {
+                id: me.timeseriesGraph.yaxes[yaxescount].id,
+                //tickAmount: 8,
+                gridLineWidth: 1,
+                offset: 10,
+                labels: {
+                    format: '{value} ',
+                    style: {
+                        color: me.timeseriesGraph.yaxes[yaxescount].title_color,  // Highcharts.getOptions().colors[yaxescount],
+                        "font-family": 'Arial, Verdana, Helvetica, sans-serif',
+                        "fontWeight": 'bold',
+                        "fontSize": me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size + 'px'
+                    }
+                },
+                title: {
+                    text: me.timeseriesGraph.yaxes[yaxescount].title + unit,
+                    style: {
+                        color: me.timeseriesGraph.yaxes[yaxescount].title_color,  // Highcharts.getOptions().colors[yaxescount],
+                        "font-family": 'Arial, Verdana, Helvetica, sans-serif',
+                        "fontWeight": 'bold',
+                        "fontSize": me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size + 'px'
+                    }
+                },
+                opposite: opposite
+                ,min: min
+                ,max: max
+            };
+            Yaxes.push(yaxe);
+            timeseries_names += me.timeseriesGraph.yaxes[yaxescount].title.replace(' ', '_') + '_';
+        }
+
+        me.filename = timeseries_names + me.timeseriesChart.title.replace(' ', '_') + '_' + me.timeseriesChart.subtitle.toString().replace(' ', '_');
+
+        var timeseries = me.timeseriesGraph.timeseries;
+        //console.info(timeseries);
+
+        var spacingRight = 10;
+        if (me.timeseriesGraph.yaxes.length == 1) {
+            spacingRight = 40;
+        }
+
+
+        me.tschart = new Highcharts.Chart({
+            //colors: ['#006600', '#000000', '#0070CC', '#00008A', '#8C8C8C', '#1EB611', '#FF9655', '#FFF263', '#6AF9C4'],
+            chart: {
+                renderTo: 'tschart_' + me.id,
+                className: 'chartfitlayout',
+                zoomType: 'xy',
+                spacingRight: spacingRight,
+                alignTicks: true,
+                //margin: chartMargin, // [35, 15, 65, 65],  // for legend on the bottom of the chart
+                //marginTop:top,
+                //marginRight: marginright,
+                //marginBottom: 160,
+                //marginLeft:left,
+                plotBackgroundImage: plotBackgroundImage
+            },
+            exporting: {
+                enabled: false,
+                buttons: {
+                    exportButton: {
+                        enabled: false
+                    },
+                    printButton: {
+                        enabled: false
+                    }
+
+                }
+            },
+            //exporting: {
+            //    //chartOptions: { // specific options for the exported image
+            //    //    plotOptions: {
+            //    //        series: {
+            //    //            dataLabels: {
+            //    //                enabled: false
+            //    //            }
+            //    //        }
+            //    //    }
+            //    //},
+            //    scale: 1,
+            //    fallbackToExportServer: false
+            //},
+            credits: {
+                enabled: false
+            },
+            //plotOptions: {
+            //    series: {
+            //        marker: {
+            //            enabled: false,
+            //            states: {
+            //                hover: {
+            //                    enabled: true,
+            //                    radius: 4,
+            //                    radiusPlus: 0
+            //                    // lineWidthPlus: 2,
+            //                }
+            //            }
+            //        },
+            //        states: {
+            //            hover: {
+            //                halo: {
+            //                    size: 0
+            //                },
+            //                lineWidthPlus: 1
+            //            }
+            //        }
+            //    },
+            //    column: {
+            //        pointPadding: 10,
+            //        //pointWidth: 15,
+            //        borderWidth: 0,
+            //        groupPadding: 10,
+            //        shadow: false
+            //    },
+            //    area: {
+            //        stacking: 'normal',
+            //        lineWidth: 1
+            //    }
+            //},
+            title: {
+                text: me.timeseriesChart.title,
+                align: 'center',
+                //y: 50,
+                style: {
+                    color: me.timeseriesChart.chart_title_font_color,
+                    "font-family": 'Arial, Verdana, Helvetica, sans-serif',
+                    "fontWeight": 'bold',
+                    "fontSize": me.timeseriesChart.chart_title_font_size + 'px'
+                }
+            },
+            subtitle: {
+                text: me.timeseriesChart.subtitle,
+                align: 'center',
+                //y: 65,
+                style: {
+                    color: me.timeseriesChart.chart_subtitle_font_color,
+                    "font-family": 'Arial, Verdana, Helvetica, sans-serif',
+                    "fontWeight": 'bold',
+                    "fontSize": me.timeseriesChart.chart_subtitle_font_size + 'px'
+                }
+            },
+            xAxis: xAxis,
+            //xAxis: [{
+            //    type: 'datetime',
+            //    //tickmarkPlacement: 'on', // on between  - For categorized axes only!
+            //    startOnTick: false,
+            //    labels: xAxisLabels,
+            //    tickInterval: 30 * 24 * 3600 * 1000
+            //
+            //    //labels: {
+            //    //    enabled: 1,
+            //    //    y:28,
+            //    //    //step: 1,
+            //    //    style: xaxis_labelstyle,
+            //    //    formatter: function() {
+            //    //        return Highcharts.dateFormat('%b', this.value);
+            //    //    }
+            //    //}
+            //    //,minorTickInterval: 3
+            //    //dateTimeLabelFormats: {
+            //    //    day: '%e %b'
+            //    //},
+            //    //categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            //}],
+            yAxis: Yaxes,
+            tooltip: {
+                shared: true,
+                split: true,
+                dateTimeLabelFormats: {
+                    millisecond: '',
+                    second: '',
+                    minute: '',
+                    hour: '',
+                    day: "",
+                    month: '',
+                    year: '%e %b %Y'
+                }
+            },
+            legend: {
+                layout: 'horizontal',  // horizontal vertical
+                align: 'center', // center left right
+                verticalAlign: 'bottom',
+                //x: 80,
+                //y: 55,
+                floating: false,
+                backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF',
+                //borderColor: Highcharts.theme.legendBackgroundColor || '#FFFFFF',
+                symbolPadding: 3,
+                symbolWidth: 35,
+                symbolHeight: 25,
+                borderRadius: 3,
+                borderWidth: 0,
+                itemMarginBottom: 10,
+                itemStyle: {
+                    "font-family": 'Arial, Verdana, Helvetica, sans-serif',
+                    "fontWeight": 'bold',
+                    "fontSize": me.timeseriesChart.legend_title_font_size + 'px',     // '18px',
+                    color: me.timeseriesChart.legend_title_font_color     //'black'
+                }
+
+            },
+            series: timeseries
+        });
+
+        me.tschart.setSize(document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight);
+        me.tschart.redraw();
+        //console.info(me.tschart);
     },
 
     generateChart: function(){
         var me = this.getView();
         var chartpropertiesStore = this.getStore('chartproperties');
 
-        if (me.charttype == 'default'){
+        //if (me.charttype == 'xy'){
             chartpropertiesStore.load({
                 params: {
                     charttype: me.charttype
@@ -465,49 +971,71 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 callback:function(){
                     me.getController().setDefaultChartDrawProperties();
                     chartpropertiesStore.each(function(chartproperties) {
-                        me.setSize(parseInt(chartproperties.get('chart_width')), parseInt(chartproperties.get('chart_height')));
+                        var height = parseInt(chartproperties.get('chart_height'));
+                        if (height > Ext.getBody().getViewSize().height-80){
+                            height = Ext.getBody().getViewSize().height-80
+                        }
+                        me.setSize(parseInt(chartproperties.get('chart_width')), height);
                     });
-                    me.getController().getTimeseries(me.getController().createDefaultChart);
+                    if (me.charttype == 'ranking'){
+                        me.getController().getTimeseries(me.getController().createRankingChart);
+                    }
+                    else {
+                        me.getController().getTimeseries(me.getController().createDefaultChart);
+                    }
                 }
             });
-        }
+        //}
     },
 
     refreshChart: function(){
         var me = this.getView();
         var chartpropertiesStore = this.getStore('chartproperties');
-        var timeseriesselections = Ext.getCmp('analysismain').getController().getTimeseriesSelections();
-        var chartdrawpropertiespanel = this.lookupReference('chart_draw_properties_'+me.id);
+        //var timeseriesselections = Ext.getCmp('analysismain').getController().getTimeseriesSelections();
+        var timeseriesselections = Ext.getCmp('timeserieschartselection').getController().getTimeseriesSelections(me.charttype);
+        var chartdrawpropertiespanel = this.lookupReference('chart_draw_properties_' + me.id);
 
         if (chartdrawpropertiespanel != null){
             chartdrawpropertiespanel.close();
         }
 
         if (timeseriesselections != null) {
+            //console.info(timeseriesselections);
             me.selectedTimeseries = timeseriesselections.selectedTimeseries;
             me.yearTS = timeseriesselections.yearTS;
             me.tsFromPeriod = timeseriesselections.tsFromPeriod;
             me.tsToPeriod = timeseriesselections.tsToPeriod;
+            me.yearsToCompare = timeseriesselections.yearsToCompare;
+            me.tsFromSeason = timeseriesselections.tsFromSeason;
+            me.tsToSeason = timeseriesselections.tsToSeason;
             me.wkt = timeseriesselections.wkt;
+
+            if( me.tschart instanceof Highcharts.Chart) {
+                me.tschart.destroy();
+            }
+            me.tschart = null;
+
+            this.generateChart();
+
+            ////if (me.charttype == 'default'){
+            //    chartpropertiesStore.load({
+            //        params: {
+            //            charttype: me.charttype
+            //        },
+            //        callback:function(){
+            //            me.getController().setDefaultChartDrawProperties();
+            //            //chartpropertiesStore.each(function(chartproperties) {
+            //            //    me.setSize(parseInt(chartproperties.get('chart_width')), parseInt(chartproperties.get('chart_height')));
+            //            //});
+            //            if( me.tschart instanceof Highcharts.Chart) {
+            //                me.tschart.destroy();
+            //            }
+            //            me.getController().getTimeseries(me.getController().createDefaultChart);
+            //        }
+            //    });
+            ////}
         }
-        if( me.tschart instanceof Highcharts.Chart) {
-            me.tschart.destroy();
-        }
-        //this.createChart(this);
-        if (me.charttype == 'default'){
-            chartpropertiesStore.load({
-                params: {
-                    charttype: me.charttype
-                },
-                callback:function(){
-                    me.getController().setDefaultChartDrawProperties();
-                    chartpropertiesStore.each(function(chartproperties) {
-                        me.setSize(parseInt(chartproperties.get('chart_width')), parseInt(chartproperties.get('chart_height')));
-                    });
-                    me.getController().getTimeseries(me.getController().createDefaultChart);
-                }
-            });
-        }
+
     },
 
     openChartProperties: function() {
@@ -1007,7 +1535,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                             }
 
                             if (value != oldValue) {
-                                if (me.charttype == 'default') {
+                                //if (me.charttype == 'default') {
                                     if (recordId == 'chart_width') {
                                         me.timeseriesChart.width = value;
                                         me.setSize(parseInt(me.timeseriesChart.width), parseInt(me.timeseriesChart.height));
@@ -1146,10 +1674,10 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                                         saveYaxeProperty(me.timeseriesGraph.yaxes[2]);
                                     }
 
-
+                                    me.timeseriesChart.localRefresh = true;
                                     saveChartProperty(recordId, value);
                                     me.getController().createDefaultChart(me);
-                                }
+                                //}
                             }
                         },
                         beforeedit: function( editor, e, opts ) {
@@ -1193,7 +1721,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
         var render_width = EXPORT_WIDTH;
         var render_height = render_width * chart.chartHeight / chart.chartWidth;
 
-        // Get the cart's SVG code
+        // Get the cart's SVG code          getSVGForLocalExport() if using modules/offline-exporting.js
         var svg = chart.getSVG({
             exporting: {
               sourceWidth: chart.chartWidth,
@@ -1214,7 +1742,8 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 var data = canvas.toDataURL("image/png");
                 download(data, me.filename + '.png');
             };
-        image.src = 'data:image/svg+xml;base64,' + window.btoa(svg);
+        //image.src = 'data:image/svg+xml;base64,' + window.btoa(svg);
+        image.src = 'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent(svg)));
 
 
         //console.info(data);
@@ -1232,51 +1761,51 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
         chart.exportChartLocal({ type: type, filename: this.getView().filename});
     }
 
-    ,_saveChart: function() {
-        // FROM : http://willkoehler.net/2014/11/07/client-side-solution-for-downloading-highcharts-charts-as-images.html
-
-        function download(canvas, filename) {
-            download_in_ie(canvas, filename) || download_with_link(canvas, filename);
-        }
-
-        // Works in IE10 and newer
-        function download_in_ie(canvas, filename) {
-            return(navigator.msSaveOrOpenBlob && navigator.msSaveOrOpenBlob(canvas.msToBlob(), filename));
-        }
-
-        // Works in Chrome and FF. Safari just opens image in current window, since .download attribute is not supported
-        function download_with_link(canvas, filename) {
-            var a = document.createElement('a')
-            a.download = filename
-            a.href = canvas.toDataURL("image/png")
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-        }
-
-        var chart = this.getView().tschart;
-
-        var render_width = 1000;
-        var render_height = render_width * chart.chartHeight / chart.chartWidth;
-
-        var svg = chart.getSVG({
-            exporting: {
-                sourceWidth: chart.chartWidth,
-                sourceHeight: chart.chartHeight
-            }
-        });
-
-        var canvas = document.createElement('canvas');
-        canvas.height = render_height;
-        canvas.width = render_width;
-
-        canvg(canvas, svg, {
-            scaleWidth: render_width,
-            scaleHeight: render_height,
-            ignoreDimensions: true
-        });
-
-        download(canvas, this.getView().filename + '.png');
-
-    }
+    //,_saveChart: function() {
+    //    // FROM : http://willkoehler.net/2014/11/07/client-side-solution-for-downloading-highcharts-charts-as-images.html
+    //
+    //    function download(canvas, filename) {
+    //        download_in_ie(canvas, filename) || download_with_link(canvas, filename);
+    //    }
+    //
+    //    // Works in IE10 and newer
+    //    function download_in_ie(canvas, filename) {
+    //        return(navigator.msSaveOrOpenBlob && navigator.msSaveOrOpenBlob(canvas.msToBlob(), filename));
+    //    }
+    //
+    //    // Works in Chrome and FF. Safari just opens image in current window, since .download attribute is not supported
+    //    function download_with_link(canvas, filename) {
+    //        var a = document.createElement('a')
+    //        a.download = filename
+    //        a.href = canvas.toDataURL("image/png")
+    //        document.body.appendChild(a);
+    //        a.click();
+    //        a.remove();
+    //    }
+    //
+    //    var chart = this.getView().tschart;
+    //
+    //    var render_width = 1000;
+    //    var render_height = render_width * chart.chartHeight / chart.chartWidth;
+    //
+    //    var svg = chart.getSVG({
+    //        exporting: {
+    //            sourceWidth: chart.chartWidth,
+    //            sourceHeight: chart.chartHeight
+    //        }
+    //    });
+    //
+    //    var canvas = document.createElement('canvas');
+    //    canvas.height = render_height;
+    //    canvas.width = render_width;
+    //
+    //    canvg(canvas, svg, {
+    //        scaleWidth: render_width,
+    //        scaleHeight: render_height,
+    //        ignoreDimensions: true
+    //    });
+    //
+    //    download(canvas, this.getView().filename + '.png');
+    //
+    //}
 });

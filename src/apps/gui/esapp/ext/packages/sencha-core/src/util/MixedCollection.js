@@ -37,8 +37,6 @@ Ext.define('Ext.util.MixedCollection', {
      * Configure as `true` if the {@link #addAll} function should add function references to the collection.
      */
 
-    //me.addEvents('sort');
-
     /**
      * Creates new MixedCollection.
      * @param {Object} config A configuration object.
@@ -50,9 +48,8 @@ Ext.define('Ext.util.MixedCollection', {
      * equivalent to overriding the {@link #method-getKey} method.
      */
     constructor: function() {
-        var me = this;
-        me.initConfig();
-        me.callParent(arguments);
+        this.initConfig();
+        this.callParent(arguments);
     },
 
     doSort: function(sorterFn) {
@@ -144,7 +141,7 @@ Ext.define('Ext.util.MixedCollection', {
             key = me.getKey(item);
             keys[i] = key;
             me.indexMap[key] = i;
-            delete items.$extCollectionIndex;
+            delete item.$extCollectionIndex;
         }
         me.generation++;
         me.indexGeneration = me.generation;
@@ -187,45 +184,13 @@ Ext.define('Ext.util.MixedCollection', {
     },
 
     /**
-     * Reorders each of the items based on a mapping from old index to new index. Internally this
-     * just translates into a sort. The 'sort' event is fired whenever reordering has occured.
-     * @param {Object} mapping Mapping from old item index to new item index
+     * @inheritdoc Ext.util.AbstractMixedCollection#method-reorder
      */
-    reorder: function(mapping) {
-        var me = this,
-            items = me.items,
-            index = 0,
-            length = items.length,
-            order = [],
-            remaining = [],
-            oldIndex;
-
-        me.suspendEvents();
-
-        //object of {oldPosition: newPosition} reversed to {newPosition: oldPosition}
-        for (oldIndex in mapping) {
-            order[mapping[oldIndex]] = items[oldIndex];
-        }
-
-        for (index = 0; index < length; index++) {
-            if (mapping[index] == undefined) {
-                remaining.push(items[index]);
-            }
-        }
-
-        for (index = 0; index < length; index++) {
-            if (order[index] == undefined) {
-                order[index] = remaining.shift();
-            }
-        }
-
-        me.clear();
-        me.addAll(order);
-
-        me.resumeEvents();
-        me.fireEvent('sort', me);
+    reorder: function (mapping) {
+        this.callParent([mapping]);
+        this.fireEvent('sort', this);
     },
-
+    
     /**
      * Sorts this collection by <b>key</b>s.
      * @param {String} direction (optional) 'ASC' or 'DESC'. Defaults to 'ASC'.

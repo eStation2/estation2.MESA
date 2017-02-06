@@ -17,7 +17,7 @@ Ext.define('esapp.model.ProductNavigator', {
        {name: 'order_index', mapping: 'order_index'}
     ]
 
-    ,autoLoad: true
+    ,autoLoad: false
     ,autoSync: false
     ,remoteSort: false
     ,remoteGroup: false
@@ -115,8 +115,51 @@ Ext.define('esapp.model.ProductNavigatorMapSetDataSet', {
     ]
 });
 
+Ext.define('esapp.model.ProductNavigatorDatasetColorScheme', {
+    extend : 'esapp.model.Base',
 
-Ext.define('esapp.model.ProductNavigatorDataSetCompleteness', {
+    fields: [
+        {name: 'default_legend', mapping: 'default_legend'},
+        {name: 'defaulticon', mapping: 'defaulticon'},
+        {name: 'legend_id', mapping: 'legend_id'},
+        {name: 'legend_name', mapping: 'legend_name'},
+        {name: 'colorschemeHTML', mapping: 'colorschemeHTML'},
+        {name: 'legendHTML', mapping: 'legendHTML'},
+        {name: 'legendHTMLVertical', mapping: 'legendHTMLVertical'}
+    ],
+
+    proxy: {
+        type: 'ajax',
+        url: 'analysis/getproductcolorschemes',
+        //params: params,
+        //extraParams:{
+        //    activated:'True'
+        //},
+        reader: {
+            type: 'json',
+            rootProperty: 'legends',
+            successProperty: 'success',
+            messageProperty: 'message'
+        },
+
+        listeners: {
+            exception: function(proxy, response, operation){
+                // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
+                console.info('COLOR SCHEMES MODEL - REMOTE EXCEPTION');
+                //Ext.Msg.show({
+                //    title: 'COLOR SCHEMES - REMOTE EXCEPTION',
+                //    msg: operation.getError(),
+                //    icon: Ext.Msg.ERROR,
+                //    buttons: Ext.Msg.OK
+                //});
+            }
+        }
+
+    }
+});
+
+
+/*Ext.define('esapp.model.ProductNavigatorDataSetCompleteness', {
     extend : 'esapp.model.Base',
 
     fields: [
@@ -145,47 +188,7 @@ Ext.define('esapp.model.ProductNavigatorDataSetIntervals', {
        {name: 'intervaltype'},
        {name: 'intervalpercentage', type:'int'}
     ]
-});
+});*/
 
 
-Ext.define('esapp.model.ColorScheme', {
-    extend : 'esapp.model.Base',
 
-    fields: [
-        {name: 'default_legend', mapping: 'default_legend'},
-        {name: 'defaulticon', mapping: 'defaulticon'},
-        {name: 'legend_id', mapping: 'legend_id'},
-        {name: 'legend_name', mapping: 'legend_name'},
-        {name: 'colorschemeHTML', mapping: 'colorschemeHTML'},
-        {name: 'legendHTML', mapping: 'legendHTML'},
-        {name: 'legendHTMLVertical', mapping: 'legendHTMLVertical'}
-    ],
-
-    proxy: {
-        type: 'ajax',
-        url: 'analysis/getcolorschemes',
-        //params: params,
-        //extraParams:{
-        //    activated:'True'
-        //},
-        reader: {
-            type: 'json',
-            rootProperty: 'legends',
-            successProperty: 'success',
-            messageProperty: 'message'
-        },
-
-        listeners: {
-            exception: function(proxy, response, operation){
-                // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
-                Ext.Msg.show({
-                    title: 'COLOR SCHEMES - REMOTE EXCEPTION',
-                    msg: operation.getError(),
-                    icon: Ext.Msg.ERROR,
-                    buttons: Ext.Msg.OK
-                });
-            }
-        }
-
-    }
-});

@@ -5,25 +5,22 @@
  * A sprite that represents a circle.
  *
  *     @example
- *     Ext.create('Ext.Container', {
- *         renderTo: Ext.getBody(),
- *         width: 600,
- *         height: 400,
- *         layout: 'fit',
- *         items: {
- *             xtype: 'draw',
- *             sprites: [{
- *                  type: 'circle',
- *                  cx: 100,
- *                  cy: 100,
- *                  r: 25,
- *                  fillStyle: 'blue'
- *              }]
- *         }
+ *     Ext.create({
+ *        xtype: 'draw', 
+ *        renderTo: document.body,
+ *        width: 600,
+ *        height: 400,
+ *        sprites: [{
+ *            type: 'circle',
+ *            cx: 100,
+ *            cy: 100,
+ *            r: 50,
+ *            fillStyle: '#1F6D91'
+ *        }]
  *     });
  */
-Ext.define("Ext.draw.sprite.Circle", {
-    extend: "Ext.draw.sprite.Path",
+Ext.define('Ext.draw.sprite.Circle', {
+    extend: 'Ext.draw.sprite.Path',
     alias: 'sprite.circle',
     type: 'circle',
     inheritableStatics: {
@@ -32,31 +29,31 @@ Ext.define("Ext.draw.sprite.Circle", {
                 /**
                  * @cfg {Number} [cx=0] The center coordinate of the sprite on the x-axis.
                  */
-                cx: "number",
+                cx: 'number',
 
                 /**
                  * @cfg {Number} [cy=0] The center coordinate of the sprite on the y-axis.
                  */
-                cy: "number",
+                cy: 'number',
 
                 /**
                  * @cfg {Number} [r=0] The radius of the sprite.
                  */
-                r: "number"
+                r: 'number'
             },
             aliases: {
-                radius: "r",
-                x: "cx",
-                y: "cy",
-                centerX: "cx",
-                centerY: "cy"
+                radius: 'r',
+                x: 'cx',
+                y: 'cy',
+                centerX: 'cx',
+                centerY: 'cy'
             },
             defaults: {
                 cx: 0,
                 cy: 0,
                 r: 4
             },
-            dirtyTriggers: {
+            triggers: {
                 cx: 'path',
                 cy: 'path',
                 r: 'path'
@@ -81,11 +78,11 @@ Ext.define("Ext.draw.sprite.Circle", {
             cy = attr.cy,
             r = attr.r,
             matrix = attr.matrix,
-            scalesX = matrix.getScaleX(),
-            scalesY = matrix.getScaleY(),
+            scaleX = matrix.getScaleX(),
+            scaleY = matrix.getScaleY(),
             w, h;
-        w = scalesX * r;
-        h = scalesY * r;
+        w = scaleX * r;
+        h = scaleY * r;
         transform.x = matrix.x(cx, cy) - w;
         transform.y = matrix.y(cx, cy) - h;
         transform.width = w + w;

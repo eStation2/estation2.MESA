@@ -103,7 +103,6 @@ img {
 @if $include-ie {
     .#{$prefix}ie-shadow {
         background-color: #777;
-        display: none;
         position: absolute;
         overflow: hidden;
     }
@@ -189,6 +188,7 @@ td.#{$prefix}frame-br {
 .#{$prefix}item-disabled,
 .#{$prefix}item-disabled * {
     cursor: default;
+    pointer-events: none; // prevents :hover styling on child elements
 }
 
 .#{$prefix}component,
@@ -200,10 +200,14 @@ td.#{$prefix}frame-br {
 
 // TODO: remove outline from individual components that need it instead of resetting globally
 // *Really* TODO: use focus outline for its intended purpose: implementing ARIA. Instead of hacking focus outlines.
-.#{$prefix}webkit {
-    * {
-        &:focus {
-            outline:none;
-        }
-    }
+// This prevents the default outline added to focused elements by some browsers (ahem, webkit)
+:focus {
+    outline:none;
+}
+
+// This is used by FileButton to reset position: absolute temporarily
+// after focusing parent input field. A workaround for file input element
+// not being properly positioned in IE8/9.
+.#{$prefix}position-relative {
+    position: relative !important;
 }

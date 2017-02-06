@@ -1,7 +1,5 @@
 /**
- * @docauthor Robert Dougan <rob@sencha.com>
- *
- * Create simple buttons with this component. Customisations include {@link #iconAlign aligned}
+ * Create simple buttons with this component. Customizations include {@link #iconAlign aligned}
  * {@link #iconCls icons}, {@link #cfg-menu dropdown menus}, {@link #tooltip tooltips}
  * and {@link #scale sizing options}. Specify a {@link #handler handler} to run code when
  * a user clicks the button, or use {@link #listeners listeners} for other events such as
@@ -175,14 +173,14 @@ Ext.define('Ext.button.Button', {
         /**
          * @cfg {Boolean}
          * `false` to hide the button arrow.  Only applicable for {@link Ext.button.Split
-         * Split Buttons} and buttons configured with a {@link #menu}.
+         * Split Buttons} and buttons configured with a {@link #cfg-menu}.
          */
         arrowVisible: true
     },
 
     /* End Definitions */
 
-    /*
+    /**
      * @property {Boolean}
      * `true` in this class to identify an object as an instantiated Button, or subclass thereof.
      */
@@ -231,10 +229,13 @@ Ext.define('Ext.button.Button', {
      */
 
     /**
-     * @cfg {Function} handler
+     * @cfg {Function/String} handler
      * A function called when the button is clicked (can be used instead of click event).
-     * @cfg {Ext.button.Button} handler.button This button.
-     * @cfg {Ext.event.Event} handler.e The click event.
+     * 
+     * See also {@link #clickEvent}
+     * @param {Ext.button.Button} button This button.
+     * @param {Ext.event.Event} e The click event.
+     * @declarativeHandler
      */
 
     /**
@@ -260,6 +261,12 @@ Ext.define('Ext.button.Button', {
      */
 
     /**
+     * @cfg padding
+     * @inheritdoc
+     * @removed Use the $button-*-padding CSS Vars within a custom theme instead.
+     */
+
+    /**
      * @cfg {Boolean} [pressed=false]
      * True to start pressed (only if enableToggle = true)
      */
@@ -278,7 +285,8 @@ Ext.define('Ext.button.Button', {
 
     /**
      * @cfg {Number} tabIndex
-     * Set a DOM tabIndex for this button.
+     * Sets a DOM tabIndex for this button. tabIndex may be set to `-1` in order to remove
+     * the button from the tab rotation.
      */
     tabIndex: 0,
 
@@ -295,10 +303,11 @@ Ext.define('Ext.button.Button', {
     enableToggle: false,
 
     /**
-     * @cfg {Function} toggleHandler
+     * @cfg {Function/String} toggleHandler
      * Function called when a Button with {@link #enableToggle} set to true is clicked.
      * @cfg {Ext.button.Button} toggleHandler.button This button.
      * @cfg {Boolean} toggleHandler.state The next state of the Button, true means pressed.
+     * @declarativeHandler
      */
 
     /**
@@ -415,8 +424,7 @@ Ext.define('Ext.button.Button', {
 
     /**
      * @cfg {String/Number} value
-     * The value of this button.  Only applicable when used as an item of a {@link
-     * Ext.button.Segmented Segmented Button}.
+     * The value of this button.  Only applicable when used as an item of a {@link Ext.button.Segmented Segmented Button}.
      */
     
     focusable: true,
@@ -433,7 +441,6 @@ Ext.define('Ext.button.Button', {
     },
     
     // private
-    menuClickBuffer: 250,
     _btnWrapCls: Ext.baseCSSPrefix + 'btn-wrap',
     _btnCls: Ext.baseCSSPrefix + 'btn-button',
     _baseIconCls: Ext.baseCSSPrefix + 'btn-icon-el',
@@ -720,10 +727,10 @@ Ext.define('Ext.button.Button', {
                 // The only way to completely disable navigation is removing the href
                 if (!me.disabled) {
                     config.href = href;
-                }
-                if (hrefTarget) {
-                    config.target = hrefTarget;
-                }
+                    if (hrefTarget) {
+                       config.target = hrefTarget;
+                    }
+                }   
             }
         }
         return config;
@@ -742,7 +749,7 @@ Ext.define('Ext.button.Button', {
     },
 
     /**
-     * Get the {@link #menu} for this button.
+     * Get the {@link #cfg-menu} for this button.
      * @return {Ext.menu.Menu} The menu. `null` if no menu is configured.
      */
     getMenu: function() {
@@ -759,7 +766,8 @@ Ext.define('Ext.button.Button', {
      */
     setMenu: function (menu, destroyMenu, /* private */ initial) {
         var me = this,
-            oldMenu = me.menu;
+            oldMenu = me.menu,
+            instanced;
 
         if (oldMenu && !initial) {
             if (destroyMenu !== false && me.destroyMenu) {
@@ -769,6 +777,7 @@ Ext.define('Ext.button.Button', {
         }
 
         if (menu) {
+            instanced = menu.isMenu;
             // Retrieve menu by id or instantiate instance if needed.
             menu = Ext.menu.Manager.get(menu, {
                 // Use ownerCmp as the upward link. Menus *must have no ownerCt* - they are global floaters.
@@ -777,7 +786,14 @@ Ext.define('Ext.button.Button', {
             });
             // We need to forcibly set this here because we could be passed an existing menu, which means
             // the config above won't get applied during creation.
-            menu.ownerCmp = me;
+            menu.setOwnerCmp(me, instanced);
+
+            // Menu can't reshow within 250ms of being hidden.
+            // Likewise, must set here in case an instantiated Menu is passed.
+            // This is so that clicking on this button when the menu is visible
+            // leaves the menu hidden. Mousedown hides it, and the click caused by
+            // mouseup should not reshow.
+            menu.menuClickBuffer = 250;
 
             me.mon(menu, {
                 scope: me,
@@ -801,6 +817,7 @@ Ext.define('Ext.button.Button', {
                 me._removeSplitCls();
                 me.updateLayout();
             }
+
             me.split = false;
             me.menu = null;
         }
@@ -813,7 +830,6 @@ Ext.define('Ext.button.Button', {
             btn,
             btnListeners;
 
-        me.doc = Ext.getDoc();
         me.callParent(arguments);
 
         // Set btn as a local variable for easy access
@@ -881,6 +897,13 @@ Ext.define('Ext.button.Button', {
         }
 
         Ext.button.Manager.register(me);
+    },
+
+    onFocusLeave: function(e) {
+        this.callParent([e]);
+        if (this.menu) {
+            this.menu.hide();
+        }
     },
 
     /**
@@ -957,7 +980,9 @@ Ext.define('Ext.button.Button', {
      *
      */
     setHref: function(href) {
-        var me = this;
+        var me = this,
+            hrefTarget = me.hrefTarget,
+            dom;
 
         me.href = href;
 
@@ -966,13 +991,18 @@ Ext.define('Ext.button.Button', {
         }
 
         if (me.rendered) {
+            dom = me.el.dom;
             // https://sencha.jira.com/browse/EXTJS-11964
             // Disabled links are clickable on iPad, and right clickable on desktop browsers.
             // The only way to completely disable navigation is removing the href
             if (!href || me.disabled) {
-                me.el.dom.removeAttribute('href');
+                dom.removeAttribute('href');
+                dom.removeAttribute('hrefTarget');
             } else {
-                me.el.dom.href = me.getHref();
+                dom.href = me.getHref();
+                if (hrefTarget) {
+                    dom.target = hrefTarget;
+                }
             }
         }
     },
@@ -1006,24 +1036,29 @@ Ext.define('Ext.button.Button', {
      *     });
      *
      * When clicked, this button will open a new window with the url http://www.sencha.com/?foo=bar&company=Sencha because
-     * the button wased configured with the {@link #baseParams} to have `foo` = `'bar'` and then used {@link #setParams} to set the `company` parameter to `'Sencha'`.
+     * the button was configured with the {@link #baseParams} to have `foo` = `'bar'` 
+     * and then used {@link #setParams} to set the `company` parameter to `'Sencha'`.
      *
      * **Only valid if the Button was originally configured with a {@link #href}**
      *
      * @param {Object} params Parameters to use in the href URL.
      */
     setParams: function(params) {
-        var me = this;
+        var me = this,
+            dom;
 
         me.params = params;
 
         // https://sencha.jira.com/browse/EXTJS-11964
         // Disabled links are clickable on iPad, and right clickable on desktop browsers.
         // The only way to completely disable navigation is removing the href
-        if (me.disabled) {
-            me.el.dom.removeAttribute('href');
-        } else {
-            me.el.dom.href = me.getHref();
+        if (me.rendered) {
+            dom = me.el.dom;
+            if (me.disabled) {
+                dom.removeAttribute('href');
+            } else {
+                dom.href = me.getHref() || '';
+            }
         }
     },
 
@@ -1045,7 +1080,7 @@ Ext.define('Ext.button.Button', {
             oldIcon = me.icon || '';
 
         me.icon = icon;
-        if (icon != oldIcon) {
+        if (icon !== oldIcon) {
             if (btnIconEl) {
                 btnIconEl.setStyle('background-image', icon ? 'url(' + icon + ')': '');
                 me._syncHasIconCls();
@@ -1071,7 +1106,7 @@ Ext.define('Ext.button.Button', {
             oldCls = me.iconCls || '';
 
         me.iconCls = cls;
-        if (oldCls != cls) {
+        if (oldCls !== cls) {
             if (btnIconEl) {
                 // Remove the previous iconCls from the button
                 btnIconEl.removeCls(oldCls);
@@ -1112,7 +1147,7 @@ Ext.define('Ext.button.Button', {
             if (!glyph) {
                 btnIconEl.dom.innerHTML = '';
                 btnIconEl.removeCls(glyphCls);
-            } else if (oldGlyph != glyph) {
+            } else if (oldGlyph !== glyph) {
                 btnIconEl.dom.innerHTML = '&#' + glyph + ';';
                 btnIconEl.addCls(glyphCls);
             }
@@ -1202,7 +1237,7 @@ Ext.define('Ext.button.Button', {
     },
 
     getTipAttr: function(){
-        return this.tooltipType == 'qtip' ? 'data-qtip' : 'title';
+        return this.tooltipType === 'qtip' ? 'data-qtip' : 'title';
     },
 
     // @private
@@ -1232,26 +1267,29 @@ Ext.define('Ext.button.Button', {
     // @private
     beforeDestroy: function() {
         var me = this;
+
         if (me.rendered) {
             me.clearTip();
         }
-        if (me.menu && me.destroyMenu) {
-            me.menu.destroy();
-        }
+
         Ext.destroy(me.repeater);
         me.callParent();
     },
 
     // @private
     onDestroy: function() {
-        var me = this;
-        if (me.rendered) {
-            me.doc.un('mouseover', me.monitorMouseOver, me);
-            delete me.doc;
+        var me = this,
+            menu = me.menu;
 
+        if (me.rendered) {
             Ext.destroy(me.keyMap);
             delete me.keyMap;
         }
+
+        if (menu && me.destroyMenu) {
+            me.menu = Ext.destroy(menu);
+        }
+
         Ext.button.Manager.unregister(me);
         me.callParent();
     },
@@ -1271,24 +1309,22 @@ Ext.define('Ext.button.Button', {
         return this;
     },
 
-    applyText: function(text) {
+    updateText: function(text, oldText) {
         // Coerce to string. Maybe set to a numeric value.
         text = text == null ? '' : String(text);
+        oldText = oldText || '';
+
         var me = this,
             btnInnerEl = me.btnInnerEl,
-            btnEl = me.btnEl,
-            oldText = me.text || '';
+            btnEl = me.btnEl;
 
-        if (text != oldText) {
-            me.text = text;
-            if (me.rendered) {
-                btnInnerEl.setHtml(text || '&#160;');
-                btnEl[text ? 'addCls' : 'removeCls'](me._textCls);
-                btnEl[text ? 'removeCls' : 'addCls'](me._noTextCls);
-                me.updateLayout();
-            }
-            me.fireEvent('textchange', me, oldText, text);
+        if (me.rendered) {
+            btnInnerEl.setHtml(text || '&#160;');
+            btnEl[text ? 'addCls' : 'removeCls'](me._textCls);
+            btnEl[text ? 'removeCls' : 'addCls'](me._noTextCls);
+            me.updateLayout();
         }
+        me.fireEvent('textchange', me, oldText, text);
     },
 
     /**
@@ -1320,6 +1356,11 @@ Ext.define('Ext.button.Button', {
      */
     toggle: function(state, suppressEvent) {
         var me = this;
+
+        if (!me.enableToggle) {
+            return me;
+        }
+
         state = state === undefined ? !me.pressed: !!state;
         if (state !== me.pressed) {
             me[state ? 'addCls': 'removeCls'](me._pressedCls);
@@ -1328,7 +1369,7 @@ Ext.define('Ext.button.Button', {
                 me.fireEvent('toggle', me, state);
                 Ext.callback(me.toggleHandler, me.scope, [me, state], 0, me);
 
-                if (me.reference && me.publishState) {
+                if (me.publishState) {
                     me.publishState('pressed', state);
                 }
             }
@@ -1336,29 +1377,35 @@ Ext.define('Ext.button.Button', {
         return me;
     },
 
-    maybeShowMenu: function(){
-        var me = this;
-        if (me.menu && !me.hasVisibleMenu() && !me.ignoreNextClick) {
-            me.showMenu(true);
+    maybeShowMenu: function(e) {
+        if (this.menu) {
+            this.showMenu(e);
         }
     },
 
     /**
      * Shows this button's menu (if it has one)
      */
-    showMenu: function(/* private */ fromEvent) {
+    showMenu: function(/* private */ clickEvent) {
         var me = this,
-            menu = me.menu;
+            menu = me.menu,
+            isPointerEvent = !clickEvent || clickEvent.pointerType;
 
-        if (me.rendered) {
-            if (me.tooltip && Ext.quickTipsActive && me.getTipAttr() != 'title') {
+        if (menu && me.rendered) {
+            if (me.tooltip && Ext.quickTipsActive && me.getTipAttr() !== 'title') {
                 Ext.tip.QuickTipManager.getQuickTip().cancelShow(me.el);
             }
             if (menu.isVisible()) {
-                menu.hide();
+                // Click/tap toggles the menu visibility.
+                if (isPointerEvent) {
+                    menu.hide();
+                } else {
+                    menu.focus();
+                }
             }
-
-            if (!fromEvent || me.showEmptyMenu || menu.items.getCount() > 0) {
+            else if (!clickEvent || me.showEmptyMenu || menu.items.getCount() > 0) {
+                // Pointer-invoked menus do not auto focus, key invoked ones do.
+                menu.autoFocus = !isPointerEvent;
                 menu.showBy(me.el, me.menuAlign);
             }
         }
@@ -1405,10 +1452,19 @@ Ext.define('Ext.button.Button', {
         if (e.type !== 'keydown' && e.button) {
             return;
         }
+
         if (!me.disabled) {
             me.doToggle();
-            me.maybeShowMenu();
+            me.maybeShowMenu(e);
             me.fireHandler(e);
+        }
+    },
+
+    doToggle: function() {
+        var me = this;
+
+        if (me.allowDepress !== false || !me.pressed) {
+            me.toggle();
         }
     },
 
@@ -1421,15 +1477,9 @@ Ext.define('Ext.button.Button', {
     fireHandler: function(e) {
         var me = this;
 
-        if (me.fireEvent('click', me, e) !== false) {
+        // Click may have destroyed the button
+        if (me.fireEvent('click', me, e) !== false && !me.isDestroyed) {
             Ext.callback(me.handler, me.scope, [me, e], 0, me);
-        }
-    },
-
-    doToggle: function() {
-        var me = this;
-        if (me.enableToggle && (me.allowDepress !== false || !me.pressed)) {
-            me.toggle();
         }
     },
 
@@ -1576,45 +1626,48 @@ Ext.define('Ext.button.Button', {
         me.fireEvent('menutriggerout', me, me.menu, e);
     },
 
-    enable: function(silent) {
-        var me = this;
+    onEnable: function() {
+        var me = this,
+            href = me.href,
+            hrefTarget = me.hrefTarget,
+            dom = me.el.dom;
 
-        me.callParent(arguments);
+        me.callParent();
 
         me.removeCls(me._disabledCls);
-        if (me.rendered) {
-            me.el.dom.setAttribute('tabindex', me.tabIndex);
+        dom.setAttribute('tabindex', me.tabIndex);
 
-            // https://sencha.jira.com/browse/EXTJS-11964
-            // Disabled links are clickable on iPad, and right clickable on desktop browsers.
-            // The only way to completely disable navigation is removing the href
-            if (me.href) {
-                me.el.dom.href = me.href;
-            }
+        // https://sencha.jira.com/browse/EXTJS-11964
+        // Disabled links are clickable on iPad, and right clickable on desktop browsers.
+        // The only way to completely disable navigation is removing the href
+        if (href) {
+            dom.href = href;
         }
-
-        return me;
+        if (hrefTarget) {
+            dom.target = hrefTarget;
+        }
     },
 
-    disable: function(silent) {
-        var me = this;
+    onDisable: function() {
+        var me = this,
+            dom = me.el.dom;
 
-        me.callParent(arguments);
+        me.callParent();
 
         me.addCls(me._disabledCls);
         me.removeCls(me.overCls);
-        if (me.rendered) {
-            me.el.dom.removeAttribute('tabindex');
 
-            // https://sencha.jira.com/browse/EXTJS-11964
-            // Disabled links are clickable on iPad, and right clickable on desktop browsers.
-            // The only way to completely disable navigation is clearing the href
-            if (me.href) {
-                me.el.dom.removeAttribute('href');
-            }
+        dom.removeAttribute('tabindex');
+
+        // https://sencha.jira.com/browse/EXTJS-11964
+        // Disabled links are clickable on iPad, and right clickable on desktop browsers.
+        // The only way to completely disable navigation is clearing the href
+        if (me.href) {
+            dom.removeAttribute('href');
         }
-
-        return me;
+        if (me.hrefTarget) {
+            dom.removeAttribute('target');
+        }
     },
 
     /**
@@ -1650,10 +1703,21 @@ Ext.define('Ext.button.Button', {
     onMouseDown: function(e) {
         var me = this;
 
-        if (Ext.isIE) {
+        if (Ext.isIE || e.pointerType === 'touch') {
             // In IE the use of unselectable on the button's elements causes the element
             // to not receive focus, even when it is directly clicked.
-            me.getFocusEl().focus();
+            // On Touch devices, we need to explicitly focus on touchstart.
+            Ext.defer(function() {
+                // Deferred to give other mousedown handlers the chance to preventDefault
+                if (!e.defaultPrevented) {
+                    var focusEl = me.getFocusEl();
+                    
+                    // The component might be destroyed by this time
+                    if (focusEl) {
+                        focusEl.focus();
+                    }
+                }
+            }, 1);
         }
 
         if (!me.disabled && e.button === 0) {
@@ -1661,6 +1725,7 @@ Ext.define('Ext.button.Button', {
             me.addCls(me._pressedCls);
         }
     },
+
     // @private
     onMouseUp: function(e) {
         var me = this;
@@ -1672,30 +1737,20 @@ Ext.define('Ext.button.Button', {
             }
         }
     },
+
     // @private
     onMenuShow: function() {
         var me = this;
-        me.ignoreNextClick = 0;
         me.addCls(me._menuActiveCls);
         me.fireEvent('menushow', me, me.menu);
     },
 
     // @private
     onMenuHide: function(e) {
-        var me = this,
-            menuClickBuffer = me.menuClickBuffer;
+        var me = this;
 
         me.removeCls(me._menuActiveCls);
-        if (menuClickBuffer) {
-            me.ignoreNextClick = Ext.defer(me.restoreClick, menuClickBuffer, me);
-        }
         me.fireEvent('menuhide', me, me.menu);
-        me.focus();
-    },
-
-    // @private
-    restoreClick: function() {
-        this.ignoreNextClick = 0;
     },
 
     // @private
@@ -1703,7 +1758,7 @@ Ext.define('Ext.button.Button', {
         var me = this;
 
         if (me.menu && !me.disabled) {
-            me.showMenu();
+            me.showMenu(e);
             e.stopEvent();
             return false;
         }
@@ -1754,7 +1809,8 @@ Ext.define('Ext.button.Button', {
          * @private
          * @override
          * Needed for when widget is rendered into a grid cell. The class to add to the cell element.
-         * Override needed to add scale to the mix which is poart of the ui name in the mixin and the CSS rule
+         * Override needed to add scale to the mix which is part of the ui name in the 
+         * mixin and the CSS rule.
          */
         getTdCls: function() {
             return Ext.baseCSSPrefix + 'button-' + this.ui + '-' + this.scale + '-cell';
@@ -1800,6 +1856,7 @@ Ext.define('Ext.button.Button', {
 
         wrapPrimaryEl: function(dom) {
             this.el = new Ext.dom.ButtonElement(dom);
+            this.callParent([dom]);
         }
     }
 });

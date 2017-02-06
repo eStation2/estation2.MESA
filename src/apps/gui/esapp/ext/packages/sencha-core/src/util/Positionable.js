@@ -136,7 +136,7 @@ Ext.define('Ext.util.Positionable', {
 
     /**
      * Sets the X position of the DOM element based on page coordinates.
-     * @param {Number} The X position
+     * @param {Number} x The X position
      * @return {Ext.util.Positionable} this
      */
     setX: function() {
@@ -155,7 +155,7 @@ Ext.define('Ext.util.Positionable', {
 
     /**
      * Sets the Y position of the DOM element based on page coordinates.
-     * @param {Number} The Y position
+     * @param {Number} y The Y position
      * @return {Ext.util.Positionable} this
      */
     setY: function() {
@@ -340,7 +340,7 @@ Ext.define('Ext.util.Positionable', {
         }
 
         offset = offset || [0,0];
-        posSpec = (!posSpec || posSpec == "?" ? "tl-bl?" :
+        posSpec = (!posSpec || posSpec === "?" ? "tl-bl?" :
             (!(/-/).test(posSpec) && posSpec !== "" ? "tl-" + posSpec : posSpec || "tl-bl")).toLowerCase();
 
         posSpec = me.convertPositionSpec(posSpec);
@@ -380,7 +380,7 @@ Ext.define('Ext.util.Positionable', {
             // Otherwise, use this Positionable's element's parent node.
             constrainToEl = me.constrainTo || me.container || me.el.parent();
             constrainToEl = Ext.get(constrainToEl.el || constrainToEl);
-            constrainTo = constrainToEl.getViewRegion();
+            constrainTo = constrainToEl.getConstrainRegion();
             constrainTo.right = constrainTo.left + constrainToEl.el.dom.clientWidth;
 
             myWidth = me.getWidth();
@@ -541,7 +541,8 @@ Ext.define('Ext.util.Positionable', {
             parentOffset,
             borderPadding,
             proposedConstrainPosition,
-            xy = false;
+            xy = false,
+            localXY;
 
         if (local && fp) {
             parentOffset = parentNode.getXY();
@@ -558,15 +559,54 @@ Ext.define('Ext.util.Positionable', {
         // constrainTo setting. getConstrainVector will provide a default constraint
         // region if there is no explicit constrainTo, *and* there is no floatParent owner Component.
         constrainTo = constrainTo || me.constrainTo || parentNode || me.container || me.el.parent();
-        vector = me.getConstrainVector(constrainTo, proposedConstrainPosition, proposedSize);
+
+        if (local && proposedConstrainPosition) {
+            proposedConstrainPosition = me.reverseTranslateXY(proposedConstrainPosition);
+        }
+
+        vector = ((me.constrainHeader && me.header.rendered) ? me.header : me).getConstrainVector(
+            constrainTo,
+            proposedConstrainPosition,
+            proposedSize
+        );
 
         // false is returned if no movement is needed
-        xy = proposedPosition || me.getPosition(local);
         if (vector) {
+            xy = proposedPosition || me.getPosition(local);
             xy[0] += vector[0];
             xy[1] += vector[1];
         }
         return xy;
+    },
+
+    /**
+     * Returns the content region of this element for purposes of constraining floating
+     * children.  That is the region within the borders and scrollbars, but not within the padding.
+     */
+    getConstrainRegion: function() {
+        var me = this,
+            el = me.el,
+            isBody = el.dom.nodeName === 'BODY',
+            dom = el.dom,
+            borders = el.getBorders(),
+            pos = el.getXY(),
+            left = pos[0] + borders.beforeX,
+            top = pos[1] + borders.beforeY,
+            scroll, width, height;
+
+        // For the body we want to do some special logic.
+        if (isBody) {
+            scroll = el.getScroll();
+            left = scroll.left;
+            top = scroll.top;
+            width = Ext.Element.getViewportWidth();
+            height = Ext.Element.getViewportHeight();
+        } else {
+            width = dom.clientWidth;
+            height = dom.clientHeight;
+        }
+
+        return new Ext.util.Region(top, left + width, top + height, left);
     },
 
     /**
@@ -608,7 +648,7 @@ Ext.define('Ext.util.Positionable', {
             // getRegion uses bounding client rect.
             // We need to clear any scrollbars, so get the size using getViewSize
             constrainSize = constrainTo.getViewSize();
-            constrainTo = constrainTo.getViewRegion();
+            constrainTo = constrainTo.getConstrainRegion();
             constrainTo.right = constrainTo.left + constrainSize.width;
             constrainTo.bottom = constrainTo.top + constrainSize.height;
         }
@@ -616,7 +656,7 @@ Ext.define('Ext.util.Positionable', {
         // Apply constraintInsets
         if (constraintInsets) {
             constraintInsets = Ext.isObject(constraintInsets) ? constraintInsets : Ext.Element.parseBox(constraintInsets);
-            constrainTo.adjust(constraintInsets.top, constraintInsets.right, constraintInsets.bottom, constraintInsets.length);
+            constrainTo.adjust(constraintInsets.top, constraintInsets.right, constraintInsets.bottom, constraintInsets.left);
         }
 
         // Shift this region to occupy the proposed position
@@ -679,6 +719,40 @@ Ext.define('Ext.util.Positionable', {
     },
 
     /**
+     * Returns a region object that defines the client area of this element.
+     *
+     * That is, the area *within* any scrollbars.
+     * @return {Ext.util.Region} A Region containing "top, left, bottom, right" properties.
+     */
+    getClientRegion: function() {
+        var me = this,
+            scrollbarSize,
+            viewContentBox = me.getBox(),
+            myDom = me.dom;
+
+        // Capture width taken by any vertical scrollbar.
+        // If there is a vertical scrollbar, shrink the box.
+        scrollbarSize = myDom.offsetWidth - myDom.clientWidth;
+        if (scrollbarSize) {
+            if (me.getStyle('direction') === 'rtl') {
+                viewContentBox.left += scrollbarSize;
+            } else {
+                viewContentBox.right -= scrollbarSize;
+            }
+        }
+
+        // Capture width taken by any horizontal scrollbar.
+        // If there is a vertical scrollbar, shrink the box.
+        scrollbarSize = myDom.offsetHeight - myDom.clientHeight;
+        if (scrollbarSize) {
+            viewContentBox.bottom -= scrollbarSize;
+        }
+
+        // The client region excluding any scrollbars.
+        return new Ext.util.Region(viewContentBox.top, viewContentBox.right, viewContentBox.bottom, viewContentBox.left);
+    },
+
+    /**
      * Returns the **content** region of this element. That is the region within the borders
      * and padding.
      * @return {Ext.util.Region} A Region containing "top, left, bottom, right" member data.
@@ -706,6 +780,28 @@ Ext.define('Ext.util.Positionable', {
             height = me.getHeight(true);
         }
 
+        return new Ext.util.Region(top, left + width, top + height, left);
+    },
+    
+    /**
+     * @private
+     * Returns the **client** region of this element, i.e. the content region excluding
+     * horizontal and/or vertical scrollbars.
+     *
+     * @return {Ext.util.Region} Region containing "top, left, bottom, right" member data.
+     */
+    getClientRegion: function() {
+        var el = this.el,
+            borderPadding, pos, left, top, width, height;
+        
+        borderPadding = this.getBorderPadding();
+        pos = this.getXY();
+        
+        left = pos[0] + borderPadding.beforeX;
+        top = pos[1] + borderPadding.beforeY;
+        width = el.dom.clientWidth;
+        height = el.dom.clientHeight;
+        
         return new Ext.util.Region(top, left + width, top + height, left);
     },
 
@@ -768,9 +864,10 @@ Ext.define('Ext.util.Positionable', {
         x = box.x;
         y = box.y;
      
-        // Position to the contrained
-        me.setSize(box.width, box.height);
+        // Position to the contrained position
+        // Call setSize *last* so that any possible layout has the last word on position.
         me.setXY([x, y]);
+        me.setSize(box.width, box.height);
         me.afterSetPosition(x, y);
         return me;
     },
@@ -851,5 +948,41 @@ Ext.define('Ext.util.Positionable', {
             x: left,
             y: top
         };
+    },
+
+    /**
+     * Converts local coordinates into page-level coordinates
+     * @param {Number[]} xy The local x and y coordinates
+     * @return {Number[]} The translated coordinates
+     * @private
+     */
+    reverseTranslateXY: function(xy) {
+        var coords = xy,
+            el = this.el,
+            translatedXY = [],
+            dom = el.dom,
+            offsetParent = dom.offsetParent,
+            relative,
+            offsetParentXY,
+            x, y;
+
+        if (offsetParent) {
+            relative = el.isStyle('position', 'relative'),
+            offsetParentXY = Ext.fly(offsetParent).getXY(),
+
+            x = xy[0] + offsetParentXY[0] + offsetParent.clientLeft;
+            y = xy[1] + offsetParentXY[1] + offsetParent.clientTop;
+
+            if (relative) {
+                // relative positioned elements sit inside the offsetParent's padding,
+                // while absolute positioned element sit just inside the border
+                x += el.getPadding('l');
+                y += el.getPadding('t');
+            }
+
+            coords = [x, y];
+        }
+
+        return coords;
     }
 });

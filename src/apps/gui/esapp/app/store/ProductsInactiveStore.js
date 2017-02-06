@@ -53,12 +53,13 @@ Ext.define('esapp.store.ProductsInactiveStore', {
         }
     }
     ,grouper:{
-             // property: 'cat_descr_name',
-             groupFn : function (item) {
-                 return "<span style='display: none;'>" + item.get('order_index') + "</span>" + esapp.Utils.getTranslation(item.get('category_id'))
-//                                "</span><span class='group-header-style'>" + item.get('cat_descr_name') + "</span>"
-             },
-             sortProperty: 'order_index'
+        groupFn : function (item) {
+            return esapp.Utils.getTranslation(item.get('category_id'));
+            //return "<span style='display: none;'>" + item.get('order_index') + "</span>" + esapp.Utils.getTranslation(item.get('category_id'));
+            //            "</span><span class='group-header-style'>" + item.get('cat_descr_name') + "</span>"
+        },
+        property: 'order_index',
+        sortProperty: 'order_index'
     }
 
     ,listeners: {

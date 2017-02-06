@@ -46,10 +46,6 @@ Ext.define('Ext.grid.plugin.HeaderResizer', {
     destroy: function() {
         var tracker = this.tracker;
         if (tracker) {
-            delete tracker.onBeforeStart;
-            delete tracker.onStart;
-            delete tracker.onDrag;
-            delete tracker.onEnd;
             tracker.destroy();
             this.tracker = null;
         }
@@ -61,10 +57,7 @@ Ext.define('Ext.grid.plugin.HeaderResizer', {
             el = headerCt.el;
 
         headerCt.mon(el, 'mousemove', me.onHeaderCtMouseMove, me);
-        me.markerOwner = me.ownerGrid = me.headerCt.up('tablepanel');
-        if (me.markerOwner.ownerLockable) {
-            me.markerOwner = me.markerOwner.ownerLockable;
-        }
+        me.markerOwner = me.ownerGrid = me.headerCt.up('tablepanel').ownerGrid;
 
         me.tracker = new Ext.dd.DragTracker({
             disabled: me.disabled,
@@ -89,39 +82,44 @@ Ext.define('Ext.grid.plugin.HeaderResizer', {
                 me.activeHd.el.dom.style.cursor = '';
                 delete me.activeHd;
             }
-        } else {
+        } else if (e.pointerType !== 'touch') {
             me.findActiveHeader(e);
         }
     },
 
     findActiveHeader: function(e) {
         var me = this,
-            headerEl = e.getTarget('.' + me.colHeaderCls, 3, true),
-            overHeader, resizeHeader, headers;
+            headerCt = me.headerCt,
+            headerEl = e.getTarget('.' + me.colHeaderCls, headerCt.el, true),
+            ownerGrid = me.ownerGrid,
+            ownerLockable = ownerGrid.ownerLockable,
+            overHeader, resizeHeader, headers, header;
 
+        me.activeHd = null;
         if (headerEl) {
             overHeader = Ext.getCmp(headerEl.id);
 
             // If near the right edge, we're resizing the column we are over.
-            if (overHeader.isOnRightEdge(e)) {
+            if (overHeader.isAtEndEdge(e)) {
                 
                 // Cannot resize the only column in a forceFit grid.
-                if (me.headerCt.visibleColumnManager.getColumns().length === 1 && me.headerCt.forceFit) {
+                if (headerCt.visibleColumnManager.getColumns().length === 1 && headerCt.forceFit) {
                     return;
                 }
                 
                 resizeHeader = overHeader;
             }
             // Else... we might be near the right edge
-            else if (overHeader.isOnLeftEdge(e)) {
+            else if (overHeader.isAtStartEdge(e)) {
                 // Extract previous visible leaf header
-                headers = me.headerCt.visibleColumnManager.getColumns();
-                resizeHeader = headers[Ext.Array.indexOf(headers, overHeader) - 1];
+                headers = headerCt.visibleColumnManager.getColumns();
+                header = overHeader.isGroupHeader ? overHeader.getGridColumns()[0] : overHeader;
+                resizeHeader = headers[Ext.Array.indexOf(headers, header) - 1];
 
                 // If there wasn't one, and we are the normal side of a lockable assembly then
                 // use the last visible leaf header of the locked side.
-                if (!resizeHeader && me.ownerGrid.ownerLockable && !me.ownerGrid.isLocked) {
-                    headers = me.ownerGrid.ownerLockable.lockedGrid.headerCt.visibleColumnManager.getColumns();
+                if (!resizeHeader && ownerLockable && !ownerGrid.isLocked) {
+                    headers = ownerLockable.lockedGrid.headerCt.visibleColumnManager.getColumns();
                     resizeHeader = headers[headers.length - 1];
                 }
             }
@@ -151,7 +149,6 @@ Ext.define('Ext.grid.plugin.HeaderResizer', {
                 if (overHeader.triggerEl) {
                     overHeader.triggerEl.dom.style.cursor = '';
                 }
-                me.activeHd = null;
             }
         }
         return me.activeHd;
@@ -162,11 +159,11 @@ Ext.define('Ext.grid.plugin.HeaderResizer', {
         var me = this;
 
         // If on touch, we will have received no mouseover, so we have to
-        // decide whether the touch is in a resize zone, and if so, which header is to be sized.
+        // decide whether the touchstart is in a resize zone, and if so, which header is to be sized.
         // Cache any activeHd because it will be cleared on subsequent mousemoves outside the resize zone.
-        me.dragHd = Ext.supports.Touch ? me.findActiveHeader(e) : me.activeHd;
+        me.dragHd = me.activeHd || e.pointerType === 'touch' && me.findActiveHeader(e);
 
-        if (!!me.dragHd && !me.headerCt.dragging) {
+        if (me.dragHd && !me.headerCt.dragging) {
 
             // Calculate how far off the right marker line the mouse pointer is.
             // This will be the xDelta during the following drag operation.
@@ -221,7 +218,7 @@ Ext.define('Ext.grid.plugin.HeaderResizer', {
         var me       = this,
             dragHd   = me.dragHd,
             width    = dragHd.el.getWidth(),
-            headerCt = dragHd.getOwnerHeaderCt(),
+            headerCt = dragHd.getRootHeaderCt(),
             x, y, markerOwner, lhsMarker, rhsMarker, markerHeight;
 
         me.headerCt.dragging = true;
@@ -244,6 +241,11 @@ Ext.define('Ext.grid.plugin.HeaderResizer', {
             rhsMarker    = markerOwner.getRhsMarker();
             markerHeight = me.ownerGrid.body.getHeight() + headerCt.getHeight();
             y            = headerCt.getOffsetsTo(markerOwner)[1] - markerOwner.el.getBorderWidth('t');
+
+            // Ensure the markers have the correct cursor in case the cursor is *exactly* over
+            // this single pixel line, not just within the active resize zone
+            lhsMarker.dom.style.cursor = me.eResizeCursor;
+            rhsMarker.dom.style.cursor = me.eResizeCursor;
 
             lhsMarker.setLocalY(y);
             rhsMarker.setLocalY(y);
@@ -271,29 +273,31 @@ Ext.define('Ext.grid.plugin.HeaderResizer', {
 
     onEnd: function(e) {
         var me = this,
-            markerOwner;
+            markerOwner = me.markerOwner;
 
         me.headerCt.dragging = false;
         if (me.dragHd) {
             if (!me.dynamic) {
-                markerOwner = me.headerCt.up('tablepanel');
-
-                // hide markers
-                if (markerOwner.ownerLockable) {
-                    markerOwner = markerOwner.ownerLockable;
-                }
                 // If we had saved the gridOverflowSetting, restore it
                 if ('gridOverflowSetting' in me) {
                     markerOwner.el.dom.style.overflow = me.gridOverflowSetting;
                 }
 
+                // hide markers
                 me.setMarkerX(markerOwner.getLhsMarker(), -9999);
                 me.setMarkerX(markerOwner.getRhsMarker(), -9999);
             }
             me.doResize();
+
+            // On mouseup (a real mouseup), we must be ready to start dragging again immediately -
+            // Leave the activeHd active.
+            if (e.pointerType !== 'touch') {
+                me.dragHd = null;
+                me.activeHd.el.dom.style.cursor = me.eResizeCursor;
+            } else {
+                me.dragHd = me.activeHd = null;
+            }
         }
-        // If the mouse is still within the handleWidth, then we must be ready to drag again
-        me.onHeaderCtMouseMove(e);
     },
 
     doResize: function() {

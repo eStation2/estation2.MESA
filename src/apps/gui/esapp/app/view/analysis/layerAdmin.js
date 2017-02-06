@@ -42,20 +42,23 @@ Ext.define("esapp.view.analysis.layerAdmin",{
         padding: 1
     },
 
-    tools: [
-    {
-        type: 'refresh',
-        align: 'c-c',
-        tooltip: esapp.Utils.getTranslation('refreshlayerslist'),    // 'Refresh layers list',
-        callback: 'loadLayersStore'
-    }],
-
     listeners: {
         close: 'onClose'
     },
 
     initComponent: function () {
         var me = this;
+
+        me.title = '<div class="panel-title-style-16">' + esapp.Utils.getTranslation('layeradministration') + '</div>';
+        me.height = Ext.getBody().getViewSize().height-80;
+
+        me.tools = [
+        {
+            type: 'refresh',
+            align: 'c-c',
+            tooltip: esapp.Utils.getTranslation('refreshlayerslist'),    // 'Refresh layers list',
+            callback: 'loadLayersStore'
+        }];
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             items: [{
@@ -68,6 +71,10 @@ Ext.define("esapp.view.analysis.layerAdmin",{
                 // glyph: 'xf055@FontAwesome',
                 scale: 'medium',
                 handler: 'addLayer'
+            },{
+                xtype: 'container',
+                html: '<div id="boundaries_disclaimer' + me.id + '" style="text-align:left; font-size: 14px; font-weight: bold;">'+esapp.Utils.getTranslation('boundaries_disclaimer')+'</div>',
+                margin: '0 0 0 40'
             }]
         });
 
@@ -187,7 +194,7 @@ Ext.define("esapp.view.analysis.layerAdmin",{
                 hideable: false
             }, {
                 text: esapp.Utils.getTranslation('layerorderindex'),  // 'Order index',
-                width: 100,
+                width: 70,
                 dataIndex: 'layerorderidx',
                 hidden: false,
                 menuDisabled: true,
@@ -214,7 +221,7 @@ Ext.define("esapp.view.analysis.layerAdmin",{
             //    hidden: false
             }, {
                 text: esapp.Utils.getTranslation('layermenu'),  // 'Menu',
-                width: 110,
+                width: 170,
                 dataIndex: 'menu',
                 hidden: false,
                 menuDisabled: true,
@@ -228,7 +235,7 @@ Ext.define("esapp.view.analysis.layerAdmin",{
                 }
             }, {
                 text: esapp.Utils.getTranslation('layersubmenu'),  // 'Sub menu',
-                width: 225,
+                width: 200,
                 dataIndex: 'submenu',
                 hidden: false,
                 menuDisabled: true,
@@ -246,7 +253,7 @@ Ext.define("esapp.view.analysis.layerAdmin",{
                 draggable:false,
                 groupable:false,
                 hideable: false,
-                width: 60,
+                width: 100,
                 align: 'center',
                 stopSelection: false,
                 items: [{
@@ -283,7 +290,7 @@ Ext.define("esapp.view.analysis.layerAdmin",{
                 draggable:false,
                 groupable:false,
                 hideable: false,
-                width: 130,
+                width: 100,
                 align: 'center',
                 stopSelection: false,
                 items: [{

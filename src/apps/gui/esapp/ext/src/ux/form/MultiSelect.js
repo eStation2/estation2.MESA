@@ -130,29 +130,17 @@ Ext.define('Ext.ux.form.MultiSelect', {
      * Any configuration that is valid for BoundList can be included.
      */
 
-    //TODO - doc me.addEvents('drop');
-
     initComponent: function(){
         var me = this;
 
-        me.bindStore(me.store, true);
-        if (me.store.autoCreated) {
-            me.valueField = me.displayField = 'field1';
-            if (!me.store.expanded) {
-                me.displayField = 'field2';
-            }
-        }
-
-        if (!Ext.isDefined(me.valueField)) {
-            me.valueField = me.displayField;
-        }
         me.items = me.setupItems();
-        
-        
+
+        me.bindStore(me.store, true);
+
         me.callParent();
         me.initField();
     },
-    
+
     setupItems: function() {
         var me = this;
 
@@ -164,8 +152,12 @@ Ext.define('Ext.ux.form.MultiSelect', {
             displayField: me.displayField,
             disabled: me.disabled
         }, me.listConfig));
+
         me.boundList.getSelectionModel().on('selectionchange', me.onSelectChange, me);
-        
+
+        // Boundlist expects a reference to its pickerField for when an item is selected (see Boundlist#onItemClick).
+        me.boundList.pickerField = me;
+
         // Only need to wrap the BoundList in a Panel if we have a title.
         if (!me.title) {
             return me.boundList;
@@ -480,11 +472,39 @@ Ext.define('Ext.ux.form.MultiSelect', {
     },
     
     onBindStore: function(store){
-        var boundList = this.boundList;
-        
+        var me = this,
+            boundList = this.boundList;
+
+        if (store.autoCreated) {
+            me.resolveDisplayField();
+        }
+
+        if (!Ext.isDefined(me.valueField)) {
+            me.valueField = me.displayField;
+        }
+
         if (boundList) {
             boundList.bindStore(store);
         }
-    }
-    
+    },
+
+    /**
+     * Applies auto-created store fields to field and boundlist
+     * @private
+     */
+    resolveDisplayField: function() {
+        var me = this,
+            boundList = me.boundList,
+            store = me.getStore();
+
+        me.valueField = me.displayField = 'field1';
+
+        if (!store.expanded) {
+            me.displayField = 'field2';
+        }
+
+        if (boundList) {
+            boundList.setDisplayField(me.displayField);
+        }
+    }    
 });

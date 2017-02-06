@@ -139,17 +139,17 @@ Ext.define('Ext.sparkline.Base', {
          */
         tooltipSkipNull: true,
         
-        /*
+        /**
          * @cfg {String} [tooltipPrefix] A string to prepend to each field displayed in a tooltip.
          */
         tooltipPrefix: '',
         
-        /*
-         * @cfg {String} [tooltipPrefix] A string to append to each field displayed in a tooltip.
+        /**
+         * @cfg {String} [tooltipSuffix] A string to append to each field displayed in a tooltip.
          */
         tooltipSuffix: '',
         
-        /*
+        /**
          * @cfg {Boolean} [disableTooltips=false] Set to `true` to disable mouseover tooltips.
          */
         disableTooltips: false,
@@ -196,8 +196,18 @@ Ext.define('Ext.sparkline.Base', {
     redrawQueue: {},
 
     inheritableStatics: {
+        /**
+         * @private
+         * @static
+         * @inheritable
+         */
         sparkLineTipClass: Ext.baseCSSPrefix + 'sparkline-tip-target',
 
+        /**
+         * @private
+         * @static
+         * @inheritable
+         */
         onClassCreated: function(cls) {
             var proto = cls.prototype,
                 configs = cls.getConfigurator().configs,
@@ -329,16 +339,9 @@ Ext.define('Ext.sparkline.Base', {
     },
 
     redraw: function() {
-        var me = this,
-            tooltip;
+        var me = this;
 
         if (me.getValues()) {
-            tooltip = me.tooltip;
-            // Avoid the visible tooltup thinking a subsequent mousemove is a mouseout by updating its triggerElement
-            if (tooltip && tooltip.isVisible() && me.currentPageXY && me.el.getRegion().contains(me.currentPageXY)) {
-                me.tooltip.triggerElement = me.el.dom;
-            }
-
             me.onUpdate();
             me.canvas.onOwnerUpdate();
             me.renderGraph();
@@ -347,7 +350,7 @@ Ext.define('Ext.sparkline.Base', {
 
     onUpdate: Ext.emptyFn,
 
-    /*
+    /**
      * Render the chart to the canvas
      */
     renderGraph: function () {
@@ -364,6 +367,7 @@ Ext.define('Ext.sparkline.Base', {
     },
 
     onMouseMove: function (e) {
+        this.tooltip.triggerEvent = e;
         this.currentPageXY = e.getPoint();
         this.redraw();
     },
@@ -372,43 +376,51 @@ Ext.define('Ext.sparkline.Base', {
         var me = this;
         me.currentPageXY = me.targetX = me.targetY = null;
         me.redraw();
+        me.tooltip.target = null;  
+        me.tooltip.hide();
     },
 
     updateDisplay: function () {
         var me = this,
-            offset, tooltip, tooltipHTML, region;
+            values = me.getValues(),
+            offset, tooltip = me.tooltip, tooltipHTML, region;
 
-        if (me.currentPageXY && me.el.getRegion().contains(me.currentPageXY)) {
+        if (values && values.length && me.currentPageXY && me.el.getRegion().contains(me.currentPageXY)) {
             offset = me.canvas.el.getXY();
             region = me.getRegion(me.currentPageXY[0] - offset[0], me.currentPageXY[1] - offset[1]);
 
-            if (region != null && !me.disableHighlight) {
-                me.renderHighlight(region);
+            if (region != null && region < values.length) {
+                if (!me.disableHighlight) {
+                    me.renderHighlight(region);
+                }
+                tooltipHTML = me.getRegionTooltip(region);
             }
             me.fireEvent('sparklineregionchange', me);
 
-            tooltip = me.tooltip;
-            if (region != null && tooltip) {
-                tooltipHTML = me.getRegionTooltip(region);
-                if (tooltipHTML) {
-                    if (!me.lastTooltipHTML || tooltipHTML[0] !== me.lastTooltipHTML[0] || tooltipHTML[1] !== me.lastTooltipHTML[1]) {
-                        tooltip.setTitle(tooltipHTML[0]);
-                        tooltip.update(tooltipHTML[1]);
-                        me.lastTooltipHTML = tooltipHTML;
-                    }
-                } else {
-                    tooltip.hide();
+            if (tooltipHTML) {
+                if (!me.lastTooltipHTML || tooltipHTML[0] !== me.lastTooltipHTML[0] || tooltipHTML[1] !== me.lastTooltipHTML[1]) {
+                    tooltip.setTitle(tooltipHTML[0]);
+                    tooltip.update(tooltipHTML[1]);
+                    me.lastTooltipHTML = tooltipHTML;
                 }
+                tooltip.target = me.el;
+                tooltip.onTargetOver(tooltip.triggerEvent);
             }
+        }
+
+        // No tip content; ensure it's hidden
+        if (!tooltipHTML) {
+            tooltip.target = null;  
+            tooltip.hide();
         }
     },
 
-    /*
+    /**
      * Return a region id for a given x/y co-ordinate
      */
     getRegion: Ext.emptyFn,
 
-    /*
+    /**
      * Fetch the HTML to display as a tooltip
      */
     getRegionTooltip: function(region) {
@@ -417,7 +429,7 @@ Ext.define('Ext.sparkline.Base', {
             entries = [],
             tipTpl = me.getTipTpl(),
             fields, showFields, showFieldsKey, newFields, fv,
-            formatter, fieldlen, j;
+            formatter, fieldlen, i, j;
 
         fields = me.getRegionFields(region);
         formatter = me.tooltipFormatter;
@@ -438,7 +450,7 @@ Ext.define('Ext.sparkline.Base', {
             newFields = [];
             for (i = fields.length; i--;) {
                 fv = fields[i][showFieldsKey];
-                if ((j = Ext.Array.indexOf(fv, showFields)) != -1) {
+                if ((j = Ext.Array.indexOf(fv, showFields)) !== -1) {
                     newFields[j] = fields[i];
                 }
             }
@@ -492,21 +504,19 @@ Ext.define('Ext.sparkline.Base', {
         delete this.redrawQueue[this.getId()];
         this.callParent();
     }
-}, function(cls) {
-    var proto = cls.prototype;
+}, function(SparklineBase) {
+    var proto = SparklineBase.prototype;
 
-    Ext.onReady(function() {
+    Ext.onInternalReady(function() {
         proto.tooltip = new Ext.tip.ToolTip({
             id: 'sparklines-tooltip',
-            target: document.body,
-            delegate: '.' + cls.sparkLineTipClass,
             showDelay: 0,
             dismissDelay: 0,
             hideDelay: 400
         });
     });
 
-    cls.onClassCreated(cls);
+    SparklineBase.onClassCreated(SparklineBase);
     
     proto.processRedrawQueue = function () {
         var redrawQueue = proto.redrawQueue,
@@ -518,4 +528,33 @@ Ext.define('Ext.sparkline.Base', {
         proto.redrawQueue = {};
         proto.redrawTimer = 0;
     };
+
+    // If we are on a VML platform (IE8 - TODO: remove this when that retires)...
+    if (!Ext.supports.Canvas) {
+        SparklineBase.prototype.element = {
+            tag: 'span',
+            reference: 'element',
+            listeners: {
+                mouseenter: 'onMouseEnter',
+                mouseleave: 'onMouseLeave',
+                mousemove: 'onMouseMove'
+            },
+            style: {
+                display: 'inline-block',
+                position: 'relative',
+                overflow: 'hidden',
+                margin: '0px',
+                padding: '0px',
+                verticalAlign: 'top',
+                cursor: 'default'
+            },
+            children: [{
+                tag: 'svml:group',
+                reference: 'groupEl',
+                coordorigin: '0 0',
+                coordsize: '0 0',
+                style: 'position:absolute;width:0;height:0;pointer-events:none'
+            }]
+        };
+    }
 });

@@ -22,7 +22,19 @@ Ext.define("Ext.draw.sprite.Image", {
             },
             defaults: {
                 src: '',
+                /**
+                 * @cfg {Number} [width=null] The width of the image.
+                 * For consistent image size on all devices the width must be explicitly set.
+                 * Otherwise the natural image width devided by the device pixel ratio
+                 * (for a crisp looking image) will be used as the width of the sprite.
+                 */
                 width: null,
+                /**
+                 * @cfg {Number} [height=null] The height of the image.
+                 * For consistent image size on all devices the height must be explicitly set.
+                 * Otherwise the natural image height devided by the device pixel ratio
+                 * (for a crisp looking image) will be used as the height of the sprite.
+                 */
                 height: null
             }
         }
@@ -74,5 +86,18 @@ Ext.define("Ext.draw.sprite.Image", {
             Ext.Array.include(loadingStub.pendingSprites, me);
             Ext.Array.include(loadingStub.pendingSurfaces, surface);
         }
+    },
+
+    /**
+     * @private
+     */
+    isVisible: function () {
+        var attr = this.attr,
+            parent = this.getParent(),
+            hasParent = parent && (parent.isSurface || parent.isVisible()),
+            isSeen = hasParent && !attr.hidden && attr.globalAlpha;
+
+        return !!isSeen;
     }
+
 });

@@ -41,6 +41,8 @@ Ext.define("esapp.view.system.ThemaAdmin",{
     initComponent: function () {
         var me = this;
 
+        me.title = esapp.Utils.getTranslation('changethema');    // 'Change Thema',
+
         me.bbar = ['->',
             {
                 xtype: 'button',

@@ -5,76 +5,103 @@
  * The CrossZoom interaction allows the user to zoom in on a selected area of the chart.
  *
  *     @example
- *     Ext.create('Ext.Container', {
+ *     Ext.create({
+ *         xtype: 'cartesian',
  *         renderTo: Ext.getBody(),
  *         width: 600,
  *         height: 400,
- *         layout: 'fit',
- *         items: {
- *             xtype: 'cartesian',
- *             interactions: 'crosszoom',
- *             store: {
- *               fields: ['name', 'data1', 'data2', 'data3', 'data4', 'data5'],
- *               data: [
- *                   {'name':'metric one', 'data1':10, 'data2':12, 'data3':14, 'data4':8, 'data5':13},
- *                   {'name':'metric two', 'data1':7, 'data2':8, 'data3':16, 'data4':10, 'data5':3},
- *                   {'name':'metric three', 'data1':5, 'data2':2, 'data3':14, 'data4':12, 'data5':7},
- *                   {'name':'metric four', 'data1':2, 'data2':14, 'data3':6, 'data4':1, 'data5':23},
- *                   {'name':'metric five', 'data1':27, 'data2':38, 'data3':36, 'data4':13, 'data5':33}
- *               ]
- *             },
- *             axes: [{
- *                 type: 'numeric',
- *                 position: 'left',
- *                 fields: ['data1'],
- *                 title: {
- *                     text: 'Sample Values',
- *                     fontSize: 15
- *                 },
- *                 grid: true,
- *                 minimum: 0
+ *         insetPadding: 40,
+ *         interactions: 'crosszoom',
+ *         store: {
+ *             fields: ['name', 'data1', 'data2', 'data3', 'data4', 'data5'],
+ *             data: [{
+ *                 'name': 'metric one',
+ *                 'data1': 10,
+ *                 'data2': 12,
+ *                 'data3': 14,
+ *                 'data4': 8,
+ *                 'data5': 13
  *             }, {
- *                 type: 'category',
- *                 position: 'bottom',
- *                 fields: ['name'],
- *                 title: {
- *                     text: 'Sample Values',
- *                     fontSize: 15
- *                 }
- *             }],
- *             series: [{
- *                 type: 'line',
- *                 highlight: {
- *                     size: 7,
- *                     radius: 7
- *                 },
- *                 style: {
- *                     stroke: 'rgb(143,203,203)'
- *                 },
- *                 xField: 'name',
- *                 yField: 'data1',
- *                 marker: {
- *                     type: 'path',
- *                     path: ['M', -2, 0, 0, 2, 2, 0, 0, -2, 'Z'],
- *                     stroke: 'blue',
- *                     lineWidth: 0
- *                 }
+ *                 'name': 'metric two',
+ *                 'data1': 7,
+ *                 'data2': 8,
+ *                 'data3': 16,
+ *                 'data4': 10,
+ *                 'data5': 3
  *             }, {
- *                 type: 'line',
- *                 highlight: {
- *                     size: 7,
- *                     radius: 7
- *                 },
- *                 fill: true,
- *                 xField: 'name',
- *                 yField: 'data3',
- *                 marker: {
- *                     type: 'circle',
- *                     radius: 4,
- *                     lineWidth: 0
- *                 }
+ *                 'name': 'metric three',
+ *                 'data1': 5,
+ *                 'data2': 2,
+ *                 'data3': 14,
+ *                 'data4': 12,
+ *                 'data5': 7
+ *             }, {
+ *                 'name': 'metric four',
+ *                 'data1': 2,
+ *                 'data2': 14,
+ *                 'data3': 6,
+ *                 'data4': 1,
+ *                 'data5': 23
+ *             }, {
+ *                 'name': 'metric five',
+ *                 'data1': 27,
+ *                 'data2': 38,
+ *                 'data3': 36,
+ *                 'data4': 13,
+ *                 'data5': 33
  *             }]
- *         }
+ *         },
+ *         axes: [{
+ *             type: 'numeric',
+ *             position: 'left',
+ *             fields: ['data1'],
+ *             title: {
+ *                 text: 'Sample Values',
+ *                 fontSize: 15
+ *             },
+ *             grid: true,
+ *             minimum: 0
+ *         }, {
+ *             type: 'category',
+ *             position: 'bottom',
+ *             fields: ['name'],
+ *             title: {
+ *                 text: 'Sample Values',
+ *                 fontSize: 15
+ *             }
+ *         }],
+ *         series: [{
+ *             type: 'line',
+ *             highlight: {
+ *                 size: 7,
+ *                 radius: 7
+ *             },
+ *             style: {
+ *                 stroke: 'rgb(143,203,203)'
+ *             },
+ *             xField: 'name',
+ *             yField: 'data1',
+ *             marker: {
+ *                 type: 'path',
+ *                 path: ['M', - 2, 0, 0, 2, 2, 0, 0, - 2, 'Z'],
+ *                 stroke: 'blue',
+ *                 lineWidth: 0
+ *             }
+ *         }, {
+ *             type: 'line',
+ *             highlight: {
+ *                 size: 7,
+ *                 radius: 7
+ *             },
+ *             fill: true,
+ *             xField: 'name',
+ *             yField: 'data3',
+ *             marker: {
+ *                 type: 'circle',
+ *                 radius: 4,
+ *                 lineWidth: 0
+ *             }
+ *         }]
  *     });
  */
 Ext.define('Ext.chart.interactions.CrossZoom', {
@@ -125,7 +152,11 @@ Ext.define('Ext.chart.interactions.CrossZoom', {
          */
         axes: true,
 
-        //@inheritdoc
+        /**
+         * @cfg {Object} gestures
+         * Defines the gestures that should trigger the cross zoom interaction to be
+         * displayed.
+         */
         gestures: {
             dragstart: 'onGestureStart',
             drag: 'onGesture',
@@ -147,6 +178,7 @@ Ext.define('Ext.chart.interactions.CrossZoom', {
 
     applyAxes: function (axesConfig) {
         var result = {};
+
         if (axesConfig === true) {
             return {
                 top: {},
@@ -175,21 +207,20 @@ Ext.define('Ext.chart.interactions.CrossZoom', {
 
     applyUndoButton: function (button, oldButton) {
         var me = this;
+
+        if (oldButton) {
+            oldButton.destroy();
+        }
+
         if (button) {
-            if (oldButton) {
-                oldButton.destroy();
-            }
             return Ext.create('Ext.Button', Ext.apply({
                 cls: [],
-                // TODO: iconCls: 'refresh', // no such picto in Ext
                 text: 'Undo Zoom',
                 disabled: true,
                 handler: function () {
                     me.undoZoom();
                 }
             }, button));
-        } else if (oldButton) {
-            oldButton.destroy();
         }
     },
 
@@ -209,8 +240,11 @@ Ext.define('Ext.chart.interactions.CrossZoom', {
             chart = me.getChart(),
             surface = me.getSurface(),
             rect = chart.getInnerRect(),
-            chartWidth = rect[2],
-            chartHeight = rect[3],
+            innerPadding = chart.getInnerPadding(),
+            minX = innerPadding.left,
+            maxX = minX + rect[2],
+            minY = innerPadding.top,
+            maxY = minY + rect[3],
             xy = chart.getEventXY(e),
             x = xy[0],
             y = xy[1];
@@ -218,7 +252,7 @@ Ext.define('Ext.chart.interactions.CrossZoom', {
         if (me.zoomAnimationInProgress) {
             return;
         }
-        if (x > 0 && x < chartWidth && y > 0 && y < chartHeight) {
+        if (x > minX && x < maxX && y > minY && y < maxY) {
             me.gestureEvent = 'drag';
             me.lockEvents(me.gestureEvent);
             me.startX = x;
@@ -249,21 +283,24 @@ Ext.define('Ext.chart.interactions.CrossZoom', {
             var chart = me.getChart(),
                 surface = me.getSurface(),
                 rect = chart.getInnerRect(),
-                chartWidth = rect[2],
-                chartHeight = rect[3],
+                innerPadding = chart.getInnerPadding(),
+                minX = innerPadding.left,
+                maxX = minX + rect[2],
+                minY = innerPadding.top,
+                maxY = minY + rect[3],
                 xy = chart.getEventXY(e),
                 x = xy[0],
                 y = xy[1];
 
-            if (x < 0) {
-                x = 0;
-            } else if (x > chartWidth) {
-                x = chartWidth;
+            if (x < minX) {
+                x = minX;
+            } else if (x > maxX) {
+                x = maxX;
             }
-            if (y < 0) {
-                y = 0;
-            } else if (y > chartHeight) {
-                y = chartHeight;
+            if (y < minY) {
+                y = minY;
+            } else if (y > maxY) {
+                y = maxY;
             }
             me.selectionRect.setAttributes({
                 width: x - me.startX,
@@ -288,30 +325,35 @@ Ext.define('Ext.chart.interactions.CrossZoom', {
             var chart = me.getChart(),
                 surface = me.getSurface(),
                 rect = chart.getInnerRect(),
-                chartWidth = rect[2],
-                chartHeight = rect[3],
+                innerPadding = chart.getInnerPadding(),
+                minX = innerPadding.left,
+                maxX = minX + rect[2],
+                minY = innerPadding.top,
+                maxY = minY + rect[3],
+                rectWidth = rect[2],
+                rectHeight = rect[3],
                 xy = chart.getEventXY(e),
                 x = xy[0],
                 y = xy[1];
 
-            if (x < 0) {
-                x = 0;
-            } else if (x > chartWidth) {
-                x = chartWidth;
+            if (x < minX) {
+                x = minX;
+            } else if (x > maxX) {
+                x = maxX;
             }
-            if (y < 0) {
-                y = 0;
-            } else if (y > chartHeight) {
-                y = chartHeight;
+            if (y < minY) {
+                y = minY;
+            } else if (y > maxY) {
+                y = maxY;
             }
             if (Math.abs(me.startX - x) < 11 || Math.abs(me.startY - y) < 11) {
                 surface.remove(me.selectionRect);
             } else {
                 me.zoomBy([
-                    Math.min(me.startX, x) / chartWidth,
-                    1 - Math.max(me.startY, y) / chartHeight,
-                    Math.max(me.startX, x) / chartWidth,
-                    1 - Math.min(me.startY, y) / chartHeight
+                    Math.min(me.startX, x) / rectWidth,
+                    1 - Math.max(me.startY, y) / rectHeight,
+                    Math.max(me.startX, x) / rectWidth,
+                    1 - Math.min(me.startY, y) / rectHeight
                 ]);
 
                 me.selectionRect.setAttributes({
@@ -326,8 +368,8 @@ Ext.define('Ext.chart.interactions.CrossZoom', {
                     globalAlpha: 0,
                     x: 0,
                     y: 0,
-                    width: chartWidth,
-                    height: chartHeight
+                    width: rectWidth,
+                    height: rectHeight
                 });
 
                 me.zoomAnimationInProgress = true;
@@ -414,5 +456,11 @@ Ext.define('Ext.chart.interactions.CrossZoom', {
 
     onDoubleTap: function (e) {
         this.undoZoom();
+    },
+
+    destroy: function () {
+        this.setUndoButton(null);
+        this.callParent(arguments);
     }
+
 });

@@ -8,10 +8,6 @@
  * in their definition. The value in the `reference` field of an entity instance holds the
  * value of the id of the related entity instance. Since many entities can hold the same
  * value in a `reference` field, this allows many entities to reference one entity.
- */
-
-
-/*
  * OrderItem has a foreign key to Order.
  * 
  *      OrderItem -> Order
@@ -90,6 +86,24 @@ Ext.define('Ext.data.schema.ManyToOne', {
                 }
             }
         },
+ 
+        onIdChanged: function(rightRecord, oldId, newId) {
+            var fieldName = this.association.getFieldName(),
+                store = this.getAssociatedItem(rightRecord),
+                leftRecords, i, len;
+
+            if (store) {
+                store.getFilters().get(this.$roleFilterId).setValue(newId);
+                // A session will automatically handle this updating. If we don't have a field
+                // then there's nothing to do here.
+                if (!rightRecord.session && fieldName) {
+                    leftRecords = store.getDataSource().items;
+                    for (i = 0, len = leftRecords.length; i < len; ++i) {
+                        leftRecords[i].set(fieldName, newId);
+                    }
+                }
+            }
+        },
 
         processUpdate: function(session, associationData) {
             var me = this,
@@ -104,8 +118,7 @@ Ext.define('Ext.data.schema.ManyToOne', {
                         leftRecords = session.getEntityList(me.cls, items[id]);
                         store = me.getAssociatedItem(rightRecord);
                         if (store) {
-                            leftRecords = me.validateAssociationRecords(session, rightRecord, leftRecords);
-                            store.loadRecords(leftRecords);
+                            store.loadData(leftRecords);
                             store.complete = true;
                         } else {
                             // We don't have a store. Create it and add the records.
@@ -118,33 +131,55 @@ Ext.define('Ext.data.schema.ManyToOne', {
             }
         },
 
-        validateAssociationRecords: function(session, associatedEntity, leftRecords) {
-            var refs = session.getRefs(associatedEntity, this, true),
-                ret = [],
-                seen, leftRecord, id, i, len;
+        findRecords: function(session, rightRecord, leftRecords, allowInfer) {
+            var ret = leftRecords,
+                refs = session.getRefs(rightRecord, this, true),
+                field = this.association.field,
+                fieldName = field.name,
+                leftRecord, id, i, len, seen;
 
-            if (refs) {
+            if (refs || allowInfer) {
+                ret = [];
                 if (leftRecords) {
                     seen = {};
                     // Loop over the records returned by the server and
-                    // check they all still belong
+                    // check they all still belong. If the session doesn't have any prior knowledge
+                    // and we're allowed to infer the parent id (via nested loading), only do so if
+                    // we explicitly have an id specified
                     for (i = 0, len = leftRecords.length; i < len; ++i) {
                         leftRecord = leftRecords[i];
                         id = leftRecord.id;
-                        if (refs[id]) {
+                        if (refs && refs[id]) {
                             ret.push(leftRecord);
+                        } else if (allowInfer && leftRecord.data[fieldName] === undefined) {
+                            ret.push(leftRecord);
+                            leftRecord.data[fieldName] = rightRecord.id;
+                            session.updateReference(leftRecord, field, rightRecord.id, undefined);
                         }
                         seen[id] = true;
                     }
                 }
 
                 // Loop over the expected set and include any missing records.
-                for (id in refs) {
-                    if (!seen || !seen[id]) {
-                        ret.push(refs[id]);
+                if (refs) {
+                    for (id in refs) {
+                        if (!seen || !seen[id]) {
+                            ret.push(refs[id]);
+                        }
                     }
                 }
             }
+            return ret;
+        },
+
+        processLoad: function(store, rightRecord, leftRecords, session) {
+            var ret = leftRecords;
+
+            if (session) {
+                // Allow infer here, we only get called when loading an associated store
+                ret = this.findRecords(session, rightRecord, leftRecords, true);
+            }
+            this.onLoadMany(rightRecord, ret, session);
             return ret;
         },
 
@@ -164,41 +199,32 @@ Ext.define('Ext.data.schema.ManyToOne', {
             var me = this;
             return function (options, scope, leftRecords) {
                 // 'this' refers to the Model instance inside this function
-                var session = this.session,
-                    hadRecords = !!leftRecords;
-
-                if (session) {
-                    leftRecords = me.validateAssociationRecords(session, this, leftRecords);
-                    if (!hadRecords && !leftRecords.length) {
-                        leftRecords = null;
-                    }
-                }
-                return me.getAssociatedStore(this, options, scope, leftRecords, hadRecords);
+                return me.getAssociatedStore(this, options, scope, leftRecords, true);
             };
         },
 
         createSetter: null, // no setter for an isMany side
 
         onAddToMany: function (store, leftRecords) {
-            this.syncFK(leftRecords, store.associatedEntity, false);
+            this.syncFK(leftRecords, store.getAssociatedEntity(), false);
         },
 
-        onLoadMany: function(store, leftRecords, successful) {
-            var key = this.inverse.role,
-                associated = store.associatedEntity,
-                id = associated.getId(),
+        onLoadMany: function(rightRecord, leftRecords, session) {
+            var instanceName = this.inverse.getInstanceName(),
+                id = rightRecord.getId(),
                 field = this.association.field,
-                session = store.getSession(),
-                i, len, leftRecord, oldId;
+                i, len, leftRecord, oldId, data, name;
 
-            if (successful) {
+            if (field) {
                 for (i = 0, len = leftRecords.length; i < len; ++i) {
                     leftRecord = leftRecords[i];
-                    leftRecord[key] = associated;
+                    leftRecord[instanceName] = rightRecord;
                     if (field) {
-                        oldId = leftRecord.data[field.name];
+                        name = field.name;
+                        data = leftRecord.data;
+                        oldId = data[name];
                         if (oldId !== id) {
-                            leftRecord.data[field.name] = id;
+                            data[name] = id;
                             if (session) {
                                 session.updateReference(leftRecord, field, id, oldId);
                             }
@@ -209,28 +235,27 @@ Ext.define('Ext.data.schema.ManyToOne', {
         },
 
         onRemoveFromMany: function (store, leftRecords) {
-            this.syncFK(leftRecords, store.associatedEntity, true);
+            this.syncFK(leftRecords, store.getAssociatedEntity(), true);
         },
 
         read: function(rightRecord, node, fromReader, readOptions) {
             var me = this,
                 // We use the inverse role here since we're setting ourselves
                 // on the other record
-                key = me.inverse.role,
-                result = me.callParent([ rightRecord, node, fromReader, readOptions ]),
-                store, leftRecords, len, i;
+                instanceName = me.inverse.getInstanceName(),
+                leftRecords = me.callParent([rightRecord, node, fromReader, readOptions]),
+                store, len, i;
             
-            // Did the root exist in the data?
-            if (result.getReadRoot()) {
+            if (leftRecords) {
                 // Create the store and dump the data
-                store = rightRecord[me.getterName](null, null, result.getRecords());
+                store = rightRecord[me.getterName](null, null, leftRecords);
                 // Inline associations should *not* arrive on the "data" object:
                 delete rightRecord.data[me.role];
 
                 leftRecords = store.getData().items;
 
                 for (i = 0, len = leftRecords.length; i < len; ++i) {
-                    leftRecords[i][key] = rightRecord;
+                    leftRecords[i][instanceName] = rightRecord;
                 }
             }
         },
@@ -242,15 +267,18 @@ Ext.define('Ext.data.schema.ManyToOne', {
             // our inverse role.
 
             var foreignKeyName = this.association.getFieldName(),
-                setter = this.inverse.setterName, // setTicket
+                inverse = this.inverse,
+                setter = inverse.setterName, // setTicket
+                instanceName = inverse.getInstanceName(),
                 i = leftRecords.length,
                 id = rightRecord.getId(),
-                different, leftRecord;
+                different, leftRecord, val;
 
             while (i-- > 0) {
                 leftRecord = leftRecords[i];
                 different = !leftRecord.isEqual(id, leftRecord.get(foreignKeyName));
 
+                val = clearing ? null : rightRecord;
                 if (different !== clearing) {
                     // clearing === true
                     //      different === true  :: leave alone (not associated anymore)
@@ -261,12 +289,11 @@ Ext.define('Ext.data.schema.ManyToOne', {
                     //      different === false :: leave alone (already associated)
                     //
                     leftRecord.changingKey = true;
-                    if (setter) {
-                        leftRecord[setter](clearing ? null : rightRecord);
-                    } else {
-                        leftRecord.set(foreignKeyName, clearing ? null : id);
-                    }
+                    leftRecord[setter](val);
                     leftRecord.changingKey = false;
+                } else {
+                    // Ensure we set the instance, we may only have the key
+                    leftRecord[instanceName] = val;
                 }
             }
         }
@@ -287,7 +314,7 @@ Ext.define('Ext.data.schema.ManyToOne', {
             if (field) {
                 leftRecord.set(field.name, null);
             }
-            leftRecord[this.role] = null;
+            leftRecord[this.getInstanceName()] = null;
         },
 
         createGetter: function() {
@@ -325,9 +352,16 @@ Ext.define('Ext.data.schema.ManyToOne', {
             // If we have a session, we may be able to find the new store this belongs to
             // If not, the best we can do is to remove the record from the associated store/s.
             var me = this,
-                joined, store, i, len, associated;
+                instanceName = me.getInstanceName(),
+                cls = me.cls,
+                hasNewValue,
+                joined, store, i, associated, rightRecord;
 
             if (!leftRecord.changingKey) {
+                hasNewValue = newValue || newValue === 0;
+                if (!hasNewValue) {
+                    leftRecord[instanceName] = null;
+                }
                 if (session) {
                     // Find the store that holds this record and remove it if possible.
                     store = me.getSessionStore(session, oldValue);
@@ -335,16 +369,23 @@ Ext.define('Ext.data.schema.ManyToOne', {
                         store.remove(leftRecord);
                     }
                     // If we have a new value, try and find it and push it into the new store.
-                    if (newValue || newValue === 0) {
+                    if (hasNewValue) {
                         store = me.getSessionStore(session, newValue);
                         if (store && !store.isLoading()) {
                             store.add(leftRecord);
                         }
+                        if (cls) {
+                            rightRecord = session.peekRecord(cls, newValue);
+                        }
+                        // Setting to undefined is important so that we can load the record later.
+                        leftRecord[instanceName] = rightRecord || undefined;
                     }
                 } else {
                     joined = leftRecord.joined;
                     if (joined) {
-                        for (i = 0, len = joined.length; i < len; ++i) {
+                        // Loop backwards because the store remove may cause unjoining, which means 
+                        // removal from the joined array.
+                        for (i = joined.length - 1; i >= 0; i--) {
                             store = joined[i];
                             if (store.isStore) {
                                 associated = store.getAssociatedEntity();
@@ -384,11 +425,15 @@ Ext.define('Ext.data.schema.ManyToOne', {
         },
         
         read: function(leftRecord, node, fromReader, readOptions) {
-            var result = this.callParent([ leftRecord, node, fromReader, readOptions ]),
-                rightRecord = result.getRecords()[0];
+            var rightRecords = this.callParent([leftRecord, node, fromReader, readOptions]),
+                rightRecord;
 
-            if (rightRecord) {
-                leftRecord[this.role] = rightRecord;
+            if (rightRecords) {
+                rightRecord = rightRecords[0];
+                if (rightRecord) {
+                    leftRecord[this.getInstanceName()] = rightRecord;
+                    delete leftRecord.data[this.role];
+                }
             }
         }
     })

@@ -104,39 +104,40 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
         mapsetdatasetgrid.show();
     },
 
-    mapsetDataSetGridRowClick: function(gridview, record) {
+    mapsetDataSetGridRowClick: function(gridview, record, tr, rowIndex, e, eOpts) {
+        //                    console.info(gridview);
+        //                    console.info(gridview.lastFocused);
+        //                    console.info(record);
+        //                    console.info(rowIndex);
+        //Ext.util.Observable.capture(gridview, function(e){console.log('mapsetDataSetGridRowClick - ' + gridview.id + ': ' + e);});
+
+        //gridview.saveState();
+        //this.suspendEvents();
+        var colorschemesgrid = this.getView().lookupReference('colorschemesGrid');
+        //var myLoadMask = new Ext.LoadMask({
+        //    msg    : esapp.Utils.getTranslation('loading'), // 'Loading...',
+        //    target : colorschemesgrid
+        //});
 
         this.getView().selectedproduct = {
             productcode:record.get('productcode'),
             productversion:record.get('version'),
             mapsetcode:record.get('mapsetcode'),
             subproductcode:record.get('subproductcode'),
-            productname:record.get('descriptive_name')
+            productname:record.get('descriptive_name'),
+            date_format:record.get('date_format')
         };
 
-        //var params = {
-        //       productcode:record.get('productcode'),
-        //       version:record.get('version'),
-        //       mapsetcode:record.get('mapsetcode'),
-        //       subproductcode:record.get('subproductcode')
-        //};
-
-        var colorschemesgrid = this.getView().lookupReference('colorschemesGrid');
-        colorschemesgrid.hide();
+        //colorschemesgrid.hide();
         this.getStore('colorschemes').removeAll();
-
-        var myLoadMask = new Ext.LoadMask({
-            msg    : esapp.Utils.getTranslation('loading'), // 'Loading...',
-            target : colorschemesgrid
-        });
-        myLoadMask.show();
+        //myLoadMask.show();
 
         var addToMapBtn = this.getView().lookupReference('addtomapbtn_'+this.getView().mapviewid.replace(/-/g,'_'));
 
         this.getStore('colorschemes').load({
             params:this.getView().selectedproduct,
             callback:function(records, options, success){
-                myLoadMask.hide();
+                //myLoadMask.hide();
                 if (records.length>0){
                     var nodefault = true;
                     for (var i = 0; i < records.length; i++) {
@@ -153,6 +154,9 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
                 }
             }
         });
+        //Ext.fly(gridview.getNode(rowIndex)).focus();        // scrollIntoView();
+        //gridview.focusRow(rowIndex);
+        //gridview.refreshScroll();
     },
 
     onRadioColumnAction:function(view, rowIndex, colIndex, item, e, record ) {

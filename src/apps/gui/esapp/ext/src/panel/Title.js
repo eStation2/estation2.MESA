@@ -21,52 +21,51 @@ Ext.define('Ext.panel.Title', {
 
     beforeRenderConfig: {
         /**
-         * @cfg {'left'/'center'/'right'} [textAlign='left']
-         * text alignment of the title
+         * @cfg [textAlign='left']
+         * @inheritdoc Ext.panel.Header#cfg-titleAlign
+         * @accessor
          */
         textAlign: null,
 
         /**
          * @cfg {String}
          * The title's text (can contain html tags/entities)
+         * @accessor
          */
         text: null,
 
         /**
-         * @cfg {Number/String} glyph
-         * A numeric unicode character code to use as the icon. The
-         * default font-family for glyphs can be set globally using
-         * {@link Ext#setGlyphFontFamily Ext.setGlyphFontFamily()}. Alternatively, this
-         * config option accepts a string with the charCode and font-family separated by the
-         * `@` symbol. For example '65@My Font Family'.
+         * @cfg glyph
+         * @inheritdoc Ext.panel.Header#cfg-glyph
+         * @accessor
          */
         glyph: null,
 
         /**
-         * @cfg {String} icon
-         * Path to image for an icon.
+         * @cfg icon
+         * @inheritdoc Ext.panel.Header#cfg-icon
+         * @accessor
          */
         icon: null,
 
         /**
          * @cfg {'top'/'right'/'bottom'/'left'} [iconAlign='left']
          * alignment of the icon
+         * @accessor
          */
         iconAlign: null,
 
         /**
-         * @cfg {String} iconCls
-         * CSS class for an icon.
+         * @cfg iconCls
+         * @inheritdoc Ext.panel.Header#cfg-iconCls
+         * @accessor
          */
         iconCls: null,
         
         /**
-         * @cfg {0/1/2} [rotation=0]
-         * The rotation of the title's text.  Can be one of the following values:
-         *
-         * - `0` - no rotation
-         * - `1` - rotate 90deg clockwise
-         * - `2` - rotate 90deg counter-clockwise
+         * @cfg rotation
+         * @inheritdoc Ext.panel.Header#cfg-titleRotation
+         * @accessor
          */
         rotation: null
     },
@@ -264,7 +263,6 @@ Ext.define('Ext.panel.Title', {
     
     onAdded: function(container, pos, instanced) {
         var me = this,
-            cls = me.cls || '',
             suffix = me._titleSuffix,
             baseCls = container.baseCls;
 
@@ -297,7 +295,7 @@ Ext.define('Ext.panel.Title', {
             if (!glyph) {
                 iconEl.dom.innerHTML = '';
                 iconEl.removeCls(glyphCls);
-            } else if (oldGlyph != glyph) {
+            } else if (oldGlyph !== glyph) {
                 iconEl.dom.innerHTML = '&#' + glyph + ';';
                 iconEl.addCls(glyphCls);
             }
@@ -316,7 +314,7 @@ Ext.define('Ext.panel.Title', {
         var me = this,
             iconEl;
 
-        if (me.rendered && icon != oldIcon) {
+        if (me.rendered && icon !== oldIcon) {
             me._syncIconVisibility();
             iconEl = me.iconEl;
             
@@ -330,7 +328,7 @@ Ext.define('Ext.panel.Title', {
     updateIconAlign: function(align, oldAlign) {
         var me = this,
             iconWrapEl = me.iconWrapEl,
-            el, iconWrapEl, iconAlignClasses;
+            el, iconAlignClasses;
 
         if (me.iconWrapEl) {
             el = me.el;
@@ -358,7 +356,7 @@ Ext.define('Ext.panel.Title', {
         var me = this,
             iconEl;
 
-        if (me.rendered && oldCls != cls) {
+        if (me.rendered && oldCls !== cls) {
             me._syncIconVisibility();
             iconEl = me.iconEl;
             
@@ -374,7 +372,7 @@ Ext.define('Ext.panel.Title', {
 
     updateRotation: function(rotation, oldRotation) {
         var me = this,
-            clearStyles, el, rotationClasses;
+            el, rotationClasses;
        
         if (me.rendered) {
             el = me.el;
@@ -408,6 +406,7 @@ Ext.define('Ext.panel.Title', {
     updateText: function(text) {
         if (this.rendered) {
             this.textEl.setHtml(text);
+            this.updateLayout();
         }
     },
 

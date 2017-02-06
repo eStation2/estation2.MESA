@@ -24,6 +24,61 @@ db = connectdb.ConnectDB().db
 dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
 
 
+def get_user_map_templates(userid, echo=False):
+    global dbschema_analysis
+    try:
+        query = "SELECT * FROM analysis.map_templates WHERE userid = '" + userid + "'"
+
+        result = db.execute(query)
+        result = result.fetchall()
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_user_map_templates: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def getusers(echo=False):
+    global dbschema_analysis
+    try:
+        query = "SELECT * FROM analysis.users"
+        result = db.execute(query)
+        result = result.fetchall()
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("getusers: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def checklogin(login=None, echo=False):
+    global dbschema_analysis
+    try:
+        query = "SELECT * FROM analysis.users WHERE userid = '" + login.username + "' AND password = '" + login.password + "'"
+        result = db.execute(query)
+        result = result.fetchall()
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("checklogin: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
 def update_yaxe_timeseries_drawproperties(yaxe, echo=False):
     global dbschema_analysis
     status = False
@@ -346,7 +401,8 @@ def get_mapsets_for_ingest(productcode, version, subproductcode, echo=False):
 def get_categories(echo=False):
     global db
     try:
-        query = "SELECT * FROM products.product_category ORDER BY category_id"
+        # query = "SELECT * FROM products.product_category ORDER BY category_id"
+        query = "select * from products.product_category where category_id in (select distinct category_id from products.product where activated = true)"
         categories = db.execute(query)
         categories = categories.fetchall()
 
@@ -684,10 +740,11 @@ def get_timeseries_subproducts(echo=False,  productcode=None, version='undefined
                     p.c.productcode,
                     p.c.subproductcode,
                     p.c.version,
-                    p.c.defined_by,
-                    p.c.activated,
-                    p.c.product_type,
-                    p.c.descriptive_name.label('prod_descriptive_name'),
+                    # p.c.defined_by,
+                    # p.c.activated,
+                    p.c.date_format,
+                    p.c.frequency_id,
+                    p.c.descriptive_name.label('descriptive_name'),        # prod_descriptive_name
                     p.c.description,
                     p.c.masked,
                     p.c.timeseries_role
@@ -699,18 +756,21 @@ def get_timeseries_subproducts(echo=False,  productcode=None, version='undefined
         if masked is None:
             where = and_(pl.c.productcode == productcode,
                          pl.c.version == version,
-                         or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
+                         pl.c.timeseries_role == subproductcode)
+                         # or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
         else:
             if not masked:
                 where = and_(pl.c.masked == 'f',
                              pl.c.productcode == productcode,
                              pl.c.version == version,
-                             or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
+                             pl.c.timeseries_role == subproductcode)
+                             # or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
             else:
                 where = and_(pl.c.masked == 't',
                              pl.c.productcode == productcode,
                              pl.c.version == version,
-                             or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
+                             pl.c.timeseries_role == subproductcode)
+                             # or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
 
         productslist = pl.filter(where).order_by(asc(pl.c.productcode), asc(pl.c.subproductcode)).all()
 
@@ -763,11 +823,12 @@ def get_timeseries_products(echo=False,  masked=None):
                     p.c.productcode,
                     p.c.subproductcode,
                     p.c.version,
-                    p.c.defined_by,
-                    p.c.activated,
+                    # p.c.defined_by,
+                    p.c.date_format,
                     p.c.product_type,
-                    p.c.descriptive_name.label('prod_descriptive_name'),
+                    p.c.descriptive_name.label('descriptive_name'),        # prod_descriptive_name
                     p.c.description,
+                    p.c.frequency_id,
                     p.c.masked,
                     p.c.timeseries_role,
                     pc.c.category_id,
@@ -806,13 +867,51 @@ def get_timeseries_products(echo=False,  masked=None):
 
 
 ######################################################################################
-#   get_legend_steps(legendid, echo=False)
-#   Purpose: Query the database to get the legend info needed for mapserver mapfile SCALE_BUCKETS setting.
+#   get_all_legends(echo=False)
+#   Purpose: Query the database to get all the difined legends.
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/07/31
 #   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
 #
-#   Output: Return legend steps of the given legendid, needed for mapserver mapfile LAYER CLASS settings.
+#   Output: Return all the difined legends.
+#
+#   SELECT * FROM analysis.product_legend
+#
+def get_all_legends(echo=False):
+
+    global dbschema_analysis
+    try:
+
+        query = "SELECT legend.legend_id,  " + \
+                "       legend.legend_name, " + \
+                "       legend.colorbar " + \
+                "FROM analysis.legend "
+
+        result = db.execute(query)
+        legends = result.fetchall()
+
+        return legends
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and log the error telling what happened.
+        logger.error("get_all_legends: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+        #dbschema_analysis = None
+
+
+######################################################################################
+#   get_product_legends(productcode=None, subproductcode=None, version=None, echo=False)
+#   Purpose: Query the database to get the legends assigned the given sub product.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2014/07/31
+#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
+#
+#   Output: Return legends assigned the given sub product.
 #
 #   SELECT pl.default_legend,
 #          pl.legend_id,
@@ -1077,35 +1176,58 @@ def get_ingestions(echo=False):
 
     global db
     try:
-        i = db.ingestion._table
-        m = db.mapset._table
-        p = db.product._table
+        query = " SELECT p.productcode || '_' || p.version as productid, " + \
+                "        p.productcode, " + \
+                "        p.subproductcode, " + \
+                "        p.version, " + \
+                "        p.frequency_id, " + \
+                "        i.mapsetcode, " + \
+                "        i.defined_by, " + \
+                "        i.activated, " + \
+                "        i.enabled, " + \
+                "        m.descriptive_name as mapsetname " + \
+                " FROM products.product p " + \
+                "      JOIN (SELECT * FROM products.ingestion i WHERE i.enabled) i ON  " + \
+                "           (p.productcode = i.productcode AND  " + \
+                "            p.subproductcode = i.subproductcode AND " + \
+                "            p.version = i.version) " + \
+                "     LEFT OUTER JOIN products.mapset m ON i.mapsetcode = m.mapsetcode " + \
+                " WHERE p.product_type = 'Ingest' "
 
-        s = select([func.CONCAT(i.c.productcode, '_', i.c.version).label('productid'),
-                    i.c.productcode,
-                    i.c.subproductcode,
-                    i.c.version,
-                    i.c.mapsetcode,
-                    p.c.frequency_id,
-                    i.c.defined_by,
-                    i.c.activated,
-                    i.c.enabled,
-                    m.c.descriptive_name.label('mapsetname')]).\
-            select_from(i.outerjoin(m, i.c.mapsetcode == m.c.mapsetcode).outerjoin(p, and_(i.c.productcode == p.c.productcode,
-                                            i.c.subproductcode == p.c.subproductcode,
-                                            i.c.version == p.c.version)))
+        result = db.execute(query)
+        ingestions = result.fetchall()
 
-        s = s.alias('ingest')
-        i = db.map(s, primary_key=[s.c.productid, i.c.subproductcode, i.c.mapsetcode])
-
-        # where = and_(i.c.defined_by != 'Test_JRC')
-        where = and_(i.c.enabled)
-        ingestions = i.filter(where).order_by(desc(i.productcode)).all()
-        #ingestions = i.order_by(desc(i.productcode)).all()
-
-        # if echo:
-        #     for row in ingestions:
-        #         print row
+        # i = db.ingestion._table
+        # m = db.mapset._table
+        # p = db.product._table
+        #
+        # s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productid'),
+        #             p.c.productcode,
+        #             p.c.subproductcode,
+        #             p.c.version,
+        #             i.c.mapsetcode,
+        #             p.c.frequency_id,
+        #             i.c.defined_by,
+        #             i.c.activated,
+        #             i.c.enabled,
+        #             m.c.descriptive_name.label('mapsetname')]).\
+        #     select_from(i.outerjoin(m, i.c.mapsetcode == m.c.mapsetcode).
+        #                 outerjoin(p, and_(i.c.productcode == p.c.productcode,
+        #                                   i.c.subproductcode == p.c.subproductcode,
+        #                                   i.c.version == p.c.version)))
+        #
+        #     # select_from(p.outerjoin(i, and_(p.c.productcode == i.c.productcode,
+        #     #                                 p.c.subproductcode == i.c.subproductcode,
+        #     #                                 p.c.version == i.c.version)).outerjoin(m, i.c.mapsetcode == m.c.mapsetcode))
+        #
+        # s = s.alias('ingest')
+        # i = db.map(s, primary_key=[s.c.productid, i.c.subproductcode, i.c.mapsetcode])
+        #
+        # # where = and_(i.c.defined_by != 'Test_JRC')
+        # # where = and_(p.c.product_type == 'Ingest', i.c.enabled)
+        # where = and_(i.c.enabled)
+        # ingestions = i.filter(where).order_by(desc(i.productcode)).all()
+        # #ingestions = i.order_by(desc(i.productcode)).all()
 
         return ingestions
 

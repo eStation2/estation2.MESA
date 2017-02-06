@@ -1,6 +1,4 @@
 /**
- * @author Ed Spencer
- *
  * The JSON Reader is used by a Proxy to read a server response that is sent back in JSON format. This usually
  * happens as a result of loading a Store - for example we might create something like this:
  *
@@ -68,7 +66,7 @@
  *         ]
  *     }
  *
- * To parse this we just pass in a {@link #root} configuration that matches the 'users' above:
+ * To parse this we just pass in a {@link #rootProperty} configuration that matches the 'users' above:
  *
  *     reader: {
  *         type: 'json',
@@ -111,7 +109,7 @@
  * add a `metaData` attribute to the root of the response data. The metaData attribute can contain anything,
  * but supports a specific set of properties that are handled by the Reader if they are present:
  * 
- * - {@link #root}: the property name of the root response node containing the record data
+ * - {@link #rootProperty}: the property name of the root response node containing the record data
  * - {@link #totalProperty}: property name for the total number of records in the data
  * - {@link #successProperty}: property name for the success status of the response
  * - {@link #messageProperty}: property name for an optional response message
@@ -130,7 +128,7 @@
  *     }
  *
  * If you were to pass a response object containing attributes different from those initially defined above, you could
- * use the `metaData` attribute to reconifgure the Reader on the fly. For example:
+ * use the `metaData` attribute to reconfigure the Reader on the fly. For example:
  *
  *     {
  *         "count": 1,
@@ -151,8 +149,8 @@
  *
  * You can also place any other arbitrary data you need into the `metaData` attribute which will be ignored by the Reader,
  * but will be accessible via the Reader's {@link #metaData} property (which is also passed to listeners via the Proxy's
- * {@link Ext.data.proxy.Proxy#metachange metachange} event (also relayed by the {@link Ext.data.AbstractStore#metachange
- * store}). Application code can then process the passed metadata in any way it chooses.
+ * {@link Ext.data.proxy.Proxy#metachange metachange} event (also relayed by the store). Application code can then
+ * process the passed metadata in any way it chooses.
  * 
  * A simple example for how this can be used would be customizing the fields for a Model that is bound to a grid. By passing
  * the `fields` property the Model will be automatically updated by the Reader internally, but that change will not be
@@ -248,55 +246,44 @@ Ext.define('Ext.data.reader.Json', {
     },
 
     /**
+     * @method readRecords
      * Reads a JSON object and returns a ResultSet. Uses the internal getTotal and getSuccess extractors to
      * retrieve meta data from the response, and extractData to turn the JSON data into model instances.
      * @param {Object} data The raw JSON data
      * @param {Object} [readOptions] See {@link #read} for details.
      * @return {Ext.data.ResultSet} A ResultSet containing model instances and meta data about the results
      */
-    readRecords: function(data, readOptions) {
-        var me = this,
-            meta;
-            
-        //this has to be before the call to super because we use the meta data in the superclass readRecords
-        if (me.getMeta) {
-            meta = me.getMeta(data);
-            if (meta) {
-                me.onMetaChange(meta);
-            }
-        } else if (data.metaData) {
-            me.onMetaChange(data.metaData);
-        }
 
-        return me.callParent([data, readOptions]);
-    },
-
-    //inherit docs
     getResponseData: function(response) {
+        var error;
+
         try {
             return Ext.decode(response.responseText);
         } catch (ex) {
+            error = this.createReadError(ex.message);
+
             Ext.Logger.warn('Unable to parse the JSON returned by the server');
-            return this.createReadError(ex.message);   
+            this.fireEvent('exception', this, response, error);
+            return error;
         }
     },
 
-    //inherit docs
     buildExtractors : function() {
         var me = this,
-            metaProp = me.getMetaProperty(),
-            root = me.getRootProperty();
+            metaProp, rootProp;
 
         // Will only return true if we need to build
         if (me.callParent(arguments)) {
-            if (root) {
-                me.getRoot = me.createAccessor(root);
+            metaProp = me.getMetaProperty();
+            rootProp = me.getRootProperty();
+            if (rootProp) {
+                me.getRoot = me.getAccessor(rootProp);
             } else {
                 me.getRoot = Ext.identityFn;
             }
         
             if (metaProp) {
-                me.getMeta = me.createAccessor(metaProp);
+                me.getMeta = me.getAccessor(metaProp);
             }
         }
     },
@@ -463,6 +450,18 @@ Ext.define('Ext.data.reader.Json', {
             } else {
                 return me.createAccessor(map);
             }    
+        }
+    },
+
+    getAccessorKey: function(prop) {
+        var simple = this.getUseSimpleAccessors() ? 'simple' : '';
+        return this.$className + simple + prop;
+    },
+
+    privates: {
+        copyFrom: function(reader) {
+            this.callParent([reader]);
+            this.getRoot = reader.getRoot;
         }
     }
 });

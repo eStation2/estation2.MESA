@@ -206,7 +206,7 @@ Ext.define('Ext.data.writer.Writer', {
         /**
          * @cfg {Function|Object} [transform]
          * If a transform function is set, it will be invoked just before {@link #writeRecords} 
-         * executes. It is passed the unserialized data object and the {@link #Ext.data.Request request} 
+         * executes. It is passed the unserialized data object and the {@link Ext.data.Request request}
          * object. The transform function returns a data object, which can be a modified version of the original 
          * data object, or a completely new data object. The transform can be a function, or an object 
          * with a 'fn' key and an optional 'scope' key. Example usage:
@@ -299,10 +299,12 @@ Ext.define('Ext.data.writer.Writer', {
             nameProperty = me.getNameProperty(),
             mapping = nameProperty !== 'name',
             idField = record.self.idField,
-            key = idField.name, // setup for idField first
+            key = idField[nameProperty] || idField.name, // setup for idField first
             value = record.id,
             writeAll = me.getWriteAllFields(),
-            ret;
+            ret, dateFormat, phantom,
+            options, clientIdProperty,
+            fieldsMap, data, field;
 
         if (idField.serialize) {
             value = idField.serialize(value);
@@ -310,15 +312,13 @@ Ext.define('Ext.data.writer.Writer', {
 
         if (!writeAll && operation && operation.isDestroyOperation) {
             ret = {};
-            ret[nameProperty ? idField[nameProperty] : key] = value;
+            ret[key] = value;
         } else {
-            var dateFormat = me.getDateFormat(),
-                phantom = record.phantom,
-                options = (phantom || writeAll) ? me.getAllDataOptions()
-                                                : me.getPartialDataOptions(),
-                clientIdProperty = phantom && me.getClientIdProperty(),
-                fieldsMap = record.getFieldsMap(),
-                data, field;
+            dateFormat = me.getDateFormat();
+            phantom = record.phantom;
+            options = (phantom || writeAll) ? me.getAllDataOptions() : me.getPartialDataOptions();
+            clientIdProperty = phantom && me.getClientIdProperty();
+            fieldsMap = record.getFieldsMap();
 
             options.serialize = false; // we must take over this here
             data = record.getData(options);

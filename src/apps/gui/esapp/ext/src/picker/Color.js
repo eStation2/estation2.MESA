@@ -87,7 +87,7 @@ Ext.define('Ext.picker.Color', {
     ],
 
     /**
-     * @cfg {Function} handler
+     * @cfg {Function/String} handler
      * A function that will handle the select event of this picker. The handler is passed the following parameters:
      *
      * - `picker` : ColorPicker
@@ -97,6 +97,8 @@ Ext.define('Ext.picker.Color', {
      * - `color` : String
      *
      *   The 6-digit color hex code (without the # symbol).
+     * 
+     * @declarativeHandler
      */
 
     /**
@@ -192,7 +194,7 @@ Ext.define('Ext.picker.Color', {
         var me = this,
             selectedCls = me.selectedCls,
             value = me.value,
-            el;
+            el, item;
 
         color = color.replace('#', '');
         if (!me.rendered) {
@@ -201,13 +203,15 @@ Ext.define('Ext.picker.Color', {
         }
 
 
-        if (color != value || me.allowReselect) {
+        if (color !== value || me.allowReselect) {
             el = me.el;
 
             if (me.value) {
-                el.down('a.color-' + value).removeCls(selectedCls);
+                item = el.down('a.color-' + value, true);
+                Ext.fly(item).removeCls(selectedCls);
             }
-            el.down('a.color-' + color).addCls(selectedCls);
+            item = el.down('a.color-' + color, true);
+            Ext.fly(item).addCls(selectedCls);
             me.value = color;
             if (suppressEvent !== true) {
                 me.fireEvent('select', me, color);
@@ -224,8 +228,8 @@ Ext.define('Ext.picker.Color', {
             el;
             
         if (value && me.rendered) {
-            el = me.el.down('a.color-' + value);
-            el.removeCls(me.selectedCls);
+            el = me.el.down('a.color-' + value, true);
+            Ext.fly(el).removeCls(me.selectedCls);
         }
         me.value = null;  
     },

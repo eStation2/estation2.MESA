@@ -81,10 +81,34 @@ Ext.define('Ext.form.RadioGroup', {
     // private
     defaultType : 'radiofield',
 
+    /**
+     * @cfg {Boolean} [local=false]
+     * By default, child {@link Ext.form.field.Radio radio} `name`s are scoped to the encapsulating {@link Ext.form.Panel form panel}
+     * if any, of the document.
+     *
+     * If you are using multiple `RadioGroup`s each of which uses the same `name` configuration in child {@link Ext.form.field.Radio radio}s, configure this as `true` to scope
+     * the names to within this `RadioGroup`
+     */
+    local: false,
+
+    defaultBindProperty: 'value',
+
     // private
     groupCls : Ext.baseCSSPrefix + 'form-radio-group',
     
     ariaRole: 'radiogroup',
+
+    lookupComponent: function(config) {
+        var result = this.callParent([config]);
+
+        // Local means that the exclusivity of checking by name is scoped to this RadioGroup.
+        // So multiple RadioGroups can be used which use the same Radio names.
+        // This enables their use as a grid widget.
+        if (this.local) {
+            result.formId = this.getId();
+        }
+        return result;
+    },
     
     getBoxes: function(query, root) {
         return (root || this).query('[isRadio]' + (query||''));
@@ -142,19 +166,20 @@ Ext.define('Ext.form.RadioGroup', {
             i, len, name;
 
         if (Ext.isObject(value)) {
-            for (name in value) {
-                if (value.hasOwnProperty(name)) {
-                    cbValue = value[name];
-                    first = this.items.first();
-                    formId = first ? first.getFormId() : null;
-                    radios = Ext.form.RadioManager.getWithValue(name, cbValue, formId).items;
-                    len = radios.length;
+            Ext.suspendLayouts();
+            first = this.items.first();
+            formId = first ? first.getFormId() : null;
 
-                    for (i = 0; i < len; ++i) {
-                        radios[i].setValue(true);
-                    }
+            for (name in value) {
+                cbValue = value[name];
+                radios = Ext.form.RadioManager.getWithValue(name, cbValue, formId).items;
+                len = radios.length;
+
+                for (i = 0; i < len; ++i) {
+                    radios[i].setValue(true);
                 }
             }
+            Ext.resumeLayouts(true);
         }
         return this;
     },

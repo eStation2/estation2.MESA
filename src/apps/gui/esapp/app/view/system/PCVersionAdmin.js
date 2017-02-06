@@ -40,6 +40,8 @@ Ext.define("esapp.view.system.PCVersionAdmin",{
     initComponent: function () {
         var me = this;
 
+        me.title = esapp.Utils.getTranslation('changeversion');    // 'Change version';
+
         me.bbar = ['->',
             {
                 xtype: 'button',

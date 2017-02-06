@@ -1,15 +1,23 @@
-(function () {
+/**
+ * @private
+ * @class Ext.draw.sprite.AnimationParser
+ *
+ * Computes an intermidiate value between two values of the same type for use in animations.
+ * Can have pre- and post- processor functions if the values need to be processed
+ * before an intermidiate value can be computed (parseInitial), or the computed value
+ * needs to be processed before it can be used as a valid attribute value (serve).
+ */
+Ext.define('Ext.draw.sprite.AnimationParser', function () {
+
     function compute(from, to, delta) {
         return from + (to - from) * delta;
     }
 
-    /**
-     * @private
-     * @class Ext.draw.sprite.AnimationParser
-     *
-     * Parsers for sprite attributes used in animations.
-     */
-    Ext.define('Ext.draw.sprite.AnimationParser', {
+    function isNotNumber(n) {
+        return isNaN(parseFloat(n)) || !isFinite(n);
+    }
+
+    return {
         singleton: true,
         attributeRe: /^url\(#([a-zA-Z\-]+)\)$/,
         requires: ['Ext.draw.Color'],
@@ -89,6 +97,7 @@
                     length,
                     lastStripe = toStripes[toLength - 1],
                     endPoint = [lastStripe[lastStripe.length - 2], lastStripe[lastStripe.length - 1]];
+
                 for (i = fromLength; i < toLength; i++) {
                     fromStripes.push(fromStripes[fromLength - 1].slice(0));
                 }
@@ -105,7 +114,7 @@
                     toStripe = toStripes[i];
                     fromLength = fromStripe.length;
                     toLength = toStripe.length;
-                    toStripes.temp.types.push('M');
+                    toStripes.temp.commands.push('M');
                     for (j = toLength; j < fromLength; j += 6) {
                         toStripe.push(endPoint[0], endPoint[1], endPoint[0], endPoint[1], endPoint[0], endPoint[1]);
                     }
@@ -119,7 +128,7 @@
                         toStripe[i] -= fromStripe[i];
                     }
                     for (i = 2; i < toStripe.length; i += 6) {
-                        toStripes.temp.types.push('C');
+                        toStripes.temp.commands.push('C');
                     }
                 }
 
@@ -132,7 +141,8 @@
                 }
                 var i = 0, ln = fromStripes.length,
                     j = 0, ln2, from, to,
-                    temp = toStripes.temp.coords, pos = 0;
+                    temp = toStripes.temp.params, pos = 0;
+
                 for (; i < ln; i++) {
                     from = fromStripes[i];
                     to = toStripes[i];
@@ -151,19 +161,31 @@
                     lt = to.length - 1,
                     len = Math.max(lf, lt),
                     f, t, i;
+
                 if (!target || target === from) {
                     target = [];
                 }
                 target.length = len + 1;
+
                 for (i = 0; i <= len; i++) {
                     f = from[Math.min(i, lf)];
                     t = to[Math.min(i, lt)];
-                    if (isNaN(f)) {
+                    if (isNotNumber(f)) {
                         target[i] = t;
                     } else {
+                        if (isNotNumber(t)) {
+                            // This may not give the desired visual result during
+                            // animation (after all, we don't know what the target
+                            // value should be, if it wasn't given to us), but it's
+                            // better than spitting out a bunch of NaNs in the target
+                            // array, when transitioning from a non-empty to an empty
+                            // array.
+                            t = 0;
+                        }
                         target[i] = (t - f) * delta + f;
                     }
                 }
+
                 return target;
             }
         },
@@ -176,5 +198,5 @@
 
         limited: 'number',
         limited01: 'number'
-    });
-})();
+    };
+});
