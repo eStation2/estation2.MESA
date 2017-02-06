@@ -53,6 +53,7 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
             ,cfg = {changesmade:false}
         ;
         Ext.apply(cfg, {
+            title: esapp.Utils.getTranslation('activateproduct'),  // 'Activate Product',
 
             listeners: {
                 close:me.onClose
@@ -108,6 +109,8 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                     disableSelection: true,
                     trackOver:true
                 },
+
+                selModel: {listeners:{}},
 
                 //selModel : {
                 //    allowDeselect : true

@@ -5,30 +5,30 @@
  * A sprite that represents text.
  *
  *     @example
- *     Ext.create('Ext.Container', {
- *         renderTo: Ext.getBody(),
- *         width: 600,
- *         height: 400,
- *         layout: 'fit',
- *         items: {
- *             xtype: 'draw',
- *             sprites: [{
- *                 type: 'text',
- *                 x: 50,
- *                 y: 50,
- *                 text: 'Sencha',
- *                 fontSize: 18,
- *                 fillStyle: 'blue'
- *             }]
- *         }
+ *     Ext.create({
+ *        xtype: 'draw',
+ *        renderTo: document.body,
+ *        width: 600,
+ *        height: 400,
+ *        sprites: [{
+ *            type: 'text',
+ *            x: 50,
+ *            y: 50,
+ *            text: 'Sencha',
+ *            fontSize: 30,
+ *            fillStyle: '#1F6D91'
+ *        }]
  *     });
  */
 Ext.define('Ext.draw.sprite.Text', {
     extend: 'Ext.draw.sprite.Sprite',
-    requires: ['Ext.draw.TextMeasurer'],
+    requires: [
+        'Ext.draw.TextMeasurer',
+        'Ext.draw.Color'
+    ],
     alias: 'sprite.text',
     type: 'text',
-    lineBreakRe: /\n/g,
+    lineBreakRe: /\r?\n/g,
     //<debug>
     statics: {
         /**
@@ -43,80 +43,104 @@ Ext.define('Ext.draw.sprite.Text', {
     },
     //</debug>
     inheritableStatics: {
-        shortHand1Re: /'(.*)'/g,
-        shortHand2Re: / /g,
-        shortHand3Re: /\s*,\s*/g,
-        shortHand4Re: /\$\$\$\$/g,
+
         def: {
+            animationProcessors: {
+                text: 'text'
+            },
             processors: {
                 /**
-                 * @cfg {Number} [x=0] The position of the sprite on the x-axis.
+                 * @cfg {Number} [x=0]
+                 * The position of the sprite on the x-axis.
                  */
                 x: 'number',
 
                 /**
-                 * @cfg {Number} [y=0] The position of the sprite on the y-axis.
+                 * @cfg {Number} [y=0]
+                 * The position of the sprite on the y-axis.
                  */
                 y: 'number',
 
                 /**
-                 * @cfg {String} [text=''] The text represented in the sprite.
+                 * @cfg {String} [text='']
+                 * The text represented in the sprite.
                  */
                 text: 'string',
 
                 /**
-                 * @cfg {String/Number} [fontSize='10px'] The size of the font displayed.
+                 * @cfg {String/Number} [fontSize='10px']
+                 * The size of the font displayed.
                  */
-                fontSize: function (n) {
-                    if (!isNaN(n)) {
-                        return +n + 'px';
-                    } else if (n.match(Ext.dom.Element.unitRe)) {
-                        return n;
-                    }
-                },
+                fontSize: (function (fontSizes) {
+                    return function (n) {
+                        if (Ext.isNumber(+n)) {
+                            return n + 'px';
+                        } else if (n.match(Ext.dom.Element.unitRe)) {
+                            return n;
+                        } else if (n in fontSizes) {
+                            return n;
+                        }
+                    };
+                })({
+                    'xx-small': 'fontSize',
+                    'x-small': 'fontSize',
+                    'small': 'fontSize',
+                    'medium': 'fontSize',
+                    'large': 'fontSize',
+                    'x-large': 'fontSize',
+                    'xx-large': 'fontSize'
+                }),
 
                 /**
-                 * @cfg {String} [fontStyle=''] The style of the font displayed. {normal, italic, oblique}
+                 * @cfg {String} [fontStyle='']
+                 * The style of the font displayed. {normal, italic, oblique}
                  */
                 fontStyle: 'enums(,italic,oblique)',
 
                 /**
-                 * @cfg {String} [fontVariant=''] The variant of the font displayed. {normal, small-caps}
+                 * @cfg {String} [fontVariant='']
+                 * The variant of the font displayed. {normal, small-caps}
                  */
                 fontVariant: 'enums(,small-caps)',
 
                 /**
-                 * @cfg {String} [fontWeight=''] The weight of the font displayed. {normal, bold, bolder, lighter}
+                 * @cfg {String} [fontWeight='']
+                 * The weight of the font displayed. {normal, bold, bolder, lighter}
                  */
                 fontWeight: (function (fontWeights) {
                     return function (n) {
-                        if (!n) {
+                        if (n in fontWeights) {
+                            return String(n);
+                        } else {
                             return '';
-                        } else if (n === 'normal') {
-                            return '';
-                        } else if (!isNaN(n)) {
-                            n = +n;
-                            if (100 <= n && n <= 900) {
-                                return n;
-                            }
-                        } else if (n in fontWeights) {
-                            return n;
                         }
                     };
                 })({
                     normal: true,
                     bold: true,
                     bolder: true,
-                    lighter: true
+                    lighter: true,
+                    100: true,
+                    200: true,
+                    300: true,
+                    400: true,
+                    500: true,
+                    600: true,
+                    700: true,
+                    800: true,
+                    900: true
                 }),
 
                 /**
-                 * @cfg {String} [fontFamily='sans-serif'] The family of the font displayed.
+                 * @cfg {String} [fontFamily='sans-serif']
+                 * The family of the font displayed.
                  */
                 fontFamily: 'string',
 
                 /**
-                 * @cfg {String} [textAlign='start'] The alignment of the text displayed. {left, right, center, start, end}
+                 * @cfg {String} [textAlign='start']
+                 * The alignment of the text displayed.
+                 * {left, right, center, start, end}
                  */
                 textAlign: (function (textAligns) {
                     return function (n) {
@@ -132,7 +156,9 @@ Ext.define('Ext.draw.sprite.Text', {
                 }),
 
                 /**
-                 * @cfg {String} [textBaseline="alphabetic"] The baseline of the text displayed. {top, hanging, middle, alphabetic, ideographic, bottom}
+                 * @cfg {String} [textBaseline="alphabetic"]
+                 * The baseline of the text displayed.
+                 * {top, hanging, middle, alphabetic, ideographic, bottom}
                  */
                 textBaseline: (function (textBaselines) {
                     return function (n) {
@@ -149,9 +175,10 @@ Ext.define('Ext.draw.sprite.Text', {
                 }),
 
                 /**
-                 * @cfg {String} [font='10px sans-serif'] The font displayed.
+                 * @cfg {String} [font='10px sans-serif']
+                 * The font displayed.
                  */
-                font: "string"
+                font: 'string'
                 //<debug>
                 ,debug: 'default'
                 //</debug>
@@ -172,19 +199,19 @@ Ext.define('Ext.draw.sprite.Text', {
                 font: '10px sans-serif',
                 textBaseline: 'alphabetic',
                 textAlign: 'start',
-                strokeStyle: Ext.draw.Color.RGBA_NONE,
+                strokeStyle: 'rgba(0, 0, 0, 0)',
                 fillStyle: '#000',
                 x: 0,
                 y: 0,
                 text: ''
             },
-            dirtyTriggers: {
-                fontStyle: 'font,bbox',
-                fontVariant: 'font,bbox',
-                fontWeight: 'font,bbox',
-                fontSize: 'font,bbox',
-                fontFamily: 'font,bbox',
-                font: 'font-short-hand,bbox,canvas',
+            triggers: {
+                fontStyle: 'fontX,bbox',
+                fontVariant: 'fontX,bbox',
+                fontWeight: 'fontX,bbox',
+                fontSize: 'fontX,bbox',
+                fontFamily: 'fontX,bbox',
+                font: 'font,bbox,canvas',
                 textBaseline: 'bbox',
                 textAlign: 'bbox',
                 x: 'bbox',
@@ -192,69 +219,8 @@ Ext.define('Ext.draw.sprite.Text', {
                 text: 'bbox'
             },
             updaters: {
-                'font-short-hand': (function (dispatcher) {
-                    return function (attrs) {
-                        // TODO: Do this according to http://www.w3.org/TR/CSS21/fonts.html#font-shorthand
-                        var value = attrs.font,
-                            parts, part, i, ln, dispKey;
-                        value = value.replace(Ext.draw.sprite.Text.shortHand1Re, function (a, arg1) {
-                            return arg1.replace(Ext.draw.sprite.Text.shortHand2Re, '$$$$');
-                        });
-                        value = value.replace(Ext.draw.sprite.Text.shortHand3Re, ',');
-                        parts = value.split(' ');
-
-                        attrs = {};
-                        for (i = 0, ln = parts.length; i < ln; i++) {
-                            part = parts[i];
-                            dispKey = dispatcher[part];
-                            if (dispKey) {
-                                attrs[dispKey] = part;
-                            } else if (part.match(Ext.dom.Element.unitRe)) {
-                                attrs.fontSize = part;
-                            } else {
-                                attrs.fontFamily = part.replace(Ext.draw.sprite.Text.shortHand4Re, ' ');
-                            }
-                        }
-                        this.setAttributes(attrs, true);
-                    };
-                })({
-                    'italic': 'fontStyle',
-                    'oblique': 'fontStyle',
-                    'bold': 'fontWeight',
-                    'bolder': 'fontWeight',
-                    'lighter': 'fontWeight',
-                    '100': 'fontWeight',
-                    '200': 'fontWeight',
-                    '300': 'fontWeight',
-                    '400': 'fontWeight',
-                    '500': 'fontWeight',
-                    '600': 'fontWeight',
-                    '700': 'fontWeight',
-                    '800': 'fontWeight',
-                    '900': 'fontWeight',
-                    'small-caps': 'fontVariant'
-                }),
-                font: function (attrs) {
-                    var font = '';
-                    if (attrs.fontWeight) {
-                        font += attrs.fontWeight + ' ';
-                    }
-                    if (attrs.fontStyle) {
-                        font += attrs.fontStyle + ' ';
-                    }
-                    if (attrs.fontVariant) {
-                        font += attrs.fontVariant + ' ';
-                    }
-                    if (attrs.fontSize) {
-                        font += attrs.fontSize + ' ';
-                    }
-                    if (attrs.fontFamily) {
-                        font += attrs.fontFamily;
-                    }
-                    this.setAttributes({
-                        font: font
-                    }, true);
-                }
+                fontX: 'makeFontShorthand',
+                font: 'parseFontShorthand'
             }
         }
     },
@@ -271,6 +237,127 @@ Ext.define('Ext.draw.sprite.Text', {
         Ext.draw.sprite.Sprite.prototype.constructor.call(this, config);
     },
 
+    // Maps values to font properties they belong to.
+    fontValuesMap: {
+        // Skip 'normal' and 'inherit' values, as the first one
+        // is the default and the second one has no meaning in Canvas.
+        'italic': 'fontStyle',
+        'oblique': 'fontStyle',
+
+        'small-caps': 'fontVariant',
+
+        'bold': 'fontWeight',
+        'bolder': 'fontWeight',
+        'lighter': 'fontWeight',
+        '100': 'fontWeight',
+        '200': 'fontWeight',
+        '300': 'fontWeight',
+        '400': 'fontWeight',
+        '500': 'fontWeight',
+        '600': 'fontWeight',
+        '700': 'fontWeight',
+        '800': 'fontWeight',
+        '900': 'fontWeight',
+
+        // Absolute font sizes.
+        'xx-small': 'fontSize',
+        'x-small': 'fontSize',
+        'small': 'fontSize',
+        'medium': 'fontSize',
+        'large': 'fontSize',
+        'x-large': 'fontSize',
+        'xx-large': 'fontSize'
+        // Relative font sizes like 'smaller' and 'larger'
+        // have no meaning, and are not included.
+    },
+
+    makeFontShorthand: function (attr) {
+        var parts = [];
+
+        if (attr.fontStyle) {
+            parts.push(attr.fontStyle);
+        }
+        if (attr.fontVariant) {
+            parts.push(attr.fontVariant);
+        }
+        if (attr.fontWeight) {
+            parts.push(attr.fontWeight);
+        }
+        if (attr.fontSize) {
+            parts.push(attr.fontSize);
+        }
+        if (attr.fontFamily) {
+            parts.push(attr.fontFamily);
+        }
+        this.setAttributes({
+            font: parts.join(' ')
+        }, true);
+    },
+
+    // For more info see:
+    // http://www.w3.org/TR/CSS21/fonts.html#font-shorthand
+    parseFontShorthand: function (attr) {
+        var value = attr.font,
+            ln = value.length,
+            changes = {},
+            dispatcher = this.fontValuesMap,
+            start = 0, end, slashIndex,
+            part, fontProperty;
+
+        while (start < ln && end !== -1) {
+            end = value.indexOf(' ', start);
+            if (end < 0) {
+                part = value.substr(start);
+            } else if (end > start) {
+                part = value.substr(start, end - start);
+            } else {
+                continue;
+            }
+
+            // Since Canvas fillText doesn't support multi-line text,
+            // it is assumed that line height is never specified, i.e.
+            // in entries like these the part after slash is omitted:
+            // 12px/14px sans-serif
+            // x-large/110% "New Century Schoolbook", serif
+            slashIndex = part.indexOf('/');
+            if (slashIndex > 0) {
+                part = part.substr(0, slashIndex);
+            } else if (slashIndex === 0) {
+                continue;
+            }
+
+            // All optional font properties (fontStyle, fontVariant or fontWeight) can be 'normal'.
+            // They can go in any order. Which ones are 'normal' is determined by elimination.
+            // E.g. if only fontVariant is specified, then 'normal' applies to fontStyle and fontWeight.
+            // If none are explicitly mentioned, then all are 'normal'.
+            if (part !== 'normal' && part !== 'inherit') {
+                fontProperty = dispatcher[part];
+                if (fontProperty) {
+                    changes[fontProperty] = part;
+                } else if (part.match(Ext.dom.Element.unitRe)) {
+                    changes.fontSize = part;
+                } else { // Assuming that font family always goes last in the font shorthand.
+                    changes.fontFamily = value.substr(start);
+                    break;
+                }
+            }
+
+            start = end + 1;
+        }
+
+        if (!changes.fontStyle) {
+            changes.fontStyle = '';   // same as 'normal'
+        }
+        if (!changes.fontVariant) {
+            changes.fontVariant = ''; // same as 'normal'
+        }
+        if (!changes.fontWeight) {
+            changes.fontWeight = '';  // same as 'normal'
+        }
+
+        this.setAttributes(changes, true);
+    },
+
     // Overriding the getBBox method of the abstract sprite here to always
     // recalculate the bounding box of the text in flipped RTL mode
     // because in that case the position of the sprite depends not just on
@@ -282,7 +369,7 @@ Ext.define('Ext.draw.sprite.Text', {
             surface = me.getSurface();
         //<debug>
         if (!surface) {
-            Ext.Error.raise("The sprite does not belong to a surface.");
+            Ext.raise("The sprite does not belong to a surface.");
         }
         //</debug>
         if (plain.dirty) {
@@ -327,11 +414,16 @@ Ext.define('Ext.draw.sprite.Text', {
             lineWidth,
             i = 0;
 
-        // To get consistent results in all browsers we don't apply textAlign and textBaseline
-        // attributes of the sprite to context, so text is always left aligned and has an alphabetic baseline.
-        // Instead we have to calculate the horizontal offset of each line based on sprite's textAlign,
-        // and the vertical offset of the bounding box based on sprite's textBaseline.
-        // These offsets are then used by the sprite's 'render' method to position text properly.
+        // To get consistent results in all browsers we don't apply textAlign
+        // and textBaseline attributes of the sprite to context, so text is always
+        // left aligned and has an alphabetic baseline.
+        //
+        // Instead we have to calculate the horizontal offset of each line
+        // based on sprite's textAlign, and the vertical offset of the bounding box
+        // based on sprite's textBaseline.
+        //
+        // These offsets are then used by the sprite's 'render' method
+        // to position text properly.
 
         switch (baseline) {
             case 'hanging' :
@@ -393,20 +485,10 @@ Ext.define('Ext.draw.sprite.Text', {
         this.setAttributes({text: text}, true);
     },
 
-    setElementStyles: function (element, styles) {
-        var stylesCache = element.stylesCache || (element.stylesCache = {}),
-            style = element.dom.style,
-            name;
-        for (name in styles) {
-            if (stylesCache[name] !== styles[name]) {
-                stylesCache[name] = style[name] = styles[name];
-            }
-        }
-    },
-
     //<debug>
     renderBBox: function (surface, ctx) {
         var bbox = this.getBBox(true);
+
         ctx.beginPath();
         ctx.moveTo(bbox.x, bbox.y);
         ctx.lineTo(bbox.x + bbox.width, bbox.y);
@@ -428,11 +510,12 @@ Ext.define('Ext.draw.sprite.Text', {
             dx = attr.textAlignOffsets,
             none = Ext.draw.Color.RGBA_NONE,
             x, y, i, lines, lineHeight;
+
         if (attr.text.length === 0) {
             return;
         }
 
-        lines = attr.text.split('\n');
+        lines = attr.text.split(me.lineBreakRe);
         lineHeight = bbox.height / lines.length;
         // Simulate textBaseline and textAlign.
         x = attr.bbox.plain.x;

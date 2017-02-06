@@ -1,6 +1,4 @@
 /**
- * @author Ed Spencer
- *
  * The Rest proxy is a specialization of the {@link Ext.data.proxy.Ajax AjaxProxy} which simply maps the four actions
  * (create, read, update and destroy) to RESTful HTTP verbs. For example, let's set up a {@link Ext.data.Model Model}
  * with an inline Rest proxy
@@ -177,7 +175,7 @@ Ext.define('Ext.data.proxy.Rest', {
                 url += '/';
             }
 
-            url += id;
+            url += encodeURIComponent(id);
             params = request.getParams();
             if (params) {
                 delete params[me.getIdParam()];

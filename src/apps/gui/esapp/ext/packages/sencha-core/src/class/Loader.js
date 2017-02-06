@@ -131,7 +131,7 @@
  *
  * @singleton
  */
-Ext.Loader = new function() {
+Ext.Loader = (new function() {  // jshint ignore:line
 // @define Ext.Loader
 // @require Ext.Base
 // @require Ext.Class
@@ -547,11 +547,7 @@ Ext.Loader = new function() {
                 Ext.Array.push(Loader.classesLoading, missingClassNames);
                 //</debug>
 
-                // We check for existence here (onExists vs onCreated) because overrides
-                // can come into existence but pause before being created until the target
-                // of the override has been created, which may not happen. For normal
-                // classes, this timing of this will be equivalent to onCreated.
-                Manager.onExists(function () {
+                Manager.onCreated(function () {
                     //<debug>
                     Ext.Array.remove(Loader.classesLoading, missingClassNames);
                     Ext.each(missingClassNames, function(name){
@@ -612,7 +608,7 @@ Ext.Loader = new function() {
                 }
 
                 return callback.apply(this, classes);
-            }
+            };
         },
         
         onLoadFailure: function () {
@@ -767,7 +763,7 @@ Ext.Loader = new function() {
          * @param {String} className
          */
         historyPush: function(className) {
-            if (className && !isInHistory[className]) {
+            if (className && !isInHistory[className] && !Manager.overrideMap[className]) {
                 isInHistory[className] = true;
                 history.push(className);
             }
@@ -965,7 +961,7 @@ Ext.Loader = new function() {
      */
     Class.registerPreprocessor('loader', function(cls, data, hooks, continueFn) {
         //<debug>
-        Ext.classSystemMonitor && Ext.classSystemMonitor(cls, 'Ext.Loader#loaderPreprocessor', arguments);
+        Ext.classSystemMonitor && Ext.classSystemMonitor(cls, 'Ext.Loader#loaderPreprocessor', arguments); // jshint ignore:line
         //</debug>
         
         var me = this,
@@ -1001,24 +997,24 @@ Ext.Loader = new function() {
             if (data.hasOwnProperty(propertyName)) {
                 propertyValue = data[propertyName];
 
-                if (typeof propertyValue == 'string') {
+                if (typeof propertyValue === 'string') {
                     dependencies.push(propertyValue);
                 }
                 else if (propertyValue instanceof Array) {
                     for (j = 0, subLn = propertyValue.length; j < subLn; j++) {
                         value = propertyValue[j];
 
-                        if (typeof value == 'string') {
+                        if (typeof value === 'string') {
                             dependencies.push(value);
                         }
                     }
                 }
-                else if (typeof propertyValue != 'function') {
+                else if (typeof propertyValue !== 'function') {
                     for (j in propertyValue) {
                         if (propertyValue.hasOwnProperty(j)) {
                             value = propertyValue[j];
 
-                            if (typeof value == 'string') {
+                            if (typeof value === 'string') {
                                 dependencies.push(value);
                             }
                         }
@@ -1035,24 +1031,28 @@ Ext.Loader = new function() {
         }
 
         //<debug>
-        var deadlockPath = [],
+        var manifestClasses = Ext.manifest && Ext.manifest.classes,
+            deadlockPath = [],
             detectDeadlock;
 
         /*
-        Automatically detect deadlocks before-hand,
-        will throw an error with detailed path for ease of debugging. Examples of deadlock cases:
+         * Automatically detect deadlocks before-hand,
+         * will throw an error with detailed path for ease of debugging. Examples
+         * of deadlock cases:
+         *
+         *  - A extends B, then B extends A
+         *  - A requires B, B requires C, then C requires A
+         *
+         * The detectDeadlock function will recursively transverse till the leaf, hence
+         * it can detect deadlocks no matter how deep the path is. However we don't need
+         * to run this check if the class name is in the manifest: that means Cmd has
+         * already resolved all dependencies for this class with no deadlocks.
+         */
 
-        - A extends B, then B extends A
-        - A requires B, B requires C, then C requires A
-
-        The detectDeadlock function will recursively transverse till the leaf, hence it can detect deadlocks
-        no matter how deep the path is.
-        */
-
-        if (className) {
+        if (className && (!manifestClasses || !manifestClasses[className])) {
             requiredMap = Loader.requiredByMap || (Loader.requiredByMap = {});
 
-            for (i = 0,ln = dependencies.length; i < ln; i++) {
+            for (i = 0, ln = dependencies.length; i < ln; i++) {
                 dependency = dependencies[i];
                 (requiredMap[dependency] || (requiredMap[dependency] = [])).push(className);
             }
@@ -1060,22 +1060,28 @@ Ext.Loader = new function() {
             detectDeadlock = function(cls) {
                 deadlockPath.push(cls);
 
-                if (_requiresMap[cls]) {
-                    if (Ext.Array.contains(_requiresMap[cls], className)) {
+                var requires = _requiresMap[cls],
+                    dep, i, ln;
+
+                if (requires) {
+                    if (Ext.Array.contains(requires, className)) {
                         Ext.Error.raise("Circular requirement detected! '" + className +
                                 "' and '" + deadlockPath[1] + "' mutually require each other. Path: " +
                                 deadlockPath.join(' -> ') + " -> " + deadlockPath[0]);
                     }
 
-                    for (i = 0,ln = _requiresMap[cls].length; i < ln; i++) {
-                        detectDeadlock(_requiresMap[cls][i]);
+                    for (i = 0, ln = requires.length; i < ln; i++) {
+                        dep = requires[i];
+                        
+                        if (!isInHistory[dep]) {
+                            detectDeadlock(requires[i]);
+                        }
                     }
                 }
             };
 
             detectDeadlock(className);
         }
-
         //</debug>
 
         (className ? Loader.exclude(className) : Loader).require(dependencies, function() {
@@ -1085,24 +1091,24 @@ Ext.Loader = new function() {
                 if (data.hasOwnProperty(propertyName)) {
                     propertyValue = data[propertyName];
 
-                    if (typeof propertyValue == 'string') {
+                    if (typeof propertyValue === 'string') {
                         data[propertyName] = Manager.get(propertyValue);
                     }
                     else if (propertyValue instanceof Array) {
                         for (j = 0, subLn = propertyValue.length; j < subLn; j++) {
                             value = propertyValue[j];
 
-                            if (typeof value == 'string') {
+                            if (typeof value === 'string') {
                                 data[propertyName][j] = Manager.get(value);
                             }
                         }
                     }
-                    else if (typeof propertyValue != 'function') {
+                    else if (typeof propertyValue !== 'function') {
                         for (var k in propertyValue) {
                             if (propertyValue.hasOwnProperty(k)) {
                                 value = propertyValue[k];
 
-                                if (typeof value == 'string') {
+                                if (typeof value === 'string') {
                                     data[propertyName][k] = Manager.get(value);
                                 }
                             }
@@ -1137,7 +1143,7 @@ Ext.Loader = new function() {
      */
     Manager.registerPostprocessor('uses', function(name, cls, data) {
         //<debug>
-        Ext.classSystemMonitor && Ext.classSystemMonitor(cls, 'Ext.Loader#usesPostprocessor', arguments);
+        Ext.classSystemMonitor && Ext.classSystemMonitor(cls, 'Ext.Loader#usesPostprocessor', arguments); // jshint ignore:line
         //</debug>
         
         var manifest = Ext.manifest,
@@ -1175,7 +1181,7 @@ Ext.Loader = new function() {
 
     Loader.init();
     
-};
+}());
 
 //-----------------------------------------------------------------------------
 

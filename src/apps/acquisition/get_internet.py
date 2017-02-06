@@ -402,7 +402,15 @@ def loop_get_internet(dry_run=False):
                         execute_trigger = True
                         # Get this from the pads database table (move from internet_source 'pull_frequency' to the pads table,
                         # so that it can be exploited by eumetcast triggers as well). It is in minute
-                        delay_time_source_minutes = internet_source.pull_frequency
+                        pull_frequency = internet_source.pull_frequency
+
+                        # Manage the case of files to be continuously downloaded (delay < 0)
+                        if pull_frequency < 0:
+                            do_not_consider_processed_list = True
+                            delay_time_source_minutes = -pull_frequency
+                        else:
+                            do_not_consider_processed_list = False
+                            delay_time_source_minutes = pull_frequency
 
                         logger_spec = log.my_logger('apps.get_internet.'+internet_source.internet_id)
                         logger.info("Processing internet source  %s.", internet_source.descriptive_name)
@@ -430,8 +438,9 @@ def loop_get_internet(dry_run=False):
                         if execute_trigger:
                             # Restore/Create List
                             processed_list = []
-                            processed_list_filename = es_constants.get_internet_processed_list_prefix+str(internet_source.internet_id)+'.list'
-                            processed_list=functions.restore_obj_from_pickle(processed_list, processed_list_filename)
+                            if not do_not_consider_processed_list:
+                                processed_list_filename = es_constants.get_internet_processed_list_prefix+str(internet_source.internet_id)+'.list'
+                                processed_list=functions.restore_obj_from_pickle(processed_list, processed_list_filename)
 
                             processed_info['time_latest_exec']=datetime.datetime.now()
 

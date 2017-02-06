@@ -91,3 +91,17 @@ class TestFunctionsDate(TestCase):
         self.assertEqual(f.conv_date_2_8days('20121225'),45)
         self.assertEqual(f.conv_date_2_8days('20121226'),46)
         self.assertEqual(f.conv_date_2_8days('20121231'),46)
+
+
+    def test_dekad_nbr_in_season(self):
+
+        start ='0101'
+        self.assertEqual(f.dekad_nbr_in_season('0101',start), 1)
+        self.assertEqual(f.dekad_nbr_in_season('0401',start), 10)
+        self.assertEqual(f.dekad_nbr_in_season('1221',start), 36)
+
+        start ='0901'
+        self.assertEqual(f.dekad_nbr_in_season('0901',start), 1)
+        self.assertEqual(f.dekad_nbr_in_season('1201',start), 10)
+        self.assertEqual(f.dekad_nbr_in_season('0101',start), 13)
+        self.assertEqual(f.dekad_nbr_in_season('0401', start),22)

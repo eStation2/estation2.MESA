@@ -145,6 +145,7 @@ Ext.testHelper = {
     fireEvent: function(type, target, cfg) {
         var eventType = this.events[type],
             activeTouches = {},
+            scroll = Ext.getDoc().getScroll(),
             touch, id, touches;
 
         if (Ext.supports.PointerEvents || Ext.supports.MSPointerEvents) {
@@ -152,8 +153,8 @@ Ext.testHelper = {
                 target,
                 eventType,
                 cfg.id,
-                cfg.x,
-                cfg.y,
+                (cfg.x || 0) - scroll.left,
+                (cfg.y || 0) - scroll.top,
                 cfg.button || 0
             );
         } else if (Ext.supports.TouchEvents) {
@@ -183,8 +184,8 @@ Ext.testHelper = {
             jasmine.fireMouseEvent(
                 target,
                 eventType,
-                cfg.x,
-                cfg.y,
+                (cfg.x || 0) - scroll.left,
+                (cfg.y || 0) - scroll.top,
                 cfg.button ? cfg.button : 0
             );
         }

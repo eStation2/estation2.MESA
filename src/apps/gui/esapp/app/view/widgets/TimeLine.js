@@ -14,6 +14,7 @@ Ext.define("esapp.view.widgets.TimeLine",{
     ],
     id: 'time-line_chart',
     layout: 'fit',
+    product_date_format: null,
 
     initComponent: function () {
         var me = this;
@@ -23,86 +24,265 @@ Ext.define("esapp.view.widgets.TimeLine",{
         me.bodyBorder = false;
         me.layout = this.layout;
 
-        me.listeners = {
-            afterrender: function () {
-                me.timelinechart = new Highcharts.StockChart({
-                    chart: {
-                        renderTo: me.id,
-                        //reference : 'time-line_chart' + me.getView().id,
-                        margin: [8, 25, 15, 25],
-                        spacingBottom: 10,
-                        spacingTop: 8,
-                        spacingLeft: 5,
-                        spacingRight: 20,
-                        height: 115,
-                        width:600
-                    },
-                    credits: {
-                        enabled: false
-                    },
-                    exporting: {
-                        enabled: false
-                    },
-                    rangeSelector: {
-                        selected: 1,
-                        inputEnabled: true,
-                        buttons: [{
-                            type: 'ytd',
-                            text: 'YTD'
-                        }, {
-                            type: 'year',
-                            count: 1,
-                            text: '1y'
-                        }]
-                    },
+        //me.listeners = {
+        //    afterrender: function () {
+        //        me.timelinechart = new Highcharts.StockChart({
+        //            chart: {
+        //                renderTo: me.id,
+        //                //reference : 'time-line_chart' + me.getView().id,
+        //                margin: [8, 30, 10, 30],
+        //                spacingBottom: 10,
+        //                spacingTop: 8,
+        //                spacingLeft: 5,
+        //                spacingRight: 30,
+        //                height: 115,
+        //                width:580
+        //            },
+        //            credits: {
+        //                enabled: false
+        //            },
+        //            exporting: {
+        //                enabled: false
+        //            },
+        //            scrollbar: {
+        //                enabled: false
+        //            },
+        //
+        //            rangeSelector: {
+        //                selected: 1,
+        //                inputEnabled: true,
+        //                buttons: [{
+        //                    type: 'ytd',
+        //                    text: 'YTD'
+        //                }, {
+        //                    type: 'year',
+        //                    count: 1,
+        //                    text: '1y'
+        //                }],
+        //                buttonTheme: { // styles for the buttons
+        //                    fill: 'none',
+        //                    stroke: 'none',
+        //                    'stroke-width': 0,
+        //                    r: 8,
+        //                    style: {
+        //                        color: '#039',
+        //                        fontWeight: 'bold'
+        //                    },
+        //                    states: {
+        //                        hover: {
+        //                        },
+        //                        select: {
+        //                            fill: '#039',
+        //                            style: {
+        //                                color: 'white'
+        //                            }
+        //                        }
+        //                        // disabled: { ... }
+        //                    }
+        //                },
+        //                inputStyle: {
+        //                    color: '#039',
+        //                    fontWeight: 'bold'
+        //                },
+        //                labelStyle: {
+        //                    color: 'silver',
+        //                    fontWeight: 'bold'
+        //                }
+        //            },
+        //
+        //            navigator: {
+        //                height: 20,
+        //                margin: 5,
+        //                adaptToUpdatedData: false
+        //            },
+        //
+        //            tooltip: {
+        //                followPointer: true,
+        //                formatter: function () {
+        //                    return Highcharts.dateFormat('%d %b %Y', this.x, true);
+        //                }
+        //            },
+        //            xAxis: {
+        //                height: 35,
+        //                dateTimeLabelFormats: me.dateTimeLabelFormats
+        //                //labels: {
+        //                //    formatter: function () {
+        //                //        return Highcharts.dateFormat('%b', this.value, true);
+        //                //    }
+        //                //}
+        //            },
+        //
+        //            yAxis: [{
+        //                showFirstLabel: false,
+        //                showLastLabel: false,
+        //                labels: {
+        //                    align: 'right',
+        //                    x: -3
+        //                },
+        //                max: 1,
+        //                //top: '65%',
+        //                height: 25 // '40%',
+        //                //offset: 0,
+        //                //lineWidth: 2
+        //            }],
+        //
+        //            series: [{
+        //                type: 'column',
+        //                name: 'Date',
+        //                data: [],
+        //                yAxis: 0,
+        //                turboThreshold: 0
+        //                // ,dataGrouping: {
+        //                //     units: groupingUnits
+        //                // }
+        //            }]
+        //        });
+        //    }
+        //};
 
-                    navigator: {
-                        height: 20,
-                        margin: 5,
-                        adaptToUpdatedData: false
-                    },
+        me.callParent();
+    }
+    ,createTimeLineChart: function () {
+        var me = this;
 
-                    scrollbar: {
-                        enabled: false
-                    },
-                    tooltip: {
-                        followPointer: true,
-                        formatter: function () {
-                            return Highcharts.dateFormat('%d %b %Y', this.x, true);
-                        }
-                    },
-                    xAxis: {
-                        height: 20
-                    },
-
-                    yAxis: [{
-                        showFirstLabel: false,
-                        showLastLabel: false,
-                        labels: {
-                            align: 'right',
-                            x: -3
-                        },
-                        max: 1,
-                        //top: '65%',
-                        height: 25 // '40%',
-                        //offset: 0,
-                        //lineWidth: 2
-                    }],
-
-                    series: [{
-                        type: 'column',
-                        name: 'Date',
-                        data: [],
-                        yAxis: 0,
-                        turboThreshold: 0
-                        // ,dataGrouping: {
-                        //     units: groupingUnits
-                        // }
-                    }]
-                });
+        //console.info(me.product_date_format);
+        if (me.product_date_format == 'MMDD'){
+            me.dateTimeLabelFormats = {
+                day: "%d-%b",
+                week: "%d-%b",
+                month: "%b",
+                year: "%b'%y"
+            };
+            me.tooltipFormater = function () {
+                return Highcharts.dateFormat('%d %b', this.x, true);
+            }
+        }
+        else {
+            me.dateTimeLabelFormats = {
+                millisecond: '%H:%M:%S.%L',
+                second: '%H:%M:%S',
+                minute: '%H:%M',
+                hour: '%H:%M',
+                day: '%e. %b',
+                week: '%e. %b',
+                month: '%b \'%y',
+                year: '%Y'
+            };
+            me.tooltipFormater = function () {
+                return Highcharts.dateFormat('%d %b %Y', this.x, true);
             }
         }
 
-        me.callParent();
+        me.timelinechart = new Highcharts.StockChart({
+            chart: {
+                renderTo: me.id,
+                //reference : 'time-line_chart' + me.getView().id,
+                margin: [8, 30, 10, 30],
+                spacingBottom: 10,
+                spacingTop: 8,
+                spacingLeft: 5,
+                spacingRight: 30,
+                height: 115,
+                width:580
+            },
+            credits: {
+                enabled: false
+            },
+            exporting: {
+                enabled: false
+            },
+            scrollbar: {
+                enabled: false
+            },
+
+            rangeSelector: {
+                selected: 1,
+                inputEnabled: true,
+                buttons: [{
+                    type: 'ytd',
+                    text: 'YTD'
+                }, {
+                    type: 'year',
+                    count: 1,
+                    text: '1y'
+                }],
+                buttonTheme: { // styles for the buttons
+                    fill: 'none',
+                    stroke: 'none',
+                    'stroke-width': 0,
+                    r: 8,
+                    style: {
+                        color: '#039',
+                        fontWeight: 'bold'
+                    },
+                    states: {
+                        hover: {
+                        },
+                        select: {
+                            fill: '#039',
+                            style: {
+                                color: 'white'
+                            }
+                        }
+                        // disabled: { ... }
+                    }
+                },
+                inputStyle: {
+                    color: '#039',
+                    fontWeight: 'bold'
+                },
+                labelStyle: {
+                    color: 'silver',
+                    fontWeight: 'bold'
+                }
+            },
+
+            navigator: {
+                height: 20,
+                margin: 5,
+                adaptToUpdatedData: false
+            },
+
+            tooltip: {
+                followPointer: true,
+                formatter: me.tooltipFormater
+            },
+            xAxis: {
+                height: 35,
+                dateTimeLabelFormats: me.dateTimeLabelFormats
+                //labels: {
+                //    formatter: function () {
+                //        return Highcharts.dateFormat('%b', this.value, true);
+                //    }
+                //}
+            },
+
+            yAxis: [{
+                showFirstLabel: false,
+                showLastLabel: false,
+                labels: {
+                    align: 'right',
+                    x: -3
+                },
+                max: 1,
+                //top: '65%',
+                height: 25 // '40%',
+                //offset: 0,
+                //lineWidth: 2
+            }],
+
+            series: [{
+                type: 'column',
+                name: 'Date',
+                data: [],
+                yAxis: 0,
+                turboThreshold: 0
+                // ,dataGrouping: {
+                //     units: groupingUnits
+                // }
+            }]
+        });
+
+        //me.callParent();
     }
 });

@@ -10,7 +10,7 @@
  *     Ext.create('Ext.Panel', {
  *         width: 500,
  *         height: 280,
- *         title: "AutoLayout Panel",
+ *         title: 'AutoLayout Panel',
  *         layout: 'auto',
  *         renderTo: document.body,
  *         items: [{
@@ -18,8 +18,7 @@
  *             title: 'Top Inner Panel',
  *             width: '75%',
  *             height: 90
- *         },
- *         {
+ *         }, {
  *             xtype: 'panel',
  *             title: 'Bottom Inner Panel',
  *             width: '75%',
@@ -135,7 +134,7 @@ Ext.define('Ext.layout.container.Auto', {
      *             type: 'anchor',
      *             reserveScrollbar: true // There will be a gap even when there's no scrollbar
      *         },
-     *         autoScroll: true,
+     *         scrollable: true,
      *         items: grid,
      *         tbar: {
      *             defaults: {
@@ -353,10 +352,10 @@ Ext.define('Ext.layout.container.Auto', {
 
     calculateContentSize: function (ownerContext) {
         var me = this,
-            containerDimensions = ((ownerContext.widthModel.shrinkWrap ? 1 : 0) |
+            containerDimensions = ((ownerContext.widthModel.shrinkWrap ? 1 : 0) | // jshint ignore:line
                                    (ownerContext.heightModel.shrinkWrap ? 2 : 0)),
-            calcWidth = (containerDimensions & 1) || undefined,
-            calcHeight = (containerDimensions & 2) || undefined,
+            calcWidth = (containerDimensions & 1) || undefined, // jshint ignore:line
+            calcHeight = (containerDimensions & 2) || undefined, // jshint ignore:line
             needed = 0,
             props = ownerContext.props;
 
@@ -415,16 +414,16 @@ Ext.define('Ext.layout.container.Auto', {
 
             if (targetEl.scrollWidth > targetEl.clientWidth) {
                 // has horizontal scrollbar
-                scrollbars |= 1;
+                scrollbars |= 1; // jshint ignore:line
             }
 
             if (targetEl.scrollHeight > targetEl.clientHeight) {
                 // has vertical scrollbar
-                scrollbars |= 2;
+                scrollbars |= 2; // jshint ignore:line
             }
 
-            width = (yauto && (scrollbars & 2)) ? scrollbarSize.width : 0;
-            height = (xauto && (scrollbars & 1)) ? scrollbarSize.height : 0;
+            width = (yauto && (scrollbars & 2)) ? scrollbarSize.width : 0; // jshint ignore:line
+            height = (xauto && (scrollbars & 1)) ? scrollbarSize.height : 0; // jshint ignore:line
 
             if (width !== me.lastOverflowAdjust.width || height !== me.lastOverflowAdjust.height) {
                 me.done = false;
@@ -495,7 +494,7 @@ Ext.define('Ext.layout.container.Auto', {
             // the normal repaint() method doesn't seem to do the trick, but tweaking
             // the position property in combination with reading scrollWidth does.
             innerCt.setStyle('position', 'relative');
-            innerCt.dom.scrollWidth;
+            innerCt.dom.scrollWidth; // jshint ignore:line
             innerCt.setStyle('position', '');
         }
     },
@@ -559,8 +558,8 @@ Ext.define('Ext.layout.container.Auto', {
      * Returns the overflow-x style of the render target.
      * Note: If overflow is configured on a container using style or css class this method
      * will read the dom the first time it is called. It is therefore preferable for
-     * performance reasons to use the autoScroll or overflowX config when horizontal
-     * overflow is desired.
+     * performance reasons to use the {@link Ext.Component#scrollable scrollable config when
+     * horizontal overflow is desired.
      * @protected
      * @param {Ext.layout.ContextItem} ownerContext
      * @return {String}
@@ -574,8 +573,8 @@ Ext.define('Ext.layout.container.Auto', {
      * Returns the overflow-y style of the render target.
      * Note: If overflow is configured on a container using style or css class this method
      * will read the dom the first time it is called. It is therefore preferable for
-     * performance reasons to use the autoScroll or overflowY config when vertical
-     * overflow is desired.
+     * performance reasons to use the {@link Ext.Component#scrollable scrollable config when
+     * vertical overflow is desired.
      * @protected
      * @param {Ext.layout.ContextItem} ownerContext
      * @return {String}
@@ -588,17 +587,13 @@ Ext.define('Ext.layout.container.Auto', {
     initContextItems: function(ownerContext) {
         var me = this,
             target = ownerContext.target,
-            customOverflowEl = me.owner.customOverflowEl;
+            overflowEl = me.owner.getOverflowEl();
 
         ownerContext.outerCtContext = ownerContext.getEl('outerCt', me);
         ownerContext.innerCtContext = ownerContext.getEl('innerCt', me);
-        
-        if (customOverflowEl) {
-            ownerContext.overflowContext = ownerContext.getEl(customOverflowEl);    
-        } else {
-            ownerContext.overflowContext = ownerContext.targetContext;
-        }
-        
+        ownerContext.overflowContext = (overflowEl === ownerContext.el) ? ownerContext :
+            ownerContext.getEl(overflowEl);
+
         if (target[target.contentPaddingProperty] !== undefined) {
             // If padding was defined using the contentPaddingProperty, we render the
             // the padding to the innerCt or outerCt (depending on the template that is
@@ -620,7 +615,7 @@ Ext.define('Ext.layout.container.Auto', {
         // If the Container is to overflow, or we *always* reserve space for a scrollbar
         // then reserve space for a vertical scrollbar
         if (scrollbarWidth && me.manageOverflow && !me.hasOwnProperty('lastOverflowAdjust')) {
-            if (owner.autoScroll || me.reserveScrollbar) {
+            if (owner.scrollable || me.reserveScrollbar) {
                 me.lastOverflowAdjust = {
                     width: scrollbarWidth,
                     height: 0
@@ -655,9 +650,9 @@ Ext.define('Ext.layout.container.Auto', {
             style = dom.style;
             old = style.display;
             
-            if (old == 'table-cell') {
+            if (old === 'table-cell') {
                 style.display = '';
-                dom.offsetWidth;
+                dom.offsetWidth; // jshint ignore:line
                 style.display = old;
             }    
         }
@@ -671,7 +666,7 @@ Ext.define('Ext.layout.container.Auto', {
             dom = this.outerCt.dom;
             style = dom.style;
             style.display = 'table-cell';
-            dom.offsetWidth;
+            dom.offsetWidth; // jshint ignore:line
             dom.style.display = '';
         }
 
@@ -767,6 +762,11 @@ Ext.define('Ext.layout.container.Auto', {
         return this.outerCt;
     }
 
-}, function(){
-    this.prototype.chromeCellMeasureBug = Ext.isChrome && Ext.chromeVersion >= 26;
+}, function(Cls){
+    var v = Ext.chromeVersion;
+    // This was likely fixed much earlier, on the bug tracker marked as fixed on 2014/04/01.
+    // 34 was the most recently released version after this date. Google doesn't release older
+    // versions to test on so it's not possible to say. However due to the auto update nature it's
+    // highly unlikely anyone is running this range anyway.
+    Cls.prototype.chromeCellMeasureBug = Ext.isChrome && v >= 26 && v <= 34;
 });

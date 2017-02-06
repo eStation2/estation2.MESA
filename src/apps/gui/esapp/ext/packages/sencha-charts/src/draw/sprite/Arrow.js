@@ -1,3 +1,21 @@
+/**
+ * A sprite that represents an arrow.
+ *
+ *     @example
+ *     Ext.create({
+ *        xtype: 'draw', 
+ *        renderTo: document.body,
+ *        width: 600,
+ *        height: 400,
+ *        sprites: [{
+ *            type: 'arrow',
+ *            translationX: 100,
+ *            translationY: 100,
+ *            size: 40,
+ *            fillStyle: '#30BDA7'
+ *        }]
+ *     });
+ */
 Ext.define('Ext.draw.sprite.Arrow', {
     extend: 'Ext.draw.sprite.Path',
     alias: 'sprite.arrow',
@@ -18,7 +36,7 @@ Ext.define('Ext.draw.sprite.Arrow', {
                 y: 0,
                 size: 4
             },
-            dirtyTriggers: {
+            triggers: {
                 x: 'path',
                 y: 'path',
                 size: 'path'

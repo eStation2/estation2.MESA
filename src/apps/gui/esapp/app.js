@@ -4,11 +4,28 @@
  * Sencha Cmd when upgrading.
  */
 
+
+console.info('before onReady');
+//esapp = [];
+//esapp.globals = [];
+//esapp.globals['selectedLanguage'] = '';
+
+//esapp.Utils = Ext.create('esapp.Utils');
+//console.info(esapp.Utils);
+
+/**
+ * The application startup file
+ */
 Ext.application({
     name: 'esapp',
 
+    //requires: [
+    //    'esapp.Utils'
+    //],
+
     extend: 'esapp.Application'
-    
+
+    //,mainView: 'esapp.view.main.Main'
     //,autoCreateViewport:  'esapp.view.main.Main'
 	
     //-------------------------------------------------------------------------
@@ -17,3 +34,5 @@ Ext.application({
     // of merge conflicts when upgrading to new versions of Sencha Cmd.
     //-------------------------------------------------------------------------
 });
+
+// eof

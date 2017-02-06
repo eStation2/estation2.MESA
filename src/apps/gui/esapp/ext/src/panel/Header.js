@@ -36,6 +36,7 @@ Ext.define('Ext.panel.Header', {
          * {@link Ext#setGlyphFontFamily Ext.setGlyphFontFamily()}. Alternatively, this
          * config option accepts a string with the charCode and font-family separated by the
          * `@` symbol. For example '65@My Font Family'.
+         * @accessor
          */
         glyph: null,
 
@@ -44,6 +45,7 @@ Ext.define('Ext.panel.Header', {
          * Path to image for an icon.
          *
          * There are no default icons that come with Ext JS.
+         * @accessor
          */
         icon: null,
 
@@ -52,18 +54,21 @@ Ext.define('Ext.panel.Header', {
          * CSS class for an icon.
          *
          * There are no default icon classes that come with Ext JS.
+         * @accessor
          */
         iconCls: null,
 
         /**
          * @cfg {'top'/'right'/'bottom'/'left'} [iconAlign='left']
          * The side of the title to render the icon.
+         * @accessor
          */
         iconAlign: null,
 
         /**
          * @cfg {String/Ext.panel.Title}
          * The title text or config object for the {@link Ext.panel.Title Title} component.
+         * @accessor
          */
         title: {
             $value: {
@@ -72,7 +77,7 @@ Ext.define('Ext.panel.Header', {
                 flex: 1
             },
             merge: function(newValue, oldValue) {
-                if (typeof newValue == 'string') {
+                if (typeof newValue !== 'object') {
                     newValue = {
                         text: newValue
                     };
@@ -83,8 +88,10 @@ Ext.define('Ext.panel.Header', {
         },
 
         /**
-         * @cfg {String} [titleAlign='left']
-         * The alignment of the title text.
+         * @cfg {'left'/'center'/'right'} [titleAlign='left']
+         * The alignment of the title text within the available space between the
+         * icon and the tools.
+         * @accessor
          */
         titleAlign: null,
 
@@ -97,11 +104,13 @@ Ext.define('Ext.panel.Header', {
          *
          * Note that if an {@link #icon} or {@link #iconCls} has been configured, then the icon component will be the
          * first item before all specified tools or {@link #cfg-items}. This configuration does not include the icon.
+         * @accessor
          */
         titlePosition: null,
         
         /**
          * @cfg {'default'/0/1/2} [titleRotation='default']
+         * @accessor
          * The rotation of the header's title text.  Can be one of the following values:
          *
          * - `'default'` - use the default rotation, depending on the dock position of the header
@@ -135,6 +144,34 @@ Ext.define('Ext.panel.Header', {
      * be fired if the click was on a {@link Ext.panel.Tool}
      * @param {Ext.panel.Header} this
      * @param {Ext.event.Event} e
+     */
+
+    /**
+     * @cfg {Number} [itemPosition]
+     * The index at which the any {@link #cfg-items} will be inserted into the Header's
+     * items collection.  By default this will effectively be the `1` position
+     * placing the items following the panel {@link Ext.panel.Panel#title title}.
+     *
+     * Set to `0` to have the items {@link #insert inserted} before the panel title.
+     *
+     *     Ext.create('Ext.panel.Panel', {
+     *         title: 'Hello',
+     *         width: 200,
+     *         html: '<p>World!</p>',
+     *         renderTo: Ext.getBody(),
+     *         tools: [{
+     *             type: 'pin'
+     *         }],
+     *         header: {
+     *             //itemPosition: 0,	// before panel title
+     *             //itemPosition: 1, // after panel title
+     *             //itemPosition: 2, // after pin tool
+     *             items: [{
+     *                 xtype: 'button',
+     *                 text: 'Header Button'
+     *             }]
+     *         }
+     *     });
      */
 
     initComponent: function() {
@@ -212,9 +249,11 @@ Ext.define('Ext.panel.Header', {
 
         title = title || '';
 
-        if (typeof title === 'string') {
+        isString = Ext.isString(title);
+
+        if (!Ext.isObject(title)) {
             title = {
-                text: title
+                text: title.toString()
             };
         }
 
@@ -226,6 +265,9 @@ Ext.define('Ext.panel.Header', {
             Ext.resumeLayouts(true);
             title = oldTitle;
         } else {
+            if (isString) {
+                title.xtype = 'title';
+            }
             title.ui = me.ui;
             title.headerRole = me.headerRole;
             configHasRotation = ('rotation' in title);

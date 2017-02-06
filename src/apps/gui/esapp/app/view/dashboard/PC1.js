@@ -36,7 +36,7 @@ Ext.define("esapp.view.dashboard.PC1",{
 
     initComponent: function () {
         var me = this;
-
+        me.title = '<span class="panel-title-style">' + esapp.Utils.getTranslation('receivingstation') + '</span>';
         me.bodyPadding = 0;
 
         me.dvb_statusCls = '';

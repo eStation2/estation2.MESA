@@ -113,6 +113,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     #   for Group 2.c  (filtered_masks)
     activate_baresoil_linearx2 = 1
+    activate_ndvi_linearx2_agric = 1
 
     #   for Group 2.d  (filtered_anomalies)
     activate_diff_linearx2 = 1
@@ -145,13 +146,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     #   ---------------------------------------------------------------------
     #   Define input files (NDV)
     in_prod_ident = functions.set_path_filename_no_date(prod, starting_sprod,mapset, version, ext)
-
-    #logger.debug('Base data directory is: %s' % es2_data_dir)
     input_dir = es2_data_dir+ functions.set_path_sub_directory(prod, starting_sprod, 'Ingest', version, mapset)
-
-    #logger.debug('Input data directory is: %s' % input_dir)
     starting_files = input_dir+"*"+in_prod_ident
-    #logger.debug('Starting files wild card is: %s' % starting_files)
 
     #   ---------------------------------------------------------------------
     #   1.a 10Day non-filtered Stats
@@ -370,6 +366,49 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
         args = {"input_file": input_files[1], "before_file":input_files[0], "after_file": input_files[2], "output_file": output_file,
                  "output_format": 'GTIFF', "options": "compress = lzw", 'threshold': 0.1}
         raster_image_math.do_ts_linear_filter(**args)
+
+    #   ---------------------------------------------------------------------
+    #   3.a NDVI linearx2 masked using Crop Mask
+    #   ---------------------------------------------------------------------
+
+    output_sprod_group=proc_lists.proc_add_subprod_group("filtered_prods")
+    output_sprod=proc_lists.proc_add_subprod("ndvi-linearx2_agric", "filtered_prods", final=False,
+                                             descriptive_name='10d Filtered NDVI Crop Masked',
+                                             description='Ten day Filtered NDVI Masked using Crop Mask',
+                                             frequency_id='e1dekad',
+                                             date_format='YYYYMMDD',
+                                             masked=True,
+                                             timeseries_role='',
+                                             active_default=True)
+
+    prod_ident_linearx2_agric = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
+    subdir_linearx2_agric = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
+
+    input_subprod_linearx2 = "ndvi-linearx2"
+    in_prod_ident_linearx2 = functions.set_path_filename_no_date(prod, input_subprod_linearx2,mapset, version, ext)
+    input_dir_linearx2 = es2_data_dir+ functions.set_path_sub_directory(prod, input_subprod_linearx2, 'Derived', version, mapset)
+
+    if starting_dates_linearx2 is not None:
+        starting_files_linearx2 = []
+        for my_date in starting_dates_linearx2:
+            starting_files_linearx2.append(input_dir_linearx2 + my_date + in_prod_ident_linearx2)
+    else:
+        starting_files_linearx2 = input_dir_linearx2 + "*" + in_prod_ident_linearx2
+
+    formatter_in = "(?P<YYYYMMDD>[0-9]{8})"+in_prod_ident_linearx2
+    formatter_out = ["{subpath[0][5]}"+os.path.sep+subdir_linearx2_agric+"{YYYYMMDD[0]}"+prod_ident_linearx2_agric]
+
+    #@follows(vgt_ndvi_10dmed_no_filter)
+    #@active_if(group_filtered_prods, activate_ndvi_linearx2_agric)
+    @transform(starting_files_linearx2, formatter(formatter_in), formatter_out)
+    def vgt_ndvi_linearx2_agric(input_files, output_file):
+
+        output_file = functions.list_to_element(output_file)
+        functions.check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": input_files[1], "before_file":input_files[0], "after_file": input_files[2], "output_file": output_file,
+                 "output_format": 'GTIFF', "options": "compress = lzw", 'threshold': 0.1}
+        print args
+        #raster_image_math.do_ts_linear_filter(**args)
 
 
     #   ---------------------------------------------------------------------

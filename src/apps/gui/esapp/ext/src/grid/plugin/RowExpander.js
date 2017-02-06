@@ -6,6 +6,9 @@
  * Plugin (ptype = 'rowexpander') that adds the ability to have a Column in a grid which enables
  * a second row body which expands/contracts.  The expand/contract behavior is configurable to react
  * on clicking of the column, double click of the row, and/or hitting enter while a row is selected.
+ *
+ * **Note:** The rowexpander plugin and the {@link Ext.grid.feature.RowBody rowbody}
+ * feature are exclusive and cannot both be set on the same grid / tree.
  */
 Ext.define('Ext.grid.plugin.RowExpander', {
     extend: 'Ext.plugin.Abstract',
@@ -85,9 +88,11 @@ Ext.define('Ext.grid.plugin.RowExpander', {
             }
             this.nextTpl.applyOut(values, out, parent);
         },
+
         syncRowHeights: function(lockedItem, normalItem) {
             this.rowExpander.syncRowHeights(lockedItem, normalItem);
         },
+
         // We need a high priority to get in ahead of the outerRowTpl
         // so we can setup row data
         priority: 20000
@@ -256,6 +261,7 @@ Ext.define('Ext.grid.plugin.RowExpander', {
         // If this is the locked side of a lockable grid which is shrinkwrapping the locked width, increment its width.
         if (expanderGrid.isLocked && expanderGrid.ownerLockable.shrinkWrapLocked) {
             expanderGrid.width += expanderHeader.width;
+            me.grid = expanderGrid;
         }
         me.expanderColumn = expanderGrid.headerCt.insert(0, expanderHeader);
 
@@ -271,18 +277,6 @@ Ext.define('Ext.grid.plugin.RowExpander', {
 
         rowValues.rowBody = me.getRowBodyContents(rowValues);
         rowValues.rowBodyCls = me.recordsExpanded[record.internalId] ? '' : me.rowBodyHiddenCls;
-    },
-
-    setup: function(rows, rowValues){
-        var me = this,
-            lockable = me.grid.ownerLockable;
-
-        me.self.prototype.setup.apply(me, arguments);
-
-        // If we are lockable, and we are setting up the side which has the expander column, it is row spanning so we don't have to colspan it
-        if (lockable && Ext.Array.indexOf(me.grid.columnManager.getColumns(), me.rowExpander.expanderColumn) !== -1) {
-            rowValues.rowBodyColspan -= 1;
-        }
     },
 
     bindView: function(view) {
@@ -316,7 +310,7 @@ Ext.define('Ext.grid.plugin.RowExpander', {
         var me = this,
             view = me.view,
             bufferedRenderer = view.bufferedRenderer,
-            scrollManager = view.scrollManager,
+            scroller = view.getScrollable(),
             fireView = view,
             rowNode = view.getNode(rowIdx),
             normalRow = Ext.fly(rowNode),
@@ -324,11 +318,7 @@ Ext.define('Ext.grid.plugin.RowExpander', {
             nextBd = normalRow.down(me.rowBodyTrSelector, true),
             wasCollapsed = normalRow.hasCls(me.rowCollapsedCls),
             addOrRemoveCls = wasCollapsed ? 'removeCls' : 'addCls',
-
-            // The expander column should be rowSpan="2" only when the expander is expanded
-            rowSpan = wasCollapsed ? 2 : 1,
-            ownerLockable = me.grid.ownerLockable,
-            expanderCell;
+            ownerLockable = me.grid.ownerLockable;
 
         normalRow[addOrRemoveCls](me.rowCollapsedCls);
         Ext.fly(nextBd)[addOrRemoveCls](me.rowBodyHiddenCls);
@@ -358,29 +348,17 @@ Ext.define('Ext.grid.plugin.RowExpander', {
             }
         }
 
-        // Here is where we set the rowSpan on this plugin's row expander cell.
-        // It should be rowSpan="2" only when the expander row is visible.
-        if (me.expanderColumn) {
-            expanderCell = Ext.fly(view.getRow(rowIdx)).down(me.expanderColumn.getCellSelector(), true);
-            if (expanderCell) {
-                expanderCell.rowSpan = rowSpan;    
-            }
-        }
-        
         fireView.fireEvent(wasCollapsed ? 'expandbody' : 'collapsebody', rowNode, record, nextBd);
 
-        // Layout needed of we are shrinkwrapping height, or there are locked/unlocked sides to sync
-        // Will sync the expander row heights between locked and normal sides
-        if (view.getSizeModel().height.shrinkWrap || ownerLockable) {
-            view.refreshSize(true);
-        }
+        view.refreshSize(true);
+
         // If we are using the touch scroller, ensure that the scroller knows about
         // the correct scrollable range
-        if (scrollManager) {
+        if (scroller) {
             if (bufferedRenderer) {
-                bufferedRenderer.stretchView(view, bufferedRenderer.getScrollHeight(true));
+                bufferedRenderer.refreshSize();
             } else {
-                scrollManager.refresh(true);
+                scroller.refresh(true);
             }
         }    
     },
@@ -420,8 +398,11 @@ Ext.define('Ext.grid.plugin.RowExpander', {
         
         // User has unlocked all columns and left only the expander column in the locked side.
         if (lockedColumns.length === 1) {
+            lockable.normalGrid.removeCls(Ext.baseCSSPrefix + 'grid-hide-row-expander-spacer');
+            lockable.lockedGrid.addCls(Ext.baseCSSPrefix + 'grid-hide-row-expander-spacer');
             if (lockedColumns[0] === me.expanderColumn) {
                 lockable.unlock(me.expanderColumn);
+                me.grid = lockable.normalGrid;
             } else {
                 lockable.lock(me.expanderColumn, 0);
             }
@@ -430,14 +411,19 @@ Ext.define('Ext.grid.plugin.RowExpander', {
 
     onColumnLock: function(lockable, column) {
         var me = this,
-            lockedColumns;
+            lockedColumns,
+            lockedGrid;
         
         lockable = me.grid.ownerLockable;
         lockedColumns = lockable.lockedGrid.visibleColumnManager.getColumns();
         
-        // User has unlocked all columns and left only the expander column in the locked side.
+        // This is the first column to move into the locked side.
+        // The expander column must follow it.
         if (lockedColumns.length === 1) {
-            lockable.lockedGrid.headerCt.insert(0, me.expanderColumn);
+            me.grid = lockedGrid = lockable.lockedGrid;
+            lockedGrid.headerCt.insert(0, me.expanderColumn);
+            lockable.normalGrid.addCls(Ext.baseCSSPrefix + 'grid-hide-row-expander-spacer');
+            lockable.lockedGrid.removeCls(Ext.baseCSSPrefix + 'grid-hide-row-expander-spacer');
         }
     },
 
@@ -471,7 +457,7 @@ Ext.define('Ext.grid.plugin.RowExpander', {
             // This column always migrates to the locked side if the locked side is visible.
             // It has to report this correctly so that editors can position things correctly
             isLocked: function() {
-                return lockable.lockedGrid.isVisible() || this.locked;
+                return lockable && (lockable.lockedGrid.isVisible() || this.locked);
             },
 
             // In an editor, this shows nothing.

@@ -41,6 +41,8 @@ Ext.define("esapp.view.system.PCModeAdmin",{
             recovery = false,
             maintenance = false;
 
+        me.title = esapp.Utils.getTranslation('changemode');    // 'Change Mode',
+
         if (me.params.currentmode == 'nominal') nominal = true;
         else if (me.params.currentmode == 'recovery') recovery = true;
         else if (me.params.currentmode == 'maintenance') maintenance = true;

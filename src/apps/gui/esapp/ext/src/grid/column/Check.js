@@ -5,35 +5,26 @@
  *
  *     @example
  *     var store = Ext.create('Ext.data.Store', {
- *         fields : ['name', 'email', 'phone', 'active'],
- *         data   : {
- *             items : [
- *                 { name : 'Lisa',  email : 'lisa@simpsons.com',  phone : '555-111-1224', active : true  },
- *                 { name : 'Bart',  email : 'bart@simpsons.com',  phone : '555-222-1234', active : true  },
- *                 { name : 'Homer', email : 'homer@simpsons.com',  phone : '555-222-1244', active : false },
- *                 { name : 'Marge', email : 'marge@simpsons.com', phone : '555-222-1254', active : true  }
- *             ]
- *         },
- *         proxy  : {
- *             type   : 'memory',
- *             reader : {
- *                 type : 'json',
- *                 root : 'items'
- *             }
- *         }
+ *         fields: ['name', 'email', 'phone', 'active'],
+ *         data: [
+ *             { name: 'Lisa', email: 'lisa@simpsons.com', phone: '555-111-1224', active: true },
+ *             { name: 'Bart', email: 'bart@simpsons.com', phone: '555-222-1234', active: true },
+ *             { name: 'Homer', email: 'homer@simpsons.com', phone: '555-222-1244', active: false },
+ *             { name: 'Marge', email: 'marge@simpsons.com', phone: '555-222-1254', active: true }
+ *         ]
  *     });
  *
  *     Ext.create('Ext.grid.Panel', {
- *         title    : 'Simpsons',
- *         height   : 200,
- *         width    : 400,
- *         renderTo : Ext.getBody(),
- *         store    : store,
- *         columns  : [
- *             { text : 'Name', dataIndex : 'name' },
- *             { text : 'Email', dataIndex : 'email', flex : 1 },
- *             { text : 'Phone', dataIndex : 'phone' },
- *             { xtype : 'checkcolumn', text : 'Active', dataIndex : 'active' }
+ *         title: 'Simpsons',
+ *         height: 200,
+ *         width: 400,
+ *         renderTo: Ext.getBody(),
+ *         store: store,
+ *         columns: [
+ *             { text: 'Name', dataIndex: 'name' },
+ *             { text: 'Email', dataIndex: 'email', flex: 1 },
+ *             { text: 'Phone', dataIndex: 'phone' },
+ *             { xtype: 'checkcolumn', text: 'Active', dataIndex: 'active' }
  *         ]
  *     });
  *
@@ -71,6 +62,7 @@ Ext.define('Ext.grid.column.Check', {
      * @param {Ext.ux.CheckColumn} this CheckColumn
      * @param {Number} rowIndex The row index
      * @param {Boolean} checked True if the box is to be checked
+     * @param {Ext.data.Model} record The record that is being changed
      */
 
     /**
@@ -79,6 +71,7 @@ Ext.define('Ext.grid.column.Check', {
      * @param {Ext.ux.CheckColumn} this CheckColumn
      * @param {Number} rowIndex The row index
      * @param {Boolean} checked True if the box is now checked
+     * @param {Ext.data.Model} record The record that is being changed
      */
 
     constructor: function() {
@@ -93,39 +86,26 @@ Ext.define('Ext.grid.column.Check', {
     processEvent: function(type, view, cell, recordIndex, cellIndex, e, record, row) {
         var me = this,
             key = type === 'keydown' && e.getKey(),
-            mousedown = type == 'mousedown';
+            mousedown = type === 'mousedown',
+            disabled = me.disabled,
+            ret,
+            checked;
 
-        if (!me.disabled && (mousedown || (key == e.ENTER || key == e.SPACE))) {
-            var checked = !me.isRecordChecked(record);
+        // Flag event to tell SelectionModel not to process it.
+        e.stopSelection = !key && me.stopSelection;
+
+        if (!disabled && (mousedown || (key === e.ENTER || key === e.SPACE))) {
+            checked = !me.isRecordChecked(record);
 
             // Allow apps to hook beforecheckchange
-            if (me.fireEvent('beforecheckchange', me, recordIndex, checked) !== false) {
+            if (me.fireEvent('beforecheckchange', me, recordIndex, checked, record) !== false) {
                 me.setRecordCheck(record, checked, cell, row, e);
-                me.fireEvent('checkchange', me, recordIndex, checked);
-
-                // Mousedown on the now nonexistent cell causes the view to blur, so stop it continuing.
-                if (mousedown) {
-                    e.stopEvent();
-                }
-
-                // Selection will not proceed after this because of the DOM update caused by the record modification
-                // Invoke the SelectionModel unless configured not to do so
-                if (!me.stopSelection) {
-                    view.selModel.selectByPosition({
-                        row: recordIndex,
-                        column: cellIndex
-                    });
-                }
-
-                // Prevent the view from propagating the event to the selection model - we have done that job.
-                return false;
-            } else {
-                // Prevent the view from propagating the event to the selection model if configured to do so.
-                return !me.stopSelection;
+                me.fireEvent('checkchange', me, recordIndex, checked, record);
             }
         } else {
-            return me.callParent(arguments);
+            ret = me.callParent(arguments);
         }
+        return ret;
     },
 
     /**
@@ -193,8 +173,9 @@ Ext.define('Ext.grid.column.Check', {
     },
 
     updater: function (cell, value) {
-        var cellValues = {};
-        cell.firstChild.innerHTML = this.defaultRenderer(value, cellValues);
-        Ext.fly(cell).addCls(cellValues.tdCls);
+        cell = Ext.fly(cell);
+
+        cell[this.disabled ? 'addCls' : 'removeCls'](this.disabledCls);
+        Ext.fly(cell.down(this.getView().innerSelector, true).firstChild)[value ? 'addCls' : 'removeCls'](Ext.baseCSSPrefix + 'grid-checkcolumn-checked');
     }
 });

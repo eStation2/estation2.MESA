@@ -1,5 +1,6 @@
 /**
  * @alternateClassName Ext.DomHelper
+ * @singleton
  *
  * The DomHelper class provides a layer of abstraction from DOM and transparently supports creating elements via DOM or
  * using HTML fragments. It also has the ability to create HTML fragment templates from your DOM building code.
@@ -294,7 +295,32 @@ Ext.define('Ext.dom.Helper', function() {
 
         /**
          * Applies a style specification to an element.
-         * @param {String/HTMLElement} el The element to apply styles to
+         * 
+         * Styles in object form should be a valid DOM element style property.  
+         * [Valid style property names](http://www.w3schools.com/jsref/dom_obj_style.asp) 
+         * (_along with the supported CSS version for each_)
+         * 
+         *     // <div id="my-el">Phineas Flynn</div>
+         *     
+         *     var el = Ext.get('my-el'),
+         *         dh = Ext.dom.Helper;
+         *     
+         *     dh.applyStyles(el, 'color: white;');
+         *     
+         *     dh.applyStyles(el, {
+         *         fontWeight: 'bold',
+         *         backgroundColor: 'gray',
+         *         padding: '10px'
+         *     });
+         *     
+         *     dh.applyStyles(el, function () {
+         *         if (name.initialConfig.html === 'Phineas Flynn') {
+         *             return 'font-style: italic;';
+         *             // OR return { fontStyle: 'italic' };
+         *         }
+         *     });
+         * 
+         * @param {String/HTMLElement/Ext.dom.Element} el The element to apply styles to
          * @param {String/Object/Function} styles A style specification string e.g. 'width:100px', or object in the form {width:'100px'}, or
          * a function which returns such a specification.
          */
@@ -330,11 +356,23 @@ Ext.define('Ext.dom.Helper', function() {
         createDom: function(o, parentNode){
             var me = this,
                 markup = me.markup(o),
-                div = me.detachedDiv;
+                div = me.detachedDiv,
+                child;
 
             div.innerHTML = markup;
+            child = div.firstChild;
 
-            return div.firstChild;
+            // Important to clone the node here, IE8 & 9 have an issue where the markup
+            // in the first element will be lost.
+            // var ct = document.createElement('div'),
+            //     a, b;
+            //     ct.innerHTML = '<div>markup1</div>';
+            //     a = ct.firstChild;
+            //     ct.innerHTML = '<div>markup2</div>';
+            //     b = ct.firstChild;
+            //     console.log(a.innerHTML, b.innerHTML);
+
+            return Ext.supports.ChildContentClearedWhenSettingInnerHTML ? child.cloneNode(true) : child;
         },
 
         /**
@@ -553,7 +591,6 @@ Ext.define('Ext.dom.Helper', function() {
         /**
          * @method createHtml
          * Alias for {@link #markup}.
-         * @inheritdoc Ext.dom.AbstractHelper#markup
          * @deprecated 5.0.0
          */
         createHtml: function(spec) {

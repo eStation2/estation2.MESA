@@ -315,9 +315,10 @@ class TestGetInternet(unittest.TestCase):
     def TestRemoteHttp_TAMSAT(self):
 
         remote_url='http://tamsat.org.uk/public_data/'
-        from_date = '20151101'
+        from_date = '20161101'
         to_date = '20160411'
-        template='%Y/%m/rfe%Y_%m-dk%{dkm}.nc'
+        template=''
+
         frequency = 'e1dekad'
 
         files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
@@ -372,10 +373,9 @@ class TestGetInternet(unittest.TestCase):
     # Original test
     def TestRemoteHttp_MODIS_SST_1DAY(self):
 
-        remote_url='http://oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Daily/4km/SST/'
-        remote_url='http://oceandata.sci.gsfc.nasa.gov/cgi/getfile/'
-        from_date = '20150707'
-        to_date = '20151001'
+        remote_url='https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/'
+        from_date = '20161230'
+        to_date = '20161231'
         template='A%Y%j.L3m_DAY_SST_sst_4km.nc'
         usr_pwd='anonymous:anonymous'
         frequency = 'e1day'
@@ -641,7 +641,111 @@ class TestGetInternet(unittest.TestCase):
                          'pull_frequency': internet_source.pull_frequency,
                          'user_name':internet_source.user_name,
                          'password':internet_source.password,
-                         'start_date':20160401,
+                         'start_date':20161101,
+                         'end_date':20161211,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type}
+
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
+
+    def TestRemoteHttp_ARC2(self):
+
+        internet_id='CPC:NOAA:RAIN:ARC2'
+
+        internet_sources = querydb.get_active_internet_sources(echo=False)
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':20160101,
+                         'end_date':20160801,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type}
+
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
+
+    def TestRemoteHttp_CPC_SM(self):
+
+        internet_id='CPC:NCEP:NOAA:SM'
+
+        internet_sources = querydb.get_active_internet_sources(echo=False)
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':20120201,
+                         'end_date':20160801,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type}
+
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
+
+    def TestRemoteHttps_MODIS_SST(self):
+
+        internet_id='GSFC:CGI:MODIS:SST:1D'
+
+        # Direct test !
+        # remote_url = 'https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/A2016005.L3m_DAY_SST_sst_4km.nc'
+        # status = get_file_from_url(remote_url,  '/tmp/', target_file=None, userpwd='anonymous:anonymous')
+
+        internet_sources = querydb.get_active_internet_sources(echo=False)
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':20161220,
+                         'end_date':20161231,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type}
+
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
+
+    def TestRemoteHttp_CPC_SM(self):
+
+        internet_id='CPC:NCEP:NOAA:SM'
+
+        internet_sources = querydb.get_active_internet_sources(echo=False)
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':20120201,
                          'end_date':20160801,
                          'frequency_id': internet_source.frequency_id,
                          'type':internet_source.type}

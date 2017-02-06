@@ -31,16 +31,17 @@ __author__ = 'clerima'
 #
 
 # import standard modules
-
+import math
 # Import eStation lib modules
 from lib.python import es_logging as log
 from lib.python import metadata
+from lib.python import mapset
 from lib.python import functions
 from config import es_constants
 
 # Import third-party modules
 from osgeo.gdalconst import *
-from osgeo import gdal
+from osgeo import gdal, osr
 import numpy as N
 import copy
 import os, re, os.path, time, sys
@@ -1146,6 +1147,8 @@ def do_mask_image(input_file='', mask_file='', output_file='',output_format=None
     except:
         logger.warning('Error in do_mask_image. Remove outputs')
         if os.path.isfile(output_file):
+            outDrv = None
+            outDS = None
             os.remove(output_file)
 
 # _____________________________
@@ -1281,6 +1284,7 @@ def do_cumulate(input_file='', output_file='', input_nodata=None, output_nodata=
         outDrv = None
         outDS = None
         #   Writes metadata to output
+
         assign_metadata_processing(input_file, output_file)
     except:
         logger.warning('Error in do_cumulate. Remove outputs')
@@ -2072,6 +2076,119 @@ def do_ts_linear_filter(input_file='', before_file='', after_file='', output_fil
 
     assign_metadata_processing(input_list, output_file)
 
+def do_rain_onset(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
+                output_type=None, options='', current_dekad = None):
+
+    try:
+        # Manage options
+        options_list = [es_constants.ES2_OUTFILE_OPTIONS]
+        options_list.append(options)
+
+        # Determines if it is the first dekad of the season
+        if len(input_file) == 2:
+            first_dekad = True
+            fid_t0 = gdal.Open(input_file[0], GA_ReadOnly)
+            fid_m1 = gdal.Open(input_file[1], GA_ReadOnly)
+        else:
+            first_dekad = False
+            fid_t0 = gdal.Open(input_file[0], GA_ReadOnly)
+            fid_m1 = gdal.Open(input_file[1], GA_ReadOnly)
+            fid_m2 = gdal.Open(input_file[2], GA_ReadOnly)
+            fid_prev = gdal.Open(input_file[3], GA_ReadOnly)
+
+        # Read info from file
+        nb = fid_t0.RasterCount
+        ns = fid_t0.RasterXSize
+        nl = fid_t0.RasterYSize
+        dataType = fid_t0.GetRasterBand(1).DataType
+        geoTransform = fid_t0.GetGeoTransform()
+        projection = fid_t0.GetProjection()
+        driver_type = fid_t0.GetDriver().ShortName
+        rangenl = range(nl)
+
+        # Try and assign input_nodata if it is UNDEF
+        if input_nodata is None:
+            sds_meta = metadata.SdsMetadata()
+            if os.path.exists(input_file[0]):
+                input_nodata = float(sds_meta.get_nodata_value(input_file[0]))
+            else:
+                logger.info('Test file not existing: do not assign metadata')
+
+        # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
+        if output_nodata is None and input_nodata is not None:
+            output_nodata = input_nodata
+
+        # Manage out_type (take the input one as default)
+        if output_type is None:
+            outType = dataType
+        else:
+            outType = ParseType(output_type)
+
+        # manage out_format (take the input one as default)
+        if output_format is None:
+            outFormat = driver_type
+        else:
+            outFormat = output_format
+
+        # instantiate outputs
+        outDrv = gdal.GetDriverByName(outFormat)
+        outDS = outDrv.Create(output_file, ns, nl, nb, outType, options_list)
+        outDS.SetProjection(projection)
+        outDS.SetGeoTransform(geoTransform)
+        outband = outDS.GetRasterBand(1)
+
+        # First dekad of season -> 2 inputs, no previous output
+        if first_dekad:
+            # parse image by line
+            for il in rangenl:
+                outData = N.zeros(ns)
+                data1 = N.ravel(fid_m1.GetRasterBand(1).ReadAsArray(0, il, ns, 1).astype(float))
+                data2 = N.ravel(fid_t0.GetRasterBand(1).ReadAsArray(0, il, ns, 1).astype(float))
+
+                meet = ((data1 >= 25) & ((data2) >= 20))
+                # set elements matching mask to dekad number
+                outData[meet] = current_dekad-1
+
+                # reshape before writing
+                outData.shape = (1, -1)
+                outband.WriteArray(N.array(outData), 0, il)
+        else:
+            # Case of 3 inputs and the previous output
+            # parse image by line
+            for il in rangenl:
+                outData = N.zeros(ns)
+                data1 = N.ravel(fid_m2.GetRasterBand(1).ReadAsArray(0, il, ns, 1).astype(float))
+                data2 = N.ravel(fid_m1.GetRasterBand(1).ReadAsArray(0, il, ns, 1).astype(float))
+                data3 = N.ravel(fid_t0.GetRasterBand(1).ReadAsArray(0, il, ns, 1).astype(float))
+                prev_out = N.ravel(fid_prev.GetRasterBand(1).ReadAsArray(0, il, ns, 1).astype(float))
+
+                meet_1 = ((data1 >= 25) & ((data2 + data3) >= 20))
+                meet_2 = ((data2 >= 25) & (data3 >= 20))
+
+                notdone = (prev_out == 0)
+                already_done = (prev_out > 0)
+                mask_1 = (notdone & meet_1)
+                mask_2 = (notdone & meet_2)
+                # set elements matching mask to dekad number
+                outData[mask_2] = current_dekad-1
+                outData[mask_1] = current_dekad-2
+                outData[already_done] = prev_out[already_done]
+
+                # reshape before writing
+                outData.shape = (1, -1)
+                outband.WriteArray(N.array(outData), 0, il)
+
+        # ----------------------------------------------------------------------------------------------------
+        #   Close outputs
+        outDrv = None
+        outDS = None
+        #   Writes metadata to output
+        assign_metadata_processing(input_file, output_file)
+    except:
+        logger.warning('Error in rain-onset. Remove outputs')
+        if os.path.isfile(output_file):
+            os.remove(output_file)
+
 # _____________________________
 #   Merge/move wrt processing.py functions
 def ParseType(type):
@@ -2139,6 +2256,324 @@ def return_as_list(input_args):
             my_list.append(item)
     return my_list
 
+
+def do_reproject(inputfile, output_file, native_mapset_name, target_mapset_name):
+
+    native_mapset = mapset.MapSet()
+    native_mapset.assigndb(native_mapset_name)
+
+    # Define the Native mapset
+    target_mapset = mapset.MapSet()
+    target_mapset.assigndb(target_mapset_name)
+
+    # Open the input file
+    orig_ds = gdal.Open(inputfile)
+
+    orig_cs = osr.SpatialReference(wkt=native_mapset.spatial_ref.ExportToWkt())
+    orig_geo_transform = native_mapset.geo_transform
+    orig_size_x = native_mapset.size_x
+    orig_size_y = native_mapset.size_y
+    orig_band = orig_ds.GetRasterBand(1)
+    orig_ds.SetGeoTransform(native_mapset.geo_transform)
+    orig_ds.SetProjection(orig_cs.ExportToWkt())
+
+    in_data_type = orig_band.DataType
+
+    # Get the Target mapset
+    trg_mapset = mapset.MapSet()
+    trg_mapset.assigndb(target_mapset_name)
+    out_cs = trg_mapset.spatial_ref
+    out_size_x = trg_mapset.size_x
+    out_size_y = trg_mapset.size_y
+
+    # Create target in memory
+    mem_driver = gdal.GetDriverByName('MEM')
+
+    # Assign mapset to dataset in memory
+    out_data_type_gdal = 2
+    mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, out_data_type_gdal)
+    mem_ds.SetGeoTransform(trg_mapset.geo_transform)
+    mem_ds.SetProjection(out_cs.ExportToWkt())
+
+    # Do the Re-projection
+    orig_wkt = orig_cs.ExportToWkt()
+    res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
+                              es_constants.ES2_OUTFILE_INTERP_METHOD)
+
+    out_data = mem_ds.ReadAsArray()
+
+    output_driver = gdal.GetDriverByName('GTiff')
+    output_ds = output_driver.Create(output_file, out_size_x, out_size_y, 1, in_data_type)
+    output_ds.SetGeoTransform(trg_mapset.geo_transform)
+    output_ds.SetProjection(out_cs.ExportToWkt())
+    output_ds.GetRasterBand(1).WriteArray(out_data)
+
+    trg_ds = None
+    mem_ds = None
+    orig_ds = None
+
+#   -------------------------------------------------------------------------------------------
+def getRasterBox(fid, xstart, xend, ystart, yend, band):
+#
+#   Analyzes the RasterFile (fid) in the CROI area (identified by xstart, xend, ystart, yend)
+#   and returns the range of polygons IDs (minValGrid, maxValGrid) to be considered by doStats.
+#   Used by do_stats_4_raster()
+#   Arguments:
+#
+#       fid: file identifier of the 'grid' raster file (already open)
+#       xstart,xend,ystart,yend: x-y coords of the BB to be considered in the grid file
+#
+
+    # Initialise with 'extreme' values, to be updated in the loop
+    minValGrid = None
+    maxValGrid = None
+
+    ns = int(xend - xstart + 1)
+    nl = int(yend - ystart + 1)
+
+    indexRef = N.arange(ns)
+
+    for il in range(int(ystart), int(yend+1) ):
+        data = N.ravel( fid.GetRasterBand(band).ReadAsArray(int(xstart), il, ns, 1) )
+        wts = (data != 0)
+
+        if wts.any():
+
+            thisMinValGrid = data[wts].min()
+            thisMaxValGrid = data[wts].max()
+
+            if minValGrid is None:
+                minValGrid = thisMinValGrid
+            elif thisMinValGrid < minValGrid:
+                minValGrid = thisMinValGrid
+
+            if maxValGrid is None:
+                maxValGrid = thisMaxValGrid
+            elif thisMaxValGrid > maxValGrid:
+                maxValGrid = thisMaxValGrid
+
+    return [minValGrid, maxValGrid]
+
+#   -------------------------------------------------------------------------------------------
+def do_raster_stats(fid, fidID, outDS, iband, roi, minId, maxId, nodata, operation, args=None):
+#
+#   Perform the 'operation' in inputfile (fid), according the 'grid' defined in fidID, and write to fidOut
+#   Used by do_stats_4_raster()
+#   Arguments:
+#
+#       fid:    input file identifier
+#       fidID:  file identifier of the 'grid' raster file
+#       fidout: file identifier of the output raster file. file has same size as fin
+#       iband:  number of band to consider (default is 1)
+#       roi:    as returned from common_area
+#               contains all info about offsets (firstX/YOffset -> file (fid), secondX/YOffset -> raster(fidID))
+#       minId, maxID:   range of IDs to consider in fidID
+#       nodata:         value to disregard in comps
+#       operation:      operation to apply
+#       args:           list of additional arguments (FTTB only 1, used for density)
+#
+
+    # Check arguments
+    if operation=='density' and args is None:
+        logger.error('Operation density requires an addtional argument')
+        return 1
+
+    # output file (fidOut) has the same size as file (fid)
+    numIDs = maxId-minId+1
+
+    # store: sum, N, min, max, nPixId
+    statsData = N.zeros((5,(numIDs)))
+    minmaxInit= N.zeros((numIDs))
+
+    # let's parse the common window
+    ns=roi['xSize']
+    nl=roi['ySize']
+
+    # Npixels in Rasterfile
+    nsiD = fidID.RasterXSize
+
+    # Prepare a matrix to store idValues
+    MatrixidData=N.zeros((nl,ns))
+    outband = outDS.GetRasterBand(iband+1)
+
+    # print ' Identifying IDs of polygons and computing stats'
+    for il in range(0, nl-1):
+        # read 1 full line from image
+        data   = N.ravel(fid.GetRasterBand(1).ReadAsArray( 0, il, ns, 1 ))
+        # read 1 full line from idRaster
+        idDataTmp = N.ravel( fidID.GetRasterBand(iband+1).ReadAsArray( 0, il+roi['secondYOff'], nsiD, 1 ) )
+
+        # reduce data set, for raster file
+        idData = idDataTmp[roi['secondXOff']:roi['secondXOff']+ns]
+        MatrixidData[il] = idDataTmp[roi['secondXOff']:roi['secondXOff']+ns]
+
+        # accumulate values in the vector
+        # wtadd is an image index (where position)
+        if (nodata is None):
+            wtadd=(idData >= minId) * (idData <= maxId)
+        else:
+            wtadd = (data != nodata) * (idData >= minId) * (idData <= maxId)
+
+        if wtadd.any():
+            idPos = idData[wtadd] - minId
+            dataSelect = data[wtadd]
+
+            # sum up the value
+            for ii in range(len(idPos)):
+                statsData[0, idPos[ii]] = statsData[0, idPos[ii]] + dataSelect[ii]
+            # counter ++
+                statsData[1, idPos[ii]] = statsData[1, idPos[ii]] + 1
+
+            # update min and max
+            for ii in range(len(idPos)):
+                if (minmaxInit[ idPos[ii] ] == 0):
+                    statsData[2, idPos[ii] ] = dataSelect[ii]
+                    statsData[3, idPos[ii] ] = dataSelect[ii]
+                    minmaxInit[idPos[ii] ] = 1
+                else:
+                    if dataSelect[ii] < statsData[2, idPos[ii] ]:
+                        # reset min
+                        statsData[2, idPos[ii] ] = dataSelect[ii]
+                    if dataSelect[ii] > statsData[3, idPos[ii] ]:
+                        # reset max
+                        statsData[3, idPos[ii] ] = dataSelect[ii]
+
+    # On the basis of the iDMatrix, assign the output
+    outdata=N.zeros((nl,ns))
+    if nodata is not None:
+        outdata+=nodata
+
+    # Do the test first, to optimize loop ...
+    if operation=='count':
+      for il in range(0,nl-1):
+         for ip in range(0,ns-1):
+            outdata[il,ip]=statsData[1,MatrixidData[il,ip]-minId]
+    elif operation=='sum':
+      for il in range(0,nl-1):
+         for ip in range(0,ns-1):
+            outdata[il,ip]=statsData[0,MatrixidData[il,ip]-minId]
+    elif operation=='min':
+      for il in range(0,nl-1):
+         for ip in range(0,ns-1):
+            outdata[il,ip]=statsData[2,MatrixidData[il,ip]-minId]
+    elif operation=='max':
+      for il in range(0,nl-1):
+         for ip in range(0,ns-1):
+            outdata[il,ip]=statsData[3,MatrixidData[il,ip]-minId]
+    elif operation=='avg':
+      for il in range(0,nl-1):
+         for ip in range(0,ns-1):
+            if statsData[1,MatrixidData[il,ip]-minId] != 0:
+                outdata[il,ip]=float(statsData[0,MatrixidData[il,ip]-minId])/float(statsData[1,MatrixidData[il,ip]-minId])
+
+    elif operation=='density':
+       for il in range(0,nl-1):
+         for ip in range(0,ns-1):
+            outdata[il,ip]=float(statsData[0,MatrixidData[il,ip]-minId])/args[0]
+
+    outband.WriteArray(N.array(outdata), 0, 0)
+
+    return 0
+#   -------------------------------------------------------------------------------------------
+#   Computes statistics over polygons. The operation is defined by -op option.
+#   Polygons are defined by a raster of polygon ids
+#   The foreseen operations are:
+#       count, sum, min, max, avg : no additional arguments
+#       density: 1 argument -> scaling factor
+#   Argument:
+#       inputfile:      input file
+#       grid_file:      file with grid/polygons IDs
+#       output_file:    output file name
+#       operation:      see above
+#       output_format:  output format (GTIFF by default)
+#       nodata:         nodata value - in input_file
+#       output_type:    output type (by default the same as in the input file
+#       options:        additional options (e.g. compression)
+#       args:           list of additional arguments (FTTB only 1, used for density)
+#
+def do_stats_4_raster(input_file, grid_file, output_file, operation, input_mapset_name, grid_mapset_name,
+                      output_format=None, nodata=None, outType=None, options=None, args=None ):
+
+    # Manage input arguments
+    if output_format is None:
+        output_format='GTiff'
+
+    # Manage options
+    options_list = [es_constants.ES2_OUTFILE_OPTIONS]
+    if options is not None:
+        options_list.append(options)
+
+    try:
+        # Open input file
+        fidIn = gdal.Open(input_file, GA_ReadOnly)
+        if fidIn is None:
+            logger.error('Could not open input file $0'.format(input_file))
+            return 1
+        # Read info from input file
+        nsIn = fidIn.RasterXSize
+        nlIn = fidIn.RasterYSize
+        inGeo = fidIn.GetGeoTransform()
+        inProj = fidIn.GetProjection()
+        dataType=fidIn.GetRasterBand(1).DataType
+
+        if nodata is None:
+            metadata_input = metadata.SdsMetadata()
+            metadata_input.read_from_ds(fidIn)
+            nodata_output = float(metadata_input.get_item('eStation2_nodata'))
+        else:
+            nodata_output = nodata
+
+        # Assign outType (Int16 by default)
+        if outType is None:
+            outType=dataType
+
+        # Open idRaster
+        fidRaster = gdal.Open(grid_file, GA_ReadOnly)
+        if fidRaster is None:
+            logger.error('Could not open grid file $0'.format(grid_file))
+            return 1
+
+        nlevel = fidRaster.RasterCount
+
+        # Instantiate output
+        nb=1
+        outDrv=gdal.GetDriverByName(output_format)
+        outDS=outDrv.Create(output_file, nsIn, nlIn, nb, outType, options_list)
+        outDS.SetProjection(inProj)
+        outDS.SetGeoTransform(inGeo)
+
+        # Determine common area, considering the two Mapsets
+        mapset_1 = mapset.MapSet()
+        mapset_1.assigndb(input_mapset_name)
+        mapset_2 = mapset.MapSet()
+        mapset_2.assigndb(grid_mapset_name)
+
+        common_roi =  mapset_1.compute_common_area(mapset_2)
+
+        if common_roi['isCommon'] != True:
+            logger.warning('Images do not have common ROIs')
+            return 1
+
+        # Get the min/maxId value from raster file, in common ROI
+        [minId, maxId]=getRasterBox(fidRaster,
+                                    common_roi['secondXOff'], common_roi['xSize'] - 1 + common_roi['secondXOff'],
+                                    common_roi['secondYOff'], common_roi['ySize'] - 1 + common_roi['secondYOff'],
+                                    1)
+        # parse bands
+        for iband in range(nlevel):
+            # compute stats and write to output file
+            statsData = do_raster_stats(fidIn, fidRaster, outDS, iband, common_roi, minId, maxId, nodata_output, operation, args=args)
+
+
+        trg_ds = None
+        mem_ds = None
+        orig_ds = None
+
+    except:
+        logger.warning('Error in do_stats_4_raster. Remove outputs')
+        if os.path.isfile(output_file):
+            os.remove(output_file)
+
 # _____________________________
 #   Write to an output file the metadata
 #
@@ -2154,25 +2589,29 @@ def assign_metadata_processing(input_file_list, output_file):
     else:
         first_input = input_file_list
 
-    # Open and read data
-    sds_meta.read_from_file(first_input)
+    try:
+        # Open and read data
+        sds_meta.read_from_file(first_input)
 
-    # Modify/Assign some to the ingested file
-    sds_meta.assign_comput_time_now()
-    str_date, productcode, subproductcode, mapset, version = functions.get_all_from_filename(os.path.basename(output_file))
-    # [productcode, subproductcode, version, str_date, mapset] = functions.get_all_from_path_full(output_file)
+        # Modify/Assign some to the ingested file
+        sds_meta.assign_comput_time_now()
+        str_date, productcode, subproductcode, mapset, version = functions.get_all_from_filename(os.path.basename(output_file))
+        # [productcode, subproductcode, version, str_date, mapset] = functions.get_all_from_path_full(output_file)
 
-    #   TODO-M.C.: cannot read metadata from database for a newly created product ! Copy from input file ?
-    #
-    sds_meta.assign_from_product(productcode, subproductcode, version)
-    #sds_meta.assign_product_elemets(productcode, subproductcode, version)
+        #   TODO-M.C.: cannot read metadata from database for a newly created product ! Copy from input file ?
+        #
+        sds_meta.assign_from_product(productcode, subproductcode, version)
+        #sds_meta.assign_product_elemets(productcode, subproductcode, version)
 
-    sds_meta.assign_date(str_date)
-    sds_meta.assign_input_files(input_file_list)
+        sds_meta.assign_date(str_date)
+        sds_meta.assign_input_files(input_file_list)
 
-    # Define subdirectory
-    sub_directory = functions.set_path_sub_directory(productcode,subproductcode,'Derived',version,mapset)
-    sds_meta.assign_subdir(sub_directory)
+        # Define subdirectory
+        sub_directory = functions.set_path_sub_directory(productcode,subproductcode,'Derived',version,mapset)
+        sds_meta.assign_subdir(sub_directory)
 
-    # Write Metadata
-    sds_meta.write_to_file(output_file)
+        # Write Metadata
+        sds_meta.write_to_file(output_file)
+    except:
+        logger.error('Error in assign metadata. Check product defined in DB!')
+        raise Exception('Error in assign metadata')

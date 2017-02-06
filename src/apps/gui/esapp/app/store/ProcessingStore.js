@@ -11,7 +11,7 @@ Ext.define('esapp.store.ProcessingStore', {
 
     storeId : 'ProcessingStore'
 
-    ,autoLoad: false
+    ,autoLoad: true
     ,autoSync: true
     ,remoteSort: false
     ,remoteGroup: false
@@ -58,10 +58,11 @@ Ext.define('esapp.store.ProcessingStore', {
         }
     }
     ,grouper:{
-             // property: 'cat_descr_name',
              groupFn : function (item) {
-                 return "<span style='display: none;'>" + item.get('order_index') + "</span>" + esapp.Utils.getTranslation(item.get('category_id'))
+                 return esapp.Utils.getTranslation(item.get('category_id'));
+                 //return "<span style='display: none;'>" + item.get('order_index') + "</span>" + esapp.Utils.getTranslation(item.get('category_id'))
              },
+             property: 'order_index',
              sortProperty: 'order_index'
     }
     ,listeners: {

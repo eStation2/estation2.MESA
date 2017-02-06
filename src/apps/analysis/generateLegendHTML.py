@@ -65,14 +65,15 @@ def generateLegendHTML(legend_id):
         Counter = 0
         for row in legend_steps:
             GroupLabel = row.group_label
-            if GroupLabel.strip() == PrevGroupLabel:
-                Counter += 1
-                PrevGroupLabel = GroupLabel
-            else:
-                if Counter != 0:
-                     legendGroupLabels += '<td colspan="'+str(Counter)+'" align="center">'+PrevGroupLabel+'</td><td rowspan="3" style="background-color: black;"><img src="resources/img/clearpixel.gif" width="1" height="15" /></td>'
-                PrevGroupLabel = GroupLabel
-                Counter = 1
+            if GroupLabel is not None and GroupLabel != '':
+                if GroupLabel.strip() == PrevGroupLabel:
+                    Counter += 1
+                    PrevGroupLabel = GroupLabel
+                else:
+                    if Counter != 0:
+                         legendGroupLabels += '<td colspan="'+str(Counter)+'" align="center">'+PrevGroupLabel+'</td><td rowspan="3" style="background-color: black;"><img src="resources/img/clearpixel.gif" width="1" height="15" /></td>'
+                    PrevGroupLabel = GroupLabel
+                    Counter = 1
 
         legendGroupLabels += '<td colspan="'+str(Counter)+'" align="center">'+PrevGroupLabel+'</td>'
         legendGroupLabels += '</tr>'

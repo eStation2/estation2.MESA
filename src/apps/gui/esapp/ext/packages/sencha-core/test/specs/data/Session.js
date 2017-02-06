@@ -21,7 +21,18 @@ describe("Ext.data.Session", function() {
     var adminUsers, peonUsers;
     var userRufus, userBill, userTed;
 
+    function getAndComplete(type, id, theSession, data) {
+        theSession = theSession || session;
+        data = data || {};
+        var rec = theSession.getRecord(type, id);
+        data.id = data.id || id;
+        completeRequest(data);
+        return rec;
+    }
+
     beforeEach(function() {
+        MockAjaxManager.addMethods();
+
         adminGroup = {
             id: 42,
             name: 'Admins'
@@ -51,23 +62,9 @@ describe("Ext.data.Session", function() {
         peonUsers = [ userBill, userTed, userRufus ];
     });
 
-    function getAndComplete(type, id, theSession, data) {
-        theSession = theSession || session;
-        data = data || {};
-        var rec = theSession.getRecord(type, id);
-        data.id = data.id || id;
-        completeRequest(data);
-        return rec;
-    }
-
-    beforeEach(function() {
-        MockAjaxManager.addMethods();
-    });
-
     afterEach(function() {
         MockAjaxManager.removeMethods();
-        Ext.destroy(session);
-        session = null;
+        session = Ext.destroy(session);
     });
 
     describe("record access", function() {
@@ -174,7 +171,7 @@ describe("Ext.data.Session", function() {
                     });
 
                     function makeUser(id) {
-                        user = new spec.User({
+                        user = new User({
                             id: id
                         });
                     }
@@ -186,7 +183,7 @@ describe("Ext.data.Session", function() {
                                 userId: 1
                             });
 
-                            var spy = spyOn(spec.User.getProxy(), 'read');
+                            var spy = spyOn(User.getProxy(), 'read');
                             session.adopt(post);
                             expect(spy).not.toHaveBeenCalled();
                         });
@@ -208,7 +205,7 @@ describe("Ext.data.Session", function() {
                         it("should not load the store", function() {
                             makeUser(1);
                             user.posts();
-                            var spy = spyOn(spec.User.getProxy(), 'read');
+                            var spy = spyOn(User.getProxy(), 'read');
                             session.adopt(user);
                             expect(spy).not.toHaveBeenCalled();
                         });
@@ -257,7 +254,7 @@ describe("Ext.data.Session", function() {
 
                     describe("the key holder", function() {
                         it("should not attempt to load the non key holder", function() {
-                            var user = new spec.User({
+                            var user = new User({
                                 id: 1,
                                 addressId: 101
                             });
@@ -271,7 +268,7 @@ describe("Ext.data.Session", function() {
                                 id: 101
                             });
 
-                            var user = new spec.User({
+                            var user = new User({
                                 id: 1
                             });
 
@@ -286,7 +283,7 @@ describe("Ext.data.Session", function() {
                             var address = new spec.Address({
                                 id: 101
                             });
-                            var spy = spyOn(spec.User.getProxy(), 'read');
+                            var spy = spyOn(User.getProxy(), 'read');
                             session.adopt(address);
                             expect(spy).not.toHaveBeenCalled();
                         });
@@ -296,13 +293,111 @@ describe("Ext.data.Session", function() {
                                 id: 101
                             });
 
-                            var user = new spec.User({
+                            var user = new User({
                                 id: 1
                             });
                             address.setUser(user);
 
                             session.adopt(address);
                             expect(user.session).toBe(session);
+                        });
+                    });
+                });
+
+                describe("many to many", function() {
+                    var Group;
+
+                    beforeEach(function() {
+                        Group = Ext.define('spec.Group', {
+                            extend: 'Ext.data.Model',
+                            fields: ['name']
+                        });
+                    });
+
+                    afterEach(function() {
+                        Ext.undefine('spec.Group');
+                        Group = null;
+                    });
+
+                    describe("the left", function() {
+                        it("should not load the store", function() {
+                            var group = new Group({id: 1});
+                            group.users();
+                            var spy = spyOn(Group.getProxy(), 'read');
+                            session.adopt(group);
+                            expect(spy).not.toHaveBeenCalled();
+                        });
+
+                        it("should set the session onto the store", function() {
+                            var group = new Group({id: 1}),
+                                users = group.users();
+
+                            session.adopt(group);
+                            expect(users.getSession()).toBe(session);
+                        });
+
+                        it("should adopt existing children", function() {
+                            var group = new Group({id: 1}),
+                                users = group.users();
+
+                            users.add({id: 101}, {id: 102}, {id: 103});
+                            session.adopt(group);
+                            expect(users.getAt(0).session).toBe(session);
+                            expect(users.getAt(1).session).toBe(session);
+                            expect(users.getAt(2).session).toBe(session);
+                        });
+
+                        it("should adopt any newly loaded items after adopting", function() {
+                            var group = new Group({id: 1}),
+                                users = group.users();
+
+                            session.adopt(group);
+                            users.load();
+                            completeRequest([{id: 101}, {id: 102}, {id: 103}]);
+                            expect(users.getAt(0).session).toBe(session);
+                            expect(users.getAt(1).session).toBe(session);
+                            expect(users.getAt(2).session).toBe(session);
+                        });
+                    });
+
+                    describe("the right", function() {
+                        it("should not load the store", function() {
+                            var user = new User({id: 1});
+                            user.groups();
+                            var spy = spyOn(Group.getProxy(), 'read');
+                            session.adopt(user);
+                            expect(spy).not.toHaveBeenCalled();
+                        });
+
+                        it("should set the session onto the store", function() {
+                            var user = new User({id: 1}),
+                                groups = user.groups();
+
+                            session.adopt(user);
+                            expect(groups.getSession()).toBe(session);
+                        });
+
+                        it("should adopt existing children", function() {
+                            var user = new User({id: 1}),
+                                groups = user.groups();
+
+                            groups.add({id: 101}, {id: 102}, {id: 103});
+                            session.adopt(user);
+                            expect(groups.getAt(0).session).toBe(session);
+                            expect(groups.getAt(1).session).toBe(session);
+                            expect(groups.getAt(2).session).toBe(session);
+                        });
+
+                        it("should adopt any newly loaded items after adopting", function() {
+                            var user = new User({id: 1}),
+                                groups = user.groups();
+
+                            session.adopt(user);
+                            groups.load();
+                            completeRequest([{id: 101}, {id: 102}, {id: 103}]);
+                            expect(groups.getAt(0).session).toBe(session);
+                            expect(groups.getAt(1).session).toBe(session);
+                            expect(groups.getAt(2).session).toBe(session);
                         });
                     });
                 });
@@ -514,6 +609,14 @@ describe("Ext.data.Session", function() {
                     expect(rec.$className).toBe('spec.User');
                 });
 
+                it("should accept an existing record and adopt it", function() {
+                    rec = new spec.User({
+                        id: 1
+                    });
+                    expect(session.getRecord(rec)).toBe(rec);
+                    expect(rec.session).toBe(session);
+                });
+
                 it("should create a new record and track it in the session", function() {
                     rec = session.getRecord('User', 1);
                     expect(session.peekRecord('User', 1)).toBe(rec);
@@ -560,63 +663,129 @@ describe("Ext.data.Session", function() {
                             rec = getAndComplete('User', 1, parent, {name: 'Foo'});
                         });
 
-                        it("should return an existing record from the parent", function() {
-                            var child = session.getRecord('User', 1);
-                            expect(child.get('name')).toBe('Foo');
-                            expect(child.$className).toBe('spec.User');
+                        describe("with type/id", function() {
+                            it("should return an existing record from the parent", function() {
+                                var child = session.getRecord('User', 1);
+                                expect(child.get('name')).toBe('Foo');
+                                expect(child.$className).toBe('spec.User');
+                            });
+
+                            it("should return a copy, not the same instance", function() {
+                                var child = session.getRecord('User', 1);
+                                expect(child).not.toBe(rec);
+                            });
+
+                            it("should set the session to be the child session", function() {
+                                var child = session.getRecord('User', 1);
+                                expect(child.session).toBe(session);
+                            });
+
+                            it("should not trigger a load", function() {
+                                var spy = spyOn(spec.User.getProxy(), 'read');
+
+                                session.getRecord('User', 1);
+                                expect(spy).not.toHaveBeenCalled();
+                            });
+
+                            it("should not update the parent record when the child changes", function() {
+                                var child = session.getRecord('User', 1);
+                                child.set('name', 'Bar');
+                                expect(rec.get('name')).toBe('Foo');
+                            });
+
+                            it("should not update the child record when the parent changes", function() {
+                                var child = session.getRecord('User', 1);
+                                rec.set('name', 'Bar');
+                                expect(child.get('name')).toBe('Foo');
+                            });
+
+                            it("should not copy the record if the parent is loading", function() {
+                                rec = parent.getRecord('User', 2);
+                                var child = session.getRecord('User', 2);
+
+                                completeRequest({name: 'Foo'});
+                                expect(rec.get('name')).toBe('Foo');
+                                expect(child.isLoading()).toBe(true);
+                                expect(child.get('name')).toBeUndefined();
+
+                            });
                         });
 
-                        it("should return a copy, not the same instance", function() {
-                            var child = session.getRecord('User', 1);
-                            expect(child).not.toBe(rec);
-                        });
+                        describe("with parent instance", function() {
+                            it("should return an existing record from the parent", function() {
+                                var child = session.getRecord(rec);
+                                expect(child.get('name')).toBe('Foo');
+                                expect(child.$className).toBe('spec.User');
+                            });
 
-                        it("should set the session to be the child session", function() {
-                            var child = session.getRecord('User', 1);
-                            expect(child.session).toBe(session);
-                        });
+                            it("should return a copy, not the same instance", function() {
+                                var child = session.getRecord(rec);
+                                expect(child).not.toBe(rec);
+                            });
 
-                        it("should not trigger a load", function() {
-                            var spy = spyOn(spec.User.getProxy(), 'read');
+                            it("should set the session to be the child session", function() {
+                                var child = session.getRecord(rec);
+                                expect(child.session).toBe(session);
+                            });
 
-                            session.getRecord('User', 1);
-                            expect(spy).not.toHaveBeenCalled();
-                        });
+                            it("should not trigger a load", function() {
+                                var spy = spyOn(spec.User.getProxy(), 'read');
 
-                        it("should not update the parent record when the child changes", function() {
-                            var child = session.getRecord('User', 1);
-                            child.set('name', 'Bar');
-                            expect(rec.get('name')).toBe('Foo');
-                        });
+                                session.getRecord(rec);
+                                expect(spy).not.toHaveBeenCalled();
+                            });
 
-                        it("should not update the child record when the parent changes", function() {
-                            var child = session.getRecord('User', 1);
-                            rec.set('name', 'Bar');
-                            expect(child.get('name')).toBe('Foo');
-                        });
+                            it("should not update the parent record when the child changes", function() {
+                                var child = session.getRecord(rec);
+                                child.set('name', 'Bar');
+                                expect(rec.get('name')).toBe('Foo');
+                            });
 
-                        it("should not copy the record if the parent is loading", function() {
-                            rec = parent.getRecord('User', 2);
-                            var child = session.getRecord('User', 2);
+                            it("should not update the child record when the parent changes", function() {
+                                var child = session.getRecord(rec);
+                                rec.set('name', 'Bar');
+                                expect(child.get('name')).toBe('Foo');
+                            });
 
-                            completeRequest({name: 'Foo'});
-                            expect(rec.get('name')).toBe('Foo');
-                            expect(child.isLoading()).toBe(true);
-                            expect(child.get('name')).toBeUndefined();
+                            it("should not copy the record if the parent is loading", function() {
+                                rec = parent.getRecord('User', 2);
+                                var child = session.getRecord(rec);
 
+                                completeRequest({name: 'Foo'});
+                                expect(rec.get('name')).toBe('Foo');
+                                expect(child.isLoading()).toBe(true);
+                                expect(child.get('name')).toBeUndefined();
+
+                            });
                         });
                     });
 
                     describe("record does not exist in the parent", function() {
-                        it("should create an instance", function() {
-                            rec = session.getRecord('User', 1);
-                            expect(rec.getId()).toBe(1);
-                            expect(rec.$className).toBe('spec.User');
+                        describe("with type/id", function() {
+                            it("should create an instance", function() {
+                                rec = session.getRecord('User', 1);
+                                expect(rec.getId()).toBe(1);
+                                expect(rec.$className).toBe('spec.User');
+                            });
+
+                            it("not push the instance into the parent", function() {
+                                session.getRecord('User', 1);
+                                expect(parent.peekRecord('User', 1)).toBeNull();
+                            });
                         });
 
-                        it("not push the instance into the parent", function() {
-                            session.getRecord('User', 1);
-                            expect(parent.peekRecord('User', 1)).toBeNull();
+                        describe("with an instance", function() {
+                            it("should use the passed instance", function() {
+                                rec = new spec.User({id: 1});
+                                expect(session.getRecord(rec)).toBe(rec);
+                                expect(rec.session).toBe(session);
+                            });
+
+                            it("not push the instance into the parent", function() {
+                                rec = new spec.User({id: 1});
+                                session.getRecord(rec);
+                                expect(parent.peekRecord('User', 1)).toBeNull();
+                            });
                         });
                     });
                 });
@@ -633,6 +802,10 @@ describe("Ext.data.Session", function() {
 
                 it("should accept the entity class", function() {
                     expect(session.getRecord(spec.User, 1)).toBe(rec);
+                });
+
+                it("should return the same instance", function() {
+                    expect(session.getRecord(rec)).toBe(rec);
                 });
 
                 it("should return the existing record", function() {
@@ -1076,6 +1249,123 @@ describe("Ext.data.Session", function() {
         });
     });
 
+    describe("id generation", function() {
+        var User, Order, Job, identifier;
+
+        beforeEach(function() {
+            identifier = new Ext.data.identifier.Sequential({
+                id: 'spec-session',
+                seed: 10
+            });
+
+            Ext.data.Model.schema.setNamespace('spec');
+            session = new Ext.data.Session();
+
+            User = Ext.define('spec.User', {
+                extend: 'Ext.data.Model',
+                identifier: 'spec-session',
+                fields: ['id']
+            });
+
+            Order = Ext.define('spec.Order', {
+                extend: 'Ext.data.Model',
+                identifier: 'spec-session',
+                fields: ['id']
+            });
+
+            Job = Ext.define('spec.Job', {
+                extend: 'Ext.data.Model',
+                identifier: {
+                    id: 'sequential'
+                },
+                fields: ['id']
+            });
+        });
+
+        afterEach(function() {
+            Ext.undefine('spec.User');
+            Ext.undefine('spec.Order');
+            Ext.undefine('spec.Job');
+            Ext.data.Model.schema.clear(true);
+            Job = Order = User = identifier = Ext.destroy(identifier);
+
+            var Generator = Ext.data.identifier.Generator;
+            Generator.all = {
+                uuid: Generator.all.uuid
+            };
+        });
+
+        it("should start generation fresh", function() {
+            expect((new User()).id).toBe(10);
+            expect((new User()).id).toBe(11);
+            expect((new User()).id).toBe(12);
+
+            expect((new User({}, session)).id).toBe(10);
+            expect((new User({}, session)).id).toBe(11);
+            expect((new User({}, session)).id).toBe(12);
+
+            var other = new Ext.data.Session();
+
+            expect((new User({}, other)).id).toBe(10);
+            expect((new User({}, other)).id).toBe(11);
+            expect((new User({}, other)).id).toBe(12);
+
+            other.destroy();
+        });
+
+        it("should share identifiers in the way that happens outside sessions", function() {
+            expect((new User()).id).toBe(10);
+            expect((new Order()).id).toBe(11);
+            expect((new Order()).id).toBe(12);
+            expect((new Order()).id).toBe(13);
+            expect((new User()).id).toBe(14);
+            expect((new Order()).id).toBe(15);
+
+            expect((new User({}, session)).id).toBe(10);
+            expect((new Order({}, session)).id).toBe(11);
+            expect((new Order({}, session)).id).toBe(12);
+            expect((new Order({}, session)).id).toBe(13);
+            expect((new User({}, session)).id).toBe(14);
+            expect((new Order({}, session)).id).toBe(15);
+
+            var other = new Ext.data.Session();
+            expect((new User({}, other)).id).toBe(10);
+            expect((new Order({}, other)).id).toBe(11);
+            expect((new Order({}, other)).id).toBe(12);
+            expect((new Order({}, other)).id).toBe(13);
+            expect((new User({}, other)).id).toBe(14);
+            expect((new Order({}, other)).id).toBe(15);
+
+            other.destroy();
+        });
+
+        it("should not share ids for generators that are not the same", function() {
+            expect((new User()).id).toBe(10);
+            expect((new Job()).id).toBe(1);
+            expect((new Job()).id).toBe(2);
+            expect((new Job()).id).toBe(3);
+            expect((new User()).id).toBe(11);
+            expect((new Job()).id).toBe(4);
+
+            expect((new User({}, session)).id).toBe(10);
+            expect((new Job({}, session)).id).toBe(1);
+            expect((new Job({}, session)).id).toBe(2);
+            expect((new Job({}, session)).id).toBe(3);
+            expect((new User({}, session)).id).toBe(11);
+            expect((new Job({}, session)).id).toBe(4);
+
+            var other = new Ext.data.Session();
+            expect((new User({}, other)).id).toBe(10);
+            expect((new Job({}, other)).id).toBe(1);
+            expect((new Job({}, other)).id).toBe(2);
+            expect((new Job({}, other)).id).toBe(3);
+            expect((new User({}, other)).id).toBe(11);
+            expect((new Job({}, other)).id).toBe(4);
+
+            other.destroy();
+        });
+    });
+
     describe("getChanges", function() {
         var User;
 
@@ -1290,7 +1580,7 @@ describe("Ext.data.Session", function() {
 
                 it("should drop multiple records", function() {
                     var user1 = getAndComplete('User', 1),
-                        user2 = getAndComplete('User', 2);
+                        user2 = getAndComplete('User', 2),
                         user3 = getAndComplete('User', 3);
 
                     user1.drop();
@@ -1384,101 +1674,151 @@ describe("Ext.data.Session", function() {
             });
             describe("one to one", function() {
                 var user, address;
-                beforeEach(function() {
-                    user = getAndComplete('User', 1, session, {
-                        addressId: 17
-                    });
-                    address = user.getAddress();
-                    getAndComplete('Address', 17);
-                });
-
+                
                 afterEach(function() {
                     user = address = null;
                 });
 
-                it("should not include any changes when loading an association", function() {
-                    expect(session.getChanges()).toBeNull();
+                describe("basic operations", function() {
+                    beforeEach(function() {
+                        user = getAndComplete('User', 1, session, {
+                            addressId: 17
+                        });
+                        address = user.getAddress();
+                        getAndComplete('Address', 17);
+                    });
+
+                    it("should not include any changes when loading an association", function() {
+                        expect(session.getChanges()).toBeNull();
+                    });
+
+                    it("should not include extraneous records when changing the key", function() {
+                        user.setAddress(3);
+                        expect(session.getChanges()).toEqual({
+                            User: {
+                                U: [{
+                                    id: 1,
+                                    addressId: 3
+                                }]
+                            }
+                        })
+                    });
+
+                    it("should read the non key holder when nulling out a reference", function() {
+                        user.setAddress(null);
+                        expect(session.getChanges()).toEqual({
+                            User: {
+                                U: [{
+                                    id: 1,
+                                    addressId: null
+                                }]
+                            }
+                        })
+                    });
                 });
 
-                it("should not include extraneous records when changing the key", function() {
-                    user.setAddress(3);
-                    expect(session.getChanges()).toEqual({
-                        User: {
-                            U: [{
-                                id: 1,
-                                addressId: 3
-                            }]
-                        }
-                    })
-                });
-
-                it("should read the non key holder when nulling out a reference", function() {
-                    user.setAddress(null);
-                    expect(session.getChanges()).toEqual({
-                        User: {
-                            U: [{
-                                id: 1,
-                                addressId: null
-                            }]
-                        }
-                    })
+                describe("changing id", function() {
+                    it("should update when changing the id of the non key holder", function() {
+                        address = session.createRecord('spec.Address');
+                        user = session.createRecord('spec.User');
+                        user.setAddress(address);
+                        address.setId(1000);
+                        expect(session.getChanges()).toEqual({
+                            Address: {
+                                C: [{
+                                    id: 1000
+                                }]
+                            },
+                            User: {
+                                C: [{
+                                    id: user.getId(),
+                                    addressId: 1000
+                                }]
+                            }
+                        });
+                    });
                 });
             });
 
             describe("many to one", function() {
                 var user, posts;
 
-                beforeEach(function() {
-                    user = getAndComplete('User', 1);
-                    posts = user.posts();
-                    posts.load();
-                    completeRequest([{id: 101, userId: 1}, {id: 102, userId: 1}, {id: 103, userId: 1}]);
-                });
-
                 afterEach(function() {
                     user = posts = null;
                 });
 
-                it("should not include any read records", function() {
-                    expect(session.getChanges()).toBeNull();
-                });
+                describe("basic operations", function() {
+                    beforeEach(function() {
+                        user = getAndComplete('User', 1);
+                        posts = user.posts();
+                        posts.load();
+                        completeRequest([{id: 101, userId: 1}, {id: 102, userId: 1}, {id: 103, userId: 1}]);
+                    });
 
-                it("should push store removals as updates", function() {
-                    posts.removeAt(0);
-                    expect(session.getChanges()).toEqual({
-                        Post: {
-                            U: [{
-                                id: 101,
-                                userId: null
-                            }]
-                        }
+                    it("should not include any read records", function() {
+                        expect(session.getChanges()).toBeNull();
+                    });
+
+                    it("should push store removals as updates", function() {
+                        posts.removeAt(0);
+                        expect(session.getChanges()).toEqual({
+                            Post: {
+                                U: [{
+                                    id: 101,
+                                    userId: null
+                                }]
+                            }
+                        });
+                    });
+
+                    it("should push store adds as updates", function() {
+                        var post = getAndComplete('Post', 104);
+                        posts.add(post);
+                        expect(session.getChanges()).toEqual({
+                            Post: {
+                                U: [{
+                                    id: 104,
+                                    userId: 1
+                                }]
+                            }
+                        });
+                    });
+
+                    it("should push store adds of phantoms as creates", function() {
+                        var post = session.createRecord('Post');
+                        posts.add(post);
+                        expect(session.getChanges()).toEqual({
+                            Post: {
+                                C: [{
+                                    id: post.getId(),
+                                    userId: 1
+                                }]
+                            }
+                        })
                     });
                 });
 
-                it("should push store adds as updates", function() {
-                    var post = getAndComplete('Post', 104);
-                    posts.add(post);
-                    expect(session.getChanges()).toEqual({
-                        Post: {
-                            U: [{
-                                id: 104,
-                                userId: 1
-                            }]
-                        }
-                    });
-                });
+                describe("changing id", function() {
+                    it("should update when changing the id of the non key holder", function() {
+                        user = session.createRecord('User');
+                        var post = session.createRecord('Post');
+                        user.posts().add(post);
 
-                it("should push store adds of phantoms as creates", function() {
-                    var post = session.createRecord('Post');
-                    posts.add(post);
-                    expect(session.getChanges()).toEqual({
-                        Post: {
-                            C: [{
-                                id: post.getId(),
-                                userId: 1
-                            }]
-                        }
-                    })
+                        user.setId(1000);
+                        expect(session.getChanges()).toEqual({
+                            User: {
+                                C: [{
+                                    id: 1000
+                                }]
+                            },
+                            Post: {
+                                C: [{
+                                    id: post.getId(),
+                                    userId: 1000
+                                }]
+                            }
+                        });
+                    });
                 });
             });
 
@@ -1651,6 +1991,61 @@ describe("Ext.data.Session", function() {
                         });
                     });
                 });
+
+                describe("changing id", function() {
+                    it("should update when changing the id of the left", function() {
+                        var group = session.createRecord('Group'),
+                            user = session.createRecord('User');
+
+                        user.groups().add(group);
+                        user.setId(1000);
+
+                        expect(session.getChanges()).toEqual({
+                            User: {
+                                C: [{
+                                    id: 1000
+                                }],
+                                groups: {
+                                    C: {
+                                        1000: [group.getId()]
+                                    }
+                                }
+                            },
+                            Group: {
+                                C: [{
+                                    id: group.getId()
+                                }]
+                            }
+                        });
+                    });
+
+                    it("should update when changing the id of the right", function() {
+                        var group = session.createRecord('Group'),
+                            user = session.createRecord('User');
+
+                        group.users().add(user);
+                        group.setId(1000);
+
+                        var o = {};
+                        o[user.getId()] = [1000];
+
+                        expect(session.getChanges()).toEqual({
+                            User: {
+                                C: [{
+                                    id: user.getId()
+                                }],
+                                groups: {
+                                    C: o
+                                }
+                            },
+                            Group: {
+                                C: [{
+                                    id: 1000
+                                }]
+                            }
+                        });
+                    });
+                });
             });
         });
     });
@@ -1662,7 +2057,6 @@ describe("Ext.data.Session", function() {
         });
 
         afterEach(function() {
-            rec = null;
             Ext.data.Model.schema.clear(true);
         }); 
 
@@ -1833,6 +2227,20 @@ describe("Ext.data.Session", function() {
                     expect(function() {
                         session.update(wrapBlock('D', [100]));
                     }).toThrow();
+                });
+
+                it("should handle a writer with writeAllFields: true", function() {
+                    User.getProxy().getWriter().setWriteAllFields(true);
+                    var user = getAndComplete('User', 100, session, {
+                        name: 'Foo',
+                        age: 100
+                    });
+                    session.update(wrapBlock('D', [{
+                        id: 100,
+                        name: 'Foo',
+                        age: 100
+                    }]));
+                    expect(user.dropped).toBe(true);
                 });
             });
 
@@ -2236,9 +2644,31 @@ describe("Ext.data.Session", function() {
                             expect(posts.getCount()).toBe(2);
                         });
 
-                        it("should exclude local records where the FK does not match", function() {
+                        it("should infer the key when one is not specified", function() {
                             var user = getAndComplete('User', 1),
                                 post1 = getAndComplete('Post', 101);
+
+                            // Post exists, but doesn't have a FK to the user
+                            session.update({
+                                User: {
+                                    posts: {
+                                        R: {
+                                            1: [101]
+                                        }
+                                    }
+                                }
+                            });
+
+                            var posts = user.posts();
+                            expect(posts.getCount()).toBe(1);
+                            expect(posts.getAt(0)).toBe(post1);
+                        });
+
+                        it("should exclude local records where the FK does not match", function() {
+                            var user = getAndComplete('User', 1),
+                                post1 = getAndComplete('Post', 101, null, {
+                                    userId: 2
+                                });
 
                             // Post exists, but doesn't have a FK to the user
                             session.update({
@@ -2419,7 +2849,7 @@ describe("Ext.data.Session", function() {
                             });
 
                             it("should exclude removed items", function() {
-                                var user = getAndComplete('User', 1);
+                                var user = getAndComplete('User', 1),
                                     posts = user.posts();
 
                                 posts.load();
@@ -2989,6 +3419,167 @@ describe("Ext.data.Session", function() {
         });
     });
 
+    describe("drop/erase records", function() {
+        beforeEach(function() {
+            Ext.data.Model.schema.setNamespace('spec');
+            Ext.define('spec.User', {
+                extend: 'Ext.data.Model',
+                fields: ['name']
+            });
+            session = new Ext.data.Session();
+        });
+
+        afterEach(function() {
+            Ext.undefine('spec.User');
+            Ext.data.Model.schema.clear(true);
+        });
+
+        it("should evict a phantom when it is dropped", function() {
+            var user = new spec.User({}, session),
+                id = user.id;
+
+            user.drop();
+            expect(session.peekRecord('User', id)).toBeNull();
+        });
+
+        it("should not evict a non-phantom when it is dropped", function() {
+            var user = new spec.User({id: 1}, session);
+            user.drop();
+            expect(session.peekRecord('User', 1)).toBe(user);
+        });
+
+        it("should evict a non-phantom when it is erased", function() {
+            var user = new spec.User({id: 1}, session);
+            user.erase();
+            expect(session.peekRecord('User', 1)).toBe(user);
+            completeRequest({});
+            expect(session.peekRecord('User', 1)).toBeNull();
+        });
+    });
+
+    describe("commit", function() {
+        var User;
+
+        beforeEach(function() {
+            Ext.data.Model.schema.setNamespace('spec');
+            User =Ext.define('spec.User', {
+                extend: 'Ext.data.Model',
+                fields: ['name']
+            });
+            session = new Ext.data.Session();
+        });
+
+        afterEach(function() {
+            User = null;
+            Ext.undefine('spec.User');
+            Ext.data.Model.schema.clear(true);
+        });
+
+        it("should call commit on created records", function() {
+            var user = new spec.User({}, session);
+            expect(session.getChanges()).toEqual({
+                User: {
+                    C: [{
+                        id: user.getId()
+                    }]
+                }
+            });
+            session.commit();
+            expect(session.getChanges()).toBeNull();
+        });
+
+        it("should call commit on updated records", function() {
+            var user = new spec.User({id: 1, name: 'Foo'}, session);
+            user.set('name', 'Bar');
+            expect(session.getChanges()).toEqual({
+                User: {
+                    U: [{
+                        id: 1,
+                        name: 'Bar'
+                    }]
+                }
+            });
+            session.commit();
+            expect(session.getChanges()).toBeNull();
+        });
+
+        it("should call commit on dropped records", function() {
+            var user = new spec.User({id: 1}, session);
+            user.drop();
+            expect(session.getChanges()).toEqual({
+                User: {
+                    D: [1]
+                }
+            });
+            session.commit();
+            expect(session.getChanges()).toBeNull();
+        });
+
+        describe("associations", function() {
+            describe("many to many", function() {
+                var Group;
+
+                beforeEach(function() {
+                    Group = Ext.define('spec.Group', {
+                        extend: 'Ext.data.Model',
+                        fields: ['name'],
+                        manyToMany: 'User'
+                    });
+                });
+
+                afterEach(function() {
+                    Group = null;
+                    Ext.undefine('spec.Group');
+                });
+
+                it("should commit adds", function() {
+                    var user = getAndComplete(User, 1),
+                        group = getAndComplete(Group, 100);
+
+                    user.groups().add(group);
+                    expect(session.getChanges()).toEqual({
+                        Group: {
+                            users: {
+                                C: {
+                                    100: [1]
+                                }
+                            }
+                        }
+                    });
+                    session.commit();
+                    expect(session.getChanges()).toBeNull();
+                });
+
+                it("should commit deletes", function() {
+                    var user = getAndComplete(User, 1),
+                        groups = user.groups();
+
+                    groups.load();
+                    completeRequest([{
+                        id: 101
+                    }, {
+                        id: 102
+                    }, {
+                        id: 103
+                    }]);
+                    expect(session.getChanges()).toBeNull();
+                    groups.removeAt(0);
+                    expect(session.getChanges()).toEqual({
+                        Group: {
+                            users: {
+                                D: {
+                                    101: [1]
+                                }
+                            }
+                        }
+                    });
+                    session.commit();
+                    expect(session.getChanges()).toBeNull();
+                });
+            });
+        });
+    });
+
     describe("spawn", function() {
         var parent;
 
@@ -3090,7 +3681,18 @@ describe("Ext.data.Session", function() {
             });
         });
 
-        describe("record copying with associations", function() {
+        describe("record copying", function() {
+            it("should mark child records as non-phantoms even if the parent record is", function() {
+                parent = new Ext.data.Session();
+
+                var user = parent.createRecord('User', {});
+
+                session = parent.spawn();
+                expect(session.getRecord('User', user.id).phantom).toBe(false);
+            });
+        });
+
+        describe("associations", function() {
             beforeEach(function() {
                 Ext.define('spec.Post', {
                     extend: 'Ext.data.Model',
@@ -3105,38 +3707,120 @@ describe("Ext.data.Session", function() {
                 Ext.undefine('spec.Post');
             });
 
-            it("should copy any phantom records used in associations, when needed", function() {
-                parent = new Ext.data.Session();
-                getAndComplete('User', 1, parent);
-                var post = parent.createRecord('Post', {
-                    userId: 1
+            describe("record copying", function() {
+                it("should copy any phantom records used in associations, when needed", function() {
+                    parent = new Ext.data.Session();
+                    getAndComplete('User', 1, parent);
+                    var post = parent.createRecord('Post', {
+                        userId: 1
+                    });
+
+                    session = parent.spawn();
+
+                    var posts = session.getRecord('User', 1).posts();
+                    expect(posts.getAt(0).id).toBe(post.id);
+                    expect(posts.getAt(0)).not.toBe(post);
                 });
 
-                session = parent.spawn();
+                it("should copy any records added to the association, when needed", function() {
+                    parent = new Ext.data.Session();
+                    getAndComplete('User', 1, parent);
+                    var post = getAndComplete('Post', 101, parent, {
+                        userId: 1
+                    });
 
-                var posts = session.getRecord('User', 1).posts();
-                expect(posts.getAt(0).id).toBe(post.id);
-                expect(posts.getAt(0)).not.toBe(post);
+                    session = parent.spawn();
+
+                    var posts = session.getRecord('User', 1).posts();
+                    expect(posts.getAt(0).id).toBe(101);
+                    expect(posts.getAt(0)).not.toBe(post);
+                });
             });
 
-            it("should copy any records added to the association, when needed", function() {
-                parent = new Ext.data.Session();
-                getAndComplete('User', 1, parent);
-                var post = getAndComplete('Post', 101, parent, {
-                    userId: 1
+            describe("stores", function() {
+                beforeEach(function() {
+                    parent = new Ext.data.Session();
                 });
 
-                session = parent.spawn();
+                describe("store exists in the parent", function() {
+                    it("should mark loaded stores as complete", function() {
+                        getAndComplete('User', 1, parent, {
+                            id: 1,
+                            posts: [{
+                                id: 101,
+                                userId: 1
+                            }, {
+                                id: 102,
+                                userId: 1
+                            }]
+                        });
 
-                var posts = session.getRecord('User', 1).posts();
-                expect(posts.getAt(0).id).toBe(101);
-                expect(posts.getAt(0)).not.toBe(post);
+                        session = parent.spawn();
+
+                        var parentPosts = parent.getRecord('User', 1).posts(),
+                            posts = session.getRecord('User', 1).posts();
+
+                        expect(posts.complete).toBe(true);
+                        expect(posts.getAt(0)).not.toBe(parentPosts.getAt(0));
+                        expect(posts.getAt(0).getId()).toBe(parentPosts.getAt(0).getId());
+                        expect(posts.getAt(1)).not.toBe(parentPosts.getAt(1));
+                        expect(posts.getAt(1).getId()).toBe(parentPosts.getAt(1).getId());
+                    });
+
+                    it("should not mark stores as complete if not loaded", function() {
+                        getAndComplete('User', 1, parent);
+                        getAndComplete('Post', 101, parent, {
+                            userId: 1
+                        })
+
+                        session = parent.spawn();
+
+                        var parentPosts = parent.getRecord('User', 1).posts(),
+                            posts = session.getRecord('User', 1).posts();
+
+                        expect(posts.complete).toBe(false);
+                        expect(posts.getAt(0)).not.toBe(parentPosts.getAt(0));
+                        expect(posts.getAt(0).getId()).toBe(parentPosts.getAt(0).getId());
+                    });
+
+                    it("should mark the store as complete if the parent record is a phantom", function() {
+                        var user = parent.createRecord('User', {}),
+                            childUser;
+
+                        // Trigger store creation
+                        user.posts();
+                        session = parent.spawn();
+                        childUser = session.getRecord('User', user.id);
+                        expect(childUser.posts().complete).toBe(true);
+                    });
+                });
+
+                describe("store does not exist in the parent", function() {
+                    it("should mark the store as complete if the parent record is a phantom", function() {
+                        var user = parent.createRecord('User', {}),
+                            childUser;
+
+                        session = parent.spawn();
+                        childUser = session.getRecord('User', user.id);
+                        expect(childUser.posts().complete).toBe(true);
+                    });
+
+                    it("should not mark the store as complete if the parent record is not a phantom", function() {
+                        var user = parent.createRecord('User', {
+                            id: 1
+                        }), childUser;
+
+                        session = parent.spawn();
+                        childUser = session.getRecord('User', 1);
+                        expect(childUser.posts().complete).toBe(false);
+                    });
+                });
             });
         });
     });
 
     describe("updating from child to parent sessions", function() {
-        var child;
+        var child, rec;
         beforeEach(function() {
             Ext.data.Model.schema.setNamespace('spec');
             Ext.define('spec.User', {
@@ -3441,7 +4125,7 @@ describe("Ext.data.Session", function() {
                     });
 
                     afterEach(function() {
-                        users = posts = childUser = null;
+                        user = posts = childUser = null;
                     });
 
                     it("should read & update for a foreign key change", function() {
@@ -3740,6 +4424,8 @@ describe("Ext.data.Session", function() {
                 });
 
                 describe("store not loaded, created in the child", function() {
+                    var user1, user2;
+
                     beforeEach(function() {
                         group = getAndComplete('Group', 1);
                         child = session.spawn();
@@ -4430,6 +5116,10 @@ describe("Ext.data.Session", function() {
                 expect(state.newChild.id).toBe(2000);
                 expect(state.newGrandChild.data.childId).toBe(2000);
                 expect(newGrandChild2.data.childId).toBe(2000);
+
+                // We still have some requests pending, so just pause here so we don't
+                // fire off any more stuff
+                batch.pause();
 
                 // Create GrandChild (respond in reverse order & custom clientIdProperty)
                 completeRequest([{

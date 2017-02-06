@@ -40,36 +40,66 @@ Ext.define('Ext.view.DragZone', {
         }
         me.callParent([el]);
 
-        me.ddel = Ext.get(document.createElement('div'));
-        me.ddel.addCls(Ext.baseCSSPrefix + 'grid-dd-wrap');
+        me.ddel = document.createElement('div');
+        me.ddel.className = Ext.baseCSSPrefix + 'grid-dd-wrap';
     },
 
     init: function(id, sGroup, config) {
         var me = this,
-            // TODO: does multi-input device IE handle this correctly?
-            triggerEvent = Ext.supports.touchScroll ? 'itemlongpress' : 'itemmousedown',
             eventSpec = {
+                itemmousedown: me.onItemMouseDown,
                 scope: me
             };
 
-        eventSpec[triggerEvent] = me.onItemMouseDown;
+        // If there may be ambiguity with touch/swipe to scroll and a drag gesture
+        // *also* trigger drag start on longpress
+        if (me.view.touchScroll) {
+            eventSpec.itemlongpress = me.onItemMouseDown;
+
+            // Longpress fires contextmenu in some touch platforms, so if we are using longpress
+            // inhibit the contextmenu on this element
+            eventSpec.contextmenu = {
+                element: 'el',
+                fn: function(e) {
+                    e.preventDefault();
+                }
+            };
+        }
+
         me.initTarget(id, sGroup, config);
         me.view.mon(me.view, eventSpec);
     },
 
     onValidDrop: function(target, e, id) {
-        this.callParent();
+        this.callParent([target, e, id]);
         // focus the view that the node was dropped onto so that keynav will be enabled.
         target.el.focus();
     },
 
     onItemMouseDown: function(view, record, item, index, e) {
+        var navModel,
+            targetComponent = Ext.Component.fromElement(e.getTarget(), item);
+
+        // Only respond to longpress for touch dragging
+        // Reject drag start if mousedown is on a form field (editable cell or widget column).
+        if (e.pointerType === 'touch' && e.type !== 'longpress' || (targetComponent && targetComponent.isFocusable && targetComponent.isFocusable())) {
+            return;
+        }
+
         if (!this.isPreventDrag(e, record, item, index)) {
+            navModel = view.getNavigationModel();
+
             // Since handleMouseDown prevents the default behavior of the event, which
             // is to focus the view, we focus the view now.  This ensures that the view
             // remains focused if the drag is cancelled, or if no drag occurs.
-            if (view.focusRow) {
-                view.focusRow(record);
+            //
+            // A Table event will have a position property which is a CellContext
+            if (e.position) {
+                navModel.setPosition(e.position);
+            }
+            // Otherwise, just use the item index
+            else {
+                navModel.setPosition(index);
             }
             this.handleMouseDown(e);
         }
@@ -87,7 +117,7 @@ Ext.define('Ext.view.DragZone', {
      * @param {Number} index The row number mousedowned upon.
      */
     isPreventDrag: function(e, record, item, index) {
-        return false;
+        return !!e.isInputFieldEvent;
     },
 
     getDragData: function(e) {
@@ -121,8 +151,8 @@ Ext.define('Ext.view.DragZone', {
         }
         data.records = selectionModel.getSelection();
 
-        me.ddel.setHtml(me.getDragText());
-        me.proxy.update(me.ddel.dom);
+        Ext.fly(me.ddel).setHtml(me.getDragText());
+        me.proxy.update(me.ddel);
         me.onStartDrag(x, y);
         return true;
     },

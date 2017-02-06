@@ -3,7 +3,7 @@
  * @extends Ext.chart.AbstractChart
  *
  * Creates a chart that fills the entire area of the chart.
- * e.g. Gauge, Treemap
+ * e.g. Gauge Charts
  */
 Ext.define('Ext.chart.SpaceFillingChart', {
 
@@ -17,7 +17,11 @@ Ext.define('Ext.chart.SpaceFillingChart', {
     performLayout: function () {
         try {
             this.resizing++;
-            this.callParent();
+            if (this.callParent() === false) {
+                // Resizing will still be decremented
+                return;
+            }
+
             var me = this,
                 chartRect = me.getSurface('chart').getRect(),
                 padding = me.getInsetPadding(),

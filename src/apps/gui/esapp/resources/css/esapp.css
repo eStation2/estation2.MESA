@@ -6,8 +6,68 @@
     /*height: 70px !important;*/
 /*}*/
 
+/*.custom-row-selector .x-grid-row-selected .x-grid-cell {*/
+    /*background-color: #ff0 !important;*/
+    /*border-bottom-color: #999;*/
+    /*border-bottom-style: solid;*/
+    /*border-top-color: #999;*/
+    /*border-top-style: solid;*/
+/*}*/
+
+.maplogo {
+    padding: 3px;
+}
+
+.maplogo-wrap {
+    float: left;
+    margin: 5px;
+    margin-right: 0;
+    padding: 5px;
+}
+
+.maplogo-wrap span {
+    display: block;
+    overflow: hidden;
+    text-align: center;
+}
+
+.x-view-over {
+    border:1px solid #dddddd;
+    background-color: #efefef;
+    padding: 4px;
+}
+
+.x-item-selected {
+    background: #DFEDFF;
+    border: 1px solid #6593cf;
+    padding: 4px;
+}
+
+.x-item-selected .thumb {
+    background:transparent;
+}
+
+.x-item-selected span {
+    color:#1A4D8F;
+}
+
+
+
 .red {
     color: red;
+}
+.lightblue {
+    color: lightblue;
+}
+.gray {
+    color: gray;
+}
+
+.text-white {
+    /*font-weight:bold;*/
+    color:#FFFFFF;
+    font-size:12px;
+    height: 20px;
 }
 
 .ts_selectedfeature_name_font {
@@ -20,6 +80,10 @@
     border: 0;
 }
 
+.button-gray {
+    background-color: #C1DDF1;
+    color:#000000;
+}
 .highlightYaxe {
     background-color: #C1DDF1 !important;
 }
@@ -64,10 +128,24 @@ p {
     right: 0px;
 }
 
-.ol-zoom{top:2em !important; left:.5em !important;}
+/*.ol-zoom{top:2em !important; left:.5em !important;}*/
+.ol-zoom{top:5em !important; left:unset!important; right:15px !important;}
+
+.scale-line {
+    position: absolute;
+    /*margin:0;*/
+}
+.ol-scale-line {
+  position: relative;
+}
+
 
 .chartfitlayout{width:100% !important; height:100% !important;}
 
+.download_png {
+    background-image:url(../img/download_png.png);
+    background-size: 24px 24px;
+}
 
 .data-sync {
     background-image:url(../img/live_sync_24.png);
@@ -89,6 +167,16 @@ p {
 
 .legends {
     background-image:url(../img/legends.png);
+}
+
+.polygon {
+    background-image:url(../img/polygon.png);
+    background-repeat: no-repeat;
+}
+
+.polygon-gray {
+    background-image:url(../img/polygon_gray.png);
+    background-repeat: no-repeat;
 }
 
 .chart-curve_small {
@@ -124,6 +212,12 @@ p {
     background-image:url(../img/system_settings.png);
 }
 
+.map_tpl{
+    background-image:url(../img/map_tpl.png);
+    background-size: 32px 32px;
+    background-repeat: no-repeat;
+}
+
 .map-search {
     background-image:url(../img/map_magnify.png);
 }
@@ -140,6 +234,14 @@ p {
 
 .unlink {
     background-image:url(../img/link_break.png);
+}
+
+.calendar_linked {
+    background-image:url(../img/calendar_linked.png);
+}
+
+.calendar_unlinked {
+    background-image:url(../img/calendar_unlinked_red.png);
 }
 
 .statusok {
@@ -197,7 +299,8 @@ p {
     background-repeat: no-repeat;
 }
 .info {
-    background-image:url(../img/icons/information.png);
+    background-image:url(../img/icons/info.png);
+    background-repeat: no-repeat;
 }
 .add {
     background-image: url(../img/icons/add.png ) !important;
@@ -205,6 +308,14 @@ p {
 }
 .add16 {
     background-image: url(../img/add16.png ) !important;
+    background-repeat: no-repeat;
+}
+.add20 {
+    background-image: url(../img/add20.png ) !important;
+    background-repeat: no-repeat;
+}
+.add22 {
+    background-image: url(../img/add22.png ) !important;
     background-repeat: no-repeat;
 }
 .add24 {
@@ -369,10 +480,35 @@ p {
 
 #logo{position:relative;z-index:10;min-height:0;max-width:400px;padding:2px;background-color:#fff;}
 
+
+.map-templatename {
+    font-size:10px;
+    color: orange;
+    font-weight: bold;
+    margin-right: 25px;
+    display:inline;
+}
+
 .smalltext {font-size:10px;}
 /*.smalltext {display:block;font-size:10px;}*/
 
 .smalltext12 {font-size:12px;}
+
+.grayheader .x-panel-header-title-default {color: slategray !important;}
+.transparentheader {background:rgba(222, 239, 252, 1); color:lightslategray !important;}
+
+.btntransparent {background:rgb(222, 239, 252) !important; color:deepskyblue !important; border-color: lightskyblue !important;}
+.x-btn-icon-el-default-small.x-btn-glyph  {color:deepskyblue !important;}
+
+
+.rounded-box {
+    background-color: #fff;
+    border: 1px solid lightslategray !important;
+    border-radius: 5px;
+    /*box-shadow: 2px 2px 2px #bbb;*/
+    padding: 0px;
+}
+
 
 .menu-glyph-color-green .x-menu-item-glyph {
     color: green;
@@ -403,6 +539,10 @@ p {
 
 .active-panel-body-style {
     background-color: #dedede;
+}
+
+.fontsize20 {
+    font-size:20px;
 }
 
 .dashboard-header-style {
@@ -454,7 +594,62 @@ p {
     /*color:#3892D3;*/
     color:#fff;
     font-size:18px;
+    /*margin: 1px;*/
+    /*padding: 1px;*/
 }
+
+.group-header-style .x-grid-group-hd{
+    background-color: #A9DEEC !important;
+    padding: 2px 2px;
+}
+
+.product-group-header-style{
+    background-color: #A9DEEC !important;
+    font-weight:bold;
+    /*color:#3892D3;*/
+    color:#000;
+    font-size:13px;
+    line-height: 2;
+}
+
+/* .x-panel-header-text-default .x-panel-header-text  "border","1px solid #333"*/
+
+.newpanelstyle {
+    border: 1px solid #BABABA;
+    border-radius: 4px;
+}
+
+.newpanelstyle .x-panel-default-outer-border-rbl {
+    border-right-color: #BABABA !important;
+    border-right-width: 1px !important;
+    border-bottom-color:#BABABA !important;
+    border-bottom-width: 1px !important;
+    border-left-color: #BABABA !important;
+    border-left-width: 1px !important;
+}
+
+.newpanelstyle .x-panel-header-title-default {
+    font-weight:bold;
+    color:#000;
+    font-size:13px;
+}
+
+.newpanelstyle .x-panel-header-default {
+    background-color: #A9DEEC !important;
+    font-weight:bold;
+    color:#000;
+    font-size:13px;
+}
+
+.newpanelstyle .x-tool-img {
+    background-color: #A9DEEC !important;
+}
+
+.categorytitle {
+    font-size:16px;
+    color: #157FCC;
+}
+
 
 .x-column-header-last {
     border-right-width: 1px;
@@ -762,10 +957,12 @@ p {
 }
 
 
-.x-menu-no-icon {background-image: none;}
+.x-menu-no-icon {left: auto !important; background-image: none;}
 .x-menu-no-icon a.x-menu-item-link {padding-left: 3px;}
 .x-menu-no-icon .x-menu-item-icon {display: none;}
 .x-menu-no-icon a.x-menu-item-link .x-menu-item-text {margin-left: 5px;}
+
+
 
 /*.x-menu-no-icon {background-image: none;  left: 5px !important;}*/
 /*.x-menu-no-icon a.x-menu-item-link {padding-left: 3px;}*/

@@ -5,28 +5,25 @@
  * A sprite that represents an ellipse.
  *
  *     @example
- *     Ext.create('Ext.Container', {
- *         renderTo: Ext.getBody(),
- *         width: 600,
- *         height: 400,
- *         layout: 'fit',
- *         items: {
- *             xtype: 'draw',
- *             sprites: [{
- *                 type: 'ellipse',
- *                 cx: 100,
- *                 cy: 100,
- *                 rx: 40,
- *                 ry: 25,
- *                 fillStyle: 'blue'
- *             }]
- *         }
+ *     Ext.create({
+ *        xtype: 'draw', 
+ *        renderTo: document.body,
+ *        width: 600,
+ *        height: 400,
+ *        sprites: [{
+ *            type: 'ellipse',
+ *            cx: 100,
+ *            cy: 100,
+ *            rx: 80,
+ *            ry: 50,
+ *            fillStyle: '#1F6D91'
+ *        }]
  *     });
  */
 Ext.define("Ext.draw.sprite.Ellipse", {
     extend: "Ext.draw.sprite.Path",
     alias: 'sprite.ellipse',
-    type: 'circle',
+    type: 'ellipse',
     inheritableStatics: {
         def: {
             processors: {
@@ -71,7 +68,7 @@ Ext.define("Ext.draw.sprite.Ellipse", {
                 ry: 1,
                 axisRotation: 0
             },
-            dirtyTriggers: {
+            triggers: {
                 cx: 'path',
                 cy: 'path',
                 rx: 'path',

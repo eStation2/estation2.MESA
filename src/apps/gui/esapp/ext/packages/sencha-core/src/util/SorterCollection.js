@@ -135,6 +135,14 @@ Ext.define('Ext.util.SorterCollection', {
         }
     },
 
+    clear: function() {
+    // The owning Collection needs to have its onSortersEndUpdate called on sorter clear so that
+    // it clears its sorted flag.
+        this.beginUpdate();
+        this.callParent();
+        this.endUpdate(this.items);
+    },
+
     /**
      * Returns an up to date sort function.
      * @return {Function} The sort function.
@@ -255,7 +263,7 @@ Ext.define('Ext.util.SorterCollection', {
             for (i = 0; i < ln; i++) {
                 sorter = ret[i];
 
-                if (sorter && sorter.isFilter) {
+                if (sorter && sorter.isSorter) {
                     remove.push(sorter);
                 } else {
                     type = typeof sorter;

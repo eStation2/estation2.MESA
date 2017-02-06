@@ -5,8 +5,8 @@ Ext.define('esapp.store.TimeLineStore', {
     requires : [
         'esapp.model.TimeLine',
 
-        'Ext.data.proxy.JsonP',
-        'Ext.Msg'
+        'Ext.data.proxy.JsonP'
+        //,'Ext.Msg'
     ],
 
     model: 'esapp.model.TimeLine',

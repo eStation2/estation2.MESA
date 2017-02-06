@@ -163,7 +163,7 @@ Ext.define('Ext.data.Session', {
             }
         }
 
-        me.recordCreator = me.matrices = me.data = null;
+        me.identifierCache = me.recordCreator = me.matrices = me.data = null;
         me.setSchema(null);
         me.callParent();
     },
@@ -196,8 +196,34 @@ Ext.define('Ext.data.Session', {
         }
     },
 
+    /**
+     * Marks the session as "clean" by calling {@link Ext.data.Model#commit} on each record
+     * that is known to the session.
+     *
+     * - Phantom records will no longer be phantom.
+     * - Modified records will no longer be dirty.
+     * - Dropped records will be erased.
+     *
+     * @since 5.1.0
+     */
     commit: function() {
-        // TODO
+        var data = this.data,
+            matrices = this.matrices,
+            entityName, entities, id, record;
+
+        for (entityName in data) {
+            entities = data[entityName];
+            for (id in entities) {
+                record = entities[id].record;
+                if (record) {
+                    record.commit();
+                }
+            }
+        }
+
+        for (id in matrices) {
+            matrices[id].commit();
+        }
     },
 
     /**
@@ -263,7 +289,10 @@ Ext.define('Ext.data.Session', {
      * 
      * See also {@link #peekRecord}.
      *
-     * @param {String/Ext.Class} type The `entityName` or the actual class of record to create.
+     * @param {String/Ext.Class/Ext.data.Model} type The `entityName` or the actual class of record to create.
+     * This may also be a record instance, where the type and id will be inferred from the record. If the record is
+     * not attached to a session, it will be adopted. If it exists in a parent, an appropriate copy will be made as
+     * described.
      * @param {Object} id The id of the record.
      * @param {Boolean/Object} [autoLoad=true] `false` to prevent the record from being loaded if
      * it does not exist. If this parameter is an object, it will be passed to the {@link Ext.data.Model#load} call.
@@ -271,8 +300,15 @@ Ext.define('Ext.data.Session', {
      */
     getRecord: function(type, id, autoLoad) {
         var me = this,
-            record = me.peekRecord(type, id),
-            Model, parent, parentRec;
+            wasInstance = type.isModel,
+            record, Model, parent, parentRec;
+
+        if (wasInstance) {
+            wasInstance = type;
+            id = type.id;
+            type = type.self;
+        }
+        record = me.peekRecord(type, id);
 
         if (!record) {
             Model = type.$isClass ? type : me.getSchema().getEntity(type);
@@ -280,13 +316,27 @@ Ext.define('Ext.data.Session', {
             if (parent) {
                 parentRec = parent.peekRecord(Model, id);
             }
-            if (parentRec && !parentRec.isLoading()) {
-                record = parentRec.copy(undefined, me);
-                record.$source = parentRec;
-            } else {
-                record = Model.createWithId(id, null, me);
-                if (autoLoad !== false) {
-                    record.load(Ext.isObject(autoLoad) ? autoLoad : undefined);
+            if (parentRec) {
+                if (parentRec.isLoading()) {
+                    // If the parent is loading, it's as though it doesn't have
+                    // the record, so we can't copy it, but we don't want to
+                    // adopt it either.
+                    wasInstance = false;
+                } else {
+                    record = parentRec.copy(undefined, me);
+                    record.$source = parentRec;
+                }
+            }
+
+            if (!record) {
+                if (wasInstance) {
+                    record = wasInstance;
+                    me.adopt(record);
+                } else {
+                    record = Model.createWithId(id, null, me);
+                    if (autoLoad !== false) {
+                        record.load(Ext.isObject(autoLoad) ? autoLoad : undefined);
+                    }
                 }
             }
         }
@@ -599,10 +649,18 @@ Ext.define('Ext.data.Session', {
          */
         dropEntities: function(entityType, ids) {
             var len = ids.length,
-                i, rec, id;
+                i, rec, id, extractId;
+
+            if (len) {
+                // Handle writeAllFields here, we may not have an array of raw ids
+                extractId = Ext.isObject(ids[0]);
+            }
 
             for (i = 0; i < len; ++i) {
                 id = ids[i];
+                if (extractId) {
+                    id = entityType.getIdFromData(id);
+                }
                 rec = this.peekRecord(entityType, id);
                 if (rec) {
                     rec.drop();
@@ -620,11 +678,12 @@ Ext.define('Ext.data.Session', {
          */
         evict: function(record) {
             var entityName = record.entityName,
+                entities = this.data[entityName],
+                id = record.id,
                 entry;
 
-            entry = this.data[entityName];
-
-            if (entry) {
+            if (entities) {
+                delete entities[id];
             }
         },
 
@@ -714,13 +773,13 @@ Ext.define('Ext.data.Session', {
             } else {
                 cache = this.identifierCache;
                 identifier = entityType.identifier;
-                key = identifier.id || entityType.entityName;
+                key = identifier.getId() || entityType.entityName;
                 ret = cache[key];
 
                 if (!ret) {
                     if (identifier.clone) {
                         ret = identifier.clone({
-                            cache: cache
+                            id: null
                         });
                     } else {
                         ret = identifier;
@@ -764,6 +823,7 @@ Ext.define('Ext.data.Session', {
 
         onIdChanged: function (record, oldId, newId) {
             var me = this,
+                matrices = me.matrices,
                 entityName = record.entityName,
                 id = record.id,
                 bucket = me.data[entityName],
@@ -771,7 +831,7 @@ Ext.define('Ext.data.Session', {
                 associations = record.associations,
                 refs = entry.refs,
                 setNoRefs = me._setNoRefs,
-                association, fieldName, matrix, refId, role, roleName, roleRefs, store;
+                association, fieldName, matrix, refId, role, roleName, roleRefs, key;
 
             //<debug>
             if (bucket[newId]) {
@@ -783,17 +843,8 @@ Ext.define('Ext.data.Session', {
             delete bucket[oldId];
             bucket[newId] = entry;
 
-            for (roleName in associations) {
-                role = associations[roleName];
-                if (role.isMany) {
-                    store = role.getAssociatedItem(record);
-                    if (store) {
-                        matrix = store.matrix;
-                        if (matrix) {
-                            matrix.changeId(newId);
-                        }
-                    }
-                }
+            for (key in matrices) {
+                matrices[key].updateId(record, oldId, newId);
             }
 
             if (refs) {
@@ -802,9 +853,7 @@ Ext.define('Ext.data.Session', {
                     role = associations[roleName];
                     association = role.association;
 
-                    if (association.isManyToMany) {
-                        // TODO
-                    } else {
+                    if (!association.isManyToMany) {
                         fieldName = association.field.name;
 
                         for (refId in roleRefs) {
@@ -819,7 +868,7 @@ Ext.define('Ext.data.Session', {
 
         processManyBlock: function(entityType, role, items, processor) {
             var me = this,
-                id, record, store;
+                id, record, records, store;
 
             if (items) {
                 for (id in items) {

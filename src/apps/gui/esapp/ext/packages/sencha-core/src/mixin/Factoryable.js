@@ -166,7 +166,7 @@ Ext.Factory.prototype = {
 };
 
 /**
- * For example, the layout alias family could be fined like this:
+ * For example, the layout alias family could be defined like this:
  *
  *      Ext.Factory.define('layout', {
  *          defaultType: 'auto'
@@ -184,7 +184,7 @@ Ext.Factory.prototype = {
  * @param {Object/String} [config] An object specifying the config for the `Ext.Factory`
  * to be created. If a string is passed it is treated as the `defaultType`.
  * @return {Function}
- *
+ * @static
  * @since 5.0.0
  */
 Ext.Factory.define = function (type, config) {
@@ -270,7 +270,7 @@ Ext.define('Ext.mixin.Factoryable', {
             factoryConfig = proto.factoryConfig,
             alias = proto.alias,
             config = {},
-            dot;
+            dot, createFn;
 
         alias = alias && alias.length && alias[0];
         if (alias && (dot = alias.lastIndexOf('.')) > 0) {
@@ -283,7 +283,12 @@ Ext.define('Ext.mixin.Factoryable', {
             Ext.apply(config, factoryConfig);
         }
 
-        targetClass.create = Ext.Factory.define(config.type, config);
+        createFn = Ext.Factory.define(config.type, config);
+
+        if (targetClass.create === Ext.Base.create) {
+            // allow targetClass to override the create method
+            targetClass.create = createFn;
+        }
     }
 
     /**

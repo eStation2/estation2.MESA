@@ -894,7 +894,8 @@ Ext.define('Ext.draw.Draw', {
         };
     },
 
-    /* Smoothing function for a path.  Converts a path into cubic beziers.  Value defines the divider of the distance between points.
+    /**
+     * Smoothing function for a path.  Converts a path into cubic beziers.  Value defines the divider of the distance between points.
      * Defaults to a value of 4.
      */
     smooth: function (originalPath, value) {

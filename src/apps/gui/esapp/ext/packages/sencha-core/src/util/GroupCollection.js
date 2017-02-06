@@ -1,5 +1,6 @@
 /**
  * @private
+ * A collection containing the result of applying grouping to the records in the store.
  */
 Ext.define('Ext.util.GroupCollection', {
     extend: 'Ext.util.Collection',
@@ -18,10 +19,16 @@ Ext.define('Ext.util.GroupCollection', {
     isGroupCollection: true,
 
     config: {
+        grouper: null,
         itemRoot: null
     },
 
     observerPriority: -100,
+
+    constructor: function(config) {
+        this.callParent([config]);
+        this.on('remove', 'onGroupRemove', this);
+    },
 
     //-------------------------------------------------------------------------
     // Calls from the source Collection:
@@ -31,16 +38,7 @@ Ext.define('Ext.util.GroupCollection', {
     },
 
     onCollectionBeforeItemChange: function (source, details) {
-        var me = this,
-            item = details.item,
-            newKey = source.getKey(item);
-
-        // Drop the next add, remove and updatekey event
-        me.onCollectionAdd =
-        me.onCollectionRemove =
-        me.onCollectionUpdateKey = null;
-
-        me.syncItemGrouping(source, item, newKey, details.oldKey);
+        this.changeDetails = details;
     },
 
     onCollectionBeginUpdate: function () {
@@ -52,9 +50,15 @@ Ext.define('Ext.util.GroupCollection', {
     },
 
     onCollectionItemChange: function (source, details) {
-        delete this.onCollectionAdd;
-        delete this.onCollectionRemove;
-        delete this.onCollectionUpdateKey;
+        var item = details.item;
+
+        // Check if the change to the item caused the item to move. If it did, the group ordering
+        // will be handled by virtue of being removed/added to the collection. If not, check whether
+        // we're in the correct group and fix up if not.
+        if (!details.indexChanged) {
+            this.syncItemGrouping(source, item, source.getKey(item), details.oldKey, details.oldIndex);
+        }
+        this.changeDetails = null;
     },
 
     onCollectionRefresh: function (source) {
@@ -64,8 +68,24 @@ Ext.define('Ext.util.GroupCollection', {
 
     onCollectionRemove: function (source, details) {
         var me = this,
-            entries = me.groupItems(source, details.items, false),
-            entry, group, i, n, removeGroups;
+            changeDetails = me.changeDetails,
+            entries, entry, group, i, n, removeGroups, item;
+
+        if (changeDetails) {
+            // The item has changed, so the group key may be different, need
+            // to look it up
+            item = changeDetails.item;
+            group = me.findGroupForItem(item);
+            entries = [];
+            if (group) {
+                entries.push({
+                    group: group,
+                    items: [item]
+                });
+            }
+        } else {
+            entries = me.groupItems(source, details.items, false);
+        }
 
         for (i = 0, n = entries.length; i < n; ++i) {
             group = (entry = entries[i]).group;
@@ -89,35 +109,36 @@ Ext.define('Ext.util.GroupCollection', {
     onCollectionSort: function (source) {
         // sorting the collection effectively sorts the items in each group...
         var me = this,
-            sorters = source.getSorters(),
-            items = me.items,
-            length = me.length,
-            i, group;
+            sorters = source.getSorters(false),
+            items, length, i, group;
 
-        for (i = 0; i < length; ++i) {
-            group = items[i];
-            if (group.getSorters() !== sorters) {
-                group.setSorters(sorters);
+        if (sorters) {
+            items = me.items;
+            length = me.length;
+            for (i = 0; i < length; ++i) {
+                group = items[i];
+                if (group.getSorters() !== sorters) {
+                    group.setSorters(sorters);
+                }
             }
         }
     },
 
     onCollectionUpdateKey: function (source, details) {
-        this.syncItemGrouping(source, details.item, details.newKey, details.oldKey);
+        var index = details.index,
+            item = details.item;
+
+        if (!details.indexChanged) {
+            index = source.indexOf(item);
+            this.syncItemGrouping(source, item, details.newKey, details.oldKey, index);
+        }
     },
 
     //-------------------------------------------------------------------------
     // Private
 
     addItemsToGroups: function (source, items) {
-        var me = this,
-            entries = me.groupItems(source, items, true),
-            entry, i, n;
-
-        for (i = 0, n = entries.length; i < n; ++i) {
-            entry = entries[i];
-            entry.group.add(entry.items);
-        }
+        this.groupItems(source, items, true);
     },
 
     groupItems: function (source, items, adding) {
@@ -126,9 +147,9 @@ Ext.define('Ext.util.GroupCollection', {
             entries = [],
             grouper = source.getGrouper(),
             groupKeys = me.itemGroupKeys,
-            entry, group, groupKey, i, item, itemKey, n, newGroups;
+            entry, group, groupKey, i, item, itemKey, len, newGroups;
 
-        for (i = 0, n = items.length; i < n; ++i) {
+        for (i = 0, len = items.length; i < len; ++i) {
             groupKey = grouper.getGroupString(item = items[i]);
             itemKey = source.getKey(item);
 
@@ -152,6 +173,11 @@ Ext.define('Ext.util.GroupCollection', {
             entry.items.push(item);
         }
 
+        for (i = 0, len = entries.length; i < len; ++i) {
+            entry = entries[i];
+            entry.group.add(entry.items);
+        }
+
         if (newGroups) {
             me.add(newGroups);
         }
@@ -159,17 +185,21 @@ Ext.define('Ext.util.GroupCollection', {
         return entries;
     },
 
-    syncItemGrouping: function (source, item, itemKey, oldKey) {
+    syncItemGrouping: function (source, item, itemKey, oldKey, itemIndex) {
         var me = this,
             itemGroupKeys = me.itemGroupKeys || (me.itemGroupKeys = {}),
             grouper = source.getGrouper(),
             groupKey = grouper.getGroupString(item),
             removeGroups = 0,
-            addGroups, group, oldGroup, oldGroupKey;
+            index = -1,
+            findKey = itemKey,
+            addGroups, group, oldGroup, oldGroupKey,
+            firstIndex;
 
-        if (oldKey) {
+        if (oldKey || oldKey === 0) {
             oldGroupKey = itemGroupKeys[oldKey];
             delete itemGroupKeys[oldKey];
+            findKey = oldKey;
         } else {
             oldGroupKey = itemGroupKeys[itemKey];
         }
@@ -181,10 +211,26 @@ Ext.define('Ext.util.GroupCollection', {
             addGroups = [group];
         }
 
-        if (group.get(itemKey) !== item) {
-            group.add(item);
+        // This checks whether or not the item is in the collection.
+        // Short optimization instead of calling contains since we already have the key here.
+        if (group.get(findKey) !== item) {
+            if (group.getCount() > 0 && source.getSorters().getCount() === 0) {
+                // We have items in the group & it's not sorted, so find the
+                // correct position in the group to insert.
+                firstIndex = source.indexOf(group.items[0]);
+                if (itemIndex < firstIndex) {
+                    index = 0;
+                } else {
+                    index = itemIndex - firstIndex;
+                }
+            }
+            if (index === -1) {
+                group.add(item);
+            } else {
+                group.insert(index, item);
+            }
         } else {
-            group.itemChanged(item);
+            group.itemChanged(item, null, oldKey);
         }
 
         if (groupKey !== oldGroupKey && (oldGroupKey === 0 || oldGroupKey)) {
@@ -217,18 +263,63 @@ Ext.define('Ext.util.GroupCollection', {
         return item.getGroupKey();
     },
 
-    getGroupByRecord: function(record) {
-        var items = this.items,
-            len = items.length,
-            item, i;
+    createSortFn: function () {
+        var me = this,
+            grouper = me.getGrouper(),
+            sorterFn = me.getSorters().getSortFn();
 
-        for (i = 0; i < len; i++) {
-            item = items[i];
-            if (item.indexOf(record)) {
-                return item;
-            }
+        if (!grouper) {
+            return sorterFn;
         }
 
-        return null;
+        return function (lhs, rhs) {
+            // The grouper has come from the collection, so we pass the items in
+            // the group for comparison because the grouper is also used to
+            // sort the data in the collection
+            return grouper.sort(lhs.items[0], rhs.items[0]) || sorterFn(lhs, rhs);
+        };
+    },
+
+    updateGrouper: function(grouper) {
+        var me = this;
+        me.grouped = !!(grouper && me.$groupable.getAutoGroup());
+        me.onSorterChange();
+        me.onEndUpdateSorters(me.getSorters());
+    },
+
+    destroy: function() {
+        this.$groupable = null;
+        // Ensure group objects get destroyed, they may have
+        // added listeners to the main collection sorters.
+        this.destroyGroups(this.items);
+        this.callParent();
+    },
+
+    privates: {
+        destroyGroups: function(groups) {
+            var len = groups.length,
+                i;
+
+            for (i = 0; i < len; ++i) {
+                groups[i].destroy();
+            }
+        },
+
+        findGroupForItem: function(item) {
+            var items = this.items,
+                len = items.length,
+                i, group;
+
+            for (i = 0; i < len; ++i) {
+                group = items[i];
+                if (group.contains(item)) {
+                    return group;
+                }
+            }
+        },
+
+        onGroupRemove: function(collection, info) {
+            this.destroyGroups(info.items);
+        }
     }
 });

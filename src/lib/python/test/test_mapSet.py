@@ -58,3 +58,46 @@ class TestMapSet(TestCase):
     #
     # def test_validate(self):
     #     self.fail()
+
+    def test_compute_common_area(self):
+
+        # Prepare ref mapset
+        mapsetcode_afr = 'SPOTV-Africa-1km'
+        mapset_Afr = MapSet()
+        mapset_Afr.assigndb(mapsetcode_afr)
+
+        # Test wrt SADC region, which is INCLUDED in mapset 1
+        mapsetcode_sadc = 'SPOTV-SADC-1km'
+        mapset_SADC = MapSet()
+        mapset_SADC.assigndb(mapsetcode_sadc)
+        common = mapset_Afr.compute_common_area(mapset_SADC)
+
+        self.assertEqual(common['isCommon'],True)
+        self.assertEqual(common['xSize'],mapset_SADC.size_x)
+        self.assertEqual(common['ySize'],mapset_SADC.size_y)
+
+        # Test wrt ECOWAS region, which is INCLUDED in mapset 1
+        mapsetcode_ecow = 'SPOTV-ECOWAS-1km'
+        mapset_ECOW = MapSet()
+        mapset_ECOW.assigndb(mapsetcode_ecow)
+        common =  mapset_Afr.compute_common_area(mapset_ECOW)
+
+        self.assertEqual(common['isCommon'],True)
+        self.assertEqual(common['xSize'],mapset_ECOW.size_x)
+        self.assertEqual(common['ySize'],mapset_ECOW.size_y)
+
+        # Test SADC wrt ECOWAS region
+        common =  mapset_SADC.compute_common_area(mapset_ECOW)
+
+        self.assertEqual(common['isCommon'],True)
+        self.assertEqual(common['xSize'],1570)
+        self.assertEqual(common['ySize'],225)
+
+    def test_is_wbd(self):
+
+        # Prepare ref mapset
+        mapsetcode_1 = 'WD-GEE-ECOWAS-AVG'
+        mapset_Afr = MapSet()
+        mapset_Afr.assigndb(mapsetcode_1)
+
+        self.assertEqual(mapset_Afr.is_wbd(),True)

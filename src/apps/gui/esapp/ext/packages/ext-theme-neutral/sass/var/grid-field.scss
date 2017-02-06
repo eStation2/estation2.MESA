@@ -56,8 +56,10 @@ $grid-cell-field-font-family: $grid-row-cell-font-family !default;
  * @var {boolean}
  * True to include the "grid-cell" form field UIs input fields rendered in the context of a grid cell.
  *
- * This defaults to `true`. It is required if either {@link Ext.grid.plugin.Editor grid editors} are being used,
- * or if a {@link Ext.grid.column.Widget WidgetColumn} is being used to house an input field.
+ * This defaults to `true`. It is required if either grid editors
+ * ({@link Ext.grid.plugin.CellEditing cell} or {@link Ext.grid.plugin.RowEditing row})
+ * are being used, or if a {@link Ext.grid.column.Widget WidgetColumn} is being used to
+ * house an input field.
  */
 $include-grid-cell-field-ui: false !default;
 
@@ -101,13 +103,13 @@ $grid-cell-text-field-color: $grid-cell-field-color !default;
 
 /**
  * @var {color}
- * The background color of a text field's input element when endered in the context of a grid cell
+ * The background color of a text field's input element when entered in the context of a grid cell
  */
 $grid-cell-text-field-background-color: $form-text-field-background-color !default;
 
 /**
  * @var {number/list}
- * The border width of text fields endered in the context of a grid cell
+ * The border width of text fields entered in the context of a grid cell
  */
 $grid-cell-text-field-border-width: $form-text-field-border-width !default;
 
@@ -355,31 +357,31 @@ $include-checkbox-grid-ui: $include-grid-cell-field-ui !default;
  * @var {color}
  * The text color of display fields rendered in the context of a grid cell
  */
-$grid-cell-display-field-color: $form-display-field-color !default;
+$grid-cell-display-field-color: $grid-cell-field-color !default;
 
 /**
  * @var {number}
  * The font-size of display fields rendered in the context of a grid cell
  */
-$grid-cell-display-field-font-size: $form-display-field-font-size !default;
+$grid-cell-display-field-font-size: $grid-cell-field-font-size !default;
 
 /**
  * @var {string}
  * The font-family of display fields rendered in the context of a grid cell
  */
-$grid-cell-display-field-font-family: $form-display-field-font-family !default;
+$grid-cell-display-field-font-family: $grid-cell-field-font-family !default;
 
 /**
  * @var {string}
  * The font-weight of display fields rendered in the context of a grid cell
  */
-$grid-cell-display-field-font-weight: $form-display-field-font-weight !default;
+$grid-cell-display-field-font-weight: $grid-cell-field-font-weight !default;
 
 /**
  * @var {number}
  * The line-height of display fields rendered in the context of a grid cell
  */
-$grid-cell-display-field-line-height: $form-display-field-line-height !default;
+$grid-cell-display-field-line-height: $grid-row-cell-line-height !default;
 
 /**
  * @var {boolean}

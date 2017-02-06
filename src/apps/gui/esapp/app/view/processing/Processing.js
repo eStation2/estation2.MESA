@@ -12,8 +12,8 @@ Ext.define("esapp.view.processing.Processing",{
     requires: [
         'esapp.view.processing.ProcessingModel',
         'esapp.view.processing.ProcessingController',
-        'esapp.view.processing.ProcessInputProducts',
-        'esapp.view.processing.ProcessFinalOutputSubProducts',
+        //'esapp.view.processing.ProcessInputProducts',
+        //'esapp.view.processing.ProcessFinalOutputSubProducts',
 
         'Ext.grid.column.Widget',
         'Ext.grid.column.Template',
@@ -37,6 +37,8 @@ Ext.define("esapp.view.processing.Processing",{
         trackOver:true
     },
 
+    //selModel: {listeners:{}},
+
     collapsible: false,
     enableColumnMove:false,
     enableColumnResize:false,
@@ -56,17 +58,17 @@ Ext.define("esapp.view.processing.Processing",{
         groupByText: esapp.Utils.getTranslation('productcategories')  // 'Product category'
     }],
 
-    listeners: {
+    //listeners: {
         //beforecellclick: function(view, td, cellIndex) {
         //    console.info('hallo cell: ' + cellIndex);
         //    if (cellIndex > 0) return false;    // check the cellIndex for whatever columns you need.
         //}
-        cellclick : function(view, cell, cellIndex, record, row, rowIndex, e) {
-            //e.stopPropagation();
-            //console.info('cellclick');
-            return false;
-        }
-    },
+        //cellclick : function(view, cell, cellIndex, record, row, rowIndex, e) {
+        //    //e.stopPropagation();
+        //    //console.info('cellclick');
+        //    return false;
+        //}
+    //},
 
     initComponent: function () {
         var me = this;
@@ -160,7 +162,7 @@ Ext.define("esapp.view.processing.Processing",{
                         column.titleEl.removeCls('x-column-header-inner');
                     }
                 },
-                onWidgetAttach: function (widget, record) {
+                onWidgetAttach: function (col, widget, record) {
                     Ext.suspendLayouts();
                     var inputproducts = record.getData().inputproducts;
                     var newstore = Ext.create('Ext.data.JsonStore', {
@@ -232,7 +234,7 @@ Ext.define("esapp.view.processing.Processing",{
                 xtype: 'actioncolumn',
                 text: esapp.Utils.getTranslation('log'),    // 'Log',
                 id: 'processinglogcolumn',
-                width: 65,
+                width: 75,
                 height:40,
                 menuDisabled: true,
                 align:'center',
@@ -304,7 +306,7 @@ Ext.define("esapp.view.processing.Processing",{
                       column.titleEl.removeCls('x-column-header-inner');
                   }
                 },
-                onWidgetAttach: function(widget, record) {
+                onWidgetAttach: function(col, widget, record) {
                     Ext.suspendLayouts();
                     var processrec = record.getData();
                     var outputproducts = processrec.outputproducts;

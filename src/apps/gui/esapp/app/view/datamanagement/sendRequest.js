@@ -50,6 +50,8 @@ Ext.define("esapp.view.datamanagement.sendRequest",{
     initComponent: function () {
         var me = this;
 
+        me.title = esapp.Utils.getTranslation('getrequestfile');     // 'Send request',
+
         me.bbar = ['->', {
             text: esapp.Utils.getTranslation('cancel'),    // 'Cancel',
             scale: 'medium',

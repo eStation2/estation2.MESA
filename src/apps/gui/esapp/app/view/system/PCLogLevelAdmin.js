@@ -41,6 +41,8 @@ Ext.define("esapp.view.system.PCLogLevelAdmin",{
     initComponent: function () {
         var me = this;
 
+        me.title = esapp.Utils.getTranslation('changeloglevel');    // 'Change Log level',
+
         me.bbar = ['->',
             {
                 xtype: 'button',

@@ -32,7 +32,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
     resizable: true,
 
     width:900,
-    height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-80 : 800,  // 600,
+    //height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-80 : 800,  // 600,
     minWidth:400,
     minHeight:350,
     x: 50,
@@ -50,36 +50,15 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
     yearTS: null,
     tsFromPeriod: null,
     tsToPeriod: null,
+    yearsToCompare: null,
+    tsFromSeason: null,
+    tsToSeason: null,
+    //tsYear1Season: null,
+    //tsYear2Season: null,
     wkt: null,
     charttype: null,
     timeseriesChart: {},
     timeseriesGraph: {},
-
-    tools: [
-    {
-        type: 'gear',
-        tooltip: esapp.Utils.getTranslation('tiptimeserieschartshowhidetools'),  // 'Show/hide time series chart tools menu',
-        callback: function (tswin) {
-            // toggle hide/show toolbar and adjust map size.
-            var winBodyWidth = tswin.getWidth()-5;
-            var winBodyHeight = tswin.getHeight()-45;
-            var tsToolbar = tswin.getDockedItems('toolbar[dock="top"]')[0];
-            var widthToolbar = tsToolbar.getWidth();
-            var heightToolbar = tsToolbar.getHeight();
-            if (tsToolbar.hidden == false) {
-                tsToolbar.setHidden(true);
-                winBodyWidth = document.getElementById(tswin.id + "-body").offsetWidth;
-                winBodyHeight =  document.getElementById(tswin.id + "-body").offsetHeight; //+heightToolbar;
-            }
-            else {
-                tsToolbar.setHidden(false);
-                winBodyWidth = document.getElementById(tswin.id + "-body").offsetWidth;
-                winBodyHeight = document.getElementById(tswin.id + "-body").offsetHeight-heightToolbar;
-            }
-            tswin.tschart.setSize(winBodyWidth, winBodyHeight);
-            tswin.tschart.redraw();
-        }
-    }],
 
     listeners: {
         afterrender: function () {
@@ -106,11 +85,39 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
     initComponent: function () {
         var me = this;
 
+        me.title = '<span class="panel-title-style">'+esapp.Utils.getTranslation('timeseries')+'</span>';
+        //me.height = Ext.getBody().getViewSize().height-80;
         me.frame = false;
         me.border= true;
         me.bodyBorder = false;
 
         me.wkt = this.wkt;
+
+        me.tools = [
+        {
+            type: 'gear',
+            tooltip: esapp.Utils.getTranslation('tiptimeserieschartshowhidetools'),  // 'Show/hide time series chart tools menu',
+            callback: function (tswin) {
+                // toggle hide/show toolbar and adjust map size.
+                var winBodyWidth = tswin.getWidth()-5;
+                var winBodyHeight = tswin.getHeight()-45;
+                var tsToolbar = tswin.getDockedItems('toolbar[dock="top"]')[0];
+                var widthToolbar = tsToolbar.getWidth();
+                var heightToolbar = tsToolbar.getHeight();
+                if (tsToolbar.hidden == false) {
+                    tsToolbar.setHidden(true);
+                    winBodyWidth = document.getElementById(tswin.id + "-body").offsetWidth;
+                    winBodyHeight =  document.getElementById(tswin.id + "-body").offsetHeight; //+heightToolbar;
+                }
+                else {
+                    tsToolbar.setHidden(false);
+                    winBodyWidth = document.getElementById(tswin.id + "-body").offsetWidth;
+                    winBodyHeight = document.getElementById(tswin.id + "-body").offsetHeight-heightToolbar;
+                }
+                tswin.tschart.setSize(winBodyWidth, winBodyHeight);
+                tswin.tschart.redraw();
+            }
+        }];
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             id: 'tbar_'+me.id,

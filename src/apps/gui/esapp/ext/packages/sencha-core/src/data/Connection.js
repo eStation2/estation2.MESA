@@ -82,29 +82,29 @@ Ext.define('Ext.data.Connection', {
         password: '',
 
         /**
-        * @cfg {Boolean} disableCaching
-        * True to add a unique cache-buster param to GET requests.
-        */
+         * @cfg {Boolean} disableCaching
+         * True to add a unique cache-buster param to GET requests.
+         */
         disableCaching: true,
 
         /**
-        * @cfg {Boolean} withCredentials
-        * True to set `withCredentials = true` on the XHR object
-        */
+         * @cfg {Boolean} withCredentials
+         * True to set `withCredentials = true` on the XHR object
+         */
         withCredentials: false,
 
         /**
-        * @cfg {Boolean} binary
-        * True if the response should be treated as binary data.  If true, the binary
-        * data will be accessible as a "responseBytes" property on the response object.
-        */
+         * @cfg {Boolean} binary
+         * True if the response should be treated as binary data.  If true, the binary
+         * data will be accessible as a "responseBytes" property on the response object.
+         */
         binary: false,
 
         /**
-        * @cfg {Boolean} cors
-        * True to enable CORS support on the XHR object. Currently the only effect of this option
-        * is to use the XDomainRequest object instead of XMLHttpRequest if the browser is IE8 or above.
-        */
+         * @cfg {Boolean} cors
+         * True to enable CORS support on the XHR object. Currently the only effect of this option
+         * is to use the XDomainRequest object instead of XMLHttpRequest if the browser is IE8 or above.
+         */
         cors: false,
 
         isXdr: false,
@@ -112,43 +112,49 @@ Ext.define('Ext.data.Connection', {
         defaultXdrContentType: 'text/plain',
 
         /**
-        * @cfg {String} disableCachingParam
-        * Change the parameter which is sent went disabling caching through a cache buster.
-        */
+         * @cfg {String} disableCachingParam
+         * Change the parameter which is sent went disabling caching through a cache buster.
+         */
         disableCachingParam: '_dc',
 
         /**
-        * @cfg {Number} timeout
-        * The timeout in milliseconds to be used for requests.
-        */
+         * @cfg {Number} [timeout=30000] The timeout in milliseconds to be used for 
+         * requests.  
+         * Defaults to 30000 milliseconds (30 seconds).
+         * 
+         * When a request fails due to timeout the XMLHttpRequest response object will 
+         * contain:
+         * 
+         *     timedout: true
+         */
         timeout : 30000,
 
         /**
-        * @cfg {Object} extraParams
-        * Any parameters to be appended to the request.
-        */
-       extraParams: null,
+         * @cfg {Object} extraParams
+         * Any parameters to be appended to the request.
+         */
+        extraParams: null,
 
         /**
-        * @cfg {Boolean} [autoAbort=false]
-        * Whether this request should abort any pending requests.
-        */
-       autoAbort: false,
+         * @cfg {Boolean} [autoAbort=false]
+         * Whether this request should abort any pending requests.
+         */
+        autoAbort: false,
 
         /**
-        * @cfg {String} method
-        * The default HTTP method to be used for requests.
-        *
-        * If not set, but {@link #request} params are present, POST will be used;
-        * otherwise, GET will be used.
-        */
-       method: null,
+         * @cfg {String} method
+         * The default HTTP method to be used for requests.
+         *
+         * If not set, but {@link #request} params are present, POST will be used;
+         * otherwise, GET will be used.
+         */
+        method: null,
 
         /**
-        * @cfg {Object} defaultHeaders
-        * An object containing request headers which are added to each request made by this object.
-        */
-       defaultHeaders: null,
+         * @cfg {Object} defaultHeaders
+         * An object containing request headers which are added to each request made by this object.
+         */
+        defaultHeaders: null,
 
         /**
          * @cfg {String} defaultPostHeader
@@ -175,6 +181,7 @@ Ext.define('Ext.data.Connection', {
 
         /**
          * @event beforerequest
+         * @preventable
          * Fires before a network request is made to retrieve a data object.
          * @param {Ext.data.Connection} conn This Connection object.
          * @param {Object} options The options config object passed to the {@link #request} method.
@@ -267,8 +274,14 @@ Ext.define('Ext.data.Connection', {
      * draw values, then this also serves as the scope for those function calls. Defaults to the browser
      * window.
      *
-     * @param {Number} options.timeout The timeout in milliseconds to be used for this request.
-     * Defaults to 30 seconds.
+     * @param {Number} options.timeout The timeout in milliseconds to be used for this 
+     * request.  
+     * Defaults to 30000 milliseconds (30 seconds).
+     * 
+     * When a request fails due to timeout the XMLHttpRequest response object will 
+     * contain:
+     * 
+     *     timedout: true
      *
      * @param {Ext.Element/HTMLElement/String} options.form The `<form>` Element or the id of the `<form>`
      * to pull parameters from.
@@ -335,12 +348,7 @@ Ext.define('Ext.data.Connection', {
             scope = options.scope || window,
             username = options.username || me.getUsername(),
             password = options.password || me.getPassword() || '',
-            async,
-            requestOptions,
-            request,
-            headers,
-            xdr,
-            xhr;
+            async, requestOptions, request, headers, xdr, xhr;
 
         if (me.fireEvent('beforerequest', me, options) !== false) {
 
@@ -631,11 +639,15 @@ Ext.define('Ext.data.Connection', {
             extraParams = me.getExtraParams(),
             urlParams = options.urlParams,
             url = options.url || me.getUrl(),
+            cors = options.cors,
             jsonData = options.jsonData,
             method,
             disableCache,
             data;
 
+        if (cors !== undefined) {
+            me.setCors(cors);
+        }
 
         // allow params to be a method that returns the params object
         if (Ext.isFunction(params)) {
@@ -847,11 +859,12 @@ Ext.define('Ext.data.Connection', {
                 // catch all for all other browser types
                 xhr = new Ext.data.flash.BinaryXhr();
             }
-        } else  if ((options.cors || me.getCors()) && Ext.isIE && Ext.ieVersion <= 9) {
+        } else  if (me.getCors() && Ext.isIE && Ext.ieVersion <= 9) {
             xhr = me.getXdrInstance();
             me.setIsXdr(true);
         } else {
             xhr = me.getXhrInstance();
+            me.setIsXdr(false);
         }
 
         return xhr;
@@ -929,11 +942,11 @@ Ext.define('Ext.data.Connection', {
         var options = [function() {
             return new XMLHttpRequest();
         }, function() {
-            return new ActiveXObject('MSXML2.XMLHTTP.3.0');
+            return new ActiveXObject('MSXML2.XMLHTTP.3.0'); // jshint ignore:line
         }, function() {
-            return new ActiveXObject('MSXML2.XMLHTTP');
+            return new ActiveXObject('MSXML2.XMLHTTP'); // jshint ignore:line
         }, function() {
-            return new ActiveXObject('Microsoft.XMLHTTP');
+            return new ActiveXObject('Microsoft.XMLHTTP'); // jshint ignore:line
         }], i = 0,
             len = options.length,
             xhr;
@@ -1042,8 +1055,8 @@ Ext.define('Ext.data.Connection', {
         var me = this,
             globalEvents = Ext.GlobalEvents;
 
-        // Using CORS with IE doesn't support readyState so we fake it
-        if ((request.xhr && request.xhr.readyState == 4) || me.isXdr) {
+        // Using CORS with IE doesn't support readyState so we fake it.
+        if ((request.xhr && request.xhr.readyState == 4) || me.getIsXdr()) {
             me.clearTimeout(request);
             me.onComplete(request, xdrResult);
             me.cleanup(request);
@@ -1104,7 +1117,7 @@ Ext.define('Ext.data.Connection', {
             };
 
         }
-        success = me.isXdr ? xdrResult : result.success;
+        success = me.getIsXdr() ? xdrResult : result.success;
 
         if (success) {
             response = me.createResponse(request);
@@ -1259,7 +1272,7 @@ Ext.define('Ext.data.Connection', {
             // In IE9p we can get the bytes by constructing a VBArray
             // using the responseBody and then converting it to an Array.
             try {
-                byteArray = new VBArray(responseBody).toArray();
+                byteArray = new VBArray(responseBody).toArray(); // jshint ignore:line
             } catch(e) {
                 // If the binary response is empty, the VBArray constructor will
                 // choke on the responseBody.  We can't simply do a null check
@@ -1276,7 +1289,7 @@ Ext.define('Ext.data.Connection', {
             if (!this.self.vbScriptInjected) {
                 this.injectVBScript();
             }
-            getIEByteArray(xhr.responseBody, byteArray = []);
+            getIEByteArray(xhr.responseBody, byteArray = []); // jshint ignore:line
         } else {
             // in other older browsers make a best-effort attempt to read the
             // bytes from responseText

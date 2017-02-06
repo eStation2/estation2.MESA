@@ -8,6 +8,9 @@
 
 1.1 Acquisition
 
+- Add ingestion for ARC2-rain daily product - 0.1 degree - GZIP type
+- Add ingestion of CPC Soil Moisture monthly product - 0.5 degree - binary type (new pre-proc type)
+
 1.2 Processing
 
 - Change the modis_monavg computation, so that it does not work on the current month (MOI request).

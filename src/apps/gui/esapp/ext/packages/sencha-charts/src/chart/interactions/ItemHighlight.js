@@ -12,12 +12,13 @@ Ext.define('Ext.chart.interactions.ItemHighlight', {
     alias: 'interaction.itemhighlight',
 
     config: {
-        //@inheritdoc
+        /**
+         * @cfg {Object} gestures
+         * Defines the gestures that should trigger the item highlight interaction.
+         */
         gestures: {
             tap: 'onHighlightGesture',
             mousemove: 'onMouseMoveGesture',
-            mouseenter: 'onMouseEnterGesture',
-            mouseleave: 'onMouseLeaveGesture',
             mousedown: 'onMouseDownGesture',
             mouseup: 'onMouseUpGesture'
         }
@@ -27,6 +28,7 @@ Ext.define('Ext.chart.interactions.ItemHighlight', {
 
     onMouseMoveGesture: function (e) {
         var me = this,
+            isMousePointer = e.pointerType === 'mouse',
             item, tooltip, chart;
 
         if (me.isDragging) {
@@ -42,7 +44,7 @@ Ext.define('Ext.chart.interactions.ItemHighlight', {
                 me.sync();
             }
 
-            if (this.isMousePointer) {
+            if (isMousePointer) {
                 if ( me.tipItem && (!item || me.tipItem.field !== item.field || me.tipItem.record !== item.record) ) {
                     me.tipItem.series.hideTip(me.tipItem);
                     me.tipItem = null;
@@ -63,14 +65,6 @@ Ext.define('Ext.chart.interactions.ItemHighlight', {
         this.tipItem = item;
     },
 
-    onMouseEnterGesture: function () {
-        this.isMousePointer = true;
-    },
-
-    onMouseLeaveGesture: function () {
-        this.isMousePointer = false;
-    },
-
     onMouseDownGesture: function () {
         this.isDragging = true;
     },
@@ -81,7 +75,7 @@ Ext.define('Ext.chart.interactions.ItemHighlight', {
 
     onHighlightGesture: function (e) {
         // A click/tap on an item makes its highlight sticky. It requires another click/tap to unhighlight.
-        if (this.isMousePointer) {
+        if (e.pointerType === 'mouse') {
             return;
         }
         var me = this,

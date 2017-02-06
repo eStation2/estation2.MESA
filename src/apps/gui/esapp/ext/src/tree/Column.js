@@ -42,17 +42,42 @@ Ext.define('Ext.tree.Column', {
         '</tpl>'
     ],
 
+    // fields that will trigger a change in the ui that aren't likely to be bound to a column
+    uiFields: {
+        checked: 1,
+        icon: 1,
+        iconCls: 1
+    },
+
+    // fields that requires a full row render
+    rowFields: {
+        expanded: 1,
+        loaded: 1,
+        expandable: 1,
+        leaf: 1,
+        loading: 1,
+        qtip: 1,
+        qtitle: 1,
+        cls: 1
+    },
+
     initComponent: function() {
         var me = this;
 
+        me.rendererScope = me.scope;
         me.setupRenderer();
-        me.origRenderer = me.renderer;
-        me.origScope = me.scope || window;
+
+        // This always uses its own renderer.
+        // Any custom renderer is used as an inner renderer to produce the text node of a tree cell.
+        me.innerRenderer = me.renderer;
 
         me.renderer = me.treeRenderer;
-        me.scope = me;
 
         me.callParent();
+
+        me.scope = me;
+        
+        me.hasCustomRenderer = me.innerRenderer && me.innerRenderer.length > 1;
     },
 
     treeRenderer: function(value, metaData, record, rowIdx, colIdx, store, view){
@@ -60,7 +85,9 @@ Ext.define('Ext.tree.Column', {
             cls = record.get('cls'),
             rendererData;
 
-        if (cls) {
+        // The initial render will inject the cls into the TD's attributes.
+        // If cls is ever *changed*, then the full rendering path is followed.
+        if (metaData && cls) {
             metaData.tdCls += ' ' + cls;
         }
 
@@ -71,7 +98,7 @@ Ext.define('Ext.tree.Column', {
     
     initTemplateRendererData: function(value, metaData, record, rowIdx, colIdx, store, view) {
         var me = this,
-            renderer = me.origRenderer,
+            innerRenderer = me.innerRenderer,
             data = record.data,
             parent = record.parentNode,
             rootVisible = view.rootVisible,
@@ -81,7 +108,7 @@ Ext.define('Ext.tree.Column', {
         while (parent && (rootVisible || parent.data.depth > 0)) {
             parentData = parent.data;
             lines[rootVisible ? parentData.depth : parentData.depth - 1] =
-                    parentData.isLast ? 0 : 1;
+                    parent.isLastVisible() ? 0 : 1;
             parent = parent.parentNode;
         }
         
@@ -108,7 +135,36 @@ Ext.define('Ext.tree.Column', {
             // expander, elbow, checkbox).  This is used by the rtl override to add the
             // "x-rtl" class to these elements.
             childCls: me.getChildCls ? me.getChildCls() + ' ' : '',
-            value: renderer ? renderer.apply(me.origScope, arguments) : value
+            value: innerRenderer ? innerRenderer.apply(me.rendererScope, arguments) : value
         };
+    },
+
+    shouldUpdateCell: function(record, changedFieldNames) {
+        // For the TreeColumn, if any of the known tree column UI affecting fields are updated
+        // the cell should be updated in whatever way.
+        // 1 if a custom renderer (not our default tree cell renderer), else 2.
+        var me = this,
+            i = 0,
+            len, field;
+
+        if (changedFieldNames) {
+            len = changedFieldNames.length;
+
+            for (; i < len; ++i) {
+                field = changedFieldNames[i];
+                // Check for fields which always require a full row update.
+                if (me.rowFields[field]) {
+                    return 1;
+                }
+
+                // Check for fields which require this column to be updated.
+                // The TreeColumn's treeRenderer is not a custom renderer.
+                if (me.uiFields[field]) {
+                    return 2;
+                }
+            }
+        }
+
+        return me.callParent([record, changedFieldNames]);
     }
 });

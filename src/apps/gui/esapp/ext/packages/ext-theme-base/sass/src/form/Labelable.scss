@@ -11,6 +11,10 @@
     overflow: hidden;
 }
 
+.#{$prefix}form-item.#{$prefix}form-item-no-label > .#{$prefix}form-item-label {
+    display: none;
+}
+
 .#{$prefix}form-item-label,
 .#{$prefix}form-item-body {
     display: table-cell;
@@ -39,6 +43,11 @@
 
 .#{$prefix}form-item-label-right {
     text-align: right;
+    @if $include-rtl {
+        &.#{$prefix}rtl {
+            text-align: left;
+        }
+    }
 }
 
 .#{$prefix}form-error-wrap-side {
@@ -57,6 +66,7 @@
 .#{$prefix}form-error-wrap-under-side-label:before {
     display: table-cell;
     content: '';
+    pointer-events: none;
 }
 
 .#{$prefix}form-invalid-icon {

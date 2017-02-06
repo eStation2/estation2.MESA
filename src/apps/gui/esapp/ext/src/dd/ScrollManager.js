@@ -108,37 +108,23 @@ Ext.define('Ext.dd.ScrollManager', {
         if (proc.id) {
             clearInterval(proc.id);
         }
-        if (proc.scroller) {
-            proc.scroller.setSnapToBoundary(true);
-            proc.scroller.snapToBoundary();
-        }
         proc.id = 0;
-        proc.el = proc.component = proc.scroller = null;
+        proc.el = null;
         proc.dir = "";
     },
 
     startProc: function(el, dir) {
         var me = this,
-            group,
-            freq,
-            scrollComponent,
-            proc = me.proc;
+            proc = me.proc,
+            group, freq;
 
         me.clearProc();
         proc.el = el;
         proc.dir = dir;
 
-        // See if we are CSS scrolling a *Component's overflowEl*.
-        // The process has to know that so that it uses the correct methods to scroll and clear up
-        if (Ext.supports.touchScroll === 2 && (scrollComponent = el.component) && el === scrollComponent.getOverflowEl()) {
-            proc.component = scrollComponent;
-            proc.scroller = scrollComponent.scrollManager.scroller;
-            proc.scroller.setSnapToBoundary(false);
-        }
         group = el.ddScrollConfig ? el.ddScrollConfig.ddGroup : undefined;
-        freq  = (el.ddScrollConfig && el.ddScrollConfig.frequency)
-              ? el.ddScrollConfig.frequency
-              : me.frequency;
+        freq  = (el.ddScrollConfig && el.ddScrollConfig.frequency) ? el.ddScrollConfig.frequency
+                    : me.frequency;
 
         if (group === undefined || me.ddmInstance.dragCurrent.ddGroup === group) {
             proc.id = Ext.interval(me.doScroll, freq);
@@ -275,7 +261,7 @@ Ext.define('Ext.dd.ScrollManager', {
         var els = this.els,
             id;
         for (id in els) {
-            if(typeof els[id] == 'object'){ // for people extending the object prototype
+            if (typeof els[id] === 'object') { // for people extending the object prototype
                 els[id]._region = els[id].getRegion();
             }
         }

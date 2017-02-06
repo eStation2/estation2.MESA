@@ -8,34 +8,41 @@
  * documentation for more information. A typical configuration object for the pie series could be:
  *
  *     @example
- *     Ext.create('Ext.Container', {
- *         renderTo: Ext.getBody(),
- *         width: 600,
- *         height: 400,
- *         layout: 'fit',
- *         items: {
- *             xtype: 'polar',
- *             interactions: 'rotate',
- *             store: {
- *               fields: ['name', 'data1', 'data2', 'data3', 'data4', 'data5'],
- *               data: [
- *                   {name: 'metric one',   data1: 10, data2: 12, data3: 14, data4: 8,  data5: 13},
- *                   {name: 'metric two',   data1: 7,  data2: 8,  data3: 16, data4: 10, data5: 3},
- *                   {name: 'metric three', data1: 5,  data2: 2,  data3: 14, data4: 12, data5: 7},
- *                   {name: 'metric four',  data1: 2,  data2: 14, data3: 6,  data4: 1,  data5: 23},
- *                   {name: 'metric five',  data1: 27, data2: 38, data3: 36, data4: 13, data5: 33}
- *               ]
- *             },
- *             series: {
- *                 type: 'pie',
- *                 label: {
- *                     field: 'name',
- *                     display: 'rotate'
- *                 },
- *                 xField: 'data3',
- *                 donut: 30
- *             }
- *         }
+ *     Ext.create({
+ *        xtype: 'polar', 
+ *        renderTo: document.body,
+ *        width: 400,
+ *        height: 400,
+ *        theme: 'green',
+ *        interactions: 'rotate',
+ *        store: {
+ *            fields: ['name', 'data1'],
+ *            data: [{
+ *                name: 'metric one',
+ *                data1: 14
+ *            }, {
+ *                name: 'metric two',
+ *                data1: 16
+ *            }, {
+ *                name: 'metric three',
+ *                data1: 14
+ *            }, {
+ *                name: 'metric four',
+ *                data1: 6
+ *            }, {
+ *                name: 'metric five',
+ *                data1: 36
+ *            }]
+ *        },
+ *        series: {
+ *            type: 'pie',
+ *            label: {
+ *                field: 'name',
+ *                display: 'rotate'
+ *            },
+ *            xField: 'data1',
+ *            donut: 30
+ *        }
  *     });
  *
  * In this configuration we set `pie` as the type for the series, set an object with specific style properties for highlighting options
@@ -102,13 +109,59 @@ Ext.define('Ext.chart.series.Pie', {
         hidden: [],
 
         /**
-         * @cfg {Number} Allows adjustment of the radius by a specific percentage.
+         * @cfg {Number} [radiusFactor=100] Allows adjustment of the radius by a 
+         * specific percentage.
          */
         radiusFactor: 100,
 
         /**
-         * @cfg {Object} Default highlight config for the pie series.
-         * Slides highlighted pie sector outward.
+         * @cfg {Ext.chart.series.sprite.PieSlice/Object} highlightCfg
+         * Default highlight config for the pie series.
+         * Slides highlighted pie sector outward by default.
+         * 
+         * highlightCfg accepts as its value a config object (or array of configs) for a 
+         * {@link Ext.chart.series.sprite.PieSlice pie sprite}.
+         * 
+         * **Note:** You must configure the 
+         * {@link Ext.chart.interactions.ItemHighlight itemhighlight} 
+         * {@link Ext.chart.AbstractChart#interactions interaction} in order to 
+         * apply highlighting to the series.
+         * 
+         * Example config:
+         * 
+         *     Ext.create('Ext.chart.PolarChart', {
+         *         renderTo: document.body,
+         *         width: 600,
+         *         height: 400,
+         *         interactions: 'itemhighlight',
+         *         innerPadding: 5,
+         *         store: {
+         *             fields: ['name', 'data1'],
+         *             data: [{
+         *                 name: 'metric one',
+         *                 data1: 10
+         *             }, {
+         *                 name: 'metric two',
+         *                 data1: 7
+         *             }, {
+         *                 name: 'metric three',
+         *                 data1: 5
+         *             }]
+         *         },
+         *         series: {
+         *             type: 'pie',
+         *             label: {
+         *                 field: 'name',
+         *                 display: 'rotate'
+         *             },
+         *             xField: 'data1',
+         *             donut: 30,
+         *             highlightCfg: {
+         *                 margin: 10,
+         *                 fillOpacity: .7
+         *             }
+         *         }
+         *     });
          */
         highlightCfg: {
             margin: 20
@@ -132,13 +185,7 @@ Ext.define('Ext.chart.series.Pie', {
             // Override default label orientation from '' to 'vertical'.
             Ext.apply(newLabel = Ext.Object.chain(newLabel), {orientation: 'vertical'});
         }
-        if (!oldLabel) {
-            oldLabel = new Ext.chart.Markers({zIndex: 10});
-            oldLabel.setTemplate(new Ext.chart.label.Label(newLabel));
-        } else {
-            oldLabel.getTemplate().setAttributes(newLabel);
-        }
-        return oldLabel;
+        return this.callParent([newLabel, oldLabel]);
     },
 
     updateLabelData: function () {
@@ -165,57 +212,81 @@ Ext.define('Ext.chart.series.Pie', {
     coordinateX: function () {
         var me = this,
             store = me.getStore(),
-            items = store.getData().items,
-            itemCount = items.length,
-            field = me.getXField(),
-            lengthField = me.getLengthField(),
-            value, sum = 0,
-            length, maxLength = 0,
+            records = store.getData().items,
+            recordCount = records.length,
+            xField = me.getXField(),
+            yField = me.getYField(),
+            x, sumX = 0, unit,
+            y, maxY = 0,
             hidden = me.getHidden(),
             summation = [], i,
             lastAngle = 0,
             totalAngle = me.getTotalAngle(),
             clockwise = me.getClockwise() ? 1 : -1,
-            sprites = me.getSprites();
+            sprites = me.getSprites(),
+            chart, sprite;
 
         if (!sprites) {
             return;
         }
 
-        for (i = 0; i < itemCount; i++) {
-            value = Math.abs(Number(items[i].get(field))) || 0;
-            length = lengthField && Math.abs(Number(items[i].get(lengthField))) || 0;
+        for (i = 0; i < recordCount; i++) {
+            x = Math.abs(Number(records[i].get(xField))) || 0;
+            y = yField && Math.abs(Number(records[i].get(yField))) || 0;
             if (!hidden[i]) {
-                sum += value;
-                if (length > maxLength) {
-                    maxLength = length;
+                sumX += x;
+                if (y > maxY) {
+                    maxY = y;
                 }
             }
-            summation[i] = sum;
+            summation[i] = sumX;
             if (i >= hidden.length) {
                 hidden[i] = false;
             }
         }
-        me.maxLength = maxLength;
+        hidden.length = recordCount;
+        me.maxY = maxY;
 
-        if (sum !== 0) {
-            sum = totalAngle / sum;
+        if (sumX !== 0) {
+            unit = totalAngle / sumX;
         }
-        for (i = 0; i < itemCount; i++) {
+        for (i = 0; i < recordCount; i++) {
             sprites[i].setAttributes({
                 startAngle: lastAngle,
-                endAngle: lastAngle = (sum ? clockwise * summation[i] * sum : 0),
+                endAngle: lastAngle = (unit ? clockwise * summation[i] * unit : 0),
                 globalAlpha: 1
             });
         }
-        for (; i < me.sprites.length; i++) {
+        if (recordCount < me.sprites.length) {
+            for (i = recordCount; i < me.sprites.length; i++) {
+                sprite = me.sprites[i];
+                // Don't want the 'labels' Markers and its 'template' sprite to be destroyed
+                // with the PieSlice MarkerHolder, as it is also used by other pie slices.
+                // So we release 'labels' before destroying the PieSlice.
+                // But first, we have to clear the instances of the 'labels'
+                // Markers created by the PieSlice MarkerHolder.
+                sprite.getMarker('labels').clear(sprite.getId());
+                sprite.releaseMarker('labels');
+                sprite.destroy();
+            }
+            me.sprites.length = recordCount;
+        }
+        for (i = recordCount; i < me.sprites.length; i++) {
             sprites[i].setAttributes({
                 startAngle: totalAngle,
                 endAngle: totalAngle,
                 globalAlpha: 0
             });
         }
-        me.getChart().refreshLegendStore();
+
+        chart = me.getChart();
+        // 'refreshLegendStore' will attemp to grab the 'series',
+        // which are still configuring at this point.
+        // The legend store will be refreshed inside the chart.series
+        // updater anyway.
+        if (!chart.isConfiguring) {
+            chart.refreshLegendStore();
+        }
     },
 
     updateCenter: function (center) {
@@ -236,16 +307,22 @@ Ext.define('Ext.chart.series.Pie', {
 
     getStyleByIndex: function (i) {
         var me = this,
-            items = me.getStore().getData().items,
-            lengthField = me.getLengthField(),
+            store = me.getStore(),
+            item = store.getAt(i),
+            yField = me.getYField(),
             radius = me.getRadius(),
-            style, length, startRho, endRho;
-        length = lengthField && Math.abs(Number(items[i].get(lengthField))) || 0;
-        startRho = radius * me.getDonut() * 0.01;
-        endRho = radius * me.getRadiusFactor() * 0.01;
-        style = this.callParent([i]);
-        style.startRho = startRho;
-        style.endRho = me.maxLength ? (startRho + (endRho - startRho) * length / me.maxLength) : endRho;
+            style = {},
+            startRho, endRho, y;
+
+        if (item) {
+            y = yField && Math.abs(Number(item.get(yField))) || 0;
+            startRho = radius * me.getDonut() * 0.01;
+            endRho = radius * me.getRadiusFactor() * 0.01;
+            style = me.callParent([i]);
+            style.startRho = startRho;
+            style.endRho = me.maxY ? (startRho + (endRho - startRho) * y / me.maxY) : endRho;
+        }
+
         return style;
     },
 
@@ -258,12 +335,12 @@ Ext.define('Ext.chart.series.Pie', {
         this.doUpdateStyles();
     },
 
-    rotationOffset: -0.5 * Math.PI,
+    // Subtract 90 degrees from rotation, so that `rotation` config's default
+    // zero value makes first pie sector start at noon, rather than 3 o'clock.
+    rotationOffset: -Math.PI / 2,
 
     updateRotation: function (rotation) {
         this.setStyle({
-            // Subtract 90 degrees from rotation, so that `rotation` config's default
-            // zero value makes first pie sector start at noon, rather than 3 o'clock.
             rotationRads: rotation + this.rotationOffset
         });
         this.doUpdateStyles();
@@ -277,11 +354,13 @@ Ext.define('Ext.chart.series.Pie', {
         var me = this,
             chart = me.getChart(),
             store = me.getStore();
+
         if (!chart || !store) {
             return [];
         }
         me.getColors();
         me.getSubStyle();
+
         var items = store.getData().items,
             length = items.length,
             animation = me.getAnimation() || chart && chart.getAnimation(),
@@ -310,13 +389,12 @@ Ext.define('Ext.chart.series.Pie', {
                         labelOverflowPadding: me.getLabelOverflowPadding()
                     });
                     labelTpl.fx.setCustomDurations({'callout': 200});
-                    sprite.bindMarker('labels', label);
                 }
                 sprite.setAttributes(me.getStyleByIndex(i));
                 sprite.rendererData = rendererData;
-                sprite.rendererIndex = spriteIndex++;
                 spriteCreated = true;
             }
+            sprite.rendererIndex = spriteIndex++;
             sprite.fx.setConfig(animation);
         }
         if (spriteCreated) {
@@ -328,6 +406,11 @@ Ext.define('Ext.chart.series.Pie', {
     betweenAngle: function (x, a, b) {
         var pp = Math.PI * 2,
             offset = this.rotationOffset;
+
+        if (a === b) {
+            return false;
+        }
+
         if (!this.getClockwise()) {
             x *= -1;
             a *= -1;
@@ -338,15 +421,21 @@ Ext.define('Ext.chart.series.Pie', {
             a += offset;
             b += offset;
         }
-        b -= a;
+
         x -= a;
+        b -= a;
+
+        // Normalize, so that both x and b are in the [0,360) interval.
         x %= pp;
         b %= pp;
         x += pp;
         b += pp;
         x %= pp;
         b %= pp;
-        return x < b;
+
+        // Because 360 * n angles will be normalized to 0,
+        // we need to treat b === 0 as a special case.
+        return x < b || b === 0;
     },
 
     /**
@@ -396,17 +485,19 @@ Ext.define('Ext.chart.series.Pie', {
     getItemForPoint: function (x, y) {
         var me = this,
             sprites = me.getSprites();
+
         if (sprites) {
             var center = me.getCenter(),
                 offsetX = me.getOffsetX(),
                 offsetY = me.getOffsetY(),
-                originalX = x - center[0] + offsetX,
-                originalY = y - center[1] + offsetY,
+                // Distance from the center of the series to the cursor.
+                dx = x - center[0] + offsetX,
+                dy = y - center[1] + offsetY,
                 store = me.getStore(),
                 donut = me.getDonut(),
                 records = store.getData().items,
-                direction = Math.atan2(originalY, originalX) - me.getRotation(),
-                radius = Math.sqrt(originalX * originalX + originalY * originalY),
+                direction = Math.atan2(dy, dx) - me.getRotation(),
+                radius = Math.sqrt(dx * dx + dy * dy),
                 startRadius = me.getRadius() * donut * 0.01,
                 hidden = me.getHidden(),
                 i, ln, attr;

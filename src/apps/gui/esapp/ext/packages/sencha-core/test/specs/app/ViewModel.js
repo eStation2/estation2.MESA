@@ -53,20 +53,24 @@ describe("Ext.app.ViewModel", function() {
         return new Type(data, session);
     }
 
-    function createViewModel(withSession) {
-        if (withSession) {
-            session = new Ext.data.Session({
-                scheduler: {
-                    // Make a huge tickDelay, we'll control it by forcing ticks
-                    tickDelay: 9999
-                }
-            });
+    function makeSession() {
+        session = new Ext.data.Session({
+            scheduler: {
+                // Make a huge tickDelay, we'll control it by forcing ticks
+                tickDelay: 9999
+            }
+        });
+    }
+
+    function createViewModel(withSession, cfg) {
+        if (withSession && !session) {
+            makeSession();
         }
 
-        viewModel = new Ext.app.ViewModel({
+        viewModel = new Ext.app.ViewModel(Ext.apply({
             id: 'rootVM',
             session: session
-        });
+        }, cfg));
         scheduler = viewModel.getScheduler();
     }
 
@@ -95,6 +99,99 @@ describe("Ext.app.ViewModel", function() {
 
         MockAjaxManager.removeMethods();
         Ext.data.Model.schema.clear(true);
+    });
+
+    describe("isReadOnly", function() {
+        describe("always readOnly bindings", function() {
+            it("should be true for template bindings", function() {
+                createViewModel();
+                var b = viewModel.bind('Hello {foo}', Ext.emptyFn);
+                expect(b.isReadOnly()).toBe(true);
+            });
+
+            it("should be true for multi bindings", function() {
+                createViewModel();
+                var b = viewModel.bind({
+                    a: '{foo}',
+                    b: '{bar}'
+                }, Ext.emptyFn);
+                expect(b.isReadOnly()).toBe(true);
+            });
+        });
+
+        describe("normal bindings", function() {
+            it("should not be readOnly by default", function() {
+                createViewModel();
+                var b = viewModel.bind('{foo}', Ext.emptyFn);
+                expect(b.isReadOnly()).toBe(false);
+            });
+
+            it("should not be readOnly when options are passed", function() {
+                createViewModel();
+                var b = viewModel.bind('{foo}', Ext.emptyFn, null, {
+                    single: true
+                });
+                expect(b.isReadOnly()).toBe(false);
+            });
+
+            it("should be readOnly when twoWay is set to false", function() {
+                createViewModel();
+                var b = viewModel.bind('{foo}', Ext.emptyFn, null, {
+                    twoWay: false
+                });
+                expect(b.isReadOnly()).toBe(true);
+            });
+        });
+
+        describe("formulas", function() {
+            it("should be readOnly if there is no set", function() {
+                createViewModel(false, {
+                    formulas: {
+                        foo: function() {
+                            return 1;
+                        }
+                    }
+                });
+                var b = viewModel.bind('{foo}', Ext.emptyFn);
+                expect(b.isReadOnly()).toBe(true);
+            });
+
+            it("should be readOnly if there is a set but is marked as twoWay: false", function() {
+                createViewModel(false, {
+                    formulas: {
+                        foo: {
+                            get: function() {
+                                return 1;
+                            },
+                            set: function() {
+                                this.set('x', 1);
+                            }
+                        }
+                    }
+                });
+                var b = viewModel.bind('{foo}', Ext.emptyFn, null, {
+                    twoWay: false
+                });
+                expect(b.isReadOnly()).toBe(true);
+            });
+
+            it("should not be readOnly if there is a set", function() {
+                createViewModel(false, {
+                    formulas: {
+                        foo: {
+                            get: function() {
+                                return 1;
+                            },
+                            set: function() {
+                                this.set('x', 1);
+                            }
+                        }
+                    }
+                });
+                var b = viewModel.bind('{foo}', Ext.emptyFn);
+                expect(b.isReadOnly()).toBe(false);
+            });
+        });
     });
 
     describe("getting/setting values", function() {
@@ -670,8 +767,12 @@ describe("Ext.app.ViewModel", function() {
                                 });
                             });
                             notify();
-                            expect(spy.callCount).toBe(1);
-                            expectArgs(null, undefined);
+                            if (bindFirst) {
+                                expect(spy.callCount).toBe(1);
+                                expectArgs(null, undefined);
+                            } else {
+                                expect(spy).not.toHaveBeenCalled();
+                            }
                         });
 
                         it("should set the child value correctly when overwriting a hierarchy over multiple ticks", function() {
@@ -809,6 +910,39 @@ describe("Ext.app.ViewModel", function() {
         }
         createSuite(false);
         createSuite(true);
+
+        describe("data types", function() {
+            describe("dates", function() {
+                it("should change when setting an initial date", function() {
+                    var d = new Date(2010, 0, 1);
+                    bindNotify('{val}', spy);
+                    setNotify('val', d);
+                    expectArgs(d, undefined);
+                });
+
+                it("should change when setting a new date", function() {
+                    var d1 = new Date(2010, 0, 1),
+                        d2 = new Date(2000, 3, 15);
+
+                    setNotify('val', d1);
+                    bindNotify('{val}', spy);
+                    spy.reset();
+                    setNotify('val', d2);
+                    expectArgs(d2, d1);
+                });
+
+                it("should not change when setting the same date with a different reference", function() {
+                    var d1 = new Date(2010, 0, 1),
+                        d2 = new Date(2010, 0, 1);
+
+                    setNotify('val', d1);
+                    bindNotify('{val}', spy);
+                    spy.reset();
+                    setNotify('val', d2);
+                    expect(spy).not.toHaveBeenCalled();
+                });
+            });
+        });
         
         describe("firing order", function() {
             it("should fire children before parents", function() {
@@ -1181,7 +1315,11 @@ describe("Ext.app.ViewModel", function() {
                 beforeEach(function() {
                     User = Ext.define('spec.User', {
                         extend: 'Ext.data.Model',
-                        fields: ['id', 'name', 'age', 'group']
+                        fields: ['id', 'name', 'age', 'group', {
+                            name: 'addressId',
+                            reference: 'Address',
+                            unique: true
+                        }]
                     });
                 });
 
@@ -1378,6 +1516,17 @@ describe("Ext.app.ViewModel", function() {
                         notify();
                         expect(spy).toHaveBeenCalled();
                     });
+
+                    it("should publish a field when the model is cleared", function() {
+                        makeUser(1, {
+                            name: 'Foo'
+                        });
+                        bindNotify('{user.name}', spy);
+                        setNotify('user', user);
+                        spy.reset();
+                        setNotify('user', null);
+                        expectArgs(null, 'Foo');
+                    });
                 });
 
                 describe("remote loading", function() {
@@ -1407,170 +1556,6 @@ describe("Ext.app.ViewModel", function() {
                     });
                 });
 
-                describe("links", function() {
-                    it("should accept the entityName", function() {
-                        bindNotify('{theUser}', spy);
-                        viewModel.linkTo('theUser', {
-                            type: 'User',
-                            id: 18
-                        });
-                        completeNotify({});
-                        var arg = spy.mostRecentCall.args[0];
-                        expect(arg.$className).toBe('spec.User');
-                        expect(arg.getId()).toBe(18);
-                    });
-
-                    it("should accept the full class name", function() {
-                        bindNotify('{theUser}', spy);
-                        viewModel.linkTo('theUser', {
-                            type: 'spec.User',
-                            id: 18
-                        });
-                        completeNotify({});
-                        var arg = spy.mostRecentCall.args[0];
-                        expect(arg.$className).toBe('spec.User');
-                        expect(arg.getId()).toBe(18);
-                    });
-
-                    it("should accept a model type", function() {
-                        bindNotify('{theUser}', spy);
-                        viewModel.linkTo('theUser', {
-                            type: spec.User,
-                            id: 18
-                        });
-                        completeNotify({});
-                        var arg = spy.mostRecentCall.args[0];
-                        expect(arg.$className).toBe('spec.User');
-                        expect(arg.getId()).toBe(18);
-                    });
-
-                    it("should accept a model instance but create a copy of the same type/id", function() {
-                        var rec = new spec.User({
-                            id: 18
-                        });
-                        bindNotify('{theUser}', spy);
-                        viewModel.linkTo('theUser', rec);
-                        completeNotify({});
-                        var arg = spy.mostRecentCall.args[0];
-                        expect(arg.$className).toBe('spec.User');
-                        expect(arg.getId()).toBe(18);
-                        expect(arg).not.toBe(rec);
-                    });
-
-                    it("should create a record with the matching id", function() {
-                        bindNotify('{theUser}', spy);
-                        viewModel.linkTo('theUser', {
-                            type: 'spec.User',
-                            id: 18
-                        });
-                        completeNotify({});
-                        expect(spy.mostRecentCall.args[0].getId()).toBe(18);
-                    });
-
-                    it("should raise an exception if id is not specified", function() {
-                        expect(function() {
-                            viewModel.linkTo('theUser', {
-                                type: 'spec.User'
-                            });
-                        }).toThrow();
-                    });
-
-                    describe("with create: true", function() {
-                        it("should create a phantom record with create: true", function() {
-                            bindNotify('{theUser}', spy);
-                            viewModel.linkTo('theUser', {
-                                type: 'spec.User',
-                                create: true
-                            });
-                            notify();
-                            expect(spy.mostRecentCall.args[0].phantom).toBe(true);
-                        });
-
-                        it("should not load from the server", function() {
-                            spy = spyOn(User.getProxy(), 'read');
-                            viewModel.linkTo('theUser', {
-                                type: 'spec.User',
-                                create: true
-                            });
-                            notify();
-                            expect(spy).not.toHaveBeenCalled();
-                        });
-
-                        if (withSession) {
-                            it("should push the phantom into the session", function() {
-                                bindNotify('{theUser}', spy);
-                                viewModel.linkTo('theUser', {
-                                    type: 'spec.User',
-                                    create: true
-                                });
-                                notify();
-                                user = spy.mostRecentCall.args[0];
-                                expect(user.session).toBe(session);
-                            });
-                        }
-                    });
-
-                    it("should request the data from the server", function() {
-                        spy = spyOn(User.getProxy(), 'read');
-                        viewModel.linkTo('theUser', {
-                            type: 'spec.User',
-                            id: 18
-                        });
-                        expect(spy.mostRecentCall.args[0].getId()).toBe(18);
-                    });
-
-                    it("should not publish until the record returns", function() {
-                        bindNotify('{theUser}', spy);
-                        viewModel.linkTo('theUser', {
-                            type: 'User',
-                            id: 18
-                        });
-                        expect(spy).not.toHaveBeenCalled();
-                    });
-
-                    it("should be able to change the link at runtime", function() {
-                        bindNotify('{theUser}', spy);
-                        viewModel.linkTo('theUser', {
-                            type: 'User',
-                            id: 18
-                        });
-                        completeNotify({});
-                        spy.reset();
-                        viewModel.linkTo('theUser', {
-                            type: 'User',
-                            id: 34
-                        });
-                        completeNotify({});
-                        expect(spy.mostRecentCall.args[0].getId()).toBe(34);
-                    });
-
-                    if (withSession) {
-                        it("should use an existing record in the session and not query the server", function() {
-                            var proxySpy = spyOn(User.getProxy(), 'read');
-                            makeUser(22);
-                            bindNotify('{theUser}', spy);
-                            viewModel.linkTo('theUser', {
-                                type: 'User',
-                                id: 22
-                            });
-                            notify();
-                            expect(spy.mostRecentCall.args[0]).toBe(session.getRecord('User', 22));
-                            expect(proxySpy).not.toHaveBeenCalled();
-                        });
-
-                        it("should create a non-existent record in the session and load it", function() {
-                            // Not there...
-                            expect(session.peekRecord('User', 89)).toBeNull();
-                            viewModel.linkTo('theUser', {
-                                type: 'User',
-                                id: 89
-                            });
-                            user = session.getRecord('User', 89);
-                            expect(user.isLoading()).toBe(true);
-                        });
-                    }
-                });
-
                 describe("values via binding", function() {
                     it("should be able to change fields via binding", function() {
                         makeUser(1, {
@@ -1589,6 +1574,101 @@ describe("Ext.app.ViewModel", function() {
                         expect(function() {
                             binding.setValue('Bar');
                         }).toThrow();
+                    });
+
+                    describe("associations", function() {
+                        var Comment, Address;
+
+                        beforeEach(function() {
+                            Comment = Ext.define('spec.Comment', {
+                                extend: 'Ext.data.Model',
+                                fields: ['id', 'text', {
+                                    name: 'userId',
+                                    reference: 'User'
+                                }]
+                            });
+
+                            Address = Ext.define('spec.Address', {
+                                extend: 'Ext.data.Model',
+                                fields: ['id', 'street']
+                            });
+                        });
+
+                        afterEach(function() {
+                            Ext.undefine('spec.Comment');
+                            Ext.undefine('spec.Address');
+                            Address = Comment = null;
+                        });
+
+                        it("should be able to set association keys", function() {
+                            var comment = makeRecord(Comment, 101, {
+                                userId: 1
+                            });
+                            var binding = viewModel.bind('{comment.user}', spy);
+                            setNotify('comment', comment);
+                            spy.reset();
+                            binding.setValue(3);
+                            notify();
+                            expect(comment.get('userId')).toBe(3);
+                            // We set the key, but the user itself is not available
+                            expect(spy).not.toHaveBeenCalled();
+                        });
+
+                        it("should be able to set association record", function() {
+                            var comment = makeRecord(Comment, 101, {
+                                userId: 1
+                            });
+                            makeUser(3);
+                            var binding = viewModel.bind('{comment.user}', spy);
+                            setNotify('comment', comment);
+                            spy.reset();
+                            binding.setValue(user);
+                            notify();
+                            expect(comment.get('userId')).toBe(3);
+                            // We set the key, but the user itself is not available
+                            expect(spy).toHaveBeenCalled();
+                            expectArgs(user);
+                        });
+
+                        it("should be able to set an association field", function() {
+                            var comment = makeRecord(Comment, 101, {
+                                userId: 1
+                            });
+                            makeUser(3);
+                            comment.setUser(user);
+                            var binding = viewModel.bind('{comment.user.name}', spy);
+                            setNotify('comment', comment);
+                            spy.reset();
+                            binding.setValue('aNewName');
+                            notify();
+                            expect(user.get('name')).toBe('aNewName');
+
+                            binding.destroy();
+                            spy.reset();
+
+                            var address = makeRecord(Address, 201);
+                            user.setAddress(address);
+                            binding = viewModel.bind('{comment.user.address.street}', spy);
+                            spy.reset();
+                            binding.setValue('newStreet');
+                            notify();
+                            expect(address.get('street')).toBe('newStreet');
+                        });
+
+                        it("should update when a parent reference is nulled out after setting only the top level reference", function() {
+                            var comment = makeRecord(Comment, 101, {
+                                userId: 1
+                            });
+                            makeUser(1);
+                            comment.setUser(user);
+
+                            var binding = viewModel.bind('{comment.user}', spy);
+                            setNotify('comment', comment);
+                            spy.reset();
+                            setNotify('comment', null);
+                            expect(spy.callCount).toBe(1);
+                            expectArgs(null, comment.getUser());
+                        });
                     });
                 });
             });
@@ -1708,6 +1788,15 @@ describe("Ext.app.ViewModel", function() {
                         expect(comments.load).not.toHaveBeenCalled();
                     });
 
+                    it("should not load if the record is a phantom", function() {
+                        // We don't have a reference to the store, so spy on everything here
+                        var loadSpy = spyOn(Ext.data.Store.prototype, 'load').andCallThrough();
+                        user = new User({}, session);
+                        bindNotify('{user.comments}', Ext.emptyFn);
+                        setNotify('user', user);
+                        expect(loadSpy).not.toHaveBeenCalled();
+                    });
+
                     it("should not load if the data has been load via nested-loading", function() {
                         var store = new Ext.data.Store({
                             model: 'spec.User'
@@ -1799,6 +1888,18 @@ describe("Ext.app.ViewModel", function() {
                     }
 
                     describe("the one", function() {
+                        it("should react when setting the inverse record", function() {
+                            makePost(1);
+                            bindNotify('{post.user.name}', spy);
+                            setNotify('post', post);
+                            post.setUser(new User({
+                                name: 'Foo'
+                            }, session));
+                            notify();
+                            expect(spy.callCount).toBe(1);
+                            expect(spy.mostRecentCall.args[0]).toBe('Foo');
+                        });
+
                         it("should not make a request there is no FK value", function() {
                             var proxySpy = spyOn(User.getProxy(), 'read');
                             makePost(1);
@@ -1974,6 +2075,14 @@ describe("Ext.app.ViewModel", function() {
                             expect(proxySpy).not.toHaveBeenCalled();
                         });
 
+                        it("should not load the store if the record is a phantom", function() {
+                            makeUser();
+                            bindNotify('{user.posts}', spy);
+                            var proxySpy = spyOn(Post.getProxy(), 'read');
+                            setNotify('user', user);
+                            expect(proxySpy).not.toHaveBeenCalled();
+                        });
+
                         it("should not trigger a load if the store is loading", function() {
                             makeUser(1);
                             bindNotify('{user.posts}', spy);
@@ -2100,6 +2209,18 @@ describe("Ext.app.ViewModel", function() {
                     }
 
                     describe("the key holder", function() {
+                        it("should react when setting the inverse record", function() {
+                            makeUser(1);
+                            bindNotify('{user.passport.key}', spy);
+                            setNotify('user', user);
+                            user.setPassport(new Passport({
+                                key: 'Foo'
+                            }, session));
+                            notify();
+                            expect(spy.callCount).toBe(1);
+                            expect(spy.mostRecentCall.args[0]).toBe('Foo');
+                        });
+
                         it("should not make a request there is no FK value", function() {
                             var proxySpy = spyOn(Passport.getProxy(), 'read');
                             makeUser(1);
@@ -2264,6 +2385,18 @@ describe("Ext.app.ViewModel", function() {
                     });
 
                     describe("the non-key holder", function() {
+                        it("should react when setting the inverse record", function() {
+                            makePassport(1);
+                            bindNotify('{passport.user.name}', spy);
+                            setNotify('passport', passport);
+                            passport.setUser(new User({
+                                name: 'Foo'
+                            }, session));
+                            notify();
+                            expect(spy.callCount).toBe(1);
+                            expect(spy.mostRecentCall.args[0]).toBe('Foo');
+                        });
+                        
                         // Non key holder can only ever exist if it's been set via nested loading
                         it("should not publish unless there is an instance set", function() {
                             makePassport(1);
@@ -2322,6 +2455,14 @@ describe("Ext.app.ViewModel", function() {
                             var proxySpy = spyOn(Group.getProxy(), 'read');
                             setNotify('user', user);
                             expect(proxySpy).toHaveBeenCalled();
+                        });
+
+                        it("should not load the store if the record is a phantom", function() {
+                            makeUser();
+                            bindNotify('{user.groups}', spy);
+                            var proxySpy = spyOn(Group.getProxy(), 'read');
+                            setNotify('user', user);
+                            expect(proxySpy).not.toHaveBeenCalled();
                         });
 
                         it("should not load the store if it's already been loaded", function() {
@@ -2422,6 +2563,14 @@ describe("Ext.app.ViewModel", function() {
                             var proxySpy = spyOn(User.getProxy(), 'read');
                             setNotify('group', group);
                             expect(proxySpy).toHaveBeenCalled();
+                        });
+
+                        it("should not load the store if the record is a phantom", function() {
+                            makeGroup();
+                            bindNotify('{group.users}', spy);
+                            var proxySpy = spyOn(User.getProxy(), 'read');
+                            setNotify('group', group);
+                            expect(proxySpy).not.toHaveBeenCalled();
                         });
 
                         it("should not load the store if it's already been loaded", function() {
@@ -2932,6 +3081,27 @@ describe("Ext.app.ViewModel", function() {
                 expect(scheduler.passes).toBe(3);
                 expect(calls).toBe(2);
                 expect(value).toBe('Greetings Evan!');
+            });
+
+            it("should call the setter in the parent viewmodel when setting the value on a binding bound to a formula in a parent viewmodel", function() {
+                var spy = jasmine.createSpy();
+                viewModel.bind('{firstName} {lastName}', spy);
+                var nameBind = grandSubViewModel.bind('{fullName}', Ext.emptyFn);
+                notify();
+                nameBind.setValue('Foo Bar');
+                notify();
+                expect(spy).toHaveBeenCalled();
+                expect(spy.mostRecentCall.args[0]).toBe('Foo Bar');
+            });
+
+            it("should call the setter in the parent viewmodel when setting the value on a stub bound to a formula in a parent viewmodel", function() {
+                var spy = jasmine.createSpy();
+                viewModel.bind('{firstName} {lastName}', spy);
+                grandSubViewModel.bind('{fullName}', Ext.emptyFn);
+                grandSubViewModel.set('fullName', 'Foo Bar');
+                notify();
+                expect(spy).toHaveBeenCalled();
+                expect(spy.mostRecentCall.args[0]).toBe('Foo Bar');
             });
         }); // with formulas
     }); 
@@ -3586,6 +3756,162 @@ describe("Ext.app.ViewModel", function() {
                 expect(result.posts.getCount()).toBe(2);
             });
         });
+
+        describe("trackStatics", function() {
+            var options = {trackStatics: true};
+
+            describe("root level", function() {
+                it("should prune static string values", function() {
+                    var binding = viewModel.bind({
+                        a: 'foo',
+                        b: 'bar'
+                    }, spy, null, options);
+                    notify();
+                    expect(binding.pruneStaticKeys()).toEqual({});
+                });
+
+                it("should prune static numeric values", function() {
+                    var binding = viewModel.bind({
+                        a: 1,
+                        b: Math.PI
+                    }, spy, null, options);
+                    notify();
+                    expect(binding.pruneStaticKeys()).toEqual({});
+                });
+
+                it("should prune static boolean values", function() {
+                   var binding = viewModel.bind({
+                        a: true,
+                        b: false
+                    }, spy, null, options);
+                    notify();
+                    expect(binding.pruneStaticKeys()).toEqual({}); 
+                });
+
+                it("should prune static arrays", function() {
+                    var binding = viewModel.bind({
+                        a: [1, 2, 3],
+                        b: ['a', 'b', 'c']
+                    }, spy, null, options);
+                    notify();
+                    expect(binding.pruneStaticKeys()).toEqual({}); 
+                });
+
+                it("should prune static objects", function() {
+                    var binding = viewModel.bind({
+                        a: {
+                            p: 1,
+                            q: 2
+                        },
+                        b: {
+                            r: 'a',
+                            s: 'b'
+                        }
+                    }, spy, null, options);
+                    notify();
+                    expect(binding.pruneStaticKeys()).toEqual({}); 
+                });
+
+                it("should not prune a dynamic value", function() {
+                    var binding = viewModel.bind({
+                        a: '{value}'
+                    }, spy, null, options);
+                    setNotify('value', 'foo');
+                    expect(binding.pruneStaticKeys()).toEqual({
+                        a: 'foo'
+                    });   
+                });
+            });
+
+            describe("nested values", function() {
+                it("should prune deeply nested static objects", function() {
+                    var binding = viewModel.bind({
+                        a: {
+                            b: {
+                                x: {
+                                    q: 1,
+                                    r: {
+                                        s: 2
+                                    }
+                                }
+                            },
+                            c: {
+                                y: {
+                                    z: 100
+                                }
+                            },
+                            d: [100, 200, 300, 400]
+                        }
+                    }, spy, null, options);
+                    notify();
+                    expect(binding.pruneStaticKeys()).toEqual({}); 
+                });
+
+                it("should not prune an array of objects where the objects are dynamic", function() {
+                    var binding = viewModel.bind({
+                        root: [{
+                            property: 'foo',
+                            value: '{value}'
+                        }, {
+                            property: 'bar',
+                            value: '{value}'
+                        }, {
+                            property: 'baz',
+                            value: '{value}'
+                        }]
+                    }, spy, null, options);
+                    setNotify('value', 1);
+                    expect(binding.pruneStaticKeys()).toEqual({
+                        root: [{
+                            property: 'foo',
+                            value: 1
+                        }, {
+                            property: 'bar',
+                            value: 1
+                        }, {
+                            property: 'baz',
+                            value: 1
+                        }]
+                    }); 
+                });
+
+                it("should not prune nested objects where the children are dynamic", function() {
+                    var binding = viewModel.bind({
+                        root: {
+                            a: {
+                                property: 'foo',
+                                value: '{value}'
+                            },
+                            b: {
+                                property: 'bar',
+                                value: '{value}'
+                            },
+                            c: {
+                                property: 'baz',
+                                value: '{value}'
+                            }
+                        }
+                    }, spy, null, options);
+                    setNotify('value', 1);
+                    expect(binding.pruneStaticKeys()).toEqual({
+                        root: {
+                            a: {
+                                property: 'foo',
+                                value: 1
+                            },
+                            b: {
+                                property: 'bar',
+                                value: 1
+                            },
+                            c: {
+                                property: 'baz',
+                                value: 1
+                            }
+                        }
+                    });
+                });
+            });
+        });
     });
 
     describe("stores", function() {
@@ -4059,6 +4385,32 @@ describe("Ext.app.ViewModel", function() {
                         expect(s.getDirection()).toBe('DESC');
                     });
                 });
+
+                describe("filters + sorters with remoteSort & remoteFilter", function() {
+                    it("should only trigger a single load", function() {
+                        viewModel.set('prop', 'a');
+                        viewModel.setStores({
+                            users: {
+                                model: 'spec.User',
+                                remoteFilter: true,
+                                remoteSort: true,
+                                sorters: [{
+                                    property: '{prop}',
+                                    direction: 'ASC'
+                                }],
+                                filters: [{
+                                    property: 'foo',
+                                    value: '{prop}'
+                                }]
+                            }
+                        });
+                        notify();
+                        var store = viewModel.getStore('users');
+                        spyOn(store, 'load');
+                        setNotify('prop', 'b');
+                        expect(store.load.callCount).toBe(1);
+                    });
+                });
             });
         });
         
@@ -4130,6 +4482,30 @@ describe("Ext.app.ViewModel", function() {
                     child = viewModel.getStore('child');
 
                 expect(child.getSource()).toBe(parent);
+            });
+
+            describe("bindings", function() {
+                it("should be able to bind to chained store configs", function() {
+                    viewModel.setStores({
+                        parent: {
+                            model: 'spec.User'
+                        },
+                        child: {
+                            source: '{parent}',
+                            filters: [{
+                                property: 'foo',
+                                value: '{foo}'
+                            }]
+                        }
+                    });
+                    notify();
+                    setNotify('foo', 1);
+
+                    var child = viewModel.getStore('child');
+                    expect(child.getFilters().getAt(0).getValue()).toBe(1);
+                    setNotify('foo', 2);
+                    expect(child.getFilters().getAt(0).getValue()).toBe(2);
+                });
             });
         });
 
@@ -4228,6 +4604,560 @@ describe("Ext.app.ViewModel", function() {
             });
         });
     });
+
+    describe("linking", function() {
+        var User;
+
+        function makeUser(id, data) {
+            return makeRecord(User, id, data);
+        }
+
+        beforeEach(function() {
+            User = Ext.define('spec.User', {
+                extend: 'Ext.data.Model',
+                fields: ['id', 'name']
+            });
+        });
+
+        afterEach(function() {
+            Ext.undefine('spec.User');
+            User = null;
+        });
+
+        describe("links", function() {
+            function createWithConfig(cfg) {
+                createViewModel(null, cfg);
+            }
+
+            it("should accept the entityName", function() {
+                createWithConfig({
+                    links: {
+                        theUser: {
+                            type: 'User',
+                            id: 18
+                        }
+                    }
+                });
+                bindNotify('{theUser}', spy);
+                completeNotify({});
+                var arg = spy.mostRecentCall.args[0];
+                expect(arg.$className).toBe('spec.User');
+                expect(arg.getId()).toBe(18);
+            });
+
+            it("should accept the full class name", function() {
+                createWithConfig({
+                    links: {
+                        theUser: {
+                            type: 'spec.User',
+                            id: 18
+                        }
+                    }
+                });
+                bindNotify('{theUser}', spy);
+                completeNotify({});
+                var arg = spy.mostRecentCall.args[0];
+                expect(arg.$className).toBe('spec.User');
+                expect(arg.getId()).toBe(18);
+            });
+
+            it("should accept a model type", function() {
+                createWithConfig({
+                    links: {
+                        theUser: {
+                            type: spec.User,
+                            id: 18
+                        }
+                    }
+                });
+                bindNotify('{theUser}', spy);
+                completeNotify({});
+                var arg = spy.mostRecentCall.args[0];
+                expect(arg.$className).toBe('spec.User');
+                expect(arg.getId()).toBe(18);
+            });
+
+            it("should accept a model instance but create a new instance of the same type/id", function() {
+                var rec = new spec.User({
+                    id: 18
+                });
+                createWithConfig({
+                    links: {
+                        theUser: rec
+                    }
+                });
+                bindNotify('{theUser}', spy);
+                completeNotify({});
+                var arg = spy.mostRecentCall.args[0];
+                expect(arg.$className).toBe('spec.User');
+                expect(arg.getId()).toBe(18);
+                expect(arg).not.toBe(rec);
+            });
+
+            it("should raise an exception if id is not specified", function() {
+                expect(function() {
+                    createWithConfig({
+                        links: {
+                            theUser: {
+                                type: 'spec.User'
+                            }
+                        }
+                    });
+                }).toThrow();
+            });
+
+            describe("with the create option", function() {
+                describe("with create: true", function() {
+                    it("should create a phantom record", function() {
+                        createWithConfig({
+                            links: {
+                                theUser: {
+                                    type: 'spec.User',
+                                    create: true
+                                }
+                            }
+                        });
+                        bindNotify('{theUser}', spy);
+                        expect(spy.mostRecentCall.args[0].phantom).toBe(true);
+                    });
+
+                    it("should not load from the server", function() {
+                        spy = spyOn(User.getProxy(), 'read');
+                        createWithConfig({
+                            links: {
+                                theUser: {
+                                    type: 'spec.User',
+                                    create: true
+                                }
+                            }
+                        });
+                        notify();
+                        expect(spy).not.toHaveBeenCalled();
+                    });
+
+                    describe("with session", function() {
+                        it("should push the phantom into the session", function() {
+                            createViewModel(true, {
+                                links: {
+                                    theUser: {
+                                        type: 'spec.User',
+                                        create: true
+                                    }
+                                }
+                            });
+                            bindNotify('{theUser}', spy);
+                            var user = spy.mostRecentCall.args[0];
+                            expect(user.session).toBe(session);
+                        });
+                    });
+                });
+
+                describe("with create as an object", function() {
+                    it("should create a phantom record with the passed data", function() {
+                        createWithConfig({
+                            links: {
+                                theUser: {
+                                    type: 'spec.User',
+                                    create: {
+                                        name: 'Foo',
+                                        group: 'Bar'
+                                    }
+                                }
+                            }
+                        });
+                        bindNotify('{theUser}', spy);
+                        var user = spy.mostRecentCall.args[0];
+                        expect(user.phantom).toBe(true);
+                        expect(user.get('name')).toBe('Foo');
+                        expect(user.get('group')).toBe('Bar');
+                    });
+
+                    it("should not load from the server", function() {
+                        spy = spyOn(User.getProxy(), 'read');
+                        createWithConfig({
+                            links: {
+                                theUser: {
+                                    type: 'spec.User',
+                                    create: {
+                                        name: 'Foo',
+                                        group: 'Bar'
+                                    }
+                                }
+                            }
+                        });
+                        notify();
+                        expect(spy).not.toHaveBeenCalled();
+                    });
+
+                    describe("with session", function() {
+                        it("should push the phantom into the session", function() {
+                            createViewModel(true, {
+                                links: {
+                                    theUser: {
+                                        type: 'spec.User',
+                                        create: {
+                                            name: 'Foo',
+                                            group: 'Bar'
+                                        }
+                                    }
+                                }
+                            });
+                            bindNotify('{theUser}', spy);
+                            var user = spy.mostRecentCall.args[0];
+                            expect(user.session).toBe(session);
+                        });
+                    });
+                });
+            });
+
+            it("should request the data from the server", function() {
+                spy = spyOn(User.getProxy(), 'read');
+                createWithConfig({
+                    links: {
+                        theUser: {
+                            type: 'spec.User',
+                            id: 18
+                        }
+                    }
+                });
+                expect(spy.mostRecentCall.args[0].getId()).toBe(18);
+            });
+
+            it("should not publish until the record returns", function() {
+                createWithConfig({
+                    links: {
+                        theUser: {
+                            type: 'spec.User',
+                            id: 18
+                        }
+                    }
+                });
+                bindNotify('{theUser}', spy);
+                expect(spy).not.toHaveBeenCalled();
+                completeNotify({});
+                expect(spy.mostRecentCall.args[0].getId()).toBe(18);
+            });
+
+            it("should be able to change the link at runtime", function() {
+                createWithConfig({
+                    links: {
+                        theUser: {
+                            type: 'spec.User',
+                            id: 18
+                        }
+                    }
+                });
+                bindNotify('{theUser}', spy);
+                completeNotify({});
+                spy.reset();
+                viewModel.linkTo('theUser', {
+                    type: 'User',
+                    id: 34
+                });
+                completeNotify({});
+                expect(spy.mostRecentCall.args[0].getId()).toBe(34);
+            });
+
+            describe("with sessions", function() {
+                it("should use an existing record in the session and not query the server", function() {
+                    var proxySpy = spyOn(User.getProxy(), 'read');
+                    makeSession();
+                    makeUser(22);
+                    createViewModel(true, {
+                        links: {
+                            theUser: {
+                                type: 'User',
+                                id: 22
+                            }
+                        }
+                    });
+                    bindNotify('{theUser}', spy);
+                    expect(spy.mostRecentCall.args[0]).toBe(session.getRecord('User', 22));
+                    expect(proxySpy).not.toHaveBeenCalled();
+                });
+
+                it("should create a non-existent record in the session and load it", function() {
+                    createViewModel(true, {
+                        links: {
+                            theUser: {
+                                type: 'User',
+                                id: 89
+                            }
+                        }
+                    });
+                    var user = session.getRecord('User', 89);
+                    expect(user.isLoading()).toBe(true);
+                });
+            });
+        });
+
+        describe("linkTo", function() {
+            it("should accept the entityName", function() {
+                createViewModel();
+                bindNotify('{theUser}', spy);
+                viewModel.linkTo('theUser', {
+                    type: 'User',
+                    id: 18
+                });
+                completeNotify({});
+                var arg = spy.mostRecentCall.args[0];
+                expect(arg.$className).toBe('spec.User');
+                expect(arg.getId()).toBe(18);
+            });
+
+            it("should accept the full class name", function() {
+                createViewModel();
+                bindNotify('{theUser}', spy);
+                viewModel.linkTo('theUser', {
+                    type: 'spec.User',
+                    id: 18
+                });
+                completeNotify({});
+                var arg = spy.mostRecentCall.args[0];
+                expect(arg.$className).toBe('spec.User');
+                expect(arg.getId()).toBe(18);
+            });
+
+            it("should accept a model type", function() {
+                createViewModel();
+                bindNotify('{theUser}', spy);
+                viewModel.linkTo('theUser', {
+                    type: spec.User,
+                    id: 18
+                });
+                completeNotify({});
+                var arg = spy.mostRecentCall.args[0];
+                expect(arg.$className).toBe('spec.User');
+                expect(arg.getId()).toBe(18);
+            });
+
+            it("should accept a model instance but create a copy of the same type/id", function() {
+                createViewModel();
+                var rec = new spec.User({
+                    id: 18
+                });
+                bindNotify('{theUser}', spy);
+                viewModel.linkTo('theUser', rec);
+                completeNotify({});
+                var arg = spy.mostRecentCall.args[0];
+                expect(arg.$className).toBe('spec.User');
+                expect(arg.getId()).toBe(18);
+                expect(arg).not.toBe(rec);
+            });
+
+            it("should create a record with the matching id", function() {
+                createViewModel();
+                bindNotify('{theUser}', spy);
+                viewModel.linkTo('theUser', {
+                    type: 'spec.User',
+                    id: 18
+                });
+                completeNotify({});
+                expect(spy.mostRecentCall.args[0].getId()).toBe(18);
+            });
+
+            it("should raise an exception if id is not specified", function() {
+                createViewModel();
+                expect(function() {
+                    viewModel.linkTo('theUser', {
+                        type: 'spec.User'
+                    });
+                }).toThrow();
+            });
+
+            describe("with the create option", function() {
+                describe("with create: true", function() {
+                    it("should create a phantom record", function() {
+                        createViewModel();
+                        bindNotify('{theUser}', spy);
+                        viewModel.linkTo('theUser', {
+                            type: 'spec.User',
+                            create: true
+                        });
+                        notify();
+                        expect(spy.mostRecentCall.args[0].phantom).toBe(true);
+                    });
+
+                    it("should not load from the server", function() {
+                        createViewModel();
+                        spy = spyOn(User.getProxy(), 'read');
+                        viewModel.linkTo('theUser', {
+                            type: 'spec.User',
+                            create: true
+                        });
+                        notify();
+                        expect(spy).not.toHaveBeenCalled();
+                    });
+
+                    describe("with session", function() {
+                        it("should push the phantom into the session", function() {
+                            createViewModel(true);
+                            bindNotify('{theUser}', spy);
+                            viewModel.linkTo('theUser', {
+                                type: 'spec.User',
+                                create: true
+                            });
+                            notify();
+                            var user = spy.mostRecentCall.args[0];
+                            expect(user.session).toBe(session);
+                        });
+                    });
+                });
+
+                describe("with create as an object", function() {
+                    it("should create a phantom record with the passed data", function() {
+                        createViewModel();
+                        bindNotify('{theUser}', spy);
+                        viewModel.linkTo('theUser', {
+                            type: 'spec.User',
+                            create: {
+                                name: 'Foo',
+                                group: 'Bar'
+                            }
+                        });
+                        notify();
+                        var user = spy.mostRecentCall.args[0];
+                        expect(user.phantom).toBe(true);
+                        expect(user.get('name')).toBe('Foo');
+                        expect(user.get('group')).toBe('Bar');
+                    });
+
+                    it("should not load from the server", function() {
+                        createViewModel();
+                        spy = spyOn(User.getProxy(), 'read');
+                        viewModel.linkTo('theUser', {
+                            type: 'spec.User',
+                            create: {
+                                name: 'Foo',
+                                group: 'Bar'
+                            }
+                        });
+                        notify();
+                        expect(spy).not.toHaveBeenCalled();
+                    });
+
+                    describe("with session", function() {
+                        it("should push the phantom into the session", function() {
+                            createViewModel(true);
+                            bindNotify('{theUser}', spy);
+                            viewModel.linkTo('theUser', {
+                                type: 'spec.User',
+                                create: { 
+                                    name: 'Foo',
+                                    group: 'Bar'
+                                }
+                            });
+                            notify();
+                            var user = spy.mostRecentCall.args[0];
+                            expect(user.session).toBe(session);
+                        });
+                    });
+                });
+            });
+
+            it("should request the data from the server", function() {
+                createViewModel();
+                spy = spyOn(User.getProxy(), 'read');
+                viewModel.linkTo('theUser', {
+                    type: 'spec.User',
+                    id: 18
+                });
+                expect(spy.mostRecentCall.args[0].getId()).toBe(18);
+            });
+
+            it("should not publish until the record returns", function() {
+                createViewModel();
+                bindNotify('{theUser}', spy);
+                viewModel.linkTo('theUser', {
+                    type: 'User',
+                    id: 18
+                });
+                expect(spy).not.toHaveBeenCalled();
+            });
+
+            it("should be able to change the link at runtime", function() {
+                createViewModel();
+                bindNotify('{theUser}', spy);
+                viewModel.linkTo('theUser', {
+                    type: 'User',
+                    id: 18
+                });
+                completeNotify({});
+                spy.reset();
+                viewModel.linkTo('theUser', {
+                    type: 'User',
+                    id: 34
+                });
+                completeNotify({});
+                expect(spy.mostRecentCall.args[0].getId()).toBe(34);
+            });
+
+            describe("with session", function() {
+                it("should use an existing record in the session and not query the server", function() {
+                    createViewModel(true);
+                    var proxySpy = spyOn(User.getProxy(), 'read');
+                    makeUser(22);
+                    bindNotify('{theUser}', spy);
+                    viewModel.linkTo('theUser', {
+                        type: 'User',
+                        id: 22
+                    });
+                    notify();
+                    expect(spy.mostRecentCall.args[0]).toBe(session.getRecord('User', 22));
+                    expect(proxySpy).not.toHaveBeenCalled();
+                });
+
+                it("should create a non-existent record in the session and load it", function() {
+                    createViewModel(true);
+                    // Not there...
+                    expect(session.peekRecord('User', 89)).toBeNull();
+                    viewModel.linkTo('theUser', {
+                        type: 'User',
+                        id: 89
+                    });
+                    var user = session.getRecord('User', 89);
+                    expect(user.isLoading()).toBe(true);
+                });
+            });
+
+            describe("with a parent viewmodel", function() {
+                it("should create new model instances in the child view model when linking after binding", function() {
+                    createViewModel();
+
+                    var child1 = new Ext.app.ViewModel({parent: viewModel}),
+                        child2 = new Ext.app.ViewModel({parent: viewModel});
+
+                    child1.bind('{theUser}', spy);
+                    child2.bind('{theUser}', spy);
+                    notify();
+
+                    child1.linkTo('theUser', {
+                        type: 'User',
+                        id: 100
+                    });
+
+                    child2.linkTo('theUser', {
+                        type: 'User',
+                        id: 100
+                    });
+
+                    complete({});
+                    complete({});
+                    notify();
+                    
+                    expect(spy.callCount).toBe(2);
+                    var user1 = spy.calls[0].args[0],
+                        user2 = spy.calls[1].args[0];
+
+                    expect(user1).not.toBe(user2);
+                    expect(user1.getId()).toBe(user2.getId());
+                    expect(user1.$className).toBe(user2.$className);
+
+                    Ext.destroy(child1, child2);
+                });
+            });
+        });
+    }); 
     
     describe("formulas", function() {
         beforeEach(function() {
@@ -4704,6 +5634,46 @@ describe("Ext.app.ViewModel", function() {
             var binding = bindNotify('{foo}', Ext.emptyFn);
             binding.destroy();
             expect(peekStub('foo')).toBeNull();
+        });
+    });
+
+    describe("destruction", function() {
+        it("should destroy any child view models", function() {
+            createViewModel();
+            var child = new Ext.app.ViewModel({
+                parent: viewModel
+            });
+
+            viewModel.destroy();
+            expect(child.isDestroyed).toBe(true);
+        });
+
+        describe("bindings", function() {
+            beforeEach(function() {
+                createViewModel();
+            });
+
+            it("should destroy expression bindings", function() {
+                var binding = viewModel.bind('{foo}', Ext.emptyFn);
+                viewModel.destroy();
+                expect(binding.destroyed).toBe(true);
+            });
+
+            it("should destroy template bindings", function() {
+                var binding = viewModel.bind('Hello {foo}', Ext.emptyFn);
+                viewModel.destroy();
+                expect(binding.destroyed).toBe(true);
+            });
+
+            it("should destroy multi bindings", function() {
+                var binding = viewModel.bind({
+                    a: '{foo}',
+                    b: '{bar}',
+                    c: '{baz}'
+                }, Ext.emptyFn);
+                viewModel.destroy();
+                expect(binding.destroyed).toBe(true);
+            });
         });
     });
 });

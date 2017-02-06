@@ -76,7 +76,7 @@ Ext.define('Ext.util.ElementContainer', {
          * - `id` - The id of the child element.
          * - `leaf` - Set to `true` to ignore content when scanning for childEls. This
          *  should be set on things like the generated content for an `Ext.view.View`.
-         * - `select`: A selector that will be passed to {@link Ext.dom.Element#select}.
+         * - `select`: A selector that will be passed to {@link Ext.dom.Element#method-select}.
          * - `selectNode`: A selector that will be passed to {@link Ext.dom.Element#method-selectNode}.
          *
          * For example:
@@ -135,6 +135,11 @@ Ext.define('Ext.util.ElementContainer', {
          *             }
          *         }
          *     });
+         * 
+         * **Note:** `childEl`s in the {@link Ext.Component#cfg-renderTpl renderTpl} 
+         * must be referenced in a **data-ref** attribute.  Notice in the above example 
+         * that the "title" `childEl` is set in the `renderTpl` using 
+         * **data-ref="title"**.
          *
          * When using `select`, the property will be an instance of {@link Ext.CompositeElement}.
          * In all other cases, the property will be an {@link Ext.dom.Element} or `null`
@@ -212,6 +217,7 @@ Ext.define('Ext.util.ElementContainer', {
 
             if (child) {
                 if (child.destroy) {
+                    child.component = null;
                     child.destroy();
                 }
                 me[childName] = null;

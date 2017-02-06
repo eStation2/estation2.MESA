@@ -58,6 +58,8 @@ Ext.define("esapp.view.acquisition.logviewer.LogView",{
 
         //me.id = 'logviewer' + me.params.logtype + me.params.record.get('productid');
 
+        me.title = esapp.Utils.getTranslation('logviewer');     // 'Log viewer',
+
         me.tbar = ['  ',
             {
                 xtype: 'textfield',

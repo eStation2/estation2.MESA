@@ -3,12 +3,6 @@
     "index.html.tpl.merge": {
       "349bb3bac7fdf5ede4da07cbbf7ea56bac1107e9": "eJxNkE1PwzAMhu/7FV7uoVcOSSVUhkACgUQnwTFNPJqRLxJ3UCH+OyndAV/88fi1Xllsrx+7/vVpB7f9w327ESN5B14Fe8BCkrFlhMq0G6ghPJKCkShx/JjsSbIXvr/iXfRJkR0cMtAxEIaqvNtJNG/I/iv1qHLBCvf9Db+saGVkyWH7HZTHH9Gs3RltOYd+RHA2IAzo4if4qVAt4R0TgQ2kNMEhZnjGUO9D5w1QhGGyzsAcpwwqJWd1NRgDcH72U3S2i95I5q3O0UVlMDOgOaFkhF/UHNVJrWsMStaSDTFSoazSxbGwVjQrrFZFs/5IDNHMFfylZVqf2W5+AaJJcgQ\u003d"
     },
-    "app.json.tpl.merge": {
-      "6f874cf3761f0053697b20cf449cddff5496a400": "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\u003d\u003d"
-    },
-    "app.js.tpl.merge": {
-      "f8d6fce7034df68f1e1ae8d7980db28e3b143501": "eJytUj1PwzAQncmveFuhCskOE6oYGMoCQmJ040ti4fgifzQtVf87tktpKzHWg33y3Xt3fs/1vMAc771yaJUmxLMjQ1Z4khBGIowyx6st3sg0vcBikBU+OaARBiSVh/+DC5foDJGMkJYtthwsxDhq1Qiv2JRYhQQgRxnrMCmt0Ys1wTNWhIFsl/slplNLTD2ZOE1nhVSmq2K2Lp43vjojv90ViMuIgR4w28XMawz3s7LI97TxZOR5pno6gWNVKsqbCJ4XluLDPxRNI1t/gVrHy2oQylTLuM2Kmwyq6/trrV8+LNl5NMF5HtR3ntLB9Ry0zEoJmUX79zkVXtqkfjYjVh0pj2x0cq2E5CgpXNJf83TIOGoSDyzJ0JBLnkGrL9KqZ5ZHOm4PhqFh08beydALo9KAhiasybo8f0ScfaSrK7e/eyx+AB7S2Ps\u003d"
-    },
     "development.properties.merge": {
       "c45c602c9b6f6f73cace183e9f0bf09c00a3ccf6": "eJytkUuOAjEMBfec4one9w24wyy4QFDc0xbBjhyTEbcfp0F89mRny6l6liccvvl2E44rNyxcCNW0c6aGJNBOZlGgKotjUUOmJV2LoyfjdCoxFx0WymBBgJyas/zOj7k2B6+SOVObw0JtMzw6SEZQKTfwpap5UP5WEpyuXHJQgjecvhL2mToVrRcS34Oks6mMYt5NMfbzYr7l8edWns5DzGrst22vu+QtXjR8BAraFqloyoEZAT7l28cW3i9f4R+b7pUs"
     },
@@ -30,17 +24,8 @@
     "native.properties.merge": {
       "2c8c063f9588eecff09624782d7369a8a000d61c": "eJytkEsOwjAMRPecYkT3vQF3YMEFguJSi2BXjgni9rgfFQ5AdrEm743T4fTPc+hwGbli4EKYTBtnqkgCbWQWF0zK4hjUkGlIz+JoyThdS+RiwkIZLAiQJOdG/RarfeAmMmeqfUioLoJtgmQElfIGPyY1D8hrJMH1ySWz3AI3K30kHFfuESSNTeVB4v2hi8T5i/tp4vs+nu6zk9XY38tGK/+nWQx87hK0pU3RlAMzu3fv8qaG8s9f/wFV3ZB9"
     },
-    "theme.html.tpl.merge": {
-      "32f685a8af28baafcc7999862d0bd1f25df0e48b": "eJx1U02P0zAQvedXzPoEFW66CwfUTXopiwAhgbTlwNF1po13HdvY0zYR4r9jOwXSBXxI5HnzPqyxq6s3n9abr5/voKVOr4rqivMCANbWDV7tW4Jn8jncLK5vePy8nMM9GtkKeG/kvOA8Es68FkWzSkyoSJHG1V1P8OEeNi12CO+ENxhCVY7Y2NchiWhLjuO3gzrWbG0NoSG+GRwykOOuZoQ9lcnmFqK1D0j1l81b/pqtilHonBk+WtGA0Bp8EvTYgFbmMYAwDQTplaOQ+1LuTExwbNY1CzRoDC0iMaBof3aVITBoPe5qhr3onMZ5LpVngVF1yngQRzFWGQQva7a1lgJ54eYPga2qcgR/Rc++o1ha85Nq9kg8nV0ogx6+/8bS6oTfK7OE64Xrby+QSKR2Ca8WfyHOBkXKRlY8qSB1xEvcHtHvtD0t4aiC2uoJ/KP4k6znQSuJnlPMgPTivwjMnoS2TkhFQ0z9T+VyBmjCwSNsbTNAYzGAsZRzaeGAWgRvD6aJ85Q23iMfwO5g50UXK04Y1OVJmcae4NSigRRGmT3MymnE3MeTw0XykZjrT1JvhXzcZ98lxPGZ4ISP13F6hDzB8jzCqpw8gaQXZ51/Cclv5CfT2f4m"
-    },
     "config.rb.tpl.merge": {
       "33f446bd02c3fd24eb27891582eff6a2e789796b": "eJxLLi2KT8ksUrBVcMvMSdUDMvMSc1M14uPdPH1c4+M1ufJLSwpKS+KLSypzUoGqrPJSi0tSU7gALskTcA\u003d\u003d"
-    },
-    "{controllerFileName}.js.tpl.merge": {
-      "b092f4aad11d2f7eaab5ce3e2dcc2fc3134f3188": "eJxzrSjRS0lNy8xL1VCvTs7PKynKz8lJLfJLzE0tLkhMTq3VQxOtVddRqOZSAILUipLUvBQrBXVXoBmJBQV6znCF6ly1mtZcACwSIF0\u003d"
-    },
-    "{modelFileName}.js.tpl.merge": {
-      "31d5356142a167c72422f7902f19df3c583f3249": "eJxlUcFugzAMvfMVVqUq0CLorlC6w7TrfgBxSMG00dKAktAxRfn3GWg7rfMhdvKeX16c99EmDbZCYcjcpWtQfvALmp7X6BOnqPYsBhcABY4WVZMBc0du8E1yYwicoXlpBcrGZFC69byf4srlgCZZICggbAdVW9Epquaz6CZ+j7bTEF65Bo2W+GUVQ8+1nXqXhsT0UtiQxSyKQdDxLqe0X1iJRHWy5xy2W/GsvNjR0FLPTC5FdRfLWJT/I5ODpB/MOXQwDSKDttyRHfvdz/VLBf6pywfBk8Cg1ZTyX8BH4Z+h3CTWfm97OT2/WC3A6vDouRtgjx9ZTDA3Zc/AuxLCUagGRygKGOtuUDaCV2AMiBYzqPw+pQsOgVtDuoGj5OoTJP072I4cNkONcEF9Qqg71UpR08i/0sGgBmwEbTYpeZwdVcH07h/XJaFF"
     }
   },
   "targets": {
@@ -58,65 +43,12 @@
         "controllerNamespace": "esapp.controller",
         "frameworkName": "ext",
         "frameworkPath": "ext",
-        "library": "all",
         "modelNamespace": "esapp.model",
         "name": "esapp",
         "packagesRelPath": "ext/packages",
         "senchadir": ".sencha",
         "themeName": "default",
-        "uniqueId": "be5eaf97-9928-48cc-94c8-e0ddfd4f49fb",
-        "viewFileName": "Main",
-        "viewName": "Main",
-        "viewNamespace": "esapp.view"
-      }
-    },
-    "app.json": {
-      "source": "app.json.tpl.merge",
-      "version": "6f874cf3761f0053697b20cf449cddff5496a400",
-      "parameters": {
-        "appControllers": "",
-        "appModels": "",
-        "appName": "esapp",
-        "appStores": "",
-        "appViews": "",
-        "controllerFileName": "Main",
-        "controllerName": "Main",
-        "controllerNamespace": "esapp.controller",
-        "frameworkName": "ext",
-        "frameworkPath": "ext",
-        "library": "all",
-        "modelNamespace": "esapp.model",
-        "name": "esapp",
-        "packagesRelPath": "ext/packages",
-        "senchadir": ".sencha",
-        "themeName": "default",
-        "uniqueId": "be5eaf97-9928-48cc-94c8-e0ddfd4f49fb",
-        "viewFileName": "Main",
-        "viewName": "Main",
-        "viewNamespace": "esapp.view"
-      }
-    },
-    "app.js": {
-      "source": "app.js.tpl.merge",
-      "version": "f8d6fce7034df68f1e1ae8d7980db28e3b143501",
-      "parameters": {
-        "appControllers": "",
-        "appModels": "",
-        "appName": "esapp",
-        "appStores": "",
-        "appViews": "",
-        "controllerFileName": "Main",
-        "controllerName": "Main",
-        "controllerNamespace": "esapp.controller",
-        "frameworkName": "ext",
-        "frameworkPath": "ext",
-        "library": "all",
-        "modelNamespace": "esapp.model",
-        "name": "esapp",
-        "packagesRelPath": "ext/packages",
-        "senchadir": ".sencha",
-        "themeName": "default",
-        "uniqueId": "be5eaf97-9928-48cc-94c8-e0ddfd4f49fb",
+        "uniqueId": "9d809c7b-47e7-493b-8255-f3d739e7e3ce",
         "viewFileName": "Main",
         "viewName": "Main",
         "viewNamespace": "esapp.view"
@@ -136,13 +68,12 @@
         "controllerNamespace": "esapp.controller",
         "frameworkName": "ext",
         "frameworkPath": "ext",
-        "library": "all",
         "modelNamespace": "esapp.model",
         "name": "esapp",
         "packagesRelPath": "ext/packages",
         "senchadir": ".sencha",
         "themeName": "default",
-        "uniqueId": "be5eaf97-9928-48cc-94c8-e0ddfd4f49fb",
+        "uniqueId": "9d809c7b-47e7-493b-8255-f3d739e7e3ce",
         "viewFileName": "Main",
         "viewName": "Main",
         "viewNamespace": "esapp.view"
@@ -162,13 +93,12 @@
         "controllerNamespace": "esapp.controller",
         "frameworkName": "ext",
         "frameworkPath": "ext",
-        "library": "all",
         "modelNamespace": "esapp.model",
         "name": "esapp",
         "packagesRelPath": "ext/packages",
         "senchadir": ".sencha",
         "themeName": "default",
-        "uniqueId": "be5eaf97-9928-48cc-94c8-e0ddfd4f49fb",
+        "uniqueId": "9d809c7b-47e7-493b-8255-f3d739e7e3ce",
         "viewFileName": "Main",
         "viewName": "Main",
         "viewNamespace": "esapp.view"
@@ -188,13 +118,12 @@
         "controllerNamespace": "esapp.controller",
         "frameworkName": "ext",
         "frameworkPath": "ext",
-        "library": "all",
         "modelNamespace": "esapp.model",
         "name": "esapp",
         "packagesRelPath": "ext/packages",
         "senchadir": ".sencha",
         "themeName": "default",
-        "uniqueId": "be5eaf97-9928-48cc-94c8-e0ddfd4f49fb",
+        "uniqueId": "9d809c7b-47e7-493b-8255-f3d739e7e3ce",
         "viewFileName": "Main",
         "viewName": "Main",
         "viewNamespace": "esapp.view"
@@ -214,13 +143,12 @@
         "controllerNamespace": "esapp.controller",
         "frameworkName": "ext",
         "frameworkPath": "ext",
-        "library": "all",
         "modelNamespace": "esapp.model",
         "name": "esapp",
         "packagesRelPath": "ext/packages",
         "senchadir": ".sencha",
         "themeName": "default",
-        "uniqueId": "be5eaf97-9928-48cc-94c8-e0ddfd4f49fb",
+        "uniqueId": "9d809c7b-47e7-493b-8255-f3d739e7e3ce",
         "viewFileName": "Main",
         "viewName": "Main",
         "viewNamespace": "esapp.view"
@@ -240,13 +168,12 @@
         "controllerNamespace": "esapp.controller",
         "frameworkName": "ext",
         "frameworkPath": "ext",
-        "library": "all",
         "modelNamespace": "esapp.model",
         "name": "esapp",
         "packagesRelPath": "ext/packages",
         "senchadir": ".sencha",
         "themeName": "default",
-        "uniqueId": "be5eaf97-9928-48cc-94c8-e0ddfd4f49fb",
+        "uniqueId": "9d809c7b-47e7-493b-8255-f3d739e7e3ce",
         "viewFileName": "Main",
         "viewName": "Main",
         "viewNamespace": "esapp.view"
@@ -266,13 +193,12 @@
         "controllerNamespace": "esapp.controller",
         "frameworkName": "ext",
         "frameworkPath": "ext",
-        "library": "all",
         "modelNamespace": "esapp.model",
         "name": "esapp",
         "packagesRelPath": "ext/packages",
         "senchadir": ".sencha",
         "themeName": "default",
-        "uniqueId": "be5eaf97-9928-48cc-94c8-e0ddfd4f49fb",
+        "uniqueId": "9d809c7b-47e7-493b-8255-f3d739e7e3ce",
         "viewFileName": "Main",
         "viewName": "Main",
         "viewNamespace": "esapp.view"
@@ -292,39 +218,12 @@
         "controllerNamespace": "esapp.controller",
         "frameworkName": "ext",
         "frameworkPath": "ext",
-        "library": "all",
         "modelNamespace": "esapp.model",
         "name": "esapp",
         "packagesRelPath": "ext/packages",
         "senchadir": ".sencha",
         "themeName": "default",
-        "uniqueId": "be5eaf97-9928-48cc-94c8-e0ddfd4f49fb",
-        "viewFileName": "Main",
-        "viewName": "Main",
-        "viewNamespace": "esapp.view"
-      }
-    },
-    "sass/example/theme.html": {
-      "source": "theme.html.tpl.merge",
-      "version": "32f685a8af28baafcc7999862d0bd1f25df0e48b",
-      "parameters": {
-        "appControllers": "",
-        "appModels": "",
-        "appName": "esapp",
-        "appStores": "",
-        "appViews": "",
-        "controllerFileName": "Main",
-        "controllerName": "Main",
-        "controllerNamespace": "esapp.controller",
-        "frameworkName": "ext",
-        "frameworkPath": "ext",
-        "library": "all",
-        "modelNamespace": "esapp.model",
-        "name": "esapp",
-        "packagesRelPath": "ext/packages",
-        "senchadir": ".sencha",
-        "themeName": "default",
-        "uniqueId": "be5eaf97-9928-48cc-94c8-e0ddfd4f49fb",
+        "uniqueId": "9d809c7b-47e7-493b-8255-f3d739e7e3ce",
         "viewFileName": "Main",
         "viewName": "Main",
         "viewNamespace": "esapp.view"
@@ -344,64 +243,15 @@
         "controllerNamespace": "esapp.controller",
         "frameworkName": "ext",
         "frameworkPath": "ext",
-        "library": "all",
         "modelNamespace": "esapp.model",
         "name": "esapp",
         "packagesRelPath": "ext/packages",
         "senchadir": ".sencha",
         "themeName": "default",
-        "uniqueId": "be5eaf97-9928-48cc-94c8-e0ddfd4f49fb",
+        "uniqueId": "9d809c7b-47e7-493b-8255-f3d739e7e3ce",
         "viewFileName": "Main",
         "viewName": "Main",
         "viewNamespace": "esapp.view"
-      }
-    },
-    "app/controller/Main.js": {
-      "source": "{controllerFileName}.js.tpl.merge",
-      "version": "b092f4aad11d2f7eaab5ce3e2dcc2fc3134f3188",
-      "parameters": {
-        "appName": "esapp",
-        "controllerFileName": "Main",
-        "controllerName": "Main",
-        "controllerNamespace": "esapp.controller",
-        "library": "all",
-        "name": "esapp"
-      }
-    },
-    "app/model/caption.js": {
-      "source": "{modelFileName}.js.tpl.merge",
-      "version": "31d5356142a167c72422f7902f19df3c583f3249",
-      "parameters": {
-        "appName": "esapp",
-        "baseClass": "Ext.data.Model",
-        "fields": "src:auto:null",
-        "modelFileName": "caption",
-        "modelNamespace": "esapp.model",
-        "name": "caption"
-      }
-    },
-    "app/model/Header.js": {
-      "source": "{modelFileName}.js.tpl.merge",
-      "version": "31d5356142a167c72422f7902f19df3c583f3249",
-      "parameters": {
-        "appName": "esapp",
-        "baseClass": "Ext.data.Model",
-        "fields": "src:auto:null,caption:auto:null",
-        "modelFileName": "Header",
-        "modelNamespace": "esapp.model",
-        "name": "Header"
-      }
-    },
-    "app/model/InternetSource.js": {
-      "source": "{modelFileName}.js.tpl.merge",
-      "version": "31d5356142a167c72422f7902f19df3c583f3249",
-      "parameters": {
-        "appName": "esapp",
-        "baseClass": "Ext.data.Model",
-        "fields": "name:string:null",
-        "modelFileName": "InternetSource",
-        "modelNamespace": "esapp.model",
-        "name": "InternetSource"
       }
     }
   }

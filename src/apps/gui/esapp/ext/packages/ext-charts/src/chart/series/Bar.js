@@ -380,7 +380,7 @@ Ext.define('Ext.chart.series.Bar', {
             axis = chart.axes.get(boundAxes.xAxis);
             if (axis) {
                 inflections = axis.inflections;
-                if (axis.isCategoryAxis || inflections.length == data.length) {
+                if (axis.isCategoryAxis || inflections.length >= data.length) {
                     barsLoc = [];
                     for (i = 0, ln = data.length; i < ln; i++) {
                         tick = inflections[i];
@@ -1129,7 +1129,8 @@ Ext.define('Ext.chart.series.Bar', {
         }
     },
 
-    /* @private
+    /** 
+     * @private
      * Gets the dimensions of a given bar label. Uses a single hidden sprite to avoid
      * changing visible sprites.
      * @param value

@@ -169,7 +169,19 @@ Ext.define('Ext.view.MultiSelector', {
         this.callParent();
     },
 
+    afterComponentLayout: function(width, height, prevWidth, prevHeight) {
+        var me = this,
+            popup = me.searchPopup;
+
+        me.callParent([width, height, prevWidth, prevHeight]);
+        if (popup && popup.isVisible()) {
+            popup.showBy(me, me.popupAlign);
+        }
+    },
+
     privates: {
+        popupAlign: 'tl-tr?',
+
         onDismissSearch: function (e) {
             var searchPopup = this.searchPopup;
 
@@ -202,7 +214,7 @@ Ext.define('Ext.view.MultiSelector', {
                 }
             }
 
-            searchPopup.showBy(me, 'tl-tr?');
+            searchPopup.showBy(me, me.popupAlign);
             Ext.on({
                 mousedown: 'onDismissSearch',
                 scope: me

@@ -1,6 +1,4 @@
 /**
- * @docauthor Jason Johnston <jason@sencha.com>
- *
  * A container for grouping sets of fields, rendered as a HTML `fieldset` element. The {@link #title}
  * config will be rendered as the fieldset's `legend`.
  *
@@ -156,6 +154,15 @@ Ext.define('Ext.form.FieldSet', {
         '</div>'
     ],
 
+    /**
+     * @cfg stateEvents
+     * @inheritdoc Ext.state.Stateful#cfg-stateEvents
+     * @localdoc By default the following stateEvents are added:
+     * 
+     *  - {@link #event-resize} - _(added by Ext.Component)_
+     *  - {@link #event-collapse}
+     *  - {@link #event-expand}
+     */
     stateEvents : [ 'collapse', 'expand' ],
 
     maskOnDisable: false,

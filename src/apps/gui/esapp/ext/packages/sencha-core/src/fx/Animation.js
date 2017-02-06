@@ -1,7 +1,5 @@
 /**
  * @private
- * @author Jacky Nguyen <jacky@sencha.com>
- *
  * This class is a factory class that will create and return an animation class based on the {@link #type} configuration.
  */
 Ext.define('Ext.fx.Animation', {
@@ -54,7 +52,7 @@ Ext.define('Ext.fx.Animation', {
             }
             defaultClass = Ext.ClassManager.getByAlias('animation.' + type);
 
-            //<debug error>
+            //<debug>
             if (!defaultClass) {
                 Ext.Logger.error("Invalid animation type of: '" + type + "'");
             }

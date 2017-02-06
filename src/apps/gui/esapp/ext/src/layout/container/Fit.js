@@ -36,23 +36,25 @@ Ext.define('Ext.layout.container.Fit', {
 
     /* End Definitions */
 
+    /**
+     * @inheritdoc Ext.layout.container.Container#cfg-itemCls
+     */
     itemCls: Ext.baseCSSPrefix + 'fit-item',
-    targetCls: Ext.baseCSSPrefix + 'layout-fit',
     type: 'fit',
    
     manageMargins: true,
 
-    sizePolicies: {
-        0: { readsWidth: 1, readsHeight: 1, setsWidth: 0, setsHeight: 0 },
-        1: { readsWidth: 0, readsHeight: 1, setsWidth: 1, setsHeight: 0 },
-        2: { readsWidth: 1, readsHeight: 0, setsWidth: 0, setsHeight: 1 },
-        3: { readsWidth: 0, readsHeight: 0, setsWidth: 1, setsHeight: 1 }
-    },
+    sizePolicies: [
+        { readsWidth: 1, readsHeight: 1, setsWidth: 0, setsHeight: 0 },
+        { readsWidth: 0, readsHeight: 1, setsWidth: 1, setsHeight: 0 },
+        { readsWidth: 1, readsHeight: 0, setsWidth: 0, setsHeight: 1 },
+        { readsWidth: 0, readsHeight: 0, setsWidth: 1, setsHeight: 1 }
+    ],
 
     getItemSizePolicy: function (item, ownerSizeModel) {
         // this layout's sizePolicy is derived from its owner's sizeModel:
         var sizeModel = ownerSizeModel || this.owner.getSizeModel(),
-            mode = (sizeModel.width.shrinkWrap ? 0 : 1) |
+            mode = (sizeModel.width.shrinkWrap ? 0 : 1) | // jshint ignore:line
                    (sizeModel.height.shrinkWrap ? 0 : 2);
 
        return this.sizePolicies[mode];
@@ -73,7 +75,7 @@ Ext.define('Ext.layout.container.Fit', {
         // settings affect the available size. This particularly effects self-sizing
         // containers such as fields, in which the target element is naturally sized,
         // and should not be stretched by a sized child item.
-        if (resetSizes && ownerContext.targetContext.el.dom.tagName.toUpperCase() != 'TD') {
+        if (resetSizes && ownerContext.targetContext.el.dom.tagName.toUpperCase() !== 'TD') {
             resetSizes = resetWidth = resetHeight = false;
         }
 
@@ -139,7 +141,7 @@ Ext.define('Ext.layout.container.Fit', {
                                    c.scrollFlags.y) || undef;
     },
 
-    calculate : function (ownerContext) {
+    calculate: function (ownerContext) {
         var me = this,
             childItems = ownerContext.childItems,
             length = childItems.length,
@@ -155,6 +157,7 @@ Ext.define('Ext.layout.container.Fit', {
             overflowY = ownerContext.overflowY,
             scrollbars, scrollbarSize, padding, i, contentWidth, contentHeight;
 
+        ownerContext.state.info = info;
         if (overflowX || overflowY) {
             // If we have children that have minHeight/Width, we may be forced to overflow
             // and gain scrollbars. If so, we want to remove their space from the other
@@ -165,10 +168,12 @@ Ext.define('Ext.layout.container.Fit', {
 
             if (scrollbars) {
                 scrollbarSize = Ext.getScrollbarSize();
-                if (scrollbars & 1) { // if we need the hscrollbar, remove its height
+                if (scrollbars & 1) { // jshint ignore:line
+                    // if we need the hscrollbar, remove its height
                     containerSize.height -= scrollbarSize.height;
                 }
-                if (scrollbars & 2) { // if we need the vscrollbar, remove its width
+                if (scrollbars & 2) { // jshint ignore:line
+                    // if we need the vscrollbar, remove its width
                     containerSize.width -= scrollbarSize.width;
                 }
             }
@@ -184,7 +189,7 @@ Ext.define('Ext.layout.container.Fit', {
         } else {
             info.contentWidth = info.contentHeight = 0;
         }
-        
+
         if (shrinkWrapHeight || shrinkWrapWidth) {
             padding = ownerContext.targetContext.getPaddingInfo();
             
@@ -199,7 +204,8 @@ Ext.define('Ext.layout.container.Fit', {
                     // the scrollbar flag (if set) will indicate that an overflow exists on
                     // the horz(1) or vert(2) axis... if not set, then there could never be
                     // an overflow...
-                    if (scrollbars & 2) { // if we need the vscrollbar, add its width
+                    if (scrollbars & 2) { // jshint ignore:line
+                        // if we need the vscrollbar, add its width
                         contentWidth += scrollbarSize.width;
                     }
                     if (!ownerContext.setContentWidth(contentWidth)) {
@@ -219,7 +225,8 @@ Ext.define('Ext.layout.container.Fit', {
                     // the scrollbar flag (if set) will indicate that an overflow exists on
                     // the horz(1) or vert(2) axis... if not set, then there could never be
                     // an overflow...
-                    if (scrollbars & 1) { // if we need the hscrollbar, add its height
+                    if (scrollbars & 1) { // jshint ignore:line
+                        // if we need the hscrollbar, add its height
                         contentHeight += scrollbarSize.height;
                     }
                     if (!ownerContext.setContentHeight(contentHeight)) {
@@ -245,7 +252,7 @@ Ext.define('Ext.layout.container.Fit', {
         me.fitItemHeight(itemContext, info);
 
         // If not all required dimensions have been satisfied, we're not done.
-        if (info.got != info.needed) {
+        if (info.got !== info.needed) {
             me.done = false;
         }
     },
@@ -314,7 +321,7 @@ Ext.define('Ext.layout.container.Fit', {
             itemContext.setProp('x', margins.left);
         }
 
-        if (margins.width) {
+        if (margins.width && info.ownerContext.widthModel.shrinkWrap) {
             // Need the margins for shrink-wrapping but old IE sometimes collapses the left margin into the padding
             itemContext.setProp('margin-right', margins.width);
         }
@@ -327,7 +334,7 @@ Ext.define('Ext.layout.container.Fit', {
             itemContext.setProp('y', margins.top);
         }
 
-        if (margins.height) {
+        if (margins.height && info.ownerContext.heightModel.shrinkWrap) {
             // Need the margins for shrink-wrapping but old IE sometimes collapses the top margin into the padding
             itemContext.setProp('margin-bottom', margins.height);
         }

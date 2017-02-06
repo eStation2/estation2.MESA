@@ -117,6 +117,25 @@ Ext.define('Ext.resizer.ResizeTracker', {
         }
     },
 
+    // Logic to resize components on top of iframes
+    onMouseDown: function (e, target) {
+        // Logic to resize components on top of iframes or handle resizers bound to iframes.
+        // To properly handle iframes "below" the resizable component, we cannot wait for 
+        // triggerStart or onStart because if the cursor moves out of the component and over the 
+        // iframe we won't detect that the drag has started. We cannot do this in
+        // general because other draggable things cannot assume that mouseDown is safe
+        // for this purpose. In particular ComponentDragger on a maximizable window will
+        // get tricked by the maximize button onMouseDown and mask everything but will
+        // never get the onMouseUp to unmask.
+        this.callParent([e, target]);
+        Ext.dom.Element.maskIframes();
+    },
+
+    onMouseUp: function(e) {
+        this.callParent([e]);
+        Ext.dom.Element.unmaskIframes();
+    },
+
     onDrag: function(e) {
         // dynamic resizing, update dimensions during resize
         if (this.dynamic || this.proxy) {
@@ -203,7 +222,7 @@ Ext.define('Ext.resizer.ResizeTracker', {
         // Snap value between stops according to configured increments
         snappedWidth = Ext.Number.snap(newBox.width, me.widthIncrement);
         snappedHeight = Ext.Number.snap(newBox.height, me.heightIncrement);
-        if (snappedWidth != newBox.width || snappedHeight != newBox.height){
+        if (snappedWidth !== newBox.width || snappedHeight !== newBox.height){
             switch (region) {
                 case 'northeast':
                     newBox.y -= snappedHeight - newBox.height;
@@ -256,12 +275,12 @@ Ext.define('Ext.resizer.ResizeTracker', {
             newWidth = Math.min(Math.max(me.minWidth, newBox.height * ratio), me.maxWidth);
 
             // X axis: width-only change, height must obey
-            if (axis == 1) {
+            if (axis === 1) {
                 newBox.height = newHeight;
             }
 
             // Y axis: height-only change, width must obey
-            else if (axis == 2) {
+            else if (axis === 2) {
                 newBox.width = newWidth;
             }
 
@@ -279,12 +298,12 @@ Ext.define('Ext.resizer.ResizeTracker', {
                 }
 
                 // Handle dragging start coordinates
-                if (region == 'northeast') {
+                if (region === 'northeast') {
                     newBox.y = box.y - (newBox.height - box.height);
-                } else if (region == 'northwest') {
+                } else if (region === 'northwest') {
                     newBox.y = box.y - (newBox.height - box.height);
                     newBox.x = box.x - (newBox.width - box.width);
-                } else if (region == 'southwest') {
+                } else if (region === 'southwest') {
                     newBox.x = box.x - (newBox.width - box.width);
                 }
             }
@@ -308,7 +327,6 @@ Ext.define('Ext.resizer.ResizeTracker', {
             } else {
                 me.target.setSize(box.width, box.height);
             }
-
         }
 
         // In the middle of a resize - just resize the proxy

@@ -8,52 +8,60 @@
  * documentation for more information. A typical configuration object for the radar series could be:
  *
  *     @example
- *     Ext.create('Ext.Container', {
- *         renderTo: Ext.getBody(),
- *         width: 600,
- *         height: 400,
- *         layout: 'fit',
- *         items: {
- *             xtype: 'polar',
- *             interactions: 'rotate',
- *             store: {
- *                 fields: ['name', 'data1', 'data2', 'data3', 'data4', 'data5'],
- *                 data: [
- *                     {'name':'metric one', 'data1':10, 'data2':12, 'data3':14, 'data4':8, 'data5':13},
- *                     {'name':'metric two', 'data1':7, 'data2':8, 'data3':16, 'data4':10, 'data5':3},
- *                     {'name':'metric three', 'data1':5, 'data2':2, 'data3':14, 'data4':12, 'data5':7},
- *                     {'name':'metric four', 'data1':2, 'data2':14, 'data3':6, 'data4':1, 'data5':23},
- *                     {'name':'metric five', 'data1':27, 'data2':38, 'data3':36, 'data4':13, 'data5':33}
- *                 ]
- *             },
- *             series: {
- *                 type: 'radar',
- *                 xField: 'name',
- *                 yField: 'data4',
- *                 style: {
- *                     fillStyle: 'rgba(0, 0, 255, 0.1)',
- *                     strokeStyle: 'rgba(0, 0, 0, 0.8)',
- *                     lineWidth: 1
- *                 }
- *             },
- *             axes: [{
- *                 type: 'numeric',
- *                 position: 'radial',
- *                 fields: 'data4',
- *                 style: {
- *                     estStepSize: 10
- *                 },
- *                 grid: true
- *             }, {
- *                 type: 'category',
- *                 position: 'angular',
- *                 fields: 'name',
- *                 style: {
- *                     estStepSize: 1
- *                 },
- *                 grid: true
- *             }]
- *         }
+ *     Ext.create({
+ *        xtype: 'polar', 
+ *        renderTo: document.body,
+ *        width: 500,
+ *        height: 400,
+ *        interactions: 'rotate',
+ *        store: {
+ *            fields: ['name', 'data1'],
+ *            data: [{
+ *                'name': 'metric one',
+ *                'data1': 8
+ *            }, {
+ *                'name': 'metric two',
+ *                'data1': 10
+ *            }, {
+ *                'name': 'metric three',
+ *                'data1': 12
+ *            }, {
+ *                'name': 'metric four',
+ *                'data1': 1
+ *            }, {
+ *                'name': 'metric five',
+ *                'data1': 13
+ *            }]
+ *        },
+ *        series: {
+ *            type: 'radar',
+ *            xField: 'name',
+ *            yField: 'data1',
+ *            style: {
+ *                fill: '#388FAD',
+ *                fillOpacity: .1,
+ *                stroke: '#388FAD',
+ *                strokeOpacity: .8,
+ *                lineWidth: 1
+ *            }
+ *        },
+ *        axes: [{
+ *            type: 'numeric',
+ *            position: 'radial',
+ *            fields: 'data1',
+ *            style: {
+ *                estStepSize: 10
+ *            },
+ *            grid: true
+ *        }, {
+ *            type: 'category',
+ *            position: 'angular',
+ *            fields: 'name',
+ *            style: {
+ *                estStepSize: 1
+ *            },
+ *            grid: true
+ *        }]
  *     });
  *
  */
@@ -127,33 +135,27 @@ Ext.define('Ext.chart.series.Radar', {
             sprite = me.sprites && me.sprites[0],
             attr = sprite.attr,
             dataX = attr.dataX,
-            dataY = attr.dataY,
-            centerX = attr.centerX,
-            centerY = attr.centerY,
-            minX = attr.dataMinX,
-            maxX = attr.dataMaxX,
-            maxY = attr.dataMaxY,
-            endRho = attr.endRho,
-            startRho = attr.startRho,
-            baseRotation = attr.baseRotation,
-            i, length = dataX.length,
+            length = dataX.length,
             store = me.getStore(),
             marker = me.getMarker(),
-            threshhold = 22,
-            item, th, r;
+            threshhold, item, xy, i, bbox, markers;
 
         if (me.getHidden()) {
             return null;
         }
         if (sprite && marker) {
+            markers = sprite.getBoundMarker('markers')[0];
             for (i = 0; i < length; i++) {
-                th = (dataX[i] - minX) / (maxX - minX + 1) * 2 * Math.PI + baseRotation;
-                r = dataY[i] / maxY * (endRho - startRho) + startRho;
-                if (Math.abs(centerX + Math.cos(th) * r - x) < threshhold && Math.abs(centerY + Math.sin(th) * r - y) < threshhold) {
+                bbox = markers.getBBoxFor(i);
+                threshhold = (bbox.width + bbox.height) * .25;
+                xy = sprite.getDataPointXY(i);
+                if (Math.abs(xy[0] - x) < threshhold &&
+                    Math.abs(xy[1] - y) < threshhold) {
                     item = {
                         series: me,
                         sprite: sprite,
                         index: i,
+                        category: 'markers',
                         record: store.getData().items[i],
                         field: me.getYField()
                     };
@@ -164,14 +166,49 @@ Ext.define('Ext.chart.series.Radar', {
         return me.callParent(arguments);
     },
 
+    getDefaultSpriteConfig: function () {
+        var config = this.callParent(),
+            fx = {
+                customDurations: {
+                    translationX: 0,
+                    translationY: 0,
+                    rotationRads: 0,
+                    // Prevent animation of 'dataMinX' and 'dataMaxX' attributes in order
+                    // to react instantaniously to changes to the 'hidden' attribute.
+                    dataMinX: 0,
+                    dataMaxX: 0
+                }
+            };
+        if (config.fx) {
+            Ext.apply(config.fx, fx);
+        } else {
+            config.fx = fx;
+        }
+        return config;
+    },
+
     getSprites: function () {
-        if (!this.getChart()) {
+        var me = this,
+            chart = me.getChart(),
+            animation = me.getAnimation() || chart && chart.getAnimation(),
+            sprite = me.sprites[0],
+            markers;
+        
+        if (!chart) {
             return [];
         }
-        if (!this.sprites.length) {
-            this.createSprite();
+        if (!sprite) {
+            sprite = me.createSprite();
         }
-        return this.sprites;
+        if (animation) {
+            markers = sprite.getBoundMarker('markers');
+            if (markers) {
+                markers = markers[0];
+                markers.getTemplate().fx.setConfig(animation);
+            }
+            sprite.fx.setConfig(animation);
+        }
+        return me.sprites;
     },
 
     provideLegendInfo: function (target) {

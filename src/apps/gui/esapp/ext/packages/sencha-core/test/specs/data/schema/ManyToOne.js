@@ -317,11 +317,14 @@ describe("Ext.data.schema.ManyToOne", function() {
     });
 
     describe("nested loading", function() {
-        beforeEach(function() {
-            definePost();
-        });
-
-        it("should infer the key from the parent", function() {
+        it("should infer the key when using remoteFilter: false", function() {
+            definePost({
+                inverse: {
+                    storeConfig: {
+                        remoteFilter: false
+                    }
+                }
+            });
             var thread = Thread.load(1);
             complete({
                 id: 1,
@@ -336,7 +339,349 @@ describe("Ext.data.schema.ManyToOne", function() {
             expect(posts.getAt(0).dirty).toBe(false);
             expect(posts.getAt(1).get('threadId')).toBe(1);
             expect(posts.getAt(1).dirty).toBe(false);
+            expect(posts.getRemoteFilter()).toBe(false);
         });
+
+        it("should delete the many from the data collection", function() {
+            definePost();
+            var thread = Thread.load(1);
+            complete({
+                id: 1,
+                posts: [{
+                    id: 101
+                }, {
+                    id: 102
+                }]
+            });
+            expect(thread.get('posts')).toBeUndefined();
+            expect(thread.posts().getCount()).toBe(2);
+        });
+
+        it("should delete the one from the data collection", function() {
+            definePost();
+            var post = Post.load(101);
+            complete({
+                id: 101,
+                thread: {
+                    id: 1
+                }
+            });
+            expect(post.get('thread')).toBeUndefined();
+            expect(post.getThread().getId()).toBe(1);
+        });
+
+        it("should not pollute the reader when reading nested data of the same type", function() {
+            function getData() {
+                return {
+                    records: [{
+                        id: 1,
+                        parentId: null,
+                        children: [{
+                            id: 101,
+                            parentId: 1
+                        }, {
+                            id: 102,
+                            parentId: 1
+                        }]
+                    }]
+                };
+            }
+            Ext.define('spec.Node', {
+                extend: 'Ext.data.Model',
+                fields: [{
+                    name: 'parentId',
+                    reference: {
+                        type: 'Node',
+                        inverse: 'children'
+                    }
+                }],
+                proxy: {
+                    type: 'ajax',
+                    reader: {
+                        type: 'json',
+                        rootProperty: 'records'
+                    }
+                }
+            });
+
+            var store = new Ext.data.Store({
+                model: 'Node'
+            });
+            store.load();
+            complete(getData());
+            expect(store.first().children().getCount()).toBe(2);
+            store.load();
+            complete(getData());
+            expect(store.first().children().getCount()).toBe(2);
+            store.destroy();
+            Ext.undefine('spec.Node');
+        });
+
+        describe("complete", function() {
+            it("should mark the store complete if there are records", function() {
+                definePost();
+                var store = new Ext.data.Store({
+                    model: Thread
+                });
+
+                store.loadRawData([{
+                    id: 1,
+                    posts: [{
+                        id: 101,
+                        content: 'Foo'
+                    }, {
+                        id: 102,
+                        content: 'Bar'
+                    }]
+                }]);
+
+                expect(store.first().posts().complete).toBe(true);
+            });
+
+            it("should mark the store complete if a root exists and there are no records", function() {
+                definePost();
+                var store = new Ext.data.Store({
+                    model: Thread
+                });
+
+                store.loadRawData([{
+                    id: 1,
+                    posts: []
+                }]);
+
+                expect(store.first().posts().complete).toBe(true);
+            });
+
+            it("should not mark the store complete if a root doesn't exist", function() {
+                definePost();
+                var store = new Ext.data.Store({
+                    model: Thread
+                });
+
+                store.loadRawData([{
+                    id: 1
+                }]);
+
+                expect(store.first().posts().complete).toBe(false);
+            });
+        });
+
+        describe("key inference", function() {
+            describe("without session", function() {
+                beforeEach(function() {
+                    definePost();
+                });
+                
+                it("should infer the key from the parent", function() {
+                    var thread = Thread.load(1);
+                    complete({
+                        id: 1,
+                        posts: [{
+                            id: 101
+                        }, {
+                            id: 102
+                        }]
+                    });
+                    var posts = thread.posts();
+                    expect(posts.getCount()).toBe(2);
+                    expect(posts.getAt(0).getId()).toBe(101);
+                    expect(posts.getAt(0).get('threadId')).toBe(1);
+                    expect(posts.getAt(0).dirty).toBe(false);
+                    expect(posts.getAt(1).getId()).toBe(102);
+                    expect(posts.getAt(1).get('threadId')).toBe(1);
+                    expect(posts.getAt(1).dirty).toBe(false);
+                });
+
+                it("should infer the key when loading the store, not nested", function() {
+                    var thread = Thread.load(1);
+                    complete({
+                        id: 1
+                    });
+                    var posts = thread.posts();
+                    posts.load();
+                    complete([{
+                        id: 101
+                    }, {
+                        id: 102
+                    }]);
+                    expect(posts.getCount()).toBe(2);
+                    expect(posts.getAt(0).getId()).toBe(101);
+                    expect(posts.getAt(0).get('threadId')).toBe(1);
+                    expect(posts.getAt(0).dirty).toBe(false);
+                    expect(posts.getAt(1).getId()).toBe(102);
+                    expect(posts.getAt(1).get('threadId')).toBe(1);
+                    expect(posts.getAt(1).dirty).toBe(false);
+                });
+            });
+
+            describe("with session", function() {
+                var session;
+
+                beforeEach(function() {
+                    definePost();
+                    session = new Ext.data.Session();
+                });
+
+                afterEach(function() {
+                    session.destroy();
+                    session = null;
+                });
+
+                it("should favour an existing reference", function() {
+                    var post = session.createRecord('Post', {
+                        id: 101,
+                        threadId: 3
+                    });
+
+                    var thread = Thread.load(1, null, session);
+                    complete({
+                        id: 1,
+                        posts: [{
+                            id: 101
+                        }, {
+                            id: 102
+                        }]
+                    });
+                    var posts = thread.posts();
+                    expect(posts.getCount()).toBe(1);
+                    expect(posts.getAt(0).getId()).toBe(102);
+                    expect(posts.getAt(0).get('threadId')).toBe(1);
+                    expect(posts.getAt(0).dirty).toBe(false);
+                    expect(posts.indexOf(post)).toBe(-1);
+                });
+
+                it("should infer the key from the parent if not specified", function() {
+                    var thread = Thread.load(1, null, session);
+                    complete({
+                        id: 1,
+                        posts: [{
+                            id: 101
+                        }, {
+                            id: 102
+                        }]
+                    });
+                    var posts = thread.posts();
+                    expect(posts.getCount()).toBe(2);
+                    expect(posts.getAt(0).getId()).toBe(101);
+                    expect(posts.getAt(0).get('threadId')).toBe(1);
+                    expect(posts.getAt(0).dirty).toBe(false);
+                    expect(posts.getAt(1).getId()).toBe(102);
+                    expect(posts.getAt(1).get('threadId')).toBe(1);
+                    expect(posts.getAt(1).dirty).toBe(false);
+                });
+
+                it("should infer the key when loading the store, not nested", function() {
+                    var thread = Thread.load(1, null, session);
+                    complete({
+                        id: 1
+                    });
+                    var posts = thread.posts();
+                    posts.load();
+                    complete([{
+                        id: 101
+                    }, {
+                        id: 102
+                    }]);
+                    expect(posts.getCount()).toBe(2);
+                    expect(posts.getAt(0).getId()).toBe(101);
+                    expect(posts.getAt(0).get('threadId')).toBe(1);
+                    expect(posts.getAt(0).dirty).toBe(false);
+                    expect(posts.getAt(1).getId()).toBe(102);
+                    expect(posts.getAt(1).get('threadId')).toBe(1);
+                    expect(posts.getAt(1).dirty).toBe(false);
+                });
+
+                it("should not infer the key from the parent if a key is specified", function() {
+                    var thread = Thread.load(1, null, session);
+                    complete({
+                        id: 1,
+                        posts: [{
+                            id: 101,
+                            threadId: 100
+                        }, {
+                            id: 102
+                        }]
+                    });
+                    var posts = thread.posts();
+                    expect(posts.getCount()).toBe(1);
+                    expect(posts.getAt(0).getId()).toBe(102);
+                    expect(posts.getAt(0).get('threadId')).toBe(1);
+                    expect(posts.getAt(0).dirty).toBe(false);
+
+                    var rec = session.peekRecord('Post', 101);
+                    expect(posts.indexOf(rec)).toBe(-1);
+                });
+
+                it("should allow inference for phantom records", function() {
+                    var thread = session.createRecord('Thread', {}),
+                        post = session.createRecord('Post', {
+                            threadId: thread.getId()
+                        });
+
+                    expect(thread.posts().getCount()).toBe(1);
+                    expect(thread.posts().getAt(0)).toBe(post);
+                });
+            });
+        });
+    });
+
+    describe("id change of the one", function() {
+        function createSuite(withSession) {
+            describe(withSession ? "with session" : "without session", function() {
+                var session, thread;
+
+                beforeEach(function() {
+                    definePost();
+                    if (withSession) {
+                        session = new Ext.data.Session();
+                    }
+
+                    thread = new Thread(null, session);
+                });
+
+                afterEach(function() {
+                    if (withSession) {
+                        session.destroy();
+                    }
+                    session = thread = null;
+                });
+
+                it("should not cause an exception if the store is not created", function() {
+                    expect(function() {
+                        thread.setId(100);
+                    }).not.toThrow();
+                });
+
+                it("should update the store filter", function() {
+                    var posts = thread.posts(),
+                        filter = posts.getFilters().getAt(0);
+
+                    expect(filter.getValue()).toBe(thread.id);
+                    posts.add({
+                        id: 1
+                    });
+                    thread.setId(100);
+                    expect(filter.getValue()).toBe(100);
+                });
+
+                it("should update the foreign key", function() {
+                    var records = thread.posts().add([{id: 1}, {id: 2}, {id: 3}]);
+
+                    expect(records[0].get('threadId')).toBe(thread.id);
+                    expect(records[1].get('threadId')).toBe(thread.id);
+                    expect(records[2].get('threadId')).toBe(thread.id);
+
+                    thread.setId(100);
+
+                    expect(records[0].get('threadId')).toBe(100);
+                    expect(records[1].get('threadId')).toBe(100);
+                    expect(records[2].get('threadId')).toBe(100);
+                });
+            });
+        }
+
+        createSuite(false);
+        createSuite(true);
     });
     
     describe("getters/setters", function() {
@@ -809,63 +1154,190 @@ describe("Ext.data.schema.ManyToOne", function() {
 
                         describe("instance", function() {
                             var thread;
+
                             beforeEach(function() {
                                 thread = new Thread({
                                     id: 3
+                                }, session);
+                            });
+
+                            describe("with nothing existing", function() {
+                                beforeEach(function() {
+                                    post.setThread(thread);
                                 });
-                                post.setThread(thread);
-                            });
 
-                            it("should have the same record reference", function() {
-                                expect(post.getThread()).toBe(thread);
-                            });
+                                it("should have the same record reference", function() {
+                                    expect(post.getThread()).toBe(thread);
+                                });
                             
-                            it("should set the underlying key value", function() {
-                                expect(post.get('threadId')).toBe(3);  
+                                it("should set the underlying key value", function() {
+                                    expect(post.get('threadId')).toBe(3);  
+                                });
+
+                                it("should clear the instance and foreign key when setting to null", function() {
+                                    post.setThread(null);
+                                    expect(post.getThread()).toBeNull();
+                                    expect(post.get('threadId')).toBeNull();
+                                });
                             });
 
-                            it("should clear the instance and foreign key when setting to null", function() {
-                                post.setThread(null);
-                                expect(post.getThread()).toBeNull();
-                                expect(post.get('threadId')).toBeNull();
+                            describe("with an existing key, but no instance", function() {
+                                beforeEach(function() {
+                                    post.setThread(1000);
+                                    post.setThread(thread);
+                                });
+
+                                it("should have the new record reference", function() {
+                                    expect(post.getThread()).toBe(thread);
+                                });
+
+                                it("should set the underlying key value", function() {
+                                    expect(post.get('threadId')).toBe(3);  
+                                });
+
+                                it("should clear the instance and foreign key when setting to null", function() {
+                                    post.setThread(null);
+                                    expect(post.getThread()).toBeNull();
+                                    expect(post.get('threadId')).toBeNull();
+                                });
+                            });
+
+                            describe("with an existing instance", function() {
+                                beforeEach(function() {
+                                    post.setThread(new Thread({
+                                        id: 1000
+                                    }, session));
+                                    post.setThread(thread);
+                                });
+
+                                it("should have the new record reference", function() {
+                                    expect(post.getThread()).toBe(thread);
+                                });
+
+                                it("should set the underlying key value", function() {
+                                    expect(post.get('threadId')).toBe(3);  
+                                });
+
+                                it("should clear the instance and foreign key when setting to null", function() {
+                                    post.setThread(null);
+                                    expect(post.getThread()).toBeNull();
+                                    expect(post.get('threadId')).toBeNull();
+                                });
                             });
                         });
                         
                         describe("value", function() {
-                            it("should set the underlying key", function() {
-                                post.setThread(16);
-                                expect(post.get('threadId')).toBe(16);    
-                            });  
-                            
-                            it("should keep the same reference if setting the value with a matching id", function() {
-                                var thread = new Thread({
-                                    id: 3
-                                }, session);
-                                post.setThread(thread);
-                                post.setThread(3);
-                                expect(post.getThread()).toBe(thread);
-                            });
-                            
-                            it("should clear the reference if a model is already set and a new id is passed", function() {
-                                var thread = new Thread({
-                                    id: 3
-                                }, session);
-                                post.setThread(thread);
-                                post.setThread(13);
-                                spy = spyOn(Thread.getProxy(), 'read');
-                                // Reference doesn't exist, so need to grab it again here
-                                post.getThread();
-                                expect(spy.mostRecentCall.args[0].getId()).toBe(13);
+                            describe("with nothing existing", function() {
+                                it("should set the underlying key", function() {
+                                    post.setThread(16);
+                                    expect(post.get('threadId')).toBe(16);    
+                                });
+
+                                it("should return a new record object that loads", function() {
+                                    post.setThread(16);
+                                    spy = spyOn(Thread.getProxy(), 'read');
+                                    // Reference doesn't exist, so need to grab it again here
+                                    expect(post.getThread().getId()).toBe(16);
+                                    expect(spy.mostRecentCall.args[0].getId()).toBe(16);
+                                });
+
+                                it("should do nothing if the key is null", function() {
+                                    post.setThread(null);
+                                    expect(post.getThread()).toBeNull();
+                                });
                             });
 
-                            it("should set the foreign key when setting to null", function() {
-                                post.setThread(13);
+                            describe("with an existing key, but no instance", function() {
+                                beforeEach(function() {
+                                    post.setThread(1000);
+                                });
+
+                                it("should set the underlying key", function() {
+                                    post.setThread(16);
+                                    expect(post.get('threadId')).toBe(16);    
+                                });
+
+                                it("should return a new record object that loads", function() {
+                                    post.setThread(16);
+                                    spy = spyOn(Thread.getProxy(), 'read');
+                                    // Reference doesn't exist, so need to grab it again here
+                                    expect(post.getThread().getId()).toBe(16);
+                                    expect(spy.mostRecentCall.args[0].getId()).toBe(16);
+                                });
+
+                                it("should clear the key", function() {
+                                    post.setThread(null);
+                                    expect(post.get('threadId')).toBeNull();
+                                    expect(post.getThread()).toBeNull();
+                                });
+                            });
+
+                            describe("with an existing instance", function() {
+                                beforeEach(function() {
+                                    post.setThread(new Thread({
+                                        id: 1000
+                                    }, session));
+                                });
+
+                                it("should set the underlying key", function() {
+                                    post.setThread(16);
+                                    expect(post.get('threadId')).toBe(16);    
+                                });
+
+                                it("should return a new record object that loads", function() {
+                                    post.setThread(16);
+                                    spy = spyOn(Thread.getProxy(), 'read');
+                                    // Reference doesn't exist, so need to grab it again here
+                                    expect(post.getThread().getId()).toBe(16);
+                                    expect(spy.mostRecentCall.args[0].getId()).toBe(16);
+                                });
+
+                                it("should clear the key", function() {
+                                    post.setThread(null);
+                                    expect(post.get('threadId')).toBeNull();
+                                    expect(post.getThread()).toBeNull();
+                                });
+                            });
+                        });
+
+                        describe("timing", function() {
+                            var thread, joiner, fn;
+
+                            beforeEach(function() {
+                                joiner = {
+                                    afterEdit: function() {
+                                        fn();
+                                    }
+                                };
+                                thread = new Thread({
+                                    id: 101
+                                }, session);
+                            });
+
+                            afterEach(function() {
+                                fn = joiner = null;
+                            });
+
+                            it("should have the record instances set in afterEdit", function() {
+                                var val;
+                                fn = function() {
+                                    val = post.getThread();
+                                };
+                                post.join(joiner);
+                                post.setThread(thread);
+                                expect(val).toBe(thread);
+                            });
+
+                            it("should have the value cleared in afterEdit", function() {
+                                var val;
+                                post.setThread(thread);
+
+                                fn = function() {
+                                    val = post.getThread();
+                                };
+                                post.join(joiner);
                                 post.setThread(null);
-                                expect(post.get('threadId')).toBeNull();
-
-                                spy = spyOn(Thread.getProxy(), 'read');
-                                post.getThread();
-                                expect(spy).not.toHaveBeenCalled();
+                                expect(val).toBeNull();
                             });
                         });
                         
@@ -992,6 +1464,14 @@ describe("Ext.data.schema.ManyToOne", function() {
                             expect(posts.getCount()).toBe(0);
                         });
 
+                        it("should null out the one when there is no key", function() {
+                            makePost(101);
+                            post.setThread(thread);
+                            post.set('threadId', null);
+                            expect(post.thread).toBeFalsy();
+                            expect(post.getThread()).toBeNull();
+                        });
+
                         it("should not remove the record from unrelated stores", function() {
                             makePost(101);
                             spyOn(Ext.log, 'warn');
@@ -1016,6 +1496,19 @@ describe("Ext.data.schema.ManyToOne", function() {
                                 post.set('threadId', 2);
                                 expect(posts.getCount()).toBe(0);
                                 expect(otherPosts.first()).toBe(post);
+                            });
+
+                            it("should set the many record if it exists in the session", function() {
+                                var otherThread = new Thread({
+                                    id: 2
+                                }, session);
+
+                                makePost(101);
+                                expect(post.getThread()).toBe(thread);
+                                post.set('threadId', 2);
+                                var threadName = Post.associations.thread.getInstanceName();
+                                expect(post[threadName]).toBe(otherThread);
+                                expect(post.getThread()).toBe(otherThread);
                             });
 
                             it("should not create the record if the existing key does not exist", function() {
@@ -1056,11 +1549,15 @@ describe("Ext.data.schema.ManyToOne", function() {
                 
                 describe("the many", function() {
                     var posts;
-                    function makeThread() {
-                        thread = new Thread({
-                            id: 3
-                        }, session);
-                    }
+                    function makeThread(id) {
+                        var cfg = {
+                            id: id || 3
+                        };
+                        if (id === null) {
+                            delete cfg.id;
+                        }
+                        thread = new Thread(cfg, session);
+                     }
                     
                     var thread;
                     
@@ -1118,6 +1615,22 @@ describe("Ext.data.schema.ManyToOne", function() {
                         expect(filter.getProperty()).toBe('threadId');
                         expect(filter.getValue()).toBe(3);
                     });
+
+                    describe("complete", function() {
+                        beforeEach(function() {
+                            definePost();
+                        });
+
+                        it("should mark the store as complete if the record is a phantom", function() {
+                            makeThread(null);
+                            expect(thread.posts().complete).toBe(true);
+                        });
+
+                        it("should not mark the store as complete if the record is not a phantom", function() {
+                            makeThread();
+                            expect(thread.posts().complete).toBe(false);
+                        });
+                    });
                     
                     describe("autoLoad", function() {
                         it("should not load the store by default", function() {
@@ -1170,9 +1683,9 @@ describe("Ext.data.schema.ManyToOne", function() {
                             });
  
                             it("should set the owner instance when loading via nested loading", function() {
-                                 thread = Thread.load(3);
+                                thread = Thread.load(3);
                                 complete({
-                                     id: 3,
+                                    id: 3,
                                     posts: postData
                                 });
  
@@ -1223,6 +1736,29 @@ describe("Ext.data.schema.ManyToOne", function() {
                                 var readSpy = spyOn(Post.getProxy(), 'read');
                                 expect(post.getThread()).toBe(thread);
                                 expect(readSpy).not.toHaveBeenCalled();
+                            });
+
+                            it("should set the owner instance when adding when the record already has the FK", function() {
+                                var posts = thread.posts(),
+                                    post = posts.add({
+                                        id: 101,
+                                        threadId: thread.getId()
+                                    })[0];
+                                expect(post.getThread()).toBe(thread);
+                            });
+
+                            it("should have the key & instance set in the add event", function() {
+                                var posts = thread.posts(),
+                                    id, rec;
+
+                                post = new Post({}, session);
+                                posts.on('add', function() {
+                                    id = post.get('threadId');
+                                    rec = post.getThread();
+                                });
+                                posts.add(post);
+                                expect(id).toBe(thread.getId());
+                                expect(rec).toBe(thread);
                             });
                         });
 
@@ -1289,6 +1825,22 @@ describe("Ext.data.schema.ManyToOne", function() {
                                 expect(post2.getThread()).toBeNull();
                                 expect(post3.getThread()).toBeNull();
                                 expect(thread.posts()).toBe(posts);
+                            });
+
+                            it("should have the key & instance cleared in the remove event", function() {
+                                var posts = thread.posts(),
+                                    id, rec;
+
+                                posts.load();
+                                complete([{id: 11, threadId: 3}, {id: 12, threadId: 3}, {id: 13, threadId: 3}]);
+                                post = posts.first();
+                                posts.on('remove', function() {
+                                    id = post.get('threadId');
+                                    rec = post.getThread();
+                                });
+                                posts.remove(post);
+                                expect(id).toBeNull();
+                                expect(rec).toBeNull();
                             });
                         });
                     });
@@ -2051,5 +2603,31 @@ describe("Ext.data.schema.ManyToOne", function() {
         }
         createSuite(false);
         createSuite(true);
+    });
+
+    describe("misc", function() {
+        // EXTJS-19448
+        it("should not throw an exception when changing the FK causing a store removal when the record is joined to other things", function() {
+            definePost();
+
+            var thread = new Thread({
+                id: 1
+            });
+            var post = new Post();
+
+            thread.posts().add(post);
+
+            var store = new Ext.data.Store({
+                model: Post
+            });
+            store.add(post);
+
+            expect(function() {
+                post.setThread(null);
+            }).not.toThrow();
+            expect(thread.posts().getCount()).toBe(0);
+            expect(store.getCount()).toBe(1);
+            store.destroy();
+        });
     });
 });

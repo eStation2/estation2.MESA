@@ -1,29 +1,58 @@
 /**
- * Filter by a configurable Ext.picker.DatePicker menu
- *
- * Example Usage:
- *
- *     var grid = Ext.create('Ext.grid.Panel', {
- *         ...
+ * The date grid filter allows you to create a filter selection that limits results
+ * to values matching specific date constraints.  The filter can be set programmatically or via 
+ * user input with a configurable {@link Ext.picker.Date DatePicker menu} in the filter 
+ * section of the column header.
+ * 
+ * Example Date Filter Usage:
+ * 
+ *     @example 
+ *     var shows = Ext.create('Ext.data.Store', {
+ *         fields: ['id','show', {
+ *               name: 'airDate',
+ *               type: 'date',
+ *               dateFormat: 'Y-m-d'
+ *         }],
+ *         data: [
+ *             {id: 0, show: 'Battlestar Galactica', airDate: '1978-09-17'},
+ *             {id: 1, show: 'Doctor Who', airDate: '1963-11-23'},
+ *             {id: 2, show: 'Farscape', airDate: '1999-03-19'},
+ *             {id: 3, show: 'Firefly', airDate: '2002-12-20'},
+ *             {id: 4, show: 'Star Trek', airDate: '1966-09-08'},
+ *             {id: 5, show: 'Star Wars: Christmas Special', airDate: '1978-11-17'}
+ *         ]
+ *     });
+ *   
+ *     Ext.create('Ext.grid.Panel', {
+ *         renderTo: Ext.getBody(),
+ *         title: 'Sci-Fi Television',
+ *         height: 250,
+ *         width: 375,
+ *         store: shows,
+ *         plugins: 'gridfilters',
  *         columns: [{
- *             // required configs
- *             text: 'Date Added',
- *             dataIndex: 'dateAdded',
- *
+ *             dataIndex: 'id',
+ *             text: 'ID',
+ *             width: 50
+ *         },{
+ *             dataIndex: 'show',
+ *             text: 'Show',
+ *             flex: 1                  
+ *         },{
+ *             xtype: 'datecolumn',
+ *             dataIndex: 'airDate',
+ *             text: 'Original Air Date',
+ *             width: 125,
  *             filter: {
  *                 type: 'date',
- *      
- *                 // optional configs
- *                 dateFormat: 'm/d/Y',  // default
+ *                 
+ *                 // optional picker config
  *                 pickerDefaults: {
  *                     // any DatePicker configs
- *                 },
- *      
- *                 active: true // default is false
+ *                 } 
  *             }
- *         }],
- *         ...
- *     });
+ *         }]
+ *     }); 
  */
 Ext.define('Ext.grid.filters.filter.Date', {
     extend: 'Ext.grid.filters.filter.TriFilter',
@@ -33,6 +62,7 @@ Ext.define('Ext.grid.filters.filter.Date', {
     type: 'date',
 
     config: {
+        //<locale type="object">
         /**
          * @cfg {Object} [fields]
          * Configures field items individually. These properties override those defined
@@ -50,6 +80,7 @@ Ext.define('Ext.grid.filters.filter.Date', {
             gt: {text: 'After'},
             eq: {text: 'On'}
         },
+        //</locale>
 
         /**
          * @cfg {Object} pickerDefaults
@@ -58,7 +89,16 @@ Ext.define('Ext.grid.filters.filter.Date', {
         pickerDefaults: {
             xtype: 'datepicker',
             border: 0
-        }
+        },
+
+        updateBuffer: 0,
+
+        /**
+        * @cfg {String} dateFormat
+        * The date format to return when using getValue.
+        * Defaults to {@link Ext.Date#defaultFormat}.
+        */
+        dateFormat: undefined
     },
 
     itemDefaults: {
@@ -72,13 +112,6 @@ Ext.define('Ext.grid.filters.filter.Date', {
     },
 
     /**
-     * @cfg {String} dateFormat
-     * The date format to return when using getValue.
-     * Defaults to {@link Ext.Date.defaultFormat}.
-     */
-    dateFormat: null,
-
-    /**
      * @cfg {Date} maxDate
      * Allowable date as passed to the Ext.DatePicker
      * Defaults to undefined.
@@ -89,22 +122,9 @@ Ext.define('Ext.grid.filters.filter.Date', {
      * Allowable date as passed to the Ext.DatePicker
      * Defaults to undefined.
      */
-    
-    /**
-     * @private
-     * Will convert a timestamp to a Date object or vice-versa.
-     * @param {Date/Number} value
-     * @param {Boolean} [convertToDate]
-     * @return {Date/Number}
-     */
-    convertValue: function (value, convertToDate) {
-        if (convertToDate && !Ext.isDate(value)) {
-            value = Ext.isDate(value);
-        } else if (!convertToDate && Ext.isDate(value)) {
-            value = (+value);
-        }
 
-        return value;
+    applyDateFormat: function(dateFormat) {
+        return dateFormat || Ext.Date.defaultFormat;
     },
 
     /**
@@ -117,6 +137,7 @@ Ext.define('Ext.grid.filters.filter.Date', {
                 scope: me,
                 checkchange: me.onCheckChange
             },
+            menuItems = me.menuItems,
             fields, itemDefaults, pickerCfg, i, len,
             key, item, cfg, field;
 
@@ -124,10 +145,6 @@ Ext.define('Ext.grid.filters.filter.Date', {
 
         itemDefaults = me.getItemDefaults();
         fields = me.getFields();
-
-        if (!me.dateFormat) {
-            me.dateFormat = Ext.Date.defaultFormat;
-        }
 
         pickerCfg = Ext.apply({
             minDate: me.minDate,
@@ -141,8 +158,8 @@ Ext.define('Ext.grid.filters.filter.Date', {
 
         me.fields = {};
 
-        for (i = 0, len = me.menuItems.length; i < len; i++) {
-            key = me.menuItems[i];
+        for (i = 0, len = menuItems.length; i < len; i++) {
+            key = menuItems[i];
             if (key !== '-') {
                 cfg = {
                     menu: {
@@ -169,6 +186,8 @@ Ext.define('Ext.grid.filters.filter.Date', {
                 field.filterKey = key;
 
                 item.on(listeners);
+            } else {
+                me.menu.add(key);
             }
         }
     },
@@ -210,13 +229,45 @@ Ext.define('Ext.grid.filters.filter.Date', {
         this.fields[operator].up('menuitem').setChecked(false, /*suppressEvents*/ true);
     },
 
+    onStateRestore: function(filter) {
+        filter.setSerializer(this.getSerializer());
+        filter.setConvert(this.convertDateOnly);
+    },
+
+    getFilterConfig: function(config, key) {
+        config = this.callParent([config, key]);
+        config.serializer = this.getSerializer();
+        config.convert = this.convertDateOnly;
+        return config;
+    },
+
+    convertDateOnly: function(v) {
+        var result = null;
+        if (v) {
+            result = Ext.Date.clearTime(v, true).getTime();
+        }
+        return result;
+    },
+
+    getSerializer: function() {
+        var me = this;
+        return function(data) {
+            var value = data.value;
+            if (value) {
+                data.value = Ext.Date.format(value, me.getDateFormat());
+            }
+        };
+    },
+
     /**
      * Handler for when the DatePicker for a field fires the 'select' event
      * @param {Ext.picker.Date} picker
      * @param {Object} date
      */
     onMenuSelect: function (picker, date) {
-        var fields = this.fields,
+        var me = this,
+            fields = me.fields,
+            filters = me.filter,
             field = fields[picker.itemId],
             gt = fields.gt,
             lt = fields.lt,
@@ -232,14 +283,27 @@ Ext.define('Ext.grid.filters.filter.Date', {
             eq.up('menuitem').setChecked(false, true);
             if (field === gt && (+lt.value < +date)) {
                 lt.up('menuitem').setChecked(false, true);
+                // Null so filter will be removed from store, but only if it currently has a value.
+                // The Trifilter uses the number of removed filters as one of the determinants to determine
+                // whether the gridfilter should be active, so don't push a value in unless it's changed.
+                if (filters.lt.getValue() != null) {
+                    v.lt = null;
+                }
             } else if (field === lt && (+gt.value > +date)) {
                 gt.up('menuitem').setChecked(false, true);
+                // Null so filter will be removed from store, but only if it currently has a value.
+                // The Trifilter uses the number of removed filters as one of the determinants to determine
+                // whether the gridfilter should be active, so don't push a value in unless it's changed.
+                if (filters.gt.getValue() != null) {
+                    v.gt = null;
+                }
             }
         }
 
         v[field.filterKey] = date;
-        this.setValue(v);
+        me.setValue(v);
 
         picker.up('menu').hide();
       }
 });
+

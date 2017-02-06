@@ -29,13 +29,18 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
 
     viewConfig: {
         stripeRows: false,
-        enableTextSelection: false,
+        enableTextSelection: true,
         draggable: false,
         markDirty: false,
         resizable: false,
-        disableSelection: false,
+        disableSelection: true,
         trackOver: true,
         forceFit:true
+        //focusOnToFront: false,
+        //preserveScrollOnRefresh: false,
+        //focusable: false
+
+        //focusRow: Ext.emptyFn
         //,height:70
         //,getRowClass: function (record, rowIndex, rp, store) {
         //    rp.tstyle += 'height: 70px;';
@@ -49,13 +54,52 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
         //    //}
         //}
     },
+
+    //selModel: {listeners:{}},
+    //selModel: Ext.create('Ext.selection.Model', { listeners: {} }),
+
     cls: 'grid-color-yellow',
+
     hideHeaders: true,
     columnLines: false,
     rowLines: false,
+    collapsible: false,
+    variableRowHeight : true,
+    bufferedRenderer: true,
 
-    //bufferedRenderer: true,
 
+    //listeners: {
+        //cellclick: function (x, y) {
+        //    console.info('DataAcquisition cellclick');
+        //    console.info(this);
+        //},
+        //cellmousedown: function (x, y)  {
+            //Ext.util.Observable.capture(this, function(e){console.log('DataAquisition - ' + x.id + ': ' + e);});
+            //console.info('DataAcquisition cellmousedown');
+            //console.info(this);
+            //this.suspendEvent('containerclick');
+        //},
+        //selectionchange: function (x, y)  {
+        //    console.info('DataAcquisition selectionchange');
+        //    console.info(this);
+        //},
+        //rowclick: function (x, y)  {
+        //    console.info('DataAcquisition rowclick');
+        //    console.info(this);
+        //},
+        //itemclick: function (x, y)  {
+        //    console.info('DataAcquisition itemclick');
+        //    console.info(this);
+        //},
+        //containerclick: function (x, y)  {
+        //    console.info('DataAcquisition containerclick');
+        //    console.info(this);
+        //},
+        //groupchange: function (x, y)  {
+        //    console.info('DataAcquisition groupchange');
+        //    console.info(this);
+        //}
+    //},
     //listeners: {
     //    celldblclick: function(grid, el, colIndex, record){
     //        //console.info(record);
@@ -167,6 +211,7 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
         me.columns = [{
             // text: '', // 'Type',
             width: 220,
+            variableRowHeight:true,
             //dataIndex: 'type'
             xtype:'templatecolumn',
             tpl: new Ext.XTemplate(
@@ -189,10 +234,11 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
             xtype: 'actioncolumn',
             // header: 'Active',
             hideable: false,
-            hidden: true,
+            hidden: Ext.getCmp('lockunlock').pressed ? false : true,
             width: 35,
             align: 'center',
             stopSelection: false,
+            variableRowHeight:true,
             items: [{
                 // scope: me,
                 disabled: false,
@@ -244,7 +290,7 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
             xtype: 'actioncolumn',
             // header: 'Store Native',
             hideable: true,
-            hidden:true,
+            hidden: Ext.getCmp('lockunlock').pressed ? false : true,
             width: 100,
             align: 'center',
             stopSelection: false,
@@ -311,9 +357,10 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
         },{
             xtype: 'actioncolumn',
             width: 55,
-            height:40,
+            //height:40,
             align:'center',
             stopSelection: false,
+            variableRowHeight:true,
             items: [{
                 //icon: 'resources/img/icons/file-extension-log-icon-32x32.png',
                 iconCls:'log-icon',

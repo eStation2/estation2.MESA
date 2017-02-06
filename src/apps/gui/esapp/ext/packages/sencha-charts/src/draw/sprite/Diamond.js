@@ -1,3 +1,21 @@
+/**
+ * A sprite that represents a diamond.
+ *
+ *     @example
+ *     Ext.create({
+ *        xtype: 'draw', 
+ *        renderTo: document.body,
+ *        width: 600,
+ *        height: 400,
+ *        sprites: [{
+ *            type: 'diamond',
+ *            translationX: 100,
+ *            translationY: 100,
+ *            size: 40,
+ *            fillStyle: '#1F6D91'
+ *        }]
+ *     });
+ */
 Ext.define('Ext.draw.sprite.Diamond', {
     extend: 'Ext.draw.sprite.Path',
     alias: 'sprite.diamond',
@@ -18,7 +36,7 @@ Ext.define('Ext.draw.sprite.Diamond', {
                 y: 0,
                 size: 4
             },
-            dirtyTriggers: {
+            triggers: {
                 x: 'path',
                 y: 'path',
                 size: 'path'

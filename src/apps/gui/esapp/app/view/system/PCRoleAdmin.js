@@ -40,6 +40,8 @@ Ext.define("esapp.view.system.PCRoleAdmin",{
             pc2checked = false,
             pc3checked = false;
 
+        me.title = esapp.Utils.getTranslation('assignrole');    // 'Assign Role',
+
         if (me.params.currentrole == 'PC2') pc2checked = true;
         else if (me.params.currentrole == 'PC3') pc3checked = true;
 

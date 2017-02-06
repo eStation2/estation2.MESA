@@ -5,7 +5,7 @@ Ext.define('Ext.chart.Legend', {
     xtype: 'legend',
     extend: 'Ext.chart.LegendBase',
     config: {
-        baseCls: 'x-legend',
+        baseCls: Ext.baseCSSPrefix + 'legend',
         padding: 5,
 
         /**
@@ -16,15 +16,39 @@ Ext.define('Ext.chart.Legend', {
 
         disableSelection: true,
 
+        /**
+         * @cfg {Boolean} toggleable
+         * `true` to allow series items to have their visibility
+         * toggled by interaction with the legend items.
+         */
         toggleable: true
     },
 
     toggleItem: function (index) {
-        if (this.getToggleable()) {
-            var store = this.getStore(),
-                record = store && store.getAt(index);
+        if (!this.getToggleable()) {
+            return;
+        }
+        var store = this.getStore(),
+            disabledCount = 0, disabled,
+            canToggle = true,
+            i, count, record;
+
+        if (store) {
+            count = store.getCount();
+            for (i = 0; i < count; i++) {
+                record = store.getAt(i);
+                if (record.get('disabled')) {
+                    disabledCount++;
+                }
+            }
+            canToggle = count - disabledCount > 1;
+
+            record = store.getAt(index);
             if (record) {
-                record.set('disabled', !record.get('disabled'));
+                disabled = record.get('disabled');
+                if (disabled || canToggle) {
+                    record.set('disabled', !disabled);
+                }
             }
         }
     }

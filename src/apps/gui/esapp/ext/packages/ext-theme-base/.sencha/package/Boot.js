@@ -1,6 +1,5 @@
 // @tag core
 // @define Ext.Boot
-// @define Ext
 
 var Ext = Ext || {};
 
@@ -9,21 +8,10 @@ var Ext = Ext || {};
  * @class Ext.Boot
  * @singleton
  */
-Ext.Boot = (function (emptyFn) {
+Ext.Boot = Ext.Boot || (function (emptyFn) {
 
     var doc = document,
-        apply = function (dest, src, defaults) {
-            if (defaults) {
-                apply(dest, defaults);
-            }
-
-            if (dest && src && typeof src == 'object') {
-                for (var key in src) {
-                    dest[key] = src[key];
-                }
-            }
-            return dest;
-        },
+        _emptyArray = [],
         _config = {
             /*
              * @cfg {Boolean} [disableCaching=true]
@@ -58,11 +46,13 @@ Ext.Boot = (function (emptyFn) {
             preserveScripts: true,
 
             /*
-             * @cfg {String} charset
+             * @cfg {String} [charset=UTF-8]
              * Optional charset to specify encoding of dynamic content.
              */
-            charset: undefined
+            charset: 'UTF-8'
         },
+
+        _assetConfig= {},
 
         cssRe = /\.css(?:\?|$)/i,
         resolverEl = doc.createElement('a'),
@@ -70,9 +60,9 @@ Ext.Boot = (function (emptyFn) {
         _environment = {
             browser: isBrowser,
             node: !isBrowser && (typeof require === 'function'),
-            phantom: (typeof phantom !== 'undefined' && phantom.fs)
+            phantom: (window && (window._phantom || window.callPhantom)) || /PhantomJS/.test(window.navigator.userAgent)
         },
-        _tags = {},
+        _tags = (Ext.platformTags = {}),
 
     //<debug>
         _debug = function (message) {
@@ -90,8 +80,48 @@ Ext.Boot = (function (emptyFn) {
             }
             return object;
         },
+        _merge = function() {
+            var lowerCase = false,
+                obj = Array.prototype.shift.call(arguments),
+                index, i, len, value;
+
+            if (typeof arguments[arguments.length - 1] === 'boolean') {
+                lowerCase = Array.prototype.pop.call(arguments);
+            }
+
+            len = arguments.length;
+            for (index = 0; index < len; index++) {
+                value = arguments[index];
+                if (typeof value === 'object') {
+                    for (i in value) {
+                        obj[lowerCase ? i.toLowerCase() : i] = value[i];
+                    }
+                }
+            }
+
+            return obj;
+        },
+        _getKeys = (typeof Object.keys == 'function') ?
+            function(object){
+                if (!object) {
+                    return [];
+                }
+                return Object.keys(object);
+            } :
+            function(object) {
+                var keys = [],
+                    property;
+
+                for (property in object) {
+                    if (object.hasOwnProperty(property)) {
+                        keys.push(property);
+                    }
+                }
+
+                return keys;
+            },
     /*
-     * The Boot loader class manages Request objects that contain one or 
+     * The Boot loader class manages Request objects that contain one or
      * more individual urls that need to be loaded.  Requests can be performed
      * synchronously or asynchronously, but will always evaluate urls in the
      * order specified on the request object.
@@ -99,14 +129,21 @@ Ext.Boot = (function (emptyFn) {
         Boot = {
             loading: 0,
             loaded: 0,
+            apply: _apply,
             env: _environment,
             config: _config,
+
+            /**
+             * @cfg {Object} assetConfig
+             * A map (url->assetConfig) that contains information about assets loaded by the Microlaoder.
+             */
+            assetConfig: _assetConfig,
 
             // Keyed by absolute URL this object holds "true" if that URL is already loaded
             // or an array of callbacks to call once it loads.
             scripts: {
                 /*
-                 Entry objects 
+                 Entry objects
 
                  'http://foo.com/bar/baz/Thing.js': {
                  done: true,
@@ -135,43 +172,121 @@ Ext.Boot = (function (emptyFn) {
             //<debug>
             debug: _debug,
             //</debug>
+
+            /*
+             * enables / disables loading scripts via script / link elements rather
+             * than using ajax / eval
+             */
+            useElements: true,
+
             listeners: [],
 
             Request: Request,
 
             Entry: Entry,
 
-            platformTags: _tags,
+            allowMultipleBrowsers: false,
+
+            browserNames: {
+                ie: 'IE',
+                firefox: 'Firefox',
+                safari: 'Safari',
+                chrome: 'Chrome',
+                opera: 'Opera',
+                dolfin: 'Dolfin',
+                edge: 'Edge',
+                webosbrowser: 'webOSBrowser',
+                chromeMobile: 'ChromeMobile',
+                chromeiOS: 'ChromeiOS',
+                silk: 'Silk',
+                other: 'Other'
+            },
+
+            osNames: {
+                ios: 'iOS',
+                android: 'Android',
+                windowsPhone: 'WindowsPhone',
+                webos: 'webOS',
+                blackberry: 'BlackBerry',
+                rimTablet: 'RIMTablet',
+                mac: 'MacOS',
+                win: 'Windows',
+                tizen: 'Tizen',
+                linux: 'Linux',
+                bada: 'Bada',
+                chromeOS: 'ChromeOS',
+                other: 'Other'
+            },
+
+            browserPrefixes: {
+                ie: 'MSIE ',
+                edge: 'Edge/',
+                firefox: 'Firefox/',
+                chrome: 'Chrome/',
+                safari: 'Version/',
+                opera: 'OPR/',
+                dolfin: 'Dolfin/',
+                webosbrowser: 'wOSBrowser/',
+                chromeMobile: 'CrMo/',
+                chromeiOS: 'CriOS/',
+                silk: 'Silk/'
+            },
+
+            // When a UA reports multiple browsers this list is used to prioritize the 'real' browser
+            // lower index number will win
+            browserPriority: [
+                'edge',
+                'opera',
+                'dolfin',
+                'webosbrowser',
+                'silk',
+                'chromeiOS',
+                'chromeMobile',
+                'ie',
+                'firefox',
+                'safari',
+                'chrome'
+            ],
+
+            osPrefixes: {
+                tizen: '(Tizen )',
+                ios: 'i(?:Pad|Phone|Pod)(?:.*)CPU(?: iPhone)? OS ',
+                android: '(Android |HTC_|Silk/)', // Some HTC devices ship with an OSX userAgent by default,
+                // so we need to add a direct check for HTC_
+                windowsPhone: 'Windows Phone ',
+                blackberry: '(?:BlackBerry|BB)(?:.*)Version\/',
+                rimTablet: 'RIM Tablet OS ',
+                webos: '(?:webOS|hpwOS)\/',
+                bada: 'Bada\/',
+                chromeOS: 'CrOS '
+            },
+
+            fallbackOSPrefixes: {
+                windows: 'win',
+                mac: 'mac',
+                linux: 'linux'
+            },
+
+            devicePrefixes: {
+                iPhone: 'iPhone',
+                iPod: 'iPod',
+                iPad: 'iPad'
+            },
+
+            maxIEVersion: 12,
+
 
             /**
-             * The defult function that detects various platforms and sets tags
-             * in the platform map accrodingly.  Examples are iOS, android, tablet, etc.
+             * The default function that detects various platforms and sets tags
+             * in the platform map accordingly.  Examples are iOS, android, tablet, etc.
              * @param tags the set of tags to populate
              */
             detectPlatformTags: function () {
-                var ua = navigator.userAgent,
-                    isMobile = _tags.isMobile = /Mobile(\/|\s)/.test(ua),
-                    isPhone, isDesktop, isTablet, touchSupported, isIE10, isBlackberry,
+                var me = this,
+                    ua = navigator.userAgent,
+                    isMobile = /Mobile(\/|\s)/.test(ua),
                     element = document.createElement('div'),
-                    uaTagChecks = [
-                        'iPhone',
-                        'iPod',
-                        'Android',
-                        'Silk',
-                        'Android 2',
-                        'BlackBerry',
-                        'BB',
-                        'iPad',
-                        'RIM Tablet OS',
-                        'MSIE 10',
-                        'Trident',
-                        'Chrome',
-                        'Tizen',
-                        'Firefox',
-                        'Safari',
-                        'Windows Phone'
-                    ],
-                    isEventSupported = function(name, tag) {
+                    isEventSupported = function (name, tag) {
                         if (tag === undefined) {
                             tag = window;
                         }
@@ -194,30 +309,142 @@ Ext.Boot = (function (emptyFn) {
 
                         return isSupported;
                     },
-                    uaTags = {},
-                    len = uaTagChecks.length, check, c;
 
-                for (c = 0; c < len; c++) {
-                    check = uaTagChecks[c];
-                    uaTags[check] = new RegExp(check).test(ua);
-                }
+                    // Browser Detection
+                    getBrowsers = function () {
+                        var browsers = {},
+                            maxIEVersion, prefix,
+                            value, key, index, len, match, version, matched;
 
-                isPhone =
-                    (uaTags.iPhone || uaTags.iPod) ||
-                    (!uaTags.Silk && (uaTags.Android && (uaTags['Android 2'] || isMobile))) ||
-                    ((uaTags.BlackBerry || uaTags.BB) && uaTags.isMobile) ||
-                    (uaTags['Windows Phone']);
+                        // MS Edge browser (and possibly others) can report multiple browsers in the UserAgent
+                        // "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.10240"
+                        // we use this to prioritize the actual browser in this situation
+                        len = me.browserPriority.length;
+                        for (index = 0; index < len; index++) {
+                            key = me.browserPriority[index];
+                            if (!matched) {
+                                value = me.browserPrefixes[key];
+                                match = ua.match(new RegExp('(' + value + ')([\\w\\._]+)'));
+                                version = match && match.length > 1 ? parseInt(match[2]) : 0;
+                                if (version) {
+                                    matched = true;
+                                }
+                            } else {
+                                version = 0;
+                            }
+                            browsers[key] = version;
+                        }
 
-                isTablet =
-                    (!_tags.isPhone) && (
-                    uaTags.iPad ||
-                    uaTags.Android ||
-                    uaTags.Silk ||
-                    uaTags['RIM Tablet OS'] ||
-                    (uaTags['MSIE 10'] && /; Touch/.test(ua))
-                    );
+                        //Deal with IE document mode
+                        if (browsers.ie) {
+                            var mode = document.documentMode;
 
-                touchSupported =
+                            if (mode >= 8) {
+                                browsers.ie = mode;
+                            }
+                        }
+
+                        // Fancy IE greater than and less then quick tags
+                        version = browsers.ie || false;
+                        maxIEVersion = Math.max(version, me.maxIEVersion);
+
+                        for (index = 8; index <= maxIEVersion; ++index) {
+                            prefix = 'ie' + index;
+                            browsers[prefix + 'm'] = version ? version <= index : 0;
+                            browsers[prefix] = version ? version === index : 0;
+                            browsers[prefix + 'p'] = version ? version >= index : 0;
+                        }
+
+                        return browsers;
+                    },
+
+                    //OS Detection
+                    getOperatingSystems = function () {
+                        var systems = {},
+                            value, key, keys, index, len, match, matched, version, activeCount;
+
+                        keys = _getKeys(me.osPrefixes);
+                        len = keys.length;
+                        for (index = 0, activeCount = 0; index < len; index++) {
+                            key = keys[index];
+                            value = me.osPrefixes[key];
+                            match = ua.match(new RegExp('(' + value + ')([^\\s;]+)'));
+                            matched = match ? match[1] : null;
+
+                            // This is here because some HTC android devices show an OSX Snow Leopard userAgent by default.
+                            // And the Kindle Fire doesn't have any indicator of Android as the OS in its User Agent
+                            if (matched && (matched === 'HTC_' || matched === 'Silk/')) {
+                                version = 2.3;
+                            } else {
+                                version = match && match.length > 1 ? parseFloat(match[match.length - 1]) : 0;
+                            }
+
+                            if (version) {
+                                activeCount++;
+                            }
+                            systems[key] = version;
+                        }
+
+                        keys = _getKeys(me.fallbackOSPrefixes);
+
+                        // If no OS could be found we resort to the fallbacks, otherwise we just
+                        // falsify the fallbacks
+                        len = keys.length;
+                        for (index = 0; index < len; index++) {
+                            key = keys[index];
+
+                            // No OS was detected from osPrefixes
+                            if (activeCount === 0) {
+                                value = me.fallbackOSPrefixes[key];
+                                match = ua.toLowerCase().match(new RegExp(value));
+                                systems[key] = match ? true : 0;
+                            } else {
+                                systems[key] = 0;
+                            }
+                        }
+
+                        return systems;
+                    },
+
+                    // Device Detection
+                    getDevices = function () {
+                        var devices = {},
+                            value, key, keys, index, len, match;
+
+                        keys = _getKeys(me.devicePrefixes);
+                        len = keys.length;
+                        for (index = 0; index < len; index++) {
+                            key = keys[index];
+                            value = me.devicePrefixes[key];
+                            match = ua.match(new RegExp(value));
+                            devices[key] = match ? true : 0;
+                        }
+
+                        return devices;
+                    },
+                    browsers = getBrowsers(),
+                    systems = getOperatingSystems(),
+                    devices = getDevices(),
+                    platformParams = Boot.loadPlatformsParam();
+
+                // We apply platformParams from the query here first to allow for forced user valued
+                // to be used in calculation of generated tags
+                _merge(_tags, browsers, systems, devices, platformParams, true);
+
+                _tags.phone = !!((_tags.iphone || _tags.ipod) ||
+                    (!_tags.silk && (_tags.android && (_tags.android < 3 || isMobile))) ||
+                    (_tags.blackberry && isMobile) ||
+                    (_tags.windowsphone));
+
+                _tags.tablet = !!(!_tags.phone && (
+                        _tags.ipad ||
+                        _tags.android ||
+                        _tags.silk ||
+                        _tags.rimtablet ||
+                        (_tags.ie10 && /; Touch/.test(ua))
+                    ));
+
+                _tags.touch =
                     // if the browser has touch events we can be reasonably sure the device has
                     // a touch screen
                     isEventSupported('touchend') ||
@@ -228,25 +455,13 @@ Ext.Boot = (function (emptyFn) {
                     // IE10 uses a vendor-prefixed maxTouchPoints property
                     navigator.msMaxTouchPoints;
 
-                isDesktop = !isPhone && !isTablet;
-                isIE10 = uaTags['MSIE 10'];
-                isBlackberry = uaTags.Blackberry || uaTags.BB;
+                _tags.desktop = !_tags.phone && !_tags.tablet;
+                _tags.cordova = _tags.phonegap = !!(window.PhoneGap || window.Cordova || window.cordova);
+                _tags.webview = /(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)(?!.*FBAN)/i.test(ua);
+                _tags.androidstock = (_tags.android <= 4.3) && (_tags.safari || _tags.silk);
 
-                apply(_tags, Boot.loadPlatformsParam(), {
-                    phone: isPhone,
-                    tablet: isTablet,
-                    desktop: isDesktop,
-                    touch: touchSupported,
-                    ios: (uaTags.iPad || uaTags.iPhone || uaTags.iPod),
-                    android: uaTags.Android || uaTags.Silk,
-                    blackberry: isBlackberry,
-                    safari: uaTags.Safari && isBlackberry,
-                    chrome: uaTags.Chrome,
-                    ie10: isIE10,
-                    windows: isIE10 || uaTags.Trident,
-                    tizen: uaTags.Tizen,
-                    firefox: uaTags.Firefox
-                });
+                // Re-apply any query params here to allow for user override of generated tags (desktop, touch, tablet, etc)
+                _merge(_tags, platformParams, true);
             },
 
             /**
@@ -276,45 +491,47 @@ Ext.Boot = (function (emptyFn) {
                 }
 
                 if (params.platformTags) {
-                    tmpArray = params.platform.split(/\W/);
+                    tmpArray = params.platformTags.split(",");
                     for (tmplen = tmpArray.length, i = 0; i < tmplen; i++) {
                         platform = tmpArray[i].split(":");
                         name = platform[0];
+                        enabled=true;
                         if (platform.length > 1) {
                             enabled = platform[1];
                             if (enabled === 'false' || enabled === '0') {
                                 enabled = false;
-                            } else {
-                                enabled = true;
                             }
                         }
                         platforms[name] = enabled;
                     }
                 }
-                return platform;
+                return platforms;
             },
 
-            getPlatformTags: function () {
-                return Boot.platformTags;
-            },
+            filterPlatform: function (platform, excludes) {
+                platform = _emptyArray.concat(platform || _emptyArray);
+                excludes = _emptyArray.concat(excludes || _emptyArray);
 
-            filterPlatform: function (platform) {
-                platform = [].concat(platform);
-                var tags = Boot.getPlatformTags(),
-                    len, p, tag;
+                var plen = platform.length,
+                    elen = excludes.length,
+                    include = (!plen && elen), // default true if only excludes specified
+                    i, tag;
 
-                for (len = platform.length, p = 0; p < len; p++) {
-                    tag = platform[p];
-                    if (tags.hasOwnProperty(tag)) {
-                        return !!tags[tag];
-                    }
+                for (i = 0; i < plen && !include; i++) {
+                    tag = platform[i];
+                    include = !!_tags[tag];
                 }
-                return false;
+
+                for (i = 0; i < elen && include; i++) {
+                    tag = excludes[i];
+                    include = !_tags[tag];
+                }
+
+                return include;
             },
 
             init: function () {
-                var me = this,
-                    scriptEls = doc.getElementsByTagName('script'),
+                var scriptEls = doc.getElementsByTagName('script'),
                     len = scriptEls.length,
                     re = /\/ext(\-[a-z\-]+)?\.js$/,
                     entry, script, src, state, baseUrl, key, n, origin;
@@ -332,13 +549,13 @@ Ext.Boot = (function (emptyFn) {
                     // If we find a script file called "ext-*.js", then the base path is that file's base path.
                     if (!baseUrl) {
                         if (re.test(src)) {
-                            me.hasReadyState = ("readyState" in script);
-                            me.hasAsync = ("async" in script) || !me.hasReadyState;
+                            Boot.hasReadyState = ("readyState" in script);
+                            Boot.hasAsync = ("async" in script) || !Boot.hasReadyState;
                             baseUrl = src;
                         }
                     }
 
-                    if (!me.scripts[key = me.canonicalUrl(src)]) {
+                    if (!Boot.scripts[key = Boot.canonicalUrl(src)]) {
                         //<debug>
                         _debug("creating entry " + key + " in Boot.init");
                         //</debug>
@@ -356,20 +573,20 @@ Ext.Boot = (function (emptyFn) {
                 if (!baseUrl) {
                     script = scriptEls[scriptEls.length - 1];
                     baseUrl = script.src;
-                    me.hasReadyState = ('readyState' in script);
-                    me.hasAsync = ("async" in script) || !me.hasReadyState;
+                    Boot.hasReadyState = ('readyState' in script);
+                    Boot.hasAsync = ("async" in script) || !Boot.hasReadyState;
                 }
 
-                me.baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf('/') + 1);
+                Boot.baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf('/') + 1);
                 origin = window.location.origin ||
                     window.location.protocol +
                     "//" +
                     window.location.hostname +
                     (window.location.port ? ':' + window.location.port: '');
-                me.origin = origin;
+                Boot.origin = origin;
 
-                me.detectPlatformTags();
-                Ext.filterPlatform = me.filterPlatform;
+                Boot.detectPlatformTags();
+                Ext.filterPlatform = Boot.filterPlatform;
             },
 
             /*
@@ -417,7 +634,7 @@ Ext.Boot = (function (emptyFn) {
              * @return {Object}
              */
             getConfig: function (name) {
-                return name ? this.config[name] : this.config;
+                return name ? Boot.config[name] : Boot.config;
             },
 
             /*
@@ -427,18 +644,18 @@ Ext.Boot = (function (emptyFn) {
              */
             setConfig: function (name, value) {
                 if (typeof name === 'string') {
-                    this.config[name] = value;
+                    Boot.config[name] = value;
                 } else {
                     for (var s in name) {
-                        this.setConfig(s, name[s]);
+                        Boot.setConfig(s, name[s]);
                     }
                 }
-                return this;
+                return Boot;
             },
 
             getHead: function () {
-                return this.docHead ||
-                    (this.docHead = doc.head ||
+                return Boot.docHead ||
+                    (Boot.docHead = doc.head ||
                         doc.getElementsByTagName('head')[0]);
             },
 
@@ -446,16 +663,26 @@ Ext.Boot = (function (emptyFn) {
                 var config = cfg || {};
                 config.url = url;
                 config.key = key;
-                return this.scripts[key] = new Entry(config);
+                return Boot.scripts[key] = new Entry(config);
             },
 
             getEntry: function (url, cfg) {
-                var key = this.canonicalUrl(url),
-                    entry = this.scripts[key];
+                var key = Boot.canonicalUrl(url),
+                    entry = Boot.scripts[key];
                 if (!entry) {
-                    entry = this.create(url, key, cfg);
+                    entry = Boot.create(url, key, cfg);
                 }
                 return entry;
+            },
+
+            registerContent: function (url, type, content) {
+                var cfg = {
+                    content: content,
+                    loaded: true,
+                    css: type === 'css'
+                };
+
+                return Boot.getEntry(url, cfg);
             },
 
             processRequest: function(request, sync) {
@@ -466,16 +693,15 @@ Ext.Boot = (function (emptyFn) {
                 //<debug>
                 _debug("Boot.load called");
                 //</debug>
-                var me = this,
-                    request = new Request(request);
+                var request = new Request(request);
 
-                if(request.sync || me.syncMode) {
-                    return me.loadSync(request);
+                if (request.sync || Boot.syncMode) {
+                    return Boot.loadSync(request);
                 }
 
                 // If there is a request in progress, we must
                 // queue this new request to be fired  when the current request completes.
-                if (me.currentRequest) {
+                if (Boot.currentRequest) {
                     //<debug>
                     _debug("current active request, suspending this request");
                     //</debug>
@@ -483,76 +709,75 @@ Ext.Boot = (function (emptyFn) {
                     // entries with currently running requests will synchronize state
                     // with this pending one as they complete
                     request.getEntries();
-                    me.suspendedQueue.push(request);
+                    Boot.suspendedQueue.push(request);
                 } else {
-                    me.currentRequest = request;
-                    me.processRequest(request, false);
+                    Boot.currentRequest = request;
+                    Boot.processRequest(request, false);
                 }
-                return me;
+                return Boot;
             },
 
             loadSync: function (request) {
                 //<debug>
                 _debug("Boot.loadSync called");
                 //</debug>
-                var me = this,
-                    request = new Request(request);
+                var request = new Request(request);
 
-                me.syncMode++;
-                me.processRequest(request, true);
-                me.syncMode--;
-                return me;
+                Boot.syncMode++;
+                Boot.processRequest(request, true);
+                Boot.syncMode--;
+                return Boot;
             },
 
             loadBasePrefix: function(request) {
                 request = new Request(request);
                 request.prependBaseUrl = true;
-                return this.load(request);
+                return Boot.load(request);
             },
 
             loadSyncBasePrefix: function(request) {
                 request = new Request(request);
                 request.prependBaseUrl = true;
-                return this.loadSync(request);
+                return Boot.loadSync(request);
             },
 
             requestComplete: function(request) {
-                var me = this,
-                    next;
-                if(me.currentRequest === request) {
-                    me.currentRequest = null;
-                    while(me.suspendedQueue.length > 0) {
-                        next = me.suspendedQueue.shift();
+                var next;
+
+                if (Boot.currentRequest === request) {
+                    Boot.currentRequest = null;
+                    while(Boot.suspendedQueue.length > 0) {
+                        next = Boot.suspendedQueue.shift();
                         if(!next.done) {
                             //<debug>
                             _debug("resuming suspended request");
                             //</debug>
-                            me.load(next);
+                            Boot.load(next);
                             break;
                         }
                     }
                 }
-                if(!me.currentRequest && me.suspendedQueue.length == 0) {
-                    me.fireListeners();
+                if (!Boot.currentRequest && Boot.suspendedQueue.length == 0) {
+                    Boot.fireListeners();
                 }
             },
 
             isLoading: function () {
-                return !this.currentRequest && this.suspendedQueue.length == 0;
+                return !Boot.currentRequest && Boot.suspendedQueue.length == 0;
             },
 
             fireListeners: function () {
                 var listener;
-                while (this.isLoading() && (listener = this.listeners.shift())) {
+                while (Boot.isLoading() && (listener = Boot.listeners.shift())) {
                     listener();
                 }
             },
 
             onBootReady: function (listener) {
-                if (!this.isLoading()) {
+                if (!Boot.isLoading()) {
                     listener();
                 } else {
-                    this.listeners.push(listener);
+                    Boot.listeners.push(listener);
                 }
             },
 
@@ -568,31 +793,50 @@ Ext.Boot = (function (emptyFn) {
                 return Request.prototype.createLoadOrderMap(loadOrder);
             },
 
-            fetchSync: function(url) {
-                var exception, xhr, status, content;
+            fetch: function(url, complete, scope, async) {
+                async = (async === undefined) ? !!complete : async;
 
-                exception = false;
-                xhr = new XMLHttpRequest();
+                var xhr = new XMLHttpRequest(),
+                    result, status, content, exception = false,
+                    readyStateChange = function () {
+                        if (xhr && xhr.readyState == 4) {
+                            status = (xhr.status === 1223) ? 204 :
+                                (xhr.status === 0 && ((self.location || {}).protocol === 'file:' ||
+                                    (self.location || {}).protocol === 'ionp:')) ? 200 : xhr.status;
+                            content = xhr.responseText;
+                            result = {
+                                content: content,
+                                status: status,
+                                exception: exception
+                            };
+                            if (complete) {
+                                complete.call(scope, result);
+                            }
+                            xhr = null;
+                        }
+                    };
 
-                try {
-                    xhr.open('GET', url, false);
-                    xhr.send(null);
-                } catch (e) {
-                    exception = true;
+                if (async) {
+                    xhr.onreadystatechange = readyStateChange;
                 }
 
-                status = (xhr.status === 1223) ? 204 :
-                    (xhr.status === 0 && ((self.location || {}).protocol === 'file:' ||
-                        (self.location || {}).protocol === 'ionp:')) ? 200 : xhr.status;
-                content = xhr.responseText;
+                try {
+                    //<debug>
+                    _debug("fetching " + url + " " + (async ? "async" : "sync"));
+                    //</debug>
+                    xhr.open('GET', url, async);
+                    xhr.send(null);
+                } catch (err) {
+                    exception = err;
+                    readyStateChange();
+                    return result;
+                }
 
-                xhr = null; // Prevent potential IE memory leak
+                if (!async) {
+                    readyStateChange();
+                }
 
-                return {
-                    content: content,
-                    exception: exception,
-                    status: status
-                };
+                return result;
             },
 
             notifyAll: function(entry) {
@@ -613,15 +857,11 @@ Ext.Boot = (function (emptyFn) {
         var cfg = cfg.url ? cfg : {url: cfg},
             url = cfg.url,
             urls = url.charAt ? [ url ] : url,
-            boot = cfg.boot || Boot,
-            charset = cfg.charset || boot.config.charset,
-            buster = (('cache' in cfg) ? !cfg.cache : boot.config.disableCaching) &&
-                (boot.config.disableCachingParam + '=' + new Date().getTime());
+            charset = cfg.charset || Boot.config.charset;
+
         _apply(cfg, {
             urls: urls,
-            boot: boot,
-            charset: charset,
-            buster: buster
+            charset: charset
         });
         _apply(this, cfg);
     };
@@ -667,7 +907,7 @@ Ext.Boot = (function (emptyFn) {
             while (!stop) {
                 added = false;
 
-                // iterate the requirements for each index and 
+                // iterate the requirements for each index and
                 // accumulate in the index map
                 for (idx in indexMap) {
                     if (indexMap.hasOwnProperty(idx)) {
@@ -684,9 +924,9 @@ Ext.Boot = (function (emptyFn) {
                             }
                             for (len = reqs.length, i = 0; i < len; i++) {
                                 ridx = reqs[i];
-                                // if we find a requirement that wasn't 
-                                // already in the index map, 
-                                // set the added flag to indicate we need to 
+                                // if we find a requirement that wasn't
+                                // already in the index map,
+                                // set the added flag to indicate we need to
                                 // reprocess
                                 if (!indexMap[ridx]) {
                                     indexMap[ridx] = true;
@@ -797,7 +1037,7 @@ Ext.Boot = (function (emptyFn) {
                 expanded;
 
             if (!me.expanded) {
-                expanded = this.expandUrls(urls);
+                expanded = this.expandUrls(urls, true);
                 me.expanded = true;
             } else {
                 expanded = urls;
@@ -970,13 +1210,30 @@ Ext.Boot = (function (emptyFn) {
         _debug("creating entry for " + cfg.url);
         //</debug>
 
-        var boot = cfg.boot || Boot,
-            charset = cfg.charset || boot.config.charset,
-            buster = cfg.buster || ((('cache' in cfg) ? !cfg.cache : boot.config.disableCaching) &&
-                (boot.config.disableCachingParam + '=' + new Date().getTime()));
+        var charset = cfg.charset || Boot.config.charset,
+            manifest = Ext.manifest,
+            loader = manifest && manifest.loader,
+            cache = (cfg.cache !== undefined) ? cfg.cache : (loader && loader.cache),
+            buster, busterParam;
+
+        if (Boot.config.disableCaching) {
+            if (cache === undefined) {
+                cache = !Boot.config.disableCaching;
+            }
+
+            if (cache === false) {
+                buster = +new Date();
+            } else if (cache !== true) {
+                buster = cache;
+            }
+
+            if (buster) {
+                busterParam = (loader && loader.cacheParam) || Boot.config.disableCachingParam;
+                buster = busterParam + "=" + buster;
+            }
+        }
 
         _apply(cfg, {
-            boot: boot,
             charset: charset,
             buster: buster,
             requests: []
@@ -1003,7 +1260,12 @@ Ext.Boot = (function (emptyFn) {
         isCss: function () {
             var me = this;
             if (me.css === undefined) {
-                me.css = me.url && cssRe.test(me.url);
+                if (me.url) {
+                    var assetConfig = Boot.assetConfig[me.url];
+                    me.css = assetConfig ? assetConfig.type === "css" : cssRe.test(me.url);
+                } else {
+                    me.css = false;
+                }
             }
             return this.css;
         },
@@ -1030,6 +1292,11 @@ Ext.Boot = (function (emptyFn) {
                     el = doc.createElement(tag);
                     el.type = 'text/javascript';
                     me.prop = 'src';
+
+                    if (me.charset) {
+                        el.charset = me.charset;
+                    }
+
                     if (Boot.hasAsync) {
                         el.async = false;
                     }
@@ -1053,46 +1320,9 @@ Ext.Boot = (function (emptyFn) {
         fetch: function (req) {
             var url = this.getLoadUrl(),
                 async = !!req.async,
-                xhr = new XMLHttpRequest(),
-                complete = req.complete,
-                status, content, exception = false,
-                readyStateChange = function () {
-                    if (xhr && xhr.readyState == 4) {
-                        if (complete) {
-                            status = (xhr.status === 1223) ? 204 :
-                                (xhr.status === 0 && ((self.location || {}).protocol === 'file:' ||
-                                    (self.location || {}).protocol === 'ionp:')) ? 200 : xhr.status;
-                            content = xhr.responseText;
-                            complete({
-                                content: content,
-                                status: status,
-                                exception: exception
-                            });
-                        }
-                        xhr = null;
-                    }
-                };
+                complete = req.complete;
 
-            async = !!async;
-
-            if(async) {
-                xhr.onreadystatechange = readyStateChange;
-            }
-
-            try {
-                //<debug>
-                _debug("fetching " + url + " " + (async ? "async" : "sync"));
-                //</debug>
-                xhr.open('GET', url, async);
-                xhr.send(null);
-            } catch (err) {
-                exception = err;
-                readyStateChange();
-            }
-
-            if(!async) {
-                readyStateChange();
-            }
+            Boot.fetch(url, complete, this, async);
         },
 
         onContentLoaded: function (response) {
@@ -1207,7 +1437,7 @@ Ext.Boot = (function (emptyFn) {
                 head.removeChild(base);
 
             } else {
-                // Debugger friendly, file names are still shown even though they're 
+                // Debugger friendly, file names are still shown even though they're
                 // eval'ed code. Breakpoints work on both Firebug and Chrome's Web
                 // Inspector.
                 if (url) {
@@ -1224,20 +1454,26 @@ Ext.Boot = (function (emptyFn) {
                     me.loaded = me.evaluated = me.done = true;
                     me.notifyRequests();
                 };
-            if(me.isCss()) {
-                me.createLoadElement();
-                me.evaluateLoadElement();
+            me.createLoadElement(function(){
                 complete();
-            } else {
-                me.createLoadElement(function(){
-                    complete();
-                });
-                me.evaluateLoadElement();
-                // at this point, we need sequential evaluation, 
-                // which means we can't advance the load until
-                // this entry has fully completed
-                return false;
-            }
+            });
+            me.evaluateLoadElement();
+            // at this point, we need sequential evaluation,
+            // which means we can't advance the load until
+            // this entry has fully completed
+            return false;
+        },
+
+        loadElement: function() {
+            var me = this,
+                complete = function(){
+                    me.loaded = me.evaluated = me.done = true;
+                    me.notifyRequests();
+                };
+            me.createLoadElement(function(){
+                complete();
+            });
+            me.evaluateLoadElement();
             return true;
         },
 
@@ -1257,18 +1493,18 @@ Ext.Boot = (function (emptyFn) {
             var me = this;
             if (!me.loaded) {
                 if(me.loading) {
-                    // if we're calling back through load and we're loading but haven't 
-                    // yet loaded, then we should be in a sequential, cross domain 
-                    // load scenario which means we can't continue the load on the 
+                    // if we're calling back through load and we're loading but haven't
+                    // yet loaded, then we should be in a sequential, cross domain
+                    // load scenario which means we can't continue the load on the
                     // request until this entry has fully evaluated, which will mean
                     // loaded = evaluated = done = true in one step.  For css files, this
-                    // will happen immediately upon <link> element creation / insertion, 
+                    // will happen immediately upon <link> element creation / insertion,
                     // but <script> elements will set this upon load notification
                     return false;
                 }
                 me.loading = true;
 
-                // for async modes, we have some options 
+                // for async modes, we have some options
                 if (!sync) {
                     // if cross domain, just inject the script tag and let the onload
                     // events drive the progression
@@ -1276,7 +1512,7 @@ Ext.Boot = (function (emptyFn) {
                         return me.loadCrossDomain();
                     }
                     // for IE, use the readyStateChange allows us to load scripts in parallel
-                    // but serialize the evaluation by appending the script node to the 
+                    // but serialize the evaluation by appending the script node to the
                     // document
                     else if(!me.isCss() && Boot.hasReadyState) {
                         me.createLoadElement(function () {
@@ -1285,6 +1521,11 @@ Ext.Boot = (function (emptyFn) {
                         });
                     }
 
+                    else if(Boot.useElements &&
+                        // older webkit, phantomjs included, won't fire load for link elements
+                        !(me.isCss() && _environment.phantom)) {
+                        return me.loadElement();
+                    }
                     // for other browsers, just ajax the content down in parallel, and use
                     // globalEval to serialize evaluation
                     else {
@@ -1488,3 +1729,47 @@ if (!Function.prototype.bind) {
 //</feature>
 
 //</editor-fold>
+
+Ext.setResourcePath = function (poolName, path) {
+    var manifest = Ext.manifest || (Ext.manifest = {}),
+        paths = manifest.resources || (manifest.resources = {});
+
+    if (manifest) {
+        if (typeof poolName !== 'string') {
+            Ext.apply(paths, poolName);
+        } else {
+            paths[poolName] = path;
+        }
+        manifest.resources = paths;
+    }
+};
+
+Ext.getResourcePath = function (path, poolName, packageName) {
+    if (typeof path !== 'string') {
+        poolName = path.pool;
+        packageName = path.packageName;
+        path = path.path;
+    }
+    var manifest = Ext.manifest,
+        paths = manifest && manifest.resources,
+        poolPath = paths[poolName],
+        output = [];
+
+    if (poolPath == null) {
+        poolPath = paths.path;
+        if (poolPath == null) {
+            poolPath = 'resources';
+        }
+    }
+
+    if (poolPath) {
+        output.push(poolPath);
+    }
+
+    if (packageName) {
+        output.push(packageName);
+    }
+
+    output.push(path);
+    return output.join('/');
+};
