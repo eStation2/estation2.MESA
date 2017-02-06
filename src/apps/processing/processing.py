@@ -149,8 +149,8 @@ def loop_processing(dry_run=False, serialize=False):
                         'mapset':mapset,\
                         'starting_dates': list_dates,\
                         'version':version,
-                        'logfile':logfile,
-                        'native_mapset':native_mapset}
+                        'logfile':logfile}
+                        # 'native_mapset':native_mapset}
 
                 logger.debug('RL:{pipeline_run_level}; PL:{pipeline_printout_level},prod:{prod}, sprod:{starting_sprod},mapset:{mapset},\
                             dates:{starting_dates},version:{version}'.format(**args))
