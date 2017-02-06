@@ -11,11 +11,12 @@ from multiprocessing import Queue
 # subproductcode='ndv'
 # version='sv2-pv2.1'
 # start_date='19990101'
-# end_date='20141231'
+# end_date=None   #20141231'
+#
 # list_dates = proc_functions.get_list_dates_for_dataset(productcode, subproductcode, version, start_date=start_date, end_date=end_date)
 #
-# args = {'pipeline_run_level':3, \
-#         'pipeline_printout_level':0, \
+# args = {'pipeline_run_level':0, \
+#         'pipeline_printout_level':3, \
 #         'pipeline_printout_graph_level': 0, \
 #         'prod': productcode,\
 #         'starting_sprod':subproductcode,\
@@ -26,7 +27,7 @@ from multiprocessing import Queue
 #
 # res_queue = None
 # processing_std_ndvi_prods_only(res_queue,**args)
-#processing_std_ndvi_all(res_queue,**args)
+# processing_std_ndvi_all(res_queue,**args)
 
 
 #from apps.processing.processing_modis_sst import *
@@ -80,12 +81,12 @@ from multiprocessing import Queue
 # modis-sst monavg
 #   ---------------------------------------------------------------------
 # from apps.processing.processing_std_modis_monavg import *
-# args = {'pipeline_run_level':3, \
-#         'pipeline_printout_level':0, \
+# args = {'pipeline_run_level':0, \
+#         'pipeline_printout_level':4, \
 #         'pipeline_printout_graph_level': 0, \
 #         'prod': 'modis-sst',\
 #         'starting_sprod':'sst-day',\
-#         'mapset': 'MODIS-Africa-4km',\
+#         'mapset': 'MODIS-Global-4km',\
 #         'version':'v2013.1',
 #         'logfile':'modis-sst'
 #         }
@@ -162,23 +163,23 @@ from multiprocessing import Queue
 #   ---------------------------------------------------------------------
 # chirps-dekad
 #   ---------------------------------------------------------------------
-# from apps.processing.processing_std_precip_new import *
-# #
-# starting_dates = None
-# args = {'pipeline_run_level':0, \
-#         'pipeline_printout_level':3, \
-#         'pipeline_printout_graph_level': 0, \
-#         'prod': 'chirps-dekad',\
-#         'starting_sprod':'10d',\
-#         'starting_dates': None,\
-#         'mapset': 'CHIRP-Africa-5km',\
-#         'version':'2.0',
-#         'logfile':'ruffus-chirps',
-#         'touch_only':False}
+from apps.processing.processing_std_precip import *
 #
-# request_queue = Queue()
-# proc_lists=processing_std_precip_prods_only(request_queue, **args)
-# print(proc_lists)
+starting_dates = None
+args = {'pipeline_run_level':3, \
+        'pipeline_printout_level':0, \
+        'pipeline_printout_graph_level': 0, \
+        'prod': 'chirps-dekad',\
+        'starting_sprod':'10d',\
+        'starting_dates': None,\
+        'mapset': 'CHIRP-Africa-5km',\
+        'version':'2.0',
+        'logfile':'ruffus-chirps',
+        'touch_only':False}
+
+request_queue = Queue()
+proc_lists=processing_std_precip_prods_only(request_queue, **args)
+print(proc_lists)
 
 #   ---------------------------------------------------------------------
 # lsasaf-et
@@ -389,20 +390,20 @@ from multiprocessing import Queue
 #   ---------------------------------------------------------------------
 #   GSOD
 #   ---------------------------------------------------------------------
-from apps.processing.processing_std_gsod import *
-start_date='20160503'
-end_date = '20160505'
-starting_dates = proc_functions.get_list_dates_for_dataset('gsod-rain', '1dmeas', '1.0',
-                                                            start_date=start_date, end_date=end_date)
-args = {'pipeline_run_level':6, \
-        'pipeline_printout_level':0, \
-        'pipeline_printout_graph_level': 0, \
-        'prod': 'gsod-rain',\
-        'starting_sprod':'1dmeas',\
-        'mapset': 'SPOTV-SADC-1km',\
-        'version':'1.0',
-        'logfile':'gsod.log',
-        'starting_dates':starting_dates
-        }
-res_queue = None
-processing_std_gsod(res_queue, **args)
+# from apps.processing.processing_std_gsod import *
+# start_date='20160503'
+# end_date = '20160505'
+# starting_dates = proc_functions.get_list_dates_for_dataset('gsod-rain', '1dmeas', '1.0',
+#                                                             start_date=start_date, end_date=end_date)
+# args = {'pipeline_run_level':6, \
+#         'pipeline_printout_level':0, \
+#         'pipeline_printout_graph_level': 0, \
+#         'prod': 'gsod-rain',\
+#         'starting_sprod':'1dmeas',\
+#         'mapset': 'SPOTV-SADC-1km',\
+#         'version':'1.0',
+#         'logfile':'gsod.log',
+#         'starting_dates':starting_dates
+#         }
+# res_queue = None
+# processing_std_gsod(res_queue, **args)
