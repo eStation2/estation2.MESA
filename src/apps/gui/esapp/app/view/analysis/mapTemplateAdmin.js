@@ -78,19 +78,35 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
     multiColumnSort: false,
     columnLines: true,
     rowLines: true,
-
-    listeners: {
-        focusleave: function(){
-            this.hide();
-        }
-    },
+    cls: 'newpanelstyle',
 
     initComponent: function () {
         var me = this;
         //Ext.util.Observable.capture(me, function(e){console.log('mapTemplateAdmin - ' + me.id + ': ' + e);});
-        //params: {
-        //    userid: esapp.getUser().userid
-        //},
+
+        me.mon(me, {
+            loadstore: function() {
+                me.getViewModel().getStore('usermaptemplates').proxy.extraParams = {userid: esapp.getUser().userid};
+                me.getViewModel().getStore('usermaptemplates').load({
+                    callback: function(records, options, success) {
+                        //console.info(records);
+                        //console.info(options);
+                        //console.info(success);
+                    }
+                });
+            }
+        });
+
+        //me.listeners = {
+        //    //focusleave: function(){
+        //    //    this.hide();
+        //    //},
+        //    loadstore: function(){
+        //        console.info(me.store);
+        //        me.store.proxy.extraParams = {userid: esapp.getUser().userid};
+        //        me.store.load();
+        //    }
+        //};
 
         me.tools = [
         {
@@ -191,5 +207,6 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
         }];
 
         me.callParent();
+
     }
 });

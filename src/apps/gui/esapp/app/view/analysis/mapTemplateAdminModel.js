@@ -4,9 +4,10 @@ Ext.define('esapp.view.analysis.mapTemplateAdminModel', {
     stores: {
         usermaptemplates: {
             model: 'esapp.model.UserMapTemplate',
-            autoLoad: true,
+            autoLoad: false,
             autoSync: true,
             session: true,
+            storeId: 'usermaptemplates',
 
             proxy: {
                 type: 'rest',
@@ -14,7 +15,7 @@ Ext.define('esapp.view.analysis.mapTemplateAdminModel', {
                 appendId: false,
 
                 //extraParams: {
-                //    userid: null    //esapp.getUser().userid  // 'jurvtk'
+                //    userid: null    // esapp.getUser().userid  // 'jurvtk'
                 //},
 
                 api: {

@@ -69,7 +69,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                 arrowAlign: 'right',
                 collapseDirection: 'left',
                 menuAlign: 'tl-tr',
-                handler: 'loadUserMapTemplatesStore',
+                handler: 'showUserMapTemplates',
                 //listeners: {
                 //    mouseover: function(btn , y , x ){
                 //        if (btn.pressed) {
