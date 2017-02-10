@@ -252,7 +252,8 @@ Ext.define('esapp.view.analysis.timeseriesChartSelectionController', {
                     "date_format": product.get('date_format'),
                     "cumulative": product.get('cumulative'),
                     "difference": product.get('difference'),
-                    "reference": product.get('reference')
+                    "reference": product.get('reference'),
+                    "zscore": product.get('zscore') ? product.get('zscore') : false     // checkbox gives no value when not checked so no value is passed. Forse false in this case.
                 };
                 //console.info(product);
                 timeseriesselected.push(productObj);
@@ -273,6 +274,7 @@ Ext.define('esapp.view.analysis.timeseriesChartSelectionController', {
         }
 
         timeseriesselections = {
+            charttype: charttype,
             selectedTimeseries: timeseriesselected,
             yearTS: yearTS,
             tsFromPeriod: tsFromPeriod,
@@ -280,10 +282,7 @@ Ext.define('esapp.view.analysis.timeseriesChartSelectionController', {
             yearsToCompare: yearsToCompare,
             tsFromSeason: tsFromSeason,
             tsToSeason: tsToSeason,
-            wkt: wkt_polygon.getValue(),
-            charttype: charttype,
-            country:'',
-            region: ''
+            wkt: wkt_polygon.getValue()
         };
 
         return timeseriesselections

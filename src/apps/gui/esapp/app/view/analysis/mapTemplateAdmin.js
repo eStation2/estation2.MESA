@@ -97,16 +97,11 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
             }
         });
 
-        //me.listeners = {
-        //    //focusleave: function(){
-        //    //    this.hide();
-        //    //},
-        //    loadstore: function(){
-        //        console.info(me.store);
-        //        me.store.proxy.extraParams = {userid: esapp.getUser().userid};
-        //        me.store.load();
-        //    }
-        //};
+        me.listeners = {
+            focusleave: function(){
+                this.hide();
+            }
+        };
 
         me.tools = [
         {

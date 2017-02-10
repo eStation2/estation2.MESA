@@ -257,16 +257,16 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                         }
                     }
                 }]
-
-                //xtype: 'checkcolumn',
-                //dataIndex: 'difference',
-                //header: esapp.Utils.getTranslation('Diff'),
-                //width: 30,
-                //align: 'center',
-                //stopSelection: false,
-                //menuDisabled: true,
-                //hidden: !me.cumulative,
-                //disabled: !me.cumulative
+            }, {
+                xtype: 'checkcolumn',
+                dataIndex: 'zscore',
+                header: esapp.Utils.getTranslation('Z-Score'),
+                width: 30,
+                align: 'center',
+                stopSelection: false,
+                menuDisabled: true,
+                hidden: !me.ranking,
+                disabled: !me.ranking
             }, {
                 xtype: 'actioncolumn',
                 //header: esapp.Utils.getTranslation('actions'),   // 'Edit draw properties',
@@ -591,6 +591,11 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 id: 'ts_selectmultiyears_'+me.charttype,
                 //title: 'Year(s) of interest',
                 selType: 'checkboxmodel',
+                selModel: {
+                    allowDeselect:false,
+                    toggleOnClick:false,
+                    mode:'SIMPLE'
+                },
                 bind: {
                     store: '{years}'
                 },
@@ -824,17 +829,18 @@ Ext.define("esapp.view.analysis.timeseriesCategoryProducts",{
     //        }
     //    }
     //}],
-
+    //
     //onRender: function() {
     //    var me = this;
     //    me.callParent(arguments);
     //    if(me.border){
     //        me.el.setStyle("border","1px solid #333");
     //    }
+    //
     //},
 
     cls: 'group-header-style grid-color-yellow',
-    style: {"margin-right": "15px"},
+    style: {"margin-right": "15px", cursor: 'pointer'},
 
     features: [{
         reference: 'timeseriesproductcategories',
@@ -873,7 +879,7 @@ Ext.define("esapp.view.analysis.timeseriesCategoryProducts",{
 
     listeners: {
         //afterrender: 'loadTimeseriesProductsGrid',
-        //rowclick: 'TimeseriesProductsGridRowClick'
+        rowclick: 'TimeseriesProductsGridRowClick'
     },
 
     categoryid: null,
@@ -903,7 +909,13 @@ Ext.define("esapp.view.analysis.timeseriesCategoryProducts",{
                 ,anyMatch: true
             });
             //}
-
+            if (!me.multiplevariables){
+                productsStore.setFilters({
+                    property: 'date_format'
+                    ,value: 'YYYMMDD'
+                    ,anyMatch: true
+                });
+            }
             me.store = productsStore;
         });
         task.delay(500);
@@ -919,104 +931,16 @@ Ext.define("esapp.view.analysis.timeseriesCategoryProducts",{
             items: [{
                 getClass: function (v, meta, rec) {
                     return 'add20';
-                    //if (rec.get('selected')) {
-                    //    return 'activated';
-                    //} else {
-                    //    return 'deactivated';
-                    //}
                 },
                 getTip: function (v, meta, rec) {
                     return esapp.Utils.getTranslation('Add to selected');
-                    //if (rec.get('selected')) {
-                    //    return esapp.Utils.getTranslation('deactivateproduct');   // 'Deactivate Product';
-                    //} else {
-                    //    return esapp.Utils.getTranslation('activateproduct');   // 'Activate Product';
-                    //}
-                },
-                //handler: 'TimeseriesProductsGridRowClick'
-                handler: function (grid, rowIndex, colIndex, icon, e, record) {
-                    var gridSelectedTS = 'selected-timeseries-mapset-dataset-grid_'+ me.charttype;
-                    //if (grid.up().charttype == 'cumulative'){
-                    //    gridSelectedTS = 'selected-timeseries-mapset-dataset-grid_cum';
-                    //}
-                    var selectedTimeseriesStore = Ext.getCmp(gridSelectedTS).getStore();
-                    //var selectedTimeseriesStore = grid.up().up().up().lookupReference(gridSelectedTS).getStore();
-                    var yearsData = [];
-                    var newrecord = Ext.clone(record);
-
-                    //record.get('selected') ? record.set('selected', false) : record.set('selected', true);
-                    //record.get('selected') ? selectedTimeseriesStore.add(record) : selectedTimeseriesStore.remove(record);
-
-                    if (me.cumulative){
-                        newrecord.set('cumulative', true);
-                    }
-
-                    if (selectedTimeseriesStore.count() > 0){
-                        var recordExists = false;
-                        selectedTimeseriesStore.getData().each(function(product) {
-                            if (product.get('productmapsetid') == record.get('productmapsetid') && product.get('subproductcode') == record.get('subproductcode')){
-                                recordExists = true;
-                            }
-                        });
-                        if (!recordExists){
-                            if (!me.multiplevariables){
-                                selectedTimeseriesStore.removeAll();
-                            }
-                            newrecord.set('selected', true);
-                            selectedTimeseriesStore.add(newrecord);
-                        }
-                        //var  recordExists = selectedTimeseriesStore.findRecord('productmapsetid', record.get('productmapsetid'), 0, true);
-                        //console.info(recordExists);
-                        //if (recordExists != null ){
-                        //    console.info(recordExists.get('subproductcode'));
-                        //    console.info(record.get('subproductcode'));
-                        //    if (!(recordExists.get('subproductcode') == record.get('subproductcode'))){
-                        //        record.set('selected', true);
-                        //        selectedTimeseriesStore.add(record);
-                        //    }
-                        //}
-                    }
-                    else {
-                        if (!me.multiplevariables){
-                            selectedTimeseriesStore.removeAll();
-                        }
-                        newrecord.set('selected', true);
-                        selectedTimeseriesStore.add(newrecord);
-                    }
-
-                    selectedTimeseriesStore.getData().each(function(product) {
-                        yearsData = esapp.Utils.union_arrays(yearsData, product.get('years'));
-
-                        //alltimeseriesmapsetdatasets.push(product);
-                        //// First loop the mapsets to get the by the user selected mapset if the product has > 1 mapsets.
-                        //var datasets = product.get('productmapsets')[0].timeseriesmapsetdatasets;
-                        ////var datasets = product.get(children)[0].children;
-                        //datasets.forEach(function(datasetObj) {
-                        //    //yearsData = Ext.Object.merge(yearsData, datasetObj.years);
-                        //    yearsData = esapp.Utils.union_arrays(yearsData, datasetObj.years);
-                        //    alltimeseriesmapsetdatasets.push(datasetObj);
-                        //});
-                    });
-                    var yearsDataDict = [];
-                    yearsData.forEach(function(year) {
-                        yearsDataDict.push({'year': year});
-                    });
-
-                    //if (!record.get('selected') && Ext.isObject(Ext.getCmp('ts_selectyearstocompare_'+me.charttype).searchPopup)){
-                    //    Ext.getCmp('ts_selectyearstocompare_'+me.charttype).searchPopup.lookupReference('searchGrid').getSelectionModel().deselectAll();
-                    //}
-                    //Ext.getCmp('timeserieschartselection').getViewModel().getStore('years').setData(yearsDataDict);
-                    me.up().up().getViewModel().get('years').setData(yearsDataDict);
-
-                    //Ext.getCmp('selected-timeseries-mapset-dataset-grid').show();
-                    //Ext.getCmp('ts_timeframe').show();
-                    //Ext.getCmp('gettimeseries_btn').setDisabled(false);
                 }
+                //,handler: 'TimeseriesProductsGridRowClick'       //  rowclick event takes over!
             }]
         },{
             xtype: 'templatecolumn',
-            width: 280,
-            minWidth: 280,
+            width: 275,
+            //minWidth: 275,
             cellWrap: true,
             tpl: new Ext.XTemplate(
                 '<b>{product_descriptive_name}</b>',

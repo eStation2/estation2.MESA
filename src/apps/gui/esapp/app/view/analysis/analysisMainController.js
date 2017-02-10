@@ -6,6 +6,7 @@ Ext.define('esapp.view.analysis.analysisMainController', {
         //console.info(btn.down().down());
         //Ext.getCmp('userMapTemplates').show();
         btn.down().down().fireEvent('loadstore');
+        btn.down().down().show();
     }
 
     ,newMapView: function() {

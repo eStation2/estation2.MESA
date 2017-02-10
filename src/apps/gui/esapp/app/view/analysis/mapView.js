@@ -117,8 +117,8 @@ Ext.define("esapp.view.analysis.mapView",{
             projection:"EPSG:4326",
             displayProjection:"EPSG:4326",
             center: [20, -4.7],  // ol.proj.transform([21, 4], 'EPSG:4326', 'EPSG:3857'),
-            zoom: 6,
-            zoomFactor: 1.5
+            zoom: 1,    // 6
+            zoomFactor: 0.3
         });
 
         me.name ='mapviewwindow_' + me.id;
@@ -354,7 +354,7 @@ Ext.define("esapp.view.analysis.mapView",{
 
                 this.map.on('pointermove', function(evt) {
                     if (evt.dragging) {
-                    return;
+                        return;
                     }
                     //if (me.map.getLayers().getArray().length > 2) {
                         var pixel = me.map.getEventPixel(evt.originalEvent);

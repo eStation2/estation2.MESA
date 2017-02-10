@@ -1856,16 +1856,16 @@ class GetTimeseries:
     def __init__(self):
         self.lang = "eng"
 
-
     def POST(self):
         getparams = web.input()
         if getparams.charttype == 'ranking':
             return self.rankTimeseries()
+        if getparams.charttype == 'matrix':
+            return self.matrixTimeseries()
         else:
             return self.classicTimeseries()
 
-
-    def rankTimeseries(self):
+    def matrixTimeseries(self):
         from apps.analysis.getTimeseries import getTimeseries
 
         getparams = web.input()
@@ -1874,7 +1874,7 @@ class GetTimeseries:
         requestedtimeseries = json.loads(getparams.selectedTimeseries)
         tsFromPeriod = getparams.tsFromPeriod
         tsToPeriod = getparams.tsToPeriod
-        yearsToCompare = json.loads(getparams.yearsToCompare)
+        yearsToCompare = sorted(json.loads(getparams.yearsToCompare))
         tsFromSeason = getparams.tsFromSeason
         tsToSeason = getparams.tsToSeason
         showYearInTicks = True
@@ -1903,55 +1903,152 @@ class GetTimeseries:
                               'aggregation_max': ts_drawprops.aggregation_max}
                 tscolor = ts_drawprops.color
 
-            if date_format == 'MMDD' and len(yearsToCompare) > 1:
-                year = yearsToCompare[0]
-                showYearInTicks = False
-                from_date = datetime.date(year, 01, 01)
-                to_date = datetime.date(year, 12, 31)
 
-                if tsFromSeason != '' and tsToSeason != '':
-                    from_date = datetime.date(int(year), int(tsFromSeason[:2]), int(tsFromSeason[3:]))  # year month day
-                    to_date = datetime.date(int(year), int(tsToSeason[:2]), int(tsToSeason[3:]))
-                    if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
-                        to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
-
-                list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
+            if len(yearsToCompare) > 1:
+                # print yearsToCompare
                 data = []
-                for val in list_values:
-                    value = []
-                    # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ',' + str(val['date'].day) + ')'
-                    valdate = functions.unix_time_millis(val['date'])
-                    # valdate = str(val['date'].year) + str(val['date'].month) + str(val['date'].day)
-                    value.append(valdate)
-                    value.append(val['meanvalue'])
-                    data.append(value)
-                if len(list_values) > 1:
-                    data_available = True
+                for year in yearsToCompare:
+                    # print year
+                    from_date = datetime.date(int(year), 01, 01)
+                    to_date = datetime.date(int(year), 12, 31)
+
+                    if tsFromSeason != '' and tsToSeason != '':
+                        from_date = datetime.date(int(year), int(tsFromSeason[:2]), int(tsFromSeason[3:]))  # year month day
+                        to_date = datetime.date(int(year), int(tsToSeason[:2]), int(tsToSeason[3:]))
+                        if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
+                            to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
+
+                    list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
+
+                    if len(list_values) > 1:
+                        data_available = True
+
+                    for val in list_values:
+                        value = []
+                        # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ',' + str(val['date'].day) + ')'
+                        valdate = functions.unix_time_millis(val['date'])
+                        # valdate = str(val['date'].year) + str(val['date'].month) + str(val['date'].day)
+                        value.append(valdate)    # Date for xAxe
+                        value.append(int(year))  # Year for yAxe
+                        value.append(val['meanvalue'])
+                        data.append(value)
 
                 # Set defaults in case no entry exists in the DB
                 ts = {'name': productcode + '-' + version + '-' + subproductcode,
-                      'type': 'column',
-                      'color': '#000000',
                       'yAxis': productcode + ' - ' + version,
                       'data': data,
                       'visible': True
                       }
                 for ts_drawprops in timeseries_drawproperties:
                     ts = {'name': ts_drawprops.tsname_in_legend,
-                          'type': 'column',     # ts_drawprops.charttype,
-                          'color': ts_drawprops.color,
                           'yAxis': ts_drawprops.yaxes_id,
                           'data': data,
                           'visible': True
                           }
                 timeseries.append(ts)
 
-            elif len(yearsToCompare) > 1:
-                data = []
-                print yearsToCompare
+
+        colorAxis = {
+            'stops': [
+                [0, '#3060cf'],
+                [0.5, '#fffbbc'],
+                [0.9, '#c4463a'],
+                [1, '#c4463a']
+            ],
+            'min': -15,
+            'max': 25,
+            'startOnTick': False,
+            'endOnTick': False
+        }
+
+
+        yaxes = []
+        count = 0
+        timeseries_yaxes = querydb.get_timeseries_yaxes(requestedtimeseries)
+        axes = len(timeseries_yaxes)
+        for yaxe in timeseries_yaxes:
+            count += 1
+            opposite = "false"
+
+            if axes >= 2:
+                if yaxe.oposite:
+                    opposite = "true"
+            if axes == 1:
+                opposite = "false"
+
+            min = ''    # yaxe.min
+            max = ''    # yaxe.max
+
+            yaxe = {'id': yaxe.yaxes_id,
+                    'categories': yearsToCompare,
+                    'title': yaxe.title, 'title_color': yaxe.title_color, 'unit': yaxe.unit, 'opposite': opposite,
+                    'min': min, 'max': max,
+                    'aggregation_type': yaxe.aggregation_type, 'aggregation_min': yaxe.aggregation_min, 'aggregation_max': yaxe.aggregation_max}
+            yaxes.append(yaxe)
+
+
+        ts_json = {"data_available": data_available,
+                   "showYearInTicks": False,
+                   "showYearInToolTip": "true",
+                   "colorAxis": colorAxis,
+                   "yaxes": yaxes,
+                   "timeseries": timeseries}
+
+        ts_json = json.dumps(ts_json,
+                             ensure_ascii=False,
+                             sort_keys=True,
+                             separators=(', ', ': '))
+        return ts_json
+
+    def rankTimeseries(self):
+        from apps.analysis.getTimeseries import getTimeseries
+        import numpy as NP
+
+        getparams = web.input()
+        yearts = getparams.yearTS
+        wkt = getparams.WKT
+        requestedtimeseries = json.loads(getparams.selectedTimeseries)
+        tsFromPeriod = getparams.tsFromPeriod
+        tsToPeriod = getparams.tsToPeriod
+        yearsToCompare = sorted(json.loads(getparams.yearsToCompare))
+        tsFromSeason = getparams.tsFromSeason
+        tsToSeason = getparams.tsToSeason
+        showYearInTicks = True
+        data_available = False
+
+        timeseries = []
+        for timeserie in requestedtimeseries:
+            productcode = timeserie['productcode']
+            subproductcode = timeserie['subproductcode']
+            version = timeserie['version']
+            mapsetcode = timeserie['mapsetcode']
+            date_format = timeserie['date_format']
+            zscore = timeserie['zscore']
+
+            product = {"productcode": productcode,
+                       "subproductcode": subproductcode,
+                       "version": version}
+
+            # Set defaults in case no entry exists in the DB
+            aggregate = { 'aggregation_type': 'mean',
+                          'aggregation_min': None,
+                          'aggregation_max': None }
+            timeseries_drawproperties = querydb.get_product_timeseries_drawproperties(product)
+            for ts_drawprops in timeseries_drawproperties:
+                aggregate = { 'aggregation_type': ts_drawprops.aggregation_type,
+                              'aggregation_min': ts_drawprops.aggregation_min,
+                              'aggregation_max': ts_drawprops.aggregation_max}
+                tscolor = ts_drawprops.color
+
+
+            if len(yearsToCompare) > 1:
+                dataRanking = []
+                dataZScore = []
+                yearDataZScoreForAVGSTD = []
+                # print yearsToCompare
                 for year in yearsToCompare:
                     showYearInTicks = False
-                    print year
+                    # print year
                     from_date = datetime.date(int(year), 01, 01)
                     to_date = datetime.date(int(year), 12, 31)
 
@@ -1968,21 +2065,44 @@ class GetTimeseries:
 
                     cumulatedValue = 0
                     for val in list_values:
-                        cumulatedValue += val['meanvalue']
+                        if val['meanvalue'] != None:
+                            cumulatedValue += val['meanvalue']
 
-                    yearData = {
+                    yearDataRanking = {
                         'name': str(year),
                         'color': tscolor,   # '#0065a2',
                         'y': cumulatedValue
                     }
-                    data.append(yearData)
+                    dataRanking.append(yearDataRanking)
 
-                data = sorted(data, key=lambda k:k['y'], reverse=False)
-                data[0]['color'] = '#ff0000'
+                    yearDataZScore = {
+                        'name': str(year),
+                        'color': tscolor,   # '#0065a2',
+                        'y': cumulatedValue
+                    }
+                    dataZScore.append(yearDataZScore)
+                    yearDataZScoreForAVGSTD.append(cumulatedValue)
+
+                dataRanking = sorted(dataRanking, key=lambda k:k['name'], reverse=True)
+                dataRanking[0]['color'] = '#ff0000'
+                dataRanking = sorted(dataRanking, key=lambda k:k['y'], reverse=False)
+
                 # from operator import itemgetter, attrgetter
                 # data = sorted(data, key=attrgetter('y'), reverse=False)
                 # data = sorted(data, key=itemgetter(2), reverse=False)
 
+                zScoreAVG = NP.mean(yearDataZScoreForAVGSTD)
+                zScoreSTD = NP.std(yearDataZScoreForAVGSTD)
+                for yearData in dataZScore:
+                    zScore = (yearData['y']-zScoreAVG)/zScoreSTD
+                    yearData['y'] = zScore
+                    if zScore < 0:
+                        yearData['color'] = '#ff0000'
+
+                if zscore:
+                    data = dataZScore
+                else:
+                    data = dataRanking
 
                 # Set defaults in case no entry exists in the DB
                 ts = {'name': productcode + '-' + version + '-' + subproductcode,
@@ -2040,7 +2160,6 @@ class GetTimeseries:
                              separators=(', ', ': '))
         return ts_json
 
-
     def classicTimeseries(self):
         from apps.analysis.getTimeseries import getTimeseries
 
@@ -2055,6 +2174,9 @@ class GetTimeseries:
         tsToSeason = getparams.tsToSeason
         showYearInTicks = True
         data_available = False
+        cumulative = False
+        if getparams.charttype == 'cumulative':
+             cumulative = True
 
         # if isinstance(yearsToCompare, basestring):  # One year passed but is not a list so make it a list.
         #     # yearsToCompare = list(yearsToCompare)
@@ -2123,7 +2245,8 @@ class GetTimeseries:
                               'aggregation_min': ts_drawprops.aggregation_min,
                               'aggregation_max': ts_drawprops.aggregation_max}
 
-                if timeserie['cumulative']:
+                # if timeserie['cumulative']:
+                if cumulative:
                     cum_yaxe.append(ts_drawprops.yaxes_id)
 
 
@@ -2162,7 +2285,7 @@ class GetTimeseries:
                       'yAxis': productcode + ' - ' + version,
                       'data': data,
                       'visible': True,
-                      'cumulative': timeserie['cumulative'],
+                      'cumulative': cumulative,     # timeserie['cumulative'],
                       'difference': timeserie['difference'],
                       'reference': timeserie['reference']
                       }
@@ -2176,7 +2299,7 @@ class GetTimeseries:
                           'yAxis': ts_drawprops.yaxes_id,
                           'data': data,
                           'visible': True,
-                          'cumulative': timeserie['cumulative'],
+                          'cumulative': cumulative,     # timeserie['cumulative'],
                           'difference': timeserie['difference'],
                           'reference': timeserie['reference']
                           }
@@ -2234,7 +2357,7 @@ class GetTimeseries:
                           'yAxis': productcode + ' - ' + version,
                           'data': data,
                           'visible': True,
-                          'cumulative': timeserie['cumulative'],
+                          'cumulative': cumulative,     # timeserie['cumulative'],
                           'difference': timeserie['difference'],
                           'reference': timeserie['reference']
                           }
@@ -2248,7 +2371,7 @@ class GetTimeseries:
                               'yAxis': ts_drawprops.yaxes_id,
                               'data': data,
                               'visible': True,
-                              'cumulative': timeserie['cumulative'],
+                              'cumulative': cumulative,     # timeserie['cumulative'],
                               'difference': timeserie['difference'],
                               'reference': timeserie['reference']
                               }
@@ -2277,7 +2400,7 @@ class GetTimeseries:
                       'color': '#000000',
                       'yAxis': productcode + ' - ' + version,
                       'data': data,
-                      'cumulative': timeserie['cumulative'],
+                      'cumulative': cumulative,     # timeserie['cumulative'],
                       'difference': timeserie['difference'],
                       'reference': timeserie['reference']
                       }
@@ -2289,7 +2412,7 @@ class GetTimeseries:
                           'color': ts_drawprops.color,
                           'yAxis': ts_drawprops.yaxes_id,
                           'data': data,
-                          'cumulative': timeserie['cumulative'],
+                          'cumulative': cumulative,     # timeserie['cumulative'],
                           'difference': timeserie['difference'],
                           'reference': timeserie['reference']
                           }
