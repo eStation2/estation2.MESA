@@ -8,20 +8,27 @@ __author__ = 'analyst'
 #	history: 1.0
 #
 
-import sys
+import sys, time
 from apps.acquisition.ingestion import *
 from config import es_constants
 
 logger = log.my_logger(__name__)
 
-def ingest_historical_archives(input_dir, dry_run=False):
+def ingest_historical_archives(input_dir=None, dry_run=False):
 
 #    Ingest the files in format MESA_JRC_<prod>_<sprod>_<date>_<mapset>_<version>
 #    from a given location
 #    Gets the list of products/version/subproducts active for ingestion and active for processing
 
+    input_dir_def = es_constants.es2globals['archive_dir']
+    if input_dir is None:
+        input_dir = input_dir_def
+
     logger.info("Entering routine %s" % 'ingest_historical_archives')
     echo_query = False
+
+    time.sleep(120)
+    logger.info("Entering loop")
 
     # Get all active product ingestion records with a subproduct count.
     active_product_ingestions = querydb.get_ingestion_product(allrecs=True, echo=echo_query)
@@ -68,4 +75,4 @@ if __name__=='__main__':
     #input_dir = str(sys.argv[1])
     input_dir = es_constants.es2globals['archive_dir']
     print input_dir
-    result = ingest_historical_archives(input_dir)
+    result = ingest_historical_archives(input_dir=input_dir)
