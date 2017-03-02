@@ -11,6 +11,7 @@
 import pygrib
 import numpy as N
 import math
+import os
 
 # Import eStation lib modules
 from database import querydb
@@ -18,7 +19,7 @@ from database import querydb
 # Import third-party modules
 from osgeo import gdalconst
 from osgeo import gdal
-from osgeo import osr
+from osgeo import osr, ogr
 
 
 class MapSet:
@@ -306,3 +307,94 @@ class MapSet:
             return True
         else:
             return False
+
+    def compute_pixel_area(self, n_line, n_col):
+
+        #  Compute the size (m^2) for a pixel (line,col) in the mapset
+
+        # Read from the original mapset
+        orig_geotranform = self.geo_transform
+        x0 = orig_geotranform[0]
+        deltax = orig_geotranform[1]
+        y0 = orig_geotranform[3]
+        deltay = orig_geotranform[5]
+        srsOrig = self.spatial_ref
+
+        # Define the SRS for Sinusoidal projection
+        srsEqualArea = osr.SpatialReference()
+        proj4def = "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +DATUM=WGS84"
+        srsEqualArea.ImportFromProj4(proj4def)
+
+        transf = osr.CoordinateTransformation(srsOrig,srsEqualArea)
+
+        print " Mapset Name: " + self.short_name
+        print " Pixel position: x " + str(n_col) + " y " + str(n_line)
+        px = x0 + deltax * n_col
+        py = y0 + deltay * n_line
+        print " Pixel position Lon: " + str(px) + " Lat " + str(py)
+
+        #The pixel geometry must be created to execute the within method, and to calculate the actual area
+        wkt = "POLYGON(("+str(px)+" "+str(py)+","+str(px + deltax)+" "+str(py)+","+str(px + deltax)+" "+str(py+deltay)+","+str(px)+" "+str(py+deltay)+","+str(px)+" "+str(py)+"))"
+
+        geometry = ogr.CreateGeometryFromWkt(wkt)
+        pixel_area = geometry.GetArea()
+        print " Pixel area (Deg^2): " + str(pixel_area)
+
+        geometryArea = geometry.Clone()
+        geometryArea.Transform(transf)
+        pixel_area = geometryArea.GetArea()
+        print " Pixel area (m^2): " + str(pixel_area)
+
+    def create_raster_surface(self, filename=None):
+
+        #  Create a file containing the pixel-size (m2) of each pixel of the mapset
+        #  Methodology from http://geoexamples.blogspot.it/2012/06/density-maps-using-gdalogr-python.html
+
+        if filename is None:
+            dir = '/data/static/'
+            filename = dir+os.path.sep + self.short_name + '_'+ 'pixelsize.tif'
+
+        # Read from the original mapset
+        orig_geotranform = self.geo_transform
+        x0 = orig_geotranform[0]
+        deltax = orig_geotranform[1]
+        y0 = orig_geotranform[3]
+        deltay = orig_geotranform[5]
+        srsOrig = self.spatial_ref
+        size_x = self.size_x
+        size_y = self.size_y
+
+        # Create output matrix
+
+        areas = N.zeros((size_y,size_x), dtype=N.float32)
+
+        # Define the SRS for Sinusoidal projection
+        srsEqualArea = osr.SpatialReference()
+        proj4def = "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +DATUM=WGS84"
+        srsEqualArea.ImportFromProj4(proj4def)
+        transf = osr.CoordinateTransformation(srsOrig,srsEqualArea)
+
+        for iline in range(size_y):
+            print iline
+            for icol in range(size_x):
+                px = x0 + deltax * icol
+                py = y0 + deltay * iline
+
+                # Define the pixel geometry
+                wkt = "POLYGON(("+str(px)+" "+str(py)+","+str(px + deltax)+" "+str(py)+","+str(px + deltax)+" "+str(py+deltay)+","+str(px)+" "+str(py+deltay)+","+str(px)+" "+str(py)+"))"
+
+                geometry = ogr.CreateGeometryFromWkt(wkt)
+
+                geometryArea = geometry.Clone()
+                geometryArea.Transform(transf)
+                areas[iline,icol] = geometryArea.GetArea()
+                geometryArea = None
+
+        # Write matrix to output
+
+        output_driver = gdal.GetDriverByName('GTiff')
+        output_ds = output_driver.Create(filename, size_x, size_y, 1, gdal.GDT_Float32)
+        output_ds.SetProjection(self.spatial_ref.ExportToWkt())
+        output_ds.SetGeoTransform(orig_geotranform)
+        output_ds.GetRasterBand(1).WriteArray(areas)
+        output_ds = None
