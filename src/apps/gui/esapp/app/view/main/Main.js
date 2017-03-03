@@ -111,104 +111,104 @@ Ext.define('esapp.view.main.Main', {
                 },
 
                 items: [{
-                    title: esapp.Utils.getTranslation('dashboard'),  // 'Dashboard',
-                    id:'dashboardtab',
-                    xtype:'container',
-                    autoScroll: true,
-                    layout : 'center',
-                    bodyCls:'dashboard-panel-body',
-                    items: [{
-                        xtype: 'dashboard-main'
-                    }],
-                    listeners: {
-                       activate: function (dashboardtab) {
-                           var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
-                           headerlogos.setHidden(false);
-                           //dashboardtab.up().down('container[id=acquisitionmaintab]').doLayout();
-                           //dashboardtab.up().down('container[id=datamanagementmaintab]').doLayout();
-                           //Ext.getCmp('dashboard-panel').getController().setupDashboard();
-                           if (Ext.isObject(dashboardtab.down('panel[id=dashboardpc2]'))){
-                                dashboardtab.down('panel[id=dashboardpc2]').getController().checkStatusServices();
-                           }
-                       }
-                    }
-                }, {
-                    title: esapp.Utils.getTranslation('acquisition'),  // 'Acquisition',
-                    id:'acquisitionmaintab',
-                    xtype:'container',
-                    closable: false,
-                    autoScroll: true,
-                    layout: 'fit',
-                    items: [{
-                        // html: '<img alt="Mockup Acquisition" width="100%" height="100%" src="../resources/img/mockup_acquisition.png">'
-                        xtype : 'acquisition-main',
-                        id:'acquisitionmain'
-                    }],
-                    listeners: {
-                       activate: function (acquisitiontab) {
-                           var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
-                           headerlogos.setHidden(false);
-
-                           var acquisitionmain = acquisitiontab.down('panel[name=acquisitionmain]');
-                           acquisitionmain.getController().checkStatusServices();
-
-                           //Ext.util.Observable.capture(acquisitionmain, function(e){console.log(e);});
-
-                           //acquisitionmain.getView().getFeature('productcategories').expandAll();
-                           //acquisitionmain.getView().refresh();
-                       },
-                       beforedeactivate: function (acquisitiontab) {
-                           var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("datasetchart-") != -1}');
-                           Ext.each(completenessTooltips, function(item) {
-                               item.hide();
-                           });
-                       }
-                    }
-                }, {
-                    title: esapp.Utils.getTranslation('processing'),  // 'Processing',
-                    id:'processingmaintab',
-                    xtype:'container',
-                    autoScroll: true,
-                    layout: 'fit',
-                    items: [{
-                       xtype  : 'processing-main',
-                       id:'processingmain'
-                    }],
-                    listeners: {
-                       activate: function (processingtab) {
-                           var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
-                           headerlogos.setHidden(false);
-                           processingtab.down('panel[name=processingmain]').getController().checkStatusServices();
-                       }
-                    }
-                }, {
-                    title: esapp.Utils.getTranslation('datamanagement'),  // 'Data Management',
-                    id:'datamanagementmaintab',
-                    xtype:'container',
-                    autoScroll: true,
-                    layout: 'fit',
-                    items: [{
-                       xtype  : 'datamanagement-main',
-                       id:'datamanagementmain'
-                    }],
-                    listeners: {
-                       activate: function (datamanagementtab) {
-                           var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
-                           headerlogos.setHidden(false);
-
-                           //var datamanagementmain = datamanagementtab.down('panel[name=datamanagementmain]');
-                           //
-                           ////datamanagementmain.getView().getFeature('prodcat').expandAll();
-                           //datamanagementmain.getView().refresh();
-                       },
-                       beforedeactivate: function (acquisitiontab) {
-                           var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("datasetchart-") != -1}');
-                           Ext.each(completenessTooltips, function(item) {
-                               item.hide();
-                           });
-                       }
-                    }
-                }, {
+                //    title: esapp.Utils.getTranslation('dashboard'),  // 'Dashboard',
+                //    id:'dashboardtab',
+                //    xtype:'container',
+                //    autoScroll: true,
+                //    layout : 'center',
+                //    bodyCls:'dashboard-panel-body',
+                //    items: [{
+                //        xtype: 'dashboard-main'
+                //    }],
+                //    listeners: {
+                //       activate: function (dashboardtab) {
+                //           var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
+                //           headerlogos.setHidden(false);
+                //           //dashboardtab.up().down('container[id=acquisitionmaintab]').doLayout();
+                //           //dashboardtab.up().down('container[id=datamanagementmaintab]').doLayout();
+                //           //Ext.getCmp('dashboard-panel').getController().setupDashboard();
+                //           if (Ext.isObject(dashboardtab.down('panel[id=dashboardpc2]'))){
+                //                dashboardtab.down('panel[id=dashboardpc2]').getController().checkStatusServices();
+                //           }
+                //       }
+                //    }
+                //}, {
+                //    title: esapp.Utils.getTranslation('acquisition'),  // 'Acquisition',
+                //    id:'acquisitionmaintab',
+                //    xtype:'container',
+                //    closable: false,
+                //    autoScroll: true,
+                //    layout: 'fit',
+                //    items: [{
+                //        // html: '<img alt="Mockup Acquisition" width="100%" height="100%" src="../resources/img/mockup_acquisition.png">'
+                //        xtype : 'acquisition-main',
+                //        id:'acquisitionmain'
+                //    }],
+                //    listeners: {
+                //       activate: function (acquisitiontab) {
+                //           var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
+                //           headerlogos.setHidden(false);
+                //
+                //           var acquisitionmain = acquisitiontab.down('panel[name=acquisitionmain]');
+                //           acquisitionmain.getController().checkStatusServices();
+                //
+                //           //Ext.util.Observable.capture(acquisitionmain, function(e){console.log(e);});
+                //
+                //           //acquisitionmain.getView().getFeature('productcategories').expandAll();
+                //           //acquisitionmain.getView().refresh();
+                //       },
+                //       beforedeactivate: function (acquisitiontab) {
+                //           var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("datasetchart-") != -1}');
+                //           Ext.each(completenessTooltips, function(item) {
+                //               item.hide();
+                //           });
+                //       }
+                //    }
+                //}, {
+                //    title: esapp.Utils.getTranslation('processing'),  // 'Processing',
+                //    id:'processingmaintab',
+                //    xtype:'container',
+                //    autoScroll: true,
+                //    layout: 'fit',
+                //    items: [{
+                //       xtype  : 'processing-main',
+                //       id:'processingmain'
+                //    }],
+                //    listeners: {
+                //       activate: function (processingtab) {
+                //           var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
+                //           headerlogos.setHidden(false);
+                //           processingtab.down('panel[name=processingmain]').getController().checkStatusServices();
+                //       }
+                //    }
+                //}, {
+                //    title: esapp.Utils.getTranslation('datamanagement'),  // 'Data Management',
+                //    id:'datamanagementmaintab',
+                //    xtype:'container',
+                //    autoScroll: true,
+                //    layout: 'fit',
+                //    items: [{
+                //       xtype  : 'datamanagement-main',
+                //       id:'datamanagementmain'
+                //    }],
+                //    listeners: {
+                //       activate: function (datamanagementtab) {
+                //           var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
+                //           headerlogos.setHidden(false);
+                //
+                //           //var datamanagementmain = datamanagementtab.down('panel[name=datamanagementmain]');
+                //           //
+                //           ////datamanagementmain.getView().getFeature('prodcat').expandAll();
+                //           //datamanagementmain.getView().refresh();
+                //       },
+                //       beforedeactivate: function (acquisitiontab) {
+                //           var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("datasetchart-") != -1}');
+                //           Ext.each(completenessTooltips, function(item) {
+                //               item.hide();
+                //           });
+                //       }
+                //    }
+                //}, {
                     title: esapp.Utils.getTranslation('analysis'),  // 'Analysis',
                     id:'analysistab',
                     xtype:'container',
