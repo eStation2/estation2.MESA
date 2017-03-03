@@ -443,7 +443,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
             for error_file in input_files:
                 if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
                     shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
-                try: 
+                try:
                     shutil.move(error_file, ingest_error_dir)
                 except:
                     my_logger.warning("Error in moving file: %s " % error_file)
@@ -458,7 +458,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
             for error_file in input_files:
                 if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
                     shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
-                try: 
+                try:
                     shutil.move(error_file, ingest_error_dir)
                 except:
                     my_logger.warning("Error in moving file: %s " % error_file)
@@ -564,6 +564,46 @@ def pre_process_msg_mpe (subproducts, tmpdir, input_files, my_logger):
 
     return pre_processed_list
 
+def pre_process_mpe_umarf (subproducts, tmpdir, input_files, my_logger):
+# -------------------------------------------------------------------------------------------------------
+#   Pre-process msg_mpe files in UMARF format
+#   Typical filename is MSG3-SEVI-MSGMPEG-0100-0100-20160331234500.000000000Z-20160331235848-1193222.grb.gz
+#   Returns: pre_processed_list -> list of preprocessed files (to go on with ingestion)
+#            Raise Exception: something went wrong (move existing files to /data/ingest.wrong)
+
+    # Output list of pre-processed files
+    pre_processed_list = []
+
+    # Test the files exist
+    files_list = functions.element_to_list(input_files)
+    for input_file in files_list:
+
+        if not os.path.isfile(input_file):
+            my_logger.error('Input file does not exist')
+            raise Exception("Input file does not exist: %s" % input_file)
+
+        out_tmp_tiff_file = tmpdir + os.path.sep + 'MSG_MPE_temp.tif'
+        out_tmp_grib_file = tmpdir + os.path.sep + 'MSG_MPE_temp.grb'
+
+        # Read the .grb and convert to gtiff (GDAL does not do it properly)
+
+        with open(out_tmp_grib_file,'wb') as f_out, gzip.open(input_file,'rb') as f_in:                 # Create ZipFile object
+            shutil.copyfileobj(f_in, f_out)
+
+        grbs = pygrib.open(out_tmp_grib_file)
+        grb = grbs.select(name='Instantaneous rain rate')[0]
+        data = grb.values
+        # Rotate 180 (i.e. flip both horiz/vertically) - bug from UFA12 Forum/SADC
+        rev_data = N.fliplr(data)
+        data = N.flipud(rev_data)
+        output_driver = gdal.GetDriverByName(es_constants.ES2_OUTFILE_FORMAT)
+        output_ds = output_driver.Create(out_tmp_tiff_file, 3712, 3712, 1, gdal.GDT_Float64)
+        output_ds.GetRasterBand(1).WriteArray(data)
+
+        for subproduct in subproducts:
+            pre_processed_list.append(out_tmp_tiff_file)
+
+    return pre_processed_list
 
 def pre_process_modis_hdf4_tile (subproducts, tmpdir , input_files, my_logger):
 # -------------------------------------------------------------------------------------------------------
@@ -1497,6 +1537,9 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
     try:
         if preproc_type == 'MSG_MPE':
             interm_files = pre_process_msg_mpe (subproducts, tmpdir , input_files, my_logger)
+
+        elif preproc_type == 'MPE_UMARF':
+            interm_files = pre_process_mpe_umarf (subproducts, tmpdir , input_files, my_logger)
 
         elif preproc_type == 'MODIS_HDF4_TILE':
             interm_files = pre_process_modis_hdf4_tile (subproducts, tmpdir, input_files, my_logger)
