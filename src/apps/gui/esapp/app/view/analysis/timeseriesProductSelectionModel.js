@@ -34,6 +34,49 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionModel', {
             ,session: true
         },
 
+        productcolorschemes: {
+            model: 'esapp.model.ProductNavigatorDatasetColorScheme',
+            session: true
+            //fields: [
+            //    {name: 'default_legend', mapping: 'default_legend'},
+            //    {name: 'defaulticon', mapping: 'defaulticon'},
+            //    {name: 'legend_id', mapping: 'legend_id'},
+            //    {name: 'legend_name', mapping: 'legend_name'},
+            //    {name: 'colorschemeHTML', mapping: 'colorschemeHTML'},
+            //    {name: 'legendHTML', mapping: 'legendHTML'},
+            //    {name: 'legendHTMLVertical', mapping: 'legendHTMLVertical'}
+            //],
+            //
+            //proxy: {
+            //    type: 'ajax',
+            //    url: 'analysis/getproductcolorschemes',
+            //    //params: params,
+            //    //extraParams:{
+            //    //    activated:'True'
+            //    //},
+            //    reader: {
+            //        type: 'json',
+            //        rootProperty: 'legends',
+            //        successProperty: 'success',
+            //        messageProperty: 'message'
+            //    },
+            //
+            //    listeners: {
+            //        exception: function(proxy, response, operation){
+            //            // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
+            //            console.info('COLOR SCHEMES MODEL - REMOTE EXCEPTION');
+            //            //Ext.Msg.show({
+            //            //    title: 'COLOR SCHEMES - REMOTE EXCEPTION',
+            //            //    msg: operation.getError(),
+            //            //    icon: Ext.Msg.ERROR,
+            //            //    buttons: Ext.Msg.OK
+            //            //});
+            //        }
+            //    }
+            //
+            //}
+        },
+
         timeseriesdrawproperties: {
             source: 'TSDrawPropertiesStore',
             model: 'esapp.model.TSDrawProperties',

@@ -207,6 +207,7 @@ class TestQuerydb(TestCase):
 
         mapset = querydb.get_mapset(mapsetcode='SPOTV-Africa-1km')
         logger.info("Mapset: %s", mapset.pixel_shift_lat)
+        mapset_dict = functions.row2dict(mapset)
 
         self.assertEqual(1, 1)
 

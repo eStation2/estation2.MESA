@@ -24,7 +24,8 @@ Ext.define('esapp.model.TimeseriesProduct', {
         {name: 'cumulative', mapping: 'cumulative'},
         {name: 'difference', mapping: 'difference'},
         {name: 'reference', mapping: 'reference'},
-        {name: 'zscore', mapping: 'zscore'}
+        {name: 'zscore', mapping: 'zscore'},
+        {name: 'colorramp', mapping: 'colorramp'}
         //{name: 'product_type', mapping: 'product_type'},
     ]
 
@@ -57,7 +58,8 @@ Ext.define('esapp.model.SelectedTimeseriesMapSetDataSet', {
         {name: 'cumulative', mapping: 'cumulative'},
         {name: 'difference', mapping: 'difference'},
         {name: 'reference', mapping: 'reference'},
-        {name: 'zscore', mapping: 'zscore'}
+        {name: 'zscore', mapping: 'zscore'},
+        {name: 'colorramp', mapping: 'colorramp'}
         //{name: 'subproductid', type: 'string', mapping: 'subproductid'},
     ]
 });

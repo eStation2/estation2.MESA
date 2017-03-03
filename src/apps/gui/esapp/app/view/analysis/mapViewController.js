@@ -13,7 +13,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             if (esapp.Utils.objectExists(me.getView().templatename) && me.getView().templatename != ''){
                 newMapTemplateName = me.getView().templatename + ' - copy';
             }
-            Ext.MessageBox.prompt('Map Template Name', 'Please give a unique name for the new map template:', function(btn, text){
+            Ext.MessageBox.prompt(esapp.Utils.getTranslation('map_tpl_name'), esapp.Utils.getTranslation('map_tpl_save_message') + ':', function(btn, text){   // 'Map Template Name'   'Please give a unique name for the new map template'
                 if (btn == 'ok'){
                     // process text value and close...
                     me.getView().templatename = text;
@@ -78,11 +78,11 @@ Ext.define('esapp.view.analysis.mapViewController', {
             scope: me,
             success: function (response, request) {
                 var responseJSON = Ext.util.JSON.decode(response.responseText);
-                Ext.toast({html: responseJSON.message, title: "Save Map template", width: 300, align: 't'});
+                Ext.toast({html: responseJSON.message, title: esapp.Utils.getTranslation('save_map_tpl'), width: 300, align: 't'});     // "Save Map template"
             },
             //callback: function ( callinfo,responseOK,response ) {},
             failure: function (result, request) {
-                Ext.toast({html: responseJSON.message, title: "ERROR - Save Map template", width: 300, align: 't'});
+                Ext.toast({html: responseJSON.message, title: esapp.Utils.getTranslation('error_save_map_tpl'), width: 300, align: 't'});     // "ERROR saving the Map template"
             }
         });
 
@@ -1517,7 +1517,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                     }
                 }
                 if (regionname_html == 'undefined' && me.toplayer.get('layer_id') == 'drawvectorlayer'){
-                    regionname_html = "Drawn " + topfeature.getGeometry().getType();
+                    regionname_html = esapp.Utils.getTranslation('drawn') + " " + topfeature.getGeometry().getType();      // "Drawn "
                 }
                 regionname.setHtml(regionname_html);
 
@@ -1572,7 +1572,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 me.selectedFeatureFromDrawLayer = false;
                 if (regionname_html == 'undefined' && me.toplayer.get('layer_id') == 'drawvectorlayer'){
                     me.selectedFeatureFromDrawLayer = true;
-                    regionname_html = "Drawn " + feature.getGeometry().getType();
+                    regionname_html = esapp.Utils.getTranslation('drawn') + " " + feature.getGeometry().getType();     // "Drawn "
                 }
                 selectedregion.setValue(regionname_html);
 
@@ -1989,7 +1989,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             typeAhead: true,
             queryMode: 'local',
             triggerAction: 'all',
-            emptyText: 'Select a geometry...',
+            emptyText: esapp.Utils.getTranslation('select_geometry'),     // 'Select a geometry...',
             selectOnFocus: false,
             width: 100,
             indent: true,
@@ -2039,7 +2039,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                     },
                     items: [{
                             //xtype: 'button',
-                            text: 'Save as...',
+                            text: esapp.Utils.getTranslation('save_as'),    // 'Save as...',
                             iconCls: 'fa fa-save fa-lg lightblue',
                             style: { color: 'lightblue' },
                             //cls: 'x-menu-no-icon button-gray',
@@ -2118,7 +2118,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                                 // Open a small modal panel asking to name the layer file
                                 var writer = new ol.format.GeoJSON();
                                 var geojsonStr = '';
-                                var drawnLayerName = 'Drawn layer';
+                                var drawnLayerName = esapp.Utils.getTranslation('drawn_layer'); // 'Drawn layer';
 
                                 me.drawvectorlayer.getSource().getFeatures().forEach(function (feat,idx){
                                     feat.setProperties({NAME: feat.getGeometry().getType()});
@@ -2128,12 +2128,12 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
                                 //console.info(me.drawvectorlayer.getSource().getFeatures());
                                 if (me.drawvectorlayer.getSource().getFeatures().length == 0){
-                                    Ext.toast({html: 'Please draw at least one geometry to save as a layer.', title: "No geometries drawn!", width: 300, align: 't'});
+                                    Ext.toast({html: esapp.Utils.getTranslation('please_draw_geom_to_save'), title: esapp.Utils.getTranslation('no_geom_to_save'), width: 300, align: 't'});    // 'Please draw at least one geometry to save as a layer.' "No geometries drawn to save!"
                                 }
                                 else {
-                                    Ext.MessageBox.prompt('Map Template Name', 'Please give a name drawn layer:', function(btn, text){
+                                    Ext.MessageBox.prompt(esapp.Utils.getTranslation('drawn_layer_name'), esapp.Utils.getTranslation('drawn_layer_save_message') + ': ', function(btn, text){   // 'Drawn layer Name'  'Please give a name to drawn layer'
                                         if (btn == 'ok'){
-                                            //alert(geojsonStr)
+                                            //alert(geojsonStr) map_tpl_save_message
                                             params = {
                                                 layerfilename: text + '.geojson',
                                                 drawnlayerfeaturesGEOSON: geojsonStr
@@ -2150,7 +2150,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                             }
                         },{
                             //xtype: 'button',
-                            text: 'Reset',
+                            text: esapp.Utils.getTranslation('reset'),   // 'Reset',
                             iconCls: 'fa fa-undo fa-lg red',
                             //style: { color: 'red' },
                             //cls: 'x-menu-no-icon button-gray',

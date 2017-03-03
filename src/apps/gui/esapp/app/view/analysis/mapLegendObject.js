@@ -71,16 +71,17 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
                         me.setHtml(me.legendHTML);
                         me.legendLayout='horizontal';
                     }
-                    //me.fireEvent('refreshimage');
+                    me.fireEvent('refreshimage');
                 }
             },
             afterrender: function () {
                 Ext.tip.QuickTipManager.register({
                     target: this.id,
                     trackMouse: true,
-                    title: 'Legend object',
-                    text: 'Double click to change view.'
+                    title: esapp.Utils.getTranslation('legend_object'), // 'Legend object',
+                    text: esapp.Utils.getTranslation('doubleclick_to_change_view') // 'Double click to change view.'
                 });
+                me.fireEvent('refreshimage');
             },
             refreshimage: function(){
                 if(!me.hidden) {

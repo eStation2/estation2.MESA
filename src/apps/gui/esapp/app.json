@@ -121,9 +121,6 @@
         {
             "path": "app.js",
             "bundle": true
-//        },{
-//            "path": "app/CustomVTypes.js",
-//            "includeInBundle": true
         },{
             "path": "/eStation2/lib/js/OL3/build/ol.js",
             "remote": true
@@ -132,6 +129,12 @@
             "remote": true
         },{
             "path": "/eStation2/lib/js/Highstock-5.0.6/code/highstock.js",
+            "remote": true
+        },{
+            "path": "/eStation2/lib/js/Highstock-5.0.6/code/highcharts-more.js",
+            "remote": true
+        },{
+            "path": "/eStation2/lib/js/Highstock-5.0.6/code/modules/heatmap.js",
             "remote": true
         },{
             "path": "/eStation2/lib/js/Highstock-5.0.6/code/modules/exporting.js",
@@ -146,8 +149,13 @@
             // This module, after the dependencies
             "path": "/eStation2/lib/js/Highstock-5.0.6/code/modules/highcharts-export-clientside-1.4.3.js",
             "remote": true
+        },{
+            "path": "/eStation2/lib/js/html2canvas-0.5.0-alpha1/dist/html2canvas.min.js",
+            "remote": true
 
-
+//        },{
+//            "path": "app/CustomVTypes.js",
+//            "includeInBundle": true
 //        },{
 //            "path": "/eStation2/lib/js/Highstock/js/highstock-all.js",
 //            "remote": true
@@ -158,9 +166,7 @@
 //            // This module, after the dependencies
 //            "path": "/eStation2/lib/js/Highstock/js/modules/highcharts-export-clientside.js",
 //            "remote": true
-        },{
-            "path": "/eStation2/lib/js/html2canvas-0.5.0-alpha1/dist/html2canvas.min.js",
-            "remote": true
+
         }],
 
 //        },{

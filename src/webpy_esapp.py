@@ -105,6 +105,7 @@ urls = (
     "/systemsettings/changeloglevel", "ChangeLogLevel",
     "/systemsettings/ipsettings", "IPSettings",
     "/systemsettings/ipsettings/update", "UpdateIPSettings",
+    "/systemsettings/ingestarchive", "IngestArchive",
 
     "/processing", "Processing",
     "/processing/update", "UpdateProcessing",
@@ -1867,6 +1868,7 @@ class GetTimeseries:
 
     def matrixTimeseries(self):
         from apps.analysis.getTimeseries import getTimeseries
+        import calendar
 
         getparams = web.input()
         yearts = getparams.yearTS
@@ -1879,6 +1881,9 @@ class GetTimeseries:
         tsToSeason = getparams.tsToSeason
         showYearInTicks = True
         data_available = False
+        colorramp = False
+        legend_id = None
+        overTwoYears = False
 
         timeseries = []
         for timeserie in requestedtimeseries:
@@ -1887,6 +1892,9 @@ class GetTimeseries:
             version = timeserie['version']
             mapsetcode = timeserie['mapsetcode']
             date_format = timeserie['date_format']
+            frequency_id = timeserie['frequency_id']
+            colorramp = timeserie['colorramp']
+            legend_id = timeserie['legend_id']
 
             product = {"productcode": productcode,
                        "subproductcode": subproductcode,
@@ -1903,12 +1911,22 @@ class GetTimeseries:
                               'aggregation_max': ts_drawprops.aggregation_max}
                 tscolor = ts_drawprops.color
 
+            nodata = None
+            subproductinfo = querydb.get_subproduct(productcode, version, subproductcode)
+            if subproductinfo != []:
+                subproductinfo_rec = functions.row2dict(subproductinfo)
+                nodata = subproductinfo_rec['nodata']
 
-            if len(yearsToCompare) > 1:
-                # print yearsToCompare
+            if len(yearsToCompare) > 0:
                 data = []
+                y = 0
+
+                xAxesYear = yearsToCompare[-1]
+                for year in yearsToCompare:    # Handle Leap year date 29 February. If exists in data then change the year of all data to the leap year.
+                    if calendar.isleap(year):
+                        xAxesYear = year
+
                 for year in yearsToCompare:
-                    # print year
                     from_date = datetime.date(int(year), 01, 01)
                     to_date = datetime.date(int(year), 12, 31)
 
@@ -1917,50 +1935,162 @@ class GetTimeseries:
                         to_date = datetime.date(int(year), int(tsToSeason[:2]), int(tsToSeason[3:]))
                         if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
                             to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
+                            overTwoYears = True
 
                     list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
+                    # print list_values
+                    # list_values = sorted(list_values, key=lambda k:k['date'], reverse=True)
 
-                    if len(list_values) > 1:
+                    if len(list_values) > 1 and not data_available:
                         data_available = True
 
+                    x = 0
                     for val in list_values:
                         value = []
-                        # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ',' + str(val['date'].day) + ')'
-                        valdate = functions.unix_time_millis(val['date'])
-                        # valdate = str(val['date'].year) + str(val['date'].month) + str(val['date'].day)
+                        # # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ',' + str(val['date'].day) + ')'
+                        # valdate = functions.unix_time_millis(val['date'])
+                        # # valdate = str(val['date'].year) + str(val['date'].month) + str(val['date'].day)
+                        # date = str(yearsToCompare[-1]) + '-' + str(val['date'].strftime('%m')) + '-' + str(val['date'].strftime('%d'))
+                        # print val['date']
+
+                        # if overTwoYears:
+                        #     date = datetime.date(val['date'].year, val['date'].month, val['date'].day)
+                        # else:
+                        #     date = datetime.date(yearsToCompare[-1], val['date'].month, val['date'].day)
+                        date = datetime.date(xAxesYear, val['date'].month, val['date'].day)
+
+                        valdate = functions.unix_time_millis(date)
                         value.append(valdate)    # Date for xAxe
-                        value.append(int(year))  # Year for yAxe
-                        value.append(val['meanvalue'])
+                        # if overTwoYears:
+                        #     value.append(str(year) + '-' + str(year+1))  # Year for yAxe
+                        # else:
+                        value.append(val['date'].year)  # Year for yAxe
+
+                        if val['meanvalue'] == float(nodata):
+                            value.append(None)
+                        else:
+                            value.append(val['meanvalue'])
                         data.append(value)
+                        x += 1
+                    y += 1
 
                 # Set defaults in case no entry exists in the DB
-                ts = {'name': productcode + '-' + version + '-' + subproductcode,
-                      'yAxis': productcode + ' - ' + version,
-                      'data': data,
-                      'visible': True
-                      }
+                ts = {
+                    'name': productcode + '-' + version + '-' + subproductcode,
+                    'frequency_id': frequency_id,
+                    # 'type': 'heatmap',
+                    'yAxis': productcode + ' - ' + version,
+                    'data': data
+                    # 'visible': True,
+                    # 'borderWidth': 1,
+                    # 'dataLabels': {
+                    #     'enabled': True,
+                    #     'color': '#000000'
+                    # }
+                }
                 for ts_drawprops in timeseries_drawproperties:
-                    ts = {'name': ts_drawprops.tsname_in_legend,
-                          'yAxis': ts_drawprops.yaxes_id,
-                          'data': data,
-                          'visible': True
-                          }
+                    ts = {
+                        'name': ts_drawprops.tsname_in_legend,
+                        'frequency_id': frequency_id,
+                        # 'type': 'heatmap',
+                        'yAxis': ts_drawprops.yaxes_id,
+                        'data': data
+                    }
                 timeseries.append(ts)
 
 
-        colorAxis = {
-            'stops': [
-                [0, '#3060cf'],
-                [0.5, '#fffbbc'],
-                [0.9, '#c4463a'],
-                [1, '#c4463a']
-            ],
-            'min': -15,
-            'max': 25,
-            'startOnTick': False,
-            'endOnTick': False
-        }
+        # legend_steps = querydb.get_product_default_legend_steps(productcode=productcode,version=version, subproductcode=subproductcode)
+        legend_steps = querydb.get_legend_steps(legendid=legend_id)
+        if hasattr(legend_steps, "__len__") and legend_steps.__len__() > 0:
+            minimizeSteps = False
+            if legend_steps.__len__() > 35:
+                colorramp = True
+                minimizeSteps = True
 
+            # min = float((legend_steps[0].from_step - legend_steps[0].scale_offset)/legend_steps[0].scale_factor)
+            # max = float((legend_steps[legend_steps.__len__()-1].to_step - legend_steps[legend_steps.__len__()-1].scale_offset)/legend_steps[legend_steps.__len__()-1].scale_factor)
+            min = legend_steps[0].from_step
+            max = legend_steps[legend_steps.__len__()-1].to_step
+
+            stops = []
+            colors = []
+            dataClasses = []
+            rownr = 0
+            for step in legend_steps:
+                stop = []
+                rownr += 1
+                # from_step = float((step.from_step - step.scale_offset)/step.scale_factor)
+                # to_step = float((step.to_step - step.scale_offset)/step.scale_factor)
+                from_step = step.from_step
+                to_step = step.to_step
+
+                colorRGB = map(int, (color.strip() for color in step.color_rgb.split(" ") if color.strip()))
+                colorHex = functions.rgb2html(colorRGB)
+
+                if minimizeSteps:
+                    if step.color_label != None and step.color_label.strip() != '':
+                        colors.append(colorHex)
+                        if rownr == 1:
+                            stop.append(0.000)
+                        else:
+                            stop.append((from_step-min)/(max-min))
+                            # stop.append(round(float(rownr)/legend_steps.__len__(), 3))
+                        stop.append(colorHex)
+                        stops.append(stop)
+                else:
+                    colors.append(colorHex)
+                    stop.append((from_step-min)/(max-min))
+                    # stop.append(round(float(rownr)/(legend_steps.__len__()), 3))
+                    stop.append(colorHex)
+                    stops.append(stop)
+
+                dataClass = {
+                    'from': from_step,
+                    'to': to_step,
+                    'color': colorHex,
+                    'name': step.color_label
+                }
+                dataClasses.append(dataClass)
+
+
+        if colorramp:
+            if minimizeSteps:
+                tickPixelInterval = int(legend_steps.__len__()/len(stops))
+                # tickInterval = legend_steps.__len__()
+            else:
+                tickPixelInterval = 72
+                # tickPixelInterval = int(legend_steps.__len__()/len(stops))
+                # tickPixelInterval = legend_steps.__len__()
+                # tickInterval = tickPixelInterval
+
+            colorAxis = {
+                'stops': stops,
+                # 'colors': colors,
+                'min': min, # 18.0,   #
+                'max': max,  # 50, 34.0,  #
+                # 'maxColor': '#09ea3d',
+                # 'minColor': '#690000',
+                'minPadding': 0.0,
+                'maxPadding': 0.0,
+                'startOnTick': False,
+                'endOnTick': False,
+                'tickWidth': 1,
+                'tickInterval': None,
+                'tickPixelInterval': tickPixelInterval,
+                # 'tickLength': tickInterval,
+                'gridLineWidth': 0,
+                # 'gridLineColor': 'white',
+                # 'minorTickInterval': 0.1,
+                # 'minorGridLineColor': 'white',
+                'type': 'linear'   # 'logarithmic'   #
+            }
+        else:
+            colorAxis = {
+                'dataClasses': dataClasses,
+                # 'dataClassColor': 'category',
+                'startOnTick': False,
+                'endOnTick': False
+            }
 
         yaxes = []
         count = 0
@@ -1976,14 +2106,22 @@ class GetTimeseries:
             if axes == 1:
                 opposite = "false"
 
-            min = ''    # yaxe.min
-            max = ''    # yaxe.max
+            categories = []
+            if overTwoYears:
+                yearsToCompare.append(yearsToCompare[-1]+1) # Add extra year
+                # for year in yearsToCompare:
+                #     categories.append(str(year) + '-' + str(year+1))
+            categories = yearsToCompare
+
+            min = yearsToCompare[0]    # yaxe.min
+            max = yearsToCompare[-1]    # yaxe.max
 
             yaxe = {'id': yaxe.yaxes_id,
-                    'categories': yearsToCompare,
+                    'categories': categories,
                     'title': yaxe.title, 'title_color': yaxe.title_color, 'unit': yaxe.unit, 'opposite': opposite,
                     'min': min, 'max': max,
-                    'aggregation_type': yaxe.aggregation_type, 'aggregation_min': yaxe.aggregation_min, 'aggregation_max': yaxe.aggregation_max}
+                    'aggregation_type': yaxe.aggregation_type, 'aggregation_min': yaxe.aggregation_min, 'aggregation_max': yaxe.aggregation_max
+                    }
             yaxes.append(yaxe)
 
 
@@ -1991,6 +2129,7 @@ class GetTimeseries:
                    "showYearInTicks": False,
                    "showYearInToolTip": "true",
                    "colorAxis": colorAxis,
+                   'colors': colors,
                    "yaxes": yaxes,
                    "timeseries": timeseries}
 
@@ -2094,9 +2233,9 @@ class GetTimeseries:
                 zScoreAVG = NP.mean(yearDataZScoreForAVGSTD)
                 zScoreSTD = NP.std(yearDataZScoreForAVGSTD)
                 for yearData in dataZScore:
-                    zScore = (yearData['y']-zScoreAVG)/zScoreSTD
-                    yearData['y'] = zScore
-                    if zScore < 0:
+                    zScoreValue = (yearData['y']-zScoreAVG)/zScoreSTD
+                    yearData['y'] = zScoreValue
+                    if zScoreValue < 0:
                         yearData['color'] = '#ff0000'
 
                 if zscore:
@@ -2512,7 +2651,7 @@ class TimeseriesProducts:
                 if hasattr(all_prod_mapsets, "__len__") and all_prod_mapsets.__len__() > 0:
                     for mapset in all_prod_mapsets:
                         mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
-                        if mapset_info:
+                        if mapset_info != []:
                             mapset_record = functions.row2dict(mapset_info)
 
                             prod_dict['productmapsetid'] = prod_record['productid'] + '_' + mapset_record['mapsetcode']
@@ -2665,7 +2804,7 @@ class __TimeseriesProductsTree:
                     # prod_dict['children'] = []
                     for mapset in all_prod_mapsets:
                         mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
-                        if mapset_info:
+                        if mapset_info != []:
                             mapset_record = functions.row2dict(mapset_info)
                             # print mapset_record
                             mapset_dict = {}
@@ -3044,28 +3183,29 @@ class ProductNavigatorDataSets:
                     prod_dict['productmapsets'] = []
                     for mapset in all_prod_mapsets:
                         mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
-                        mapset_dict = functions.row2dict(mapset_info)
-                        mapset_dict['mapsetdatasets'] = []
-                        all_mapset_datasets = p.get_subproducts(mapset=mapset)
-                        for subproductcode in all_mapset_datasets:
-                            # print productcode + ' - ' + subproductcode
-                            dataset_info = querydb.get_subproduct(productcode=productcode,
-                                                                  version=version,
-                                                                  subproductcode=subproductcode,
-                                                                  echo=False,
-                                                                  masked=True)
+                        if mapset_info != []:
+                            mapset_dict = functions.row2dict(mapset_info)
+                            mapset_dict['mapsetdatasets'] = []
+                            all_mapset_datasets = p.get_subproducts(mapset=mapset)
+                            for subproductcode in all_mapset_datasets:
+                                # print productcode + ' - ' + subproductcode
+                                dataset_info = querydb.get_subproduct(productcode=productcode,
+                                                                      version=version,
+                                                                      subproductcode=subproductcode,
+                                                                      echo=False,
+                                                                      masked=True)
 
-                            if dataset_info is not None:
-                                dataset_dict = functions.row2dict(dataset_info)
-                                dataset_dict['mapsetcode'] = mapset
+                                if dataset_info is not None:
+                                    dataset_dict = functions.row2dict(dataset_info)
+                                    dataset_dict['mapsetcode'] = mapset
 
-                                # dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
-                                # completeness = dataset.get_dataset_normalized_info()
-                                # dataset_dict['datasetcompleteness'] = completeness
+                                    # dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+                                    # completeness = dataset.get_dataset_normalized_info()
+                                    # dataset_dict['datasetcompleteness'] = completeness
 
-                                mapset_dict['mapsetdatasets'].append(dataset_dict)
-                        if mapset_dict['mapsetdatasets'].__len__() > 0:
-                            prod_dict['productmapsets'].append(mapset_dict)
+                                    mapset_dict['mapsetdatasets'].append(dataset_dict)
+                            if mapset_dict['mapsetdatasets'].__len__() > 0:
+                                prod_dict['productmapsets'].append(mapset_dict)
                     products_dict_all.append(prod_dict)
 
             prod_json = json.dumps(products_dict_all,
@@ -3121,6 +3261,8 @@ class GetLogFile:
             if getparams['service'] == 'datasync':
                 # logfilename = '/var/log/rsyncd.log'
                 logfilename = es_constants.es2globals['log_dir']+'rsync.log'
+            if getparams['service'] == 'ingestarchive':
+                logfilename = es_constants.es2globals['log_dir']+'apps.es2system.ingest_archive.log'   # 'apps.tools.ingest_historical_archives.log'
 
         # logfilepath = es_constants.es2globals['log_dir']+logfilename
         # Display only latest (most recent file) - see #69-1
@@ -4135,6 +4277,67 @@ class UpdateIPSettings:
         return updatestatus
 
 
+class IngestArchive:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        # from apps.es2system import service_ingest_archive as sia
+        getparams = web.input()
+        service = getparams['service']
+        task = getparams['task']
+        # if task == 'run':
+        #     task = 'start'
+        # print task
+
+        pid_file = es_constants.ingest_archive_pid_filename
+        ingestarchive_daemon = es2system.IngestArchiveDaemon(pid_file, dry_run=True)
+        status = ingestarchive_daemon.status()
+        if status:
+            message = 'Ingest Archive service is running'
+        else:
+            message = 'Ingest Archive service is not running'
+
+        ingestarchive_service_script = es_constants.es2globals['system_service_dir']+os.sep+'service_ingest_archive.py'
+        if getparams.task == 'stop':
+            if status:
+                os.system("python " + ingestarchive_service_script + " stop")
+                message = 'Ingest Archive service stopped'
+            else:
+                message = 'Ingest Archive service is already down'
+
+        elif getparams.task == 'run':
+            if not status:
+                os.system("python " + ingestarchive_service_script + " start")
+                message = 'Ingest Archive service started'
+            else:
+                message = 'Ingest Archive service was already up'
+
+        elif getparams.task == 'restart':
+            os.system("python " + ingestarchive_service_script + " restart")
+            # os.system("python " + ingestarchive_service_script + " stop")
+            # os.system("python " + ingestarchive_service_script + " start")
+            message = 'Ingest Archive service restarted'
+
+        status = ingestarchive_daemon.status()
+
+        running = 'false'
+        if status:
+            running = 'true'
+        response = '{"success":"true", "running":"'+running+'", "message":"'+message+'"}'
+        # running = sia.service_ingest_archive(command=task)
+        #
+        # if not running:
+        #     if task == 'status':
+        #         response = '{"success":"false", "running":"false", "message":"Ingest archive is not running!"}'
+        #     else:
+        #         response = '{"success":"false", "message":"Ingest archive stopped!"}'
+        # else:
+        #     response = '{"success":"true", "running":"true", "message":"Ingest archive is running!"}'
+
+        return response
+
+
 class GetProductLayer:
     def __init__(self):
         self.lang = "eng"
@@ -4393,6 +4596,8 @@ class GetProductLayer:
                     stepcount += 1
                     min_step = float((step.from_step - scale_offset)/scale_factor)
                     max_step = float((step.to_step - scale_offset)/scale_factor)
+                    # min_step = float(step.from_step)
+                    # max_step = float(step.to_step)
                     colors = map(int, (color.strip() for color in step.color_rgb.split(" ") if color.strip()))
 
                     if stepcount == legend_steps.__len__():    # For the last step use <= max_step
@@ -4651,7 +4856,8 @@ class DataSets:
         self.lang = "eng"
 
     def GET(self):
-        # return web.ctx
+        from dateutil.relativedelta import relativedelta
+
         db_products = querydb.get_products(activated=True)
 
         if hasattr(db_products, "__len__") and db_products.__len__() > 0:
@@ -4673,47 +4879,76 @@ class DataSets:
                         mapset_dict = []
                         # print mapset
                         mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
-                        # if mapset_info.__len__() > 0:
-                        mapset_dict = functions.row2dict(mapset_info)
-                        mapset_dict['productcode'] = productcode
-                        mapset_dict['version'] = version
+                        if mapset_info != []:
+                            mapset_dict = functions.row2dict(mapset_info)
+                            # print mapset_dict
+                            mapset_dict['productcode'] = productcode
+                            mapset_dict['version'] = version
                         # else:
                         #   mapset_dict['mapsetcode'] = mapset
-                        mapset_dict['mapsetdatasets'] = []
-                        all_mapset_datasets = p.get_subproducts(mapset=mapset)
-                        for subproductcode in all_mapset_datasets:
-                            # print 'productcode: ' + productcode
-                            # print 'version: ' + version
-                            # print 'subproductcode: ' + subproductcode
-                            dataset_info = querydb.get_subproduct(productcode=productcode,
-                                                                  version=version,
-                                                                  subproductcode=subproductcode,
-                                                                  echo=False)
-                            # print dataset_info
-                            # dataset_info = querydb.db.product.get(productcode, version, subproductcode)
-                            # dataset_dict = {}
-                            if dataset_info is not None:
-                                dataset_dict = functions.row2dict(dataset_info)
-                                # dataset_dict = dataset_info.__dict__
-                                # del dataset_dict['_labels']
-                                if hasattr(dataset_info,'frequency_id'):
-                                    if dataset_info.frequency_id == 'e15minute' or dataset_info.frequency_id == 'e30minute':
-                                        dataset_dict['nodisplay'] = 'no_minutes_display'
-                                    # To be implemented in dataset.py
-                                    elif dataset_info.frequency_id == 'e1year':
-                                        dataset_dict['nodisplay'] = 'no_minutes_display'
-                                    else:
-                                        dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+                            mapset_dict['mapsetdatasets'] = []
+                            all_mapset_datasets = p.get_subproducts(mapset=mapset)
+                            for subproductcode in all_mapset_datasets:
+                                # print 'productcode: ' + productcode
+                                # print 'version: ' + version
+                                # print 'subproductcode: ' + subproductcode
+                                dataset_info = querydb.get_subproduct(productcode=productcode,
+                                                                      version=version,
+                                                                      subproductcode=subproductcode,
+                                                                      echo=False)
+                                # print dataset_info
+                                # dataset_info = querydb.db.product.get(productcode, version, subproductcode)
+                                # dataset_dict = {}
+                                if dataset_info is not None:
+                                    dataset_dict = functions.row2dict(dataset_info)
+                                    # dataset_dict = dataset_info.__dict__
+                                    # del dataset_dict['_labels']
+                                    if hasattr(dataset_info,'frequency_id'):
+                                        if dataset_info.frequency_id == 'e15minute':
+                                            # dataset_dict['nodisplay'] = 'no_minutes_display'
+                                            today = datetime.date.today()
+                                            from_date = today - datetime.timedelta(days=3)
+                                            kwargs = {'mapset': mapset,
+                                                      'sub_product_code': subproductcode,
+                                                      'from_date': from_date}
+                                        elif  dataset_info.frequency_id == 'e30minute':
+                                            # dataset_dict['nodisplay'] = 'no_minutes_display'
+                                            today = datetime.date.today()
+                                            from_date = today - datetime.timedelta(days=6)
+                                            kwargs = {'mapset': mapset,
+                                                      'sub_product_code': subproductcode,
+                                                      'from_date': from_date}
+                                        elif dataset_info.frequency_id == 'e1year':
+                                            dataset_dict['nodisplay'] = 'no_minutes_display'
+
+                                        elif  dataset_info.frequency_id == 'e1day':
+                                            today = datetime.date.today()
+                                            from_date = today - relativedelta(years=1)
+                                            kwargs = {'mapset': mapset,
+                                                      'sub_product_code': subproductcode,
+                                                      'from_date': from_date}
+                                        else:
+                                            kwargs = {'mapset': mapset,
+                                                      'sub_product_code': subproductcode}
+
+                                        # if dataset_info.frequency_id == 'e15minute' or dataset_info.frequency_id == 'e30minute':
+                                        #     dataset_dict['nodisplay'] = 'no_minutes_display'
+                                        # # To be implemented in dataset.py
+                                        # elif dataset_info.frequency_id == 'e1year':
+                                        #     dataset_dict['nodisplay'] = 'no_minutes_display'
+                                        # else:
+                                        #     dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+                                        dataset = p.get_dataset(**kwargs)
                                         completeness = dataset.get_dataset_normalized_info()
                                         dataset_dict['datasetcompleteness'] = completeness
                                         dataset_dict['nodisplay'] = 'false'
 
-                                    dataset_dict['mapsetcode'] = mapset_dict['mapsetcode']
-                                    dataset_dict['mapset_descriptive_name'] = mapset_dict['descriptive_name']
+                                        dataset_dict['mapsetcode'] = mapset_dict['mapsetcode']
+                                        dataset_dict['mapset_descriptive_name'] = mapset_dict['descriptive_name']
 
-                                    mapset_dict['mapsetdatasets'].append(dataset_dict)
-                                else:
-                                    pass
+                                        mapset_dict['mapsetdatasets'].append(dataset_dict)
+                                    else:
+                                        pass
                         prod_dict['productmapsets'].append(mapset_dict)
                 products_dict_all.append(prod_dict)
 
@@ -5061,6 +5296,7 @@ class Ingestion:
         self.lang = "eng"
 
     def GET(self):
+        from dateutil.relativedelta import relativedelta
         # return web.ctx
         ingestions = querydb.get_ingestions(echo=False)
         # print ingestions
@@ -5071,29 +5307,45 @@ class Ingestion:
                 ingest_dict = functions.row2dict(row)
 
                 if row.mapsetcode != None and row.mapsetcode != '':
-                    if row.frequency_id == 'e15minute' or row.frequency_id == 'e30minute':
-                        ingest_dict['nodisplay'] = 'no_minutes_display'
-                        # today = datetime.date.today()
-                        # # week_ago = today - datetime.timedelta(days=7)
+                    if row.frequency_id == 'e15minute':
+                        # ingest_dict['nodisplay'] = 'no_minutes_display'
+                        today = datetime.date.today()
+                        from_date = today - datetime.timedelta(days=3)
                         # week_ago = datetime.datetime(2015, 8, 27, 00, 00)   # .strftime('%Y%m%d%H%S')
-                        # # kwargs.update({'from_date': week_ago})  # datetime.date(2015, 08, 27)
-                        # kwargs = {'product_code': row.productcode,
-                        #           'sub_product_code': row.subproductcode,
-                        #           'version': row.version,
-                        #           'mapset': row.mapsetcode,
-                        #           'from_date': week_ago}
+                        # kwargs.update({'from_date': week_ago})  # datetime.date(2015, 08, 27)
+                        kwargs = {'product_code': row.productcode,
+                                  'sub_product_code': row.subproductcode,
+                                  'version': row.version,
+                                  'mapset': row.mapsetcode,
+                                  'from_date': from_date}
                         # dataset = Dataset(**kwargs)
                         # completeness = dataset.get_dataset_normalized_info()
+                    elif  row.frequency_id == 'e30minute':
+                        today = datetime.date.today()
+                        from_date = today - datetime.timedelta(days=6)
+                        kwargs = {'product_code': row.productcode,
+                                  'sub_product_code': row.subproductcode,
+                                  'version': row.version,
+                                  'mapset': row.mapsetcode,
+                                  'from_date': from_date}
+                    elif  row.frequency_id == 'e1day':
+                        today = datetime.date.today()
+                        from_date = today - relativedelta(years=1)
+                        kwargs = {'product_code': row.productcode,
+                                  'sub_product_code': row.subproductcode,
+                                  'version': row.version,
+                                  'mapset': row.mapsetcode,
+                                  'from_date': from_date}
                     else:
                         kwargs = {'product_code': row.productcode,
                                   'sub_product_code': row.subproductcode,
                                   'version': row.version,
                                   'mapset': row.mapsetcode}
-                        # print kwargs
-                        dataset = Dataset(**kwargs)
-                        completeness = dataset.get_dataset_normalized_info()
-                        ingest_dict['completeness'] = completeness
-                        ingest_dict['nodisplay'] = 'false'
+                    # print kwargs
+                    dataset = Dataset(**kwargs)
+                    completeness = dataset.get_dataset_normalized_info()
+                    ingest_dict['completeness'] = completeness
+                    ingest_dict['nodisplay'] = 'false'
                 else:
                     ingest_dict['completeness'] = {}
                     ingest_dict['nodisplay'] = 'false'

@@ -15,7 +15,7 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
 
     xtype: 'timeserieschartselection',
 
-    title: esapp.Utils.getTranslation('TIME SERIES GRAPHS'),  // 'Time series',
+    title: esapp.Utils.getTranslation('TIME_SERIES_GRAPHS'),  // 'TIME SERIES GRAPHS',
 
     header: {
         titlePosition: 1,
@@ -77,7 +77,7 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
             }
         };
 
-        me.title = esapp.Utils.getTranslation('TIME SERIES GRAPHS');  // 'Time series',
+        me.title = esapp.Utils.getTranslation('TIME_SERIES_GRAPHS');  // 'TIME SERIES GRAPHS',
 
         me.items = [{
             xtype: 'fieldset',
@@ -125,7 +125,7 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                 type: 'fit'
             },
             items: [{
-                title: esapp.Utils.getTranslation('CLASSIC X/Y'),  // 'DEFAULT X/Y GRAPH',
+                title: esapp.Utils.getTranslation('PROFILE'),  // 'DEFAULT X/Y GRAPH',
                 id: 'ts_xy_graph_tab_' + me.id,
                 margin: 2,
                 //minHeight: 800,
@@ -167,7 +167,7 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                 }]
             },{
 
-                title: esapp.Utils.getTranslation('CUMULATIVE'),  // 'CUMULATIVE GRAPH',
+                title: esapp.Utils.getTranslation('CUMULATIVE'),  // 'CUMULATIVE',
                 id: 'ts_cumulative_graph_tab_' + me.id,
                 margin: 2,
                 //minHeight: 800,
@@ -208,7 +208,7 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                     multipleyears: false
                 }]
             },{
-                title: esapp.Utils.getTranslation('RANKING / Z-SCORE'),  // 'RANKING/Z-SCORE',
+                title: esapp.Utils.getTranslation('RANKING_ZSCORE'),  // 'RANKING / Z-SCORE',
                 id: 'ts_ranking_graph_tab_'+me.id,
                 margin:3,
                 //minHeight: 800,
@@ -249,7 +249,7 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                     multipleyears: true
                 }]
             },{
-                title: esapp.Utils.getTranslation('MATRIX'),  // 'MATRIX GRAPH',
+                title: esapp.Utils.getTranslation('MATRIX'),  // 'MATRIX',
                 id: 'ts_matrix_graph_tab_'+me.id,
                 margin:3,
                 //minHeight: 800,
@@ -282,6 +282,7 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                     xtype: 'timeseriesproductselection',
                     charttype: 'matrix',
                     cumulative: false,
+                    matrix: true,
                     multiplevariables: false,
                     fromto: false,
                     year: false,

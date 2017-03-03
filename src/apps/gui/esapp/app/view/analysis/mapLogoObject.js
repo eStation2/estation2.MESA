@@ -88,8 +88,8 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                 Ext.tip.QuickTipManager.register({
                     target: this.id,
                     trackMouse: true,
-                    title: 'Logo object',
-                    text: '<img src="resources/img/pencil_cursor.png" alt="" height="18" width="18">' + 'Double click to edit.'
+                    title: esapp.Utils.getTranslation('logo_object'), // 'Logo object',
+                    text: '<img src="resources/img/pencil_cursor.png" alt="" height="18" width="18">' + esapp.Utils.getTranslation('doubleclick_to_edit') // 'Double click to edit.'
                 });
             },
             refreshimage: function(){
@@ -174,14 +174,14 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
             shadow: true,
             //headerOverCls: 'grayheader',
             header: {
-                title: 'Logo object',
+                title: esapp.Utils.getTranslation('logo_object'), // 'Logo object',
                 titleAlign: 'right',
                 //cls: 'transparentheader',
                 hidden: false,
                 items: [{
                     xtype:'button',
                     itemId: 'stopedit_tool_' + me.id,
-                    tooltip:'Save changes',
+                    tooltip: esapp.Utils.getTranslation('save_changes'), // 'Save changes',
                     glyph:0xf0c7,
                     cls: 'btntransparent',
                     hidden: false,

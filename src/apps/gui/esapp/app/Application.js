@@ -153,7 +153,7 @@ Ext.define('esapp.Application', {
                     Ext.Loader.loadScript({
                         url: url,
                         onLoad: function (options) {
-                            console.info('French local loaded!');
+                            //console.info('French local loaded!');
                         }
                     });
 
@@ -191,7 +191,7 @@ Ext.define('esapp.Application', {
                         Ext.Loader.loadScript({
                             url: 'app/CustomVTypes.js',
                             onLoad: function (options) {
-                                console.info('CustomVTypes');
+                                //console.info('CustomVTypes');
                             }
                         });
 

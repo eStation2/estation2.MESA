@@ -19,11 +19,21 @@ Ext.define('esapp.view.analysis.timeseriesChartSelectionController', {
             tsToSeason = null,
             postfix_charttype = charttype,
             ts_from_season = '',
-            ts_to_season = '';
+            ts_to_season = '',
+            legend_id = null;
 
         //if (charttype == 'cumulative'){
         //    postfix_charttype = '_cum'
         //}
+        if (charttype == 'matrix'){
+            //console.info(Ext.getCmp('colorschemesMatrixTSProductGrid').getStore());
+            //var legend_id = Ext.getCmp('selected-timeseries-mapset-dataset-grid_'+postfix_charttype).up().legend_id;
+            Ext.getCmp('colorschemesMatrixTSProductGrid').getStore().each(function(rec){
+                if (rec.get('default_legend')) {
+                    legend_id = rec.get('legend_id');
+                }
+            },this);
+        }
 
         //selectedTimeSeries = this.getView().down().lookupReference('selected-timeseries-mapset-dataset-grid'+postfix_charttype).getStore().getData();
         selectedTimeSeries = Ext.getCmp('selected-timeseries-mapset-dataset-grid_'+postfix_charttype).getStore().getData();
@@ -66,7 +76,7 @@ Ext.define('esapp.view.analysis.timeseriesChartSelectionController', {
                     ts_to_season.validate();
                     Ext.Msg.show({
                        title: esapp.Utils.getTranslation('mandatoryfield'),    // 'Mandatory field',
-                       msg: esapp.Utils.getTranslation('Please give Seasons "From" and "To" date!'),    // 'Please choose both "From" and "To" date!',
+                       msg: esapp.Utils.getTranslation('please_give_seasons_date'),    // 'Please give Seasons "From" and "To" date!',
                        width: 300,
                        buttons: Ext.Msg.OK,
                        animEl: '',
@@ -112,7 +122,7 @@ Ext.define('esapp.view.analysis.timeseriesChartSelectionController', {
                 if (selectedYears.length < 1){
                     Ext.Msg.show({
                        title: esapp.Utils.getTranslation('mandatoryfield'),    // 'Mandatory field',
-                       msg: esapp.Utils.getTranslation('please select one or more years'),    // 'Please select at least one year to compare!',
+                       msg: esapp.Utils.getTranslation('please_select_one_or_more_years'),    // 'Please select one or more years!',
                        width: 400,
                        buttons: Ext.Msg.OK,
                        animEl: '',
@@ -134,7 +144,7 @@ Ext.define('esapp.view.analysis.timeseriesChartSelectionController', {
                     ts_to_season.validate();
                     Ext.Msg.show({
                        title: esapp.Utils.getTranslation('mandatoryfield'),    // 'Mandatory field',
-                       msg: esapp.Utils.getTranslation('Please give Seasons "From" and "To" date!'),    // 'Please choose both "From" and "To" date!',
+                       msg: esapp.Utils.getTranslation('please_give_seasons_date'),    // 'Please give Seasons "From" and "To" date!',
                        width: 300,
                        buttons: Ext.Msg.OK,
                        animEl: '',
@@ -154,7 +164,7 @@ Ext.define('esapp.view.analysis.timeseriesChartSelectionController', {
                 if (selectedMultiYears.length < 1){
                     Ext.Msg.show({
                        title: esapp.Utils.getTranslation('mandatoryfield'),    // 'Mandatory field',
-                       msg: esapp.Utils.getTranslation('please select one or more years'),    // 'Please select at least one year to compare!',
+                       msg: esapp.Utils.getTranslation('please_select_one_or_more_years'),    // 'Please select one or more years!',
                        width: 400,
                        buttons: Ext.Msg.OK,
                        animEl: '',
@@ -176,7 +186,7 @@ Ext.define('esapp.view.analysis.timeseriesChartSelectionController', {
                     ts_to_season.validate();
                     Ext.Msg.show({
                        title: esapp.Utils.getTranslation('mandatoryfield'),    // 'Mandatory field',
-                       msg: esapp.Utils.getTranslation('Please give Seasons "From" and "To" date!'),    // 'Please choose both "From" and "To" date!',
+                       msg: esapp.Utils.getTranslation('please_give_seasons_date'),    // 'Please give Seasons "From" and "To" date!',
                        width: 300,
                        buttons: Ext.Msg.OK,
                        animEl: '',
@@ -250,9 +260,12 @@ Ext.define('esapp.view.analysis.timeseriesChartSelectionController', {
                     "subproductcode": product.get('subproductcode'),
                     "mapsetcode": product.get('mapsetcode'),
                     "date_format": product.get('date_format'),
+                    "frequency_id": product.get('frequency_id'),
                     "cumulative": product.get('cumulative'),
                     "difference": product.get('difference'),
                     "reference": product.get('reference'),
+                    "colorramp": product.get('colorramp') ? product.get('colorramp') : false,
+                    "legend_id": legend_id,
                     "zscore": product.get('zscore') ? product.get('zscore') : false     // checkbox gives no value when not checked so no value is passed. Forse false in this case.
                 };
                 //console.info(product);

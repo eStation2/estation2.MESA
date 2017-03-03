@@ -7,7 +7,7 @@ Ext.define('esapp.view.analysis.mapTemplateAdminController', {
         var selectedMapTemplates = me.getSelectionModel().getSelection();
         var analysisMain = Ext.getCmp('analysismain');
 
-        console.info(me.getSelectionModel().getSelection());
+        //console.info(me.getSelectionModel().getSelection());
         //console.info(Ext.getCmp('analysismain'));
 
         //analysisMain.getController().openSelectedMapTemplate(selections);

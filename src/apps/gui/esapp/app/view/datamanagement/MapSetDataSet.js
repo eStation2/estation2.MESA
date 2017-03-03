@@ -35,6 +35,8 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
         disableSelection: true,
         trackOver: false
     },
+    //layout: 'fit',
+
     //selType: 'cellmodel',
     //selModel: {listeners:{}},
 
@@ -76,12 +78,14 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
                 widgetattached: false
             },
             onWidgetAttach: function(col, widget, record) {
+                Ext.suspendLayouts();
                 if (!widget.widgetattached) {
                     widget.drawCompletenessChart(record);
                     widget.widgetattached = true;
                 }
-                //me.updateLayout();
+                Ext.resumeLayouts(true);
 
+                //me.updateLayout();
                 //console.info(widget.getStore());
                 //console.info(record.getData().datasetcompleteness);
                 //                widget.getStore().setData(record.getData().datasetcompleteness);

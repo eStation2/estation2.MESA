@@ -30,6 +30,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
     charttype: 'xy',
     cumulative: false,
     ranking: false,
+    matrix: false,
     multiplevariables: false,
     fromto: false,
     year: false,
@@ -145,7 +146,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                     }
                 }]
             }, {
-                text: '<div class="grid-header-style">SELECTED ' + esapp.Utils.getTranslation('timeseries') + '</div>',   //'<div class="grid-header-style">Time series</div>',
+                text: '<div class="grid-header-style">' + esapp.Utils.getTranslation('SELECTED') + ' ' + esapp.Utils.getTranslation('timeseries') + '</div>',   //'<div class="grid-header-style">Time series</div>',
                 xtype: 'templatecolumn',
                 tpl: new Ext.XTemplate(
                     //'<b>{prod_descriptive_name}</b>' +
@@ -213,8 +214,8 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
             },{
                 xtype: 'actioncolumn',
                 dataIndex: 'difference',
-                header: esapp.Utils.getTranslation('Diff'),
-                width: 30,
+                header: esapp.Utils.getTranslation('difference'),   // Diff
+                width: 20,
                 align: 'center',
                 shrinkWrap: 0,
                 stopSelection: false,
@@ -222,7 +223,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 hidden: !me.cumulative,
                 disabled: !me.cumulative,
                 items: [{
-                    tooltip: esapp.Utils.getTranslation('Diff'),
+                    tooltip: esapp.Utils.getTranslation('difference'),
                     getClass: function (v, meta, rec) {
                         if (rec.get('difference') === ' '){
                             return ''
@@ -260,13 +261,23 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
             }, {
                 xtype: 'checkcolumn',
                 dataIndex: 'zscore',
-                header: esapp.Utils.getTranslation('Z-Score'),
+                header: esapp.Utils.getTranslation('zccore'),  // 'Z-Score'
                 width: 30,
                 align: 'center',
                 stopSelection: false,
                 menuDisabled: true,
                 hidden: !me.ranking,
                 disabled: !me.ranking
+            }, {
+                xtype: 'checkcolumn',
+                dataIndex: 'colorramp',
+                header: esapp.Utils.getTranslation('gradient'), // 'Gradient'
+                width: 30,
+                align: 'center',
+                stopSelection: false,
+                menuDisabled: true,
+                hidden: !me.matrix,
+                disabled: !me.matrix
             }, {
                 xtype: 'actioncolumn',
                 //header: esapp.Utils.getTranslation('actions'),   // 'Edit draw properties',
@@ -289,6 +300,86 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 }]
             }]
         };
+
+        me.colorschemesProduct = null;
+        if (me.matrix) {
+            me.colorschemesProduct = {
+                xtype: 'grid',
+                id: 'colorschemesMatrixTSProductGrid',
+                reference: 'colorschemesMatrixTSProductGrid',
+                autoWidth: true,
+                //flex: 1,
+                //width: 530,
+                //height: 150,
+                maxHeight: 165,
+                scrollable: 'vertical',
+                hidden: true,
+                bind: '{productcolorschemes}',
+                layout: 'fit',
+
+                viewConfig: {
+                    stripeRows: false,
+                    enableTextSelection: true,
+                    draggable: false,
+                    markDirty: false,
+                    resizable: false,
+                    disableSelection: true,
+                    trackOver: false,
+                    scrollable: 'vertical'
+                },
+
+                selModel: {
+                    allowDeselect: true
+                },
+
+                collapsible: false,
+                enableColumnMove: false,
+                enableColumnResize: false,
+                multiColumnSort: false,
+                columnLines: false,
+                rowLines: true,
+                frame: false,
+                border: true,
+                bodyBorder: false,
+                //forceFit: true,
+
+                listeners: {
+                    rowclick: 'onRadioColumnAction'
+                    //rowclick: function (gridview, record) {
+                    //    console.info(record);
+                    //}
+                },
+                defaults: {
+                    sortable: false,
+                    hideable: false,
+                    variableRowHeight: false
+                },
+                columns: [{
+                    xtype: 'actioncolumn',
+                    width: 30,
+                    align: 'center',
+                    //shrinkWrap: 0,
+                    items: [{
+                        tooltip: esapp.Utils.getTranslation('selectacolorscheme'),    // 'Select color scheme',
+                        getClass: function (v, meta, rec) {
+                            return rec.get('defaulticon');
+                        }
+                        //,handler: 'onRadioColumnAction'
+                    }]
+                }, {
+                    xtype: 'templatecolumn',
+                    text: '<div class="grid-header-style">' + esapp.Utils.getTranslation('colorschemes') + '</div>',
+                    width: 475,
+                    sortable: false,
+                    menuDisabled: true,
+                    //shrinkWrap: 0,
+                    tpl: new Ext.XTemplate(
+                        '{colorschemeHTML}' +
+                        '<b>{colorbar}</b>'
+                    )
+                }]
+            };
+        }
 
         me.timeframeselection =  Ext.create('Ext.form.FieldSet', {
             xtype: 'fieldset',
@@ -401,7 +492,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
             }, {
                 xtype: 'fieldset',
                 //flex: 2,
-                title: '<b>Season</b>',
+                title: '<b>' + esapp.Utils.getTranslation('season') + '</b>',
                 layout: 'hbox',
                 layoutConfig: {columns: 2, rows: 1},
                 margin: '0 0 0 20',
@@ -469,7 +560,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
             }, {
                 xtype: 'multiselector',
                 id: 'ts_selectyearstocompare_'+me.charttype,
-                title: 'Year(s) of interest',
+                title: esapp.Utils.getTranslation('years_of_interest'),    // 'Year(s) of interest',
                 cls: 'newpanelstyle',
                 style: { "margin-right": "20px" },
                 width: 160,
@@ -478,7 +569,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 fieldName: 'year',
                 viewConfig: {
                     deferEmptyText: false,
-                    emptyText: 'No years selected'
+                    emptyText: esapp.Utils.getTranslation('no_years_selected')  // 'No years selected'
                 },
                 search: {
                     field: 'year',
@@ -521,7 +612,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
             }, {
                 xtype: 'fieldset',
                 //flex: 1,
-                title: '<b>Compare seasons</b>',
+                title: '<b>' + esapp.Utils.getTranslation('compare_seasons') + '</b>',  // 'Compare seasons'
                 layout: 'column',
                 //layoutConfig: {columns: 2, rows: 2},
                 defaults: {
@@ -604,7 +695,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 },
                 columns: [
                     {
-                        text: 'Available Years',
+                        text: esapp.Utils.getTranslation('available_years'),     // 'Available Years',
                         width: 135,
                         dataIndex: 'year',
                         menuDisabled: true,
@@ -625,7 +716,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
             }, {
                 xtype: 'fieldset',
                 //flex: 1,
-                title: '<b>Season</b>',
+                title: '<b>' + esapp.Utils.getTranslation('season') + '</b>',   // '<b>Season</b>',
                 layout: 'column',
                 //layoutConfig: {columns: 2, rows: 2},
                 defaults: {
@@ -757,6 +848,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
             }
         },
         me.selectedtimeseries,
+        me.colorschemesProduct,
         me.timeframeselection
        ];
 
@@ -933,7 +1025,7 @@ Ext.define("esapp.view.analysis.timeseriesCategoryProducts",{
                     return 'add20';
                 },
                 getTip: function (v, meta, rec) {
-                    return esapp.Utils.getTranslation('Add to selected');
+                    return esapp.Utils.getTranslation('add_to_selected');   // 'Add to selected'
                 }
                 //,handler: 'TimeseriesProductsGridRowClick'       //  rowclick event takes over!
             }]

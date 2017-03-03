@@ -169,7 +169,18 @@ def find_gaps(unsorted_filenames, frequency, only_intervals=False, from_date=Non
             most_common_ext_count = count
     # Keep only filenames with that extenions
     filenames = sorted(no_ext(f) for f in unsorted_filenames
-            if not f is None and get_ext(f) in (original_ext, MISSING_FILE_EXTENSION))
+                       if not f is None and get_ext(f) in (original_ext, MISSING_FILE_EXTENSION))
+
+    # Jurvtk: BEGIN remove filenames from list where date not between from_date and to_date
+    if frequency.dateformat == frequency.DATEFORMAT.DATETIME:
+        from_date = datetime.datetime.combine(from_date, datetime.time.min)
+        to_date = datetime.datetime.combine(to_date, datetime.time.min)
+
+    if from_date is not None and to_date is not None:
+        filenames = sorted(f for f in filenames
+                       if f is not None and frequency.extract_date(f) is not None and frequency.extract_date(f) >= from_date and frequency.extract_date(f) <= to_date)
+    # Jurvtk: END remove filenames from list where date not between from_date and to_date
+
     original_filenames = dict((no_ext(f), f) for f in unsorted_filenames if not f is None and get_ext(f) in (original_ext, MISSING_FILE_EXTENSION))
     if not filenames:
         if not (from_date or to_date):
@@ -183,14 +194,17 @@ def find_gaps(unsorted_filenames, frequency, only_intervals=False, from_date=Non
             from_date = frequency.extract_date(filenames[0])
         if not to_date:
             to_date = frequency.extract_date(filenames[-1])
+
     for date_parameter in (from_date, to_date):
         if date_parameter and not frequency.check_date(date_parameter):
             raise WrongDateParameter(date_parameter, frequency.dateformat)
+
     gaps = []
     intervals = []
     current_interval = None
     date = from_date
     mapset = frequency.get_mapset((filenames or [''])[0])
+    # dateformatlength = len(frequency.dateformat)
     while date <= to_date:
         current_filename = frequency.format_filename(date, mapset)
         if not filenames or current_filename < filenames[0]:

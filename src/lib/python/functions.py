@@ -355,14 +355,14 @@ def rgb2html(rgb):
     b = 0 if b < 0 else 255 if b > 255 else b
     b = "%x" % b
 
-    color = '0' if len(r) < 2 else '' + r
-    color += '0' if len(g) < 2 else '' + g
-    color += '0' if len(b) < 2 else '' + b
+    color = '00' if len(r) < 2 else '' + r
+    color += '00' if len(g) < 2 else '' + g
+    color += '00' if len(b) < 2 else '' + b
 
     return '#'+color
 
 
-def row2dict(row):
+def __row2dict(row):
     d = {}
     if hasattr(row, "c"):
         for column in row.c._all_col_set:
@@ -373,6 +373,26 @@ def row2dict(row):
             value = '' if str(getattr(row, column)) == 'None' else str(getattr(row, column))
             d[column] = value
 
+    return d
+
+
+def row2dict(row):
+    d = {}
+    if hasattr(row, "c"):
+        if hasattr(row.c, "_all_col_set"):
+            for column in row.c._all_col_set:
+                value = '' if str(getattr(row, column.name)) == 'None' else str(getattr(row, column.name))
+                d[column.name] = value
+        elif hasattr(row.c, "_all_columns"):
+            for column in row.c._all_columns:
+                value = '' if str(getattr(row, column.name)) == 'None' else str(getattr(row, column.name))
+                d[column.name] = value
+    elif hasattr(row, "_parent"):
+        for column in row._parent.keys:
+            value = '' if str(getattr(row, column)) == 'None' else str(getattr(row, column))
+            d[column] = value
+    else:
+        d = row
     return d
 
 

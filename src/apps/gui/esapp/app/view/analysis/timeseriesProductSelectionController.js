@@ -122,7 +122,8 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
 
             var TSDrawPropertiesWin = new Ext.Window({
                  id:'TSDrawPropertiesWin'
-                ,title: esapp.Utils.getTranslation('Time series draw properties for ') + tsdrawprobs_record.get('productcode') + ' - ' + tsdrawprobs_record.get('version') + ' - ' +  tsdrawprobs_record.get('subproductcode')
+                ,title: esapp.Utils.getTranslation('ts_draw_properties_for') + ' '   // 'Time series draw properties for'
+                        + tsdrawprobs_record.get('productcode') + ' - ' + tsdrawprobs_record.get('version') + ' - ' +  tsdrawprobs_record.get('subproductcode')
                 ,width:450
                 ,plain: true
                 ,modal: true
@@ -250,10 +251,9 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
         //var record = me.getSelection()[0];
         var newrecord = Ext.clone(record);
 
-
         //record.get('selected') ? record.set('selected', false) : record.set('selected', true);
         //record.get('selected') ? selectedTimeseriesStore.add(record) : selectedTimeseriesStore.remove(record);
-
+        //
         //if (me.cumulative){
         //    newrecord.set('cumulative', true);
         //}
@@ -318,8 +318,79 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
         //Ext.getCmp('selected-timeseries-mapset-dataset-grid').show();
         //Ext.getCmp('ts_timeframe').show();
         //Ext.getCmp('gettimeseries_btn').setDisabled(false);
-
+        //console.info(me.charttype);
+        if (me.charttype == 'matrix'){
+            this.getColorSchemes(record);
+        }
     }
+
+    ,getColorSchemes: function(record) {
+        var me = this.getView();
+        var colorSchemesStore = this.getStore('productcolorschemes');    //    Ext.getCmp('colorschemesMatrixTSProductGrid').getStore();   //
+        var selectedproduct = {
+            productcode:record.get('productcode'),
+            productversion:record.get('version'),
+            mapsetcode:record.get('mapsetcode'),
+            subproductcode:record.get('subproductcode'),
+            productname:record.get('product_descriptive_name'),
+            date_format:record.get('date_format')
+        };
+        //console.info(me.up().up());
+        //Ext.getCmp('colorschemesMatrixTSProductGrid').hide();
+        Ext.getCmp('colorschemesMatrixTSProductGrid').getStore().removeAll();
+
+        colorSchemesStore.load({
+            params: selectedproduct,
+            callback:function(records, options, success){
+                if (records.length>0){
+                    var nodefault = true;
+                    for (var i = 0; i < records.length; i++) {
+                        if (records[i].get('default_legend') == 'true' || records[i].get('default_legend')) {
+                            nodefault = false;
+                            me.up().up().legend_id = records[i].get('legend_id');
+                        }
+
+                    }
+                    if (nodefault) {
+                        records[0].set('default_legend', true);
+                        records[0].set('defaulticon', 'x-grid3-radio-col-on');
+                        //me.up().up().legend_id = records[0].get('legend_id');
+                    }
+                    Ext.getCmp('colorschemesMatrixTSProductGrid').getStore().add(records);
+                    Ext.getCmp('colorschemesMatrixTSProductGrid').getStore().sort('default_legend','DESC');
+                    Ext.getCmp('colorschemesMatrixTSProductGrid').show();
+                }
+            }
+        });
+
+        //console.info(colorSchemesStore);
+        //console.info(this.getStore('productcolorschemes'));
+    },
+
+    //onRadioColumnAction:function(view, rowIndex, colIndex, item, e, record ) {
+    onRadioColumnAction:function(view, record ) {
+        //var me = this.getView();
+
+        switch(record.get('defaulticon')) {
+            case 'x-grid3-radio-col':
+                    view.getStore('colorschemes').each(function(rec){
+                        //if (view.getStore().indexOf(rec) != rowIndex) {
+                            rec.set('default_legend', false);
+                            rec.set('defaulticon', 'x-grid3-radio-col');
+                        //}
+                    },this);
+
+                    record.set('default_legend', true);
+                    record.set('defaulticon', 'x-grid3-radio-col-on');
+                    view.getStore().sort('default_legend','DESC');
+                    //me.up().up().legend_id = record.get('legend_id');
+                    //console.info(record);
+                    //console.info(me.up().up());
+                break;
+            default:
+        }
+    }
+
 
     //,__TimeseriesProductsGridRowClick: function(gridview, record){
     //    //var selectedTimeSeriesProducts = gridview.getSelectionModel().selected.items;

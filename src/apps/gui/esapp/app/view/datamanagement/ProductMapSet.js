@@ -32,6 +32,8 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
         trackOver: false
     },
 
+    //layout: 'fit',
+
     //selType: 'cellmodel',
     //selModel: {listeners:{}},
 
@@ -113,14 +115,14 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
                 widgetattached: false
             },
             onWidgetAttach: function(col, widget, record) {
+                Ext.suspendLayouts();
                 if (!widget.widgetattached) {
                     widget.getStore().setData(record.getData().mapsetdatasets);
                     widget.widgetattached = true;
                 }
                 Ext.resumeLayouts(true);
-                //me.updateLayout();
 
-                //Ext.suspendLayouts();
+                //me.updateLayout();
                 //var mapsetdatasets = record.getData().mapsetdatasets;
                 //var newstore = Ext.create('Ext.data.JsonStore', {
                 //    model: 'MapSetDataSet',

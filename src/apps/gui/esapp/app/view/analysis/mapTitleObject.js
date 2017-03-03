@@ -51,9 +51,6 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
     config: {
         tpl: [
             '<b style="color: rgb(0, 0, 0);"><font size="3">{selected_area}</font></b><div><b style="color: rgb(0, 0, 0);"><font size="3">{product_name}</font></b><div><b><font size="3" color="#3366ff">{product_date}</font></b></div></div>'
-            //'{selected_area}',
-            //'{product_name}',       // '{selected_area:htmlEncode} - {product_name:htmlEncode}',
-            //'{product_date}'
         ],
         titleData: null
     },
@@ -92,8 +89,8 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
                 Ext.tip.QuickTipManager.register({
                     target: this.id,
                     trackMouse: true,
-                    title: 'Title object',
-                    text: '<img src="resources/img/pencil_cursor.png" alt="" height="18" width="18">' + 'Double click to edit.'
+                    title: esapp.Utils.getTranslation('title_object'), // 'Title object',
+                    text: '<img src="resources/img/pencil_cursor.png" alt="" height="18" width="18">' + esapp.Utils.getTranslation('doubleclick_to_edit') // 'Double click to edit.'
                 });
 
                 //me.mon(me.el, 'click', function(){alert('container click');});
@@ -174,8 +171,8 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
             xtype: 'button',
             //text: 'Fields',
             scope: this,
-            tooltip: 'Add a dynamic field',
-            overflowText: 'Add a dynamic field',
+            tooltip: esapp.Utils.getTranslation('add_dynamic_field'), // 'Add a dynamic field',
+            overflowText: esapp.Utils.getTranslation('add_dynamic_field'), // 'Add a dynamic field',
             hidden: false,
             iconCls: 'fa fa-code',
             floating: false,  // usually you want this set to True (default)
@@ -194,17 +191,17 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
                     padding: 2
                 },
                 items: [{
-                    text: 'Selected area',
+                    text: esapp.Utils.getTranslation('selected_area'), // 'Selected area',
                     handler: function(){
                         me.map_title_editor.insertAtCursor('{selected_area}');
                     }
                 },{
-                    text: 'Product name',
+                    text: esapp.Utils.getTranslation('product_name'), // 'Product name',
                     handler: function(){
                         me.map_title_editor.insertAtCursor('{product_name}');
                     }
                 },{
-                    text: 'Product date',
+                    text: esapp.Utils.getTranslation('product_date'), // 'Product date',
                     handler: function(){
                         me.map_title_editor.insertAtCursor('{product_date}');
                     }
@@ -234,14 +231,14 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
             shadow: true,
             headerOverCls: 'grayheader',
             header: {
-                title: 'Title object',
+                title: esapp.Utils.getTranslation('title_object'), // 'Title object',
                 titleAlign: 'right',
                 cls: 'transparentheader',
                 hidden: false,
                 items: [{
                     xtype:'button',
                     itemId: 'stopedit_tool_' + me.id,
-                    tooltip:'Save changes',
+                    tooltip: esapp.Utils.getTranslation('save_changes'), // 'Save changes',
                     glyph:0xf0c7,
                     cls: 'btntransparent',
                     hidden: false,
