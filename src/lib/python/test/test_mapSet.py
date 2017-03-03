@@ -29,35 +29,6 @@ class TestMapSet(TestCase):
         larger = mapset.get_larger_mapset()
 
         self.assertEqual(larger,'SPOTV-Africa-1km')
-    # def test_assign_ecowas(self):
-    #     self.fail()
-    #
-    # def test_assign_ioc_pml(self):
-    #     self.fail()
-    #
-    # def test_assign_vgt4africa(self):
-    #     self.fail()
-    #
-    # def test_assign_vgt4africa_500m(self):
-    #     self.fail()
-    #
-    # def test_assign_msg_disk(self):
-    #     self.fail()
-    #
-    # def test_assign_fewsnet_africa(self):
-    #     self.fail()
-    #
-    # def test_assign_tamsat_africa(self):
-    #     self.fail()
-    #
-    # def test_assign_modis_global(self):
-    #     self.fail()
-    #
-    # def test_print_out(self):
-    #     self.fail()
-    #
-    # def test_validate(self):
-    #     self.fail()
 
     def test_compute_common_area(self):
 
@@ -101,3 +72,25 @@ class TestMapSet(TestCase):
         mapset_Afr.assigndb(mapsetcode_1)
 
         self.assertEqual(mapset_Afr.is_wbd(),True)
+
+    def test_compute_pixel_area(self):
+
+        n_line = 1000
+        n_col  = 1000
+        mapsetcode = 'SPOTV-Africa-1km'
+
+        my_mapset = MapSet()
+        my_mapset.assigndb(mapsetcode)
+
+        my_mapset.compute_pixel_area(n_line, n_col)
+
+
+    def test_create_raster_surface(self):
+
+        mapsetcode = 'FEWSNET-Africa-8km'
+
+        my_mapset = MapSet()
+        my_mapset.assigndb(mapsetcode)
+
+        my_mapset.create_raster_surface()
+
