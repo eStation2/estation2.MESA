@@ -41,7 +41,6 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
     initComponent: function () {
         var me = this;
 
-
         me.selectedtimeseries = {
             xtype: 'grid',
             id: 'selected-timeseries-mapset-dataset-grid_'+me.charttype,
@@ -146,7 +145,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                     }
                 }]
             }, {
-                text: '<div class="grid-header-style">' + esapp.Utils.getTranslation('SELECTED') + ' ' + esapp.Utils.getTranslation('timeseries') + '</div>',   //'<div class="grid-header-style">Time series</div>',
+                text: '<div class="grid-header-style">' + esapp.Utils.getTranslation('selected_products') + '</div>',   //'<div class="grid-header-style">Time series</div>',
                 xtype: 'templatecolumn',
                 tpl: new Ext.XTemplate(
                     //'<b>{prod_descriptive_name}</b>' +
@@ -786,7 +785,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
             xtype: 'panel',
             //id:'productcategories',
             reference: 'productcategories',
-            title: esapp.Utils.getTranslation('products'),  // 'Products',
+            // title: esapp.Utils.getTranslation('products'),  // 'Products',
             border: true,
             frame: false,
             height: 360,
@@ -815,33 +814,47 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                     //console.info(timeseriesProductsStore);
                     if (timeseriesProductsStore.isStore) {
                         timeseriesProductsStore.reload();
-                        //me.fireEvent('render');
+                        //me.fireEvent('afterrender');
                     }
                 }
             }],
             listeners: {
-                render: function(){
+                afterrender: function(){
                     //console.info(this.getViewModel().getStore('categories'));
                     var timeseriesProductsStore = Ext.getStore('TimeseriesProductsStore'),
                         delay = 0;
+
+                    var myLoadMask = new Ext.LoadMask({
+                        msg    : esapp.Utils.getTranslation('loading'), // 'Loading...',
+                        target : this
+                    });
+
                     if (!timeseriesProductsStore.isLoaded()){
-                        delay = 4000;
+                        delay = 1000;
+                        myLoadMask.show();
                     }
 
                     var task = new Ext.util.DelayedTask(function() {
-                        me.getViewModel().getStore('categories').each(function(record){
-                            //Ext.getCmp('productcategories').add({
-                            me.lookupReference('productcategories').add({
-                                xtype:'timeseriescategoryproducts',
-                                id:'productsPanel_'+record.get('category_id')+'_'+me.id,
-                                categoryid:record.get('category_id'),
-                                categoryname:record.get('descriptive_name'),
-                                title:'<span class="categorytitle"> ' + record.get('descriptive_name') + '</span>',
-                                charttype: me.charttype,
-                                cumulative: me.cumulative,
-                                multiplevariables: me.multiplevariables
+                        if (!timeseriesProductsStore.isLoaded()) {
+                            delay = 1000;
+                            task.delay(delay);
+                        }
+                        else {
+                            myLoadMask.hide();
+                            //me.lookupReference('productcategories').removeAll();
+                            me.getViewModel().getStore('categories').each(function (record) {
+                                me.lookupReference('productcategories').add({
+                                    xtype: 'timeseriescategoryproducts',
+                                    id: 'productsPanel_' + record.get('category_id') + '_' + me.id,
+                                    categoryid: record.get('category_id'),
+                                    categoryname: record.get('descriptive_name'),
+                                    title: '<span class="categorytitle"> ' + record.get('descriptive_name') + '</span>',
+                                    charttype: me.charttype,
+                                    cumulative: me.cumulative,
+                                    multiplevariables: me.multiplevariables
+                                });
                             });
-                        });
+                        }
                     });
                     task.delay(delay);
                 }
@@ -931,7 +944,7 @@ Ext.define("esapp.view.analysis.timeseriesCategoryProducts",{
     //
     //},
 
-    cls: 'group-header-style grid-color-yellow',
+    cls: 'group-header-style',      // grid-color-yellow
     style: {"margin-right": "15px", cursor: 'pointer'},
 
     features: [{
@@ -945,7 +958,7 @@ Ext.define("esapp.view.analysis.timeseriesCategoryProducts",{
             //        '<b>{product_descriptive_name}</b>',
             //    '</tpl>',
             //'</tpl>',
-            ' {name} ({children.length})</div>'
+            ' {name} <span style="color:black; font-size:12px;"> ({children.length})</span></div>'
         ),
         hideGroupedHeader: true,
         enableGroupingMenu: false,
@@ -968,11 +981,11 @@ Ext.define("esapp.view.analysis.timeseriesCategoryProducts",{
     //    //    '</span>'
     //    //)
     //}],
-
-    listeners: {
-        //afterrender: 'loadTimeseriesProductsGrid',
-        rowclick: 'TimeseriesProductsGridRowClick'
-    },
+    //
+    //listeners: {
+    //    //afterrender: 'loadTimeseriesProductsGrid',
+    //    rowclick: 'TimeseriesProductsGridRowClick'
+    //},
 
     categoryid: null,
     categoryname: null,
@@ -985,32 +998,35 @@ Ext.define("esapp.view.analysis.timeseriesCategoryProducts",{
         var productsStore = me.getViewModel().get('products');
         me.store = productsStore;
 
-        //var delay = 0;
-        //if (productsStore == null){
-        //    delay = 2000;
-        //}
-        //else if (!productsStore.isLoaded()){
-        //    delay = 2000;
-        //}
+        me.listeners = {
+            rowclick: 'TimeseriesProductsGridRowClick',
+            beforerender: function(){
+                var delay = 0;
+                if (productsStore == null || !productsStore.isLoaded()){
+                    delay = 1000;
+                }
 
-        var task = new Ext.util.DelayedTask(function() {
-            //if (productsStore.getFilters().items.length == 0) {
-            productsStore.setFilters({
-                property: 'category_id'
-                ,value: me.categoryid
-                ,anyMatch: true
-            });
-            //}
-            if (!me.multiplevariables){
-                productsStore.setFilters({
-                    property: 'date_format'
-                    ,value: 'YYYMMDD'
-                    ,anyMatch: true
+                var task = new Ext.util.DelayedTask(function() {
+                    //if (productsStore.getFilters().items.length == 0) {
+                    productsStore.setFilters({
+                        property: 'category_id'
+                        ,value: me.categoryid
+                        ,anyMatch: true
+                    });
+                    //}
+                    if (!me.multiplevariables){
+                        productsStore.setFilters({
+                            property: 'date_format'
+                            ,value: 'YYYMMDD'
+                            ,anyMatch: true
+                        });
+                    }
+                    me.store = productsStore;
                 });
+                task.delay(delay);
             }
-            me.store = productsStore;
-        });
-        task.delay(500);
+        };
+
 
         me.columns = [{
             xtype: 'actioncolumn',
@@ -1042,6 +1058,7 @@ Ext.define("esapp.view.analysis.timeseriesCategoryProducts",{
                 '</br>',
                 '<b class="smalltext" style="color:darkgrey">{productcode} - {subproductcode}</b>',
                 '<b class="smalltext"> - {mapset_name}</b>'
+                // ,'<span>&nbsp;&nbsp;(display_index: <b style="color:black">{display_index}</b>)</span>'
                 //'<tpl for="productmapsets">',
                 //'<b class="smalltext"> - {descriptive_name}</b>',
                 //'</tpl>'

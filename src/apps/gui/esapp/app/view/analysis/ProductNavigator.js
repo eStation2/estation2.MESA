@@ -12,6 +12,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
         'esapp.view.analysis.ProductNavigatorController',
 
         'esapp.model.ProductNavigator',
+        // 'esapp.model.ProductNavigatorDatasetColorScheme',
         //'esapp.model.ProductNavigatorMapSet',
         //'esapp.model.ProductNavigatorMapSetDataSet',
 
@@ -43,7 +44,8 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
     width: 565,
     //minWidth: 1000,
     height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-10 : 830,  // 600,
-    minHeight: 775,
+    minHeight: 650,
+    maxHeight: 830,
 
     border:false,
     frame: false,
@@ -131,16 +133,16 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     groupByText: esapp.Utils.getTranslation('productcategories')  // 'Product categories'
                 }],
 
-                plugins: [{
-                    ptype: 'rowexpander',
-                    cellWrap:true,
-                    layout:'fit',
-                    rowBodyTpl : new Ext.XTemplate(
-                        '<span class="smalltext">' +
-                        '<p>{description}</p>' +
-                        '</span>'
-                    )
-                }],
+                // plugins: [{
+                //     ptype: 'rowexpander',
+                //     cellWrap:true,
+                //     layout:'fit',
+                //     rowBodyTpl : new Ext.XTemplate(
+                //         '<span class="smalltext">' +
+                //         '<p>{description}</p>' +
+                //         '</span>'
+                //     )
+                // }],
 
                 listeners: {
                     //scope: 'controller',
@@ -149,33 +151,42 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 },
 
                 columns : [{
-                    text: '<div class="grid-header-style">'+esapp.Utils.getTranslation('productcategories')+'</div>',
-                    menuDisabled: true,
-                    defaults: {
-                        sortable: false,
-                        hideable: false,
-                        variableRowHeight : true,
-                        menuDisabled:true
-                    },
-                    columns: [
-                        {
-                            text: esapp.Utils.getTranslation('product'),   // "Product",
-                            xtype: 'templatecolumn',
-                            width: 455,
-                            tpl:  new Ext.XTemplate(
-                                '<b>{prod_descriptive_name}</b>' +
-                                '<tpl if="version != \'undefined\'">',
-                                    '<b class="smalltext"> - {version}</b>',
-                                '</tpl>',
-                                '</br>' +
-                                '<b class="smalltext" style="color:darkgrey">{productcode}</b>'
-                            )
-                            //dataIndex: 'prod_descriptive_name',
-                            //renderer : function(val) {
-                            //    return '<b>' + val + '</b>';
-                            //}
+                    // text: '<div class="grid-header-style">'+esapp.Utils.getTranslation('productcategories')+'</div>',
+                    // text: esapp.Utils.getTranslation('product'),   // "Product",
+                    sortable: false,
+                    hideable: false,
+                    variableRowHeight : true,
+                    menuDisabled:true,
+                    text: '',
+                    xtype: 'templatecolumn',
+                    width: 455,
+                    tpl:  new Ext.XTemplate(
+                        '<b>{prod_descriptive_name}</b>' +
+                        '<tpl if="version != \'undefined\'">',
+                            '<b class="smalltext"> - {version}</b>',
+                        '</tpl>',
+                        '</br>' +
+                        '<b class="smalltext" style="color:darkgrey">{productcode}</b>'
+                    )
+                },{
+                    xtype: 'actioncolumn',
+                    hidden: false,
+                    hideable: false,
+                    width: 25,
+                    align: 'center',
+                    shrinkWrap: 0,
+                    variableRowHeight:true,
+                    items: [{
+                        getClass: function(v, meta, rec) {
+                            return 'info';
+                        },
+                        getTip: function(v, meta, rec) {
+                            return rec.get('description');
+                        },
+                        handler: function(grid, rowIndex, colIndex, icon, e, record) {
+
                         }
-                    ]
+                    }]
                 }]
             }, {
                 region: 'east',
@@ -258,6 +269,8 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     reference: 'product-mapsets-dataview',
                     border: true,
                     autoWidth: true,
+                    // autoRender: true,
+                    // autoShow:true,
                     //flex: 1,
                     height: 220,
                     //width: 530,
@@ -294,15 +307,18 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     xtype: 'grid',
                     reference: 'mapset-dataset-grid',
                     autoWidth: true,
+                    // autoRender: true,
+                    // autoShow:true,
                     //flex: 1,
                     //width: 530,
                     maxHeight: 250,
-                    autoScroll: false,
+                    // autoScroll: false,
                     scrollable: 'vertical',
-                    //reserveScrollbar: true,
+                    reserveScrollbar: true,
                     hidden: true,
                     bind: '{mapsetdatasets}',
                     layout: 'fit',
+                    cls: 'newpanelstyle',
 
                     viewConfig: {
                         stripeRows: false,
@@ -311,69 +327,46 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         markDirty: false,
                         resizable: false,
                         disableSelection: false,
-                        trackOver: true
-                        //preserveScrollOnRefresh: true,
-                        //preserveScrollOnReload: true
+                        trackOver: false,
+                        preserveScrollOnRefresh: true,
+                        preserveScrollOnReload: true
+                        // scrollable: true
+                        // focusRow: Ext.emptyFn,
                     },
+                    bufferedRenderer: false,
+                    scrollToTop: null,
 
-                    selModel: {
-                        allowDeselect : true,
-                        listeners: {
-                            focuschange: function(rowModel, oldFocused , newFocused , eOpts){
-                                //console.info(rowModel);
-                                //console.info(oldFocused);
-                                //console.info(newFocused);
-                                //if (oldFocused == 'undefined'){
-                                //    rowModel.selectByPosition(newFocused.id);
-                                //}
-                                //else {
-                                //    rowModel.selectByPosition(oldFocused.id);
-                                //}
-                            }
-                        }
-                    },
                     collapsible: false,
                     enableColumnMove: false,
                     enableColumnResize: false,
                     multiColumnSort: false,
-                    columnLines: true,
+                    columnLines: false,
                     rowLines: true,
                     frame: false,
                     border: false,
                     bodyBorder: false,
+                    forceFit: true,
+                    focusOnToFront: false,
 
-                    plugins: [{
-                        ptype: 'rowexpander',
-                        cellWrap: true,
-                        layout: 'fit',
-                        rowBodyTpl: new Ext.XTemplate(
-                            '<span class="smalltext">' +
-                            '<p>{description}</p>' +
-                            '</span>'
-                        )
-                    }],
+
+                    // plugins: [{
+                    //     ptype: 'rowexpander',
+                    //     cellWrap: true,
+                    //     layout: 'fit',
+                    //     rowBodyTpl: new Ext.XTemplate(
+                    //         '<span class="smalltext">' +
+                    //         '<p>{description}</p>' +
+                    //         '</span>'
+                    //     )
+                    // }],
 
                     listeners: {
                         rowclick: 'mapsetDataSetGridRowClick'
-                        //scrollend: function(x,y,z){
-                        //    console.info(x);
-                        //    console.info(y);
-                        //    console.info(z);
-                        //}
-                        //,itemclick: function(record, item, index, e, eOpts){
-                        //    this.getView().focusRow(index);
-                        //}
-
-                        //itemclick scroll
-
-                        //,afterrender: function (grid) {
-                        //    var viewEl = grid.getView().getEl();
-                        //    if (viewEl.getStyle('overflowY') === 'hidden') {
-                        //        viewEl.on('mousewheel', function (e) {
-                        //            viewEl.setScrollTop(viewEl.getScrollTop() + e.browserEvent.deltaY);
-                        //        });
-                        //    }
-                        //}
+                        ,scrolltoselection: function (events) {
+                            var record = this.getSelection();
+                            if (record.length > 0)
+                                this.ensureVisible(record[0], {focus: true});
+                        }
                     },
                     defaults: {
                         sortable: true,
@@ -390,24 +383,48 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                             '</tpl>',
                             '</br>' +
                             '<span class="smalltext"><b style="color:darkgrey">{subproductcode}</b>' +
+                            // '</span>' +
+                            // '<span>&nbsp;&nbsp;(display_index: <b style="color:black">{display_index}</b>)' +
                             '</span>'
                         ),
                         width: 425,
                         sortable: true,
                         menuDisabled: true
+                    },{
+                        xtype: 'actioncolumn',
+                        hidden: false,
+                        hideable: false,
+                        width: 25,
+                        align: 'center',
+                        shrinkWrap: 0,
+                        variableRowHeight:true,
+                        items: [{
+                            getClass: function(v, meta, rec) {
+                                return 'info';
+                            },
+                            getTip: function(v, meta, rec) {
+                                return rec.get('description');
+                            },
+                            handler: function(grid, rowIndex, colIndex, icon, e, record) {
+
+                            }
+                        }]
                     }]
                 },{
                     xtype: 'grid',
                     reference: 'colorschemesGrid',
                     autoWidth: true,
+                    // autoRender: true,
+                    // autoShow: true,
                     //flex: 1,
                     //width: 530,
                     //height: 150,
-                    maxHeight: 165,
+                    maxHeight: 170,
                     scrollable: 'vertical',
                     hidden: true,
                     bind: '{colorschemes}',
                     layout: 'fit',
+                    cls: 'newpanelstyle',
 
                     viewConfig: {
                         stripeRows: false,
@@ -417,13 +434,16 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         resizable: false,
                         disableSelection: true,
                         trackOver: false,
-                        scrollable: 'vertical'
+                        scrollable: 'vertical',
+                        preserveScrollOnRefresh: true,
+                        preserveScrollOnReload: true
                     },
+                    bufferedRenderer: false,
 
-                    selModel: {
-                        allowDeselect: true
-                    },
-
+                    // selModel: {
+                    //     allowDeselect: true
+                    // },
+                    // selModel: Ext.create('Ext.selection.Model', { listeners: {} }),
                     collapsible: false,
                     enableColumnMove: false,
                     enableColumnResize: false,
@@ -433,12 +453,10 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     frame: false,
                     border: false,
                     bodyBorder: false,
+                    reserveScrollbar: true,
+                    focusOnToFront: false,
+                    focusable: false,
 
-                    //listeners: {
-                    //    rowclick: function (gridview, record) {
-                    //        console.info(record);
-                    //    }
-                    //},
                     defaults: {
                         sortable: false,
                         hideable: false,

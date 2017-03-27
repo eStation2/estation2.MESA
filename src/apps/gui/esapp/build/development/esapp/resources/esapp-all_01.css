@@ -22936,12 +22936,12 @@ a.x-color-picker-item:hover {
 
 /* line 1, ../../../../ext/packages/ext-theme-neutral/sass/src/layout/container/Accordion.scss */
 .x-accordion-layout-ct {
-  background-color: white;
+  background-color: #f5f5f5;
   padding: 5px 5px 0; }
 
 /* line 6, ../../../../ext/packages/ext-theme-neutral/sass/src/layout/container/Accordion.scss */
 .x-accordion-hd .x-panel-header-title {
-  color: #0d284e;
+  color: white;
   font-weight: bold;
   font-family: helvetica, arial, verdana, sans-serif;
   text-transform: none; }
@@ -22951,20 +22951,20 @@ a.x-color-picker-item:hover {
   margin: 0 0 5px; }
   /* line 16, ../../../../ext/packages/ext-theme-neutral/sass/src/layout/container/Accordion.scss */
   .x-accordion-item .x-accordion-hd {
-    background: #dfeaf2;
+    background: #5bbef7;
     border-width: 0;
     border-color: #157fcc;
-    padding: 4px; }
+    padding: 5px; }
   /* line 24, ../../../../ext/packages/ext-theme-neutral/sass/src/layout/container/Accordion.scss */
   .x-accordion-item .x-accordion-hd-over {
-    background-color: #e6f1f9; }
+    background-color: #5bcef7; }
   /* line 29, ../../../../ext/packages/ext-theme-neutral/sass/src/layout/container/Accordion.scss */
   .x-accordion-item .x-accordion-hd-sibling-expanded {
     border-top-color: #157fcc;
     border-top-width: 0; }
   /* line 34, ../../../../ext/packages/ext-theme-neutral/sass/src/layout/container/Accordion.scss */
   .x-accordion-item .x-accordion-hd-last-collapsed {
-    border-bottom-color: #dfeaf2; }
+    border-bottom-color: #5bbef7; }
   /* line 38, ../../../../ext/packages/ext-theme-neutral/sass/src/layout/container/Accordion.scss */
   .x-accordion-item .x-accordion-body {
     border-width: 0; }
@@ -22980,7 +22980,7 @@ a.x-color-picker-item:hover {
 /* line 69, ../../../../ext/packages/ext-theme-neutral/sass/src/layout/container/Accordion.scss */
 .x-accordion-hd .x-tool-img {
   background-image: url(images/tools/tool-sprites-dark.png);
-  background-color: #dfeaf2; }
+  background-color: #5bbef7; }
 
 /* line 6, ../../../../ext/packages/ext-theme-neutral/sass/src/layout/container/Border.scss */
 body.x-border-layout-ct,

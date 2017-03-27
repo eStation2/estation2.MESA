@@ -313,7 +313,7 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
         //    Ext.getCmp('ts_selectyearstocompare_'+me.charttype).searchPopup.lookupReference('searchGrid').getSelectionModel().deselectAll();
         //}
         //Ext.getCmp('timeserieschartselection').getViewModel().getStore('years').setData(yearsDataDict);
-        me.up().up().getViewModel().get('years').setData(yearsDataDict);
+        me.getViewModel().get('years').setData(yearsDataDict);
 
         //Ext.getCmp('selected-timeseries-mapset-dataset-grid').show();
         //Ext.getCmp('ts_timeframe').show();

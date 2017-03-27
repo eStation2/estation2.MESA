@@ -37,36 +37,6 @@ Ext.define('esapp.Application', {
         //,'esapp.view.main.Main'
     ],
 
-    //requires: [
-    //     //'Ext.app.bindinspector.*',
-    //    //'Ext.app.*',
-    //    'Ext.window.Toast',
-    //    'Ext.state.CookieProvider',
-    //    'Ext.tip.QuickTipManager',
-    //    //'Ext.Msg',
-    //    //'Ext.data.StoreManager',
-    //
-    //    'esapp.Utils'
-    //
-    //    //,'esapp.view.main.Main'
-    //    //'esapp.*'
-    //],
-
-    //views:['help.help'],
-
-    //views: [
-    //    'header.Header',
-    //    'dashboard.Dashboard',
-    //    'acquisition.Acquisition',
-    //    'processing.Processing',
-    //    'datamanagement.DataManagement',
-    //    'analysis.analysisMain',
-    //    'system.systemsettings',
-    //    'help.help',
-    //    'widgets.datasetCompletenessChart',
-    //    'widgets.ServiceMenuButton'
-    //],
-
     //controllers: [
     //    'Root@esapp.controller'
     //],
@@ -75,43 +45,26 @@ Ext.define('esapp.Application', {
          'LogoImages'
         ,'i18nStore'
         ,'LanguagesStore'
+        ,'SystemSettingsStore'
         ,'CategoriesStore'
         ,'FrequenciesStore'
         ,'DateFormatsStore'
         ,'DataTypesStore'
-        ,'EumetcastSourceStore'
-        ,'InternetSourceStore'
+        ,'TimeseriesProductsStore'
+        ,'TSDrawPropertiesStore'
         ,'LayersStore'
         ,"ColorSchemesStore"
+        ,'LogosMapView'
+
+        ,'EumetcastSourceStore'
+        ,'InternetSourceStore'
         ,'ProductsActiveStore'
         ,'ProductsInactiveStore'
         ,'DataAcquisitionsStore'
         ,'IngestionsStore'
         ,'DataSetsStore'
         ,'ProcessingStore'
-        ,'SystemSettingsStore'
-        ,'LogosMapView'
-        ,'TimeseriesProductsStore'
-        ,'TSDrawPropertiesStore'
-        //,'IPSettingsStore'
-        //,'ProductNavigatorStore'  // using viewmodel model binding, which is loaded onAfterRender
-        //,'TimeLineStore'
     ],
-
-    //models: [
-        //'EumetcastSource'
-        //'ProductNavigator',
-        //'ProductNavigatorMapSet',
-        //'ProductNavigatorMapSetDataSet',
-        //'TimeseriesProduct'
-        //'esapp.model.Dashboard',
-        //'esapp.model.Version',
-        //'esapp.model.Themas',
-        //'esapp.model.InternetSource',
-        //'esapp.model.EumetcastSource'
-        //,'TimeserieProductMapSet'
-        //,'TimeserieProductMapSetDataSet'
-    //],
 
     // create a reference in Ext.application so we can access it from multiple functions
     splashscreen: {},
@@ -132,6 +85,22 @@ Ext.define('esapp.Application', {
         Ext.override(Ext.data.Connection, {     timeout: Ext.Ajax.timeout });
 
         esapp.globals = [];
+
+        esapp.globals['typeinstallation'] = 'full';
+        Ext.Ajax.request({
+            method: 'POST',
+            url: 'typeinstallation',
+            success: function(response, opts){
+                var resp = Ext.JSON.decode(response.responseText);
+                if (resp.typeinstallation != ''){
+                    esapp.globals['typeinstallation'] = resp.typeinstallation;
+                }
+            },
+            failure: function(response, opts) {
+                console.info(response.status);
+            }
+        });
+
         esapp.globals['selectedLanguage'] = 'eng';
         Ext.data.StoreManager.lookup('LanguagesStore').load({
             callback: function(records, options, success){
@@ -140,10 +109,48 @@ Ext.define('esapp.Application', {
                         esapp.globals['selectedLanguage'] = language.get('langcode')
                     }
                 });
+
+                Ext.data.StoreManager.lookup('i18nStore').load({
+                    params:{lang:esapp.globals['selectedLanguage']},
+                    callback: function(records, options, success){
+
+                        Ext.Loader.loadScript({
+                            url: 'app/CustomVTypes.js',
+                            onLoad: function (options) {
+                                //console.info('CustomVTypes');
+                            }
+                        });
+
+                        //// start the mask on the body and get a reference to the mask
+                        //var splashscreen = Ext.getBody().mask(esapp.Utils.getTranslation('splashscreenmessage'), 'splashscreen');
+                        //
+                        //// fade out the body mask
+                        //splashscreen.fadeOut({
+                        //    duration: 7000,
+                        //    remove: true
+                        //});
+                        //
+                        //Ext.apply(Ext.form.VTypes, {
+                        //    GeoJSON:  function(v) {
+                        //        v = v.replace(/^\s|\s$/g, ""); //trims string
+                        //        if (v.match(/([^\/\\]+)\.(geojson)$/i) )
+                        //            return true;
+                        //        else
+                        //            return false;
+                        //    },
+                        //    GeoJSONText: esapp.Utils.getTranslation('vtype_geojson')    // 'Must be a .geojson file.'
+                        //});
+                        //
+                        //Ext.create('esapp.view.main.Main');
+
+                        me.launch();
+                    }
+                });
+
                 //if (esapp.globals['selectedLanguage'] == 'fra')
                 //    Ext.require('Ext.locale.fr');
                 //else Ext.require('Ext.locale.en');
-
+                //
                 //Ext.getCmp("languageCombo").setValue(esapp.globals['selectedLanguage']);
                 //console.info(esapp.globals['selectedLanguage']);
 
@@ -183,43 +190,6 @@ Ext.define('esapp.Application', {
                 }
 
                 //console.info(esapp.Utils);
-
-                Ext.data.StoreManager.lookup('i18nStore').load({
-                    params:{lang:esapp.globals['selectedLanguage']},
-                    callback: function(records, options, success){
-
-                        Ext.Loader.loadScript({
-                            url: 'app/CustomVTypes.js',
-                            onLoad: function (options) {
-                                //console.info('CustomVTypes');
-                            }
-                        });
-
-                        //// start the mask on the body and get a reference to the mask
-                        //var splashscreen = Ext.getBody().mask(esapp.Utils.getTranslation('splashscreenmessage'), 'splashscreen');
-                        //
-                        //// fade out the body mask
-                        //splashscreen.fadeOut({
-                        //    duration: 7000,
-                        //    remove: true
-                        //});
-
-                        //Ext.apply(Ext.form.VTypes, {
-                        //    GeoJSON:  function(v) {
-                        //        v = v.replace(/^\s|\s$/g, ""); //trims string
-                        //        if (v.match(/([^\/\\]+)\.(geojson)$/i) )
-                        //            return true;
-                        //        else
-                        //            return false;
-                        //    },
-                        //    GeoJSONText: esapp.Utils.getTranslation('vtype_geojson')    // 'Must be a .geojson file.'
-                        //});
-
-                        //Ext.create('esapp.view.main.Main');
-
-                        me.launch();
-                    }
-                });
             }
         });
 
@@ -238,17 +208,46 @@ Ext.define('esapp.Application', {
         link.sizes = '16x16';
         document.getElementsByTagName('head')[0].appendChild(link);
 
-        var delay = 1500;
-        if (!Ext.data.StoreManager.lookup('TimeseriesProductsStore').isLoaded()){
-            delay = 5000;
+
+        if (esapp.globals['typeinstallation'] == 'windows'){
+            Ext.data.StoreManager.lookup('TimeseriesProductsStore').load();
+            Ext.data.StoreManager.lookup('TSDrawPropertiesStore').load();
+            Ext.data.StoreManager.lookup('LayersStore').load();
+            Ext.data.StoreManager.lookup('ColorSchemesStore').load();
+            Ext.data.StoreManager.lookup('SystemSettingsStore').load();
         }
+        else {
+            // Ext.data.StoreManager.lookup('CategoriesStore').load();
+            // Ext.data.StoreManager.lookup('FrequenciesStore').load();
+            // Ext.data.StoreManager.lookup('DateFormatsStore').load();
+            // Ext.data.StoreManager.lookup('DataTypesStore').load();
+
+            Ext.data.StoreManager.lookup('TimeseriesProductsStore').load();
+            Ext.data.StoreManager.lookup('TSDrawPropertiesStore').load();
+            Ext.data.StoreManager.lookup('LayersStore').load();
+            Ext.data.StoreManager.lookup('ColorSchemesStore').load();
+            Ext.data.StoreManager.lookup('SystemSettingsStore').load();
+
+            Ext.data.StoreManager.lookup('EumetcastSourceStore').load();
+            Ext.data.StoreManager.lookup('InternetSourceStore').load();
+            Ext.data.StoreManager.lookup('ProductsActiveStore').load();
+            Ext.data.StoreManager.lookup('ProductsInactiveStore').load();
+            Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
+            Ext.data.StoreManager.lookup('IngestionsStore').load();
+            Ext.data.StoreManager.lookup('DataSetsStore').load();
+            Ext.data.StoreManager.lookup('ProcessingStore').load();
+        }
+
+        var delay = 1500;
+        // if (!Ext.data.StoreManager.lookup('TimeseriesProductsStore').isLoaded()){
+        //     delay = 2000;
+        // }
 
         // start the mask on the body and get a reference to the mask
         var splashscreen = Ext.getBody().mask(esapp.Utils.getTranslation('splashscreenmessage'), 'splashscreen');
-
         // fade out the body mask
         splashscreen.fadeOut({
-            duration: delay+3000,
+            duration: delay+1500,
             remove: true
         });
 
@@ -257,151 +256,8 @@ Ext.define('esapp.Application', {
         });
         task.delay(delay);
 
-
-        Ext.data.StoreManager.lookup('ProductsActiveStore').load();
-        //Ext.data.StoreManager.lookup('TimeseriesProductsStore').load();
-        //Ext.data.StoreManager.lookup('ProductsInactiveStore').load();
-        //Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
-        //Ext.data.StoreManager.lookup('IngestionsStore').load();
-        //Ext.data.StoreManager.lookup('DataSetsStore').load();
-        //Ext.data.StoreManager.lookup('ProcessingStore').load();
-
         this.callParent();
     }
-
-//    launch: function () {
-//
-//        //SenchaInspector.init();
-//        console.info('launch');
-//        // Ext.getBody().addCls('graybgcolor');
-//        Ext.setGlyphFontFamily('FontAwesome');
-//        Ext.tip.QuickTipManager.init();
-//        Ext.state.Manager.setProvider(Ext.create('Ext.state.CookieProvider'));
-//
-//        //var link = '<link rel="icon" href="resources/img/africa.ico" type="image/gif" sizes="16x16">'
-//        var link = document.createElement('link');
-//        link.type = 'image/gif';  // 'image/ico';
-//        link.rel = 'icon';
-//        link.href = 'resources/img/africa.ico';
-//        link.sizes = '16x16';
-//        document.getElementsByTagName('head')[0].appendChild(link);
-//
-//
-//        //// quick and dirty override to have the language combo work
-//        //Ext.tab.Bar.prototype.beforeFocusableChildFocus = function(child, e) {
-//        //    var me = this,
-//        //        mixin = me.mixins.focusablecontainer;
-//        //
-//        //    mixin.beforeFocusableChildFocus.call(me, child, e);
-//        //
-//        //    if (!child.active && Ext.isFunction(child.activate)) {
-//        //        child.activate();
-//        //    }
-//        //
-//        //    me.doActivateTab(child);
-//        //};
-//
-//        //Ext.data.StoreManager.lookup('CategoriesStore').load();
-//
-//
-//        Ext.Ajax.timeout = 300000; // 300 seconds
-//        //Ext.override(Ext.form.Basic, {     timeout: Ext.Ajax.timeout / 1000 });
-//        Ext.override(Ext.data.proxy.Server, {     timeout: Ext.Ajax.timeout });
-//        Ext.override(Ext.data.Connection, {     timeout: Ext.Ajax.timeout });
-//
-//        esapp.globals = [];
-//        esapp.globals['selectedLanguage'] = 'eng';
-//        Ext.data.StoreManager.lookup('LanguagesStore').load({
-//            callback: function(records, options, success){
-//                records.forEach(function(language) {
-//                    if (language.get('selected') == true){
-//                        esapp.globals['selectedLanguage'] = language.get('langcode')
-//                    }
-//                });
-//                //if (esapp.globals['selectedLanguage'] == 'fra')
-//                //    Ext.require('Ext.locale.fr');
-//                //else Ext.require('Ext.locale.en');
-//
-//                //Ext.getCmp("languageCombo").setValue(esapp.globals['selectedLanguage']);
-//                //console.info(esapp.globals['selectedLanguage']);
-//
-//                Ext.data.StoreManager.lookup('i18nStore').load({
-//                    params:{lang:esapp.globals['selectedLanguage']},
-//                    callback: function(records, options, success){
-//
-//                        Ext.apply(Ext.form.VTypes, {
-//                            GeoJSON:  function(v) {
-//                                v = v.replace(/^\s|\s$/g, ""); //trims string
-//                                if (v.match(/([^\/\\]+)\.(geojson)$/i) )
-//                                    return true;
-//                                else
-//                                    return false;
-//                            },
-//                            GeoJSONText: esapp.Utils.getTranslation('vtype_geojson')    // 'Must be a .geojson file.'
-//                        });
-//
-//                        // start the mask on the body and get a reference to the mask
-//                        splashscreen = Ext.getBody().mask(esapp.Utils.getTranslation('splashscreenmessage'), 'splashscreen');
-//
-//                        var task = new Ext.util.DelayedTask(function() {
-//                            // fade out the body mask
-//                            splashscreen.fadeOut({
-//                                duration: 500,
-//                                remove: true
-//                            });
-//
-//                            // fade out the message
-//                            splashscreen.next().fadeOut({
-//                                duration: 500,
-//                                remove: true
-//                            });
-//
-//                        });
-//
-//                        task.delay(3000);
-//
-//                        Ext.data.StoreManager.lookup('ProductsActiveStore').load();
-////                        Ext.data.StoreManager.lookup('ProductsInactiveStore').load();
-//                        Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
-//                        Ext.data.StoreManager.lookup('IngestionsStore').load();
-////                        Ext.data.StoreManager.lookup('DataSetsStore').load();
-//                        Ext.data.StoreManager.lookup('ProcessingStore').load();
-//
-//                        Ext.create('esapp.view.main.Main');
-//
-//                        if (esapp.globals['selectedLanguage'] == 'fra') {
-//                            Highcharts.setOptions({
-//                                //global: {
-//                                //    canvasToolsURL: ''
-//                                //},
-//                                lang: {
-//                                    contextButtonTitle: 'Graphique menu contextuel',  // 'Chart context menu',
-//                                    downloadJPEG: 'Télécharger image JPEG',  // 'Download JPEG image',
-//                                    downloadPDF: 'Télécharger le document PDF',  // 'Download PDF document',
-//                                    downloadPNG: 'Télécharger l\'image PNG',  // 'Download PNG image',
-//                                    downloadSVG: 'Télécharger image vectorielle SVG',  // 'Download SVG vector image',
-//                                    drillUpText: 'Retour à {series.name}',  // 'Back to {series.name}',
-//                                    loading: 'Chargement...',  // 'Loading...',
-//                                    noData: 'Aucune donnée à afficher',  // 'No data to display',
-//                                    printChart: 'Imprimer tableau',  // 'Print chart',
-//                                    rangeSelectorFrom:'De',
-//                                    rangeSelectorTo: 'à',
-//                                    resetZoom: 'Réinitialiser zoom',  // 'Reset zoom',
-//                                    resetZoomTitle: 'Niveau de zoom réinitialiser 1:1',  // 'Reset zoom level 1:1',
-//                                    shortMonths: [ "Janv." , "Févr." , "Mars" , "Avril" , "Mai" , "Juin" , "Juil." , "Août" , "Sept." , "Oct." , "Nov." , "Déc."],
-//                                    months: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
-//                                    weekdays: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
-//                                }
-//                            });
-//                        }
-//                    }
-//                });
-//            }
-//        });
-//
-//        this.callParent();
-//
-//    }
 });
 
 

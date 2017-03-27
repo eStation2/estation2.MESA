@@ -14,8 +14,8 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
 
     xtype: 'maplegendobject',
 
-    id: 'product-legend',
-    reference: 'product-legend',
+    // id: 'product-legend',
+    // reference: 'product-legend',
     autoWidth: true,
     autoHeight: true,
     minWidth: 50,
@@ -39,7 +39,7 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
     header: {
         style: 'background:transparent;'
     },
-    style: 'background: white; cursor:move;',
+    style: 'background: transparent; cursor:move;',
     // Do not use default Panel dragging: use window type dragging
     // initDraggable: Ext.window.Window.prototype.initDraggable,
     // simpleDrag: true,
@@ -59,6 +59,8 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
     initComponent: function () {
         var me = this;
         //Ext.util.Observable.capture(me, function(e){console.log('maplegendobject - ' + me.id + ': ' + e);});
+
+        me.legendHTML_ImageObj = new Image();
 
         me.listeners = {
             el: {

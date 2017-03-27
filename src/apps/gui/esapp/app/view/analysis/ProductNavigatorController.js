@@ -33,11 +33,7 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
                 myLoadMask.hide();
             }
         });
-        //    var productsgridstore  = Ext.data.StoreManager.lookup('ProductNavigatorStore');
-        //    var productsgridstore = productnavwin.lookupReference('productsGrid').getStore('products');
-        //    if (productsgridstore.isStore) {
-        //        productsgridstore.load({loadMask:true});
-        //    }
+
     },
 
     productsGridRowClick: function(gridview, record){
@@ -58,68 +54,43 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
         productinfopanel.expand(true);
         this.getStore('productmapsets').setData(record.get('productmapsets'));
 
-        //var mapsets = record.data.productmapsets;
-        //var itemsInGroup = [];
-        //
-        //for (var i = 0, l = mapsets.length; i < l; i++) {
-        //    var mapset = mapsets[i];
-        //
-        //    itemsInGroup.push( {
-        //        boxLabel: mapset.descriptive_name,
-        //        name: mapset.mapsetcode,
-        //        inputValue: mapset.mapsetcode
-        //    });
-        //}
-        //
-        //var myGroup = {
-        //  xtype: 'radiogroup',
-        //  fieldLabel: '',
-        //  items: itemsInGroup
-        //};
-        //
-        //var productinfopanel = Ext.ComponentQuery.query('panel[id=product-datasets-info]')[0];
-        //var productinfopanel = gridview.up().up().down('panel[reference=product-datasets-info]');
-        //productinfopanel.down('fieldset').removeAll();
-        //productinfopanel.down('fieldset').add(myGroup);
     },
 
     mapsetItemClick: function(dataview, record ){
-
         this.lookupReference('addtomapbtn_'+this.getView().mapviewid.replace(/-/g,'_')).disable();
-        this.lookupReference('colorschemesGrid').hide();
         this.getStore('colorschemes').removeAll();
         this.getStore('mapsetdatasets').removeAll();
         // nodes contain all selected records when dataview has multiSelect to true!
         // here we do not use multiSelect so nodes is the record of the selected mapset!
         this.getStore('mapsetdatasets').setData(record.get('mapsetdatasets'));
         var sorters = [{
-            property: 'subproductcode',
+        //     property: 'prod_descriptive_name',
+        //     direction: 'ASC'
+        // },{
+            property: 'display_index',
             direction: 'ASC'
         }];
+
+        var colorschemesgrid = this.lookupReference('colorschemesGrid');
+        colorschemesgrid.columns[1].setText('<div class="grid-header-style">'+esapp.Utils.getTranslation('colorschemes')+'</div>');
+        colorschemesgrid.show();
 
         this.getStore('mapsetdatasets').setSorters(sorters);
         this.getStore('mapsetdatasets').sort(sorters);
         var mapsetdatasetgrid = this.lookupReference('mapset-dataset-grid');
         mapsetdatasetgrid.columns[0].setText('<div class="grid-header-style">' + esapp.Utils.getTranslation('datasets') + ' <b class="smalltext">' + esapp.Utils.getTranslation('formapset') + ' ' + record.get('descriptive_name') + '</b></div>');
         mapsetdatasetgrid.show();
+
     },
 
-    mapsetDataSetGridRowClick: function(gridview, record, tr, rowIndex, e, eOpts) {
-        //                    console.info(gridview);
-        //                    console.info(gridview.lastFocused);
-        //                    console.info(record);
-        //                    console.info(rowIndex);
-        //Ext.util.Observable.capture(gridview, function(e){console.log('mapsetDataSetGridRowClick - ' + gridview.id + ': ' + e);});
 
-        //gridview.saveState();
-        //this.suspendEvents();
-        var colorschemesgrid = this.getView().lookupReference('colorschemesGrid');
-        //var myLoadMask = new Ext.LoadMask({
-        //    msg    : esapp.Utils.getTranslation('loading'), // 'Loading...',
-        //    target : colorschemesgrid
-        //});
+    mapsetDataSetGridRowClick: function(gridview, record, tr, rowIndex, e, eOpts) { // for rowclick
+        var me = this.getView();
+        var addToMapBtn = this.getView().lookupReference('addtomapbtn_'+this.getView().mapviewid.replace(/-/g,'_'));
+        var colorschemesgrid = me.lookupReference('colorschemesGrid');
+        var mapsetdatasetgrid = this.lookupReference('mapset-dataset-grid');
 
-        this.getView().selectedproduct = {
+        me.selectedproduct = {
             productcode:record.get('productcode'),
             productversion:record.get('version'),
             mapsetcode:record.get('mapsetcode'),
@@ -128,16 +99,20 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
             date_format:record.get('date_format')
         };
 
-        //colorschemesgrid.hide();
-        this.getStore('colorschemes').removeAll();
-        //myLoadMask.show();
+        colorschemesgrid.columns[1].setText('<div class="grid-header-style">' + esapp.Utils.getTranslation('colorschemes') +
+            ' <b class="smalltext">' + esapp.Utils.getTranslation('formapset') + ' ' + record.get('descriptive_name') +
+            ' - ' + record.get('subproductcode') + '</b></div>');
 
-        var addToMapBtn = this.getView().lookupReference('addtomapbtn_'+this.getView().mapviewid.replace(/-/g,'_'));
+        if (colorschemesgrid.hidden) {
+            // console.info('colorschemesgrid hidden, so show');
+            colorschemesgrid.show();
+        }
+
+        this.getStore('colorschemes').removeAll();
 
         this.getStore('colorschemes').load({
             params:this.getView().selectedproduct,
             callback:function(records, options, success){
-                //myLoadMask.hide();
                 if (records.length>0){
                     var nodefault = true;
                     for (var i = 0; i < records.length; i++) {
@@ -150,13 +125,16 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
                         records[0].set('defaulticon', 'x-grid3-radio-col-on');
                     }
                     addToMapBtn.enable();
-                    colorschemesgrid.show();
                 }
             }
         });
-        //Ext.fly(gridview.getNode(rowIndex)).focus();        // scrollIntoView();
-        //gridview.focusRow(rowIndex);
-        //gridview.refreshScroll();
+
+
+        var task = new Ext.util.DelayedTask(function() {
+            mapsetdatasetgrid.fireEvent('scrolltoselection');
+        });
+        task.delay(250);
+
     },
 
     onRadioColumnAction:function(view, rowIndex, colIndex, item, e, record ) {

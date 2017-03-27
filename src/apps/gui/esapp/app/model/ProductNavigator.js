@@ -92,7 +92,7 @@ Ext.define('esapp.model.ProductNavigatorMapSet', {
 
 Ext.define('esapp.model.ProductNavigatorMapSetDataSet', {
     extend : 'esapp.model.Base',
-
+    idProperty: 'datasetID',
     fields: [
        {name: 'mapsetcode', reference:'ProductNavigatorMapSet'},
        {name: 'datasetID'},
@@ -103,16 +103,27 @@ Ext.define('esapp.model.ProductNavigatorMapSetDataSet', {
        {name: 'activated', type: 'boolean'},
        {name: 'product_type'},
        {name: 'prod_descriptive_name'},
-       {name: 'description'}
-        ,{name: 'datasetcompleteness_id', mapping:'datasetID'}
+       {name: 'description'},
+       {name: 'display_index', type: 'integer'},
+       {name: 'datasetcompleteness_id', mapping:'datasetID'}
     ]
-    ,associations:[
-        {
-            type: 'hasOne',
-            model: 'ProductNavigatorDataSetCompleteness',
-            name : 'productnavigatordatasetcompleteness'
-        }
-    ]
+    // ,associations:[
+    //     {
+    //         type: 'hasOne',
+    //         model: 'ProductNavigatorDataSetCompleteness',
+    //         name : 'productnavigatordatasetcompleteness'
+    //     }
+    // ],
+    // sorters: [{
+    //     property: 'display_index',
+    //     direction: 'ASC'
+    // // }, {
+    // //     property: 'prod_descriptive_name',
+    // //     direction: 'ASC'
+    // }],
+    // sortRoot: 'prod_descriptive_name',
+    // sortOnLoad: true,
+    // remoteSort: false
 });
 
 Ext.define('esapp.model.ProductNavigatorDatasetColorScheme', {

@@ -30,8 +30,9 @@ Ext.define("esapp.view.analysis.layerAdmin",{
     resizable: true,
     //resizeHandles: 'n,s',
     autoScroll: false,
-    height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-10 : 830,  // 600,
-    minHeight:500,
+    height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-130 : 830,  // 600,
+    minHeight: 500,
+    maxHeight: 830,
     width: 1275,
 
     border:false,
@@ -50,7 +51,7 @@ Ext.define("esapp.view.analysis.layerAdmin",{
         var me = this;
 
         me.title = '<div class="panel-title-style-16">' + esapp.Utils.getTranslation('layeradministration') + '</div>';
-        me.height = Ext.getBody().getViewSize().height-80;
+        me.height = Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-130 : 830;  // 600,
 
         me.tools = [
         {
@@ -61,6 +62,7 @@ Ext.define("esapp.view.analysis.layerAdmin",{
         }];
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
+            padding: 3,
             items: [{
                 xtype: 'button',
                 text: esapp.Utils.getTranslation('addlayer'),    // 'Add layer',
@@ -73,8 +75,9 @@ Ext.define("esapp.view.analysis.layerAdmin",{
                 handler: 'addLayer'
             },{
                 xtype: 'container',
-                html: '<div id="boundaries_disclaimer' + me.id + '" style="text-align:left; font-size: 14px; font-weight: bold;">'+esapp.Utils.getTranslation('boundaries_disclaimer')+'</div>',
-                margin: '0 0 0 40'
+                html: '<div id="boundaries_disclaimer' + me.id + '" style="text-align:left; vertical-align: top; line-height:12px !important; font-size: 12px; font-weight: bold;">'+esapp.Utils.getTranslation('boundaries_disclaimer')+'</div>',
+                margin: '0 0 0 40',
+                padding: 0
             }]
         });
 

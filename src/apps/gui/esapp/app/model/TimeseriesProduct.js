@@ -11,6 +11,7 @@ Ext.define('esapp.model.TimeseriesProduct', {
         {name: 'version', mapping: 'version'},
         {name: 'subproductcode', mapping: 'subproductcode'},
         {name: 'productmapsetid', type: 'string', mapping: 'productmapsetid'},
+        {name: 'display_index', type: 'integer'},
         {name: 'mapsetcode', mapping: 'mapsetcode'},
         {name: 'mapset_name', mapping: 'mapset_name'},
         {name: 'group_product_descriptive_name', mapping: 'group_product_descriptive_name'},

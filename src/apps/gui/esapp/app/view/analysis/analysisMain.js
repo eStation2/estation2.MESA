@@ -596,16 +596,21 @@ Ext.define("esapp.view.analysis.analysisMain",{
 
         me.commonMapView = new ol.View({
             projection:"EPSG:4326",
-            displayProjection:"EPSG:4326",
-            center: [20, -4.7],   // ol.proj.transform([20, 4.5], 'EPSG:3857', 'EPSG:4326'),
-            zoom: 25,
-            //minZoom: 0,
-            //maxZoom: 10
-            zoomFactor: 1.1
+            center: [15, 2],   // [20, -4.7],   // ol.proj.transform([20, 4.5], 'EPSG:3857', 'EPSG:4326'),
+            resolution: 0.1,
+            minResolution: 0.0001,
+            maxResolution: 0.25,
+            zoomFactor: 1.1+0.1*5   // (cioe' nel range 1.1 -> 2.1)
+            // zoom: 6,
+            // minZoom: 4,
+            // maxZoom: 100,
+            // zoomFactor: 1.5 // 1.0+(0.075*1)
         });
+        me.zoomFactorSliderValue = 5;
 
         me.listeners = {
             afterrender: function() {
+                // Ext.util.Observable.capture(me, function (e) { console.log('analysismain - ' + e);});
                 //if (window.navigator.onLine){
                     me.backgroundLayers = [];
                     me.backgroundLayers.push(
@@ -638,7 +643,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                         //me.lookupReference('analysismain_timeseriesbtn').fireEvent('click');
                         var timeseriesChartSelectionWindow = me.lookupReference('timeserieschartselection');
                         timeseriesChartSelectionWindow.show();
-                        timeseriesChartSelectionWindow.fireEvent('align');
+                        //timeseriesChartSelectionWindow.fireEvent('align');
                     });
                     taskOpenTimeseriesChartSelection.delay(0);
 
@@ -743,6 +748,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                     //);
                 //}
             },
+
             // The resize handle is necessary to set the map!
             resize: function () {
                 //var size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight];
@@ -750,9 +756,8 @@ Ext.define("esapp.view.analysis.analysisMain",{
                 if (esapp.Utils.objectExists(me.map)) {
                     me.map.setSize(size);
                 }
-
+                // console.info('analysis tab resized!');
                 var timeseriesChartSelectionWindow = this.lookupReference('timeserieschartselection');
-                timeseriesChartSelectionWindow.setHeight(Ext.getBody().getViewSize().height-65);
                 timeseriesChartSelectionWindow.fireEvent('align');
             }
         };

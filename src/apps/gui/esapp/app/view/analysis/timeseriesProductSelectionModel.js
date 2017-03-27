@@ -15,17 +15,19 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionModel', {
             //,autoLoad: false
             //,loadMask: true
             //
-            ,sorters: {property: 'order_index', direction: 'DESC'}
+            ,sorters: [{property: 'display_index', direction: 'ASC'}]
 
             ,grouper:{
                      groupFn : function (item) {
-                         return item.get('group_product_descriptive_name');
+                         return item.get('group_product_descriptive_name') + ' - <b class="smalltext" style="color:black">' +  item.get('version') + ' - ' + item.get('productcode') + '</b>';
+                         // return item.get('group_product_descriptive_name');
                          //return esapp.Utils.getTranslation(item.get('category_id'));
                          //return "<span style='display: none;'>" + item.get('order_index') + "</span>" + esapp.Utils.getTranslation(item.get('category_id'))
                          //return item.get('cat_descr_name')
                      },
-                     property: 'group_product_descriptive_name',
-                     sortProperty: 'productmapsetid'
+                     property: 'group_product_descriptive_name'
+                     // sortProperty: 'display_index'
+                     // sortProperty: 'productmapsetid'
             }
         },
 

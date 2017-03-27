@@ -26,8 +26,9 @@ Ext.define('esapp.view.analysis.analysisMainController', {
 
     ,showTimeseriesChartSelection: function(){
         var timeseriesChartSelectionWindow = this.getView().lookupReference('timeserieschartselection');
-        timeseriesChartSelectionWindow.show();
-        //timeseriesChartSelectionWindow.fireEvent('align');
+        // timeseriesChartSelectionWindow.setHeight(Ext.getBody().getViewSize().height-65);
+        timeseriesChartSelectionWindow.fireEvent('align');
+        // timeseriesChartSelectionWindow.show();
     }
 
     ,toggleBackgroundlayer: function(btn, event) {
@@ -52,6 +53,9 @@ Ext.define('esapp.view.analysis.analysisMainController', {
                     })
                 }).extend([me.scaleline])   // me.mousePositionControl,
             });
+            me.map.addInteraction(new ol.interaction.MouseWheelZoom({
+              duration: 50
+            }));
         }
 
         if (btn.pressed){

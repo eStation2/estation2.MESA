@@ -394,6 +394,13 @@ p {
 
 .log-icon-small {background: url('../img/icons/file-extension-log-icon-16x16.png') no-repeat 0 0 !important; }
 
+.transparencyicon { background: url('../img/icons/opacity20.png') no-repeat 0 0 !important; }
+
+.nobackgroundcolor {
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
 @font-face {
     font-family: ECSquareSansPro-Regular;
     src: url('../fonts/ECSquareSansPro-Regular.ttf');
@@ -473,12 +480,14 @@ p {
     /*border-radius: 5px;*/
 }
 
-#header{position:absolute;left:275px;top:0;z-index:10;min-height:64px;min-width:100%;line-height:1.4;background-color:#0065a2;}
-#header #banner-title-text{position:absolute;left:210px;top:10px;font-size:30px;height:auto;margin:0;padding:0;color:#fff;overflow:hidden;}
-#header #banner-title-text-small{position:absolute;left:370px;top:18px;font-size:22px;height:auto;margin:0;padding:0;color:#fff;overflow:hidden;}
+/*#header{position:absolute;left:275px;top:0;z-index:10;min-height:64px;min-width:100%;line-height:1.4;background-color:#0065a2;}*/
+#header{position:absolute;left:430px;top:0;z-index:10;min-height:68px;min-width:100%;line-height:1.4;background-color:#0065a2;}
+#header #banner-title-text{position:absolute;left:110px;top:10px;font-size:30px;height:auto;margin:0;padding:0;color:#fff;overflow:hidden;}
+#header #banner-title-text-small{position:absolute;left:270px;top:18px;font-size:22px;height:auto;margin:0;padding:0;color:#fff;overflow:hidden;}
 
 
-#logo{position:relative;z-index:10;min-height:0;max-width:400px;padding:2px;background-color:#fff;}
+/*#logo{position:relative;z-index:10;min-height:0;max-width:435px;padding:2px;background-color:#fff;}*/
+#logo{position:relative;z-index:10;min-height:0;padding:2px;background-color:#fff;}
 
 
 .map-templatename {
@@ -647,7 +656,7 @@ p {
 
 .categorytitle {
     font-size:16px;
-    color: #157FCC;
+    color: #FFFFFF; // #157FCC;
 }
 
 
@@ -802,7 +811,7 @@ p {
 }
 
 .help-main .thumb-mesa {
-    background-image: url(../img/logo/MESA_logo.png);
+    background-image: url(../img/logo/MESA_h110.jpg);
     height: 50px;
     width: 100px;
     background-size: contain;
@@ -812,7 +821,7 @@ p {
 }
 
 .x-ie8 .help-main .thumb-mesa {
-    background-image: url(../img/logo/MESA_logo.png)
+    background-image: url(../img/logo/MESA_h110.jpg)
 }
 
 .help-main .thumb-copernicus {
@@ -830,7 +839,7 @@ p {
 }
 
 .help-main .thumb-eumetsat {
-    background-image: url(../img/logo/eumetsat-logo.png);
+    background-image: url(../img/logo/EUMETSAT_h110.jpg);
     height: 50px;
     width: 100px;
     background-size: contain;
@@ -840,7 +849,7 @@ p {
 }
 
 .x-ie8 .help-main .thumb-eumetsat {
-    background-image: url(../img/logo/eumetsat-logo.png)
+    background-image: url(../img/logo/EUMETSAT_h110.jpg)
 }
 
 .help-main .thumb-estation2 {

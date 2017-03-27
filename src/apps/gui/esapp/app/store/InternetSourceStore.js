@@ -12,7 +12,7 @@ Ext.define('esapp.store.InternetSourceStore', {
 
     storeId : 'InternetSourceStore'
 
-    ,autoLoad: true
+    ,autoLoad: false
     ,autoSync: false
     //,session: true
 

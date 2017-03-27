@@ -18,10 +18,10 @@ import datetime
 import json
 import glob
 import time
+import calendar
+import numpy as NP
 
-# import config
 from config import es_constants
-# import locals
 from database import querydb
 from database import crud
 
@@ -33,6 +33,8 @@ from apps.es2system import es2system
 # from apps.productmanagement.datasets import Frequency
 from apps.productmanagement.products import Product
 from apps.analysis import generateLegendHTML
+from apps.analysis.getTimeseries import (getTimeseries, getFilesList)
+from multiprocessing import (Process, Queue)
 
 from lib.python import functions
 from lib.python import es_logging as log
@@ -48,6 +50,8 @@ urls = (
     "/product/createproduct", "CreateProduct",
     "/product/updateproductinfo", "UpdateProductInfo",
     "/product/unassigndatasource", "UnassignProductDataSource",
+
+    "/typeinstallation", "GetInstallationType",
 
     "/users", "Users",
     "/login", "Login",
@@ -182,6 +186,20 @@ class EsApp:
         #     return render.index_fr()
         # else:
         #     return render.index()
+
+
+class GetInstallationType:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        #return web.ctx
+        getparams = web.input()
+        systemsettings = functions.getSystemSettings()
+
+        typeinstallation_json = '{"success":"true", "typeinstallation":"'+systemsettings['type_installation'].lower() + '"}'
+
+        return typeinstallation_json
 
 
 class GetMapTemplates:
@@ -688,6 +706,7 @@ class GetHelpFile:
             if not buf:
                 break
             yield buf
+        f.close()
 
 
 class GetHelp:
@@ -826,6 +845,7 @@ class SaveRequest:
                 if not buf:
                     break
                 yield buf
+            f.close()
 
 
 class GetCategories:
@@ -1854,8 +1874,10 @@ class GetLanguages:
 
 
 class GetTimeseries:
+
     def __init__(self):
         self.lang = "eng"
+        # self.out_queue = Queue()
 
     def POST(self):
         getparams = web.input()
@@ -1867,9 +1889,6 @@ class GetTimeseries:
             return self.classicTimeseries()
 
     def matrixTimeseries(self):
-        from apps.analysis.getTimeseries import getTimeseries
-        import calendar
-
         getparams = web.input()
         yearts = getparams.yearTS
         wkt = getparams.WKT
@@ -1917,6 +1936,11 @@ class GetTimeseries:
                 subproductinfo_rec = functions.row2dict(subproductinfo)
                 nodata = subproductinfo_rec['nodata']
 
+            # mapset_info = querydb.get_mapset(mapsetcode=mapsetcode)
+            # product_info = querydb.get_product_out_info(productcode=productcode,
+            #                                             subproductcode=subproductcode,
+            #                                             version=version)
+
             if len(yearsToCompare) > 0:
                 data = []
                 y = 0
@@ -1937,6 +1961,12 @@ class GetTimeseries:
                             to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
                             overTwoYears = True
 
+                    # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, from_date, to_date)
+                    # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate, mapset_info, product_info, list_files, dates_list]
+                    # p = Process(target=getTimeseries, args=args)
+                    # p.start()
+                    # p.join()
+                    # list_values = self.out_queue.get()
                     list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
                     # print list_values
                     # list_values = sorted(list_values, key=lambda k:k['date'], reverse=True)
@@ -2140,9 +2170,6 @@ class GetTimeseries:
         return ts_json
 
     def rankTimeseries(self):
-        from apps.analysis.getTimeseries import getTimeseries
-        import numpy as NP
-
         getparams = web.input()
         yearts = getparams.yearTS
         wkt = getparams.WKT
@@ -2179,6 +2206,10 @@ class GetTimeseries:
                               'aggregation_max': ts_drawprops.aggregation_max}
                 tscolor = ts_drawprops.color
 
+            # mapset_info = querydb.get_mapset(mapsetcode=mapsetcode)
+            # product_info = querydb.get_product_out_info(productcode=productcode,
+            #                                             subproductcode=subproductcode,
+            #                                             version=version)
 
             if len(yearsToCompare) > 1:
                 dataRanking = []
@@ -2197,6 +2228,12 @@ class GetTimeseries:
                         if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
                             to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
 
+                    # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, from_date, to_date)
+                    # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate, mapset_info, product_info, list_files, dates_list]
+                    # p = Process(target=getTimeseries, args=args)
+                    # p.start()
+                    # p.join()
+                    # list_values = self.out_queue.get()
                     list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
 
                     if len(list_values) > 1:
@@ -2300,8 +2337,6 @@ class GetTimeseries:
         return ts_json
 
     def classicTimeseries(self):
-        from apps.analysis.getTimeseries import getTimeseries
-
         getparams = web.input()
         yearts = getparams.yearTS
         wkt = getparams.WKT
@@ -2360,7 +2395,6 @@ class GetTimeseries:
             to_date = datetime.datetime.strptime(tsToPeriod, '%Y-%m-%d').date()
 
 
-
         cum_yaxe = []
         timeseries = []
         for timeserie in requestedtimeseries:
@@ -2388,6 +2422,10 @@ class GetTimeseries:
                 if cumulative:
                     cum_yaxe.append(ts_drawprops.yaxes_id)
 
+            mapset_info = querydb.get_mapset(mapsetcode=mapsetcode)
+            product_info = querydb.get_product_out_info(productcode=productcode,
+                                                        subproductcode=subproductcode,
+                                                        version=version)
 
             if date_format == 'MMDD' and len(yearsToCompare) > 1:
                 year = yearsToCompare[0]
@@ -2401,7 +2439,14 @@ class GetTimeseries:
                     if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
                         to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
 
+                # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, from_date, to_date)
+                # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate, mapset_info, product_info, list_files, dates_list]
+                # p = Process(target=getTimeseries, args=args)
+                # p.start()
+                # p.join()
+                # list_values = self.out_queue.get()
                 list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
+
                 data = []
                 for val in list_values:
                     value = []
@@ -2473,7 +2518,15 @@ class GetTimeseries:
                     colorAdd += 65
                     colorSubstract += 50
 
+                    # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, from_date, to_date)
+                    # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate, mapset_info, product_info, list_files, dates_list]
+                    # p = Process(target=getTimeseries, args=args)
+                    # p.start()
+                    # p.join()
+                    # list_values = self.out_queue.get()
+                    # self.out_queue.empty()
                     list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
+
                     data = []
                     for val in list_values:
                         value = []
@@ -2517,7 +2570,14 @@ class GetTimeseries:
                     timeseries.append(ts)
 
             else:
+                # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, from_date, to_date)
+                # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate, mapset_info, product_info, list_files, dates_list]
+                # p = Process(target=getTimeseries, args=args)
+                # p.start()
+                # p.join()
+                # list_values = self.out_queue.get()
                 list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
+
                 data = []
                 for val in list_values:
                     value = []
@@ -2627,13 +2687,14 @@ class TimeseriesProducts:
                 prod_dict['category_id'] = prod_record['category_id']
                 prod_dict['cat_descr_name'] = prod_record['cat_descr_name']
                 prod_dict['order_index'] = prod_record['order_index']
+                prod_dict['display_index'] = prod_record['display_index']
                 prod_dict['productid'] = prod_record['productid']
                 prod_dict['productcode'] = prod_record['productcode']
                 prod_dict['version'] = prod_record['version']
                 prod_dict['subproductcode'] = prod_record['subproductcode']
                 # prod_dict['mapsetcode'] = ""
                 # prod_dict['mapset_name'] = ""
-                prod_dict['group_product_descriptive_name'] = prod_record['descriptive_name']
+                prod_dict['group_product_descriptive_name'] = prod_record['group_product_descriptive_name']
                 prod_dict['product_descriptive_name'] = prod_record['descriptive_name']
                 prod_dict['product_description'] = prod_record['description']
                 prod_dict['frequency_id'] = prod_record['frequency_id']
@@ -2647,6 +2708,7 @@ class TimeseriesProducts:
 
                 # does the product have mapsets?
                 p = Product(product_code=productcode, version=version)
+
                 all_prod_mapsets = p.mapsets
                 if hasattr(all_prod_mapsets, "__len__") and all_prod_mapsets.__len__() > 0:
                     for mapset in all_prod_mapsets:
@@ -2714,9 +2776,10 @@ class TimeseriesProducts:
                                     dataset_dict['version'] = dataset_record['version']
                                     dataset_dict['subproductcode'] = dataset_record['subproductcode']
                                     dataset_dict['productmapsetid'] = prod_dict['productmapsetid']
+                                    dataset_dict['display_index'] = dataset_record['display_index']
                                     dataset_dict['mapsetcode'] = mapset_record['mapsetcode']
                                     dataset_dict['mapset_name'] = mapset_record['descriptive_name']
-                                    dataset_dict['group_product_descriptive_name'] = prod_record['descriptive_name']
+                                    dataset_dict['group_product_descriptive_name'] = prod_record['group_product_descriptive_name']
                                     dataset_dict['product_descriptive_name'] = dataset_record['descriptive_name']
                                     dataset_dict['product_description'] = dataset_record['description']
                                     dataset_dict['frequency_id'] = dataset_record['frequency_id']
@@ -3854,6 +3917,7 @@ class SaveDrawnVectorLayer:
                 if not buf:
                     break
                 yield buf
+            f.close()
         else:
             status = '{"success":false, "message":"An error occured while saving the drawn layer!"}'
             # return status
@@ -4066,6 +4130,7 @@ class SystemReport:
             if not buf:
                 break
             yield buf
+        f.close()
         os.remove(filename)
 
 
@@ -4085,6 +4150,7 @@ class InstallReport:
             if not buf:
                 break
             yield buf
+        f.close()
         os.remove(filename)
 
 
@@ -4353,6 +4419,7 @@ class GetProductLayer:
             if not buf:
                 break
             yield buf
+        f.close()
         os.remove(filename_png)
 
     def POST(self):
@@ -4366,6 +4433,7 @@ class GetProductLayer:
             if not buf:
                 break
             yield buf
+        f.close()
         os.remove(filename_png)
 
 
@@ -4629,6 +4697,7 @@ class GetProductLayer:
         #     if not buf:
         #         break
         #     yield buf
+        # f.close()
         # os.remove(filename_png)
 
         # #print owsrequest.getValueByName('BBOX')

@@ -131,6 +131,9 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
 
         me.items = [{
             xtype: 'dataview',
+            // minHeight: 125,
+            // maxWidth: 240,
+            // maxHeight: 90,
             itemSelector: 'img',
             bind: {
                 data: '{logoData}'
@@ -139,7 +142,9 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
             tpl:  new Ext.XTemplate(
                 '<div id="maplogos">',
                 '<tpl for=".">',
-                    '<img src="{src}" width="{width}" height="{height}" style="padding: 0px 5px 0px 0px;"/>',
+                    '<span style="vertical-align: middle;"></span>',
+                    // '<img src="{src}" width="{width}" height="{height}" style="padding: 0px 5px 0px 0px;"/>',
+                    '<img src="{src}" height="70" style="vertical-align: middle; padding: 0px 5px 0px 0px;"/>',
                 '</tpl>',
                 '</div>'
             )
@@ -149,11 +154,11 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
         me.map_logo_editor_panel = Ext.create('Ext.panel.Panel', {
             id: 'map_logo_editor_panel' + me.id,
             autoWidth: false,
-            autoHeight: false,
+            autoHeight: true,
             autoScroll: false,
-            width: 530,
-            height: 500,
-            layout: 'border',
+            width: 565,
+            minHeight: 500,
+            layout: 'vbox',
             modal: true,
             hidden: true,
             floating: true,
@@ -208,81 +213,101 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
             //    currentLogoData:'{currentLogoData}'
             //},
             items: [{
-                xtype: 'dataview',
-                id: 'logo-editor-view-' + me.id,
+                xtype: 'container',
                 region: 'center',
-                layout: 'center',
-                cls: 'rounded-box',
-                margin: 5,
-                flex: 1,
-                singleSelect: true,
-                overItemCls: 'x-view-over',
-                itemSelector: 'div.maplogo-wrap',
-                listeners: {
-                    scope: this,
-                    selectionchange: this.onIconSelect,
-                    itemdblclick: function(view, rec, itemEl) {
-                        //Ext.toast({html: "itemdblclick", title: "itemdblclick", width: 300, align: 't'});
-                        view.store.remove(rec);
-                        //if (selectedImage) {
-                        //    this.fireEvent('selected', selectedImage);
-                        //    this.hide();
-                        //}
-                    }
-                },
-                //bind: {
-                //    data: '{currentLogoData}'
-                //},
-                store: Ext.create('Ext.data.Store', {
-                    autoLoad: false,
-                    model   : 'esapp.model.LogosMapView'
-                }),
-                //data: null,
-                emptyText: esapp.Utils.getTranslation('noimagesavailable'),  // 'No images available'
-                tpl:  new Ext.XTemplate(
-                    //'<div id="maplogoseditview">',
-                    '<tpl for=".">',
-                        '<div class="maplogo-wrap">',
-                            '<div class="maplogo">',
-                              '<img src="{src}" width="{width}" height="{height}" style="padding: 0px 5px 0px 0px;"/>',
-                            '</div>',
-                        '</div>',
-                    '</tpl>'
-                    //'</div>'
-                )
-            },{
-                xtype: 'dataview',
-                region: 'south',
                 layout: 'fit',
-                minHeight: 350,
+                cls: 'rounded-box',
+                autoHeight: true,
+                autoWidth: true,
                 scrollable: true,
                 autoScroll: true,
-                id: 'logo-chooser-view-' + me.id,
-                flex: 2,
-                listeners: {
-                    scope: this,
-                    selectionchange: this.onIconSelect,
-                    itemdblclick: function(view, rec, itemEl) {
-                        //Ext.toast({html: "itemdblclick", title: "itemdblclick", width: 300, align: 't'});
-                        view.up().down('dataview').store.add(rec);
-                    }
-                },
-                singleSelect: true,
-                overItemCls: 'x-view-over',
-                itemSelector: 'div.maplogo-wrap',
-                store: "LogosMapView",
-                //bind: '{logos}',
-                tpl: new Ext.XTemplate(
-                    '<tpl for=".">',
-                        '<div class="maplogo-wrap">',
-                            '<div class="maplogo">',
-                                '<img src="{src}" width="100" />',
+                minWidth: 545,
+                minHeight: 135,
+                maxHeight: 135,
+                // maxWidth: 540,
+                margin: 5,
+                // flex: 1,
+                items: [{
+                    xtype: 'dataview',
+                    id: 'logo-editor-view-' + me.id,
+                    minWidth: 530,
+                    maxWidth: 530,
+                    minHeight: 125,
+                    maxHeight: 130,
+                    singleSelect: true,
+                    overItemCls: 'x-view-over',
+                    itemSelector: 'div.maplogo-wrap',
+                    listeners: {
+                        scope: this,
+                        selectionchange: this.onIconSelect,
+                        itemdblclick: function (view, rec, itemEl) {
+                            view.store.remove(rec);
+                            //if (selectedImage) {
+                            //    this.fireEvent('selected', selectedImage);
+                            //    this.hide();
+                            //}
+                        }
+                    },
+                    //bind: {
+                    //    data: '{currentLogoData}'
+                    //},
+                    store: Ext.create('Ext.data.Store', {
+                        autoLoad: false,
+                        model: 'esapp.model.LogosMapView'
+                    }),
+                    emptyText: esapp.Utils.getTranslation('noimagesavailable'),  // 'No images available'
+                    tpl: new Ext.XTemplate(
+                        //'<div id="maplogoseditview">',
+                        '<tpl for=".">',
+                            '<div class="maplogo-wrap">',
+                                '<div class="maplogo">',
+                                    // '<img src="{src}" width="{width}" height="{height}" style="padding: 0px 5px 0px 0px;"/>',
+                                    '<img src="{src}" width="110" style="vertical-align: middle; padding: 0px 5px 0px 0px;"/>',
+                                '</div>',
                             '</div>',
-                        '</div>',
-                        '<tpl if="xindex % 4 === 0"><div class="x-clear"></div></tpl>',
-                    '</tpl>',
-                    '<div class="x-clear"></div>'
-                )
+                        '</tpl>'
+                        //'</div>'
+                    )
+                }]
+            },{
+                xtype: 'container',
+                region: 'south',
+                layout: 'fit',
+                cls: 'rounded-box',
+                margin: 5,
+                minHeight: 350,
+                maxHeight: 400,
+                scrollable: true,
+                autoScroll: true,
+                // flex: 2,
+                items: [{
+                    xtype: 'dataview',
+                    id: 'logo-chooser-view-' + me.id,
+                    listeners: {
+                        scope: this,
+                        selectionchange: this.onIconSelect,
+                        itemdblclick: function(view, rec, itemEl) {
+                            //Ext.toast({html: "itemdblclick", title: "itemdblclick", width: 300, align: 't'});
+                            view.up().up().down('dataview').store.add(rec);
+                        }
+                    },
+                    singleSelect: true,
+                    overItemCls: 'x-view-over',
+                    itemSelector: 'div.maplogo-wrap',
+                    store: "LogosMapView",
+                    //bind: '{logos}',
+                    tpl: new Ext.XTemplate(
+                        '<tpl for=".">',
+                            '<div class="maplogo-wrap">',
+                                '<div class="maplogo">',
+                                    '<img src="{src}" width="110" />',
+                                '</div>',
+                            '</div>',
+                            '<tpl if="xindex % 4 === 0"><div class="x-clear"></div></tpl>',
+                        '</tpl>',
+                        '<div class="x-clear"></div>'
+                    )
+                }]
             }]
         });
 

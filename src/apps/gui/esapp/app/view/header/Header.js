@@ -26,7 +26,7 @@ Ext.define("esapp.view.header.Header",{
         var imageTpl = new Ext.XTemplate(
             '<div id="logo">',
             '<tpl for=".">',
-                  '<img alt="{caption}" src="{src}" width="60" height="50" />  ',
+                  '<img alt="{caption}" src="{src}" width="{width}" height="60" />  ',
             '</tpl>',
             '</div>',
             '<div id="header"> <p id="banner-title-text">eStation 2 - </p><span id="banner-title-text-small">' + esapp.Utils.getTranslation('earthobservationprocessingservice') + '</span></div>'

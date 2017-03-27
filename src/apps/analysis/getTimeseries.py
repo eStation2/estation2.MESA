@@ -123,6 +123,488 @@ def getFilesList(productcode, subproductcode, version, mapsetcode, date_format, 
     return [list_files, dates_list]
 
 
+def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_date, end_date, aggregate):
+
+    #    Extract timeseries from a list of files and return as JSON object
+    #    It applies to a single dataset (prod/sprod/version/mapset) and between 2 dates
+    #    Several types of aggregation foreseen:
+    #
+    #       mean :      Sum(Xi)/N(Xi)        -> min/max not considered          e.g. Rain
+    #       cumulate:   Sum(Xi)              -> min/max not considered          e.g. Fire
+    #
+    #       count:      N(Xi where min < Xi < max)                              e.g. Vegetation anomalies
+    #       surface:    count * PixelArea                                       e.g. Water Bodies
+    #       percent:    count/Ntot                                              e.g. Vegetation anomalies
+    #
+    #   History: 1.0 :  Initial release - since 2.0.1 -> now renamed '_green' from greenwich package
+    #            1.1 :  Since Feb. 2017, it is based on a different approach (gdal.RasterizeLayer instead of greenwich)
+    #                   in order to solve the issue with MULTIPOLYGON
+    #
+
+    # Convert the wkt into a geometry
+    ogr.UseExceptions()
+    theGeomWkt = ' '.join(wkt.strip().split())
+    geom = Geometry(wkt=str(theGeomWkt), srs=4326)
+
+    # Get Mapset Info
+    mapset_info = querydb.get_mapset(mapsetcode=mapsetcode)
+
+    # Compute pixel area by converting degree to km
+    pixelArea = abs(mapset_info.pixel_shift_lat)*abs(mapset_info.pixel_shift_lat)*12544.0
+
+    # Get Product Info
+    product_info = querydb.get_product_out_info(productcode=productcode,
+                                                subproductcode=subproductcode,
+                                                version=version)
+    if product_info.__len__() > 0:
+        # Get info from product_info
+        scale_factor = 0
+        scale_offset = 0
+        nodata = 0
+        date_format = ''
+        for row in product_info:
+            scale_factor = row.scale_factor
+            scale_offset = row.scale_offset
+            nodata = row.nodata
+            date_format = row.date_format
+            date_type = row.data_type_id
+
+        # Create an output/temp shapefile, for managing the output layer (really mandatory ?? Can be simplified ???)
+        try:
+            tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_getTimeseries',
+                                      dir=es_constants.base_tmp_dir)
+        except:
+            logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
+            raise NameError('Error in creating tmpdir')
+
+        out_shape = tmpdir+os.path.sep+"output_shape.shp"
+        outDriver = ogr.GetDriverByName('ESRI Shapefile')
+
+        # Create the output shapefile
+        outDataSource = outDriver.CreateDataSource(out_shape)
+        dest_srs = ogr.osr.SpatialReference()
+        dest_srs.ImportFromEPSG(4326)
+
+        outLayer = outDataSource.CreateLayer("Layer", dest_srs)
+        # outLayer = outDataSource.CreateLayer("Layer")
+        idField = ogr.FieldDefn("id", ogr.OFTInteger)
+        outLayer.CreateField(idField)
+
+        featureDefn  = outLayer.GetLayerDefn()
+        feature = ogr.Feature(featureDefn)
+        feature.SetGeometry(geom)
+        feature.SetField("id", 1)
+        outLayer.CreateFeature(feature)
+        feature = None
+
+        [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, start_date, end_date)
+
+        # Built a dictionary with filenames/dates
+        dates_to_files_dict = dict(zip(dates_list, list_files))
+
+        # Generate unique list of files
+        unique_list = set(list_files)
+        uniqueFilesValues = []
+
+        geo_mask_created = False
+        for infile in unique_list:
+            single_result = {'filename': '', 'meanvalue_noscaling': nodata, 'meanvalue': None}
+
+            if os.path.isfile(infile):
+                # Open input file
+                orig_ds = gdal.Open(infile, gdal.GA_ReadOnly)
+                orig_cs = osr.SpatialReference()
+                orig_cs.ImportFromWkt(orig_ds.GetProjectionRef())
+                orig_geoT = orig_ds.GetGeoTransform()
+                x_origin = orig_geoT[0]
+                y_origin = orig_geoT[3]
+                pixel_size_x = orig_geoT[1]
+                pixel_size_y = -orig_geoT[5]
+
+                in_data_type_gdal = conv_data_type_to_gdal(date_type)
+
+                # Create a mask from the geometry, with the same georef as the input file[s]
+                if not geo_mask_created:
+
+                    # Read polygon extent and round to raster resolution
+                    x_min, x_max, y_min, y_max = outLayer.GetExtent()
+                    x_min_round = int((x_min-x_origin)/pixel_size_x)*pixel_size_x+x_origin
+                    x_max_round = (int((x_max-x_origin)/(pixel_size_x))+1)*pixel_size_x+x_origin
+                    y_min_round = (int((y_min-y_origin)/(pixel_size_y))-1)*pixel_size_y+y_origin
+                    y_max_round = int((y_max-y_origin)/(pixel_size_y))*pixel_size_y+y_origin
+                #
+                #     # Create the destination data source
+                    x_res = int(round((x_max_round - x_min_round) / pixel_size_x))
+                    y_res = int(round((y_max_round - y_min_round) / pixel_size_y))
+                #
+                #     # Create mask in memory
+                    mem_driver = gdal.GetDriverByName('MEM')
+                    mem_ds = mem_driver.Create('', x_res, y_res, 1, in_data_type_gdal)
+                    mask_geoT = [x_min_round, pixel_size_x, 0, y_max_round, 0, -pixel_size_y]
+                    mem_ds.SetGeoTransform(mask_geoT)
+                    mem_ds.SetProjection(orig_cs.ExportToWkt())
+                #
+                #     # Create a Layer with '1' for the pixels to be selected
+                    gdal.RasterizeLayer(mem_ds, [1], outLayer, burn_values=[1])
+                    # gdal.RasterizeLayer(mem_ds, [1], outLayer, None, None, [1])
+
+                #
+                    band = mem_ds.GetRasterBand(1)
+                    geo_values = mem_ds.ReadAsArray()
+
+                    # Create a mask from geo_values (mask-out the '0's)
+                    geo_mask = ma.make_mask(geo_values == 0)
+                    geo_mask_created = True
+                #
+                #     # Clean/Close objects
+                    mem_ds = None
+                    mem_driver = None
+                    outDriver = None
+                    outLayer = None
+
+                # Read data from input file
+                x_offset = int((x_min-x_origin)/pixel_size_x)
+                y_offset = int((y_origin-y_max)/pixel_size_y)
+
+                band_in = orig_ds.GetRasterBand(1)
+                data = band_in.ReadAsArray(x_offset, y_offset, x_res, y_res)
+
+                # Create a masked array from the data (considering Nodata)
+                masked_data = ma.masked_equal(data, nodata)
+
+                # Apply on top of it the geo mask
+                # mxnodata = ma.masked_where(geo_mask, masked_data)
+                mxnodata = masked_data  # TEMP !!!!
+
+                # Test ONLY
+                # write_ds_to_geotiff(mem_ds, '/data/processing/exchange/Tests/mem_ds.tif')
+
+                if aggregate['aggregation_type'] == 'count' or aggregate['aggregation_type'] == 'percent' or aggregate['aggregation_type'] == 'surface':
+
+                    min_val = aggregate['aggregation_min']
+                    max_val = aggregate['aggregation_max']
+                    # Scale threshold from physical to digital value
+                    min_val_scaled = (min_val-scale_offset)/scale_factor
+                    max_val_scaled = (max_val-scale_offset)/scale_factor
+                    mxrange = ma.masked_outside(mxnodata, min_val_scaled, max_val_scaled)
+
+                    if aggregate['aggregation_type'] == 'percent':
+                        # 'percent'
+                        meanResult = float(mxrange.count())/float(mxnodata.count()) * 100
+
+                    elif aggregate['aggregation_type'] == 'surface':
+                        # 'surface'
+                        meanResult = float(mxrange.count())* pixelArea
+                    else:
+                        # 'count'
+                        meanResult = float(mxrange.count())
+
+                    # Both results are equal
+                    finalvalue = meanResult
+
+                else:   #if aggregate['type'] == 'mean' or if aggregate['type'] == 'cumulate':
+                    if mxnodata.count() == 0:
+                        meanResult = 0.0
+                    else:
+                        if aggregate['aggregation_type'] == 'mean':
+                            # 'mean'
+                            meanResult = mxnodata.mean()
+                        else:
+                            # 'cumulate'
+                            meanResult = mxnodata.sum()
+
+                    # Scale to physical value
+                    finalvalue = (meanResult*scale_factor+scale_offset)
+
+                # Assign results
+                single_result['filename'] = infile
+                single_result['meanvalue_noscaling'] = meanResult
+                single_result['meanvalue'] = finalvalue
+
+            else:
+                logger.debug('ERROR: raster file does not exist - %s' % infile)
+
+            uniqueFilesValues.append(single_result)
+
+        # Define a dictionary to associate filenames/values
+        files_to_values_dict = dict((x['filename'], x['meanvalue']) for x in uniqueFilesValues)
+
+        # Prepare array for result
+        resultDatesValues = []
+
+        # Returns a list of 'filenames', 'dates', 'values'
+        for mydate in dates_list:
+
+            my_result = {'date': datetime.date.today(), 'meanvalue':nodata}
+
+            # Assign the date
+            my_result['date'] = mydate
+            # Assign the filename
+            my_filename = dates_to_files_dict[mydate]
+
+            # Map from array of Values
+            my_result['meanvalue'] = files_to_values_dict[my_filename]
+
+            # Map from array of dates
+            resultDatesValues.append(my_result)
+
+        try:
+            shutil.rmtree(tmpdir)
+        except:
+            logger.debug('ERROR: Error in deleting tmpdir. Exit')
+
+        # Return result
+        return resultDatesValues
+    else:
+        logger.debug('ERROR: product not registered in the products table! - %s %s %s' % (productcode, subproductcode, version))
+        return []
+
+
+def getTimeseries_process(queue, productcode, subproductcode, version, mapsetcode, wkt, start_date, end_date, aggregate, mapset_info, product_info, list_files, dates_list):
+
+    #    Extract timeseries from a list of files and return as JSON object
+    #    It applies to a single dataset (prod/sprod/version/mapset) and between 2 dates
+    #    Several types of aggregation foreseen:
+    #
+    #       mean :      Sum(Xi)/N(Xi)        -> min/max not considered          e.g. Rain
+    #       cumulate:   Sum(Xi)              -> min/max not considered          e.g. Fire
+    #
+    #       count:      N(Xi where min < Xi < max)                              e.g. Vegetation anomalies
+    #       surface:    count * PixelArea                                       e.g. Water Bodies
+    #       percent:    count/Ntot                                              e.g. Vegetation anomalies
+    #
+    #   History: 1.0 :  Initial release - since 2.0.1 -> now renamed '_green' from greenwich package
+    #            1.1 :  Since Feb. 2017, it is based on a different approach (gdal.RasterizeLayer instead of greenwich)
+    #                   in order to solve the issue with MULTIPOLYGON
+    #
+
+    # Convert the wkt into a geometry
+
+    ogr.UseExceptions()
+    theGeomWkt = ' '.join(wkt.strip().split())
+    geom = Geometry(wkt=str(theGeomWkt), srs=4326)
+
+    # Get Mapset Info
+    # mapset_info = querydb.get_mapset(mapsetcode=mapsetcode)
+
+    # Compute pixel area by converting degree to km
+    pixelArea = abs(mapset_info.pixel_shift_lat)*abs(mapset_info.pixel_shift_lat)*12544.0
+
+    # Get Product Info
+    # product_info = querydb.get_product_out_info(productcode=productcode,
+    #                                             subproductcode=subproductcode,
+    #                                             version=version)
+
+    if product_info.__len__() > 0:
+        # Get info from product_info
+        scale_factor = 0
+        scale_offset = 0
+        nodata = 0
+        date_format = ''
+        for row in product_info:
+            scale_factor = row.scale_factor
+            scale_offset = row.scale_offset
+            nodata = row.nodata
+            date_format = row.date_format
+            date_type = row.data_type_id
+
+        # Create an output/temp shapefile, for managing the output layer (really mandatory ?? Can be simplified ???)
+        try:
+            # tmpdir = es_constants.base_tmp_dir+os.path.sep+__name__+'_getTimeseries'
+            # print tmpdir
+            # os.mkdir(tmpdir, 0777)
+            tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_getTimeseries',
+                                      dir=es_constants.base_tmp_dir)
+        except:
+            logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
+            raise NameError('Error in creating tmpdir')
+
+        out_shape = tmpdir+os.path.sep+"output_shape.shp"
+        outDriver = ogr.GetDriverByName('ESRI Shapefile')
+
+        # if os.path.exists(out_shape):
+        #     print 'deleting output_shape.shp'
+        #     outDriver.DeleteDataSource(out_shape)
+        # Create the output shapefile
+        outDataSource = outDriver.CreateDataSource(out_shape)
+        #outLayer = outDataSource.CreateLayer("point", geom_type=ogr.wkbLineString)
+        outLayer = outDataSource.CreateLayer("Layer")
+        idField = ogr.FieldDefn("id", ogr.OFTInteger)
+        outLayer.CreateField(idField)
+
+        featureDefn  = outLayer.GetLayerDefn()
+        feature = ogr.Feature(featureDefn)
+        feature.SetGeometry(geom)
+        feature.SetField("id", 1)
+        outLayer.CreateFeature(feature)
+        feature = None
+
+        # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, start_date, end_date)
+
+        # Built a dictionary with filenames/dates
+        dates_to_files_dict = dict(zip(dates_list, list_files))
+
+        # Generate unique list of files
+        unique_list = set(list_files)
+        uniqueFilesValues = []
+
+        geo_mask_created = False
+        for infile in unique_list:
+            single_result = {'filename': '', 'meanvalue_noscaling': nodata, 'meanvalue': None}
+
+            if os.path.isfile(infile):
+                # try:
+
+                    # Open input file
+                    orig_ds = gdal.Open(infile, gdal.GA_ReadOnly)
+                    orig_cs = osr.SpatialReference()
+                    orig_cs.ImportFromWkt(orig_ds.GetProjectionRef())
+                    orig_geoT = orig_ds.GetGeoTransform()
+                    x_origin = orig_geoT[0]
+                    y_origin = orig_geoT[3]
+                    pixel_size_x = orig_geoT[1]
+                    pixel_size_y = -orig_geoT[5]
+
+                    in_data_type_gdal = conv_data_type_to_gdal(date_type)
+
+                    # Create a mask from the geometry, with the same georef as the input file[s]
+                    if not geo_mask_created:
+
+                        # Read polygon extent and round to raster resolution
+                        x_min, x_max, y_min, y_max = outLayer.GetExtent()
+                        x_min_round = int((x_min-x_origin)/pixel_size_x)*pixel_size_x+x_origin
+                        x_max_round = (int((x_max-x_origin)/(pixel_size_x))+1)*pixel_size_x+x_origin
+                        y_min_round = (int((y_min-y_origin)/(pixel_size_y))-1)*pixel_size_y+y_origin
+                        y_max_round = int((y_max-y_origin)/(pixel_size_y))*pixel_size_y+y_origin
+
+                        # Create the destination data source
+                        x_res = int(round((x_max_round - x_min_round) / pixel_size_x))
+                        y_res = int(round((y_max_round - y_min_round) / pixel_size_y))
+
+                        # Create mask in memory
+                        mem_driver = gdal.GetDriverByName('MEM')
+                        mem_ds = mem_driver.Create('', x_res, y_res, 1, in_data_type_gdal)
+                        mask_geoT = [x_min_round, pixel_size_x, 0, y_max_round, 0, -pixel_size_y]
+                        mem_ds.SetGeoTransform(mask_geoT)
+                        mem_ds.SetProjection(orig_cs.ExportToWkt())
+                        # spatialRef = mem_ds.GetSpatialRef()
+                        print 'before'
+                        # Create a Layer with '1' for the pixels to be selected
+                        gdal.RasterizeLayer(mem_ds, [1], outLayer, None, None, burn_values=[1])     # ['ALL_TOUCHED=TRUE']) # rasterize all pixels touched by polygons
+                        print 'after'
+
+                        band = mem_ds.GetRasterBand(1)
+                        geo_values = mem_ds.ReadAsArray()
+
+                        # Create a mask from geo_values (mask-out the '0's)
+                        geo_mask = ma.make_mask(geo_values == 0)
+                        geo_mask_created = True
+                        # outDataSource.DeleteLayer(0)
+                        # outDataSource.Destroy()
+                        # outLayer = None
+
+                    # Read data from input file
+                    x_offset = int((x_min-x_origin)/pixel_size_x)
+                    y_offset = int((y_origin-y_max)/pixel_size_y)
+
+                    band_in = orig_ds.GetRasterBand(1)
+                    data = band_in.ReadAsArray(x_offset, y_offset, x_res, y_res)
+
+                    # Create a masked array from the data (considering Nodata)
+                    masked_data = ma.masked_equal(data, nodata)
+
+                    # Apply on top of it the geo mask
+                    mxnodata = ma.masked_where(geo_mask,masked_data)
+
+                    # Test ONLY
+                    # write_ds_to_geotiff(mem_ds, '/data/processing/exchange/Tests/mem_ds.tif')
+
+                    if aggregate['aggregation_type'] == 'count' or aggregate['aggregation_type'] == 'percent' or aggregate['aggregation_type'] == 'surface':
+
+                        min_val = aggregate['aggregation_min']
+                        max_val = aggregate['aggregation_max']
+                        # Scale threshold from physical to digital value
+                        min_val_scaled = (min_val-scale_offset)/scale_factor
+                        max_val_scaled = (max_val-scale_offset)/scale_factor
+                        mxrange = ma.masked_outside(mxnodata, min_val_scaled, max_val_scaled)
+
+                        if aggregate['aggregation_type'] == 'percent':
+                            # 'percent'
+                            meanResult = float(mxrange.count())/float(mxnodata.count()) * 100
+
+                        elif aggregate['aggregation_type'] == 'surface':
+                            # 'surface'
+                            meanResult = float(mxrange.count())* pixelArea
+                        else:
+                            # 'count'
+                            meanResult = float(mxrange.count())
+
+                        # Both results are equal
+                        finalvalue = meanResult
+
+                    else:   #if aggregate['type'] == 'mean' or if aggregate['type'] == 'cumulate':
+                        if mxnodata.count() == 0:
+                            meanResult = 0.0
+                        else:
+                            if aggregate['aggregation_type'] == 'mean':
+                                # 'mean'
+                                meanResult = mxnodata.mean()
+                            else:
+                                # 'cumulate'
+                                meanResult = mxnodata.sum()
+
+                        # Scale to physical value
+                        finalvalue = (meanResult*scale_factor+scale_offset)
+
+                    # Assign results
+                    single_result['filename'] = infile
+                    single_result['meanvalue_noscaling'] = meanResult
+                    single_result['meanvalue'] = finalvalue
+
+            else:
+                logger.debug('ERROR: raster file does not exist - %s' % infile)
+
+            uniqueFilesValues.append(single_result)
+
+
+        # Define a dictionary to associate filenames/values
+        files_to_values_dict = dict((x['filename'], x['meanvalue']) for x in uniqueFilesValues)
+
+        # Prepare array for result
+        resultDatesValues = []
+
+        # Returns a list of 'filenames', 'dates', 'values'
+        for mydate in dates_list:
+
+            my_result = {'date': datetime.date.today(), 'meanvalue':nodata}
+
+            # Assign the date
+            my_result['date'] = mydate
+            # Assign the filename
+            my_filename = dates_to_files_dict[mydate]
+
+            # Map from array of Values
+            my_result['meanvalue'] = files_to_values_dict[my_filename]
+
+            # Map from array of dates
+            resultDatesValues.append(my_result)
+
+        try:
+            shutil.rmtree(tmpdir)
+        except:
+            logger.debug('ERROR: Error in deleting tmpdir. Exit')
+
+        # returnVal = queue.get()
+        returnVal = resultDatesValues
+        queue.put(returnVal)
+
+        # Return result
+        return resultDatesValues
+    else:
+        logger.debug('ERROR: product not registered in the products table! - %s %s %s' % (productcode, subproductcode, version))
+        return []
+
+
 def getTimeseries_green(productcode, subproductcode, version, mapsetcode, wkt, start_date, end_date, aggregate):
     #    Extract timeseries from a list of files and return as JSON object
     #    It applies to a single dataset (prod/sprod/version/mapset) and between 2 dates
@@ -265,231 +747,3 @@ def getTimeseries_green(productcode, subproductcode, version, mapsetcode, wkt, s
     else:
         logger.debug('ERROR: product not registered in the products table! - %s %s %s' % (productcode, subproductcode, version))
         return []
-
-def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_date, end_date, aggregate):
-
-    #    Extract timeseries from a list of files and return as JSON object
-    #    It applies to a single dataset (prod/sprod/version/mapset) and between 2 dates
-    #    Several types of aggregation foreseen:
-    #
-    #       mean :      Sum(Xi)/N(Xi)        -> min/max not considered          e.g. Rain
-    #       cumulate:   Sum(Xi)              -> min/max not considered          e.g. Fire
-    #
-    #       count:      N(Xi where min < Xi < max)                              e.g. Vegetation anomalies
-    #       surface:    count * PixelArea                                       e.g. Water Bodies
-    #       percent:    count/Ntot                                              e.g. Vegetation anomalies
-    #
-    #   History: 1.0 :  Initial release - since 2.0.1 -> now renamed '_green' from greenwich package
-    #            1.1 :  Since Feb. 2017, it is based on a different approach (gdal.RasterizeLayer instead of greenwich)
-    #                   in order to solve the issue with MULTIPOLYGON
-    #
-
-    # Convert the wkt into a geometry
-    ogr.UseExceptions()
-    theGeomWkt = ' '.join(wkt.strip().split())
-    geom = Geometry(wkt=str(theGeomWkt), srs=4326)
-
-    # Get Mapset Info
-    mapset_info = querydb.get_mapset(mapsetcode=mapsetcode)
-
-    # Compute pixel area by converting degree to km
-    pixelArea = abs(mapset_info.pixel_shift_lat)*abs(mapset_info.pixel_shift_lat)*12544.0
-
-    # Get Product Info
-    product_info = querydb.get_product_out_info(productcode=productcode,
-                                                subproductcode=subproductcode,
-                                                version=version)
-    if product_info.__len__() > 0:
-        # Get info from product_info
-        scale_factor = 0
-        scale_offset = 0
-        nodata = 0
-        date_format = ''
-        for row in product_info:
-            scale_factor = row.scale_factor
-            scale_offset = row.scale_offset
-            nodata = row.nodata
-            date_format = row.date_format
-            date_type = row.data_type_id
-
-        # Create an output/temp shapefile, for managing the output layer (really mandatory ?? Can be simplified ???)
-        try:
-            tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_getTimeseries',
-                                      dir=es_constants.base_tmp_dir)
-        except:
-            logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
-            raise NameError('Error in creating tmpdir')
-
-        out_shape = tmpdir+os.path.sep+"output_shape.shp"
-        outDriver = ogr.GetDriverByName('ESRI Shapefile')
-
-        # Create the output shapefile
-        outDataSource = outDriver.CreateDataSource(out_shape)
-        #outLayer = outDataSource.CreateLayer("point", geom_type=ogr.wkbLineString)
-        outLayer = outDataSource.CreateLayer("Layer")
-        idField = ogr.FieldDefn("id", ogr.OFTInteger)
-        outLayer.CreateField(idField)
-
-        featureDefn  = outLayer.GetLayerDefn()
-        feature = ogr.Feature(featureDefn)
-        feature.SetGeometry(geom)
-        feature.SetField("id", 1)
-        outLayer.CreateFeature(feature)
-        feature = None
-
-        [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, start_date, end_date)
-
-        # Built a dictionary with filenames/dates
-        dates_to_files_dict = dict(zip(dates_list, list_files))
-
-        # Generate unique list of files
-        unique_list = set(list_files)
-        uniqueFilesValues = []
-
-        geo_mask_created = False
-        for infile in unique_list:
-            single_result = {'filename': '', 'meanvalue_noscaling': nodata, 'meanvalue': None}
-
-            if os.path.isfile(infile):
-                # try:
-
-                    # Open input file
-                    orig_ds = gdal.Open(infile, gdal.GA_ReadOnly)
-                    orig_cs = osr.SpatialReference()
-                    orig_cs.ImportFromWkt(orig_ds.GetProjectionRef())
-                    orig_geoT = orig_ds.GetGeoTransform()
-                    x_origin = orig_geoT[0]
-                    y_origin = orig_geoT[3]
-                    pixel_size_x = orig_geoT[1]
-                    pixel_size_y = -orig_geoT[5]
-
-                    in_data_type_gdal = conv_data_type_to_gdal(date_type)
-
-                    # Create a mask from the geometry, with the same georef as the input file[s]
-                    if not geo_mask_created:
-
-                        # Read polygon extent and round to raster resolution
-                        x_min, x_max, y_min, y_max = outLayer.GetExtent()
-                        x_min_round = int((x_min-x_origin)/pixel_size_x)*pixel_size_x+x_origin
-                        x_max_round = (int((x_max-x_origin)/(pixel_size_x))+1)*pixel_size_x+x_origin
-                        y_min_round = (int((y_min-y_origin)/(pixel_size_y))-1)*pixel_size_y+y_origin
-                        y_max_round = int((y_max-y_origin)/(pixel_size_y))*pixel_size_y+y_origin
-
-                        # Create the destination data source
-                        x_res = int(round((x_max_round - x_min_round) / pixel_size_x))
-                        y_res = int(round((y_max_round - y_min_round) / pixel_size_y))
-
-                        # Create mask in memory
-                        mem_driver = gdal.GetDriverByName('MEM')
-                        mem_ds = mem_driver.Create('', x_res, y_res, 1, in_data_type_gdal)
-                        mask_geoT = [x_min_round, pixel_size_x, 0, y_max_round, 0, -pixel_size_y]
-                        mem_ds.SetGeoTransform(mask_geoT)
-                        mem_ds.SetProjection(orig_cs.ExportToWkt())
-
-                        # Create a Layer with '1' for the pixels to be selected
-                        gdal.RasterizeLayer(mem_ds, [1], outLayer, burn_values=[1])
-
-                        band = mem_ds.GetRasterBand(1)
-                        geo_values = mem_ds.ReadAsArray()
-
-                        # Create a mask from geo_values (mask-out the '0's)
-                        geo_mask = ma.make_mask(geo_values == 0)
-                        geo_mask_created = True
-
-                    # Read data from input file
-                    x_offset = int((x_min-x_origin)/pixel_size_x)
-                    y_offset = int((y_origin-y_max)/pixel_size_y)
-
-                    band_in = orig_ds.GetRasterBand(1)
-                    data = band_in.ReadAsArray(x_offset, y_offset, x_res, y_res)
-
-                    # Create a masked array from the data (considering Nodata)
-                    masked_data = ma.masked_equal(data, nodata)
-
-                    # Apply on top of it the geo mask
-                    mxnodata = ma.masked_where(geo_mask,masked_data)
-
-                    # Test ONLY
-                    # write_ds_to_geotiff(mem_ds, '/data/processing/exchange/Tests/mem_ds.tif')
-
-                    if aggregate['aggregation_type'] == 'count' or aggregate['aggregation_type'] == 'percent' or aggregate['aggregation_type'] == 'surface':
-
-                        min_val = aggregate['aggregation_min']
-                        max_val = aggregate['aggregation_max']
-                        # Scale threshold from physical to digital value
-                        min_val_scaled = (min_val-scale_offset)/scale_factor
-                        max_val_scaled = (max_val-scale_offset)/scale_factor
-                        mxrange = ma.masked_outside(mxnodata, min_val_scaled, max_val_scaled)
-
-                        if aggregate['aggregation_type'] == 'percent':
-                            # 'percent'
-                            meanResult = float(mxrange.count())/float(mxnodata.count()) * 100
-
-                        elif aggregate['aggregation_type'] == 'surface':
-                            # 'surface'
-                            meanResult = float(mxrange.count())* pixelArea
-                        else:
-                            # 'count'
-                            meanResult = float(mxrange.count())
-
-                        # Both results are equal
-                        finalvalue = meanResult
-
-                    else:   #if aggregate['type'] == 'mean' or if aggregate['type'] == 'cumulate':
-                        if mxnodata.count() == 0:
-                            meanResult = 0.0
-                        else:
-                            if aggregate['aggregation_type'] == 'mean':
-                                # 'mean'
-                                meanResult = mxnodata.mean()
-                            else:
-                                # 'cumulate'
-                                meanResult = mxnodata.sum()
-
-                        # Scale to physical value
-                        finalvalue = (meanResult*scale_factor+scale_offset)
-
-                    # Assign results
-                    single_result['filename'] = infile
-                    single_result['meanvalue_noscaling'] = meanResult
-                    single_result['meanvalue'] = finalvalue
-
-            else:
-                logger.debug('ERROR: raster file does not exist - %s' % infile)
-
-            uniqueFilesValues.append(single_result)
-
-        # Define a dictionary to associate filenames/values
-        files_to_values_dict = dict((x['filename'], x['meanvalue']) for x in uniqueFilesValues)
-
-        # Prepare array for result
-        resultDatesValues = []
-
-        # Returns a list of 'filenames', 'dates', 'values'
-        for mydate in dates_list:
-
-            my_result = {'date': datetime.date.today(), 'meanvalue':nodata}
-
-            # Assign the date
-            my_result['date'] = mydate
-            # Assign the filename
-            my_filename = dates_to_files_dict[mydate]
-
-            # Map from array of Values
-            my_result['meanvalue'] = files_to_values_dict[my_filename]
-
-            # Map from array of dates
-            resultDatesValues.append(my_result)
-
-        try:
-            shutil.rmtree(tmpdir)
-        except:
-            logger.debug('ERROR: Error in deleting tmpdir. Exit')
-
-        # Return result
-        return resultDatesValues
-    else:
-        logger.debug('ERROR: product not registered in the products table! - %s %s %s' % (productcode, subproductcode, version))
-        return []
-
-

@@ -9,9 +9,9 @@ Ext.define('esapp.view.analysis.mapViewModel', {
             product_date: ''
         },
         logoData: [
-            { src:'resources/img/logo/MESA_logo.png', width:'65', height:'50' },
-            { src:'resources/img/logo/AfricanUnion_logo.jpg', width:'65', height:'50' },
-            { src:'resources/img/logo/ACP_logo.jpg', width:'65', height:'50' },
+            { src:'resources/img/logo/MESA_h110.jpg', width:'65', height:'50' },
+            { src:'resources/img/logo/AUC_h110.jpg', width:'65', height:'50' },
+            { src:'resources/img/logo/ACP_h110.jpg', width:'65', height:'50' },
             { src:'resources/img/logo/logo_en.gif', width:'65', height:'50' }
         ]
     },

@@ -22,7 +22,7 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
         titleAlign: 'center'
     },
     constrainHeader: true,
-    constrain: true,
+    constrain: false,
     autoShow : false,
     hidden: true,
     closable: true,
@@ -36,44 +36,56 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
     floatable: true,
     alwaysOnTop: false,
 
-    width:525,
-    minWidth:525,
-    //autoHeight: true,
+    width:530,
+    minWidth:530,
+    autoHeight: true,
     height: Ext.getBody().getViewSize().height-65,
 
     alignTarget: Ext.getCmp('backgroundmap'),
     defaultAlign: 'tr-tr',
     // glyph : 'xf080@FontAwesome',
     margin: '0 0 0 0',
+    padding: '0 0 0 0',
     frame: true,
     border: true,
-    layout: {
-        type: 'fit'
-    },
+    // layout: {
+    //     type: 'fit'
+    // },
 
 
     initComponent: function () {
         var me = this;
+        me.maxHeight = Ext.getBody().getViewSize().height-65;
+        // me.defaultAlign = 'tr-tr';
+        // me.alignTarget = Ext.getCmp('backgroundmap');
 
-        //Ext.util.Observable.capture(me, function (e) { console.log('timeserieschartselection - ' + e);});
+        me.viewConfig = {
+            defaultAlign: 'tr-tr',
+            alignTarget: Ext.getCmp('backgroundmap')
+        };
 
         me.listeners = {
-            align: function(){
-                if (!me.hidden){
-                    var task = new Ext.util.DelayedTask(function() {
-                        //console.info('align');
-                        //console.info(Ext.getCmp('analysismain').lookupReference('backgroundmap'));
-                        me.show();
-                        me.expand();
-                        me.alignTo(Ext.getCmp('analysismain').lookupReference('backgroundmap'), 'tr-tr');
-                        me.updateLayout();
-                    });
-                    task.delay(0);
-                }
-            }
-            ,activate: function() {
-                //console.info('activate tsselectionwin');
+            // afterrender: function(){
+            //     Ext.util.Observable.capture(me, function (e) { console.log('timeserieschartselection - ' + e);});
+            //     // me.fireEvent('align');
+            // },
+            show: function(){
+                // console.info('show tschartselection');
                 me.fireEvent('align');
+            },
+            align: function() {
+                // console.info('align tschartselection');
+                // if (me.hidden) {
+                //     me.show();
+                // }
+                var task = new Ext.util.DelayedTask(function() {
+                    me.show();
+                    me.expand();
+                    me.alignTo(Ext.getCmp('analysismain').lookupReference('backgroundmap'), 'tr-tr');
+                    // me.alignTo(Ext.getCmp('analysismain'), 'tr-tr');
+                    // me.updateLayout();
+                });
+                task.delay(50);
             }
         };
 
@@ -89,7 +101,7 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
             maxHeight: 60,
             border: 2,
             padding: '5 5 5 15',
-            margin: '15 0 15 0',
+            margin: '10 0 10 0',
             style: {
                 borderColor: '#157FCC',
                 borderStyle: 'solid'
@@ -118,16 +130,17 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
             hideCollapseTool: true,
             header: false,
             autoScroll:false,
+            reserveScrollbar: true,
             frame: false,
             border: false,
-            margin: '15 0 0 0',
+            margin: '10px 0 0 0',
             layout: {
                 type: 'fit'
             },
             items: [{
                 title: esapp.Utils.getTranslation('PROFILE'),  // 'DEFAULT X/Y GRAPH',
                 id: 'ts_xy_graph_tab_' + me.id,
-                margin: 2,
+                margin: 4,
                 //minHeight: 800,
                 autoHeight: true,
                 autoScroll: true,
@@ -169,7 +182,7 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
 
                 title: esapp.Utils.getTranslation('CUMULATIVE'),  // 'CUMULATIVE',
                 id: 'ts_cumulative_graph_tab_' + me.id,
-                margin: 2,
+                margin: 4,
                 //minHeight: 800,
                 autoHeight: true,
                 autoScroll: true,
@@ -210,7 +223,7 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
             },{
                 title: esapp.Utils.getTranslation('RANKING_ZSCORE'),  // 'RANKING / Z-SCORE',
                 id: 'ts_ranking_graph_tab_'+me.id,
-                margin:3,
+                margin:4,
                 //minHeight: 800,
                 autoHeight: true,
                 autoScroll:true,
@@ -251,7 +264,7 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
             },{
                 title: esapp.Utils.getTranslation('MATRIX'),  // 'MATRIX',
                 id: 'ts_matrix_graph_tab_'+me.id,
-                margin:3,
+                margin: 4,
                 //minHeight: 800,
                 autoHeight: true,
                 autoScroll:true,

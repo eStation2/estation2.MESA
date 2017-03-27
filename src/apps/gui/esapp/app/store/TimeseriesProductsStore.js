@@ -13,7 +13,7 @@ Ext.define('esapp.store.TimeseriesProductsStore', {
     storeId : 'TimeseriesProductsStore'
 
     //,session: false
-    ,autoLoad: true
+    ,autoLoad: false
     ,loadMask: true
 
     //,sorters: {property: 'order_index', direction: 'DESC'}

@@ -1744,7 +1744,7 @@ def pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=None):
         reader = csv.reader(f, delimiter=',')
         for row in reader:
             stations_list.append(row)
-        f.close
+        f.close()
 
         # Create dictionary for translating station -> Lat/Lon
         dict_latlon = {'empty_key':'empty_value'}
