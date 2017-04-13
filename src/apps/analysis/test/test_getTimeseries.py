@@ -37,9 +37,9 @@ class TestTS(unittest.TestCase):
         to_date = date(2016, 12, 31)
         date_format = 'YYYYMMDD'
         list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_test_polygon, from_date, to_date, self.aggregate)
-        # list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_test_line, from_date, to_date, self.aggregate)
+        print list_values
+        list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_test_polygon, from_date, to_date, self.aggregate)
         # list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_test_point, from_date, to_date, self.aggregate)
-
         print list_values
 
         self.assertEquals(len(list_values), 36)
