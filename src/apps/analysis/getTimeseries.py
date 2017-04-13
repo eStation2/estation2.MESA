@@ -325,8 +325,11 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
 
         # Create the output shapefile
         outDataSource = outDriver.CreateDataSource(out_shape)
-        #outLayer = outDataSource.CreateLayer("point", geom_type=ogr.wkbLineString)
-        outLayer = outDataSource.CreateLayer("Layer")
+        dest_srs = ogr.osr.SpatialReference()
+        dest_srs.ImportFromEPSG(4326)
+
+        outLayer = outDataSource.CreateLayer("Layer", dest_srs)
+        # outLayer = outDataSource.CreateLayer("Layer")
         idField = ogr.FieldDefn("id", ogr.OFTInteger)
         outLayer.CreateField(idField)
 
@@ -374,27 +377,35 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
                         x_max_round = (int((x_max-x_origin)/(pixel_size_x))+1)*pixel_size_x+x_origin
                         y_min_round = (int((y_min-y_origin)/(pixel_size_y))-1)*pixel_size_y+y_origin
                         y_max_round = int((y_max-y_origin)/(pixel_size_y))*pixel_size_y+y_origin
-
-                        # Create the destination data source
+                    #
+                    #     # Create the destination data source
                         x_res = int(round((x_max_round - x_min_round) / pixel_size_x))
                         y_res = int(round((y_max_round - y_min_round) / pixel_size_y))
-
-                        # Create mask in memory
+                    #
+                    #     # Create mask in memory
                         mem_driver = gdal.GetDriverByName('MEM')
                         mem_ds = mem_driver.Create('', x_res, y_res, 1, in_data_type_gdal)
                         mask_geoT = [x_min_round, pixel_size_x, 0, y_max_round, 0, -pixel_size_y]
                         mem_ds.SetGeoTransform(mask_geoT)
                         mem_ds.SetProjection(orig_cs.ExportToWkt())
-
-                        # Create a Layer with '1' for the pixels to be selected
+                    #
+                    #     # Create a Layer with '1' for the pixels to be selected
                         gdal.RasterizeLayer(mem_ds, [1], outLayer, burn_values=[1])
+                        # gdal.RasterizeLayer(mem_ds, [1], outLayer, None, None, [1])
 
+                    #
                         band = mem_ds.GetRasterBand(1)
                         geo_values = mem_ds.ReadAsArray()
 
                         # Create a mask from geo_values (mask-out the '0's)
                         geo_mask = ma.make_mask(geo_values == 0)
                         geo_mask_created = True
+                    #
+                    #     # Clean/Close objects
+                        mem_ds = None
+                        mem_driver = None
+                        outDriver = None
+                        outLayer = None
 
                     # Read data from input file
                     x_offset = int((x_min-x_origin)/pixel_size_x)
@@ -407,7 +418,8 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
                     masked_data = ma.masked_equal(data, nodata)
 
                     # Apply on top of it the geo mask
-                    mxnodata = ma.masked_where(geo_mask,masked_data)
+                    # mxnodata = ma.masked_where(geo_mask, masked_data)
+                    mxnodata = masked_data  # TEMP !!!!
 
                     # Test ONLY
                     # write_ds_to_geotiff(mem_ds, '/data/processing/exchange/Tests/mem_ds.tif')
