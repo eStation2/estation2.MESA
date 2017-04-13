@@ -113,12 +113,21 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
         this.getStore('colorschemes').load({
             params:this.getView().selectedproduct,
             callback:function(records, options, success){
-                if (records.length>0){
-                    var nodefault = true;
+                if (records != null && records.length>0){
+                    var nodefault = true,
+                        defaultcount = 0;
                     for (var i = 0; i < records.length; i++) {
-                        if (records[i].get('default_legend') == 'true') {
+                        if (records[i].get('default_legend') || records[i].get('default_legend') == 'true') {
+                            defaultcount += 1;
                             nodefault = false;
                         }
+                    }
+                    if (defaultcount > 1) {
+                        for (var ii = 0; ii < records.length; ii++) {
+                            records[ii].set('default_legend', false);
+                            records[ii].set('defaulticon', 'x-grid3-radio-col');
+                        }
+                        nodefault = true;
                     }
                     if (nodefault) {
                         records[0].set('default_legend', true);

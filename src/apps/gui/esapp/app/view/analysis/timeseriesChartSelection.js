@@ -31,7 +31,7 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
     collapsible: true,
     collapsed: false,
     resizable: false,
-    autoScroll: false,
+    autoScroll: true,
     floating: true,
     floatable: true,
     alwaysOnTop: false,
@@ -55,7 +55,7 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
 
     initComponent: function () {
         var me = this;
-        me.maxHeight = Ext.getBody().getViewSize().height-65;
+        // me.maxHeight = Ext.getBody().getViewSize().height-65;
         // me.defaultAlign = 'tr-tr';
         // me.alignTarget = Ext.getCmp('backgroundmap');
 
@@ -83,7 +83,8 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                     me.expand();
                     me.alignTo(Ext.getCmp('analysismain').lookupReference('backgroundmap'), 'tr-tr');
                     // me.alignTo(Ext.getCmp('analysismain'), 'tr-tr');
-                    // me.updateLayout();
+                    me.height = Ext.getBody().getViewSize().height-65;
+                    me.updateLayout();
                 });
                 task.delay(50);
             }

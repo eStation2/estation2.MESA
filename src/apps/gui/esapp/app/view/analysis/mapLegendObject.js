@@ -52,15 +52,19 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
     //},
     legendHTML_ImageObj: new Image(),
     legendLayout: 'vertical',
-    legendPosition: [5, 210],
+    legendPosition: [5, 67],
     showlegend: true,
-    html: '&nbsp;',
+
+    config: {
+        html: ''
+    },
 
     initComponent: function () {
         var me = this;
         //Ext.util.Observable.capture(me, function(e){console.log('maplegendobject - ' + me.id + ': ' + e);});
 
         me.legendHTML_ImageObj = new Image();
+        me.legendPosition = [5, 67];
 
         me.listeners = {
             el: {
@@ -83,26 +87,37 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
                     title: esapp.Utils.getTranslation('legend_object'), // 'Legend object',
                     text: esapp.Utils.getTranslation('doubleclick_to_change_view') // 'Double click to change view.'
                 });
+
+                // me.mon(me, {
+                //     move: function() {
+                //         console.info('moving legend');
+                //         console.info(me.legendPosition);
+                //         me.legendPosition = me.getPosition(true);
+                //     }
+                // });
+
                 me.fireEvent('refreshimage');
             },
             refreshimage: function(){
                 if(!me.hidden) {
                     var legendObjDom = me.getEl().dom;
-
                     var task = new Ext.util.DelayedTask(function() {
                         html2canvas(legendObjDom, {
-                            //width: me.getWidth(),
+                            width: me.getWidth(),
+                            height: me.getHeight(),
+                            // logging: true,
                             onrendered: function (canvas) {
                                 me.legendHTML_ImageObj.src = canvas.toDataURL("image/png");
-                                //console.info(me.legendHTML_ImageObj);
                             }
                         });
                     });
-                    task.delay(200);
+                    task.delay(250);
                 }
             }
             ,show: function(){
-                //console.info('SHOW LEGEND');
+                // console.info('SHOW LEGEND');
+                // console.info(me.legendPosition);
+                me.setPosition(me.legendPosition);
 
                 if (me.legendLayout == 'horizontal') {
                     me.setHtml(me.legendHTML);
@@ -111,23 +126,15 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
                     me.setHtml(me.legendHTMLVertical);
                 }
 
-                me.setPosition(me.legendPosition);
-
                 if (!me.showlegend) {
                     me.hide();
                 }
 
-                me.mon(me, {
-                    move: function() {
-                       me.legendPosition = me.getPosition(true);
-                    }
-                });
+                me.fireEvent('refreshimage');
             }
-            //,move: function(){
-            //    me.legendPosition = me.getPosition(true);
-            //}
         };
 
         me.callParent();
+
     }
 });

@@ -18,11 +18,13 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
 
     id: 'title_obj',
     reference: 'title_obj',
-    autoWidth: true,
-    autoHeight: true,
-    minWidth: 300,
-    minHeight: 45,
+    // autoWidth: true,
+    // autoHeight: true,
+    minWidth: 150,
+    minHeight: 50,
+    // height: 'auto',
     layout: 'fit',
+    liquidLayout: false,
     hidden: true,
     floating: true,
     defaultAlign: 'tl-tl',
@@ -32,25 +34,25 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
     constrain: true,
     alwaysOnTop: true,
     autoShow: false,
-    resizable: false,
+    resizable: true,
     frame: false,
     frameHeader : false,
     border: false,
     shadow: false,
     cls: 'rounded-box',
     //style: 'background: white; cursor:url(resources/img/pencil_cursor.png),auto;',
-    style: 'background: white; cursor:move;',
+    style: 'background: white; cursor:move; line-height:24px;',
     //bodyStyle:  'background:transparent;',
     margin: 0,
     padding: 3,
     html: '',
     title_ImageObj: new Image(),
-    titlePosition: [5,5],  // [37, 20],
+    titlePosition: [3,3],
     changesmade: false,
 
     config: {
         tpl: [
-            '<b style="color: rgb(0, 0, 0);"><font size="3">{selected_area}</font></b><div><b style="color: rgb(0, 0, 0);"><font size="3">{product_name}</font></b><div><b><font size="3" color="#3366ff">{product_date}</font></b></div></div>'
+            '<div><b style="color:rgb(0,0,0);"><font size="3">{selected_area}</font></b></div><div><b style="color:rgb(0,0,0);"><font size="3">{product_name}</font></b></div><div><b style="color:rgb(51,102,255);"><font size="3">{product_date}</font></b></div>'
         ],
         titleData: null
     },
@@ -63,6 +65,15 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
 
     initComponent: function () {
         var me = this;
+
+        // me.autoWidth = true;
+        // me.autoHeight = true;
+        me.setMinWidth(150);
+        me.setMinHeight(50);
+        // me.height = 'auto';
+        me.layout = 'fit';
+        me.title_ImageObj = new Image();
+        me.titlePosition = [3,3];
 
         //me.defaultTpl = '<font size="3" style="color: rgb(0, 0, 0);"><b>{selected_area} - {product_name}&nbsp;</b></font><div><font size="3"><b>Decade of <font color="#3366ff">{product_date}</font></b></font></div>';
         //me.tpl = me.defaultTpl;
@@ -93,6 +104,12 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
                     text: '<img src="resources/img/pencil_cursor.png" alt="" height="18" width="18">' + esapp.Utils.getTranslation('doubleclick_to_edit') // 'Double click to edit.'
                 });
 
+                // me.mon(me, {
+                //     move: function() {
+                //         me.titlePosition = me.getPosition(true);
+                //     }
+                // });
+                //
                 //me.mon(me.el, 'click', function(){alert('container click');});
                 //me.mon(me.el, 'change', function(){alert('container change');});
             },
@@ -107,27 +124,22 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
                         esapp.Utils.removeClass(titleObjDom, 'rounded-box');
                         //titleObjDomClone.style.width = me.getWidth();
                         html2canvas(titleObjDom, {
+                            width: me.getWidth(),
+                            height: me.getHeight(),
                             onrendered: function (canvas) {
                                 me.title_ImageObj.src = canvas.toDataURL("image/png");
-                                //console.info(me.title_ImageObj);
                                 esapp.Utils.addClass(titleObjDom, 'rounded-box');
                             }
                         });
                     });
                     if (me.changesmade){
-                        task.delay(500);
+                        task.delay(250);
                     }
                 }
             },
             show: function(){
                 me.setPosition(me.titlePosition);
                 me.fireEvent('refreshimage');
-
-                me.mon(me, {
-                    move: function() {
-                       me.titlePosition = me.getPosition(true);
-                    }
-                });
             }
             //,move: function(){
             //    me.titlePosition = me.getPosition(true);
@@ -247,15 +259,18 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
                         var panel = btn.up().up();
                         var mapTitleObj = me,
                             mapTitleEditor = panel.down('#map_title_editor_' + me.id);
-                        panel.hide();
+
+                        // console.info(mapTitleObj);
+                        // mapTitleObj.setTpl(mapTitleEditor.getValue());   // .replace(/"/g, '&quot;', true);
                         mapTitleObj.tpl.set(mapTitleEditor.getValue(), true);   // .replace(/"/g, '&quot;', true);
                         //console.info(mapTitleObj.getData());
                         mapTitleObj.update(mapTitleObj.getData());
+                        mapTitleObj.setHeight('auto');
                         mapTitleObj.updateLayout();
                         mapTitleObj.changesmade = true;
-                        //mapTitleObj.show();
+                        // mapTitleObj.show();
                         mapTitleObj.fireEvent('refreshimage');
-
+                        panel.hide();
                         //mapTitleObj.down().tpl.set(mapTitleEditor.getValue(), true);   // .replace(/"/g, '&quot;', true);
                         //console.info(mapTitleObj.down().getData());
                         //mapTitleObj.down().update(mapTitleObj.down().getData());

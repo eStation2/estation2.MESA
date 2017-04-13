@@ -440,6 +440,25 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     },
                     bufferedRenderer: false,
 
+                    listeners: {
+                        rowclick: function(view, record, el, rowIndex) {
+                            switch(record.get('defaulticon')) {
+                                case 'x-grid3-radio-col':
+                                        view.getStore('colorschemes').each(function(rec){
+                                            if (view.getStore().indexOf(rec) != rowIndex) {
+                                                rec.set('default_legend', false);
+                                                rec.set('defaulticon', 'x-grid3-radio-col');
+                                            }
+                                        },this);
+
+                                        record.set('default_legend', true);
+                                        record.set('defaulticon', 'x-grid3-radio-col-on');
+                                    break;
+                                default:
+                            }
+                        }
+                    },
+
                     // selModel: {
                     //     allowDeselect: true
                     // },

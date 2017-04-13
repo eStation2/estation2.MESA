@@ -55,13 +55,13 @@ Ext.define('esapp.view.analysis.mapViewController', {
             mapsetcode: me.mapsetcode,
             legendid: me.legendid,
             legendlayout: mapLegendObj.legendLayout,
-            legendObjPosition: mapLegendObj.legendPosition.toString(),
+            legendObjPosition: mapLegendObj.getPosition(true).toString(),
             showlegend: mapLegendToggleBtn.pressed,
-            titleObjPosition: titleObj.titlePosition.toString(),
+            titleObjPosition: titleObj.getPosition(true).toString(),
             titleObjContent: titleObj.tpl.html,
-            disclaimerObjPosition: disclaimerObj.disclaimerPosition.toString(),
+            disclaimerObjPosition: disclaimerObj.getPosition(true).toString(),
             disclaimerObjContent: disclaimerObj.getContent(),
-            logosObjPosition: logoObj.logoPosition.toString(),
+            logosObjPosition: logoObj.getPosition(true).toString(),
             logosObjContent: Ext.encode(logoObj.getLogoData()),
             showObjects: mapObjectToggleBtn.pressed,
             scalelineObjPosition: scalelineObj.getPosition(true).toString(),
@@ -335,6 +335,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
         mapLegendObj.legendHTMLVertical = legendHTMLVertical;
         mapLegendObj.hide();    // Hide first to always trigger the show event!
         mapLegendObj.show();
+        // mapLegendObj.fireEvent('show');
 
         var maplegend_togglebtn = me.lookupReference('legendbtn_' + me.getView().id.replace(/-/g, '_')); //  + me.getView().id);
         maplegend_togglebtn.show();
@@ -633,6 +634,10 @@ Ext.define('esapp.view.analysis.mapViewController', {
             disclaimerObjPosition = disclaimerObj.getPosition(true);
             logosObjPosition = logosObj.getPosition(true);
         }
+        // console.info('legendObjPosition: ' + legendObjPosition);
+        // console.info('titleObjPosition: ' + titleObjPosition);
+        // console.info('disclaimerObjPosition: ' + disclaimerObjPosition);
+        // console.info('logosObjPosition: ' + logosObjPosition);
 
         var task = new Ext.util.DelayedTask(function() {
             me.map.once('postcompose', function(event) {
@@ -687,7 +692,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             downloadlink.click();
 
         });
-        task.delay(1000);
+        task.delay(500);
 
         //if(typeof Promise !== "undefined" && Promise.toString().indexOf("[native code]") !== -1){
         //   console.info('Browser supports Promise natively!');
@@ -2020,18 +2025,42 @@ Ext.define('esapp.view.analysis.mapViewController', {
             border: false,
             shadow: false,
             padding: 0,
+            defaults: {
+                margin: 2
+            },
             items: [{
-                text: '<div style="font-size: 11px;">' + esapp.Utils.getTranslation('productnavigator') + '</div>', // 'Product navigator',
-                iconCls: 'africa',
+                text: '<div style="font-size: 11px;">' + esapp.Utils.getTranslation('productnavigator') + '</div>', // 'PRODUCT',
+                // iconCls: 'africa',
                 scale: 'medium',
+                cls: 'nopadding-btn',
+                // style: {padding: 0},
+                // padding: 0,
+                // margin: 2,
                 handler: 'openProductNavigator'
             }
             ,layersmenubutton
             ,{
+                iconCls: 'download_png',
+                scale: 'medium',
+                handler: 'saveMap',
+                href: '',
+                download: 'estationmap.png',
+                listeners: {
+                    afterrender: function (me) {
+                        // Register the new tip with an element's ID
+                        Ext.tip.QuickTipManager.register({
+                            target: me.getId(), // Target button's ID
+                            title: '',
+                            text: esapp.Utils.getTranslation('download_map_as_png')
+                        });
+                    }
+                }
+            },{
                 xtype: 'splitbutton',
                 reference: 'saveMapTemplate_'+me.id.replace(/-/g,'_'),
                 iconCls: 'fa fa-save fa-2x',
                 style: {color: 'lightblue'},
+                cls: 'nopadding-splitbtn',
                 scale: 'medium',
                 hidden:  (esapp.getUser() == 'undefined' || esapp.getUser() == null ? true : false),
                 handler: 'setMapTemplateName',
@@ -2039,7 +2068,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                     hideOnClick: false,
                     alwaysOnTop: true,
                     //iconAlign: '',
-                    width: 125,
+                    width: 165,
                     defaults: {
                         hideOnClick: true,
                         //cls: "x-menu-no-icon",
@@ -2051,7 +2080,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                             iconCls: 'fa fa-save fa-lg lightblue',
                             style: { color: 'lightblue' },
                             //cls: 'x-menu-no-icon button-gray',
-                            width: 60,
+                            width: 165,
                             handler: function(){
                                 me.isNewTemplate = true;
                                 me.getController().setMapTemplateName();
@@ -2060,24 +2089,30 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 }
             },{
                 xtype: 'container',
-                width: 300,
-                height: 38,
+                // layout: 'fit',
+                autoWidth: true,
+                minWidth: 220,
+                // width: 350,
+                height: 35,
                 top: 0,
                 align:'left',
                 defaults: {
                     style: {
-                        "font-size": '10px'
+                        "font-size": '10px',
+                        "line-height": '14px'
                     }
                 },
                 items: [{
                     xtype: 'box',
-                    height: 17,
+                    // autoWidth: true,
+                    // minWidth: 250,
+                    height: 25,
                     top:0,
-                    html: '<div id="region_name_' + me.id + '" style="text-align:left; font-size: 10px; font-weight: bold;"></div>'
+                    html: '<div id="region_name_' + me.id + '" style="line-height:14px; text-align:left; font-size: 10px; font-weight: bold;"></div>'
                 },{
                     xtype: 'box',
-                    height: 15,
-                    top:17,
+                    height: 10,
+                    top:25,
                     html: '<div id="mouse-position_' + me.id + '"></div>'
                 }]
             },'->', {
@@ -2358,23 +2393,6 @@ Ext.define('esapp.view.analysis.mapViewController', {
                             target: me.getId(), // Target button's ID
                             title: '',
                             text: esapp.Utils.getTranslation('show_hide_legend')
-                        });
-                    }
-                }
-            },{
-                iconCls: 'download_png',
-                //style: { color: 'lightblue' },
-                scale: 'medium',
-                handler: 'saveMap',
-                href: '',
-                download: 'estationmap.png',
-                listeners: {
-                    afterrender: function (me) {
-                        // Register the new tip with an element's ID
-                        Ext.tip.QuickTipManager.register({
-                            target: me.getId(), // Target button's ID
-                            title: '',
-                            text: esapp.Utils.getTranslation('download_map_as_png')
                         });
                     }
                 }

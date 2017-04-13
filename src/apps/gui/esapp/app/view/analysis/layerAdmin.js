@@ -30,7 +30,7 @@ Ext.define("esapp.view.analysis.layerAdmin",{
     resizable: true,
     //resizeHandles: 'n,s',
     autoScroll: false,
-    height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-130 : 830,  // 600,
+    height: Ext.getBody().getViewSize().height < 830 ? Ext.getBody().getViewSize().height-130 : 830,  // 600,
     minHeight: 500,
     maxHeight: 830,
     width: 1275,
@@ -51,7 +51,7 @@ Ext.define("esapp.view.analysis.layerAdmin",{
         var me = this;
 
         me.title = '<div class="panel-title-style-16">' + esapp.Utils.getTranslation('layeradministration') + '</div>';
-        me.height = Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-130 : 830;  // 600,
+        me.height = Ext.getBody().getViewSize().height < 830 ? Ext.getBody().getViewSize().height-130 : 830;  // 600,
 
         me.tools = [
         {

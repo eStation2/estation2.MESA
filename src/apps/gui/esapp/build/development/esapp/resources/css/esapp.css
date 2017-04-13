@@ -14,6 +14,71 @@
     /*border-top-style: solid;*/
 /*}*/
 
+
+.table-header-rotated{
+    border-spacing:0;
+    margin: 0;
+    padding: 0;
+    background: white;
+}
+.table-header-rotated th.row-header{
+    width: auto;
+}
+
+/*.table-header-rotated td{*/
+  /*width: 34px;*/
+  /*border-top: 1px solid #dddddd;*/
+  /*border-left: 1px solid #dddddd;*/
+  /*border-right: 1px solid #dddddd;*/
+  /*vertical-align: middle;*/
+  /*text-align: center;*/
+/*}*/
+
+.table-header-rotated th.rotate-45{
+  height: 48px;
+  /*width: 40px;*/
+  /*min-width: 34px;*/
+  /*max-width: 34px;*/
+  position: relative;
+  vertical-align: bottom;
+  padding: 0;
+  font-size: 22px;
+  /*line-height: 0.8;*/
+}
+
+.table-header-rotated th.rotate-45 > div{
+  position: relative;
+  top: 0;
+  left: 9px; /* 40px; /* 80 * tan(45) / 2 = 40 where 80 is the height on the cell and 45 is the transform angle*/
+  height: 100%;
+  -ms-transform:skew(-45deg,0deg);
+  -moz-transform:skew(-45deg,0deg);
+  -webkit-transform:skew(-45deg,0deg);
+  -o-transform:skew(-45deg,0deg);
+  transform:skew(-45deg,0deg);
+  overflow: hidden;
+  /*border-left: 1px solid #000000;*/
+  /*border-right: 1px solid #000000;*/
+  /*border-top: 1px solid #dddddd;*/
+}
+
+.table-header-rotated th.rotate-45 span {
+  -ms-transform:skew(45deg,0deg) rotate(315deg);
+  -moz-transform:skew(45deg,0deg) rotate(315deg);
+  -webkit-transform:skew(45deg,0deg) rotate(315deg);
+  -o-transform:skew(45deg,0deg) rotate(315deg);
+  transform:skew(45deg,0deg) rotate(315deg);
+  position: absolute;
+  bottom: 10px; /* 40 cos(45) = 28 with an additional 2px margin*/
+  left: -21px; /*Because it looked good, but there is probably a mathematical link here as well*/
+  display: inline-block;
+  /*width: 100%;*/
+  width: 67px; /* 80 / cos(45) - 40 cos (45) = 85 where 80 is the height of the cell, 40 the width of the cell and 45 the transform angle*/
+  text-align: right;
+  white-space: nowrap; /* !*whether to display in one line or not*!*/
+}
+
+
 .maplogo {
     padding: 3px;
 }
@@ -394,7 +459,16 @@ p {
 
 .log-icon-small {background: url('../img/icons/file-extension-log-icon-16x16.png') no-repeat 0 0 !important; }
 
-.transparencyicon { background: url('../img/icons/opacity20.png') no-repeat 0 0 !important; }
+.transparencyicon { background: url('../img/icons/Opacity-20 black.png') no-repeat 0 0 !important; }
+
+
+.nopadding-btn .x-btn-inner-default-toolbar-medium {
+    padding: 0px !important;
+}
+
+.nopadding-splitbtn .x-btn-split-right > .x-btn-icon.x-btn-no-text.x-btn-button-default-toolbar-medium {
+    padding-right: 0px !important;
+}
 
 .nobackgroundcolor {
     background-color: transparent !important;

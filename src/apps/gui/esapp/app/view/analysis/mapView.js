@@ -39,10 +39,10 @@ Ext.define("esapp.view.analysis.mapView",{
     resizable: true,
 
     width:800,
-    height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-80 : 950,
+    height: Ext.getBody().getViewSize().height < 900 ? Ext.getBody().getViewSize().height-80 : 900,
 
-    minWidth:600,
-    minHeight:350,
+    minWidth:630,
+    minHeight:550,
 
     // glyph : 'xf080@FontAwesome',
     margin: '0 0 0 0',
@@ -86,7 +86,7 @@ Ext.define("esapp.view.analysis.mapView",{
         me.selectedFeatureFromDrawLayer = false;
 
         me.title = '<span id="mapview_title_templatename_' + me.id + '" class="map-templatename"></span><span id="mapview_title_productname_' + me.id + '"></span>';
-        me.height = Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-80 : 950;
+        me.height = Ext.getBody().getViewSize().height < 900 ? Ext.getBody().getViewSize().height-80 : 900;
 
         me.controller.createToolBar();
 
@@ -144,7 +144,7 @@ Ext.define("esapp.view.analysis.mapView",{
                 iconCls: 'fa fa-search',
                 cls: 'nobackgroundcolor',
                 style: {
-                    color: 'lightblue',
+                    color: 'black',
                     "font-size": '1.70em'
                 },
                 glyph: null,
@@ -971,6 +971,7 @@ Ext.define("esapp.view.analysis.mapView",{
                 else {
                     size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight - 135];
                 }
+                // console.info('map size: ' + size);
                 this.map.setSize(size);
 
                 this.getController().redrawTimeLine(this);

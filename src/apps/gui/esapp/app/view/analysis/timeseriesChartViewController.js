@@ -250,13 +250,13 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
         if (me.charttype == 'cumulative' && !me.timeseriesChart.localRefresh) {
             var TimeseriesCumulatedAverages = null;
             var TimeseriesCumulatedData = null;
-            var aboveAvgColor = '#0000ff';
+            var aboveAvgColor = '#009E00';
             me.timeseriesGraph.timeseries.forEach(function (timeserie) {
                 //if (timeserie.cumulative) {
                     //me.timeseriesGraph.cumulative = true;
-                    timeserie.type = 'line';
-                    timeserie.dashStyle = 'Solid';
-                    timeserie.lineWidth = 2;
+                    // timeserie.type = 'line';
+                    // timeserie.dashStyle = 'Solid';
+                    // timeserie.lineWidth = 2;
 
                     var cumulated = 0;
                     timeserie.data.forEach(function (datarecord) {
@@ -287,7 +287,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                     else if (timeserie.reference == true){
                         //console.info(timeserie);
                         TimeseriesCumulatedData = Ext.clone(timeserie.data);
-                        aboveAvgColor = timeserie.color;
+                        // aboveAvgColor = timeserie.color;
                     }
                 //}
             });
@@ -328,8 +328,8 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
 
                 var belowAvg = {
                     data: cumulatedNegative,
-                    fillColor: "#ff0000",
-                    color: "#ff0000",
+                    fillColor: "#ff0000",  // "#ff0000",   // "#009E00",  //
+                    color: "#ff0000",  // "#ff0000",       // "#009E00",  //
                     id: "Below",
                     name: "Below",
                     type: "area",

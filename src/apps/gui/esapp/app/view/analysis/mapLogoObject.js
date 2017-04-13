@@ -45,7 +45,7 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
     padding: 3,
     html: '',
     logos_ImageObj: new Image(),
-    logoPosition: [522, 678],
+    logoPosition: [3, 610],
     changesmade: true,
     config: {
         logoData: null
@@ -65,6 +65,9 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
 
     initComponent: function () {
         var me = this;
+
+        me.logos_ImageObj = new Image();
+        me.logoPosition = [3, 610];
 
         me.listeners = {
             //element  : 'el',
@@ -91,42 +94,39 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                     title: esapp.Utils.getTranslation('logo_object'), // 'Logo object',
                     text: '<img src="resources/img/pencil_cursor.png" alt="" height="18" width="18">' + esapp.Utils.getTranslation('doubleclick_to_edit') // 'Double click to edit.'
                 });
+
+                // me.mon(me, {
+                //     move: function() {
+                //        me.logoPosition = me.getPosition(true);
+                //     }
+                // });
             },
             refreshimage: function(){
                 if(!me.hidden) {
                     //var logosObjDomClone = Ext.clone(me.getEl().dom);
                     var logosObjDom = me.getEl().dom;
-
                     var task = new Ext.util.DelayedTask(function() {
                         esapp.Utils.removeClass(logosObjDom, 'rounded-box');
                         //logosObjDomClone.style.width = me.getWidth();
                         html2canvas(logosObjDom, {
                             width: me.getWidth(),
+                            height: me.getHeight(),
                             onrendered: function (canvas) {
                                 me.logos_ImageObj.src = canvas.toDataURL("image/png");
-                                //console.info(me.logos_ImageObj);
                                 esapp.Utils.addClass(logosObjDom, 'rounded-box');
                                 me.changesmade = false;
                             }
                         });
                     });
                     if (me.changesmade){
-                        task.delay(200);
+                        task.delay(250);
                     }
                 }
             },
             show: function(){
                 me.setPosition(me.logoPosition);
                 me.fireEvent('refreshimage');
-                me.mon(me, {
-                    move: function() {
-                       me.logoPosition = me.getPosition(true);
-                    }
-                });
             }
-            //,move: function(){
-            //    me.logoPosition = me.getPosition(true);
-            //}
         };
 
         me.items = [{
@@ -238,8 +238,8 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                     overItemCls: 'x-view-over',
                     itemSelector: 'div.maplogo-wrap',
                     listeners: {
-                        scope: this,
-                        selectionchange: this.onIconSelect,
+                        // scope: this,
+                        // selectionchange: this.onIconSelect,
                         itemdblclick: function (view, rec, itemEl) {
                             view.store.remove(rec);
                             //if (selectedImage) {
@@ -284,8 +284,8 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                     xtype: 'dataview',
                     id: 'logo-chooser-view-' + me.id,
                     listeners: {
-                        scope: this,
-                        selectionchange: this.onIconSelect,
+                        // scope: this,
+                        // selectionchange: this.onIconSelect,
                         itemdblclick: function(view, rec, itemEl) {
                             //Ext.toast({html: "itemdblclick", title: "itemdblclick", width: 300, align: 't'});
                             view.up().up().down('dataview').store.add(rec);
@@ -312,33 +312,34 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
         });
 
         me.callParent();
+
     }
 
     /**
      * Called whenever the user clicks on an item in the DataView. This tells the info panel in the east region to
      * display the details of the image that was clicked on
      */
-    ,onIconSelect: function(dataview, selections) {
-        //console.info(dataview);
-        //console.info(selections);
-        //Ext.toast({html: "Item selected", title: "Item selected", width: 300, align: 't'});
-        //var selected = selections[0];
-        //
-        //if (selected) {
-        //    this.down('infopanel').loadRecord(selected);
-        //}
-    },
+    // ,onIconSelect: function(dataview, selections) {
+    //     //console.info(dataview);
+    //     //console.info(selections);
+    //     //Ext.toast({html: "Item selected", title: "Item selected", width: 300, align: 't'});
+    //     //var selected = selections[0];
+    //     //
+    //     //if (selected) {
+    //     //    this.down('infopanel').loadRecord(selected);
+    //     //}
+    // },
 
     /**
      * Fires the 'selected' event, informing other components that an image has been selected
      */
-    fireImageSelected: function() {
-        //Ext.toast({html: "fireImageSelected", title: "fireImageSelected", width: 300, align: 't'});
-        //var selectedImage = this.down('iconbrowser').selModel.getSelection()[0];
-        //
-        //if (selectedImage) {
-        //    this.fireEvent('selected', selectedImage);
-        //    this.hide();
-        //}
-    }
+    // fireImageSelected: function() {
+    //     //Ext.toast({html: "fireImageSelected", title: "fireImageSelected", width: 300, align: 't'});
+    //     //var selectedImage = this.down('iconbrowser').selModel.getSelection()[0];
+    //     //
+    //     //if (selectedImage) {
+    //     //    this.fireEvent('selected', selectedImage);
+    //     //    this.hide();
+    //     //}
+    // }
 });
