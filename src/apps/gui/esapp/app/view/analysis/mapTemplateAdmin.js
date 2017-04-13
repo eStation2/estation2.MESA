@@ -38,7 +38,7 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
     //autoHeight: false,
     //maxHeight: 300,
     height: 300,
-    width: 500,
+    width: 375,
 
     border:false,
     frame: false,
@@ -78,32 +78,43 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
     multiColumnSort: false,
     columnLines: true,
     rowLines: true,
-
-    listeners: {
-        focusleave: function(){
-            this.hide();
-        }
-    },
+    cls: 'newpanelstyle',
 
     initComponent: function () {
         var me = this;
         //Ext.util.Observable.capture(me, function(e){console.log('mapTemplateAdmin - ' + me.id + ': ' + e);});
-        //params: {
-        //    userid: esapp.getUser().userid
-        //},
+
+        me.mon(me, {
+            loadstore: function() {
+                me.getViewModel().getStore('usermaptemplates').proxy.extraParams = {userid: esapp.getUser().userid};
+                me.getViewModel().getStore('usermaptemplates').load({
+                    callback: function(records, options, success) {
+                        //console.info(records);
+                        //console.info(options);
+                        //console.info(success);
+                    }
+                });
+            }
+        });
+
+        me.listeners = {
+            focusleave: function(){
+                // this.hide();
+            }
+        };
 
         me.tools = [
         {
             type: 'refresh',
             align: 'c-c',
-            tooltip: 'Refresh map template list',   //esapp.Utils.getTranslation('refreshmaptpllist'),    // 'Refresh map template list',
+            tooltip: esapp.Utils.getTranslation('refreshmaptpllist'),    // 'Refresh map template list',
             callback: 'loadUserMapTplStore'
         }];
 
         me.bbar = Ext.create('Ext.toolbar.Toolbar', {
             items: [{
                 xtype: 'button',
-                text: 'Open selected',  // esapp.Utils.getTranslation('openselected'),    // 'Open selected',
+                text: esapp.Utils.getTranslation('openselected'),    // 'Open selected',
                 name: 'addlayer',
                 iconCls: 'fa fa-folder-open-o fa-2x',
                 style: {color: 'green'},
@@ -115,8 +126,8 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
         });
 
         me.columns = [{
-            text: 'Map template name',  // esapp.Utils.getTranslation('maptemplatename'),  // 'Map template name',
-            width: 300,
+            text: esapp.Utils.getTranslation('maptemplatename'),  // 'Map template name',
+            width: 250,
             dataIndex: 'templatename',
             cellWrap:true,
             menuDisabled: true,
@@ -125,42 +136,42 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
             draggable:false,
             groupable:false,
             hideable: false
-        }, {
-            xtype: 'actioncolumn',
-            header: 'Auto open template',   // esapp.Utils.getTranslation('autoopentpl'),  // 'Auto open template',
-            menuDisabled: true,
-            sortable: true,
-            variableRowHeight: true,
-            draggable: false,
-            groupable: false,
-            hideable: false,
-            width: 100,
-            align: 'center',
-            stopSelection: false,
-            items: [{
-                // scope: me,
-                disabled: false,
-                style: {"line-height": "70px"},
-                getClass: function (v, meta, rec) {
-                    if (rec.get('auto_open')) {
-                        return 'activated';
-                    } else {
-                        return 'deactivated';
-                    }
-                },
-                getTip: function (v, meta, rec) {
-                    if (rec.get('auto_open')) {
-                        return 'Do not auto open template';  // esapp.Utils.getTranslation('tip_no_autoopentpl');     // 'Do not auto open template';
-                    } else {
-                        return 'Auto open template';    // esapp.Utils.getTranslation('tip_autoopentpl');     // 'Auto open template';
-                    }
-                },
-                handler: function (grid, rowIndex, colIndex) {
-                    var rec = grid.getStore().getAt(rowIndex),
-                        action = (rec.get('auto_open') ? 'deactivated' : 'activated');
-                    rec.get('auto_open') ? rec.set('auto_open', false) : rec.set('auto_open', true);
-                }
-            }]
+        // }, {
+        //     xtype: 'actioncolumn',
+        //     header: esapp.Utils.getTranslation('autoopentpl'),  // 'Auto open template',
+        //     menuDisabled: true,
+        //     sortable: true,
+        //     variableRowHeight: true,
+        //     draggable: false,
+        //     groupable: false,
+        //     hideable: false,
+        //     width: 100,
+        //     align: 'center',
+        //     stopSelection: false,
+        //     items: [{
+        //         // scope: me,
+        //         disabled: false,
+        //         style: {"line-height": "70px"},
+        //         getClass: function (v, meta, rec) {
+        //             if (rec.get('auto_open')) {
+        //                 return 'activated';
+        //             } else {
+        //                 return 'deactivated';
+        //             }
+        //         },
+        //         getTip: function (v, meta, rec) {
+        //             if (rec.get('auto_open')) {
+        //                 return esapp.Utils.getTranslation('tip_no_autoopentpl');     // 'Do not auto open template';
+        //             } else {
+        //                 return esapp.Utils.getTranslation('tip_autoopentpl');     // 'Auto open template';
+        //             }
+        //         },
+        //         handler: function (grid, rowIndex, colIndex) {
+        //             var rec = grid.getStore().getAt(rowIndex),
+        //                 action = (rec.get('auto_open') ? 'deactivated' : 'activated');
+        //             rec.get('auto_open') ? rec.set('auto_open', false) : rec.set('auto_open', true);
+        //         }
+        //     }]
         },{
             xtype: 'actioncolumn',
             header: esapp.Utils.getTranslation('delete'),   // 'Delete',
@@ -170,7 +181,7 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
             draggable:false,
             groupable:false,
             hideable: false,
-            width: 80,
+            width: 100,
             align: 'center',
             stopSelection: false,
 
@@ -184,12 +195,13 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
                     //}
                 },
                 getTip: function(v, meta, rec) {
-                    return esapp.Utils.getTranslation('Delete Map template: ') + ' ' + rec.get('templatename');
+                    return esapp.Utils.getTranslation('delete_map_template') + ': ' + rec.get('templatename');   // 'Delete Map template'
                 },
                 handler: 'deleteMapTemplate'
             }]
         }];
 
         me.callParent();
+
     }
 });

@@ -20,7 +20,7 @@ Ext.define("esapp.view.analysis.mapDisclaimerObject",{
     reference: 'disclaimer_obj',
     autoWidth: true,
     autoHeight: true,
-    minWidth: 250,
+    minWidth: 150,
     minHeight: 30,
     layout: 'fit',
     hidden: true,
@@ -45,15 +45,17 @@ Ext.define("esapp.view.analysis.mapDisclaimerObject",{
     margin: 0,
     padding: 3,
     disclaimer_ImageObj: new Image(),
-    disclaimerPosition: [267,710],
+    disclaimerPosition: [3,580],
     changesmade: true,
     config: {
-        html: '',
+        // html: '',
         content: ''
     },
 
     initComponent: function () {
         var me = this;
+        me.disclaimer_ImageObj = new Image();
+        me.disclaimerPosition = [3,580];
 
         //me.defaultContent = '<font size="1">​Geographical map, WGS 84 - Resolution 5km</font><div><font size="1">Sources: 1) Image NDVI &nbsp;2) Vectors FAO GAUL 2015</font></div>';
         //me.html = me.defaultContent;
@@ -73,43 +75,43 @@ Ext.define("esapp.view.analysis.mapDisclaimerObject",{
                 Ext.tip.QuickTipManager.register({
                     target: this.id,
                     trackMouse: true,
-                    title: 'Disclaimer object',
-                    text: '<img src="resources/img/pencil_cursor.png" alt="" height="18" width="18">' + 'Double click to edit.'
+                    title: esapp.Utils.getTranslation('disclaimer_object'), // 'Disclaimer object',
+                    text: '<img src="resources/img/pencil_cursor.png" alt="" height="18" width="18">' + esapp.Utils.getTranslation('doubleclick_to_edit') // 'Double click to edit.'
                 });
 
-                //this.setPosition(14, 588);
+                // me.mon(me, {
+                //     move: function() {
+                //        me.disclaimerPosition = me.getPosition(true);
+                //        // console.info(me.disclaimerPosition);
+                //     }
+                // });
             },
             refreshimage: function(){
                 if(!me.hidden) {
                     //var disclaimerObjDomClone = Ext.clone(me.getEl().dom);
                     var disclaimerObjDom = me.getEl().dom;
-
                     var task = new Ext.util.DelayedTask(function() {
                         esapp.Utils.removeClass(disclaimerObjDom, 'rounded-box');
                         //disclaimerObjDomClone.style.width = me.getWidth();
+                        // console.info(disclaimerObjDom);
                         html2canvas(disclaimerObjDom, {
                             width: me.getWidth(),
+                            height: me.getHeight(),
                             onrendered: function (canvas) {
                                 me.disclaimer_ImageObj.src = canvas.toDataURL("image/png");
-                                //console.info(me.disclaimer_ImageObj);
                                 esapp.Utils.addClass(disclaimerObjDom, 'rounded-box');
                                 me.changesmade = false;
                             }
                         });
                     });
                     if (me.getContent() != '' && me.changesmade){
-                        task.delay(500);
+                        task.delay(250);
                     }
                 }
             },
             show: function(){
                 me.setPosition(me.disclaimerPosition);
                 me.fireEvent('refreshimage');
-                me.mon(me, {
-                    move: function() {
-                       me.disclaimerPosition = me.getPosition(true);
-                    }
-                });
             }
         };
 
@@ -135,14 +137,14 @@ Ext.define("esapp.view.analysis.mapDisclaimerObject",{
             shadow: true,
             headerOverCls: 'grayheader',
             header: {
-                title: 'Disclaimer object',
+                title: esapp.Utils.getTranslation('disclaimer_object'), // 'Disclaimer object',
                 titleAlign: 'right',
                 cls: 'transparentheader',
                 hidden: false,
                 items: [{
                     xtype:'button',
                     itemId: 'stopedit_tool_' + me.id,
-                    tooltip:'Save changes',
+                    tooltip: esapp.Utils.getTranslation('save_changes'), // 'Save changes',
                     glyph:0xf0c7,
                     cls: 'btntransparent',
                     hidden: false,

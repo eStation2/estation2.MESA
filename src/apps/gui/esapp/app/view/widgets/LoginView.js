@@ -66,27 +66,27 @@ Ext.define("esapp.view.widgets.LoginView",{
                 // needed for defaultButton
                 , itemId: 'username'
                 , hideLabel: true
-                , fieldLabel: 'User Name'
-                , emptyText: esapp.Utils.getTranslation('User name')
+                , fieldLabel: esapp.Utils.getTranslation('username')    // 'User Name'
+                , emptyText: esapp.Utils.getTranslation('username')
                 , margin: '4 5 0 5'
                 , width: 100
             }, {
                 bind: '{password}'
                 , hideLabel: true
-                , fieldLabel: 'Password'
-                , emptyText: esapp.Utils.getTranslation('Password')
+                , fieldLabel: esapp.Utils.getTranslation('password')    // 'Password'
+                , emptyText: esapp.Utils.getTranslation('password')
                 , inputType: 'password'
                 , margin: '4 5 0 5'
                 , width: 100
             }, {
                 xtype: 'splitbutton'
-                , text: 'Login'
+                , text: esapp.Utils.getTranslation('login')  // 'Login'
                 , margin: '4 10 0 5'
                 , formBind: false
                 , handler: 'onLoginClick'
                 , menu: {
                     items: [{
-                        text: 'Forgot password?'
+                        text: esapp.Utils.getTranslation('forgot_password')   // 'Forgot password?'
                         //, iconCls: 'fa fa-lock'
                         , glyph: 'xf023@FontAwesome'
                         , cls:'menu-glyph-color-red'
@@ -96,12 +96,12 @@ Ext.define("esapp.view.widgets.LoginView",{
                 }
             }, {
                 xtype: 'box'
-                , html: 'or'
+                , html: esapp.Utils.getTranslation('or')   // 'or'
                 , cls: 'text-white'
                 , margin: '8 5 0 0'
             }, {
                 xtype: 'button'
-                , text: 'Register'
+                , text: esapp.Utils.getTranslation('register')   // 'Register'
                 , margin: '4 45 0 5'
                 , formBind: false
                 , handler: 'onRegisterClick'
@@ -124,12 +124,12 @@ Ext.define("esapp.view.widgets.LoginView",{
             , items: [{
                 xtype: 'box'
                 , reference: 'UserLoggedIn'
-                , html: 'Hello '
+                , html: esapp.Utils.getTranslation('hello') + ' '   // 'Hello '
                 , cls: 'text-white'
                 , margin: '8 5 0 0'
             }, {
                 xtype: 'button'
-                , text: 'Logout'
+                , text: esapp.Utils.getTranslation('logout')   // 'Logout'
                 , margin: '4 45 0 5'
                 , formBind: false
                 , handler: 'onLogoutClick'
@@ -184,7 +184,7 @@ Ext.define("esapp.view.widgets.LoginView",{
         var  me = this;
         me.removeAll();
         me.add(me.logoutItems);
-        me.lookupReference('UserLoggedIn').setHtml('Hello ' + esapp.getUser().username);
+        me.lookupReference('UserLoggedIn').setHtml(esapp.Utils.getTranslation('hello') + ' ' + esapp.getUser().username);
 
         me.toggleUserFunctionality();
 
@@ -208,7 +208,7 @@ Ext.define("esapp.view.widgets.LoginView",{
         var  me = this;
         Ext.Msg.show({
              title:'Error'
-            ,msg:'Username or password incorrect!'
+            ,msg:esapp.Utils.getTranslation('username_password_incorrect')    // Username or password incorrect!
             ,icon:Ext.Msg.ERROR
             ,buttons:Ext.Msg.OK
         });

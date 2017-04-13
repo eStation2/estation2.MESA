@@ -24,16 +24,15 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             timeout : 300000,
             scope: me,
             params:{
+                charttype: me.charttype,
                 selectedTimeseries: me.selectedTimeseries,
                 yearTS: me.yearTS,
                 tsFromPeriod: Ext.Date.format(me.tsFromPeriod, 'Y-m-d'),
                 tsToPeriod: Ext.Date.format(me.tsToPeriod, 'Y-m-d'),
                 yearsToCompare: selectedYears,
-                //yearsToCompare: me.yearsToCompare,
                 tsFromSeason: Ext.Date.format(me.tsFromSeason, 'm-d'),
                 tsToSeason: Ext.Date.format(me.tsToSeason, 'm-d'),
-                WKT:me.wkt,
-                charttype: me.charttype
+                WKT:me.wkt
             },
             method: 'POST',
             success: function ( result, request ) {
@@ -77,7 +76,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                     me.timeseriesChart.subtitle = year;
                 })
                 if ( me.tsFromSeason != null && me.tsToSeason != null){
-                    me.timeseriesChart.subtitle = 'Season ' +  Ext.Date.format(me.tsFromSeason, 'm/d') + ' - ' + Ext.Date.format(me.tsToSeason, 'm/d') + ' of ' + me.timeseriesChart.subtitle;
+                    me.timeseriesChart.subtitle = esapp.Utils.getTranslation('season') + ' ' +  Ext.Date.format(me.tsFromSeason, 'm/d') + ' - ' + Ext.Date.format(me.tsToSeason, 'm/d') + ' ' + esapp.Utils.getTranslation('of') + ' ' + me.timeseriesChart.subtitle;
                 }
             }
         }
@@ -87,7 +86,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             me.timeseriesChart.subtitle = esapp.Utils.getTranslation('from') + ' ' + Ext.Date.format(me.tsFromPeriod, 'Y-m-d') + '  ' + esapp.Utils.getTranslation('to') + ' ' + Ext.Date.format(me.tsToPeriod, 'Y-m-d');
         }
         else if ( me.tsFromSeason != null && me.tsToSeason != null){
-            me.timeseriesChart.subtitle = 'Season ' +  Ext.Date.format(me.tsFromSeason, 'm/d') + ' - ' + Ext.Date.format(me.tsToSeason, 'm/d');
+            me.timeseriesChart.subtitle = esapp.Utils.getTranslation('season') + ' ' +  Ext.Date.format(me.tsFromSeason, 'm/d') + ' - ' + Ext.Date.format(me.tsToSeason, 'm/d');
         }
 
 
@@ -248,16 +247,16 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             }]
         }
 
-        if (!me.timeseriesChart.localRefresh) {
+        if (me.charttype == 'cumulative' && !me.timeseriesChart.localRefresh) {
             var TimeseriesCumulatedAverages = null;
             var TimeseriesCumulatedData = null;
-            var aboveAvgColor = '#0000ff';
+            var aboveAvgColor = '#009E00';
             me.timeseriesGraph.timeseries.forEach(function (timeserie) {
-                if (timeserie.cumulative) {
+                //if (timeserie.cumulative) {
                     //me.timeseriesGraph.cumulative = true;
-                    timeserie.type = 'line';
-                    timeserie.dashStyle = 'Solid';
-                    timeserie.lineWidth = 2;
+                    // timeserie.type = 'line';
+                    // timeserie.dashStyle = 'Solid';
+                    // timeserie.lineWidth = 2;
 
                     var cumulated = 0;
                     timeserie.data.forEach(function (datarecord) {
@@ -288,9 +287,9 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                     else if (timeserie.reference == true){
                         //console.info(timeserie);
                         TimeseriesCumulatedData = Ext.clone(timeserie.data);
-                        aboveAvgColor = timeserie.color;
+                        // aboveAvgColor = timeserie.color;
                     }
-                }
+                //}
             });
 
 
@@ -329,8 +328,8 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
 
                 var belowAvg = {
                     data: cumulatedNegative,
-                    fillColor: "#ff0000",
-                    color: "#ff0000",
+                    fillColor: "#ff0000",  // "#ff0000",   // "#009E00",  //
+                    color: "#ff0000",  // "#ff0000",       // "#009E00",  //
                     id: "Below",
                     name: "Below",
                     type: "area",
@@ -793,18 +792,12 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
 
 
         me.tschart = new Highcharts.Chart({
-            //colors: ['#006600', '#000000', '#0070CC', '#00008A', '#8C8C8C', '#1EB611', '#FF9655', '#FFF263', '#6AF9C4'],
             chart: {
                 renderTo: 'tschart_' + me.id,
                 className: 'chartfitlayout',
                 zoomType: 'xy',
                 spacingRight: spacingRight,
                 alignTicks: true,
-                //margin: chartMargin, // [35, 15, 65, 65],  // for legend on the bottom of the chart
-                //marginTop:top,
-                //marginRight: marginright,
-                //marginBottom: 160,
-                //marginLeft:left,
                 plotBackgroundImage: plotBackgroundImage
             },
             exporting: {
@@ -819,60 +812,29 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
 
                 }
             },
-            //exporting: {
-            //    //chartOptions: { // specific options for the exported image
-            //    //    plotOptions: {
-            //    //        series: {
-            //    //            dataLabels: {
-            //    //                enabled: false
-            //    //            }
-            //    //        }
-            //    //    }
-            //    //},
-            //    scale: 1,
-            //    fallbackToExportServer: false
-            //},
             credits: {
                 enabled: false
             },
-            //plotOptions: {
-            //    series: {
-            //        marker: {
-            //            enabled: false,
-            //            states: {
-            //                hover: {
-            //                    enabled: true,
-            //                    radius: 4,
-            //                    radiusPlus: 0
-            //                    // lineWidthPlus: 2,
-            //                }
-            //            }
-            //        },
-            //        states: {
-            //            hover: {
-            //                halo: {
-            //                    size: 0
-            //                },
-            //                lineWidthPlus: 1
-            //            }
-            //        }
-            //    },
-            //    column: {
-            //        pointPadding: 10,
-            //        //pointWidth: 15,
-            //        borderWidth: 0,
-            //        groupPadding: 10,
-            //        shadow: false
-            //    },
-            //    area: {
-            //        stacking: 'normal',
-            //        lineWidth: 1
-            //    }
-            //},
+            plotOptions: {
+                series: {
+                    cursor: 'pointer',
+                    point: {
+                        events: {
+                            click: function(event) {
+                                var series = me.tschart.series[0];
+                                series.data.forEach(function(point) {
+                                    point.update({ color: series.color }, true, false);
+                                });
+                                series.redraw();
+                                this.update({ color: '#ff0000' }, true, false);
+                            }
+                        }
+                    }
+                }
+            },
             title: {
                 text: me.timeseriesChart.title,
                 align: 'center',
-                //y: 50,
                 style: {
                     color: me.timeseriesChart.chart_title_font_color,
                     "font-family": 'Arial, Verdana, Helvetica, sans-serif',
@@ -883,7 +845,6 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             subtitle: {
                 text: me.timeseriesChart.subtitle,
                 align: 'center',
-                //y: 65,
                 style: {
                     color: me.timeseriesChart.chart_subtitle_font_color,
                     "font-family": 'Arial, Verdana, Helvetica, sans-serif',
@@ -892,28 +853,6 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 }
             },
             xAxis: xAxis,
-            //xAxis: [{
-            //    type: 'datetime',
-            //    //tickmarkPlacement: 'on', // on between  - For categorized axes only!
-            //    startOnTick: false,
-            //    labels: xAxisLabels,
-            //    tickInterval: 30 * 24 * 3600 * 1000
-            //
-            //    //labels: {
-            //    //    enabled: 1,
-            //    //    y:28,
-            //    //    //step: 1,
-            //    //    style: xaxis_labelstyle,
-            //    //    formatter: function() {
-            //    //        return Highcharts.dateFormat('%b', this.value);
-            //    //    }
-            //    //}
-            //    //,minorTickInterval: 3
-            //    //dateTimeLabelFormats: {
-            //    //    day: '%e %b'
-            //    //},
-            //    //categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            //}],
             yAxis: Yaxes,
             tooltip: {
                 shared: true,
@@ -932,11 +871,8 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 layout: 'horizontal',  // horizontal vertical
                 align: 'center', // center left right
                 verticalAlign: 'bottom',
-                //x: 80,
-                //y: 55,
                 floating: false,
                 backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF',
-                //borderColor: Highcharts.theme.legendBackgroundColor || '#FFFFFF',
                 symbolPadding: 3,
                 symbolWidth: 35,
                 symbolHeight: 25,
@@ -947,7 +883,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                     "font-family": 'Arial, Verdana, Helvetica, sans-serif',
                     "fontWeight": 'bold',
                     "fontSize": me.timeseriesChart.legend_title_font_size + 'px',     // '18px',
-                    color: me.timeseriesChart.legend_title_font_color     //'black'
+                    color: me.timeseriesChart.legend_title_font_color
                 }
 
             },
@@ -959,39 +895,366 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
         //console.info(me.tschart);
     },
 
+    createMatrixChart: function(mecallback) {
+        var me = mecallback;
+        var plotBackgroundImage = '';
+        var categories = [];
+        var legend = {};
+
+        if (!me.timeseriesGraph.data_available) {
+            plotBackgroundImage = 'resources/img/no_data.gif';
+        }
+        var timeseries = me.timeseriesGraph.timeseries[0];
+        //console.info(timeseries);
+
+        var colsize = 11 * 24 * 36e5; // 10 days    Dekad
+        if (me.timeseriesGraph.data_available){
+            if (timeseries.frequency_id == 'e1day')
+                colsize = 1 * 24 * 36e5; // 1 day
+            if (timeseries.frequency_id == 'e1modis8day')
+                colsize = 8 * 24 * 36e5; // 8 days
+            if (timeseries.frequency_id == 'e1modis16day')
+                colsize = 16 * 24 * 36e5; // 16 days
+            if (timeseries.frequency_id == 'e1month')
+                colsize = 30 * 24 * 36e5; // 30 days
+            if (timeseries.frequency_id == 'e3month')
+                colsize = 3*30 * 24 * 36e5; // 3*30 days
+            if (timeseries.frequency_id == 'e6month')
+                colsize = 6*30 * 24 * 36e5; // 6*30 days
+            if (timeseries.frequency_id == 'e1dekad')
+                colsize = 11 * 24 * 36e5; // 11 days
+        }
+
+        var series = [];
+        if (me.timeseriesGraph.data_available) {
+            series = [{
+                //type: 'heatmap',
+                //colorByPoint: true,
+                //colors: ['#90006F', '#3300CC', '#004AFF', '#00F5FF', '#00FF00', '#FFFF00', '#FF7F00', '#FF0000', '#690000'],    // me.timeseriesGraph.colors
+                name: timeseries.name,
+                borderWidth: 0,
+                borderColor: "#ffffff",
+                nullColor: 'transparent',
+                colsize: colsize,   // 2 * 24 * 36e5, // 11 days     // 30 * me.timeseriesGraph.yaxes[0].categories.length,  // (me.tschart.plotWidth / (timeseries.data.length / me.timeseriesGraph.categories.length)),    //
+                data: timeseries.data
+            }]
+        }
+
+
+        var colorAxis = me.timeseriesGraph.colorAxis;
+
+        if (Ext.isDefined(colorAxis.stops)) {
+            legend = {
+                layout: 'horizontal',  // horizontal vertical
+                align: 'center', // center left right
+                verticalAlign: 'bottom',    // bottom
+                width: 460,
+                symbolWidth: 450,
+                itemStyle: {
+                    "font-family": 'Arial, Verdana, Helvetica, sans-serif',
+                    "fontWeight": 'bold',
+                    "fontSize": me.timeseriesChart.legend_title_font_size + 'px'
+                }
+            };
+
+            colorAxis.labels = {
+                formatter: function () {
+                    //console.info(this.value);
+                    //console.info(this.value.toFixed(2));
+                    if (this.value % 1 === 0)
+                        return this.value;
+                    else
+                        return this.value.toFixed(2);
+                }
+            }
+        }
+        else {
+            legend = {
+                layout: 'vertical',  // horizontal vertical
+                align: 'right', // center left right
+                verticalAlign: 'top',    // bottom
+                x: 0,
+                y: 100,
+                itemStyle: {
+                    "font-family": 'Arial, Verdana, Helvetica, sans-serif',
+                    "fontWeight": 'bold',
+                    "fontSize": me.timeseriesChart.legend_title_font_size + 'px'
+                }
+            };
+        }
+
+        var xAxisLabels = {
+            enabled: 1,
+            y: 34,
+            style: {
+                color: me.timeseriesChart.xaxe_font_color,
+                "font-family": 'Arial, Verdana, Helvetica, sans-serif',
+                "fontWeight": 'bold',
+                "fontSize": me.timeseriesChart.xaxe_font_size + 'px',
+                margin: '0 0 0 0'
+            },
+            format: '{value:%b}' // long month
+            //formatter: function () {
+            //    return Highcharts.dateFormat('%b', this.value);
+            //}
+        };
+
+        var xAxis = [{
+            type: 'datetime',
+            reversed: false,
+            ordinal: true,
+            showEmpty: false,
+            tickmarkPlacement: 'on',      // on between  - For categorized axes only!
+            startOnTick: false,
+            lineWidth: 1,
+            labels: xAxisLabels
+            ,tickInterval: 30 * 24 * 3600 * 1000    //   colsize  //
+        }];
+
+        //me.timeseriesGraph.timeseries.forEach(function (timeserie) {
+        //    timeserie.data.forEach(function (dataItem){
+        //        dataItem.color = esapp.Utils.convertRGBtoHex(dataItem.color);
+        //    })
+        //    timeserie.color = esapp.Utils.convertRGBtoHex(timeserie.color);
+        //});
+
+
+        var Yaxes = [];
+        var timeseries_names = '';
+        for (var yaxescount = 0; yaxescount < me.timeseriesGraph.yaxes.length; yaxescount++) {
+            var opposite = false;
+            if (me.timeseriesGraph.yaxes[yaxescount].opposite === 'true' ||
+                me.timeseriesGraph.yaxes[yaxescount].opposite == true ||
+                me.timeseriesGraph.yaxes[yaxescount].opposite == 'true')
+                opposite = true;
+
+            var unit = me.timeseriesGraph.yaxes[yaxescount].unit;
+            if (unit == null || unit.trim() == '')
+                unit = ''
+            else unit = ' (' + unit + ')'
+
+            var min = me.timeseriesGraph.yaxes[yaxescount].min;
+            if (min == null || min == '' || min == 'null'){
+                min = null
+            }
+            else {
+                min =  parseFloat(me.timeseriesGraph.yaxes[yaxescount].min)
+            }
+            var max = me.timeseriesGraph.yaxes[yaxescount].max;
+            if (max == null || max == '' || max == 'null') {
+                max = null
+            }
+            else {
+                max = parseFloat(me.timeseriesGraph.yaxes[yaxescount].max)
+            }
+
+            me.timeseriesGraph.yaxes[yaxescount].title_color = esapp.Utils.convertRGBtoHex(me.timeseriesGraph.yaxes[yaxescount].title_color);
+
+            if (yaxescount == 0) me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size = me.timeseriesChart.yaxe1_font_size;
+            if (yaxescount == 1) me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size = me.timeseriesChart.yaxe2_font_size;
+            if (yaxescount == 2) me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size = me.timeseriesChart.yaxe3_font_size;
+
+            var yaxe = {
+                id: me.timeseriesGraph.yaxes[yaxescount].id,
+                //categories: me.timeseriesGraph.yaxes[yaxescount].categories,
+                //tickAmount: 8,
+                gridLineWidth: 1,
+                startOnTick: false,
+                endOnTick: false,
+                offset: 10,
+                labels: {
+                    format: '{value} ',
+                    style: {
+                        color: me.timeseriesGraph.yaxes[yaxescount].title_color,  // Highcharts.getOptions().colors[yaxescount],
+                        "font-family": 'Arial, Verdana, Helvetica, sans-serif',
+                        "fontWeight": 'bold',
+                        "fontSize": me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size + 'px'
+                    }
+                },
+                title: {
+                    text: me.timeseriesGraph.yaxes[yaxescount].title + unit,
+                    style: {
+                        color: me.timeseriesGraph.yaxes[yaxescount].title_color,  // Highcharts.getOptions().colors[yaxescount],
+                        "font-family": 'Arial, Verdana, Helvetica, sans-serif',
+                        "fontWeight": 'bold',
+                        "fontSize": me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size + 'px'
+                    }
+                },
+                opposite: opposite
+                ,min: min
+                ,max: max
+            };
+            Yaxes.push(yaxe);
+            timeseries_names += me.timeseriesGraph.yaxes[yaxescount].title.replace(' ', '_') + '_';
+        }
+
+        me.filename = timeseries_names + me.timeseriesChart.title.replace(' ', '_') + '_' + me.timeseriesChart.subtitle.toString().replace(' ', '_');
+
+        var spacingRight = 10;
+        //if (me.timeseriesGraph.yaxes.length == 1) {
+        //    spacingRight = 40;
+        //}
+
+        //console.info(me.timeseriesGraph.colors);
+        //
+        //Highcharts.setOptions({
+        //    series: {
+        //        colors: ['#90006F', '#3300CC', '#004AFF', '#00F5FF', '#00FF00', '#FFFF00', '#FF7F00', '#FF0000', '#690000']    // me.timeseriesGraph.colors
+        //    }
+        //});
+        //
+        //Highcharts.theme = {
+        //    colors: ['#90006F', '#3300CC', '#004AFF', '#00F5FF', '#00FF00', '#FFFF00', '#FF7F00', '#FF0000', '#690000']    // me.timeseriesGraph.colors
+        //}
+        //
+        //Highcharts.setOptions(Highcharts.theme);
+        //
+        //me.tschart = new Highcharts.Chart(Highcharts.merge(Highcharts.theme,{
+        me.tschart = new Highcharts.Chart({
+            //colorByPoint: true,
+            //colors: ['#90006F', '#3300CC', '#004AFF', '#00F5FF', '#00FF00', '#FFFF00', '#FF7F00', '#FF0000', '#690000'],    // me.timeseriesGraph.colors
+            //colors: ['rgba(64,19,117,0.05)', 'rgba(64,19,117,0.2)', 'rgba(64,19,117,0.4)', 'rgba(64,19,117,0.5)', 'rgba(64,19,117,0.6)', 'rgba(64,19,117,0.8)', 'rgba(64,19,117,1)'],
+
+            chart: {
+                type: 'heatmap',
+                renderTo: 'tschart_' + me.id,
+                className: 'chartfitlayout',
+                spacingRight: spacingRight,
+                plotBackgroundImage: plotBackgroundImage
+            },
+
+            exporting: {
+                enabled: false,
+                buttons: {
+                    exportButton: {
+                        enabled: false
+                    },
+                    printButton: {
+                        enabled: false
+                    }
+
+                }
+            },
+
+            credits: {
+                enabled: false
+            },
+
+            title: {
+                text: me.timeseriesChart.title,
+                align: 'center',
+                style: {
+                    color: me.timeseriesChart.chart_title_font_color,
+                    "font-family": 'Arial, Verdana, Helvetica, sans-serif',
+                    "fontWeight": 'bold',
+                    "fontSize": me.timeseriesChart.chart_title_font_size + 'px'
+                }
+            },
+
+            subtitle: {
+                text: me.timeseriesChart.subtitle,
+                align: 'center',
+                style: {
+                    color: me.timeseriesChart.chart_subtitle_font_color,
+                    "font-family": 'Arial, Verdana, Helvetica, sans-serif',
+                    "fontWeight": 'bold',
+                    "fontSize": me.timeseriesChart.chart_subtitle_font_size + 'px'
+                }
+            },
+
+            //plotOptions: {
+                //heatmap: {
+                //    //colorByPoint: true,
+                //    colors: ['#90006F', '#3300CC', '#004AFF', '#00F5FF', '#00FF00', '#FFFF00', '#FF7F00', '#FF0000', '#690000']    // me.timeseriesGraph.colors
+                //}
+                //series: {
+                //    turboThreshold: 0
+                //    point: {
+                //        events: {
+                //            mouseOver: function () {
+                //                console.log(this);
+                //                this.shapeArgs.width = 2;
+                //            }
+                //        }
+                //    }
+                //}
+            //},
+
+            series: series,
+
+            xAxis: xAxis,
+
+            yAxis: Yaxes,
+
+            colorAxis: colorAxis,
+
+            //legend: {
+            //    align: 'right',
+            //    layout: 'vertical',
+            //    margin: 0,
+            //    verticalAlign: 'top',
+            //    y: 25,
+            //    symbolHeight: 280
+            //},
+
+            legend: legend,
+
+            tooltip: {
+                formatter: function () {
+                    if (this.point.value == null){
+                        return false;
+                    }
+                    else {
+                        return '<b>' + Highcharts.dateFormat('%d %b', this.point.x) + ' ' + this.point.y +
+                                //'</b> Year: <br><b>' + this.point.y + '</b>' +
+                            '<br>' + this.point.value
+                            ;
+                    }
+                    //return '<b>Date:' + this.series.xAxis.categories[this.point.x] + '</b> Value: <br><b>' +
+                    //    this.point.value + '</b> Year: <br><b>' + this.series.yAxis.categories[this.point.y] + '</b>';
+                }
+            }
+        });
+        //}));
+
+        me.tschart.setSize(document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight);
+        me.tschart.redraw();
+        //console.info(me.tschart);
+    },
+
     generateChart: function(){
         var me = this.getView();
         var chartpropertiesStore = this.getStore('chartproperties');
 
-        //if (me.charttype == 'xy'){
-            chartpropertiesStore.load({
-                params: {
-                    charttype: me.charttype
-                },
-                callback:function(){
-                    me.getController().setDefaultChartDrawProperties();
-                    chartpropertiesStore.each(function(chartproperties) {
-                        var height = parseInt(chartproperties.get('chart_height'));
-                        if (height > Ext.getBody().getViewSize().height-80){
-                            height = Ext.getBody().getViewSize().height-80
-                        }
-                        me.setSize(parseInt(chartproperties.get('chart_width')), height);
-                    });
-                    if (me.charttype == 'ranking'){
-                        me.getController().getTimeseries(me.getController().createRankingChart);
+        chartpropertiesStore.load({
+            params: {
+                charttype: me.charttype
+            },
+            callback:function(){
+                me.getController().setDefaultChartDrawProperties();
+                chartpropertiesStore.each(function(chartproperties) {
+                    var height = parseInt(chartproperties.get('chart_height'));
+                    if (height > Ext.getBody().getViewSize().height-80){
+                        height = Ext.getBody().getViewSize().height-80
                     }
-                    else {
-                        me.getController().getTimeseries(me.getController().createDefaultChart);
-                    }
+                    me.setSize(parseInt(chartproperties.get('chart_width')), height);
+                });
+                if (me.charttype == 'ranking'){
+                    me.getController().getTimeseries(me.getController().createRankingChart);
                 }
-            });
-        //}
+                else if (me.charttype == 'matrix'){
+                    me.getController().getTimeseries(me.getController().createMatrixChart);
+                }
+                else {
+                    me.getController().getTimeseries(me.getController().createDefaultChart);
+                }
+            }
+        });
     },
 
     refreshChart: function(){
         var me = this.getView();
         var chartpropertiesStore = this.getStore('chartproperties');
-        //var timeseriesselections = Ext.getCmp('analysismain').getController().getTimeseriesSelections();
         var timeseriesselections = Ext.getCmp('timeserieschartselection').getController().getTimeseriesSelections(me.charttype);
         var chartdrawpropertiespanel = this.lookupReference('chart_draw_properties_' + me.id);
 
@@ -1016,26 +1279,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             me.tschart = null;
 
             this.generateChart();
-
-            ////if (me.charttype == 'default'){
-            //    chartpropertiesStore.load({
-            //        params: {
-            //            charttype: me.charttype
-            //        },
-            //        callback:function(){
-            //            me.getController().setDefaultChartDrawProperties();
-            //            //chartpropertiesStore.each(function(chartproperties) {
-            //            //    me.setSize(parseInt(chartproperties.get('chart_width')), parseInt(chartproperties.get('chart_height')));
-            //            //});
-            //            if( me.tschart instanceof Highcharts.Chart) {
-            //                me.tschart.destroy();
-            //            }
-            //            me.getController().getTimeseries(me.getController().createDefaultChart);
-            //        }
-            //    });
-            ////}
         }
-
     },
 
     openChartProperties: function() {
@@ -1676,7 +1920,17 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
 
                                     me.timeseriesChart.localRefresh = true;
                                     saveChartProperty(recordId, value);
-                                    me.getController().createDefaultChart(me);
+
+                                    if (me.charttype == 'ranking'){
+                                        me.getController().createRankingChart(me);
+                                    }
+                                    else if (me.charttype == 'matrix'){
+                                        me.getController().createMatrixChart(me);
+                                    }
+                                    else {
+                                        me.getController().createDefaultChart(me);
+                                    }
+
                                 //}
                             }
                         },

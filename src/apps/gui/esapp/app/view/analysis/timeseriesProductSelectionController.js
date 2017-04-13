@@ -122,7 +122,8 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
 
             var TSDrawPropertiesWin = new Ext.Window({
                  id:'TSDrawPropertiesWin'
-                ,title: esapp.Utils.getTranslation('Time series draw properties for ') + tsdrawprobs_record.get('productcode') + ' - ' + tsdrawprobs_record.get('version') + ' - ' +  tsdrawprobs_record.get('subproductcode')
+                ,title: esapp.Utils.getTranslation('ts_draw_properties_for') + ' '   // 'Time series draw properties for'
+                        + tsdrawprobs_record.get('productcode') + ' - ' + tsdrawprobs_record.get('version') + ' - ' +  tsdrawprobs_record.get('subproductcode')
                 ,width:450
                 ,plain: true
                 ,modal: true
@@ -241,6 +242,155 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
             TSDrawPropertiesWin.alignTo(gridview.getEl(),"r-tr", [-6, 0]);  // See: http://www.extjs.com/deploy/dev/docs/?class=Ext.Window&member=alignTo
         }
     }
+
+    ,TimeseriesProductsGridRowClick: function(gridview, record, colIndex, icon, e, rec) {
+        var me = this.getView();
+        var gridSelectedTS = 'selected-timeseries-mapset-dataset-grid_'+ me.charttype;
+        var selectedTimeseriesStore = Ext.getCmp(gridSelectedTS).getStore();
+        var yearsData = [];
+        //var record = me.getSelection()[0];
+        var newrecord = Ext.clone(record);
+
+        //record.get('selected') ? record.set('selected', false) : record.set('selected', true);
+        //record.get('selected') ? selectedTimeseriesStore.add(record) : selectedTimeseriesStore.remove(record);
+        //
+        //if (me.cumulative){
+        //    newrecord.set('cumulative', true);
+        //}
+
+        if (selectedTimeseriesStore.count() > 0){
+            var recordExists = false;
+            selectedTimeseriesStore.getData().each(function(product) {
+                if (product.get('productmapsetid') == record.get('productmapsetid') && product.get('subproductcode') == record.get('subproductcode')){
+                    recordExists = true;
+                }
+            });
+            if (!recordExists){
+                if (!me.multiplevariables){
+                    selectedTimeseriesStore.removeAll();
+                }
+                newrecord.set('selected', true);
+                selectedTimeseriesStore.add(newrecord);
+            }
+            //var  recordExists = selectedTimeseriesStore.findRecord('productmapsetid', record.get('productmapsetid'), 0, true);
+            //console.info(recordExists);
+            //if (recordExists != null ){
+            //    console.info(recordExists.get('subproductcode'));
+            //    console.info(record.get('subproductcode'));
+            //    if (!(recordExists.get('subproductcode') == record.get('subproductcode'))){
+            //        record.set('selected', true);
+            //        selectedTimeseriesStore.add(record);
+            //    }
+            //}
+        }
+        else {
+            if (!me.multiplevariables){
+                selectedTimeseriesStore.removeAll();
+            }
+            newrecord.set('selected', true);
+            selectedTimeseriesStore.add(newrecord);
+        }
+
+        selectedTimeseriesStore.getData().each(function(product) {
+            yearsData = esapp.Utils.union_arrays(yearsData, product.get('years'));
+
+            //alltimeseriesmapsetdatasets.push(product);
+            //// First loop the mapsets to get the by the user selected mapset if the product has > 1 mapsets.
+            //var datasets = product.get('productmapsets')[0].timeseriesmapsetdatasets;
+            ////var datasets = product.get(children)[0].children;
+            //datasets.forEach(function(datasetObj) {
+            //    //yearsData = Ext.Object.merge(yearsData, datasetObj.years);
+            //    yearsData = esapp.Utils.union_arrays(yearsData, datasetObj.years);
+            //    alltimeseriesmapsetdatasets.push(datasetObj);
+            //});
+        });
+        var yearsDataDict = [];
+        yearsData.forEach(function(year) {
+            yearsDataDict.push({'year': year});
+        });
+
+        //if (!record.get('selected') && Ext.isObject(Ext.getCmp('ts_selectyearstocompare_'+me.charttype).searchPopup)){
+        //    Ext.getCmp('ts_selectyearstocompare_'+me.charttype).searchPopup.lookupReference('searchGrid').getSelectionModel().deselectAll();
+        //}
+        //Ext.getCmp('timeserieschartselection').getViewModel().getStore('years').setData(yearsDataDict);
+        me.getViewModel().get('years').setData(yearsDataDict);
+
+        //Ext.getCmp('selected-timeseries-mapset-dataset-grid').show();
+        //Ext.getCmp('ts_timeframe').show();
+        //Ext.getCmp('gettimeseries_btn').setDisabled(false);
+        //console.info(me.charttype);
+        if (me.charttype == 'matrix'){
+            this.getColorSchemes(record);
+        }
+    }
+
+    ,getColorSchemes: function(record) {
+        var me = this.getView();
+        var colorSchemesStore = this.getStore('productcolorschemes');    //    Ext.getCmp('colorschemesMatrixTSProductGrid').getStore();   //
+        var selectedproduct = {
+            productcode:record.get('productcode'),
+            productversion:record.get('version'),
+            mapsetcode:record.get('mapsetcode'),
+            subproductcode:record.get('subproductcode'),
+            productname:record.get('product_descriptive_name'),
+            date_format:record.get('date_format')
+        };
+        //console.info(me.up().up());
+        //Ext.getCmp('colorschemesMatrixTSProductGrid').hide();
+        Ext.getCmp('colorschemesMatrixTSProductGrid').getStore().removeAll();
+
+        colorSchemesStore.load({
+            params: selectedproduct,
+            callback:function(records, options, success){
+                if (records.length>0){
+                    var nodefault = true;
+                    for (var i = 0; i < records.length; i++) {
+                        if (records[i].get('default_legend') == 'true' || records[i].get('default_legend')) {
+                            nodefault = false;
+                            me.up().up().legend_id = records[i].get('legend_id');
+                        }
+
+                    }
+                    if (nodefault) {
+                        records[0].set('default_legend', true);
+                        records[0].set('defaulticon', 'x-grid3-radio-col-on');
+                        //me.up().up().legend_id = records[0].get('legend_id');
+                    }
+                    Ext.getCmp('colorschemesMatrixTSProductGrid').getStore().add(records);
+                    Ext.getCmp('colorschemesMatrixTSProductGrid').getStore().sort('default_legend','DESC');
+                    Ext.getCmp('colorschemesMatrixTSProductGrid').show();
+                }
+            }
+        });
+
+        //console.info(colorSchemesStore);
+        //console.info(this.getStore('productcolorschemes'));
+    },
+
+    //onRadioColumnAction:function(view, rowIndex, colIndex, item, e, record ) {
+    onRadioColumnAction:function(view, record ) {
+        //var me = this.getView();
+
+        switch(record.get('defaulticon')) {
+            case 'x-grid3-radio-col':
+                    view.getStore('colorschemes').each(function(rec){
+                        //if (view.getStore().indexOf(rec) != rowIndex) {
+                            rec.set('default_legend', false);
+                            rec.set('defaulticon', 'x-grid3-radio-col');
+                        //}
+                    },this);
+
+                    record.set('default_legend', true);
+                    record.set('defaulticon', 'x-grid3-radio-col-on');
+                    view.getStore().sort('default_legend','DESC');
+                    //me.up().up().legend_id = record.get('legend_id');
+                    //console.info(record);
+                    //console.info(me.up().up());
+                break;
+            default:
+        }
+    }
+
 
     //,__TimeseriesProductsGridRowClick: function(gridview, record){
     //    //var selectedTimeSeriesProducts = gridview.getSelectionModel().selected.items;

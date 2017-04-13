@@ -5,7 +5,7 @@
  */
 
 
-console.info('before onReady');
+// console.info('before onReady');
 //esapp = [];
 //esapp.globals = [];
 //esapp.globals['selectedLanguage'] = '';

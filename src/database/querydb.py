@@ -24,12 +24,38 @@ db = connectdb.ConnectDB().db
 dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
 
 
+def get_product_default_legend_steps(productcode, version, subproductcode, echo=False):
+    global dbschema_analysis
+    try:
+        query = " SELECT ls.from_step, ls.to_step, ls.color_rgb, ls.color_label, p.scale_factor, p.scale_offset FROM analysis.product_legend pl " + \
+                " INNER JOIN products.product p ON pl.productcode = p.productcode AND pl.version = p.version AND pl.subproductcode = p.subproductcode " + \
+                " INNER JOIN analysis.legend_step ls ON pl.legend_id = ls.legend_id " \
+                " WHERE pl.productcode = '" + productcode + "'" + \
+                "   AND pl.version = '" + version + "'" + \
+                "   AND pl.subproductcode = '" + subproductcode + "'" + \
+                "   AND pl.default_legend = TRUE " + \
+                " ORDER BY  ls.from_step "
+
+        result = dbschema_analysis.execute(query)
+        result = result.fetchall()
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_product_default_legend_steps: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
 def get_user_map_templates(userid, echo=False):
     global dbschema_analysis
     try:
         query = "SELECT * FROM analysis.map_templates WHERE userid = '" + userid + "'"
 
-        result = db.execute(query)
+        result = dbschema_analysis.execute(query)
         result = result.fetchall()
         return result
     except:
@@ -47,7 +73,7 @@ def getusers(echo=False):
     global dbschema_analysis
     try:
         query = "SELECT * FROM analysis.users"
-        result = db.execute(query)
+        result = dbschema_analysis.execute(query)
         result = result.fetchall()
         return result
     except:
@@ -65,7 +91,7 @@ def checklogin(login=None, echo=False):
     global dbschema_analysis
     try:
         query = "SELECT * FROM analysis.users WHERE userid = '" + login.username + "' AND password = '" + login.password + "'"
-        result = db.execute(query)
+        result = dbschema_analysis.execute(query)
         result = result.fetchall()
         return result
     except:
@@ -120,8 +146,8 @@ def update_yaxe_timeseries_drawproperties(yaxe, echo=False):
                 "   ,aggregation_max = " + str(aggregation_max) + \
                 " WHERE yaxes_id = '" + yaxe['id'] + "'"
         # print query
-        result = db.execute(query)
-        db.commit()
+        result = dbschema_analysis.execute(query)
+        dbschema_analysis.commit()
 
         status = True
         return status
@@ -141,7 +167,7 @@ def get_timeseries_drawproperties(echo=False):
     global dbschema_analysis
     try:
         query = "SELECT * FROM analysis.timeseries_drawproperties order by productcode asc, subproductcode asc, version asc"
-        result = db.execute(query)
+        result = dbschema_analysis.execute(query)
         result = result.fetchall()
         # print result
         return result
@@ -201,7 +227,7 @@ def get_chart_drawproperties(charttype='default', echo=False):
     global dbschema_analysis
     try:
         query = "SELECT * FROM analysis.chart_drawproperties WHERE chart_type = '" + charttype + "'"
-        result = db.execute(query)
+        result = dbschema_analysis.execute(query)
         result = result.fetchall()
 
         return result
@@ -220,7 +246,7 @@ def get_layers(echo=False):
     global dbschema_analysis
     try:
         query = "SELECT * FROM analysis.layers order by menu asc, submenu asc, layerlevel asc"
-        result = db.execute(query)
+        result = dbschema_analysis.execute(query)
         result = result.fetchall()
 
         return result
@@ -236,14 +262,14 @@ def get_layers(echo=False):
 
 
 def get_legend_totals(legendid, echo=False):
-    global db
+    global dbschema_analysis
     try:
 
         query = " SELECT ts.TotSteps, tsl.TotColorLabels, tgl.TotGroupLabels " + \
                 " FROM ( SELECT count(*) as TotSteps FROM analysis.legend_step ls1 WHERE ls1.legend_id = " + str(legendid) + " ) ts, " + \
                 "      ( SELECT count(color_label) as TotColorLabels FROM analysis.legend_step ls2 WHERE ls2.legend_id = " + str(legendid) + " AND trim(color_label) != '') tsl, " + \
                 "      ( SELECT count(group_label) as TotGroupLabels FROM analysis.legend_step ls3 WHERE ls3.legend_id = " + str(legendid) + " AND trim(group_label) != '') tgl "
-        legendtotals = db.execute(query)
+        legendtotals = dbschema_analysis.execute(query)
         legendtotals = legendtotals.fetchall()
 
         return legendtotals
@@ -254,8 +280,8 @@ def get_legend_totals(legendid, echo=False):
         # Exit the script and print an error telling what happened.
         logger.error("get_legend_totals: Database query error!\n -> {}".format(exceptionvalue))
     finally:
-        if db.session:
-            db.session.close()
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
 
 
 def get_spirits(echo=False):
@@ -402,7 +428,7 @@ def get_categories(echo=False):
     global db
     try:
         # query = "SELECT * FROM products.product_category ORDER BY category_id"
-        query = "select * from products.product_category where category_id in (select distinct category_id from products.product where activated = true)"
+        query = "select * from products.product_category where category_id in (select distinct category_id from products.product where activated = true) ORDER BY order_index"
         categories = db.execute(query)
         categories = categories.fetchall()
 
@@ -740,6 +766,7 @@ def get_timeseries_subproducts(echo=False,  productcode=None, version='undefined
                     p.c.productcode,
                     p.c.subproductcode,
                     p.c.version,
+                    p.c.display_index,
                     # p.c.defined_by,
                     # p.c.activated,
                     p.c.date_format,
@@ -816,43 +843,81 @@ def get_timeseries_products(echo=False,  masked=None):
 
     global db
     try:
-        pc = db.product_category._table
-        p = db.product._table
 
-        s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productid'),
-                    p.c.productcode,
-                    p.c.subproductcode,
-                    p.c.version,
-                    # p.c.defined_by,
-                    p.c.date_format,
-                    p.c.product_type,
-                    p.c.descriptive_name.label('descriptive_name'),        # prod_descriptive_name
-                    p.c.description,
-                    p.c.frequency_id,
-                    p.c.masked,
-                    p.c.timeseries_role,
-                    pc.c.category_id,
-                    pc.c.descriptive_name.label('cat_descr_name'),
-                    pc.c.order_index]).select_from(p.outerjoin(pc, p.c.category_id == pc.c.category_id))
-
-        s = s.alias('pl')
-        pl = db.map(s, primary_key=[s.c.productid])
+        query = "select p.productcode || '_' || p.version as productid, " + \
+                "       p.productcode, " + \
+                "       p.subproductcode, " + \
+                "       p.version, " + \
+                "       p.display_index, " + \
+                "       p.date_format, " + \
+                "       p.product_type, " + \
+                "       p.descriptive_name, " + \
+                "       p.description, " + \
+                "       p.frequency_id, " + \
+                "       p.masked, " + \
+                "       p.timeseries_role, " + \
+                "       pc.category_id, " + \
+                "       pc.descriptive_name as cat_descr_name, " + \
+                "       pc.order_index, " + \
+                "       pnative.descriptive_name as group_product_descriptive_name " + \
+                "from products.product p " + \
+                "     left outer join products.product_category pc on p.category_id = pc.category_id " + \
+                "     left outer join products.product pnative on p.productcode = pnative.productcode and p.version = pnative.version " + \
+                "where p.timeseries_role = 'Initial' " + \
+                "  and pnative.product_type = 'Native' "
 
         if masked is None:
-            where = and_(pl.c.timeseries_role == 'Initial')
+            where = ""
         else:
             if not masked:
-                where = and_(pl.c.timeseries_role == 'Initial', pl.c.masked == 'f')
+                where = " and p.masked == 'f' "
             else:
-                where = and_(pl.c.timeseries_role == 'Initial', pl.c.masked == 't')
+                where = " and p.masked == 't' "
 
-        productslist = pl.filter(where).order_by(asc(pl.c.order_index), asc(pl.c.productcode)).all()
-
-        # if echo:
-        #     for row in productslist:
-        #         print row
-
+        query += where
+        productslist = db.execute(query)
+        productslist = productslist.fetchall()
+        # print result
         return productslist
+
+        # pc = db.product_category._table
+        # p = db.product._table
+        #
+        # s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productid'),
+        #             p.c.productcode,
+        #             p.c.subproductcode,
+        #             p.c.version,
+        #             p.c.display_index,
+        #             # p.c.defined_by,
+        #             p.c.date_format,
+        #             p.c.product_type,
+        #             p.c.descriptive_name.label('descriptive_name'),        # prod_descriptive_name
+        #             p.c.description,
+        #             p.c.frequency_id,
+        #             p.c.masked,
+        #             p.c.timeseries_role,
+        #             pc.c.category_id,
+        #             pc.c.descriptive_name.label('cat_descr_name'),
+        #             pc.c.order_index]).select_from(p.outerjoin(pc, p.c.category_id == pc.c.category_id))
+        #
+        # s = s.alias('pl')
+        # pl = db.map(s, primary_key=[s.c.productid])
+        #
+        # if masked is None:
+        #     where = and_(pl.c.timeseries_role == 'Initial')
+        # else:
+        #     if not masked:
+        #         where = and_(pl.c.timeseries_role == 'Initial', pl.c.masked == 'f')
+        #     else:
+        #         where = and_(pl.c.timeseries_role == 'Initial', pl.c.masked == 't')
+        #
+        # productslist = pl.filter(where).order_by(asc(pl.c.order_index), asc(pl.c.productcode)).all()
+        #
+        # # if echo:
+        # #     for row in productslist:
+        # #         print row
+        #
+        # return productslist
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
@@ -887,7 +952,7 @@ def get_all_legends(echo=False):
                 "       legend.colorbar " + \
                 "FROM analysis.legend "
 
-        result = db.execute(query)
+        result = dbschema_analysis.execute(query)
         legends = result.fetchall()
 
         return legends
@@ -939,7 +1004,7 @@ def get_product_legends(productcode=None, subproductcode=None, version=None, ech
                 "  AND product_legend.subproductcode = '" + subproductcode + "' " + \
                 "  AND product_legend.version = '" + version + "' "
 
-        result = db.execute(query)
+        result = dbschema_analysis.execute(query)
         productlegends = result.fetchall()
 
 
@@ -1106,7 +1171,7 @@ def get_legend_info(legendid=None, echo=False):
                 "       analysis.legend.step_range_to, " + \
                 "       analysis.legend.unit "
 
-        result = db.execute(query)
+        result = dbschema_analysis.execute(query)
         legend_info = result.fetchall()
 
         # ls = dbschema_analysis.legend_step._table
@@ -1501,8 +1566,8 @@ def get_frequency(frequency_id='', echo=False):
 #          version          - The version of the specific product info requested. Default='undefined'
 #   Output: Return the fields of all or a specific product record from the table product.
 def get_product_out_info(allrecs=False, echo=False, productcode='', subproductcode='', version='undefined'):
-
     global db
+    # my_db = connectdb.ConnectDB().db
     try:
         if allrecs:
             product_out_info = db.product.order_by(asc(db.product.productcode)).all()
@@ -1527,7 +1592,7 @@ def get_product_out_info(allrecs=False, echo=False, productcode='', subproductco
     finally:
         if db.session:
             db.session.close()
-        #db = None
+        # my_db = None
 
 ######################################################################################
 #   get_product_out_info_connect(allrecs=False, echo=False, productcode='', subproductcode='', version='undefined')
@@ -1780,6 +1845,7 @@ def get_internet(internet_id='', allrecs=False, echo=False):
 #   Output: Return the fields of all or a specific mapset record from the table mapset.
 def get_mapset(mapsetcode='', allrecs=False, echo=False):
     global db
+    # my_db = connectdb.ConnectDB().db
     try:
         mapset = []
         if allrecs:
@@ -1801,7 +1867,7 @@ def get_mapset(mapsetcode='', allrecs=False, echo=False):
     finally:
         if db.session:
             db.session.close()
-        # db = None
+        # my_db = None
 
 
 ######################################################################################

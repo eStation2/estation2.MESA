@@ -18,11 +18,13 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
 
     id: 'title_obj',
     reference: 'title_obj',
-    autoWidth: true,
-    autoHeight: true,
-    minWidth: 300,
-    minHeight: 45,
+    // autoWidth: true,
+    // autoHeight: true,
+    minWidth: 150,
+    minHeight: 50,
+    // height: 'auto',
     layout: 'fit',
+    liquidLayout: false,
     hidden: true,
     floating: true,
     defaultAlign: 'tl-tl',
@@ -32,28 +34,25 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
     constrain: true,
     alwaysOnTop: true,
     autoShow: false,
-    resizable: false,
+    resizable: true,
     frame: false,
     frameHeader : false,
     border: false,
     shadow: false,
     cls: 'rounded-box',
     //style: 'background: white; cursor:url(resources/img/pencil_cursor.png),auto;',
-    style: 'background: white; cursor:move;',
+    style: 'background: white; cursor:move; line-height:24px;',
     //bodyStyle:  'background:transparent;',
     margin: 0,
     padding: 3,
     html: '',
     title_ImageObj: new Image(),
-    titlePosition: [5,5],  // [37, 20],
+    titlePosition: [3,3],
     changesmade: false,
 
     config: {
         tpl: [
-            '<b style="color: rgb(0, 0, 0);"><font size="3">{selected_area}</font></b><div><b style="color: rgb(0, 0, 0);"><font size="3">{product_name}</font></b><div><b><font size="3" color="#3366ff">{product_date}</font></b></div></div>'
-            //'{selected_area}',
-            //'{product_name}',       // '{selected_area:htmlEncode} - {product_name:htmlEncode}',
-            //'{product_date}'
+            '<div><b style="color:rgb(0,0,0);"><font size="3">{selected_area}</font></b></div><div><b style="color:rgb(0,0,0);"><font size="3">{product_name}</font></b></div><div><b style="color:rgb(51,102,255);"><font size="3">{product_date}</font></b></div>'
         ],
         titleData: null
     },
@@ -66,6 +65,15 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
 
     initComponent: function () {
         var me = this;
+
+        // me.autoWidth = true;
+        // me.autoHeight = true;
+        me.setMinWidth(150);
+        me.setMinHeight(50);
+        // me.height = 'auto';
+        me.layout = 'fit';
+        me.title_ImageObj = new Image();
+        me.titlePosition = [3,3];
 
         //me.defaultTpl = '<font size="3" style="color: rgb(0, 0, 0);"><b>{selected_area} - {product_name}&nbsp;</b></font><div><font size="3"><b>Decade of <font color="#3366ff">{product_date}</font></b></font></div>';
         //me.tpl = me.defaultTpl;
@@ -92,10 +100,16 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
                 Ext.tip.QuickTipManager.register({
                     target: this.id,
                     trackMouse: true,
-                    title: 'Title object',
-                    text: '<img src="resources/img/pencil_cursor.png" alt="" height="18" width="18">' + 'Double click to edit.'
+                    title: esapp.Utils.getTranslation('title_object'), // 'Title object',
+                    text: '<img src="resources/img/pencil_cursor.png" alt="" height="18" width="18">' + esapp.Utils.getTranslation('doubleclick_to_edit') // 'Double click to edit.'
                 });
 
+                // me.mon(me, {
+                //     move: function() {
+                //         me.titlePosition = me.getPosition(true);
+                //     }
+                // });
+                //
                 //me.mon(me.el, 'click', function(){alert('container click');});
                 //me.mon(me.el, 'change', function(){alert('container change');});
             },
@@ -110,27 +124,22 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
                         esapp.Utils.removeClass(titleObjDom, 'rounded-box');
                         //titleObjDomClone.style.width = me.getWidth();
                         html2canvas(titleObjDom, {
+                            width: me.getWidth(),
+                            height: me.getHeight(),
                             onrendered: function (canvas) {
                                 me.title_ImageObj.src = canvas.toDataURL("image/png");
-                                //console.info(me.title_ImageObj);
                                 esapp.Utils.addClass(titleObjDom, 'rounded-box');
                             }
                         });
                     });
                     if (me.changesmade){
-                        task.delay(500);
+                        task.delay(250);
                     }
                 }
             },
             show: function(){
                 me.setPosition(me.titlePosition);
                 me.fireEvent('refreshimage');
-
-                me.mon(me, {
-                    move: function() {
-                       me.titlePosition = me.getPosition(true);
-                    }
-                });
             }
             //,move: function(){
             //    me.titlePosition = me.getPosition(true);
@@ -174,8 +183,8 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
             xtype: 'button',
             //text: 'Fields',
             scope: this,
-            tooltip: 'Add a dynamic field',
-            overflowText: 'Add a dynamic field',
+            tooltip: esapp.Utils.getTranslation('add_dynamic_field'), // 'Add a dynamic field',
+            overflowText: esapp.Utils.getTranslation('add_dynamic_field'), // 'Add a dynamic field',
             hidden: false,
             iconCls: 'fa fa-code',
             floating: false,  // usually you want this set to True (default)
@@ -194,17 +203,17 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
                     padding: 2
                 },
                 items: [{
-                    text: 'Selected area',
+                    text: esapp.Utils.getTranslation('selected_area'), // 'Selected area',
                     handler: function(){
                         me.map_title_editor.insertAtCursor('{selected_area}');
                     }
                 },{
-                    text: 'Product name',
+                    text: esapp.Utils.getTranslation('product_name'), // 'Product name',
                     handler: function(){
                         me.map_title_editor.insertAtCursor('{product_name}');
                     }
                 },{
-                    text: 'Product date',
+                    text: esapp.Utils.getTranslation('product_date'), // 'Product date',
                     handler: function(){
                         me.map_title_editor.insertAtCursor('{product_date}');
                     }
@@ -234,14 +243,14 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
             shadow: true,
             headerOverCls: 'grayheader',
             header: {
-                title: 'Title object',
+                title: esapp.Utils.getTranslation('title_object'), // 'Title object',
                 titleAlign: 'right',
                 cls: 'transparentheader',
                 hidden: false,
                 items: [{
                     xtype:'button',
                     itemId: 'stopedit_tool_' + me.id,
-                    tooltip:'Save changes',
+                    tooltip: esapp.Utils.getTranslation('save_changes'), // 'Save changes',
                     glyph:0xf0c7,
                     cls: 'btntransparent',
                     hidden: false,
@@ -250,15 +259,18 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
                         var panel = btn.up().up();
                         var mapTitleObj = me,
                             mapTitleEditor = panel.down('#map_title_editor_' + me.id);
-                        panel.hide();
+
+                        // console.info(mapTitleObj);
+                        // mapTitleObj.setTpl(mapTitleEditor.getValue());   // .replace(/"/g, '&quot;', true);
                         mapTitleObj.tpl.set(mapTitleEditor.getValue(), true);   // .replace(/"/g, '&quot;', true);
                         //console.info(mapTitleObj.getData());
                         mapTitleObj.update(mapTitleObj.getData());
+                        mapTitleObj.setHeight('auto');
                         mapTitleObj.updateLayout();
                         mapTitleObj.changesmade = true;
-                        //mapTitleObj.show();
+                        // mapTitleObj.show();
                         mapTitleObj.fireEvent('refreshimage');
-
+                        panel.hide();
                         //mapTitleObj.down().tpl.set(mapTitleEditor.getValue(), true);   // .replace(/"/g, '&quot;', true);
                         //console.info(mapTitleObj.down().getData());
                         //mapTitleObj.down().update(mapTitleObj.down().getData());

@@ -148,6 +148,7 @@ class Frequency(object):
     # In case of date_format='mmdd', it adds the current year
     def extract_date(self, filename):
         try:
+            date = None
             if self.dateformat == self.DATEFORMAT.MONTHDAY:
                 date_parts = (datetime.date.today().year, int(filename[:2]), int(filename[2:4]))
                 date = datetime.date(*date_parts)
@@ -299,7 +300,7 @@ class Dataset(object):
         if not from_date and self.no_year():
             from_date = datetime.date(datetime.date.today().year, 1, 1)
         if not to_date and self.no_year():
-            to_date = datetime.date(datetime.date.today().year, 12, 1)
+            to_date = datetime.date(datetime.date.today().year, 12, 31)
         self.from_date = from_date or None
         self.to_date = to_date or self._frequency.today()
 
@@ -428,6 +429,6 @@ class Dataset(object):
     def intervals(self):
         _intervals = getattr(self, "_intervals", None)
         if _intervals is None:
-            _intervals = [Interval(**self._extract_kwargs(interval)) for interval in self.find_intervals()]
+            _intervals = [Interval(**self._extract_kwargs(interval)) for interval in self.find_intervals(from_date=self.from_date, to_date=self.to_date)]
             setattr(self, "_intervals", _intervals)
         return _intervals

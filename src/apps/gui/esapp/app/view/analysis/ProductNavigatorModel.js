@@ -32,13 +32,16 @@ Ext.define('esapp.view.analysis.ProductNavigatorModel', {
         },
         mapsetdatasets: {
             model: 'esapp.model.ProductNavigatorMapSetDataSet',
-            sorters: [{
-                property: 'subproductcode',
-                direction: 'ASC'
-            }],
-            //sortRoot: 'prod_descriptive_name',
-            //sortOnLoad: true,
-            //remoteSort: false,
+            // sorters: [{
+            //     property: 'display_index',
+            //     direction: 'ASC'
+            // // }, {
+            // //     property: 'prod_descriptive_name',
+            // //     direction: 'ASC'
+            // }],
+            // // sortRoot: 'prod_descriptive_name',
+            // // sortOnLoad: true,
+            // // remoteSort: false,
             session: true
         },
         colorschemes: {

@@ -12,7 +12,7 @@ Ext.define('esapp.store.LayersStore', {
 
     storeId : 'LayersStore'
 
-    ,autoLoad: true
+    ,autoLoad: false
     ,autoSync: true
     //,session: true
 

@@ -12,7 +12,7 @@ Ext.define('esapp.store.DataSetsStore', {
 
     storeId : 'DataSetsStore'
 
-    ,autoLoad: true
+    ,autoLoad: false
     ,autoSync: false
     ,remoteSort: false
     ,remoteGroup: false

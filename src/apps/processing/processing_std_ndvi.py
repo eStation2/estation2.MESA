@@ -9,12 +9,15 @@
 # Import std modules
 import glob
 import os
+import tempfile
+import shutil
 
 # Import eStation2 modules
 from lib.python import functions
 from lib.python.image_proc import raster_image_math
 from lib.python import es_logging as log
 from config import es_constants
+from lib.python import metadata
 
 # Import third-party modules
 from ruffus import *
@@ -44,21 +47,12 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     if proc_lists is None:
         proc_lists = functions.ProcLists()
 
-
-# # switch for 'final' products (e.g. products to be controlled by the User)
-    # final_ndvi_linearx2=0
-    # final_diff_linearx2=0
-    # final_linearx2diff_linearx2=0
-    # final_vci=0
-    # final_icn=0
-    # final_vci_linearx2=0
-    # final_icn_linearx2=0
-
     #   switch wrt groups - according to options
 
     # DEFAULT: ALL off
     group_no_filter_stats = 0                  # 1.a    -> Not done anymore
     group_no_filter_anomalies = 0              # 1.b    -> To be done
+    group_no_filter_masks = 0                  # 1.c
 
     group_filtered_prods = 0                   # 2.a
     group_filtered_stats = 0                   # 2.b
@@ -71,28 +65,33 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     group_monthly_anomalies = 0                # 3.d
 
     if nrt_products:
-        group_no_filter_anomalies = 0              # 1.b    -> no relevant - FTTB
+        group_no_filter_anomalies = 0              # 1.b    -> To be done
+        group_no_filter_masks = 1                  # 1.c
         group_filtered_prods = 1                   # 2.a
         group_filtered_masks = 1                   # 2.c
         group_filtered_anomalies = 1               # 2.d
         group_monthly_prods = 1                    # 3.a
-        group_monthly_masks = 1                    # 3.c
-        group_monthly_anomalies = 0                # 3.d    # To be done
+        group_monthly_masks = 0                    # 3.c    -> To be done
+        group_monthly_anomalies = 0                # 3.d    -> To be done
 
     if update_stats:
-        group_no_filter_stats = 0                  # 1.a    -> no relevant - FTTB
+        group_no_filter_stats = 1                  # 1.a    -> Not done FTTB
         group_filtered_stats = 1                   # 2.b
         group_monthly_stats = 1                    # 3.b
 
-    #   switch wrt single products: not to be changed !!
+    #   switch wrt single products: not to be changed
+
     #   for Group 1.a (ndvi_no_filter_stats)
     activate_10davg_no_filter = 1
     activate_10dmin_no_filter = 1
     activate_10dmax_no_filter = 1
     activate_10dmed_no_filter = 1
-    activate_10dstd_no_filter = 0              # TBDone
+    activate_10dstd_no_filter = 0              # To be done
 
     #   for Group 1.b (ndvi_no_filter_anom)
+
+    #   for Group 1.c (no_filter_mask)
+    activate_baresoil = 1
 
     #   for Group 2.a (filtered_prods)
     activate_ndvi_linearx1 = 1
@@ -113,16 +112,17 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     #   for Group 2.c  (filtered_masks)
     activate_baresoil_linearx2 = 1
-    activate_ndvi_linearx2_agric = 1
+    activate_ndvi_linearx2_agric = 0            # TEMP
 
     #   for Group 2.d  (filtered_anomalies)
-    activate_diff_linearx2 = 1
+    activate_diff_linearx2 = 0
     activate_linearx2_diff_linearx2 = 1
-    activate_stddiff_linearx2 = 0               # To be done
     activate_icn = 1
     activate_vci = 1
     activate_icn_linearx2 = 1
     activate_vci_linearx2 = 1
+    activate_ratio_linearx2 = 1
+    activate_stddiff_linearx2 = 1               # To be done
 
     #   for Group 3.a (monthly_prods)
     activate_monndvi = 1
@@ -142,7 +142,10 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     activate_1monvci = 1
     activate_1monicn = 1
 
+
+    sds_meta = metadata.SdsMetadata()
     es2_data_dir = es_constants.es2globals['processing_dir']+os.path.sep
+
     #   ---------------------------------------------------------------------
     #   Define input files (NDV)
     in_prod_ident = functions.set_path_filename_no_date(prod, starting_sprod,mapset, version, ext)
@@ -199,7 +202,6 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_no_filter_stats, activate_10dmin_no_filter)
     @collate(starting_files, formatter(formatter_in),formatter_out)
-    #@follows(vgt_ndvi_10davg_no_filter)
     def vgt_ndvi_10dmin_no_filter(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -226,18 +228,12 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_no_filter_stats, activate_10dmax_no_filter)
     @collate(starting_files, formatter(formatter_in), formatter_out)
-    #@follows(vgt_ndvi_10dmin_no_filter)
     def vgt_ndvi_10dmax_no_filter(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
         raster_image_math.do_max_image(**args)
-
-    #   ---------------------------------------------------------------------
-    #   NDV std x dekad (i.e. std_dekad)
-    output_sprod = "10DSTD"
-
 
     #  ---------------------------------------------------------------------
     #   NDV med x dekad (i.e. med_dekad)
@@ -260,7 +256,6 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_no_filter_stats, activate_10dmed_no_filter)
     @collate(starting_files, formatter(formatter_in),formatter_out)
-    #@follows(vgt_ndvi_10dmax_no_filter)
     def vgt_ndvi_10dmed_no_filter(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -312,7 +307,6 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
                     yield (three_files_in_a_row, output_file)
 
     @files(generate_parameters_ndvi_linearx1)
-    #@follows(vgt_ndvi_10dmed_no_filter)
     @active_if(group_filtered_prods, activate_ndvi_linearx1)
     def vgt_ndvi_linearx1(input_files, output_file):
 
@@ -320,7 +314,6 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_files[1], "before_file":input_files[0], "after_file": input_files[2], "output_file": output_file,
                  "output_format": 'GTIFF', "options": "compress = lzw", 'threshold': 0.1}
-        #print args
         raster_image_math.do_ts_linear_filter(**args)
 
     output_sprod=proc_lists.proc_add_subprod("ndvi-linearx2", "filtered_prods", final=False,
@@ -358,7 +351,6 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_prods,activate_ndvi_linearx2)
     @files(generate_parameters_ndvi_linearx2)
-    @follows(vgt_ndvi_linearx1)
     def vgt_ndvi_linearx2(input_files, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -368,7 +360,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
         raster_image_math.do_ts_linear_filter(**args)
 
     #   ---------------------------------------------------------------------
-    #   3.a NDVI linearx2 masked using Crop Mask
+    #   2.a NDVI linearx2 masked using Crop Mask
     #   ---------------------------------------------------------------------
 
     output_sprod_group=proc_lists.proc_add_subprod_group("filtered_prods")
@@ -398,8 +390,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     formatter_in = "(?P<YYYYMMDD>[0-9]{8})"+in_prod_ident_linearx2
     formatter_out = ["{subpath[0][5]}"+os.path.sep+subdir_linearx2_agric+"{YYYYMMDD[0]}"+prod_ident_linearx2_agric]
 
-    #@follows(vgt_ndvi_10dmed_no_filter)
-    #@active_if(group_filtered_prods, activate_ndvi_linearx2_agric)
+    # @follows(vgt_ndvi_10dmed_no_filter)
+    @active_if(group_filtered_prods, activate_ndvi_linearx2_agric)
     @transform(starting_files_linearx2, formatter(formatter_in), formatter_out)
     def vgt_ndvi_linearx2_agric(input_files, output_file):
 
@@ -449,7 +441,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     @collate(starting_files_linearx2,
              formatter("[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident_linearx2),
              ["{subpath[0][5]}"+os.path.sep+subdir_10davg_linearx2+"{MMDD[0]}"+prod_ident_10davg_linearx2])
-    @follows(vgt_ndvi_linearx2)
+    # @follows(vgt_ndvi_linearx2)
     def vgt_ndvi_10davg_linearx2(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -475,7 +467,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_stats, activate_10dmin_linearx2)
     @collate(starting_files_linearx2, formatter(formatter_in),formatter_out)
-    @follows(vgt_ndvi_linearx2)
+    # @follows(vgt_ndvi_linearx2)
     def vgt_ndvi_10dmin_linearx2(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -501,7 +493,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_stats, activate_10dmax_linearx2)
     @collate(starting_files_linearx2, formatter(formatter_in),formatter_out)
-    @follows(vgt_ndvi_linearx2)
+    # @follows(vgt_ndvi_linearx2)
     def vgt_ndvi_10dmax_linearx2(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -534,7 +526,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_stats, activate_10dmed_linearx2)
     @collate(starting_files_linearx2, formatter(formatter_in),formatter_out)
-    @follows(vgt_ndvi_linearx2)
+    # @follows(vgt_ndvi_linearx2)
     def vgt_ndvi_10dmed_linearx2(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -561,7 +553,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_stats, activate_year_min_linearx2)
     @collate(starting_files_linearx2, formatter(formatter_in),formatter_out)
-    @follows(vgt_ndvi_10dmin_linearx2)
+    # @follows(vgt_ndvi_10dmed_linearx2)
     def vgt_ndvi_year_min_linearx2(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -589,7 +581,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_stats, activate_year_max_linearx2)
     @collate(starting_files_linearx2, formatter(formatter_in),formatter_out)
-    @follows(vgt_ndvi_10dmax_linearx2)
+    # @follows(vgt_ndvi_10dmin_linearx2)
     def vgt_ndvi_year_max_linearx2(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -627,7 +619,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_stats, activate_absol_min_linearx2)
     @collate(starting_files_year_min_linearx2, formatter(formatter_in), formatter_out)
-    @follows(vgt_ndvi_year_min_linearx2)
+    # @follows(vgt_ndvi_year_min_linearx2)
     def vgt_ndvi_absol_min_linearx2(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -664,7 +656,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_stats, activate_absol_max_linearx2)
     @collate(starting_files_year_max_linearx2, formatter(formatter_in), formatter_out)
-    @follows(vgt_ndvi_year_max_linearx2)
+    # @follows(vgt_ndvi_year_max_linearx2)
     def vgt_ndvi_absol_max_linearx2(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -673,12 +665,49 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
         raster_image_math.do_max_image(**args)
 
     #   ---------------------------------------------------------------------
-    #   2.b NDVI_baresoil mask
-    #       TODO-M.C.: FTTB does not use min/max ... to be changed ??
+    #   1.c NDVI_baresoil mask (non-filtered NDVI)
+    #   ---------------------------------------------------------------------
+    #
+
+    output_sprod_group=proc_lists.proc_add_subprod_group("no_filter_masks")
+    output_sprod=proc_lists.proc_add_subprod("baresoil", "no_filter_stats", final=False,
+                                             descriptive_name='Baresoil Mask',
+                                             description='Baresoil Mask NDVI',
+                                             frequency_id='e1dekad',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='',
+                                             active_default=True)
+
+    prod_ident_baresoil = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
+    subdir_baresoil = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
+
+    formatter_in = "(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
+    formatter_out = ["{subpath[0][5]}"+os.path.sep+subdir_baresoil+"{YYYY[0]}{MMDD[0]}"+prod_ident_baresoil]
+
+    ancillary_sprod_1 = "10davg-linearx2"
+    ancillary_sprod_ident_1 = functions.set_path_filename_no_date(prod, ancillary_sprod_1,mapset, version, ext)
+    ancillary_subdir_1 = functions.set_path_sub_directory(prod, ancillary_sprod_1, 'Derived', version, mapset)
+    ancillary_input_1 = "{subpath[0][5]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
+
+    @active_if(group_no_filter_masks, activate_baresoil)
+    @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input_1), formatter_out)
+    @follows(vgt_ndvi_10davg_linearx2)
+    def vgt_ndvi_baresoil(input_file, output_file):
+
+        [current_file, average_file] = input_file
+
+        output_file = functions.list_to_element(output_file)
+        functions.check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": current_file, "avg_file": average_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+        raster_image_math.do_make_baresoil(**args)
+
+
+    #   ---------------------------------------------------------------------
+    #   2.b NDVI_baresoil mask (using avgNDV)
     #   ---------------------------------------------------------------------
     #
     starting_files_linearx2_all = input_dir_linearx2+"*"+in_prod_ident_linearx2
-
 
     output_sprod_group=proc_lists.proc_add_subprod_group("filtered_masks")
     output_sprod=proc_lists.proc_add_subprod("baresoil-linearx2", "filtered_stats", final=False,
@@ -693,28 +722,34 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     prod_ident_baresoil_linearx2 = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_baresoil_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
-    formatter_in = "(?P<YYYYMMDD>[0-9]{8})"+in_prod_ident_linearx2
-    formatter_out = ["{subpath[0][5]}"+os.path.sep+subdir_baresoil_linearx2+"{YYYYMMDD[0]}"+prod_ident_baresoil_linearx2]
+    formatter_in = "(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident_linearx2
+    formatter_out = ["{subpath[0][5]}"+os.path.sep+subdir_baresoil_linearx2+"{YYYY[0]}{MMDD[0]}"+prod_ident_baresoil_linearx2]
+
+    ancillary_sprod_1 = "10davg-linearx2"
+    ancillary_sprod_ident_1 = functions.set_path_filename_no_date(prod, ancillary_sprod_1,mapset, version, ext)
+    ancillary_subdir_1 = functions.set_path_sub_directory(prod, ancillary_sprod_1, 'Derived', version, mapset)
+    ancillary_input_1 = "{subpath[0][5]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
 
     @active_if(group_filtered_masks, activate_baresoil_linearx2)
-    @transform(starting_files_linearx2_all, formatter(formatter_in), formatter_out)
-    @follows(vgt_ndvi_absol_max_linearx2)
+    @transform(starting_files_linearx2_all, formatter(formatter_in), add_inputs(ancillary_input_1), formatter_out)
     def vgt_ndvi_baresoil_linearx2(input_file, output_file):
+
+        [current_file, average_file] = input_file
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+        args = {"input_file": current_file, "avg_file": average_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
         raster_image_math.do_make_baresoil(**args)
 
     #   ---------------------------------------------------------------------
-    #   2.c NDVI_linearx2 anomalies
+    #   2.D NDVI_linearx2 anomalies
     #   ---------------------------------------------------------------------
 
     #  ---------------------------------------------------------------------
     #   'diff' vs. avg_filtered (NDV - avg_dekad_filtered)
 
-    output_sprod_group=proc_lists.proc_add_subprod_group("filtered_anomalies")
-    output_sprod=proc_lists.proc_add_subprod("diff-linearx2", "filtered_anomalies", final=False,
+    output_sprod_group=proc_lists.proc_add_subprod_group("no_filter_anomalies")
+    output_sprod=proc_lists.proc_add_subprod("diff-linearx2", "no_filter_anomalies", final=False,
                                              descriptive_name='NDVI difference',
                                              description='NDVI difference vs. filtered average',
                                              frequency_id='e1dekad',
@@ -729,21 +764,38 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     formatter_in = "(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
     formatter_out = ["{subpath[0][5]}"+os.path.sep+subdir_diff_linearx2+"{YYYY[0]}{MMDD[0]}"+prod_ident_diff_linearx2]
 
-    ancillary_sprod = "10davg-linearx2"
-    ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod,mapset, version, ext)
-    ancillary_subdir = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived', version, mapset)
-    ancillary_input = "{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
+    ancillary_sprod_1 = "10davg-linearx2"
+    ancillary_sprod_ident_1 = functions.set_path_filename_no_date(prod, ancillary_sprod_1,mapset, version, ext)
+    ancillary_subdir_1 = functions.set_path_sub_directory(prod, ancillary_sprod_1, 'Derived', version, mapset)
+    ancillary_input_1 = "{subpath[0][5]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
+
+    ancillary_sprod_2 = "baresoil"
+    ancillary_sprod_ident_2 = functions.set_path_filename_no_date(prod, ancillary_sprod_2,mapset, version, ext)
+    ancillary_subdir_2 = functions.set_path_sub_directory(prod, ancillary_sprod_2, 'Derived', version, mapset)
+    ancillary_input_2 = "{subpath[0][5]}"+os.path.sep+ancillary_subdir_2+"{YYYY[0]}{MMDD[0]}"+ancillary_sprod_ident_2
 
     @active_if(group_filtered_anomalies, activate_diff_linearx2)
-    @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
-    @follows(vgt_ndvi_baresoil_linearx2)
+    @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input_1, ancillary_input_2), formatter_out)
     def vgt_ndvi_diff_linearx2(input_file, output_file):
 
+        [current_file, average_file, baresoil_file] = input_file
         output_file = functions.list_to_element(output_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        # Temporary (not masked) file
+        output_file_temp = tmpdir+os.path.sep+os.path.basename(output_file)
+
+        # Compute temporary file
+        args = {"input_file": [current_file,average_file], "output_file": output_file_temp, "output_format": 'GTIFF', "options": "compress = lzw"}
         raster_image_math.do_oper_subtraction(**args)
 
+        # Mask with baresoil file
+        no_data = int(sds_meta.get_nodata_value(current_file))
+        functions.check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": output_file_temp, "mask_file": baresoil_file, "output_file":output_file, "options":"compress = lzw" , "mask_value":no_data, "out_value": no_data}
+        raster_image_math.do_mask_image(**args)
+        shutil.rmtree(tmpdir)
 
     #  ---------------------------------------------------------------------
     #   Linearx2 'diff' (Linearx2 - avg_dekad_filtered)
@@ -763,51 +815,38 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     formatter_in = "(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident_linearx2
     formatter_out = ["{subpath[0][5]}"+os.path.sep+subdir_linearx2_diff_linearx2+"{YYYY[0]}{MMDD[0]}"+prod_ident_linearx2_diff_linearx2]
 
-    ancillary_sprod = "10davg-linearx2"
-    ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod,mapset, version, ext)
-    ancillary_subdir = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived', version, mapset)
-    ancillary_input = "{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
+    ancillary_sprod_1 = "10davg-linearx2"
+    ancillary_sprod_ident_1 = functions.set_path_filename_no_date(prod, ancillary_sprod_1,mapset, version, ext)
+    ancillary_subdir_1 = functions.set_path_sub_directory(prod, ancillary_sprod_1, 'Derived', version, mapset)
+    ancillary_input_1 = "{subpath[0][5]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
 
+    ancillary_sprod_2 = "baresoil-linearx2"
+    ancillary_sprod_ident_2 = functions.set_path_filename_no_date(prod, ancillary_sprod_2,mapset, version, ext)
+    ancillary_subdir_2 = functions.set_path_sub_directory(prod, ancillary_sprod_2, 'Derived', version, mapset)
+    ancillary_input_2 = "{subpath[0][5]}"+os.path.sep+ancillary_subdir_2+"{YYYY[0]}{MMDD[0]}"+ancillary_sprod_ident_2
 
     @active_if(group_filtered_anomalies, activate_linearx2_diff_linearx2)
-    @transform(starting_files_linearx2_all, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
-    @follows(vgt_ndvi_diff_linearx2)
+    @transform(starting_files_linearx2_all, formatter(formatter_in), add_inputs(ancillary_input_1,ancillary_input_2), formatter_out)
     def vgt_ndvi_linearx2_diff_linearx2(input_file, output_file):
 
+        [current_file, average_file, baresoil_file] = input_file
         output_file = functions.list_to_element(output_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        # Temporary (not masked) file
+        output_file_temp = tmpdir+os.path.sep+os.path.basename(output_file)
+
+        # Compute temporary file
+        args = {"input_file": [current_file,average_file], "output_file": output_file_temp, "output_format": 'GTIFF', "options": "compress = lzw"}
         raster_image_math.do_oper_subtraction(**args)
 
-    #  ---------------------------------------------------------------------
-    #   Linearx2 'stddiff2avg' (Linearx2 -avg/std)
-    #   TODO-M.C.: STD missing !!!!
-    #
-    # output_sprod = "STDDIFF2AVG_LINEARX2"
-    # prod_ident_stddiff2avg_linearx2 = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
-    # subdir_stddiff2avg_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
-    #
-    # formatter_in = "(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident_linearx2
-    # formatter_out = ["{subpath[0][5]}"+os.path.sep+subdir_stddiff2avg_linearx2+"{YYYY[0]}{MMDD[0]}"+prod_ident_stddiff2avg_linearx2]
-    #
-    # ancillary_sprod_1 = "10DAVG_LINEARX2"
-    # ancillary_sprod_ident_1 = functions.set_path_filename_no_date(prod, ancillary_sprod_1,mapset, version, ext)
-    # ancillary_subdir_1 = functions.set_path_sub_directory(prod, ancillary_sprod_1, 'Derived', version, mapset)
-    # ancillary_input_1  = "{subpath[0][5]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
-    #
-    # ancillary_sprod_2 = "10DSTD_LINEARX2"
-    # ancillary_sprod_ident_2 = functions.set_path_filename_no_date(prod, ancillary_sprod_2,mapset, version, ext)
-    # ancillary_subdir_2     = functions.set_path_sub_directory(prod, ancillary_sprod_2, 'Derived', version, mapset)
-    # ancillary_input_2 = "{subpath[0][5]}"+os.path.sep+ancillary_subdir_2+"{MMDD[0]}"+ancillary_sprod_ident_2
-    #
-    # @active_if(activate_vgt_ndvi_comput, activate_filtered_stats, activate_linearx2_diff_linearx2)
-    # @transform(starting_files_linearx2, formatter(formatter_in), add_inputs(ancillary_input_1,ancillary_input_2), formatter_out)
-    # def vgt_ndvi_stddiff2avg_linearx2(input_file, output_file):
-    #
-    #     output_file = functions.list_to_element(output_file)
-    #     functions.check_output_dir(os.path.dirname(output_file))
-    #     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
-    #     raster_image_math.do_oper_subtraction(**args)
+        # Mask with baresoil file
+        no_data = int(sds_meta.get_nodata_value(current_file))
+        functions.check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": output_file_temp, "mask_file": baresoil_file, "output_file":output_file, "options":"compress = lzw" , "mask_value":no_data, "out_value": no_data}
+        raster_image_math.do_mask_image(**args)
+        shutil.rmtree(tmpdir)
 
     #  ---------------------------------------------------------------------
     #   vci (NDV - min)/(max - min)  -> min/max per dekad - filtered
@@ -837,15 +876,35 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     ancillary_subdir_2 = functions.set_path_sub_directory(prod, ancillary_sprod_2, 'Derived', version, mapset)
     ancillary_input_2 = "{subpath[0][5]}"+os.path.sep+ancillary_subdir_2+"{MMDD[0]}"+ancillary_sprod_ident_2
 
+    ancillary_sprod_3 = "baresoil"
+    ancillary_sprod_ident_3 = functions.set_path_filename_no_date(prod, ancillary_sprod_3,mapset, version, ext)
+    ancillary_subdir_3 = functions.set_path_sub_directory(prod, ancillary_sprod_3, 'Derived', version, mapset)
+    ancillary_input_3 = "{subpath[0][5]}"+os.path.sep+ancillary_subdir_3+"{YYYY[0]}{MMDD[0]}"+ancillary_sprod_ident_3
+
     @active_if(group_filtered_anomalies, activate_vci)
-    @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input_1,ancillary_input_2), formatter_out)
-    @follows(vgt_ndvi_linearx2_diff_linearx2)
+    @follows(vgt_ndvi_10dmax_linearx2, vgt_ndvi_10dmin_linearx2)
+    @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input_1,ancillary_input_2, ancillary_input_3), formatter_out)
     def vgt_ndvi_vci(input_file, output_file):
 
+        [current_file, max_file, min_file, baresoil_file] = input_file
         output_file = functions.list_to_element(output_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file[0], "max_file": input_file[1],"min_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        # Temporary (not masked) file
+        output_file_temp = tmpdir+os.path.sep+os.path.basename(output_file)
+
+        # Compute temporary file
+        args = {"input_file":current_file, "max_file": max_file,"min_file": min_file, "output_file": output_file_temp, "output_format": 'GTIFF', "options": "compress = lzw"}
         raster_image_math.do_make_vci(**args)
+
+        # Mask with baresoil file
+        no_data = int(sds_meta.get_nodata_value(current_file))
+        functions.check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": output_file_temp, "mask_file": baresoil_file, "output_file":output_file, "options":"compress = lzw" , "mask_value":no_data, "out_value": no_data}
+        raster_image_math.do_mask_image(**args)
+        shutil.rmtree(tmpdir)
 
     #  ---------------------------------------------------------------------
     #   icn (NDV - min)/(max - min)  -> min/max absolute
@@ -875,15 +934,35 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     ancillary_subdir_2     = functions.set_path_sub_directory(prod, ancillary_sprod_2, 'Derived', version, mapset)
     ancillary_input_2 = "{subpath[0][5]}"+os.path.sep+ancillary_subdir_2+"Overall"+ancillary_sprod_ident_2
 
-    @active_if(group_filtered_anomalies, activate_icn)
-    @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input_1,ancillary_input_2), formatter_out)
-    @follows(vgt_ndvi_vci)
+    ancillary_sprod_3 = "baresoil"
+    ancillary_sprod_ident_3 = functions.set_path_filename_no_date(prod, ancillary_sprod_3,mapset, version, ext)
+    ancillary_subdir_3 = functions.set_path_sub_directory(prod, ancillary_sprod_3, 'Derived', version, mapset)
+    ancillary_input_3 = "{subpath[0][5]}"+os.path.sep+ancillary_subdir_3+"{YYYY[0]}{MMDD[0]}"+ancillary_sprod_ident_3
+
+    @active_if(group_no_filter_anomalies, activate_icn)
+    @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input_1,ancillary_input_2,ancillary_input_3), formatter_out)
+    @follows(vgt_ndvi_10dmax_linearx2, vgt_ndvi_10dmin_linearx2)
     def vgt_ndvi_icn(input_file, output_file):
 
+        [current_file, max_file, min_file, baresoil_file] = input_file
         output_file = functions.list_to_element(output_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file[0],"max_file": input_file[1], "min_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        # Temporary (not masked) file
+        output_file_temp = tmpdir+os.path.sep+os.path.basename(output_file)
+
+        # Compute temporary file
+        args = {"input_file":current_file, "max_file": max_file,"min_file": min_file, "output_file": output_file_temp, "output_format": 'GTIFF', "options": "compress = lzw"}
         raster_image_math.do_make_vci(**args)
+
+        # Mask with baresoil file
+        no_data = int(sds_meta.get_nodata_value(current_file))
+        functions.check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": output_file_temp, "mask_file": baresoil_file, "output_file":output_file, "options":"compress = lzw" , "mask_value":no_data, "out_value": no_data}
+        raster_image_math.do_mask_image(**args)
+        shutil.rmtree(tmpdir)
 
     #  ---------------------------------------------------------------------
     #   vci_linearx2 (linearx2 - min)/(max - min)  -> min/max per dekad
@@ -912,15 +991,33 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     ancillary_subdir_2     = functions.set_path_sub_directory(prod, ancillary_sprod_2, 'Derived', version, mapset)
     ancillary_input_2 = "{subpath[0][5]}"+os.path.sep+ancillary_subdir_2+"{MMDD[0]}"+ancillary_sprod_ident_2
 
-    @active_if(group_filtered_anomalies, activate_vci_linearx2)
-    @transform(starting_files_linearx2_all, formatter(formatter_in), add_inputs(ancillary_input_1,ancillary_input_2), formatter_out)
-    @follows(vgt_ndvi_icn)
+    ancillary_sprod_3 = "baresoil-linearx2"
+    ancillary_sprod_ident_3 = functions.set_path_filename_no_date(prod, ancillary_sprod_3,mapset, version, ext)
+    ancillary_subdir_3 = functions.set_path_sub_directory(prod, ancillary_sprod_3, 'Derived', version, mapset)
+    ancillary_input_3 = "{subpath[0][5]}"+os.path.sep+ancillary_subdir_3+"{YYYY[0]}{MMDD[0]}"+ancillary_sprod_ident_3
+
+    @active_if(group_no_filter_anomalies, activate_vci_linearx2)
+    @transform(starting_files_linearx2_all, formatter(formatter_in), add_inputs(ancillary_input_1,ancillary_input_2, ancillary_input_3), formatter_out)
     def vgt_ndvi_vci_linearx2(input_file, output_file):
 
+        [current_file, max_file, min_file, baresoil_file] = input_file
         output_file = functions.list_to_element(output_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file[0], "max_file": input_file[1], "min_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        # Temporary (not masked) file
+        output_file_temp = tmpdir+os.path.sep+os.path.basename(output_file)
+
+        args = {"input_file":current_file, "max_file": max_file,"min_file": min_file, "output_file": output_file_temp, "output_format": 'GTIFF', "options": "compress = lzw"}
         raster_image_math.do_make_vci(**args)
+
+        # Mask with baresoil file
+        no_data = int(sds_meta.get_nodata_value(current_file))
+        functions.check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": output_file_temp, "mask_file": baresoil_file, "output_file":output_file, "options":"compress = lzw" , "mask_value":no_data, "out_value": no_data}
+        raster_image_math.do_mask_image(**args)
+        shutil.rmtree(tmpdir)
 
     #  ---------------------------------------------------------------------
     #   icn_linearx2 (linearx2 - min)/(max - min)  -> min/max absolute
@@ -949,15 +1046,84 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     ancillary_subdir_2 = functions.set_path_sub_directory(prod, ancillary_sprod_2, 'Derived', version, mapset)
     ancillary_input_2 = "{subpath[0][5]}"+os.path.sep+ancillary_subdir_2+"Overall"+ancillary_sprod_ident_2
 
+    ancillary_sprod_3 = "baresoil-linearx2"
+    ancillary_sprod_ident_3 = functions.set_path_filename_no_date(prod, ancillary_sprod_3,mapset, version, ext)
+    ancillary_subdir_3 = functions.set_path_sub_directory(prod, ancillary_sprod_3, 'Derived', version, mapset)
+    ancillary_input_3 = "{subpath[0][5]}"+os.path.sep+ancillary_subdir_3+"{YYYY[0]}{MMDD[0]}"+ancillary_sprod_ident_3
+
     @active_if(group_filtered_anomalies, activate_icn_linearx2)
-    @transform(starting_files_linearx2_all, formatter(formatter_in), add_inputs(ancillary_input_1, ancillary_input_2), formatter_out)
-    @follows(vgt_ndvi_vci_linearx2)
+    @transform(starting_files_linearx2_all, formatter(formatter_in), add_inputs(ancillary_input_1, ancillary_input_2, ancillary_input_3), formatter_out)
     def vgt_ndvi_icn_linearx2(input_file, output_file):
 
+        [current_file, max_file, min_file, baresoil_file] = input_file
         output_file = functions.list_to_element(output_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file[0], "max_file": input_file[1], "min_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        # Temporary (not masked) file
+        output_file_temp = tmpdir+os.path.sep+os.path.basename(output_file)
+
+        args = {"input_file": current_file, "max_file": max_file, "min_file": min_file, "output_file": output_file_temp, "output_format": 'GTIFF', "options": "compress = lzw"}
         raster_image_math.do_make_vci(**args)
+
+        # Mask with baresoil file
+        no_data = int(sds_meta.get_nodata_value(current_file))
+        functions.check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": output_file_temp, "mask_file": baresoil_file, "output_file":output_file, "options":"compress = lzw" , "mask_value":no_data, "out_value": no_data}
+        raster_image_math.do_mask_image(**args)
+        shutil.rmtree(tmpdir)
+
+    #  ---------------------------------------------------------------------
+    #   ratio_linearx2 (linearx2/avg) -> 0-100 % value
+
+    output_sprod=proc_lists.proc_add_subprod("ratio-linearx2", "filtered_anomalies", final=False,
+                                             descriptive_name='Ratio linearx2',
+                                             description='Ratio linearx2 (curr/avg)',
+                                             frequency_id='e1dekad',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='',
+                                             active_default=True)
+
+    prod_ident_ratio_linearx2 = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
+    subdir_ratio_linearx2 = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
+
+    formatter_in = "(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident_linearx2
+    formatter_out = ["{subpath[0][5]}"+os.path.sep+subdir_ratio_linearx2+"{YYYY[0]}{MMDD[0]}"+prod_ident_ratio_linearx2]
+
+    ancillary_sprod = "10davg-linearx2"
+    ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod,mapset, version, ext)
+    ancillary_subdir = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived', version, mapset)
+    ancillary_input = "{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
+
+    ancillary_sprod_1 = "baresoil-linearx2"
+    ancillary_sprod_ident_1 = functions.set_path_filename_no_date(prod, ancillary_sprod_1,mapset, version, ext)
+    ancillary_subdir_1 = functions.set_path_sub_directory(prod, ancillary_sprod_1, 'Derived', version, mapset)
+    ancillary_input_1 = "{subpath[0][5]}"+os.path.sep+ancillary_subdir_1+"{YYYY[0]}{MMDD[0]}"+ancillary_sprod_ident_1
+
+    @active_if(group_filtered_anomalies, activate_ratio_linearx2)
+    @transform(starting_files_linearx2_all, formatter(formatter_in), add_inputs(ancillary_input, ancillary_input_1), formatter_out)
+    def vgt_ndvi_ratio_linearx2(input_file, output_file):
+
+        [current_file, avg_file, baresoil_file] = input_file
+
+        output_file = functions.list_to_element(output_file)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        # Temporary (not masked) file
+        output_file_temp = tmpdir+os.path.sep+os.path.basename(output_file)
+
+        args = {"input_file": [current_file,avg_file], "output_file": output_file_temp, "output_format": 'GTIFF', "options": "compress = lzw"}
+        raster_image_math.do_oper_division_perc(**args)
+
+        # Mask with baresoil file
+        no_data = int(sds_meta.get_nodata_value(current_file))
+        functions.check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": output_file_temp, "mask_file": baresoil_file, "output_file":output_file, "options":"compress = lzw" , "mask_value":no_data, "out_value": no_data}
+        raster_image_math.do_mask_image(**args)
+        shutil.rmtree(tmpdir)
 
     #   ---------------------------------------------------------------------
     #   3.a NDVI monthly product (avg)
@@ -981,7 +1147,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_monthly_prods, activate_monndvi)
     @collate(starting_files_linearx2_all, formatter(formatter_in), formatter_out)
-    @follows(vgt_ndvi_icn_linearx2)
+    # @follows(vgt_ndvi_icn_linearx2)
     def vgt_ndvi_monndvi(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -1027,7 +1193,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_monthly_stats, activate_1monavg)
     @collate(starting_files_monndvi, formatter(formatter_in), formatter_out)
-    @follows(vgt_ndvi_monndvi)
+    # @follows(vgt_ndvi_monndvi)
     def vgt_ndvi_1monavg(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -1054,7 +1220,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_monthly_stats, activate_1monmin)
     @collate(starting_files_monndvi, formatter(formatter_in), formatter_out)
-    @follows(vgt_ndvi_1monavg)
+    # @follows(vgt_ndvi_1monavg)
     def vgt_ndvi_1monmin(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -1081,7 +1247,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_monthly_stats, activate_1monmax)
     @collate(starting_files_monndvi, formatter(formatter_in), formatter_out)
-    @follows(vgt_ndvi_1monmin)
+    # @follows(vgt_ndvi_1monmin)
     def vgt_ndvi_1monmax(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)

@@ -22,8 +22,7 @@ import shlex
 from lib.python import functions
 from lib.python import es_logging as log
 from config import es_constants
-from apps.acquisition import acquisition
-from apps.processing import processing
+from apps.tools import ingest_historical_archives as iha
 from apps.es2system import convert_2_spirits as conv
 
 logger = log.my_logger(__name__)
@@ -158,7 +157,6 @@ def system_bucardo_service(action):
             logger.info('Bucardo is properly stopped.')
         else:
             logger.warning('Error in stopping Bucardo.')
-
 
 def system_db_sync_full(pc_role):
 
@@ -785,7 +783,6 @@ def cmd(acmd):
         logger.error(pe)
     return None
 
-
 def get_status_PC1():
 #   Get info on the status of the services on PC1:
 #   DVB
@@ -834,5 +831,9 @@ def get_status_PC1():
 class SystemDaemon(DaemonDryRunnable):
     def run(self):
         loop_system(dry_run=self.dry_run)
+
+class IngestArchiveDaemon(DaemonDryRunnable):
+    def run(self):
+        iha.ingest_historical_archives(input_dir=None, dry_run=self.dry_run)
 
 

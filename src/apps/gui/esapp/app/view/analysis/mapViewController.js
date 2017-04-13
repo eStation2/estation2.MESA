@@ -13,7 +13,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             if (esapp.Utils.objectExists(me.getView().templatename) && me.getView().templatename != ''){
                 newMapTemplateName = me.getView().templatename + ' - copy';
             }
-            Ext.MessageBox.prompt('Map Template Name', 'Please give a unique name for the new map template:', function(btn, text){
+            Ext.MessageBox.prompt(esapp.Utils.getTranslation('map_tpl_name'), esapp.Utils.getTranslation('map_tpl_save_message') + ':', function(btn, text){   // 'Map Template Name'   'Please give a unique name for the new map template'
                 if (btn == 'ok'){
                     // process text value and close...
                     me.getView().templatename = text;
@@ -55,13 +55,13 @@ Ext.define('esapp.view.analysis.mapViewController', {
             mapsetcode: me.mapsetcode,
             legendid: me.legendid,
             legendlayout: mapLegendObj.legendLayout,
-            legendObjPosition: mapLegendObj.legendPosition.toString(),
+            legendObjPosition: mapLegendObj.getPosition(true).toString(),
             showlegend: mapLegendToggleBtn.pressed,
-            titleObjPosition: titleObj.titlePosition.toString(),
+            titleObjPosition: titleObj.getPosition(true).toString(),
             titleObjContent: titleObj.tpl.html,
-            disclaimerObjPosition: disclaimerObj.disclaimerPosition.toString(),
+            disclaimerObjPosition: disclaimerObj.getPosition(true).toString(),
             disclaimerObjContent: disclaimerObj.getContent(),
-            logosObjPosition: logoObj.logoPosition.toString(),
+            logosObjPosition: logoObj.getPosition(true).toString(),
             logosObjContent: Ext.encode(logoObj.getLogoData()),
             showObjects: mapObjectToggleBtn.pressed,
             scalelineObjPosition: scalelineObj.getPosition(true).toString(),
@@ -78,11 +78,11 @@ Ext.define('esapp.view.analysis.mapViewController', {
             scope: me,
             success: function (response, request) {
                 var responseJSON = Ext.util.JSON.decode(response.responseText);
-                Ext.toast({html: responseJSON.message, title: "Save Map template", width: 300, align: 't'});
+                Ext.toast({html: responseJSON.message, title: esapp.Utils.getTranslation('save_map_tpl'), width: 300, align: 't'});     // "Save Map template"
             },
             //callback: function ( callinfo,responseOK,response ) {},
             failure: function (result, request) {
-                Ext.toast({html: responseJSON.message, title: "ERROR - Save Map template", width: 300, align: 't'});
+                Ext.toast({html: responseJSON.message, title: esapp.Utils.getTranslation('error_save_map_tpl'), width: 300, align: 't'});     // "ERROR saving the Map template"
             }
         });
 
@@ -335,9 +335,15 @@ Ext.define('esapp.view.analysis.mapViewController', {
         mapLegendObj.legendHTMLVertical = legendHTMLVertical;
         mapLegendObj.hide();    // Hide first to always trigger the show event!
         mapLegendObj.show();
+        // mapLegendObj.fireEvent('show');
 
         var maplegend_togglebtn = me.lookupReference('legendbtn_' + me.getView().id.replace(/-/g, '_')); //  + me.getView().id);
         maplegend_togglebtn.show();
+
+        var opacityslider_togglebtn = me.lookupReference('opacityslider_' + me.getView().id.replace(/-/g, '_'));
+        opacityslider_togglebtn.show();
+        // opacityslider_togglebtn.setPosition(me.getView().getWidth() - 48, 150);
+
 
         if (mapLegendObj.showlegend ) {
             //maplegend_togglebtn.toggle();
@@ -590,13 +596,13 @@ Ext.define('esapp.view.analysis.mapViewController', {
             mapviewwin = btn.up().up(),
             mapimage_url = '',
 
-            ObjectToggleBtn = mapviewwin.lookupReference('objectsbtn_'+me.id.replace(/-/g,'_')),
+            ObjectToggleBtn = me.lookupReference('objectsbtn_'+me.id.replace(/-/g,'_')),
 
-            legendObj = mapviewwin.lookupReference('product-legend_' + mapviewwin.id),
-            titleObj = mapviewwin.lookupReference('title_obj_' + mapviewwin.id),
-            disclaimerObj = mapviewwin.lookupReference('disclaimer_obj_' + mapviewwin.id),
-            logosObj = mapviewwin.lookupReference('logo_obj_' + mapviewwin.id),
-            scalelineObj = mapviewwin.lookupReference('scale-line_' + mapviewwin.id),
+            legendObj = me.lookupReference('product-legend_' + me.id),
+            titleObj = me.lookupReference('title_obj_' + me.id),
+            disclaimerObj = me.lookupReference('disclaimer_obj_' + me.id),
+            logosObj = me.lookupReference('logo_obj_' + me.id),
+            scalelineObj = me.lookupReference('scale-line_' + me.id),
 
             legendObjPosition = [],
             titleObjPosition = [],
@@ -620,7 +626,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
         }
 
         if (!legendObj.hidden) {
-            legendObj.fireEvent('refreshimage');
+            // legendObj.fireEvent('refreshimage');
             legendObjPosition = legendObj.getPosition(true);
         }
         if (ObjectToggleBtn.pressed) {
@@ -628,9 +634,13 @@ Ext.define('esapp.view.analysis.mapViewController', {
             disclaimerObjPosition = disclaimerObj.getPosition(true);
             logosObjPosition = logosObj.getPosition(true);
         }
+        // console.info('legendObjPosition: ' + legendObjPosition);
+        // console.info('titleObjPosition: ' + titleObjPosition);
+        // console.info('disclaimerObjPosition: ' + disclaimerObjPosition);
+        // console.info('logosObjPosition: ' + logosObjPosition);
 
         var task = new Ext.util.DelayedTask(function() {
-            mapviewwin.map.once('postcompose', function(event) {
+            me.map.once('postcompose', function(event) {
                 var canvas = event.context.canvas,
                     context = canvas.getContext('2d');
                 if (!legendObj.hidden) {
@@ -666,7 +676,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 //ctx.stroke();
 
             });
-            mapviewwin.map.renderSync();
+            me.map.renderSync();
 
 
             if (Ext.fly('downloadlink')) {
@@ -682,7 +692,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             downloadlink.click();
 
         });
-        task.delay(1000);
+        task.delay(500);
 
         //if(typeof Promise !== "undefined" && Promise.toString().indexOf("[native code]") !== -1){
         //   console.info('Browser supports Promise natively!');
@@ -731,12 +741,14 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
         if (btn.pressed) {
             mapviewwin.map.setView(mapviewwin.mapView);
+            mapviewwin.lookupReference('zoomfactorslider_' + mapviewwin.id.replace(/-/g,'_')).setValue(mapviewwin.zoomFactorSliderValue);
             //btn.setText('Link');
             //btn.setIconCls('link');
             btn.setIconCls('fa fa-chain-broken fa-2x red');
         }
         else {
             mapviewwin.map.setView(mapviewwin.up().commonMapView);
+            mapviewwin.lookupReference('zoomfactorslider_' + mapviewwin.id.replace(/-/g,'_')).setValue(mapviewwin.up().zoomFactorSliderValue);
             //btn.setText('Unlink');
             //btn.setIconCls('unlink');
             btn.setIconCls('fa fa-link fa-2x gray');
@@ -805,6 +817,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             mapviewwin.map.removeInteraction(mapviewwin.draw);
             mapviewwin.getController().addDrawInteraction();
             btn.setIconCls('polygon');
+            // btn.showMenu();
         }
         else {
             mapviewwin.map.removeInteraction(mapviewwin.draw);
@@ -1517,7 +1530,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                     }
                 }
                 if (regionname_html == 'undefined' && me.toplayer.get('layer_id') == 'drawvectorlayer'){
-                    regionname_html = "Drawn " + topfeature.getGeometry().getType();
+                    regionname_html = esapp.Utils.getTranslation('drawn') + " " + topfeature.getGeometry().getType();      // "Drawn "
                 }
                 regionname.setHtml(regionname_html);
 
@@ -1572,7 +1585,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 me.selectedFeatureFromDrawLayer = false;
                 if (regionname_html == 'undefined' && me.toplayer.get('layer_id') == 'drawvectorlayer'){
                     me.selectedFeatureFromDrawLayer = true;
-                    regionname_html = "Drawn " + feature.getGeometry().getType();
+                    regionname_html = esapp.Utils.getTranslation('drawn') + " " + feature.getGeometry().getType();     // "Drawn "
                 }
                 selectedregion.setValue(regionname_html);
 
@@ -1989,7 +2002,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             typeAhead: true,
             queryMode: 'local',
             triggerAction: 'all',
-            emptyText: 'Select a geometry...',
+            emptyText: esapp.Utils.getTranslation('select_geometry'),     // 'Select a geometry...',
             selectOnFocus: false,
             width: 100,
             indent: true,
@@ -2012,18 +2025,42 @@ Ext.define('esapp.view.analysis.mapViewController', {
             border: false,
             shadow: false,
             padding: 0,
+            defaults: {
+                margin: 2
+            },
             items: [{
-                text: '<div style="font-size: 11px;">' + esapp.Utils.getTranslation('productnavigator') + '</div>', // 'Product navigator',
-                iconCls: 'africa',
+                text: '<div style="font-size: 11px;">' + esapp.Utils.getTranslation('productnavigator') + '</div>', // 'PRODUCT',
+                // iconCls: 'africa',
                 scale: 'medium',
+                cls: 'nopadding-btn',
+                // style: {padding: 0},
+                // padding: 0,
+                // margin: 2,
                 handler: 'openProductNavigator'
             }
             ,layersmenubutton
             ,{
+                iconCls: 'download_png',
+                scale: 'medium',
+                handler: 'saveMap',
+                href: '',
+                download: 'estationmap.png',
+                listeners: {
+                    afterrender: function (me) {
+                        // Register the new tip with an element's ID
+                        Ext.tip.QuickTipManager.register({
+                            target: me.getId(), // Target button's ID
+                            title: '',
+                            text: esapp.Utils.getTranslation('download_map_as_png')
+                        });
+                    }
+                }
+            },{
                 xtype: 'splitbutton',
                 reference: 'saveMapTemplate_'+me.id.replace(/-/g,'_'),
                 iconCls: 'fa fa-save fa-2x',
                 style: {color: 'lightblue'},
+                cls: 'nopadding-splitbtn',
                 scale: 'medium',
                 hidden:  (esapp.getUser() == 'undefined' || esapp.getUser() == null ? true : false),
                 handler: 'setMapTemplateName',
@@ -2031,7 +2068,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                     hideOnClick: false,
                     alwaysOnTop: true,
                     //iconAlign: '',
-                    width: 125,
+                    width: 165,
                     defaults: {
                         hideOnClick: true,
                         //cls: "x-menu-no-icon",
@@ -2039,11 +2076,11 @@ Ext.define('esapp.view.analysis.mapViewController', {
                     },
                     items: [{
                             //xtype: 'button',
-                            text: 'Save as...',
+                            text: esapp.Utils.getTranslation('save_as'),    // 'Save as...',
                             iconCls: 'fa fa-save fa-lg lightblue',
                             style: { color: 'lightblue' },
                             //cls: 'x-menu-no-icon button-gray',
-                            width: 60,
+                            width: 165,
                             handler: function(){
                                 me.isNewTemplate = true;
                                 me.getController().setMapTemplateName();
@@ -2052,27 +2089,161 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 }
             },{
                 xtype: 'container',
-                width: 300,
-                height: 38,
+                // layout: 'fit',
+                autoWidth: true,
+                minWidth: 220,
+                // width: 350,
+                height: 35,
                 top: 0,
                 align:'left',
                 defaults: {
                     style: {
-                        "font-size": '10px'
+                        "font-size": '10px',
+                        "line-height": '14px'
                     }
                 },
                 items: [{
                     xtype: 'box',
-                    height: 17,
+                    // autoWidth: true,
+                    // minWidth: 250,
+                    height: 25,
                     top:0,
-                    html: '<div id="region_name_' + me.id + '" style="text-align:left; font-size: 10px; font-weight: bold;"></div>'
+                    html: '<div id="region_name_' + me.id + '" style="line-height:14px; text-align:left; font-size: 10px; font-weight: bold;"></div>'
                 },{
                     xtype: 'box',
-                    height: 15,
-                    top:17,
+                    height: 10,
+                    top:25,
                     html: '<div id="mouse-position_' + me.id + '"></div>'
                 }]
             },'->', {
+                // xtype: 'button',
+                // id: 'zoomFactorBtn_' + me.id,
+                // //reference: 'zoomFactorBtn_' + me.id,
+                // iconCls: 'fa fa-search',
+                // style: {
+                //     color: 'lightblue',
+                //     "font-size": '1.70em'
+                // },
+                // glyph: null,
+                // scale: 'medium',
+                // hidden: false,
+                // arrowVisible: false,
+                // arrowAlign: 'right',
+                // collapseDirection: 'left',
+                // menuAlign: 'tr-tl',
+                // listeners: {
+                //     // mouseover: function(btn){
+                //     //     btn.showMenu();
+                //     // },
+                //     afterrender: function (me) {
+                //         // Register the new tip with an element's ID
+                //         Ext.tip.QuickTipManager.register({
+                //             target: me.getId(), // Target button's ID
+                //             title: '',
+                //             text: esapp.Utils.getTranslation('zoom_factor')
+                //         });
+                //     }
+                // },
+                // menu: {
+                //     maxWidth: 200,
+                //     hideOnClick: false,
+                //     listeners: {
+                //         mouseout: function(menuitem){
+                //             menuitem.up().hideMenu();
+                //         }
+                //     },
+                //     items: [{
+            //             xtype: 'slider',  // 'numberfield',
+            //             //id: 'zoomFactor_slider_' + me.id,
+            //             reference: 'zoomfactorslider_' + me.id.replace(/-/g,'_'),
+            //             fieldLabel: '<b>'+esapp.Utils.getTranslation('zoom_factor')+'</b>',
+            //             labelAlign: 'top',
+            //             hideLabel: false,
+            //             hideOnClick: false,
+            //             width: 180,
+            //             maxWidth: 180,
+            //             allowDecimals: false,
+            //             value: 5,
+            //             //step: 1,
+            //             increment: 1,
+            //             minValue: 1,
+            //             maxValue: 10,
+            //             tipText: function (thumb) {
+            //                 return Ext.String.format('<b>{0}</b>', thumb.value);
+            //             },
+            //             listeners: {
+            //                 changecomplete: function(menuitem, value, oldvalue){
+            //                     //console.info(me.lookupReference('toggleLink_btn_'+me.id.replace(/-/g,'_')));
+            //                     // console.info('changecomplete called from '+me.id);
+            //                     //me.up().commonMapView.setProperties({zoomFactor: 1.1+(0.01*value)});
+            //                     //me.up().commonMapView.set('zoomFactor', 1.1+(0.01*value), false);
+            //                     var mapview_linked = true;
+            //                     var mapViewWindows = Ext.ComponentQuery.query('mapview-window');
+            //
+            //                     mapview_linked = !me.lookupReference('toggleLink_btn_'+me.id.replace(/-/g,'_')).pressed;
+            //                     if (mapview_linked){
+            //                         me.up().zoomFactorValue = value;
+            //                         me.up().commonMapView =  new ol.View({
+            //                             projection:"EPSG:4326",
+            //                             displayProjection:"EPSG:4326",
+            //                             center: me.up().commonMapView.getCenter(),    // [20, -2],   // [20, -4.7],
+            //                             resolution: 0.1,
+            //                             minResolution: 0.0001,
+            //                             maxResolution: 0.25,
+            //                             zoomFactor: 1.1+0.1*value   // (cioe' nel range 1.1 -> 2.1)
+            //                             // zoom: me.up().commonMapView.getZoom()-(2*value),
+            //                             // minZoom: 15-(2*value),
+            //                             // maxZoom: 110,
+            //                             // zoomFactor: 1.1+(0.01*value)
+            //                         });
+            //                         me.up().zoomFactorSliderValue = value;
+            //                         me.map.setView(me.up().commonMapView);
+            //                         if (esapp.Utils.objectExists(me.up().map)){
+            //                             me.up().map.setView(me.up().commonMapView);
+            //                         }
+            //                     }
+            //                     else {
+            //                         me.mapView = new ol.View({
+            //                             projection:"EPSG:4326",
+            //                             displayProjection:"EPSG:4326",
+            //                             center: me.up().commonMapView.getCenter(),    // [20, -2],   // [20, -4.7],
+            //                             resolution: 0.1,
+            //                             minResolution: 0.0001,
+            //                             maxResolution: 0.25,
+            //                             zoomFactor: 1.1+0.1*value   // (cioe' nel range 1.1 -> 2.1)
+            //                             // zoom: me.up().commonMapView.getZoom(),
+            //                             // minZoom: 12,
+            //                             // maxZoom: 100,
+            //                             // zoomFactor: 1.1+(0.01*value)
+            //                         });
+            //                         me.zoomFactorSliderValue = value;
+            //                         me.map.setView(me.mapView);
+            //                     }
+            //
+            //                     if (mapview_linked){
+            //                         Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
+            //                             var mapview_window_linked = !mapview_window.lookupReference('toggleLink_btn_'+mapview_window.id.replace(/-/g,'_')).pressed;
+            //                             if (me != mapview_window && mapview_window_linked){
+            //                                mapview_window.map.setView(me.up().commonMapView);
+            //                                mapview_window.lookupReference('zoomfactorslider_' + mapview_window.id.replace(/-/g,'_')).setValue(value);
+            //                             }
+            //                         });
+            //                     }
+            //
+            //                 }
+            //             }
+            //         }]
+            //     }
+            //     ,handler: function(btn , y , x ){
+            //
+            //         // if (btn.pressed) {
+            //         //     btn.showMenu();
+            //         // }
+            //         // else {
+            //         //     btn.hideMenu();
+            //         // }
+            //     }
+            // },{
                 xtype: 'button',
                 reference: 'drawgeometry_'+me.id.replace(/-/g,'_'),
                 hidden: false,
@@ -2086,14 +2257,22 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 menuAlign: 'tr-tl',
                 handler: 'toggleDrawGeometry',
                 listeners: {
-                    mouseover: function(btn , y , x ){
-                        if (btn.pressed) {
-                            btn.showMenu();
-                        }
-                        else {
-                            btn.hideMenu();
-                        }
+                    afterrender: function (me) {
+                        // Register the new tip with an element's ID
+                        Ext.tip.QuickTipManager.register({
+                            target: me.getId(), // Target button's ID
+                            title: '',
+                            text: esapp.Utils.getTranslation('draw_geometries')
+                        });
                     }
+                    // mouseover: function(btn , y , x ){
+                    //     if (btn.pressed) {
+                    //         btn.showMenu();
+                    //     }
+                    //     else {
+                    //         btn.hideMenu();
+                    //     }
+                    // }
                 },
                 menu: {
                     hideOnClick: false,
@@ -2118,7 +2297,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                                 // Open a small modal panel asking to name the layer file
                                 var writer = new ol.format.GeoJSON();
                                 var geojsonStr = '';
-                                var drawnLayerName = 'Drawn layer';
+                                var drawnLayerName = esapp.Utils.getTranslation('drawn_layer'); // 'Drawn layer';
 
                                 me.drawvectorlayer.getSource().getFeatures().forEach(function (feat,idx){
                                     feat.setProperties({NAME: feat.getGeometry().getType()});
@@ -2128,12 +2307,12 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
                                 //console.info(me.drawvectorlayer.getSource().getFeatures());
                                 if (me.drawvectorlayer.getSource().getFeatures().length == 0){
-                                    Ext.toast({html: 'Please draw at least one geometry to save as a layer.', title: "No geometries drawn!", width: 300, align: 't'});
+                                    Ext.toast({html: esapp.Utils.getTranslation('please_draw_geom_to_save'), title: esapp.Utils.getTranslation('no_geom_to_save'), width: 300, align: 't'});    // 'Please draw at least one geometry to save as a layer.' "No geometries drawn to save!"
                                 }
                                 else {
-                                    Ext.MessageBox.prompt('Map Template Name', 'Please give a name drawn layer:', function(btn, text){
+                                    Ext.MessageBox.prompt(esapp.Utils.getTranslation('drawn_layer_name'), esapp.Utils.getTranslation('drawn_layer_save_message') + ': ', function(btn, text){   // 'Drawn layer Name'  'Please give a name to drawn layer'
                                         if (btn == 'ok'){
-                                            //alert(geojsonStr)
+                                            //alert(geojsonStr) map_tpl_save_message
                                             params = {
                                                 layerfilename: text + '.geojson',
                                                 drawnlayerfeaturesGEOSON: geojsonStr
@@ -2150,7 +2329,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                             }
                         },{
                             //xtype: 'button',
-                            text: 'Reset',
+                            text: esapp.Utils.getTranslation('reset'),   // 'Reset',
                             iconCls: 'fa fa-undo fa-lg red',
                             //style: { color: 'red' },
                             //cls: 'x-menu-no-icon button-gray',
@@ -2168,7 +2347,17 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 iconCls: 'africa-orange24',
                 scale: 'medium',
                 enableToggle: true,
-                handler: 'toggleOutmask'
+                handler: 'toggleOutmask',
+                listeners: {
+                    afterrender: function (me) {
+                        // Register the new tip with an element's ID
+                        Ext.tip.QuickTipManager.register({
+                            target: me.getId(), // Target button's ID
+                            title: '',
+                            text: esapp.Utils.getTranslation('outmask_selected_geometry')
+                        });
+                    }
+                }
             },{
                 reference: 'objectsbtn_'+me.id.replace(/-/g,'_'),
                 hidden: false,
@@ -2178,7 +2367,17 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 },
                 scale: 'medium',
                 enableToggle: true,
-                handler: 'toggleObjects'
+                handler: 'toggleObjects',
+                listeners: {
+                    afterrender: function (me) {
+                        // Register the new tip with an element's ID
+                        Ext.tip.QuickTipManager.register({
+                            target: me.getId(), // Target button's ID
+                            title: '',
+                            text: esapp.Utils.getTranslation('show_hide_title_logo_discalaimer_objects')
+                        });
+                    }
+                }
             },{
                 //id: 'legendbtn_'+me.id,
                 reference: 'legendbtn_'+me.id.replace(/-/g,'_'),
@@ -2186,22 +2385,36 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 iconCls: 'legends',
                 scale: 'medium',
                 enableToggle: true,
-                handler: 'toggleLegend'
+                handler: 'toggleLegend',
+                listeners: {
+                    afterrender: function (me) {
+                        // Register the new tip with an element's ID
+                        Ext.tip.QuickTipManager.register({
+                            target: me.getId(), // Target button's ID
+                            title: '',
+                            text: esapp.Utils.getTranslation('show_hide_legend')
+                        });
+                    }
+                }
             },{
-                iconCls: 'download_png',
-                //style: { color: 'lightblue' },
-                scale: 'medium',
-                handler: 'saveMap',
-                href: '',
-                download: 'estationmap.png'
-            },{
+                reference: 'toggleLink_btn_'+me.id.replace(/-/g,'_'),
                 //text: 'Unlink',
                 enableToggle: true,
                 iconCls: 'fa fa-link fa-2x',
                 style: {color: 'gray'},
                 //iconCls: 'unlink',
                 scale: 'medium',
-                handler: 'toggleLink'
+                handler: 'toggleLink',
+                listeners: {
+                    afterrender: function (me) {
+                        // Register the new tip with an element's ID
+                        Ext.tip.QuickTipManager.register({
+                            target: me.getId(), // Target button's ID
+                            title: '',
+                            text: esapp.Utils.getTranslation('link_unlink_mapview')
+                        });
+                    }
+                }
             }]
         });
 

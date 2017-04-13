@@ -42,7 +42,7 @@ Ext.define("esapp.view.widgets.Register",{
         var me = this;
 
         me.title = {
-            text: 'Create an Account',
+            text: esapp.Utils.getTranslation('create_account'),  // 'Create an Account',
             cls: 'fontsize20'
         };
 
@@ -67,7 +67,7 @@ Ext.define("esapp.view.widgets.Register",{
 
             buttonAlign: 'center',
             buttons: [{
-                text: '<b style="font-size: 20px">' + 'Register' + '</b>',
+                text: '<b style="font-size: 20px">' + esapp.Utils.getTranslation('register') + '</b>',  // 'Register'
                 disabled: true,
                 formBind: true,
                 iconAlign: 'left',
@@ -118,18 +118,18 @@ Ext.define("esapp.view.widgets.Register",{
                 xtype: 'textfield',
                 name: 'fullname',
                 //fieldLabel: 'Full Name',
-                emptyText: 'Full Name'
+                emptyText: esapp.Utils.getTranslation('fullname')   // 'Full Name'
                 //ui: 'light'
             },{
                 xtype: 'textfield',
                 name: 'user',
                 reference: 'user',
                 //fieldLabel: 'Username',
-                emptyText: 'Username',
+                emptyText: esapp.Utils.getTranslation('username'),   // 'Username',
                 validator: function(value){
                     if (value.length > 3){
                         if (me.getViewModel().getStore('users').findRecord('userid', value) != null){
-                            return 'Username already exists!';
+                            return esapp.Utils.getTranslation('username_already_exists');  // 'Username already exists!';
                         }
                         else return true;
                     }
@@ -155,7 +155,7 @@ Ext.define("esapp.view.widgets.Register",{
                 xtype: 'textfield',
                 name: 'email',
                 //fieldLabel: 'Email',
-                emptyText: 'Email',
+                emptyText: esapp.Utils.getTranslation('email'),   // 'Email',
                 vtype: 'email'
             },{
                 xtype: 'textfield',
@@ -163,7 +163,7 @@ Ext.define("esapp.view.widgets.Register",{
                 itemId: 'pass',
                 reference: 'pass',
                 //fieldLabel: 'Password',
-                emptyText: 'Password',
+                emptyText: esapp.Utils.getTranslation('password'),   // 'Password',
                 inputType: 'password',
                 listeners: {
                     validitychange: function(field){
@@ -177,7 +177,7 @@ Ext.define("esapp.view.widgets.Register",{
                 xtype: 'textfield',
                 name: 'pass-cfrm',
                 //fieldLabel: 'Verify',
-                emptyText: 'Verify password',
+                emptyText: esapp.Utils.getTranslation('verify_password'),   // 'Verify password',
                 inputType: 'password',
                 vtype: 'password',
                 initialPassField: 'pass' // id of the initial password field

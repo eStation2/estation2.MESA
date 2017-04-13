@@ -693,10 +693,6 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
             else:
                 logger.info('Test file not existing: do not assign metadata')
 
-        # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
-        if output_nodata is None and input_nodata is not None:
-            output_nodata = input_nodata
-
         # manage out_type (take the input one as default)
         if output_type is None:
             outType=dataType
@@ -714,6 +710,7 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
         if input_nodata is None:
             input_nodata = -32768.0
 
+        # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
         if output_nodata is None and input_nodata is not None:
             output_nodata = input_nodata
 
@@ -736,11 +733,11 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
 
                 # TODO-M.C.: check this assignment is done for the other functions as well
                 dataout=N.zeros(ns).astype(float)
-                if output_nodata is None:
+                if output_nodata is not None:
                     dataout=N.zeros(ns).astype(float) + output_nodata
 
-            if wtc.any():
-                dataout[wtc] = data0[wtc]/data1[wtc]
+                if wtc.any():
+                    dataout[wtc] = data0[wtc]/data1[wtc]
 
                 dataout = dataout*100.00
                 dataout = dataout.round()
@@ -946,18 +943,26 @@ def do_make_vci(input_file='', min_file='', max_file='', output_file='', input_n
             os.remove(output_file)
 
 # _____________________________
-def do_make_baresoil(input_file='', min_file='', max_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
+def do_make_baresoil(input_file='', avg_file='', min_file='', max_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
            output_type=None, options='', delta_ndvi_max=0.15, ndvi_max=0.14):
 
 #
-#   Compute a mask for identifying 'baresoil' from a single NDVI image - based on the condition:
+#   Compute a mask for identifying 'baresoil' from a single NDVI image and LT stats
 #
-#   deltaNDVI < deltaNDVImax AND curr_NDVI < NDVImax
+#   Conditions for classification as baresoil are:
 #
-#   where: deltaNDVI is Max-Min for the current year
+#   1. curr_NDVI < NDVImax
+#   2. deltaNDVI < deltaNDVImax
+#   3. meanNDVI  < NDVImax
+#
+#   Condition 1. apply always, 2. if min/max files are provided, and 3. if avg file is provided
+#   Conditions apply in AND, e.g. if avg is provided (standard case) baresoil is identified where:
+#
+#               curr_NDVI < NDVImax  AND meanNDVI  < NDVImax
+#
+#   leading to a less extended baresoil region, so that more anomalies are identified.
 #
 #   Output: 0 (or output_nodata)-> baresoil/no-data, 1 -> vegetated
-#
 #   Note: nodata are considered only in the NDVIcurr file (NOT in min/max).
 #
     try:
@@ -970,6 +975,9 @@ def do_make_baresoil(input_file='', min_file='', max_file='', output_file='', in
         if min_file != '' and max_file != '':
             minFID = gdal.Open(min_file, GA_ReadOnly)
             maxFID = gdal.Open(max_file, GA_ReadOnly)
+
+        if avg_file != '':
+            avgFID = gdal.Open(avg_file, GA_ReadOnly)
 
         # Read info from file
         nb = fileFID.RasterCount
@@ -985,8 +993,19 @@ def do_make_baresoil(input_file='', min_file='', max_file='', output_file='', in
             sds_meta = metadata.SdsMetadata()
             if os.path.exists(input_file):
                 input_nodata=float(sds_meta.get_nodata_value(input_file))
+                [scaling_factor, scaling_offset] = sds_meta.get_scaling_values(input_file)
             else:
                 logger.info('Test file not existing: do not assign metadata')
+
+        # Convert the physical thresholds (ndvi_max, delta_ndvi_max) in DN equivalent
+        if os.path.exists(input_file):
+            input_nodata=float(sds_meta.get_nodata_value(input_file))
+            [scaling_factor, scaling_offset] = sds_meta.get_scaling_values(input_file)
+            ndvi_max_dn = (ndvi_max-scaling_offset)/scaling_factor
+            delta_ndvi_max_dn = (delta_ndvi_max-scaling_offset)/scaling_factor
+
+        else:
+            logger.info('Test file not existing: do not assign metadata')
 
         # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
         if output_nodata is None and input_nodata is not None:
@@ -1016,6 +1035,11 @@ def do_make_baresoil(input_file='', min_file='', max_file='', output_file='', in
         if min_file != '' and max_file != '':
             inmin = minFID.GetRasterBand(1)
             inmax = maxFID.GetRasterBand(1)
+            logger.info('Using NDVI val and NDVI-delta')
+
+        if avg_file != '':
+            inavg = avgFID.GetRasterBand(1)
+            logger.info('Using NDVI val and NDVI-average')
 
         for il in range(fileFID.RasterYSize):
             data   = N.ravel(indata.ReadAsArray(0, il, indata.XSize, 1))
@@ -1023,6 +1047,9 @@ def do_make_baresoil(input_file='', min_file='', max_file='', output_file='', in
                 minVal = N.ravel(inmin.ReadAsArray(0, il, inmin.XSize, 1))
                 maxVal = N.ravel(inmax.ReadAsArray(0, il, inmax.XSize, 1))
                 deltaVal = maxVal - minVal
+
+            if avg_file != '' :
+                avgVal = N.ravel(inavg.ReadAsArray(0, il, inavg.XSize, 1))
 
             datatype=data.dtype
             if input_nodata is None:
@@ -1032,9 +1059,11 @@ def do_make_baresoil(input_file='', min_file='', max_file='', output_file='', in
 
             # Identify 'bare' pixels (or nodata)
             if min_file != '' and max_file != '':
-                w_bare = (data < ndvi_max) * (deltaVal < delta_ndvi_max)
+                w_bare = (data < ndvi_max_dn) * (deltaVal < delta_ndvi_max_dn)
+            elif avg_file != '':
+                w_bare = (data < ndvi_max_dn) * (avgVal < ndvi_max_dn)
             else:
-                w_bare = (data < ndvi_max)
+                w_bare = (data < ndvi_max_dn)
 
             if input_nodata is not None:
                 w_nodata = (data == input_nodata)
@@ -1055,14 +1084,21 @@ def do_make_baresoil(input_file='', min_file='', max_file='', output_file='', in
                     mask[w_nodata] = output_value
 
             mask.shape = (1,-1)
+            maskout = N.array(mask).astype(int)
             outband.WriteArray(mask, 0, il)
 
         #   ----------------------------------------------------------------------------------------------------
         #   Writes metadata to output
         input_list = []
         input_list.append(input_file)
-        input_list.append(min_file)
-        input_list.append(max_file)
+        if min_file != '':
+            input_list.append(min_file)
+        if max_file != '':
+            input_list.append(max_file)
+        #   Close outputs
+        outDrv = None
+        outDS = None
+
         assign_metadata_processing(input_list, output_file)
     except:
         logger.warning('Error in do_make_baresoil. Remove outputs')
@@ -1143,7 +1179,7 @@ def do_mask_image(input_file='', mask_file='', output_file='',output_format=None
         #   Close outputs
         outDrv = None
         outDS = None
-        #assign_metadata_processing(input_list, output_file)
+        assign_metadata_processing(input_list, output_file)
     except:
         logger.warning('Error in do_mask_image. Remove outputs')
         if os.path.isfile(output_file):

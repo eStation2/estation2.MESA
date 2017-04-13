@@ -1,3 +1,180 @@
+ALTER TABLE products.product
+  ADD COLUMN display_index integer;
+
+
+ALTER TABLE products.thema
+  ADD COLUMN activated boolean DEFAULT FALSE::boolean;
+
+UPDATE products.thema set activated = FALSE;
+-- UPDATE products.thema set activated = TRUE WHERE thema_id = themaid;
+-- READ themaid from /eStation2/settings/system_settings.ini
+-- systemsettings = functions.getSystemSettings()
+-- themaid = systemsettings['thema']
+
+CREATE OR REPLACE FUNCTION products.activate_deactivate_ingestion_pads_processing() RETURNS TRIGGER
+    LANGUAGE plpgsql STRICT
+    AS $$
+BEGIN
+	IF TG_OP='UPDATE' THEN
+		IF (OLD.activated IS DISTINCT FROM NEW.activated AND NEW.product_type = 'Native') THEN
+			UPDATE products.ingestion i
+			SET activated = NEW.activated,
+				  enabled = NEW.activated
+			WHERE i.productcode = NEW.productcode
+			AND i.version = NEW.version
+			AND i.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product
+                           WHERE thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                             AND activated = TRUE
+                             AND productcode = NEW.productcode
+                             AND version = NEW.version);
+
+			UPDATE products.process_product pp
+			SET activated = NEW.activated
+			WHERE pp.productcode = NEW.productcode
+			AND pp.version = NEW.version
+			AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product
+                            WHERE thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                              AND activated = TRUE
+                              AND productcode = NEW.productcode
+                              AND version = NEW.version);
+
+			UPDATE products.processing p
+			SET activated = NEW.activated,
+				  enabled = NEW.activated
+			WHERE (p.process_id) in (SELECT process_id
+                               FROM products.process_product pp
+                               WHERE pp.type = 'INPUT'
+                                 AND pp.productcode = NEW.productcode
+                                 AND pp.version = NEW.version
+                                 AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product
+                                                       WHERE thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                                                         AND activated = TRUE
+                                                         AND productcode = NEW.productcode
+                                                         AND version = NEW.version));
+
+			UPDATE products.product_acquisition_data_source pads
+			SET activated = NEW.activated
+			WHERE pads.productcode = NEW.productcode AND pads.version = NEW.version;
+		END IF;
+	END IF;
+
+	RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER update_product
+	BEFORE UPDATE ON products.product
+	FOR EACH ROW
+	WHEN (OLD.activated IS DISTINCT FROM NEW.activated AND NEW.product_type = 'Native')
+	EXECUTE PROCEDURE products.activate_deactivate_ingestion_pads_processing();
+
+
+
+CREATE OR REPLACE FUNCTION products.set_thema(themaid character varying)
+  RETURNS boolean AS
+$BODY$
+DECLARE
+    themaid   ALIAS FOR  $1;
+BEGIN
+    IF themaid != '' THEN
+        -- BEGIN
+      UPDATE products.thema set activated = FALSE;
+      UPDATE products.thema set activated = TRUE WHERE thema_id = themaid;
+
+      UPDATE products.product
+      SET activated = FALSE
+      WHERE defined_by = 'JRC';
+
+      UPDATE products.ingestion
+      SET activated = FALSE,
+          enabled = FALSE
+      WHERE defined_by = 'JRC';
+
+      UPDATE products.processing
+      SET activated = FALSE,
+          enabled = FALSE
+      WHERE defined_by = 'JRC';
+
+      UPDATE products.process_product pp
+      SET activated = FALSE
+      WHERE (pp.process_id) in (SELECT process_id FROM products.processing WHERE defined_by = 'JRC');
+
+      UPDATE products.product_acquisition_data_source
+      SET activated = FALSE
+      WHERE defined_by = 'JRC';
+
+
+      IF themaid != 'ALL' THEN
+          UPDATE products.product p
+          SET activated = TRUE
+          WHERE p.product_type = 'Native'
+            AND (p.productcode, p.version) in (SELECT productcode, version FROM products.thema_product WHERE thema_id = themaid AND activated = TRUE);
+
+          UPDATE products.ingestion i
+          SET activated = TRUE,
+              enabled = TRUE
+          WHERE (i.productcode, i.version, i.mapsetcode) in (SELECT productcode, version, mapsetcode FROM products.thema_product WHERE thema_id = themaid AND activated = TRUE);
+
+          UPDATE products.process_product pp
+          SET activated = TRUE
+          WHERE (pp.productcode, pp.version, pp.mapsetcode) in (SELECT productcode, version, mapsetcode FROM products.thema_product WHERE thema_id = themaid AND activated = TRUE);
+
+          UPDATE products.processing p
+          SET activated = TRUE,
+              enabled = TRUE
+          WHERE (p.process_id) in (SELECT process_id
+           FROM products.process_product pp
+           WHERE pp.type = 'INPUT'
+             AND (pp.productcode, pp.version, pp.mapsetcode) in (SELECT productcode, version, mapsetcode FROM products.thema_product WHERE thema_id = themaid AND activated = TRUE));
+
+          UPDATE products.product_acquisition_data_source pads
+          SET activated = TRUE
+          WHERE (pads.productcode, pads.version) in (SELECT productcode, version FROM products.thema_product WHERE thema_id = themaid AND activated = TRUE);
+
+      ELSE
+          UPDATE products.product p
+          SET activated = TRUE
+          WHERE p.product_type = 'Native'
+            AND (p.productcode, p.version) in (SELECT productcode, version FROM products.thema_product WHERE thema_id != themaid AND activated = TRUE);
+
+          UPDATE products.ingestion i
+          SET activated = TRUE,
+              enabled = TRUE
+          WHERE (i.productcode, i.version, i.mapsetcode) in (SELECT productcode, version, mapsetcode FROM products.thema_product WHERE thema_id != themaid AND activated = TRUE);
+
+          UPDATE products.process_product pp
+          SET activated = TRUE
+          WHERE (pp.productcode, pp.version, pp.mapsetcode) in (SELECT productcode, version, mapsetcode FROM products.thema_product WHERE thema_id != themaid AND activated = TRUE);
+
+          UPDATE products.processing p
+          SET activated = TRUE,
+              enabled = TRUE
+          WHERE (p.process_id) in (SELECT process_id
+           FROM products.process_product pp
+           WHERE pp.type = 'INPUT'
+             AND (pp.productcode, pp.version, pp.mapsetcode) in (SELECT productcode, version, mapsetcode FROM products.thema_product WHERE thema_id != themaid AND activated = TRUE));
+
+          UPDATE products.product_acquisition_data_source pads
+          SET activated = TRUE
+          WHERE (pads.productcode, pads.version) in (SELECT productcode, version FROM products.thema_product WHERE thema_id != themaid AND activated = TRUE);
+      END IF;
+
+      RETURN TRUE;
+
+    ELSE
+        RETURN FALSE;
+    END IF;
+
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE STRICT
+  COST 100;
+ALTER FUNCTION products.set_thema(character varying)
+  OWNER TO estation;
+
+
+
+
 ALTER TABLE analysis.timeseries_drawproperties
   ADD COLUMN aggregation_type character varying DEFAULT 'mean';
 
@@ -171,8 +348,8 @@ COMMENT ON TABLE products.geoserver
 
 
 
-CREATE OR REPLACE FUNCTION products.populate_geoserver(full_copy boolean DEFAULT FALSE)
-RETURNS boolean AS
+CREATE OR REPLACE FUNCTION products.populate_geoserver(full_copy boolean DEFAULT false)
+  RETURNS boolean AS
 $BODY$
 DECLARE
 
@@ -274,178 +451,14 @@ BEGIN
 
 END;
 $BODY$
-  LANGUAGE plpgsql VOLATILE;
-
-
-
-CREATE OR REPLACE FUNCTION analysis.update_insert_layers(layerid integer, layerlevel character varying, layername character varying, description character varying, filename character varying, layerorderidx integer, layertype character varying, polygon_outlinecolor character varying, polygon_outlinewidth integer, polygon_fillcolor character varying, polygon_fillopacity integer, feature_display_column character varying, feature_highlight_outlinecolor character varying, feature_highlight_outlinewidth integer, feature_highlight_fillcolor character varying, feature_highlight_fillopacity integer, feature_selected_outlinecolor character varying, feature_selected_outlinewidth integer, enabled boolean, deletable boolean, background_legend_image_filename character varying, projection character varying, submenu character varying, menu character varying, defined_by character varying, open_in_mapview boolean, provider character varying, full_copy boolean DEFAULT false)
-  RETURNS boolean AS
-$BODY$
-	DECLARE
-
-	  _layerid 				ALIAS FOR  $1;
-	  _layerlevel 				ALIAS FOR  $2;
-	  _layername 				ALIAS FOR  $3;
-	  _description 				ALIAS FOR  $4;
-	  _filename 				ALIAS FOR  $5;
-	  _layerorderidx 			ALIAS FOR  $6;
-	  _layertype 				ALIAS FOR  $7;
-	  _polygon_outlinecolor 		ALIAS FOR  $8;
-	  _polygon_outlinewidth 		ALIAS FOR  $9;
-	  _polygon_fillcolor 			ALIAS FOR  $10;
-	  _polygon_fillopacity 			ALIAS FOR  $11;
-	  _feature_display_column 		ALIAS FOR  $12;
-	  _feature_highlight_outlinecolor 	ALIAS FOR  $13;
-	  _feature_highlight_outlinewidth 	ALIAS FOR  $14;
-	  _feature_highlight_fillcolor	  	ALIAS FOR  $15;
-	  _feature_highlight_fillopacity  	ALIAS FOR  $16;
-	  _feature_selected_outlinecolor  	ALIAS FOR  $17;
-	  _feature_selected_outlinewidth  	ALIAS FOR  $18;
-	  _enabled 			  	ALIAS FOR  $19;
-	  _deletable 			  	ALIAS FOR  $20;
-	  _background_legend_image_filename 	ALIAS FOR  $21;
-	  _projection 				ALIAS FOR  $22;
-	  _submenu 				ALIAS FOR  $23;
-	  _menu 				ALIAS FOR  $24;
-	  _defined_by 				ALIAS FOR  $25;
-	  _open_in_mapview			ALIAS FOR  $26;
-	  _provider 				ALIAS FOR  $27;
-	  _full_copy 				ALIAS FOR  $28;
-
-	BEGIN
-		PERFORM * FROM analysis.layers l WHERE l.layerid = _layerid;
-		IF FOUND THEN
-			IF _full_copy THEN
-				UPDATE analysis.layers l
-				SET layerlevel = TRIM(_layerlevel),
-				    layername = TRIM(_layername),
-				    description = TRIM(_description),
-				    filename = TRIM(_filename),
-				    layerorderidx = _layerorderidx,
-				    layertype = TRIM(_layertype),
-				    polygon_outlinecolor = TRIM(_polygon_outlinecolor),
-				    polygon_outlinewidth = _polygon_outlinewidth,
-				    polygon_fillcolor = TRIM(_polygon_fillcolor),
-				    polygon_fillopacity = _polygon_fillopacity,
-				    feature_display_column = TRIM(_feature_display_column),
-				    feature_highlight_outlinecolor = TRIM(_feature_highlight_outlinecolor),
-				    feature_highlight_outlinewidth = _feature_highlight_outlinewidth,
-				    feature_highlight_fillcolor = TRIM(_feature_highlight_fillcolor),
-				    feature_highlight_fillopacity = _feature_highlight_fillopacity,
-				    feature_selected_outlinecolor = TRIM(_feature_selected_outlinecolor),
-				    feature_selected_outlinewidth = _feature_selected_outlinewidth,
-				    enabled = _enabled,
-				    deletable = _deletable,
-				    background_legend_image_filename = TRIM(_background_legend_image_filename),
-				    projection = TRIM(_projection),
-				    submenu = TRIM(_submenu),
-				    menu = TRIM(_menu),
-				    defined_by = TRIM(_defined_by),
-				    open_in_mapview = _open_in_mapview,
-				    provider = TRIM(_provider)
-				WHERE l.layerid = _layerid;
-			ELSE
-				UPDATE analysis.layers l
-				SET layerlevel = TRIM(_layerlevel),
-				    layername = TRIM(_layername),
-				    description = TRIM(_description),
-				    filename = TRIM(_filename),
-				    layerorderidx = _layerorderidx,
-				    layertype = TRIM(_layertype),
-				    -- polygon_outlinecolor = TRIM(_polygon_outlinecolor),
-				    -- polygon_outlinewidth = _polygon_outlinewidth,
-				    -- polygon_fillcolor = TRIM(_polygon_fillcolor),
-				    -- polygon_fillopacity = _polygon_fillopacity,
-				    -- feature_display_column = TRIM(_feature_display_column),
-				    -- feature_highlight_outlinecolor = TRIM(_feature_highlight_outlinecolor),
-				    -- feature_highlight_outlinewidth = _feature_highlight_outlinewidth,
-				    -- feature_highlight_fillcolor = TRIM(_feature_highlight_fillcolor),
-				    -- feature_highlight_fillopacity = _feature_highlight_fillopacity,
-				    -- feature_selected_outlinecolor = TRIM(_feature_selected_outlinecolor),
-				    -- feature_selected_outlinewidth = _feature_selected_outlinewidth,
-				    -- enabled = _enabled,
-				    deletable = _deletable,
-				    background_legend_image_filename = TRIM(_background_legend_image_filename),
-				    projection = TRIM(_projection),
-				    submenu = TRIM(_submenu),
-				    menu = TRIM(_menu),
-				    defined_by = TRIM(_defined_by),
-				    -- open_in_mapview = _open_in_mapview,
-				    provider = TRIM(_provider)
-				WHERE l.layerid = _layerid;
-			END IF;
-
-		ELSE
-			INSERT INTO analysis.layers (
-				layerid,
-				layerlevel,
-				layername,
-				description,
-				filename,
-				layerorderidx,
-				layertype,
-				polygon_outlinecolor,
-				polygon_outlinewidth,
-				polygon_fillcolor,
-				polygon_fillopacity,
-				feature_display_column,
-				feature_highlight_outlinecolor,
-				feature_highlight_outlinewidth,
-				feature_highlight_fillcolor,
-				feature_highlight_fillopacity,
-				feature_selected_outlinecolor,
-				feature_selected_outlinewidth,
-				enabled,
-				deletable,
-				background_legend_image_filename,
-				projection,
-				submenu,
-				menu,
-				defined_by,
-				open_in_mapview,
-				provider
-			)
-			VALUES (
-			    _layerid,
-			    TRIM(_layerlevel),
-			    TRIM(_layername),
-			    TRIM(_description),
-			    TRIM(_filename),
-			    _layerorderidx,
-			    TRIM(_layertype),
-			    TRIM(_polygon_outlinecolor),
-			    _polygon_outlinewidth,
-			    TRIM(_polygon_fillcolor),
-			    _polygon_fillopacity,
-			    TRIM(_feature_display_column),
-			    TRIM(_feature_highlight_outlinecolor),
-			    _feature_highlight_outlinewidth,
-			    TRIM(_feature_highlight_fillcolor),
-			    _feature_highlight_fillopacity,
-			    TRIM(_feature_selected_outlinecolor),
-			    _feature_selected_outlinewidth,
-			    _enabled,
-			    _deletable,
-			    TRIM(_background_legend_image_filename),
-			    TRIM(_projection),
-			    TRIM(_submenu),
-			    TRIM(_menu),
-			    TRIM(_defined_by),
-			    _open_in_mapview,
-			    TRIM(_provider)
-			);
-		END IF;
-		RETURN TRUE;
-	END;
-$BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION analysis.update_insert_layers(integer, character varying, character varying, character varying, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, integer, boolean, boolean, character varying, character varying, character varying, character varying, character varying, boolean, character varying, boolean)
+ALTER FUNCTION products.populate_geoserver(boolean)
   OWNER TO estation;
 
-
-
-
+/**********************************
+ Functions of SCHEMA "products"
+***********************************/
 CREATE OR REPLACE FUNCTION products.update_insert_internet_source(internet_id character varying, defined_by character varying, descriptive_name character varying, description character varying, modified_by character varying, update_datetime timestamp without time zone, url character varying, user_name character varying, password character varying, type character varying, include_files_expression character varying, files_filter_expression character varying, status boolean, pull_frequency integer, datasource_descr_id character varying, frequency_id character varying, start_date bigint, end_date bigint, full_copy boolean DEFAULT false)
   RETURNS boolean AS
 $BODY$
@@ -572,7 +585,11 @@ ALTER FUNCTION products.update_insert_internet_source(character varying, charact
 
 -- DROP FUNCTION products.update_insert_product(character varying, character varying, character varying, character varying, boolean, character varying, character varying, character varying, character varying, character varying, character varying, character varying, double precision, double precision, bigint, double precision, double precision, character varying, character varying, boolean, character varying, boolean);
 
-CREATE OR REPLACE FUNCTION products.update_insert_product(productcode character varying, subproductcode character varying, version character varying, defined_by character varying, activated boolean, category_id character varying, product_type character varying, descriptive_name character varying, description character varying, provider character varying, frequency_id character varying, date_format character varying, scale_factor double precision, scale_offset double precision, nodata bigint, mask_min double precision, mask_max double precision, unit character varying, data_type_id character varying, masked boolean, timeseries_role character varying, full_copy boolean DEFAULT false)
+CREATE OR REPLACE FUNCTION products.update_insert_product(productcode character varying, subproductcode character varying, version character varying, defined_by character varying, activated boolean,
+							  category_id character varying, product_type character varying, descriptive_name character varying, description character varying,
+							  provider character varying, frequency_id character varying, date_format character varying, scale_factor double precision, scale_offset double precision,
+							  nodata bigint, mask_min double precision, mask_max double precision, unit character varying, data_type_id character varying,
+							  masked boolean, timeseries_role character varying, display_index integer, full_copy boolean DEFAULT false)
   RETURNS boolean AS
 $BODY$
 	DECLARE
@@ -597,7 +614,8 @@ $BODY$
 		_data_type_id  		ALIAS FOR  $19;
 		_masked  			ALIAS FOR  $20;
 		_timeseries_role  	ALIAS FOR  $21;
-		_full_copy	  		ALIAS FOR  $22;
+		_display_index		ALIAS FOR  $22;
+		_full_copy	  		ALIAS FOR  $23;
 
 	BEGIN
 		PERFORM * FROM products.product p
@@ -627,7 +645,8 @@ $BODY$
 					unit = TRIM(_unit),
 					data_type_id = TRIM(_data_type_id),
 					masked = _masked,
-					timeseries_role = TRIM(_timeseries_role)
+					timeseries_role = TRIM(_timeseries_role),
+					display_index = _display_index
 				WHERE p.productcode = TRIM(_productcode)
 				  AND p.subproductcode = TRIM(_subproductcode)
 				  AND p.version = TRIM(_version);
@@ -650,7 +669,8 @@ $BODY$
 					unit = TRIM(_unit),
 					data_type_id = TRIM(_data_type_id),
 					masked = _masked,
-					timeseries_role = TRIM(_timeseries_role)
+					timeseries_role = TRIM(_timeseries_role),
+					display_index = _display_index
 				WHERE p.productcode = TRIM(_productcode)
 				  AND p.subproductcode = TRIM(_subproductcode)
 				  AND p.version = TRIM(_version);
@@ -681,7 +701,8 @@ $BODY$
 				unit,
 				data_type_id,
 				masked,
-				timeseries_role
+				timeseries_role,
+				display_index
 			)
 			VALUES (
 			  TRIM(_productcode),
@@ -704,7 +725,8 @@ $BODY$
 			  TRIM(_unit),
 			  TRIM(_data_type_id),
 			  _masked,
-			  TRIM(_timeseries_role)
+			  TRIM(_timeseries_role),
+			  _display_index
 			);
 
 			-- RAISE NOTICE 'Product inserted';
@@ -724,46 +746,40 @@ $BODY$
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION products.update_insert_product(character varying, character varying, character varying, character varying, boolean, character varying, character varying, character varying, character varying, character varying, character varying, character varying, double precision, double precision, bigint, double precision, double precision, character varying, character varying, boolean, character varying, boolean)
+ALTER FUNCTION products.update_insert_product(character varying, character varying, character varying, character varying, boolean, character varying, character varying, character varying, character varying, character varying, character varying, character varying, double precision, double precision, bigint, double precision, double precision, character varying, character varying, boolean, character varying, integer, boolean)
   OWNER TO estation;
 
 
 
+/**********************************
+ Functions of SCHEMA "analysis"
+***********************************/
 
--- Function: analysis.update_insert_layers(integer, character varying, character varying, character varying, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, integer, boolean, boolean, character varying, character varying, character varying, character varying, character varying, boolean, character varying, boolean)
+CREATE OR REPLACE FUNCTION products.update_insert_thema(thema_id character varying, description character varying, activated boolean)
+  RETURNS boolean AS
+$BODY$
+	DECLARE
+		_thema_id 	  ALIAS FOR  $1;
+		_description  ALIAS FOR  $2;
+		_activated  ALIAS FOR  $3;
+	BEGIN
+		PERFORM * FROM products.thema t WHERE t.thema_id = TRIM(_thema_id);
+		IF FOUND THEN
+			UPDATE products.thema t SET description = TRIM(_description) WHERE t.thema_id = TRIM(_thema_id);
+		ELSE
+			INSERT INTO products.thema (thema_id, description, activated) VALUES (TRIM(_thema_id), TRIM(_description), FALSE);
+		END IF;
+		RETURN TRUE;
+	END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION products.update_insert_thema(character varying, character varying, boolean)
+  OWNER TO estation;
 
--- DROP FUNCTION analysis.update_insert_layers(integer, character varying, character varying, character varying, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, integer, boolean, boolean, character varying, character varying, character varying, character varying, character varying, boolean, character varying, boolean);
 
-CREATE OR REPLACE FUNCTION analysis.update_insert_layers(
-							 layerid integer,
-							 layerlevel character varying,
-							 layername character varying,
-							 description character varying,
-							 filename character varying,
-							 layerorderidx integer,
-							 layertype character varying,
-							 polygon_outlinecolor character varying,
-							 polygon_outlinewidth integer,
-							 polygon_fillcolor character varying,
-							 polygon_fillopacity integer,
-							 feature_display_column character varying,
-							 feature_highlight_outlinecolor character varying,
-							 feature_highlight_outlinewidth integer,
-							 feature_highlight_fillcolor character varying,
-							 feature_highlight_fillopacity integer,
-							 feature_selected_outlinecolor character varying,
-							 feature_selected_outlinewidth integer,
-							 enabled boolean,
-							 deletable boolean,
-							 background_legend_image_filename character varying,
-							 projection character varying,
-							 submenu character varying,
-							 menu character varying,
-							 defined_by character varying,
-							 open_in_mapview boolean,
-							 provider character varying,
-							 full_copy boolean DEFAULT false
-							 )
+
+CREATE OR REPLACE FUNCTION analysis.update_insert_layers(layerid integer, layerlevel character varying, layername character varying, description character varying, filename character varying, layerorderidx integer, layertype character varying, polygon_outlinecolor character varying, polygon_outlinewidth integer, polygon_fillcolor character varying, polygon_fillopacity integer, feature_display_column character varying, feature_highlight_outlinecolor character varying, feature_highlight_outlinewidth integer, feature_highlight_fillcolor character varying, feature_highlight_fillopacity integer, feature_selected_outlinecolor character varying, feature_selected_outlinewidth integer, enabled boolean, deletable boolean, background_legend_image_filename character varying, projection character varying, submenu character varying, menu character varying, defined_by character varying, open_in_mapview boolean, provider character varying, full_copy boolean DEFAULT false)
   RETURNS boolean AS
 $BODY$
 	DECLARE
@@ -862,6 +878,7 @@ $BODY$
 
 		ELSE
 			INSERT INTO analysis.layers (
+			  -- layerid,
 				layerlevel,
 				layername,
 				description,
@@ -890,6 +907,7 @@ $BODY$
 				provider
 			)
 			VALUES (
+			    -- _layerid,
 			    TRIM(_layerlevel),
 			    TRIM(_layername),
 			    TRIM(_description),
@@ -923,61 +941,16 @@ $BODY$
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION analysis.update_insert_layers(	integer,
-						character varying,
-						character varying,
-						character varying,
-						character varying,
-						integer,
-						character varying,
-						character varying,
-						integer,
-						character varying,
-						integer,
-						character varying,
-						character varying,
-						integer,
-						character varying,
-						integer,
-						character varying,
-						integer,
-						boolean,
-						boolean,
-						character varying,
-						character varying,
-						character varying,
-						character varying,
-						character varying,
-						boolean,
-						character varying,
-						boolean
-					)
+ALTER FUNCTION analysis.update_insert_layers(integer, character varying, character varying, character varying, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, character varying, integer, character varying, integer, character varying, integer, boolean, boolean, character varying, character varying, character varying, character varying, character varying, boolean, character varying, boolean)
   OWNER TO estation;
+
 
 
 -- Function: analysis.update_insert_timeseries_drawproperties(character varying, character varying, character varying, character varying, character varying, double precision, double precision, boolean, character varying, character varying, character varying, integer, character varying, character varying, character varying)
 
 -- DROP FUNCTION analysis.update_insert_timeseries_drawproperties(character varying, character varying, character varying, character varying, character varying, double precision, double precision, boolean, character varying, character varying, character varying, integer, character varying, character varying, character varying);
 
-CREATE OR REPLACE FUNCTION analysis.update_insert_timeseries_drawproperties(productcode character varying,
-									    subproductcode character varying,
-									    version character varying,
-									    title character varying,
-									    unit character varying,
-									    min double precision,
-									    max double precision,
-									    oposite boolean,
-									    tsname_in_legend character varying,
-									    charttype character varying,
-									    linestyle character varying,
-									    linewidth integer,
-									    color character varying,
-									    yaxes_id character varying,
-									    title_color character varying,
-									    aggregation_type character varying,
-									    aggregation_min double precision,
-									    aggregation_max double precision
-									    )
+CREATE OR REPLACE FUNCTION analysis.update_insert_timeseries_drawproperties(productcode character varying, subproductcode character varying, version character varying, title character varying, unit character varying, min double precision, max double precision, oposite boolean, tsname_in_legend character varying, charttype character varying, linestyle character varying, linewidth integer, color character varying, yaxes_id character varying, title_color character varying, aggregation_type character varying, aggregation_min double precision, aggregation_max double precision)
   RETURNS boolean AS
 $BODY$
 	DECLARE
@@ -1011,7 +984,7 @@ $BODY$
 			    max = _max,
 			    oposite = _oposite,
 			    tsname_in_legend = TRIM(_tsname_in_legend),
-    			charttype = TRIM(_charttype),
+    			    charttype = TRIM(_charttype),
 			    linestyle = TRIM(_linestyle),
 			    linewidth = _linewidth,
 			    color = TRIM(_color),
@@ -1066,8 +1039,9 @@ $BODY$
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION analysis.update_insert_timeseries_drawproperties(character varying, character varying, character varying, character varying, character varying, double precision, double precision, boolean, character varying, character varying, character varying, integer, character varying, character varying, character varying)
+ALTER FUNCTION analysis.update_insert_timeseries_drawproperties(character varying, character varying, character varying, character varying, character varying, double precision, double precision, boolean, character varying, character varying, character varying, integer, character varying, character varying, character varying, character varying, double precision, double precision)
   OWNER TO estation;
+
 
 
 
@@ -1157,6 +1131,12 @@ ALTER FUNCTION analysis.update_insert_chart_drawproperties(character varying, in
 
 
 
+
+
+/**********************************
+ EXPORT DATA FUNCTIONS
+***********************************/
+
 -- Function: products.export_jrc_data(boolean)
 
 -- DROP FUNCTION products.export_jrc_data(boolean);
@@ -1225,6 +1205,7 @@ BEGIN
 	RETURN QUERY SELECT 'SELECT products.update_insert_thema('
 		|| 'thema_id := ''' || thema_id || ''''
 		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', activated := ' || activated
 		|| ' );'  as inserts
 	FROM products.thema;
 
@@ -1252,6 +1233,7 @@ BEGIN
 		|| ', data_type_id := ' || COALESCE('''' || data_type_id || '''', '''undefined''')
 		|| ', masked := ' || masked
 		|| ', timeseries_role := ' || COALESCE('''' || timeseries_role || '''', 'NULL')
+		|| ', display_index := ' || COALESCE(TRIM(to_char(display_index, '99999999')), 'NULL')
 		|| ', full_copy := ' || _full_copy
 		|| ' );'  as inserts
 	FROM products.product
@@ -1632,7 +1614,9 @@ ALTER FUNCTION products.export_jrc_data(boolean)
 
 
 
+-- Function: products.export_all_data(boolean)
 
+-- DROP FUNCTION products.export_all_data(boolean);
 
 -- Function: products.export_all_data(boolean)
 
@@ -1700,6 +1684,7 @@ BEGIN
 	RETURN QUERY SELECT 'SELECT products.update_insert_thema('
 		|| 'thema_id := ''' || thema_id || ''''
 		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', activated := ' || activated
 		|| ' );'  as inserts
 	FROM products.thema;
 
@@ -1727,6 +1712,7 @@ BEGIN
 		|| ', data_type_id := ' || COALESCE('''' || data_type_id || '''', '''undefined''')
 		|| ', masked := ' || masked
 		|| ', timeseries_role := ' || COALESCE('''' || timeseries_role || '''', 'NULL')
+		|| ', display_index := ' || COALESCE(TRIM(to_char(display_index, '99999999')), 'NULL')
 		|| ', full_copy := ' || _full_copy
 		|| ' );'  as inserts
 	FROM products.product;
@@ -2097,6 +2083,7 @@ ALTER FUNCTION products.export_all_data(boolean)
 
 
 
+
 CREATE OR REPLACE FUNCTION products.export_product_data(product_code character varying, full_copy boolean DEFAULT true)
   RETURNS SETOF text AS
 $BODY$
@@ -2128,6 +2115,7 @@ BEGIN
 		|| ', data_type_id := ' || COALESCE('''' || data_type_id || '''', '''undefined''')
 		|| ', masked := ' || masked
 		|| ', timeseries_role := ' || COALESCE('''' || timeseries_role || '''', 'NULL')
+		|| ', display_index := ' || COALESCE(TRIM(to_char(display_index, '99999999')), 'NULL')
 		|| ', full_copy := ' || _full_copy
 		|| ' );'  as inserts
 	FROM products.product

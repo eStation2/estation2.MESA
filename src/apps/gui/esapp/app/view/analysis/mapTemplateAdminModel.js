@@ -4,9 +4,10 @@ Ext.define('esapp.view.analysis.mapTemplateAdminModel', {
     stores: {
         usermaptemplates: {
             model: 'esapp.model.UserMapTemplate',
-            autoLoad: true,
+            autoLoad: false,
             autoSync: true,
             session: true,
+            storeId: 'usermaptemplates',
 
             proxy: {
                 type: 'rest',
@@ -14,7 +15,7 @@ Ext.define('esapp.view.analysis.mapTemplateAdminModel', {
                 appendId: false,
 
                 //extraParams: {
-                //    userid: null    //esapp.getUser().userid  // 'jurvtk'
+                //    userid: null    // esapp.getUser().userid  // 'jurvtk'
                 //},
 
                 api: {
@@ -56,7 +57,7 @@ Ext.define('esapp.view.analysis.mapTemplateAdminModel', {
                     //console.info(store);
                     //console.info(operation.getRecords()[0]);
                     if (operation.success) {
-                        Ext.toast({html: operation.getRecords()[0].get('templatename') + ' deleted', title: "Map template deleted", width: 300, align: 't'});
+                        Ext.toast({html: operation.getRecords()[0].get('templatename') + ' ' + esapp.Utils.getTranslation('deleted'), title: esapp.Utils.getTranslation('map_tpl_deleted'), width: 300, align: 't'});   // "Map template deleted"
                     }
                 }
             }

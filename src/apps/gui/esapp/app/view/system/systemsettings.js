@@ -582,7 +582,8 @@ Ext.define("esapp.view.system.systemsettings",{
                 collapsible:false,
                 defaults: {
                     width: 450,
-                    labelWidth: 120
+                    labelWidth: 120,
+                    layout: 'hbox'
                 },
                 items:[{
                    id: 'base_dir',
@@ -625,13 +626,191 @@ Ext.define("esapp.view.system.systemsettings",{
                    style:'font-weight: bold;',
                    allowBlank: false
                 },{
-                   id: 'archive_dir',
-                   name: 'archive_dir',
-                   bind: '{system_setting.archive_dir}',
-                   xtype: 'textfield',
-                   fieldLabel: me.form_fieldlabel_archive_dir,
-                   style:'font-weight: bold;',
-                   allowBlank: false
+                   width: 450+145,
+                   defaults: {
+                       margin: '0 5 5 0'
+                   },
+                   items:[{
+                        id: 'archive_dir',
+                        name: 'archive_dir',
+                        bind: '{system_setting.archive_dir}',
+                        xtype: 'textfield',
+                        vtype: 'directory',
+                        fieldLabel: me.form_fieldlabel_archive_dir,
+                        style:'font-weight: bold;',
+                        allowBlank: false,
+                        width: 450
+                        //,listeners: {
+                        //    change: function (cmp, value) {
+                        //        console.info(cmp);
+                        //        console.info(value);
+                        //
+                        //    }
+                        //}
+                    //},{
+                    //    id: 'choose_archive_dir',
+                    //    xtype: 'fileuploadfield',       // <input type="file" webkitdirectory directory multiple mozdirectory msdirectory odirectory/>
+                    //    buttonText: esapp.Utils.getTranslation('...'),
+                    //    width: 30,
+                    //    buttonOnly: true,
+                    //    hideLabel: true,
+                    //    vtype: 'directory',
+                    //    listeners: {
+                    //        change: function (fld, value, x, y) {
+                    //            //console.log(fld.files[0].mozFullPath);
+                    //
+                    //            console.info(fld);
+                    //            console.info(value);
+                    //            console.info(x);
+                    //            console.info(y);
+                    //            Ext.getCmp('archive_dir').setValue(value);
+                    //        }
+                    //        //,afterrender:function(cmp){
+                    //        //    cmp.fileInputEl.set({
+                    //        //        'webkitdirectory': '',
+                    //        //        'directory': '',
+                    //        //        'mozdirectory': '',
+                    //        //        'msdirectory': '',
+                    //        //        'odirectory': ''
+                    //        //    });
+                    //        //}
+                    //    },
+                    //    //iconCls: 'fa fa-pencil-square-o',
+                    //    //style: { color: 'white' },
+                    //    //scale: 'medium',
+                    //    scope:me,
+                    //    handler: function(){
+                    //
+                    //    }
+                    },{
+                        xtype: 'splitbutton',
+                        text: esapp.Utils.getTranslation('ingest_archive'),
+                        width: 140,
+                        iconCls: '',    // 'fa fa-spinner',
+                        style: { color: 'white'},
+                        //scale: 'medium',
+                        //scope:me,
+                        formBind: false,
+                        name: 'ingestarchivebtn',
+                        service: 'ingestarchive',
+                        task: 'status',
+                        menu: {
+                            width: 150,
+                            margin: '0 0 10 0',
+                            floating: true,  // usually you want this set to True (default)
+                            collapseDirection: 'right',
+                            defaults: {
+                              align: 'right'
+                            },
+                            items: [
+                                // these will render as dropdown menu items when the arrow is clicked:
+                                {   text: esapp.Utils.getTranslation('run'),    // 'Run',
+                                    name: 'run_ingestarchive',
+                                    service: 'ingestarchive',
+                                    task: 'run',
+                                    // iconCls: 'fa-play-circle-o', // xf01d   // fa-play xf04b
+                                    glyph: 'xf04b@FontAwesome',
+                                    cls:'menu-glyph-color-green',
+                                    // style: { color: 'green' },
+                                    handler: 'execServiceTask'
+                                },
+                                {   text: esapp.Utils.getTranslation('stop'),    // 'Stop',
+                                    name: 'stop_ingestarchive',
+                                    service: 'ingestarchive',
+                                    task: 'stop',
+                                    // iconCls: 'fa fa-stop',
+                                    glyph: 'xf04d@FontAwesome',
+                                    cls:'menu-glyph-color-red',
+                                    // style: { color: 'red' },
+                                    handler: 'execServiceTask'
+                                },
+                                {   text: esapp.Utils.getTranslation('restart')+'          ',    // 'Restart          ',
+                                    name: 'restart_ingestarchive',
+                                    service: 'ingestarchive',
+                                    task: 'restart',
+                                    // iconCls: 'fa fa-refresh',
+                                    glyph: 'xf021@FontAwesome',
+                                    cls:'menu-glyph-color-orange',
+                                    // style: { color: 'orange' },
+                                    handler: 'execServiceTask'
+                                },
+                                {
+                                    text: esapp.Utils.getTranslation('viewlogfile'),    // 'View log file',
+                                    name: 'view_logfile_ingestarchive',
+                                    service: 'ingestarchive',
+                                    task: 'logfile',
+                                    iconCls:'log-icon-small',
+                                    handler: 'viewLogFile'
+                                }
+                            ]
+                        },
+                        listeners: {
+                            beforerender: 'execServiceTask'
+                        },
+                        handler: 'execServiceTask'
+                        //handler: function(btn){
+                        //    var task;
+                        //    //console.info(btn);
+                        //    //if (btn.iconCls == '') {
+                        //        var runner = new Ext.util.TaskRunner();
+                        //        task = runner.newTask({     //  newTask
+                        //            run: function () {
+                        //                Ext.Ajax.request({
+                        //                    method: 'POST',
+                        //                    params: {
+                        //                        service: btn.service,
+                        //                        task: btn.task
+                        //                    },
+                        //                    url: 'systemsettings/ingestarchive',
+                        //                    success: function (response, opts) {
+                        //                        var result = Ext.JSON.decode(response.responseText);
+                        //                        if (result.success) {
+                        //                            console.info(result);
+                        //                            if (result.running == 'true') {
+                        //                                btn.setIconCls('fa fa-spin fa-spinner');
+                        //                                //me.getView().down('button[name=ingestarchivebtn]').setStyle('color','white');
+                        //                                btn.down('menuitem[name=run_ingestarchive]').setDisabled(true);
+                        //                                btn.down('menuitem[name=stop_ingestarchive]').setDisabled(false);
+                        //                                btn.down('menuitem[name=restart_ingestarchive]').setDisabled(false);
+                        //                            } else {
+                        //                                btn.setIconCls('');
+                        //                                //me.getView().down('button[name=ingestarchivebtn]').setIconCls('fa fa-spinner');
+                        //                                //me.getView().down('button[name=ingestarchivebtn]').setStyle('color','gray');
+                        //                                btn.down('menuitem[name=run_ingestarchive]').setDisabled(false);
+                        //                                btn.down('menuitem[name=stop_ingestarchive]').setDisabled(true);
+                        //                                btn.down('menuitem[name=restart_ingestarchive]').setDisabled(true);
+                        //                                task.stop();
+                        //                            }
+                        //                            //if (result.running == 'true') {
+                        //                            //    Ext.toast({
+                        //                            //        html: 'Ingest archive running...',
+                        //                            //        title: 'Ingest archive',
+                        //                            //        width: 250,
+                        //                            //        align: 't'
+                        //                            //    });
+                        //                            //    btn.setIconCls('fa fa-spin fa-spinner');
+                        //                            //}
+                        //                            //else {
+                        //                            //    btn.setIconCls('');
+                        //                            //    task.stop();
+                        //                            //    //Ext.util.TaskRunner.destroy(task);
+                        //                            //}
+                        //                        }
+                        //                    },
+                        //                    failure: function (response, opts) {
+                        //                        console.info(response.status);
+                        //                        btn.setIconCls('');
+                        //                        task.stop();
+                        //                    }
+                        //                });
+                        //            },
+                        //            interval: 5000
+                        //        });
+                        //
+                        //        task.start();
+                        //    //}
+                        //}
+                    }]
                 },{
                    id: 'eumetcast_files_dir',
                    name: 'eumetcast_files_dir',
