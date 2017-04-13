@@ -336,6 +336,23 @@ class SdsMetadata:
             logger.warning('File %s does not exist. Exit' % input_file)
             return None
 
+    def get_scaling_values(self, input_file):
+
+    # Given a .GTiff file, reads its metadata and extract NoData value
+
+    # Check the file exists
+        if os.path.isfile(input_file):
+            try:
+                self.read_from_file(input_file)
+            except:
+                logger.warning('Error in loading from file %s . Exit' % input_file)
+
+            scaling_factor = sds_metadata['eStation2_scaling_factor']
+            scaling_offset = sds_metadata['eStation2_scaling_offset']
+            return [float(scaling_factor), float(scaling_offset)]
+        else:
+            logger.warning('File %s does not exist. Exit' % input_file)
+            return None
 
     def print_out(self):
     #
