@@ -158,7 +158,6 @@ def system_bucardo_service(action):
         else:
             logger.warning('Error in stopping Bucardo.')
 
-
 def system_db_sync_full(pc_role):
 
 #   Manage the transition from Recovery to Nominal, by forcing a full sync of both DB schemas
@@ -784,7 +783,6 @@ def cmd(acmd):
         logger.error(pe)
     return None
 
-
 def get_status_PC1():
 #   Get info on the status of the services on PC1:
 #   DVB
@@ -836,6 +834,6 @@ class SystemDaemon(DaemonDryRunnable):
 
 class IngestArchiveDaemon(DaemonDryRunnable):
     def run(self):
-        iha.ingest_historical_archives(dry_run=self.dry_run)
+        iha.ingest_historical_archives(input_dir=None, dry_run=self.dry_run)
 
 

@@ -8,22 +8,60 @@ logger = log.my_logger("apps.es2system.ingest_archive")
 
 try:
     command = str(sys.argv[1])
-except: 
-    logger.fatal("An argument should be provided: status/start/stop") 
+except:
+    logger.fatal("An argument should be provided: status/start/stop")
     exit(1)
 
 # Define pid file and create daemon
 pid_file = es_constants.ingest_archive_pid_filename
-daemon = es2system.IngestArchiveDaemon(pid_file, dry_run=1)
+daemon = es2system.IngestArchiveDaemon(pid_file, dry_run=False)
 
+status = False
 if command == "status":
-        status = daemon.status()
-        print("Current status of the IngestArchive Service: %s" % status)
-    
+    status = daemon.status()
+
 if command == "start":
-        logger.info("Starting IngestArchive service")
-        daemon.start()
-        
+    logger.info("Starting IngestArchive service")
+    daemon.start()
+    status = daemon.status()
+
 if command == "stop":
-        logger.info("Stopping IngestArchive service")
-        daemon.stop()
+    logger.info("Stopping IngestArchive service")
+    daemon.stop()
+    status = daemon.status()
+
+if command == "restart":
+    logger.info("Restarting IngestArchive service")
+    daemon.restart()
+    status = daemon.status()
+
+print "Current status of the IngestArchive Service: %s" % status
+
+
+# def service_ingest_archive(command='status'):
+#     # Define pid file and create daemon
+#     pid_file = es_constants.ingest_archive_pid_filename
+#     daemon = es2system.IngestArchiveDaemon(pid_file, dry_run=True)
+#
+#     status = False
+#     if command == "status":
+#         status = daemon.status()
+#         logger.info("Current status of the IngestArchive Service: %s" % status)
+#
+#     if command == "start":
+#         logger.info("Starting IngestArchive service")
+#         daemon.start()
+#         status = daemon.status()
+#
+#     if command == "stop":
+#         logger.info("Stopping IngestArchive service")
+#         daemon.stop()
+#         status = daemon.status()
+#
+#     if command == "restart":
+#         logger.info("Restarting IngestArchive service")
+#         daemon.restart()
+#         status = daemon.status()
+#
+#     return status
+

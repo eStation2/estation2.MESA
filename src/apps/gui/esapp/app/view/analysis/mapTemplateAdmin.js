@@ -97,29 +97,24 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
             }
         });
 
-        //me.listeners = {
-        //    //focusleave: function(){
-        //    //    this.hide();
-        //    //},
-        //    loadstore: function(){
-        //        console.info(me.store);
-        //        me.store.proxy.extraParams = {userid: esapp.getUser().userid};
-        //        me.store.load();
-        //    }
-        //};
+        me.listeners = {
+            focusleave: function(){
+                this.hide();
+            }
+        };
 
         me.tools = [
         {
             type: 'refresh',
             align: 'c-c',
-            tooltip: 'Refresh map template list',   //esapp.Utils.getTranslation('refreshmaptpllist'),    // 'Refresh map template list',
+            tooltip: esapp.Utils.getTranslation('refreshmaptpllist'),    // 'Refresh map template list',
             callback: 'loadUserMapTplStore'
         }];
 
         me.bbar = Ext.create('Ext.toolbar.Toolbar', {
             items: [{
                 xtype: 'button',
-                text: 'Open selected',  // esapp.Utils.getTranslation('openselected'),    // 'Open selected',
+                text: esapp.Utils.getTranslation('openselected'),    // 'Open selected',
                 name: 'addlayer',
                 iconCls: 'fa fa-folder-open-o fa-2x',
                 style: {color: 'green'},
@@ -131,7 +126,7 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
         });
 
         me.columns = [{
-            text: 'Map template name',  // esapp.Utils.getTranslation('maptemplatename'),  // 'Map template name',
+            text: esapp.Utils.getTranslation('maptemplatename'),  // 'Map template name',
             width: 300,
             dataIndex: 'templatename',
             cellWrap:true,
@@ -143,7 +138,7 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
             hideable: false
         }, {
             xtype: 'actioncolumn',
-            header: 'Auto open template',   // esapp.Utils.getTranslation('autoopentpl'),  // 'Auto open template',
+            header: esapp.Utils.getTranslation('autoopentpl'),  // 'Auto open template',
             menuDisabled: true,
             sortable: true,
             variableRowHeight: true,
@@ -166,9 +161,9 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
                 },
                 getTip: function (v, meta, rec) {
                     if (rec.get('auto_open')) {
-                        return 'Do not auto open template';  // esapp.Utils.getTranslation('tip_no_autoopentpl');     // 'Do not auto open template';
+                        return esapp.Utils.getTranslation('tip_no_autoopentpl');     // 'Do not auto open template';
                     } else {
-                        return 'Auto open template';    // esapp.Utils.getTranslation('tip_autoopentpl');     // 'Auto open template';
+                        return esapp.Utils.getTranslation('tip_autoopentpl');     // 'Auto open template';
                     }
                 },
                 handler: function (grid, rowIndex, colIndex) {
@@ -200,7 +195,7 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
                     //}
                 },
                 getTip: function(v, meta, rec) {
-                    return esapp.Utils.getTranslation('Delete Map template: ') + ' ' + rec.get('templatename');
+                    return esapp.Utils.getTranslation('delete_map_template') + ': ' + rec.get('templatename');   // 'Delete Map template'
                 },
                 handler: 'deleteMapTemplate'
             }]

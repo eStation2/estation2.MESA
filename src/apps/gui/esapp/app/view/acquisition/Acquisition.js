@@ -41,16 +41,6 @@ Ext.define('esapp.view.acquisition.Acquisition',{
 
     store: 'ProductsActiveStore',
 
-    //features: [{
-    //    id: 'productcategories',
-    //    ftype: 'grouping',
-    //    groupHeaderTpl: Ext.create('Ext.XTemplate', '<div class="group-header-style">{name} ({children.length})</div>'),
-    //    hideGroupedHeader: true,
-    //    enableGroupingMenu: false,
-    //    startCollapsed : true,
-    //    groupByText: esapp.Utils.getTranslation('productcategories')  // 'Product categories'
-    //}],
-
     viewConfig: {
         stripeRows: true,
         enableTextSelection: true,

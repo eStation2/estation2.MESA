@@ -24,6 +24,32 @@ db = connectdb.ConnectDB().db
 dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
 
 
+def get_product_default_legend_steps(productcode, version, subproductcode, echo=False):
+    global dbschema_analysis
+    try:
+        query = " SELECT ls.from_step, ls.to_step, ls.color_rgb, ls.color_label, p.scale_factor, p.scale_offset FROM analysis.product_legend pl " + \
+                " INNER JOIN products.product p ON pl.productcode = p.productcode AND pl.version = p.version AND pl.subproductcode = p.subproductcode " + \
+                " INNER JOIN analysis.legend_step ls ON pl.legend_id = ls.legend_id " \
+                " WHERE pl.productcode = '" + productcode + "'" + \
+                "   AND pl.version = '" + version + "'" + \
+                "   AND pl.subproductcode = '" + subproductcode + "'" + \
+                "   AND pl.default_legend = TRUE " + \
+                " ORDER BY  ls.from_step "
+
+        result = db.execute(query)
+        result = result.fetchall()
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_product_default_legend_steps: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
 def get_user_map_templates(userid, echo=False):
     global dbschema_analysis
     try:

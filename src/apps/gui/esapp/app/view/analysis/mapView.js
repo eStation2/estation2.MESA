@@ -117,8 +117,10 @@ Ext.define("esapp.view.analysis.mapView",{
             projection:"EPSG:4326",
             displayProjection:"EPSG:4326",
             center: [20, -4.7],  // ol.proj.transform([21, 4], 'EPSG:4326', 'EPSG:3857'),
-            zoom: 6,
-            zoomFactor: 1.5
+            zoom: 25,
+            //minZoom: 0,
+            //maxZoom: 10
+            zoomFactor: 1.1
         });
 
         me.name ='mapviewwindow_' + me.id;
@@ -262,8 +264,8 @@ Ext.define("esapp.view.analysis.mapView",{
                                     // Register the new tip with an element's ID
                                     Ext.tip.QuickTipManager.register({
                                         target: me.getId(), // Target button's ID
-                                        title: '',  // QuickTip Header
-                                        text: 'Interval in milliseconds' // Tip content
+                                        title: '',
+                                        text: esapp.Utils.getTranslation('interval_in_ms') // 'Interval in milliseconds'
                                     });
                                 }
                             }
@@ -354,7 +356,7 @@ Ext.define("esapp.view.analysis.mapView",{
 
                 this.map.on('pointermove', function(evt) {
                     if (evt.dragging) {
-                    return;
+                        return;
                     }
                     //if (me.map.getLayers().getArray().length > 2) {
                         var pixel = me.map.getEventPixel(evt.originalEvent);

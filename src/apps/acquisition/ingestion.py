@@ -443,7 +443,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
             for error_file in input_files:
                 if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
                     shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
-                try: 
+                try:
                     shutil.move(error_file, ingest_error_dir)
                 except:
                     my_logger.warning("Error in moving file: %s " % error_file)
@@ -458,7 +458,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
             for error_file in input_files:
                 if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
                     shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
-                try: 
+                try:
                     shutil.move(error_file, ingest_error_dir)
                 except:
                     my_logger.warning("Error in moving file: %s " % error_file)

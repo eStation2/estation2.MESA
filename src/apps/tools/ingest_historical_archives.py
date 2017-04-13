@@ -12,7 +12,9 @@ import sys, time
 from apps.acquisition.ingestion import *
 from config import es_constants
 
-logger = log.my_logger(__name__)
+# logger = log.my_logger(__name__)
+logger = log.my_logger('apps.es2system.ingest_archive')
+
 
 def ingest_historical_archives(input_dir=None, dry_run=False):
 
@@ -27,9 +29,9 @@ def ingest_historical_archives(input_dir=None, dry_run=False):
     logger.info("Entering routine %s" % 'ingest_historical_archives')
     echo_query = False
 
-    time.sleep(120)
+    # time.sleep(30)
     logger.info("Entering loop")
-
+    # exit(1)
     # Get all active product ingestion records with a subproduct count.
     active_product_ingestions = querydb.get_ingestion_product(allrecs=True, echo=echo_query)
     for active_product_ingest in active_product_ingestions:

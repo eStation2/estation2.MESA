@@ -108,7 +108,7 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
     }
 
 
-    ,renderHiddenColumnsWhenUnlocked: function(){
+    //,renderHiddenColumnsWhenUnlocked: function(){
         //var dataacquisitiongrids = Ext.ComponentQuery.query('dataacquisitiongrid');
         //var ingestiongrids = Ext.ComponentQuery.query('ingestiongrid');
         //
@@ -146,9 +146,9 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
         //        //ingestiongrid.updateLayout();
         //    });
         //}
-    }
-
-
+    //}
+    //
+    //
     //,onAddClick: function(){
     //
     //    win = Ext.create('esapp.view.acquisition.product.editProduct', {

@@ -58,7 +58,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                 xtype: 'button',
                 name: 'analysismain_maptemplatebtn',
                 reference: 'analysismain_maptemplatebtn',
-                text: esapp.Utils.getTranslation('MAP TEMPLATE'),
+                text: esapp.Utils.getTranslation('map_template'), // 'MAP TEMPLATE'
                 iconCls: 'map_tpl',
                 style: { color: 'gray' },
                 scale: 'small',
@@ -598,8 +598,10 @@ Ext.define("esapp.view.analysis.analysisMain",{
             projection:"EPSG:4326",
             displayProjection:"EPSG:4326",
             center: [20, -4.7],   // ol.proj.transform([20, 4.5], 'EPSG:3857', 'EPSG:4326'),
-            zoom: 6,
-            zoomFactor: 1.5
+            zoom: 25,
+            //minZoom: 0,
+            //maxZoom: 10
+            zoomFactor: 1.1
         });
 
         me.listeners = {

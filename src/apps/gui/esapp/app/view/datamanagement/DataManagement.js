@@ -49,6 +49,8 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
     frame: false,
     border: false,
 
+    //layout: 'fit',
+
     features: [{
         id: 'prodcat',
         ftype: 'grouping',
@@ -235,7 +237,7 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
             ,columns: [{
                 xtype: 'widgetcolumn',
                 //dataIndex: 'productmapsets',
-                width: 1015,
+                minWidth: 1025,
                 bodyPadding:0,
 
                 header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 215px; left: 0px; tabindex="-1">' +
@@ -285,7 +287,7 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                     //    data: productmapsets
                     //});
                     //widget.setStore(newstore);
-                    //Ext.resumeLayouts(true);
+                    Ext.resumeLayouts(true);
                 }
             }]
         }];
