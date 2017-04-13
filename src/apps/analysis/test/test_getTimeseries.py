@@ -14,14 +14,38 @@ class TestTS(unittest.TestCase):
     wkt_simple = 'POLYGON((30.0  -15.0, 34.0  -19.0, 38.0 -15.0 , 34.0 -11.0, 30.0  -15.0))'
     wkt_point = 'POINT(30.001 -14.998)'
 
-    # Compare polygon and line
-    wkt_poly_thin = 'POLYGON((30.0  -15.0, 30.04  -15.0, 30.04 -14.0 , 30.0 -14.0, 30.0  -15.0))'
-    wkt_poly_line = 'LINESTRING(30.0  -15.0, 30.0 -14.0)'
+    # Compare polygon, line and point
+    wkt_test_polygon = 'POLYGON((17.6117 -8.6655, 17.620 -8.6655, 17.620 -8.674, 17.6117 -8.674, 17.6117 -8.6655))'
+    wkt_test_point = 'POINT(17.61749383509286 -8.669792916188465)'
+    wkt_test_line = 'LINESTRING(17.620332195396873 -8.670385805073723,17.62050129082339 -8.673658667869148,17.61364114174842 -8.673261732805757,17.611898679860804 -8.670246408122715)'
 
     wkt_line = 'LINESTRING(21.466286229428963 -0.6593739797435525, 23.883990821821985 0.8791653063247331, 25.78884898552558 -0.5128464286894285)'
 
 
-    wkt = wkt_point
+    wkt = wkt_test_point
+
+
+    aggregate = {'aggregation_type': 'mean',
+                 'aggregation_min': 0.0,
+                 'aggregation_max': 0.0}
+
+    def test_point_line_poly_vgt_ndvi_ndv(self):
+
+        productcode = "vgt-ndvi"
+        subproductcode = "ndv"
+        version = "sv2-pv2.1"
+        mapsetcode = "SPOTV-Africa-1km"
+        from_date = date(2016, 01, 01)
+        to_date = date(2016, 12, 31)
+        date_format = 'YYYYMMDD'
+        list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_test_polygon, from_date, to_date, self.aggregate)
+        print list_values
+        list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_test_polygon, from_date, to_date, self.aggregate)
+        # list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_test_point, from_date, to_date, self.aggregate)
+        print list_values
+
+        self.assertEquals(len(list_values), 36)
+
 
     def test_files_vgt_ndvi_ndv(self):
 

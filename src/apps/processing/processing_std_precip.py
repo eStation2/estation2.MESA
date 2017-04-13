@@ -5,6 +5,7 @@
 #   descr:	 Generate additional derived products/implements processing chains
 #	history: 1.0 Initial release
 #            1.1 Oct. 2016: add the 3mon/6mon/1yrs cumulates and change stats computation to exclude current year
+#            1.2 Apr. 2017: the 3mon/6mon/1year cumulates are removed (to be included in the SPI, so not to impact the Users at national level)
 #
 #   NOTE (to be included in doc): since 1.1 the stats are computed by excluding the current year
 #
@@ -52,18 +53,6 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     activate_monstats_comput=0          # monthly stats
     activate_monanomalies_comput=0      # monthly anomalies
 
-    activate_quarterly_comput=0         # quarterly cumulation
-    activate_3monstats_comput=0         # quarterly stats
-    activate_3monanomalies_comput=0     # quarterly anomalies
-
-    activate_sixmonthly_comput=0        # sixmonthly cumulation
-    activate_6monstats_comput=0         # sixmonthly stats
-    activate_6monanomalies_comput=0     # sixmonthly anomalies
-
-    activate_yearly_comput=0            # yearly cumulation
-    activate_1yearstats_comput=0        # yearly stats
-    activate_1yearanomalies_comput=0    # yearly anomalies
-
     #   switch wrt groups - according to options
     if nrt_products:
         activate_10danomalies_comput=1      # 10d anomalies
@@ -71,21 +60,9 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         activate_monthly_comput=1           # monthly cumulation
         activate_monanomalies_comput=1      # monthly anomalies
 
-        activate_quarterly_comput=1         # quarterly cumulation
-        activate_3monanomalies_comput=1     # quarterly anomalies
-
-        activate_sixmonthly_comput=1        # sixmonthly cumulation
-        activate_6monanomalies_comput=1     # sixmonthly anomalies
-
-        activate_yearly_comput=1            # yearly cumulation
-        activate_1yearanomalies_comput=1     # yearly anomalies
-
     if update_stats:
         activate_10dstats_comput=1          # 10d stats
         activate_monstats_comput=1          # monthly stats
-        activate_3monstats_comput=1         # quarterly stats
-        activate_6monstats_comput=1         # sixmonthly stats
-        activate_1yearstats_comput=1        # yearly stats
 
     #   switch wrt single products: not to be changed !!
     activate_10davg_comput=1
@@ -94,6 +71,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     activate_10ddiff_comput=1
     activate_10dperc_comput=1
     activate_10dnp_comput=1
+    activate_10dratio_comput=1
 
     activate_1moncum_comput=1
     activate_1monavg_comput=1
@@ -102,27 +80,6 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     activate_1mondiff_comput=1
     activate_1monperc_comput=1
     activate_1monnp_comput=1
-
-    activate_3moncum_comput=1
-    activate_3monavg_comput=1
-    activate_3monmin_comput=1
-    activate_3monmax_comput=1
-    activate_3mondiff_comput=1
-    activate_3monperc_comput=1
-
-    activate_6moncum_comput=1
-    activate_6monavg_comput=1
-    activate_6monmin_comput=1
-    activate_6monmax_comput=1
-    activate_6mondiff_comput=1
-    activate_6monperc_comput=1
-
-    activate_1yearcum_comput=1
-    activate_1yearavg_comput=1
-    activate_1yearmin_comput=1
-    activate_1yearmax_comput=1
-    activate_1yeardiff_comput=1
-    activate_1yearperc_comput=1
 
     es2_data_dir = es_constants.es2globals['processing_dir']+os.path.sep
 
@@ -323,6 +280,36 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file[0], "min_file": input_file[1],"max_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_make_vci(**args)
+
+    #   ---------------------------------------------------------------------
+    #   10dratio
+    output_sprod=proc_lists.proc_add_subprod("10dratio", "10anomalies",  final=False,
+                                             descriptive_name='10d Ratio',
+                                             description='10d Ratio (curr/avg)',
+                                             frequency_id='e1dekad',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='10d',
+                                             active_default=True)
+    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
+    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
+
+    #   Starting files + min + max
+    formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
+    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
+
+    ancillary_sprod_1 = "10davg"
+    ancillary_sprod_ident_1 = functions.set_path_filename_no_date(prod, ancillary_sprod_1, mapset, version, ext)
+    ancillary_subdir_1      = functions.set_path_sub_directory(prod, ancillary_sprod_1, 'Derived',version, mapset)
+    ancillary_input_1="{subpath[0][5]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
+
+    @follows(std_precip_10dmin, std_precip_10dmax)
+    @active_if(activate_10danomalies_comput, activate_10dratio_comput)
+    @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input_1), formatter_out)
+    def std_precip_10dratio(input_file, output_file):
+
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+        raster_image_math.do_oper_division_perc(**args)
 
     #   ---------------------------------------------------------------------
     #   1moncum
@@ -544,647 +531,6 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file[0], "min_file": input_file[1],"max_file": input_file[2], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
         raster_image_math.do_make_vci(**args)
-
-    #   ---------------------------------------------------------------------
-    #   3moncum
-    output_sprod_group=proc_lists.proc_add_subprod_group("quarterly")
-    output_sprod_3moncum=proc_lists.proc_add_subprod("3moncum", "quarterly", final=False,
-                                             descriptive_name='Quarterly Cumulate',
-                                             description='Quarterly Cumulate Precipitation',
-                                             frequency_id='e3month',
-                                             date_format='YYYYMMDD',
-                                             masked=False,
-                                             timeseries_role='10d',
-                                             active_default=True)
-
-    out_prod_3moncum_ident = functions.set_path_filename_no_date(prod, output_sprod_3moncum, mapset, version, ext)
-    output_3moncum_subdir  = functions.set_path_sub_directory   (prod, output_sprod_3moncum, 'Derived', version, mapset)
-
-    input_dir = es2_data_dir+ \
-                functions.set_path_sub_directory(prod, '1moncum', 'Derived', version, mapset)
-    moncum_prod_ident = functions.set_path_filename_no_date(prod, '1moncum', mapset, version, ext)
-
-
-    def generate_parameters_3moncum():
-
-        starting_files=input_dir+"*"+ moncum_prod_ident
-
-        #   Look for all input files in input_dir, and sort them
-        input_files = glob.glob(starting_files)
-        quarter_list = []
-
-        # Create unique list of all dekads (as 'Julian' number)
-        for input_file in input_files:
-            basename=os.path.basename(input_file)
-            mydate=functions.get_date_from_path_filename(basename)
-            mydate_yyyymmdd=str(mydate)[0:8]
-            myquarter_nbr=functions.conv_date_2_quarter(mydate_yyyymmdd)
-            if myquarter_nbr not in quarter_list:
-              quarter_list.append(myquarter_nbr)
-
-        quarter_list = sorted(quarter_list)
-
-        # Compute the 'julian' dakad for the current day
-        today = datetime.date.today()
-        today_str = today.strftime('%Y%m%d')
-        quarter_now = functions.conv_date_2_quarter(today_str)
-
-        for quarter in quarter_list:
-            # Exclude the current dekad
-            if quarter != quarter_now:
-                file_list = []
-                for input_file in input_files:
-
-                    basename=os.path.basename(input_file)
-                    mydate_yyyymmdd=functions.get_date_from_path_filename(basename)
-                    myquarter_nbr=functions.conv_date_2_quarter(mydate_yyyymmdd[0:8])
-
-                    if myquarter_nbr == quarter:
-                        file_list.append(input_file)
-
-                    output_file=es_constants.processing_dir+output_3moncum_subdir+os.path.sep+quarter+out_prod_3moncum_ident
-                yield (file_list, output_file)
-
-    @active_if(activate_quarterly_comput, activate_3moncum_comput)
-    @files(generate_parameters_3moncum)
-    def std_precip_3moncum(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file,"output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-        raster_image_math.do_cumulate(**args)
-
-    #   ---------------------------------------------------------------------
-    #   Quarterly Average
-    new_input_subprod='3moncum'
-
-    in_prod_ident = functions.set_path_filename_no_date(prod, new_input_subprod, mapset, version, ext)
-    in_prod_subdir= functions.set_path_sub_directory   (prod, new_input_subprod, 'Derived', version, mapset)
-    starting_files= es2_data_dir+in_prod_subdir+"*"+ in_prod_ident
-
-    output_sprod_group=proc_lists.proc_add_subprod_group("3monstat")
-    output_sprod=proc_lists.proc_add_subprod('3monavg', "3monstat",final=False,
-                                             descriptive_name='Quarter Average',
-                                             description='Quarter Average Precipitation',
-                                             frequency_id='e3month',
-                                             date_format='MMDD',
-                                             masked=False,
-                                             timeseries_role='10d',
-                                             active_default=True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
-
-    formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
-
-    @follows(std_precip_3moncum)
-    @active_if(activate_3monstats_comput, activate_3monavg_comput)
-    @collate(starting_files, formatter(formatter_in),formatter_out)
-    def std_precip_3monavg(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        reduced_list = exclude_current_year(input_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-        raster_image_math.do_avg_image(**args)
-
-    #   ---------------------------------------------------------------------
-    #   Quarterly Minimum
-    output_sprod=proc_lists.proc_add_subprod("3monmin", "3monstat",final=False,
-                                             descriptive_name='Quarter Minimum',
-                                             description='Quarter Minimum Precipitation',
-                                             frequency_id='e3month',
-                                             date_format='MMDD',
-                                             masked=False,
-                                             timeseries_role='10d',
-                                             active_default=True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
-
-    formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
-
-    @follows(std_precip_3moncum)
-    @active_if(activate_3monstats_comput, activate_3monmin_comput)
-    @collate(starting_files, formatter(formatter_in),formatter_out)
-    def std_precip_3monmin(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        reduced_list = exclude_current_year(input_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-        raster_image_math.do_min_image(**args)
-
-    #   ---------------------------------------------------------------------
-    #   Quarterly Maximum
-    output_sprod=proc_lists.proc_add_subprod("3monmax", "3monstat",final=False,
-                                             descriptive_name='Quarter Maximum',
-                                             description='Quarter Maximum Precipitation',
-                                             frequency_id='e3month',
-                                             date_format='MMDD',
-                                             masked=False,
-                                             timeseries_role='10d',
-                                             active_default=True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
-
-    reg_ex_in="[0-9]{4}([0-9]{4})"+in_prod_ident
-
-    formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
-
-    @follows(std_precip_3moncum)
-    @active_if(activate_3monstats_comput, activate_3monmax_comput)
-    @collate(starting_files, formatter(formatter_in),formatter_out)
-    def std_precip_3monmax(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        reduced_list = exclude_current_year(input_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-        raster_image_math.do_max_image(**args)
-
-    #   ---------------------------------------------------------------------
-    #   3monDiff
-    output_sprod_group=proc_lists.proc_add_subprod_group("3monanomalies")
-    output_sprod=proc_lists.proc_add_subprod("3mondiff", "3monanomalies", final=False,
-                                             descriptive_name='Quarter Absolute Difference',
-                                             description='Quarter Absolute Difference Precipitation',
-                                             frequency_id='e3month',
-                                             date_format='YYYYMMDD',
-                                             masked=False,
-                                             timeseries_role='10d',
-                                             active_default=True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
-
-    # inputs
-    #   Starting files + avg
-    formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
-
-    ancillary_sprod = "3monavg"
-    ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, version, ext)
-    ancillary_subdir      = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived', version, mapset)
-    ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
-
-    @follows(std_precip_3monavg)
-    @active_if(activate_3monanomalies_comput, activate_3mondiff_comput)
-    @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
-    def std_precip_3mondiff(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-        raster_image_math.do_oper_subtraction(**args)
-
-    #   ---------------------------------------------------------------------
-    #   3monperc
-    output_sprod=proc_lists.proc_add_subprod("3monperc", "3monanomalies", final=False,
-                                             descriptive_name='Quarter Percent Difference',
-                                             description='Quarter Percent Difference Precipitation',
-                                             frequency_id='e3month',
-                                             date_format='YYYYMMDD',
-                                             masked=False,
-                                             timeseries_role='10d',
-                                             active_default=True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
-
-    # inputs
-    #   Starting files + avg
-    formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
-
-    ancillary_sprod = "3monavg"
-    ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, version, ext)
-    ancillary_subdir      = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived',version, mapset)
-    ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
-
-    @follows(std_precip_3monavg)
-    @active_if(activate_3monanomalies_comput, activate_3monperc_comput)
-    @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
-    def std_precip_3monperc(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file[0], "avg_file": input_file[1], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-        raster_image_math.do_compute_perc_diff_vs_avg(**args)
-
-
-    #   ---------------------------------------------------------------------
-    #   6moncum
-    output_sprod_group=proc_lists.proc_add_subprod_group("sixmonth")
-    output_sprod_6moncum=proc_lists.proc_add_subprod("6moncum", "sixmonth", final=False,
-                                             descriptive_name='SixMonth Cumulate',
-                                             description='SixMonth Cumulate Precipitation',
-                                             frequency_id='e6month',
-                                             date_format='YYYYMMDD',
-                                             masked=False,
-                                             timeseries_role='10d',
-                                             active_default=True)
-
-    out_prod_6moncum_ident = functions.set_path_filename_no_date(prod, output_sprod_6moncum, mapset, version, ext)
-    output_6moncum_subdir  = functions.set_path_sub_directory   (prod, output_sprod_6moncum, 'Derived', version, mapset)
-
-    input_dir = es2_data_dir+ \
-                functions.set_path_sub_directory(prod, '1moncum', 'Derived', version, mapset)
-    moncum_prod_ident = functions.set_path_filename_no_date(prod, '1moncum', mapset, version, ext)
-
-
-    def generate_parameters_6moncum():
-
-        starting_files=input_dir+"*"+ moncum_prod_ident
-
-        #   Look for all input files in input_dir, and sort them
-        input_files = glob.glob(starting_files)
-        semester_list = []
-
-        # Create unique list of all dekads (as 'Julian' number)
-        for input_file in input_files:
-            basename=os.path.basename(input_file)
-            mydate=functions.get_date_from_path_filename(basename)
-            mydate_yyyymmdd=str(mydate)[0:8]
-            mysemester_nbr=functions.conv_date_2_semester(mydate_yyyymmdd)
-            if mysemester_nbr not in semester_list:
-              semester_list.append(mysemester_nbr)
-
-        semester_list = sorted(semester_list)
-        # Compute the 'julian' dakad for the current day
-        today = datetime.date.today()
-        today_str = today.strftime('%Y%m%d')
-        semester_now = functions.conv_date_2_semester(today_str)
-
-        for semester in semester_list:
-            # Exclude the current dekad
-            if semester != semester_now:
-                file_list = []
-                for input_file in input_files:
-
-                    basename=os.path.basename(input_file)
-                    mydate_yyyymmdd=functions.get_date_from_path_filename(basename)
-                    mysemester_nbr=functions.conv_date_2_semester(mydate_yyyymmdd[0:8])
-
-                    if mysemester_nbr == semester:
-                        file_list.append(input_file)
-
-                    output_file=es_constants.processing_dir+output_6moncum_subdir+os.path.sep+semester+out_prod_6moncum_ident
-                yield (file_list, output_file)
-
-    @active_if(activate_sixmonthly_comput, activate_6moncum_comput)
-    @files(generate_parameters_6moncum)
-    def std_precip_6moncum(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file,"output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-        raster_image_math.do_cumulate(**args)
-
-    #   ---------------------------------------------------------------------
-    #   Six-Month Average
-    new_input_subprod='6moncum'
-
-    in_prod_ident = functions.set_path_filename_no_date(prod, new_input_subprod, mapset, version, ext)
-    in_prod_subdir= functions.set_path_sub_directory   (prod, new_input_subprod, 'Derived', version, mapset)
-    starting_files= es2_data_dir+in_prod_subdir+"*"+ in_prod_ident
-
-    output_sprod_group=proc_lists.proc_add_subprod_group("6monstat")
-    output_sprod=proc_lists.proc_add_subprod('6monavg', "6monstat",final=False,
-                                             descriptive_name='Six-Month Average',
-                                             description='Six-Month Average Precipitation',
-                                             frequency_id='e6month',
-                                             date_format='MMDD',
-                                             masked=False,
-                                             timeseries_role='10d',
-                                             active_default=True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
-
-    formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
-
-    @follows(std_precip_6moncum)
-    @active_if(activate_6monstats_comput, activate_6monavg_comput)
-    @collate(starting_files, formatter(formatter_in),formatter_out)
-    def std_precip_6monavg(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        reduced_list = exclude_current_year(input_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-        raster_image_math.do_avg_image(**args)
-
-    #   ---------------------------------------------------------------------
-    #   Six-Month Minimum
-    output_sprod=proc_lists.proc_add_subprod("6monmin", "6monstat",final=False,
-                                             descriptive_name='Six-Month Minimum',
-                                             description='Six-Month Minimum Precipitation',
-                                             frequency_id='e6month',
-                                             date_format='MMDD',
-                                             masked=False,
-                                             timeseries_role='10d',
-                                             active_default=True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
-
-    formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
-
-    @follows(std_precip_6moncum)
-    @active_if(activate_6monstats_comput, activate_6monmin_comput)
-    @collate(starting_files, formatter(formatter_in),formatter_out)
-    def std_precip_6monmin(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        reduced_list = exclude_current_year(input_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-        raster_image_math.do_min_image(**args)
-
-    #   ---------------------------------------------------------------------
-    #   Six-Month Maximum
-    output_sprod=proc_lists.proc_add_subprod("6monmax", "6monstat",final=False,
-                                             descriptive_name='Six-Month Maximum',
-                                             description='Six-Month Maximum Precipitation',
-                                             frequency_id='e6month',
-                                             date_format='MMDD',
-                                             masked=False,
-                                             timeseries_role='10d',
-                                             active_default=True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
-
-    reg_ex_in="[0-9]{4}([0-9]{4})"+in_prod_ident
-
-    formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
-
-    @follows(std_precip_6moncum)
-    @active_if(activate_6monstats_comput, activate_6monmax_comput)
-    @collate(starting_files, formatter(formatter_in),formatter_out)
-    def std_precip_6monmax(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        reduced_list = exclude_current_year(input_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-        raster_image_math.do_max_image(**args)
-
-    #   ---------------------------------------------------------------------
-    #   6monDiff
-    output_sprod_group=proc_lists.proc_add_subprod_group("6monanomalies")
-    output_sprod=proc_lists.proc_add_subprod("6mondiff", "6monanomalies", final=False,
-                                             descriptive_name='Six-Month Absolute Difference',
-                                             description='Six-Month Absolute Difference Precipitation',
-                                             frequency_id='e6month',
-                                             date_format='YYYYMMDD',
-                                             masked=False,
-                                             timeseries_role='10d',
-                                             active_default=True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
-
-    # inputs
-    #   Starting files + avg
-    formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
-
-    ancillary_sprod = "6monavg"
-    ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, version, ext)
-    ancillary_subdir      = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived', version, mapset)
-    ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
-
-    @follows(std_precip_6monavg)
-    @active_if(activate_6monanomalies_comput, activate_6mondiff_comput)
-    @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
-    def std_precip_6mondiff(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-        raster_image_math.do_oper_subtraction(**args)
-
-    #   ---------------------------------------------------------------------
-    #   6monperc
-    output_sprod=proc_lists.proc_add_subprod("6monperc", "6monanomalies", final=False,
-                                             descriptive_name='Six-Month Percent Difference',
-                                             description='Six-Month Percent Difference Precipitation',
-                                             frequency_id='e6month',
-                                             date_format='YYYYMMDD',
-                                             masked=False,
-                                             timeseries_role='10d',
-                                             active_default=True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
-
-    # inputs
-    #   Starting files + avg
-    formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
-
-    ancillary_sprod = "6monavg"
-    ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, version, ext)
-    ancillary_subdir      = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived',version, mapset)
-    ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
-
-    @follows(std_precip_6monavg)
-    @active_if(activate_6monanomalies_comput, activate_6monperc_comput)
-    @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
-    def std_precip_6monperc(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file[0], "avg_file": input_file[1], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-        raster_image_math.do_compute_perc_diff_vs_avg(**args)
-
-    #   ---------------------------------------------------------------------
-    #   1yearcum
-    output_sprod_group=proc_lists.proc_add_subprod_group("yearly")
-    output_sprod=proc_lists.proc_add_subprod("1yearcum", "yearly", final=False,
-                                             descriptive_name='Yearly Cumulate',
-                                             description='Yearly Cumulate Precipitation',
-                                             frequency_id='e1year',
-                                             date_format='YYYYMMDD',
-                                             masked=False,
-                                             timeseries_role='10d',
-                                             active_default=True)
-
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
-
-    # inputs: files from same months
-    formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+out_prod_3moncum_ident
-    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYY[0]}"+'0101'+out_prod_ident
-
-    starting_files_1yearcum = es2_data_dir+os.path.sep+output_3moncum_subdir+os.path.sep+'*'+out_prod_3moncum_ident
-
-    @active_if(activate_yearly_comput, activate_1yearcum_comput)
-    @collate(starting_files_1yearcum, formatter(formatter_in), formatter_out)
-    def std_precip_1yearcum(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file,"output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-        raster_image_math.do_cumulate(**args)
-
-    #   ---------------------------------------------------------------------
-    #   Yearly Average
-    new_input_subprod='1yearcum'
-
-    in_prod_ident = functions.set_path_filename_no_date(prod, new_input_subprod, mapset, version, ext)
-    in_prod_subdir= functions.set_path_sub_directory   (prod, new_input_subprod, 'Derived', version, mapset)
-    starting_files= es2_data_dir+in_prod_subdir+"*"+ in_prod_ident
-
-    output_sprod_group=proc_lists.proc_add_subprod_group("1yearstat")
-    output_sprod=proc_lists.proc_add_subprod('1yearavg', "1yearstat",final=False,
-                                             descriptive_name='Yearly Average',
-                                             description='Yearly Average Precipitation',
-                                             frequency_id='e1year',
-                                             date_format='MMDD',
-                                             masked=False,
-                                             timeseries_role='10d',
-                                             active_default=True)
-
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
-
-    formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
-
-    @follows(std_precip_1yearcum)
-    @active_if(activate_1yearstats_comput, activate_1yearavg_comput)
-    @collate(starting_files, formatter(formatter_in),formatter_out)
-    def std_precip_1yearavg(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        reduced_list = exclude_current_year(input_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-        raster_image_math.do_avg_image(**args)
-
-    #   ---------------------------------------------------------------------
-    #   Yearly Minimum
-    output_sprod=proc_lists.proc_add_subprod("1yearmin", "1yearstat",final=False,
-                                             descriptive_name='Yearly Minimum',
-                                             description='Yearly Minimum Precipitation',
-                                             frequency_id='e1year',
-                                             date_format='MMDD',
-                                             masked=False,
-                                             timeseries_role='10d',
-                                             active_default=True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
-
-    formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
-
-    @follows(std_precip_1yearcum)
-    @active_if(activate_1yearstats_comput, activate_1yearmin_comput)
-    @collate(starting_files, formatter(formatter_in),formatter_out)
-    def std_precip_1yearmin(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        reduced_list = exclude_current_year(input_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-        raster_image_math.do_min_image(**args)
-
-    #   ---------------------------------------------------------------------
-    #   Yearly Maximum
-    output_sprod=proc_lists.proc_add_subprod("1yearmax", "1yearstat",final=False,
-                                             descriptive_name='Yearly Maximum',
-                                             description='Yearly Maximum Precipitation',
-                                             frequency_id='e1year',
-                                             date_format='MMDD',
-                                             masked=False,
-                                             timeseries_role='10d',
-                                             active_default=True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
-
-    reg_ex_in="[0-9]{4}([0-9]{4})"+in_prod_ident
-
-    formatter_in="[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
-
-    @follows(std_precip_1yearcum)
-    @active_if(activate_1yearstats_comput, activate_1yearmax_comput)
-    @collate(starting_files, formatter(formatter_in),formatter_out)
-    def std_precip_1yearmax(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        reduced_list = exclude_current_year(input_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-        raster_image_math.do_max_image(**args)
-
-    #   ---------------------------------------------------------------------
-    #   1yearDiff
-    output_sprod_group=proc_lists.proc_add_subprod_group("1yearanomalies")
-    output_sprod=proc_lists.proc_add_subprod("1yeardiff", "1yearanomalies", final=False,
-                                             descriptive_name='Yearly Absolute Difference',
-                                             description='Yearly Absolute Difference Precipitation',
-                                             frequency_id='e1year',
-                                             date_format='YYYYMMDD',
-                                             masked=False,
-                                             timeseries_role='10d',
-                                             active_default=True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
-
-    # inputs
-    #   Starting files + avg
-    formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
-
-    ancillary_sprod = "1yearavg"
-    ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, version, ext)
-    ancillary_subdir      = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived', version, mapset)
-    ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
-
-    @follows(std_precip_1yearavg)
-    @active_if(activate_1yearanomalies_comput, activate_1yeardiff_comput)
-    @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
-    def std_precip_1yeardiff(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-        raster_image_math.do_oper_subtraction(**args)
-
-    #   ---------------------------------------------------------------------
-    #   1yearperc
-    output_sprod=proc_lists.proc_add_subprod("1yearperc", "1yearanomalies", final=False,
-                                             descriptive_name='Yearly Percent Difference',
-                                             description='Yearly Percent Difference Precipitation',
-                                             frequency_id='e1year',
-                                             date_format='YYYYMMDD',
-                                             masked=False,
-                                             timeseries_role='10d',
-                                             active_default=True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    output_subdir  = functions.set_path_sub_directory   (prod, output_sprod, 'Derived', version, mapset)
-
-    # inputs
-    #   Starting files + avg
-    formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident
-    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYY[0]}{MMDD[0]}"+out_prod_ident
-
-    ancillary_sprod = "1yearavg"
-    ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, version, ext)
-    ancillary_subdir      = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived',version, mapset)
-    ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
-
-    @follows(std_precip_1yearavg)
-    @active_if(activate_1yearanomalies_comput, activate_1yearperc_comput)
-    @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
-    def std_precip_1yearperc(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file[0], "avg_file": input_file[1], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-        raster_image_math.do_compute_perc_diff_vs_avg(**args)
-
 
     return proc_lists
 #   ---------------------------------------------------------------------

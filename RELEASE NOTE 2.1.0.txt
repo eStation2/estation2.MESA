@@ -1,0 +1,51 @@
+#
+#   Release Note for 2.1.0
+#   Changes with respect to 2.0.4-11 - Unless specification, they refer to Apps.rpm package.
+#   NOTE: the modifications done for 2.0.5 are also described here (2.0.5 was not officially released within MESA)
+#
+
+1. BUG FIXING
+-------------
+
+1.1 Acquisition
+
+- Add ingestion for ARC2-rain daily product - 0.1 degree - GZIP type
+- Add ingestion of CPC Soil Moisture monthly product - 0.5 degree - binary type (new pre-proc type)
+- Add the GLC 2.2 version for NDVI (SPOTV/PROBAV) in netcdf format.
+
+
+1.2 Processing
+
+- Change the modis_monavg computation, so that it does not work on the current month (MOI request).
+- Issue with modis_par 4 km processing chain: two versions (2012.0 and 2013.1) existing in process_products table (MOI request)??
+- Primary Production computation not triggered (MOI request).
+- New sub-product for NDVI std processing (ratio-linearx2) and apply baresoil masks to ndv and ndvi-linearx2 anomalies.
+- New subproducts for the std_precip chain, namely the 3 month, 6 month and 1 year cumulation, stats and anomalies (to be activated ??)
+
+
+1.3 DataManagement
+
+1.4 Visualization
+
+1.5 Service
+
+1.6 Configuration/DB
+
+
+
+2. NEW FEATURES
+---------------
+
+2.0 General
+
+2.1 Dashboard
+
+2.2 Acquisition/Processing/DataManagement
+
+2.3 Visualization/Analysis
+
+2.4 Configuration/DB
+
+2.5 Other packages
+
+- Integration of the 'Geoportal' module into eStation2-Apps.

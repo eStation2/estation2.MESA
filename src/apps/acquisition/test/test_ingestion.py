@@ -367,13 +367,13 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_lsasaf_et(self):
 
-        date_fileslist = ['/data/ingest.wrong/S-LSA_-HDF5_LSASAF_MSG_LST_SAfr_201601040915.bz2','/data/ingest.wrong/S-LSA_-HDF5_LSASAF_MSG_LST_NAfr_201601040915.bz2']
-        in_date = '201601040915'
-        productcode = 'lsasaf-lst'
+        date_fileslist = ['/data/TestIngestion/S-LSA_-HDF5_LSASAF_MSG_ET_SAfr_201511301000.bz2']
+        in_date = '201511301000'
+        productcode = 'lsasaf-et'
         productversion = 'undefined'
-        subproductcode = 'lst'
+        subproductcode = 'et'
         mapsetcode = 'MSG-satellite-3km'
-        datasource_descrID='EO:EUM:DAT:MSG:LST-SEVIRI'
+        datasource_descrID='EO:EUM:DAT:MSG:ET-SEVIRI'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -583,6 +583,43 @@ class TestIngestion(unittest.TestCase):
 
         date_fileslist = ['/data/ingest/test/chirps-v2.0.2016.02.1.tif.gz']
         in_date = '2016.02.1'
+        productcode = 'chirps-dekad'
+        productversion = '2.0'
+        subproductcode = '10d'
+        mapsetcode = 'CHIRP-Africa-5km'
+        datasource_descrID='UCSB:CHIRPS:PREL:DEKAD'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
+                                                                              source_id=datasource_descrID):
+
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+            #self.assertEqual(1, 1)
+
+    def test_ingest_chirps_tif(self):
+
+        date_fileslist = ['/data/ingest/chirps-v2.0.2017.02.1.tif']
+        in_date = '2017.02.1'
         productcode = 'chirps-dekad'
         productversion = '2.0'
         subproductcode = '10d'
@@ -1024,3 +1061,134 @@ class TestIngestion(unittest.TestCase):
                                                                               source_id=datasource_descrID):
 
             ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+    def test_ingest_g_cls_ndvi_2_2_netcdf(self):
+
+
+        file = '/data/TestIngestion/c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.nc'
+        outputfile= '/data/TestIngestion/c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.tif'
+
+        # hdf = gdal.Open('HDF5:'+file+'://NDVI')
+        hdf = gdal.Open(file)
+        sdsdict = hdf.GetMetadata('SUBDATASETS')
+
+        # sdslist = in_ds.GetSubDatasets()
+        # in_ds = gdal.Open('HDF5:'+file+'://NDVI')
+        ingestion.write_ds_to_geotiff(hdf, outputfile)
+        print sdsdict
+        #
+        #
+        # date_fileslist = glob.glob('/data/native/DISK_MSG_MPE/MSG3*201609301200*gz')
+        # in_date = '201609301200'
+        # productcode = 'msg-mpe'
+        # productversion = 'undefined'
+        # subproductcode = 'mpe'
+        # mapsetcode = 'MSG-satellite-3km'
+        # datasource_descrID='EO:EUM:DAT:MSG:MPE-UMARF'
+        #
+        # product = {"productcode": productcode,
+        #            "version": productversion}
+        # args = {"productcode": productcode,
+        #         "subproductcode": subproductcode,
+        #         "datasource_descr_id": datasource_descrID,
+        #         "version": productversion}
+        #
+        # product_in_info = querydb.get_product_in_info(echo=1, **args)
+        #
+        # re_process = product_in_info.re_process
+        # re_extract = product_in_info.re_extract
+        #
+        # sprod = {'subproduct': subproductcode,
+        #                      'mapsetcode': mapsetcode,
+        #                      're_extract': re_extract,
+        #                      're_process': re_process}
+        #
+        # subproducts=[]
+        # subproducts.append(sprod)
+        #
+        # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
+        #                                                                       source_id=datasource_descrID):
+        #
+        #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+    def test_ingest_g_cls_ndvi_2_2(self):
+
+        # Test Copernicus Products version 2.2 (starting with NDVI 2.2.1)
+        # Products released from VITO in March 2017
+
+        date_fileslist = glob.glob('/data/TestIngestion/c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.zip*')
+        in_date = '201401010000'
+        productcode = 'vgt-ndvi'
+        productversion = 'proba-v2.2'
+        subproductcode = 'ndv'
+        mapsetcode = 'SPOTV-Africa-1km'
+        datasource_descrID='EO:EUM:DAT:PROBA-V2.2:NDVI'
+
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                                              source_id=datasource_descrID):
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+    def test_ingest_g_cls_ndvi_2_2_global(self):
+
+
+        # Similar to the test above, but specific to the products made available for Long Term Statistics by T. Jacobs
+        # Products released from VITO in March 2017
+
+        # date_fileslist = glob.glob('/data/TestIngestion/c_gls_NDVI_2017*_GLOBE_PROBAV_V2.2.1.nc')
+        date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_19*_GLOBE_VGT_V2.2.1.nc')
+
+        for one_file in date_fileslist:
+
+            one_filename = os.path.basename(one_file)
+            in_date = one_filename.split('_')[3]
+            productcode = 'vgt-ndvi'
+            productversion = 'spot-v2.2'
+            subproductcode = 'ndv'
+            mapsetcode = 'SPOTV-Africa-1km'
+            datasource_descrID='PDF:GLS:PROBA-V2.2:NDVI'
+
+
+            product = {"productcode": productcode,
+                       "version": productversion}
+            args = {"productcode": productcode,
+                    "subproductcode": subproductcode,
+                    "datasource_descr_id": datasource_descrID,
+                    "version": productversion}
+
+            product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+            re_process = product_in_info.re_process
+            re_extract = product_in_info.re_extract
+
+            sprod = {'subproduct': subproductcode,
+                                 'mapsetcode': mapsetcode,
+                                 're_extract': re_extract,
+                                 're_process': re_process}
+
+            subproducts=[]
+            subproducts.append(sprod)
+
+            for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
+                                                                                  source_id=datasource_descrID):
+                ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
