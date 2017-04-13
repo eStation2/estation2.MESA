@@ -60,6 +60,52 @@ class TestFunctions(TestCase):
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw",'output_type':'Float32', 'input_nodata':-32767}
         raster_image_math.do_oper_subtraction(**args)
 
+    def test_baresoil(self):
+
+        # Create baresoil mask for 2016/12/21 (w/o using delta_ndvi_max .. only ndvi_max)
+
+        input_file='/data/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20161221_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif'
+        min_file  = '/data/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/10dmin-linearx2/1221_vgt-ndvi_10dmin-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif'
+        max_file  = '/data/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/10dmax-linearx2/1221_vgt-ndvi_10dmax-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif'
+        min_file  = ''
+        max_file  = ''
+
+        output_file='/data/temp/20161221_vgt-ndvi_baresoil-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif'
+
+        args = {"input_file": input_file, "min_file": min_file, "max_file": max_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+        raster_image_math.do_make_baresoil(**args)
+
+    def test_ratio(self):
+
+        # Create ratio_linearx2 for 2016/12/21
+
+        input_file='/data/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20161221_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif'
+        avg_file  = '/data/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/10davg-linearx2/1221_vgt-ndvi_10davg-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif'
+        output_file='/data/temp/20161221_vgt-ndvi_ratio-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif'
+
+        args = {"input_file": [input_file,avg_file], "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+        raster_image_math.do_oper_division_perc(**args)
+
+        # Use baresoil mask to filter out desert/bare areas
+
+        output_file_masked='/data/temp/20161221_vgt-ndvi_ratio-linearx2-masked_SPOTV-Africa-1km_sv2-pv2.1.tif'
+        mask = '/data/temp/20161221_vgt-ndvi_baresoil-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif'
+        args = {"input_file": output_file, "mask_file": mask, "output_file":output_file_masked, "options":"compress = lzw" , "mask_value":-32768, "out_value": -32768}
+        raster_image_math.do_mask_image(**args)
+
+
+    def test_vci(self):
+
+        input_file='/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/tif/ndv/20170301_vgt-ndvi_ndv_SPOTV-Africa-1km_sv2-pv2.1.tif'
+        min_file  = '/data/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/10dmin-linearx2/0301_vgt-ndvi_10dmin-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif'
+        max_file  = '/data/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/10dmax-linearx2/0301_vgt-ndvi_10dmax-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif'
+
+        output_file='/data/temp/20170301_vgt-ndvi_baresoil-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif'
+
+        args = {"input_file": input_file, "min_file": min_file, "max_file": max_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+        raster_image_math.do_make_vci(**args)
+
+
     def test_cumul(self):
 
         input_files=['/data/processing/arc2-rain/2.0/ARC2-Africa-11km/tif/1day/19830301_arc2-rain_1day_ARC2-Africa-11km_2.0.tif',\
