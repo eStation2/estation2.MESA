@@ -21,7 +21,7 @@ if __name__=='__main__':
     debug = 0
     # req_file = '/home/adminuser/fewsnet-rfe_2.0_all_enabled_mapsets_2016-05-02_1156.req'
     req_file = None
-    req_directory = '/data/processing/exchange/requests/ACMAD/2016.12.12/'
+    req_directory = '/data/processing/exchange/requests/ACMAD/2017.04.03/'
     debug_req_file = None
 
     if not debug:
