@@ -1241,6 +1241,111 @@ def pre_process_hdf5_zip(subproducts, tmpdir, input_files, my_logger):
 
     return interm_files_list
 
+def pre_process_hdf5_gls(subproducts, tmpdir, input_files, my_logger):
+# -------------------------------------------------------------------------------------------------------
+#   Pre-process HDF5 zipped files (specifically for g_cls files from VITO)
+#   Only one zipped file is expected, containing more files (.nc, .xls, .txt, .xml, ..)
+#   Only the .nc is normally extracted. Then, the relevant SDSs extracted and converted to geotiff.
+#
+
+    # prepare the output as an empty list
+    interm_files_list = []
+
+    # Build a list of subdatasets to be extracted
+    sds_to_process = []
+    for sprod in subproducts:
+       # if sprod != 0:
+            sds_to_process.append(sprod['re_process'])
+
+    # Make sure input is a list (if only a string is received, it loops over chars)
+    if isinstance(input_files, list):
+        list_input_files = input_files
+    else:
+        list_input_files = []
+        list_input_files.append(input_files)
+
+    # Unzips the file
+    for input_file in list_input_files:
+
+        if zipfile.is_zipfile(input_file):
+            zip_file = zipfile.ZipFile(input_file)              # Create ZipFile object
+            zip_list = zip_file.namelist()                      # Get the list of its contents
+
+            # Loop over subproducts and extract associated files
+            for sprod in subproducts:
+
+                # Define the re_expr for extracting files
+                re_extract = '.*' + sprod['re_extract'] + '.*'
+                my_logger.debug('Re_expression: ' + re_extract + ' to match sprod ' + sprod['subproduct'])
+
+                for files in zip_list:
+                    my_logger.debug('File in the .zip archive is: ' + files)
+                    if re.match(re_extract, files):        # Check it matches one of sprods -> extract from zip
+                        filename = os.path.basename(files)
+                        data = zip_file.read(files)
+                        myfile_path = os.path.join(tmpdir, filename)
+                        myfile = open(myfile_path, "wb")
+                        myfile.write(data)
+                        myfile.close()
+                        my_unzip_file = myfile_path
+
+            zip_file.close()
+
+        else:
+            my_logger.error("File %s is not a valid zipfile. Exit", input_files)
+            return 1
+
+
+        # Loop over datasets and extract the one in the list
+        for output_sds in sds_to_process:
+            # Open directly the SDS with the HDF interface (the NETCDF one goes in segfault)
+            my_sds_hdf='HDF5:'+my_unzip_file+'://'+output_sds
+            sds_in = gdal.Open(my_sds_hdf)
+
+            outputfile = tmpdir + os.path.sep + filename + '.tif'
+            write_ds_to_geotiff(sds_in, outputfile)
+            sds_in = None
+            interm_files_list.append(outputfile)
+
+    return interm_files_list
+
+def pre_process_hdf5_gls_nc(subproducts, tmpdir, input_files, my_logger):
+# -------------------------------------------------------------------------------------------------------
+#   Pre-process HDF5 non-zipped files (specifically for g_cls files from VITO)
+#   It is the 'simplified' version of the pre_process_hdf5_gls method above, for the 'Global' files
+#
+
+    # prepare the output as an empty list
+    interm_files_list = []
+
+    # Build a list of subdatasets to be extracted
+    sds_to_process = []
+    for sprod in subproducts:
+       # if sprod != 0:
+            sds_to_process.append(sprod['re_process'])
+
+    # Make sure input is a list (if only a string is received, it loops over chars)
+    if isinstance(input_files, list):
+        list_input_files = input_files
+    else:
+        list_input_files = []
+        list_input_files.append(input_files)
+
+    # Unzips the file
+    for input_file in list_input_files:
+
+        # Loop over datasets and extract the one in the list
+        for output_sds in sds_to_process:
+            # Open directly the SDS with the HDF interface (the NETCDF one goes in segfault)
+            my_sds_hdf='HDF5:'+input_file+'://'+output_sds
+            sds_in = gdal.Open(my_sds_hdf)
+
+            outputfile = tmpdir + os.path.sep + os.path.basename(input_file) + '.tif'
+            write_ds_to_geotiff(sds_in, outputfile)
+            sds_in = None
+            interm_files_list.append(outputfile)
+
+    return interm_files_list
 
 def pre_process_nasa_firms(subproducts, tmpdir, input_files, my_logger):
 # -------------------------------------------------------------------------------------------------------
@@ -1565,6 +1670,12 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 
         elif preproc_type == 'HDF5_ZIP':
             interm_files = pre_process_hdf5_zip (subproducts, tmpdir, input_files, my_logger)
+
+        elif preproc_type == 'HDF5_GLS':
+            interm_files = pre_process_hdf5_gls (subproducts, tmpdir, input_files, my_logger)
+
+        elif preproc_type == 'HDF5_GLS_NC':
+            interm_files = pre_process_hdf5_gls_nc(subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'NASA_FIRMS':
             interm_files = pre_process_nasa_firms (subproducts, tmpdir, input_files, my_logger)
