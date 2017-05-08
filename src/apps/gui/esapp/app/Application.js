@@ -87,6 +87,8 @@ Ext.define('esapp.Application', {
         esapp.globals = [];
 
         esapp.globals['typeinstallation'] = 'full';
+        esapp.globals['role'] = 'pc2';
+        esapp.globals['mode'] = 'nominal';
         Ext.Ajax.request({
             method: 'POST',
             url: 'typeinstallation',
@@ -95,11 +97,19 @@ Ext.define('esapp.Application', {
                 if (resp.typeinstallation != ''){
                     esapp.globals['typeinstallation'] = resp.typeinstallation;
                 }
+                if (resp.role != ''){
+                    esapp.globals['role'] = resp.role;
+                }
+                if (resp.mode != ''){
+                    esapp.globals['mode'] = resp.mode;
+                }
             },
             failure: function(response, opts) {
                 console.info(response.status);
             }
         });
+
+        // Ext.data.StoreManager.lookup('TimeseriesProductsStore').load();
 
         esapp.globals['selectedLanguage'] = 'eng';
         Ext.data.StoreManager.lookup('LanguagesStore').load({
@@ -121,15 +131,14 @@ Ext.define('esapp.Application', {
                             }
                         });
 
-                        //// start the mask on the body and get a reference to the mask
-                        //var splashscreen = Ext.getBody().mask(esapp.Utils.getTranslation('splashscreenmessage'), 'splashscreen');
-                        //
-                        //// fade out the body mask
-                        //splashscreen.fadeOut({
-                        //    duration: 7000,
-                        //    remove: true
-                        //});
-                        //
+                        // start the mask on the body and get a reference to the mask
+                        var splashscreen = Ext.getBody().mask(esapp.Utils.getTranslation('splashscreenmessage'), 'splashscreen');
+                        // fade out the body mask
+                        splashscreen.fadeOut({
+                            duration: 4000,
+                            remove: true
+                        });
+
                         //Ext.apply(Ext.form.VTypes, {
                         //    GeoJSON:  function(v) {
                         //        v = v.replace(/^\s|\s$/g, ""); //trims string
@@ -210,7 +219,7 @@ Ext.define('esapp.Application', {
 
 
         if (esapp.globals['typeinstallation'] == 'windows'){
-            Ext.data.StoreManager.lookup('TimeseriesProductsStore').load();
+            // Ext.data.StoreManager.lookup('TimeseriesProductsStore').load();
             Ext.data.StoreManager.lookup('TSDrawPropertiesStore').load();
             Ext.data.StoreManager.lookup('LayersStore').load();
             Ext.data.StoreManager.lookup('ColorSchemesStore').load();
@@ -222,20 +231,32 @@ Ext.define('esapp.Application', {
             // Ext.data.StoreManager.lookup('DateFormatsStore').load();
             // Ext.data.StoreManager.lookup('DataTypesStore').load();
 
-            Ext.data.StoreManager.lookup('TimeseriesProductsStore').load();
+            // Ext.data.StoreManager.lookup('TimeseriesProductsStore').load();
             Ext.data.StoreManager.lookup('TSDrawPropertiesStore').load();
             Ext.data.StoreManager.lookup('LayersStore').load();
             Ext.data.StoreManager.lookup('ColorSchemesStore').load();
             Ext.data.StoreManager.lookup('SystemSettingsStore').load();
 
-            Ext.data.StoreManager.lookup('EumetcastSourceStore').load();
-            Ext.data.StoreManager.lookup('InternetSourceStore').load();
-            Ext.data.StoreManager.lookup('ProductsActiveStore').load();
-            Ext.data.StoreManager.lookup('ProductsInactiveStore').load();
-            Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
-            Ext.data.StoreManager.lookup('IngestionsStore').load();
-            Ext.data.StoreManager.lookup('DataSetsStore').load();
-            Ext.data.StoreManager.lookup('ProcessingStore').load();
+            if (esapp.globals['role'] == 'pc2') {
+                // Ext.data.StoreManager.lookup('EumetcastSourceStore').load();
+                // Ext.data.StoreManager.lookup('InternetSourceStore').load();
+                // Ext.data.StoreManager.lookup('ProductsActiveStore').load();
+                Ext.data.StoreManager.lookup('ProductsInactiveStore').load();
+                // Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
+                // Ext.data.StoreManager.lookup('IngestionsStore').load();
+                // Ext.data.StoreManager.lookup('DataSetsStore').load();
+                Ext.data.StoreManager.lookup('ProcessingStore').load();
+            }
+            if (esapp.globals['role'] == 'pc3' && esapp.globals['mode'] == 'recovery'){
+                // Ext.data.StoreManager.lookup('EumetcastSourceStore').load();
+                // Ext.data.StoreManager.lookup('InternetSourceStore').load();
+                // Ext.data.StoreManager.lookup('ProductsActiveStore').load();
+                Ext.data.StoreManager.lookup('ProductsInactiveStore').load();
+                // Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
+                // Ext.data.StoreManager.lookup('IngestionsStore').load();
+                // Ext.data.StoreManager.lookup('DataSetsStore').load();
+                Ext.data.StoreManager.lookup('ProcessingStore').load();
+            }
         }
 
         var delay = 1500;
@@ -243,13 +264,13 @@ Ext.define('esapp.Application', {
         //     delay = 2000;
         // }
 
-        // start the mask on the body and get a reference to the mask
-        var splashscreen = Ext.getBody().mask(esapp.Utils.getTranslation('splashscreenmessage'), 'splashscreen');
-        // fade out the body mask
-        splashscreen.fadeOut({
-            duration: delay+1500,
-            remove: true
-        });
+        // // start the mask on the body and get a reference to the mask
+        // var splashscreen = Ext.getBody().mask(esapp.Utils.getTranslation('splashscreenmessage'), 'splashscreen');
+        // // fade out the body mask
+        // splashscreen.fadeOut({
+        //     duration: delay+1500,
+        //     remove: true
+        // });
 
         var task = new Ext.util.DelayedTask(function() {
             Ext.create('esapp.view.main.Main');

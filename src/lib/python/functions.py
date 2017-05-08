@@ -123,7 +123,7 @@ def get_remote_system_status(server_address):
     return status_remote_machine
 
 
-def check_connection(server_info):
+def _check_connection(server_info):
     cpos = server_info.find(':')
     try:
         sock = socket()
@@ -136,7 +136,7 @@ def check_connection(server_info):
     except:
         return False
 
-def _check_connection(server_info):
+def check_connection(server_info):
     try:
         # response = os.system("ping -c 1 " + hostname)
         response = os.system("ping -c 1 -w2 " + server_info + " > /dev/null 2>&1")

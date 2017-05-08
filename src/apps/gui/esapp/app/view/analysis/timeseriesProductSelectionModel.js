@@ -13,7 +13,7 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionModel', {
             model: 'esapp.model.TimeseriesProduct'
             //,session: false
             //,autoLoad: false
-            //,loadMask: true
+            ,loadMask: true
             //
             ,sorters: [{property: 'display_index', direction: 'ASC'}]
 
