@@ -16,11 +16,12 @@
 
 1.2 Processing
 
-- Change the modis_monavg computation, so that it does not work on the current month (MOI request).
+- MODIS MON-AVG: Change the computation, so that it does not work on the current month (MOI request).
 - Issue with modis_par 4 km processing chain: two versions (2012.0 and 2013.1) existing in process_products table (MOI request)??
 - Primary Production computation not triggered (MOI request).
-- New sub-product for NDVI std processing (ratio-linearx2) and apply baresoil masks to ndv and ndvi-linearx2 anomalies.
-- New subproducts for the std_precip chain, namely the 3 month, 6 month and 1 year cumulation, stats and anomalies (to be activated ??)
+- NDVI: New sub-products for std processing (ratio-linearx2) and apply baresoil masks to ndv and ndvi-linearx2 anomalies.
+- PRECIP-10d: New processing chain for precipitations for SPI, starting from the 3 month, 6 month and 1 year cumulation: std_precip_spi (not activated by default)
+- MODIS FIRMS: add the 10km grid-cumulated products
 
 
 1.3 DataManagement
