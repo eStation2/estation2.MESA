@@ -27,8 +27,8 @@ Ext.define('esapp.view.analysis.analysisMainController', {
     ,showTimeseriesChartSelection: function(){
         var timeseriesChartSelectionWindow = this.getView().lookupReference('timeserieschartselection');
         // timeseriesChartSelectionWindow.setHeight(Ext.getBody().getViewSize().height-65);
-        timeseriesChartSelectionWindow.fireEvent('align');
-        // timeseriesChartSelectionWindow.show();
+        // timeseriesChartSelectionWindow.fireEvent('align');
+        timeseriesChartSelectionWindow.show();
     }
 
     ,toggleBackgroundlayer: function(btn, event) {

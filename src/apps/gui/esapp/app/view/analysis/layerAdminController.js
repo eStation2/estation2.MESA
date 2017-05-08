@@ -6,6 +6,10 @@ Ext.define('esapp.view.analysis.layerAdminController', {
         Ext.getCmp('analysismain').lookupReference('analysismain_layersbtn').enable();
     }
 
+    ,onShow: function(win, ev) {
+        this.loadLayersStore();
+    }
+
     ,loadLayersStore: function(win, ev) {
         var me = this.getView();
         var layersgridstore  = Ext.data.StoreManager.lookup('LayersStore');

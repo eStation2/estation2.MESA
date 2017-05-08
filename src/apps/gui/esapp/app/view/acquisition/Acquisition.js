@@ -443,6 +443,12 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                     var internetsourcestore = Ext.data.StoreManager.lookup('InternetSourceStore');
                     //var view = btn.up().up().getView();
 
+                    var myLoadMask = new Ext.LoadMask({
+                        msg    : esapp.Utils.getTranslation('loading'), // 'Loading...',
+                        target : me
+                    });
+                    myLoadMask.show();
+
                     me.getView().getFeature('productcategories').collapseAll();
                     if (productgridstore.isStore) {
                         //Ext.suspendLayouts();
@@ -456,6 +462,8 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                                             if (ingestiongridstore.isStore) {
                                                 ingestiongridstore.load({
                                                     callback: function(records, options, success){
+                                                        myLoadMask.hide();
+
                                                         //Ext.resumeLayouts(true);
                                                         //var view = btn.up().up().getView();
                                                         ////view.getFeature('productcategories').expandAll();

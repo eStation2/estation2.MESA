@@ -219,7 +219,6 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 xaxeVisible = false;
                 xAxis.push(xAxe);
             })
-            //console.info(xAxis);
         }
         else {
             xAxis = [{
@@ -254,9 +253,9 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             me.timeseriesGraph.timeseries.forEach(function (timeserie) {
                 //if (timeserie.cumulative) {
                     //me.timeseriesGraph.cumulative = true;
-                    // timeserie.type = 'line';
-                    // timeserie.dashStyle = 'Solid';
-                    // timeserie.lineWidth = 2;
+                    timeserie.type = 'line';
+                    timeserie.dashStyle = 'Solid';
+                    timeserie.lineWidth = 2;
 
                     var cumulated = 0;
                     timeserie.data.forEach(function (datarecord) {

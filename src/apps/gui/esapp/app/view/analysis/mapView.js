@@ -418,7 +418,6 @@ Ext.define("esapp.view.analysis.mapView",{
             dockedItems: [{
                 xtype: 'toolbar',
                 dock: 'right',
-
                 items: [{
                     xtype: 'splitbutton',
                     id: 'playBtn_' + me.id,
@@ -429,14 +428,17 @@ Ext.define("esapp.view.analysis.mapView",{
                     scale: 'small',
                     hidden: false,
                     arrowAlign: 'bottom',
+                    handler: 'play',
                     menu: {
-                        maxWidth: 65,
+                        hideOnClick: false,
+                        alwaysOnTop: true,
+                        width: 45,
                         items: [{
                             xtype: 'numberfield',
                             id: 'playInterval_' + me.id,
                             hideLabel: true,
-                            width: 65,
-                            maxWidth: 65,
+                            width: 45,
+                            // maxWidth: 45,
                             allowDecimals: false,
                             value: 3000,
                             step: 500,
@@ -453,8 +455,7 @@ Ext.define("esapp.view.analysis.mapView",{
                                 }
                             }
                         }]
-                    },
-                    handler: 'play'
+                    }
                 }, {
                     xtype: 'button',
                     id: 'pauseBtn_' + me.id,

@@ -71,22 +71,23 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
             // },
             show: function(){
                 // console.info('show tschartselection');
+                me.hidden = false;
                 me.fireEvent('align');
+                me.expand();
             },
             align: function() {
                 // console.info('align tschartselection');
-                // if (me.hidden) {
-                //     me.show();
-                // }
                 var task = new Ext.util.DelayedTask(function() {
-                    me.show();
-                    me.expand();
+                    // me.show();
+                    // me.expand();
                     me.alignTo(Ext.getCmp('analysismain').lookupReference('backgroundmap'), 'tr-tr');
                     // me.alignTo(Ext.getCmp('analysismain'), 'tr-tr');
                     me.height = Ext.getBody().getViewSize().height-65;
                     me.updateLayout();
                 });
-                task.delay(50);
+                if (!me.hidden) {
+                    task.delay(50);
+                }
             }
         };
 

@@ -44,7 +44,8 @@ Ext.define("esapp.view.analysis.layerAdmin",{
     },
 
     listeners: {
-        close: 'onClose'
+        close: 'onClose',
+        show: 'onShow'
     },
 
     initComponent: function () {
