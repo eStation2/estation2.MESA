@@ -26,22 +26,22 @@ class TestCreate(unittest.TestCase):
         base_target_dir='/data/archives/'
         mapset='SPOTV-Africa-1km'
         product='vgt-ndvi'
-        version='sv2-pv2.1'
+        version='sv2-pv2.2'
         start_date=datetime.date(2011, 1, 1)
         end_date=None
 
-        # # NDV from sv2-pv2.1: since 01.01.2011 -> real files (not or ) are created !
-        subproduct='ndv'
-        target_dir = base_target_dir + product+ os.path.sep + subproduct
-        functions.check_output_dir(target_dir)
-        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
-
-        # ndvi_linearx1/2
-        subproducts=['ndvi-linearx1','ndvi-linearx2']
-        for subproduct in subproducts:
-            target_dir = base_target_dir + product+ os.path.sep + subproduct
-            functions.check_output_dir(target_dir)
-            create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+        # # NDV from sv2-pv2.2: since 02.05.2017 -> real files (not or ) are created !
+        # subproduct='ndv'
+        # target_dir = base_target_dir + product+ os.path.sep + subproduct
+        # functions.check_output_dir(target_dir)
+        # create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+        #
+        # # ndvi_linearx1/2
+        # subproducts=['ndvi-linearx1','ndvi-linearx2']
+        # for subproduct in subproducts:
+        #     target_dir = base_target_dir + product+ os.path.sep + subproduct
+        #     functions.check_output_dir(target_dir)
+        #     create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
         # 10day stats
         subproducts=['10davg-linearx2', '10dmin-linearx2','10dmax-linearx2', '10dmed-linearx2']
@@ -50,49 +50,49 @@ class TestCreate(unittest.TestCase):
             functions.check_output_dir(target_dir)
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
-        # 10day stats - additional
-        subproducts=['year-min-linearx2','year-max-linearx2','absol-min-linearx2','absol-max-linearx2']
-        for subproduct in subproducts:
-             target_dir = base_target_dir + product + os.path.sep + subproduct
-             functions.check_output_dir(target_dir)
-             create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
-
-        # # baresoil mask
-        subproducts=['baresoil-linearx2']
-        for subproduct in subproducts:
-            target_dir = base_target_dir + product + os.path.sep + subproduct
-            functions.check_output_dir(target_dir)
-            create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+        # # 10day stats - additional
+        # subproducts=['year-min-linearx2','year-max-linearx2','absol-min-linearx2','absol-max-linearx2']
+        # for subproduct in subproducts:
+        #      target_dir = base_target_dir + product + os.path.sep + subproduct
+        #      functions.check_output_dir(target_dir)
+        #      create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
         #
-        # # anomalies based on ndv (not filtered) and linearx2 statistics
-        subproducts=['diff-linearx2','vci','icn']
-        for subproduct in subproducts:
-            target_dir = base_target_dir + product + os.path.sep + subproduct
-            functions.check_output_dir(target_dir)
-            create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+        # # # baresoil mask
+        # subproducts=['baresoil-linearx2']
+        # for subproduct in subproducts:
+        #     target_dir = base_target_dir + product + os.path.sep + subproduct
+        #     functions.check_output_dir(target_dir)
+        #     create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+        # #
+        # # # anomalies based on ndv (not filtered) and linearx2 statistics
+        # subproducts=['diff-linearx2','vci','icn']
+        # for subproduct in subproducts:
+        #     target_dir = base_target_dir + product + os.path.sep + subproduct
+        #     functions.check_output_dir(target_dir)
+        #     create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+        # #
+        # # # anomalies based on filtered ndv and statistics
+        # subproducts=['linearx2diff-linearx2','vci-linearx2','icn-linearx2']
+        # for subproduct in subproducts:
+        #     target_dir = base_target_dir + product + os.path.sep + subproduct
+        #     functions.check_output_dir(target_dir)
+        #     create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
         #
-        # # anomalies based on filtered ndv and statistics
-        subproducts=['linearx2diff-linearx2','vci-linearx2','icn-linearx2']
-        for subproduct in subproducts:
-            target_dir = base_target_dir + product + os.path.sep + subproduct
-            functions.check_output_dir(target_dir)
-            create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
-
-        # 1mon prod and stats
-        subproduct='monndvi'
-        target_dir = base_target_dir + product + os.path.sep + subproduct
-        functions.check_output_dir(target_dir)
-        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
-
-        # monthly stats
-        subproducts=['1monavg', '1monmin','1monmax']
-        start_date=None
-        end_date=None
-        for subproduct in subproducts:
-
-            target_dir = base_target_dir + product + os.path.sep + subproduct
-            functions.check_output_dir(target_dir)
-            create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
+        # # 1mon prod and stats
+        # subproduct='monndvi'
+        # target_dir = base_target_dir + product + os.path.sep + subproduct
+        # functions.check_output_dir(target_dir)
+        # create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+        #
+        # # monthly stats
+        # subproducts=['1monavg', '1monmin','1monmax']
+        # start_date=None
+        # end_date=None
+        # for subproduct in subproducts:
+        #
+        #     target_dir = base_target_dir + product + os.path.sep + subproduct
+        #     functions.check_output_dir(target_dir)
+        #     create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
     def TestCreateArchive_vgt_fapar(self):
 
