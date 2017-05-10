@@ -87,7 +87,7 @@ class TestMapSet(TestCase):
 
     def test_create_raster_surface(self):
 
-        mapsetcode = 'FEWSNET-Africa-8km'
+        mapsetcode = 'CHIRP-Africa-5km'
 
         my_mapset = MapSet()
         my_mapset.assigndb(mapsetcode)
