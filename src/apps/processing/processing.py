@@ -35,6 +35,7 @@ from apps.processing import processing_std_lsasaf_lst
 from apps.processing import processing_std_lsasaf_et
 from apps.processing import processing_std_modis_monavg
 from apps.processing import processing_std_modis_firms
+from apps.processing import processing_std_modis_pp
 from apps.processing import processing_std_msg_mpe
 from apps.processing import processing_std_rain_onset
 from apps.processing import processing_std_seas_cum

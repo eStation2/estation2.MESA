@@ -21,7 +21,7 @@ if __name__=='__main__':
     debug = 0
     # req_file = '/home/adminuser/fewsnet-rfe_2.0_all_enabled_mapsets_2016-05-02_1156.req'
     req_file = None
-    req_directory = '/data/processing/exchange/requests/ACMAD/2017.04.03/'
+    req_directory = '/data/processing/exchange/requests/20170414_Ref_Station_JRC/'
     debug_req_file = None
 
     if not debug:
@@ -50,6 +50,7 @@ if __name__=='__main__':
             if os.path.isdir(req_directory):
                 req_files = glob.glob(req_directory+'*.req')
                 for my_req in req_files:
+                    logger.info('Working on file: %s' % my_req)
                     requests.create_archive_from_request(my_req)
             else:
                 logger.error('Req. file does not exist: %s' % req_file)
