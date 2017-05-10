@@ -577,6 +577,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 #
 #   ---------------------------------------------------------------------
 
+
 def processing_std_modis_firms(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None, update_stats=False, nrt_products=True, write2file=None,
