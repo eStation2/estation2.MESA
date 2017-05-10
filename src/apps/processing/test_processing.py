@@ -7,29 +7,29 @@ from multiprocessing import Queue
 # # vgt-ndvi
 # #   ---------------------------------------------------------------------
 
-# from apps.processing.processing_std_ndvi import *
-# productcode='vgt-ndvi'
-# subproductcode='ndv'
-# version='sv2-pv2.2'
-# start_date='19990101'
-# end_date='20161231'
-#
-# list_dates = proc_functions.get_list_dates_for_dataset(productcode, subproductcode, version, start_date=start_date, end_date=end_date)
-#
-# args = {'pipeline_run_level':3, \
-#         'pipeline_printout_level':0, \
-#         'pipeline_printout_graph_level': 0, \
-#         'prod': productcode,\
-#         'starting_sprod':subproductcode,\
-#         'mapset': 'SPOTV-Africa-1km',\
-#         'version': version,
-#         'starting_dates': list_dates,
-#         'logfile':'test_processing_ndvi',
-#         'touch_files_only':False}
-#
-#
-# res_queue = None
-# processing_std_ndvi_all(res_queue,**args)
+from apps.processing.processing_std_ndvi import *
+productcode='vgt-ndvi'
+subproductcode='ndv'
+version='sv2-pv2.2'
+start_date='19990101'
+end_date='20161231'
+
+list_dates = proc_functions.get_list_dates_for_dataset(productcode, subproductcode, version, start_date=start_date, end_date=end_date)
+
+args = {'pipeline_run_level':1, \
+        'pipeline_printout_level':0, \
+        'pipeline_printout_graph_level': 0, \
+        'prod': productcode,\
+        'starting_sprod':subproductcode,\
+        'mapset': 'SPOTV-Africa-1km',\
+        'version': version,
+        'starting_dates': list_dates,
+        'logfile':'test_processing_ndvi',
+        'touch_files_only':False}
+
+
+res_queue = None
+processing_std_ndvi_prods_only(res_queue,**args)
 
 #   ---------------------------------------------------------------------
 # vgt-ndvi merge (for sv2-pv2.2)
@@ -49,7 +49,6 @@ from multiprocessing import Queue
 # res_queue = None
 # processing_merge(**args)
 
-#from apps.processing.processing_modis_sst import *
 # #   ---------------------------------------------------------------------
 # # pml-modis-sst
 # #   ---------------------------------------------------------------------
@@ -100,8 +99,8 @@ from multiprocessing import Queue
 # modis-sst monavg
 #   ---------------------------------------------------------------------
 # from apps.processing.processing_std_modis_monavg import *
-# args = {'pipeline_run_level':0, \
-#         'pipeline_printout_level':4, \
+# args = {'pipeline_run_level':3, \
+#         'pipeline_printout_level':0, \
 #         'pipeline_printout_graph_level': 0, \
 #         'prod': 'modis-sst',\
 #         'starting_sprod':'sst-day',\
@@ -335,28 +334,28 @@ from multiprocessing import Queue
 #   ---------------------------------------------------------------------
 # arc2-rain cumulate
 #   ---------------------------------------------------------------------
-from apps.processing.processing_std_precip_1day import *
-# # # # # # Create the list of dates -> returns empty if start==end==None
+# from apps.processing.processing_std_precip_1day import *
+# # # # # # # Create the list of dates -> returns empty if start==end==None
+# # # #
+# start_date='20160101'
+# end_date = '20170401'
+# starting_dates = proc_functions.get_list_dates_for_dataset('arc2-rain','1day', '2.0', start_date=start_date, end_date=end_date)
+# # starting_dates = None
+# mapset='ARC2-Africa-11km'
 # # #
-start_date='20160101'
-end_date = '20170401'
-starting_dates = proc_functions.get_list_dates_for_dataset('arc2-rain','1day', '2.0', start_date=start_date, end_date=end_date)
-# starting_dates = None
-mapset='ARC2-Africa-11km'
-# #
-args = {'pipeline_run_level':3, \
-        'pipeline_printout_level':0, \
-        'pipeline_printout_graph_level': 0, \
-        'prod': 'arc2-rain',\
-        'starting_sprod':'1day',\
-        'starting_dates': starting_dates,\
-        'mapset': mapset,\
-        'version':'2.0',
-        'logfile':'log-arc2-rain.log'}
-
-res_queue = None
-proc_lists=processing_std_precip_1day(res_queue,**args)
-print(proc_lists)
+# args = {'pipeline_run_level':3, \
+#         'pipeline_printout_level':0, \
+#         'pipeline_printout_graph_level': 0, \
+#         'prod': 'arc2-rain',\
+#         'starting_sprod':'1day',\
+#         'starting_dates': starting_dates,\
+#         'mapset': mapset,\
+#         'version':'2.0',
+#         'logfile':'log-arc2-rain.log'}
+#
+# res_queue = None
+# proc_lists=processing_std_precip_1day(res_queue,**args)
+# print(proc_lists)
 
 #   ---------------------------------------------------------------------
 # arc2-rain SPI

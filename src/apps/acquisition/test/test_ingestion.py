@@ -786,8 +786,8 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_ecmwf_evtp(self):
 
-        date_fileslist = ['/data/ingest/ope_africa_evpt_20160801.zip']
-        in_date = '20160801'
+        date_fileslist = ['/data/ingest/ope_africa_evpt_20170401.zip']
+        in_date = '20170401'
         productcode = 'ecmwf-evpt'
         productversion = 'OPE'
         subproductcode = '10d'
@@ -1192,3 +1192,42 @@ class TestIngestion(unittest.TestCase):
             for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
                                                                                   source_id=datasource_descrID):
                 ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+    def test_ingest_g_cls_fapar_2_0_1(self):
+
+        # Test Copernicus Products version 2.0.1 (for FAPAR)
+        # Products released from VITO in March 2017
+
+        date_fileslist = glob.glob('/data/TestIngestion/c_gls_FAPAR-RT0_201704100000_AFRI_PROBAV_V2.0.1.zip*')
+        in_date = '201704100000'
+        productcode = 'vgt-fapar'
+        productversion = 'V2.0'
+        subproductcode = 'fapar'
+        mapsetcode = 'SPOTV-Africa-1km'
+        datasource_descrID='EO:EUM:DAT:PROBA-V2.0:FAPAR'
+
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                                              source_id=datasource_descrID):
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+

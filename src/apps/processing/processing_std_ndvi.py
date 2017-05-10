@@ -75,7 +75,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
         group_monthly_anomalies = 0                # 3.d    -> To be done
 
     if update_stats:
-        group_no_filter_stats = 1                  # 1.a    -> Not done FTTB
+        group_no_filter_stats = 0                  # 1.a    -> Not done FTTB
         group_filtered_stats = 1                   # 2.b
         group_monthly_stats = 1                    # 3.b
 
@@ -308,6 +308,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @files(generate_parameters_ndvi_linearx1)
     @active_if(group_filtered_prods, activate_ndvi_linearx1)
+    @follows(vgt_ndvi_10dmed_no_filter)
     def vgt_ndvi_linearx1(input_files, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -351,6 +352,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_prods,activate_ndvi_linearx2)
     @files(generate_parameters_ndvi_linearx2)
+    @follows(vgt_ndvi_linearx1)
     def vgt_ndvi_linearx2(input_files, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -390,9 +392,9 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     formatter_in = "(?P<YYYYMMDD>[0-9]{8})"+in_prod_ident_linearx2
     formatter_out = ["{subpath[0][5]}"+os.path.sep+subdir_linearx2_agric+"{YYYYMMDD[0]}"+prod_ident_linearx2_agric]
 
-    # @follows(vgt_ndvi_10dmed_no_filter)
     @active_if(group_filtered_prods, activate_ndvi_linearx2_agric)
     @transform(starting_files_linearx2, formatter(formatter_in), formatter_out)
+    @follows(vgt_ndvi_linearx2)
     def vgt_ndvi_linearx2_agric(input_files, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -441,7 +443,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     @collate(starting_files_linearx2,
              formatter("[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident_linearx2),
              ["{subpath[0][5]}"+os.path.sep+subdir_10davg_linearx2+"{MMDD[0]}"+prod_ident_10davg_linearx2])
-    # @follows(vgt_ndvi_linearx2)
+    @follows(vgt_ndvi_linearx2)
     def vgt_ndvi_10davg_linearx2(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -467,7 +469,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_stats, activate_10dmin_linearx2)
     @collate(starting_files_linearx2, formatter(formatter_in),formatter_out)
-    # @follows(vgt_ndvi_linearx2)
+    @follows(vgt_ndvi_10davg_linearx2)
     def vgt_ndvi_10dmin_linearx2(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -493,7 +495,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_stats, activate_10dmax_linearx2)
     @collate(starting_files_linearx2, formatter(formatter_in),formatter_out)
-    # @follows(vgt_ndvi_linearx2)
+    @follows(vgt_ndvi_10dmin_linearx2)
     def vgt_ndvi_10dmax_linearx2(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -526,7 +528,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_stats, activate_10dmed_linearx2)
     @collate(starting_files_linearx2, formatter(formatter_in),formatter_out)
-    # @follows(vgt_ndvi_linearx2)
+    @follows(vgt_ndvi_10dmax_linearx2)
     def vgt_ndvi_10dmed_linearx2(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -553,7 +555,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_stats, activate_year_min_linearx2)
     @collate(starting_files_linearx2, formatter(formatter_in),formatter_out)
-    # @follows(vgt_ndvi_10dmed_linearx2)
+    @follows(vgt_ndvi_10dmed_linearx2)
     def vgt_ndvi_year_min_linearx2(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -581,7 +583,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_stats, activate_year_max_linearx2)
     @collate(starting_files_linearx2, formatter(formatter_in),formatter_out)
-    # @follows(vgt_ndvi_10dmin_linearx2)
+    @follows(vgt_ndvi_year_min_linearx2)
     def vgt_ndvi_year_max_linearx2(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -619,7 +621,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_stats, activate_absol_min_linearx2)
     @collate(starting_files_year_min_linearx2, formatter(formatter_in), formatter_out)
-    # @follows(vgt_ndvi_year_min_linearx2)
+    @follows(vgt_ndvi_year_max_linearx2)
     def vgt_ndvi_absol_min_linearx2(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -656,7 +658,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_stats, activate_absol_max_linearx2)
     @collate(starting_files_year_max_linearx2, formatter(formatter_in), formatter_out)
-    # @follows(vgt_ndvi_year_max_linearx2)
+    @follows(vgt_ndvi_absol_min_linearx2)
     def vgt_ndvi_absol_max_linearx2(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -692,7 +694,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_no_filter_masks, activate_baresoil)
     @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input_1), formatter_out)
-    @follows(vgt_ndvi_10davg_linearx2)
+    @follows(vgt_ndvi_absol_max_linearx2)
     def vgt_ndvi_baresoil(input_file, output_file):
 
         [current_file, average_file] = input_file
@@ -732,6 +734,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_masks, activate_baresoil_linearx2)
     @transform(starting_files_linearx2_all, formatter(formatter_in), add_inputs(ancillary_input_1), formatter_out)
+    @follows(vgt_ndvi_10davg_linearx2,vgt_ndvi_baresoil)
     def vgt_ndvi_baresoil_linearx2(input_file, output_file):
 
         [current_file, average_file] = input_file
@@ -776,6 +779,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_anomalies, activate_diff_linearx2)
     @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input_1, ancillary_input_2), formatter_out)
+    @follows(vgt_ndvi_baresoil_linearx2)
     def vgt_ndvi_diff_linearx2(input_file, output_file):
 
         [current_file, average_file, baresoil_file] = input_file
@@ -827,6 +831,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_anomalies, activate_linearx2_diff_linearx2)
     @transform(starting_files_linearx2_all, formatter(formatter_in), add_inputs(ancillary_input_1,ancillary_input_2), formatter_out)
+    @follows(vgt_ndvi_10davg_linearx2, vgt_ndvi_baresoil_linearx2, vgt_ndvi_diff_linearx2)
     def vgt_ndvi_linearx2_diff_linearx2(input_file, output_file):
 
         [current_file, average_file, baresoil_file] = input_file
@@ -882,7 +887,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     ancillary_input_3 = "{subpath[0][5]}"+os.path.sep+ancillary_subdir_3+"{YYYY[0]}{MMDD[0]}"+ancillary_sprod_ident_3
 
     @active_if(group_filtered_anomalies, activate_vci)
-    @follows(vgt_ndvi_10dmax_linearx2, vgt_ndvi_10dmin_linearx2)
+    @follows(vgt_ndvi_10dmax_linearx2, vgt_ndvi_10dmin_linearx2, vgt_ndvi_baresoil, vgt_ndvi_linearx2_diff_linearx2)
     @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input_1,ancillary_input_2, ancillary_input_3), formatter_out)
     def vgt_ndvi_vci(input_file, output_file):
 
@@ -941,7 +946,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_no_filter_anomalies, activate_icn)
     @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input_1,ancillary_input_2,ancillary_input_3), formatter_out)
-    @follows(vgt_ndvi_10dmax_linearx2, vgt_ndvi_10dmin_linearx2)
+    @follows(vgt_ndvi_absol_min_linearx2, vgt_ndvi_absol_max_linearx2, vgt_ndvi_baresoil, vgt_ndvi_vci)
     def vgt_ndvi_icn(input_file, output_file):
 
         [current_file, max_file, min_file, baresoil_file] = input_file
@@ -998,6 +1003,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_no_filter_anomalies, activate_vci_linearx2)
     @transform(starting_files_linearx2_all, formatter(formatter_in), add_inputs(ancillary_input_1,ancillary_input_2, ancillary_input_3), formatter_out)
+    @follows(vgt_ndvi_10dmax_linearx2, vgt_ndvi_10dmin_linearx2, vgt_ndvi_baresoil_linearx2,vgt_ndvi_icn)
     def vgt_ndvi_vci_linearx2(input_file, output_file):
 
         [current_file, max_file, min_file, baresoil_file] = input_file
@@ -1053,6 +1059,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_anomalies, activate_icn_linearx2)
     @transform(starting_files_linearx2_all, formatter(formatter_in), add_inputs(ancillary_input_1, ancillary_input_2, ancillary_input_3), formatter_out)
+    @follows(vgt_ndvi_absol_min_linearx2, vgt_ndvi_absol_max_linearx2, vgt_ndvi_baresoil_linearx2, vgt_ndvi_vci_linearx2)
     def vgt_ndvi_icn_linearx2(input_file, output_file):
 
         [current_file, max_file, min_file, baresoil_file] = input_file
@@ -1103,6 +1110,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_anomalies, activate_ratio_linearx2)
     @transform(starting_files_linearx2_all, formatter(formatter_in), add_inputs(ancillary_input, ancillary_input_1), formatter_out)
+    @follows(vgt_ndvi_10davg_linearx2, vgt_ndvi_baresoil_linearx2,vgt_ndvi_icn_linearx2)
     def vgt_ndvi_ratio_linearx2(input_file, output_file):
 
         [current_file, avg_file, baresoil_file] = input_file
@@ -1147,7 +1155,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_monthly_prods, activate_monndvi)
     @collate(starting_files_linearx2_all, formatter(formatter_in), formatter_out)
-    # @follows(vgt_ndvi_icn_linearx2)
+    @follows(vgt_ndvi_ratio_linearx2)
     def vgt_ndvi_monndvi(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -1193,7 +1201,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_monthly_stats, activate_1monavg)
     @collate(starting_files_monndvi, formatter(formatter_in), formatter_out)
-    # @follows(vgt_ndvi_monndvi)
+    @follows(vgt_ndvi_monndvi)
     def vgt_ndvi_1monavg(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -1220,7 +1228,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_monthly_stats, activate_1monmin)
     @collate(starting_files_monndvi, formatter(formatter_in), formatter_out)
-    # @follows(vgt_ndvi_1monavg)
+    @follows(vgt_ndvi_1monavg)
     def vgt_ndvi_1monmin(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -1247,7 +1255,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_monthly_stats, activate_1monmax)
     @collate(starting_files_monndvi, formatter(formatter_in), formatter_out)
-    # @follows(vgt_ndvi_1monmin)
+    @follows(vgt_ndvi_1monmin)
     def vgt_ndvi_1monmax(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -1282,7 +1290,8 @@ def processing_std_ndvi(res_queue, pipeline_run_level=0, pipeline_printout_level
         fwrite_id=None
 
     if pipeline_run_level > 0:
-        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, touch_files_only=touch_files_only, history_file='/eStation2/log/.ruffus_history.sqlite')
+        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, touch_files_only=touch_files_only, history_file='/eStation2/log/.ruffus_history_'+prod+'_'+version+'.sqlite',
+                     checksum_level=0)
 
     if pipeline_printout_level > 0:
         pipeline_printout(verbose=pipeline_printout_level) #, output_stream=fout)
