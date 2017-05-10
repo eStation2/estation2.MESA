@@ -133,7 +133,9 @@ chmod 777 /var/www
 
 # Change permissions for writing in Desktop
 chown -R adminuser:adminuser /home/adminuser/*
+chmod -R 755 /home/adminuser/Desktop
 chown -R analyst:analyst /home/analyst/*
+chmod -R 755 /home/analyst/Desktop
 
 # Change permissions of the Layers dir (2.0.4)
 echo "`date +'%Y-%m-%d %H:%M '` Change permissions of /eStation2/layers to 775"
@@ -195,6 +197,12 @@ EOF
     # Update database structure to current release
     echo "`date +'%Y-%m-%d %H:%M '` Update database structure" 
     psql -h localhost -U estation -d estationdb -f /var/www/eStation2/database/dbInstall/update_db_structure.sql >/dev/null 2>&1
+
+    # Activate the User THEMA in the thema table (since 2.1.0)
+    thema=`grep -i thema /eStation2/settings/system_settings.ini | sed 's/thema =//'| sed 's/ //g'`
+    psql -U estation -d estationdb -c "update products.thema SET activated=TRUE WHERE thema_id='$thema'"
+    echo "`date +'%Y-%m-%d %H:%M '` Thema acivated in the products.thema table"
+
 
     # Update Tables (both for upgrade and installation from scratch)
     echo "`date +'%Y-%m-%d %H:%M '` Populate/update tables" 
@@ -274,9 +282,9 @@ sed -i "s|.*active_version.=.*|active_version = %{version}|" /eStation2/settings
 #if [[ ! -h /usr/lib64/libmapserver.so.6.4.1 ]]; then ln -fs /usr/local/lib64/libmapserver.so.6.4.1 /usr/lib64/; fi
 
 # Specific to upgrade from 2.0.2 -> re-set the THEMA (for pads settings table)
-thema=`grep -i thema /eStation2/settings/system_settings.ini | sed 's/thema =//'| sed 's/ //g'`
-psql -U estation -d estationdb -c "select products.set_thema('$thema')"
-echo "`date +'%Y-%m-%d %H:%M '` Set again the Thema to $thema" 
+# thema=`grep -i thema /eStation2/settings/system_settings.ini | sed 's/thema =//'| sed 's/ //g'`
+# psql -U estation -d estationdb -c "select products.set_thema('$thema')"
+# echo "`date +'%Y-%m-%d %H:%M '` Set again the Thema to $thema"
 
 # Start the eStation Services 
 echo "`date +'%Y-%m-%d %H:%M '` Starting all services"
