@@ -54,14 +54,14 @@ Ext.define('esapp.view.analysis.mapViewController', {
             productversion: me.productversion,
             mapsetcode: me.mapsetcode,
             legendid: me.legendid,
-            legendlayout: mapLegendObj.legendLayout,
-            legendObjPosition: mapLegendObj.getPosition(true).toString(),
+            legendlayout:  mapLegendObj.legendLayout,
+            legendObjPosition: me.productcode != '' && mapLegendObj.html != '' ? mapLegendObj.getPosition(true).toString() : mapLegendObj.legendPosition.toString(),
             showlegend: mapLegendToggleBtn.pressed,
-            titleObjPosition: titleObj.getPosition(true).toString(),
+            titleObjPosition: titleObj.rendered ? titleObj.getPosition(true).toString() : titleObj.titlePosition.toString(),
             titleObjContent: titleObj.tpl.html,
-            disclaimerObjPosition: disclaimerObj.getPosition(true).toString(),
+            disclaimerObjPosition: disclaimerObj.rendered ? disclaimerObj.getPosition(true).toString() : disclaimerObj.disclaimerPosition.toString(),
             disclaimerObjContent: disclaimerObj.getContent(),
-            logosObjPosition: logoObj.getPosition(true).toString(),
+            logosObjPosition: logoObj.rendered ? logoObj.getPosition(true).toString() : logoObj.logoPosition.toString(),
             logosObjContent: Ext.encode(logoObj.getLogoData()),
             showObjects: mapObjectToggleBtn.pressed,
             scalelineObjPosition: scalelineObj.getPosition(true).toString(),
@@ -692,7 +692,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             downloadlink.click();
 
         });
-        task.delay(500);
+        task.delay(750);
 
         //if(typeof Promise !== "undefined" && Promise.toString().indexOf("[native code]") !== -1){
         //   console.info('Browser supports Promise natively!');
@@ -2314,7 +2314,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                                         if (btn == 'ok'){
                                             //alert(geojsonStr) map_tpl_save_message
                                             params = {
-                                                layerfilename: text + '.geojson',
+                                                layerfilename: text,    //  + '.geojson',
                                                 drawnlayerfeaturesGEOSON: geojsonStr
                                             };
 
@@ -2323,6 +2323,17 @@ Ext.define('esapp.view.analysis.mapViewController', {
                                                 url: 'layers/savedrawnlayer',
                                                 params: params
                                             });
+
+                                            var task = new Ext.util.DelayedTask(function() {
+                                                var layersgridstore  = Ext.data.StoreManager.lookup('LayersStore');
+                                                if (layersgridstore.isStore) {
+                                                    layersgridstore.load({
+                                                        callback: function(records, options, success) {
+                                                        }
+                                                    });
+                                                }
+                                            });
+                                            task.delay(500);
                                         }
                                     }, this, false, drawnLayerName);
                                 }

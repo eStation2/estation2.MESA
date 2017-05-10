@@ -823,15 +823,15 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                     //console.info(this.getViewModel().getStore('categories'));
                     var timeseriesProductsStore = Ext.getStore('TimeseriesProductsStore'),
                         delay = 0;
-
+// console.info(me);
                     var myLoadMask = new Ext.LoadMask({
                         msg    : esapp.Utils.getTranslation('loading'), // 'Loading...',
-                        target : this
+                        target : me
                     });
 
                     if (!timeseriesProductsStore.isLoaded()){
                         delay = 1000;
-                        myLoadMask.show();
+                        // myLoadMask.show();
                     }
 
                     var task = new Ext.util.DelayedTask(function() {

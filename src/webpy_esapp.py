@@ -197,7 +197,8 @@ class GetInstallationType:
         getparams = web.input()
         systemsettings = functions.getSystemSettings()
 
-        typeinstallation_json = '{"success":"true", "typeinstallation":"'+systemsettings['type_installation'].lower() + '"}'
+        typeinstallation_json = '{"success":"true", "typeinstallation":"'+systemsettings['type_installation'].lower() + \
+                                '", "role":"'+systemsettings['role'].lower() + '", "mode":"'+systemsettings['mode'].lower()+'"}'
 
         return typeinstallation_json
 
@@ -2673,8 +2674,9 @@ class TimeseriesProducts:
         import copy
         # import time
         # t0 = time.time()
+        # print 'START: ' + str(t0)
+
         db_products = querydb.get_timeseries_products()
-        # totalget_dataset = 0
         if hasattr(db_products, "__len__") and db_products.__len__() > 0:
             products_dict_all = []
             for row in db_products:
@@ -2707,7 +2709,11 @@ class TimeseriesProducts:
                 # prod_dict['years'] = []
 
                 # does the product have mapsets?
+                # t1 = time.time()
+                # print 'before calling Product(): ' + str(t1)
                 p = Product(product_code=productcode, version=version)
+                # t2 = time.time()
+                # print 'after calling Product(): ' + str(t2-t1)
 
                 all_prod_mapsets = p.mapsets
                 if hasattr(all_prod_mapsets, "__len__") and all_prod_mapsets.__len__() > 0:
@@ -2720,19 +2726,20 @@ class TimeseriesProducts:
                             prod_dict['mapsetcode'] = mapset_record['mapsetcode']
                             prod_dict['mapset_name'] = mapset_record['descriptive_name']
 
-                            # t4 = time.time()
+                            # t3 = time.time()
+                            # print 'before getting dataset info: ' + str(t3)
 
                             dataset = p.get_dataset(mapset=mapset, sub_product_code=prod_dict['subproductcode'])
                             dataset.get_filenames()
                             all_present_product_dates = dataset.get_dates()
 
+                            # t4 = time.time()
+                            # tot_get_dataset = t4-t3
+                            # print 'after getting dataset info: ' + str(tot_get_dataset)
+
+
                             # t5 = time.time()
-                            # tot_get_dataset = t5-t4
-                            # totalget_dataset = totalget_dataset + tot_get_dataset
-                            # print 'get_dataset: ' + str(total)
-
-
-                            # t6 = time.time()
+                            # print 'before getting years: ' + str(t5)
 
                             distinctyears = []
                             for product_date in all_present_product_dates:
@@ -2746,14 +2753,16 @@ class TimeseriesProducts:
                                 products_dict_all.append(tmp_prod_dict)
                                 tmp_prod_dict = []
 
-                            # t7 = time.time()
-                            # total = t7-t6
-                            # print 'years: ' + str(total)
+                            # t6 = time.time()
+                            # total = t6-t5
+                            # print 'after getting years: ' + str(total)
 
                             timeseries_mapset_datasets = querydb.get_timeseries_subproducts(productcode=productcode,
                                                                                             version=version,
                                                                                             subproductcode=subproductcode)
-                            # t8 = time.time()
+                            # t7 = time.time()
+                            # print 'before getting subproduct info: ' + str(t7)
+
                             for subproduct in timeseries_mapset_datasets:
                                 if subproduct is not None:
 
@@ -2798,10 +2807,9 @@ class TimeseriesProducts:
                                         products_dict_all.append(tmp_prod_dict)
                                         tmp_prod_dict = []
 
-            #                 t9 = time.time()
-            #                 totals_subproduct = t9-t8
-            #         print 'totals subproduct: ' + str(totals_subproduct)
-            # print 'get_dataset: ' + str(totalget_dataset)
+                            # t8 = time.time()
+                            # totals_subproduct = t8-t7
+                            # print 'after getting subproduct info: ' + str(totals_subproduct)
 
             prod_json = json.dumps(products_dict_all,
                                    ensure_ascii=False,
@@ -2809,18 +2817,18 @@ class TimeseriesProducts:
                                    indent=4,
                                    separators=(', ', ': '))
 
-            datamanagement_json = '{"success":"true", "total":'\
+            timeseriesproducts_json = '{"success":"true", "total":'\
                                   + str(db_products.__len__())\
                                   + ',"products":'+prod_json+'}'
 
         else:
-            datamanagement_json = '{"success":false, "error":"No data sets defined!"}'
+            timeseriesproducts_json = '{"success":false, "error":"No data sets defined!"}'
 
-        # t1 = time.time()
-        # total = t1-t0
+        # t9 = time.time()
+        # total = t9-t0
         # print 'Total time: ' + str(total)
 
-        return datamanagement_json
+        return timeseriesproducts_json
 
 
 class __TimeseriesProductsTree:
@@ -3840,8 +3848,10 @@ class SaveDrawnVectorLayer:
         layerfiledir = es_constants.es2globals['estation2_layers_dir']
         if 'layerfilename' in getparams: # to check if the file-object is created
             try:
-                filepath=getparams.layerfilename.replace('\\','/') # replaces the windows-style slashes with linux ones.
-                filename=filepath.split('/')[-1] # splits the and chooses the last part (the filename with extension)
+                filename=getparams.layerfilename.replace('\\','/') # replaces the windows-style slashes with linux ones.
+                filename=filename.split('/')[-1] # splits the filepath and chooses the last part (the filename with extension)
+                filename = filename.replace(' ', '_')
+                filename += '.geojson'
 
                 # Separate base from extension
                 base, extension = os.path.splitext(filename)
@@ -3875,7 +3885,7 @@ class SaveDrawnVectorLayer:
             layerdrawprobs = {
                                 # 'layerid': getparams['layer']['layerid'],
                                 # 'layerlevel': getparams['layer']['layerlevel'],
-                                'layername': finalfilename,
+                                'layername': getparams.layerfilename,
                                 'description': '',
                                 'filename': finalfilename,
                                 'layerorderidx': 1,
@@ -4987,8 +4997,8 @@ class DataSets:
                                             kwargs = {'mapset': mapset,
                                                       'sub_product_code': subproductcode,
                                                       'from_date': from_date}
-                                        elif dataset_info.frequency_id == 'e1year':
-                                            dataset_dict['nodisplay'] = 'no_minutes_display'
+                                        # elif dataset_info.frequency_id == 'e1year':
+                                        #     dataset_dict['nodisplay'] = 'no_minutes_display'
 
                                         elif  dataset_info.frequency_id == 'e1day':
                                             today = datetime.date.today()

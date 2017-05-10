@@ -6,10 +6,12 @@ ALTER TABLE products.thema
   ADD COLUMN activated boolean DEFAULT FALSE::boolean;
 
 UPDATE products.thema set activated = FALSE;
--- UPDATE products.thema set activated = TRUE WHERE thema_id = themaid;
 -- READ themaid from /eStation2/settings/system_settings.ini
 -- systemsettings = functions.getSystemSettings()
--- themaid = systemsettings['thema']
+-- themaid = systemsettings['thema'];
+-- UPDATE products.thema set activated = TRUE WHERE thema_id = themaid;
+-- SELECT * FROM products.set_thema(themaid);
+
 
 CREATE OR REPLACE FUNCTION products.activate_deactivate_ingestion_pads_processing() RETURNS TRIGGER
     LANGUAGE plpgsql STRICT
