@@ -13,6 +13,7 @@ echo "Machine Name = ${uname}"
 # Check the dump file exists
 date_dump=$1
 dump_structure='/var/www/eStation2/database/dbInstall/products_dump_structure_only.sql'
+update_structure='/var/www/eStation2/database/dbInstall/update_db_structure.sql'
 dump_analysis=$(ls /eStation2/db_dump/estationdb_analysis_"${date_dump}"*.sql)
 dump_products=$(ls /eStation2/db_dump/estationdb_products_"${date_dump}"*.sql)
 
@@ -42,7 +43,10 @@ if [ "$(nc -v -z localhost 5432 > /dev/null 2>&1; echo $?)" = 0 ]; then
         echo "Re-build the schemas\' structure " 
 	psql -d estationdb -h localhost -p 5432 -U estation -f ${dump_structure}
 
-        echo "Restore Schema products" 
+        echo "Update the schemas\' structure "
+	psql -d estationdb -h localhost -p 5432 -U estation -f ${update_structure}
+
+        echo "Restore Schema products"
 	psql -d estationdb -h localhost -p 5432 -U estation -f ${dump_products}
 	
         echo "Restore Schema analysis" 
