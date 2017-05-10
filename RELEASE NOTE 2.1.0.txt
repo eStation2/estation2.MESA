@@ -9,10 +9,6 @@
 
 1.1 Acquisition
 
-- Add ingestion for ARC2-rain daily product - 0.1 degree - GZIP type
-- Add ingestion of CPC Soil Moisture monthly product - 0.5 degree - binary type (new pre-proc type)
-- Add the GLC 2.2 version for NDVI (SPOTV/PROBAV) in netcdf format.
-
 
 1.2 Processing
 
@@ -42,6 +38,11 @@
 2.1 Dashboard
 
 2.2 Acquisition/Processing/DataManagement
+
+- Add ingestion for ARC2-rain daily product - 0.1 degree - GZIP type
+- Add ingestion of CPC Soil Moisture monthly product - 0.5 degree - binary type (new pre-proc type)
+- Add the GLC 2.2 version for NDVI (SPOTV/PROBAV) in netcdf format.
+
 
 2.3 Visualization/Analysis
 
