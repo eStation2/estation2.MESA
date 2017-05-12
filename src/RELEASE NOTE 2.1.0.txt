@@ -1,0 +1,91 @@
+#
+#   Release Note for 2.1.0
+#   Changes with respect to 2.0.4-11 - Unless specification, they refer to Apps.rpm package.
+#   NOTE: the modifications done for 2.0.5 are also described here (2.0.5 was not officially released within MESA)
+#
+
+1. BUG FIXING
+-------------
+
+1.1 Acquisition
+
+- Activating a product did not activate the defined get/ingest/processing: correct it through a trigger in the DB.
+- Move the Add mapset to ingest icon to the right in a new column: it does make possible to add a mapset when no mapsets are
+  defined for a product (resolve through moving the icon in its own column).
+
+1.2 Processing
+
+- MODIS MON-AVG: Change the computation, so that it does not work on the current month (MOI request).
+- Issue with modis_par 4 km processing chain: two versions (2012.0 and 2013.1) existing in process_products table (MOI request)??
+- Primary Production computation not triggered (MOI request).
+- In the std_ndvi chain apply baresoil masks to ndv and ndvi-linearx2 anomalies (was missing)
+
+
+1.3 DataManagement
+
+- Made the rendering of dataset completeness chart more robust (sometimes it did not display properly).
+- Statistical derived subproducts (with date format MMDD) were shown as 34 files in completeness instead of 36 files.
+- Change the User Interface loop to avoid error of an existing product w/o any get/ingest/processing defined.
+- Harmonize the products naming/definition in products table
+- Data set completeness adjustment for frequency types e15minute, e30minute and e1day by passing a from_date.
+
+
+1.4 Visualization
+
+- Correct the display of the timeline to MMDD products (e.g. 10d average)
+- Replace the greenwich time-series computation with a direct gdal-python call (the greenwich used version does not support some polygons, nor points/lines)
+- Ensure the bar charts are equally distributed in the graphs of type 'Profile'
+
+1.5 Service
+
+1.6 Configuration/DB
+
+
+
+2. NEW FEATURES
+---------------
+
+2.0 General
+
+2.1 Dashboard
+
+2.2.1 Acquisition
+
+- Add the Copernicus Global Land (CGL) 2.2 version for NDVI (SPOTV/PROBAV) in netcdf format, and prepare for version 2.0.1
+  of LAI/FCOVE/FAPAR (not yet activated)
+- Add ingestion for ARC2-rain daily product - 0.1 degree - GZIP type
+- Add ingestion of CPC Soil Moisture monthly product - 0.5 degree - binary type (new pre-proc type)
+
+2.2.2 Processing
+
+- In the std_precip processing chain, add the 3/6/12 months cumulation and anomalies (for FEWSNET, TAMSAT, ....) and ratio
+- In the std_modis_irms (active fires) processing chain, add the grid-computation (10k FTTB)
+- In the std_ndvi chain a sub-product is added (ratio-linearx2)
+- Modify cumulation period of the msg-mpe product from 6:00 AM to 5:45 AM of the next day (BDMS request, to match gauge meas).
+
+2.2.3 DataManagement
+
+2.3.1 Visualization/General
+
+- Implement the User login (to allow saving of the analysis 'templates')
+- Save.restore the Analysis templates (for Maps only - FTTB)
+
+2.3.2 Visualization/Maps
+
+- Add the option to draw and save polygons, lines and points (for computing TS)
+- Add the animation of the selected time period ('movie' option)
+- Add for the User the option to 'fine-tuning' the zoom level
+- Add the possibility to define all Maps graphical properties (to be saved in the template), e.g. size/position, title, disclaimer.
+- Improve visualization of the logos
+- Add a data disclaimer
+
+2.3.3 Visualization/Graphs
+
+- Add the 'Cumulative', 'Ranking/Z-score' and 'Matrix' types of graphs (on top of the existing one, renamed 'Profile')
+- Organize the subproduct list, under each product, according to the time lag category (1d, 10d, 1 month, ...) so to facilitate the User selection
+
+2.4 Configuration/DB
+
+2.5 Other packages
+
+- Integration of the 'Geoportal' module into eStation2-Apps.
