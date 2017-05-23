@@ -67,6 +67,15 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
         //if (Ext.isObject(Ext.getCmp('radio-year')) &&  Ext.getCmp('radio-year').getValue() && me.yearTS != '') {
         if (me.yearTS != '') {
             me.timeseriesChart.subtitle = me.yearTS;
+            if ( me.tsFromSeason != null && me.tsToSeason != null){
+                if (parseInt(Ext.Date.format(me.tsFromSeason, 'm')) > parseInt(Ext.Date.format(me.tsToSeason, 'm'))) {
+                    me.timeseriesChart.subtitle = esapp.Utils.getTranslation('from') + ' ' + me.timeseriesChart.subtitle + '/' + Ext.Date.format(me.tsFromSeason, 'm/d') + '  ' + esapp.Utils.getTranslation('to') + ' ' + (parseInt(me.timeseriesChart.subtitle)+1) + '/' + Ext.Date.format(me.tsToSeason, 'm/d');
+                }
+                else {
+                    // me.timeseriesChart.subtitle = esapp.Utils.getTranslation('season') + ' ' +  Ext.Date.format(me.tsFromSeason, 'm/d') + ' - ' + Ext.Date.format(me.tsToSeason, 'm/d') + ' ' + esapp.Utils.getTranslation('of') + ' ' + me.timeseriesChart.subtitle;
+                    me.timeseriesChart.subtitle = esapp.Utils.getTranslation('from') + ' ' + me.timeseriesChart.subtitle + '/' + Ext.Date.format(me.tsFromSeason, 'm/d') + '  ' + esapp.Utils.getTranslation('to') + ' ' + me.timeseriesChart.subtitle + '/' + Ext.Date.format(me.tsToSeason, 'm/d');
+                }
+            }
         }
         //else if (Ext.getCmp('radio-compareyears').getValue() && me.yearsToCompare != '') {
         else if (me.yearsToCompare != '') {
@@ -76,19 +85,25 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                     me.timeseriesChart.subtitle = year;
                 })
                 if ( me.tsFromSeason != null && me.tsToSeason != null){
-                    me.timeseriesChart.subtitle = esapp.Utils.getTranslation('season') + ' ' +  Ext.Date.format(me.tsFromSeason, 'm/d') + ' - ' + Ext.Date.format(me.tsToSeason, 'm/d') + ' ' + esapp.Utils.getTranslation('of') + ' ' + me.timeseriesChart.subtitle;
+                    if (parseInt(Ext.Date.format(me.tsFromSeason, 'm')) > parseInt(Ext.Date.format(me.tsToSeason, 'm'))) {
+                        me.timeseriesChart.subtitle = esapp.Utils.getTranslation('from') + ' ' + me.timeseriesChart.subtitle + '/' + Ext.Date.format(me.tsFromSeason, 'm/d') + '  ' + esapp.Utils.getTranslation('to') + ' ' + (parseInt(me.timeseriesChart.subtitle)+1) + '/' + Ext.Date.format(me.tsToSeason, 'm/d');
+                    }
+                    else {
+                        // me.timeseriesChart.subtitle = esapp.Utils.getTranslation('season') + ' ' +  Ext.Date.format(me.tsFromSeason, 'm/d') + ' - ' + Ext.Date.format(me.tsToSeason, 'm/d') + ' ' + esapp.Utils.getTranslation('of') + ' ' + me.timeseriesChart.subtitle;
+                        me.timeseriesChart.subtitle = esapp.Utils.getTranslation('from') + ' ' + me.timeseriesChart.subtitle + '/' + Ext.Date.format(me.tsFromSeason, 'm/d') + '  ' + esapp.Utils.getTranslation('to') + ' ' + me.timeseriesChart.subtitle + '/' + Ext.Date.format(me.tsToSeason, 'm/d');
+                    }
+                }
+            }
+            else {
+                if ( me.tsFromSeason != null && me.tsToSeason != null){
+                    me.timeseriesChart.subtitle = esapp.Utils.getTranslation('from') + ' ' + Ext.Date.format(me.tsFromSeason, 'm/d') + '  ' + esapp.Utils.getTranslation('to') + ' ' +  Ext.Date.format(me.tsToSeason, 'm/d');
                 }
             }
         }
         //else if ( Ext.getCmp('radio-fromto').getValue() ){
         else if ( me.tsFromPeriod != '' && me.tsToPeriod != ''){
-
             me.timeseriesChart.subtitle = esapp.Utils.getTranslation('from') + ' ' + Ext.Date.format(me.tsFromPeriod, 'Y-m-d') + '  ' + esapp.Utils.getTranslation('to') + ' ' + Ext.Date.format(me.tsToPeriod, 'Y-m-d');
         }
-        else if ( me.tsFromSeason != null && me.tsToSeason != null){
-            me.timeseriesChart.subtitle = esapp.Utils.getTranslation('season') + ' ' +  Ext.Date.format(me.tsFromSeason, 'm/d') + ' - ' + Ext.Date.format(me.tsToSeason, 'm/d');
-        }
-
 
         me.timeseriesChart.filename = me.timeseriesChart.title + '_' + me.timeseriesChart.subtitle.toString().replace(' ', '_');
 
@@ -413,6 +428,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
 
         var Yaxes = [];
         var timeseries_names = '';
+        var gridLineWidth = 1;
         for (var yaxescount = 0; yaxescount < me.timeseriesGraph.yaxes.length; yaxescount++) {
             var opposite = false;
             if (me.timeseriesGraph.yaxes[yaxescount].opposite === 'true' ||
@@ -467,10 +483,14 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             //    me.timeseriesGraph.yaxes[yaxescount].title_color = titlecolor;
             //}
 
+            gridLineWidth = 1;
+            if (opposite) {
+                gridLineWidth = 0;
+            }
             var yaxe = {
                 id: me.timeseriesGraph.yaxes[yaxescount].id,
                 //tickAmount: 8,
-                gridLineWidth: 1,
+                gridLineWidth: gridLineWidth,
                 offset: 10,
                 labels: {
                     format: '{value} ',

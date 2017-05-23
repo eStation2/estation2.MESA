@@ -44,7 +44,7 @@ Ext.define("esapp.view.analysis.mapScaleLineObject",{
     padding: 0,
 
     scaleline_ImageObj: new Image(),
-    scalelinePosition: [615,660],
+    scalelinePosition: [217,611],
     config: {
         html: '',
         mapView: null
@@ -55,7 +55,7 @@ Ext.define("esapp.view.analysis.mapScaleLineObject",{
     initComponent: function () {
         var me = this;
         me.scaleline_ImageObj = new Image();
-        me.scalelinePosition = [615,660];
+        me.scalelinePosition = [217,611];
 
         me.listeners = {
             el: {
@@ -75,12 +75,15 @@ Ext.define("esapp.view.analysis.mapScaleLineObject",{
             },
             refreshimage: function(){
                 if(!me.hidden) {
-                    html2canvas(me.getEl().dom, {
-                        //width: me.getWidth(),
-                        onrendered: function (canvas) {
-                            me.scaleline_ImageObj.src = canvas.toDataURL("image/png");
-                        }
+                    var task = new Ext.util.DelayedTask(function() {
+                        html2canvas(me.getEl().dom, {
+                            //width: me.getWidth(),
+                            onrendered: function (canvas) {
+                                me.scaleline_ImageObj.src = canvas.toDataURL("image/png");
+                            }
+                        });
                     });
+                    task.delay(350);
                 }
             },
             show: function(){

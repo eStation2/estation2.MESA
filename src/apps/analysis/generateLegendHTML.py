@@ -54,24 +54,24 @@ def generateLegendHTML(legend_id):
     ######################################
 
     if TotSteps >= 25:
-        fontSizeLabels = 22
-        fontSizeTitle = 22
+        fontSizeLabels = 20
+        fontSizeTitle = 20
         # stepWidth = 28
-        legendWidth = 800
+        legendWidth = 775
         legendTableBegin = '<table style="border-spacing:0px; background:white; padding: 5px 35px 5px 5px;"> '
-        legendHeader = '<tr><td colspan='+str(TotSteps)+' style="background:white; padding: 0px 5px 5px 0px; font-size:' + str(fontSizeTitle) + 'px;"><b>' + legendName + '</b></td></tr>'
+        legendHeader = '<tr><td colspan='+str(TotSteps)+' style="background:white; padding: 0px 5px 5px 0px; font-size:' + str(fontSizeTitle) + 'px;">' + legendName + '</td></tr>'
 
         if TotColorLabels > 0:
             ColumnSpan = math.ceil(TotSteps / float(TotColorLabels))
         else:
             ColumnSpan = 1
 
-        if TotSteps > 5:
+        if TotSteps > 60:
             stepWidth = legendWidth / TotSteps
         else:
             stepWidth = 50
 
-        if stepWidth < 3:
+        if stepWidth < 4:
             stepWidth = 1
 
         legendColors = '<tr>'
@@ -88,8 +88,7 @@ def generateLegendHTML(legend_id):
             if TotSteps <= 30:
                 border = "border:1px solid black; "
 
-            legendColors = legendColors + '<td width=' + str(
-                stepWidth) + 'px; height=15px; style="' + border + ' background-color: ' + color_html + '"></td>'
+            legendColors = legendColors + '<td width=' + str(stepWidth) + 'px; height=15px; style="' + border + ' background-color: ' + color_html + '"></td>'
         legendColors += '</tr>'
 
         legendColorLabels = '<tr>'
@@ -122,7 +121,7 @@ def generateLegendHTML(legend_id):
         legendHTMLHorizontal = legendTableBegin + legendHeader + legendColors + legendColorLabels + legendTableEnd
     else:
         mainTable = '<table style="background: white; border:0px solid black; border-spacing:0px; border-padding:0px; cellspacing:0px; cellpadding:0px; margin: 0px; padding: 10px; ">'
-        mainTable += '<tr><td colspan=1 style="font-size:22px; line-height:24px !important;"><b>' + legendName + '</b></td></tr>'   # line-height:26px;
+        mainTable += '<tr><td colspan=1 style="font-size:22px; line-height:24px !important;">' + legendName + '</td></tr>'   # line-height:26px;
         mainTable += '<tr><td>'
         mainTable += '<table class="table table-striped table-header-rotated">'
         mainTableBody = '<tbody>'
@@ -176,18 +175,18 @@ def generateLegendHTML(legend_id):
     # Create vertical legend
     ######################################
     if TotSteps >= 25:
-        fontSizeLabels = 22
-        fontSizeTitle = 22
+        fontSizeLabels = 20
+        fontSizeTitle = 20
         stepWidth = 28
         stepHeight = 1
         if TotSteps <= 60:
-            stepHeight = 7
+            stepHeight = 3
         elif TotSteps <= 115:
-            stepHeight = 5
+            stepHeight = 2
 
         mainTableBegin = '<table style="border-spacing:0px; background:white; padding:0;"> '
         mainTableEnd = '</table>'
-        legendHeaderRow = '<tr><td style="background:white; padding: 5px; font-size:' + str(fontSizeTitle) + 'px;"><b>' + legendName + '</b></td></tr>'
+        legendHeaderRow = '<tr><td style="background:white; padding: 5px; font-size:' + str(fontSizeTitle) + 'px;">' + legendName + '</td></tr>'
         legendTableBegin = '<table style="border-spacing:0px; background:white; padding: 5px 5px 15px 10px;"> '
         legendTableEnd = '</table>'
 
@@ -233,21 +232,21 @@ def generateLegendHTML(legend_id):
 
     else:
         mainTableBackgroundColor = 'transparent'
-        fontSizeHeader = 22
-        fontSizeLabels = 22
+        fontSizeHeader = 20
+        fontSizeLabels = 20
         firstColumnWidth = 35
         legendColorTableBackgroundColor = 'white'
         legendLabelTableBackgroundColor = 'white'
         extraFirstRowHeight = 14
         absoluteMaxRowColorTableHeight = 18
         colorColumnWidth = 35
-        colorColumnHeight = 32
+        colorColumnHeight = 26
         tickColumnWidth = 8
-        tickColumnHeight = 32
-        labelColumnHeight = 32
+        tickColumnHeight = 26
+        labelColumnHeight = 26
 
         mainTableBegin = '<table style="background: ' + mainTableBackgroundColor + '; border:0px solid black; border-spacing:0px; border-padding:0px; cellspacing=0px; cellpadding=0px; margin: 3px; padding: 0px; ">'
-        legendHeaderRow = '<tr><td colspan=2 style="background: white; padding:3px;"><b style=" font-size:' + str(fontSizeHeader) + 'px;">' + legendName + '</b></td></tr>'     # line-height: 24px;
+        legendHeaderRow = '<tr><td colspan=2 style="background: white; padding:3px;"><span style=" font-size:' + str(fontSizeHeader) + 'px;">' + legendName + '</span></td></tr>'     # line-height: 24px;
         legendRowBegin = '<tr>'
         firstColumnBegin = '<td width=' + str(firstColumnWidth) + 'px; style="border:0px solid black; border-spacing:0px; border-padding:0px; cellspacing=0px; cellpadding=0px; margin: 0px; padding: 0px;">'
         secondColumnBegin = '<td valign="top" align="left" style="border:0px solid black; border-spacing:0px; border-padding:0px; cellspacing=0px; cellpadding=0px; margin: 0px; padding: 0px;" >'

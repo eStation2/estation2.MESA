@@ -45,7 +45,7 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
     padding: 3,
     html: '',
     logos_ImageObj: new Image(),
-    logoPosition: [3, 610],
+    logoPosition: [434, 583],
     changesmade: true,
     config: {
         logoData: null
@@ -67,7 +67,7 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
         var me = this;
 
         me.logos_ImageObj = new Image();
-        me.logoPosition = [3, 610];
+        me.logoPosition = [434, 583];
 
         me.listeners = {
             //element  : 'el',
@@ -144,7 +144,7 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                 '<tpl for=".">',
                     '<span style="vertical-align: middle;"></span>',
                     // '<img src="{src}" width="{width}" height="{height}" style="padding: 0px 5px 0px 0px;"/>',
-                    '<img src="{src}" height="70" style="vertical-align: middle; padding: 0px 5px 0px 0px;"/>',
+                    '<img src="{src}" height="50" style="vertical-align: middle; padding: 0px 5px 0px 0px;"/>',
                 '</tpl>',
                 '</div>'
             )

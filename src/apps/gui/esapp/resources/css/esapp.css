@@ -42,7 +42,8 @@
   position: relative;
   vertical-align: bottom;
   padding: 0;
-  font-size: 22px;
+  font-size: 20px;
+  font-weight: normal;
   /*line-height: 0.8;*/
 }
 
