@@ -542,11 +542,11 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
             var pattern = /(\d{4})(\d{2})(\d{2})/;
             //me.productdate = clickeddate.replace(pattern,'$3-$2-$1');
-            var productdateHTML = ' - <b class="" style="color: mediumspringgreen;">' + me.productdate.replace(pattern,'$3-$2-$1') + '</b>';
+            var productdateHTML = ' - <b class="" style="color: mediumspringgreen; font-size: 20px;">' + me.productdate.replace(pattern,'$3-$2-$1') + '</b>';
             if (me.date_format == 'MMDD') {
                 var mydate = new Date(me.productdate.replace(pattern,'$2/$3/$1'));
                 mydate.setHours(mydate.getHours()+5);   // add some hours so otherwise Highcharts.dateFormat assigns a day before if the hour is 00:00.
-                productdateHTML = ' - <b class="" style="color: mediumspringgreen;">' + Highcharts.dateFormat('%d %b', mydate, true) + '</b>';
+                productdateHTML = ' - <b class="" style="color: mediumspringgreen; font-size: 20px;">' + Highcharts.dateFormat('%d %b', mydate, true) + '</b>';
             }
             //var mapviewTitle = me.productname + versiontitle + ' - <b class="smalltext">' + me.productdate + '</b>';
             var mapviewTitle = me.productname + versiontitle + mapsetcodeHTML + productdateHTML;
