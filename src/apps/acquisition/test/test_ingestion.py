@@ -1155,15 +1155,15 @@ class TestIngestion(unittest.TestCase):
         # Similar to the test above, but specific to the products made available for Long Term Statistics by T. Jacobs
         # Products released from VITO in March 2017
 
-        # date_fileslist = glob.glob('/data/TestIngestion/c_gls_NDVI_2017*_GLOBE_PROBAV_V2.2.1.nc')
-        date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_19*_GLOBE_VGT_V2.2.1.nc')
+        date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_201703*_GLOBE_PROBAV_V2.2.1.nc')
+        # date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_19*_GLOBE_VGT_V2.2.1.nc')
 
         for one_file in date_fileslist:
 
             one_filename = os.path.basename(one_file)
             in_date = one_filename.split('_')[3]
             productcode = 'vgt-ndvi'
-            productversion = 'spot-v2.2'
+            productversion = 'proba-v2.2'
             subproductcode = 'ndv'
             mapsetcode = 'SPOTV-Africa-1km'
             datasource_descrID='PDF:GLS:PROBA-V2.2:NDVI'
