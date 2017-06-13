@@ -45,17 +45,17 @@ Ext.define("esapp.view.analysis.mapDisclaimerObject",{
     margin: 0,
     padding: 3,
     disclaimer_ImageObj: new Image(),
-    disclaimerPosition: [3,580],
+    disclaimerPosition: [0,611],
     changesmade: true,
     config: {
         // html: '',
-        content: ''
+        content: '&nbsp;'
     },
 
     initComponent: function () {
         var me = this;
         me.disclaimer_ImageObj = new Image();
-        me.disclaimerPosition = [3,580];
+        me.disclaimerPosition = [0,611];
 
         //me.defaultContent = '<font size="1">​Geographical map, WGS 84 - Resolution 5km</font><div><font size="1">Sources: 1) Image NDVI &nbsp;2) Vectors FAO GAUL 2015</font></div>';
         //me.html = me.defaultContent;

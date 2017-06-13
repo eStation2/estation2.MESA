@@ -1,7 +1,7 @@
 Summary: eStation 2.0 application from JRC
 Name: eStation2-Apps
-Version: 2.0.5
-Release: 5
+Version: 2.1.0
+Release: 2
 Group: eStation
 License: GPL
 Source: /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz
@@ -16,10 +16,10 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 
 %prep
 # Sync the git repository from github
-cd /home/adminuser/eStation2.git
-git pull origin main
+cd /home/adminuser/eStation2.git			# -> TEMP: locally unzippped manually
+git pull origin main		  			# -> TEMP: locally unzippped manually
 # Create the .tgz
-cd src
+# cd /home/adminuser/estation2.MESA-main/src
 tar -cvzf /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz *
 
 # Prepare the files in BUILD_ROOT
@@ -51,8 +51,9 @@ exec 2>/var/log/eStation2/%{name}-%{version}-preinst.err
 
 # Stop the eStation Services (for upgrade)
 echo "`date +'%Y-%m-%d %H:%M '` Stopping all services"
+if [[ -d /var/www/eStation2 ]]; then 
 /etc/init.d/tas_all_servicesd stop
-
+fi
 # En preinst pas de script externe inclus dans le RPM car pas encore decompressé
 # Ajout du compte analyst
 echo "`date +'%Y-%m-%d %H:%M '` Checking/creating analyst User"
@@ -137,19 +138,25 @@ chmod -R 755 /home/adminuser/Desktop
 chown -R analyst:analyst /home/analyst/*
 chmod -R 755 /home/analyst/Desktop
 
-# Change permissions of the Layers dir (2.0.4)
-echo "`date +'%Y-%m-%d %H:%M '` Change permissions of /eStation2/layers to 775"
-chmod 775 -R /eStation2/layers
-
-# Change settings of apache for layer size (2.0.4)
-echo "`date +'%Y-%m-%d %H:%M '` Change apache config LimitRequestBody to 300Mb"
-apache_config='/usr/local/src/tas/eStation_wsgi_srv/httpd.conf'
-sed -i "s|.*LimitRequestBody.*|LimitRequestBody 314572800|" ${apache_config}
+# Change permissions of the Layers dir (2.0.4) -> it is done in layers-2.0.4
+#echo "`date +'%Y-%m-%d %H:%M '` Change permissions of /eStation2/layers to 775"
+#chmod 775 -R /eStation2/layers
 
 # Creation of the symlink on the /var/www/eStation2-%{version}
 echo "`date +'%Y-%m-%d %H:%M '` Create sym link /var/www/eStation2-%{version}"
+is_an_upgrade=0
+if [[ -d /var/www/eStation2 ]]; then 
 rm /var/www/eStation2
+is_an_upgrade=1
+fi
 ln -fs /var/www/eStation2-%{version} /var/www/eStation2
+
+# Change settings of apache for layer size (2.0.4)
+if [[ ${is_an_upgrade} == 1 ]]; then
+echo "`date +'%Y-%m-%d %H:%M '` Change apache config LimitRequestBody to 300Mb"
+apache_config='/usr/local/src/tas/eStation_wsgi_srv/httpd.conf'
+sed -i "s|.*LimitRequestBody.*|LimitRequestBody 314572800|" ${apache_config}
+fi
 
 # Restart postgresql 
 echo "`date +'%Y-%m-%d %H:%M '` Restart postgresql-9.3"
@@ -196,7 +203,7 @@ EOF
     fi
     # Update database structure to current release
     echo "`date +'%Y-%m-%d %H:%M '` Update database structure" 
-    psql -h localhost -U estation -d estationdb -f /var/www/eStation2/database/dbInstall/update_db_structure.sql >/dev/null 2>&1
+    psql -h localhost -U estation -d estationdb -f /var/www/eStation2/database/dbInstall/update_db_structure.sql >/var/log/eStation2/%{name}-%{version}-update_db_structure.log 2>/var/log/eStation2/%{name}-%{version}-update_db_structure.err
 
     # Activate the User THEMA in the thema table (since 2.1.0)
     thema=`grep -i thema /eStation2/settings/system_settings.ini | sed 's/thema =//'| sed 's/ //g'`
@@ -206,7 +213,7 @@ EOF
 
     # Update Tables (both for upgrade and installation from scratch)
     echo "`date +'%Y-%m-%d %H:%M '` Populate/update tables" 
-    psql -h localhost -U estation -d estationdb -f /var/www/eStation2/database/dbInstall/update_insert_jrc_data.sql > /dev/null 2>&1
+    psql -h localhost -U estation -d estationdb -f /var/www/eStation2/database/dbInstall/update_insert_jrc_data.sql >/var/log/eStation2/%{name}-%{version}-update_insert_jrc_data.log 2>/var/log/eStation2/%{name}-%{version}-update_insert_jrc_data.err
 
 else
     echo "`date +'%Y-%m-%d %H:%M '` Postgresql is NOT running: DB not created !" 
@@ -288,7 +295,9 @@ sed -i "s|.*active_version.=.*|active_version = %{version}|" /eStation2/settings
 
 # Start the eStation Services 
 echo "`date +'%Y-%m-%d %H:%M '` Starting all services"
+if [[ ${is_an_upgrade} == 1 ]]; then
 /etc/init.d/tas_all_servicesd start
+fi
 
 # Before uninstall: remove the link and copy all code into a bck dir
 %preun

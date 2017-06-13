@@ -1506,7 +1506,7 @@ BEGIN
 
 
 
-	RETURN QUERY SELECT 'SELECT analysis.update_insert_layers('
+	RETURN QUERY SELECT 'PERFORM analysis.update_insert_layers('
 		|| ' layerid := ' || layerid
 		|| ', layerlevel := ' || COALESCE('''' || layerlevel || '''', 'NULL')
 		|| ', layername := ' || COALESCE('''' || layername || '''', 'NULL')
@@ -1536,7 +1536,9 @@ BEGIN
 		|| ', provider := ' || COALESCE('''' || provider || '''', 'NULL')
 		|| ', full_copy := ' || _full_copy
 		|| ' );'  as inserts
-	FROM analysis.layers;
+	FROM analysis.layers
+	WHERE layerid < 100
+	ORDER BY layerid;
 
 
 
@@ -1976,7 +1978,7 @@ BEGIN
 
 
 
-	RETURN QUERY SELECT 'SELECT analysis.update_insert_layers('
+	RETURN QUERY SELECT 'PERFORM analysis.update_insert_layers('
 		|| ' layerid := ' || layerid
 		|| ', layerlevel := ' || COALESCE('''' || layerlevel || '''', 'NULL')
 		|| ', layername := ' || COALESCE('''' || layername || '''', 'NULL')
@@ -2006,7 +2008,9 @@ BEGIN
 		|| ', provider := ' || COALESCE('''' || provider || '''', 'NULL')
 		|| ', full_copy := ' || _full_copy
 		|| ' );'  as inserts
-	FROM analysis.layers;
+	FROM analysis.layers
+	WHERE layerid < 100
+	ORDER BY layerid;
 
 
 

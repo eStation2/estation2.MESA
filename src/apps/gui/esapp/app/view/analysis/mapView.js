@@ -39,7 +39,7 @@ Ext.define("esapp.view.analysis.mapView",{
     resizable: true,
 
     width:800,
-    height: Ext.getBody().getViewSize().height < 900 ? Ext.getBody().getViewSize().height-80 : 900,
+    height: Ext.getBody().getViewSize().height < 850 ? Ext.getBody().getViewSize().height-80 : 850,
 
     minWidth:630,
     minHeight:550,
@@ -86,7 +86,7 @@ Ext.define("esapp.view.analysis.mapView",{
         me.selectedFeatureFromDrawLayer = false;
 
         me.title = '<span id="mapview_title_templatename_' + me.id + '" class="map-templatename"></span><span id="mapview_title_productname_' + me.id + '"></span>';
-        me.height = Ext.getBody().getViewSize().height < 900 ? Ext.getBody().getViewSize().height-80 : 900;
+        me.height = Ext.getBody().getViewSize().height < 850 ? Ext.getBody().getViewSize().height-80 : 850;
 
         me.controller.createToolBar();
 

@@ -224,6 +224,7 @@ Ext.define('esapp.Application', {
             Ext.data.StoreManager.lookup('LayersStore').load();
             Ext.data.StoreManager.lookup('ColorSchemesStore').load();
             Ext.data.StoreManager.lookup('SystemSettingsStore').load();
+            Ext.data.StoreManager.lookup('DataSetsStore').load();
         }
         else {
             // Ext.data.StoreManager.lookup('CategoriesStore').load();
@@ -236,6 +237,7 @@ Ext.define('esapp.Application', {
             Ext.data.StoreManager.lookup('LayersStore').load();
             Ext.data.StoreManager.lookup('ColorSchemesStore').load();
             Ext.data.StoreManager.lookup('SystemSettingsStore').load();
+            Ext.data.StoreManager.lookup('DataSetsStore').load();
 
             if (esapp.globals['role'] == 'pc2') {
                 // Ext.data.StoreManager.lookup('EumetcastSourceStore').load();

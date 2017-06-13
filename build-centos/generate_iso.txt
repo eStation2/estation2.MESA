@@ -1,0 +1,21 @@
+#
+#   Instructions to generate a new ISO - after modifying eStation 2.0 rpms.
+#
+
+cd /home/adminuser/iso_1.0.4/ 					# Working Dir
+
+# Update the relevant files (namely eStation2 .rpms)
+
+cp /rpm/rpmbuild/RPMS/x86_64/eStation2-Apps-2.0.4-12.x86_64.rpm Packages/JRC/estation/				# as an example
+
+# Update the repodata
+
+rm repodata/*-comps.xml.gz					# Remove the hashed groups .xml.gz
+mv repodata/*-comps.xml repodata/comps.xml			# Rename the hashed groups .xml (to avoid double-hashed)
+
+createrepo --update ./						# Update the .xml and sqlite 
+createrepo -g ./repodata/comps.xml .				# Update the 'groups' package
+
+# Create the ISO
+
+mkisofs -D -o /home/adminuser/mesa_1.0.4.iso  -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -J -R -V "CentOS MESA 1.0.4" .

@@ -293,7 +293,8 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
     mapset_info = querydb.get_mapset(mapsetcode=mapsetcode)
 
     # Compute pixel area by converting degree to km
-    pixelArea = abs(mapset_info.pixel_shift_lat)*abs(mapset_info.pixel_shift_lat)*12544.0
+    # pixelArea = abs(mapset_info.pixel_shift_lat)*abs(mapset_info.pixel_shift_lat)*12544.0
+    pixelArea = abs(mapset_info.pixel_shift_lat) * abs(mapset_info.pixel_shift_long) * 12544.0
 
     # Get Product Info
     product_info = querydb.get_product_out_info(productcode=productcode,

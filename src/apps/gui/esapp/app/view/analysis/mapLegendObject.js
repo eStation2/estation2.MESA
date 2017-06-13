@@ -52,7 +52,7 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
     //},
     legendHTML_ImageObj: new Image(),
     legendLayout: 'vertical',
-    legendPosition: [5, 67],
+    legendPosition: [0, 95],
     showlegend: true,
 
     config: {
@@ -64,7 +64,7 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
         //Ext.util.Observable.capture(me, function(e){console.log('maplegendobject - ' + me.id + ': ' + e);});
 
         me.legendHTML_ImageObj = new Image();
-        me.legendPosition = [5, 67];
+        me.legendPosition = [0, 95];
 
         me.listeners = {
             el: {

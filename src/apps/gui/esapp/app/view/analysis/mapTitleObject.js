@@ -47,12 +47,13 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
     padding: 3,
     html: '',
     title_ImageObj: new Image(),
-    titlePosition: [3,3],
+    titlePosition: [0,0],
     changesmade: false,
 
     config: {
         tpl: [
-            '<div><b style="color:rgb(0,0,0);"><font size="3">{selected_area}</font></b></div><div><b style="color:rgb(0,0,0);"><font size="3">{product_name}</font></b></div><div><b style="color:rgb(51,102,255);"><font size="3">{product_date}</font></b></div>'
+            // '<div><b style="color:rgb(0,0,0);"><font size="3">{selected_area}</font></b></div><div><b style="color:rgb(0,0,0);"><font size="3">{product_name}</font></b></div><div><b style="color:rgb(51,102,255);"><font size="3">{product_date}</font></b></div>'
+            '<div><span style="color:rgb(0,0,0); font-size: 20px; font-weight: bold;">{selected_area}</span></div><div><span style="color:rgb(0,0,0); font-size: 20px;">{product_name}</span></div><div><span style="color:rgb(51,102,255); font-size: 20px;">{product_date}</span></div>'
         ],
         titleData: null
     },
@@ -73,7 +74,7 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
         // me.height = 'auto';
         me.layout = 'fit';
         me.title_ImageObj = new Image();
-        me.titlePosition = [3,3];
+        me.titlePosition = [0,0];
 
         //me.defaultTpl = '<font size="3" style="color: rgb(0, 0, 0);"><b>{selected_area} - {product_name}&nbsp;</b></font><div><font size="3"><b>Decade of <font color="#3366ff">{product_date}</font></b></font></div>';
         //me.tpl = me.defaultTpl;
