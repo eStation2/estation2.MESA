@@ -62,6 +62,7 @@
 - In the std_modis_irms (active fires) processing chain, add the grid-computation (10k FTTB)
 - In the std_ndvi chain a sub-product is added (ratio-linearx2)
 - Modify cumulation period of the msg-mpe product from 6:00 AM to 5:45 AM of the next day (BDMS request, to match gauge meas).
+- Modify the MSG-MPE processing chain in order to delete the tmp dir (and call 1dcum only for n_files >86). Furthermore, a unique logfile is used.
 
 2.2.3 DataManagement
 

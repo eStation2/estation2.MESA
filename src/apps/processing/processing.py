@@ -220,10 +220,10 @@ def loop_processing(dry_run=False, serialize=False):
 
                     # Do NOT detach process (work in series)
                     else:
+                        logger.info("Work in series - do not detach process")
                         results_queue = Queue()
                         proc_lists = proc_func(results_queue, **args)
                         os.remove(processing_unique_lock)
-
                         time.sleep(float(sleep_time))
                 else:
                     logger.debug("Lock already exist: %s" % processing_unique_id)

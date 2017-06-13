@@ -29,13 +29,14 @@ import datetime
 #   General definitions for this processing chain
 ext=es_constants.ES2_OUTFILE_EXTENSION
 
-def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version, starting_dates=None, proc_lists=None, day_time=None):
+def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version, starting_dates=None, proc_lists=None, day_time=None, logger=None):
 
     # Test flag (to save non-projected cumulated products)
     test_mode = False
 
     # Create Logger
-    logger = log.my_logger('msg-mpe.log')
+    # logger.fatal('Version 13.06.2017 !!!!!!!!!!!!!!!!!!!!!!!!!!')
+
     #   ---------------------------------------------------------------------
     #   Create lists
     if proc_lists is None:
@@ -48,20 +49,11 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
     es2_data_dir = es_constants.es2globals['processing_dir']+os.path.sep
 
     #   ---------------------------------------------------------------------
-    #   Define input files ('lst' subproduct)
+    #   Define input files ('mpe' subproduct)
     in_prod_ident = functions.set_path_filename_no_date(prod, starting_sprod, native_mapset, version, ext)
 
     input_dir = es2_data_dir+ \
                 functions.set_path_sub_directory(prod, starting_sprod, 'Ingest', version, native_mapset)
-
-    if starting_dates is not None:
-        starting_files = []
-        for my_date in starting_dates:
-            starting_files.append(input_dir+my_date+in_prod_ident)
-    else:
-        starting_files=input_dir+"*"+in_prod_ident
-
-    logger.info("starting_files %s" % starting_files)
 
     # ----------------------------------------------------------------------------------------------------------------
     # 1dcum
@@ -82,7 +74,16 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
     def generate_parameters_1dcum():
 
         #   Look for all input files in input_dir, and sort them
-        input_files = glob.glob(starting_files)
+        if starting_dates is not None:
+            input_files = []
+            for my_date in starting_dates:
+                input_files.append(input_dir+my_date+in_prod_ident)
+        else:
+            starting_files=input_dir+"*"+in_prod_ident
+            input_files = glob.glob(starting_files)
+
+        logger.debug("starting_files %s" % input_files)
+
         day_list = []
 
         # Create unique list of all dekads (as 'Julian' number)
@@ -120,37 +121,38 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
 
                 output_file=es_constants.processing_dir+output_subdir_1dcum+os.path.sep+str((int(myday))*10000+int(day_time))+out_prod_ident_1dcum
                 file_list = sorted(file_list)
-                yield (file_list, output_file)
+                # Check here the number of missing files (for optimization)
+                if len(file_list) > 86:
+                    yield (file_list, output_file)
 #
     @active_if(activate_1dcum_comput)
     @files(generate_parameters_1dcum)
     def msg_mpe_1dcum(input_file, output_file):
 #
-        if len(input_file) > 86:
-            output_file = functions.list_to_element(output_file)
-            functions.check_output_dir(os.path.dirname(output_file))
+        output_file = functions.list_to_element(output_file)
+        functions.check_output_dir(os.path.dirname(output_file))
 
-            tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='',dir=es_constants.base_tmp_dir)
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='',dir=es_constants.base_tmp_dir)
 
-            tmp_output_file = tmpdir+os.path.sep+os.path.basename(output_file)
-            logger.fatal(tmp_output_file)
-            # Divide by 10 to pass from 0.01 to 0.1 as scale factor for 1d cum
-            factor = 0.1
-            args = {"input_file": input_file, "output_file": tmp_output_file, "output_format": 'GTIFF',
-                    "options": "compress=lzw", "scale_factor": factor, "input_nodata":-32768}
+        tmp_output_file = tmpdir+os.path.sep+os.path.basename(output_file)
+        # Divide by 10 to pass from 0.01 to 0.1 as scale factor for 1d cum
+        factor = 0.1
+        args = {"input_file": input_file, "output_file": tmp_output_file, "output_format": 'GTIFF',
+                "options": "compress=lzw", "scale_factor": factor, "input_nodata":-32768}
 
-            raster_image_math.do_cumulate(**args)
+        raster_image_math.do_cumulate(**args)
 
-            reproject_output(tmp_output_file, native_mapset, target_mapset)
+        reproject_output(tmp_output_file, native_mapset, target_mapset)
 
-            # Copy the non-reprojected file for validation, only in test_mode
-            if test_mode:
-                msg_proj_dir= es_constants.processing_dir+functions.set_path_sub_directory(prod, '1dcum', 'Derived', version, native_mapset)
-                functions.check_output_dir(msg_proj_dir)
-                shutil.copy(tmp_output_file, msg_proj_dir+os.path.sep)
-            #shutil.rmtree(tmpdir)
-        else:
-            logger.warning('More than 10 files missing for output {0}: Skip'.format(os.path.basename(output_file)))
+        # Copy the non-reprojected file for validation, only in test_mode
+        if test_mode:
+            msg_proj_dir= es_constants.processing_dir+functions.set_path_sub_directory(prod, '1dcum', 'Derived', version, native_mapset)
+            functions.check_output_dir(msg_proj_dir)
+            shutil.copy(tmp_output_file, msg_proj_dir+os.path.sep)
+
+        # Copy the non-reprojected file for validation, only in test_mode
+        shutil.rmtree(tmpdir)
+
 
     # ----------------------------------------------------------------------------------------------------------------
     #   10 day Cumulate (mm)
@@ -255,7 +257,7 @@ def processing_std_msg_mpe(res_queue, pipeline_run_level=0,pipeline_printout_lev
 
     proc_lists = None
     proc_lists = create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
-                                 starting_dates=starting_dates, proc_lists=proc_lists, day_time=day_time)
+                                 starting_dates=starting_dates, proc_lists=proc_lists, day_time=day_time, logger=spec_logger)
     if write2file is not None:
         fwrite_id=open(write2file,'w')
     else:
