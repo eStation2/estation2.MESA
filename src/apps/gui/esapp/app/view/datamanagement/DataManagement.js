@@ -250,17 +250,17 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                 '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('actions') + '</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 215px; right: auto; left: 285px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 255px; right: auto; left: 285px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('subproduct') + '</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('subproductname') + '</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 360px; right: auto; left: 505px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 360px; right: auto; left: 545px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('status') + '</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 865px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 905px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('actions') + '</span>' +
                 '           </div>' +

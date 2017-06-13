@@ -118,6 +118,9 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
                 Ext.suspendLayouts();
                 if (!widget.widgetattached) {
                     widget.getStore().setData(record.getData().mapsetdatasets);
+                    var sorters = widget.getStore().getSorters();
+                    sorters.add('display_index');
+
                     widget.widgetattached = true;
                 }
                 Ext.resumeLayouts(true);
