@@ -1159,6 +1159,10 @@ BEGIN
 	FROM products.product_category;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
 	RETURN QUERY SELECT 'SELECT products.update_insert_frequency('
 		|| 'frequency_id := ''' || frequency_id || ''''
 		|| ', time_unit := ''' || time_unit || ''''
@@ -1169,6 +1173,10 @@ BEGIN
 	FROM products.frequency;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
 	RETURN QUERY SELECT 'SELECT products.update_insert_date_format('
 		|| 'date_format := ''' || date_format || ''''
 		|| ', definition := ' || COALESCE('''' || definition || '''', 'NULL')
@@ -1176,11 +1184,19 @@ BEGIN
 	FROM products.date_format;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
 	RETURN QUERY SELECT 'SELECT products.update_insert_data_type('
 		|| 'data_type_id := ''' || data_type_id || ''''
 		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
 		|| ' );'  as inserts
 	FROM products.data_type;
+
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_mapset('
@@ -1204,6 +1220,10 @@ BEGIN
 	WHERE defined_by = 'JRC';
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
 	RETURN QUERY SELECT 'SELECT products.update_insert_thema('
 		|| 'thema_id := ''' || thema_id || ''''
 		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
@@ -1211,6 +1231,9 @@ BEGIN
 		|| ' );'  as inserts
 	FROM products.thema;
 
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_product('
@@ -1242,6 +1265,9 @@ BEGIN
 	WHERE defined_by = 'JRC';
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_thema_product('
 		|| 'thema_id := ''' || thema_id || ''''
@@ -1250,8 +1276,12 @@ BEGIN
 		|| ', mapsetcode := ''' || mapsetcode || ''''
 		|| ', activated := ' || activated
 		|| ' );'  as inserts
-	FROM products.thema_product;
+	FROM products.thema_product tp
+	WHERE (tp.productcode, tp.version) in (SELECT productcode, version FROM products.product WHERE defined_by = 'JRC');
 
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 	-- insert into products.datasource_description (datasource_descr_id) select internet_id from products.internet_source where internet_id not in (select datasource_descr_id from products.datasource_description)
@@ -1279,6 +1309,10 @@ BEGIN
 		|| ' );'  as inserts
 	FROM products.internet_source
 	WHERE defined_by = 'JRC';
+
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 	-- insert into products.datasource_description (datasource_descr_id) select eumetcast_id from products.eumetcast_source where eumetcast_id not in (select datasource_descr_id from products.datasource_description)
@@ -1331,6 +1365,9 @@ BEGIN
 	FROM products.eumetcast_source;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_datasource_description('
 		|| '  datasource_descr_id := ' || COALESCE('''' || datasource_descr_id || '''', 'NULL')
@@ -1357,6 +1394,9 @@ BEGIN
 	  OR dd.datasource_descr_id in (SELECT internet_id FROM products.internet_source WHERE defined_by = 'JRC');
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_product_acquisition_data_source('
 		|| ' productcode := ''' || productcode || ''''
@@ -1369,9 +1409,13 @@ BEGIN
 		|| ', store_original_data := ' || store_original_data
 		|| ', full_copy := ' || _full_copy
 		|| ' );'  as inserts
-	FROM products.product_acquisition_data_source
-	WHERE defined_by = 'JRC';
+	FROM products.product_acquisition_data_source pads
+	WHERE defined_by = 'JRC'
+	AND (pads.productcode, pads.version, pads.subproductcode) in (SELECT productcode, version, subproductcode FROM products.product WHERE defined_by = 'JRC');
 
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_sub_datasource_description('
@@ -1389,8 +1433,12 @@ BEGIN
 		|| ', re_extract := ' || COALESCE('''' || re_extract || '''', 'NULL')
 		|| ', full_copy := ' || _full_copy
 		|| ' );'  as inserts
-	FROM products.sub_datasource_description;
+	FROM products.sub_datasource_description sdd
+	WHERE (sdd.productcode, sdd.version, sdd.subproductcode) in (SELECT productcode, version, subproductcode FROM products.product WHERE defined_by = 'JRC');
 
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_ingestion('
@@ -1405,9 +1453,13 @@ BEGIN
 		|| ', enabled := ' || enabled
 		|| ', full_copy := ' || _full_copy
 		|| ' );'  as inserts
-	FROM products.ingestion
-	WHERE defined_by = 'JRC';
+	FROM products.ingestion i
+	WHERE defined_by = 'JRC'
+	AND (i.productcode, i.version, i.subproductcode) in (SELECT productcode, version, subproductcode FROM products.product WHERE defined_by = 'JRC');
 
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_processing('
@@ -1425,6 +1477,9 @@ BEGIN
 	WHERE defined_by = 'JRC';
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_process_product('
 		|| ' process_id := ' || process_id
@@ -1440,8 +1495,13 @@ BEGIN
 		|| ', end_date:= ' || COALESCE(TRIM(to_char(end_date, '999999999999')), 'NULL')
 		|| ', full_copy := ' || _full_copy
 		|| ' );'  as inserts
-	FROM products.process_product
-	WHERE process_id IN (SELECT process_id FROM products.processing WHERE defined_by = 'JRC');
+	FROM products.process_product pp
+	WHERE process_id IN (SELECT process_id FROM products.processing WHERE defined_by = 'JRC')
+	AND (pp.productcode, pp.version, pp.subproductcode) in (SELECT productcode, version, subproductcode FROM products.product WHERE defined_by = 'JRC');
+
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_i18n('
@@ -1456,6 +1516,10 @@ BEGIN
 	FROM analysis.i18n;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_languages('
 		|| ' langcode := ' || COALESCE('''' || langcode || '''', 'NULL')
 		|| ', langdescription := ' || COALESCE('''' || langdescription || '''', 'NULL')
@@ -1463,6 +1527,9 @@ BEGIN
 		|| ' );'  as inserts
 	FROM analysis.languages;
 
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_legend('
@@ -1482,6 +1549,9 @@ BEGIN
 	FROM analysis.legend;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
 
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_legend_step('
 		|| ' legend_id := ' || legend_id
@@ -1494,6 +1564,9 @@ BEGIN
 	FROM analysis.legend_step;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
 
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_product_legend('
 		|| ' productcode := ' || COALESCE('''' || productcode || '''', 'NULL')
@@ -1502,8 +1575,12 @@ BEGIN
 		|| ', legend_id := ' || legend_id
 		|| ', default_legend := ' || default_legend
 		|| ' );'  as inserts
-	FROM analysis.product_legend;
+	FROM analysis.product_legend pl
+	WHERE (pl.productcode, pl.version, pl.subproductcode) in (SELECT productcode, version, subproductcode FROM products.product WHERE defined_by = 'JRC');
 
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 	RETURN QUERY SELECT 'PERFORM analysis.update_insert_layers('
@@ -1541,6 +1618,9 @@ BEGIN
 	ORDER BY layerid;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
 
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_timeseries_drawproperties('
 		|| ' productcode := ' || COALESCE('''' || productcode || '''', 'NULL')
@@ -1565,6 +1645,9 @@ BEGIN
 	FROM analysis.timeseries_drawproperties;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
 
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_chart_drawproperties('
 		|| ' chart_type := ' || COALESCE('''' || chart_type || '''', 'NULL')
@@ -1584,6 +1667,9 @@ BEGIN
 		|| ' );'  as inserts
 	FROM analysis.chart_drawproperties;
 
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_spirits('

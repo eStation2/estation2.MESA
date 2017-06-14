@@ -1,6 +1,4 @@
 ﻿
-TRUNCATE TABLE analysis.legend CASCADE;
-
 SELECT products.update_insert_product_category(category_id := 'vegetation', order_index := 1, descriptive_name := 'Vegetation' );
 SELECT products.update_insert_product_category(category_id := 'rainfall', order_index := 2, descriptive_name := 'Rainfall' );
 SELECT products.update_insert_product_category(category_id := 'fire', order_index := 3, descriptive_name := 'Fire' );
@@ -664,8 +662,6 @@ SELECT products.update_insert_thema_product(thema_id := 'Training', productcode 
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'msg-mpe', version := 'undefined', mapsetcode := 'SPOTV-CEMAC-1km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'wd-gee', version := '1.0', mapsetcode := 'WD-GEE-ECOWAS-AVG', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'wd-gee', version := '1.0', mapsetcode := 'WD-GEE-ECOWAS-AVG', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'ACMAD', productcode := 'modis-sst', version := 'sst-3day', mapsetcode := 'MODIS-Global-4km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'ACMAD', productcode := 'cpc-sm', version := 'sm', mapsetcode := 'CPC-Africa-50km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'AGRHYMET', productcode := 'vgt-ndvi', version := 'proba-v2.2', mapsetcode := 'SPOTV-ECOWAS-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'BDMS', productcode := 'vgt-ndvi', version := 'proba-v2.2', mapsetcode := 'SPOTV-SADC-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'vgt-ndvi', version := 'proba-v2.2', mapsetcode := 'SPOTV-IGAD-1km', activated := true );
@@ -682,15 +678,6 @@ SELECT products.update_insert_thema_product(thema_id := 'ACMAD', productcode := 
 SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'vgt-ndvi', version := 'sv2-pv2.2', mapsetcode := 'SPOTV-IOC-1km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'vgt-ndvi', version := 'sv2-pv2.2', mapsetcode := 'SPOTV-Africa-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'vgt-ndvi', version := 'sv2-pv2.2', mapsetcode := 'SPOTV-Africa-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'ecmwf-evtp', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'ecmwf-evtp', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'ACMAD', productcode := 'ecmwf-evtp', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'BDMS', productcode := 'ecmwf-evtp', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'AGRHYMET', productcode := 'ecmwf-evtp', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'ecmwf-evtp', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'CICOS', productcode := 'ecmwf-evtp', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'ecmwf-evtp', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := false );
-SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'ecmwf-evtp', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'ACMAD', productcode := 'arc2-rain', version := '2.0', mapsetcode := 'ARC2-Africa-11km', activated := true );
 
 
@@ -2239,6 +2226,7 @@ SELECT analysis.update_insert_languages( langcode := 'lang1', langdescription :=
 
 
 
+TRUNCATE TABLE analysis.legend CASCADE;
 
 SELECT analysis.update_insert_legend( legend_id := 16, legend_name := 'NDVI Ratio</BR>(%)', step_type := 'irregular', min_value := 1.000000, max_value := 200.000000, min_real_value := 'NO_LOW', max_real_value := 'NO_HIGH', colorbar := 'NDVI ratio: USGS palette', step := 1.000000, step_range_from := 200.000000, step_range_to := 200.000000, unit := '%' );
 SELECT analysis.update_insert_legend( legend_id := 148, legend_name := 'ChlA</BR>(mg/m³)', step_type := 'irregular', min_value := .000000, max_value := 10.000000, min_real_value := 'NO_LOW', max_real_value := 'NO_HIGH', colorbar := 'Chlorophyll A (mg/m³): JRC 230 color steps to 10', step := .010000, step_range_from := .000000, step_range_to := 10.000000, unit := 'mg/m³' );
@@ -7196,8 +7184,6 @@ SELECT analysis.update_insert_product_legend( productcode := 'arc2-rain', subpro
 SELECT analysis.update_insert_product_legend( productcode := 'vgt-ndvi', subproductcode := 'ndv', version := 'proba-v2.2', legend_id := 6, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'vgt-ndvi', subproductcode := 'ndv', version := 'proba-v2.2', legend_id := 9, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'vgt-ndvi', subproductcode := 'ndv', version := 'proba-v2.2', legend_id := 111, default_legend := false );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '3monmin', version := '2.0', legend_id := 142, default_legend := false );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '6moncum', version := '2.0', legend_id := 139, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '10d', version := '2.0', legend_id := 139, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '10davg', version := '2.0', legend_id := 139, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '10dmax', version := '2.0', legend_id := 139, default_legend := false );
@@ -7219,9 +7205,6 @@ SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', sub
 SELECT analysis.update_insert_product_legend( productcode := 'vgt-ndvi', subproductcode := 'ndv', version := 'proba-v2.2', legend_id := 112, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '10d', version := '2.0', legend_id := 140, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'arc2-rain', subproductcode := '3mon', version := '2.0', legend_id := 139, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '6monavg', version := '2.0', legend_id := 139, default_legend := false );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '6monmax', version := '2.0', legend_id := 139, default_legend := false );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '6monmin', version := '2.0', legend_id := 139, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'msg-mpe', subproductcode := '1dcum', version := 'undefined', legend_id := 138, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'msg-mpe', subproductcode := '10dcum', version := 'undefined', legend_id := 85, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'msg-mpe', subproductcode := '10dcum', version := 'undefined', legend_id := 139, default_legend := false );
@@ -7242,13 +7225,6 @@ SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', sub
 SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '1monmax', version := '2.0', legend_id := 142, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '1monmin', version := '2.0', legend_id := 142, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'ecmwf-rain', subproductcode := '10d', version := 'OPE', legend_id := 140, default_legend := false );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '3monavg', version := '2.0', legend_id := 139, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '3monavg', version := '2.0', legend_id := 142, default_legend := false );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '3moncum', version := '2.0', legend_id := 139, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '3moncum', version := '2.0', legend_id := 142, default_legend := false );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '3monmax', version := '2.0', legend_id := 139, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '3monmin', version := '2.0', legend_id := 139, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '3monmax', version := '2.0', legend_id := 142, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '10d', version := '2.0', legend_id := 140, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '10davg', version := '2.0', legend_id := 140, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '10dmax', version := '2.0', legend_id := 140, default_legend := false );
@@ -7271,41 +7247,13 @@ SELECT analysis.update_insert_product_legend( productcode := 'tamsat-rfe', subpr
 SELECT analysis.update_insert_product_legend( productcode := 'modis-chla', subproductcode := 'monavg', version := 'v2013.1', legend_id := 202, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'arc2-rain', subproductcode := '10d', version := '2.0', legend_id := 141, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'arc2-rain', subproductcode := '10d', version := '2.0', legend_id := 75, default_legend := false );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '3monperc', version := '2.0', legend_id := 88, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '6monperc', version := '2.0', legend_id := 88, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'tamsat-rfe', subproductcode := '1monmax', version := '2.0', legend_id := 139, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'tamsat-rfe', subproductcode := '1monmin', version := '2.0', legend_id := 139, default_legend := false );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '1yeardiff', version := '2.0', legend_id := 146, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '1yearmin', version := '2.0', legend_id := 139, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '1yearmax', version := '2.0', legend_id := 139, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '1yearcum', version := '2.0', legend_id := 139, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '1yearavg', version := '2.0', legend_id := 139, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '3mondiff', version := '2.0', legend_id := 144, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '6mondiff', version := '2.0', legend_id := 144, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'chirps-dekad', subproductcode := '1yearperc', version := '2.0', legend_id := 88, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'ecmwf-evpt', subproductcode := '10d', version := 'OPE', legend_id := 75, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'ecmwf-evpt', subproductcode := '10d', version := 'OPE', legend_id := 85, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'ecmwf-evpt', subproductcode := '10d', version := 'OPE', legend_id := 139, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'ecmwf-evpt', subproductcode := '10d', version := 'OPE', legend_id := 140, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'ecmwf-evpt', subproductcode := '10d', version := 'OPE', legend_id := 141, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '3monavg', version := '2.0', legend_id := 139, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '3monavg', version := '2.0', legend_id := 142, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '3moncum', version := '2.0', legend_id := 139, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '3moncum', version := '2.0', legend_id := 142, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '3monmax', version := '2.0', legend_id := 139, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '3monmax', version := '2.0', legend_id := 142, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '3monmin', version := '2.0', legend_id := 142, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '3monmin', version := '2.0', legend_id := 139, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '6monavg', version := '2.0', legend_id := 139, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '6moncum', version := '2.0', legend_id := 139, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '6monmin', version := '2.0', legend_id := 139, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '6monmax', version := '2.0', legend_id := 139, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '3mondiff', version := '2.0', legend_id := 144, default_legend := false );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '6mondiff', version := '2.0', legend_id := 144, default_legend := false );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '1yearmax', version := '2.0', legend_id := 139, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '1yearmin', version := '2.0', legend_id := 139, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '1yearcum', version := '2.0', legend_id := 139, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '1yearavg', version := '2.0', legend_id := 139, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'tamsat-rfe', subproductcode := '1monmax', version := '2.0', legend_id := 142, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'arc2-rain', subproductcode := '3mon', version := '2.0', legend_id := 142, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'vgt-ndvi', subproductcode := 'ndv', version := 'proba-v2.2', legend_id := 19, default_legend := false );
@@ -7320,9 +7268,6 @@ SELECT analysis.update_insert_product_legend( productcode := 'modis-chla', subpr
 SELECT analysis.update_insert_product_legend( productcode := 'modis-firms', subproductcode := '10dcount10kratio', version := 'v5.0', legend_id := 16, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'modis-firms', subproductcode := '10dcount', version := 'v5.0', legend_id := 73, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'modis-firms', subproductcode := '10dcountavg', version := 'v5.0', legend_id := 73, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '1yearperc', version := '2.0', legend_id := 88, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '3monperc', version := '2.0', legend_id := 88, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '6monperc', version := '2.0', legend_id := 88, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'modis-firms', subproductcode := '10dcount10kperc', version := 'v5.0', legend_id := 80, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'modis-firms', subproductcode := '10dcountmax', version := 'v5.0', legend_id := 73, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'vgt-ndvi', subproductcode := '10davg-linearx2', version := 'sv2-pv2.2', legend_id := 6, default_legend := false );
@@ -7375,7 +7320,6 @@ SELECT analysis.update_insert_product_legend( productcode := 'modis-firms', subp
 SELECT analysis.update_insert_product_legend( productcode := 'modis-firms', subproductcode := '10dcount10kavg', version := 'v5.0', legend_id := 73, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'modis-firms', subproductcode := '10dcount10kmin', version := 'v5.0', legend_id := 73, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'modis-firms', subproductcode := '10dcount10k', version := 'v5.0', legend_id := 73, default_legend := true );
-SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '1yeardiff', version := '2.0', legend_id := 146, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'vgt-ndvi', subproductcode := 'year-min-linearx2', version := 'sv2-pv2.2', legend_id := 6, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'vgt-ndvi', subproductcode := 'year-min-linearx2', version := 'sv2-pv2.2', legend_id := 9, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'vgt-ndvi', subproductcode := 'year-min-linearx2', version := 'sv2-pv2.2', legend_id := 111, default_legend := false );
@@ -7386,6 +7330,7 @@ SELECT analysis.update_insert_product_legend( productcode := 'modis-firms', subp
 SELECT analysis.update_insert_product_legend( productcode := 'modis-firms', subproductcode := '10dcount10kmax', version := 'v5.0', legend_id := 74, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'modis-firms', subproductcode := '10dcount10k', version := 'v5.0', legend_id := 81, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'modis-firms', subproductcode := '10dcount10k', version := 'v5.0', legend_id := 74, default_legend := false );
+
 
 
 
@@ -7547,6 +7492,7 @@ SELECT products.update_insert_spirits(  productcode := 'fewsnet-rfe', subproduct
 SELECT products.update_insert_spirits(  productcode := 'tamsat-rfe', subproductcode := '10d', version := '2.0', mapsetcode := NULL, prod_values := '{RFE, mm, 0, 1000, 0, 1000, 0, 1}', flags := '{-32768=missing}', data_ignore_value := -32768, days := 10, start_date := 20000101, end_date := NULL, sensor_type := 'TAMSAT', comment := 'RFE v2.0, JRC eStation2.0', sensor_filename_prefix := 't', frequency_filename_prefix := 't', product_anomaly_filename_prefix := 'c', activated := true );
 SELECT products.update_insert_spirits(  productcode := 'tamsat-rfe', subproductcode := '10davg', version := '2.0', mapsetcode := NULL, prod_values := '{RFE_AVG, mm, 0, 1000, 0, 1000, 0, 1}', flags := '{-32768=missing}', data_ignore_value := -32768, days := 10, start_date := NULL, end_date := NULL, sensor_type := 'TAMSAT', comment := 'RFE v2.0 AVERAGE(2001-2014), JRC eStation2.0', sensor_filename_prefix := 't', frequency_filename_prefix := 't1962', product_anomaly_filename_prefix := 'c', activated := true );
 SELECT products.update_insert_spirits(  productcode := 'vgt-dmp', subproductcode := 'dmp', version := 'V1.0', mapsetcode := NULL, prod_values := '{DMP, kg/ha/day, 0, 32767, 0, 32767, 0, 0.01}', flags := '{-32768=missing}', data_ignore_value := -32768, days := 10, start_date := 19990101, end_date := NULL, sensor_type := 'SPOT VGT-PROBA V', comment := 'DMP v1.0', sensor_filename_prefix := 'v', frequency_filename_prefix := 't', product_anomaly_filename_prefix := 'p', activated := true );
+
 
 
 
