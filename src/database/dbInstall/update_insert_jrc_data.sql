@@ -7502,7 +7502,7 @@ BEGIN
 	-- Save the latest layerid (it could be that the user installed the eStation-Apps-2.0.4 first and created a new layer
 	-- before installing the eStation-Layers-2.0.4 package.
 
-	SELECT INTO current_layer_id currval('analysis.layers_layerid_seq');
+	SELECT INTO current_layer_id nextval('analysis.layers_layerid_seq');
 	-- raise notice 'current_layer_id set to: %', current_layer_id;
 
 	DELETE FROM analysis.layers WHERE layerid < 100;
