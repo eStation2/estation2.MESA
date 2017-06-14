@@ -26,7 +26,6 @@ from apps.productmanagement import products
 from lib.python.daemon import DaemonDryRunnable
 
 logger = log.my_logger(__name__)
-
 #   Definitions
 local_data_dir = es_constants.es2globals['processing_dir']
 remote_data_dir = geoserverREST.restBaseDir

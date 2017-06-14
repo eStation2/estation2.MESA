@@ -40,13 +40,13 @@ def setWorkspaceName(service, product, subproduct, version, mapset, nameType='fu
     nameType = nameType.lower().replace('_','')
 
     wrkList = {"full":'{0}_{1}_{2}_{3}_{4}'.format(service, product, subproduct, mapset, version.replace('.', '_')),
-               "serviceproductsubproduct":'{}_{}_{}'.format(service, product, subproduct),
+               "serviceproductsubproduct":'{0}_{1}_{2}'.format(service, product, subproduct),
                "service":service,
                "product":product,
-               "serviceproduct":"{}_{}".format(service, product),
-               "productsubproduct":'{}_{}'.format(product, subproduct),
-               "productsubproductmapset":'{}_{}_{}'.format(product, subproduct, mapset),
-               "productsubproductmapsetversion":'{}_{}_{}_{}'.format(product, subproduct, mapset, version.replace('.','_'))
+               "serviceproduct":"{0}_{1}".format(service, product),
+               "productsubproduct":'{0}_{1}'.format(product, subproduct),
+               "productsubproductmapset":'{0}_{1}_{2}'.format(product, subproduct, mapset),
+               "productsubproductmapsetversion":'{0}_{1}_{2}_{3}'.format(product, subproduct, mapset, version.replace('.','_'))
                }
 
     if nameType in wrkList.keys():
@@ -114,16 +114,15 @@ def createSLD(product, version, subproduct, output_file=None):
     # Get scale factor
     product_info = querydb.get_product_out_info(productcode=product,subproductcode=subproduct,version=version)
     scale_factor = product_info[0].scale_factor
-    legend_steps = []
-    legend_name = ''
+
     if hasattr(product_legends, "__len__") and product_legends.__len__() > 0:
 
         for legend in product_legends:
-            legend_dict = legend
-            # legend_dict = functions.row2dict(legend)
+
+            legend_dict = functions.row2dict(legend)
             default_legend = legend_dict['default_legend']
 
-            if default_legend:
+            if default_legend == 'True':
                 defaultlegend = True
             else:
                 defaultlegend = False
@@ -148,17 +147,17 @@ def createSLD(product, version, subproduct, output_file=None):
 
     # Modify the schema for that Legend
     # Modify Layer Name
-    for child in tree.iter():
+    for child in tree.getiterator():
         if child.tag == 'NamedLayer':
             child.set("Name", product)
 
     # Modify User Style Title
-    for child in tree.iter():
+    for child in tree.getiterator():
         if child.tag == 'UserStyle':
             child.set("Title",legend_name)
 
     # Modify the Steps (and remove remaining ones)
-    for child in tree.iter():
+    for child in tree.getiterator():
         if child.tag == 'ColorMap':
             ColorMap = child
             num_CME = len(ColorMap)
@@ -218,7 +217,6 @@ def registerRaster(service, product, subproduct, version, mapset, date, productT
             # Upload to geoserver the style
             if sld==0:
                 resultSLD = geoserverREST.createStyle(sld_name, sld_file_name)
-                print dir(resultSLD)
             else:
                 logger.warning('CreateSLD failed for prod/subprod/version {0}/{1}/{2}. Exit'.format(product,subproduct,version))
 
@@ -256,7 +254,8 @@ def existsRemote(host, path, user=None):
 def uploadRemote(host, local_path, target_path, user=None):
 
     if user is not None:
-        my_host = '{0}@{1}'.format(user,host)
+        #my_host = '{0}@{1}'.format(user, host)
+        my_host = '{0}@{1}'.format(user,host)#VO edit to restLogin
     else:
         my_host = host
 
@@ -264,7 +263,7 @@ def uploadRemote(host, local_path, target_path, user=None):
     subdir = os.path.dirname(target_path)
     try:
         if geoserverREST.sshKeyAgentParam == '':
-            thisCommand='{} ssh {} mkdir -p {}'.format(geoserverREST.sshKeyAgentParam, my_host, subdir)
+            thisCommand='{0} ssh {1} mkdir -p {2}'.format(geoserverREST.sshKeyAgentParam, my_host, subdir)#VO
             status = subprocess.call(thisCommand, shell=True)
         else:
             status = subprocess.call(
@@ -276,7 +275,7 @@ def uploadRemote(host, local_path, target_path, user=None):
     # Upload file to remote server
     try:
         if geoserverREST.sshKeyAgentParam == '':
-            thisCommand='{} scp {} {}:{}'.format(geoserverREST.sshKeyAgentParam, local_path, my_host,target_path)
+            thisCommand='{0} scp {1} {2}:{3}'.format(geoserverREST.sshKeyAgentParam, local_path, my_host,target_path)#VO
             status = subprocess.call(thisCommand, shell=True)
         else:
             status = subprocess.call(
@@ -315,8 +314,9 @@ def uploadAndRegisterRaster(service, product, subproduct, version, mapset, date,
     #if not geoserverREST.isRaster(workspace,layerName):
     if not geoserverREST.isRaster(workspace, coverage):
         # Ensure file is uploaded
-        if not existsRemote(geoserverREST.restHost,remoteFilepath, user=geoserverREST.sshUser):
-            if uploadRemote(geoserverREST.restHost, localFilepath, remoteFilepath, user=geoserverREST.sshUser):
+        if not existsRemote(geoserverREST.restHost,remoteFilepath, user=geoserverREST.restLogin):#VO changed sshUser to restLogin
+            #if uploadRemote(geoserverREST.restHost, localFilepath, remoteFilepath, user=geoserverREST.sshUser):
+            if uploadRemote(geoserverREST.restHost, localFilepath, remoteFilepath, user=geoserverREST.restLogin):#VO changed sshUser to restLogin so that it is mesa@197.254.113.174 and not adminuser@197.254.113.117
                 logger.error('Cannot upload file {0}.'.format(localFilepath))
                 status = True
             else:
