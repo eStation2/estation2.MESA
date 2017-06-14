@@ -65,9 +65,20 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
         };
 
         me.columns = [{
-            header: '', // 'Sub Product Code',
-            dataIndex: 'subproductcode',
-            width: 210
+            // header: '', // 'Sub Product Code',
+            // dataIndex: 'subproductcode',
+            // width: 210
+
+            xtype:'templatecolumn',
+            header: '', // 'Productcode',
+            tpl: new Ext.XTemplate(
+                    '<b>{descriptive_name}</b>' +
+                    '</br>' +
+                    '<b class="smalltext" style="color:darkgrey">{subproductcode}</b>' +
+                    '</br>'
+                ),
+            width: 250,
+            cellWrap:true
         }, {
             header: '', // 'Status',
             xtype: 'widgetcolumn',
