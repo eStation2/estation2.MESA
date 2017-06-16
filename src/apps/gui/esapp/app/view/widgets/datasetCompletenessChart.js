@@ -453,6 +453,12 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
             lastdate = completeness.lastdate;
         }
 
+        if (firstdate.length>10){
+            firstdate = firstdate.slice(0, -5);
+        }
+        if (lastdate.length>10){
+            lastdate = lastdate.slice(0, -5);
+        }
         me.tooltipintervals = seriestitles;
 
 

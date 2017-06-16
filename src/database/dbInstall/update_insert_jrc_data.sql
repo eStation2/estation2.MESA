@@ -1,4 +1,8 @@
-﻿SELECT products.update_insert_product_category(category_id := 'vegetation', order_index := 1, descriptive_name := 'Vegetation' );
+﻿
+
+
+
+SELECT products.update_insert_product_category(category_id := 'vegetation', order_index := 1, descriptive_name := 'Vegetation' );
 SELECT products.update_insert_product_category(category_id := 'rainfall', order_index := 2, descriptive_name := 'Rainfall' );
 SELECT products.update_insert_product_category(category_id := 'fire', order_index := 3, descriptive_name := 'Fire' );
 SELECT products.update_insert_product_category(category_id := 'inlandwater', order_index := 4, descriptive_name := 'Inland water' );
@@ -7501,6 +7505,7 @@ FROM (VALUES
   ('vgt-fapar','V2.0'),
   ('vgt-fcover','V2.0'),
   ('vgt-lai','V2.0'),
+  ('vgt-ndvi', 'spot-v2'),
   ('vgt-ndvi','proba-v2.2'),
   ('vgt-ndvi','spot-v2.2'),
   ('vgt-ndvi','sv2-pv2.2')
@@ -7520,6 +7525,7 @@ FROM (VALUES
   ('vgt-fapar','V2.0'),
   ('vgt-fcover','V2.0'),
   ('vgt-lai','V2.0'),
+  ('vgt-ndvi', 'spot-v2'),
   ('vgt-ndvi','proba-v2.2'),
   ('vgt-ndvi','spot-v2.2'),
   ('vgt-ndvi','sv2-pv2.2')
@@ -7537,6 +7543,7 @@ FROM (VALUES
   ('vgt-fapar','V2.0'),
   ('vgt-fcover','V2.0'),
   ('vgt-lai','V2.0'),
+  ('vgt-ndvi', 'spot-v2'),
   ('vgt-ndvi','proba-v2.2'),
   ('vgt-ndvi','spot-v2.2'),
   ('vgt-ndvi','sv2-pv2.2')
@@ -7557,6 +7564,7 @@ WHERE (p.process_id) in (SELECT process_id
 				  ('vgt-fapar','V2.0'),
 				  ('vgt-fcover','V2.0'),
 				  ('vgt-lai','V2.0'),
+				  ('vgt-ndvi', 'spot-v2'),
 				  ('vgt-ndvi','proba-v2.2'),
 				  ('vgt-ndvi','spot-v2.2'),
 				  ('vgt-ndvi','sv2-pv2.2')
@@ -7575,11 +7583,14 @@ FROM (VALUES
   ('vgt-fapar','V2.0'),
   ('vgt-fcover','V2.0'),
   ('vgt-lai','V2.0'),
+  ('vgt-ndvi', 'spot-v2'),
   ('vgt-ndvi','proba-v2.2'),
   ('vgt-ndvi','spot-v2.2'),
   ('vgt-ndvi','sv2-pv2.2')
   ) AS tmp (productcode,version)
 WHERE tmp.productcode = pads.productcode AND tmp.version = pads.version;
+
+
 
 
 SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('arc2-rain', '2.0', TRUE, FALSE);
@@ -7593,6 +7604,7 @@ SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('vg
 SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('vgt-ndvi','proba-v2.2', TRUE, FALSE);
 SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('vgt-ndvi','spot-v2.2', TRUE, FALSE);
 SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('vgt-ndvi','sv2-pv2.2', TRUE, FALSE);
+
 
 
 -- OBSOLETE becauase the update_product trigger has been removed and replaced by
@@ -7630,6 +7642,10 @@ FROM (VALUES
   ('gsod-rain', '1.0'),
   ('modis-ba', 'undefined'),
   ('osisaf-sst',	'undefined'),
+  ('pml-modis-chl-nrt', '3.0'),
+  ('pml-modis-chl-ref', '3.0'),
+  ('pml-modis-sst-nrt', '3.0'),
+  ('pml-modis-sst-ref', '3.0'),
   ('pml-meris-chl', 'undefined'),
   ('vgt-albe', 'undefined'),
   ('vgt_albq', 'undefined'),

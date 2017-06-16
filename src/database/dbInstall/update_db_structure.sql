@@ -75,7 +75,11 @@ DROP TRIGGER IF EXISTS update_product ON products.product;
 
 
 
-CREATE OR REPLACE FUNCTION products.activate_deactivate_product_ingestion_pads_processing(productcode character varying, version character varying, activate boolean DEFAULT FALSE, forse boolean DEFAULT FALSE)
+CREATE OR REPLACE FUNCTION products.activate_deactivate_product_ingestion_pads_processing(
+    productcode character varying,
+    version character varying,
+    activate boolean DEFAULT false,
+    forse boolean DEFAULT false)
   RETURNS boolean AS
 $BODY$
 DECLARE
@@ -91,7 +95,12 @@ BEGIN
 	SET activated = _activate
 	WHERE p.product_type = 'Native'
 	AND p.productcode = _productcode
-	AND p.version = _version;
+	AND p.version = _version
+	AND (p.productcode, p.version) IN (SELECT DISTINCT tp.productcode, tp.version FROM products.thema_product tp
+			     WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+			     -- AND activated = TRUE
+			     AND tp.productcode = _productcode
+			     AND tp.version = _version);
 
 	UPDATE products.ingestion i
 	SET activated = _activate,
@@ -141,7 +150,12 @@ BEGIN
 	SET activated = _activate
 	WHERE p.product_type = 'Native'
 	AND p.productcode = _productcode
-	AND p.version = _version;
+	AND p.version = _version
+	AND (p.productcode, p.version) IN (SELECT DISTINCT tp.productcode, tp.version FROM products.thema_product tp
+			     WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+			     AND activated = TRUE
+			     AND tp.productcode = _productcode
+			     AND tp.version = _version);
 
 	UPDATE products.ingestion i
 	SET activated = _activate,
@@ -200,6 +214,7 @@ $BODY$
   COST 100;
 ALTER FUNCTION products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean)
   OWNER TO estation;
+
 
 
 
