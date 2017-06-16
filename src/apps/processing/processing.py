@@ -39,6 +39,8 @@ from apps.processing import processing_std_modis_pp
 from apps.processing import processing_std_msg_mpe
 from apps.processing import processing_std_rain_onset
 from apps.processing import processing_std_seas_cum
+from apps.processing import processing_std_precip_1day
+
 
 from lib.python.daemon import DaemonDryRunnable
 
