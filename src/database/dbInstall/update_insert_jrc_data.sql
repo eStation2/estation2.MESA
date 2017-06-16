@@ -1,5 +1,4 @@
-﻿
-SELECT products.update_insert_product_category(category_id := 'vegetation', order_index := 1, descriptive_name := 'Vegetation' );
+﻿SELECT products.update_insert_product_category(category_id := 'vegetation', order_index := 1, descriptive_name := 'Vegetation' );
 SELECT products.update_insert_product_category(category_id := 'rainfall', order_index := 2, descriptive_name := 'Rainfall' );
 SELECT products.update_insert_product_category(category_id := 'fire', order_index := 3, descriptive_name := 'Fire' );
 SELECT products.update_insert_product_category(category_id := 'inlandwater', order_index := 4, descriptive_name := 'Inland water' );
