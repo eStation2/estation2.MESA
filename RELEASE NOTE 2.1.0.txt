@@ -9,9 +9,7 @@
 
 1.1 Acquisition
 
-- Activating a product did not activate the defined get/ingest/processing: correct it through a trigger in the DB.
-- Move the Add mapset to ingest icon to the right in a new column: it does make possible to add a mapset when no mapsets are
-  defined for a product (resolve through moving the icon in its own column).
+- Activating a product did not activate the defined get/ingest/processing: correct it through a function in the DB.
 
 1.2 Processing
 

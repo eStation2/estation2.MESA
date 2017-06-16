@@ -749,7 +749,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                 },
                 onWidgetAttach: function(col, widget, record) {
                     var daStore = widget.getViewModel().get('productingestions');
-                    //Ext.suspendLayouts();
+                    Ext.suspendLayouts();
                     if (!widget.widgetattached) {
                         //if (daStore.getFilters().items.length == 0) {
                         daStore.setFilters({
@@ -761,6 +761,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                         //}
                         widget.widgetattached = true;
                     }
+                    Ext.resumeLayouts(true);
                 }
             }]
         },{

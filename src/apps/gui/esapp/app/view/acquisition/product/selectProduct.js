@@ -273,7 +273,7 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
             var productgridstore  = Ext.data.StoreManager.lookup('ProductsActiveStore');
             var acqgridsstore = Ext.data.StoreManager.lookup('DataAcquisitionsStore');
             var ingestiongridstore = Ext.data.StoreManager.lookup('IngestionsStore');
-            var acq_main = Ext.ComponentQuery.query('panel[name=acquisitionmain]');
+            // var acq_main = Ext.ComponentQuery.query('panel[name=acquisitionmain]');
 
             //if (Ext.getCmp('lockunlock').pressed) {
             //    var dataacquisitiongrids = Ext.ComponentQuery.query('dataacquisitiongrid');
@@ -308,7 +308,7 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                                                 //var view = btn.up().up().getView();
                                                 ////view.getFeature('productcategories').expandAll();
                                                 //view.refresh();
-                                                acq_main[0].getController().renderHiddenColumnsWhenUnlocked();
+                                                // acq_main[0].getController().renderHiddenColumnsWhenUnlocked();
                                             }
                                         });
                                     }

@@ -24,6 +24,23 @@ db = connectdb.ConnectDB().db
 dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
 
 
+def activate_deactivate_product(productcode='', version='', activate=False, forse=False):
+    global db
+    try:
+        query = "SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('" + productcode + "', '" + version + "', " + str(activate).upper() + ", " + str(forse).upper() + "); COMMIT;"
+        product_updated = db.execute(query)
+
+        return True
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("activate_deactivate_product: Database query error!\n -> {}".format(exceptionvalue))
+        return False
+    finally:
+        if db.session:
+            db.session.close()
+
+
 def get_product_default_legend_steps(productcode, version, subproductcode, echo=False):
     global dbschema_analysis
     try:
@@ -1420,6 +1437,7 @@ def get_products_acquisition(echo=False, activated=None):
             #              db.pl.c.activated != 't',
             #              db.pa.c.totgets > 0)
             where = and_(db.pl.c.product_type == 'Native',
+                         db.pl.c.defined_by != 'JRC-Test',
                          db.pl.c.activated != 't')
         else:
             where = and_(db.pl.c.product_type == 'Native', db.pa.c.totgets > 0)
