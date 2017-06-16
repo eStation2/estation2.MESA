@@ -27,10 +27,11 @@ with open('/var/www/eStation2/apps/es2system/GeoPortal/geoportal.conf') as confF
 restLogin = str(conf["restLogin"])
 restPassword = str(conf["restPassword"])
 restHost = str(conf["restHost"])
-restServer = 'http://{}'.format(restHost)
+restServer = 'http://{0}'.format(restHost)
 restPort = str(conf["restPort"])
 restBaseDir = str(conf["restBaseDir"])
-restURL='{0}:{1}/geoserver/rest/'.format(restServer, restPort)          # MUST end with '/' for urljoin to work
+#restURL='{0}:{1}/geoserver/rest/'.format(restServer, restPort)          # MUST end with '/' for urljoin to work
+restURL='{0}/geoserver/rest/'.format(restServer) #edit by VO removed the ":" & restPort as running on terminal gives warning couldnot resolve 197.254.113.174:
 restFormat={'text':'text', 'xml':'text/xml', 'json':'text/json'}
 
 # MC 22.06.2016 -> add user of the geoserver machine

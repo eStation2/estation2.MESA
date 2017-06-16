@@ -194,8 +194,9 @@ def do_avg_image(input_file='', output_file='', input_nodata=None, output_nodata
         logger.warning('Error in do_avg_image. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-        if os.path.isfile(output_stddev):
-            os.remove(output_stddev)
+        if output_stddev != None:
+            if os.path.isfile(output_stddev):
+                os.remove(output_stddev)
 
 # _____________________________
 def do_min_image(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
