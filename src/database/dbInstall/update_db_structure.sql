@@ -506,7 +506,8 @@ DECLARE
 
 	prods CURSOR FOR SELECT productcode, subproductcode, version, defined_by, FALSE as activated, NULL as "startdate", NULL as "enddate"
 		     FROM products.product
-		     WHERE product_type != 'Native';
+		     WHERE product_type != 'Native'
+		     AND defined_by = 'JRC';
 
 	prods_row RECORD;
 

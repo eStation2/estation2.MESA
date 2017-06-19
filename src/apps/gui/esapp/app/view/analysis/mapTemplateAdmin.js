@@ -14,7 +14,7 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
         type: "analysis-maptemplateadmin"
     },
 
-    "xtype"  : 'usermaptpl',
+    xtype  : 'usermaptpl',
 
     id: 'userMapTemplates',
     reference: 'userMapTemplates',
@@ -99,7 +99,7 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
 
         me.listeners = {
             focusleave: function(){
-                // this.hide();
+                me.hide();
             }
         };
 

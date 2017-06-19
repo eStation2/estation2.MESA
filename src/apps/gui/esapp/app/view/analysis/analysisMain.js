@@ -67,8 +67,8 @@ Ext.define("esapp.view.analysis.analysisMain",{
                 enableToggle: false,
                 arrowVisible: false,
                 arrowAlign: 'right',
-                collapseDirection: 'left',
-                menuAlign: 'tl-tr',
+                collapseDirection: 'bottom',
+                menuAlign: 'tl-bc',
                 handler: 'showUserMapTemplates',
                 //listeners: {
                 //    mouseover: function(btn , y , x ){
@@ -88,7 +88,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                         padding: 0
                     },
                     items: [{
-                            xtype: 'usermaptpl'
+                        xtype: 'usermaptpl'
                     }]
                 }
             },{
