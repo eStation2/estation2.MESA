@@ -1,8 +1,8 @@
 ﻿/*  *****************************************************************************************
 *   Update or insert JRC data for all the tables in the products and analysis schema's
+*   eStation2 version 2.1.0
 *   Date:   19-06-2017
 *********************************************************************************************  */
-
 
 SELECT products.update_insert_product_category(category_id := 'vegetation', order_index := 1, descriptive_name := 'Vegetation' );
 SELECT products.update_insert_product_category(category_id := 'rainfall', order_index := 2, descriptive_name := 'Rainfall' );
