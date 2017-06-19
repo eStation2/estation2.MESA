@@ -1479,8 +1479,10 @@ def create_sym_link(src_file, trg_file, force=False):
     # Create the symbolic link
     try:
         os.symlink(src_file, trg_file)
+        return 0
     except:
         logger.error('Error in creating symlink %s' % trg_file)
+        return 1
 
 
 ######################################################################################
