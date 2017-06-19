@@ -572,6 +572,7 @@ SELECT products.update_insert_thema_product(thema_id := 'Training', productcode 
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'msg-mpe', version := 'undefined', mapsetcode := 'SPOTV-CEMAC-1km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'wd-gee', version := '1.0', mapsetcode := 'WD-GEE-ECOWAS-AVG', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'wd-gee', version := '1.0', mapsetcode := 'WD-GEE-ECOWAS-AVG', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'ACMAD', productcode := 'ecmwf-evpt', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'AGRHYMET', productcode := 'vgt-ndvi', version := 'proba-v2.2', mapsetcode := 'SPOTV-ECOWAS-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'BDMS', productcode := 'vgt-ndvi', version := 'proba-v2.2', mapsetcode := 'SPOTV-SADC-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'vgt-ndvi', version := 'proba-v2.2', mapsetcode := 'SPOTV-IGAD-1km', activated := true );
@@ -588,6 +589,10 @@ SELECT products.update_insert_thema_product(thema_id := 'ACMAD', productcode := 
 SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'vgt-ndvi', version := 'sv2-pv2.2', mapsetcode := 'SPOTV-IOC-1km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'vgt-ndvi', version := 'sv2-pv2.2', mapsetcode := 'SPOTV-Africa-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'vgt-ndvi', version := 'sv2-pv2.2', mapsetcode := 'SPOTV-Africa-1km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'ACMAD', productcode := 'cpc-sm', version := '1.0', mapsetcode := 'CPC-Africa-50km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'ecmwf-evpt', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'ecmwf-evpt', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'ACMAD', productcode := 'modis-sst', version := 'v2013.1', mapsetcode := 'MODIS-Global-4km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'ACMAD', productcode := 'arc2-rain', version := '2.0', mapsetcode := 'ARC2-Africa-11km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'arc2-rain', version := '2.0', mapsetcode := 'ARC2-Africa-11km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'arc2-rain', version := '2.0', mapsetcode := 'ARC2-Africa-11km', activated := true );
@@ -597,6 +602,19 @@ SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'a
 SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'arc2-rain', version := '2.0', mapsetcode := 'ARC2-Africa-11km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'CICOS', productcode := 'arc2-rain', version := '2.0', mapsetcode := 'ARC2-Africa-11km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'AGRHYMET', productcode := 'arc2-rain', version := '2.0', mapsetcode := 'ARC2-Africa-11km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'AGRHYMET', productcode := 'cpc-sm', version := '1.0', mapsetcode := 'CPC-Africa-50km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'BDMS', productcode := 'cpc-sm', version := '1.0', mapsetcode := 'CPC-Africa-50km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'CICOS', productcode := 'cpc-sm', version := '1.0', mapsetcode := 'CPC-Africa-50km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'cpc-sm', version := '1.0', mapsetcode := 'CPC-Africa-50km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'cpc-sm', version := '1.0', mapsetcode := 'CPC-Africa-50km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'cpc-sm', version := '1.0', mapsetcode := 'CPC-Africa-50km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'AGRHYMET', productcode := 'ecmwf-evpt', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'BDMS', productcode := 'ecmwf-evpt', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'CICOS', productcode := 'ecmwf-evpt', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'ecmwf-evpt', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'ecmwf-evpt', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'ecmwf-evpt', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := false );
+
 
 
 
