@@ -16,16 +16,17 @@ from apps.processing import proc_functions
 from lib.python import functions
 from database import querydb
 
-logger = log.my_logger(__name__)
-
 #   General definitions for this processing chain
 ext=es_constants.ES2_OUTFILE_EXTENSION
 
 #   ---------------------------------------------------------------------
 #   Run the pipeline
 def processing_merge(pipeline_run_level=0, pipeline_printout_level=0,
-                     input_products='', output_product='', mapset=''):
+                     input_products='', output_product='', mapset='', logfile=None):
 
+
+    spec_logger = log.my_logger(logfile)
+    spec_logger.info("Entering routine %s" % 'processing_merge')
 
     # Dummy return arguments
     proc_lists = functions.ProcLists()
@@ -89,6 +90,8 @@ def processing_merge(pipeline_run_level=0, pipeline_printout_level=0,
                 out_file_path = out_dir+my_date+out_prod_ident
 
                 # Create the link
-                functions.create_sym_link(in_file_path, out_file_path, force=False)
+                status = functions.create_sym_link(in_file_path, out_file_path, force=False)
+                if status == 0:
+                    spec_logger.info("Merged file %s created" % out_file_path)
 
     return list_subprods, list_subprod_groups
