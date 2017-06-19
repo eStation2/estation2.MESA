@@ -35,7 +35,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         proc_lists = functions.ProcLists()
 
     # 8d cumul
-    activate_8dayavg_comput=0
+    activate_8dayavg_comput=1
 
     # monthly
     activate_monavg_comput=1
