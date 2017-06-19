@@ -1,4 +1,10 @@
-﻿SELECT products.update_insert_product_category(category_id := 'vegetation', order_index := 1, descriptive_name := 'Vegetation' );
+﻿/*  *****************************************************************************************
+*   Update or insert JRC data for all the tables in the products and analysis schema's
+*   Date:   19-06-2017
+*********************************************************************************************  */
+
+
+SELECT products.update_insert_product_category(category_id := 'vegetation', order_index := 1, descriptive_name := 'Vegetation' );
 SELECT products.update_insert_product_category(category_id := 'rainfall', order_index := 2, descriptive_name := 'Rainfall' );
 SELECT products.update_insert_product_category(category_id := 'fire', order_index := 3, descriptive_name := 'Fire' );
 SELECT products.update_insert_product_category(category_id := 'inlandwater', order_index := 4, descriptive_name := 'Inland water' );
