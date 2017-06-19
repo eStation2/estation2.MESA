@@ -43,9 +43,8 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
     width: '100%',
     height: 38,
     minWidth : 340,
-
-
     hidden: false
+    // ,chart_ImageObj: new Image()
 
     //,constructor:function(config) {
     //    var me = this,
@@ -185,16 +184,16 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
             width: '100%',
             height: 38,
             minWidth: 340,
-            suspendLayout: true,
-            saveDelay: 10,
+            // suspendLayout: true,
+            // saveDelay: 10,
             //listeners: {
             //    afterlayout: function () {
             //        //console.info(this);
             //        //console.info(this.getImage());
             //    }
             //},
-            //engine: Ext.draw.engine.Canvas,
-            engine: Ext.draw.engine.Svg,
+            engine: Ext.draw.engine.Canvas,
+            // engine: Ext.draw.engine.Svg,
 
             colors: [
                 '#81AF34', // green
@@ -248,7 +247,7 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
                 fontSize: me.fontsize,
                 fontWeight: 'bold',
                 textAlign: 'middle',
-                x: 286+25,
+                x: 286+20,
                 y: spriteY
             }],
 
@@ -454,6 +453,12 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
             lastdate = completeness.lastdate;
         }
 
+        if (firstdate.length>10){
+            firstdate = firstdate.slice(0, -5);
+        }
+        if (lastdate.length>10){
+            lastdate = lastdate.slice(0, -5);
+        }
         me.tooltipintervals = seriestitles;
 
 

@@ -5282,18 +5282,20 @@ class CreateProduct:
 class UpdateProduct:
     def __init__(self):
         self.lang = "eng"
-        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+        # self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
 
     def PUT(self):
         getparams = json.loads(web.data())
-        productinfo = {'productcode': getparams['products']['productcode'],
-                       'subproductcode': getparams['products']['subproductcode'],
-                       'version': getparams['products']['version'],
-                       'product_type': getparams['products']['product_type'],
-                       'defined_by': getparams['products']['defined_by'],
-                       'activated': getparams['products']['activated']}
+        # productinfo = {'productcode': getparams['products']['productcode'],
+        #                'subproductcode': getparams['products']['subproductcode'],
+        #                'version': getparams['products']['version'],
+        #                'product_type': getparams['products']['product_type'],
+        #                'defined_by': getparams['products']['defined_by'],
+        #                'activated': getparams['products']['activated']}
 
-        if self.crud_db.update('product', productinfo):
+        result = querydb.activate_deactivate_product(productcode=getparams['products']['productcode'], version=getparams['products']['version'], activate=getparams['products']['activated'], forse=True)
+        # if self.crud_db.update('product', productinfo):
+        if result:
             updatestatus = '{"success":"true", "message":"Product updated!"}'
         else:
             updatestatus = '{"success":false, "message":"An error occured while updating the product!"}'

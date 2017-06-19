@@ -400,6 +400,10 @@ class Dataset(object):
                 'intervals': ''
         }
 
+        dateformat = "%Y-%m-%d"
+        if self._frequency.dateformat == self._frequency.DATEFORMAT.DATETIME:
+            dateformat = "%Y-%m-%d %H:%M"
+
         if from_date and (not self.from_date or from_date < self.from_date):
             self.from_date = from_date
             refresh = True
@@ -409,8 +413,8 @@ class Dataset(object):
         if refresh:
             self._clean_cache()
         interval_list = list({'totfiles': interval.length,
-                     'fromdate': self.strip_year(interval.from_date.strftime("%Y-%m-%d")),
-                     'todate': self.strip_year(interval.to_date.strftime("%Y-%m-%d")),
+                     'fromdate': self.strip_year(interval.from_date.strftime(dateformat)),
+                     'todate': self.strip_year(interval.to_date.strftime(dateformat)),
                      'intervaltype': interval.interval_type,
                      'missing': interval.missing,
                      'intervalpercentage': interval.percentage} for interval in self.intervals)
