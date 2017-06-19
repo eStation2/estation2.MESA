@@ -238,7 +238,9 @@ def loop_processing(dry_run=False, serialize=False):
                 args = {'pipeline_run_level':pipeline_run_level, \
                         'pipeline_printout_level':pipeline_printout_level,\
                         'input_products': input_products, \
-                        'output_product': output_products}
+                        'output_product': output_products,
+                        'logfile': logfile}
+
                 # Define an id from a combination of fields
                 processing_unique_id='ID='+str(process_id)+'_METHOD='+derivation_method+'_ALGO='+algorithm+'.lock'
                 processing_unique_lock=es_constants.processing_tasks_dir+processing_unique_id
