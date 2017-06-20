@@ -11,7 +11,7 @@ logger = log.my_logger("apps.acquisition.drive_get_eumetcast")
 do_start = True
 dry_run = False
 service  = False
-use_ftp  = True
+use_ftp  = False
 
 if service:
     # Make sure the pid dir exists
