@@ -63,7 +63,7 @@ def loop_ingestion(dry_run=False):
 
     while True:
 
-        # Manage the ingestion of Historical Archives (e.g. eStation prods disseminated via EUMETCast)
+        # Manage the ingestion of Historical Archives (e.g. eStation prods disseminated via EUMETCast - MESA_JRC_*.tif)
         try:
             status = ingest_archives_eumetcast(dry_run=dry_run)
         except:
