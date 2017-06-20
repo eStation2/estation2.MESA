@@ -21,9 +21,9 @@ class GetEumetcastDaemon(DaemonDryRunnable):
         systemsettings = functions.getSystemSettings()
         # Special case for mesa-proc @ JRC
         if systemsettings['type_installation'] == 'Server':
-            get_eumetcast.loop_eumetcast_ftp(dry_run=self.dry_run)
-        else:
             get_eumetcast.loop_eumetcast(dry_run=self.dry_run)
+        else:
+            get_eumetcast.loop_eumetcast_ftp(dry_run=self.dry_run)
 
 class GetInternetDaemon(DaemonDryRunnable):
     def run(self):
