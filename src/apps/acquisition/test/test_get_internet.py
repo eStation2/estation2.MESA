@@ -328,6 +328,32 @@ class TestGetInternet(unittest.TestCase):
 
         status = get_file_from_url(remote_url+files_list[-1],  '/tmp/', target_file=None, userpwd='')
 
+
+    # Test 2.1.0 - Get 1 source
+    def TestRemoteHttp_TAMSAT_1(self):
+
+        internet_id='READINGS:TAMSAT:10D:NC'
+        internet_sources = querydb.get_active_internet_sources(echo=False)
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':20161101,
+                         'end_date':20170601,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type}
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
+
+
     # Original test
     def TestRemoteHttp_FEWSNET(self):
 
@@ -616,8 +642,8 @@ class TestGetInternet(unittest.TestCase):
                          'pull_frequency': internet_source.pull_frequency,
                          'user_name':internet_source.user_name,
                          'password':internet_source.password,
-                         'start_date':20160401,
-                         'end_date':20160801,
+                         'start_date':20170401,
+                         'end_date':20170601,
                          'frequency_id': internet_source.frequency_id,
                          'type':internet_source.type}
 
@@ -642,7 +668,7 @@ class TestGetInternet(unittest.TestCase):
                          'user_name':internet_source.user_name,
                          'password':internet_source.password,
                          'start_date':20161101,
-                         'end_date':20161211,
+                         'end_date':20170601,
                          'frequency_id': internet_source.frequency_id,
                          'type':internet_source.type}
 
