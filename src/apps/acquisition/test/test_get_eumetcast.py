@@ -62,3 +62,10 @@ class TestGetEumetcast(unittest.TestCase):
         ftp_eumetcast_url='ftp://mesa-pc2'
         ftp_eumetcast_userpwd='root:rootroot'
         current_list = get_list_matching_files_dir_ftp(ftp_eumetcast_url, ftp_eumetcast_userpwd, filter_expression_jrc)
+
+
+    def TestGetEumetcast_Archives(self):
+
+        print('Start Test')
+        get_archives_eumetcast()
+        print('Test Finished')
