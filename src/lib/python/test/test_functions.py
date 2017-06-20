@@ -50,3 +50,7 @@ class TestFunctions(TestCase):
         status = functions.save_netcdf_scaling(sds, preproc_file)
         [fact, off] = functions.read_netcdf_scaling(preproc_file)
         print fact, off
+
+    def test_get_status_All_Services(self):
+        services_status = functions.getStatusAllServices()
+        print services_status
