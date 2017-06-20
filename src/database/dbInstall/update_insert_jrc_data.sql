@@ -1,4 +1,5 @@
-﻿/*  *****************************************************************************************
+﻿
+/*  *****************************************************************************************
 *   Update or insert JRC data for all the tables in the products and analysis schema's
 *   eStation2 version 2.1.0
 *   Date:   19-06-2017
@@ -7508,7 +7509,6 @@ FROM (VALUES
   ('vgt-fapar','V2.0'),
   ('vgt-fcover','V2.0'),
   ('vgt-lai','V2.0'),
-  ('vgt-ndvi', 'spot-v2'),
   ('vgt-ndvi','proba-v2.2'),
   ('vgt-ndvi','spot-v2.2'),
   ('vgt-ndvi','sv2-pv2.2')
@@ -7528,7 +7528,6 @@ FROM (VALUES
   ('vgt-fapar','V2.0'),
   ('vgt-fcover','V2.0'),
   ('vgt-lai','V2.0'),
-  ('vgt-ndvi', 'spot-v2'),
   ('vgt-ndvi','proba-v2.2'),
   ('vgt-ndvi','spot-v2.2'),
   ('vgt-ndvi','sv2-pv2.2')
@@ -7546,7 +7545,6 @@ FROM (VALUES
   ('vgt-fapar','V2.0'),
   ('vgt-fcover','V2.0'),
   ('vgt-lai','V2.0'),
-  ('vgt-ndvi', 'spot-v2'),
   ('vgt-ndvi','proba-v2.2'),
   ('vgt-ndvi','spot-v2.2'),
   ('vgt-ndvi','sv2-pv2.2')
@@ -7567,7 +7565,6 @@ WHERE (p.process_id) in (SELECT process_id
 				  ('vgt-fapar','V2.0'),
 				  ('vgt-fcover','V2.0'),
 				  ('vgt-lai','V2.0'),
-				  ('vgt-ndvi', 'spot-v2'),
 				  ('vgt-ndvi','proba-v2.2'),
 				  ('vgt-ndvi','spot-v2.2'),
 				  ('vgt-ndvi','sv2-pv2.2')
@@ -7586,7 +7583,6 @@ FROM (VALUES
   ('vgt-fapar','V2.0'),
   ('vgt-fcover','V2.0'),
   ('vgt-lai','V2.0'),
-  ('vgt-ndvi', 'spot-v2'),
   ('vgt-ndvi','proba-v2.2'),
   ('vgt-ndvi','spot-v2.2'),
   ('vgt-ndvi','sv2-pv2.2')
@@ -7598,7 +7594,6 @@ WHERE tmp.productcode = pads.productcode AND tmp.version = pads.version;
 
 SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('arc2-rain', '2.0', TRUE, FALSE);
 SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('cpc-sm','1.0', TRUE, FALSE);
-SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('vgt-ndvi', 'spot-v2', TRUE, FALSE);
 SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('ecmwf-evpt','OPE', TRUE, FALSE);
 SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('modis-pp','v2013.1', TRUE, FALSE);
 SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('vgt-fapar','V2.0', TRUE, FALSE);
@@ -7666,7 +7661,7 @@ FROM (VALUES
   ('vgt-swb', 'undefined'),
   ('vgt-vpi', 'undefined')
   ) AS tmp (productcode,version)
-WHERE tmp.productcode = p.productcode AND tmp.version = p.version
+WHERE tmp.productcode = p.productcode AND tmp.version = p.version;
 
 
 SELECT * FROM products.populate_geoserver();
