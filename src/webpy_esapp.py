@@ -3807,9 +3807,10 @@ class GetServerLayerFileList:
         self.lang = "eng"
 
     def GET(self):
-        layerfiledir = '/eStation2/layers/'
+        layerfiledir = es_constants.es2globals['estation2_layers_dir']   # '/eStation2/layers/'
         layers_json = ''
         layerfiles_dict = []
+        pattern = ""
         pattern = ""
         alist_filter = ['geojson']
         layerfiles_json = '{"success":false, "error":"No Layers defined!"}'
