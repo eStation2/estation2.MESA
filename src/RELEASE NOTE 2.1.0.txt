@@ -17,7 +17,7 @@
 - Issue with modis_par 4 km processing chain: two versions (2012.0 and 2013.1) existing in process_products table (MOI request)??
 - Primary Production computation not triggered (MOI request).
 - In the std_ndvi chain apply baresoil masks to ndv and ndvi-linearx2 anomalies (was missing)
-
+- Merge processing change slightly improved to save in logfile.
 
 1.3 DataManagement
 
@@ -53,6 +53,7 @@
   of LAI/FCOVE/FAPAR (not yet activated)
 - Add ingestion for ARC2-rain daily product - 0.1 degree - GZIP type
 - Add ingestion of CPC Soil Moisture monthly product - 0.5 degree - binary type (new pre-proc type)
+- Add the get_eumetcast functions for the MESA_JRC archives
 
 2.2.2 Processing
 
