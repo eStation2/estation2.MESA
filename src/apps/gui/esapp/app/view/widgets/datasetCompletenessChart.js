@@ -247,7 +247,7 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
                 fontSize: me.fontsize,
                 fontWeight: 'bold',
                 textAlign: 'middle',
-                x: 286+25,
+                x: 286+22,
                 y: spriteY
             }],
 
