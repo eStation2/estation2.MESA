@@ -103,15 +103,16 @@ def get_archives_eumetcast_ftp():
         current_list = []
         time.sleep(60)
 
+    logger_spec.info("Number of files currently on PC1 for trigger %s is %i", source_id, len(current_list))
+
     if len(current_list) > 0:
-        logger_spec.info("Number of files currently on PC1 for trigger %s is %i", source_id, len(current_list))
 
         #logger.debug("Number of files already copied for trigger %s is %i", eumetcast_source.eumetcast_id, len(processed_list))
         logger_spec.debug("Number of files already copied for trigger %s is %i", source_id, len(processed_list))
         listtoprocess = []
         listtoprocess = set(current_list) - set(processed_list)
         #logger.debug("Number of files to be copied for trigger %s is %i", eumetcast_source.eumetcast_id, len(listtoprocess))
-        logger_spec.debug("Number of files to be copied for trigger %s is %i", source_id, len(listtoprocess))
+        logger_spec.info("Number of files to be copied for trigger %s is %i", source_id, len(listtoprocess))
         if listtoprocess != set([]):
             logger_spec.debug("Loop on the found files.")
             for filename in list(listtoprocess):
@@ -156,6 +157,7 @@ def get_archives_eumetcast():
                       'time_latest_exec': datetime.datetime.now(),
                       'time_latest_copy': datetime.datetime.now()}
 
+    logger.warning("Input DIR for get_archives_eumetcast is defined as: *** %s ***", input_dir)
     logger.debug("Loading the processed file list for source %s ", source_id)
 
     # Restore/Create List
@@ -173,15 +175,15 @@ def get_archives_eumetcast():
         current_list = []
         time.sleep(60)
 
+    logger_spec.info("Number of files currently on PC1 for trigger %s is %i", source_id, len(current_list))
     if len(current_list) > 0:
-        logger_spec.info("Number of files currently on PC1 for trigger %s is %i", source_id, len(current_list))
 
         #logger.debug("Number of files already copied for trigger %s is %i", eumetcast_source.eumetcast_id, len(processed_list))
         logger_spec.debug("Number of files already copied for trigger %s is %i", source_id, len(processed_list))
         listtoprocess = []
         listtoprocess = set(current_list) - set(processed_list)
         #logger.debug("Number of files to be copied for trigger %s is %i", eumetcast_source.eumetcast_id, len(listtoprocess))
-        logger_spec.debug("Number of files to be copied for trigger %s is %i", source_id, len(listtoprocess))
+        logger_spec.info("Number of files to be copied for trigger %s is %i", source_id, len(listtoprocess))
         if listtoprocess != set([]):
             logger_spec.debug("Loop on the found files.")
             for filename in list(listtoprocess):
