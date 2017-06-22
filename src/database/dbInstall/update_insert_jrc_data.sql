@@ -1,14 +1,3 @@
-﻿
-/*  *****************************************************************************************
-*   Update or insert JRC data for all the tables in the products and analysis schema's
-*   eStation2 version 2.1.0
-*   Date:   19-06-2017
-*********************************************************************************************  */
-
-
-TRUNCATE TABLE analysis.legend CASCADE;
-
-
 SELECT products.update_insert_product_category(category_id := 'vegetation', order_index := 1, descriptive_name := 'Vegetation' );
 SELECT products.update_insert_product_category(category_id := 'rainfall', order_index := 2, descriptive_name := 'Rainfall' );
 SELECT products.update_insert_product_category(category_id := 'fire', order_index := 3, descriptive_name := 'Fire' );
@@ -2158,7 +2147,7 @@ SELECT analysis.update_insert_languages( langcode := 'por', langdescription := '
 SELECT analysis.update_insert_languages( langcode := 'lang1', langdescription := 'Español', active := false );
 
 
-
+TRUNCATE TABLE analysis.legend CASCADE;
 
 SELECT analysis.update_insert_legend( legend_id := 16, legend_name := 'NDVI Ratio</BR>(%)', step_type := 'irregular', min_value := 1.000000, max_value := 200.000000, min_real_value := 'NO_LOW', max_real_value := 'NO_HIGH', colorbar := 'NDVI ratio: USGS palette', step := 1.000000, step_range_from := 200.000000, step_range_to := 200.000000, unit := '%' );
 SELECT analysis.update_insert_legend( legend_id := 148, legend_name := 'ChlA</BR>(mg/m³)', step_type := 'irregular', min_value := .000000, max_value := 10.000000, min_real_value := 'NO_LOW', max_real_value := 'NO_HIGH', colorbar := 'Chlorophyll A (mg/m³): JRC 230 color steps to 10', step := .010000, step_range_from := .000000, step_range_to := 10.000000, unit := 'mg/m³' );

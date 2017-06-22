@@ -1,7 +1,7 @@
 Summary: eStation 2.0 application from JRC
 Name: eStation2-Apps
 Version: 2.1.0
-Release: 2
+Release: 11
 Group: eStation
 License: GPL
 Source: /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz
@@ -20,6 +20,7 @@ cd /home/adminuser/eStation2.git			# -> TEMP: locally unzippped manually
 git pull origin main		  			# -> TEMP: locally unzippped manually
 # Create the .tgz
 # cd /home/adminuser/estation2.MESA-main/src
+cd src
 tar -cvzf /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz *
 
 # Prepare the files in BUILD_ROOT
