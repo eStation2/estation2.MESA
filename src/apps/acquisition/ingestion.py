@@ -25,6 +25,7 @@ import shutil
 import gzip
 import psutil
 import csv
+import sys
 
 from multiprocessing import *
 
@@ -39,7 +40,8 @@ from apps.processing import proc_functions
 from apps.productmanagement import products
 from apps.productmanagement import datasets
 
-import pygrib
+if sys.platform != 'win32':
+    import pygrib
 import fnmatch
 from osgeo import gdal
 from osgeo import osr

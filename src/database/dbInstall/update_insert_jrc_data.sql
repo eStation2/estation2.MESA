@@ -1,3 +1,13 @@
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+SET search_path = products, analysis, pg_catalog;
+
+
 SELECT products.update_insert_product_category(category_id := 'vegetation', order_index := 1, descriptive_name := 'Vegetation' );
 SELECT products.update_insert_product_category(category_id := 'rainfall', order_index := 2, descriptive_name := 'Rainfall' );
 SELECT products.update_insert_product_category(category_id := 'fire', order_index := 3, descriptive_name := 'Fire' );

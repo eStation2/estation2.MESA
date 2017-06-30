@@ -16,6 +16,7 @@
 #
 
 import os
+import sys
 import ConfigParser
 from osgeo import gdalconst
 #from lib.python import es_logging as log
@@ -25,11 +26,20 @@ from osgeo import gdalconst
 # Set the mask for log files
 os.umask(0000)
 
+if sys.platform != 'win32':
+    factory_settings_filename = 'factory_settings.ini'
+else:
+    factory_settings_filename = 'factory_settings_windows.ini'
+
 thisfiledir = os.path.dirname(os.path.abspath(__file__))
 config_factorysettings = ConfigParser.ConfigParser()
-config_factorysettings.read([os.path.join(thisfiledir, 'factory_settings.ini')])
+config_factorysettings.read([os.path.join(thisfiledir, factory_settings_filename)])
 
-usersettingsfile = '/eStation2/settings/user_settings.ini'
+if sys.platform != 'win32':
+    usersettingsfile = '/eStation2/settings/user_settings.ini'
+else:
+    usersettingsfile = 'C:/eStation2/eStation2/settings/user_settings.ini'
+
 if not os.path.isfile(usersettingsfile):
     usersettingsfile = os.path.join(thisfiledir, 'install/user_settings.ini')
     # ToDo: copy user_settings.ini from config dir to /eStation2/settings/ ???
