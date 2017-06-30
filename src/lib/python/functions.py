@@ -20,7 +20,7 @@ import math
 import calendar
 import datetime
 import re
-import resource
+# import resource
 from datetime import date
 import uuid
 import pickle
@@ -30,6 +30,7 @@ import subprocess
 from socket import socket
 import urllib2
 import ast
+import sys
 from osgeo import gdal, osr
 
 # Import eStation2 modules
@@ -218,6 +219,8 @@ def getListVersions():
     vers_dirs = glob.glob(base+'*')
     for ver in vers_dirs:
         if os.path.isdir(ver):
+            if sys.platform == 'win32':
+                ver = ver.replace('\\','/')
             v = ver.replace(base, '')
             versions.append(v)
 
@@ -1513,10 +1516,10 @@ def ensure_sep_present(path, position):
 #  Simple function to show the memory Usage
 # (see http://stackoverflow.com/questions/552744/how-do-i-profile-memory-usage-in-python)
 #
-def mem_usage(point=""):
-    usage = resource.getrusage(resource.RUSAGE_SELF)
-    return '''%s: usertime=%s systime=%s mem=%s mb
-           ''' % (point, usage[0], usage[1], (usage[2]*resource.getpagesize())/1000000.0)
+# def mem_usage(point=""):
+#     usage = resource.getrusage(resource.RUSAGE_SELF)
+#     return '''%s: usertime=%s systime=%s mem=%s mb
+#            ''' % (point, usage[0], usage[1], (usage[2]*resource.getpagesize())/1000000.0)
 
 
 ######################################################################################

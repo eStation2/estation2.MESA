@@ -27,7 +27,7 @@ from database import crud
 
 from apps.acquisition import get_eumetcast
 from apps.acquisition import acquisition
-from apps.processing import processing
+from apps.processing import processing      # Comment in WINDOWS version!
 from apps.productmanagement.datasets import Dataset
 from apps.es2system import es2system
 # from apps.productmanagement.datasets import Frequency
@@ -4367,7 +4367,7 @@ class IngestArchive:
         #     task = 'start'
         # print task
 
-        pid_file = es_constants.ingest_archive_pid_filename
+        pid_file = es_constants.es2globals['ingest_archive_pid_filename']
         ingestarchive_daemon = es2system.IngestArchiveDaemon(pid_file, dry_run=True)
         status = ingestarchive_daemon.status()
         if status:
@@ -5004,6 +5004,10 @@ class DataSets:
                                         elif  dataset_info.frequency_id == 'e1day':
                                             today = datetime.date.today()
                                             from_date = today - relativedelta(years=1)
+                                            # if sys.platform != 'win32':
+                                            #     from_date = today - relativedelta(years=1)
+                                            # else:
+                                            #     from_date = today - datetime.timedelta(days=365)
                                             kwargs = {'mapset': mapset,
                                                       'sub_product_code': subproductcode,
                                                       'from_date': from_date}
@@ -5379,6 +5383,7 @@ class Ingestion:
 
     def GET(self):
         from dateutil.relativedelta import relativedelta
+
         # return web.ctx
         ingestions = querydb.get_ingestions(echo=False)
         # print ingestions
@@ -5413,6 +5418,11 @@ class Ingestion:
                     elif  row.frequency_id == 'e1day':
                         today = datetime.date.today()
                         from_date = today - relativedelta(years=1)
+
+                        # if sys.platform != 'win32':
+                        #     from_date = today - relativedelta(years=1)
+                        # else:
+                        #     from_date = today - datetime.timedelta(days=365)
                         kwargs = {'product_code': row.productcode,
                                   'sub_product_code': row.subproductcode,
                                   'version': row.version,
