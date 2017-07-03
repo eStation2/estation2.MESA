@@ -3811,7 +3811,6 @@ class GetServerLayerFileList:
         layers_json = ''
         layerfiles_dict = []
         pattern = ""
-        pattern = ""
         alist_filter = ['geojson']
         layerfiles_json = '{"success":false, "error":"No Layers defined!"}'
 
@@ -4201,9 +4200,15 @@ class UpdateUserSettings:
 
     def PUT(self):
         import ConfigParser
+
+        if sys.platform != 'win32':
+            factory_settings_filename = 'factory_settings.ini'
+        else:
+            factory_settings_filename = 'factory_settings_windows.ini'
+
         config_factorysettings = ConfigParser.ConfigParser()
-        config_factorysettings.read(['factory_settings.ini',
-                                     es_constants.es2globals['config_dir'] + '/factory_settings.ini'])
+        config_factorysettings.read([factory_settings_filename,
+                                     es_constants.es2globals['config_dir'] + '/' + factory_settings_filename])
 
         usersettingsfilepath = es_constants.es2globals['settings_dir']+'/user_settings.ini'
         # usersettingsfilepath = '/eStation2/settings/user_settings.ini'
@@ -4239,13 +4244,19 @@ class UserSettings:
 
     def GET(self):
         import ConfigParser
+
+        if sys.platform != 'win32':
+            factory_settings_filename = 'factory_settings.ini'
+        else:
+            factory_settings_filename = 'factory_settings_windows.ini'
+
         config_usersettings = ConfigParser.ConfigParser()
         config_usersettings.read(['user_settings.ini',
                                   es_constants.es2globals['settings_dir']+'/user_settings.ini'])
 
         config_factorysettings = ConfigParser.ConfigParser()
-        config_factorysettings.read(['factory_settings.ini',
-                                     es_constants.es2globals['config_dir'] + '/factory_settings.ini'])
+        config_factorysettings.read([factory_settings_filename,
+                                     es_constants.es2globals['config_dir'] + '/' + factory_settings_filename])
 
         settings = {}
         usersettings = config_usersettings.items('USER_SETTINGS')
