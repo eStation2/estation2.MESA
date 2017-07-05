@@ -10,6 +10,7 @@
 import os
 import glob, datetime
 import tempfile
+import shutil
 
 # Import eStation2 modules
 from lib.python import functions
@@ -341,6 +342,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
                 "target_mapset_name": target_mapset_name}
 
         raster_image_math.do_reproject(**args)
+
+        shutil.rmtree(tmpdir)
 
     #   ---------------------------------------------------------------------
     #   Derived product: 10dcount10kavg
