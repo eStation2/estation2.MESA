@@ -2,7 +2,8 @@
 
 import sys, os, time, atexit
 import psutil
-from signal import SIGKILL, SIGTERM
+if sys.platform != 'win32':
+    from signal import SIGKILL, SIGTERM
 from lib.python import es_logging as log
 logger = log.my_logger("lib.python.daemon")
 from config import es_constants
@@ -137,7 +138,8 @@ class Daemon(object):
         try:
             while 1:
                 #os.kill(pid, SIGTERM)
-                os.kill(pid, SIGKILL)
+                if sys.platform != 'win32':
+                    os.kill(pid, SIGKILL)
                 time.sleep(0.1)
         except OSError, err:
             err = str(err)

@@ -7,19 +7,19 @@
 #   TODO-M.C.: optimize (replace loops)
 
 # Import standard modules
-import sys
-import os.path
-#import cpimgfile ??
+# import sys
+# import os.path
+# import cpimgfile ??
 
 # Import eStation lib modules
-import database.querydb as querydb
+# import database.querydb as querydb
 
 # Import third-party modules
-from osgeo.gdalconst import *
-from osgeo import gdal
-from osgeo import osr
-import pygrib
-import numpy as N
+# from osgeo.gdalconst import *
+# from osgeo import gdal
+# from osgeo import osr
+# import pygrib
+# import numpy as N
 
 try:
     from osgeo import gdal
@@ -41,8 +41,8 @@ except ImportError:
     
 import sys
 import os.path
-import operator
-import math
+# import operator
+# import math
 
 # _____________________________
 def ParseType(type):
