@@ -35,7 +35,7 @@ from apps.processing import processing_std_lsasaf_lst
 from apps.processing import processing_std_lsasaf_et
 from apps.processing import processing_std_modis_monavg
 from apps.processing import processing_std_modis_firms
-from apps.processing import processing_std_modis_pp
+from apps.processing import processing_modis_pp
 from apps.processing import processing_std_msg_mpe
 from apps.processing import processing_std_rain_onset
 from apps.processing import processing_std_seas_cum
@@ -121,7 +121,7 @@ def loop_processing(dry_run=False, serialize=False):
             version = input_products[0].version
             native_mapset=input_products[0].mapsetcode
 
-            logger.info("Processing product: %s" % str(product_code))
+            logger.info("Algorithm %s applied to [%s]/[%s]" % (str(algorithm), str(product_code),str(sub_product_code)))
 
             # Get product metadata for output products (from first input)
             input_product_info = querydb.get_product_out_info(productcode=product_code,
