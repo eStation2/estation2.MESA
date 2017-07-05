@@ -1502,7 +1502,7 @@ def do_compute_primary_production(chla_file='', sst_file='', kd_file='', par_fil
             data_sst = N.ravel(sst_fileID.ReadAsArray(0, il, XSize, 1))
             data_par   = N.ravel(par_fileID.ReadAsArray(0, il, XSize, 1))
             data_kd   = N.ravel(kd_fileID.ReadAsArray(0, il, XSize, 1))
-            data_sst = data_sst*0.01
+            data_sst_rescal = data_sst*0.01
             data_kd_rescal = data_kd*0.001
 
             valid = (data_chl !=  chla_nodata) * (data_sst != sst_nodata) * (data_par != par_nodata) *(data_kd != kd_nodata)
