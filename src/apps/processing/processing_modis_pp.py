@@ -163,7 +163,7 @@ def create_pipeline(input_products, output_product, logfile=None):
 #   ---------------------------------------------------------------------
 #   Run the pipeline
 
-def processing_modis_pp(pipeline_run_level=0, pipeline_printout_level=0,
+def processing_modis_pp(res_queue, pipeline_run_level=0, pipeline_printout_level=0,
                         pipeline_printout_graph_level=0, input_products='', output_product='',
                         write2file=None, logfile=None):
 
