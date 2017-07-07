@@ -67,7 +67,7 @@ def loop_ingestion(dry_run=False):
 
         # Manage the ingestion of Historical Archives (e.g. eStation prods disseminated via EUMETCast - MESA_JRC_*.tif)
         try:
-            status = ingest_archives_eumetcast(dry_run=dry_run)
+            status = 0 #ingest_archives_eumetcast(dry_run=dry_run)
         except:
             logger.error("Error in executing ingest_archives_eumetcast")
 
@@ -710,7 +710,8 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger, out_qu
         # Test the file exists
         if not os.path.isfile(ifile):
             my_logger.error('Input file does not exist ' + ifile)
-            raise Exception("Input file does not exist: %s" % ifile)
+            return 1
+            # raise Exception("Input file does not exist: %s" % ifile)
         # Unzip to tmpdir and add to list
         if re.match('.*\.bz2', ifile):
             try:
@@ -731,7 +732,8 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger, out_qu
                     bz2file.close()
                 # Need to put something, otherwise goes in error
                 out_queue.put('')
-                raise Exception("Error in unzipping file: %s" % ifile)
+                return 1
+                # raise Exception("Error in unzipping file: %s" % ifile)
             else:
                 myfile.close()
                 bz2file.close()
@@ -752,8 +754,8 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger, out_qu
         if not os.path.isfile(unzipped_file):
             my_logger.error('Input file does not exist ' + unzipped_file)
             out_queue.put('')
-            raise Exception("Input file does not exist: %s" % unzipped_file)
-
+            # raise Exception("Input file does not exist: %s" % unzipped_file)
+            return 1
         # Test the hdf file and read list of datasets
         try:
             hdf = gdal.Open(unzipped_file)
@@ -776,7 +778,8 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger, out_qu
             hdf = None
             #close_hdf_dataset(unzipped_file)
             out_queue.put('')
-            raise Exception('Error in extracting SDS')
+            return 1
+            # raise Exception('Error in extracting SDS')
 
     # For each dataset, merge the files, by using the dedicated function
     for id_subdataset in list_to_extr:
@@ -791,7 +794,8 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger, out_qu
     except:
         my_logger.error('Error in mosaicing')
         out_queue.put('')
-        raise Exception('Error in mosaicing')
+        return 1
+        # raise Exception('Error in mosaicing')
 
     my_logger.debug('Output file generated: ' + output_file)
 
