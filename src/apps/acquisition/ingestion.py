@@ -722,13 +722,16 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger, out_qu
                 myfile_path = os.path.join(tmpdir, filename)
                 myfile = open(myfile_path, "wb")
                 myfile.write(data)
-
                 unzipped_input_files.append(myfile_path)
             except:
-                my_logger.error('Error in unzipping file: ' + ifile)
-                myfile.close()
-                bz2file.close()
-                raise Exception ('Error in unzipping file')
+                my_logger.error('Error in unzipping my file: ' + ifile)
+                if myfile is not None:
+                    myfile.close()
+                if bz2file is not None:
+                    bz2file.close()
+                # Need to put something, otherwise goes in error
+                out_queue.put('')
+                raise Exception("Error in unzipping file: %s" % ifile)
             else:
                 myfile.close()
                 bz2file.close()
@@ -748,6 +751,7 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger, out_qu
         # Test the file exists
         if not os.path.isfile(unzipped_file):
             my_logger.error('Input file does not exist ' + unzipped_file)
+            out_queue.put('')
             raise Exception("Input file does not exist: %s" % unzipped_file)
 
         # Test the hdf file and read list of datasets
@@ -771,6 +775,7 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger, out_qu
             my_logger.error('Error in extracting SDS')
             hdf = None
             #close_hdf_dataset(unzipped_file)
+            out_queue.put('')
             raise Exception('Error in extracting SDS')
 
     # For each dataset, merge the files, by using the dedicated function
@@ -785,6 +790,7 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger, out_qu
         mosaic_lsasaf_msg(files_to_merge, output_file, '')
     except:
         my_logger.error('Error in mosaicing')
+        out_queue.put('')
         raise Exception('Error in mosaicing')
 
     my_logger.debug('Output file generated: ' + output_file)
