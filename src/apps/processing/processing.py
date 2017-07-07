@@ -35,7 +35,7 @@ from apps.processing import processing_std_lsasaf_lst
 from apps.processing import processing_std_lsasaf_et
 from apps.processing import processing_std_modis_monavg
 from apps.processing import processing_std_modis_firms
-from apps.processing import processing_std_modis_pp
+from apps.processing import processing_modis_pp
 from apps.processing import processing_std_msg_mpe
 from apps.processing import processing_std_rain_onset
 from apps.processing import processing_std_seas_cum
@@ -121,7 +121,7 @@ def loop_processing(dry_run=False, serialize=False):
             version = input_products[0].version
             native_mapset=input_products[0].mapsetcode
 
-            logger.info("Processing product: %s" % str(product_code))
+            logger.info("Algorithm %s applied to [%s]/[%s]" % (str(algorithm), str(product_code),str(sub_product_code)))
 
             # Get product metadata for output products (from first input)
             input_product_info = querydb.get_product_out_info(productcode=product_code,
@@ -133,7 +133,6 @@ def loop_processing(dry_run=False, serialize=False):
             logfile='apps.processing.'+processing_unique_id
 
             # Case of a 'std_' processing (i.e. ruffus with 1 input) -> get all info from 1st INPUT and manage dates
-
             if re.search('^std_.*',algorithm):
                 logger.debug("Processing Chain is standard type")
 
@@ -231,13 +230,13 @@ def loop_processing(dry_run=False, serialize=False):
                     logger.debug("Lock already exist: %s" % processing_unique_id)
 
 
-            # Case of no 'std' (e.g. merge processing) -> get output products and pass everything to function
+            # Case of no 'std' (e.g. merge processing - or more than 1 input) -> get output products and pass everything to function
             else:
                 output_products = querydb.get_processing_chain_products(chain.process_id,type='output')
                 # Prepare arguments
-                args = {'pipeline_run_level':pipeline_run_level, \
-                        'pipeline_printout_level':pipeline_printout_level,\
-                        'input_products': input_products, \
+                args = {'pipeline_run_level':pipeline_run_level,
+                        'pipeline_printout_level':pipeline_printout_level,
+                        'input_products': input_products,
                         'output_product': output_products,
                         'logfile': logfile}
 
@@ -258,12 +257,31 @@ def loop_processing(dry_run=False, serialize=False):
                     proc_mod = getattr(proc_pck, module_name)
                     proc_func= getattr(proc_mod, function_name)
 
-                    # Do NOT detach process (work in series)
-                    proc_lists = proc_func(**args)
+                    if re.search('.*merge.*',algorithm):
+                        logger.debug("Processing Chain is merge type")
+                        # Do NOT detach process (work in series)
+                        proc_lists = proc_func(**args)
 
-                    time.sleep(float(sleep_time))
-                    logger.info("Waking-up now, and removing the .lock")
-                    os.remove(processing_unique_lock)
+                        time.sleep(float(sleep_time))
+                        logger.info("Waking-up now, and removing the .lock")
+                        os.remove(processing_unique_lock)
+                    else:
+                        logger.info("Processing Chain is more-inputs type (e.g. modis-pp)")
+
+                        # We have to 'detach' the process for avoiding ruffus exception 'error_duplicate_task_name'
+                        results_queue = Queue()
+                        p = Process(target=proc_func, args=(results_queue,), kwargs=args)
+                        p.start()
+                        p.join()
+
+                        # Sleep time to be read from processing
+                        time.sleep(float(sleep_time))
+                        logger.debug("Execution finished - remove lock")
+                        try:
+                            os.remove(processing_unique_lock)
+                        except:
+                            logger.warning("Lock not removed: %s" % processing_unique_lock)
+
                 else:
                     logger.debug("Processing already running for ID: %s " % processing_unique_id)
 

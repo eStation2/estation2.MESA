@@ -1,0 +1,49 @@
+#
+#   Release Note - after 2.1.0 (2.1.1 or 2.2.0)
+#   Changes with respect to 2.1.0 - Unless specification, they refer to Apps.rpm package.
+#
+
+1. BUG FIXING
+-------------
+
+1.1 Acquisition
+
+1.2 Processing
+
+1.3 DataManagement
+
+1.4 Visualization
+
+1.5 Service
+
+1.6 Configuration/DB
+
+
+
+2. NEW FEATURES
+---------------
+
+2.0 General
+
+2.1 Dashboard
+
+2.2.1 Acquisition
+
+- Correct a bug on ingestion of LSASAF-LST (corrupted .bz2 files make the ingestion service stuck)
+
+2.2.2 Processing
+
+- Fully implement the modis-pp processing chain, as a non-standard chain (~ merge). Define two chains for 8daysavg and monavg products.
+
+2.2.3 DataManagement
+
+2.3.1 Visualization/General
+
+2.3.2 Visualization/Maps
+
+2.3.3 Visualization/Graphs
+
+2.4 Configuration/DB
+
+2.5 Other packages
+

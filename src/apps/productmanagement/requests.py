@@ -97,7 +97,7 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
 def create_archive_from_request(request_file):
 
     # Creates an archive file (.tgz) from a 'json' request file
-    # Create a self-extracting archive (.bsx?) from a template script and the .tgz
+    # Create a self-extracting archive (.bsx) from a template script and the .tgz
 
     # Read the request
     try:
@@ -115,10 +115,13 @@ def create_archive_from_request(request_file):
     n_mapsets = len(my_mapsets)
     incresing_number=1
 
+    # Loop over defined mapsets
     for my_mapset in my_mapsets:
         mapsetcode = my_mapset['mapsetcode']
 
         mapsetdatasets = my_mapset['mapsetdatasets']
+
+        # Loop over all datasets in a mapset
         for mapsetdataset in mapsetdatasets:
             subproductcode =  mapsetdataset['subproductcode']
             missing_info = mapsetdataset['missing']
@@ -127,11 +130,12 @@ def create_archive_from_request(request_file):
             self_extracting_name=archive_name
             self_extracting_name=self_extracting_name.replace('.tgz','.bsx')
             logger.debug( 'Archive file name: {0}'.format(archive_name))
-            # Create a product object
+
+            # Create a product object - no date indication
             product = Product(product_code=my_product, version=my_version)
             [tarfile , results] = product.create_tar(missing_info, filetar=archive_name, tgz=True)
             logger.debug('Files found for {0}: {1}'.format(subproductcode,results['n_file_copied']))
-            # Test there at list a file missing
+            # Test there is - at list - 1 file missing
             if results['n_file_copied'] > 0:
 
                 logger.info('Creating file {0}'.format(self_extracting_name))
@@ -156,4 +160,5 @@ def get_archive_name(productcode, version, id):
     filename = es_constants.es2globals['base_tmp_dir']+os.path.sep
     filename += 'archive_'+productcode+'_'+version+'_'+id+'.tgz'
     return filename
+
 

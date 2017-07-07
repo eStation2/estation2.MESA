@@ -191,7 +191,9 @@ class Product(object):
         return missing_filenames
 
     @staticmethod
+
     def create_tar(missing_info, filetar=None, tgz=True):
+
     # Given a 'missing_info' object, creates a tar-file containing all required files
 
         result = {'status':0,            # 0 -> ok, all files copied, 1-> at least 1 file missing
@@ -230,7 +232,8 @@ class Product(object):
                         tmp_dir = tempfile.mkdtemp(prefix=__name__, suffix='',dir=es_constants.base_tmp_dir)
                     # Do reprojection to a /tmp dir (if the file exists)
                     if os.path.isfile(filename):
-                        new_filename = reproject_output(filename, my_mapset, orig_mapset, output_dir=tmp_dir+os.path.sep)
+                        new_filename = reproject_output(filename, my_mapset, orig_mapset, output_dir=tmp_dir+os.path.sep,
+                                                        version=missing['version'])
                         if os.path.isfile(new_filename):
                             final_filenames.append(new_filename)
 
@@ -241,6 +244,7 @@ class Product(object):
             subdir = functions.get_subdir_from_path_full(filename)
             if os.path.isfile(filename):
                 tar.add(filename, arcname=subdir+name)
+                logger.info('Added file: %s', filename)
                 result['n_file_copied']+=1
             else:
                 result['n_file_missing']+=1
@@ -363,7 +367,7 @@ class Product(object):
 #   Output: output_file
 #
 
-def reproject_output(input_file, native_mapset_id, target_mapset_id, output_dir=None, logger=None):
+def reproject_output(input_file, native_mapset_id, target_mapset_id, output_dir=None, version=None, logger=None):
 
     # Check logger
     if logger is None:
@@ -393,7 +397,9 @@ def reproject_output(input_file, native_mapset_id, target_mapset_id, output_dir=
     str_date = sds_meta_in.get_item('eStation2_date')
     product_code = sds_meta_in.get_item('eStation2_product')
     sub_product_code = sds_meta_in.get_item('eStation2_subProduct')
-    version = sds_meta_in.get_item('eStation2_product_version')
+    # 22.06.2017 Add the option to force the version
+    if version is None:
+        version = sds_meta_in.get_item('eStation2_product_version')
 
     # Define output filename
     sub_dir = sds_meta_in.get_item('eStation2_subdir')

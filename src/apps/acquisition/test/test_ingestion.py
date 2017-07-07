@@ -1155,8 +1155,9 @@ class TestIngestion(unittest.TestCase):
         # Similar to the test above, but specific to the products made available for Long Term Statistics by T. Jacobs
         # Products released from VITO in March 2017
 
-        date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_201703*_GLOBE_PROBAV_V2.2.1.nc')
+        date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_201706*_GLOBE_PROBAV_V2.2.1.nc')
         # date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_19*_GLOBE_VGT_V2.2.1.nc')
+        date_fileslist = glob.glob('/data/ingest/c_gls_NDVI_201706*_GLOBE_PROBAV_V2.2.1.*')
 
         for one_file in date_fileslist:
 
