@@ -52,12 +52,12 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     if nrt_products:
         activate_10dcount_comput=1          # 10d count
         activate_10danomalies_comput=1      # 10d anomalies
-        activate_10d_10k_comput=1           # 10d on 10km
-        activate_10d_10k_anom_comput=1      # 10d on 10km anomalies
+        activate_10d_10k_comput=0           # 10d on 10km
+        activate_10d_10k_anom_comput=0      # 10d on 10km anomalies
 
     if update_stats:
         activate_10dstats_comput= 1         # 10d stats
-        activate_10d_10k_stats_comput=1     # 10d on 10km statistics
+        activate_10d_10k_stats_comput=0     # 10d on 10km statistics
 
     #   Switch wrt single products: not to be changed !!
 
