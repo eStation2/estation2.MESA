@@ -291,7 +291,7 @@ SELECT products.update_insert_product(  productcode := 'modis-chla', subproductc
 SELECT products.update_insert_product(  productcode := 'modis-kd490', subproductcode := 'modis-kd490_native', version := 'v2012.0', defined_by := 'JRC', activated := true, category_id := 'oceanography', product_type := 'Native', descriptive_name := 'MODIS - Kd490', description := 'MODIS Absorption coefficient at 490 nm', provider := 'NASA', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := .000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := 'm^-1', data_type_id := 'undefined', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'modis-par', subproductcode := 'modis-par_native', version := 'v2012.0', defined_by := 'JRC', activated := true, category_id := 'oceanography', product_type := 'Native', descriptive_name := 'MODIS - PAR', description := 'MODIS Photosyntetic available radiation', provider := 'NASA', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := .000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := 'Einstein m^-2 Day', data_type_id := 'undefined', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'absol-max-linearx2', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := 'Absolute Maximum', description := 'Absolute Maximum NDVI', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1year', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
-SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'vgt-ndvi_native', version := 'sv2-pv2.1', defined_by := 'JRC', activated := true, category_id := 'vegetation', product_type := 'Native', descriptive_name := 'SPOT.VGT/PROBA.V - NDVI', description := 'The NDVI can be used to measure and monitor plant growth, vegetation cover, and biomass production. It is a dimensionless variable.  The values vary between -1 and 1. Increasing positive NDVI values indicate increasing amounts of green vegetation. Moderate values represent shrub and grassland (0.2 to 0.3), while high values indicate temperate and tropical rainforests (0.6 to 0.8). NDVI values near zero and decreasing negative values indicate non-vegetated features such as barren surfaces (rock and soil) and water, snow, ice, and clouds.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'undefined', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'vgt-ndvi_native', version := 'sv2-pv2.1', defined_by := 'JRC', activated := true, category_id := 'vegetation', product_type := 'Native', descriptive_name := 'SPOT.VGT/PROBA.V - NDVI', description := 'The NDVI can be used to measure and monitor plant growth, vegetation cover, and biomass production. It is a dimensionless variable.  The values vary between -1 and 1. Increasing positive NDVI values indicate increasing amounts of green vegetation. Moderate values represent shrub and grassland (0.2 to 0.3), while high values indicate temperate and tropical rainforests (0.6 to 0.8). NDVI values near zero and decreasing negative values indicate non-vegetated features such as barren surfaces (rock and soil) and water, snow, ice, and clouds.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'undefined', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-lai', subproductcode := 'lai', version := 'V1.4', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day LAI', description := '', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-fapar', subproductcode := 'vgt-fapar_native', version := 'V1.4', defined_by := 'JRC', activated := true, category_id := 'vegetation', product_type := 'Native', descriptive_name := 'SPOT.VGT/PROBA.V - fAPAR', description := NULL, provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := NULL, scale_offset := NULL, nodata := NULL, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '10davg', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_LTA', description := 'Average rainfall for dekad', provider := 'TAMSAT - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 2, full_copy := false );
@@ -7501,6 +7501,7 @@ END $$;
 UPDATE products.product p
 SET activated = FALSE
 FROM (VALUES
+  ('msg-mpe', 'undefined'),
   ('arc2-rain', '2.0'),
   ('cpc-sm','1.0'),
   ('ecmwf-evpt','OPE'),
@@ -7520,6 +7521,7 @@ UPDATE products.ingestion i
 SET activated = FALSE,
     enabled = FALSE
 FROM (VALUES
+  ('msg-mpe', 'undefined'),
   ('arc2-rain', '2.0'),
   ('cpc-sm','1.0'),
   ('ecmwf-evpt','OPE'),
@@ -7537,6 +7539,7 @@ WHERE tmp.productcode = i.productcode AND tmp.version = i.version;
 UPDATE products.process_product pp
 SET activated = FALSE
 FROM (VALUES
+  ('msg-mpe', 'undefined'),
   ('arc2-rain', '2.0'),
   ('cpc-sm','1.0'),
   ('ecmwf-evpt','OPE'),
@@ -7557,6 +7560,7 @@ SET activated = FALSE,
 WHERE (p.process_id) in (SELECT process_id
 		         FROM products.process_product pp,
 			      (VALUES
+          ('msg-mpe', 'undefined'),
 				  ('arc2-rain', '2.0'),
 				  ('cpc-sm','1.0'),
 				  ('ecmwf-evpt','OPE'),
@@ -7575,6 +7579,7 @@ WHERE (p.process_id) in (SELECT process_id
 UPDATE products.product_acquisition_data_source pads
 SET activated = FALSE
 FROM (VALUES
+  ('msg-mpe', 'undefined'),
   ('arc2-rain', '2.0'),
   ('cpc-sm','1.0'),
   ('ecmwf-evpt','OPE'),
@@ -7590,7 +7595,7 @@ WHERE tmp.productcode = pads.productcode AND tmp.version = pads.version;
 
 
 
-
+SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('msg-mpe', 'undefined', TRUE, FALSE);
 SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('arc2-rain', '2.0', TRUE, FALSE);
 SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('cpc-sm','1.0', TRUE, FALSE);
 SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('ecmwf-evpt','OPE', TRUE, FALSE);
@@ -7630,6 +7635,8 @@ SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('vg
 
 
 
+-- Disable the following list of products by deactivating them and
+-- put defined_by on JRC_test so that they will not appear in the GUI
 UPDATE products.product p
 SET activated = FALSE,
     defined_by = 'JRC-Test'
