@@ -67,7 +67,7 @@ def loop_ingestion(dry_run=False):
 
         # Manage the ingestion of Historical Archives (e.g. eStation prods disseminated via EUMETCast - MESA_JRC_*.tif)
         try:
-            status = 0 #ingest_archives_eumetcast(dry_run=dry_run)
+            status = ingest_archives_eumetcast(dry_run=dry_run)
         except:
             logger.error("Error in executing ingest_archives_eumetcast")
 
@@ -679,6 +679,18 @@ def drive_pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger):
     proc_mod = getattr(proc_pck, module_name)
     proc_func= getattr(proc_mod, function_name)
     out_queue = Queue()
+
+    # Check the input files (corrupted would stop the detached process)
+    for infile in input_files:
+        try:
+            command = 'bunzip2 -t {0} > /dev/null 2>dev/null'.format(infile)
+            status = os.system(command)
+            if status:
+                my_logger.error('File {0} is not a valid bz2. Exit'.format(os.path.basename(infile)))
+                raise Exception('Error preproc')
+        except:
+            my_logger.error('Error in checking file {0}. Exit'.format(os.path.basename(infile)))
+            raise Exception('Error preproc')
 
     args = [subproducts, tmpdir, input_files, my_logger, out_queue]
     try:
