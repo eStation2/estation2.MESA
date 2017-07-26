@@ -680,6 +680,18 @@ def drive_pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger):
     proc_func= getattr(proc_mod, function_name)
     out_queue = Queue()
 
+    # Check the input files (corrupted would stop the detached process)
+    for infile in input_files:
+        try:
+            command = 'bunzip2 -t {0} > /dev/null 2>dev/null'.format(infile)
+            status = os.system(command)
+            if status:
+                my_logger.error('File {0} is not a valid bz2. Exit'.format(os.path.basename(infile)))
+                raise Exception('Error preproc')
+        except:
+            my_logger.error('Error in checking file {0}. Exit'.format(os.path.basename(infile)))
+            raise Exception('Error preproc')
+
     args = [subproducts, tmpdir, input_files, my_logger, out_queue]
     try:
         p = Process(target=proc_func, args=args)
@@ -710,7 +722,8 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger, out_qu
         # Test the file exists
         if not os.path.isfile(ifile):
             my_logger.error('Input file does not exist ' + ifile)
-            raise Exception("Input file does not exist: %s" % ifile)
+            return 1
+            # raise Exception("Input file does not exist: %s" % ifile)
         # Unzip to tmpdir and add to list
         if re.match('.*\.bz2', ifile):
             try:
@@ -731,7 +744,8 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger, out_qu
                     bz2file.close()
                 # Need to put something, otherwise goes in error
                 out_queue.put('')
-                raise Exception("Error in unzipping file: %s" % ifile)
+                return 1
+                # raise Exception("Error in unzipping file: %s" % ifile)
             else:
                 myfile.close()
                 bz2file.close()
@@ -752,8 +766,8 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger, out_qu
         if not os.path.isfile(unzipped_file):
             my_logger.error('Input file does not exist ' + unzipped_file)
             out_queue.put('')
-            raise Exception("Input file does not exist: %s" % unzipped_file)
-
+            # raise Exception("Input file does not exist: %s" % unzipped_file)
+            return 1
         # Test the hdf file and read list of datasets
         try:
             hdf = gdal.Open(unzipped_file)
@@ -776,7 +790,8 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger, out_qu
             hdf = None
             #close_hdf_dataset(unzipped_file)
             out_queue.put('')
-            raise Exception('Error in extracting SDS')
+            return 1
+            # raise Exception('Error in extracting SDS')
 
     # For each dataset, merge the files, by using the dedicated function
     for id_subdataset in list_to_extr:
@@ -791,7 +806,8 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger, out_qu
     except:
         my_logger.error('Error in mosaicing')
         out_queue.put('')
-        raise Exception('Error in mosaicing')
+        return 1
+        # raise Exception('Error in mosaicing')
 
     my_logger.debug('Output file generated: ' + output_file)
 
