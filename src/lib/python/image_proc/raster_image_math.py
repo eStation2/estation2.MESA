@@ -1550,10 +1550,10 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
     # Check and assign parameters
 
     if histogramWindowSize is None:
-        histogramWindowSize=16
+        histogramWindowSize=32
 
     if histogramWindowStride is None:
-        histogramWindowStride=8
+        histogramWindowStride=16
 
     if minTheta is None:
         minTheta=0.76
@@ -1568,7 +1568,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
         minSinglePopCohesion=0.90
 
     if minImageValue is None:
-        minImageValue=2
+        minImageValue=10
 
     if masks is not None:
         if maskTests is None:
@@ -1611,11 +1611,11 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
     # Apply the caller's masks.
 
     if minImageValue is not None:
-        print ' Debug: minImageValue not defined.'
+        print ' Debug: minImageValue is defined.'
         unbufferedMask[:] = numpy.logical_or(unbufferedMask, image < minImageValue)
 
     if maxImageValue is not None:
-        print ' Debug: maxImageValue not defined.'
+        print ' Debug: maxImageValue is defined.'
         unbufferedMask[:] = numpy.logical_or(unbufferedMask, image > maxImageValue)
 
     if masks is not None:
@@ -1921,7 +1921,7 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
         else:
             minImageValue = None
 
-        minThreshold = 2
+        minThreshold = 1
         if 'minThreshold' in parameters.keys():
             if parameters['minThreshold'] is not None:
                 minThreshold = parameters['minThreshold']
@@ -1975,7 +1975,10 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
     # Read Input
     inband = inputID.GetRasterBand(1)
     inData = inband.ReadAsArray(0,0,inband.XSize,inband.YSize)
-    inDataInt = N.uint16(inData*1000)                               # To Be Verified
+
+    inDataInt = N.uint16(inData)*0
+    inData_good = (inData > 0)
+    inDataInt[inData_good] = inData[inData_good]
 
     # Call FrontDetection Algorithm
     [uMask, uImage, uCandidateCounts, uFrontCounts,uWindowStatusCodes, uWindowStatusValues] = \
@@ -2000,9 +2003,9 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
     if debug:
         outband = outDS.GetRasterBand(1)
         outband.WriteArray(uFrontCounts,0,0)
-        outband = outDS.GetRasterBand(2)
-        outband.WriteArray(dataOut,0,0)
         outband = outDS.GetRasterBand(3)
+        outband.WriteArray(dataOut,0,0)
+        outband = outDS.GetRasterBand(2)
         outband.WriteArray(thin_output,0,0)
     else:
         outband = outDS.GetRasterBand(1)
