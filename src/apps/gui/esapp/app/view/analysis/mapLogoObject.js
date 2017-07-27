@@ -144,7 +144,7 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                 '<tpl for=".">',
                     '<span style="vertical-align: middle;"></span>',
                     // '<img src="{src}" width="{width}" height="{height}" style="padding: 0px 5px 0px 0px;"/>',
-                    '<img src="{src}" height="50" style="vertical-align: middle; padding: 0px 5px 0px 0px;"/>',
+                    '<img src="{src}" height="{height}"  style="vertical-align: middle; padding: 0px 5px 0px 0px;"/>',
                 '</tpl>',
                 '</div>'
             )
