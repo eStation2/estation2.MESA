@@ -1,0 +1,54 @@
+#   ==========================================================
+#	Procedure to generate the update_insert_jrc_data.sql file
+#   ==========================================================
+
+Table than MUST NOT be 'full-copied':
+
+pads, processing, ingestion, process_products 	-> depends on THEMA 
+products					                    -> depends on THEMA
+
+Specific actions - like removing a processing chain or correcting a record - can be done on single records
+
+
+Table that CAN be 'full-copied':
+												NOTE
+datasource_description 		-> in case of correction/patches			can be changed by Users in the interface
+sub_datasource_description 	-> in case of correction/patches			can be changed by Users in the interface
+eumetcast_source		    -> in case of correction/patches			can be changed by Users in the interface
+internet_source			    -> in case of correction/patches			can be changed by Users in the interface
+
+mapset				        -> in case of correction/patches			cannot be changed by Users in the interface
+
+
+#   ==========================================================
+#	Procedure used to set 'activated' according to THEMA
+#   ==========================================================
+
+The 'thema_product' table is used to activate/de-activate products in the following table:
+
+products                                    (according to product/version)
+pads                                        (according to product/version)
+
+ingestion                                   (according to product/version/mapset)
+processing+process_products                 (according to product/version/mapset)
+
+Actually the approach was different until and after version 2.1.0
+
+In version 2.0.4: the set_thema() function is called at the end of postinst and does everything
+In version 2.1.0: the newly defined products (see list below) are manually 'de-activated' and activated by function:
+
+    products.activate_deactivate_product_ingestion_pads_processing
+
+List of 'new' products (e.g. > 2.0.4)
+
+  ('msg-mpe', 'undefined'),
+  ('arc2-rain', '2.0'),
+  ('cpc-sm','1.0'),
+  ('ecmwf-evpt','OPE'),
+  ('modis-pp','v2013.1'),
+  ('vgt-fapar','V2.0'),
+  ('vgt-fcover','V2.0'),
+  ('vgt-lai','V2.0'),
+  ('vgt-ndvi','proba-v2.2'),
+  ('vgt-ndvi','spot-v2.2'),
+  ('vgt-ndvi','sv2-pv2.2')
