@@ -132,6 +132,8 @@ def create_pipeline(input_products, output_product, logfile=None):
 
     # Define outputs
 
+    output_nodata = -32767
+
     output_prod=output_product[0].productcode
     output_sprod=output_product[0].subproductcode
     output_version=output_product[0].version
@@ -156,7 +158,7 @@ def create_pipeline(input_products, output_product, logfile=None):
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"chla_file": input_file[1], "sst_file": input_file[3], "kd_file": input_file[0],"par_file": input_file[2], \
                 "sst_nodata": sst_nodata, "kd_nodata": kd_nodata, "chla_nodata": chla_nodata,\
-                "par_nodata": par_nodata, "output_file": output_file, "output_nodata": -9999, "output_format": 'GTIFF',\
+                "par_nodata": par_nodata, "output_file": output_file, "output_nodata":output_nodata, "output_format": 'GTIFF',\
                 "output_type": None, "options": "compress=lzw"}
         raster_image_math.do_compute_primary_production(**args)
 
