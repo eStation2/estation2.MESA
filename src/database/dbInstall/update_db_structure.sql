@@ -75,6 +75,10 @@ DROP TRIGGER IF EXISTS update_product ON products.product;
 
 
 
+-- Function: products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean)
+
+-- DROP FUNCTION products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean);
+
 CREATE OR REPLACE FUNCTION products.activate_deactivate_product_ingestion_pads_processing(
     productcode character varying,
     version character varying,
@@ -128,8 +132,7 @@ BEGIN
 	    enabled = _activate
 	WHERE (p.process_id) in (SELECT process_id
 	       FROM products.process_product pp
-	       WHERE pp.type = 'INPUT'
-		 AND pp.productcode = _productcode
+	       WHERE pp.productcode = _productcode
 		 AND pp.version = _version
 		 AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
 				       WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
@@ -183,8 +186,7 @@ BEGIN
 	    enabled = _activate
 	WHERE (p.process_id) in (SELECT process_id
 	       FROM products.process_product pp
-	       WHERE pp.type = 'INPUT'
-		 AND pp.productcode = _productcode
+	       WHERE pp.productcode = _productcode
 		 AND pp.version = _version
 		 AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
 				       WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
@@ -214,6 +216,7 @@ $BODY$
   COST 100;
 ALTER FUNCTION products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean)
   OWNER TO estation;
+
 
 
 
