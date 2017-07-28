@@ -7,7 +7,15 @@ SET client_min_messages = warning;
 
 SET search_path = products, analysis, pg_catalog;
 
+/*******************************************************************************************
+* PRE- update insert JRC data
+********************************************************************************************/
+TRUNCATE TABLE analysis.legend CASCADE;
 
+
+/*******************************************************************************************
+* Update insert JRC data
+********************************************************************************************/
 
 SELECT products.update_insert_product_category(category_id := 'vegetation', order_index := 1, descriptive_name := 'Vegetation' );
 SELECT products.update_insert_product_category(category_id := 'rainfall', order_index := 2, descriptive_name := 'Rainfall' );
@@ -7530,6 +7538,10 @@ END $$;
 
 
 
+/*******************************************************************************************
+* POST- update insert JRC data
+********************************************************************************************/
+
 -- De-activate 'new' products (i.e. products defined after 2.0.4): they are activated afterwards - according to thema_product
 
 UPDATE products.product p
@@ -7707,4 +7719,4 @@ WHERE tmp.productcode = p.productcode AND tmp.version = p.version;
 SELECT * FROM products.populate_geoserver();
 
 -- Delete the wrong modis-pp processing chain. In delete cascade of table products.process_product.
-delete from products.processing where process_id = 47;
+delete from products.processing where algorithm = 'std_modis_pp';
