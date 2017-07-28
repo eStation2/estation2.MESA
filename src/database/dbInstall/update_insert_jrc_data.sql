@@ -7711,7 +7711,8 @@ FROM (VALUES
   ('vgt-phenoks', 'undefined'),
   ('vgt-phenomax', 'undefined'),
   ('vgt-swb', 'undefined'),
-  ('vgt-vpi', 'undefined')
+  ('vgt-vpi', 'undefined'),
+  ('wrsi-sadc', '1.0')
   ) AS tmp (productcode,version)
 WHERE tmp.productcode = p.productcode AND tmp.version = p.version;
 
