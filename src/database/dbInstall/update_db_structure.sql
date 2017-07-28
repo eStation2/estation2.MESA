@@ -128,8 +128,7 @@ BEGIN
 	    enabled = _activate
 	WHERE (p.process_id) in (SELECT process_id
 	       FROM products.process_product pp
-	       WHERE pp.type = 'INPUT'
-		 AND pp.productcode = _productcode
+	       WHERE pp.productcode = _productcode
 		 AND pp.version = _version
 		 AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
 				       WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
@@ -183,8 +182,7 @@ BEGIN
 	    enabled = _activate
 	WHERE (p.process_id) in (SELECT process_id
 	       FROM products.process_product pp
-	       WHERE pp.type = 'INPUT'
-		 AND pp.productcode = _productcode
+	       WHERE pp.productcode = _productcode
 		 AND pp.version = _version
 		 AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
 				       WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
