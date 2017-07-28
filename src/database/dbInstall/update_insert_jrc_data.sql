@@ -7604,22 +7604,21 @@ UPDATE products.processing p
 SET activated = FALSE,
     enabled = FALSE
 WHERE (p.process_id) in (SELECT process_id
-		         FROM products.process_product pp,
-			      (VALUES
-          ('msg-mpe', 'undefined'),
-				  ('arc2-rain', '2.0'),
-				  ('cpc-sm','1.0'),
-				  ('ecmwf-evpt','OPE'),
-				  ('modis-pp','v2013.1'),
-				  ('vgt-fapar','V2.0'),
-				  ('vgt-fcover','V2.0'),
-				  ('vgt-lai','V2.0'),
-				  ('vgt-ndvi','proba-v2.2'),
-				  ('vgt-ndvi','spot-v2.2'),
-				  ('vgt-ndvi','sv2-pv2.2')
-				) AS tmp (productcode,version)
-		         WHERE pp.type = 'INPUT'
-			   AND tmp.productcode = pp.productcode AND tmp.version = pp.version);
+                         FROM products.process_product pp,
+                        (VALUES
+                          ('msg-mpe', 'undefined'),
+                          ('arc2-rain', '2.0'),
+                          ('cpc-sm','1.0'),
+                          ('ecmwf-evpt','OPE'),
+                          ('modis-pp','v2013.1'),
+                          ('vgt-fapar','V2.0'),
+                          ('vgt-fcover','V2.0'),
+                          ('vgt-lai','V2.0'),
+                          ('vgt-ndvi','proba-v2.2'),
+                          ('vgt-ndvi','spot-v2.2'),
+                          ('vgt-ndvi','sv2-pv2.2')
+                        ) AS tmp (productcode,version)
+                         WHERE tmp.productcode = pp.productcode AND tmp.version = pp.version);
 
 
 UPDATE products.product_acquisition_data_source pads
