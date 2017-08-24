@@ -11,6 +11,7 @@ import glob
 import tarfile
 import shutil
 import tempfile
+import re
 from osgeo import gdal, osr
 
 from config import es_constants
@@ -190,8 +191,45 @@ class Product(object):
 
         return missing_filenames
 
-    @staticmethod
+    def get_missing_filenames_all(self, missing, existing_only=True):
 
+        # NOTES:    by default, it returns the existing filenames ONLY
+        #           w.r.t. get_missing_filenames(), does not consider time period
+
+        product = Product(missing['product'], version=missing['version'])
+        version = missing['version']
+        mapset = missing['mapset']
+        subproduct = missing['subproduct']
+        dataset = product.get_dataset(mapset=mapset, sub_product_code=missing['subproduct'])
+
+        missing_filenames=[]
+
+        # Manage the mapset: if the required one does not exist, use a 'larger' one (if exists)
+        existing_files = dataset.get_filenames()
+        if len(existing_files) == 0:
+
+            logger.warning("No any file found for original mapset: %s. Return" % mapset)
+            my_mapset = MapSet()
+            my_mapset.assigndb(mapset)
+            larger_mapset = my_mapset.get_larger_mapset()
+            new_dataset = product.get_dataset(mapset=larger_mapset, sub_product_code=missing['subproduct'])
+            new_existing_files = new_dataset.get_filenames()
+
+            if len(new_existing_files) > 0:
+                use_mapset = larger_mapset
+                dataset = new_dataset
+            else:
+                logger.warning('No any file found for larger mapset: %s. Return' % larger_mapset)
+                return
+        else:
+                use_mapset = mapset
+
+        missing_filenames = dataset.get_filenames()
+
+        return missing_filenames
+
+
+    @staticmethod
     def create_tar(missing_info, filetar=None, tgz=True):
 
     # Given a 'missing_info' object, creates a tar-file containing all required files
@@ -256,6 +294,93 @@ class Product(object):
             shutil.rmtree(tmp_dir)
 
         return [filetar, result]
+
+    def create_tar_vars(self, productcode, version, subproductcode, mapsetcode, from_date=None, to_date=None, filetar=None, tgz=True):
+
+    # Given a list o variables, creates a tar-file containing all required files
+
+        result = {'status':0,            # 0 -> ok, all files copied, 1-> at least 1 file missing
+                  'n_file_copied':0,
+                  'n_file_missing':0,
+                  }
+
+        tmp_dir = None
+        final_filenames = []
+
+        # Create missing structure
+        interval = {'fromdate':from_date,
+                    'todate':to_date,
+                    'missing': True}
+
+        info ={'intervals': [interval]}
+        missing = {'product': productcode,
+                   'version': version,
+                   'mapset':mapsetcode,
+                   'subproduct': subproductcode,
+                   'info': info,
+                   'to_end': False}
+
+
+        # Check the target file name is passed (or define a temp one)
+        if filetar is None:
+            file_temp = tempfile.NamedTemporaryFile()
+            filetar = file_temp.name
+            file_temp.close()
+
+        filenames = []
+        # Loop over missing objects
+        try:
+            product = Product(productcode, version)
+            if from_date is None or to_date is None:
+                filenames.extend(product.get_missing_filenames_all(missing,existing_only=False))
+            else:
+                filenames.extend(product.get_missing_filenames(missing,existing_only=False))
+
+            # dataset = product.get_dataset(mapset=mapsetcode, sub_product_code=subproductcode, from_date=from_date, to_date=to_date)
+            # filenames.extend(dataset.get_filenames_range())
+            filenames.sort()
+        except NoProductFound:
+            pass
+
+        orig_mapset = mapsetcode
+
+        # The get_missing_filenames can return a 'larger' mapset.
+        # Manage here the re-projection
+        for filename in filenames:
+            [product_code, sub_product_code, version, str_date, my_mapset] = functions.get_all_from_path_full(filename)
+
+            if my_mapset == orig_mapset:
+                final_filenames.append(filename)
+            else:
+                if tmp_dir is None:
+                    tmp_dir = tempfile.mkdtemp(prefix=__name__, suffix='',dir=es_constants.base_tmp_dir)
+                # Do reprojection to a /tmp dir (if the file exists)
+                if os.path.isfile(filename):
+                    new_filename = reproject_output(filename, my_mapset, orig_mapset, output_dir=tmp_dir+os.path.sep,
+                                                    version=version)
+                    if os.path.isfile(new_filename):
+                        final_filenames.append(new_filename)
+
+        # Create .tar
+        tar = tarfile.open(filetar, "w|gz" if tgz else "w|",dereference=True)
+        for filename in final_filenames:
+            name = os.path.basename(filename)
+            subdir = functions.get_subdir_from_path_full(filename)
+            if os.path.isfile(filename):
+                tar.add(filename, arcname=subdir+name)
+                logger.debug('Added file: %s', filename)
+                result['n_file_copied']+=1
+            else:
+                result['n_file_missing']+=1
+                result['status']=1
+        tar.close()
+
+        # Remove tmp_dir
+        if tmp_dir is not None:
+            shutil.rmtree(tmp_dir)
+
+        return [filetar, result]
+
 
     @staticmethod
     def import_tar(filetar, tgz=False):
@@ -378,7 +503,7 @@ def reproject_output(input_file, native_mapset_id, target_mapset_id, output_dir=
         output_dir = es_constants.es2globals['processing_dir']
 
     # Get the existing dates for the dataset
-    logger.info("Entering routine %s for file %s" % ('reproject_output', input_file))
+    logger.debug("Entering routine %s for file %s" % ('reproject_output', input_file))
     ext=es_constants.ES2_OUTFILE_EXTENSION
 
     # Test the file/files exists
@@ -403,7 +528,12 @@ def reproject_output(input_file, native_mapset_id, target_mapset_id, output_dir=
 
     # Define output filename
     sub_dir = sds_meta_in.get_item('eStation2_subdir')
-    product_type = functions.get_product_type_from_subdir(sub_dir)
+    # Fix a bug for 10davg-linearx2 metadata - and make method more robust
+    if re.search('.*derived.*',sub_dir):
+        product_type = 'Derived'
+    elif re.search('.*tif.*',sub_dir):
+        product_type = 'Native'
+    # product_type = functions.get_product_type_from_subdir(sub_dir)
 
     out_prod_ident = functions.set_path_filename_no_date(product_code, sub_product_code, target_mapset_id, version, ext)
     output_subdir  = functions.set_path_sub_directory   (product_code, sub_product_code, product_type, version, target_mapset_id)
