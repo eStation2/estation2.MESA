@@ -19,6 +19,10 @@ internet_source			    -> in case of correction/patches			can be changed by Users
 
 mapset				        -> in case of correction/patches			cannot be changed by Users in the interface
 
+Table that ARE always 'full-copied':
+												NOTE
+legend,legend_steps 		-> truncated at the beginning of the update .sql
+
 
 #   ==========================================================
 #	Procedure used to set 'activated' according to THEMA
