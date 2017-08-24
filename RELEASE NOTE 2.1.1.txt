@@ -12,7 +12,7 @@
 
 1.2 Processing
 
-- Correct Primary Production algorithm (28.5 Celsius threshould for PbOpt omputation - see ES2-49) and check all files present (see ES2-36).
+- Correct Primary Production algorithm (28.5 Celsius threshould for PbOpt computation - see ES2-49) and check all files present (see ES2-36).
 - Correct std_modis_monavg computation (see ES2-35).
 
 1.3 DataManagement
