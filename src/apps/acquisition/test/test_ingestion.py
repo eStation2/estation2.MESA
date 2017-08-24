@@ -76,10 +76,60 @@ class TestIngestion(unittest.TestCase):
         #print('['+command+']')
         os.system(command)
 
+    def test_ingest_modis_firms_nasa_6(self):
+
+        # This is for MCD14DL format from ftp://nrt3.modaps.eosdis.nasa.gov/FIRMS/c6/Global
+        # having columns as: latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp
+
+        # Definitions
+        myfile='MODIS_C6_Global_MCD14DL_NRT_2016024.txt'
+        file_mcd14dl = es_constants.es2globals['ingest_dir'] + myfile
+        # shutil.copy('/data/processing/modis-firms/v5.0/archive/'+myfile, file_mcd14dl)
+        pix_size = '0.008928571428571'
+        # Create a temporary working dir
+        tmpdir='/tmp/eStation2/test_ingest_firms_nasa/'
+        file_vrt=tmpdir+"firms_file.vrt"
+        file_csv=tmpdir+"firms_file.csv"
+        file_tif=tmpdir+"firms_file.tif"
+        out_layer="firms_file"
+        file_shp=tmpdir+out_layer+".shp"
+
+        # Write the 'vrt' file
+        with open(file_vrt,'w') as outFile:
+            outFile.write('<OGRVRTDataSource>\n')
+            outFile.write('    <OGRVRTLayer name="firms_file">\n')
+            outFile.write('        <SrcDataSource>'+file_csv+'</SrcDataSource>\n')
+            outFile.write('        <OGRVRTLayer name="firms_file" />\n')
+            outFile.write('        <GeometryType>wkbPoint</GeometryType>\n')
+            outFile.write('        <LayerSRS>WGS84</LayerSRS>\n')
+            outFile.write('        <GeometryField encoding="PointFromColumns" x="longitude" y="latitude" />\n')
+            outFile.write('    </OGRVRTLayer>\n')
+            outFile.write('</OGRVRTDataSource>\n')
+
+        # Generate the csv file with header
+        with open(file_csv,'w') as outFile:
+            #outFile.write('latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp')
+            with open(file_mcd14dl, 'r') as input_file:
+                outFile.write(input_file.read())
+
+        # Execute the ogr2ogr command
+        command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' '+file_vrt
+        #print('['+command+']')
+        os.system(command)
+
+        # Convert from shapefile to rasterfile
+        command = 'gdal_rasterize  -l ' + out_layer + ' -burn 1 '\
+                  + ' -tr ' + str(pix_size) + ' ' + str(pix_size) \
+                  + ' -co "compress=LZW" -of GTiff -ot Byte '     \
+                  +file_shp+' '+file_tif
+
+        #print('['+command+']')
+        os.system(command)
+
     def test_ingest_modis_sst_netcdf(self):
 
-        date_fileslist = ['/data/ingest/A2016201.L3m_DAY_SST_sst_4km.nc']
-        in_date = '2016201'
+        date_fileslist = ['/data/ingest/A2017218.L3m_DAY_SST_sst_4km.nc']
+        in_date = '2017218'
         productcode = 'modis-sst'
         productversion = 'v2013.1'
         subproductcode = 'sst-day'
