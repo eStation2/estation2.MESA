@@ -124,7 +124,9 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
                     for day in add_days:
                         date = next_year+day
                         matches=[x for x in input_files if fnmatch.fnmatch(x,'*{0}*'.format(date))]
-                        file_list.append(matches[0])
+                        # Fixes ES2-35 (see YouTrack)
+                        if len(matches) > 0:
+                            file_list.append(matches[0])
 
                 yield (sorted(file_list), output_file)
 
