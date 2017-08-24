@@ -52,12 +52,12 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     if nrt_products:
         activate_10dcount_comput=1          # 10d count
         activate_10danomalies_comput=1      # 10d anomalies
-        activate_10d_10k_comput=0           # 10d on 10km
-        activate_10d_10k_anom_comput=0      # 10d on 10km anomalies
+        activate_10d_10k_comput=1           # 10d on 10km
+        activate_10d_10k_anom_comput=1      # 10d on 10km anomalies
 
     if update_stats:
         activate_10dstats_comput= 1         # 10d stats
-        activate_10d_10k_stats_comput=0     # 10d on 10km statistics
+        activate_10d_10k_stats_comput=1     # 10d on 10km statistics
 
     #   Switch wrt single products: not to be changed !!
 
@@ -81,6 +81,19 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     activate_10dcount10kdiff_comput=1
     activate_10dcount10kperc_comput=1
     activate_10dcount10kratio_comput=1
+
+    #   ---------------------------------------------------------------------
+    #   Define the 'grid' file for the 10k count conversion
+    #   If it does not exists, disable computation
+    #   ---------------------------------------------------------------------
+
+    grid_mapset_name='SPOTV-Africa-1km'
+    grid_file='/eStation2/layers/Mask_Africa_SPOTV_10km.tif'
+
+    if not os.path.isfile(grid_file):
+        activate_10d_10k_comput=0           # 10d on 10km
+        activate_10d_10k_anom_comput=0      # 10d on 10km anomalies
+        activate_10d_10k_stats_comput=0     # 10d on 10km statistics
 
 
     es2_data_dir = es_constants.es2globals['processing_dir']+os.path.sep
@@ -326,9 +339,6 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
         # Temporary (not masked) file
         output_file_temp = tmpdir+os.path.sep+os.path.basename(output_file)
-
-        grid_file='/eStation2/layers/Mask_Africa_SPOTV_10km.tif'
-        grid_mapset_name='SPOTV-Africa-1km'
         input_mapset_name=mapset
 
         operation='sum'
