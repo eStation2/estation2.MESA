@@ -90,13 +90,15 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
         var colorschemesgrid = me.lookupReference('colorschemesGrid');
         var mapsetdatasetgrid = this.lookupReference('mapset-dataset-grid');
 
+        // console.info(record);
         me.selectedproduct = {
             productcode:record.get('productcode'),
             productversion:record.get('version'),
             mapsetcode:record.get('mapsetcode'),
             subproductcode:record.get('subproductcode'),
             productname:record.get('descriptive_name'),
-            date_format:record.get('date_format')
+            date_format:record.get('date_format'),
+            frequency_id:record.get('frequency_id')
         };
 
         colorschemesgrid.columns[1].setText('<div class="grid-header-style">' + esapp.Utils.getTranslation('colorschemes') +

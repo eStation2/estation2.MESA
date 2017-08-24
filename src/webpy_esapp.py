@@ -1189,6 +1189,49 @@ class GetInternetSources:
         if hasattr(internetsources, "__len__") and internetsources.__len__() > 0:
             for row in internetsources:
                 row_dict = functions.row2dict(row)
+
+                startdate = None
+                if row_dict['start_date'] != '':
+                    try:
+                        startdate = int(row_dict['start_date'])
+                    except ValueError:
+                        startdate = None
+
+                enddate = None
+                if row_dict['end_date'] != '':
+                    try:
+                        enddate = int(row_dict['end_date'])
+                    except ValueError:
+                        enddate = None
+
+                prod_id_position = None
+                if row_dict['prod_id_position'] != '':
+                    try:
+                        prod_id_position = int(row_dict['prod_id_position'])
+                    except ValueError:
+                        prod_id_position = None
+
+                prod_id_length = None
+                if row_dict['prod_id_length'] != '':
+                    try:
+                        prod_id_length = int(row_dict['prod_id_length'])
+                    except ValueError:
+                        prod_id_length = None
+
+                area_length = None
+                if row_dict['area_length'] != '':
+                    try:
+                        area_length = int(row_dict['area_length'])
+                    except ValueError:
+                        area_length = None
+
+                release_length = None
+                if row_dict['release_length'] != '':
+                    try:
+                        release_length = int(row_dict['release_length'])
+                    except ValueError:
+                        release_length = None
+
                 internetsource = {'internet_id': row_dict['internet_id'],
                                   'defined_by': row_dict['defined_by'],
                                   'descriptive_name': row_dict['descriptive_name'],
@@ -1204,8 +1247,8 @@ class GetInternetSources:
                                   'status': row_dict['status'],
                                   'pull_frequency': row_dict['pull_frequency'],
                                   'frequency_id': row_dict['frequency_id'],
-                                  'start_date': row_dict['start_date'],
-                                  'end_date': row_dict['end_date'],
+                                  'start_date': startdate,
+                                  'end_date': enddate,
                                   'datasource_descr_id': row_dict['datasource_descr_id'],
                                   'format_type': row_dict['format_type'],
                                   'file_extension': row_dict['file_extension'],
@@ -1213,15 +1256,15 @@ class GetInternetSources:
                                   'date_format': row_dict['date_format'],
                                   'date_position': row_dict['date_position'],
                                   'product_identifier': row_dict['product_identifier'],
-                                  'prod_id_position': row_dict['prod_id_position'],
-                                  'prod_id_length': row_dict['prod_id_length'],
+                                  'prod_id_position': prod_id_position,
+                                  'prod_id_length': prod_id_length,
                                   'area_type': row_dict['area_type'],
                                   'area_position': row_dict['area_position'],
-                                  'area_length': row_dict['area_length'],
+                                  'area_length': area_length,
                                   'preproc_type': row_dict['preproc_type'],
                                   'product_release': row_dict['product_release'],
                                   'release_position': row_dict['release_position'],
-                                  'release_length': row_dict['release_length'],
+                                  'release_length': release_length,
                                   'native_mapset': row_dict['native_mapset']}
 
                 internetsources_dict_all.append(internetsource)
@@ -1253,32 +1296,46 @@ class UpdateInternetSource:
         if 'internetsources' in getparams:
 
             startdate = None
-            if isinstance(getparams['internetsources']['start_date'],int):
-                startdate = getparams['internetsources']['start_date']
-            elif isinstance(getparams['internetsources']['start_date'],str) and getparams['internetsources']['start_date'].isdigit():
-                startdate = int(getparams['internetsources']['start_date'])
+            if getparams['internetsources']['start_date'] != None:
+                try:
+                    startdate = int(getparams['internetsources']['start_date'])
+                except ValueError:
+                    startdate = None
 
             enddate = None
-            if isinstance(getparams['internetsources']['end_date'],int):
-                enddate = getparams['internetsources']['end_date']
-            elif isinstance(getparams['internetsources']['end_date'],str) and getparams['internetsources']['end_date'].isdigit():
-                enddate = int(getparams['internetsources']['end_date'])
+            if getparams['internetsources']['end_date'] != None:
+                try:
+                    enddate = int(getparams['internetsources']['end_date'])
+                except ValueError:
+                    enddate = None
 
             prod_id_position = None
-            if getparams['internetsources']['prod_id_position'].isdigit():
-                prod_id_position = int(getparams['internetsources']['prod_id_position'])
+            if getparams['internetsources']['prod_id_position'] != None:
+                try:
+                    prod_id_position = int(getparams['internetsources']['prod_id_position'])
+                except ValueError:
+                    prod_id_position = None
 
             prod_id_length = None
-            if getparams['internetsources']['prod_id_length'].isdigit():
-                prod_id_length = int(getparams['internetsources']['prod_id_length'])
+            if getparams['internetsources']['prod_id_length'] != None:
+                try:
+                    prod_id_length = int(getparams['internetsources']['prod_id_length'])
+                except ValueError:
+                    prod_id_length = None
 
             area_length = None
-            if getparams['internetsources']['area_length'].isdigit():
-                area_length = int(getparams['internetsources']['area_length'])
+            if getparams['internetsources']['area_length'] != None:
+                try:
+                    area_length = int(getparams['internetsources']['area_length'])
+                except ValueError:
+                    area_length = None
 
             release_length = None
-            if getparams['internetsources']['release_length'].isdigit():
-                release_length = int(getparams['internetsources']['release_length'])
+            if getparams['internetsources']['release_length'] != None:
+                try:
+                    release_length = int(getparams['internetsources']['release_length'])
+                except ValueError:
+                    release_length = None
 
             internetsourceinfo = {'internet_id': getparams['internetsources']['internet_id'],
                                   'defined_by': getparams['internetsources']['defined_by'],
@@ -1929,7 +1986,7 @@ class GetTimeseries:
                 aggregate = { 'aggregation_type': ts_drawprops.aggregation_type,
                               'aggregation_min': ts_drawprops.aggregation_min,
                               'aggregation_max': ts_drawprops.aggregation_max}
-                tscolor = ts_drawprops.color
+                tscolor = ts_drawprops.color.replace("  ", " ")
 
             nodata = None
             subproductinfo = querydb.get_subproduct(productcode, version, subproductcode)
@@ -2205,7 +2262,7 @@ class GetTimeseries:
                 aggregate = { 'aggregation_type': ts_drawprops.aggregation_type,
                               'aggregation_min': ts_drawprops.aggregation_min,
                               'aggregation_max': ts_drawprops.aggregation_max}
-                tscolor = ts_drawprops.color
+                tscolor = ts_drawprops.color.replace("  ", " ")
 
             # mapset_info = querydb.get_mapset(mapsetcode=mapsetcode)
             # product_info = querydb.get_product_out_info(productcode=productcode,
@@ -2292,7 +2349,7 @@ class GetTimeseries:
                 for ts_drawprops in timeseries_drawproperties:
                     ts = {'name': ts_drawprops.tsname_in_legend,
                           'type': 'column', # ts_drawprops.charttype,
-                          'color': ts_drawprops.color,
+                          'color': ts_drawprops.color.replace("  ", " "),
                           'yAxis': ts_drawprops.yaxes_id,
                           'data': data,
                           'visible': True
@@ -2320,7 +2377,7 @@ class GetTimeseries:
             min = ''    # yaxe.min
             max = ''    # yaxe.max
 
-            yaxe = {'id': yaxe.yaxes_id, 'title': yaxe.title, 'title_color': yaxe.title_color, 'unit': yaxe.unit, 'opposite': opposite,
+            yaxe = {'id': yaxe.yaxes_id, 'title': yaxe.title, 'title_color': yaxe.title_color.replace("  ", " "), 'unit': yaxe.unit, 'opposite': opposite,
                     'min': min, 'max': max, 'aggregation_type': yaxe.aggregation_type, 'aggregation_min': yaxe.aggregation_min, 'aggregation_max': yaxe.aggregation_max}
             yaxes.append(yaxe)
 
@@ -2475,11 +2532,12 @@ class GetTimeseries:
                       'reference': timeserie['reference']
                       }
                 for ts_drawprops in timeseries_drawproperties:
+                    # print ts_drawprops.color
                     ts = {'name': ts_drawprops.tsname_in_legend,
                           'type': ts_drawprops.charttype,
                           'dashStyle': ts_drawprops.linestyle,
                           'lineWidth': ts_drawprops.linewidth,
-                          'color': ts_drawprops.color,
+                          'color': ts_drawprops.color.replace("  ", " "),
                           # 'xAxis': str(year),
                           'yAxis': ts_drawprops.yaxes_id,
                           'data': data,
@@ -2510,7 +2568,14 @@ class GetTimeseries:
                         rgb = tuple(int(h[i:i+2], 16) for i in (0, 2 ,4))
                         rgb = list(rgb)
                     else:
-                        rgb = ts_drawprops.color.split(' ')
+                        # print ts_drawprops.color
+                        # rgb = ts_drawprops.color.replace("  ", " ").split(' ')
+                        if (functions.isValidRGB(ts_drawprops.color.replace("  ", " "))):
+                            rgb = ts_drawprops.color.replace("  ", " ").split(' ')
+                        else:
+                            # RGB value stored in the database is not correct so define as default value BLACK.
+                            rgb = "0 0 0".split(' ')
+                    # print rgb
                     rgb = map(int,rgb)
                     rgb[-1] = rgb[-1]+colorAdd
                     rgb[-2] = rgb[-2]+colorAdd
@@ -2605,11 +2670,12 @@ class GetTimeseries:
                       'reference': timeserie['reference']
                       }
                 for ts_drawprops in timeseries_drawproperties:
+                    # print ts_drawprops.color
                     ts = {'name': ts_drawprops.tsname_in_legend,
                           'type': ts_drawprops.charttype,
                           'dashStyle': ts_drawprops.linestyle,
                           'lineWidth': ts_drawprops.linewidth,
-                          'color': ts_drawprops.color,
+                          'color': ts_drawprops.color.replace("  ", " "),
                           'yAxis': ts_drawprops.yaxes_id,
                           'data': data,
                           'cumulative': cumulative,     # timeserie['cumulative'],
@@ -2642,7 +2708,7 @@ class GetTimeseries:
             else:
                 min = yaxe.min
                 max = yaxe.max
-            yaxe = {'id': yaxe.yaxes_id, 'title': yaxe.title, 'title_color': yaxe.title_color, 'unit': yaxe.unit, 'opposite': opposite,
+            yaxe = {'id': yaxe.yaxes_id, 'title': yaxe.title, 'title_color': yaxe.title_color.replace("  ", " "), 'unit': yaxe.unit, 'opposite': opposite,
                     'min': min, 'max': max, 'aggregation_type': yaxe.aggregation_type, 'aggregation_min': yaxe.aggregation_min, 'aggregation_max': yaxe.aggregation_max}
             yaxes.append(yaxe)
 
@@ -3952,7 +4018,8 @@ class ImportLayer:
                 base, extension = os.path.splitext(filename)
 
                 # Initial new name
-                new_name = os.path.join(layerfiledir, filename)
+                # new_name = os.path.join(layerfiledir, filename)
+                new_name = layerfiledir + '/' + filename
 
                 if not os.path.exists(new_name):  # file does not exist in <layerfiledir>
                     fout = open(new_name,'w') # creates the file where the uploaded file should be stored
@@ -3961,7 +4028,8 @@ class ImportLayer:
                 else:  # file exists in <layerfiledir>
                     ii = 1
                     while True:
-                        new_name = os.path.join(layerfiledir, base + "_" + str(ii) + extension)
+                        # new_name = os.path.join(layerfiledir, base + "_" + str(ii) + extension)
+                        new_name = layerfiledir + '/' + base + "_" + str(ii) + extension
                         if not os.path.exists(new_name):
                             fout = open(new_name,'w') # creates the file where the uploaded file should be stored
                             fout.write(getparams.layerfile) # .read()  writes the uploaded file to the newly created file.

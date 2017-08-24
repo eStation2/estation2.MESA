@@ -51,7 +51,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
     frame: false,
     layout: {
         type  : 'border',
-        padding: 5
+        padding: 0
     },
 
     productselected:false,
@@ -255,7 +255,8 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                                                                                      me.selectedproduct.legendHTML,
                                                                                      me.selectedproduct.legendHTMLVertical,
                                                                                      me.selectedproduct.productname,
-                                                                                     me.selectedproduct.date_format
+                                                                                     me.selectedproduct.date_format,
+                                                                                     me.selectedproduct.frequency_id
                             );
                             me.close();
                         }

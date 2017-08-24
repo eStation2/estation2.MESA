@@ -35,10 +35,15 @@ thisfiledir = os.path.dirname(os.path.abspath(__file__))
 config_factorysettings = ConfigParser.ConfigParser()
 config_factorysettings.read([os.path.join(thisfiledir, factory_settings_filename)])
 
-if sys.platform != 'win32':
-    usersettingsfile = '/eStation2/settings/user_settings.ini'
-else:
-    usersettingsfile = 'C:/eStation2/eStation2/settings/user_settings.ini'
+base_local_dir = config_factorysettings.get('FACTORY_SETTINGS', 'base_local_dir', 0)
+# print 'base_local_dir: ' + base_local_dir
+
+usersettingsfile = base_local_dir + '/settings/user_settings.ini'
+
+# if sys.platform != 'win32':
+#     usersettingsfile = '/eStation2/settings/user_settings.ini'
+# else:
+#     usersettingsfile = 'C:/eStation2/eStation2/settings/user_settings.ini'
 
 if not os.path.isfile(usersettingsfile):
     usersettingsfile = os.path.join(thisfiledir, 'install/user_settings.ini')

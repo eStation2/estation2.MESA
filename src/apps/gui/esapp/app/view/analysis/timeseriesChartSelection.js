@@ -177,8 +177,8 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                     multiplevariables: true,
                     fromto: true,
                     year: false,
-                    compareyears: true,
-                    multipleyears: false
+                    compareyears: false,
+                    multipleyears: true
                 }]
             },{
 

@@ -339,6 +339,22 @@ def unix_time_millis(d):
     dt = datetime.datetime.combine(d, datetime.time.min)
     return unix_time(dt) * 1000.0
 
+
+def isValidRGB(color):
+    rgb = color.split(' ')
+    try:
+        R = int(rgb[0])
+        G = int(rgb[1])
+        B = int(rgb[2])
+
+        if isinstance(R, int) and isinstance(G, int) and isinstance(B, int):
+            return True
+        else:
+            return False
+    except ValueError:
+        return False
+
+
 ######################################################################################
 # Second function, rgb2html converts its arguments (r, g, b) to hexadecimal html-color string #RRGGBB
 # Arguments are converted to integers and trimmed to 0..255 range. It is possible to call it with array argument

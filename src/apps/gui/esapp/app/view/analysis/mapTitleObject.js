@@ -76,8 +76,8 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
         me.title_ImageObj = new Image();
         me.titlePosition = [0,0];
 
-        //me.defaultTpl = '<font size="3" style="color: rgb(0, 0, 0);"><b>{selected_area} - {product_name}&nbsp;</b></font><div><font size="3"><b>Decade of <font color="#3366ff">{product_date}</font></b></font></div>';
-        //me.tpl = me.defaultTpl;
+        me.defaultTpl = ['<div><span style="color:rgb(0,0,0); font-size: 20px; font-weight: bold;">{selected_area}</span></div><div><span style="color:rgb(0,0,0); font-size: 20px;">{product_name}</span></div><div><span style="color:rgb(51,102,255); font-size: 20px;">{product_date}</span></div>'];
+        me.tpl = me.defaultTpl;
 
         me.listeners = {
             //element  : 'el',
@@ -264,7 +264,7 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
                         // console.info(mapTitleObj);
                         // mapTitleObj.setTpl(mapTitleEditor.getValue());   // .replace(/"/g, '&quot;', true);
                         mapTitleObj.tpl.set(mapTitleEditor.getValue(), true);   // .replace(/"/g, '&quot;', true);
-                        //console.info(mapTitleObj.getData());
+                        console.info(mapTitleObj.getData());
                         mapTitleObj.update(mapTitleObj.getData());
                         mapTitleObj.setHeight('auto');
                         mapTitleObj.updateLayout();

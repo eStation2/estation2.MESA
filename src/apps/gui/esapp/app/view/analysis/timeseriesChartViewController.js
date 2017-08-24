@@ -528,7 +528,10 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             spacingRight = 40;
         }
 
-
+        var seriesMarkerEnabled = false;
+        if (me.charttype == 'cumulative'){
+            seriesMarkerEnabled = false;
+        }
         me.tschart = new Highcharts.Chart({
             //colors: ['#006600', '#000000', '#0070CC', '#00008A', '#8C8C8C', '#1EB611', '#FF9655', '#FFF263', '#6AF9C4'],
             chart: {
@@ -574,8 +577,11 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             },
             plotOptions: {
                 series: {
+                    connectNulls: true,
+                    // pointPlacement: 'on',
                     marker: {
-                        enabled: false,
+                        enabled: seriesMarkerEnabled,
+                        radius: 3,
                         states: {
                             hover: {
                                 enabled: true,
@@ -593,6 +599,12 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                             lineWidthPlus: 1
                         }
                     }
+                },
+                line: {
+                    marker: {
+                        enabled: true,
+                        radius: 3
+                    },
                 },
                 column: {
                     pointPadding: 0,

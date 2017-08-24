@@ -669,6 +669,7 @@ def get_languages(echo=False):
 def get_product_timeseries_drawproperties(product, echo=False):
 
     global dbschema_analysis
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
 
     try:
         timeseries_drawproperties = []
@@ -679,9 +680,32 @@ def get_product_timeseries_drawproperties(product, echo=False):
 
         if dbschema_analysis.timeseries_drawproperties.filter(where).count() >= 1:
             timeseries_drawproperties = dbschema_analysis.timeseries_drawproperties.filter(where).all()
-            # if echo:
-            #     for row in timeseries_drawproperties:
-            #         print row
+        else:
+            # Insert a new record in the table timeseries_drawproperties for the product with default values
+            default_ts_drawproperties = {
+                "productcode": product['productcode'],
+                "subproductcode": product['subproductcode'],
+                "version": product['version'],
+                "title": product['productcode'],
+                "unit": '',
+                "min": None,
+                "max": None,
+                "oposite": False,
+                "tsname_in_legend": product['productcode'] + '-' + product['version'] + '-' + product['subproductcode'],
+                "charttype": 'line',
+                "linestyle": 'Solid',
+                "linewidth": 4,
+                "color": '#000000',
+                "yaxes_id": product['productcode'] + '-' + product['version'],
+                "title_color": '#0000FF',
+                "aggregation_type": 'mean',
+                "aggregation_min": None,
+                "aggregation_max": None
+            }
+
+            if crud_db.create('timeseries_drawproperties', default_ts_drawproperties):
+                timeseries_drawproperties = dbschema_analysis.timeseries_drawproperties.filter(where).all()
+
         return timeseries_drawproperties
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
@@ -698,6 +722,7 @@ def get_product_timeseries_drawproperties(product, echo=False):
 def get_timeseries_yaxes(products, echo=False):
 
     global dbschema_analysis
+
     try:
         timeseries_yaxes = []
 
@@ -2133,6 +2158,7 @@ def get_active_internet_sources(echo=False):
 
         intsrc = session.query(db.internet_source).subquery()
         pads = aliased(db.product_acquisition_data_source)
+        p = aliased(db.product)
         # The columns on the subquery "intsrc" are accessible through an attribute called "c"
         # e.g. intsrc.c.filter_expression_jrc
 
@@ -2157,8 +2183,9 @@ def get_active_internet_sources(echo=False):
                                  intsrc.c.datasource_descr_id)
                      if x != intsrc.c.update_datetime)
 
-        internet_sources = session.query(*args).outerjoin(intsrc, pads.data_source_id == intsrc.c.internet_id).\
-            filter(and_(pads.type == 'INTERNET', pads.activated)).all()
+        internet_sources = session.query(*args).outerjoin(intsrc, pads.data_source_id == intsrc.c.internet_id). \
+            outerjoin(p, and_(pads.productcode == p.productcode, pads.version == p.version)). \
+            filter(and_(pads.type == 'INTERNET', pads.activated, p.product_type == 'Native', p.activated)).all()
 
         # if echo:
         #     for row in internet_sources:

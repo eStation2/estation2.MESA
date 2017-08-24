@@ -671,7 +671,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
             items: [{
                 xtype: 'radio',
                 id: 'radio-multiyears_'+me.charttype,
-                checked: true,
+                checked: !me.fromto,
                 name: 'ts-period_'+me.charttype,
                 //inputValue: 'year',
                 style: {"margin-right": "5px"},
@@ -684,7 +684,12 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 selModel: {
                     allowDeselect:false,
                     toggleOnClick:false,
-                    mode:'SIMPLE'
+                    mode:'SIMPLE',
+                    listeners: {
+                        selectionchange: function () {
+                            Ext.getCmp("radio-multiyears_"+me.charttype).setValue(true);
+                        }
+                    }
                 },
                 bind: {
                     store: '{years}'
@@ -823,7 +828,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                     //console.info(this.getViewModel().getStore('categories'));
                     var timeseriesProductsStore = Ext.getStore('TimeseriesProductsStore'),
                         delay = 0;
-// console.info(me);
+
                     var myLoadMask = new Ext.LoadMask({
                         msg    : esapp.Utils.getTranslation('loading'), // 'Loading...',
                         target : me

@@ -2,13 +2,6 @@ Ext.define('esapp.view.analysis.analysisMainController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.analysis-analysismain'
 
-    ,showUserMapTemplates: function(btn){
-        //console.info(btn.down().down());
-        //Ext.getCmp('userMapTemplates').show();
-        btn.down().down().fireEvent('loadstore');
-        btn.down().down().show();
-    }
-
     ,newMapView: function() {
         var newMapViewWin = new esapp.view.analysis.mapView({
             epsg: 'EPSG:4326'

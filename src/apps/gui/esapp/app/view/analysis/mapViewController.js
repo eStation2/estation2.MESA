@@ -171,7 +171,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
         mapTitleObj.fireEvent('refreshimage');
     }
 
-    ,addProductLayer: function(productcode, productversion, mapsetcode, subproductcode, legendid, legendHTML, legendHTMLVertical, productname, date_format) {
+    ,addProductLayer: function(productcode, productversion, mapsetcode, subproductcode, legendid, legendHTML, legendHTMLVertical, productname, date_format, frequency_id) {
         var me = this;
         var params = {
                productcode:productcode,
@@ -188,7 +188,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
         //me.getView().legendHTML = legendHTML;
         //me.getView().legendHTMLVertical = legendHTMLVertical;
         me.getView().date_format = date_format;
-
+        me.getView().frequency_id = frequency_id;
 
         Ext.Ajax.request({
             method: 'GET',
@@ -245,8 +245,6 @@ Ext.define('esapp.view.analysis.mapViewController', {
                         });
                     }
                 }
-                var mapview_timelinechart_container = me.lookupReference('time-line-chart' + me.getView().id);
-                mapview_timelinechart_container.timelinechart.series[0].setData(data, false);
 
                 // Set the MapView window title to the selected product and date
                 var versiontitle = '';
@@ -258,27 +256,37 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 var pattern = /(\d{4})(\d{2})(\d{2})/;
                 //me.getView().productdate = me.getView().productdate.replace(pattern,'$3-$2-$1');
                 //var dt = new Date(me.getView().productdate.replace(pattern,'$3-$2-$1'));
-                var productdateHTML = ' - <b class="" style="color: mediumspringgreen; font-size: 20px;">' + me.getView().productdate.replace(pattern,'$3-$2-$1') + '</b>';
+                var productdateHTML = ' - <b class="" style="color: #ffffff; font-size: 20px;">' + me.getView().productdate.replace(pattern,'$3-$2-$1') + '</b>';
                 if (date_format == 'MMDD') {
                     var mydate = new Date(me.getView().productdate.replace(pattern,'$2/$3/$1'));
                     mydate.setHours(mydate.getHours()+5);   // add some hours so otherwise Highcharts.dateFormat assigns a day before if the hour is 00:00.
-                    productdateHTML = ' - <b class="" style="color: mediumspringgreen; font-size: 20px;">' + Highcharts.dateFormat('%d %b', mydate, true) + '</b>';
+                    productdateHTML = ' - <b class="" style="color: #ffffff; font-size: 20px;">' + Highcharts.dateFormat('%d %b', mydate, true) + '</b>';
                 }
                 var mapviewTitle = productname + versiontitle + mapsetcodeHTML + productdateHTML;
 
                 Ext.fly('mapview_title_productname_' + me.getView().id).dom.innerHTML = mapviewTitle;
                 //me.getView().setTitle(mapviewTitle);
-
-                // Show product time line
-                var mapviewtimeline = me.lookupReference('product-time-line_' + me.getView().id);
-                //mapviewtimeline.setHidden(false);
-                //if (me.getView().showTimeline) {
-                    mapviewtimeline.show();
-                    me.getView().getController().redrawTimeLine(me.getView());
-                //}
-                //me.getView().center();
-
                 me.getView().getController().refreshTitleData();
+
+
+                // Set the timeline data, its rangeselector selected button and show product time line
+                var mapviewtimeline = me.lookupReference('product-time-line_' + me.getView().id);
+                var mapview_timelinechart_container = me.lookupReference('time-line-chart' + me.getView().id);
+                mapview_timelinechart_container.timelinechart.series[0].setData(data, false);
+                // console.info(mapview_timelinechart_container.timelinechart);
+                // console.info(data);
+                mapviewtimeline.show();
+                mapviewtimeline.fireEvent('expand');
+                if (frequency_id == 'e1day'){
+                    mapview_timelinechart_container.timelinechart.rangeSelector.setSelected(1);
+                    mapview_timelinechart_container.timelinechart.rangeSelector.clickButton(1); // setSelected(2);
+                    // mapview_timelinechart_container.timelinechart.rangeSelector.updateButtonStates();
+                }
+                // else {
+                //     mapview_timelinechart_container.timelinechart.rangeSelector.setSelected(4);
+                //     mapview_timelinechart_container.timelinechart.rangeSelector.clickButton(4);
+                // }
+
             },
             //callback: function ( callinfo,responseOK,response ) {},
             failure: function ( result, request) {}
@@ -542,11 +550,11 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
             var pattern = /(\d{4})(\d{2})(\d{2})/;
             //me.productdate = clickeddate.replace(pattern,'$3-$2-$1');
-            var productdateHTML = ' - <b class="" style="color: mediumspringgreen; font-size: 20px;">' + me.productdate.replace(pattern,'$3-$2-$1') + '</b>';
+            var productdateHTML = ' - <b class="" style="color: #ffffff; font-size: 20px;">' + me.productdate.replace(pattern,'$3-$2-$1') + '</b>';
             if (me.date_format == 'MMDD') {
                 var mydate = new Date(me.productdate.replace(pattern,'$2/$3/$1'));
                 mydate.setHours(mydate.getHours()+5);   // add some hours so otherwise Highcharts.dateFormat assigns a day before if the hour is 00:00.
-                productdateHTML = ' - <b class="" style="color: mediumspringgreen; font-size: 20px;">' + Highcharts.dateFormat('%d %b', mydate, true) + '</b>';
+                productdateHTML = ' - <b class="" style="color: #ffffff; font-size: 20px;">' + Highcharts.dateFormat('%d %b', mydate, true) + '</b>';
             }
             //var mapviewTitle = me.productname + versiontitle + ' - <b class="smalltext">' + me.productdate + '</b>';
             var mapviewTitle = me.productname + versiontitle + mapsetcodeHTML + productdateHTML;
@@ -579,15 +587,20 @@ Ext.define('esapp.view.analysis.mapViewController', {
         //var timeline_container_size = mapviewtimeline.getSize();
 
         if (mapviewtimeline.hidden == false){
-            mapviewtimeline.setHeight(135);
+            // console.info('mapviewtimeline.hidden=false');
+            // mapviewtimeline.setHeight(145);
             mapview_timelinechart_container.timelinechart.container.width = mapviewtimeline.getSize().width;
             mapview_timelinechart_container.timelinechart.setSize(mapviewtimeline.getSize().width-35, mapviewtimeline.getSize().height, false);
             //mapview_timelinechart_container.timelinechart.reflow();
             mapview_timelinechart_container.timelinechart.redraw();
             mapview_timelinechart_container.updateLayout();
 
-            mapview.map.setSize([document.getElementById(mapview.id + "-body").offsetWidth, document.getElementById(mapview.id + "-body").offsetHeight - 135]);
+            mapview.map.setSize([document.getElementById(mapview.id + "-body").offsetWidth, document.getElementById(mapview.id + "-body").offsetHeight+130]);
         }
+        // else {
+        //     console.info('mapviewtimeline.hidden=true');
+        //     mapview.map.setSize([document.getElementById(mapview.id + "-body").offsetWidth, document.getElementById(mapview.id + "-body").offsetHeight-130]);
+        // }
     }
 
     ,saveMap: function(btn, event) {
@@ -1654,7 +1667,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
         var BorderDrawPropertiesWin = new Ext.Window({
              id:'BorderDrawPropertiesWin'
-            ,title: esapp.Utils.getTranslation('Draw properties ') + esapp.Utils.getTranslation(layerrecord.get('submenu')) + (layerrecord.get('submenu') != '' ? ' ' : '') + esapp.Utils.getTranslation(layerrecord.get('layerlevel'))
+            ,title: esapp.Utils.getTranslation('Draw properties ') + esapp.Utils.getTranslation(layerrecord.get('layername'))   // esapp.Utils.getTranslation(layerrecord.get('menu')) + ' ' + (layerrecord.get('submenu') != '' ? layerrecord.get('submenu') + ' ' : ' ') + esapp.Utils.getTranslation(layerrecord.get('layername'))
             ,width:420
             ,plain: true
             ,modal: true
@@ -1848,6 +1861,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 //boxLabel: esapp.Utils.getTranslation(layer.get('submenu')) + (layer.get('submenu') != '' ? ' ' : '') + esapp.Utils.getTranslation(layer.get('layerlevel')),
                 boxLabel: esapp.Utils.getTranslation(layer.get('layername')) + '</BR><b class="smalltext" style="color:darkgrey">' + esapp.Utils.getTranslation(layer.get('provider')) +'</b>',
                 flex: 1,
+                maxWidth: 250,
                 margin: '0 5 0 5',
                 layerrecord: layer,
                 name: layer.get('layername'),

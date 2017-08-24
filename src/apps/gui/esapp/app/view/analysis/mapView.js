@@ -39,13 +39,14 @@ Ext.define("esapp.view.analysis.mapView",{
     resizable: true,
 
     width:800,
-    height: Ext.getBody().getViewSize().height < 850 ? Ext.getBody().getViewSize().height-80 : 850,
+    height: Ext.getBody().getViewSize().height < 850 ? Ext.getBody().getViewSize().height-100 : 850,
 
     minWidth:630,
     minHeight:550,
 
     // glyph : 'xf080@FontAwesome',
     margin: '0 0 0 0',
+    shadow: false,
     layout: {
         type: 'border'
     },
@@ -73,7 +74,7 @@ Ext.define("esapp.view.analysis.mapView",{
         me.layers = [];
         me.draw = null;
         me.frame = false;
-        me.border= true;
+        me.border= false;
         me.bodyBorder = false;
         me.highlight = null;
         me.toplayer = null;
@@ -86,7 +87,7 @@ Ext.define("esapp.view.analysis.mapView",{
         me.selectedFeatureFromDrawLayer = false;
 
         me.title = '<span id="mapview_title_templatename_' + me.id + '" class="map-templatename"></span><span id="mapview_title_productname_' + me.id + '"></span>';
-        me.height = Ext.getBody().getViewSize().height < 850 ? Ext.getBody().getViewSize().height-80 : 850;
+        me.height = Ext.getBody().getViewSize().height < 850 ? Ext.getBody().getViewSize().height-100 : 850;
 
         me.controller.createToolBar();
 
@@ -391,29 +392,31 @@ Ext.define("esapp.view.analysis.mapView",{
             id: 'product-time-line_' + me.id,
             reference: 'product-time-line_' + me.id,
             align:'left',
+            alwaysOnTop: true,
             autoWidth:true,
             margin:0,
-            height: 135,
-            maxHeight: 135,
+            padding:0,
+            height: 125,
+            maxHeight: 125,
             hidden: true,
             hideMode : 'visibility',    //'display',
             frame:  false,
             shadow: false,
             border: false,
             bodyBorder: true,
-            style: {
-                "border-top": '1px solid black;'
-            },
+            // style: {
+            //     "border-top": '1px solid black;'
+            // },
 
             header : false,
-            collapsible: false,
+            collapsible: true,
             collapsed: false,
             collapseFirst: false,
             collapseDirection: 'top',
             collapseMode : "mini",  // The Panel collapses without a visible header.
             //headerPosition: 'left',
             hideCollapseTool: true,
-            split: false,
+            split: true,
             splitterResize : false,
             dockedItems: [{
                 xtype: 'toolbar',
@@ -491,10 +494,23 @@ Ext.define("esapp.view.analysis.mapView",{
             }],
             listeners: {
                 show: function () {
-                    var size = [document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight-this.height];
-                    me.map.setSize(size);
+                    // var size = [document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight-this.height];
+                    // me.map.setSize(size);
+                    // console.info('Show timeline call redraw');
+                    me.getController().redrawTimeLine(me);
+                },
+                expand: function () {
+                    // var size = [document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight-this.height];
+                    // me.map.setSize(size);
+                    // console.info('Expand timeline call redraw');
                     me.getController().redrawTimeLine(me);
                 }
+                // ,collapse: function () {
+                //     // var size = [document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight];
+                //     // me.map.setSize(size);
+                //     console.info('Collapse timeline call redraw');
+                //     // me.getController().redrawTimeLine(me);
+                // }
             }
             ,items: [{
                 xtype: 'time-line-chart',
@@ -902,7 +918,11 @@ Ext.define("esapp.view.analysis.mapView",{
 
                     //titleObj.suspendEvents();
                     titleObj.titlePosition = me.titleObjPosition;
-                    titleObj.setTpl(me.titleObjContent);
+                    if (me.titleObjContent != null && me.titleObjContent.trim() != ''){
+                        titleObj.setTpl(me.titleObjContent);
+                    }
+                    // console.info(titleObj);
+                    // titleObj.tpl.set(me.titleObjContent, true);
 
                     if (me.showObjects){
                         var task = new Ext.util.DelayedTask(function() {
@@ -919,6 +939,7 @@ Ext.define("esapp.view.analysis.mapView",{
                     if (me.productcode != ''){
                         var task = new Ext.util.DelayedTask(function() {
                             Ext.data.StoreManager.lookup('DataSetsStore').each(function(rec){
+                                // console.info(rec);
                                 if (rec.get('productcode')==me.productcode &&
                                     rec.get('version')==me.productversion ){
                                     //console.info(rec.get('productmapsets'));
@@ -926,8 +947,10 @@ Ext.define("esapp.view.analysis.mapView",{
                                         if (mapset.mapsetcode==me.mapsetcode){
                                             mapset.mapsetdatasets.forEach(function(mapsetdataset){
                                                 if (mapsetdataset.subproductcode==me.subproductcode){
+                                                    // console.info(mapsetdataset);
                                                     me.productname = mapsetdataset.descriptive_name;
                                                     me.date_format = mapsetdataset.date_format;
+                                                    me.frequency_id = mapsetdataset.frequency_id;
                                                 }
                                             },this);
                                         }
@@ -951,7 +974,8 @@ Ext.define("esapp.view.analysis.mapView",{
                                                                me.legendHTML,
                                                                me.legendHTMLVertical,
                                                                me.productname,
-                                                               me.date_format
+                                                               me.date_format,
+                                                               me.frequency_id
                             );
                         });
                         task.delay(500);

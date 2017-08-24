@@ -20,7 +20,7 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
     reference: 'userMapTemplates',
     //title: '',
     header: {
-        hidden: true
+        hidden: false
         //titlePosition: 0,
         //titleAlign: 'center'
         //,iconCls: 'maptemplate'
@@ -82,7 +82,7 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
 
     initComponent: function () {
         var me = this;
-        //Ext.util.Observable.capture(me, function(e){console.log('mapTemplateAdmin - ' + me.id + ': ' + e);});
+        // Ext.util.Observable.capture(me, function(e){console.log('mapTemplateAdmin - ' + me.id + ': ' + e);});
 
         me.mon(me, {
             loadstore: function() {
@@ -98,8 +98,11 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
         });
 
         me.listeners = {
-            focusleave: function(){
-                me.hide();
+            // focusleave: function(){
+                // me.hide();
+            // },
+            viewready: function(){
+                me.fireEvent('loadstore');
             }
         };
 
@@ -108,7 +111,9 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
             type: 'refresh',
             align: 'c-c',
             tooltip: esapp.Utils.getTranslation('refreshmaptpllist'),    // 'Refresh map template list',
-            callback: 'loadUserMapTplStore'
+            callback: function() {
+                me.fireEvent('loadstore');
+            }
         }];
 
         me.bbar = Ext.create('Ext.toolbar.Toolbar', {
