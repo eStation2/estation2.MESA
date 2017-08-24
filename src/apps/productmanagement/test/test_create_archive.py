@@ -310,8 +310,8 @@ class TestCreate(unittest.TestCase):
         mapset='MODIS-Africa-4km'
         product='modis-chla'
         version='v2013.1'
-        start_date=datetime.date(2014, 1, 1)
-        end_date=None
+        start_date=datetime.date(2002, 1, 1)
+        end_date=datetime.date(2014, 1, 1)
 
         # MODIS Chla: since 01.01.2014
         subproducts=['chla-day','monavg','monanom']
@@ -321,10 +321,10 @@ class TestCreate(unittest.TestCase):
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
         # MODIS Chla stats
-        subproduct='monclim'
-        target_dir = base_target_dir + product+ os.path.sep + subproduct
-        functions.check_output_dir(target_dir)
-        create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
+        # subproduct='monclim'
+        # target_dir = base_target_dir + product+ os.path.sep + subproduct
+        # functions.check_output_dir(target_dir)
+        # create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
     def TestCreateArchive_modis_sst(self):
 
@@ -332,8 +332,8 @@ class TestCreate(unittest.TestCase):
         mapset='MODIS-Africa-4km'
         product='modis-sst'
         version='v2013.1'
-        start_date=datetime.date(2014, 1, 1)
-        end_date=None
+        start_date=datetime.date(2002, 1, 1)
+        end_date=datetime.date(2014, 1, 1)
 
         # MODIS SST: since 01.01.2014
         subproducts=['sst-day','monavg','monanom']
@@ -343,10 +343,10 @@ class TestCreate(unittest.TestCase):
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
         # MODIS SST stats
-        subproduct='monclim'
-        target_dir = base_target_dir + product+ os.path.sep + subproduct
-        functions.check_output_dir(target_dir)
-        create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
+        # subproduct='monclim'
+        # target_dir = base_target_dir + product+ os.path.sep + subproduct
+        # functions.check_output_dir(target_dir)
+        # create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
     def TestCreateArchive_modis_par(self):
 
@@ -354,8 +354,8 @@ class TestCreate(unittest.TestCase):
         mapset='MODIS-Africa-4km'
         product='modis-par'
         version='v2012.0'
-        start_date=datetime.date(2014, 1, 1)
-        end_date=None
+        start_date=datetime.date(2002, 1, 1)
+        end_date=datetime.date(2014, 1, 1)
 
         # MODIS PAR: since 01.01.2014
         subproducts=['par-day','monavg','monanom']
@@ -365,10 +365,10 @@ class TestCreate(unittest.TestCase):
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
         # MODIS PAR stats
-        subproduct='monclim'
-        target_dir = base_target_dir + product+ os.path.sep + subproduct
-        functions.check_output_dir(target_dir)
-        create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
+        # subproduct='monclim'
+        # target_dir = base_target_dir + product+ os.path.sep + subproduct
+        # functions.check_output_dir(target_dir)
+        # create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
     def TestCreateArchive_modis_kd490(self):
 
@@ -376,8 +376,8 @@ class TestCreate(unittest.TestCase):
         mapset='MODIS-Africa-4km'
         product='modis-kd490'
         version='v2012.0'
-        start_date=datetime.date(2014, 1, 1)
-        end_date=None
+        start_date=datetime.date(2002, 1, 1)
+        end_date=datetime.date(2014, 1, 1)
 
         # MODIS KD490: since 01.01.2014
         subproducts=['kd490-day','monavg','monanom']
@@ -387,10 +387,10 @@ class TestCreate(unittest.TestCase):
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
         # MODIS KD490 stats
-        subproduct='monclim'
-        target_dir = base_target_dir + product+ os.path.sep + subproduct
-        functions.check_output_dir(target_dir)
-        create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
+        # subproduct='monclim'
+        # target_dir = base_target_dir + product+ os.path.sep + subproduct
+        # functions.check_output_dir(target_dir)
+        # create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
     def TestCreateArchive_modis_firms(self):
 
@@ -422,3 +422,19 @@ class TestCreate(unittest.TestCase):
         self.TestCreateArchive_modis_par()
         self.TestCreateArchive_modis_kd490()
         self.TestCreateArchive_modis_firms()
+
+
+    def TestCreateArchive_vgt_ndvi_2_2(self):
+
+        base_target_dir='/data/archives/vgt-ndvi-2.2/'
+        mapset='SPOTV-ECOWAS-1km'
+        product='vgt-ndvi'
+        version='sv2-pv2.2'
+        start_date=datetime.date(2011, 1, 1)
+        end_date=datetime.date(2011, 12, 31)
+
+        subproduct='ndv'
+        target_dir = base_target_dir + mapset+ os.path.sep + subproduct
+        functions.check_output_dir(target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
