@@ -75,6 +75,10 @@ DROP TRIGGER IF EXISTS update_product ON products.product;
 
 
 
+-- Function: products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean)
+
+-- DROP FUNCTION products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean);
+
 CREATE OR REPLACE FUNCTION products.activate_deactivate_product_ingestion_pads_processing(
     productcode character varying,
     version character varying,
@@ -128,8 +132,7 @@ BEGIN
 	    enabled = _activate
 	WHERE (p.process_id) in (SELECT process_id
 	       FROM products.process_product pp
-	       WHERE pp.type = 'INPUT'
-		 AND pp.productcode = _productcode
+	       WHERE pp.productcode = _productcode
 		 AND pp.version = _version
 		 AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
 				       WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
@@ -183,8 +186,7 @@ BEGIN
 	    enabled = _activate
 	WHERE (p.process_id) in (SELECT process_id
 	       FROM products.process_product pp
-	       WHERE pp.type = 'INPUT'
-		 AND pp.productcode = _productcode
+	       WHERE pp.productcode = _productcode
 		 AND pp.version = _version
 		 AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
 				       WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
@@ -214,6 +216,7 @@ $BODY$
   COST 100;
 ALTER FUNCTION products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean)
   OWNER TO estation;
+
 
 
 
@@ -1375,7 +1378,6 @@ BEGIN
 	RETURN QUERY SELECT 'SELECT products.update_insert_thema('
 		|| 'thema_id := ''' || thema_id || ''''
 		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
-		|| ', activated := ' || activated
 		|| ' );'  as inserts
 	FROM products.thema;
 
@@ -1407,7 +1409,7 @@ BEGIN
 		|| ', masked := ' || masked
 		|| ', timeseries_role := ' || COALESCE('''' || timeseries_role || '''', 'NULL')
 		|| ', display_index := ' || COALESCE(TRIM(to_char(display_index, '99999999')), 'NULL')
-		|| ', full_copy := ' || _full_copy
+		|| ', full_copy := ' || FALSE
 		|| ' );'  as inserts
 	FROM products.product
 	WHERE defined_by = 'JRC';
@@ -1555,7 +1557,7 @@ BEGIN
 		|| ', type := ''' || type || ''''
 		|| ', activated := ' || activated
 		|| ', store_original_data := ' || store_original_data
-		|| ', full_copy := ' || _full_copy
+		|| ', full_copy := ' || FALSE
 		|| ' );'  as inserts
 	FROM products.product_acquisition_data_source pads
 	WHERE defined_by = 'JRC'
@@ -1582,7 +1584,9 @@ BEGIN
 		|| ', full_copy := ' || _full_copy
 		|| ' );'  as inserts
 	FROM products.sub_datasource_description sdd
-	WHERE (sdd.productcode, sdd.version, sdd.subproductcode) in (SELECT productcode, version, subproductcode FROM products.product WHERE defined_by = 'JRC');
+	WHERE (sdd.productcode, sdd.version, sdd.subproductcode) in (SELECT productcode, version, subproductcode FROM products.product WHERE defined_by = 'JRC')
+	  AND (sdd.datasource_descr_id in (SELECT eumetcast_id FROM products.eumetcast_source)
+	       OR sdd.datasource_descr_id in (SELECT internet_id FROM products.internet_source WHERE defined_by = 'JRC'));
 
 
 	RETURN QUERY SELECT chr(10);
@@ -1599,7 +1603,7 @@ BEGIN
 		|| ', wait_for_all_files := ' || wait_for_all_files
 		|| ', input_to_process_re := ' || COALESCE('''' || input_to_process_re || '''', 'NULL')
 		|| ', enabled := ' || enabled
-		|| ', full_copy := ' || _full_copy
+		|| ', full_copy := ' || FALSE
 		|| ' );'  as inserts
 	FROM products.ingestion i
 	WHERE defined_by = 'JRC'
@@ -1619,7 +1623,7 @@ BEGIN
 		|| ', algorithm := ' || COALESCE('''' || algorithm || '''', 'NULL')
 		|| ', priority := ' || COALESCE('''' || priority || '''', 'NULL')
 		|| ', enabled := ' || enabled
-		|| ', full_copy := ' || _full_copy
+		|| ', full_copy := ' || FALSE
 		|| ' );'  as inserts
 	FROM products.processing
 	WHERE defined_by = 'JRC';
@@ -1641,7 +1645,7 @@ BEGIN
 		|| ', date_format := ' || COALESCE('''' || date_format || '''', '''undefined''')
 		|| ', start_date:=   ' || COALESCE(TRIM(to_char(start_date, '999999999999')), 'NULL')
 		|| ', end_date:= ' || COALESCE(TRIM(to_char(end_date, '999999999999')), 'NULL')
-		|| ', full_copy := ' || _full_copy
+		|| ', full_copy := ' || FALSE
 		|| ' );'  as inserts
 	FROM products.process_product pp
 	WHERE process_id IN (SELECT process_id FROM products.processing WHERE defined_by = 'JRC')
@@ -1731,45 +1735,6 @@ BEGIN
 	RETURN QUERY SELECT chr(10);
 
 
-	RETURN QUERY SELECT 'PERFORM analysis.update_insert_layers('
-		|| ' layerid := ' || layerid
-		|| ', layerlevel := ' || COALESCE('''' || layerlevel || '''', 'NULL')
-		|| ', layername := ' || COALESCE('''' || layername || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
-		|| ', filename := ' || COALESCE('''' || filename || '''', 'NULL')
-		|| ', layerorderidx := ' || layerorderidx
-		|| ', layertype := ' || COALESCE('''' || layertype || '''', 'NULL')
-		|| ', polygon_outlinecolor := ' || COALESCE('''' || polygon_outlinecolor || '''', 'NULL')
-		|| ', polygon_outlinewidth := ' || polygon_outlinewidth
-		|| ', polygon_fillcolor := ' || COALESCE('''' || polygon_fillcolor || '''', 'NULL')
-		|| ', polygon_fillopacity := ' || polygon_fillopacity
-		|| ', feature_display_column := ' || COALESCE('''' || feature_display_column || '''', 'NULL')
-		|| ', feature_highlight_outlinecolor := ' || COALESCE('''' || feature_highlight_outlinecolor || '''', 'NULL')
-		|| ', feature_highlight_outlinewidth := ' || feature_highlight_outlinewidth
-		|| ', feature_highlight_fillcolor := ' || COALESCE('''' || feature_highlight_fillcolor || '''', 'NULL')
-		|| ', feature_highlight_fillopacity := ' || feature_highlight_fillopacity
-		|| ', feature_selected_outlinecolor := ' || COALESCE('''' || feature_selected_outlinecolor || '''', 'NULL')
-		|| ', feature_selected_outlinewidth := ' || feature_selected_outlinewidth
-		|| ', enabled := ' || enabled
-		|| ', deletable := ' || deletable
-		|| ', background_legend_image_filename := ' || COALESCE('''' || background_legend_image_filename || '''', 'NULL')
-		|| ', projection := ' || COALESCE('''' || projection || '''', 'NULL')
-		|| ', submenu := ' || COALESCE('''' || submenu || '''', 'NULL')
-		|| ', menu := ' || COALESCE('''' || menu || '''', 'NULL')
-		|| ', defined_by := ' || COALESCE('''' || defined_by || '''', 'NULL')
-		|| ', open_in_mapview := ' || open_in_mapview
-		|| ', provider := ' || COALESCE('''' || provider || '''', 'NULL')
-		|| ', full_copy := ' || _full_copy
-		|| ' );'  as inserts
-	FROM analysis.layers
-	WHERE layerid < 100
-	ORDER BY layerid;
-
-
-	RETURN QUERY SELECT chr(10);
-	RETURN QUERY SELECT chr(10);
-
-
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_timeseries_drawproperties('
 		|| ' productcode := ' || COALESCE('''' || productcode || '''', 'NULL')
 		|| ', subproductcode := ' || COALESCE('''' || subproductcode || '''', 'NULL')
@@ -1841,6 +1806,45 @@ BEGIN
 	FROM products.spirits;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
+	RETURN QUERY SELECT 'PERFORM analysis.update_insert_layers('
+		|| ' layerid := ' || layerid
+		|| ', layerlevel := ' || COALESCE('''' || layerlevel || '''', 'NULL')
+		|| ', layername := ' || COALESCE('''' || layername || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', filename := ' || COALESCE('''' || filename || '''', 'NULL')
+		|| ', layerorderidx := ' || layerorderidx
+		|| ', layertype := ' || COALESCE('''' || layertype || '''', 'NULL')
+		|| ', polygon_outlinecolor := ' || COALESCE('''' || polygon_outlinecolor || '''', 'NULL')
+		|| ', polygon_outlinewidth := ' || polygon_outlinewidth
+		|| ', polygon_fillcolor := ' || COALESCE('''' || polygon_fillcolor || '''', 'NULL')
+		|| ', polygon_fillopacity := ' || polygon_fillopacity
+		|| ', feature_display_column := ' || COALESCE('''' || feature_display_column || '''', 'NULL')
+		|| ', feature_highlight_outlinecolor := ' || COALESCE('''' || feature_highlight_outlinecolor || '''', 'NULL')
+		|| ', feature_highlight_outlinewidth := ' || feature_highlight_outlinewidth
+		|| ', feature_highlight_fillcolor := ' || COALESCE('''' || feature_highlight_fillcolor || '''', 'NULL')
+		|| ', feature_highlight_fillopacity := ' || feature_highlight_fillopacity
+		|| ', feature_selected_outlinecolor := ' || COALESCE('''' || feature_selected_outlinecolor || '''', 'NULL')
+		|| ', feature_selected_outlinewidth := ' || feature_selected_outlinewidth
+		|| ', enabled := ' || enabled
+		|| ', deletable := ' || deletable
+		|| ', background_legend_image_filename := ' || COALESCE('''' || background_legend_image_filename || '''', 'NULL')
+		|| ', projection := ' || COALESCE('''' || projection || '''', 'NULL')
+		|| ', submenu := ' || COALESCE('''' || submenu || '''', 'NULL')
+		|| ', menu := ' || COALESCE('''' || menu || '''', 'NULL')
+		|| ', defined_by := ' || COALESCE('''' || defined_by || '''', 'NULL')
+		|| ', open_in_mapview := ' || open_in_mapview
+		|| ', provider := ' || COALESCE('''' || provider || '''', 'NULL')
+		|| ', full_copy := ' || _full_copy
+		|| ' );'  as inserts
+	FROM analysis.layers
+	WHERE layerid < 100
+	ORDER BY layerid;
+
+
 END;
 $BODY$
   LANGUAGE plpgsql VOLATILE
@@ -1848,6 +1852,7 @@ $BODY$
   ROWS 1000;
 ALTER FUNCTION products.export_jrc_data(boolean)
   OWNER TO estation;
+
 
 
 
@@ -1922,7 +1927,6 @@ BEGIN
 	RETURN QUERY SELECT 'SELECT products.update_insert_thema('
 		|| 'thema_id := ''' || thema_id || ''''
 		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
-		|| ', activated := ' || activated
 		|| ' );'  as inserts
 	FROM products.thema;
 
@@ -1951,7 +1955,7 @@ BEGIN
 		|| ', masked := ' || masked
 		|| ', timeseries_role := ' || COALESCE('''' || timeseries_role || '''', 'NULL')
 		|| ', display_index := ' || COALESCE(TRIM(to_char(display_index, '99999999')), 'NULL')
-		|| ', full_copy := ' || _full_copy
+		|| ', full_copy := ' || FALSE
 		|| ' );'  as inserts
 	FROM products.product;
 
@@ -2077,7 +2081,7 @@ BEGIN
 		|| ', type := ''' || type || ''''
 		|| ', activated := ' || activated
 		|| ', store_original_data := ' || store_original_data
-		|| ', full_copy := ' || _full_copy
+		|| ', full_copy := ' || FALSE
 		|| ' );'  as inserts
 	FROM products.product_acquisition_data_source;
 
@@ -2112,7 +2116,7 @@ BEGIN
 		|| ', wait_for_all_files := ' || wait_for_all_files
 		|| ', input_to_process_re := ' || COALESCE('''' || input_to_process_re || '''', 'NULL')
 		|| ', enabled := ' || enabled
-		|| ', full_copy := ' || _full_copy
+		|| ', full_copy := ' || FALSE
 		|| ' );'  as inserts
 	FROM products.ingestion;
 
@@ -2127,7 +2131,7 @@ BEGIN
 		|| ', algorithm := ' || COALESCE('''' || algorithm || '''', 'NULL')
 		|| ', priority := ' || COALESCE('''' || priority || '''', 'NULL')
 		|| ', enabled := ' || enabled
-		|| ', full_copy := ' || _full_copy
+		|| ', full_copy := ' || FALSE
 		|| ' );'  as inserts
 	FROM products.processing;
 
@@ -2145,7 +2149,7 @@ BEGIN
 		|| ', date_format := ' || COALESCE('''' || date_format || '''', '''undefined''')
 		|| ', start_date:=   ' || COALESCE(TRIM(to_char(start_date, '999999999999')), 'NULL')
 		|| ', end_date:= ' || COALESCE(TRIM(to_char(end_date, '999999999999')), 'NULL')
-		|| ', full_copy := ' || _full_copy
+		|| ', full_copy := ' || FALSE
 		|| ' );'  as inserts
 	FROM products.process_product;
 
@@ -2212,42 +2216,6 @@ BEGIN
 
 
 
-	RETURN QUERY SELECT 'PERFORM analysis.update_insert_layers('
-		|| ' layerid := ' || layerid
-		|| ', layerlevel := ' || COALESCE('''' || layerlevel || '''', 'NULL')
-		|| ', layername := ' || COALESCE('''' || layername || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
-		|| ', filename := ' || COALESCE('''' || filename || '''', 'NULL')
-		|| ', layerorderidx := ' || layerorderidx
-		|| ', layertype := ' || COALESCE('''' || layertype || '''', 'NULL')
-		|| ', polygon_outlinecolor := ' || COALESCE('''' || polygon_outlinecolor || '''', 'NULL')
-		|| ', polygon_outlinewidth := ' || polygon_outlinewidth
-		|| ', polygon_fillcolor := ' || COALESCE('''' || polygon_fillcolor || '''', 'NULL')
-		|| ', polygon_fillopacity := ' || polygon_fillopacity
-		|| ', feature_display_column := ' || COALESCE('''' || feature_display_column || '''', 'NULL')
-		|| ', feature_highlight_outlinecolor := ' || COALESCE('''' || feature_highlight_outlinecolor || '''', 'NULL')
-		|| ', feature_highlight_outlinewidth := ' || feature_highlight_outlinewidth
-		|| ', feature_highlight_fillcolor := ' || COALESCE('''' || feature_highlight_fillcolor || '''', 'NULL')
-		|| ', feature_highlight_fillopacity := ' || feature_highlight_fillopacity
-		|| ', feature_selected_outlinecolor := ' || COALESCE('''' || polygon_fillcolor || '''', 'NULL')
-		|| ', feature_selected_outlinewidth := ' || polygon_fillopacity
-		|| ', enabled := ' || enabled
-		|| ', deletable := ' || deletable
-		|| ', background_legend_image_filename := ' || COALESCE('''' || background_legend_image_filename || '''', 'NULL')
-		|| ', projection := ' || COALESCE('''' || projection || '''', 'NULL')
-		|| ', submenu := ' || COALESCE('''' || submenu || '''', 'NULL')
-		|| ', menu := ' || COALESCE('''' || menu || '''', 'NULL')
-		|| ', defined_by := ' || COALESCE('''' || defined_by || '''', 'NULL')
-		|| ', open_in_mapview := ' || open_in_mapview
-		|| ', provider := ' || COALESCE('''' || provider || '''', 'NULL')
-		|| ', full_copy := ' || _full_copy
-		|| ' );'  as inserts
-	FROM analysis.layers
-	WHERE layerid < 100
-	ORDER BY layerid;
-
-
-
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_timeseries_drawproperties('
 		|| ' productcode := ' || COALESCE('''' || productcode || '''', 'NULL')
 		|| ', subproductcode := ' || COALESCE('''' || subproductcode || '''', 'NULL')
@@ -2311,6 +2279,41 @@ BEGIN
 		|| ', activated := ' || activated
 		|| ' );'  as inserts
 	FROM products.spirits;
+
+
+	RETURN QUERY SELECT 'PERFORM analysis.update_insert_layers('
+		|| ' layerid := ' || layerid
+		|| ', layerlevel := ' || COALESCE('''' || layerlevel || '''', 'NULL')
+		|| ', layername := ' || COALESCE('''' || layername || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', filename := ' || COALESCE('''' || filename || '''', 'NULL')
+		|| ', layerorderidx := ' || layerorderidx
+		|| ', layertype := ' || COALESCE('''' || layertype || '''', 'NULL')
+		|| ', polygon_outlinecolor := ' || COALESCE('''' || polygon_outlinecolor || '''', 'NULL')
+		|| ', polygon_outlinewidth := ' || polygon_outlinewidth
+		|| ', polygon_fillcolor := ' || COALESCE('''' || polygon_fillcolor || '''', 'NULL')
+		|| ', polygon_fillopacity := ' || polygon_fillopacity
+		|| ', feature_display_column := ' || COALESCE('''' || feature_display_column || '''', 'NULL')
+		|| ', feature_highlight_outlinecolor := ' || COALESCE('''' || feature_highlight_outlinecolor || '''', 'NULL')
+		|| ', feature_highlight_outlinewidth := ' || feature_highlight_outlinewidth
+		|| ', feature_highlight_fillcolor := ' || COALESCE('''' || feature_highlight_fillcolor || '''', 'NULL')
+		|| ', feature_highlight_fillopacity := ' || feature_highlight_fillopacity
+		|| ', feature_selected_outlinecolor := ' || COALESCE('''' || polygon_fillcolor || '''', 'NULL')
+		|| ', feature_selected_outlinewidth := ' || polygon_fillopacity
+		|| ', enabled := ' || enabled
+		|| ', deletable := ' || deletable
+		|| ', background_legend_image_filename := ' || COALESCE('''' || background_legend_image_filename || '''', 'NULL')
+		|| ', projection := ' || COALESCE('''' || projection || '''', 'NULL')
+		|| ', submenu := ' || COALESCE('''' || submenu || '''', 'NULL')
+		|| ', menu := ' || COALESCE('''' || menu || '''', 'NULL')
+		|| ', defined_by := ' || COALESCE('''' || defined_by || '''', 'NULL')
+		|| ', open_in_mapview := ' || open_in_mapview
+		|| ', provider := ' || COALESCE('''' || provider || '''', 'NULL')
+		|| ', full_copy := ' || _full_copy
+		|| ' );'  as inserts
+	FROM analysis.layers
+	WHERE layerid < 100
+	ORDER BY layerid;
 
 END;
 $BODY$
