@@ -24,9 +24,11 @@ from lib.python import es_logging as log
 from config import es_constants
 from apps.tools import ingest_historical_archives as iha
 from apps.es2system import convert_2_spirits as conv
+from database import querydb
+from apps.productmanagement.products import *
 
 logger = log.my_logger(__name__)
-data_dir = es_constants.es2globals['data_dir']
+data_dir = es_constants.es2globals['processing_dir']
 
 from lib.python.daemon import DaemonDryRunnable
 
@@ -580,6 +582,12 @@ def loop_system(dry_run=False):
     delay_data_sync_minutes = es_constants.es2globals['system_delay_data_sync_min']
     time_for_db_dump = es_constants.es2globals['system_time_db_dump_hhmm']
     time_for_spirits_conv = es_constants.es2globals['system_time_spirits_conv']
+    try:
+        time_for_push_ftp = es_constants.es2globals['system_time_push_ftp']
+    except:
+        logger.info("Parameter not defined in factory_settings: %s" % 'system_time_push_ftp')
+        time_for_push_ftp = '24:01'
+
     do_bucardo_config = False
 
     # Restart bucardo
@@ -602,11 +610,12 @@ def loop_system(dry_run=False):
     execute_loop = True
     while execute_loop:
 
-        logger.info("Starting the System Service loop")
+        logger.info("")
+        logger.info("Entering the System Service loop")
 
         # Read the relevant info from system settings
         system_settings = functions.getSystemSettings()
-        logger.info('System Settings Mode: %s ' % system_settings['mode'])
+        logger.debug('System Settings Mode: %s ' % system_settings['mode'])
 
         # Initialize To Do flags
         do_data_sync = False
@@ -614,6 +623,7 @@ def loop_system(dry_run=False):
         schemas_db_dump = []
         do_convert_spirits = False
         do_clean_tmp= True
+        do_push_ftp = False
 
         if system_settings['data_sync'] in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
             do_data_sync = True
@@ -703,16 +713,21 @@ def loop_system(dry_run=False):
             schemas_db_sync = []
             schemas_db_dump = ['products', 'analysis']
             do_convert_spirits = False
+            do_push_ftp = True
 
         if es_constants.es2globals['do_spirits_conversion'] in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
             do_convert_spirits = True
 
         # Report on the actions to be done
-        logger.info("\tBucardo config: " + str(do_bucardo_config))
-        logger.info("\tDo data sync  : " + str(do_data_sync))
-        logger.info("\tDo DB sync    : " + str(do_db_sync))
-        logger.info("\tNr schema dump: " + str(len(schemas_db_dump)))
-        logger.info("\tConv Spirits  : " + str(do_convert_spirits))
+        logger.info("")
+        logger.info("*   Schedule follows ")
+        logger.info("*   Do bucardo config:  " + str(do_bucardo_config))
+        logger.info("*   Do data-sync:       " + str(do_data_sync))
+        logger.info("*   Do db-sync:         " + str(do_db_sync))
+        # logger.info("*   Nr schema to dump:  " + str(len(schemas_db_dump)))
+        logger.info("*   Do spirits convers: " + str(do_convert_spirits))
+        logger.info("*   Do push to ftp:     " + str(do_push_ftp))
+        logger.info("")
 
         # do_bucardo_config
         if do_bucardo_config:
@@ -766,6 +781,15 @@ def loop_system(dry_run=False):
         if do_clean_tmp:
             logger.info("Cleaning Temporary dirs")
             clean_temp_dir()
+
+        # Push data to ftp server
+        operation = 'push_to_ftp'
+        if do_push_ftp:
+            check_time = check_delay_time(operation, time=time_for_push_ftp)
+            if check_time:
+                logger.info("Push data to remote ftp server")
+                status = push_data_ftp()
+
 
         # Exit in case of dry_run
         if dry_run:
@@ -827,6 +851,115 @@ def get_status_PC1():
                   'fts_status': fts_status}
 
     return status_PC1
+
+def push_data_ftp(dry_run=False):
+
+#   Synchronized data towards an ftp server (only for JRC)
+#   It replaces, since the new srv-ies-ftp.jrc.it ftp is set, the bash script: mirror_to_ftp.sh
+#   Configuration:  it looks at all 'non-masked' products and pushes them
+#                   For the mapsets, find what is in the filesystem, and pushes only the 'largest'
+#   It uses a command like:
+#       lftp -e "mirror -RLe /data/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/10dmax-linearx2/
+#                            /narma/eStation_2.0/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/10dmax-linearx2/;exit"
+#                            -u narma:JRCVRw2960 sftp://srv-ies-ftp.jrc.it"" >> /eStation2/log/push_data_ftp.log
+#
+
+    try:
+        from config import server_ftp
+    except:
+        logger.warning('Configuration file for ftp sync not found. Exit')
+        return 1
+
+    user = server_ftp.server['user']
+    psw  = server_ftp.server['psw']
+    url=server_ftp.server['url']
+    trg_dir=server_ftp.server['data_dir']
+
+    # Create an ad-hoc file for the lftp command output (beside the standard logger)
+    logfile=es_constants.es2globals['log_dir']+'push_data_ftp.log'
+    message=time.strftime("%Y-%m-%d %H:%M")+' INFO: Running the ftp sync now ... \n'
+    log_id=open(logfile,'a')
+
+    logger.debug("Entering routine %s" % 'push_data_ftp')
+
+    # Loop over 'not-masked' products
+    products = querydb.get_products(masked=False)
+
+    for row in products:
+
+        prod_dict = functions.row2dict(row)
+        productcode = prod_dict['productcode']
+        version = prod_dict['version']
+
+        # Check it if is in the list of 'exclusions' defined in ./config/server_ftp.py
+        key ='{}/{}'.format(productcode,version)
+        skip = False
+        if key in server_ftp.exclusions:
+            skip = True
+            logger.debug('Do not sync for {}/{}'.format(productcode,version))
+
+        p = Product(product_code=productcode, version=version)
+
+        all_prod_mapsets = p.mapsets
+        all_prod_subproducts = p.subproducts
+
+        # Check there is at least one mapset and one subproduct
+        if all_prod_mapsets.__len__() > 0 and all_prod_subproducts.__len__() > 0 and not skip:
+
+            # In case of several mapsets, check if there is a 'larger' one
+            if len(all_prod_mapsets) > 1:
+                mapset_to_use = []
+                for my_mapset in all_prod_mapsets:
+                    mapset_info = querydb.get_mapset(mapsetcode=my_mapset, allrecs=False, echo=False)
+                    if hasattr(mapset_info, "mapsetcode"):
+                        my_mapobj = MapSet()
+                        my_mapobj.assigndb(my_mapset)
+
+                        larger_mapset = my_mapobj.get_larger_mapset()
+                        if larger_mapset is not None:
+                            if larger_mapset not in mapset_to_use:
+                                mapset_to_use.append(larger_mapset)
+                        else:
+                            if my_mapset not in mapset_to_use:
+                                mapset_to_use.append(my_mapset)
+            else:
+                mapset_to_use=all_prod_mapsets
+            # Loop over existing mapset
+            for mapset in mapset_to_use:
+                all_mapset_datasets = p.get_subproducts(mapset=mapset)
+
+                # Loop over existing subproducts
+                for subproductcode in all_mapset_datasets:
+                    # Get info - and ONLY for NOT masked products
+                    dataset_info = querydb.get_subproduct(productcode=productcode,
+                                                          version=version,
+                                                          subproductcode=subproductcode,
+                                                          echo=False,
+                                                          masked=True)  # -> this means sprod NOT masked
+
+                    if dataset_info is not None:
+                        dataset_dict = functions.row2dict(dataset_info)
+                        dataset_dict['mapsetcode'] = mapset
+
+                        logger.debug('Working on {}/{}/{}/{}'.format(productcode,version,mapset,subproductcode))
+                        log_id.write('Working on {}/{}/{}/{}'.format(productcode,version,mapset,subproductcode))
+
+                        subdir = functions.set_path_sub_directory(productcode, subproductcode,  dataset_dict['product_type'], version, mapset)
+                        source = data_dir+subdir
+                        target = trg_dir + subdir
+
+                        command = 'lftp -e "mirror -RLe {} {};exit" -u {}:{} {}"" >> {}'.format(source,target,user,psw,url,logfile)
+
+                        logger.debug("Executing %s" % command)
+                        # return
+                        try:
+                            status = os.system(command)
+                            if status:
+                                logger.error("Error in executing %s" % command)
+                        except:
+                            logger.error('Error in executing command: {}'.format(command))
+
+    log_id.close()
 
 class SystemDaemon(DaemonDryRunnable):
     def run(self):
