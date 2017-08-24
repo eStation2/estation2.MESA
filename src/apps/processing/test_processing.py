@@ -141,21 +141,30 @@ from multiprocessing import Queue
 # res_queue = None
 # processing_std_modis_monavg(res_queue, **args)
 #   ---------------------------------------------------------------------
-# modis-pp computation
+# modis-pp computation - NON standard
 #   ---------------------------------------------------------------------
-from apps.processing.processing_std_modis_pp import *
-args = {'pipeline_run_level':0, \
-        'pipeline_printout_level':3, \
-        'pipeline_printout_graph_level': 0, \
-        'prod': 'modis-chla',\
-        'starting_sprod':'monavg',\
-        'mapset': 'MODIS-Africa-4km',\
-        'version':'v2013.1',
-        'logfile':'modis-pp'
-        }
-res_queue = None
-processing_std_modis_pp(res_queue, **args)
+# from apps.processing.processing_modis_pp import *
 #
+# derivation_method = 'modis_pp'
+# algorithm = 'modis_pp'
+# mapset = 'MODIS-Africa-4km'
+# process_id = 62
+#
+# # Get input products
+# input_products = querydb.get_processing_chain_products(process_id,type='input')
+# output_products = querydb.get_processing_chain_products(process_id,type='output')
+#
+# # Prepare arguments
+# args = {'pipeline_run_level':3,
+#         'pipeline_printout_level':0,
+#         'input_products': input_products,
+#         'output_product': output_products,
+#         'logfile': 'test_processing.log'}
+#
+# res_queue = None
+# processing_modis_pp(res_queue, **args)
+
+# #
 #   ---------------------------------------------------------------------
 # tamsat-rfe
 #   ---------------------------------------------------------------------
@@ -277,34 +286,34 @@ processing_std_modis_pp(res_queue, **args)
 #   ---------------------------------------------------------------------
 # modis-firms
 #   ---------------------------------------------------------------------
-# from apps.processing.processing_std_modis_firms import *
-# # # Create the list of dates -> returns empty if start==end==None
-# #
-# # starting_dates = None
-# #
-# # start_date='20161001'
-# # end_date = '20161010'
-# # starting_dates = proc_functions.get_list_dates_for_dataset('modis-firms', '1day', 'v5.0', start_date=start_date, end_date=end_date)
-# starting_dates = None
-# target_mapset='SPOTV-Africa-1km'
+from apps.processing.processing_std_modis_firms import *
+# # Create the list of dates -> returns empty if start==end==None
 #
-# args = {'pipeline_run_level':3,
-#         'pipeline_printout_level':0,
-#         'pipeline_printout_graph_level': 0,
-#         'prod': 'modis-firms',
-#         'starting_sprod':'1day',
-#         'starting_dates': starting_dates,
-#         'mapset': target_mapset,
-#         'version':'v5.0',
-#         'logfile':'log-modis-firms.log',
-#         'update_stats' : False,
-#         'nrt_products' : True,
-#         'touch_files_only':False}
 #
-# res_queue = None
-# proc_lists=processing_std_modis_firms(res_queue,**args)
-# print(proc_lists)
-#   ---------------------------------------------------------------------
+# start_date='20161001'
+# end_date = '20161010'
+# starting_dates = proc_functions.get_list_dates_for_dataset('modis-firms', '1day', 'v5.0', start_date=start_date, end_date=end_date)
+starting_dates = None
+
+target_mapset='SPOTV-Africa-1km'
+
+args = {'pipeline_run_level':3,
+        'pipeline_printout_level':0,
+        'pipeline_printout_graph_level': 0,
+        'prod': 'modis-firms',
+        'starting_sprod':'1day',
+        'starting_dates': starting_dates,
+        'mapset': target_mapset,
+        'version':'v6.0',
+        'logfile':'log-modis-firms.log',
+        'update_stats' : False,
+        'nrt_products' : True,
+        'touch_files_only':False}
+
+res_queue = None
+proc_lists=processing_std_modis_firms(res_queue,**args)
+print(proc_lists)
+# ---------------------------------------------------------------------
 # msg-mpe
 #   ---------------------------------------------------------------------
 from apps.processing.processing_std_msg_mpe import *
