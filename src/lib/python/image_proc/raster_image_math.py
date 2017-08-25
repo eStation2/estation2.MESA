@@ -1512,10 +1512,16 @@ def do_compute_primary_production(chla_file='', sst_file='', kd_file='', par_fil
                 # calculating f ratio  F using (0.66125 * Eo)/(Eo + 4.1)
                 F_ratio[valid] = (0.66125*data_par[valid])/(data_par[valid] + 4.1)
 
+                # Add a test on SST > 28.5 (see bug ES2-49)
+                high_temp = (data_sst_rescal > 28.5)
+
                 # Calculate Pb_opt from SST
                 Pb_opt[valid] = -3.27e-8*data_sst_rescal[valid]**7 + 3.4132e-6*data_sst_rescal[valid]**6 - 1.348e-4*data_sst_rescal[valid]**5 + \
                           2.462e-3*data_sst_rescal[valid]**4 - 0.0205*data_sst_rescal[valid]**3 + 0.0617*data_sst_rescal[valid]**2 + \
                           0.2749*data_sst_rescal[valid] + 1.2956
+
+                if high_temp.any():
+                    Pb_opt[high_temp]= 4.0
 
                 data_pp[valid] = data_chl[valid]*(4.6/data_kd_rescal[valid])*F_ratio[valid]*Pb_opt[valid]*dl
 

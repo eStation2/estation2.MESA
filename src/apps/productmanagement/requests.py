@@ -161,4 +161,68 @@ def get_archive_name(productcode, version, id):
     filename += 'archive_'+productcode+'_'+version+'_'+id+'.tgz'
     return filename
 
+def get_request_filename(productcode, version, subproductcode, mapsetcode, date=None):
+
+    if date is None:
+        filename = productcode+'_'+subproductcode+'_'+mapsetcode+'_'+version
+
+    return filename
+
+def create_archive_vars(productcode, version, mapsetcode, subproductcode, from_date=None, to_date=None, time_suffix=None, output_dir=None):
+
+    # Creates an archive file (.tgz) for a single period (prod/version/sprod/mapset)
+    incresing_number=1
+
+    if output_dir is None:
+        output_dir = es_constants.es2globals['base_tmp_dir']
+
+    if time_suffix is not None:
+        time_token=str(time_suffix)
+    else:
+        if from_date is not None:
+            time_token=from_date
+            if to_date is not None:
+                time_token+='_to_'
+                time_token+=to_date
+        else:
+            time_token='alltimes'
+
+    # Define archive name
+    archive_base_name=output_dir+os.path.sep+ \
+                      productcode+'_'+version+'_'+mapsetcode+'_'+subproductcode+'_'+time_token
+
+    archive_name=archive_base_name+'_{0:04d}'.format(incresing_number)+'.tgz'
+    self_extracting_name=archive_name
+    self_extracting_name=self_extracting_name.replace('.tgz','.bsx')
+
+    logger.debug( 'Archive file name: {0}'.format(archive_name))
+
+    # Create a product object - no date indication
+    product = Product(product_code=productcode, version=version)
+    [tarfile , results] = product.create_tar_vars(productcode, version, subproductcode, mapsetcode, from_date=from_date,
+                                                  to_date=to_date, filetar=archive_name, tgz=True)
+
+    logger.info( 'Tar archive created: {0}'.format(archive_name))
+    logger.debug('Files found for {0}: {1}'.format(subproductcode,results['n_file_copied']))
+
+    # Test there is - at list - 1 file missing
+    if results['n_file_copied'] > 0:
+
+        logger.info('Creating file {0}'.format(self_extracting_name))
+        # Get the decompression script template
+        decompress_file = es_constants.decompress_script
+
+        target = open(self_extracting_name,'wb')
+        shutil.copyfileobj(open(decompress_file,'rb'),target)
+        shutil.copyfileobj(open(archive_name,'rb'),target)
+        target.close()
+        os.chmod(self_extracting_name,0775)
+        # Increase the counter
+        incresing_number+=1
+
+    # Remove .tgz file
+    os.remove(archive_name)
+    product = None
+
+    return self_extracting_name
 

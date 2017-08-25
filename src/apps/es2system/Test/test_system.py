@@ -160,3 +160,8 @@ class TestSystem(unittest.TestCase):
         # Should get here the role of my machine ...
         status = es2system.get_status_PC1()
         print status
+
+    def test_push_ftp(self):
+
+        # Should get here the role of my machine ...
+        status = es2system.push_data_ftp()

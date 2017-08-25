@@ -9,6 +9,7 @@
 # Source my definitions
 import os
 import re
+import glob
 
 # Import eStation2 modules
 from lib.python import functions
@@ -21,7 +22,7 @@ from config import es_constants
 from ruffus import *
 
 # Primary Production Monthly
-activate_pp_1mon_comput=1
+activate_pp_comput=1
 
 #   General definitions for this processing chain
 ext=es_constants.ES2_OUTFILE_EXTENSION
@@ -128,8 +129,6 @@ def create_pipeline(input_products, output_product, logfile=None):
     # else:
     #     starting_files=input_dir+"*"+in_prod_ident
 
-    kd_files = kd490_input_dir+my_date+"*"+kd490_prod_ident
-
     # Define outputs
 
     output_nodata = -32767
@@ -142,16 +141,38 @@ def create_pipeline(input_products, output_product, logfile=None):
     out_prod_ident = functions.set_path_filename_no_date(output_prod, output_sprod, output_mapset,output_version, ext)
     output_subdir  = functions.set_path_sub_directory (output_prod, output_sprod, 'Derived', output_version, output_mapset)
 
-    #   Starting files monthly composites
-    formatter_kd="(?P<YYYYMMDD>[0-9]{8})"+kd490_prod_ident
-    formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{YYYYMMDD[0]}"+out_prod_ident
 
-    ancillary_chla  = chla_input_dir+"{YYYYMMDD[0]}"+chla_prod_ident
-    ancillary_par = par_input_dir+"{YYYYMMDD[0]}"+par_prod_ident
-    ancillary_sst = sst_input_dir+"{YYYYMMDD[0]}"+sst_prod_ident
+    # Fixes ES2-36
+    def generate_input_files_pp():
 
-    @active_if(activate_pp_1mon_comput)
-    @transform(kd_files, formatter(formatter_kd), add_inputs(ancillary_chla, ancillary_par, ancillary_sst), formatter_out)
+        # Take kd490 as starting point
+        kd_files = kd490_input_dir+my_date+"*"+kd490_prod_ident
+        input_files =sorted(glob.glob(kd_files))
+
+        for input_file in input_files:
+            basename=os.path.basename(input_file)
+            mydate=functions.get_date_from_path_filename(basename)
+
+            ancillary_chla  = chla_input_dir+mydate+chla_prod_ident
+            ancillary_par = par_input_dir+mydate+par_prod_ident
+            ancillary_sst = sst_input_dir+mydate+sst_prod_ident
+
+            do_comp = True
+            if not os.path.isfile(ancillary_chla):
+                do_comp = False
+            if not os.path.isfile(ancillary_par):
+                do_comp = False
+            if not os.path.isfile(ancillary_sst):
+                do_comp = False
+
+            if do_comp is True:
+
+                output_file=es_constants.processing_dir+output_subdir+os.path.sep+mydate+out_prod_ident
+                my_inputs = (input_file, ancillary_chla, ancillary_par, ancillary_sst)
+                yield (my_inputs, output_file)
+
+    @active_if(activate_pp_comput)
+    @files(generate_input_files_pp)
     def modis_pp_1mon(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)

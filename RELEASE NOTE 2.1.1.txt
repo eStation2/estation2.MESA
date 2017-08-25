@@ -8,17 +8,24 @@
 
 1.1 Acquisition
 
+- Correct a bug on ingestion of LSASAF-LST (corrupted .bz2 files make the ingestion service stuck)
+
 1.2 Processing
+
+- Correct Primary Production algorithm (28.5 Celsius threshould for PbOpt omputation - see ES2-49) and check all files present (see ES2-36).
+- Correct std_modis_monavg computation (see ES2-35).
 
 1.3 DataManagement
 
 1.4 Visualization
 
+- Correct Timeseries value returned for nodata (None rather than 0 -> see ES2-47)
+
 1.5 Service
 
 1.6 Configuration/DB
 
-
+- Internet source for TAMSAT updated (see ES2-48)
 
 2. NEW FEATURES
 ---------------
@@ -29,15 +36,20 @@
 
 2.2.1 Acquisition
 
-- Correct a bug on ingestion of LSASAF-LST (corrupted .bz2 files make the ingestion service stuck)
-
 2.2.2 Processing
 
 - Fully implement the modis-pp processing chain, as a non-standard chain (~ merge). Define two chains for 8daysavg and monavg products.
+- Remove tmpdir used in modis-firms 10km re-projection
 
 2.2.3 DataManagement
 
+- Implement functions to generate .bsx archives for a single datasets (e.g. NDVI 2.2 yearly datasets). No GUI, only from pycharm/python.
+
 2.3.1 Visualization/General
+
+- Change settings in DB in order to have NDVI sv2-pv2.1 not masked
+- Change settings in DB in order not to get (via eumetcast) MSG-MPE product
+
 
 2.3.2 Visualization/Maps
 
