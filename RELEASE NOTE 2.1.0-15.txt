@@ -1,6 +1,12 @@
 #
-#   Release Note - after 2.1.0 (2.1.1 or 2.2.0)
-#   Changes with respect to 2.1.0 - Unless specification, they refer to Apps.rpm package.
+#   Release Note for 2.1.0-15
+#   Changes are with respect to 2.1.0-12 (disseminated through EUMETCast on 11th July 2017)
+#   It actually includes modifications done in the following versions:
+#       2.1.0-13: changes after TAFIRI OTJT: sst-fronts, primary production computation
+#       2.1.0-14: mainly the MODIS 4km EUMETCast sources -> has .sql corrupted !!
+#       2.1.0-15: update internet sources, primary production
+#
+#   Unless specification, they refer to Apps.rpm package.
 #
 
 1. BUG FIXING
@@ -9,6 +15,7 @@
 1.1 Acquisition
 
 - Correct a bug on ingestion of LSASAF-LST (corrupted .bz2 files make the ingestion service stuck)
+- Update source for FEWSNET-2.0 and TAMSAT-2.0 (2.1.0-15)
 
 1.2 Processing
 
@@ -27,6 +34,7 @@
 
 - Internet source for TAMSAT updated (see ES2-48)
 
+
 2. NEW FEATURES
 ---------------
 
@@ -40,6 +48,7 @@
 
 - Fully implement the modis-pp processing chain, as a non-standard chain (~ merge). Define two chains for 8daysavg and monavg products.
 - Remove tmpdir used in modis-firms 10km re-projection
+- Implement the SST Fronts detection
 
 2.2.3 DataManagement
 
@@ -49,7 +58,6 @@
 
 - Change settings in DB in order to have NDVI sv2-pv2.1 not masked
 - Change settings in DB in order not to get (via eumetcast) MSG-MPE product
-
 
 2.3.2 Visualization/Maps
 
