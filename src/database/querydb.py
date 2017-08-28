@@ -1536,11 +1536,11 @@ def get_products(echo=False, activated=None, masked=None):
 
         if masked is None:
             if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
-                where = and_(pl.c.product_type == 'Native', pl.c.activated)
+                where = and_(pl.c.product_type == 'Native', pl.c.activated == 't', pl.c.defined_by != 'JRC-Test')
             elif activated is False or activated in ['False', 'false', '0', 'f', 'n', 'N', 'no', 'No']:
-                where = and_(pl.c.product_type == 'Native', pl.c.activated != 't')
+                where = and_(pl.c.product_type == 'Native', pl.c.activated == 'f', pl.c.defined_by != 'JRC-Test')
             else:
-                where = and_(pl.c.product_type == 'Native')
+                where = and_(pl.c.product_type == 'Native', pl.c.defined_by != 'JRC-Test')
         else:
             if not masked:
                 where = and_(pl.c.product_type == 'Native', pl.c.masked == 'f')

@@ -528,7 +528,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             spacingRight = 40;
         }
 
-        var seriesMarkerEnabled = false;
+        var seriesMarkerEnabled = true;
         if (me.charttype == 'cumulative'){
             seriesMarkerEnabled = false;
         }
@@ -577,11 +577,11 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             },
             plotOptions: {
                 series: {
-                    connectNulls: true,
+                    connectNulls: false,
                     // pointPlacement: 'on',
                     marker: {
                         enabled: seriesMarkerEnabled,
-                        radius: 3,
+                        radius: 1,
                         states: {
                             hover: {
                                 enabled: true,
@@ -603,7 +603,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 line: {
                     marker: {
                         enabled: true,
-                        radius: 3
+                        radius: 2
                     },
                 },
                 column: {
