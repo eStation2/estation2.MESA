@@ -322,6 +322,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                     mapsetcode:mapsetcode,
                     legendid:legendid,
                     'FORMAT': 'image/png'
+                    // ,'time': new Date().getTime()    // Force openlayers to not use browser cache for tiles refresh
                 },
                 serverType: 'mapserver' /** @type {ol.source.wms.ServerType}  ('mapserver') */
             })
@@ -579,6 +580,18 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 }
             });
         }
+    }
+
+    ,clearSelectedFeatureOverlayInOtherMapViews: function () {
+        var me = this.getView();
+        var mapViewWindows = Ext.ComponentQuery.query('mapview-window');
+
+        Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
+            if (me != mapview_window && esapp.Utils.objectExists(mapview_window.selectedFeatureOverlay)){
+                mapview_window.selectedFeatureOverlay.getSource().clear();
+                mapview_window.selectedfeature = null;
+            }
+        });
     }
 
     ,redrawTimeLine: function (mapview) {
@@ -1005,12 +1018,29 @@ Ext.define('esapp.view.analysis.mapViewController', {
     ,findlayer: function (map, layer_id){
         var layer_idx = -1;
         map.getLayers().getArray().forEach(function (layer,idx){
-            var this_layer_id = layer.get("layer_id")
+            var this_layer_id = layer.get("layer_id");
             if(this_layer_id == layer_id){
               layer_idx = idx;
             }
         });
         return layer_idx;
+    }
+
+    ,findHighlightLayer: function (map, layer_id, highlight){
+        var highlightlayer = null,
+            layerNamePrefix = 'selectedfeatureOverlay_';
+        if (highlight){
+            layerNamePrefix = 'highlightfeatureOverlay_';
+        }
+        // else debugger;
+        map.getLayers().getArray().forEach(function (layer,idx){
+            var this_layer_id = layer.get("layer_id");
+            // console.info(this_layer_id + ' idx: ' + idx);
+            if(this_layer_id == layerNamePrefix + layer_id){
+              highlightlayer = layer;
+            }
+        });
+        return highlightlayer;
     }
 
     ,outmaskingPossible: function (){
@@ -1276,7 +1306,6 @@ Ext.define('esapp.view.analysis.mapViewController', {
             ,vectorlayer_idx = -1
             ,layertitle = esapp.Utils.getTranslation(layerrecord.get('layername')) + '</BR><b class="smalltext" style="color:darkgrey">' + esapp.Utils.getTranslation(layerrecord.get('provider')) +'</b>';
             //,outmask_togglebtn = me.lookupReference('outmaskbtn_'+ me.id.replace(/-/g,'_'));
-
             //,fillopacity = (layerrecord.get('feature_highlight_fillopacity')/100).toString().replace(",", ".")
             //,highlight_fillcolor_opacity = 'rgba(' + esapp.Utils.HexToRGB(layerrecord.get('feature_highlight_fillcolor')) + ',' + fillopacity + ')';
             //namefield = layerrecord.get('feature_display_column').split(',')[0];
@@ -1322,8 +1351,12 @@ Ext.define('esapp.view.analysis.mapViewController', {
               ol.Observable.unByKey(listenerKey);
               // or vectorSource.unByKey(listenerKey) if you don't use the current master branch of ol3
           }
+          else if (vectorSource.getState() == 'error'){
+              myLoadMask.hide();
+              Ext.toast({html: esapp.Utils.getTranslation('error_loading_vectory_layer'), title: esapp.Utils.getTranslation('error'), width: 300, align: 't'});
+          }
           else {
-            myLoadMask.hide();
+              myLoadMask.hide();
           }
         });
 
@@ -1369,7 +1402,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             styles['Point'] = [
               new ol.style.Style({
                 image: new ol.style.Circle({
-                  radius: 5,
+                  radius: 6,
                   fill: new ol.style.Fill({
                     color: layerrecord.get('polygon_fillcolor')  // [0, 153, 255, 1]
                   }),
@@ -1454,12 +1487,221 @@ Ext.define('esapp.view.analysis.mapViewController', {
         me.getController().addLayerSwitcher(me.map);
 
         this.outmaskingPossible();
+
+        // console.info(layerrecord);
+        // feature_highlight_fillcolor
+        // feature_highlight_fillopacity
+        // feature_highlight_outlinecolor
+        // feature_highlight_outlinewidth
+        // feature_selected_outlinecolor
+        // feature_selected_outlinewidth
+
+        var fillopacity = (layerrecord.get('feature_highlight_fillopacity')/100).toString().replace(",", ".")
+            ,highlight_fillcolor_opacity = 'rgba(' + esapp.Utils.HexToRGB(layerrecord.get('feature_highlight_fillcolor')) + ',' + fillopacity + ')'
+            ,pointfillopacity = (80/100).toString().replace(",", ".")
+            ,pointhighlight_fillcolor_opacity = 'rgba(' + esapp.Utils.HexToRGB(layerrecord.get('feature_highlight_fillcolor')) + ',' + pointfillopacity + ')'
+            ,feature_highlight_outlinecolor = layerrecord.get('feature_highlight_outlinecolor')
+            ,feature_highlight_outlinewidth = layerrecord.get('feature_highlight_outlinewidth');
+
+        var featureOverlayStyle = (function() {
+            var styles = {};
+            styles['Polygon'] = [
+              new ol.style.Style({
+                fill: new ol.style.Fill({
+                  color: highlight_fillcolor_opacity    // 'Transparent'  // [255, 255, 255, 0.5]
+                })
+              }),
+              new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                  color: feature_highlight_outlinecolor, // [255, 0, 0, 1],
+                  width: feature_highlight_outlinewidth
+                })
+              })
+              //,new ol.style.Style({
+              //  stroke: new ol.style.Stroke({
+              //    color: [0, 153, 255, 1],
+              //    width: 3
+              //  })
+              //})
+            ];
+            styles['MultiPolygon'] = styles['Polygon'];
+
+            styles['LineString'] = [
+              new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                  color: feature_highlight_outlinecolor, // [255, 0, 0, 1],
+                  width: feature_highlight_outlinewidth
+                })
+              })
+              //,new ol.style.Style({
+              //  stroke: new ol.style.Stroke({
+              //    color: [0, 153, 255, 1],
+              //    width: 3
+              //  })
+              //})
+            ];
+            styles['MultiLineString'] = styles['LineString'];
+
+            styles['Point'] = [
+              new ol.style.Style({
+                image: new ol.style.Circle({
+                  radius: 6,
+                  fill: new ol.style.Fill({
+                    color: pointhighlight_fillcolor_opacity  // [0, 153, 255, 1]
+                  }),
+                  stroke: new ol.style.Stroke({
+                    color: feature_highlight_outlinecolor,   //[255, 0, 0, 0.75],
+                    width: feature_highlight_outlinewidth
+                  })
+                }),
+                zIndex: 100000
+              })
+            ];
+            styles['MultiPoint'] = styles['Point'];
+
+            styles['GeometryCollection'] = styles['Polygon'].concat(styles['Point']);
+
+            return function(feature) {
+              return styles[feature.getGeometry().getType()];
+            };
+        })();
+
+        var featureOverlay = new ol.layer.Vector({      //new ol.FeatureOverlay({
+            layer_id: 'highlightfeatureOverlay_' + layerrecord.get('layername'),
+            source: new ol.source.Vector({
+                features: new ol.Collection(),
+                useSpatialIndex: false, // optional, might improve performance
+                wrapX: false,
+                noWrap: true
+            }),
+            updateWhileAnimating: true, // optional, for instant visual feedback
+            updateWhileInteracting: true, // optional, for instant visual feedback
+
+            map: me.map,
+            style: featureOverlayStyle
+            //style: function (feature, resolution) {
+            //    var text = resolution < 5000 ? feature.get(namefield) : '';
+            //    //var highlightStyleCache = {};
+            //    if (!highlightStyleCache[text]) {
+            //        highlightStyleCache[text] = [new ol.style.Style({
+            //            stroke: new ol.style.Stroke({
+            //                color: layerrecord.get('feature_highlight_outlinecolor'),    // '#319FD3',
+            //                width: layerrecord.get('feature_highlight_outlinewidth')
+            //            })
+            //            , fill: new ol.style.Fill({
+            //                color: highlight_fillcolor_opacity    // 'rgba(49,159,211,0.1)'
+            //            })
+            //            //,text: new ol.style.Text({
+            //            //  font: '12px Calibri,sans-serif',
+            //            //  text: text,
+            //            //  fill: new ol.style.Fill({
+            //            //    color: '#000'
+            //            //  }),
+            //            //  stroke: new ol.style.Stroke({
+            //            //    color: '#f00',
+            //            //    width: 3
+            //            //  })
+            //            //})
+            //        })];
+            //    }
+            //    return highlightStyleCache[text];
+            //}
+        });
+        me.map.getLayers().insertAt(50, featureOverlay);
+
+
+        var feature_selected_outlinecolor = layerrecord.get('feature_selected_outlinecolor')    // '#FF0000'
+           ,feature_selected_outlinewidth = layerrecord.get('feature_selected_outlinewidth');   // 2;
+        var selectedFeatureOverlayStyle = (function() {
+            var styles = {};
+            styles['Polygon'] = [
+              new ol.style.Style({
+                fill: new ol.style.Fill({
+                  color: 'Transparent'  // [255, 255, 255, 0.5]
+                })
+              }),
+              new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                  color: feature_selected_outlinecolor,         // layerrecord.get('feature_selected_outlinecolor'), // [255, 0, 0, 1],
+                  width: feature_selected_outlinewidth          // layerrecord.get('feature_selected_outlinewidth')  // 3
+                })
+              })
+            ];
+            styles['MultiPolygon'] = styles['Polygon'];
+
+            styles['LineString'] = [
+              new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                  color: feature_selected_outlinecolor,         // layerrecord.get('feature_selected_outlinecolor'), // [255, 0, 0, 1],
+                  width: feature_selected_outlinewidth          // layerrecord.get('feature_selected_outlinewidth')  // 3
+                })
+              })
+            ];
+            styles['MultiLineString'] = styles['LineString'];
+
+            styles['Point'] = [
+              new ol.style.Style({
+                image: new ol.style.Circle({
+                  radius: 6,
+                  fill: new ol.style.Fill({
+                    color: 'Transparent'  // [0, 153, 255, 1]
+                  }),
+                  stroke: new ol.style.Stroke({
+                    color: feature_selected_outlinecolor,       // layerrecord.get('feature_selected_outlinecolor'),   //[255, 0, 0, 0.75],
+                    width: feature_selected_outlinewidth        // layerrecord.get('feature_highlight_outlinewidth')
+                  })
+                }),
+                zIndex: 100000
+              })
+            ];
+            styles['MultiPoint'] = styles['Point'];
+
+            styles['GeometryCollection'] = styles['Polygon'].concat(styles['Point']);
+
+            return function(feature) {
+              return styles[feature.getGeometry().getType()];
+            };
+        })();
+
+        var selectStyleCache = {};
+        var selectedFeatureOverlay = new ol.layer.Vector({      //new ol.FeatureOverlay({
+            layer_id: 'selectedfeatureOverlay_' + layerrecord.get('layername'),
+            source: new ol.source.Vector({
+                features: new ol.Collection(),
+                useSpatialIndex: false, // optional, might improve performance
+                wrapX: false,
+                noWrap: true
+            }),
+            updateWhileAnimating: true, // optional, for instant visual feedback
+            updateWhileInteracting: true, // optional, for instant visual feedback
+
+            map: me.map,
+            style: selectedFeatureOverlayStyle
+            //style: function (feature, resolution) {
+            //    var text = resolution < 5000 ? feature.get(namefield) : '';
+            //    //var selectStyleCache = {};
+            //    if (!selectStyleCache[text]) {
+            //        selectStyleCache[text] = [new ol.style.Style({
+            //            stroke: new ol.style.Stroke({
+            //                color: layerrecord.get('feature_selected_outlinecolor'),   // '#f00',
+            //                width: layerrecord.get('feature_selected_outlinewidth')
+            //            })
+            //            , fill: new ol.style.Fill({
+            //                color: 'Transparent' // 'rgba(255,0,0,0.1)'
+            //            })
+            //        })];
+            //    }
+            //    return selectStyleCache[text];
+            //}
+        });
+        me.map.getLayers().insertAt(60, selectedFeatureOverlay);
+
         //if (me.getController().outmaskingPossible(me.map)){
         //    outmask_togglebtn.show();
         //}
         //else outmask_togglebtn.hide();
-
-
+        //
+        //
         //me.mon(Ext.select('ol-viewport'), 'mousemove', function(evt){
         //    var pixel = me.map.getEventPixel(evt.originalEvent);
         //    displayFeatureInfo(pixel);
@@ -1518,6 +1760,8 @@ Ext.define('esapp.view.analysis.mapViewController', {
         var me = this.getView();
         var toplayeridx = 10;
         var topfeature;
+        var toplayer_id = '';
+        var regionname = Ext.get('region_name_' + me.id);
 
         me.map.forEachFeatureAtPixel(pixel, function(feature, layer) {
             if (layer != null){
@@ -1525,13 +1769,15 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 if (this_layer_idx != 100 && layer.getVisible()  && this_layer_idx < toplayeridx) {
                     toplayeridx = this_layer_idx;
                     me.toplayer = layer;
-                    topfeature = feature
+                    topfeature = feature;
+                    toplayer_id = layer.get("layer_id");
                 }
             }
         });
 
-        var regionname = Ext.get('region_name_' + me.id);
-
+        // console.info(topfeature);
+        // console.info(toplayer_id);
+        var featureOverlay = me.getController().findHighlightLayer(me.map, toplayer_id, true);
         if (esapp.Utils.objectExists(topfeature)) {
             if (topfeature !== me.highlight) {
                 var feature_columns = me.toplayer.get('feature_display_column').split(',');
@@ -1547,14 +1793,22 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 }
                 regionname.setHtml(regionname_html);
 
-                me.featureOverlay.getSource().clear();
-                me.featureOverlay.getSource().addFeature(topfeature);
+                if (featureOverlay != null){
+                    if (esapp.Utils.objectExists(me.featureOverlay)) {
+                        me.featureOverlay.getSource().clear();
+                    }
+                    featureOverlay.getSource().clear();
+                    featureOverlay.getSource().addFeature(topfeature);
+                    me.featureOverlay = featureOverlay;
+                }
                 me.highlight = topfeature;
             }
         } else {
-             me.featureOverlay.getSource().clear();
-             regionname.setHtml('&nbsp;');
-             me.highlight = null;
+            if (esapp.Utils.objectExists(me.featureOverlay)) {
+                me.featureOverlay.getSource().clear();
+            }
+            regionname.setHtml('&nbsp;');
+            me.highlight = null;
         }
 
         //var featureTooltip = Ext.create('Ext.tip.ToolTip', {
@@ -1580,10 +1834,6 @@ Ext.define('esapp.view.analysis.mapViewController', {
         var feature = me.highlight;
         var selectedregion = Ext.getCmp('selectedregionname');
         var wkt_polygon = Ext.getCmp('wkt_polygon');
-        //var regionname = Ext.getCmp('regionname');
-        //var admin0name = Ext.getCmp('admin0name');
-        //var admin1name = Ext.getCmp('admin1name');
-        //var admin2name = Ext.getCmp('admin2name');
 
         if (esapp.Utils.objectExists(feature)) {
             if (feature !== me.selectedfeature) {
@@ -1616,9 +1866,18 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
                 Ext.getCmp('fieldset_selectedregion').show();
 
-                me.selectedFeatureOverlay.getSource().clear();
-                me.selectedFeatureOverlay.getSource().addFeature(feature);
-                me.selectedfeature = feature;
+                var selectedFeatureOverlay = me.getController().findHighlightLayer(me.map, me.toplayer.get("layer_id"), false);
+                if (selectedFeatureOverlay != null){
+                    if (esapp.Utils.objectExists(me.selectedFeatureOverlay)) {
+                        me.selectedFeatureOverlay.getSource().clear();
+                    }
+                    selectedFeatureOverlay.getSource().clear();
+                    selectedFeatureOverlay.getSource().addFeature(feature);
+                    me.selectedFeatureOverlay = selectedFeatureOverlay;
+                    me.selectedfeature = feature;
+                    me.getController().clearSelectedFeatureOverlayInOtherMapViews();
+                }
+
                 //if (me.selectedfeature != null) {
                 //    me.selectedFeatureOverlay.getSource().removeFeature(me.selectedfeature);
                 //}
@@ -1629,14 +1888,12 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 }
             }
         } else {
-            //regionname.setValue('&nbsp;');
-            //admin0name.setValue('&nbsp;');
-            //admin1name.setValue('&nbsp;');
-            //admin2name.setValue('&nbsp;');
             wkt_polygon.setValue('');
             selectedregion.setValue('&nbsp;');
             Ext.getCmp('fieldset_selectedregion').hide();
-            me.selectedFeatureOverlay.getSource().clear();
+            if (esapp.Utils.objectExists(me.selectedFeatureOverlay)) {
+                me.selectedFeatureOverlay.getSource().clear();
+            }
             me.selectedfeature = null;
         }
     }
@@ -1921,9 +2178,9 @@ Ext.define('esapp.view.analysis.mapViewController', {
     ,createToolBar: function() {
         var me = this.getView();
 
-        var borderVectorLayerItems = this.createLayersMenuItems('border');
-        var marineVectorLayerMenuItems = this.createLayersMenuItems('marine');
-        var otherVectorLayerMenuItems = this.createLayersMenuItems('other');
+        // var borderVectorLayerItems = this.createLayersMenuItems('border');
+        // var marineVectorLayerMenuItems = this.createLayersMenuItems('marine');
+        // var otherVectorLayerMenuItems = this.createLayersMenuItems('other');
 
         var layersmenubutton = {
             xtype: 'button',
@@ -1936,6 +2193,21 @@ Ext.define('esapp.view.analysis.mapViewController', {
             menuAlign: 'tl-tr',
             arrowVisible: false,
             alwaysOnTop: true,
+            handler: function(){
+                var borderVectorLayerItems = me.getController().createLayersMenuItems('border');
+                var marineVectorLayerMenuItems = me.getController().createLayersMenuItems('marine');
+                var otherVectorLayerMenuItems = me.getController().createLayersMenuItems('other');
+                // console.info(this.down('[name=border]'));
+                // console.info(this.down('[name=marine]'));
+                // console.info(this.down('[name=other]'));
+
+                this.down('[name=border]').menu.removeAll();
+                this.down('[name=border]').menu.add(borderVectorLayerItems);
+                this.down('[name=marine]').menu.removeAll();
+                this.down('[name=marine]').menu.add(marineVectorLayerMenuItems);
+                this.down('[name=other]').menu.removeAll();
+                this.down('[name=other]').menu.add(otherVectorLayerMenuItems);
+            },
             menu: {
                 hideOnClick: false,
                 iconAlign: '',
@@ -1948,7 +2220,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 },
                 items: [{
                     text: esapp.Utils.getTranslation('borderlayers'),   // 'Border layers (FAO Gaul 2015)',
-                    name: 'gaul2015',
+                    name: 'border',
                     //handler: 'editDrawPropertiesAdminLevels',
                     menu: {
                         defaults: {
@@ -1959,7 +2231,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                             collapseDirection: 'left'
                         },
                         plain: true,
-                        items: borderVectorLayerItems
+                        items: []   // borderVectorLayerItems
                     }
                 },{
                     text: esapp.Utils.getTranslation('marinelayers'),   // 'Marine vector layers',
@@ -1973,7 +2245,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                             collapseDirection: 'left'
                         },
                         plain: true,
-                        items: marineVectorLayerMenuItems
+                        items: []   // marineVectorLayerMenuItems
                     }
                 },{
                     text: esapp.Utils.getTranslation('otherlayers'),   // 'Other vector layers',
@@ -1987,7 +2259,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                             collapseDirection: 'left'
                         },
                         plain: true,
-                        items: otherVectorLayerMenuItems
+                        items: []   // otherVectorLayerMenuItems
                     }
                 }]
             }

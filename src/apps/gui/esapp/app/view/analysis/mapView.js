@@ -555,7 +555,7 @@ Ext.define("esapp.view.analysis.mapView",{
                 });
 
                 this.map.addInteraction(new ol.interaction.MouseWheelZoom({
-                  duration: 50
+                    duration: 25
                 }));
 
                 this.map.on('pointermove', function(evt) {
@@ -590,15 +590,18 @@ Ext.define("esapp.view.analysis.mapView",{
                         if (esapp.Utils.objectExists(me.selectedfeature)) {
                             // Zoom to and center the selected feature
                             var polygon = /** @type {ol.geom.SimpleGeometry} */ (me.selectedfeature.getGeometry());
-                            var size = /** @type {ol.Size} */ (me.map.getSize());
-                            me.map.getView().fit(
-                                polygon,
-                                size,
-                                {
-                                    padding: [50, 50, 50, 50],
-                                    constrainResolution: false
-                                }
-                            );
+                            // console.info(polygon.getType());
+                            if (polygon.getType() != 'Point') {
+                                var size = /** @type {ol.Size} */ (me.map.getSize());
+                                me.map.getView().fit(
+                                    polygon,
+                                    size,
+                                    {
+                                        padding: [50, 50, 50, 50],
+                                        constrainResolution: false
+                                    }
+                                );
+                            }
                         }
                     }
                 });
@@ -641,6 +644,7 @@ Ext.define("esapp.view.analysis.mapView",{
                     })
                 });
                 this.map.getLayers().insertAt(10, this.drawvectorlayer);
+
                 //me.getController().addLayerSwitcher(me.map);
                 //var selectDrawfeatures = new ol.interaction.Select({
                 //    wrapX: false,
@@ -661,202 +665,204 @@ Ext.define("esapp.view.analysis.mapView",{
                 //    }
                 //});
                 //this.map.addInteraction(modifyDrawfeatures);
-
-
-                var fillopacity = (10/100).toString().replace(",", ".")
-                    ,highlight_fillcolor_opacity = 'rgba(' + esapp.Utils.HexToRGB('#319FD3') + ',' + fillopacity + ')'
-                    ,feature_highlight_outlinecolor = '#319FD3'
-                    ,feature_highlight_outlinewidth = 2;
-                var featureOverlayStyle = (function() {
-                    var styles = {};
-                    styles['Polygon'] = [
-                      new ol.style.Style({
-                        fill: new ol.style.Fill({
-                          color: highlight_fillcolor_opacity    // 'Transparent'  // [255, 255, 255, 0.5]
-                        })
-                      }),
-                      new ol.style.Style({
-                        stroke: new ol.style.Stroke({
-                          color: feature_highlight_outlinecolor, // [255, 0, 0, 1],
-                          width: feature_highlight_outlinewidth
-                        })
-                      })
-                      //,new ol.style.Style({
-                      //  stroke: new ol.style.Stroke({
-                      //    color: [0, 153, 255, 1],
-                      //    width: 3
-                      //  })
-                      //})
-                    ];
-                    styles['MultiPolygon'] = styles['Polygon'];
-
-                    styles['LineString'] = [
-                      new ol.style.Style({
-                        stroke: new ol.style.Stroke({
-                          color: feature_highlight_outlinecolor, // [255, 0, 0, 1],
-                          width: feature_highlight_outlinewidth
-                        })
-                      })
-                      //,new ol.style.Style({
-                      //  stroke: new ol.style.Stroke({
-                      //    color: [0, 153, 255, 1],
-                      //    width: 3
-                      //  })
-                      //})
-                    ];
-                    styles['MultiLineString'] = styles['LineString'];
-
-                    styles['Point'] = [
-                      new ol.style.Style({
-                        image: new ol.style.Circle({
-                          radius: 5,
-                          fill: new ol.style.Fill({
-                            color: highlight_fillcolor_opacity  // [0, 153, 255, 1]
-                          }),
-                          stroke: new ol.style.Stroke({
-                            color: feature_highlight_outlinecolor,   //[255, 0, 0, 0.75],
-                            width: feature_highlight_outlinewidth
-                          })
-                        }),
-                        zIndex: 100000
-                      })
-                    ];
-                    styles['MultiPoint'] = styles['Point'];
-
-                    styles['GeometryCollection'] = styles['Polygon'].concat(styles['Point']);
-
-                    return function(feature) {
-                      return styles[feature.getGeometry().getType()];
-                    };
-                })();
-
-                this.featureOverlay = new ol.layer.Vector({      //new ol.FeatureOverlay({
-                        name: 'highlightfeatureOverlay_',       // + layerrecord.get('layername'),
-                        source: new ol.source.Vector({
-                            features: new ol.Collection(),
-                            useSpatialIndex: false, // optional, might improve performance
-                            wrapX: false,
-                            noWrap: true
-                        }),
-                        updateWhileAnimating: true, // optional, for instant visual feedback
-                        updateWhileInteracting: true, // optional, for instant visual feedback
-
-                        map: this.map,
-                        style: featureOverlayStyle
-                        //style: function (feature, resolution) {
-                        //    var text = resolution < 5000 ? feature.get(namefield) : '';
-                        //    //var highlightStyleCache = {};
-                        //    if (!highlightStyleCache[text]) {
-                        //        highlightStyleCache[text] = [new ol.style.Style({
-                        //            stroke: new ol.style.Stroke({
-                        //                color: layerrecord.get('feature_highlight_outlinecolor'),    // '#319FD3',
-                        //                width: layerrecord.get('feature_highlight_outlinewidth')
-                        //            })
-                        //            , fill: new ol.style.Fill({
-                        //                color: highlight_fillcolor_opacity    // 'rgba(49,159,211,0.1)'
-                        //            })
-                        //            //,text: new ol.style.Text({
-                        //            //  font: '12px Calibri,sans-serif',
-                        //            //  text: text,
-                        //            //  fill: new ol.style.Fill({
-                        //            //    color: '#000'
-                        //            //  }),
-                        //            //  stroke: new ol.style.Stroke({
-                        //            //    color: '#f00',
-                        //            //    width: 3
-                        //            //  })
-                        //            //})
-                        //        })];
-                        //    }
-                        //    return highlightStyleCache[text];
-                        //}
-                    });
-
-
-                var feature_selected_outlinecolor = '#FF0000'
-                   ,feature_selected_outlinewidth = 2;
-                var selectedFeatureOverlayStyle = (function() {
-                    var styles = {};
-                    styles['Polygon'] = [
-                      new ol.style.Style({
-                        fill: new ol.style.Fill({
-                          color: 'Transparent'  // [255, 255, 255, 0.5]
-                        })
-                      }),
-                      new ol.style.Style({
-                        stroke: new ol.style.Stroke({
-                          color: feature_selected_outlinecolor,         // layerrecord.get('feature_selected_outlinecolor'), // [255, 0, 0, 1],
-                          width: feature_selected_outlinewidth          // layerrecord.get('feature_selected_outlinewidth')  // 3
-                        })
-                      })
-                    ];
-                    styles['MultiPolygon'] = styles['Polygon'];
-
-                    styles['LineString'] = [
-                      new ol.style.Style({
-                        stroke: new ol.style.Stroke({
-                          color: feature_selected_outlinecolor,         // layerrecord.get('feature_selected_outlinecolor'), // [255, 0, 0, 1],
-                          width: feature_selected_outlinewidth          // layerrecord.get('feature_selected_outlinewidth')  // 3
-                        })
-                      })
-                    ];
-                    styles['MultiLineString'] = styles['LineString'];
-
-                    styles['Point'] = [
-                      new ol.style.Style({
-                        image: new ol.style.Circle({
-                          radius: 5,
-                          fill: new ol.style.Fill({
-                            color: 'Transparent'  // [0, 153, 255, 1]
-                          }),
-                          stroke: new ol.style.Stroke({
-                            color: feature_selected_outlinecolor,       // layerrecord.get('feature_selected_outlinecolor'),   //[255, 0, 0, 0.75],
-                            width: feature_selected_outlinewidth        // layerrecord.get('feature_highlight_outlinewidth')
-                          })
-                        }),
-                        zIndex: 100000
-                      })
-                    ];
-                    styles['MultiPoint'] = styles['Point'];
-
-                    styles['GeometryCollection'] = styles['Polygon'].concat(styles['Point']);
-
-                    return function(feature) {
-                      return styles[feature.getGeometry().getType()];
-                    };
-                })();
-
-                var selectStyleCache = {};
-                this.selectedFeatureOverlay = new ol.layer.Vector({      //new ol.FeatureOverlay({
-                    name: 'selectedfeatureOverlay',        //  + layerrecord.get('layername'),
-                    source: new ol.source.Vector({
-                        features: new ol.Collection(),
-                        useSpatialIndex: false, // optional, might improve performance
-                        wrapX: false,
-                        noWrap: true
-                    }),
-                    updateWhileAnimating: true, // optional, for instant visual feedback
-                    updateWhileInteracting: true, // optional, for instant visual feedback
-
-                    map: this.map,
-                    style: selectedFeatureOverlayStyle
-                    //style: function (feature, resolution) {
-                    //    var text = resolution < 5000 ? feature.get(namefield) : '';
-                    //    //var selectStyleCache = {};
-                    //    if (!selectStyleCache[text]) {
-                    //        selectStyleCache[text] = [new ol.style.Style({
-                    //            stroke: new ol.style.Stroke({
-                    //                color: layerrecord.get('feature_selected_outlinecolor'),   // '#f00',
-                    //                width: layerrecord.get('feature_selected_outlinewidth')
-                    //            })
-                    //            , fill: new ol.style.Fill({
-                    //                color: 'Transparent' // 'rgba(255,0,0,0.1)'
-                    //            })
-                    //        })];
-                    //    }
-                    //    return selectStyleCache[text];
-                    //}
-                });
+                //
+                //
+                // var fillopacity = (10/100).toString().replace(",", ".")
+                //     ,highlight_fillcolor_opacity = 'rgba(' + esapp.Utils.HexToRGB('#319FD3') + ',' + fillopacity + ')'
+                //     ,pointfillopacity = (80/100).toString().replace(",", ".")
+                //     ,pointhighlight_fillcolor_opacity = 'rgba(' + esapp.Utils.HexToRGB('#319FD3') + ',' + pointfillopacity + ')'
+                //     ,feature_highlight_outlinecolor = '#319FD3'
+                //     ,feature_highlight_outlinewidth = 2;
+                // var featureOverlayStyle = (function() {
+                //     var styles = {};
+                //     styles['Polygon'] = [
+                //       new ol.style.Style({
+                //         fill: new ol.style.Fill({
+                //           color: highlight_fillcolor_opacity    // 'Transparent'  // [255, 255, 255, 0.5]
+                //         })
+                //       }),
+                //       new ol.style.Style({
+                //         stroke: new ol.style.Stroke({
+                //           color: feature_highlight_outlinecolor, // [255, 0, 0, 1],
+                //           width: feature_highlight_outlinewidth
+                //         })
+                //       })
+                //       //,new ol.style.Style({
+                //       //  stroke: new ol.style.Stroke({
+                //       //    color: [0, 153, 255, 1],
+                //       //    width: 3
+                //       //  })
+                //       //})
+                //     ];
+                //     styles['MultiPolygon'] = styles['Polygon'];
+                //
+                //     styles['LineString'] = [
+                //       new ol.style.Style({
+                //         stroke: new ol.style.Stroke({
+                //           color: feature_highlight_outlinecolor, // [255, 0, 0, 1],
+                //           width: feature_highlight_outlinewidth
+                //         })
+                //       })
+                //       //,new ol.style.Style({
+                //       //  stroke: new ol.style.Stroke({
+                //       //    color: [0, 153, 255, 1],
+                //       //    width: 3
+                //       //  })
+                //       //})
+                //     ];
+                //     styles['MultiLineString'] = styles['LineString'];
+                //
+                //     styles['Point'] = [
+                //       new ol.style.Style({
+                //         image: new ol.style.Circle({
+                //           radius: 6,
+                //           fill: new ol.style.Fill({
+                //             color: pointhighlight_fillcolor_opacity  // [0, 153, 255, 1]
+                //           }),
+                //           stroke: new ol.style.Stroke({
+                //             color: feature_highlight_outlinecolor,   //[255, 0, 0, 0.75],
+                //             width: feature_highlight_outlinewidth
+                //           })
+                //         }),
+                //         zIndex: 100000
+                //       })
+                //     ];
+                //     styles['MultiPoint'] = styles['Point'];
+                //
+                //     styles['GeometryCollection'] = styles['Polygon'].concat(styles['Point']);
+                //
+                //     return function(feature) {
+                //       return styles[feature.getGeometry().getType()];
+                //     };
+                // })();
+                //
+                // this.featureOverlay = new ol.layer.Vector({      //new ol.FeatureOverlay({
+                //         name: 'highlightfeatureOverlay_',       // + layerrecord.get('layername'),
+                //         source: new ol.source.Vector({
+                //             features: new ol.Collection(),
+                //             useSpatialIndex: false, // optional, might improve performance
+                //             wrapX: false,
+                //             noWrap: true
+                //         }),
+                //         updateWhileAnimating: true, // optional, for instant visual feedback
+                //         updateWhileInteracting: true, // optional, for instant visual feedback
+                //
+                //         map: this.map,
+                //         style: featureOverlayStyle
+                //         //style: function (feature, resolution) {
+                //         //    var text = resolution < 5000 ? feature.get(namefield) : '';
+                //         //    //var highlightStyleCache = {};
+                //         //    if (!highlightStyleCache[text]) {
+                //         //        highlightStyleCache[text] = [new ol.style.Style({
+                //         //            stroke: new ol.style.Stroke({
+                //         //                color: layerrecord.get('feature_highlight_outlinecolor'),    // '#319FD3',
+                //         //                width: layerrecord.get('feature_highlight_outlinewidth')
+                //         //            })
+                //         //            , fill: new ol.style.Fill({
+                //         //                color: highlight_fillcolor_opacity    // 'rgba(49,159,211,0.1)'
+                //         //            })
+                //         //            //,text: new ol.style.Text({
+                //         //            //  font: '12px Calibri,sans-serif',
+                //         //            //  text: text,
+                //         //            //  fill: new ol.style.Fill({
+                //         //            //    color: '#000'
+                //         //            //  }),
+                //         //            //  stroke: new ol.style.Stroke({
+                //         //            //    color: '#f00',
+                //         //            //    width: 3
+                //         //            //  })
+                //         //            //})
+                //         //        })];
+                //         //    }
+                //         //    return highlightStyleCache[text];
+                //         //}
+                //     });
+                //
+                //
+                // var feature_selected_outlinecolor = '#FF0000'
+                //    ,feature_selected_outlinewidth = 2;
+                // var selectedFeatureOverlayStyle = (function() {
+                //     var styles = {};
+                //     styles['Polygon'] = [
+                //       new ol.style.Style({
+                //         fill: new ol.style.Fill({
+                //           color: 'Transparent'  // [255, 255, 255, 0.5]
+                //         })
+                //       }),
+                //       new ol.style.Style({
+                //         stroke: new ol.style.Stroke({
+                //           color: feature_selected_outlinecolor,         // layerrecord.get('feature_selected_outlinecolor'), // [255, 0, 0, 1],
+                //           width: feature_selected_outlinewidth          // layerrecord.get('feature_selected_outlinewidth')  // 3
+                //         })
+                //       })
+                //     ];
+                //     styles['MultiPolygon'] = styles['Polygon'];
+                //
+                //     styles['LineString'] = [
+                //       new ol.style.Style({
+                //         stroke: new ol.style.Stroke({
+                //           color: feature_selected_outlinecolor,         // layerrecord.get('feature_selected_outlinecolor'), // [255, 0, 0, 1],
+                //           width: feature_selected_outlinewidth          // layerrecord.get('feature_selected_outlinewidth')  // 3
+                //         })
+                //       })
+                //     ];
+                //     styles['MultiLineString'] = styles['LineString'];
+                //
+                //     styles['Point'] = [
+                //       new ol.style.Style({
+                //         image: new ol.style.Circle({
+                //           radius: 6,
+                //           fill: new ol.style.Fill({
+                //             color: 'Transparent'  // [0, 153, 255, 1]
+                //           }),
+                //           stroke: new ol.style.Stroke({
+                //             color: feature_selected_outlinecolor,       // layerrecord.get('feature_selected_outlinecolor'),   //[255, 0, 0, 0.75],
+                //             width: feature_selected_outlinewidth        // layerrecord.get('feature_highlight_outlinewidth')
+                //           })
+                //         }),
+                //         zIndex: 100000
+                //       })
+                //     ];
+                //     styles['MultiPoint'] = styles['Point'];
+                //
+                //     styles['GeometryCollection'] = styles['Polygon'].concat(styles['Point']);
+                //
+                //     return function(feature) {
+                //       return styles[feature.getGeometry().getType()];
+                //     };
+                // })();
+                //
+                // var selectStyleCache = {};
+                // this.selectedFeatureOverlay = new ol.layer.Vector({      //new ol.FeatureOverlay({
+                //     name: 'selectedfeatureOverlay',        //  + layerrecord.get('layername'),
+                //     source: new ol.source.Vector({
+                //         features: new ol.Collection(),
+                //         useSpatialIndex: false, // optional, might improve performance
+                //         wrapX: false,
+                //         noWrap: true
+                //     }),
+                //     updateWhileAnimating: true, // optional, for instant visual feedback
+                //     updateWhileInteracting: true, // optional, for instant visual feedback
+                //
+                //     map: this.map,
+                //     style: selectedFeatureOverlayStyle
+                //     //style: function (feature, resolution) {
+                //     //    var text = resolution < 5000 ? feature.get(namefield) : '';
+                //     //    //var selectStyleCache = {};
+                //     //    if (!selectStyleCache[text]) {
+                //     //        selectStyleCache[text] = [new ol.style.Style({
+                //     //            stroke: new ol.style.Stroke({
+                //     //                color: layerrecord.get('feature_selected_outlinecolor'),   // '#f00',
+                //     //                width: layerrecord.get('feature_selected_outlinewidth')
+                //     //            })
+                //     //            , fill: new ol.style.Fill({
+                //     //                color: 'Transparent' // 'rgba(255,0,0,0.1)'
+                //     //            })
+                //     //        })];
+                //     //    }
+                //     //    return selectStyleCache[text];
+                //     //}
+                // });
 
 
 
@@ -1001,14 +1007,13 @@ Ext.define("esapp.view.analysis.mapView",{
 
                 this.getController().redrawTimeLine(this);
 
-                this.updateLayout();
                 if (!this.lookupReference('opacityslider_' + this.id.replace(/-/g,'_')).hidden) {
                     this.lookupReference('opacityslider_' + this.id.replace(/-/g, '_')).setPosition(this.getWidth() - 48, 155);
                 }
                 //this.lookupReference('opacityslider_' + this.id.replace(/-/g,'_')).doConstrain();
 
                 this.lookupReference('zoomFactorBtn_' + this.id.replace(/-/g, '_')).setPosition(this.getWidth() - 48, 120);
-
+                this.updateLayout();
             }
             ,move: function () {
                 this.getController().redrawTimeLine(this);
