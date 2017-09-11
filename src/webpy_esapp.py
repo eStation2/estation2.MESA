@@ -601,6 +601,7 @@ class GetChartProperties:
                                   'yaxe1_font_size': row_dict['yaxe1_font_size'],
                                   'yaxe2_font_size': row_dict['yaxe2_font_size'],
                                   'yaxe3_font_size': row_dict['yaxe3_font_size'],
+                                  'yaxe4_font_size': row_dict['yaxe4_font_size'],
                                   'legend_font_size': row_dict['legend_font_size'],
                                   'legend_font_color': row_dict['legend_font_color'],
                                   'xaxe_font_size': row_dict['xaxe_font_size'],
@@ -2796,7 +2797,7 @@ class TimeseriesProducts:
                             # print 'before getting dataset info: ' + str(t3)
 
                             dataset = p.get_dataset(mapset=mapset, sub_product_code=prod_dict['subproductcode'])
-                            dataset.get_filenames()
+                            # dataset.get_filenames()
                             all_present_product_dates = dataset.get_dates()
 
                             # t4 = time.time()
@@ -2814,10 +2815,11 @@ class TimeseriesProducts:
                             prod_dict['years'] = distinctyears
 
                             if prod_dict['years'].__len__() > 0:
-                                tmp_prod_dict = copy.deepcopy(prod_dict)
-
-                                products_dict_all.append(tmp_prod_dict)
-                                tmp_prod_dict = []
+                                products_dict_all.append(prod_dict)
+                                # tmp_prod_dict = copy.deepcopy(prod_dict)
+                                #
+                                # products_dict_all.append(tmp_prod_dict)
+                                # tmp_prod_dict = []
 
                             # t6 = time.time()
                             # total = t6-t5
@@ -2834,7 +2836,7 @@ class TimeseriesProducts:
 
                                     dataset_record = functions.row2dict(subproduct)
                                     dataset = p.get_dataset(mapset=mapset, sub_product_code=dataset_record['subproductcode'])
-                                    dataset.get_filenames()
+                                    # dataset.get_filenames()
                                     all_present_product_dates = dataset.get_dates()
 
                                     distinctyears = []
@@ -2867,11 +2869,12 @@ class TimeseriesProducts:
                                     dataset_dict['reference'] = False
 
                                     if dataset_dict['years'].__len__() > 0:
-                                        # tmp_prod_dict = prod_dict.copy()
-                                        tmp_prod_dict = copy.deepcopy(dataset_dict)
-
-                                        products_dict_all.append(tmp_prod_dict)
-                                        tmp_prod_dict = []
+                                        products_dict_all.append(dataset_dict)
+                                        # # tmp_prod_dict = prod_dict.copy()
+                                        # tmp_prod_dict = copy.deepcopy(dataset_dict)
+                                        #
+                                        # products_dict_all.append(tmp_prod_dict)
+                                        # tmp_prod_dict = []
 
                             # t8 = time.time()
                             # totals_subproduct = t8-t7
@@ -4746,6 +4749,9 @@ class GetProductLayer:
 
             if processing_novalue != '':
                 layer.setProcessing(processing_novalue)
+
+            resample_processing = "RESAMPLE=AVERAGE"
+            layer.setProcessing(resample_processing)
 
             legend_steps = querydb.get_legend_steps(legendid=inputparams.legendid)
             if hasattr(legend_steps, "__len__") and legend_steps.__len__() > 0:

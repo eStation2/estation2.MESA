@@ -154,7 +154,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
             minResolution: 0.0001,
             maxResolution: 0.25,
             zoomFactor: 1.1+0.1*5   // (cioe' nel range 1.1 -> 2.1)
-            // zoom: 6,
+            // zoom: 2,
             // minZoom: 4,
             // maxZoom: 100,
             // zoomFactor: 1.5 // 1.0+(0.075*1)

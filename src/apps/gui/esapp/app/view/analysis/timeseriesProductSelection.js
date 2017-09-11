@@ -132,16 +132,23 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                         selectedTimeseriesStore.getData().each(function (product) {
                             yearsData = esapp.Utils.union_arrays(yearsData, product.get('years'));
                         });
-                        var yearsDataDict = [];
-                        yearsData.forEach(function (year) {
-                            yearsDataDict.push({'year': year});
+
+                        me.getViewModel().get('years').getData().each(function(year) {
+                            if (!Ext.Array.contains(yearsData, year.get('year'))){
+                                me.getViewModel().get('years').remove(year);
+                            }
                         });
 
-                        //if (Ext.isObject(Ext.getCmp('ts_selectyearstocompare_'+me.charttype).searchPopup)) {
-                        //    Ext.getCmp('ts_selectyearstocompare_'+me.charttype).searchPopup.lookupReference('searchGrid').getSelectionModel().deselectAll();
-                        //}
-                        //Ext.getCmp('timeserieschartselection').getViewModel().getStore('years').setData(yearsDataDict);
-                        me.getViewModel().getStore('years').setData(yearsDataDict);
+                        // var yearsDataDict = [];
+                        // yearsData.forEach(function (year) {
+                        //     yearsDataDict.push({'year': year});
+                        // });
+                        //
+                        // //if (Ext.isObject(Ext.getCmp('ts_selectyearstocompare_'+me.charttype).searchPopup)) {
+                        // //    Ext.getCmp('ts_selectyearstocompare_'+me.charttype).searchPopup.lookupReference('searchGrid').getSelectionModel().deselectAll();
+                        // //}
+                        // //Ext.getCmp('timeserieschartselection').getViewModel().getStore('years').setData(yearsDataDict);
+                        // me.getViewModel().getStore('years').setData(yearsDataDict);
                     }
                 }]
             }, {

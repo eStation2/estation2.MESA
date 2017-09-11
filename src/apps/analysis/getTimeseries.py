@@ -454,6 +454,7 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
                     else:   #if aggregate['type'] == 'mean' or if aggregate['type'] == 'cumulate':
                         if mxnodata.count() == 0:
                             finalvalue = None
+                            meanResult = None
                         else:
                             if aggregate['aggregation_type'] == 'mean':
                                 # 'mean'
