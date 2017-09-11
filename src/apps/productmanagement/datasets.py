@@ -16,24 +16,23 @@ from lib.python import es_logging as log
 from lib.python import functions
 from database import querydb
 
-
 logger = log.my_logger(__name__)
-
 
 from .exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
                          WrongFrequencyType, WrongFrequencyDateFormat,
                          NoProductFound, NoFrequencyFound,
                          WrongDateType)
 from .helpers import (add_years, add_months, add_dekads, add_pentads, add_days, manage_date,
-                     find_gaps, cast_to_int, INTERVAL_TYPE)
+                      find_gaps, cast_to_int, INTERVAL_TYPE, FILE_EXTENSIONS)
 
 
 def _check_constant(class_, constant_name, value):
     for k, v in getattr(getattr(class_, constant_name, None),
-            '__dict__', {}).items():
+                        '__dict__', {}).items():
         if k.isupper() and v == value:
             return True
     return False
+
 
 #
 #   Class to define a dataset frequency, i.e. the repeat-time of a dataset
@@ -129,7 +128,7 @@ class Frequency(object):
             return date + datetime.timedelta(minutes=value)
         else:
             logger.error("Unit not managed: %s" % unit)
-            #raise Exception("Unit not managed: %s" % unit)
+            # raise Exception("Unit not managed: %s" % unit)
 
     def get_mapset(self, filename):
         return filename[len(self.dateformat):]
@@ -139,7 +138,7 @@ class Frequency(object):
 
     def check_date(self, date_datetime):
         if type(date_datetime) is datetime.datetime and (
-                self.dateformat in (self.DATEFORMAT.DATE, self.DATEFORMAT.MONTHDAY)):
+                    self.dateformat in (self.DATEFORMAT.DATE, self.DATEFORMAT.MONTHDAY)):
             return False
         if type(date_datetime) is datetime.date and self.dateformat == self.DATEFORMAT.DATETIME:
             return False
@@ -153,7 +152,7 @@ class Frequency(object):
                 date_parts = (datetime.date.today().year, int(filename[:2]), int(filename[2:4]))
                 date = datetime.date(*date_parts)
             elif self.dateformat == self.DATEFORMAT.YYYY:
-                date_parts = (int(filename[:4]),1,1)
+                date_parts = (int(filename[:4]), 1, 1)
                 date = datetime.date(*date_parts)
             else:
                 date_parts = (int(filename[:4]), int(filename[4:6]), int(filename[6:8]))
@@ -181,7 +180,7 @@ class Frequency(object):
             date = self.get_next_date(date, self.unit, self.value)
         elif self.frequency_type == self.TYPE.PER:
             new_date = self.get_next_date(date, self.unit, 1)
-            date = date + (new_date - date)/self.value
+            date = date + (new_date - date) / self.value
         else:
             raise Exception("Dateformat not managed: %s" % self.dateformat)
         return date
@@ -209,8 +208,8 @@ class Frequency(object):
         return dates[:-1]
 
     def get_internet_dates(self, dates, template):
-        #%{dkm}
-        #%{+/-<Nt><strftime>} = +/- N delta days/hours/
+        # %{dkm}
+        # %{+/-<Nt><strftime>} = +/- N delta days/hours/
         return [manage_date(date, template) for date in dates]
 
     def next_filename(self, filename):
@@ -237,8 +236,7 @@ class Frequency(object):
         self.dateformat = dateformat or self.dateformat_default(unit)
 
 
-
-#   Class to define a temporal interval and logically refers to a fraction of a dataset
+# Class to define a temporal interval and logically refers to a fraction of a dataset
 #   It includes:    from_date -> to_date
 #                   Length
 #                   percentage      (wrt to dataset extension)
@@ -257,7 +255,7 @@ class Interval(object):
         return self.interval_type == INTERVAL_TYPE.MISSING
 
 
-#   Class to define a dataset, i.e. a collection of EO images, identified by the 4 key:
+# Class to define a dataset, i.e. a collection of EO images, identified by the 4 key:
 #                              product/version/subproduct/mapset
 #   It also includes:    from_date -> to_date
 #
@@ -270,11 +268,11 @@ class Dataset(object):
     def __init__(self, product_code, sub_product_code, mapset, version=None, from_date=None, to_date=None):
         kwargs = {'productcode': product_code,
                   'subproductcode': sub_product_code.lower() if sub_product_code else None}
-        if not version is None:
+        if version is not None:
             kwargs['version'] = version
-        if from_date:
+        if from_date is not None:
             self._check_date(from_date)
-        if to_date:
+        if to_date is not None:
             self._check_date(to_date)
         self._db_product = querydb.get_product_out_info(**kwargs)
         if self._db_product is None or self._db_product == []:
@@ -288,11 +286,11 @@ class Dataset(object):
                                                       version,
                                                       mapset)
         self.fullpath = os.path.join(es_constants.es2globals['processing_dir'], self._path)
-        #self._db_frequency = querydb.db.frequency.get(self._db_product.frequency_id)
-        #self._db_frequency = querydb.get_frequency(self._db_product.frequency_id)
-        #if self._db_frequency is None:
+        # self._db_frequency = querydb.db.frequency.get(self._db_product.frequency_id)
+        # self._db_frequency = querydb.get_frequency(self._db_product.frequency_id)
+        # if self._db_frequency is None:
         #    raise NoFrequencyFound(self._db_product)
-        #self._frequency = Frequency(value=self._db_frequency.frequency,
+        # self._frequency = Frequency(value=self._db_frequency.frequency,
         #                            unit=self._db_frequency.time_unit,
         #                            frequency_type=self._db_frequency.frequency_type,
         #                            dateformat=self._db_product.date_format)
@@ -309,24 +307,25 @@ class Dataset(object):
         _db_frequency = querydb.get_frequency(frequency_id)
         if _db_frequency is None:
             raise NoFrequencyFound(frequency_id)
-        return  Frequency(value=_db_frequency.frequency,
-                                    unit=_db_frequency.time_unit,
-                                    frequency_type=_db_frequency.frequency_type,
-                                    dateformat=dateformat)
-
+        return Frequency(value=_db_frequency.frequency,
+                         unit=_db_frequency.time_unit,
+                         frequency_type=_db_frequency.frequency_type,
+                         dateformat=dateformat)
 
     def next_date(self, date):
         return self._frequency.next_date(date)
 
-    def get_filenames(self):
-        return glob.glob(os.path.join(self.fullpath, "*"))
+    def get_filenames(self, regex='*'):
+        # self._regex = regex
+        # self._filenames = glob.glob(os.path.join(self.fullpath, regex))
+        return glob.glob(os.path.join(self.fullpath, regex))
 
     def get_filenames_range(self):
         all_files = glob.glob(os.path.join(self.fullpath, "*"))
         filenames = []
         for file in all_files:
             str_date = functions.get_date_from_path_full(file)
-            my_date=datetime.date(int(str_date[0:4]),int(str_date[4:6]), int(str_date[6:8]))
+            my_date = datetime.date(int(str_date[0:4]), int(str_date[4:6]), int(str_date[6:8]))
             if my_date >= self.from_date and my_date <= self.to_date:
                 filenames.append((file))
         return filenames
@@ -334,8 +333,10 @@ class Dataset(object):
     def get_number_files(self):
         return len(self.get_filenames())
 
-    def get_basenames(self):
-        return list(os.path.basename(filename) for filename in self.get_filenames())
+    def get_basenames(self, regex='*'):
+        # return list(os.path.basename(filename) for filename in self.get_filenames())
+        return list(os.path.basename(filename) for filename in self.get_filenames(regex=regex)
+                    if len(os.path.basename(filename).split('_')) == 5 and filename.endswith((FILE_EXTENSIONS.TIF_FILE_EXTENSION, FILE_EXTENSIONS.MISSING_FILE_EXTENSION)))
 
     def no_year(self):
         return self._frequency.no_year()
@@ -352,12 +353,33 @@ class Dataset(object):
     def get_last_date(self):
         return self.intervals[-1].to_date
 
+    def get_regex_from_range(self, from_date, to_date):
+        regex = ''
+        str_from = from_date.strftime("%Y%m%d%H%M")
+        str_to = to_date.strftime("%Y%m%d%H%M")
+        len_date = len(str_from)
+        for i in range(len_date):
+            if str_from[i] == str_to[i]:
+                regex += str_from[i]
+            else:
+                regex += '[' + str_from[i] + '-' + str_to[
+                    i] + ']' + '*'  # + '[\.tif|\.missing]'  ['+FILE_EXTENSIONS.TIF_FILE_EXTENSION + '-' + FILE_EXTENSIONS.MISSING_FILE_EXTENSION + ']'
+                return regex
+
     def find_intervals(self, from_date=None, to_date=None, only_intervals=True):
-        return find_gaps(self.get_basenames(), self._frequency, only_intervals,
+        regex = '*'     #  +'[\.tif|\.missing]'
+        if from_date is not None and to_date is not None and not self.no_year():
+            regex = self.get_regex_from_range(from_date, to_date)
+
+        return find_gaps(self.get_basenames(regex=regex), self._frequency, only_intervals,
                          from_date=from_date or self.from_date, to_date=to_date or self.to_date)
 
     def find_gaps(self, from_date=None, to_date=None):
-        return find_gaps(self.get_basenames(), self._frequency, only_intervals=False,
+        regex = '*'     # + '[\.tif|\.missing]'
+        if from_date is not None and to_date is not None and not self.no_year():
+            regex = self.get_regex_from_range(from_date, to_date)
+
+        return find_gaps(self.get_basenames(regex=regex), self._frequency, only_intervals=False,
                          from_date=from_date or self.from_date, to_date=to_date or self.to_date)
 
     def get_interval_dates(self, from_date, to_date, last_included=True, first_included=True):
@@ -394,11 +416,11 @@ class Dataset(object):
         if self._frequency.frequency_type == 'n':
             return {
                 'firstdate': '',
-                'lastdate':  '',
+                'lastdate': '',
                 'totfiles': 1,
                 'missingfiles': 0,
                 'intervals': ''
-        }
+            }
 
         dateformat = "%Y-%m-%d"
         if self._frequency.dateformat == self._frequency.DATEFORMAT.DATETIME:
@@ -413,17 +435,17 @@ class Dataset(object):
         if refresh:
             self._clean_cache()
         interval_list = list({'totfiles': interval.length,
-                     'fromdate': self.strip_year(interval.from_date.strftime(dateformat)),
-                     'todate': self.strip_year(interval.to_date.strftime(dateformat)),
-                     'intervaltype': interval.interval_type,
-                     'missing': interval.missing,
-                     'intervalpercentage': interval.percentage} for interval in self.intervals)
+                              'fromdate': self.strip_year(interval.from_date.strftime(dateformat)),
+                              'todate': self.strip_year(interval.to_date.strftime(dateformat)),
+                              'intervaltype': interval.interval_type,
+                              'missing': interval.missing,
+                              'intervalpercentage': interval.percentage} for interval in self.intervals)
         return {
-                'firstdate': interval_list[0]['fromdate'] if interval_list else '',
-                'lastdate': interval_list[-1]['todate'] if interval_list else '',
-                'totfiles': sum(i['totfiles'] for i in interval_list),
-                'missingfiles': sum(i['totfiles'] for i in interval_list if i['missing']),
-                'intervals': interval_list
+            'firstdate': interval_list[0]['fromdate'] if interval_list else '',
+            'lastdate': interval_list[-1]['todate'] if interval_list else '',
+            'totfiles': sum(i['totfiles'] for i in interval_list),
+            'missingfiles': sum(i['totfiles'] for i in interval_list if i['missing']),
+            'intervals': interval_list
         }
 
     def _clean_cache(self):
@@ -433,6 +455,7 @@ class Dataset(object):
     def intervals(self):
         _intervals = getattr(self, "_intervals", None)
         if _intervals is None:
-            _intervals = [Interval(**self._extract_kwargs(interval)) for interval in self.find_intervals(from_date=self.from_date, to_date=self.to_date)]
+            _intervals = [Interval(**self._extract_kwargs(interval)) for interval in
+                          self.find_intervals(from_date=self.from_date, to_date=self.to_date)]
             setattr(self, "_intervals", _intervals)
         return _intervals
