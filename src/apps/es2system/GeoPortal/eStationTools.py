@@ -314,9 +314,11 @@ def uploadAndRegisterRaster(service, product, subproduct, version, mapset, date,
     #if not geoserverREST.isRaster(workspace,layerName):
     if not geoserverREST.isRaster(workspace, coverage):
         # Ensure file is uploaded
-        if not existsRemote(geoserverREST.restHost,remoteFilepath, user=geoserverREST.restLogin):#VO changed sshUser to restLogin
-            #if uploadRemote(geoserverREST.restHost, localFilepath, remoteFilepath, user=geoserverREST.sshUser):
-            if uploadRemote(geoserverREST.restHost, localFilepath, remoteFilepath, user=geoserverREST.restLogin):#VO changed sshUser to restLogin so that it is mesa@197.254.113.174 and not adminuser@197.254.113.117
+        if not existsRemote(geoserverREST.restHost,remoteFilepath, user=geoserverREST.sshUser):                         # Here, and below - we should act as sshUser - see ES2-72
+            if uploadRemote(geoserverREST.restHost, localFilepath, remoteFilepath, user=geoserverREST.sshUser):         # the previously done changes by VO are rolled-back
+
+        # if not existsRemote(geoserverREST.restHost,remoteFilepath, user=geoserverREST.restLogin):                     #VO changed sshUser to restLogin -> wrong (see above)
+            # if uploadRemote(geoserverREST.restHost, localFilepath, remoteFilepath, user=geoserverREST.restLogin):     #VO changed sshUser to restLogin so that it is mesa@197.254.113.174 and not adminuser@197.254.113.117
                 logger.error('Cannot upload file {0}.'.format(localFilepath))
                 status = True
             else:
