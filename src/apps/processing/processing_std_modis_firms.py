@@ -17,6 +17,7 @@ from lib.python import functions
 from lib.python.image_proc import raster_image_math
 from lib.python import es_logging as log
 from config import es_constants
+import proc_functions
 
 # Import third-party modules
 from ruffus import *
@@ -25,11 +26,21 @@ from ruffus import *
 ext=es_constants.ES2_OUTFILE_EXTENSION
 
 def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, proc_lists=None,
-                    update_stats=False, nrt_products=True):
+                    starting_dates_stats=None, update_stats=False, nrt_products=True):
 
     #   ---------------------------------------------------------------------
     #   Create lists to store definition of the derived products, and their
-    #   groups
+    #   groups.
+    #   Two starting dates ranges are passed:
+    #
+    #       starting_dates: range - 1d frequency - for 1day -> 10dcount
+    #                       Normally not used: only for tests (the number of 1day files i large!)
+    #
+    #       starting_dates_stats: range - 10d frequency - for 10dcount -> 10dcountmin/max/avg
+    #                             Used to define a specific range for stats, normally 20030101 -> <prev-year>1221
+    #
+    #   For the 10d products anomalies (both 1km and 10km) ALL available files are used for anomaly computation
+    #
     #   ---------------------------------------------------------------------
 
     if proc_lists is None:
@@ -52,7 +63,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     if nrt_products:
         activate_10dcount_comput=1          # 10d count
         activate_10danomalies_comput=1      # 10d anomalies
-        activate_10d_10k_comput=1           # 10d on 10km
+        activate_10d_10k_comput=1           # 10d on 10k
         activate_10d_10k_anom_comput=1      # 10d on 10km anomalies
 
     if update_stats:
@@ -108,12 +119,13 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     input_dir = es2_data_dir+ \
                 functions.set_path_sub_directory(prod, starting_sprod, 'Ingest', version, mapset)
 
+    # starting_dates -> 1 day
     if starting_dates is not None:
-        starting_files = []
+        starting_files_1day = []
         for my_date in starting_dates:
-            starting_files.append(input_dir+my_date+in_prod_ident)
+            starting_files_1day.append(input_dir+my_date+in_prod_ident)
     else:
-        starting_files=glob.glob(input_dir+"*"+in_prod_ident)
+        starting_files_1day=glob.glob(input_dir+"*"+in_prod_ident)
 
     #   ---------------------------------------------------------------------
     #   Derived product: 10dcount
@@ -135,7 +147,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     def generate_parameters_10dcount():
 
         #   Look for all input files in input_dir, and sort them
-        input_files = starting_files
+        input_files = starting_files_1day
         dekad_list = []
 
         # Create unique list of all dekads (as 'Julian' number)
@@ -184,7 +196,13 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   Derived product: 10dcountavg
     #   ---------------------------------------------------------------------
 
-    starting_files_10dcount = es_constants.processing_dir+output_subdir_10dcount+"*"+out_prod_ident_10dcount
+
+    if starting_dates_stats is not None:
+        files_10dcount_4stats = []
+        for my_date in starting_dates_stats:
+            files_10dcount_4stats.append(es2_data_dir+output_subdir_10dcount+my_date+out_prod_ident_10dcount)
+    else:
+        files_10dcount_4stats = es2_data_dir+output_subdir_10dcount+"*"+out_prod_ident_10dcount
 
     output_sprod_group=proc_lists.proc_add_subprod_group("10dstats")
     output_sprod=proc_lists.proc_add_subprod("10dcountavg", "10dstats", final=False,
@@ -203,12 +221,13 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
 
     @active_if(activate_10dstats_comput, activate_10dcountavg_comput)
-    @collate(starting_files_10dcount, formatter(formatter_in),formatter_out)
+    @collate(files_10dcount_4stats, formatter(formatter_in),formatter_out)
+    @follows(std_fire_10dcount)
     def std_fire_10dcountavg(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32767}
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32768}
         raster_image_math.do_avg_image(**args)
 
     #   ---------------------------------------------------------------------
@@ -231,7 +250,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
 
     @active_if(activate_10dstats_comput, activate_10dcountmin_comput)
-    @collate(starting_files_10dcount, formatter(formatter_in),formatter_out)
+    @collate(files_10dcount_4stats, formatter(formatter_in),formatter_out)
+    @follows(std_fire_10dcountavg)
     def std_fire_10dcountmin(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -258,7 +278,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
 
     @active_if(activate_10dstats_comput, activate_10dcountmax_comput)
-    @collate(starting_files_10dcount, formatter(formatter_in),formatter_out)
+    @collate(files_10dcount_4stats, formatter(formatter_in),formatter_out)
+    @follows(std_fire_10dcountmin)
     def std_fire_10dcountmax(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -269,6 +290,17 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   ---------------------------------------------------------------------
     #   Derived product: 10dDiff
     #   ---------------------------------------------------------------------
+
+    #   Define the input files for conversion to 10k on the basis of the 'starting_dates' (not 'starting_dates_stats')
+    if starting_dates is not None:
+        files_10dcount_4anom = []
+        use_dates_10dcount = proc_functions.get_list_dates_for_dataset(prod, '10dcount', version,
+                                     start_date=starting_dates[0], end_date=starting_dates[-1])
+
+        for my_date in use_dates_10dcount:
+            files_10dcount_4anom.append(es2_data_dir+output_subdir_10dcount+my_date+out_prod_ident_10dcount)
+    else:
+        files_10dcount_4anom=glob.glob(es2_data_dir+output_subdir_10dcount+"*"+out_prod_ident_10dcount)
 
     output_sprod_group=proc_lists.proc_add_subprod_group("10danomalies")
     output_sprod=proc_lists.proc_add_subprod("10dcountdiff", "10danomalies", final=False,
@@ -294,19 +326,20 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     # @follows(std_fire_10dcountavg)
     @active_if(activate_10danomalies_comput, activate_10ddiff_comput)
-    @transform(std_fire_10dcount, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
+    @transform(files_10dcount_4anom, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
+    @follows(std_fire_10dcountmax)
     def std_fire_10dcountdiff(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32767}
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32768}
         raster_image_math.do_oper_subtraction(**args)
 
 
     #   ---------------------------------------------------------------------
     #   Derived product: 10dcount10km
     #   ---------------------------------------------------------------------
-
+    #
     target_mapset_name= 'SPOTV-Africa-10km'
 
     output_sprod_group=proc_lists.proc_add_subprod_group("10dcount10k")
@@ -326,9 +359,9 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     formatter_in="(?P<YYYYMMDD>[0-9]{8})"+out_prod_ident_10dcount
     formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir_10dcount10k+"{YYYYMMDD[0]}"+out_prod_ident_10dcount10k
 
-    # @follows(std_fire_10dcount)
     @active_if(activate_10d_10k_comput,activate_10dcount10k_comput)
-    @transform(std_fire_10dcount, formatter(formatter_in),formatter_out)
+    @transform(files_10dcount_4anom, formatter(formatter_in),formatter_out)
+    @follows(std_fire_10dcountdiff)
     def std_fire_10dcount10k(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -344,7 +377,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         operation='sum'
         args = {"input_file": input_file, "grid_file":grid_file, "output_file": output_file_temp,
                 "operation":operation, "input_mapset_name":input_mapset_name, "grid_mapset_name":grid_mapset_name,
-                "output_format": 'GTIFF', "options": "compress=lzw"}
+                "output_format": 'GTIFF', "options": "compress=lzw", "output_type":'Int16'}
 
         raster_image_math.do_stats_4_raster(**args)
 
@@ -359,7 +392,12 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   Derived product: 10dcount10kavg
     #   ---------------------------------------------------------------------
 
-    starting_files_10dcount10k = es_constants.processing_dir+output_subdir_10dcount10k+"*"+out_prod_ident_10dcount10k
+    if starting_dates_stats is not None:
+        files_10dcount10k_4stats = []
+        for my_date in starting_dates_stats:
+            files_10dcount10k_4stats.append(es2_data_dir+output_subdir_10dcount10k+my_date+out_prod_ident_10dcount10k)
+    else:
+        files_10dcount10k_4stats = es2_data_dir+output_subdir_10dcount10k+"*"+out_prod_ident_10dcount10k
 
     output_sprod_group=proc_lists.proc_add_subprod_group("10dcount10kstats")
     output_sprod=proc_lists.proc_add_subprod("10dcount10kavg", "10dcount10kstats", final=False,
@@ -378,12 +416,13 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
 
     @active_if(activate_10d_10k_stats_comput, activate_10dcount10kavg_comput)
-    @collate(starting_files_10dcount10k, formatter(formatter_in),formatter_out)
+    @collate(files_10dcount10k_4stats, formatter(formatter_in),formatter_out)
+    @follows(std_fire_10dcount10k)
     def std_fire_10dcount10kavg(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32767}
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32768}
         raster_image_math.do_avg_image(**args)
 
     #   ---------------------------------------------------------------------
@@ -407,12 +446,13 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident]
 
     @active_if(activate_10d_10k_stats_comput, activate_10dcount10kmin_comput)
-    @collate(starting_files_10dcount10k, formatter(formatter_in),formatter_out)
+    @collate(files_10dcount10k_4stats, formatter(formatter_in),formatter_out)
+    @follows(std_fire_10dcount10kavg)
     def std_fire_10dcount10kmin(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32767}
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Int16', 'input_nodata':-32768}
         raster_image_math.do_min_image(**args)
 
     #   ---------------------------------------------------------------------
@@ -436,17 +476,29 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     formatter_out="{subpath[0][5]}"+os.path.sep+output_subdir+"{MMDD[0]}"+out_prod_ident
 
     @active_if(activate_10d_10k_stats_comput, activate_10dcount10kmax_comput)
-    @collate(starting_files_10dcount10k, formatter(formatter_in),formatter_out)
+    @collate(files_10dcount10k_4stats, formatter(formatter_in),formatter_out)
+    @follows(std_fire_10dcount10kmin)
     def std_fire_10dcount10kmax(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32767}
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Int16', 'input_nodata':-32768}
         raster_image_math.do_max_image(**args)
 
     #   ---------------------------------------------------------------------
     #   Derived product: 10dcount10kdiff
     #   ---------------------------------------------------------------------
+
+    #   Define the input files for conversion to 10k on the basis of the 'starting_dates' (not 'starting_dates_stats')
+    if starting_dates is not None:
+        files_10dcount10k_4anom = []
+        use_dates_10dcount10k = proc_functions.get_list_dates_for_dataset(prod, '10dcount10k', version,
+                                     start_date=starting_dates[0], end_date=starting_dates[-1])
+
+        for my_date in use_dates_10dcount10k:
+            files_10dcount10k_4anom.append(es2_data_dir+output_subdir_10dcount10k+my_date+out_prod_ident_10dcount10k)
+    else:
+        files_10dcount10k_4anom=glob.glob(es2_data_dir+output_subdir_10dcount10k+"*"+out_prod_ident_10dcount10k)
 
     output_sprod_group=proc_lists.proc_add_subprod_group("10dcount10kanomalies")
     output_sprod=proc_lists.proc_add_subprod("10dcount10kdiff", "10dcount10kanomalies", final=False,
@@ -471,12 +523,13 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
 
     @active_if(activate_10d_10k_anom_comput, activate_10dcount10kdiff_comput)
-    @transform(starting_files_10dcount10k, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
+    @transform(files_10dcount10k_4anom, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
+    @follows(std_fire_10dcount10kmax)
     def std_fire_10dcount10kdiff(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32767}
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32768}
         raster_image_math.do_oper_subtraction(**args)
 
     #   ---------------------------------------------------------------------
@@ -506,12 +559,13 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
 
     @active_if(activate_10d_10k_anom_comput, activate_10dcount10kperc_comput)
-    @transform(starting_files_10dcount10k, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
+    @transform(files_10dcount10k_4anom, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
+    @follows(std_fire_10dcount10kdiff)
     def std_fire_10dcount10kperc(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file[0], "avg_file": input_file[1], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32767}
+        args = {"input_file": input_file[0], "avg_file": input_file[1], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32768}
         raster_image_math.do_compute_perc_diff_vs_avg(**args)
 
     #   ---------------------------------------------------------------------
@@ -541,12 +595,13 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
 
     @active_if(activate_10d_10k_anom_comput, activate_10dcount10kratio_comput)
-    @transform(starting_files_10dcount10k, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
+    @transform(files_10dcount10k_4anom, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
+    @follows(std_fire_10dcount10kperc)
     def std_fire_10dcount10kratio(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32767}
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32768}
         raster_image_math.do_oper_division_perc(**args)
 
     #
@@ -593,7 +648,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
 def processing_std_modis_firms(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None, update_stats=False, nrt_products=True, write2file=None,
+                          starting_dates=None, starting_dates_stats=None, update_stats=False, nrt_products=True, write2file=None,
                           logfile=None, touch_files_only=False):
 
     spec_logger = log.my_logger(logfile)
@@ -601,7 +656,8 @@ def processing_std_modis_firms(res_queue, pipeline_run_level=0,pipeline_printout
 
     proc_lists = None
     proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
-                                 starting_dates=starting_dates, proc_lists=proc_lists, update_stats=update_stats, nrt_products=nrt_products)
+                                 starting_dates_stats=starting_dates_stats, starting_dates=starting_dates, proc_lists=proc_lists,
+                                 update_stats=update_stats, nrt_products=nrt_products)
 
     if write2file is not None:
         fwrite_id=open(write2file,'w')
@@ -640,7 +696,7 @@ def processing_std_modis_firms(res_queue, pipeline_run_level=0,pipeline_printout
 #   ---------------------------------------------------------------------
 def processing_std_modis_firms_stats_only(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None,write2file=None, logfile=None, touch_files_only=False):
+                          starting_dates_stats=None,write2file=None, logfile=None, touch_files_only=False):
 
     result = processing_std_modis_firms(res_queue, pipeline_run_level=pipeline_run_level,
                           pipeline_printout_level=pipeline_printout_level,
@@ -649,7 +705,7 @@ def processing_std_modis_firms_stats_only(res_queue, pipeline_run_level=0,pipeli
                           starting_sprod=starting_sprod,
                           mapset=mapset,
                           version=version,
-                          starting_dates=starting_dates,
+                          starting_dates_stats=starting_dates_stats,
                           nrt_products=False,
                           update_stats=True,
                           write2file=write2file,
@@ -703,7 +759,7 @@ def processing_modis_firms_prods_only(res_queue, pipeline_run_level=0,pipeline_p
 #   ---------------------------------------------------------------------
 def processing_std_modis_firms_all(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None,write2file=None, logfile=None, touch_files_only=False):
+                          starting_dates=None, starting_dates_stats=None,write2file=None, logfile=None, touch_files_only=False):
 
     result = processing_std_modis_firms(res_queue, pipeline_run_level=pipeline_run_level,
                           pipeline_printout_level=pipeline_printout_level,
@@ -713,6 +769,7 @@ def processing_std_modis_firms_all(res_queue, pipeline_run_level=0,pipeline_prin
                           mapset=mapset,
                           version=version,
                           starting_dates=starting_dates,
+                          starting_dates_stats=starting_dates_stats,
                           nrt_products=True,
                           update_stats=True,
                           write2file=write2file,
