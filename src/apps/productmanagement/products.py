@@ -232,7 +232,7 @@ class Product(object):
     @staticmethod
     def create_tar(missing_info, filetar=None, tgz=True):
 
-    # Given a 'missing_info' object, creates a tar-file containing all required files
+    # Given a 'missing_info' object, creates a tar-file containing all required (i.e. missing) files
 
         result = {'status':0,            # 0 -> ok, all files copied, 1-> at least 1 file missing
                   'n_file_copied':0,
@@ -242,7 +242,7 @@ class Product(object):
         tmp_dir = None
         final_filenames = []
 
-        # Check the target file name is passed (or define a temp one)
+        # Check that the target filename for TAR is passed (OR define a temp one)
         if filetar is None:
             file_temp = tempfile.NamedTemporaryFile()
             filetar = file_temp.name
@@ -258,8 +258,9 @@ class Product(object):
                 pass
             orig_mapset = missing['mapset']
 
-            # The get_missing_filenames can return a 'larger' mapset.
-            # Manage here the re-projection
+            # The get_missing_filenames can return a 'larger' mapset (if the orig is missing):
+            #   manage here the re-projection and append in final_filenames the ones for the 'orig' mapset
+
             for filename in filenames:
                 [product_code, sub_product_code, version, str_date, my_mapset] = functions.get_all_from_path_full(filename)
 
@@ -268,6 +269,7 @@ class Product(object):
                 else:
                     if tmp_dir is None:
                         tmp_dir = tempfile.mkdtemp(prefix=__name__, suffix='',dir=es_constants.base_tmp_dir)
+
                     # Do reprojection to a /tmp dir (if the file exists)
                     if os.path.isfile(filename):
                         new_filename = reproject_output(filename, my_mapset, orig_mapset, output_dir=tmp_dir+os.path.sep,
