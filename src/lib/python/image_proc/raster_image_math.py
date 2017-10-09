@@ -2003,6 +2003,7 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
     # Apply thinning
     print ("Debug: Applying now thinning")
     thin_output = pymorph.thin(dataOut)
+    # thin_output = dataOut                              # For TEST only ... make it faster
 
     # Create and write output band
     print ("Debug: Writing the output files")
@@ -2019,13 +2020,15 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
 
     # #   ----------------------------------------------------------------------------------------------------
     # #   Writes metadata to output
+    print ("Debug: Assigning metadata")
     input_list = []
     input_list.append(input_file)
-    #assign_metadata_processing(input_list, output_file)
 
     # #   Close outputs
     outDrv = None
     outDS = None
+    assign_metadata_processing(input_list, output_file, parameters=parameters)
+
 
 # _____________________________
 def do_ts_linear_filter(input_file='', before_file='', after_file='', output_file='', input_nodata=None, output_format=None,
@@ -2228,6 +2231,7 @@ def do_rain_onset(input_file='', output_file='', input_nodata=None, output_nodat
         #   Close outputs
         outDrv = None
         outDS = None
+
         #   Writes metadata to output
         assign_metadata_processing(input_file, output_file)
     except:
@@ -2357,6 +2361,12 @@ def do_reproject(inputfile, output_file, native_mapset_name, target_mapset_name)
     trg_ds = None
     mem_ds = None
     orig_ds = None
+
+    # Copy metadata, by changing mapset only
+    meta_data = metadata.SdsMetadata()
+    meta_data.read_from_file(inputfile)
+    meta_data.assign_mapset(target_mapset_name)
+    meta_data.write_to_file(output_file)
 
 #   -------------------------------------------------------------------------------------------
 def getRasterBox(fid, xstart, xend, ystart, yend, band):
@@ -2538,7 +2548,7 @@ def do_raster_stats(fid, fidID, outDS, iband, roi, minId, maxId, nodata, operati
 #       args:           list of additional arguments (FTTB only 1, used for density)
 #
 def do_stats_4_raster(input_file, grid_file, output_file, operation, input_mapset_name, grid_mapset_name,
-                      output_format=None, nodata=None, outType=None, options=None, args=None ):
+                      output_format=None, nodata=None, output_type=None, options=None, args=None ):
 
     # Manage input arguments
     if output_format is None:
@@ -2569,9 +2579,11 @@ def do_stats_4_raster(input_file, grid_file, output_file, operation, input_mapse
         else:
             nodata_output = nodata
 
-        # Assign outType (Int16 by default)
-        if outType is None:
+        # Manage out_type (take the input one as default)
+        if output_type is None:
             outType=dataType
+        else:
+            outType=ParseType(output_type)
 
         # Open idRaster
         fidRaster = gdal.Open(grid_file, GA_ReadOnly)
@@ -2611,9 +2623,11 @@ def do_stats_4_raster(input_file, grid_file, output_file, operation, input_mapse
             statsData = do_raster_stats(fidIn, fidRaster, outDS, iband, common_roi, minId, maxId, nodata_output, operation, args=args)
 
 
-        trg_ds = None
-        mem_ds = None
-        orig_ds = None
+        outDS = None
+        outDrv = None
+
+        #   Writes metadata to output
+        assign_metadata_processing(input_file, output_file)
 
     except:
         logger.warning('Error in do_stats_4_raster. Remove outputs')
@@ -2621,10 +2635,14 @@ def do_stats_4_raster(input_file, grid_file, output_file, operation, input_mapse
             os.remove(output_file)
 
 # _____________________________
-#   Write to an output file the metadata
+#   Write metadata to an output file.
+#   Most of the metadata are copied from an input file (including datatype, scaling, frequency) because we cannot read from
+#   the DB -> this is prone to errors !!! we should either
+#       1. Populate the DB from the procssing chain.
+#       2. Stop if the output product is not define din DB
 #
 
-def assign_metadata_processing(input_file_list, output_file):
+def assign_metadata_processing(input_file_list, output_file, parameters=None):
 
     # Create Metadata object
     sds_meta = metadata.SdsMetadata()
@@ -2636,18 +2654,20 @@ def assign_metadata_processing(input_file_list, output_file):
         first_input = input_file_list
 
     try:
-        # Open and read data
+        # Open and read metadata from the 'first' input file
         sds_meta.read_from_file(first_input)
 
-        # Modify/Assign some to the ingested file
+        # If parameters is defined, assign it
+        if parameters is not None:
+            sds_meta.assign_parameters(parameters)
+
+        # Modify/Assign some of the metadata
         sds_meta.assign_comput_time_now()
         str_date, productcode, subproductcode, mapset, version = functions.get_all_from_filename(os.path.basename(output_file))
-        # [productcode, subproductcode, version, str_date, mapset] = functions.get_all_from_path_full(output_file)
 
         #   TODO-M.C.: cannot read metadata from database for a newly created product ! Copy from input file ?
         #
         sds_meta.assign_from_product(productcode, subproductcode, version)
-        #sds_meta.assign_product_elemets(productcode, subproductcode, version)
 
         sds_meta.assign_date(str_date)
         sds_meta.assign_input_files(input_file_list)
@@ -2659,5 +2679,5 @@ def assign_metadata_processing(input_file_list, output_file):
         # Write Metadata
         sds_meta.write_to_file(output_file)
     except:
-        logger.error('Error in assign metadata. Check product defined in DB!')
+        logger.error('Error in assign metadata.')
         raise Exception('Error in assign metadata')
