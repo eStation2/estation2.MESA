@@ -246,21 +246,24 @@ class TestGetInternet(unittest.TestCase):
         self.assertTrue(file_to_check in list)
 
     #   ---------------------------------------------------------------------------
-    #   Test remote ftp JRC
+    #   Test remote ftp JRC -> obsolete
+    #   This was a work-around for collection 5, but moving to collection 6 the
+    #   direct download from MODAPS:EOSDIS:NASA:FIRMS works !
+    #
     #   ---------------------------------------------------------------------------
-    def TestRemoteFtp_JRC(self):
-
-        # Retrieve a list files from JRC ftp -> ftp-type contents (not through proxy)
-        remote_url='ftp://h05-ftp.jrc.it/'
-        usr_pwd='narmauser:2016mesa!'
-        full_regex   ='/eStation_2.0/Documents/DesignDocs/'
-        file_to_check='SRD_eStation_MESA_1.5.pdf'
-        internet_type = 'ftp'
-
-        list = get_list_matching_files(remote_url, usr_pwd, full_regex,internet_type)
-
-        self.assertTrue(file_to_check in list)
-
+    # def TestRemoteFtp_JRC(self):
+    #
+    #     # Retrieve a list files from JRC ftp -> ftp-type contents (not through proxy)
+    #     remote_url='ftp://h05-ftp.jrc.it/'
+    #     usr_pwd='narmauser:2016mesa!'
+    #     full_regex   ='/eStation_2.0/Documents/DesignDocs/'
+    #     file_to_check='SRD_eStation_MESA_1.5.pdf'
+    #     internet_type = 'ftp'
+    #
+    #     list = get_list_matching_files(remote_url, usr_pwd, full_regex,internet_type)
+    #
+    #     self.assertTrue(file_to_check in list)
+    #
     #   ---------------------------------------------------------------------------
     #   Test iteration on remote ftp (e.g. ARC2)
     #   ---------------------------------------------------------------------------
@@ -642,8 +645,8 @@ class TestGetInternet(unittest.TestCase):
                          'pull_frequency': internet_source.pull_frequency,
                          'user_name':internet_source.user_name,
                          'password':internet_source.password,
-                         'start_date':20170401,
-                         'end_date':20170601,
+                         'start_date':20170701,
+                         'end_date':20170711,
                          'frequency_id': internet_source.frequency_id,
                          'type':internet_source.type}
 
