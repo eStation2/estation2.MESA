@@ -2,6 +2,7 @@
 #   Release Note for 2.1.0-15
 #   Changes are with respect to 2.1.0-12 (disseminated through EUMETCast on 11th July 2017)
 #   It actually includes modifications done in the following versions:
+#
 #       2.1.0-13: changes after TAFIRI OTJT: sst-fronts, primary production computation
 #       2.1.0-14: mainly the MODIS 4km EUMETCast sources -> has .sql corrupted !!
 #       2.1.0-15: update internet sources, primary production
