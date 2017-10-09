@@ -59,8 +59,6 @@ sds_metadata = { 'eStation2_es2_version': '',               # 0. eStation 2 vers
 
 
 }
-# TODO-M.C.: Is it possible to write to a specific domain (e.g. 'eStation2' ???)
-#            FTTB we use the 'eStation2_' prefix
 
 class SdsMetadata:
 
@@ -94,6 +92,8 @@ class SdsMetadata:
         sds_metadata['eStation2_input_files'] = '/my/path/to/file/and/filename1'
         sds_metadata['eStation2_comp_time'] = 'my_comp_time'
         sds_metadata['eStation2_mac_address'] = get_machine_mac_address()
+
+        sds_metadata['eStation2_parameters'] = 'my_processing_parameters'
 
     def write_to_ds(self, dataset):
     #
@@ -245,10 +245,10 @@ class SdsMetadata:
     #   Assign input file list
         file_string = ''
         if isinstance(input_files,basestring):
-            file_string+=input_files+';'
+            file_string+=os.path.basename(input_files)+';'
         else:
             for ifile in input_files:
-                file_string+=ifile+';'
+                file_string+=os.path.basename(ifile)+';'
         sds_metadata['eStation2_input_files'] = file_string
 
     def merge_input_file_lists(self, old_list, input_files):
@@ -259,10 +259,10 @@ class SdsMetadata:
         true_list_not_empty = []
         for elem in true_list:
             if elem != '':
-                true_list_not_empty.append(elem)
+                true_list_not_empty.append(os.path.basename(elem))
         for infile in input_files:
             if not infile in true_list_not_empty:
-                true_list_not_empty.append(infile)
+                true_list_not_empty.append(os.path.basename(infile))
         return true_list_not_empty
 
     def assign_scaling(self, scaling_factor, scaling_offset, nodata, unit):
@@ -278,6 +278,21 @@ class SdsMetadata:
     #   Assign scaling
         sds_metadata['eStation2_nodata'] = str(nodata)
 
+    def assign_scl_factor(self, scl_factor):
+    #
+    #   Assign scaling
+        sds_metadata['eStation2_scaling_factor'] = str(scl_factor)
+
+    def assign_parameters(self, parameters):
+    #
+    #   Assign parameters (defined specifically for SST-FRONTS detection)
+        parameters_string=''
+        for key, value in sorted(parameters.iteritems()):
+            parameters_string+='{}={}; '.format(key,value)
+
+        sds_metadata['eStation2_parameters'] = parameters_string
+
+
     def get_item(self, itemname):
 
         value='metadata item not found'
@@ -287,11 +302,6 @@ class SdsMetadata:
             pass
 
         return value
-
-    def assign_scl_factor(self, scl_factor):
-    #
-    #   Assign scaling
-        sds_metadata['eStation2_scaling_factor'] = str(scl_factor)
 
     def get_target_filepath(self, input_file):
 
