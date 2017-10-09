@@ -119,13 +119,15 @@ def createSLD(product, version, subproduct, output_file=None):
 
         for legend in product_legends:
 
-            legend_dict = functions.row2dict(legend)
-            default_legend = legend_dict['default_legend']
+            # Changes for ES2-85
+            legend_dict = legend
+            defaultlegend = legend_dict['default_legend']
 
-            if default_legend == 'True':
-                defaultlegend = True
-            else:
-                defaultlegend = False
+            # Changes for ES2-85
+            # if default_legend == 'True':
+            #     defaultlegend = True
+            # else:
+            #     defaultlegend = False
 
             # if there is only 1 legend defined, this is the default legend (even if not defined as default legend).
             if product_legends.__len__() == 1:
