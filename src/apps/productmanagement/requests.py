@@ -153,7 +153,7 @@ def create_archive_from_request(request_file):
             # Remove .tgz file
             os.remove(archive_name)
             product = None
-    return
+    return 0
 
 def get_archive_name(productcode, version, id):
 
