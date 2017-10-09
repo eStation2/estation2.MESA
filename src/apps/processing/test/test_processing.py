@@ -9,9 +9,28 @@ from lib.python import es_logging as log
 logger = log.my_logger(__name__)
 
 from apps.processing import proc_functions
+from lib.python import functions
+import glob
+
 from lib.python.image_proc.raster_image_math import *
 
+def sst_shapefile_conversion(self, input_file, output_file):
+
+    output_file = functions.list_to_element(output_file)
+    # Check if the output file already exists - and delete it
+    if os.path.isfile(output_file):
+        files=glob.glob(output_file.replace('.shp','.*'))
+        for my_file in files:
+            os.remove(my_file)
+
+    functions.check_output_dir(os.path.dirname(output_file))
+    command=es_constants.es2globals['gdal_polygonize']+' '+ input_file+' '+ output_file+' -nomask -f "ESRI Shapefile"'
+    p = os.system(command)
+
+    return 0
+
 class TestProcessing(TestCase):
+
 
     def Test_create_permanent_missing_files(self):
         args = {"product_code":"tamsat-rfe", "version":"2.0", "sub_product_code":"10d", "mapset_code":"TAMSAT-Africa-8km"}
@@ -29,3 +48,11 @@ class TestProcessing(TestCase):
 
         # proc_functions.create_permanently_missing_for_dataset(**args)
         self.assertEqual(1, 1)
+
+
+    def Test_convert_shape(self):
+
+        infile='/data/processing/pml-modis-sst/3.0/SPOTV-IOC-1km/derived/sst-fronts/20160331_pml-modis-sst_sst-fronts_SPOTV-IOC-1km_3.0.tif'
+        outfile='/data/temp/20160331_pml-modis-sst_sst-fronts_SPOTV-IOC-1km_3.0.shp'
+
+        status = sst_shapefile_conversion(self,infile,outfile)
