@@ -2,7 +2,7 @@
 #	purpose: Define the processing chain for 'ndvi-like' processing chains
 #	author:  M.Clerici & Jurriaan van't Klooster
 #	date:	 05.01.2015
-#   descr:	 Generate additional Derived products /implements processing chains
+#   descr:	 Generate additional Derived products/implements processing chains
 #	history: 1.0
 #
 
@@ -50,8 +50,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     #   switch wrt groups - according to options
 
     # DEFAULT: ALL off
-    group_no_filter_stats = 0                  # 1.a    -> Not done anymore
-    group_no_filter_anomalies = 0              # 1.b    -> To be done
+    group_no_filter_stats = 0                  # 1.a
+    group_no_filter_anomalies = 0              # 1.b
     group_no_filter_masks = 0                  # 1.c
 
     group_filtered_prods = 0                   # 2.a
@@ -66,7 +66,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     if nrt_products:
         group_no_filter_anomalies = 0              # 1.b    -> To be done
-        group_no_filter_masks = 1                  # 1.c
+        group_no_filter_masks = 1                  # 1.c    -> NDV no-filtered + Abs_Max_Linearx2
         group_filtered_prods = 1                   # 2.a
         group_filtered_masks = 1                   # 2.c
         group_filtered_anomalies = 1               # 2.d
@@ -75,7 +75,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
         group_monthly_anomalies = 0                # 3.d    -> To be done
 
     if update_stats:
-        group_no_filter_stats = 0                  # 1.a    -> Not done FTTB
+        group_no_filter_stats = 0                  # 1.a    -> Not done anymore
         group_filtered_stats = 1                   # 2.b
         group_monthly_stats = 1                    # 3.b
 
@@ -117,12 +117,12 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     #   for Group 2.d  (filtered_anomalies)
     activate_diff_linearx2 = 0
     activate_linearx2_diff_linearx2 = 1
-    activate_icn = 1
+    activate_icn = 1                            
     activate_vci = 1
     activate_icn_linearx2 = 1
     activate_vci_linearx2 = 1
     activate_ratio_linearx2 = 1
-    activate_stddiff_linearx2 = 1               # To be done
+    activate_stddiff_linearx2 = 0               # To be done
 
     #   for Group 3.a (monthly_prods)
     activate_monndvi = 1
@@ -266,6 +266,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     #   ---------------------------------------------------------------------
     #   1.b 10Day non-filtered Anomalies
     #   ---------------------------------------------------------------------
+
+    #   Not yet done (diff, vci, icn of ndv vs non filtered stats)
 
     #   ---------------------------------------------------------------------
     #   2.a NDVI linearx1/x2
@@ -706,7 +708,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
 
     #   ---------------------------------------------------------------------
-    #   2.b NDVI_baresoil mask (using avgNDV)
+    #   2.c NDVI_baresoil mask (using avg NDV linearx2)
     #   ---------------------------------------------------------------------
     #
     starting_files_linearx2_all = input_dir_linearx2+"*"+in_prod_ident_linearx2
@@ -944,7 +946,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     ancillary_subdir_3 = functions.set_path_sub_directory(prod, ancillary_sprod_3, 'Derived', version, mapset)
     ancillary_input_3 = "{subpath[0][5]}"+os.path.sep+ancillary_subdir_3+"{YYYY[0]}{MMDD[0]}"+ancillary_sprod_ident_3
 
-    @active_if(group_no_filter_anomalies, activate_icn)
+    @active_if(group_filtered_anomalies, activate_icn)
     @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input_1,ancillary_input_2,ancillary_input_3), formatter_out)
     @follows(vgt_ndvi_absol_min_linearx2, vgt_ndvi_absol_max_linearx2, vgt_ndvi_baresoil, vgt_ndvi_vci)
     def vgt_ndvi_icn(input_file, output_file):
@@ -1001,7 +1003,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     ancillary_subdir_3 = functions.set_path_sub_directory(prod, ancillary_sprod_3, 'Derived', version, mapset)
     ancillary_input_3 = "{subpath[0][5]}"+os.path.sep+ancillary_subdir_3+"{YYYY[0]}{MMDD[0]}"+ancillary_sprod_ident_3
 
-    @active_if(group_no_filter_anomalies, activate_vci_linearx2)
+    @active_if(group_filtered_anomalies, activate_vci_linearx2)
     @transform(starting_files_linearx2_all, formatter(formatter_in), add_inputs(ancillary_input_1,ancillary_input_2, ancillary_input_3), formatter_out)
     @follows(vgt_ndvi_10dmax_linearx2, vgt_ndvi_10dmin_linearx2, vgt_ndvi_baresoil_linearx2,vgt_ndvi_icn)
     def vgt_ndvi_vci_linearx2(input_file, output_file):
