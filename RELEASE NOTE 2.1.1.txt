@@ -1,0 +1,84 @@
+#
+#   Release Note for 2.1.1
+#   Changes are with respect to 2.1.0-12 (disseminated through EUMETCast on 11th July 2017)
+#   Unless specification, they refer to Apps.rpm package.
+#   The references ES2-NN report the number of a corresponding ticket opened in YouTrack (https://estation2.myjetbrains.com/youtrack/)
+#   Date: November 2017
+
+1. BUG FIXING
+-------------
+
+1.1 Acquisition
+
+- Correct a bug on ingestion of LSASAF-LST (corrupted .bz2 files make the ingestion service stuck)
+- Update source for FEWSNET-2.0 and TAMSAT-2.0 (2.1.0-15)
+- Exclude from the get services products that are not activated (see ES2-4)
+- Correct a bug to enable the correct editing of internet sources, when more than 1 is defined (see ES2-73)
+
+1.2 Processing
+
+- Correct Primary Production algorithm (28.5 Celsius threshould for PbOpt computation - see ES2-49) and check all files present (see ES2-36).
+- Correct std_modis_monavg computation, in order to account for possible missing files at begin of following year (see ES2-35).
+
+1.3 DataManagement
+
+- Add checks on the file extensions, not to have the visualization blocked by unexpected files (see ES2-3)
+
+1.4 Visualization
+
+- Correct Timeseries value returned for nodata (None rather than 0 -> see ES2-47)
+- Do not reload the product layer when 'outmask' function is de-activated, ans save time (see ES2-7)
+- Correct the FCOVER legend (see ES2-11)
+- Correct the End-date entry in Map viewer's timeline (see ES2-20)
+- Change mapserver parameters to avoid shift of low-resolution products (RESAMPLE=AVERAGE, see ES2-58)
+
+1.5 System Service
+
+1.6 Help
+
+- Correct the link to the Product Report in English (was going to the French version - see ES2-24)
+
+1.7 Configuration/DB
+
+- Internet source for TAMSAT updated (see ES2-48)
+
+
+2. NEW FEATURES
+---------------
+
+2.0 General
+
+2.1 Dashboard
+
+2.2.1 Acquisition
+
+- Define additional sources for the MODIS marine 4km global products (see ES2-23)
+
+2.2.2 Processing
+
+- Fully implement the modis-pp processing chain, as a non-standard chain (~ merge). Define two chains for 8daysavg and monavg products.
+- Remove tmpdir used in modis-firms 10km re-projection
+- Implement the SST Fronts detection
+- Correct the No-data value in Primary Production files, from -9999 to -32768 (see ES2-16)
+
+2.2.3 Data Management
+
+- Implement functions to generate .bsx archives for a single datasets (e.g. NDVI 2.2 yearly datasets). No GUI, only from pycharm/python.
+
+2.3.1 Visualization/General
+
+- Change settings in DB in order to have NDVI sv2-pv2.1 not masked
+- Change settings in DB in order not to get (via eumetcast) MSG-MPE product
+- Adapt the lenght of the 'Timeline' period in Map Viewer, in order to display always around 30/40 steps (see ES2-21)
+
+2.3.2 Visualization/Maps
+
+2.3.3 Visualization/Graphs
+
+2.4 Configuration/DB
+
+- Change/make uniform the description of products/subproducts (see ES2-82)
+
+2.5 Other packages
+
+- Upgrade the version of Firefox (31.1.0 -> 52.4.0) since the original stopped working - on machines connected to the internet - in September 2017 (see ES2-83)
