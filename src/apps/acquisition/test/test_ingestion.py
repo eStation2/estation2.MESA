@@ -24,8 +24,6 @@ class TestIngestion(unittest.TestCase):
         ingestion.drive_ingestion()
         self.assertEqual(1, 1)
 
-
-
     def test_ingest_modis_firms_nasa(self):
 
         # This is for MCD14DL format from ftp://nrt1.modaps.eosdis.nasa.gov/FIRMS/Global
@@ -199,6 +197,7 @@ class TestIngestion(unittest.TestCase):
             ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
 
             self.assertEqual(1, 1)
+
     def test_ingest_modis_kd490_netcdf(self):
 
         date_fileslist = ['/data/ingest/A2015189.L3m_DAY_KD490_Kd_490_4km.nc']
@@ -451,6 +450,7 @@ class TestIngestion(unittest.TestCase):
             ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
 
             self.assertEqual(1, 1)
+
     def test_ingest_vgt_lai(self):
 
         date_fileslist = ['/data/ingest/test/g2_BIOPAR_LAI_201510240000_AFRI_PROBAV_V1.4.zip']
@@ -487,6 +487,7 @@ class TestIngestion(unittest.TestCase):
             ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
 
             self.assertEqual(1, 1)
+
     def test_ingest_vgt_fcover(self):
 
         date_fileslist = ['/data/ingest/g2_BIOPAR_FCOVER_201601130000_AFRI_PROBAV_V1.4.zip']
@@ -595,6 +596,7 @@ class TestIngestion(unittest.TestCase):
                                                                               source_id=datasource_descrID):
 
             ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
     def test_ingest_vgt_ndvi(self):
 
         date_fileslist = ['/data/temp/proba-v/g2_BIOPAR_NDVI_201601110000_AFRI_PROBAV_V2.1.zip']
@@ -629,6 +631,7 @@ class TestIngestion(unittest.TestCase):
                                                                               source_id=datasource_descrID):
 
             ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
     def test_ingest_chirps(self):
 
         date_fileslist = ['/data/ingest/test/chirps-v2.0.2016.02.1.tif.gz']
@@ -705,9 +708,9 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_jrc_wbd(self):
 
-        date_fileslist = glob.glob('/data/processing/wd-gee/1.0/for_ingest/JRC-WBD_20160501*')
+        date_fileslist = glob.glob('/data/processing/wd-gee/1.0/for_ingest/JRC-WBD_20161101*')
         #date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
-        in_date = '20160501'
+        in_date = '20161101'
         productcode = 'wd-gee'
         productversion = '1.0'
         subproductcode = 'occurr'
@@ -740,6 +743,7 @@ class TestIngestion(unittest.TestCase):
             ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
 
             self.assertEqual(1, 1)
+
     def test_preprocess_ecmwf_mars(self):
 
         date_fileslist = ['/data/temp/ope_africa_rain_20160221.zip']
@@ -750,6 +754,7 @@ class TestIngestion(unittest.TestCase):
         ingestion.pre_process_ecmwf_mars(tmpdir, date_fileslist, logger)
 
         self.assertEqual(1, 1)
+
     def test_ingest_ecmwf_rain(self):
 
         date_fileslist = ['/data/ingest/test/ope_africa_rain_20160221.zip']
