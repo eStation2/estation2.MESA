@@ -345,6 +345,7 @@ def ingest_archives_eumetcast_product(product_code, version, subproduct_code, ma
 #    Note that mapset is the 'target' mapset
 #    input_dir = if None -> looks in ingest_dir (default for EUMETCast dissemination)
 #                if defined -> looks in the specific location (for Historical Archives)
+#
 
     # Manage the input_dir option
     if input_dir is None:
@@ -373,20 +374,6 @@ def ingest_archives_eumetcast_product(product_code, version, subproduct_code, ma
                     ingest_file_archive(in_file, mapset_id, echo_query=False, no_delete=no_delete)
                 except:
                     logger.warning("Error in ingesting file %s" % in_file)
-
-    # Get the list of matching files in /data/ingest
-    # logger.debug("Looking in directory: %s" % es_constants.es2globals['archive_dir'])
-
-    # # Call the ingestion routine
-    # if len(available_files)>0:
-    #     for in_file in available_files:
-    #         if dry_run:
-    #             logger.info("Found file: %s" % in_file)
-    #         else:
-    #             try:
-    #                 ingest_file_archive(in_file, mapset_id, echo_query=False, no_delete=True)
-    #             except:
-    #                 logger.warning("Error in ingesting file %s" % in_file)
 
 
 def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_logger, echo_query=False):
@@ -1442,8 +1429,18 @@ def pre_process_nasa_firms(subproducts, tmpdir, input_files, my_logger):
 def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my_logger):
 # -------------------------------------------------------------------------------------------------------
 #   Merges the various tiles of the .tif files retrieved from GEE application
-#   Additionally, writes to the 'standard' mapset 'WD-GEE-ECOWAS-AVG'
+#   Additionally, writes to the 'standard' mapset 'WD-GEE-ECOWAS-AVG', which MUST be indicated as
+#   'native-mapset' for the datasource
+#   Here below gdal options used for testing (they refer to ECOWAS-AVG mapset):
 #
+#   gdalwarp format:
+#       -te -17.5290058 4.2682552 24.0006488 27.3132762
+#       -tr 0.000269494585236 0.000269494585236
+
+#   gdal_merge.py format:
+#       -ps 0.000269494585236 0.000269494585236
+#       -ul_lr -17.5290058 27.3132762 24.0006488 4.2682552
+
 
     # Prepare the output as an empty list
     interm_files_list = []
@@ -1471,10 +1468,14 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
     output_file         = tmpdir+os.path.sep + 'merge_output.tif'
     output_file_mapset  = tmpdir+os.path.sep + 'merge_output_WD-GEE-ECOWAS-AVG.tif'
 
-    # Merge all input products into a 'tmp' file
+    # -------------------------------------------------------------------------
+    # STEP 1: Merge all input products into a 'tmp' file
+    # -------------------------------------------------------------------------
     try:
         command = es_constants.gdal_merge
         command += ' -co \"compress=lzw\"'
+        command += ' -ps 0.000269494585236 0.000269494585236 '
+        command += ' -ul_lr -17.5290058 27.3132762 24.0006488 4.2682552 '
         command += ' -o ' + output_file
         command += ' -ot BYTE '
         for file in good_input_files:
@@ -1485,49 +1486,25 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
     except:
         pass
 
+    # M.C. 30.10.17 (see ES2-96)
+    # Do gdal_translate, in order to better compress the file
 
-    # Check if re-projection has to be done
-    trg_mapset_id=sprod['mapsetcode']
+    try:
+        command = es_constants.gdal_translate
+        command += ' -co \"compress=lzw\"'
+        command += ' -ot BYTE '
+        command += ' '+output_file
+        command += ' '+output_file_mapset
 
-    if trg_mapset_id != native_mapset_code:
+        my_logger.debug('Command for re-project is: ' + command)
+        os.system(command)
+        interm_files_list.append(output_file_mapset)
 
-        trg_mapset = mapset.MapSet()
-        trg_mapset.assigndb(trg_mapset_id)
-        trg_xsize = trg_mapset.size_x
-        trg_ysize = trg_mapset.size_y
+    except:
+        pass
 
-        # Original mapset (from datasource_description -> subproduct)
-        orig_mapset = mapset.MapSet()
-        orig_mapset.assigndb(native_mapset_code)
-
-        # Do some checks on mapsets compatibility
-        if trg_mapset.geo_transform[0] != orig_mapset.geo_transform[0] or \
-           trg_mapset.geo_transform[1] != orig_mapset.geo_transform[1] or \
-           trg_mapset.geo_transform[3] != orig_mapset.geo_transform[3] or \
-           trg_mapset.geo_transform[5] != orig_mapset.geo_transform[5]:
-
-            # Raise error and exit
-            my_logger.debug('Warping cannot be done from orig to target mapset')
-            return None
-
-        try:
-            command = es_constants.gdal_translate
-            command += ' -co \"compress=lzw\"'
-            command += ' -ot BYTE '
-            command += ' -outsize '+str(trg_xsize)+' '+str(trg_ysize)
-            command += ' '+output_file
-            command += ' '+output_file_mapset
-
-            my_logger.debug('Command for re-project is: ' + command)
-            os.system(command)
-            interm_files_list.append(output_file_mapset)
-
-        except:
-            pass
-
-    else:
-        # Assign output file
-        interm_files_list.append(output_file)
+    # Assign output file
+    interm_files_list.append(output_file_mapset)
 
     return interm_files_list
 
@@ -2527,31 +2504,50 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete
 #       target_mapset: target mapset
 #       no_delete: do not delete input file (for external medium)
 #
+#   Since 30/10/17: manages .zipped files, ending with extension .gz.tif (see ES2-96)
+#
 
     logger.info("Entering routine %s for file %s" % ('ingest_file_archive', input_file))
     extension='.tif'
+
     # Test the file/files exists
     if not os.path.isfile(input_file):
         logger.error('Input file: %s does not exist' % input_file)
         return 1
+
+    # # Create temp output dir for unzipping
+    #
+    # if re.match('MESA_JRC_.*.gz.tif',input_file):
+    #
+    #     try:
+    #         tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+    #                                   dir=es_constants.base_tmp_dir)
+    #     except:
+    #         logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
+    #         raise NameError('Error in creating tmpdir')
+    #
+    #     # unzip the file
+    # else:
+    #     my_input_file = input_file
+
+    my_input_file = input_file
 
     # Instance metadata object (for output_file)
     sds_meta_out = metadata.SdsMetadata()
 
     # Read metadata from input_file
     sds_meta_in = metadata.SdsMetadata()
-    sds_meta_in.read_from_file(input_file)
-    #sds_meta_in.print_out()
+    sds_meta_in.read_from_file(my_input_file)
 
     # Extract info from input file
-    [str_date, product_code, sub_product_code, mapsetid, version] = functions.get_all_from_filename_eumetcast(input_file)
+    [str_date, product_code, sub_product_code, mapsetid, version] = functions.get_all_from_filename_eumetcast(my_input_file)
 
     # Define output filename
     sub_dir = sds_meta_in.get_item('eStation2_subdir')
     product_type = functions.get_product_type_from_subdir(sub_dir)
 
     output_file = es_constants.es2globals['processing_dir']+\
-                      functions.convert_name_from_eumetcast(input_file, product_type, with_dir=True, new_mapset=target_mapsetid)
+                      functions.convert_name_from_eumetcast(my_input_file, product_type, with_dir=True, new_mapset=target_mapsetid)
 
     # make sure output dir exists
     output_dir = os.path.split(output_file)[0]
@@ -2564,7 +2560,7 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete
         if os.path.isfile(output_file):
             os.remove(output_file)
         # Copy file to output
-        shutil.copyfile(input_file,output_file)
+        shutil.copyfile(my_input_file,output_file)
         # Open output dataset for writing metadata
         #trg_ds = gdal.Open(output_file)
 
@@ -2573,7 +2569,7 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete
         # -------------------------------------------------------------------------
         # Manage the geo-referencing associated to input file
         # -------------------------------------------------------------------------
-        orig_ds = gdal.Open(input_file, gdal.GA_ReadOnly)
+        orig_ds = gdal.Open(my_input_file, gdal.GA_ReadOnly)
 
         # Read the data type
         band = orig_ds.GetRasterBand(1)
@@ -2640,7 +2636,7 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete
     sds_meta_out.assign_date(str_date)
     sds_meta_out.assign_subdir_from_fullpath(output_dir)
     sds_meta_out.assign_comput_time_now()
-    sds_meta_out.assign_input_files(input_file)
+    sds_meta_out.assign_input_files(my_input_file)
 
     # Write metadata to file
     sds_meta_out.write_to_file(output_file)
