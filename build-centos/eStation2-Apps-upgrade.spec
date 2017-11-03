@@ -295,7 +295,7 @@ sed -i "s|.*active_version.=.*|active_version = %{version}|" /eStation2/settings
 
 # Run the patch to install Firefox 52.4.0
 echo "`date +'%Y-%m-%d %H:%M '` Run Firefox Upgrader"
-/var/www/eStation2/src/patches/updater_firefox_52.4.0.dbx
+/var/www/eStation2/patches/updater_firefox_52.4.0.dbx
 echo "`date +'%Y-%m-%d %H:%M '` Firefox version now: `firefox -v | awk '{ print $3 }' 2>> /dev/null`"
 
 # Start the eStation Services 
