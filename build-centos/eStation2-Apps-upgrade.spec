@@ -1,7 +1,7 @@
 Summary: eStation 2.0 application from JRC
 Name: eStation2-Apps
-Version: 2.1.0
-Release: 15
+Version: 2.1.1
+Release: 1
 Group: eStation
 License: GPL
 Source: /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz
@@ -19,7 +19,6 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 cd /home/adminuser/eStation2.git			# -> TEMP: locally unzippped manually
 git pull origin main		  			# -> TEMP: locally unzippped manually
 # Create the .tgz
-# cd /home/adminuser/estation2.MESA-main/src
 cd src
 tar -cvzf /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz *
 
@@ -293,6 +292,11 @@ sed -i "s|.*active_version.=.*|active_version = %{version}|" /eStation2/settings
 # thema=`grep -i thema /eStation2/settings/system_settings.ini | sed 's/thema =//'| sed 's/ //g'`
 # psql -U estation -d estationdb -c "select products.set_thema('$thema')"
 # echo "`date +'%Y-%m-%d %H:%M '` Set again the Thema to $thema"
+
+# Run the patch to install Firefox 52.4.0
+echo "`date +'%Y-%m-%d %H:%M '` Run Firefox Upgrader"
+/var/www/eStation2/src/patches/updater_firefox_52.4.0.dbx
+echo "`date +'%Y-%m-%d %H:%M '` Firefox version now: `firefox -v | awk '{ print $3 }' 2>> /dev/null`"
 
 # Start the eStation Services 
 echo "`date +'%Y-%m-%d %H:%M '` Starting all services"
