@@ -36,7 +36,7 @@ Ext.define('esapp.model.SystemSetting', {
         {name: 'log_general_level'}
     ]
 
-    ,autoLoad: false
+    ,autoLoad: true
     ,autoSync: true
     ,remoteSort: false
     ,remoteGroup: false

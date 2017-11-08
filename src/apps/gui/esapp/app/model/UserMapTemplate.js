@@ -25,6 +25,9 @@ Ext.define('esapp.model.UserMapTemplate', {
         {name: 'vectorlayers', mapping: 'vectorlayers'},
         {name: 'outmask',  type: 'boolean', mapping: 'outmask'},
         {name: 'outmaskfeature', mapping: 'outmaskfeature'},
-        {name: 'auto_open', type: 'boolean', mapping: 'auto_open'}
+        {name: 'auto_open', type: 'boolean', mapping: 'auto_open'},
+        {name: 'zoomextent', mapping: 'zoomextent'},
+        {name: 'mapsize', mapping: 'mapsize'},
+        {name: 'mapcenter', mapping: 'mapcenter'}
     ]
 });

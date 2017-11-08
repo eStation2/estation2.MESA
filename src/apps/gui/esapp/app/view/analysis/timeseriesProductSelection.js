@@ -825,6 +825,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                     //var timeseriesProductsStore = me.getViewModel().getStore('products');
                     //console.info(timeseriesProductsStore);
                     if (timeseriesProductsStore.isStore) {
+                        timeseriesProductsStore.proxy.extraParams = {forse: true};
                         timeseriesProductsStore.reload();
                         //me.fireEvent('afterrender');
                     }
@@ -842,13 +843,13 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                     });
 
                     if (!timeseriesProductsStore.isLoaded()){
-                        delay = 1000;
+                        delay = 500;
                         // myLoadMask.show();
                     }
 
                     var task = new Ext.util.DelayedTask(function() {
                         if (!timeseriesProductsStore.isLoaded()) {
-                            delay = 1000;
+                            delay = 500;
                             task.delay(delay);
                         }
                         else {

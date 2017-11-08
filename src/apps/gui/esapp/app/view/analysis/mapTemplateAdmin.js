@@ -18,21 +18,29 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
 
     id: 'userMapTemplates',
     reference: 'userMapTemplates',
-    //title: '',
+    title: esapp.Utils.getTranslation('map_template'),
     header: {
-        hidden: false
-        //titlePosition: 0,
-        //titleAlign: 'center'
+        hidden: false,
+        titlePosition: 0,
+        titleAlign: 'center',
+        focusable: true
         //,iconCls: 'maptemplate'
     },
-    //constrainHeader: Ext.getBody(),
 
-    //modal: false,
+    // constrainHeader: Ext.getBody(),
+    // constrain: false,
+    autoShow : false,
+    hidden: true,
+
+    floating: true,
+    // floatable: true,
+    // alwaysOnTop: true,
     closable: false,
-    closeAction: 'hide',
+    // closeAction: 'hide',
     maximizable: false,
-    //resizable: false,
-    //autoScroll: true,
+    collapsible: false,
+    resizable: false,
+    autoScroll: true,
     //height: Ext.getBody().getViewSize().height < 400 ? Ext.getBody().getViewSize().height-10 : 400,
     //autoWidth: false,
     //autoHeight: false,
@@ -44,24 +52,14 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
     frame: false,
     bodyBorder: true,
     //bodyCls: 'rounded-box',
-    layout: {
-        type  : 'fit',
-        padding: 0
-    },
-
+    // layout: {
+    //     type  : 'fit',
+    //     padding: 0
+    // },
+    alignTarget: Ext.getCmp('analysismain_maptemplatebtn'),
+    defaultAlign: 'tl-bc',
     bind: '{usermaptemplates}',
     //session:true,
-
-    viewConfig: {
-        stripeRows: false,
-        enableTextSelection: true,
-        draggable: false,
-        markDirty: false,
-        resizable: false,
-        disableSelection: false,
-        trackOver: true,
-        forceFit:true
-    },
 
     selModel : {
         allowDeselect : true,
@@ -71,7 +69,6 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
 
     //cls: 'grid-color-yellow',
     hideHeaders: false,
-    collapsible: false,
     enableColumnMove:false,
     enableColumnResize:true,
     sortableColumns:true,
@@ -80,29 +77,62 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
     rowLines: true,
     cls: 'newpanelstyle',
 
+    config: {
+        forseStoreLoad: false,
+        dirtyStore: false
+    },
+
     initComponent: function () {
         var me = this;
+
+        me.title = esapp.Utils.getTranslation('map_template');
+
+        me.hidden = true;
+
+        me.viewConfig = {
+            defaultAlign: 'tl-bc',
+            alignTarget: Ext.getCmp('analysismain_maptemplatebtn'),
+            stripeRows: false,
+            enableTextSelection: true,
+            draggable: false,
+            markDirty: false,
+            disableSelection: false,
+            trackOver: true,
+            forceFit: true
+        };
+
         // Ext.util.Observable.capture(me, function(e){console.log('mapTemplateAdmin - ' + me.id + ': ' + e);});
 
         me.mon(me, {
             loadstore: function() {
-                me.getViewModel().getStore('usermaptemplates').proxy.extraParams = {userid: esapp.getUser().userid};
-                me.getViewModel().getStore('usermaptemplates').load({
-                    callback: function(records, options, success) {
-                        //console.info(records);
-                        //console.info(options);
-                        //console.info(success);
-                    }
-                });
+                if (me.forseStoreLoad || !me.getViewModel().getStore('usermaptemplates').isLoaded() || me.dirtyStore) {
+                    me.getViewModel().getStore('usermaptemplates').proxy.extraParams = {userid: esapp.getUser().userid};
+                    me.getViewModel().getStore('usermaptemplates').load({
+                        callback: function (records, options, success) {
+                        }
+                    });
+                    me.forseStoreLoad = false;
+                    me.dirtyStore = false;
+                }
             }
         });
 
         me.listeners = {
-            // focusleave: function(){
-                // me.hide();
-            // },
-            viewready: function(){
+            show: function(){
                 me.fireEvent('loadstore');
+                me.fireEvent('align');
+            },
+            align: function() {
+                // var task = new Ext.util.DelayedTask(function() {
+                    me.alignTo(Ext.getCmp('analysismain').lookupReference('analysismain_maptemplatebtn'), 'tl-bc');
+                    me.updateLayout();
+                // });
+                // if (!me.hidden) {
+                //     task.delay(50);
+                // }
+            },
+            focusleave: function(){
+                me.hide();
             }
         };
 
@@ -112,11 +142,13 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
             align: 'c-c',
             tooltip: esapp.Utils.getTranslation('refreshmaptpllist'),    // 'Refresh map template list',
             callback: function() {
+                me.forseStoreLoad = true;
                 me.fireEvent('loadstore');
             }
         }];
 
         me.bbar = Ext.create('Ext.toolbar.Toolbar', {
+            focusable: true,
             items: [{
                 xtype: 'button',
                 text: esapp.Utils.getTranslation('openselected'),    // 'Open selected',
@@ -132,7 +164,7 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
 
         me.columns = [{
             text: esapp.Utils.getTranslation('maptemplatename'),  // 'Map template name',
-            width: 250,
+            width: 270,
             dataIndex: 'templatename',
             cellWrap:true,
             menuDisabled: true,
@@ -186,7 +218,7 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
             draggable:false,
             groupable:false,
             hideable: false,
-            width: 100,
+            width: 80,
             align: 'center',
             stopSelection: false,
 

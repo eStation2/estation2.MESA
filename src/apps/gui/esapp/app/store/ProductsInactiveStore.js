@@ -9,7 +9,7 @@ Ext.define('esapp.store.ProductsInactiveStore', {
 
     ,storeId : 'ProductsInactiveStore'
 
-    ,autoLoad: false
+    ,autoLoad: true
     ,autoSync: true
     ,remoteSort: false
     ,remoteGroup: false

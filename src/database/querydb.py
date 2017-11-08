@@ -20,8 +20,38 @@ from database import crud
 from config import es_constants
 logger = log.my_logger(__name__)
 
-db = connectdb.ConnectDB().db
+db = connectdb.ConnectDB(schema='products').db
 dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
+# print db
+
+
+def copylegend(legendid=-1, legend_descriptive_name=''):
+    global dbschema_analysis
+    try:
+        if legendid != -1:
+            query = "SELECT * FROM analysis.copylegend(" + str(legendid) + ", '" + legend_descriptive_name + "'" + "); "  # COMMIT;
+            result = dbschema_analysis.execute(query)
+            newlegendid = result.fetchall()
+            newlegendid = newlegendid[0]._row[0]
+            # if hasattr(newlegendid, "__len__") and newlegendid.__len__() > 0:
+            #     for row in newlegendid:
+            #         newlegendid = row
+            # else:
+            #     newlegendid = newlegendid[0]._row[0]
+
+            dbschema_analysis.commit()
+        else:
+            newlegendid = legendid
+
+        return newlegendid
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("copylegend: Database query error!\n -> {}".format(exceptionvalue))
+        return False
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
 
 
 def activate_deactivate_product(productcode='', version='', activate=False, forse=False):
@@ -991,6 +1021,8 @@ def get_all_legends(echo=False):
 
         query = "SELECT legend.legend_id,  " + \
                 "       legend.legend_name, " + \
+                "       legend.min_value, " + \
+                "       legend.max_value, " + \
                 "       legend.colorbar " + \
                 "FROM analysis.legend "
 
@@ -1009,6 +1041,38 @@ def get_all_legends(echo=False):
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
         #dbschema_analysis = None
+
+
+def createlegend(params):
+
+    global dbschema_analysis
+    try:
+
+        query = "INSERT INTO analysis.legend (legend_name, min_value, max_value, colorbar) VALUES ( " + \
+                "'" + params['legend_name'] + \
+                "', " + str(params['min_value']) + \
+                ", " + str(params['max_value']) + \
+                ", " + "'" + params['colorbar'] + \
+                "') RETURNING legend_id"
+
+        result = dbschema_analysis.execute(query)
+        legend = result.fetchall()
+        dbschema_analysis.commit()
+
+        return legend[0]._row[0]
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if False:
+            print traceback.format_exc()
+        # Exit the script and log the error telling what happened.
+        logger.error("get_all_legends: Database query error!\n -> {}".format(exceptionvalue))
+        return -1
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+            # dbschema_analysis = None
+
 
 
 ######################################################################################
@@ -1103,6 +1167,41 @@ def get_product_legends(productcode=None, subproductcode=None, version=None, ech
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
         #dbschema_analysis = None
+
+
+def get_legend_assigned_datasets(legendid, echo=False):
+
+    global dbschema_analysis
+    try:
+
+        query = "SELECT product_legend.legend_id,  " + \
+                "       product_legend.productcode, " + \
+                "       product_legend.subproductcode, " + \
+                "       product_legend.version, " + \
+                "       product_legend.default_legend, " + \
+                "       product.descriptive_name, " + \
+                "       product.description " + \
+                "FROM products.product JOIN analysis.product_legend " + \
+                " ON ( product.productcode = product_legend.productcode " + \
+                "  AND product.subproductcode = product_legend.subproductcode " + \
+                "  AND product.version = product_legend.version )" + \
+                "WHERE product_legend.legend_id = " + str(legendid)
+
+        result = dbschema_analysis.execute(query)
+        legend_datasets = result.fetchall()
+
+        return legend_datasets
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and log the error telling what happened.
+        logger.error("get_legend_assigned_datasets: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+            # dbschema_analysis = None
 
 
 ######################################################################################
@@ -1484,7 +1583,7 @@ def get_products_acquisition(echo=False, activated=None):
         if echo:
             print traceback.format_exc()
         # Exit the script and log the error telling what happened.
-        logger.error("get_products: Database query error!\n -> {}".format(exceptionvalue))
+        logger.error("get_products_acquisition: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if db.session:
             db.session.close()

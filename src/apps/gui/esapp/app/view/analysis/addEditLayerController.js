@@ -157,7 +157,7 @@ Ext.define('esapp.view.analysis.addEditLayerController', {
         var fp = new Ext.form.Panel({
             fileUpload: true,
             width: 400,
-            frame: true,
+            frame: false,
             title: '',
             autoHeight: true,
             bodyStyle: 'padding: 10px 0px 0px 10px;',

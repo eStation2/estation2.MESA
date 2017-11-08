@@ -404,6 +404,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                                             //me.getController().renderHiddenColumnsWhenUnlocked();
 
                                             if (ingestiongridstore.isStore) {
+                                                ingestiongridstore.proxy.extraParams = {forse: true};
                                                 ingestiongridstore.load({
                                                     callback: function(records, options, success){
                                                         myLoadMask.hide();

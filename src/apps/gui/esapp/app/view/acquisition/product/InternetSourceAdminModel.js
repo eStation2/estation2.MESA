@@ -4,9 +4,10 @@ Ext.define('esapp.view.acquisition.product.InternetSourceAdminModel', {
     stores: {
         // Define a store of InternetSource records that links to the Session.
         internetsources: {
-            model: 'InternetSource',
-            autoLoad: true,
-            autoSync: true
+            source: 'InternetSourceStore'
+            // model: 'InternetSource',
+            // autoLoad: true,
+            // autoSync: true
             ,session: true
         }
     }

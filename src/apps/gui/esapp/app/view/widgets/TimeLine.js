@@ -198,6 +198,11 @@ Ext.define("esapp.view.widgets.TimeLine",{
                 liveRedraw: false
             },
 
+            plotOptions: {
+                series: {
+                    cursor: 'pointer'
+                }
+            },
             rangeSelector: {
                 // allButtonsEnabled: true,
                 selected: 4,

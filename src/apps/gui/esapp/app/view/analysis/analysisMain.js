@@ -12,6 +12,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
         'esapp.view.analysis.analysisMainModel',
         'esapp.view.analysis.analysisMainController',
         'esapp.view.analysis.timeseriesChartSelection',
+        // 'esapp.view.analysis.mapTemplateAdmin',
         //'esapp.view.analysis.mapView',
         //'esapp.view.analysis.ProductNavigator',
         //'esapp.view.analysis.timeseriesChartView',
@@ -56,38 +57,55 @@ Ext.define("esapp.view.analysis.analysisMain",{
                 handler: 'newMapView'
             },{
                 xtype: 'button',
+                id: 'analysismain_maptemplatebtn',
                 name: 'analysismain_maptemplatebtn',
                 reference: 'analysismain_maptemplatebtn',
-                text: esapp.Utils.getTranslation('map_template'), // 'MAP TEMPLATE'
+                text: esapp.Utils.getTranslation('map_template'), // 'MY MAPS'
                 iconCls: 'map_tpl',
                 style: { color: 'gray' },
                 scale: 'small',
                 hidden:  (esapp.getUser() == 'undefined' || esapp.getUser() == null ? true : false),
-                floating: false,  // usually you want this set to True (default)
-                enableToggle: false,
-                arrowVisible: false,
-                arrowAlign: 'right',
-                collapseDirection: 'bottom',
-                menuAlign: 'tl-bc',
-                menu: {
-                    hideOnClick: true,
-                    defaults: {
-                        cls: "x-menu-no-icon",
-                        padding: 0
-                    },
-                    listeners: {
-                       // afterrender: function(menu , y , x ){
-                       //     Ext.util.Observable.capture(menu, function(e){console.log('mapTemplateMenu - ' + menu.id + ': ' + e);});
-                       // },
-                       activate: function(menu , y , x ){
-                            menu.down().fireEvent('loadstore');
-                       }
-                    },
-                    items: [{
-                        xtype: 'usermaptpl',
-                        hidden: false
-                    }]
+                // floating: false,  // usually you want this set to True (default)
+                handler: 'showUserMaptemplates',
+                listeners: {
+                    afterrender: function (btn) {
+                        btn.mapTemplateAdminPanel = new esapp.view.analysis.mapTemplateAdmin();
+                    }
                 }
+                // enableToggle: false,
+                // arrowVisible: false,
+                // arrowAlign: 'right',
+                // collapseDirection: 'bottom',
+                // menuAlign: 'tl-bc',
+                // menu: {
+                //     // hideOnClick: true,
+                //     defaults: {
+                //         cls: "x-menu-no-icon",
+                //         padding: 0
+                //     },
+                //     listeners: {
+                //        // afterrender: function(menu , y , x ){
+                //        //     Ext.util.Observable.capture(menu, function(e){console.log('mapTemplateMenu - ' + menu.id + ': ' + e);});
+                //        // },
+                //        activate: function(menu , y , x ){
+                //             // menu.down().fireEvent('loadstore');
+                //             // menu.down().show();
+                //        }
+                //     },
+                //     items: [{
+                //         xtype: 'usermaptpl'
+                //         // ,hidden: false
+                //     }]
+                // }
+            },{
+                xtype: 'button',
+                name: 'analysismain_legendsbtn',
+                reference: 'analysismain_legendsbtn',
+                text: esapp.Utils.getTranslation('legends'),  // 'Legends',
+                iconCls: 'legends',
+                style: { color: 'gray' },
+                scale: 'small',
+                handler: 'legendAdmin'
             },{
                 xtype: 'button',
                 name: 'analysismain_layersbtn',
@@ -124,6 +142,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
 
         //me.html = '<div id="backgroundmap_' + me.id + '"></div>';
 
+
         me.defaults = {
             titleAlign: 'center',
             frame: false,
@@ -149,16 +168,17 @@ Ext.define("esapp.view.analysis.analysisMain",{
 
         me.commonMapView = new ol.View({
             projection:"EPSG:4326",
-            center: [14, -7],   // [15, 2]   [20, -4.7],   // ol.proj.transform([20, 4.5], 'EPSG:3857', 'EPSG:4326'),
+            center: [16.4, -0.5],   // [15, 2]   [20, -4.7],   // ol.proj.transform([20, 4.5], 'EPSG:3857', 'EPSG:4326'),
             resolution: 0.1,
             minResolution: 0.0001,
             maxResolution: 0.25,
             zoomFactor: 1.1+0.1*5   // (cioe' nel range 1.1 -> 2.1)
-            // zoom: 2,
+            // ,zoom: 3
             // minZoom: 4,
             // maxZoom: 100,
             // zoomFactor: 1.5 // 1.0+(0.075*1)
         });
+        me.commonMapView.setZoom(1.5);
         me.zoomFactorSliderValue = 5;
 
         me.listeners = {
@@ -192,14 +212,13 @@ Ext.define("esapp.view.analysis.analysisMain",{
                       units: 'metric'       // 'degrees'  'nautical mile'
                     });
 
-                    var taskOpenTimeseriesChartSelection = new Ext.util.DelayedTask(function() {
+                    // var taskOpenTimeseriesChartSelection = new Ext.util.DelayedTask(function() {
                         //me.lookupReference('analysismain_timeseriesbtn').fireEvent('click');
                         var timeseriesChartSelectionWindow = me.lookupReference('timeserieschartselection');
                         timeseriesChartSelectionWindow.show();
                         //timeseriesChartSelectionWindow.fireEvent('align');
-                    });
-                    taskOpenTimeseriesChartSelection.delay(0);
-
+                    // });
+                    // taskOpenTimeseriesChartSelection.delay(0);
 
 
                     //me.map = new ol.Map({

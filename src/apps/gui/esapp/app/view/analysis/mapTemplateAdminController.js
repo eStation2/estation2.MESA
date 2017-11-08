@@ -39,7 +39,10 @@ Ext.define('esapp.view.analysis.mapTemplateAdminController', {
                 scalelineObjPosition: selectedMapTemplates[i].data.scalelineobjposition.split(",").map(function(x){return parseInt(x)}),
                 vectorLayers: selectedMapTemplates[i].data.vectorlayers,
                 outmask: selectedMapTemplates[i].data.outmask,
-                outmaskFeature: selectedMapTemplates[i].data.outmaskfeature
+                outmaskFeature: selectedMapTemplates[i].data.outmaskfeature,
+                zoomextent: selectedMapTemplates[i].data.zoomextent,
+                mapsize: selectedMapTemplates[i].data.mapsize,
+                mapcenter: selectedMapTemplates[i].data.mapcenter
             };
 
             //mapTemplate = {
@@ -80,7 +83,7 @@ Ext.define('esapp.view.analysis.mapTemplateAdminController', {
             newMapViewWin.show();
         }
 
-       //me.hide();
+       // me.hide();
     }
 
 

@@ -11,7 +11,7 @@ Ext.define('esapp.store.ProcessingStore', {
 
     storeId : 'ProcessingStore'
 
-    ,autoLoad: false
+    ,autoLoad: true
     ,autoSync: true
     ,remoteSort: false
     ,remoteGroup: false

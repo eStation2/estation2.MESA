@@ -17,6 +17,27 @@ Ext.define('esapp.view.analysis.analysisMainController', {
         this.getView().lookupReference('analysismain_layersbtn').disable();
     }
 
+    ,legendAdmin: function(){
+        var newLegendAdminWin = new esapp.view.analysis.legendAdmin();
+        this.getView().add(newLegendAdminWin);
+        newLegendAdminWin.show();
+        this.getView().lookupReference('analysismain_legendsbtn').disable();
+    }
+
+    ,showUserMaptemplates: function(btn){
+        // var userMapTemplatesWindow = this.getView().lookupReference('userMapTemplates');
+        // userMapTemplatesWindow.show();
+        btn.mapTemplateAdminPanel.show();
+        // if (!esapp.Utils.objectExists(Ext.getCmp('userMapTemplates'))){
+        //     var mapTemplateAdminPanel = new esapp.view.analysis.mapTemplateAdmin();
+        //     this.getView().add(mapTemplateAdminPanel);
+        //     mapTemplateAdminPanel.show();
+        // }
+        // else {
+        //     Ext.getCmp('userMapTemplates').show();
+        // }
+    }
+
     ,showTimeseriesChartSelection: function(){
         var timeseriesChartSelectionWindow = this.getView().lookupReference('timeserieschartselection');
         // timeseriesChartSelectionWindow.setHeight(Ext.getBody().getViewSize().height-65);

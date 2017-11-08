@@ -604,7 +604,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                     marker: {
                         enabled: true,
                         radius: 2
-                    },
+                    }
                 },
                 column: {
                     pointPadding: 0,
@@ -697,8 +697,10 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                     "fontWeight": 'bold',
                     "fontSize": me.timeseriesChart.legend_title_font_size + 'px',     // '18px',
                     color: me.timeseriesChart.legend_title_font_color     //'black'
+                },
+                itemHiddenStyle: {
+                    color: 'gray'
                 }
-
             },
             series: timeseries
         });

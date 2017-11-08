@@ -17,11 +17,11 @@ Ext.define('esapp.model.ProductNavigator', {
        {name: 'order_index', mapping: 'order_index'}
     ]
 
-    ,autoLoad: false
+    // ,autoLoad: true
     ,autoSync: false
     ,remoteSort: false
     ,remoteGroup: false
-    ,loadMask: true
+    ,loadMask: false
 
     ,proxy: {
         type: 'rest',

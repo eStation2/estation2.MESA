@@ -18,8 +18,8 @@ Ext.define("esapp.view.analysis.mapScaleLineObject",{
     reference: 'scale-line',
     autoWidth: true,
     autoHeight: true,
-    minWidth: 175,
-    minHeight: 30,
+    minWidth: 70,
+    minHeight: 22,
     layout: 'fit',
     hidden: false,
     floating: true,
@@ -46,7 +46,7 @@ Ext.define("esapp.view.analysis.mapScaleLineObject",{
     scaleline_ImageObj: new Image(),
     scalelinePosition: [217,611],
     config: {
-        html: '',
+        // html: '',
         mapView: null
     },
 
@@ -57,6 +57,13 @@ Ext.define("esapp.view.analysis.mapScaleLineObject",{
         me.scaleline_ImageObj = new Image();
         me.scalelinePosition = [217,611];
 
+        // me.items = [{
+        //     xtype: 'box',
+        //     id: 'scale-line-container'+ me.id,
+        //     layout: 'fit',
+        //     autoWidth: true,
+        //     autoHeight: true
+        // }];
         me.listeners = {
             el: {
                 dblclick: function () {
@@ -64,13 +71,19 @@ Ext.define("esapp.view.analysis.mapScaleLineObject",{
                 }
             },
             afterrender: function () {
-
                 var scaleline = new ol.control.ScaleLine({
                     units: 'metric',       // 'degrees'  'nautical mile'
                     //className: 'scale-line',
                     target: me.getEl()  //document.getElementById('scale-line_' + me.id)
                 });
                 me.mapView.map.addControl(scaleline);
+
+                var element = document.getElementById(me.getEl().dom.lastChild.id);
+                new ResizeSensor(element, function() {
+                    // console.info(element);
+                    // console.log('Changed to ' + element.clientWidth);
+                    me.setWidth(element.clientWidth);
+                });
                 me.fireEvent('refreshimage');
             },
             refreshimage: function(){
@@ -90,8 +103,11 @@ Ext.define("esapp.view.analysis.mapScaleLineObject",{
                 if (me.scalelinePosition != null){
                     me.setPosition(me.scalelinePosition);
                 }
-                me.fireEvent('refreshimage');
+                // me.fireEvent('refreshimage');
             }
+            // ,move: function(){
+            //     me.scalelinePosition = me.getPosition();
+            // }
         };
 
         me.callParent();
