@@ -24,7 +24,7 @@
 2. On mesa-proc (MP:), we do the rest, i.e. mosaicing and mapset management (including metadata assignment).
 
 --------------------------------------------------------
-# Working PROCEDURE - CAN START from here
+# Working PROCEDURE - CAN START from here - see also ES2-96
 --------------------------------------------------------
 
 1. MP: Put the original files in a subdirectory of mesa-proc (e.g. /data/processing/wd-gee/1.0/new_files/1WAF_WB/2016)
