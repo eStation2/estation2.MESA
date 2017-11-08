@@ -2515,22 +2515,32 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete
         logger.error('Input file: %s does not exist' % input_file)
         return 1
 
-    # # Create temp output dir for unzipping
-    #
-    # if re.match('MESA_JRC_.*.gz.tif',input_file):
-    #
-    #     try:
-    #         tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
-    #                                   dir=es_constants.base_tmp_dir)
-    #     except:
-    #         logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
-    #         raise NameError('Error in creating tmpdir')
-    #
-    #     # unzip the file
-    # else:
-    #     my_input_file = input_file
+    # Create temp output dir for unzipping (since release 2.1.1 - for wd-gee products)
+    if re.match('MESA_JRC_.*.gz.tif',os.path.basename(input_file)):
+        try:
+            tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                                      dir=es_constants.base_tmp_dir)
+        except:
+            logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
+            raise NameError('Error in creating tmpdir')
 
-    my_input_file = input_file
+        # unzip the file
+        output_filename = os.path.basename(input_file).replace('gz.tif','tif')
+
+        command='gunzip -c '+input_file+' > '+tmpdir+os.path.sep+output_filename
+        try:
+            os.system(command)
+        except:
+            logger.error('Cannot gunzip file ' + os.path.basename(input_file) + '. Exit')
+            raise NameError('Error in unzipping file')
+
+        my_input_file = tmpdir+os.path.sep+output_filename
+        b_unzipped = True
+        extension = '.gz.tif'
+    else:
+        my_input_file = input_file
+        b_unzipped = False
+        extension = '.tif'
 
     # Instance metadata object (for output_file)
     sds_meta_out = metadata.SdsMetadata()
@@ -2654,6 +2664,10 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete
             os.utime(trace_file, None)
     else:
         logger.debug('Do not delete ingest file.')
+
+    # Remove temp dir
+    if b_unzipped:
+        shutil.rmtree(tmpdir)
 
 
 def write_ds_to_geotiff(dataset, output_file):
