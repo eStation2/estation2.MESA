@@ -133,6 +133,10 @@ class Product(object):
             my_mapset = MapSet()
             my_mapset.assigndb(mapset)
             larger_mapset = my_mapset.get_larger_mapset()
+            # See ES2-64: 07.11.17 -> check a larger mapset exist (or return empty)
+            if not larger_mapset:
+                logger.warning("No larger mapset found for original mapset: %s. Return" % mapset)
+                return missing_filenames
             new_dataset = product.get_dataset(mapset=larger_mapset, sub_product_code=missing['subproduct'])
             new_existing_files = new_dataset.get_filenames()
 
@@ -141,7 +145,7 @@ class Product(object):
                 dataset = new_dataset
             else:
                 logger.warning('No any file found for larger mapset: %s. Return' % larger_mapset)
-                return
+                return missing_filenames
         else:
                 use_mapset = mapset
 
