@@ -395,6 +395,29 @@ class TestGetInternet(unittest.TestCase):
         files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
         self.assertEqual(len(files_list),18)
 
+    # Test new version (2.1.1-1)
+    def TestRemoteHttp_FEWSNET_2(self):
+
+        internet_id='USGS:EARLWRN:FEWSNET'
+        internet_sources = querydb.get_active_internet_sources(echo=False)
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':20171001,
+                         'end_date':20171111,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type}
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
     #   ---------------------------------------------------------------------------
     #   Test download of files from GSFC oceandata http site (id:GSFC:OCEAN:MODIS:SST:1D)
     #   ---------------------------------------------------------------------------
@@ -570,19 +593,39 @@ class TestGetInternet(unittest.TestCase):
     def TestRemoteFtp_CHIRPS_PREL(self):
 
         # Manually define relevant fields of internet source
-        internet_source = {'internet_id': 'UCSB:CHIRPS:PREL:DEKAD',
-                           'url': 'ftp://chg-ftpout.geog.ucsb.edu/pub/org/chg/products/CHIRPS-2.0/prelim/global_dekad/tifs/',
-                           'include_files_expression': 'chirps-v2.0.201.*.tif.gz',
-                           'pull_frequency': 1,
-                           'user_name':'',
-                           'password':'',
-                           'start_date':None,
-                           'end_date':None,
-                           'type':'ftp'
-                           }
+        # internet_source = {'internet_id': 'UCSB:CHIRPS:PREL:DEKAD',
+        #                    'url': 'ftp://chg-ftpout.geog.ucsb.edu/pub/org/chg/products/CHIRPS-2.0/prelim/global_dekad/tifs/',
+        #                    'include_files_expression': 'chirps-v2.0.201.*.tif.gz',
+        #                    'pull_frequency': 1,
+        #                    'user_name':'',
+        #                    'password':'',
+        #                    'start_date':None,
+        #                    'end_date':None,
+        #                    'type':'ftp'
+        #                    }
+        internet_id='UCSB:CHIRPS:PREL:DEKAD'
+
+
+        internet_sources = querydb.get_active_internet_sources(echo=False)
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':internet_source.start_date,
+                         'end_date':internet_source.end_date,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type}
+
 
         # Check last 90 days (check list length = 9)
-        result = get_one_source(internet_source)
+        result = get_one_source(my_source)
 
     def TestRemoteHttp_MODIS_CHL(self):
 
@@ -671,7 +714,7 @@ class TestGetInternet(unittest.TestCase):
                          'user_name':internet_source.user_name,
                          'password':internet_source.password,
                          'start_date':20161101,
-                         'end_date':20170601,
+                         'end_date':None,
                          'frequency_id': internet_source.frequency_id,
                          'type':internet_source.type}
 
@@ -695,8 +738,8 @@ class TestGetInternet(unittest.TestCase):
                          'pull_frequency': internet_source.pull_frequency,
                          'user_name':internet_source.user_name,
                          'password':internet_source.password,
-                         'start_date':-365,
-                         'end_date':-2,
+                         'start_date':20170327,
+                         'end_date':20170329,
                          'frequency_id': internet_source.frequency_id,
                          'type':internet_source.type}
 
