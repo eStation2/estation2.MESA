@@ -60,9 +60,12 @@ def create_archives_from_dir(req_directory):
                 # Move to target dir (Done or Faulty)
                 functions.check_output_dir(target_dir)
                 files=glob.glob(my_req.replace('.req','*.bsx'))
-                shutil.move(my_req,target_dir)
+
+                # See ES2-64: 07.11.2017
+                shutil.move(my_req,target_dir+os.path.sep+os.path.basename(my_req))
                 for my_file in files:
-                    shutil.move(my_file,target_dir)
+                    # See ES2-64: 07.11.2017
+                    shutil.move(my_file,target_dir+os.path.sep+os.path.basename(my_file))
 
         else:
             logger.error('Req. directory does not exist: %s' % req_directory)
@@ -71,7 +74,7 @@ def create_archives_from_dir(req_directory):
 
 if __name__=='__main__':
 
-    req_directory='/data/processing/exchange/Requests/'
+    req_directory='/data/processing/exchange/Requests/RefStat_07.11.17/'
 
     create_archives_from_dir(req_directory)
 #
