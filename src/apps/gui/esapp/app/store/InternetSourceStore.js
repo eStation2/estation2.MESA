@@ -2,7 +2,7 @@ Ext.define('esapp.store.InternetSourceStore', {
     extend  : 'Ext.data.Store',
     alias: 'store.internetsource',
 
-    model: 'esapp.model.Ingestion',
+    model: 'esapp.model.InternetSource',
 
     requires : [
         'esapp.model.InternetSource',
@@ -12,7 +12,7 @@ Ext.define('esapp.store.InternetSourceStore', {
 
     storeId : 'InternetSourceStore'
 
-    ,autoLoad: false
+    ,autoLoad: true
     ,autoSync: false
     //,session: true
 

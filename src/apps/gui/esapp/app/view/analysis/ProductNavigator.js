@@ -12,6 +12,8 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
         'esapp.view.analysis.ProductNavigatorController',
 
         'esapp.model.ProductNavigator',
+        'esapp.view.analysis.addEditLegend',
+
         // 'esapp.model.ProductNavigatorDatasetColorScheme',
         //'esapp.model.ProductNavigatorMapSet',
         //'esapp.model.ProductNavigatorMapSetDataSet',
@@ -29,7 +31,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
     title: '<div class="panel-title-style-16">' + esapp.Utils.getTranslation('productnavigator') + '</div>',    // '<div class="panel-title-style-16">Product Navigator</div>',
     header: {
         titlePosition: 0,
-        titleAlign: 'center',
+        titleAlign: 'left',
         iconCls: 'africa'
     },
     constrainHeader: Ext.getBody(),
@@ -41,17 +43,17 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
     resizable: true,
     resizeHandles: 'n,s',
     scrollable: false,
-    width: 565,
+    width: 415,
     //minWidth: 1000,
-    height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-10 : 830,  // 600,
+    height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-10 : 750,  // 600,
     minHeight: 650,
-    maxHeight: 830,
+    maxHeight: 750,
 
     border:false,
     frame: false,
     layout: {
         type  : 'border',
-        padding: 5
+        padding: 0
     },
 
     productselected:false,
@@ -72,10 +74,12 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
         Ext.apply(cfg, {
             id: me.mapviewid+'-productnavigator',
             title: '<div class="panel-title-style-16">' + esapp.Utils.getTranslation('productnavigator') + '</div>',
-            height: Ext.getBody().getViewSize().height-80,
+            height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-10 : 750,  // 600,
             border:false,
             frame: false,
             bodyBorder: false,
+            x: 200,
+            y: 60,
 
             tools: [
             {
@@ -93,7 +97,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 xtype : 'grid',
                 reference: 'productsGrid',
                 region: 'center',
-                width: 465,
+                maxWidth: 380,
                 //store: 'ProductNavigatorStore',
                 bind: '{products}',
                 session:true,
@@ -105,7 +109,8 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     markDirty: false,
                     resizable:false,
                     disableSelection: false,
-                    trackOver:true
+                    trackOver:true,
+                    reserveScrollbar: true
                 },
 
                 selModel : {
@@ -159,7 +164,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     menuDisabled:true,
                     text: '',
                     xtype: 'templatecolumn',
-                    width: 455,
+                    width: 325,
                     tpl:  new Ext.XTemplate(
                         '<b>{prod_descriptive_name}</b>' +
                         '<tpl if="version != \'undefined\'">',
@@ -195,7 +200,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 header: {
                     titlePosition: 0,
                     titleAlign: 'left',
-                    height: 33
+                    height: 25
                     //,style: {backgroundColor:'#ADD2ED'}
                 },
                 autoWidth:true,
@@ -208,7 +213,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 border: false,
                 bodyBorder: false,
                 defaults: {
-                    margin: {top: 10, right: 10, bottom: 20, left: 10},
+                    margin: {top: 5, right: 10, bottom: 5, left: 10},
                     layout: {
                         type: 'vbox'
                     }
@@ -216,17 +221,17 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 listeners: {
                     expand: function(){
                         //this.up().down('grid').setWidth(460)
-                        this.setWidth(550);
-                        me.center();
-                        this.up().setPosition(200,10);
-                        this.up().setWidth(1060);
+                        this.setWidth(525);
+                        // me.center();
+                        // this.up().setPosition(200,10);
+                        this.up().setWidth(510+415);   // 1060
                     },
                     collapse: function(){
                         //this.up().down('grid').setWidth(485)
                         this.setWidth(5);
-                        me.center();
+                        // me.center();
                         //this.up().setPosition(670,140);
-                        this.up().setWidth(565);
+                        this.up().setWidth(415);    // 565
                     }
                 },
                 bbar: Ext.create('Ext.toolbar.Toolbar', {
@@ -255,7 +260,8 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                                                                                      me.selectedproduct.legendHTML,
                                                                                      me.selectedproduct.legendHTMLVertical,
                                                                                      me.selectedproduct.productname,
-                                                                                     me.selectedproduct.date_format
+                                                                                     me.selectedproduct.date_format,
+                                                                                     me.selectedproduct.frequency_id
                             );
                             me.close();
                         }
@@ -272,7 +278,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     // autoRender: true,
                     // autoShow:true,
                     //flex: 1,
-                    height: 220,
+                    maxHeight: 200,
                     //width: 530,
                     collapsible: false,
                     layout: 'fit',
@@ -291,7 +297,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                             '<div class="x-clear"></div>'
                         ),
                         multiSelect: false,
-                        height: 250,
+                        height: 200,
                         width: 140,
                         trackOver: true,
                         cls:'mapsets',
@@ -311,7 +317,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     // autoShow:true,
                     //flex: 1,
                     //width: 530,
-                    maxHeight: 250,
+                    maxHeight: 225,
                     // autoScroll: false,
                     scrollable: 'vertical',
                     reserveScrollbar: true,
@@ -362,16 +368,17 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
 
                     listeners: {
                         rowclick: 'mapsetDataSetGridRowClick'
-                        ,scrolltoselection: function (events) {
-                            var record = this.getSelection();
-                            if (record.length > 0)
-                                this.ensureVisible(record[0], {focus: true});
-                        }
+                        // ,scrolltoselection: function (events) {
+                        //     var record = this.getSelection();
+                        //     if (record.length > 0)
+                        //         this.ensureVisible(record[0], {focus: true});
+                        // }
                     },
                     defaults: {
                         sortable: true,
                         hideable: false,
-                        variableRowHeight: false
+                        variableRowHeight: false,
+                        menuDisabled: true
                     },
                     columns: [{
                         text: '<div class="grid-header-style">'+esapp.Utils.getTranslation('datasets')+'</div>',
@@ -381,8 +388,8 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                             '<tpl if="version != \'undefined\'">',
                             '<b class="smalltext"> - {version} </b>',
                             '</tpl>',
-                            '</br>' +
-                            '<span class="smalltext"><b style="color:darkgrey">{subproductcode}</b>' +
+                            // '</br>' +
+                            '<span class="smalltext"><b style="color:darkgrey"> - {subproductcode}</b>' +
                             // '</span>' +
                             // '<span>&nbsp;&nbsp;(display_index: <b style="color:black">{display_index}</b>)' +
                             '</span>'
@@ -400,7 +407,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         variableRowHeight:true,
                         items: [{
                             getClass: function(v, meta, rec) {
-                                return 'info';
+                                return 'info x-action-col-cell-18';
                             },
                             getTip: function(v, meta, rec) {
                                 return rec.get('description');
@@ -419,7 +426,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     //flex: 1,
                     //width: 530,
                     //height: 150,
-                    maxHeight: 170,
+                    maxHeight: 210,
                     scrollable: 'vertical',
                     hidden: true,
                     bind: '{colorschemes}',
@@ -476,6 +483,22 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     focusOnToFront: false,
                     focusable: false,
 
+                    tbar: {
+                        padding: 4,
+                        defaults: {
+                            scale: 'small',
+                            hidden: false
+                        },
+                        items: ['->',{
+                            xtype: 'button',
+                            text: esapp.Utils.getTranslation('assign_legend'),    // 'Assign legend to product',
+                            name: 'assign_legend',
+                            iconCls: 'fa fa-plus-circle fa-1x',
+                            style: {color: 'green'},
+                            handler: 'assignLegend'
+                        }]
+                    },
+
                     defaults: {
                         sortable: false,
                         hideable: false,
@@ -494,16 +517,70 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                             handler: 'onRadioColumnAction'
                         }]
                     },{
-                        xtype:'templatecolumn',
-                        text: '<div class="grid-header-style">'+esapp.Utils.getTranslation('colorschemes')+'</div>',
-                        width: 475,
+                        xtype: 'templatecolumn',
+                        text: '<div class="grid-header-style">' + esapp.Utils.getTranslation('colorschemes') + '</div>',
+                        width: 420,
                         sortable: false,
                         menuDisabled: true,
                         shrinkWrap: 0,
                         tpl: new Ext.XTemplate(
-                                '{colorschemeHTML}' +
-                                '<b>{colorbar}</b>'
+                            '{colorschemeHTML}' +
+                            '<b>{colorbar}</b>'
                         )
+                    },{
+                        xtype: 'actioncolumn',
+                        // header: esapp.Utils.getTranslation('actions'),   // 'Actions',
+                        menuDisabled: true,
+                        sortable: true,
+                        variableRowHeight : true,
+                        draggable:false,
+                        groupable:false,
+                        hideable: false,
+                        width: 35,
+                        align: 'center',
+                        stopSelection: false,
+
+                        items: [{
+                            // scope: me,
+                            width:'35',
+                            disabled: false,
+                            getClass: function (v, meta, rec) {
+                                return 'delete16';
+                            },
+                            getTip: function (v, meta, rec) {
+                                // console.info(me);
+                                return esapp.Utils.getTranslation('unassignlegendfromdataset') + ': <BR>' +
+                                       me.selectedproduct['productname'] + ' ' +
+                                       me.selectedproduct['productversion'] + ' - ' +
+                                       me.selectedproduct['subproductcode'];
+                            },
+                            handler: 'unassignLegend'
+                        }]
+                    // },{
+                    //     xtype: 'actioncolumn',
+                    //     // header: esapp.Utils.getTranslation('actions'),   // 'Actions',
+                    //     menuDisabled: true,
+                    //     sortable: true,
+                    //     variableRowHeight : true,
+                    //     draggable:false,
+                    //     groupable:false,
+                    //     hideable: false,
+                    //     width: 35,
+                    //     align: 'center',
+                    //     stopSelection: false,
+                    //
+                    //     items: [{
+                    //         // scope: me,
+                    //         width:'35',
+                    //         disabled: false,
+                    //         getClass: function (v, meta, rec) {
+                    //             return 'edit';
+                    //         },
+                    //         getTip: function (v, meta, rec) {
+                    //             return esapp.Utils.getTranslation('editlegendproperties') + ' ' + rec.get('legend_descriptive_name');
+                    //         },
+                    //         handler: 'editLegend'
+                    //     }]
                     }]
                 }]
             }]

@@ -6,13 +6,14 @@ Ext.define('esapp.view.analysis.layerAdminController', {
         Ext.getCmp('analysismain').lookupReference('analysismain_layersbtn').enable();
     }
 
-    ,onShow: function(win, ev) {
-        this.loadLayersStore();
-    }
+    // ,onShow: function(win, ev) {
+        // this.loadLayersStore();
+    // }
 
     ,loadLayersStore: function(win, ev) {
         var me = this.getView();
         var layersgridstore  = Ext.data.StoreManager.lookup('LayersStore');
+        // var layersgridstore  = me.lookupReference('layersGrid').getStore('layers');
         //console.info(me.view);
         if (layersgridstore.isStore) {
             layersgridstore.load({
@@ -22,8 +23,8 @@ Ext.define('esapp.view.analysis.layerAdminController', {
                 }
             });
         }
-        me.lookupReference('layersGrid').updateLayout();
-        me.updateLayout();
+        // me.lookupReference('layersGrid').updateLayout();
+        // me.updateLayout();
     }
 
     ,addLayer: function(){

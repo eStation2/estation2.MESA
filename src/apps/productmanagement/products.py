@@ -269,7 +269,8 @@ class Product(object):
                 [product_code, sub_product_code, version, str_date, my_mapset] = functions.get_all_from_path_full(filename)
 
                 if my_mapset == orig_mapset:
-                    final_filenames.append(filename)
+                    if os.path.isfile(filename):
+                        final_filenames.append(filename)
                 else:
                     if tmp_dir is None:
                         tmp_dir = tempfile.mkdtemp(prefix=__name__, suffix='',dir=es_constants.base_tmp_dir)
@@ -282,18 +283,19 @@ class Product(object):
                             final_filenames.append(new_filename)
 
         # Create .tar
-        tar = tarfile.open(filetar, "w|gz" if tgz else "w|",dereference=True)
-        for filename in final_filenames:
-            name = os.path.basename(filename)
-            subdir = functions.get_subdir_from_path_full(filename)
-            if os.path.isfile(filename):
-                tar.add(filename, arcname=subdir+name)
-                logger.info('Added file: %s', filename)
-                result['n_file_copied']+=1
-            else:
-                result['n_file_missing']+=1
-                result['status']=1
-        tar.close()
+        if len(final_filenames) > 0:
+            tar = tarfile.open(filetar, "w|gz" if tgz else "w|",dereference=True)
+            for filename in final_filenames:
+                name = os.path.basename(filename)
+                subdir = functions.get_subdir_from_path_full(filename)
+                if os.path.isfile(filename):
+                    tar.add(filename, arcname=subdir+name)
+                    logger.info('Added file: %s', filename)
+                    result['n_file_copied']+=1
+                else:
+                    result['n_file_missing']+=1
+                    result['status']=1
+            tar.close()
 
         # Remove tmp_dir
         if tmp_dir is not None:

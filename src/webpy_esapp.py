@@ -20,6 +20,7 @@ import glob
 import time
 import calendar
 import numpy as NP
+import webpy_esapp_helpers
 
 from config import es_constants
 from database import querydb
@@ -38,6 +39,7 @@ from multiprocessing import (Process, Queue)
 
 from lib.python import functions
 from lib.python import es_logging as log
+
 
 logger = log.my_logger(__name__)
 
@@ -144,6 +146,19 @@ urls = (
     "/layers/import", "ImportLayer",
     "/layers/serverlayerfiles", "GetServerLayerFileList",
     "/layers/savedrawnlayer", "SaveDrawnVectorLayer",
+    "/layers/downloadvectorlayer", "DownloadVectorLayer",
+
+    "/legends", "GetLegends",
+    "/legends/savelegend", "SaveLegend",
+    "/legends/update", "UpdateLegend",
+    "/legends/delete", "DeleteLegend",
+    "/legends/copylegend", "copyLegend",
+    "/legends/import", "ImportLegend",
+    "/legends/export", "ExportLegend",
+    "/legends/legendclasses", "GetLegendClasses",
+    "/legends/assignlegends", "AssignLegends",
+    "/legends/unassignlegend", "UnassignLegend",
+    "/legends/assigneddatasets", "GetAssignedDatasets",
 
     "/getmapsets", "GetMapsets",
     "/addingestmapset", "AddIngestMapset",
@@ -186,6 +201,88 @@ class EsApp:
         #     return render.index_fr()
         # else:
         #     return render.index()
+
+
+class GetAssignedDatasets:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        params = web.input()
+        if hasattr(params, "legendid") and params['legendid'] != '':
+            assigneddatasets_json = webpy_esapp_helpers.GetAssignedDatasets(params['legendid'])
+        else:
+            assigneddatasets_json = '{"success":false, "error":"No Legend ID passed!"}'
+
+        return assigneddatasets_json
+
+
+class UnassignLegend:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        params = web.input()
+        return webpy_esapp_helpers.UnassignLegend(params)
+
+
+class AssignLegends:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        params = web.input()
+        return webpy_esapp_helpers.AssignLegends(params)
+
+
+class copyLegend:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        params = web.input()
+        return webpy_esapp_helpers.copyLegend(params)
+
+
+class DeleteLegend:
+    def __init__(self):
+        self.lang = "eng"
+
+    def DELETE(self):
+        params = json.loads(web.data())
+        return webpy_esapp_helpers.DeleteLegend(params)
+
+
+class SaveLegend:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        params = web.input()
+        return webpy_esapp_helpers.SaveLegend(params)
+
+
+class GetLegends:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        getparams = web.input()
+        return webpy_esapp_helpers.GetLegends()
+
+
+class GetLegendClasses:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        getparams = web.input()
+        if hasattr(getparams, "legendid") and getparams['legendid'] != '':
+            legendclasses_json = webpy_esapp_helpers.GetLegendClasses(getparams['legendid'])
+        else:
+            legendclasses_json = '{"success":false, "error":"No Legend ID passed!"}'
+
+        return legendclasses_json
 
 
 class GetInstallationType:
@@ -239,8 +336,12 @@ class GetMapTemplates:
                         'showobjects': row_dict['showobjects'],
                         'scalelineobjposition': row_dict['scalelineobjposition'],
                         'vectorlayers': row_dict['vectorlayers'],
+                        'outmask': row_dict['outmask'],
                         'outmaskfeature': row_dict['outmaskfeature'],
-                        'auto_open': row_dict['auto_open']
+                        'auto_open': row_dict['auto_open'],
+                        'zoomextent': row_dict['zoomextent'],
+                        'mapsize': row_dict['mapsize'],
+                        'mapcenter': row_dict['mapcenter']
                     }
 
                     maptemplate_dict_all.append(mapTemplate)
@@ -299,7 +400,7 @@ class SaveMapTemplate:
         getparams = web.input()
         # getparams = json.loads(web.data())  # get PUT data
 
-        createstatus = '{"success":"false", "message":"An error occured while saving the Map Template!"}'
+        createstatus = '{"success":false, "message":"An error occured while saving the Map Template!"}'
 
         if 'userid' in getparams and 'templatename' in getparams:
             legendid = getparams['legendid']
@@ -328,20 +429,26 @@ class SaveMapTemplate:
                 'showobjects': getparams['showObjects'],
                 'scalelineobjposition': getparams['scalelineObjPosition'],
                 'vectorlayers': getparams['vectorLayers'],
+                'outmask': getparams['outmask'],
                 'outmaskfeature': getparams['outmaskFeature'],
-                'auto_open': getparams['auto_open']
+                'auto_open': getparams['auto_open'],
+                'zoomextent': getparams['zoomextent'],
+                'mapsize': getparams['mapsize'],
+                'mapcenter': getparams['mapcenter']
             }
 
             # print getparams
             if getparams['newtemplate'] == 'true':
                 if self.crud_db.create('map_templates', mapTemplate):
-                    createstatus = '{"success":"true", "message":"Map Template created!"}'
+                    createstatus = '{"success":true, "message":"Map Template created!"}'
+                else:
+                    createstatus = '{"success":false, "message":"Error saving the Map Template! Name already exists!"}'
             else:
                 if self.crud_db.update('map_templates', mapTemplate):
-                    createstatus = '{"success":"true", "message":"Map Template updated!"}'
+                    createstatus = '{"success":true, "message":"Map Template updated!"}'
 
         else:
-            createstatus = '{"success":"false", "message":"No Map Template data given!"}'
+            createstatus = '{"success":false, "message":"No Map Template data given!"}'
 
         return createstatus
 
@@ -601,6 +708,7 @@ class GetChartProperties:
                                   'yaxe1_font_size': row_dict['yaxe1_font_size'],
                                   'yaxe2_font_size': row_dict['yaxe2_font_size'],
                                   'yaxe3_font_size': row_dict['yaxe3_font_size'],
+                                  'yaxe4_font_size': row_dict['yaxe4_font_size'],
                                   'legend_font_size': row_dict['legend_font_size'],
                                   'legend_font_color': row_dict['legend_font_color'],
                                   'xaxe_font_size': row_dict['xaxe_font_size'],
@@ -1189,6 +1297,49 @@ class GetInternetSources:
         if hasattr(internetsources, "__len__") and internetsources.__len__() > 0:
             for row in internetsources:
                 row_dict = functions.row2dict(row)
+
+                startdate = None
+                if row_dict['start_date'] != '':
+                    try:
+                        startdate = int(row_dict['start_date'])
+                    except ValueError:
+                        startdate = None
+
+                enddate = None
+                if row_dict['end_date'] != '':
+                    try:
+                        enddate = int(row_dict['end_date'])
+                    except ValueError:
+                        enddate = None
+
+                prod_id_position = None
+                if row_dict['prod_id_position'] != '':
+                    try:
+                        prod_id_position = int(row_dict['prod_id_position'])
+                    except ValueError:
+                        prod_id_position = None
+
+                prod_id_length = None
+                if row_dict['prod_id_length'] != '':
+                    try:
+                        prod_id_length = int(row_dict['prod_id_length'])
+                    except ValueError:
+                        prod_id_length = None
+
+                area_length = None
+                if row_dict['area_length'] != '':
+                    try:
+                        area_length = int(row_dict['area_length'])
+                    except ValueError:
+                        area_length = None
+
+                release_length = None
+                if row_dict['release_length'] != '':
+                    try:
+                        release_length = int(row_dict['release_length'])
+                    except ValueError:
+                        release_length = None
+
                 internetsource = {'internet_id': row_dict['internet_id'],
                                   'defined_by': row_dict['defined_by'],
                                   'descriptive_name': row_dict['descriptive_name'],
@@ -1204,8 +1355,8 @@ class GetInternetSources:
                                   'status': row_dict['status'],
                                   'pull_frequency': row_dict['pull_frequency'],
                                   'frequency_id': row_dict['frequency_id'],
-                                  'start_date': row_dict['start_date'],
-                                  'end_date': row_dict['end_date'],
+                                  'start_date': startdate,
+                                  'end_date': enddate,
                                   'datasource_descr_id': row_dict['datasource_descr_id'],
                                   'format_type': row_dict['format_type'],
                                   'file_extension': row_dict['file_extension'],
@@ -1213,15 +1364,15 @@ class GetInternetSources:
                                   'date_format': row_dict['date_format'],
                                   'date_position': row_dict['date_position'],
                                   'product_identifier': row_dict['product_identifier'],
-                                  'prod_id_position': row_dict['prod_id_position'],
-                                  'prod_id_length': row_dict['prod_id_length'],
+                                  'prod_id_position': prod_id_position,
+                                  'prod_id_length': prod_id_length,
                                   'area_type': row_dict['area_type'],
                                   'area_position': row_dict['area_position'],
-                                  'area_length': row_dict['area_length'],
+                                  'area_length': area_length,
                                   'preproc_type': row_dict['preproc_type'],
                                   'product_release': row_dict['product_release'],
                                   'release_position': row_dict['release_position'],
-                                  'release_length': row_dict['release_length'],
+                                  'release_length': release_length,
                                   'native_mapset': row_dict['native_mapset']}
 
                 internetsources_dict_all.append(internetsource)
@@ -1253,32 +1404,46 @@ class UpdateInternetSource:
         if 'internetsources' in getparams:
 
             startdate = None
-            if isinstance(getparams['internetsources']['start_date'],int):
-                startdate = getparams['internetsources']['start_date']
-            elif isinstance(getparams['internetsources']['start_date'],str) and getparams['internetsources']['start_date'].isdigit():
-                startdate = int(getparams['internetsources']['start_date'])
+            if getparams['internetsources']['start_date'] != None:
+                try:
+                    startdate = int(getparams['internetsources']['start_date'])
+                except ValueError:
+                    startdate = None
 
             enddate = None
-            if isinstance(getparams['internetsources']['end_date'],int):
-                enddate = getparams['internetsources']['end_date']
-            elif isinstance(getparams['internetsources']['end_date'],str) and getparams['internetsources']['end_date'].isdigit():
-                enddate = int(getparams['internetsources']['end_date'])
+            if getparams['internetsources']['end_date'] != None:
+                try:
+                    enddate = int(getparams['internetsources']['end_date'])
+                except ValueError:
+                    enddate = None
 
             prod_id_position = None
-            if getparams['internetsources']['prod_id_position'].isdigit():
-                prod_id_position = int(getparams['internetsources']['prod_id_position'])
+            if getparams['internetsources']['prod_id_position'] != None:
+                try:
+                    prod_id_position = int(getparams['internetsources']['prod_id_position'])
+                except ValueError:
+                    prod_id_position = None
 
             prod_id_length = None
-            if getparams['internetsources']['prod_id_length'].isdigit():
-                prod_id_length = int(getparams['internetsources']['prod_id_length'])
+            if getparams['internetsources']['prod_id_length'] != None:
+                try:
+                    prod_id_length = int(getparams['internetsources']['prod_id_length'])
+                except ValueError:
+                    prod_id_length = None
 
             area_length = None
-            if getparams['internetsources']['area_length'].isdigit():
-                area_length = int(getparams['internetsources']['area_length'])
+            if getparams['internetsources']['area_length'] != None:
+                try:
+                    area_length = int(getparams['internetsources']['area_length'])
+                except ValueError:
+                    area_length = None
 
             release_length = None
-            if getparams['internetsources']['release_length'].isdigit():
-                release_length = int(getparams['internetsources']['release_length'])
+            if getparams['internetsources']['release_length'] != None:
+                try:
+                    release_length = int(getparams['internetsources']['release_length'])
+                except ValueError:
+                    release_length = None
 
             internetsourceinfo = {'internet_id': getparams['internetsources']['internet_id'],
                                   'defined_by': getparams['internetsources']['defined_by'],
@@ -1929,7 +2094,7 @@ class GetTimeseries:
                 aggregate = { 'aggregation_type': ts_drawprops.aggregation_type,
                               'aggregation_min': ts_drawprops.aggregation_min,
                               'aggregation_max': ts_drawprops.aggregation_max}
-                tscolor = ts_drawprops.color
+                tscolor = ts_drawprops.color.replace("  ", " ")
 
             nodata = None
             subproductinfo = querydb.get_subproduct(productcode, version, subproductcode)
@@ -2205,7 +2370,7 @@ class GetTimeseries:
                 aggregate = { 'aggregation_type': ts_drawprops.aggregation_type,
                               'aggregation_min': ts_drawprops.aggregation_min,
                               'aggregation_max': ts_drawprops.aggregation_max}
-                tscolor = ts_drawprops.color
+                tscolor = ts_drawprops.color.replace("  ", " ")
 
             # mapset_info = querydb.get_mapset(mapsetcode=mapsetcode)
             # product_info = querydb.get_product_out_info(productcode=productcode,
@@ -2292,7 +2457,7 @@ class GetTimeseries:
                 for ts_drawprops in timeseries_drawproperties:
                     ts = {'name': ts_drawprops.tsname_in_legend,
                           'type': 'column', # ts_drawprops.charttype,
-                          'color': ts_drawprops.color,
+                          'color': ts_drawprops.color.replace("  ", " "),
                           'yAxis': ts_drawprops.yaxes_id,
                           'data': data,
                           'visible': True
@@ -2320,7 +2485,7 @@ class GetTimeseries:
             min = ''    # yaxe.min
             max = ''    # yaxe.max
 
-            yaxe = {'id': yaxe.yaxes_id, 'title': yaxe.title, 'title_color': yaxe.title_color, 'unit': yaxe.unit, 'opposite': opposite,
+            yaxe = {'id': yaxe.yaxes_id, 'title': yaxe.title, 'title_color': yaxe.title_color.replace("  ", " "), 'unit': yaxe.unit, 'opposite': opposite,
                     'min': min, 'max': max, 'aggregation_type': yaxe.aggregation_type, 'aggregation_min': yaxe.aggregation_min, 'aggregation_max': yaxe.aggregation_max}
             yaxes.append(yaxe)
 
@@ -2475,11 +2640,12 @@ class GetTimeseries:
                       'reference': timeserie['reference']
                       }
                 for ts_drawprops in timeseries_drawproperties:
+                    # print ts_drawprops.color
                     ts = {'name': ts_drawprops.tsname_in_legend,
                           'type': ts_drawprops.charttype,
                           'dashStyle': ts_drawprops.linestyle,
                           'lineWidth': ts_drawprops.linewidth,
-                          'color': ts_drawprops.color,
+                          'color': ts_drawprops.color.replace("  ", " "),
                           # 'xAxis': str(year),
                           'yAxis': ts_drawprops.yaxes_id,
                           'data': data,
@@ -2510,7 +2676,14 @@ class GetTimeseries:
                         rgb = tuple(int(h[i:i+2], 16) for i in (0, 2 ,4))
                         rgb = list(rgb)
                     else:
-                        rgb = ts_drawprops.color.split(' ')
+                        # print ts_drawprops.color
+                        # rgb = ts_drawprops.color.replace("  ", " ").split(' ')
+                        if (functions.isValidRGB(ts_drawprops.color.replace("  ", " "))):
+                            rgb = ts_drawprops.color.replace("  ", " ").split(' ')
+                        else:
+                            # RGB value stored in the database is not correct so define as default value BLACK.
+                            rgb = "0 0 0".split(' ')
+                    # print rgb
                     rgb = map(int,rgb)
                     rgb[-1] = rgb[-1]+colorAdd
                     rgb[-2] = rgb[-2]+colorAdd
@@ -2605,11 +2778,12 @@ class GetTimeseries:
                       'reference': timeserie['reference']
                       }
                 for ts_drawprops in timeseries_drawproperties:
+                    # print ts_drawprops.color
                     ts = {'name': ts_drawprops.tsname_in_legend,
                           'type': ts_drawprops.charttype,
                           'dashStyle': ts_drawprops.linestyle,
                           'lineWidth': ts_drawprops.linewidth,
-                          'color': ts_drawprops.color,
+                          'color': ts_drawprops.color.replace("  ", " "),
                           'yAxis': ts_drawprops.yaxes_id,
                           'data': data,
                           'cumulative': cumulative,     # timeserie['cumulative'],
@@ -2642,7 +2816,7 @@ class GetTimeseries:
             else:
                 min = yaxe.min
                 max = yaxe.max
-            yaxe = {'id': yaxe.yaxes_id, 'title': yaxe.title, 'title_color': yaxe.title_color, 'unit': yaxe.unit, 'opposite': opposite,
+            yaxe = {'id': yaxe.yaxes_id, 'title': yaxe.title, 'title_color': yaxe.title_color.replace("  ", " "), 'unit': yaxe.unit, 'opposite': opposite,
                     'min': min, 'max': max, 'aggregation_type': yaxe.aggregation_type, 'aggregation_min': yaxe.aggregation_min, 'aggregation_max': yaxe.aggregation_max}
             yaxes.append(yaxe)
 
@@ -2671,164 +2845,184 @@ class TimeseriesProducts:
         self.lang = "eng"
 
     def GET(self):
-        import copy
-        # import time
-        # t0 = time.time()
-        # print 'START: ' + str(t0)
+        getparams = web.input()
+        forse = False
+        if 'forse' in getparams:
+            forse = getparams.forse
+        return webpy_esapp_helpers.getTimeseriesProducts(forse)
 
-        db_products = querydb.get_timeseries_products()
-        if hasattr(db_products, "__len__") and db_products.__len__() > 0:
-            products_dict_all = []
-            for row in db_products:
-                prod_dict = {}
-                prod_record = functions.row2dict(row)
-                productcode = prod_record['productcode']
-                subproductcode = prod_record['subproductcode']
-                version = prod_record['version']
+        # timeseriesproducts_file = es_constants.base_tmp_dir + os.path.sep + 'timeseries_products.json'
+        #
+        # if os.path.isfile(timeseriesproducts_file):
+        #     with open(timeseriesproducts_file) as text_file:
+        #         timeseriesproducts_json = text_file.read()
+        # else:
+        #     timeseriesproducts_json = webpy_esapp_helpers.TimeseriesProducts()
+        #     with open(timeseriesproducts_file, "w") as text_file:
+        #         text_file.write(timeseriesproducts_json)
+        #
+        # return timeseriesproducts_json
 
-                prod_dict['category_id'] = prod_record['category_id']
-                prod_dict['cat_descr_name'] = prod_record['cat_descr_name']
-                prod_dict['order_index'] = prod_record['order_index']
-                prod_dict['display_index'] = prod_record['display_index']
-                prod_dict['productid'] = prod_record['productid']
-                prod_dict['productcode'] = prod_record['productcode']
-                prod_dict['version'] = prod_record['version']
-                prod_dict['subproductcode'] = prod_record['subproductcode']
-                # prod_dict['mapsetcode'] = ""
-                # prod_dict['mapset_name'] = ""
-                prod_dict['group_product_descriptive_name'] = prod_record['group_product_descriptive_name']
-                prod_dict['product_descriptive_name'] = prod_record['descriptive_name']
-                prod_dict['product_description'] = prod_record['description']
-                prod_dict['frequency_id'] = prod_record['frequency_id']
-                prod_dict['date_format'] = prod_record['date_format']
-                prod_dict['timeseries_role'] = prod_record['timeseries_role']
-                prod_dict['selected'] = False
-                prod_dict['cumulative'] = False
-                prod_dict['difference'] = False
-                prod_dict['reference'] = False
-                # prod_dict['years'] = []
-
-                # does the product have mapsets?
-                # t1 = time.time()
-                # print 'before calling Product(): ' + str(t1)
-                p = Product(product_code=productcode, version=version)
-                # t2 = time.time()
-                # print 'after calling Product(): ' + str(t2-t1)
-
-                all_prod_mapsets = p.mapsets
-                if hasattr(all_prod_mapsets, "__len__") and all_prod_mapsets.__len__() > 0:
-                    for mapset in all_prod_mapsets:
-                        mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
-                        if mapset_info != []:
-                            mapset_record = functions.row2dict(mapset_info)
-
-                            prod_dict['productmapsetid'] = prod_record['productid'] + '_' + mapset_record['mapsetcode']
-                            prod_dict['mapsetcode'] = mapset_record['mapsetcode']
-                            prod_dict['mapset_name'] = mapset_record['descriptive_name']
-
-                            # t3 = time.time()
-                            # print 'before getting dataset info: ' + str(t3)
-
-                            dataset = p.get_dataset(mapset=mapset, sub_product_code=prod_dict['subproductcode'])
-                            dataset.get_filenames()
-                            all_present_product_dates = dataset.get_dates()
-
-                            # t4 = time.time()
-                            # tot_get_dataset = t4-t3
-                            # print 'after getting dataset info: ' + str(tot_get_dataset)
-
-
-                            # t5 = time.time()
-                            # print 'before getting years: ' + str(t5)
-
-                            distinctyears = []
-                            for product_date in all_present_product_dates:
-                                if product_date.year not in distinctyears:
-                                    distinctyears.append(product_date.year)
-                            prod_dict['years'] = distinctyears
-
-                            if prod_dict['years'].__len__() > 0:
-                                tmp_prod_dict = copy.deepcopy(prod_dict)
-
-                                products_dict_all.append(tmp_prod_dict)
-                                tmp_prod_dict = []
-
-                            # t6 = time.time()
-                            # total = t6-t5
-                            # print 'after getting years: ' + str(total)
-
-                            timeseries_mapset_datasets = querydb.get_timeseries_subproducts(productcode=productcode,
-                                                                                            version=version,
-                                                                                            subproductcode=subproductcode)
-                            # t7 = time.time()
-                            # print 'before getting subproduct info: ' + str(t7)
-
-                            for subproduct in timeseries_mapset_datasets:
-                                if subproduct is not None:
-
-                                    dataset_record = functions.row2dict(subproduct)
-                                    dataset = p.get_dataset(mapset=mapset, sub_product_code=dataset_record['subproductcode'])
-                                    dataset.get_filenames()
-                                    all_present_product_dates = dataset.get_dates()
-
-                                    distinctyears = []
-                                    for product_date in all_present_product_dates:
-                                        if product_date.year not in distinctyears:
-                                            distinctyears.append(product_date.year)
-
-                                    dataset_dict = {}
-                                    dataset_dict['category_id'] = prod_record['category_id']
-                                    dataset_dict['cat_descr_name'] = prod_record['cat_descr_name']
-                                    dataset_dict['order_index'] = prod_record['order_index']
-                                    dataset_dict['productid'] = dataset_record['productid']
-                                    dataset_dict['productcode'] = dataset_record['productcode']
-                                    dataset_dict['version'] = dataset_record['version']
-                                    dataset_dict['subproductcode'] = dataset_record['subproductcode']
-                                    dataset_dict['productmapsetid'] = prod_dict['productmapsetid']
-                                    dataset_dict['display_index'] = dataset_record['display_index']
-                                    dataset_dict['mapsetcode'] = mapset_record['mapsetcode']
-                                    dataset_dict['mapset_name'] = mapset_record['descriptive_name']
-                                    dataset_dict['group_product_descriptive_name'] = prod_record['group_product_descriptive_name']
-                                    dataset_dict['product_descriptive_name'] = dataset_record['descriptive_name']
-                                    dataset_dict['product_description'] = dataset_record['description']
-                                    dataset_dict['frequency_id'] = dataset_record['frequency_id']
-                                    dataset_dict['date_format'] = dataset_record['date_format']
-                                    dataset_dict['timeseries_role'] = dataset_record['timeseries_role']
-                                    dataset_dict['years'] = distinctyears
-                                    dataset_dict['selected'] = False
-                                    dataset_dict['cumulative'] = False
-                                    dataset_dict['difference'] = False
-                                    dataset_dict['reference'] = False
-
-                                    if dataset_dict['years'].__len__() > 0:
-                                        # tmp_prod_dict = prod_dict.copy()
-                                        tmp_prod_dict = copy.deepcopy(dataset_dict)
-
-                                        products_dict_all.append(tmp_prod_dict)
-                                        tmp_prod_dict = []
-
-                            # t8 = time.time()
-                            # totals_subproduct = t8-t7
-                            # print 'after getting subproduct info: ' + str(totals_subproduct)
-
-            prod_json = json.dumps(products_dict_all,
-                                   ensure_ascii=False,
-                                   sort_keys=True,
-                                   indent=4,
-                                   separators=(', ', ': '))
-
-            timeseriesproducts_json = '{"success":"true", "total":'\
-                                  + str(db_products.__len__())\
-                                  + ',"products":'+prod_json+'}'
-
-        else:
-            timeseriesproducts_json = '{"success":false, "error":"No data sets defined!"}'
-
-        # t9 = time.time()
-        # total = t9-t0
-        # print 'Total time: ' + str(total)
-
-        return timeseriesproducts_json
+        # import copy
+        # # import time
+        # # t0 = time.time()
+        # # print 'START: ' + str(t0)
+        #
+        # db_products = querydb.get_timeseries_products()
+        # if hasattr(db_products, "__len__") and db_products.__len__() > 0:
+        #     products_dict_all = []
+        #     for row in db_products:
+        #         prod_dict = {}
+        #         prod_record = functions.row2dict(row)
+        #         productcode = prod_record['productcode']
+        #         subproductcode = prod_record['subproductcode']
+        #         version = prod_record['version']
+        #
+        #         prod_dict['category_id'] = prod_record['category_id']
+        #         prod_dict['cat_descr_name'] = prod_record['cat_descr_name']
+        #         prod_dict['order_index'] = prod_record['order_index']
+        #         prod_dict['display_index'] = prod_record['display_index']
+        #         prod_dict['productid'] = prod_record['productid']
+        #         prod_dict['productcode'] = prod_record['productcode']
+        #         prod_dict['version'] = prod_record['version']
+        #         prod_dict['subproductcode'] = prod_record['subproductcode']
+        #         # prod_dict['mapsetcode'] = ""
+        #         # prod_dict['mapset_name'] = ""
+        #         prod_dict['group_product_descriptive_name'] = prod_record['group_product_descriptive_name']
+        #         prod_dict['product_descriptive_name'] = prod_record['descriptive_name']
+        #         prod_dict['product_description'] = prod_record['description']
+        #         prod_dict['frequency_id'] = prod_record['frequency_id']
+        #         prod_dict['date_format'] = prod_record['date_format']
+        #         prod_dict['timeseries_role'] = prod_record['timeseries_role']
+        #         prod_dict['selected'] = False
+        #         prod_dict['cumulative'] = False
+        #         prod_dict['difference'] = False
+        #         prod_dict['reference'] = False
+        #         # prod_dict['years'] = []
+        #
+        #         # does the product have mapsets?
+        #         # t1 = time.time()
+        #         # print 'before calling Product(): ' + str(t1)
+        #         p = Product(product_code=productcode, version=version)
+        #         # t2 = time.time()
+        #         # print 'after calling Product(): ' + str(t2-t1)
+        #
+        #         all_prod_mapsets = p.mapsets
+        #         if hasattr(all_prod_mapsets, "__len__") and all_prod_mapsets.__len__() > 0:
+        #             for mapset in all_prod_mapsets:
+        #                 mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
+        #                 if mapset_info != []:
+        #                     mapset_record = functions.row2dict(mapset_info)
+        #
+        #                     prod_dict['productmapsetid'] = prod_record['productid'] + '_' + mapset_record['mapsetcode']
+        #                     prod_dict['mapsetcode'] = mapset_record['mapsetcode']
+        #                     prod_dict['mapset_name'] = mapset_record['descriptive_name']
+        #
+        #                     # t3 = time.time()
+        #                     # print 'before getting dataset info: ' + str(t3)
+        #
+        #                     dataset = p.get_dataset(mapset=mapset, sub_product_code=prod_dict['subproductcode'])
+        #                     # dataset.get_filenames()
+        #                     all_present_product_dates = dataset.get_dates()
+        #
+        #                     # t4 = time.time()
+        #                     # tot_get_dataset = t4-t3
+        #                     # print 'after getting dataset info: ' + str(tot_get_dataset)
+        #
+        #
+        #                     # t5 = time.time()
+        #                     # print 'before getting years: ' + str(t5)
+        #
+        #                     distinctyears = []
+        #                     for product_date in all_present_product_dates:
+        #                         if product_date.year not in distinctyears:
+        #                             distinctyears.append(product_date.year)
+        #                     prod_dict['years'] = distinctyears
+        #
+        #                     if prod_dict['years'].__len__() > 0:
+        #                         products_dict_all.append(prod_dict)
+        #                         # tmp_prod_dict = copy.deepcopy(prod_dict)
+        #                         #
+        #                         # products_dict_all.append(tmp_prod_dict)
+        #                         # tmp_prod_dict = []
+        #
+        #                     # t6 = time.time()
+        #                     # total = t6-t5
+        #                     # print 'after getting years: ' + str(total)
+        #
+        #                     timeseries_mapset_datasets = querydb.get_timeseries_subproducts(productcode=productcode,
+        #                                                                                     version=version,
+        #                                                                                     subproductcode=subproductcode)
+        #                     # t7 = time.time()
+        #                     # print 'before getting subproduct info: ' + str(t7)
+        #
+        #                     for subproduct in timeseries_mapset_datasets:
+        #                         if subproduct is not None:
+        #
+        #                             dataset_record = functions.row2dict(subproduct)
+        #                             dataset = p.get_dataset(mapset=mapset, sub_product_code=dataset_record['subproductcode'])
+        #                             # dataset.get_filenames()
+        #                             all_present_product_dates = dataset.get_dates()
+        #
+        #                             distinctyears = []
+        #                             for product_date in all_present_product_dates:
+        #                                 if product_date.year not in distinctyears:
+        #                                     distinctyears.append(product_date.year)
+        #
+        #                             dataset_dict = {}
+        #                             dataset_dict['category_id'] = prod_record['category_id']
+        #                             dataset_dict['cat_descr_name'] = prod_record['cat_descr_name']
+        #                             dataset_dict['order_index'] = prod_record['order_index']
+        #                             dataset_dict['productid'] = dataset_record['productid']
+        #                             dataset_dict['productcode'] = dataset_record['productcode']
+        #                             dataset_dict['version'] = dataset_record['version']
+        #                             dataset_dict['subproductcode'] = dataset_record['subproductcode']
+        #                             dataset_dict['productmapsetid'] = prod_dict['productmapsetid']
+        #                             dataset_dict['display_index'] = dataset_record['display_index']
+        #                             dataset_dict['mapsetcode'] = mapset_record['mapsetcode']
+        #                             dataset_dict['mapset_name'] = mapset_record['descriptive_name']
+        #                             dataset_dict['group_product_descriptive_name'] = prod_record['group_product_descriptive_name']
+        #                             dataset_dict['product_descriptive_name'] = dataset_record['descriptive_name']
+        #                             dataset_dict['product_description'] = dataset_record['description']
+        #                             dataset_dict['frequency_id'] = dataset_record['frequency_id']
+        #                             dataset_dict['date_format'] = dataset_record['date_format']
+        #                             dataset_dict['timeseries_role'] = dataset_record['timeseries_role']
+        #                             dataset_dict['years'] = distinctyears
+        #                             dataset_dict['selected'] = False
+        #                             dataset_dict['cumulative'] = False
+        #                             dataset_dict['difference'] = False
+        #                             dataset_dict['reference'] = False
+        #
+        #                             if dataset_dict['years'].__len__() > 0:
+        #                                 products_dict_all.append(dataset_dict)
+        #                                 # # tmp_prod_dict = prod_dict.copy()
+        #                                 # tmp_prod_dict = copy.deepcopy(dataset_dict)
+        #                                 #
+        #                                 # products_dict_all.append(tmp_prod_dict)
+        #                                 # tmp_prod_dict = []
+        #
+        #                     # t8 = time.time()
+        #                     # totals_subproduct = t8-t7
+        #                     # print 'after getting subproduct info: ' + str(totals_subproduct)
+        #
+        #     prod_json = json.dumps(products_dict_all,
+        #                            ensure_ascii=False,
+        #                            sort_keys=True,
+        #                            indent=4,
+        #                            separators=(', ', ': '))
+        #
+        #     timeseriesproducts_json = '{"success":"true", "total":'\
+        #                           + str(db_products.__len__())\
+        #                           + ',"products":'+prod_json+'}'
+        #
+        # else:
+        #     timeseriesproducts_json = '{"success":false, "error":"No data sets defined!"}'
+        #
+        # # t9 = time.time()
+        # # total = t9-t0
+        # # print 'Total time: ' + str(total)
+        #
+        # return timeseriesproducts_json
 
 
 class __TimeseriesProductsTree:
@@ -3090,63 +3284,65 @@ class GetTimeLine:
         # print timeline_json
         return timeline_json
 
+
 class GetAllColorSchemes:
     def __init__(self):
         self.lang = "eng"
 
     def GET(self):
         getparams = web.input()
+        return webpy_esapp_helpers.getAllColorSchemes()
 
-        all_legends = querydb.get_all_legends()
-
-        if hasattr(all_legends, "__len__") and all_legends.__len__() > 0:
-            legends_dict_all = []
-            for legend in all_legends:
-                # legend_dict = functions.row2dict(legend)
-                # legend_dict = legend.__dict__
-                legend_dict = {}
-                legend_id = legend['legend_id']
-                legend_name = legend['legend_name']
-                # legend_name = legend['colorbar']
-
-                legend_steps = querydb.get_legend_steps(legendid=legend_id)
-
-                colorschemeHTML = '<table cellspacing=0 cellpadding=0 width=100%><tr>'
-                for step in legend_steps:
-                    # convert step['color_rgb'] from RGB to html color
-                    color_rgb = step.color_rgb.split(' ')
-                    color_html = functions.rgb2html(color_rgb)
-                    r = color_rgb[0]
-                    g = color_rgb[1]
-                    b = color_rgb[2]
-                    color_html = 'rgb('+r+','+g+','+b+')'
-                    colorschemeHTML = colorschemeHTML + \
-                                      "<td height=15 style='padding:0; margin:0; background-color: " + \
-                                      color_html + ";'></td>"
-                colorschemeHTML = colorschemeHTML + '</tr></table>'
-
-                legend_dict['legend_id'] = legend_id
-                legend_dict['legend_name'] = legend_name
-                legend_dict['colorbar'] = legend['colorbar']
-                legend_dict['colorschemeHTML'] = colorschemeHTML
-                legendsHTML = generateLegendHTML.generateLegendHTML(legend_id)
-                # print legendsHTML['legendHTML']
-                legend_dict['legendHTML'] = legendsHTML['legendHTML']
-                legend_dict['legendHTMLVertical'] = legendsHTML['legendHTMLVertical']
-
-                legends_dict_all.append(legend_dict)
-
-            legends_json = json.dumps(legends_dict_all,
-                                      ensure_ascii=False,
-                                      sort_keys=True,
-                                      indent=4,
-                                      separators=(', ', ': '))
-
-            colorschemes = '{"success":"true", "total":' + str(all_legends.__len__()) + ',"legends":'+legends_json+'}'
-        else:
-            colorschemes = '{"success":"true", "message":"No legends defined!"}'
-
-        return colorschemes
+        # all_legends = querydb.get_all_legends()
+        #
+        # if hasattr(all_legends, "__len__") and all_legends.__len__() > 0:
+        #     legends_dict_all = []
+        #     for legend in all_legends:
+        #         # legend_dict = functions.row2dict(legend)
+        #         # legend_dict = legend.__dict__
+        #         legend_dict = {}
+        #         legend_id = legend['legend_id']
+        #         legend_name = legend['legend_name']
+        #         # legend_name = legend['colorbar']
+        #
+        #         legend_steps = querydb.get_legend_steps(legendid=legend_id)
+        #
+        #         colorschemeHTML = '<table cellspacing=0 cellpadding=0 width=100%><tr>'
+        #         for step in legend_steps:
+        #             # convert step['color_rgb'] from RGB to html color
+        #             color_rgb = step.color_rgb.split(' ')
+        #             color_html = functions.rgb2html(color_rgb)
+        #             r = color_rgb[0]
+        #             g = color_rgb[1]
+        #             b = color_rgb[2]
+        #             color_html = 'rgb('+r+','+g+','+b+')'
+        #             colorschemeHTML = colorschemeHTML + \
+        #                               "<td height=15 style='padding:0; margin:0; background-color: " + \
+        #                               color_html + ";'></td>"
+        #         colorschemeHTML = colorschemeHTML + '</tr></table>'
+        #
+        #         legend_dict['legend_id'] = legend_id
+        #         legend_dict['legend_name'] = legend_name
+        #         legend_dict['colorbar'] = legend['colorbar']
+        #         legend_dict['colorschemeHTML'] = colorschemeHTML
+        #         legendsHTML = generateLegendHTML.generateLegendHTML(legend_id)
+        #         # print legendsHTML['legendHTML']
+        #         legend_dict['legendHTML'] = legendsHTML['legendHTML']
+        #         legend_dict['legendHTMLVertical'] = legendsHTML['legendHTMLVertical']
+        #
+        #         legends_dict_all.append(legend_dict)
+        #
+        #     legends_json = json.dumps(legends_dict_all,
+        #                               ensure_ascii=False,
+        #                               sort_keys=True,
+        #                               indent=4,
+        #                               separators=(', ', ': '))
+        #
+        #     colorschemes = '{"success":"true", "total":' + str(all_legends.__len__()) + ',"legends":'+legends_json+'}'
+        # else:
+        #     colorschemes = '{"success":"true", "message":"No legends defined!"}'
+        #
+        # return colorschemes
 
 
 class GetProductColorSchemes:
@@ -3235,64 +3431,67 @@ class ProductNavigatorDataSets:
         self.lang = "eng"
 
     def GET(self):
-        db_products = querydb.get_products(echo=False, activated=None, masked=False)
 
-        if hasattr(db_products, "__len__") and db_products.__len__() > 0:
-            products_dict_all = []
-            # loop the products list
-            for row in db_products:
-                prod_dict = functions.row2dict(row)
-                productcode = prod_dict['productcode']
-                version = prod_dict['version']
+        return webpy_esapp_helpers.ProductNavigatorDataSets()
 
-                p = Product(product_code=productcode, version=version)
-
-                # does the product have mapsets AND subproducts?
-                all_prod_mapsets = p.mapsets
-                all_prod_subproducts = p.subproducts
-                if all_prod_mapsets.__len__() > 0 and all_prod_subproducts.__len__() > 0:
-                    prod_dict['productmapsets'] = []
-                    for mapset in all_prod_mapsets:
-                        mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
-                        if mapset_info != []:
-                            mapset_dict = functions.row2dict(mapset_info)
-                            mapset_dict['mapsetdatasets'] = []
-                            all_mapset_datasets = p.get_subproducts(mapset=mapset)
-                            for subproductcode in all_mapset_datasets:
-                                # print productcode + ' - ' + subproductcode
-                                dataset_info = querydb.get_subproduct(productcode=productcode,
-                                                                      version=version,
-                                                                      subproductcode=subproductcode,
-                                                                      echo=False,
-                                                                      masked=True)
-
-                                if dataset_info is not None:
-                                    dataset_dict = functions.row2dict(dataset_info)
-                                    dataset_dict['mapsetcode'] = mapset
-
-                                    # dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
-                                    # completeness = dataset.get_dataset_normalized_info()
-                                    # dataset_dict['datasetcompleteness'] = completeness
-
-                                    mapset_dict['mapsetdatasets'].append(dataset_dict)
-                            if mapset_dict['mapsetdatasets'].__len__() > 0:
-                                prod_dict['productmapsets'].append(mapset_dict)
-                    products_dict_all.append(prod_dict)
-
-            prod_json = json.dumps(products_dict_all,
-                                   ensure_ascii=False,
-                                   sort_keys=True,
-                                   indent=4,
-                                   separators=(', ', ': '))
-
-            datamanagement_json = '{"success":"true", "total":'\
-                                  + str(db_products.__len__())\
-                                  + ',"products":'+prod_json+'}'
-
-        else:
-            datamanagement_json = '{"success":false, "error":"No data sets defined!"}'
-
-        return datamanagement_json
+        # db_products = querydb.get_products(echo=False, activated=None, masked=False)
+        #
+        # if hasattr(db_products, "__len__") and db_products.__len__() > 0:
+        #     products_dict_all = []
+        #     # loop the products list
+        #     for row in db_products:
+        #         prod_dict = functions.row2dict(row)
+        #         productcode = prod_dict['productcode']
+        #         version = prod_dict['version']
+        #
+        #         p = Product(product_code=productcode, version=version)
+        #
+        #         # does the product have mapsets AND subproducts?
+        #         all_prod_mapsets = p.mapsets
+        #         all_prod_subproducts = p.subproducts
+        #         if all_prod_mapsets.__len__() > 0 and all_prod_subproducts.__len__() > 0:
+        #             prod_dict['productmapsets'] = []
+        #             for mapset in all_prod_mapsets:
+        #                 mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
+        #                 if mapset_info != []:
+        #                     mapset_dict = functions.row2dict(mapset_info)
+        #                     mapset_dict['mapsetdatasets'] = []
+        #                     all_mapset_datasets = p.get_subproducts(mapset=mapset)
+        #                     for subproductcode in all_mapset_datasets:
+        #                         # print productcode + ' - ' + subproductcode
+        #                         dataset_info = querydb.get_subproduct(productcode=productcode,
+        #                                                               version=version,
+        #                                                               subproductcode=subproductcode,
+        #                                                               echo=False,
+        #                                                               masked=True)
+        #
+        #                         if dataset_info is not None:
+        #                             dataset_dict = functions.row2dict(dataset_info)
+        #                             dataset_dict['mapsetcode'] = mapset
+        #
+        #                             # dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+        #                             # completeness = dataset.get_dataset_normalized_info()
+        #                             # dataset_dict['datasetcompleteness'] = completeness
+        #
+        #                             mapset_dict['mapsetdatasets'].append(dataset_dict)
+        #                     if mapset_dict['mapsetdatasets'].__len__() > 0:
+        #                         prod_dict['productmapsets'].append(mapset_dict)
+        #             products_dict_all.append(prod_dict)
+        #
+        #     prod_json = json.dumps(products_dict_all,
+        #                            ensure_ascii=False,
+        #                            sort_keys=True,
+        #                            indent=4,
+        #                            separators=(', ', ': '))
+        #
+        #     datamanagement_json = '{"success":"true", "total":'\
+        #                           + str(db_products.__len__())\
+        #                           + ',"products":'+prod_json+'}'
+        #
+        # else:
+        #     datamanagement_json = '{"success":false, "error":"No data sets defined!"}'
+        #
+        # return datamanagement_json
 
 
 class GetLogFile:
@@ -3362,6 +3561,7 @@ class GetLogFile:
             # logfilecontent = logfilecontent.replace(' CLOSED ', '<b style="color:brown"> CLOSED </b>')
 
             logfilecontent = logfilecontent.replace('\'', '')
+            logfilecontent = logfilecontent.replace('"', '')
             logfilecontent = logfilecontent.replace(chr(10), '<br />')
             logfilecontent = logfilecontent.replace(' TRACE ', "<b style='color:gray'> TRACE </b>")
             logfilecontent = logfilecontent.replace(' DEBUG ', "<b style='color:gray'> DEBUG </b>")
@@ -3752,7 +3952,8 @@ class GetLayers:
 
         if hasattr(layers, "__len__") and layers.__len__() > 0:
             for row in layers:
-                row_dict = functions.row2dict(row)
+                # row_dict = functions.row2dict(row)
+                row_dict = row
 
                 layer = { 'layerid': row_dict['layerid'],
                           'layerlevel': row_dict['layerlevel'],
@@ -3857,7 +4058,8 @@ class SaveDrawnVectorLayer:
                 base, extension = os.path.splitext(filename)
 
                 # Initial new name
-                new_name = os.path.join(layerfiledir, filename)
+                new_name = os.path.join(layerfiledir, filename).encode('utf-8')
+                new_name_final = os.path.join(layerfiledir, filename)
 
                 if not os.path.exists(new_name):  # file does not exist in <layerfiledir>
                     fout = open(new_name,'w') # creates the file where the uploaded file should be stored
@@ -3866,7 +4068,8 @@ class SaveDrawnVectorLayer:
                 else:  # file exists in <layerfiledir>
                     ii = 1
                     while True:
-                        new_name = os.path.join(layerfiledir, base + "_" + str(ii) + extension)
+                        new_name = os.path.join(layerfiledir, base + "_" + str(ii) + extension).encode('utf-8')
+                        new_name_final = os.path.join(layerfiledir, base + "_" + str(ii) + extension)
                         if not os.path.exists(new_name):
                             fout = open(new_name,'w') # creates the file where the uploaded file should be stored
                             fout.write(getparams.drawnlayerfeaturesGEOSON) # .read()  writes the uploaded file to the newly created file.
@@ -3874,7 +4077,7 @@ class SaveDrawnVectorLayer:
                             break
                         ii += 1
 
-                finalfilename = new_name.split('/')[-1] # splits the and chooses the last part (the filename with extension)
+                finalfilename = new_name_final.split('/')[-1] # splits the and chooses the last part (the filename with extension)
                 success = True
             except:
                 success = False
@@ -3913,24 +4116,58 @@ class SaveDrawnVectorLayer:
 
 
             if self.crud_db.create('layers', layerdrawprobs):
-                status = '{"success":"true", "message":"Layer created!"}'
+                newlayer = self.crud_db.read('layers', filename = finalfilename)
+                for layer in newlayer:
+                    layerid = layer['layerid']
+
+                status = '{"success":true, "layerid":'+layerid+', "layerfilename": "'+finalfilename+'", "message":"Layer created!"}'
             else:
                 status = '{"success":false, "message":"An error occured while saving the settings in the database for the drawn layer!"}'
 
-
-            web.header('Content-Type', 'text/html')   # 'application/x-compressed'  'application/force-download'
-            web.header('Content-transfer-encoding', 'binary')
-            web.header('Content-Disposition', 'attachment; filename=' + finalfilename)  # force browser to show "Save as" dialog.
-            f = open(layerfiledir+'/'+finalfilename, 'rb')
-            while 1:
-                buf = f.read(1024 * 8)
-                if not buf:
-                    break
-                yield buf
-            f.close()
+            # SEE class DownloadVectorLayer below
+            #
+            # web.header('Content-Type', 'text/html')   # 'application/x-compressed'  'application/force-download'
+            # web.header('Content-transfer-encoding', 'binary')
+            # web.header('Content-Disposition', 'attachment; filename=' + finalfilename)  # force browser to show "Save as" dialog.
+            # f = open(layerfiledir+'/'+finalfilename, 'rb')
+            # while 1:
+            #     buf = f.read(1024 * 8)
+            #     if not buf:
+            #         break
+            #     yield buf
+            # f.close()
         else:
             status = '{"success":false, "message":"An error occured while saving the drawn layer!"}'
+
+        return status
+
+
+class DownloadVectorLayer:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        getparams = web.input()
+        if not hasattr(getparams, "layerfilename"):
+            status = '{"success":false, "message":"No layer filename given!"}'
             # return status
+        else:
+            layerfilename = getparams['layerfilename'].encode('utf-8')
+            layerfiledir = es_constants.es2globals['estation2_layers_dir']
+            if os.path.exists(layerfiledir + '/' + layerfilename):
+                web.header('Content-Type', 'text/html')  # 'application/x-compressed'  'application/force-download'
+                web.header('Content-transfer-encoding', 'binary')
+                web.header('Content-Disposition',
+                           'attachment; filename=' + layerfilename)  # force browser to show "Save as" dialog.
+                f = open(layerfiledir + '/' + layerfilename, 'rb')
+                while 1:
+                    buf = f.read(1024 * 8)
+                    if not buf:
+                        break
+                    yield buf
+                f.close()
+            else:
+                status = '{"success":false, "message":"Layer file not found!"}'
 
 
 class ImportLayer:
@@ -3952,7 +4189,8 @@ class ImportLayer:
                 base, extension = os.path.splitext(filename)
 
                 # Initial new name
-                new_name = os.path.join(layerfiledir, filename)
+                new_name = os.path.join(layerfiledir, filename).encode('utf-8')
+                new_name_final = layerfiledir + '/' + filename
 
                 if not os.path.exists(new_name):  # file does not exist in <layerfiledir>
                     fout = open(new_name,'w') # creates the file where the uploaded file should be stored
@@ -3961,7 +4199,8 @@ class ImportLayer:
                 else:  # file exists in <layerfiledir>
                     ii = 1
                     while True:
-                        new_name = os.path.join(layerfiledir, base + "_" + str(ii) + extension)
+                        new_name = os.path.join(layerfiledir, base + "_" + str(ii) + extension).encode('utf-8')
+                        new_name_final = os.path.join(layerfiledir, base + "_" + str(ii) + extension)
                         if not os.path.exists(new_name):
                             fout = open(new_name,'w') # creates the file where the uploaded file should be stored
                             fout.write(getparams.layerfile) # .read()  writes the uploaded file to the newly created file.
@@ -3969,7 +4208,7 @@ class ImportLayer:
                             break
                         ii += 1
 
-                finalfilename = new_name.split('/')[-1] # splits the and chooses the last part (the filename with extension)
+                finalfilename = new_name_final.split('/')[-1] # splits the and chooses the last part (the filename with extension)
                 success = True
             except:
                 success = False
@@ -4115,7 +4354,7 @@ class GetVectorLayer:
         getparams = web.input()
         filename = getparams['file']
         # layerfilepath = '/srv/www/eStation2_Layers/'+filename
-        layerfilepath = es_constants.estation2_layers_dir + os.path.sep + filename
+        layerfilepath = es_constants.estation2_layers_dir + os.path.sep + filename.encode('utf-8')
         # if isFile(layerfilepath):
         layerfile = open(layerfilepath, 'r')
         layerfilecontent = layerfile.read()
@@ -4679,6 +4918,9 @@ class GetProductLayer:
             if processing_novalue != '':
                 layer.setProcessing(processing_novalue)
 
+            resample_processing = "RESAMPLE=AVERAGE"
+            layer.setProcessing(resample_processing)
+
             legend_steps = querydb.get_legend_steps(legendid=inputparams.legendid)
             if hasattr(legend_steps, "__len__") and legend_steps.__len__() > 0:
                 stepcount = 0
@@ -4830,72 +5072,78 @@ class Processing:
         self.lang = "eng"
 
     def GET(self):
-        #   Todo JURVTK: on each call of a processing chain for a product, get the list of output (sub)products from the
-        #   Todo JURVTK: processing chain algorithm using processing_std_precip . get_subprods_std_precip () and loop
-        #   Todo JURVTK: this list to check the existance of the output product in the table product.process_product
-        #   Todo JURVTK: Insert the output product in the table product.process_product if no record exists.
-        #   Todo JURVTK:  Use: from apps . processing import processing_std_precip
-        #   Todo JURVTK:       brachet l1, l2 brachet = processing_std_precip . get_subprods_std_precip ()
+        getparams = web.input()
+        forse = False
+        if 'forse' in getparams:
+            forse = getparams.forse
+        return webpy_esapp_helpers.getProcessing(forse)
 
-        processing_chains_json = '{"success":true, "message":"No processing chains defined!"}'
-
-        processing_chains = querydb.get_processing_chains()
-
-        if hasattr(processing_chains, "__len__") and processing_chains.__len__() > 0:
-            processing_chains_dict_all = []
-
-            for process in processing_chains:
-                process_id = process.process_id
-                process_dict = functions.row2dict(process)
-
-                db_process_input_products = querydb.get_processingchains_input_products(process_id)
-                process_dict['inputproducts'] = []
-                if hasattr(db_process_input_products, "__len__") and db_process_input_products.__len__() > 0:
-
-                    for input_product in db_process_input_products:
-                        # process_id = input_product.process_id
-                        input_mapsetcode = input_product.mapsetcode
-                        process_dict['category_id'] = input_product.category_id
-                        process_dict['cat_descr_name'] = input_product.cat_descr_name
-                        process_dict['order_index'] = input_product.order_index
-
-                        input_prod_dict = functions.row2dict(input_product)
-                        # prod_dict = input_product.__dict__
-                        # del prod_dict['_labels']
-                        # input_prod_dict['inputproductmapset'] = []
-                        # mapset_info = querydb.get_mapset(mapsetcode=input_mapsetcode)
-                        # mapset_dict = functions.row2dict(mapset_info)
-                        # input_prod_dict['inputproductmapset'].append(mapset_dict)
-                        process_dict['inputproducts'].append(input_prod_dict)
-
-                db_process_output_products = querydb.get_processingchain_output_products(process_id)
-                process_dict['outputproducts'] = []
-                if hasattr(db_process_output_products, "__len__") and db_process_output_products.__len__() > 0:
-                    for outputproduct in db_process_output_products:
-                        output_mapsetcode = outputproduct.mapsetcode
-                        output_product_dict = functions.row2dict(outputproduct)
-                        # output_product_dict = outputproduct.__dict__
-                        # del outputproduct_dict['_labels']
-
-                        # output_product_dict['outputproductmapset'] = []
-                        # mapset_info = querydb.get_mapset(mapsetcode=output_mapsetcode)
-                        # mapset_dict = functions.row2dict(mapset_info)
-                        # output_product_dict['outputproductmapset'].append(mapset_dict)
-                        process_dict['outputproducts'].append(output_product_dict)
-
-                processing_chains_dict_all.append(process_dict)
-
-                processes_json = json.dumps(processing_chains_dict_all,
-                                            ensure_ascii=False,
-                                            sort_keys=True,
-                                            indent=4,
-                                            separators=(', ', ': '))
-
-                processing_chains_json = '{"success":"true", "total":'\
-                                         + str(processing_chains.__len__())\
-                                         + ',"processes":'+processes_json+'}'
-
-        return processing_chains_json
+        # #   Todo JURVTK: on each call of a processing chain for a product, get the list of output (sub)products from the
+        # #   Todo JURVTK: processing chain algorithm using processing_std_precip . get_subprods_std_precip () and loop
+        # #   Todo JURVTK: this list to check the existance of the output product in the table product.process_product
+        # #   Todo JURVTK: Insert the output product in the table product.process_product if no record exists.
+        # #   Todo JURVTK:  Use: from apps . processing import processing_std_precip
+        # #   Todo JURVTK:       brachet l1, l2 brachet = processing_std_precip . get_subprods_std_precip ()
+        #
+        # processing_chains_json = '{"success":true, "message":"No processing chains defined!"}'
+        #
+        # processing_chains = querydb.get_processing_chains()
+        #
+        # if hasattr(processing_chains, "__len__") and processing_chains.__len__() > 0:
+        #     processing_chains_dict_all = []
+        #
+        #     for process in processing_chains:
+        #         process_id = process.process_id
+        #         process_dict = functions.row2dict(process)
+        #
+        #         db_process_input_products = querydb.get_processingchains_input_products(process_id)
+        #         process_dict['inputproducts'] = []
+        #         if hasattr(db_process_input_products, "__len__") and db_process_input_products.__len__() > 0:
+        #
+        #             for input_product in db_process_input_products:
+        #                 # process_id = input_product.process_id
+        #                 input_mapsetcode = input_product.mapsetcode
+        #                 process_dict['category_id'] = input_product.category_id
+        #                 process_dict['cat_descr_name'] = input_product.cat_descr_name
+        #                 process_dict['order_index'] = input_product.order_index
+        #
+        #                 input_prod_dict = functions.row2dict(input_product)
+        #                 # prod_dict = input_product.__dict__
+        #                 # del prod_dict['_labels']
+        #                 # input_prod_dict['inputproductmapset'] = []
+        #                 # mapset_info = querydb.get_mapset(mapsetcode=input_mapsetcode)
+        #                 # mapset_dict = functions.row2dict(mapset_info)
+        #                 # input_prod_dict['inputproductmapset'].append(mapset_dict)
+        #                 process_dict['inputproducts'].append(input_prod_dict)
+        #
+        #         db_process_output_products = querydb.get_processingchain_output_products(process_id)
+        #         process_dict['outputproducts'] = []
+        #         if hasattr(db_process_output_products, "__len__") and db_process_output_products.__len__() > 0:
+        #             for outputproduct in db_process_output_products:
+        #                 output_mapsetcode = outputproduct.mapsetcode
+        #                 output_product_dict = functions.row2dict(outputproduct)
+        #                 # output_product_dict = outputproduct.__dict__
+        #                 # del outputproduct_dict['_labels']
+        #
+        #                 # output_product_dict['outputproductmapset'] = []
+        #                 # mapset_info = querydb.get_mapset(mapsetcode=output_mapsetcode)
+        #                 # mapset_dict = functions.row2dict(mapset_info)
+        #                 # output_product_dict['outputproductmapset'].append(mapset_dict)
+        #                 process_dict['outputproducts'].append(output_product_dict)
+        #
+        #         processing_chains_dict_all.append(process_dict)
+        #
+        #         processes_json = json.dumps(processing_chains_dict_all,
+        #                                     ensure_ascii=False,
+        #                                     sort_keys=True,
+        #                                     indent=4,
+        #                                     separators=(', ', ': '))
+        #
+        #         processing_chains_json = '{"success":"true", "total":'\
+        #                                  + str(processing_chains.__len__())\
+        #                                  + ',"processes":'+processes_json+'}'
+        #
+        # return processing_chains_json
 
 
 class UpdateProcessing:
@@ -4947,120 +5195,167 @@ class DataSets:
         self.lang = "eng"
 
     def GET(self):
-        from dateutil.relativedelta import relativedelta
+        getparams = web.input()
+        forse = False
+        if 'forse' in getparams:
+            forse = getparams.forse
+        return webpy_esapp_helpers.getDataSets(forse)
 
-        db_products = querydb.get_products(activated=True)
+        # # import time
+        # import datetime
+        # datasetsinfo_file = es_constants.base_tmp_dir + os.path.sep + 'datasets_info.json'
+        # if os.path.isfile(datasetsinfo_file):
+        #     # now = time.time()
+        #     # nowdatetime = datetime.datetime.fromtimestamp(now)   # .strftime('%Y-%m-%d %H:%M:%S')
+        #     lastmodfified = os.path.getmtime(datasetsinfo_file)
+        #     lastmodfifieddatetime = datetime.datetime.fromtimestamp(lastmodfified)  # .strftime('%Y-%m-%d %H:%M:%S')
+        #     if lastmodfifieddatetime < datetime.datetime.now() - datetime.timedelta(hours=3):   # seconds=5
+        #         datamanagement_json = webpy_esapp_helpers.DataSets()
+        #         try:
+        #             with open(datasetsinfo_file, "w") as text_file:
+        #                 text_file.write(datamanagement_json)
+        #         except IOError:
+        #             try:
+        #                 os.remove(datasetsinfo_file)     # remove file and recreate next call
+        #             except OSError:
+        #                 pass
+        #     else:
+        #         try:
+        #             with open(datasetsinfo_file) as text_file:
+        #                 datamanagement_json = text_file.read()
+        #         except IOError:
+        #             datamanagement_json = webpy_esapp_helpers.DataSets()
+        #             try:
+        #                 os.remove(datasetsinfo_file)     # remove file and recreate next call
+        #             except OSError:
+        #                 pass
+        #
+        # else:
+        #     datamanagement_json = webpy_esapp_helpers.DataSets()
+        #     try:
+        #         with open(datasetsinfo_file, "w") as text_file:
+        #             text_file.write(datamanagement_json)
+        #     except IOError:
+        #         try:
+        #             os.remove(datasetsinfo_file)  # remove file and recreate next call
+        #         except OSError:
+        #             pass
+        # return datamanagement_json
 
-        if hasattr(db_products, "__len__") and db_products.__len__() > 0:
-            products_dict_all = []
-            # loop the products list
-            for row in db_products:
-                prod_dict = functions.row2dict(row)
-                productcode = prod_dict['productcode']
-                version = prod_dict['version']
-
-                p = Product(product_code=productcode, version=version)
-                # print productcode
-                # does the product have mapsets AND subproducts?
-                all_prod_mapsets = p.mapsets
-                all_prod_subproducts = p.subproducts
-                if all_prod_mapsets.__len__() > 0 and all_prod_subproducts.__len__() > 0:
-                    prod_dict['productmapsets'] = []
-                    for mapset in all_prod_mapsets:
-                        mapset_dict = []
-                        # print mapset
-                        mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
-                        if mapset_info != []:
-                            mapset_dict = functions.row2dict(mapset_info)
-                            # print mapset_dict
-                            mapset_dict['productcode'] = productcode
-                            mapset_dict['version'] = version
-                        # else:
-                        #   mapset_dict['mapsetcode'] = mapset
-                            mapset_dict['mapsetdatasets'] = []
-                            all_mapset_datasets = p.get_subproducts(mapset=mapset)
-                            for subproductcode in all_mapset_datasets:
-                                # print 'productcode: ' + productcode
-                                # print 'version: ' + version
-                                # print 'subproductcode: ' + subproductcode
-                                dataset_info = querydb.get_subproduct(productcode=productcode,
-                                                                      version=version,
-                                                                      subproductcode=subproductcode,
-                                                                      echo=False)
-                                # print dataset_info
-                                # dataset_info = querydb.db.product.get(productcode, version, subproductcode)
-                                # dataset_dict = {}
-                                if dataset_info is not None:
-                                    dataset_dict = functions.row2dict(dataset_info)
-                                    # dataset_dict = dataset_info.__dict__
-                                    # del dataset_dict['_labels']
-                                    if hasattr(dataset_info,'frequency_id'):
-                                        if dataset_info.frequency_id == 'e15minute':
-                                            # dataset_dict['nodisplay'] = 'no_minutes_display'
-                                            today = datetime.date.today()
-                                            from_date = today - datetime.timedelta(days=3)
-                                            kwargs = {'mapset': mapset,
-                                                      'sub_product_code': subproductcode,
-                                                      'from_date': from_date}
-                                        elif  dataset_info.frequency_id == 'e30minute':
-                                            # dataset_dict['nodisplay'] = 'no_minutes_display'
-                                            today = datetime.date.today()
-                                            from_date = today - datetime.timedelta(days=6)
-                                            kwargs = {'mapset': mapset,
-                                                      'sub_product_code': subproductcode,
-                                                      'from_date': from_date}
-                                        # elif dataset_info.frequency_id == 'e1year':
-                                        #     dataset_dict['nodisplay'] = 'no_minutes_display'
-
-                                        elif  dataset_info.frequency_id == 'e1day':
-                                            today = datetime.date.today()
-                                            from_date = today - relativedelta(years=1)
-                                            # if sys.platform != 'win32':
-                                            #     from_date = today - relativedelta(years=1)
-                                            # else:
-                                            #     from_date = today - datetime.timedelta(days=365)
-                                            kwargs = {'mapset': mapset,
-                                                      'sub_product_code': subproductcode,
-                                                      'from_date': from_date}
-                                        else:
-                                            kwargs = {'mapset': mapset,
-                                                      'sub_product_code': subproductcode}
-
-                                        # if dataset_info.frequency_id == 'e15minute' or dataset_info.frequency_id == 'e30minute':
-                                        #     dataset_dict['nodisplay'] = 'no_minutes_display'
-                                        # # To be implemented in dataset.py
-                                        # elif dataset_info.frequency_id == 'e1year':
-                                        #     dataset_dict['nodisplay'] = 'no_minutes_display'
-                                        # else:
-                                        #     dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
-                                        dataset = p.get_dataset(**kwargs)
-                                        completeness = dataset.get_dataset_normalized_info()
-                                        dataset_dict['datasetcompleteness'] = completeness
-                                        dataset_dict['nodisplay'] = 'false'
-
-                                        dataset_dict['mapsetcode'] = mapset_dict['mapsetcode']
-                                        dataset_dict['mapset_descriptive_name'] = mapset_dict['descriptive_name']
-
-                                        mapset_dict['mapsetdatasets'].append(dataset_dict)
-                                    else:
-                                        pass
-                        prod_dict['productmapsets'].append(mapset_dict)
-                products_dict_all.append(prod_dict)
-
-            prod_json = json.dumps(products_dict_all,
-                                   ensure_ascii=False,
-                                   sort_keys=True,
-                                   indent=4,
-                                   separators=(', ', ': '))
-
-            datamanagement_json = '{"success":"true", "total":'\
-                                  + str(db_products.__len__())\
-                                  + ',"products":'+prod_json+'}'
-
-        else:
-            datamanagement_json = '{"success":false, "error":"No data sets defined!"}'
-
-        return datamanagement_json
+        # from dateutil.relativedelta import relativedelta
+        #
+        # db_products = querydb.get_products(activated=True)
+        #
+        # if hasattr(db_products, "__len__") and db_products.__len__() > 0:
+        #     products_dict_all = []
+        #     # loop the products list
+        #     for row in db_products:
+        #         prod_dict = functions.row2dict(row)
+        #         productcode = prod_dict['productcode']
+        #         version = prod_dict['version']
+        #
+        #         p = Product(product_code=productcode, version=version)
+        #         # print productcode
+        #         # does the product have mapsets AND subproducts?
+        #         all_prod_mapsets = p.mapsets
+        #         all_prod_subproducts = p.subproducts
+        #         if all_prod_mapsets.__len__() > 0 and all_prod_subproducts.__len__() > 0:
+        #             prod_dict['productmapsets'] = []
+        #             for mapset in all_prod_mapsets:
+        #                 mapset_dict = []
+        #                 # print mapset
+        #                 mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
+        #                 if mapset_info != []:
+        #                     mapset_dict = functions.row2dict(mapset_info)
+        #                     # print mapset_dict
+        #                     mapset_dict['productcode'] = productcode
+        #                     mapset_dict['version'] = version
+        #                 # else:
+        #                 #   mapset_dict['mapsetcode'] = mapset
+        #                     mapset_dict['mapsetdatasets'] = []
+        #                     all_mapset_datasets = p.get_subproducts(mapset=mapset)
+        #                     for subproductcode in all_mapset_datasets:
+        #                         # print 'productcode: ' + productcode
+        #                         # print 'version: ' + version
+        #                         # print 'subproductcode: ' + subproductcode
+        #                         dataset_info = querydb.get_subproduct(productcode=productcode,
+        #                                                               version=version,
+        #                                                               subproductcode=subproductcode,
+        #                                                               echo=False)
+        #                         # print dataset_info
+        #                         # dataset_info = querydb.db.product.get(productcode, version, subproductcode)
+        #                         # dataset_dict = {}
+        #                         if dataset_info is not None:
+        #                             dataset_dict = functions.row2dict(dataset_info)
+        #                             # dataset_dict = dataset_info.__dict__
+        #                             # del dataset_dict['_labels']
+        #                             if hasattr(dataset_info,'frequency_id'):
+        #                                 if dataset_info.frequency_id == 'e15minute':
+        #                                     # dataset_dict['nodisplay'] = 'no_minutes_display'
+        #                                     today = datetime.date.today()
+        #                                     from_date = today - datetime.timedelta(days=3)
+        #                                     kwargs = {'mapset': mapset,
+        #                                               'sub_product_code': subproductcode,
+        #                                               'from_date': from_date}
+        #                                 elif  dataset_info.frequency_id == 'e30minute':
+        #                                     # dataset_dict['nodisplay'] = 'no_minutes_display'
+        #                                     today = datetime.date.today()
+        #                                     from_date = today - datetime.timedelta(days=6)
+        #                                     kwargs = {'mapset': mapset,
+        #                                               'sub_product_code': subproductcode,
+        #                                               'from_date': from_date}
+        #                                 # elif dataset_info.frequency_id == 'e1year':
+        #                                 #     dataset_dict['nodisplay'] = 'no_minutes_display'
+        #
+        #                                 elif  dataset_info.frequency_id == 'e1day':
+        #                                     today = datetime.date.today()
+        #                                     from_date = today - relativedelta(years=1)
+        #                                     # if sys.platform != 'win32':
+        #                                     #     from_date = today - relativedelta(years=1)
+        #                                     # else:
+        #                                     #     from_date = today - datetime.timedelta(days=365)
+        #                                     kwargs = {'mapset': mapset,
+        #                                               'sub_product_code': subproductcode,
+        #                                               'from_date': from_date}
+        #                                 else:
+        #                                     kwargs = {'mapset': mapset,
+        #                                               'sub_product_code': subproductcode}
+        #
+        #                                 # if dataset_info.frequency_id == 'e15minute' or dataset_info.frequency_id == 'e30minute':
+        #                                 #     dataset_dict['nodisplay'] = 'no_minutes_display'
+        #                                 # # To be implemented in dataset.py
+        #                                 # elif dataset_info.frequency_id == 'e1year':
+        #                                 #     dataset_dict['nodisplay'] = 'no_minutes_display'
+        #                                 # else:
+        #                                 #     dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+        #                                 dataset = p.get_dataset(**kwargs)
+        #                                 completeness = dataset.get_dataset_normalized_info()
+        #                                 dataset_dict['datasetcompleteness'] = completeness
+        #                                 dataset_dict['nodisplay'] = 'false'
+        #
+        #                                 dataset_dict['mapsetcode'] = mapset_dict['mapsetcode']
+        #                                 dataset_dict['mapset_descriptive_name'] = mapset_dict['descriptive_name']
+        #
+        #                                 mapset_dict['mapsetdatasets'].append(dataset_dict)
+        #                             else:
+        #                                 pass
+        #                 prod_dict['productmapsets'].append(mapset_dict)
+        #         products_dict_all.append(prod_dict)
+        #
+        #     prod_json = json.dumps(products_dict_all,
+        #                            ensure_ascii=False,
+        #                            sort_keys=True,
+        #                            indent=4,
+        #                            separators=(', ', ': '))
+        #
+        #     datamanagement_json = '{"success":"true", "total":'\
+        #                           + str(db_products.__len__())\
+        #                           + ',"products":'+prod_json+'}'
+        #
+        # else:
+        #     datamanagement_json = '{"success":false, "error":"No data sets defined!"}'
+        #
+        # return datamanagement_json
 
 
 class CheckStatusAllServices:
@@ -5393,79 +5688,85 @@ class Ingestion:
         self.lang = "eng"
 
     def GET(self):
-        from dateutil.relativedelta import relativedelta
+        getparams = web.input()
+        forse = False
+        if 'forse' in getparams:
+            forse = getparams.forse
+        return webpy_esapp_helpers.getIngestion(forse)
 
-        # return web.ctx
-        ingestions = querydb.get_ingestions(echo=False)
-        # print ingestions
-
-        if hasattr(ingestions, "__len__") and ingestions.__len__() > 0:
-            ingest_dict_all = []
-            for row in ingestions:
-                ingest_dict = functions.row2dict(row)
-
-                if row.mapsetcode != None and row.mapsetcode != '':
-                    if row.frequency_id == 'e15minute':
-                        # ingest_dict['nodisplay'] = 'no_minutes_display'
-                        today = datetime.date.today()
-                        from_date = today - datetime.timedelta(days=3)
-                        # week_ago = datetime.datetime(2015, 8, 27, 00, 00)   # .strftime('%Y%m%d%H%S')
-                        # kwargs.update({'from_date': week_ago})  # datetime.date(2015, 08, 27)
-                        kwargs = {'product_code': row.productcode,
-                                  'sub_product_code': row.subproductcode,
-                                  'version': row.version,
-                                  'mapset': row.mapsetcode,
-                                  'from_date': from_date}
-                        # dataset = Dataset(**kwargs)
-                        # completeness = dataset.get_dataset_normalized_info()
-                    elif  row.frequency_id == 'e30minute':
-                        today = datetime.date.today()
-                        from_date = today - datetime.timedelta(days=6)
-                        kwargs = {'product_code': row.productcode,
-                                  'sub_product_code': row.subproductcode,
-                                  'version': row.version,
-                                  'mapset': row.mapsetcode,
-                                  'from_date': from_date}
-                    elif  row.frequency_id == 'e1day':
-                        today = datetime.date.today()
-                        from_date = today - relativedelta(years=1)
-
-                        # if sys.platform != 'win32':
-                        #     from_date = today - relativedelta(years=1)
-                        # else:
-                        #     from_date = today - datetime.timedelta(days=365)
-                        kwargs = {'product_code': row.productcode,
-                                  'sub_product_code': row.subproductcode,
-                                  'version': row.version,
-                                  'mapset': row.mapsetcode,
-                                  'from_date': from_date}
-                    else:
-                        kwargs = {'product_code': row.productcode,
-                                  'sub_product_code': row.subproductcode,
-                                  'version': row.version,
-                                  'mapset': row.mapsetcode}
-                    # print kwargs
-                    dataset = Dataset(**kwargs)
-                    completeness = dataset.get_dataset_normalized_info()
-                    ingest_dict['completeness'] = completeness
-                    ingest_dict['nodisplay'] = 'false'
-                else:
-                    ingest_dict['completeness'] = {}
-                    ingest_dict['nodisplay'] = 'false'
-
-                ingest_dict_all.append(ingest_dict)
-
-            # ingestions_json = tojson(ingestions)
-            ingestions_json = json.dumps(ingest_dict_all,
-                                         ensure_ascii=False,
-                                         sort_keys=True,
-                                         indent=4,
-                                         separators=(', ', ': '))
-            ingestions_json = '{"success":"true", "total":'+str(ingestions.__len__())+',"ingestions":'+ingestions_json+'}'
-        else:
-            ingestions_json = '{"success":false, "error":"No ingestions defined!"}'
-
-        return ingestions_json
+        # from dateutil.relativedelta import relativedelta
+        #
+        # # return web.ctx
+        # ingestions = querydb.get_ingestions(echo=False)
+        # # print ingestions
+        #
+        # if hasattr(ingestions, "__len__") and ingestions.__len__() > 0:
+        #     ingest_dict_all = []
+        #     for row in ingestions:
+        #         ingest_dict = functions.row2dict(row)
+        #
+        #         if row.mapsetcode != None and row.mapsetcode != '':
+        #             if row.frequency_id == 'e15minute':
+        #                 # ingest_dict['nodisplay'] = 'no_minutes_display'
+        #                 today = datetime.date.today()
+        #                 from_date = today - datetime.timedelta(days=3)
+        #                 # week_ago = datetime.datetime(2015, 8, 27, 00, 00)   # .strftime('%Y%m%d%H%S')
+        #                 # kwargs.update({'from_date': week_ago})  # datetime.date(2015, 08, 27)
+        #                 kwargs = {'product_code': row.productcode,
+        #                           'sub_product_code': row.subproductcode,
+        #                           'version': row.version,
+        #                           'mapset': row.mapsetcode,
+        #                           'from_date': from_date}
+        #                 # dataset = Dataset(**kwargs)
+        #                 # completeness = dataset.get_dataset_normalized_info()
+        #             elif  row.frequency_id == 'e30minute':
+        #                 today = datetime.date.today()
+        #                 from_date = today - datetime.timedelta(days=6)
+        #                 kwargs = {'product_code': row.productcode,
+        #                           'sub_product_code': row.subproductcode,
+        #                           'version': row.version,
+        #                           'mapset': row.mapsetcode,
+        #                           'from_date': from_date}
+        #             elif  row.frequency_id == 'e1day':
+        #                 today = datetime.date.today()
+        #                 from_date = today - relativedelta(years=1)
+        #
+        #                 # if sys.platform != 'win32':
+        #                 #     from_date = today - relativedelta(years=1)
+        #                 # else:
+        #                 #     from_date = today - datetime.timedelta(days=365)
+        #                 kwargs = {'product_code': row.productcode,
+        #                           'sub_product_code': row.subproductcode,
+        #                           'version': row.version,
+        #                           'mapset': row.mapsetcode,
+        #                           'from_date': from_date}
+        #             else:
+        #                 kwargs = {'product_code': row.productcode,
+        #                           'sub_product_code': row.subproductcode,
+        #                           'version': row.version,
+        #                           'mapset': row.mapsetcode}
+        #             # print kwargs
+        #             dataset = Dataset(**kwargs)
+        #             completeness = dataset.get_dataset_normalized_info()
+        #             ingest_dict['completeness'] = completeness
+        #             ingest_dict['nodisplay'] = 'false'
+        #         else:
+        #             ingest_dict['completeness'] = {}
+        #             ingest_dict['nodisplay'] = 'false'
+        #
+        #         ingest_dict_all.append(ingest_dict)
+        #
+        #     # ingestions_json = tojson(ingestions)
+        #     ingestions_json = json.dumps(ingest_dict_all,
+        #                                  ensure_ascii=False,
+        #                                  sort_keys=True,
+        #                                  indent=4,
+        #                                  separators=(', ', ': '))
+        #     ingestions_json = '{"success":"true", "total":'+str(ingestions.__len__())+',"ingestions":'+ingestions_json+'}'
+        # else:
+        #     ingestions_json = '{"success":false, "error":"No ingestions defined!"}'
+        #
+        # return ingestions_json
 
 
 class DataAcquisition:

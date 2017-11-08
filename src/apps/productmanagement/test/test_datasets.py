@@ -264,16 +264,22 @@ class TestDatasets(unittest.TestCase):
         kwargs = {
                 'product_code':"lsasaf-lst",
                 'version': "undefined",
-                'sub_product_code': "lst",
+                'sub_product_code': "10d15min",      #  "lst"
                 'mapset': 'MSG-satellite-3km',
                 'from_date': from_date,
                 'to_date': to_date
                  }
         # kwargs = {
-        #         'product_code':"vgt-ndvi",
+        #         'product_code': "vgt-ndvi",
         #         'version': "sv2-pv2.1",
-        #         'sub_product_code': "ndv",
+        #         'sub_product_code': "10davg-linearx2",
         #         'mapset': 'SPOTV-Africa-1km'
+        #          }
+        # kwargs = {
+        #         'product_code':"arc2-rain",
+        #         'version': "2.0",
+        #         'sub_product_code': "1year",
+        #         'mapset': 'ARC2-Africa-11km'
         #          }
         dataset = Dataset(**kwargs)
         info = dataset.get_dataset_normalized_info()

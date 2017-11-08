@@ -43,13 +43,13 @@ Ext.define("esapp.view.analysis.mapDisclaimerObject",{
 
     //bodyStyle:  'background:transparent;',
     margin: 0,
-    padding: 3,
+    padding: 0,
     disclaimer_ImageObj: new Image(),
     disclaimerPosition: [0,611],
-    changesmade: true,
+    changesmade: false,
     config: {
         // html: '',
-        content: '&nbsp;'
+        content: ''
     },
 
     initComponent: function () {
@@ -104,8 +104,12 @@ Ext.define("esapp.view.analysis.mapDisclaimerObject",{
                             }
                         });
                     });
-                    if (me.getContent() != '' && me.changesmade){
+
+                    if ( (me.disclaimer_ImageObj.src == '' && me.getContent().trim() != '') || (me.getContent().trim() != '' && me.changesmade) ){
                         task.delay(250);
+                    }
+                    else {
+                        me.disclaimer_ImageObj = new Image();
                     }
                 }
             },

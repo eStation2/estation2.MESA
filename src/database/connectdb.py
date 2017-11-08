@@ -41,7 +41,7 @@ class ConnectDB(object):
         try:
             self.schema = schema or es_constants.es2globals['schema_products']
             if usesqlsoup:
-                dburl = ConnectDB.get_db_url()
+                dburl = self.get_db_url()
                 self.db = sqlsoup.SQLSoup(dburl)
                 myengine = self.db.engine
                 self.session = sqlsoup.Session    # self.db.session

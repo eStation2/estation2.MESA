@@ -54,62 +54,6 @@ Ext.define('esapp.view.acquisition.Acquisition',{
         //focusRow: Ext.emptyFn
     },
 
-    //selType: '',
-    //selModel: {
-    //    //preventFocus: true,
-    //    //selectionMode: 'SIMPLE',
-    //    listeners: {
-    //        focuschange: function(selmodel, oldFocused, newFocused ,eOpts) {
-    //            console.info('focuschange');
-    //            console.info(selmodel);
-    //            console.info(oldFocused);
-    //            console.info(newFocused);
-    //            console.info(eOpts);
-    //
-    //
-    //            //return null;
-    //            //
-    //            //selmodel.selectPrevious(false, false);
-    //            //oldFocused = null;
-    //            //newFocused = null;
-    //            //selmodel.navigationModel.lastFocused = null;
-    //            if (oldFocused == 'undefined' || oldFocused == 'null' || oldFocused == null){
-    //                Ext.suspendLayouts();
-    //            }
-    //            else {
-    //                Ext.resumeLayouts(true);
-    //            }
-    //            //selmodel.clearSelections();
-    //        }
-    //
-    //        //,lastfocuschanged: function (oldFocused, newFocused, supressFocus) {
-    //        //    console.info('lastfocuschanged');
-    //        //    console.info(this);
-    //        //    console.info(oldFocused);
-    //        //    console.info(newFocused);
-    //        //    console.info(supressFocus);
-    //        //}
-    //        //,beforeselect: function (record , index , eOpts) {
-    //        //    console.info('beforeselect');
-    //        //    console.info(this);
-    //        //    this.selectPrevious(false, false);
-    //        //    //return null;
-    //        //    //this.clearSelections();
-    //        //}
-    //        //,selection: function (record , index , eOpts) {
-    //        //    console.info('selection');
-    //        //    console.info(this);
-    //        //    //return null;
-    //        //    //this.clearSelections();
-    //        //}
-    //        //,selectionchange: function (selected , eOpts) {
-    //        //    console.info('selectionchange');
-    //        //    console.info(this);
-    //        //    //return null;
-    //        //    //this.clearSelections();
-    //        //}
-    //    }
-    //},
     //selModel: {listeners:{}},
     //selModel: Ext.create('Ext.selection.Model', { listeners: {} }),
 
@@ -129,10 +73,10 @@ Ext.define('esapp.view.acquisition.Acquisition',{
 
     session:true,
 
-    listeners: {
-        groupclick: function( view, node, group, eOpts ) {
+    // listeners: {
+        // groupclick: function( view, node, group, eOpts ) {
             //this.getController().renderHiddenColumnsWhenUnlocked();
-        }
+        // }
         //,afterrender: function (view) {
         //    //this.getView().getFeature('productcategories').collapseAll();
         //}
@@ -147,8 +91,8 @@ Ext.define('esapp.view.acquisition.Acquisition',{
         //    //this.getSelectionModel().getNavigationModel().removeListener('navigate', this.getSelectionModel().getNavigationModel());
         //    //console.info(this.getSelectionModel());
         //}
-    },
-
+    // },
+    //
     //plugins:[{
     //    ptype:'lazyitems'
     //},{
@@ -460,6 +404,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                                             //me.getController().renderHiddenColumnsWhenUnlocked();
 
                                             if (ingestiongridstore.isStore) {
+                                                ingestiongridstore.proxy.extraParams = {forse: true};
                                                 ingestiongridstore.load({
                                                     callback: function(records, options, success){
                                                         myLoadMask.hide();

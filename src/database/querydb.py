@@ -20,8 +20,38 @@ from database import crud
 from config import es_constants
 logger = log.my_logger(__name__)
 
-db = connectdb.ConnectDB().db
+db = connectdb.ConnectDB(schema='products').db
 dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
+# print db
+
+
+def copylegend(legendid=-1, legend_descriptive_name=''):
+    global dbschema_analysis
+    try:
+        if legendid != -1:
+            query = "SELECT * FROM analysis.copylegend(" + str(legendid) + ", '" + legend_descriptive_name + "'" + "); "  # COMMIT;
+            result = dbschema_analysis.execute(query)
+            newlegendid = result.fetchall()
+            newlegendid = newlegendid[0]._row[0]
+            # if hasattr(newlegendid, "__len__") and newlegendid.__len__() > 0:
+            #     for row in newlegendid:
+            #         newlegendid = row
+            # else:
+            #     newlegendid = newlegendid[0]._row[0]
+
+            dbschema_analysis.commit()
+        else:
+            newlegendid = legendid
+
+        return newlegendid
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("copylegend: Database query error!\n -> {}".format(exceptionvalue))
+        return False
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
 
 
 def activate_deactivate_product(productcode='', version='', activate=False, forse=False):
@@ -669,6 +699,7 @@ def get_languages(echo=False):
 def get_product_timeseries_drawproperties(product, echo=False):
 
     global dbschema_analysis
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
 
     try:
         timeseries_drawproperties = []
@@ -679,9 +710,32 @@ def get_product_timeseries_drawproperties(product, echo=False):
 
         if dbschema_analysis.timeseries_drawproperties.filter(where).count() >= 1:
             timeseries_drawproperties = dbschema_analysis.timeseries_drawproperties.filter(where).all()
-            # if echo:
-            #     for row in timeseries_drawproperties:
-            #         print row
+        else:
+            # Insert a new record in the table timeseries_drawproperties for the product with default values
+            default_ts_drawproperties = {
+                "productcode": product['productcode'],
+                "subproductcode": product['subproductcode'],
+                "version": product['version'],
+                "title": product['productcode'],
+                "unit": '',
+                "min": None,
+                "max": None,
+                "oposite": False,
+                "tsname_in_legend": product['productcode'] + '-' + product['version'] + '-' + product['subproductcode'],
+                "charttype": 'line',
+                "linestyle": 'Solid',
+                "linewidth": 4,
+                "color": '#000000',
+                "yaxes_id": product['productcode'] + '-' + product['version'],
+                "title_color": '#0000FF',
+                "aggregation_type": 'mean',
+                "aggregation_min": None,
+                "aggregation_max": None
+            }
+
+            if crud_db.create('timeseries_drawproperties', default_ts_drawproperties):
+                timeseries_drawproperties = dbschema_analysis.timeseries_drawproperties.filter(where).all()
+
         return timeseries_drawproperties
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
@@ -698,6 +752,7 @@ def get_product_timeseries_drawproperties(product, echo=False):
 def get_timeseries_yaxes(products, echo=False):
 
     global dbschema_analysis
+
     try:
         timeseries_yaxes = []
 
@@ -966,6 +1021,8 @@ def get_all_legends(echo=False):
 
         query = "SELECT legend.legend_id,  " + \
                 "       legend.legend_name, " + \
+                "       legend.min_value, " + \
+                "       legend.max_value, " + \
                 "       legend.colorbar " + \
                 "FROM analysis.legend "
 
@@ -984,6 +1041,38 @@ def get_all_legends(echo=False):
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
         #dbschema_analysis = None
+
+
+def createlegend(params):
+
+    global dbschema_analysis
+    try:
+
+        query = "INSERT INTO analysis.legend (legend_name, min_value, max_value, colorbar) VALUES ( " + \
+                "'" + params['legend_name'] + \
+                "', " + str(params['min_value']) + \
+                ", " + str(params['max_value']) + \
+                ", " + "'" + params['colorbar'] + \
+                "') RETURNING legend_id"
+
+        result = dbschema_analysis.execute(query)
+        legend = result.fetchall()
+        dbschema_analysis.commit()
+
+        return legend[0]._row[0]
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if False:
+            print traceback.format_exc()
+        # Exit the script and log the error telling what happened.
+        logger.error("get_all_legends: Database query error!\n -> {}".format(exceptionvalue))
+        return -1
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+            # dbschema_analysis = None
+
 
 
 ######################################################################################
@@ -1078,6 +1167,41 @@ def get_product_legends(productcode=None, subproductcode=None, version=None, ech
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
         #dbschema_analysis = None
+
+
+def get_legend_assigned_datasets(legendid, echo=False):
+
+    global dbschema_analysis
+    try:
+
+        query = "SELECT product_legend.legend_id,  " + \
+                "       product_legend.productcode, " + \
+                "       product_legend.subproductcode, " + \
+                "       product_legend.version, " + \
+                "       product_legend.default_legend, " + \
+                "       product.descriptive_name, " + \
+                "       product.description " + \
+                "FROM products.product JOIN analysis.product_legend " + \
+                " ON ( product.productcode = product_legend.productcode " + \
+                "  AND product.subproductcode = product_legend.subproductcode " + \
+                "  AND product.version = product_legend.version )" + \
+                "WHERE product_legend.legend_id = " + str(legendid)
+
+        result = dbschema_analysis.execute(query)
+        legend_datasets = result.fetchall()
+
+        return legend_datasets
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and log the error telling what happened.
+        logger.error("get_legend_assigned_datasets: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+            # dbschema_analysis = None
 
 
 ######################################################################################
@@ -1459,7 +1583,7 @@ def get_products_acquisition(echo=False, activated=None):
         if echo:
             print traceback.format_exc()
         # Exit the script and log the error telling what happened.
-        logger.error("get_products: Database query error!\n -> {}".format(exceptionvalue))
+        logger.error("get_products_acquisition: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if db.session:
             db.session.close()
@@ -2133,6 +2257,7 @@ def get_active_internet_sources(echo=False):
 
         intsrc = session.query(db.internet_source).subquery()
         pads = aliased(db.product_acquisition_data_source)
+        p = aliased(db.product)
         # The columns on the subquery "intsrc" are accessible through an attribute called "c"
         # e.g. intsrc.c.filter_expression_jrc
 
@@ -2157,8 +2282,9 @@ def get_active_internet_sources(echo=False):
                                  intsrc.c.datasource_descr_id)
                      if x != intsrc.c.update_datetime)
 
-        internet_sources = session.query(*args).outerjoin(intsrc, pads.data_source_id == intsrc.c.internet_id).\
-            filter(and_(pads.type == 'INTERNET', pads.activated)).all()
+        internet_sources = session.query(*args).outerjoin(intsrc, pads.data_source_id == intsrc.c.internet_id). \
+            outerjoin(p, and_(pads.productcode == p.productcode, pads.version == p.version)). \
+            filter(and_(pads.type == 'INTERNET', pads.activated, p.product_type == 'Native', p.activated)).all()
 
         # if echo:
         #     for row in internet_sources:

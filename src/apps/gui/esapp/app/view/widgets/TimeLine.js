@@ -176,14 +176,16 @@ Ext.define("esapp.view.widgets.TimeLine",{
         me.timelinechart = new Highcharts.StockChart({
             chart: {
                 renderTo: me.id,
-                //reference : 'time-line_chart' + me.getView().id,
-                margin: [8, 30, 10, 30],
-                spacingBottom: 10,
+                // //reference : 'time-line_chart' + me.getView().id,
+                // margin: [3, 3, 3, 3],
+                // padding: [2, 2, 2, 2],
+                // margin: [8, 30, 15, 30],
+                spacingBottom: 2,
                 spacingTop: 8,
                 spacingLeft: 5,
-                spacingRight: 30,
-                height: 115,
-                width:580
+                spacingRight: 20
+                // height: 115
+                // width:580
             },
             credits: {
                 enabled: false
@@ -192,19 +194,41 @@ Ext.define("esapp.view.widgets.TimeLine",{
                 enabled: false
             },
             scrollbar: {
-                enabled: false
+                enabled: true,
+                liveRedraw: false
             },
 
+            plotOptions: {
+                series: {
+                    cursor: 'pointer'
+                }
+            },
             rangeSelector: {
-                selected: 1,
-                inputEnabled: true,
+                // allButtonsEnabled: true,
+                selected: 4,
                 buttons: [{
-                    type: 'ytd',
-                    text: 'YTD'
+                    type: 'month',
+                    count: 1,
+                    text: '1m'
+                }, {
+                    type: 'month',
+                    count: 2,
+                    text: '2m'
+                }, {
+                    type: 'month',
+                    count: 3,
+                    text: '3m'
+                }, {
+                    type: 'month',
+                    count: 6,
+                    text: '6m'
                 }, {
                     type: 'year',
                     count: 1,
                     text: '1y'
+                }, {
+                    type: 'ytd',
+                    text: 'YTD'
                 }],
                 buttonTheme: { // styles for the buttons
                     fill: 'none',
@@ -227,6 +251,10 @@ Ext.define("esapp.view.widgets.TimeLine",{
                         // disabled: { ... }
                     }
                 },
+                height: 27,
+                inputEnabled: true,
+                inputBoxWidth: 100,
+                inputBoxHeight: 16,
                 inputStyle: {
                     color: '#039',
                     fontWeight: 'bold'
@@ -238,9 +266,9 @@ Ext.define("esapp.view.widgets.TimeLine",{
             },
 
             navigator: {
-                height: 20,
-                margin: 5,
-                adaptToUpdatedData: false
+                height: 25
+                // margin: 5,
+                // ,adaptToUpdatedData: false   # do not adapt to changes manually made to From-To input fields.
             },
 
             tooltip: {
@@ -248,7 +276,7 @@ Ext.define("esapp.view.widgets.TimeLine",{
                 formatter: me.tooltipFormater
             },
             xAxis: {
-                height: 35,
+                height: 25,
                 dateTimeLabelFormats: me.dateTimeLabelFormats
                 //labels: {
                 //    formatter: function () {
@@ -265,8 +293,7 @@ Ext.define("esapp.view.widgets.TimeLine",{
                     x: -3
                 },
                 max: 1,
-                //top: '65%',
-                height: 25 // '40%',
+                height: 25
                 //offset: 0,
                 //lineWidth: 2
             }],
@@ -276,7 +303,7 @@ Ext.define("esapp.view.widgets.TimeLine",{
                 name: 'Date',
                 data: [],
                 yAxis: 0,
-                turboThreshold: 0
+                turboThreshold: 18000   // from 1982-2030 ~50 years daily products
                 // ,dataGrouping: {
                 //     units: groupingUnits
                 // }

@@ -1,4 +1,4 @@
-
+﻿
 Ext.define("esapp.view.system.systemsettings",{
     "extend": "Ext.form.Panel",
     "controller": "system-systemsettings",
@@ -279,10 +279,28 @@ Ext.define("esapp.view.system.systemsettings",{
                 scale: 'medium',
                 disabled: false,
                 handler: function () {
+                    // if (!Ext.fly('app-upload-frame')) {
+                    //     var body = Ext.getBody();
+                    //     var downloadFrame = body.createChild({
+                    //         tag: 'iframe',
+                    //         cls: 'x-hidden',
+                    //         id: 'app-upload-frame',
+                    //         name: 'uploadframe'
+                    //     });
+                    //
+                    //     var downloadForm = body.createChild({
+                    //         tag: 'form',
+                    //         cls: 'x-hidden',
+                    //         id: 'app-upload-form',
+                    //         target: 'app-upload-frame'
+                    //     });
+                    // }
+
+
                     if (!Ext.fly('frmExportDummy')) {
                         var frm = document.createElement('form');
                         frm.id = 'frmExportDummy';
-                        frm.name = id;
+                        frm.name = frm.id;
                         frm.className = 'x-hidden';
                         document.body.appendChild(frm);
                     }
@@ -293,10 +311,11 @@ Ext.define("esapp.view.system.systemsettings",{
                         isUpload: true,
                         form: Ext.fly('frmExportDummy'),
                         success: function(response, opts){
-                            //var result = Ext.JSON.decode(response.responseText);
-                            //if (result.success){
-                            //    Ext.toast({ html: 'Download system report', title: 'System report', width: 200, align: 't' });
-                            //}
+                            var result = Ext.JSON.decode(response.responseText);
+                            if (!result.success){
+                                console.info(response.status);
+                               // Ext.toast({ html: 'Download system report', title: 'System report', width: 200, align: 't' });
+                            }
                         },
                         failure: function(response, opts) {
                             console.info(response.status);

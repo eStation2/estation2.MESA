@@ -87,7 +87,7 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
 
     ,selectProduct: function(btn, event) {
         var selectProductWin = new esapp.view.acquisition.product.selectProduct();
-        selectProductWin.down('grid').getStore().load();
+        // selectProductWin.down('grid').getStore().load();
         selectProductWin.show();
     }
 

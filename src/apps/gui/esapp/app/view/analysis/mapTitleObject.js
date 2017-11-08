@@ -53,9 +53,10 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
     config: {
         tpl: [
             // '<div><b style="color:rgb(0,0,0);"><font size="3">{selected_area}</font></b></div><div><b style="color:rgb(0,0,0);"><font size="3">{product_name}</font></b></div><div><b style="color:rgb(51,102,255);"><font size="3">{product_date}</font></b></div>'
-            '<div><span style="color:rgb(0,0,0); font-size: 20px; font-weight: bold;">{selected_area}</span></div><div><span style="color:rgb(0,0,0); font-size: 20px;">{product_name}</span></div><div><span style="color:rgb(51,102,255); font-size: 20px;">{product_date}</span></div>'
+            // '<div><span style="color:rgb(0,0,0); font-size: 20px; font-weight: bold;">{selected_area}</span></div><div><span style="color:rgb(0,0,0); font-size: 20px;">{product_name}</span></div><div><span style="color:rgb(51,102,255); font-size: 20px;">{product_date}</span></div>'
         ],
         titleData: null
+        // ,content: ''
     },
     //bind:{
     //    titleData:'{titleData}'
@@ -75,9 +76,8 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
         me.layout = 'fit';
         me.title_ImageObj = new Image();
         me.titlePosition = [0,0];
-
-        //me.defaultTpl = '<font size="3" style="color: rgb(0, 0, 0);"><b>{selected_area} - {product_name}&nbsp;</b></font><div><font size="3"><b>Decade of <font color="#3366ff">{product_date}</font></b></font></div>';
-        //me.tpl = me.defaultTpl;
+        me.defaultTpl = '<div><span style="color:rgb(0,0,0); font-size: 20px; font-weight: bold;">{selected_area}</span></div><div><span style="color:rgb(0,0,0); font-size: 20px;">{product_name}</span></div><div><span style="color:rgb(51,102,255); font-size: 20px;">{product_date}</span></div>';
+        me.tpl.push(me.defaultTpl);
 
         me.listeners = {
             //element  : 'el',
@@ -89,8 +89,6 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
                     editorpanel.constrainTo = this.component.constrainTo;
                     editorpanel.show();
 
-                    //Ext.util.Observable.capture(this, function(e){console.log('titleObj ' + e);});
-                    //
                     //this.component.up().down('#stopedit_tool_' + me.id).show();
                     //this.component.up().down('htmleditor').setValue(this.component.tpl.html);
                     //this.component.up().down('htmleditor').show();
@@ -105,6 +103,8 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
                     text: '<img src="resources/img/pencil_cursor.png" alt="" height="18" width="18">' + esapp.Utils.getTranslation('doubleclick_to_edit') // 'Double click to edit.'
                 });
 
+                // Ext.util.Observable.capture(this, function(e){console.log('titleObj ' + e);});
+                //
                 // me.mon(me, {
                 //     move: function() {
                 //         me.titlePosition = me.getPosition(true);
@@ -115,8 +115,6 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
                 //me.mon(me.el, 'change', function(){alert('container change');});
             },
             refreshimage: function(){
-                //alert('container change');
-
                 if(!me.hidden) {
                     //var titleObjDomClone = Ext.clone(me.getEl().dom);
                     var titleObjDom = me.getEl().dom;
@@ -133,8 +131,12 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
                             }
                         });
                     });
-                    if (me.changesmade){
+                    // console.info(me.getContent());
+                    if (me.tpl.html != '' && (me.changesmade || me.title_ImageObj.src == '')){
                         task.delay(250);
+                    }
+                    else {
+                        me.title_ImageObj = new Image();
                     }
                 }
             },
@@ -142,9 +144,14 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
                 me.setPosition(me.titlePosition);
                 me.fireEvent('refreshimage');
             }
-            //,move: function(){
-            //    me.titlePosition = me.getPosition(true);
-            //}
+            // ,move: function(){
+            //     console.info('moving title object');
+            //     me.titlePosition = me.getPosition();
+            // }
+            ,beforedestroy: function(){
+                // To fix the error: mapView.js?_dc=1506608907564:56 Uncaught TypeError: binding.destroy is not a function
+                me.bind = null;
+            }
             //,single: true  // Remove the listener after first invocation
             //,change: {
             //    element  : 'el',
@@ -259,17 +266,25 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
                     handler: function (btn) {
                         var panel = btn.up().up();
                         var mapTitleObj = me,
-                            mapTitleEditor = panel.down('#map_title_editor_' + me.id);
+                            mapTitleEditor = panel.down('#map_title_editor_' + me.id),
+                            cleanText = mapTitleEditor.getValue().trim().replace(/<\/?[^>]+(>|$)/g, "");
 
-                        // console.info(mapTitleObj);
                         // mapTitleObj.setTpl(mapTitleEditor.getValue());   // .replace(/"/g, '&quot;', true);
                         mapTitleObj.tpl.set(mapTitleEditor.getValue(), true);   // .replace(/"/g, '&quot;', true);
-                        //console.info(mapTitleObj.getData());
+                        if (cleanText == ''){
+                            mapTitleObj.tpl.set('', true);
+                        }
+                        // console.info(mapTitleObj.getData());
                         mapTitleObj.update(mapTitleObj.getData());
-                        mapTitleObj.setHeight('auto');
+                        // mapTitleObj.setHeight('auto');
                         mapTitleObj.updateLayout();
                         mapTitleObj.changesmade = true;
-                        // mapTitleObj.show();
+                        // console.info(cleanText);
+                        // mapTitleObj.setContent(mapTitleEditor.getValue());
+                        // if (mapTitleEditor.getValue().trim() == '' || mapTitleEditor.getValue().trim() == '<br>'){
+                        //     mapTitleObj.setContent('');
+                        //     // console.info('content: ' + mapTitleObj.getContent());
+                        // }
                         mapTitleObj.fireEvent('refreshimage');
                         panel.hide();
                         //mapTitleObj.down().tpl.set(mapTitleEditor.getValue(), true);   // .replace(/"/g, '&quot;', true);

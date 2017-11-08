@@ -15,6 +15,8 @@
 /*}*/
 
 
+
+
 .table-header-rotated{
     border-spacing:0;
     margin: 0;
@@ -105,7 +107,7 @@
 
 .x-item-selected {
     background: #DFEDFF;
-    border: 1px solid #6593cf;
+    /*border: 1px solid #6593cf;*/
     padding: 4px;
 }
 
@@ -199,12 +201,27 @@ p {
 
 .scale-line {
     position: absolute;
+    width:100% !important;
     /*margin:0;*/
 }
 .ol-scale-line {
-  position: relative;
+    position: relative;
+    background: white !important;
+    bottom: 0px !important;
+    left: 0px !important;
+    padding: 0px !important;
 }
 
+.ol-scale-line-inner {
+    border: 3px solid #000 !important;
+    border-top: none !important;
+    color: #000 !important;
+    font-size: 16px !important;
+    font-weight: bold !important;
+    text-align: center;
+    margin: 1px;
+    will-change: contents,width;
+}
 
 .chartfitlayout{width:100% !important; height:100% !important;}
 
@@ -368,6 +385,12 @@ p {
     background-image:url(../img/icons/info.png);
     background-repeat: no-repeat;
 }
+
+.colorwheel {
+    background-image: url(../img/color_wheel.png ) !important;
+    background-repeat: no-repeat;
+}
+
 .add {
     background-image: url(../img/icons/add.png ) !important;
     background-repeat: no-repeat;
@@ -400,7 +423,7 @@ p {
 }
 
 .delete16 {
-    background-image: url(../img/delete16.png ) !important;
+    background-image: url(../img/cancel.png ) !important;
     background-repeat: no-repeat;
 }
 .delete24 {
@@ -593,6 +616,10 @@ p {
     padding: 0px;
 }
 
+.rounded-box-gray-header {
+    color: #0e90d2 !important;
+    background-color: lightgrey !important;
+}
 
 .menu-glyph-color-green .x-menu-item-glyph {
     color: green;
@@ -731,12 +758,22 @@ p {
 
 .categorytitle {
     font-size:16px;
-    color: #FFFFFF; // #157FCC;
+    color: #FFFFFF; /* #157FCC; */
 }
 
 
 .x-column-header-last {
     border-right-width: 1px;
+}
+
+.x-action-col-cell-18 {
+  height: 18px !important;
+  width: 18px !important;
+}
+
+.x-action-col-cell-16 {
+  height: 16px !important;
+  width: 16px !important;
 }
 
 .x-action-col-cell img {
@@ -788,7 +825,7 @@ p {
     color: #333;
     font-size: 12px;
     font-family: "Helvetica Neue",sans-serif;
-    height: 170px;
+    height: 155px;
     /*width: 140px;*/
     overflow: hidden;
     border-top: 1px solid transparent;
@@ -985,7 +1022,7 @@ p {
     display: table;
     float: left;
     width: 50%;
-    padding: 5px
+    padding: 10px
 }
 
 @media screen and (max-width: 980px) and (orientation: landscape), screen and (max-width: 760px) and (orientation: portrait) {

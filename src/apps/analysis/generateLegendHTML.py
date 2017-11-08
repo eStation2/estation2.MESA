@@ -53,7 +53,7 @@ def generateLegendHTML(legend_id):
     # Create horizontal legend
     ######################################
 
-    if TotSteps >= 25:
+    if TotSteps >= 35:
         fontSizeLabels = 20
         fontSizeTitle = 20
         # stepWidth = 28
@@ -174,7 +174,7 @@ def generateLegendHTML(legend_id):
     ######################################
     # Create vertical legend
     ######################################
-    if TotSteps >= 25:
+    if TotSteps >= 35:
         fontSizeLabels = 20
         fontSizeTitle = 20
         stepWidth = 28
@@ -245,13 +245,13 @@ def generateLegendHTML(legend_id):
         tickColumnHeight = 26
         labelColumnHeight = 26
 
-        mainTableBegin = '<table style="background: ' + mainTableBackgroundColor + '; border:0px solid black; border-spacing:0px; border-padding:0px; cellspacing=0px; cellpadding=0px; margin: 3px; padding: 0px; ">'
+        mainTableBegin = '<table style="background: ' + mainTableBackgroundColor + '; border:0px solid black; border-spacing:0px; border-padding:0px; cellspacing=0px; cellpadding=0px; margin: 0px; padding: 0px; ">'
         legendHeaderRow = '<tr><td colspan=2 style="background: white; padding:3px;"><span style=" font-size:' + str(fontSizeHeader) + 'px;">' + legendName + '</span></td></tr>'     # line-height: 24px;
         legendRowBegin = '<tr>'
         firstColumnBegin = '<td width=' + str(firstColumnWidth) + 'px; style="border:0px solid black; border-spacing:0px; border-padding:0px; cellspacing=0px; cellpadding=0px; margin: 0px; padding: 0px;">'
         secondColumnBegin = '<td valign="top" align="left" style="border:0px solid black; border-spacing:0px; border-padding:0px; cellspacing=0px; cellpadding=0px; margin: 0px; padding: 0px;" >'
 
-        legendColorTable = '<table style="background: ' + legendColorTableBackgroundColor + '; border:0px solid black; border-spacing:0px; border-padding:0px; cellspacing=0px; cellpadding=0px; margin: 0px; padding: 3px;">'
+        legendColorTable = '<table style="background: ' + legendColorTableBackgroundColor + '; border:0px solid black; border-spacing:0px; border-padding:0px; cellspacing=0px; cellpadding=0px; margin: 0px; padding-left: 3px;">'
         legendColorTable += '<tr><td colspan=2 height=' + str(extraFirstRowHeight) + 'px; style=""></td></tr>'
 
         legendLabelTable = '<table style="background: ' + legendLabelTableBackgroundColor + '; border:0px solid black; border-spacing:0px; border-padding:0px; cellspacing=0px; cellpadding=0px; margin: 0px; padding: 3px; ">'
