@@ -141,7 +141,9 @@ Ext.define('esapp.view.analysis.legendAdminController', {
 
         var newLegendWin = new esapp.view.analysis.addEditLegend({
             params: {
+                new: true,
                 edit: false,
+                view: false,
                 legendrecord: newrecord
             }
         });
@@ -152,10 +154,20 @@ Ext.define('esapp.view.analysis.legendAdminController', {
         if(!isNaN(record)) {    // record is the rowIndex so get the record from the store through the rowIndex
             record = grid.getStore().getAt(record);
         }
+
+        var edit = false;
+        var view = true;
+        if (record.get('defined_by') != 'JRC'){
+            edit = true;
+            view = false;
+        }
+
         //if (record.get('defined_by') != 'JRC') {
             var editLegendWin = new esapp.view.analysis.addEditLegend({
                 params: {
-                    edit: true,
+                    new: false,
+                    edit: edit,
+                    view: view,
                     legendrecord: record
                 }
             });

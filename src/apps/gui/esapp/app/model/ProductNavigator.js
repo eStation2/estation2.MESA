@@ -130,7 +130,7 @@ Ext.define('esapp.model.ProductNavigatorDatasetColorScheme', {
     extend : 'esapp.model.Base',
 
     fields: [
-        {name: 'default_legend', mapping: 'default_legend'},
+        {name: 'default_legend', type: 'boolean', mapping: 'default_legend'},
         {name: 'defaulticon', mapping: 'defaulticon'},
         {name: 'legend_id', mapping: 'legend_id'},
         {name: 'legend_name', mapping: 'legend_name'},

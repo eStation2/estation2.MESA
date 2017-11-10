@@ -438,6 +438,11 @@ p {
     opacity: 0.8;
 }
 
+.vieweye {
+    background-image: url(../img/eye_32_32.png ) !important;
+    background-repeat: no-repeat;
+}
+
 .edit {
     background-image: url(../img/icons/edit.png ) !important;
     background-repeat: no-repeat;

@@ -137,11 +137,11 @@ def AssignLegends(params):
 def copyLegend(params):
 
     if 'legendid' in params:
-        newlegendname = 'Copy of ' + params['legend_descriptive_name']
+        newlegendname = params['legend_descriptive_name'] + ' - copy'
         newlegendid = querydb.copylegend(legendid=params['legendid'], legend_descriptive_name=newlegendname)
 
         if newlegendid != -1:
-            message = '{"success":true, "legendid": ' + str(newlegendid) + ', "legend_descriptive_name": "' + newlegendname + '  - ID: ' + str(newlegendid) + '","message":"Legend copied!"}'
+            message = '{"success":true, "legendid": ' + str(newlegendid) + ', "legend_descriptive_name": "' + newlegendname + '","message":"Legend copied!"}'
         else:
             message = '{"success":false, "message":"Error copying the legend!"}'
     else:
@@ -287,12 +287,13 @@ def GetLegends():
             colorschemeHTML += '</tr></table>'
 
             legend_dict = {'legendid': row_dict['legend_id'],
-                     'colourscheme': colorschemeHTML,
-                     'legendname': row_dict['legend_name'],
-                     'minvalue': row_dict['min_value'],
-                     'maxvalue': row_dict['max_value'],
-                     'legend_descriptive_name': row_dict['colorbar']
-                     }
+                           'colourscheme': colorschemeHTML,
+                           'legendname': row_dict['legend_name'],
+                           'minvalue': row_dict['min_value'],
+                           'maxvalue': row_dict['max_value'],
+                           'legend_descriptive_name': row_dict['colorbar'],
+                           'defined_by': row_dict['defined_by']
+                           }
 
             legends_dict_all.append(legend_dict)
 
@@ -486,7 +487,7 @@ def getDataSets(forse):
         # nowdatetime = datetime.datetime.fromtimestamp(now)   # .strftime('%Y-%m-%d %H:%M:%S')
         lastmodfified = os.path.getmtime(datasetsinfo_file)
         lastmodfifieddatetime = datetime.datetime.fromtimestamp(lastmodfified)  # .strftime('%Y-%m-%d %H:%M:%S')
-        if lastmodfifieddatetime < datetime.datetime.now() - datetime.timedelta(seconds=3):  # seconds=5
+        if lastmodfifieddatetime < datetime.datetime.now() - datetime.timedelta(hours=3):  # seconds=5
             datamanagement_json = DataSets().encode('utf-8')
             try:
                 with open(datasetsinfo_file, "w") as text_file:
@@ -1001,6 +1002,7 @@ def Ingestion():
 
 def getProcessing(forse):
     # import time
+    forse = True
     processinginfo_file = es_constants.base_tmp_dir + os.path.sep + 'processing_info.json'
     if forse:
         processing_chains_json = Processing().encode('utf-8')

@@ -173,6 +173,9 @@ COMMENT ON TABLE products.geoserver
   For version 2.1.1
  *********************************************************/
 
+ALTER TABLE analysis.legend
+  ADD COLUMN defined_by character varying DEFAULT 'USER';
+
 
 ALTER TABLE analysis.chart_drawproperties
   ADD COLUMN yaxe4_font_size integer;
@@ -210,7 +213,7 @@ BEGIN
   SELECT INTO newlegendid currval('analysis.legend_legend_id_seq');
 
   INSERT INTO analysis.legend (legend_id, legend_name, step_type, min_value, max_value, min_real_value, max_real_value, colorbar, step, step_range_from, step_range_to, unit )
-  (SELECT newlegendid, legend_name, step_type, min_value, max_value, min_real_value, max_real_value, newlegendname || '  - ID: ' || CAST(newlegendid AS text), step, step_range_from, step_range_to, unit
+  (SELECT newlegendid, legend_name, step_type, min_value, max_value, min_real_value, max_real_value, newlegendname, step, step_range_from, step_range_to, unit
    FROM analysis.legend
    WHERE legend_id = tocopylegendid );
 
