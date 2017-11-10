@@ -175,10 +175,13 @@ Ext.define("esapp.view.analysis.legendAdmin",{
                     width:'35',
                     disabled: false,
                     getClass: function (v, meta, rec) {
-                        return 'edit';
+                        if (rec.get('defined_by')!='JRC'){
+                            return 'edit';
+                        }
+                        else return 'vieweye';
                     },
                     getTip: function (v, meta, rec) {
-                        return esapp.Utils.getTranslation('editlegendproperties') + ' ' + rec.get('legend_descriptive_name');
+                        return esapp.Utils.getTranslation('editlegendproperties') + ' "' + rec.get('legend_descriptive_name') + '"';
                     },
                     handler: 'editLegend'
                 }]
@@ -253,12 +256,12 @@ Ext.define("esapp.view.analysis.legendAdmin",{
                     width:'35',
                     disabled: false,
                     getClass: function(v, meta, rec) {
-                        // if (rec.get('deletable')){
+                        if (rec.get('defined_by')!='JRC'){
                             return 'delete';
-                        // }
+                        }
                     },
                     getTip: function(v, meta, rec) {
-                        return esapp.Utils.getTranslation('deletelegend') + ' ' + rec.get('legend_descriptive_name');
+                        return esapp.Utils.getTranslation('deletelegend') + ' "' + rec.get('legend_descriptive_name') + '"';
                     },
                     handler: 'deleteLegend'
                 }]

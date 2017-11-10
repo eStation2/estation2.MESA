@@ -350,20 +350,26 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
                     var nodefault = true,
                         defaultcount = 0;
                     for (var i = 0; i < records.length; i++) {
-                        if (records[i].get('default_legend') || records[i].get('default_legend') == 'true') {
+                        if (records[i].get('default_legend') || records[i].get('default_legend') === 'true') {
                             defaultcount += 1;
                             nodefault = false;
                         }
                     }
                     if (defaultcount > 1) {
                         for (var ii = 0; ii < records.length; ii++) {
-                            records[ii].set('default_legend', false);
+                            // records[ii].data.default_legend = false;
+                            // records[ii].data.defaulticon = 'x-grid3-radio-col';
+                            // records[ii].dirty = false;
+                            records[ii].set('default_legend', 'false');
                             records[ii].set('defaulticon', 'x-grid3-radio-col');
                         }
                         nodefault = true;
                     }
                     if (nodefault) {
-                        records[0].set('default_legend', true);
+                        // records[0].data.default_legend = true;
+                        // records[0].data.defaulticon = 'x-grid3-radio-col-on';
+                        // records[0].dirty = false;
+                        records[0].set('default_legend', 'true');
                         records[0].set('defaulticon', 'x-grid3-radio-col-on');
                     }
                     addToMapBtn.enable();
@@ -380,16 +386,21 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
     },
 
     onRadioColumnAction:function(view, rowIndex, colIndex, item, e, record ) {
-        //console.info(record);
         switch(record.get('defaulticon')) {
             case 'x-grid3-radio-col':
                     view.getStore('colorschemes').each(function(rec){
                         if (view.getStore().indexOf(rec) != rowIndex) {
+                            // rec.data.default_legend = 'false';
+                            // rec.data.defaulticon = 'x-grid3-radio-col';
+                            // rec.dirty = false;
                             rec.set('default_legend', false);
                             rec.set('defaulticon', 'x-grid3-radio-col');
                         }
                     },this);
 
+                    // record.data.default_legend = 'true';
+                    // record.data.defaulticon = 'x-grid3-radio-col-on';
+                    // record.dirty = false;
                     record.set('default_legend', true);
                     record.set('defaulticon', 'x-grid3-radio-col-on');
                 break;

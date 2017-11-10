@@ -12,17 +12,17 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
         'esapp.view.analysis.ProductNavigatorController',
 
         'esapp.model.ProductNavigator',
-        'esapp.view.analysis.addEditLegend',
+        // 'esapp.view.analysis.addEditLegend',
 
         // 'esapp.model.ProductNavigatorDatasetColorScheme',
         //'esapp.model.ProductNavigatorMapSet',
         //'esapp.model.ProductNavigatorMapSetDataSet',
 
-        'Ext.layout.container.Form',
+        // 'Ext.layout.container.Form',
         'Ext.layout.container.Center',
         'Ext.grid.plugin.RowExpander',
-        'Ext.XTemplate',
-        'Ext.form.RadioGroup'
+        'Ext.XTemplate'
+        // 'Ext.form.RadioGroup
     ],
 
     //bind: '{products}',
@@ -453,11 +453,17 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                                 case 'x-grid3-radio-col':
                                         view.getStore('colorschemes').each(function(rec){
                                             if (view.getStore().indexOf(rec) != rowIndex) {
+                                                // rec.data.default_legend = 'false';
+                                                // rec.data.defaulticon = 'x-grid3-radio-col';
+                                                // rec.dirty = false;
                                                 rec.set('default_legend', false);
                                                 rec.set('defaulticon', 'x-grid3-radio-col');
                                             }
                                         },this);
 
+                                        // record.data.default_legend = 'true';
+                                        // record.data.defaulticon = 'x-grid3-radio-col-on';
+                                        // record.dirty = false;
                                         record.set('default_legend', true);
                                         record.set('defaulticon', 'x-grid3-radio-col-on');
                                     break;
@@ -502,13 +508,17 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     defaults: {
                         sortable: false,
                         hideable: false,
-                        variableRowHeight: false
+                        variableRowHeight: true,
+                        menuDisabled: true,
+                        draggable:false,
+                        groupable:false,
+                        stopSelection: false
                     },
                     columns: [{
                         xtype: 'actioncolumn',
                         width: 30,
                         align: 'center',
-                        shrinkWrap: 0,
+                        // shrinkWrap: 0,
                         items: [{
                             tooltip: esapp.Utils.getTranslation('selectacolorscheme'),    // 'Select color scheme',
                             getClass: function(v, meta, rec) {
@@ -520,8 +530,6 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         xtype: 'templatecolumn',
                         text: '<div class="grid-header-style">' + esapp.Utils.getTranslation('colorschemes') + '</div>',
                         width: 420,
-                        sortable: false,
-                        menuDisabled: true,
                         shrinkWrap: 0,
                         tpl: new Ext.XTemplate(
                             '{colorschemeHTML}' +
@@ -530,25 +538,17 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     },{
                         xtype: 'actioncolumn',
                         // header: esapp.Utils.getTranslation('actions'),   // 'Actions',
-                        menuDisabled: true,
-                        sortable: true,
-                        variableRowHeight : true,
-                        draggable:false,
-                        groupable:false,
-                        hideable: false,
                         width: 35,
                         align: 'center',
-                        stopSelection: false,
-
                         items: [{
                             // scope: me,
                             width:'35',
                             disabled: false,
-                            getClass: function (v, meta, rec) {
-                                return 'delete16';
-                            },
+                            iconCls: 'delete16',
+                            // getClass: function (v, meta, rec) {
+                            //     return 'delete16';
+                            // },
                             getTip: function (v, meta, rec) {
-                                // console.info(me);
                                 return esapp.Utils.getTranslation('unassignlegendfromdataset') + ': <BR>' +
                                        me.selectedproduct['productname'] + ' ' +
                                        me.selectedproduct['productversion'] + ' - ' +

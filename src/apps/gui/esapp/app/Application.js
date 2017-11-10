@@ -44,6 +44,7 @@ Ext.define('esapp.Application', {
 
     stores: [
          'LogoImages'
+        ,'ProcessingStore'
         ,'i18nStore'
         ,'LanguagesStore'
         ,'SystemSettingsStore'
@@ -63,7 +64,6 @@ Ext.define('esapp.Application', {
         ,'TimeseriesProductsStore'
         ,'TSDrawPropertiesStore'
         ,"ColorSchemesStore"
-        ,'ProcessingStore'
         ,'DataSetsStore'            // no autoload
     ],
 
