@@ -61,6 +61,7 @@ Ext.define("esapp.view.analysis.addEditLegend",{
 
     initComponent: function () {
         var me = this;
+        me.changedsaved = false;
 
         var colorrenderer = function(color) {
             var renderTpl = color;
@@ -117,6 +118,11 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                     me.lookupReference('legend_maxvalue').setValue(me.params.legendrecord.get('maxvalue'));
                 }
                 me.setY(me.getY()-75);
+            },
+            close: function(){
+                if (me.changedsaved){
+                    Ext.getCmp('legendsadministration').getController().loadLegendsStore();
+                }
             }
         };
 
