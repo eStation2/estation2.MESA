@@ -1,7 +1,7 @@
 Summary: eStation 2.0 Documentation
 Name: eStation2-Docs
 Version: 2.1.0
-Release: 5
+Release: 6
 Group: eStation
 License: GPL
 Source: /home/adminuser/rpms/eStation-Docs/%{name}-%{version}-%{release}.tgz
