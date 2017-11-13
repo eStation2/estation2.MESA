@@ -83,6 +83,8 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
                                         icon:Ext.Msg.INFO,
                                         buttons:Ext.Msg.OK
                                     });
+
+                                    me.changedsaved = true;
                                } else{
                                    esapp.Utils.showError(returnData.error || result.responseText);
                                }

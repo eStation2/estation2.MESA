@@ -1044,6 +1044,30 @@ def get_all_legends(echo=False):
         #dbschema_analysis = None
 
 
+def deletelegendsteps(legendid):
+    global dbschema_analysis
+    try:
+
+        query = "DELETE FROM analysis.legend_step WHERE legend_id = " + legendid
+
+        result = dbschema_analysis.execute(query)
+        # legend = result.fetchall()
+        dbschema_analysis.commit()
+
+        return True
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if False:
+            print traceback.format_exc()
+        # Exit the script and log the error telling what happened.
+        logger.error("deletelegendsteps: Database query error!\n -> {}".format(exceptionvalue))
+        return False
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
 def createlegend(params):
 
     global dbschema_analysis

@@ -72,10 +72,10 @@ def GetAssignedDatasets(legendid):
                                             indent=4,
                                             separators=(', ', ': '))
 
-        assigned_datasets_json = '{"success":"true", "total":' + str(legend_assigned_datasets.__len__()) + ',"assigneddatasets":' + assigned_datasets_json + '}'
+        assigned_datasets_json = '{"success":true, "total":' + str(legend_assigned_datasets.__len__()) + ',"assigneddatasets":' + assigned_datasets_json + '}'
 
     else:
-        assigned_datasets_json = '{"success":false, "message":"No products assigned!"}'
+        assigned_datasets_json = '{"success":true, "message":"No products assigned!"}'
 
     return assigned_datasets_json
 
@@ -202,18 +202,22 @@ def SaveLegend(params):
                 message = '{"success":false, "message":"Error saving the new legend!"}'
         else:
             if crud_db.update('legend', legend):
-                message = '{"success":true, "legendid": ' + params['legendid'] + ',"message":"Legend updated!"}'
-                for legendstep in legendClasses:
-                    legendstep_dict = {'legend_id': int(params['legendid']),
-                                       'from_step': int(legendstep['from_step']),
-                                       'to_step': int(legendstep['to_step']),
-                                       'color_rgb': legendstep['color_rgb'],
-                                       'color_label': legendstep['color_label'],
-                                       'group_label': legendstep['group_label']
-                                       }
-                    if not crud_db.update('legend_step', legendstep_dict):
-                        message = '{"success":false, "message":"Error updating a legend class of the legend!"}'
-                        break
+                if querydb.deletelegendsteps(params['legendid']):
+
+                    message = '{"success":true, "legendid": ' + params['legendid'] + ',"message":"Legend updated!"}'
+                    for legendstep in legendClasses:
+                        legendstep_dict = {'legend_id': int(params['legendid']),
+                                           'from_step': int(legendstep['from_step']),
+                                           'to_step': int(legendstep['to_step']),
+                                           'color_rgb': legendstep['color_rgb'],
+                                           'color_label': legendstep['color_label'],
+                                           'group_label': legendstep['group_label']
+                                           }
+                        if not crud_db.create('legend_step', legendstep_dict):
+                            message = '{"success":false, "message":"Error creating for updating a legend class of the legend!"}'
+                            break
+                else:
+                    message = '{"success":false, "message":"Error deleting the legend steps!"}'
             else:
                 message = '{"success":false, "message":"Error updating the legend!"}'
     else:
