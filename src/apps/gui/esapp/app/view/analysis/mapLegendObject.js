@@ -81,6 +81,7 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
                 }
             },
             afterrender: function () {
+                // console.info('afterrender LEGEND');
                 Ext.tip.QuickTipManager.register({
                     target: this.id,
                     trackMouse: true,
@@ -95,11 +96,16 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
                 //         me.legendPosition = me.getPosition(true);
                 //     }
                 // });
-
-                me.fireEvent('refreshimage');
+                // if (!me.showlegend) {
+                //     me.hide();
+                // }
+                // else {
+                //     me.fireEvent('refreshimage');
+                // }
             },
             refreshimage: function(){
                 if(!me.hidden) {
+                    // console.info('refreshimage LEGEND');
                     var legendObjDom = me.getEl().dom;
                     var task = new Ext.util.DelayedTask(function() {
                         html2canvas(legendObjDom, {
@@ -116,22 +122,28 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
             }
             ,show: function(){
                 // console.info('SHOW LEGEND');
+                // console.info(me.showlegend);
                 // console.info(me.legendPosition);
-                me.setPosition(me.legendPosition);
-
-                if (me.legendLayout == 'horizontal') {
-                    me.setHtml(me.legendHTML);
-                }
-                else {
-                    me.setHtml(me.legendHTMLVertical);
-                }
 
                 if (!me.showlegend) {
                     me.hide();
                 }
+                else {
 
-                me.fireEvent('refreshimage');
+                    me.setPosition(me.legendPosition);
+
+                    if (me.legendLayout == 'horizontal') {
+                        me.setHtml(me.legendHTML);
+                    }
+                    else {
+                        me.setHtml(me.legendHTMLVertical);
+                    }
+                    me.fireEvent('refreshimage');
+                }
             }
+            // ,move: function(){
+            //     me.legendPosition = me.getPosition();
+            // }
         };
 
         me.callParent();

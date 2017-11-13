@@ -2,13 +2,6 @@ Ext.define('esapp.view.analysis.analysisMainController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.analysis-analysismain'
 
-    ,showUserMapTemplates: function(btn){
-        //console.info(btn.down().down());
-        //Ext.getCmp('userMapTemplates').show();
-        btn.down().down().fireEvent('loadstore');
-        btn.down().down().show();
-    }
-
     ,newMapView: function() {
         var newMapViewWin = new esapp.view.analysis.mapView({
             epsg: 'EPSG:4326'
@@ -22,6 +15,27 @@ Ext.define('esapp.view.analysis.analysisMainController', {
         this.getView().add(newLayerAdminWin);
         newLayerAdminWin.show();
         this.getView().lookupReference('analysismain_layersbtn').disable();
+    }
+
+    ,legendAdmin: function(){
+        var newLegendAdminWin = new esapp.view.analysis.legendAdmin();
+        this.getView().add(newLegendAdminWin);
+        newLegendAdminWin.show();
+        this.getView().lookupReference('analysismain_legendsbtn').disable();
+    }
+
+    ,showUserMaptemplates: function(btn){
+        // var userMapTemplatesWindow = this.getView().lookupReference('userMapTemplates');
+        // userMapTemplatesWindow.show();
+        btn.mapTemplateAdminPanel.show();
+        // if (!esapp.Utils.objectExists(Ext.getCmp('userMapTemplates'))){
+        //     var mapTemplateAdminPanel = new esapp.view.analysis.mapTemplateAdmin();
+        //     this.getView().add(mapTemplateAdminPanel);
+        //     mapTemplateAdminPanel.show();
+        // }
+        // else {
+        //     Ext.getCmp('userMapTemplates').show();
+        // }
     }
 
     ,showTimeseriesChartSelection: function(){

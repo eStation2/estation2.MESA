@@ -245,10 +245,12 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
                 me.params.orig_productcode = Ext.getCmp('productcode').getValue();
                 me.params.orig_version = Ext.getCmp('version').getValue();
 
-                Ext.data.StoreManager.lookup('ProductsInactiveStore').load();
+                // Ext.data.StoreManager.lookup('ProductsInactiveStore').load();
+                var daStore = Ext.data.StoreManager.lookup('DataAcquisitionsStore');
                 Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
 
-                var daStore = me.getViewModel().get('productdatasources');
+                // var daStore = me.getViewModel().get('productdatasources');
+                console.info(daStore);
 
                 daStore.setFilters({
                      property:'productid'

@@ -52,7 +52,9 @@ Ext.define('esapp.LoginSetup', {
                 else {
                     // save received user data
                     user = o.user;
-                    //Ext.util.Cookies.set('estation2_sessid', user);
+                    Ext.util.Cookies.set('estation2_userid', user.userid);
+                    Ext.util.Cookies.set('estation2_username', user.username);
+                    Ext.util.Cookies.set('estation2_useremail', user.email);
                     me.fireEvent('setupready')
                 }
             } // eo function success
@@ -116,6 +118,9 @@ Ext.define('esapp.LoginSetup', {
              */
             ,setUser:function(usr) {
                 user = usr;
+                Ext.util.Cookies.set('estation2_userid', user.userid);
+                Ext.util.Cookies.set('estation2_username', user.username);
+                Ext.util.Cookies.set('estation2_useremail', user.email);
             } // eo function getUser
 
             /**
@@ -134,10 +139,10 @@ Ext.define('esapp.LoginSetup', {
              * redirect a logout url.
              */
             ,logout:function() {
-                //Ext.getBody().hide();
                 user = null;
-                Ext.util.Cookies.clear('estation2_sessid');
-                //window.location.reload();
+                Ext.util.Cookies.clear('estation2_userid');
+                Ext.util.Cookies.clear('estation2_username');
+                Ext.util.Cookies.clear('estation2_useremail');
             } // eo function logout
 
         });

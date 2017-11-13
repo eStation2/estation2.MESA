@@ -1,3 +1,415 @@
+/**********************************************************
+  FIRST TABLE CREATION, then alter table adding columns
+ *********************************************************/
+
+/**********************************************************
+  From version 2.1.0-11
+ *********************************************************/
+
+-- Table: analysis.users
+-- DROP TABLE analysis.users;
+
+CREATE TABLE IF NOT EXISTS analysis.users
+(
+  userid character varying(50) NOT NULL,
+  username character varying(80) NOT NULL,
+  password character varying(32),
+  userlevel integer NOT NULL,
+  email character varying(50),
+  "timestamp" numeric(11,0),
+  CONSTRAINT users_pkey PRIMARY KEY (userid)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE analysis.users
+  OWNER TO estation;
+
+
+
+CREATE TABLE IF NOT EXISTS analysis.layers
+(
+  layerid bigserial NOT NULL,
+  layerlevel character varying(80),
+  layername character varying(80),
+  description character varying(255),
+  filename character varying(80),
+  layerorderidx integer DEFAULT 1,
+  layertype character varying(80) DEFAULT 'polygon'::character varying,
+  polygon_outlinecolor character varying(11) DEFAULT '0 0 0'::character varying,
+  polygon_outlinewidth integer DEFAULT 1,
+  polygon_fillcolor character varying(11) DEFAULT '0 0 0'::character varying,
+  polygon_fillopacity integer DEFAULT 100,
+  feature_display_column character varying(255),
+  feature_highlight_outlinecolor character varying(11) DEFAULT '0 0 0'::character varying,
+  feature_highlight_outlinewidth integer DEFAULT 1,
+  feature_highlight_fillcolor character varying(11) DEFAULT '0 0 0'::character varying,
+  feature_highlight_fillopacity integer DEFAULT 100,
+  feature_selected_outlinecolor character varying(11) DEFAULT '0 0 0'::character varying,
+  feature_selected_outlinewidth integer DEFAULT 1,
+  enabled boolean DEFAULT true,
+  deletable boolean DEFAULT true,
+  background_legend_image_filename character varying(80),
+  projection character varying(80),
+  submenu character varying(80),
+  menu character varying(80),
+  defined_by character varying DEFAULT 'USER'::character varying,
+  open_in_mapview boolean DEFAULT false,
+  provider character varying,
+  CONSTRAINT layers_pkey PRIMARY KEY (layerid)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE analysis.layers
+  OWNER TO estation;
+
+
+ALTER TABLE analysis.layers
+   ALTER COLUMN polygon_fillcolor SET DEFAULT 'Transparent'::character varying;
+ALTER TABLE analysis.layers
+   ALTER COLUMN feature_highlight_fillcolor SET DEFAULT 'Transparent'::character varying;
+
+
+
+CREATE TABLE IF NOT EXISTS analysis.chart_drawproperties
+(
+  chart_type character varying NOT NULL,
+  chart_width integer,
+  chart_height integer,
+  chart_title_font_size integer,
+  chart_title_font_color character varying,
+  chart_subtitle_font_size integer,
+  chart_subtitle_font_color character varying,
+  yaxe1_font_size integer,
+  yaxe2_font_size integer,
+  legend_font_size integer,
+  legend_font_color character varying,
+  xaxe_font_size integer,
+  xaxe_font_color character varying,
+  yaxe3_font_size integer,
+  CONSTRAINT chart_drawproperties_pk PRIMARY KEY (chart_type)
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE analysis.chart_drawproperties
+  OWNER TO estation;
+
+
+
+-- Table: analysis.map_templates
+
+-- DROP TABLE analysis.map_templates;
+
+CREATE TABLE IF NOT EXISTS analysis.map_templates
+(
+  templatename character varying(80) NOT NULL,
+  userid character varying(50) NOT NULL,
+  mapviewposition character varying(10),
+  mapviewsize character varying(10),
+  productcode character varying,
+  subproductcode character varying,
+  productversion character varying,
+  mapsetcode character varying,
+  legendid integer,
+  legendlayout character varying(15) DEFAULT 'vertical'::character varying,
+  legendobjposition character varying(10),
+  showlegend boolean NOT NULL DEFAULT false,
+  titleobjposition character varying(10),
+  titleobjcontent text,
+  disclaimerobjposition character varying(10),
+  disclaimerobjcontent text,
+  logosobjposition character varying(10),
+  logosobjcontent text,
+  showobjects boolean NOT NULL DEFAULT false,
+  scalelineobjposition character varying(10),
+  vectorlayers character varying(20),
+  outmask boolean NOT NULL DEFAULT false,
+  outmaskfeature text,
+  auto_open boolean DEFAULT false,
+  CONSTRAINT map_templates_pkey PRIMARY KEY (templatename, userid),
+  CONSTRAINT user_map_templates_fkey FOREIGN KEY (userid)
+      REFERENCES analysis.users (userid) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE CASCADE
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE analysis.map_templates
+  OWNER TO estation;
+
+
+
+-- DROP TABLE products.geoserver;
+
+CREATE TABLE IF NOT EXISTS products.geoserver
+(
+  geoserver_id serial NOT NULL,
+  productcode character varying NOT NULL,
+  subproductcode character varying NOT NULL,
+  version character varying NOT NULL,
+  defined_by character varying NOT NULL,
+  activated boolean NOT NULL DEFAULT false,
+  startdate bigint,
+  enddate bigint,
+  CONSTRAINT geoserver_pk PRIMARY KEY (geoserver_id),
+  CONSTRAINT product_geoserver_fk FOREIGN KEY (productcode, subproductcode, version)
+      REFERENCES products.product (productcode, subproductcode, version) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE CASCADE
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE products.geoserver
+  OWNER TO estation;
+COMMENT ON TABLE products.geoserver
+  IS 'Define which products/versions/subproducts have to be synchronized.';
+
+
+
+
+/**********************************************************
+  For version 2.1.1
+ *********************************************************/
+
+ALTER TABLE analysis.legend
+  ADD COLUMN defined_by character varying DEFAULT 'USER';
+
+
+ALTER TABLE analysis.chart_drawproperties
+  ADD COLUMN yaxe4_font_size integer;
+
+UPDATE analysis.chart_drawproperties
+SET yaxe4_font_size = 26;
+
+ALTER TABLE analysis.map_templates
+   ALTER COLUMN vectorlayers TYPE character varying;
+ALTER TABLE analysis.map_templates
+  ADD COLUMN zoomextent character varying;
+
+ALTER TABLE analysis.map_templates
+  ADD COLUMN mapsize character varying;
+
+ALTER TABLE analysis.map_templates
+  ADD COLUMN mapcenter character varying;
+
+ALTER TABLE analysis.legend
+   ALTER COLUMN step_type SET DEFAULT 'irregular';
+
+
+CREATE OR REPLACE FUNCTION analysis.update_insert_legend(
+    legend_id integer,
+    legend_name character varying,
+    step_type character varying,
+    min_value double precision,
+    max_value double precision,
+    min_real_value character varying,
+    max_real_value text,
+    colorbar text,
+    step double precision,
+    step_range_from double precision,
+    step_range_to double precision,
+    unit character varying,
+    defined_by character varying)
+  RETURNS boolean AS
+$BODY$
+	DECLARE
+		_legend_id 		ALIAS FOR  $1;
+		_legend_name 		ALIAS FOR  $2;
+		_step_type 		ALIAS FOR  $3;
+		_min_value 		ALIAS FOR  $4;
+		_max_value 		ALIAS FOR  $5;
+		_min_real_value 	ALIAS FOR  $6;
+		_max_real_value 	ALIAS FOR  $7;
+		_colorbar 		ALIAS FOR  $8;
+		_step 			ALIAS FOR  $9;
+		_step_range_from	ALIAS FOR  $10;
+		_step_range_to 		ALIAS FOR  $11;
+		_unit 			ALIAS FOR  $12;
+		_defined_by 		ALIAS FOR  $13;
+
+	BEGIN
+		IF _max_real_value= 'NULL' THEN
+			_max_real_value = NULL;
+		END IF;
+		IF _colorbar= 'NULL' THEN
+			_colorbar = NULL;
+		END IF;
+
+		PERFORM * FROM analysis.legend l WHERE l.legend_id = _legend_id;
+		IF FOUND THEN
+			UPDATE analysis.legend l
+			SET legend_name = TRIM(_legend_name),
+			    step_type = TRIM(_step_type),
+			    min_value = _min_value,
+			    max_value = _max_value,
+			    min_real_value = TRIM(_min_real_value),
+			    max_real_value = TRIM(_max_real_value),
+			    colorbar = TRIM(_colorbar),
+			    step = _step,
+			    step_range_from = _step_range_from,
+			    step_range_to = _step_range_to,
+			    unit = TRIM(_unit),
+			    defined_by = TRIM(_defined_by)
+			WHERE l.legend_id = _legend_id;
+		ELSE
+			INSERT INTO analysis.legend (legend_id, legend_name, step_type, min_value, max_value, min_real_value, max_real_value, colorbar, step, step_range_from, step_range_to, unit, defined_by)
+			VALUES (_legend_id, TRIM(legend_name), TRIM(_step_type), _min_value, _max_value, TRIM(_min_real_value), TRIM(_max_real_value), TRIM(_colorbar), _step, _step_range_from, _step_range_to, _unit, _defined_by);
+		END IF;
+		RETURN TRUE;
+	END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION analysis.update_insert_legend(integer, character varying, character varying, double precision, double precision, character varying, text, text, double precision, double precision, double precision, character varying, character varying)
+  OWNER TO estation;
+
+
+
+
+CREATE OR REPLACE FUNCTION analysis.copylegend(
+    tocopylegendid bigint,
+    newlegendname text)
+  RETURNS integer AS
+$BODY$
+DECLARE
+    newlegendid INT8;
+BEGIN
+
+  PERFORM nextval('analysis.legend_legend_id_seq');
+  SELECT INTO newlegendid currval('analysis.legend_legend_id_seq');
+
+  INSERT INTO analysis.legend (legend_id, legend_name, step_type, min_value, max_value, min_real_value, max_real_value, colorbar, step, step_range_from, step_range_to, unit )
+  (SELECT newlegendid, legend_name, step_type, min_value, max_value, min_real_value, max_real_value, newlegendname, step, step_range_from, step_range_to, unit
+   FROM analysis.legend
+   WHERE legend_id = tocopylegendid );
+
+  INSERT INTO analysis.legend_step ( legend_id, from_step, to_step, color_rgb, color_label, group_label )
+  (SELECT newlegendid, from_step, to_step, color_rgb, color_label, group_label
+   FROM analysis.legend_step
+   WHERE legend_id = tocopylegendid);
+
+  RETURN newlegendid;
+
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION analysis.copylegend(bigint, text)
+  OWNER TO estation;
+
+
+
+-- Function: analysis.update_insert_chart_drawproperties(character varying, integer, integer, integer, character varying, integer, character varying, integer, integer, integer, character varying, integer, character varying, integer)
+
+-- DROP FUNCTION analysis.update_insert_chart_drawproperties(character varying, integer, integer, integer, character varying, integer, character varying, integer, integer, integer, character varying, integer, character varying, integer);
+
+CREATE OR REPLACE FUNCTION analysis.update_insert_chart_drawproperties(
+    chart_type character varying,
+    chart_width integer,
+    chart_height integer,
+    chart_title_font_size integer,
+    chart_title_font_color character varying,
+    chart_subtitle_font_size integer,
+    chart_subtitle_font_color character varying,
+    yaxe1_font_size integer,
+    yaxe2_font_size integer,
+    legend_font_size integer,
+    legend_font_color character varying,
+    xaxe_font_size integer,
+    xaxe_font_color character varying,
+    yaxe3_font_size integer,
+    yaxe4_font_size integer)
+  RETURNS boolean AS
+$BODY$
+	DECLARE
+
+	  _chart_type 			ALIAS FOR  $1;
+	  _chart_width 			ALIAS FOR  $2;
+	  _chart_height 		ALIAS FOR  $3;
+	  _chart_title_font_size 	ALIAS FOR  $4;
+	  _chart_title_font_color 	ALIAS FOR  $5;
+	  _chart_subtitle_font_size 	ALIAS FOR  $6;
+	  _chart_subtitle_font_color 	ALIAS FOR  $7;
+	  _yaxe1_font_size 		ALIAS FOR  $8;
+	  _yaxe2_font_size 		ALIAS FOR  $9;
+	  _legend_font_size 		ALIAS FOR  $10;
+	  _legend_font_color 		ALIAS FOR  $11;
+	  _xaxe_font_size 		ALIAS FOR  $12;
+	  _xaxe_font_color 		ALIAS FOR  $13;
+	  _yaxe3_font_size 		ALIAS FOR  $14;
+	  _yaxe4_font_size 		ALIAS FOR  $15;
+
+	BEGIN
+		PERFORM * FROM analysis.chart_drawproperties cd WHERE cd.chart_type = _chart_type;
+		IF FOUND THEN
+			UPDATE analysis.chart_drawproperties cd
+			SET chart_width = _chart_width,
+			    chart_height = _chart_height,
+			    chart_title_font_size = _chart_title_font_size,
+			    chart_title_font_color = TRIM(_chart_title_font_color),
+			    chart_subtitle_font_size = _chart_subtitle_font_size,
+			    chart_subtitle_font_color = TRIM(_chart_subtitle_font_color),
+			    yaxe1_font_size = _yaxe1_font_size,
+			    yaxe2_font_size = _yaxe2_font_size,
+			    legend_font_size = _legend_font_size,
+			    legend_font_color = TRIM(_legend_font_color),
+			    xaxe_font_size = _xaxe_font_size,
+			    xaxe_font_color = TRIM(_xaxe_font_color),
+			    yaxe3_font_size = _yaxe3_font_size,
+			    yaxe4_font_size = _yaxe4_font_size
+			WHERE cd.chart_type = _chart_type;
+		ELSE
+			INSERT INTO analysis.chart_drawproperties (
+				chart_type,
+				chart_width,
+				chart_height,
+				chart_title_font_size,
+				chart_title_font_color,
+				chart_subtitle_font_size,
+				chart_subtitle_font_color,
+				yaxe1_font_size,
+				yaxe2_font_size,
+				legend_font_size,
+				legend_font_color,
+				xaxe_font_size,
+				xaxe_font_color,
+				yaxe3_font_size,
+				yaxe4_font_size
+			)
+			VALUES (
+			    TRIM(_chart_type),
+			    _chart_width,
+			    _chart_height,
+			    _chart_title_font_size,
+			    TRIM(_chart_title_font_color),
+			    _chart_subtitle_font_size,
+			    TRIM(_chart_subtitle_font_color),
+			    _yaxe1_font_size,
+			    _yaxe2_font_size,
+			    _legend_font_size,
+			    TRIM(_legend_font_color),
+			    _xaxe_font_size,
+			    TRIM(_xaxe_font_color),
+			    _yaxe3_font_size,
+			    _yaxe4_font_size
+			);
+		END IF;
+		RETURN TRUE;
+	END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION analysis.update_insert_chart_drawproperties(character varying, integer, integer, integer, character varying, integer, character varying, integer, integer, integer, character varying, integer, character varying, integer, integer)
+  OWNER TO estation;
+
+
+
+/**********************************************************
+  FROM version 2.1.0-11
+ *********************************************************/
+
 ALTER TABLE products.product
   ADD COLUMN display_index integer;
 
@@ -11,6 +423,17 @@ UPDATE products.thema set activated = FALSE;
 -- themaid = systemsettings['thema'];
 -- UPDATE products.thema set activated = TRUE WHERE thema_id = themaid;
 -- SELECT * FROM products.set_thema(themaid);
+
+
+ALTER TABLE analysis.timeseries_drawproperties
+  ADD COLUMN aggregation_type character varying DEFAULT 'mean';
+
+ALTER TABLE analysis.timeseries_drawproperties
+  ADD COLUMN aggregation_min double precision;
+
+ALTER TABLE analysis.timeseries_drawproperties
+  ADD COLUMN aggregation_max double precision;
+
 
 
 DROP TRIGGER IF EXISTS update_product ON products.product;
@@ -74,10 +497,6 @@ DROP TRIGGER IF EXISTS update_product ON products.product;
 
 
 
-
--- Function: products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean)
-
--- DROP FUNCTION products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean);
 
 CREATE OR REPLACE FUNCTION products.activate_deactivate_product_ingestion_pads_processing(
     productcode character varying,
@@ -221,7 +640,6 @@ ALTER FUNCTION products.activate_deactivate_product_ingestion_pads_processing(ch
 
 
 
-
 CREATE OR REPLACE FUNCTION products.set_thema(themaid character varying)
   RETURNS boolean AS
 $BODY$
@@ -325,178 +743,6 @@ ALTER FUNCTION products.set_thema(character varying)
   OWNER TO estation;
 
 
-
-
-ALTER TABLE analysis.timeseries_drawproperties
-  ADD COLUMN aggregation_type character varying DEFAULT 'mean';
-
-ALTER TABLE analysis.timeseries_drawproperties
-  ADD COLUMN aggregation_min double precision;
-
-ALTER TABLE analysis.timeseries_drawproperties
-  ADD COLUMN aggregation_max double precision;
-
-
--- Table: analysis.users
--- DROP TABLE analysis.users;
-
-CREATE TABLE IF NOT EXISTS analysis.users
-(
-  userid character varying(50) NOT NULL,
-  username character varying(80) NOT NULL,
-  password character varying(32),
-  userlevel integer NOT NULL,
-  email character varying(50),
-  "timestamp" numeric(11,0),
-  CONSTRAINT users_pkey PRIMARY KEY (userid)
-)
-WITH (
-  OIDS=FALSE
-);
-ALTER TABLE analysis.users
-  OWNER TO estation;
-
-
-
-CREATE TABLE IF NOT EXISTS analysis.layers
-(
-  layerid bigserial NOT NULL,
-  layerlevel character varying(80),
-  layername character varying(80),
-  description character varying(255),
-  filename character varying(80),
-  layerorderidx integer DEFAULT 1,
-  layertype character varying(80) DEFAULT 'polygon'::character varying,
-  polygon_outlinecolor character varying(11) DEFAULT '0 0 0'::character varying,
-  polygon_outlinewidth integer DEFAULT 1,
-  polygon_fillcolor character varying(11) DEFAULT '0 0 0'::character varying,
-  polygon_fillopacity integer DEFAULT 100,
-  feature_display_column character varying(255),
-  feature_highlight_outlinecolor character varying(11) DEFAULT '0 0 0'::character varying,
-  feature_highlight_outlinewidth integer DEFAULT 1,
-  feature_highlight_fillcolor character varying(11) DEFAULT '0 0 0'::character varying,
-  feature_highlight_fillopacity integer DEFAULT 100,
-  feature_selected_outlinecolor character varying(11) DEFAULT '0 0 0'::character varying,
-  feature_selected_outlinewidth integer DEFAULT 1,
-  enabled boolean DEFAULT true,
-  deletable boolean DEFAULT true,
-  background_legend_image_filename character varying(80),
-  projection character varying(80),
-  submenu character varying(80),
-  menu character varying(80),
-  defined_by character varying DEFAULT 'USER'::character varying,
-  open_in_mapview boolean DEFAULT false,
-  provider character varying,
-  CONSTRAINT layers_pkey PRIMARY KEY (layerid)
-)
-WITH (
-  OIDS=FALSE
-);
-ALTER TABLE analysis.layers
-  OWNER TO estation;
-
-
-ALTER TABLE analysis.layers
-   ALTER COLUMN polygon_fillcolor SET DEFAULT 'Transparent'::character varying;
-ALTER TABLE analysis.layers
-   ALTER COLUMN feature_highlight_fillcolor SET DEFAULT 'Transparent'::character varying;
-
-
-
-CREATE TABLE IF NOT EXISTS analysis.chart_drawproperties
-(
-  chart_type character varying NOT NULL,
-  chart_width integer,
-  chart_height integer,
-  chart_title_font_size integer,
-  chart_title_font_color character varying,
-  chart_subtitle_font_size integer,
-  chart_subtitle_font_color character varying,
-  yaxe1_font_size integer,
-  yaxe2_font_size integer,
-  legend_font_size integer,
-  legend_font_color character varying,
-  xaxe_font_size integer,
-  xaxe_font_color character varying,
-  yaxe3_font_size integer,
-  CONSTRAINT chart_drawproperties_pk PRIMARY KEY (chart_type)
-)
-WITH (
-  OIDS=TRUE
-);
-ALTER TABLE analysis.chart_drawproperties
-  OWNER TO estation;
-
-
-
--- Table: analysis.map_templates
-
--- DROP TABLE analysis.map_templates;
-
-CREATE TABLE IF NOT EXISTS analysis.map_templates
-(
-  templatename character varying(80) NOT NULL,
-  userid character varying(50) NOT NULL,
-  mapviewposition character varying(10),
-  mapviewsize character varying(10),
-  productcode character varying,
-  subproductcode character varying,
-  productversion character varying,
-  mapsetcode character varying,
-  legendid integer,
-  legendlayout character varying(15) DEFAULT 'vertical'::character varying,
-  legendobjposition character varying(10),
-  showlegend boolean NOT NULL DEFAULT false,
-  titleobjposition character varying(10),
-  titleobjcontent text,
-  disclaimerobjposition character varying(10),
-  disclaimerobjcontent text,
-  logosobjposition character varying(10),
-  logosobjcontent text,
-  showobjects boolean NOT NULL DEFAULT false,
-  scalelineobjposition character varying(10),
-  vectorlayers character varying(20),
-  outmask boolean NOT NULL DEFAULT false,
-  outmaskfeature text,
-  auto_open boolean DEFAULT false,
-  CONSTRAINT map_templates_pkey PRIMARY KEY (templatename, userid),
-  CONSTRAINT user_map_templates_fkey FOREIGN KEY (userid)
-      REFERENCES analysis.users (userid) MATCH SIMPLE
-      ON UPDATE CASCADE ON DELETE CASCADE
-)
-WITH (
-  OIDS=FALSE
-);
-ALTER TABLE analysis.map_templates
-  OWNER TO estation;
-
-
-
-
--- DROP TABLE products.geoserver;
-
-CREATE TABLE IF NOT EXISTS products.geoserver
-(
-  geoserver_id serial NOT NULL,
-  productcode character varying NOT NULL,
-  subproductcode character varying NOT NULL,
-  version character varying NOT NULL,
-  defined_by character varying NOT NULL,
-  activated boolean NOT NULL DEFAULT false,
-  startdate bigint,
-  enddate bigint,
-  CONSTRAINT geoserver_pk PRIMARY KEY (geoserver_id),
-  CONSTRAINT product_geoserver_fk FOREIGN KEY (productcode, subproductcode, version)
-      REFERENCES products.product (productcode, subproductcode, version) MATCH SIMPLE
-      ON UPDATE CASCADE ON DELETE CASCADE
-)
-WITH (
-  OIDS=FALSE
-);
-ALTER TABLE products.geoserver
-  OWNER TO estation;
-COMMENT ON TABLE products.geoserver
-  IS 'Define which products/versions/subproducts have to be synchronized.';
 
 
 
@@ -608,6 +854,8 @@ $BODY$
   COST 100;
 ALTER FUNCTION products.populate_geoserver(boolean)
   OWNER TO estation;
+
+
 
 /**********************************
  Functions of SCHEMA "products"
@@ -1378,6 +1626,7 @@ BEGIN
 	RETURN QUERY SELECT 'SELECT products.update_insert_thema('
 		|| 'thema_id := ''' || thema_id || ''''
 		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', activated := FALSE'
 		|| ' );'  as inserts
 	FROM products.thema;
 
@@ -1412,7 +1661,8 @@ BEGIN
 		|| ', full_copy := ' || FALSE
 		|| ' );'  as inserts
 	FROM products.product
-	WHERE defined_by = 'JRC';
+	WHERE defined_by = 'JRC'
+	ORDER BY productcode, version;
 
 
 	RETURN QUERY SELECT chr(10);
@@ -1427,7 +1677,8 @@ BEGIN
 		|| ', activated := ' || activated
 		|| ' );'  as inserts
 	FROM products.thema_product tp
-	WHERE (tp.productcode, tp.version) in (SELECT productcode, version FROM products.product WHERE defined_by = 'JRC');
+	WHERE (tp.productcode, tp.version) in (SELECT productcode, version FROM products.product WHERE defined_by = 'JRC')
+	ORDER BY thema_id;
 
 
 	RETURN QUERY SELECT chr(10);
@@ -1684,7 +1935,7 @@ BEGIN
 	RETURN QUERY SELECT chr(10);
 
 
-	RETURN QUERY SELECT 'SELECT analysis.update_insert_legend('
+	RETURN QUERY SELECT 'PERFORM analysis.update_insert_legend('
 		|| ' legend_id := ' || legend_id
 		|| ', legend_name := ' || COALESCE('''' || legend_name || '''', 'NULL')
 		|| ', step_type := ' || COALESCE('''' || step_type || '''', 'NULL')
@@ -1697,9 +1948,12 @@ BEGIN
 		|| ', step_range_from := ' || COALESCE(TRIM(to_char(step_range_from, '99999999D999999')), 'NULL')
 		|| ', step_range_to := ' || COALESCE(TRIM(to_char(step_range_to, '99999999D999999')), 'NULL')
 		|| ', unit := ' || COALESCE('''' || unit || '''', 'NULL')
+		|| ', defined_by := ' || COALESCE('''' || defined_by || '''', 'NULL')
 		|| ' );'  as inserts
-	FROM analysis.legend;
-
+	FROM analysis.legend
+	WHERE legend_id < 400
+	-- AND defined_by = 'JRC'
+	ORDER BY legend_id;
 
 	RETURN QUERY SELECT chr(10);
 	RETURN QUERY SELECT chr(10);
@@ -1777,6 +2031,7 @@ BEGIN
 		|| ', xaxe_font_size := ' || xaxe_font_size
 		|| ', xaxe_font_color := ' || COALESCE('''' || xaxe_font_color || '''', 'NULL')
 		|| ', yaxe3_font_size := ' || yaxe3_font_size
+		|| ', yaxe4_font_size := ' || yaxe4_font_size
 		|| ' );'  as inserts
 	FROM analysis.chart_drawproperties;
 
@@ -1861,10 +2116,6 @@ ALTER FUNCTION products.export_jrc_data(boolean)
 
 -- DROP FUNCTION products.export_all_data(boolean);
 
--- Function: products.export_all_data(boolean)
-
--- DROP FUNCTION products.export_all_data(boolean);
-
 CREATE OR REPLACE FUNCTION products.export_all_data(full_copy boolean DEFAULT true)
   RETURNS SETOF text AS
 $BODY$
@@ -1880,6 +2131,10 @@ BEGIN
 	FROM products.product_category;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
 	RETURN QUERY SELECT 'SELECT products.update_insert_frequency('
 		|| 'frequency_id := ''' || frequency_id || ''''
 		|| ', time_unit := ''' || time_unit || ''''
@@ -1890,6 +2145,10 @@ BEGIN
 	FROM products.frequency;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
 	RETURN QUERY SELECT 'SELECT products.update_insert_date_format('
 		|| 'date_format := ''' || date_format || ''''
 		|| ', definition := ' || COALESCE('''' || definition || '''', 'NULL')
@@ -1897,11 +2156,20 @@ BEGIN
 	FROM products.date_format;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
 	RETURN QUERY SELECT 'SELECT products.update_insert_data_type('
 		|| 'data_type_id := ''' || data_type_id || ''''
 		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
 		|| ' );'  as inserts
 	FROM products.data_type;
+
+
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_mapset('
@@ -1924,12 +2192,20 @@ BEGIN
 	FROM products.mapset;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
 	RETURN QUERY SELECT 'SELECT products.update_insert_thema('
 		|| 'thema_id := ''' || thema_id || ''''
 		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', activated := ' || activated
 		|| ' );'  as inserts
 	FROM products.thema;
 
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_product('
@@ -1960,6 +2236,9 @@ BEGIN
 	FROM products.product;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_thema_product('
 		|| 'thema_id := ''' || thema_id || ''''
@@ -1971,6 +2250,8 @@ BEGIN
 	FROM products.thema_product;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_internet_source('
@@ -1996,6 +2277,10 @@ BEGIN
 		|| ' );'  as inserts
 	FROM products.internet_source;
 
+
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 
@@ -2047,6 +2332,9 @@ BEGIN
 	FROM products.eumetcast_source;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_datasource_description('
 		|| '  datasource_descr_id := ' || COALESCE('''' || datasource_descr_id || '''', 'NULL')
@@ -2071,6 +2359,9 @@ BEGIN
 	FROM products.datasource_description dd;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_product_acquisition_data_source('
 		|| ' productcode := ''' || productcode || ''''
@@ -2085,6 +2376,9 @@ BEGIN
 		|| ' );'  as inserts
 	FROM products.product_acquisition_data_source;
 
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_sub_datasource_description('
@@ -2105,6 +2399,9 @@ BEGIN
 	FROM products.sub_datasource_description;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_ingestion('
 		|| '  productcode := ' || COALESCE('''' || productcode || '''', 'NULL')
@@ -2121,6 +2418,9 @@ BEGIN
 	FROM products.ingestion;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_processing('
 		|| ' process_id := ' || process_id
@@ -2135,6 +2435,9 @@ BEGIN
 		|| ' );'  as inserts
 	FROM products.processing;
 
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_process_product('
@@ -2154,6 +2457,10 @@ BEGIN
 	FROM products.process_product;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_i18n('
 		|| ' label := ' || COALESCE('''' || label || '''', 'NULL')
 		|| ', eng := ''' || COALESCE(replace(replace(eng,'"',''''), '''', ''''''), 'NULL') || ''''
@@ -2166,6 +2473,10 @@ BEGIN
 	FROM analysis.i18n;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_languages('
 		|| ' langcode := ' || COALESCE('''' || langcode || '''', 'NULL')
 		|| ', langdescription := ' || COALESCE('''' || langdescription || '''', 'NULL')
@@ -2173,6 +2484,9 @@ BEGIN
 		|| ' );'  as inserts
 	FROM analysis.languages;
 
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_legend('
@@ -2189,8 +2503,12 @@ BEGIN
 		|| ', step_range_to := ' || COALESCE(TRIM(to_char(step_range_to, '99999999D999999')), 'NULL')
 		|| ', unit := ' || COALESCE('''' || unit || '''', 'NULL')
 		|| ' );'  as inserts
-	FROM analysis.legend;
+	FROM analysis.legend
+	ORDER BY legend_id;
 
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_legend_step('
@@ -2204,6 +2522,9 @@ BEGIN
 	FROM analysis.legend_step;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
 
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_product_legend('
 		|| ' productcode := ' || COALESCE('''' || productcode || '''', 'NULL')
@@ -2214,6 +2535,9 @@ BEGIN
 		|| ' );'  as inserts
 	FROM analysis.product_legend;
 
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_timeseries_drawproperties('
@@ -2239,6 +2563,9 @@ BEGIN
 	FROM analysis.timeseries_drawproperties;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
 
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_chart_drawproperties('
 		|| ' chart_type := ' || COALESCE('''' || chart_type || '''', 'NULL')
@@ -2255,9 +2582,13 @@ BEGIN
 		|| ', xaxe_font_size := ' || xaxe_font_size
 		|| ', xaxe_font_color := ' || COALESCE('''' || xaxe_font_color || '''', 'NULL')
 		|| ', yaxe3_font_size := ' || yaxe3_font_size
+		|| ', yaxe4_font_size := ' || yaxe4_font_size
 		|| ' );'  as inserts
 	FROM analysis.chart_drawproperties;
 
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_spirits('
@@ -2279,6 +2610,10 @@ BEGIN
 		|| ', activated := ' || activated
 		|| ' );'  as inserts
 	FROM products.spirits;
+
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
 
 
 	RETURN QUERY SELECT 'PERFORM analysis.update_insert_layers('
@@ -2322,6 +2657,7 @@ $BODY$
   ROWS 1000;
 ALTER FUNCTION products.export_all_data(boolean)
   OWNER TO estation;
+
 
 
 

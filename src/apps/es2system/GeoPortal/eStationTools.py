@@ -119,13 +119,15 @@ def createSLD(product, version, subproduct, output_file=None):
 
         for legend in product_legends:
 
-            legend_dict = functions.row2dict(legend)
-            default_legend = legend_dict['default_legend']
+            # Changes for ES2-85
+            legend_dict = legend
+            defaultlegend = legend_dict['default_legend']
 
-            if default_legend == 'True':
-                defaultlegend = True
-            else:
-                defaultlegend = False
+            # Changes for ES2-85
+            # if default_legend == 'True':
+            #     defaultlegend = True
+            # else:
+            #     defaultlegend = False
 
             # if there is only 1 legend defined, this is the default legend (even if not defined as default legend).
             if product_legends.__len__() == 1:
@@ -314,9 +316,11 @@ def uploadAndRegisterRaster(service, product, subproduct, version, mapset, date,
     #if not geoserverREST.isRaster(workspace,layerName):
     if not geoserverREST.isRaster(workspace, coverage):
         # Ensure file is uploaded
-        if not existsRemote(geoserverREST.restHost,remoteFilepath, user=geoserverREST.restLogin):#VO changed sshUser to restLogin
-            #if uploadRemote(geoserverREST.restHost, localFilepath, remoteFilepath, user=geoserverREST.sshUser):
-            if uploadRemote(geoserverREST.restHost, localFilepath, remoteFilepath, user=geoserverREST.restLogin):#VO changed sshUser to restLogin so that it is mesa@197.254.113.174 and not adminuser@197.254.113.117
+        if not existsRemote(geoserverREST.restHost,remoteFilepath, user=geoserverREST.sshUser):                         # Here, and below - we should act as sshUser - see ES2-72
+            if uploadRemote(geoserverREST.restHost, localFilepath, remoteFilepath, user=geoserverREST.sshUser):         # the previously done changes by VO are rolled-back
+
+        # if not existsRemote(geoserverREST.restHost,remoteFilepath, user=geoserverREST.restLogin):                     #VO changed sshUser to restLogin -> wrong (see above)
+            # if uploadRemote(geoserverREST.restHost, localFilepath, remoteFilepath, user=geoserverREST.restLogin):     #VO changed sshUser to restLogin so that it is mesa@197.254.113.174 and not adminuser@197.254.113.117
                 logger.error('Cannot upload file {0}.'.format(localFilepath))
                 status = True
             else:

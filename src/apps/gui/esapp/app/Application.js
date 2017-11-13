@@ -19,6 +19,7 @@
 //});
 
 
+
 /**
  * The main application class. An instance of this class is created by app.js when it calls
  * Ext.application(). This is the ideal place to handle application launch and initialization
@@ -43,6 +44,7 @@ Ext.define('esapp.Application', {
 
     stores: [
          'LogoImages'
+        ,'ProcessingStore'
         ,'i18nStore'
         ,'LanguagesStore'
         ,'SystemSettingsStore'
@@ -50,20 +52,19 @@ Ext.define('esapp.Application', {
         ,'FrequenciesStore'
         ,'DateFormatsStore'
         ,'DataTypesStore'
-        ,'TimeseriesProductsStore'
-        ,'TSDrawPropertiesStore'
-        ,'LayersStore'
-        ,"ColorSchemesStore"
         ,'LogosMapView'
-
+        ,'LayersStore'
+        ,'LegendsStore'
         ,'EumetcastSourceStore'
         ,'InternetSourceStore'
-        ,'ProductsActiveStore'
         ,'ProductsInactiveStore'
-        ,'DataAcquisitionsStore'
-        ,'IngestionsStore'
-        ,'DataSetsStore'
-        ,'ProcessingStore'
+        ,'ProductsActiveStore'      // no autoload
+        ,'DataAcquisitionsStore'    // no autoload
+        ,'IngestionsStore'          // no autoload
+        ,'TimeseriesProductsStore'
+        ,'TSDrawPropertiesStore'
+        ,"ColorSchemesStore"
+        ,'DataSetsStore'            // no autoload
     ],
 
     // create a reference in Ext.application so we can access it from multiple functions
@@ -74,6 +75,10 @@ Ext.define('esapp.Application', {
         //console.info('onBeforeLaunch');
         var me = this;
         //console.info(me);
+
+        Ext.override(Ext.tip.QuickTip, {
+            dismissDelay: 20000
+        });
 
         Ext.tip.QuickTipManager.init();
         Ext.setGlyphFontFamily('FontAwesome');
@@ -219,49 +224,23 @@ Ext.define('esapp.Application', {
 
 
         if (esapp.globals['typeinstallation'] == 'windows'){
-            // Ext.data.StoreManager.lookup('TimeseriesProductsStore').load();
-            Ext.data.StoreManager.lookup('TSDrawPropertiesStore').load();
-            Ext.data.StoreManager.lookup('LayersStore').load();
-            Ext.data.StoreManager.lookup('ColorSchemesStore').load();
-            Ext.data.StoreManager.lookup('SystemSettingsStore').load();
             Ext.data.StoreManager.lookup('DataSetsStore').load();
         }
         else {
-            // Ext.data.StoreManager.lookup('CategoriesStore').load();
-            // Ext.data.StoreManager.lookup('FrequenciesStore').load();
-            // Ext.data.StoreManager.lookup('DateFormatsStore').load();
-            // Ext.data.StoreManager.lookup('DataTypesStore').load();
-
-            // Ext.data.StoreManager.lookup('TimeseriesProductsStore').load();
-            Ext.data.StoreManager.lookup('TSDrawPropertiesStore').load();
-            Ext.data.StoreManager.lookup('LayersStore').load();
-            Ext.data.StoreManager.lookup('ColorSchemesStore').load();
-            Ext.data.StoreManager.lookup('SystemSettingsStore').load();
-            Ext.data.StoreManager.lookup('DataSetsStore').load();
-
             if (esapp.globals['role'] == 'pc2') {
-                // Ext.data.StoreManager.lookup('EumetcastSourceStore').load();
-                // Ext.data.StoreManager.lookup('InternetSourceStore').load();
-                // Ext.data.StoreManager.lookup('ProductsActiveStore').load();
-                Ext.data.StoreManager.lookup('ProductsInactiveStore').load();
-                // Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
-                // Ext.data.StoreManager.lookup('IngestionsStore').load();
-                // Ext.data.StoreManager.lookup('DataSetsStore').load();
-                Ext.data.StoreManager.lookup('ProcessingStore').load();
+                Ext.data.StoreManager.lookup('ProductsActiveStore').load();
+                Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
+                Ext.data.StoreManager.lookup('IngestionsStore').load();
             }
             if (esapp.globals['role'] == 'pc3' && esapp.globals['mode'] == 'recovery'){
-                // Ext.data.StoreManager.lookup('EumetcastSourceStore').load();
-                // Ext.data.StoreManager.lookup('InternetSourceStore').load();
-                // Ext.data.StoreManager.lookup('ProductsActiveStore').load();
-                Ext.data.StoreManager.lookup('ProductsInactiveStore').load();
-                // Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
-                // Ext.data.StoreManager.lookup('IngestionsStore').load();
-                // Ext.data.StoreManager.lookup('DataSetsStore').load();
-                Ext.data.StoreManager.lookup('ProcessingStore').load();
+                Ext.data.StoreManager.lookup('ProductsActiveStore').load();
+                Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
+                Ext.data.StoreManager.lookup('IngestionsStore').load();
             }
+            Ext.data.StoreManager.lookup('DataSetsStore').load();
         }
 
-        var delay = 1500;
+        var delay = 500;
         // if (!Ext.data.StoreManager.lookup('TimeseriesProductsStore').isLoaded()){
         //     delay = 2000;
         // }

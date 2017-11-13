@@ -9,6 +9,11 @@ Ext.define('esapp.view.analysis.mapTemplateAdminModel', {
             session: true,
             storeId: 'usermaptemplates',
 
+            sorters: [{
+                property: 'templatename',
+                direction: 'ASC'
+            }],
+
             proxy: {
                 type: 'rest',
 

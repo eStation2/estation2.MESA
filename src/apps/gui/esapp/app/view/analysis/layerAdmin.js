@@ -44,9 +44,10 @@ Ext.define("esapp.view.analysis.layerAdmin",{
     },
 
     listeners: {
-        close: 'onClose',
-        show: 'onShow'
+        close: 'onClose'
+        // ,show: 'onShow'
     },
+    session:true,
 
     initComponent: function () {
         var me = this;
@@ -87,8 +88,9 @@ Ext.define("esapp.view.analysis.layerAdmin",{
             reference: 'layersGrid',
             //region: 'center',
             //width: 465,
+            // store: 'layers',
             bind: '{layers}',
-            session:true,
+            // session:true,
 
             viewConfig: {
                 stripeRows: false,

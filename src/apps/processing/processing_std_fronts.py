@@ -8,6 +8,7 @@
 
 # Import std modules
 import os
+import glob
 
 # Import eStation2 modules
 from lib.python import functions
@@ -73,14 +74,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
                         'minThreshold' : None }
 
     if prod == 'pml-modis-sst':
-        parameters = {  'histogramWindowStride': None,
-                        'minTheta' : None,
-                        'minPopProp' : None,
-                        'minPopMeanDifference' : None,
-                        'minSinglePopCohesion' : None,
-                        'histogramWindowSize' : None,
-                        'minImageValue' : None,
-                        'minThreshold' : None }
+        parameters = {  'histogramWindowSize' : 32,
+                        'histogramWindowStride': 16,
+                        'minTheta' : 0.76,
+                        'minPopProp' : 0.25,
+                        'minPopMeanDifference' : 20,
+                        'minSinglePopCohesion' : 0.60,
+                        'minImageValue' : 1,
+                        'minThreshold' : 1 }
 
     #   ---------------------------------------------------------------------
     #   SST Fronts (raster)
@@ -141,12 +142,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     def sst_shapefile_conversion(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
+        # Check if the output file already exists - and delete it
+        if os.path.isfile(output_file):
+            files=glob.glob(output_file.replace('.shp','.*'))
+            for my_file in files:
+                os.remove(my_file)
+
         functions.check_output_dir(os.path.dirname(output_file))
-        #command=[es_constants.es2globals['gdal_polygonize'], input_file, output_file, '-nomask', '-f', 'ESRI Shapefile']
-        #p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        #out, err = p.communicate()
         command=es_constants.es2globals['gdal_polygonize']+' '+ input_file+' '+ output_file+' -nomask -f "ESRI Shapefile"'
-        print command
         p = os.system(command)
 
     return proc_lists
@@ -155,7 +158,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 #   Run the pipeline
 def processing_std_fronts(res_queue, pipeline_run_level=0, pipeline_printout_level=0,
                         pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                        starting_dates=None, update_stats=False, nrt_products=True, write2file=None, logfile=None):
+                        starting_dates=None, update_stats=False, nrt_products=True, write2file=None, logfile=None,
+                        touch_files_only=False):
 
     spec_logger = log.my_logger(logfile)
     spec_logger.info("Entering routine %s" % 'processing_std_fronts')
@@ -170,7 +174,8 @@ def processing_std_fronts(res_queue, pipeline_run_level=0, pipeline_printout_lev
         fwrite_id=None
 
     if pipeline_run_level > 0:
-        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, history_file='/eStation2/log/.ruffus_history.sqlite')
+        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, history_file='/eStation2/log/.ruffus_history.sqlite',touch_files_only=touch_files_only,
+                     checksum_level=0)
 
     if pipeline_printout_level > 0:
         pipeline_printout(verbose=pipeline_printout_level, output_stream=fwrite_id)

@@ -133,6 +133,10 @@ class Product(object):
             my_mapset = MapSet()
             my_mapset.assigndb(mapset)
             larger_mapset = my_mapset.get_larger_mapset()
+            # See ES2-64: 07.11.17 -> check a larger mapset exist (or return empty)
+            if not larger_mapset:
+                logger.warning("No larger mapset found for original mapset: %s. Return" % mapset)
+                return missing_filenames
             new_dataset = product.get_dataset(mapset=larger_mapset, sub_product_code=missing['subproduct'])
             new_existing_files = new_dataset.get_filenames()
 
@@ -141,7 +145,7 @@ class Product(object):
                 dataset = new_dataset
             else:
                 logger.warning('No any file found for larger mapset: %s. Return' % larger_mapset)
-                return
+                return missing_filenames
         else:
                 use_mapset = mapset
 
@@ -232,7 +236,7 @@ class Product(object):
     @staticmethod
     def create_tar(missing_info, filetar=None, tgz=True):
 
-    # Given a 'missing_info' object, creates a tar-file containing all required files
+    # Given a 'missing_info' object, creates a tar-file containing all required (i.e. missing) files
 
         result = {'status':0,            # 0 -> ok, all files copied, 1-> at least 1 file missing
                   'n_file_copied':0,
@@ -242,7 +246,7 @@ class Product(object):
         tmp_dir = None
         final_filenames = []
 
-        # Check the target file name is passed (or define a temp one)
+        # Check that the target filename for TAR is passed (OR define a temp one)
         if filetar is None:
             file_temp = tempfile.NamedTemporaryFile()
             filetar = file_temp.name
@@ -258,16 +262,19 @@ class Product(object):
                 pass
             orig_mapset = missing['mapset']
 
-            # The get_missing_filenames can return a 'larger' mapset.
-            # Manage here the re-projection
+            # The get_missing_filenames can return a 'larger' mapset (if the orig is missing):
+            #   manage here the re-projection and append in final_filenames the ones for the 'orig' mapset
+
             for filename in filenames:
                 [product_code, sub_product_code, version, str_date, my_mapset] = functions.get_all_from_path_full(filename)
 
                 if my_mapset == orig_mapset:
-                    final_filenames.append(filename)
+                    if os.path.isfile(filename):
+                        final_filenames.append(filename)
                 else:
                     if tmp_dir is None:
                         tmp_dir = tempfile.mkdtemp(prefix=__name__, suffix='',dir=es_constants.base_tmp_dir)
+
                     # Do reprojection to a /tmp dir (if the file exists)
                     if os.path.isfile(filename):
                         new_filename = reproject_output(filename, my_mapset, orig_mapset, output_dir=tmp_dir+os.path.sep,
@@ -276,18 +283,19 @@ class Product(object):
                             final_filenames.append(new_filename)
 
         # Create .tar
-        tar = tarfile.open(filetar, "w|gz" if tgz else "w|",dereference=True)
-        for filename in final_filenames:
-            name = os.path.basename(filename)
-            subdir = functions.get_subdir_from_path_full(filename)
-            if os.path.isfile(filename):
-                tar.add(filename, arcname=subdir+name)
-                logger.info('Added file: %s', filename)
-                result['n_file_copied']+=1
-            else:
-                result['n_file_missing']+=1
-                result['status']=1
-        tar.close()
+        if len(final_filenames) > 0:
+            tar = tarfile.open(filetar, "w|gz" if tgz else "w|",dereference=True)
+            for filename in final_filenames:
+                name = os.path.basename(filename)
+                subdir = functions.get_subdir_from_path_full(filename)
+                if os.path.isfile(filename):
+                    tar.add(filename, arcname=subdir+name)
+                    logger.info('Added file: %s', filename)
+                    result['n_file_copied']+=1
+                else:
+                    result['n_file_missing']+=1
+                    result['status']=1
+            tar.close()
 
         # Remove tmp_dir
         if tmp_dir is not None:

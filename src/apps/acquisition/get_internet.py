@@ -338,6 +338,11 @@ def get_file_from_url(remote_url_file,  target_dir, target_file=None,userpwd='')
             outputfile.close()
             os.remove(target_fullpath)
             raise Exception('HTTP Error in downloading the file: %i' % c.getinfo(pycurl.HTTP_CODE))
+        # See ES2-67
+        elif c.getinfo(pycurl.HTTP_CODE) == 301:
+            outputfile.close()
+            os.remove(target_fullpath)
+            raise Exception('File moved permanently: %i' % c.getinfo(pycurl.HTTP_CODE))
         else:
             outputfile.close()
             shutil.move(target_fullpath, target_final)
