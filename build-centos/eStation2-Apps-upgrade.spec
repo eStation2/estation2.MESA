@@ -208,7 +208,7 @@ EOF
     # Activate the User THEMA in the thema table (since 2.1.0)
     thema=`grep -i thema /eStation2/settings/system_settings.ini | sed 's/thema =//'| sed 's/ //g'`
     psql -U estation -d estationdb -c "update products.thema SET activated=TRUE WHERE thema_id='$thema'"
-    echo "`date +'%Y-%m-%d %H:%M '` Thema acivated in the products.thema table"
+    echo "`date +'%Y-%m-%d %H:%M '` Thema activated in the products.thema table"
 
 
     # Update Tables (both for upgrade and installation from scratch)
@@ -294,9 +294,9 @@ sed -i "s|.*active_version.=.*|active_version = %{version}|" /eStation2/settings
 # echo "`date +'%Y-%m-%d %H:%M '` Set again the Thema to $thema"
 
 # Run the patch to install Firefox 52.4.0
-echo "`date +'%Y-%m-%d %H:%M '` Run Firefox Upgrader"
-/var/www/eStation2/patches/updater_firefox_52.4.0.dbx
-echo "`date +'%Y-%m-%d %H:%M '` Firefox version now: `firefox -v | awk '{ print $3 }' 2>> /dev/null`"
+# echo "`date +'%Y-%m-%d %H:%M '` Run Firefox Upgrader"
+# /var/www/eStation2/patches/updater_firefox_52.4.0.dbx
+# echo "`date +'%Y-%m-%d %H:%M '` Firefox version now: `firefox -v | awk '{ print $3 }' 2>> /dev/null`"
 
 # Start the eStation Services 
 echo "`date +'%Y-%m-%d %H:%M '` Starting all services"
