@@ -10,7 +10,7 @@ Ext.define('esapp.store.TSDrawPropertiesStore', {
 
     storeId : 'TSDrawPropertiesStore',
 
-    autoLoad: false,
+    autoLoad: true,
     autoSync: true,
     //session: true,
 

@@ -13,6 +13,7 @@ Ext.define('esapp.view.analysis.mapTemplateAdminController', {
         //analysisMain.getController().openSelectedMapTemplate(selections);
 
        for (var i = 0; i < selectedMapTemplates.length; i++) {
+           // console.info(selectedMapTemplates[i]);
             var mapTemplate = {
                 isTemplate: true,
                 isNewTemplate: false,
@@ -34,12 +35,14 @@ Ext.define('esapp.view.analysis.mapTemplateAdminController', {
                 disclaimerObjContent: selectedMapTemplates[i].data.disclaimerobjcontent,
                 logosObjPosition: selectedMapTemplates[i].data.logosobjposition.split(",").map(function(x){return parseInt(x)}),
                 logosObjContent: Ext.decode(selectedMapTemplates[i].data.logosobjcontent),
-                //logosObjContent: '',
                 showObjects: selectedMapTemplates[i].data.showobjects,
                 scalelineObjPosition: selectedMapTemplates[i].data.scalelineobjposition.split(",").map(function(x){return parseInt(x)}),
                 vectorLayers: selectedMapTemplates[i].data.vectorlayers,
                 outmask: selectedMapTemplates[i].data.outmask,
-                outmaskFeature: selectedMapTemplates[i].data.outmaskfeature
+                outmaskFeature: selectedMapTemplates[i].data.outmaskfeature,
+                zoomextent: selectedMapTemplates[i].data.zoomextent,
+                mapsize: selectedMapTemplates[i].data.mapsize,
+                mapcenter: selectedMapTemplates[i].data.mapcenter
             };
 
             //mapTemplate = {
@@ -80,7 +83,7 @@ Ext.define('esapp.view.analysis.mapTemplateAdminController', {
             newMapViewWin.show();
         }
 
-       //me.hide();
+       // me.hide();
     }
 
 

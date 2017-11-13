@@ -205,8 +205,10 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                         reference: 'start_date',
                         msgTarget: 'side',
                         emptyText: '',
+                        // allowOnlyWhitespace: false,
+                        allowBlank: true,
                         maxValue: 99999999,
-                        minValue: -99999999,
+                        // minValue: -99999999,
                         allowDecimals: true,
                         hideTrigger: false,
                         bind: '{theInternetSource.start_date}'
@@ -216,8 +218,10 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                         reference: 'end_date',
                         msgTarget: 'side',
                         emptyText: '',
+                        // allowOnlyWhitespace: false,
+                        allowBlank: true,
                         maxValue: 99999999,
-                        minValue: -99999999,
+                        // minValue: -99999999,
                         allowDecimals: true,
                         hideTrigger: false,
                         bind: '{theInternetSource.end_date}'

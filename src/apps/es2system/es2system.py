@@ -582,6 +582,7 @@ def loop_system(dry_run=False):
     delay_data_sync_minutes = es_constants.es2globals['system_delay_data_sync_min']
     time_for_db_dump = es_constants.es2globals['system_time_db_dump_hhmm']
     time_for_spirits_conv = es_constants.es2globals['system_time_spirits_conv']
+
     try:
         time_for_push_ftp = es_constants.es2globals['system_time_push_ftp']
     except:
@@ -949,8 +950,8 @@ def push_data_ftp(dry_run=False):
                         target = trg_dir + subdir
 
                         command = 'lftp -e "mirror -RLe {} {};exit" -u {}:{} {}"" >> {}'.format(source,target,user,psw,url,logfile)
-
                         logger.debug("Executing %s" % command)
+
                         # return
                         try:
                             status = os.system(command)

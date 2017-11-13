@@ -4,9 +4,10 @@ Ext.define('esapp.view.acquisition.product.EumetcastSourceAdminModel', {
     stores: {
         // Define a store of EumetcastSource records that links to the Session.
         eumetcastsources: {
-            model: 'EumetcastSource',
-            autoLoad: true,
-            autoSync: true
+            source: 'EumetcastSourceStore'
+            // model: 'EumetcastSource',
+            // autoLoad: true,
+            // autoSync: true
             ,session: true
         }
     }

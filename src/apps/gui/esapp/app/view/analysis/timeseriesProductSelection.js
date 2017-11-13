@@ -132,16 +132,23 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                         selectedTimeseriesStore.getData().each(function (product) {
                             yearsData = esapp.Utils.union_arrays(yearsData, product.get('years'));
                         });
-                        var yearsDataDict = [];
-                        yearsData.forEach(function (year) {
-                            yearsDataDict.push({'year': year});
+
+                        me.getViewModel().get('years').getData().each(function(year) {
+                            if (!Ext.Array.contains(yearsData, year.get('year'))){
+                                me.getViewModel().get('years').remove(year);
+                            }
                         });
 
-                        //if (Ext.isObject(Ext.getCmp('ts_selectyearstocompare_'+me.charttype).searchPopup)) {
-                        //    Ext.getCmp('ts_selectyearstocompare_'+me.charttype).searchPopup.lookupReference('searchGrid').getSelectionModel().deselectAll();
-                        //}
-                        //Ext.getCmp('timeserieschartselection').getViewModel().getStore('years').setData(yearsDataDict);
-                        me.getViewModel().getStore('years').setData(yearsDataDict);
+                        // var yearsDataDict = [];
+                        // yearsData.forEach(function (year) {
+                        //     yearsDataDict.push({'year': year});
+                        // });
+                        //
+                        // //if (Ext.isObject(Ext.getCmp('ts_selectyearstocompare_'+me.charttype).searchPopup)) {
+                        // //    Ext.getCmp('ts_selectyearstocompare_'+me.charttype).searchPopup.lookupReference('searchGrid').getSelectionModel().deselectAll();
+                        // //}
+                        // //Ext.getCmp('timeserieschartselection').getViewModel().getStore('years').setData(yearsDataDict);
+                        // me.getViewModel().getStore('years').setData(yearsDataDict);
                     }
                 }]
             }, {
@@ -671,7 +678,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
             items: [{
                 xtype: 'radio',
                 id: 'radio-multiyears_'+me.charttype,
-                checked: true,
+                checked: !me.fromto,
                 name: 'ts-period_'+me.charttype,
                 //inputValue: 'year',
                 style: {"margin-right": "5px"},
@@ -684,7 +691,12 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 selModel: {
                     allowDeselect:false,
                     toggleOnClick:false,
-                    mode:'SIMPLE'
+                    mode:'SIMPLE',
+                    listeners: {
+                        selectionchange: function () {
+                            Ext.getCmp("radio-multiyears_"+me.charttype).setValue(true);
+                        }
+                    }
                 },
                 bind: {
                     store: '{years}'
@@ -694,8 +706,8 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 },
                 columns: [
                     {
-                        text: esapp.Utils.getTranslation('available_years'),     // 'Available Years',
-                        width: 135,
+                        text: '<span class="smalltext">' + esapp.Utils.getTranslation('available_years')+ '</span>',     // 'Available Years',
+                        width: 132,
                         dataIndex: 'year',
                         menuDisabled: true,
                         sortable: true,
@@ -710,7 +722,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 border: false,
                 cls: 'newpanelstyle',
                 style: { "margin-right": "20px" },
-                width: 185,
+                width: 175,
                 height: 140
             }, {
                 xtype: 'fieldset',
@@ -813,6 +825,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                     //var timeseriesProductsStore = me.getViewModel().getStore('products');
                     //console.info(timeseriesProductsStore);
                     if (timeseriesProductsStore.isStore) {
+                        timeseriesProductsStore.proxy.extraParams = {forse: true};
                         timeseriesProductsStore.reload();
                         //me.fireEvent('afterrender');
                     }
@@ -823,20 +836,20 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                     //console.info(this.getViewModel().getStore('categories'));
                     var timeseriesProductsStore = Ext.getStore('TimeseriesProductsStore'),
                         delay = 0;
-// console.info(me);
+
                     var myLoadMask = new Ext.LoadMask({
                         msg    : esapp.Utils.getTranslation('loading'), // 'Loading...',
                         target : me
                     });
 
                     if (!timeseriesProductsStore.isLoaded()){
-                        delay = 1000;
+                        delay = 500;
                         // myLoadMask.show();
                     }
 
                     var task = new Ext.util.DelayedTask(function() {
                         if (!timeseriesProductsStore.isLoaded()) {
-                            delay = 1000;
+                            delay = 500;
                             task.delay(delay);
                         }
                         else {

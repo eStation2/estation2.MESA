@@ -42,13 +42,13 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
     style: 'background: white; cursor:move;',
     //bodyStyle:  'background:transparent;',
     margin: 0,
-    padding: 3,
+    padding: 0,
     html: '',
     logos_ImageObj: new Image(),
     logoPosition: [434, 583],
-    changesmade: true,
+    changesmade: false,
     config: {
-        logoData: null
+        logoData: []
     },
 
     //bind: {
@@ -65,6 +65,13 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
 
     initComponent: function () {
         var me = this;
+
+        me.bind = {
+            logoData:'{logoData}'
+        };
+        me.publishes = ['logoData'];
+
+        // me.logoData = me.getViewModel().data.logoData;
 
         me.logos_ImageObj = new Image();
         me.logoPosition = [434, 583];
@@ -118,14 +125,26 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                             }
                         });
                     });
-                    if (me.changesmade){
-                        task.delay(250);
+
+                    if ((me.getViewModel().data.logoData != null && me.getViewModel().data.logoData.length > 0) && (me.changesmade || me.logos_ImageObj.src == '')){
+                        // console.info('refresh the logo image');
+                        task.delay(500);
+                    }
+                    else {
+                        me.logos_ImageObj = new Image();
                     }
                 }
             },
             show: function(){
                 me.setPosition(me.logoPosition);
                 me.fireEvent('refreshimage');
+            }
+            // ,move: function(){
+            //     me.logoPosition = me.getPosition();
+            // }
+            ,beforedestroy: function(){
+                // To fix the error: mapView.js?_dc=1506608907564:56 Uncaught TypeError: binding.destroy is not a function
+                me.bind = null;
             }
         };
 
@@ -156,8 +175,8 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
             autoWidth: false,
             autoHeight: true,
             autoScroll: false,
-            width: 575,
-            minHeight: 500,
+            width: 568,
+            minHeight: 400,
             layout: 'vbox',
             modal: true,
             hidden: true,
@@ -171,16 +190,17 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
             alwaysOnTop: false,
             autoShow: false,
             resizable: false,
-            frame: true,
+            frame: false,
             frameHeader : false,
             border: false,
             bodyBorder: false,
             bodyStyle: "background-color: white !important;",
             shadow: true,
+            cls: 'rounded-box',
             //headerOverCls: 'grayheader',
             header: {
                 title: esapp.Utils.getTranslation('logo_object'), // 'Logo object',
-                titleAlign: 'right',
+                titleAlign: 'left',
                 //cls: 'transparentheader',
                 hidden: false,
                 items: [{
@@ -213,15 +233,19 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
             //    currentLogoData:'{currentLogoData}'
             //},
             items: [{
-                xtype: 'container',
+                xtype: 'panel',
+                header: {
+                    title: esapp.Utils.getTranslation('selected_logos'),    // 'Selected logos',
+                    cls: 'rounded-box-gray-header'
+                },
                 region: 'center',
                 layout: 'fit',
                 cls: 'rounded-box',
                 // autoHeight: true,
                 // autoWidth: true,
                 // scrollable: true,
-                width: 560,
-                height: 135,
+                width: 555,
+                height: 105,
                 autoScroll: true,
                 scrollable: 'vertical',
                 reserveScrollbar: true,
@@ -263,10 +287,10 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                     tpl: new Ext.XTemplate(
                         //'<div id="maplogoseditview">',
                         '<tpl for=".">',
-                            '<div class="maplogo-wrap">',
-                                '<div class="maplogo">',
+                            '<div class="maplogo-wrap" style="cursor: pointer;">',
+                                '<div class="maplogo" data-qtip="'+esapp.Utils.getTranslation('doubleclick_to_remove_from_selected_logos')+'">',
                                     // '<img src="{src}" width="{width}" height="{height}" style="padding: 0px 5px 0px 0px;"/>',
-                                    '<img src="{src}" width="110" style="vertical-align: middle; padding: 0px 5px 0px 0px;"/>',
+                                    '<img src="{src}" height="{height}" style="vertical-align: middle; padding: 0px 5px 0px 0px;"/>',
                                 '</div>',
                             '</div>',
                         '</tpl>'
@@ -274,7 +298,11 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                     )
                 }]
             },{
-                xtype: 'container',
+                xtype: 'panel',
+                header: {
+                    title: esapp.Utils.getTranslation('available_logos'),    // 'Available logos',
+                    cls: 'rounded-box-gray-header'
+                },
                 region: 'south',
                 layout: 'fit',
                 cls: 'rounded-box',
@@ -282,8 +310,8 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                 // minHeight: 350,
                 // maxHeight: 400,
                 // scrollable: true,
-                width: 560,
-                height: 400,
+                width: 555,
+                height: 310,
                 autoScroll: true,
                 scrollable: 'vertical',
                 reserveScrollbar: true,
@@ -295,7 +323,6 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                         // scope: this,
                         // selectionchange: this.onIconSelect,
                         itemdblclick: function(view, rec, itemEl) {
-                            //Ext.toast({html: "itemdblclick", title: "itemdblclick", width: 300, align: 't'});
                             view.up().up().down('dataview').store.add(rec);
                         }
                     },
@@ -306,8 +333,8 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                     //bind: '{logos}',
                     tpl: new Ext.XTemplate(
                         '<tpl for=".">',
-                            '<div class="maplogo-wrap">',
-                                '<div class="maplogo">',
+                            '<div class="maplogo-wrap" style="cursor: pointer;">',
+                                '<div class="maplogo" data-qtip="'+esapp.Utils.getTranslation('doubleclick_to_add_to_selected_logos')+'">',
                                     '<img src="{src}" width="110" />',
                                 '</div>',
                             '</div>',

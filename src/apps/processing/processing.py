@@ -136,7 +136,7 @@ def loop_processing(dry_run=False, serialize=False):
             if re.search('^std_.*',algorithm):
                 logger.debug("Processing Chain is standard type")
 
-                #log_to_stderr()
+                # Define dates interval from input product
                 start_date = input_products[0].start_date
                 end_date = input_products[0].end_date
 

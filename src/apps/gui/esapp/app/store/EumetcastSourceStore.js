@@ -12,7 +12,7 @@ Ext.define('esapp.store.EumetcastSourceStore', {
 
     storeId : 'EumetcastSourceStore'
 
-    ,autoLoad: false
+    ,autoLoad: true
     ,autoSync: false
     ,session: false
 

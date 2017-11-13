@@ -11,7 +11,7 @@ Ext.define('esapp.store.ColorSchemesStore', {
 
     storeId : 'colorschemes',
 
-    autoLoad: false,
+    autoLoad: true,
 
      proxy: {
         type: 'ajax',

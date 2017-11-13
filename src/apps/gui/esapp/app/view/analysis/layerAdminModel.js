@@ -4,6 +4,8 @@ Ext.define('esapp.view.analysis.layerAdminModel', {
     stores: {
         layers: {
             source:'LayersStore'
+            // model: 'esapp.model.Layer'
+           // ,session: true
         }
     }
 });

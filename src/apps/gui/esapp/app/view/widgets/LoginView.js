@@ -8,6 +8,7 @@ Ext.define("esapp.view.widgets.LoginView",{
 
         'Ext.layout.container.Fit',
         'Ext.app.ViewModel'
+        ,'Ext.util.Cookies'
     ],
 
     controller: "widgets-loginview",
@@ -41,6 +42,21 @@ Ext.define("esapp.view.widgets.LoginView",{
             ,setupready:me.setupLogout
             ,setupfail:me.failLogin
         });
+
+        me.listeners = {
+            beforerender: function(){
+                if (Ext.util.Cookies.get('estation2_userid') != null){
+                    var userinfo = {
+                        userid: Ext.util.Cookies.get('estation2_userid'),
+                        username: Ext.util.Cookies.get('estation2_username'),
+                        email: Ext.util.Cookies.get('estation2_useremail')
+                    };
+
+                    esapp.setUser(userinfo);
+                    me.setupLogout();
+                }
+            }
+        };
 
         me.loginItems = [{
             xtype: 'form'

@@ -1,11 +1,11 @@
 __author__ = "Marco Clerici"
 
-import datetime
+import datetime, os
 import proc_functions
 from multiprocessing import Queue
-# #   ---------------------------------------------------------------------
-# # vgt-ndvi
-# #   ---------------------------------------------------------------------
+#   ---------------------------------------------------------------------
+# vgt-ndvi
+#   ---------------------------------------------------------------------
 
 # from apps.processing.processing_std_ndvi import *
 # productcode='vgt-ndvi'
@@ -49,21 +49,24 @@ from multiprocessing import Queue
 # res_queue = None
 # processing_merge(**args)
 
-# #   ---------------------------------------------------------------------
-# # pml-modis-sst
-# #   ---------------------------------------------------------------------
-# from apps.processing.processing_std_fronts import *
-# args = {'pipeline_run_level':3, \
-#         'pipeline_printout_level':0, \
-#         'pipeline_printout_graph_level': 0, \
-#         'prod': 'pml-modis-sst',\
-#         'starting_sprod':'sst-3day',\
-#         'mapset': 'SPOTV-IOC-1km',\
-#         'version':'3.0',
-#         'logfile':'pml-modis-sst'
-#         }
-# res_queue = None
-# processing_std_fronts(res_queue, **args)
+#   ---------------------------------------------------------------------
+# pml-modis-sst
+#   ---------------------------------------------------------------------
+from apps.processing.processing_std_fronts import *
+def test_proc_pml_modis_fronts(pipe_run=0, pipe_print=3, touch_files_only=False):
+
+    args = {'pipeline_run_level':pipe_run, \
+            'pipeline_printout_level':pipe_print, \
+            'pipeline_printout_graph_level': 0, \
+            'prod': 'pml-modis-sst',\
+            'starting_sprod':'sst-3day',\
+            'mapset': 'SPOTV-IOC-1km',\
+            'version':'3.0',
+            'logfile':'pml-modis-sst',
+            'touch_files_only':touch_files_only
+            }
+    res_queue = None
+    processing_std_fronts(res_queue, **args)
 #   ---------------------------------------------------------------------
 # modis-sst
 #   ---------------------------------------------------------------------
@@ -213,23 +216,28 @@ from multiprocessing import Queue
 #   ---------------------------------------------------------------------
 # chirps-dekad
 #   ---------------------------------------------------------------------
-# from apps.processing.processing_std_precip import *
-# #
-# starting_dates = None
-# args = {'pipeline_run_level':3, \
-#         'pipeline_printout_level':0, \
-#         'pipeline_printout_graph_level': 0, \
-#         'prod': 'chirps-dekad',\
-#         'starting_sprod':'10d',\
-#         'starting_dates': None,\
-#         'mapset': 'CHIRP-Africa-5km',\
-#         'version':'2.0',
-#         'logfile':'ruffus-chirps',
-#         'touch_only':False}
-#
-# request_queue = Queue()
-# proc_lists=processing_std_precip_prods_only(request_queue, **args)
-# print(proc_lists)
+from apps.processing.processing_std_precip import *
+def test_proc_chirps_dekad(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False):
+
+    # Create the list of dates -> returns empty if start==end==None
+    if start_date is not None and end_date is not None:
+        starting_dates = proc_functions.get_list_dates_for_dataset('modis-firms', '1day', 'v6.0', start_date=start_date, end_date=end_date)
+    else:
+        starting_dates = None
+
+    args = {'pipeline_run_level':pipe_run, \
+            'pipeline_printout_level':pipe_print, \
+            'pipeline_printout_graph_level': 0, \
+            'prod': 'chirps-dekad',\
+            'starting_sprod':'10d',\
+            'starting_dates': starting_dates,\
+            'mapset': 'CHIRP-Africa-5km',\
+            'version':'2.0',
+            'logfile':'ruffus-chirps',
+            'touch_only':touch_files_only}
+
+    request_queue = Queue()
+    proc_lists=processing_std_precip_prods_only(request_queue, **args)
 
 #   ---------------------------------------------------------------------
 # lsasaf-et
@@ -287,32 +295,40 @@ from multiprocessing import Queue
 # modis-firms
 #   ---------------------------------------------------------------------
 from apps.processing.processing_std_modis_firms import *
-# # Create the list of dates -> returns empty if start==end==None
-#
-#
-# start_date='20161001'
-# end_date = '20161010'
-# starting_dates = proc_functions.get_list_dates_for_dataset('modis-firms', '1day', 'v5.0', start_date=start_date, end_date=end_date)
-starting_dates = None
+def test_proc_modis_firms(start_date=None, end_date=None, pipe_run=0, pipe_print=3, start_date_stats=None, end_date_stats=None):
 
-target_mapset='SPOTV-Africa-1km'
+    # Create the list of dates -> returns empty if start==end==None
+    if start_date is not None and end_date is not None:
+        starting_dates = proc_functions.get_list_dates_for_dataset('modis-firms', '1day', 'v6.0', start_date=start_date, end_date=end_date)
+    else:
+        starting_dates = None
 
-args = {'pipeline_run_level':3,
-        'pipeline_printout_level':0,
-        'pipeline_printout_graph_level': 0,
-        'prod': 'modis-firms',
-        'starting_sprod':'1day',
-        'starting_dates': starting_dates,
-        'mapset': target_mapset,
-        'version':'v6.0',
-        'logfile':'log-modis-firms.log',
-        'update_stats' : False,
-        'nrt_products' : True,
-        'touch_files_only':False}
+    if start_date_stats is not None and end_date_stats is not None:
+        starting_dates_stats = proc_functions.get_list_dates_for_dataset('modis-firms', '10dcount', 'v6.0', start_date=start_date_stats, end_date=end_date_stats)
+    else:
+        starting_dates_stats = None
 
-res_queue = None
-proc_lists=processing_std_modis_firms(res_queue,**args)
-print(proc_lists)
+    target_mapset='SPOTV-Africa-1km'
+
+    touch_files_only=False
+
+    args = {'pipeline_run_level':pipe_run,
+            'pipeline_printout_level':pipe_print,
+            'pipeline_printout_graph_level': 0,
+            'prod': 'modis-firms',
+            'starting_sprod':'1day',
+            'starting_dates': starting_dates,
+            'starting_dates_stats': starting_dates_stats,
+            'mapset': target_mapset,
+            'version':'v6.0',
+            'logfile':'log-modis-firms.log',
+            'update_stats' : False,
+            'nrt_products' : True,
+            'touch_files_only':touch_files_only}
+
+    res_queue = None
+    proc_lists=processing_std_modis_firms(res_queue,**args)
+    print(proc_lists)
 # ---------------------------------------------------------------------
 # msg-mpe
 #   ---------------------------------------------------------------------
@@ -436,3 +452,16 @@ from apps.processing.processing_std_msg_mpe import *
 #         }
 # res_queue = None
 # processing_std_gsod(res_queue, **args)
+
+#   ---------------------------------------------------------------------
+#   Calls
+#   ---------------------------------------------------------------------
+
+# test_proc_pml_modis_fronts(pipe_run=3, pipe_print=0, touch_files_only=False)
+# test_proc_modis_firms(pipe_run=4, pipe_print=0, start_date_stats='20030101', end_date_stats='20161231')
+test_proc_chirps_dekad(pipe_run=3, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
+
+# my_starting_dates_stats = proc_functions.get_list_dates_for_dataset('modis-firms', '10dcount', 'v6.0', start_date='20020701', end_date='20170821')
+# for date in my_starting_dates_stats:
+#     filename='/data/processing/modis-firms/v6.0/SPOTV-Africa-10km/derived/10dcount10k/'+date+'_modis-firms_10dcount10k_SPOTV-Africa-10km_v6.0.tif'
+#     st=os.system('touch '+filename)

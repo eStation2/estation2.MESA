@@ -100,22 +100,26 @@ Ext.define('esapp.view.main.Main', {
                         target : this
                     });
 
-                    if (!ingestiongridstore.isLoaded()){
-                        myLoadMask.show();
+                    if (eumetcastsourcestore.isStore && !eumetcastsourcestore.isLoaded()) {
+                        eumetcastsourcestore.load();
+                    }
+                    if (internetsourcestore.isStore && !internetsourcestore.isLoaded()) {
+                        internetsourcestore.load();
                     }
 
-
-                    if (productgridstore.isStore && !productgridstore.isLoaded()) {
-                        productgridstore.load({
-                            callback: function(records, options, success) {
-                                eumetcastsourcestore.load();
-                                internetsourcestore.load();
-
+                    if (ingestiongridstore.isStore && !ingestiongridstore.isLoaded() ){
+                        myLoadMask.show();
+                        ingestiongridstore.load({
+                            callback: function(records, options, success){
+                                myLoadMask.hide();
                                 if (acqgridsstore.isStore && !acqgridsstore.isLoaded()) {
+                                    myLoadMask.show();
                                     acqgridsstore.load({
                                         callback: function(records, options, success) {
-                                            if (ingestiongridstore.isStore && !ingestiongridstore.isLoaded()) {
-                                                ingestiongridstore.load({
+                                            myLoadMask.hide();
+                                            if (productgridstore.isStore && !productgridstore.isLoaded()) {
+                                                myLoadMask.show();
+                                                productgridstore.load({
                                                     callback: function(records, options, success){
                                                         myLoadMask.hide();
                                                     }

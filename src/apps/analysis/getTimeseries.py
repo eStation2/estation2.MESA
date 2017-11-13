@@ -354,7 +354,7 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
         for infile in unique_list:
             single_result = {'filename': '', 'meanvalue_noscaling': nodata, 'meanvalue': None}
 
-            if os.path.isfile(infile):
+            if infile.strip() != '' and os.path.isfile(infile):
                 # try:
 
                     # Open input file
@@ -454,6 +454,7 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
                     else:   #if aggregate['type'] == 'mean' or if aggregate['type'] == 'cumulate':
                         if mxnodata.count() == 0:
                             finalvalue = None
+                            meanResult = None
                         else:
                             if aggregate['aggregation_type'] == 'mean':
                                 # 'mean'

@@ -308,6 +308,9 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input_1), formatter_out)
     def std_precip_10dratio(input_file, output_file):
 
+        output_file = functions.list_to_element(output_file)
+        functions.check_output_dir(os.path.dirname(output_file))
+
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
         raster_image_math.do_oper_division_perc(**args)
 

@@ -10,7 +10,7 @@ from __future__ import absolute_import
 
 import unittest
 import datetime
-import sys
+import time
 from apps.productmanagement.helpers import INTERVAL_TYPE
 from apps.productmanagement.datasets import Dataset, Frequency
 from apps.productmanagement.exceptions import (WrongDateType, NoProductFound)
@@ -255,6 +255,35 @@ class TestDatasets(unittest.TestCase):
         for i in range(12):
             current_date = dataset.next_date(current_date)
         self.assertEquals(last_date, current_date)
+
+    def test_find_gaps(self):
+        start_time = time.time()
+        from_date = datetime.datetime(2017, 7, 1, 0, 0)
+        to_date = datetime.datetime(2017, 8, 1, 0, 0)
+
+        kwargs = {
+                'product_code':"lsasaf-lst",
+                'version': "undefined",
+                'sub_product_code': "10d15min",      #  "lst"
+                'mapset': 'MSG-satellite-3km',
+                'from_date': from_date,
+                'to_date': to_date
+                 }
+        # kwargs = {
+        #         'product_code': "vgt-ndvi",
+        #         'version': "sv2-pv2.1",
+        #         'sub_product_code': "10davg-linearx2",
+        #         'mapset': 'SPOTV-Africa-1km'
+        #          }
+        # kwargs = {
+        #         'product_code':"arc2-rain",
+        #         'version': "2.0",
+        #         'sub_product_code': "1year",
+        #         'mapset': 'ARC2-Africa-11km'
+        #          }
+        dataset = Dataset(**kwargs)
+        info = dataset.get_dataset_normalized_info()
+        print ("--- %s seconds ---" % (time.time() - start_time))
 
 #   Additional test to mimic/replicate what happens in webpy_esapp (M.C.)
 class TestDatasets4UI(unittest.TestCase):

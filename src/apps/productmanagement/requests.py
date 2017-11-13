@@ -109,8 +109,13 @@ def create_archive_from_request(request_file):
         return 1
 
     my_product = my_request['product']
-    my_mapsets = my_request['productmapsets']
     my_version = my_request['version']
+    # See ES2-64 : mapset MUST be specified
+    try:
+        my_mapsets = my_request['productmapsets']
+    except:
+        logger.error('No mapset defined in the request: cannot proceed. Exit')
+        return 1
 
     n_mapsets = len(my_mapsets)
     incresing_number=1
@@ -153,7 +158,7 @@ def create_archive_from_request(request_file):
             # Remove .tgz file
             os.remove(archive_name)
             product = None
-    return
+    return 0
 
 def get_archive_name(productcode, version, id):
 
