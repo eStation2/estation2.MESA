@@ -1967,7 +1967,8 @@ BEGIN
 		|| ', color_label := ' || COALESCE('''' || color_label || '''', 'NULL')
 		|| ', group_label := ' || COALESCE('''' || group_label || '''', 'NULL')
 		|| ' );'  as inserts
-	FROM analysis.legend_step;
+	FROM analysis.legend_step
+	ORDER BY legend_id;
 
 
 	RETURN QUERY SELECT chr(10);
