@@ -275,6 +275,12 @@ def GetLegends():
             # print legendname.encode('utf-8')
             legendname = legendname.replace('<BR>', ' ')
             legendname = legendname.replace('</BR>', ' ')
+            legendname = legendname.replace('<br>', ' ')
+            legendname = legendname.replace('</br>', ' ')
+            legendname = legendname.replace('<div>', ' ')
+            legendname = legendname.replace('</div>', ' ')
+            legendname = legendname.replace('<DIV>', ' ')
+            legendname = legendname.replace('</DIV>', ' ')
 
             # colorschemeHTML = '<table cellspacing=0 cellpadding=0 width=100%><tr><th colspan='+str(len(legend_steps))+'>'+legendname+'</th></tr><tr>'
             colorschemeHTML = legendname+'<table cellspacing=0 cellpadding=0 width=100%><tr>'
