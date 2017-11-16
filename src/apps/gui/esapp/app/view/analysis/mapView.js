@@ -249,7 +249,7 @@ Ext.define("esapp.view.analysis.mapView",{
                                     me.mapView = new ol.View({
                                         projection:"EPSG:4326",
                                         displayProjection:"EPSG:4326",
-                                        center: me.up().commonMapView.getCenter(),    // [20, -2],   // [20, -4.7],
+                                        center: me.mapView.getCenter(),      // me.up().commonMapView.getCenter(),    // [20, -2],   // [20, -4.7],
                                         resolution: 0.1,
                                         minResolution: 0.0001,
                                         maxResolution: 0.25,
@@ -502,10 +502,11 @@ Ext.define("esapp.view.analysis.mapView",{
                 show: function () {
                     // Ext.util.Observable.capture(this, function(e){console.log('timeline - ' + this.id + ': ' + e);});
                     this.expand();
+                    // console.info('show');
                     me.getController().redrawTimeLine(me);
                 }
                 ,beforeexpand: function () {
-                    // console.info('beforeexpand Height to: ' + me.height+133);
+                    // console.info('beforeexpand Height to: ' + me.height+125);
                     me.setHeight(me.height+125);
                 }
                 ,expand: function () {
@@ -533,7 +534,7 @@ Ext.define("esapp.view.analysis.mapView",{
                     if (!mapLegendObj.hidden) {
                         mapLegendObj.legendPosition = mapLegendObj.getPosition(true);
                     }
-                    // console.info('beforecollapse Height to: ' + me.height-133);
+                    // console.info('beforecollapse Height to: ' + me.height-125);
                     me.setHeight(me.height-125);
                 }
                 ,collapse: function () {
@@ -1105,21 +1106,43 @@ Ext.define("esapp.view.analysis.mapView",{
                         scalelineObj = me.lookupReference('scale-line_' + me.id),
                         mapObjectToggleBtn = me.lookupReference('objectsbtn_'+me.id.replace(/-/g,'_'));
 
+                    // if (me.zoomextent != null && me.zoomextent.trim() != ''){
+                    //     var extent = me.zoomextent.split(",").map(Number);
+                    //     var mapsize = (me.mapsize != null && me.mapsize.trim() != '') ? me.mapsize.split(",").map(Number) : [790, 778]; // /** @type {ol.Size} */ (me.map.getSize());
+                    //     var mapcenter = (me.mapcenter != null && me.mapcenter.trim() != '') ? me.mapcenter.split(",").map(Number) : me.map.getView().getCenter();
+                    //     // Unlink Mapview window
+                    //     var mapviewLinkToggleBtn = me.lookupReference('toggleLink_btn_'+ me.id.replace(/-/g,'_'));
+                    //     me.map.setView(me.mapView);
+                    //     mapviewLinkToggleBtn.setIconCls('fa fa-chain-broken fa-2x red');
+                    //     mapviewLinkToggleBtn.toggle(true);  // ('pressed', false);
+                    //     me.map.setSize(mapsize);
+                    //     me.map.getView().fit(extent, mapsize); // Zoom to saved extent
+                    //     me.map.getView().setCenter(mapcenter);
+                    //     me.map.getView().setZoom(me.map.getView().getZoom());
+                    // }
+
                     if (me.zoomextent != null && me.zoomextent.trim() != ''){
-                        var extent = me.zoomextent.split(",").map(Number);
-                        var mapsize = (me.mapsize != null && me.mapsize.trim() != '') ? me.mapsize.split(",").map(Number) : [790, 778]; // /** @type {ol.Size} */ (me.map.getSize());
-                        var mapcenter = (me.mapcenter != null && me.mapcenter.trim() != '') ? me.mapcenter.split(",").map(Number) : me.map.getView().getCenter();
-                        // Unlink Mapview window
-                        var mapviewLinkToggleBtn = me.lookupReference('toggleLink_btn_'+ me.id.replace(/-/g,'_'));
-                        me.map.setView(me.mapView);
-                        mapviewLinkToggleBtn.setIconCls('fa fa-chain-broken fa-2x red');
-                        mapviewLinkToggleBtn.toggle(true);  // ('pressed', false);
-                        me.map.setSize(mapsize);
-                        me.map.getView().fit(extent, mapsize); // Zoom to saved extent
-                        me.map.getView().setCenter(mapcenter);
-                        me.map.getView().setZoom(me.map.getView().getZoom());
+                        var taskZoom = new Ext.util.DelayedTask(function() {
+                            var extent = me.zoomextent.split(",").map(Number);
+                            var mapsize = (me.mapsize != null && me.mapsize.trim() != '') ? me.mapsize.split(",").map(Number) : [790, 778]; // /** @type {ol.Size} */ (me.map.getSize());
+                            var mapcenter = (me.mapcenter != null && me.mapcenter.trim() != '') ? me.mapcenter.split(",").map(Number) : me.map.getView().getCenter();
+
+                            // me.map.setView(me.mapView);
+                            me.map.setSize(mapsize);
+                            me.map.getView().fit(extent, mapsize); // Zoom to saved extent   , {size: me.map.getSize()}
+                            me.map.getView().setCenter(mapcenter);
+                            // me.map.getView().setZoom(1.5);
+                        });
+                        taskZoom.delay(50);
                     }
 
+                    // Unlink Mapview window
+                    var mapviewLinkToggleBtn = me.lookupReference('toggleLink_btn_'+ me.id.replace(/-/g,'_'));
+                    // mapviewLinkToggleBtn.setIconCls('fa fa-chain-broken fa-2x red');
+                    mapviewLinkToggleBtn.toggle(true);  // ('pressed', false);
+                    // mapviewLinkToggleBtn.fireEvent('toggle');
+
+                    me.setSize(me.mapviewSize[0],me.mapviewSize[1]);
                     me.setPosition(me.mapviewPosition);
 
                     disclaimerObj.disclaimerPosition = me.disclaimerObjPosition;
@@ -1156,8 +1179,9 @@ Ext.define("esapp.view.analysis.mapView",{
                     Ext.fly('mapview_title_templatename_' + me.id).dom.innerHTML = me.templatename;
                     //me.setTitle('<div id="mapview_title_templatename_' + me.id + '" class="map-templatename">' + me.templatename + '</div>');
 
+
                     if (me.productcode != ''){
-                        var taskAddProductLayer = new Ext.util.DelayedTask(function() {
+                        // var taskAddProductLayer = new Ext.util.DelayedTask(function() {
                             Ext.data.StoreManager.lookup('DataSetsStore').each(function(rec){
                                 if (rec.get('productcode')== me.productcode && rec.get('version')== me.productversion ){
                                     rec.get('productmapsets').forEach(function(mapset){
@@ -1193,10 +1217,9 @@ Ext.define("esapp.view.analysis.mapView",{
                                                                me.date_format,
                                                                me.frequency_id
                             );
-                        });
-                        taskAddProductLayer.delay(10);
+                        // });
+                        // taskAddProductLayer.delay(0);
                     }
-                    me.setSize(me.mapviewSize[0],me.mapviewSize[1]);
 
                     if (me.vectorLayers != null && me.vectorLayers.trim() != '') {
                         this.getController().loadLayersByID(me.vectorLayers.split(",").map(Number));
