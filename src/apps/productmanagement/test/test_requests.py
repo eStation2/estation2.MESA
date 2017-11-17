@@ -99,6 +99,44 @@ class TestCreateRequests(unittest.TestCase):
 
         print request_json
 
+
+    def test_requests_4(self):
+        getparams = {
+            'level': 'dataset',
+            'productcode': 'lsasaf-lst',
+            'version': 'undefined',
+            'mapsetcode': 'MSG-satellite-3km',
+            'subproductcode': 'lst'
+        }
+        productcode = None
+        version = None
+        mapsetcode = None
+        subproductcode = None
+
+        if getparams['level'] == 'product':
+            productcode = getparams['productcode']
+            version = getparams['version']
+        elif getparams['level'] == 'mapset':
+            productcode = getparams['productcode']
+            version = getparams['version']
+            mapsetcode = getparams['mapsetcode']
+        elif getparams['level'] == 'dataset':
+            productcode = getparams['productcode']
+            version = getparams['version']
+            mapsetcode = getparams['mapsetcode']
+            subproductcode = getparams['subproductcode']
+
+        request = requests.create_request(productcode, version, mapsetcode=mapsetcode, subproductcode=subproductcode)
+        request_json = json.dumps(request,
+                               ensure_ascii=False,
+                               sort_keys=True,
+                               indent=4,
+                               separators=(', ', ': '))
+
+        print request_json
+
+
+
 class TestCreateArchives(unittest.TestCase):
 
     # Create a .bsx archive by using the method: create_archive_vars()

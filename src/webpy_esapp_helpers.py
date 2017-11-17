@@ -189,8 +189,8 @@ def SaveLegend(params):
                 message = '{"success":true, "legendid": ' + str(newlegendid) + ',"message":"Legend created!"}'
                 for legendstep in legendClasses:
                     legendstep_dict = {'legend_id': newlegendid,
-                                       'from_step': int(legendstep['from_step']),
-                                       'to_step': int(legendstep['to_step']),
+                                       'from_step': float(legendstep['from_step']),
+                                       'to_step': float(legendstep['to_step']),
                                        'color_rgb': legendstep['color_rgb'],
                                        'color_label': legendstep['color_label'],
                                        'group_label': legendstep['group_label']
@@ -207,8 +207,8 @@ def SaveLegend(params):
                     message = '{"success":true, "legendid": ' + params['legendid'] + ',"message":"Legend updated!"}'
                     for legendstep in legendClasses:
                         legendstep_dict = {'legend_id': int(params['legendid']),
-                                           'from_step': int(legendstep['from_step']),
-                                           'to_step': int(legendstep['to_step']),
+                                           'from_step': float(legendstep['from_step']),
+                                           'to_step': float(legendstep['to_step']),
                                            'color_rgb': legendstep['color_rgb'],
                                            'color_label': legendstep['color_label'],
                                            'group_label': legendstep['group_label']
@@ -275,6 +275,12 @@ def GetLegends():
             # print legendname.encode('utf-8')
             legendname = legendname.replace('<BR>', ' ')
             legendname = legendname.replace('</BR>', ' ')
+            legendname = legendname.replace('<br>', ' ')
+            legendname = legendname.replace('</br>', ' ')
+            legendname = legendname.replace('<div>', ' ')
+            legendname = legendname.replace('</div>', ' ')
+            legendname = legendname.replace('<DIV>', ' ')
+            legendname = legendname.replace('</DIV>', ' ')
 
             # colorschemeHTML = '<table cellspacing=0 cellpadding=0 width=100%><tr><th colspan='+str(len(legend_steps))+'>'+legendname+'</th></tr><tr>'
             colorschemeHTML = legendname+'<table cellspacing=0 cellpadding=0 width=100%><tr>'

@@ -207,6 +207,8 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                             // id: 'legend_minvalue',
                             reference: 'legend_minvalue',
                             xtype: 'numberfield',
+                            decimalPrecision: 4,
+                            decimalSeparator: '.',
                             fieldLabel: esapp.Utils.getTranslation('minvalue'),
                             width: 80,
                             allowBlank: false,
@@ -215,6 +217,8 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                             // id: 'legend_maxvalue',
                             reference: 'legend_maxvalue',
                             xtype: 'numberfield',
+                            decimalPrecision: 4,
+                            decimalSeparator: '.',
                             fieldLabel: esapp.Utils.getTranslation('maxvalue'),
                             width: 80,
                             allowBlank: false,
@@ -440,7 +444,8 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                         hideable: false
                     },
                     items: [{
-                        xtype: 'rownumberer'
+                        xtype: 'rownumberer',
+                        width: 'auto'
                     // },{
                     //     header: 'id',
                     //     dataIndex: 'id',
