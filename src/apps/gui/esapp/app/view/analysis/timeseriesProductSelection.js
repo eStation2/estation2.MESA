@@ -706,8 +706,8 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 },
                 columns: [
                     {
-                        text: esapp.Utils.getTranslation('available_years'),     // 'Available Years',
-                        width: 135,
+                        text: '<span class="smalltext">' + esapp.Utils.getTranslation('available_years')+ '</span>',     // 'Available Years',
+                        width: 132,
                         dataIndex: 'year',
                         menuDisabled: true,
                         sortable: true,
@@ -722,7 +722,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 border: false,
                 cls: 'newpanelstyle',
                 style: { "margin-right": "20px" },
-                width: 185,
+                width: 175,
                 height: 140
             }, {
                 xtype: 'fieldset',

@@ -12,7 +12,7 @@ Ext.define('esapp.view.analysis.addEditLegendModel', {
             model: 'esapp.model.LegendClasses',
             autoLoad: false,
             autoSync: false,
-            session: true,
+            session: false,
 
             proxy: {
                 type: 'rest',

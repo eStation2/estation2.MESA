@@ -175,13 +175,15 @@ def find_gaps(unsorted_filenames, frequency, only_intervals=False, from_date=Non
     # Keep only filenames with that extenions
     # filenames = sorted(no_ext(f) for f in unsorted_filenames
     #                    if not f is None and get_ext(f) in (FILE_EXTENSIONS.TIF_FILE_EXTENSION, FILE_EXTENSIONS.MISSING_FILE_EXTENSION))   # in (original_ext, MISSING_FILE_EXTENSION)) #
-    filenames = sorted(no_ext(f) for f in unsorted_filenames)
-    # Jurvtk: BEGIN remove filenames from list where date not between from_date and to_date
-    if frequency.dateformat == frequency.DATEFORMAT.DATETIME:
-        from_date = datetime.datetime.combine(from_date, datetime.time.min)
-        to_date = datetime.datetime.combine(to_date, datetime.time.min)
 
+    filenames = sorted(no_ext(f) for f in unsorted_filenames)
+
+    # Jurvtk: BEGIN remove filenames from list where date not between from_date and to_date
     if from_date is not None and to_date is not None:
+        if frequency.dateformat == frequency.DATEFORMAT.DATETIME:
+            from_date = datetime.datetime.combine(from_date, datetime.time.min)
+            to_date = datetime.datetime.combine(to_date, datetime.time.min)
+
         filenames = sorted(f for f in filenames
                        if f is not None and frequency.extract_date(f) is not None and frequency.extract_date(f) >= from_date and frequency.extract_date(f) <= to_date)
     # Jurvtk: END remove filenames from list where date not between from_date and to_date

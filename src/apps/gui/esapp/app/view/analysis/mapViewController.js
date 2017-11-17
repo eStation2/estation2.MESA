@@ -53,7 +53,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             productTimeline = me.lookupReference('product-time-line_' + me.id);
 
         // console.info(me.map.getView().calculateExtent(me.map.getSize()).toString());
-        if (productTimeline.collapsed != 'bottom' || !productTimeline.collapsed){
+        if (me.productcode != '' && (productTimeline.collapsed != 'bottom' || !productTimeline.collapsed)){
             mapviewSize = me.getSize().width + "," + (me.getSize().height-125).toString()
         }
         var layerdb_ids = []
@@ -759,7 +759,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             downloadlink.click();
             mapimage_url = null;
         });
-        taskSaveMap.delay(500);
+        taskSaveMap.delay(750);
 
         //if(typeof Promise !== "undefined" && Promise.toString().indexOf("[native code]") !== -1){
         //   console.info('Browser supports Promise natively!');
@@ -805,7 +805,8 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
     ,toggleLink: function(btn, event) {
         var mapviewwin = btn.up().up();
-
+        // console.info('toggleLink');
+        // console.info(btn);
         if (btn.pressed) {
             mapviewwin.map.setView(mapviewwin.mapView);
             mapviewwin.lookupReference('zoomfactorslider_' + mapviewwin.id.replace(/-/g,'_')).setValue(mapviewwin.zoomFactorSliderValue);
@@ -2250,8 +2251,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 var borderVectorLayerItems = me.getController().createLayersMenuItems('border');
                 var marineVectorLayerMenuItems = me.getController().createLayersMenuItems('marine');
                 var otherVectorLayerMenuItems = me.getController().createLayersMenuItems('other');
-console.info(borderVectorLayerItems);
-console.info(this.down('[name=border]'));
+
                 this.down('[name=border]').menu.removeAll();
                 this.down('[name=border]').menu.add(borderVectorLayerItems);
                 this.down('[name=marine]').menu.removeAll();
@@ -2678,7 +2678,8 @@ console.info(this.down('[name=border]'));
                             title: '',
                             text: esapp.Utils.getTranslation('link_unlink_mapview')
                         });
-                    }
+                    },
+                    toggle: 'toggleLink'
                 }
             }]
         });

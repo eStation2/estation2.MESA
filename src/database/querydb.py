@@ -1019,12 +1019,13 @@ def get_all_legends(echo=False):
     global dbschema_analysis
     try:
 
-        query = "SELECT legend.legend_id,  " + \
+        query = " SELECT legend.legend_id,  " + \
                 "       legend.legend_name, " + \
                 "       legend.min_value, " + \
                 "       legend.max_value, " + \
-                "       legend.colorbar " + \
-                "FROM analysis.legend "
+                "       legend.colorbar, " + \
+                "       legend.defined_by " + \
+                " FROM analysis.legend "
 
         result = dbschema_analysis.execute(query)
         legends = result.fetchall()
@@ -1041,6 +1042,30 @@ def get_all_legends(echo=False):
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
         #dbschema_analysis = None
+
+
+def deletelegendsteps(legendid):
+    global dbschema_analysis
+    try:
+
+        query = "DELETE FROM analysis.legend_step WHERE legend_id = " + legendid
+
+        result = dbschema_analysis.execute(query)
+        # legend = result.fetchall()
+        dbschema_analysis.commit()
+
+        return True
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if False:
+            print traceback.format_exc()
+        # Exit the script and log the error telling what happened.
+        logger.error("deletelegendsteps: Database query error!\n -> {}".format(exceptionvalue))
+        return False
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
 
 
 def createlegend(params):
@@ -1066,7 +1091,7 @@ def createlegend(params):
         if False:
             print traceback.format_exc()
         # Exit the script and log the error telling what happened.
-        logger.error("get_all_legends: Database query error!\n -> {}".format(exceptionvalue))
+        logger.error("createlegend: Database query error!\n -> {}".format(exceptionvalue))
         return -1
     finally:
         if dbschema_analysis.session:

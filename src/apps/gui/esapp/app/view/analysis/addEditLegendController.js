@@ -45,54 +45,67 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
 
         if (this.validateClasses()){
 
-            Ext.Ajax.request({
-               url: 'legends/savelegend',
-               params:{
-                   legend_descriptive_name: legenddescriptivename.getValue(),
-                   title_in_legend: title_in_legend.getValue(),
-                   legendid: legendid,
-                   minvalue: legendminvalue.getValue(),
-                   maxvalue: legendmaxvalue.getValue(),
-                   legendClasses:esapp.Utils.makeGridJSON(legendClassesStore)
-               },
-               method: 'POST',
-               waitMsg:esapp.Utils.getTranslation('savinglegend'), // 'Saving legend...',
-               scope:this,
-               success: function(result, request) {
-                   // The success handler is called if the XHR request actually
-                   // made it to the server and a response of some kind occurs.
-                   var returnData = Ext.util.JSON.decode(result.responseText);
-                   // console.info(returnData);
-                   if (returnData.success){
-                        me.params.legendrecord.set('legendid', returnData.legendid);
-                        me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('editlegend') + '</span>');
-                        // legendclasses.onLoadClick(this.legendid);
-                        // var legendlist = Ext.getCmp('legendslist');
-                        // legendlist.store.load();
-                        Ext.Msg.show({
-                            title:esapp.Utils.getTranslation('legend_saved'), // 'Legend saved',
-                            msg:esapp.Utils.getTranslation('legend_saved'), // 'Legend saved successfully',
-                            modal:true,
-                            icon:Ext.Msg.INFO,
-                            buttons:Ext.Msg.OK
+            Ext.Msg.show({
+                title: esapp.Utils.getTranslation('savelegendquestion'),     // 'Save legend',
+                message: esapp.Utils.getTranslation('savelegendquestion') + ' "' + legenddescriptivename.getValue() + '"?',
+                buttons: Ext.Msg.OKCANCEL,
+                icon: Ext.Msg.QUESTION,
+                fn: function(btn) {
+                    if (btn === 'ok') {
+                        Ext.Ajax.request({
+                           url: 'legends/savelegend',
+                           params:{
+                               legend_descriptive_name: legenddescriptivename.getValue(),
+                               title_in_legend: title_in_legend.getValue(),
+                               legendid: legendid,
+                               minvalue: legendminvalue.getValue(),
+                               maxvalue: legendmaxvalue.getValue(),
+                               legendClasses:esapp.Utils.makeGridJSON(legendClassesStore)
+                           },
+                           method: 'POST',
+                           waitMsg:esapp.Utils.getTranslation('savinglegend'), // 'Saving legend...',
+                           scope:this,
+                           success: function(result, request) {
+                               // The success handler is called if the XHR request actually
+                               // made it to the server and a response of some kind occurs.
+                               var returnData = Ext.util.JSON.decode(result.responseText);
+                               // console.info(returnData);
+                               if (returnData.success){
+                                    me.params.legendrecord.set('legendid', returnData.legendid);
+                                    me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('editlegend') + '</span>');
+                                    // legendclasses.onLoadClick(this.legendid);
+                                    // var legendlist = Ext.getCmp('legendslist');
+                                    // legendlist.store.load();
+                                    Ext.Msg.show({
+                                        title:esapp.Utils.getTranslation('legend_saved'), // 'Legend saved',
+                                        msg:esapp.Utils.getTranslation('legend_saved'), // 'Legend saved successfully',
+                                        modal:true,
+                                        icon:Ext.Msg.INFO,
+                                        buttons:Ext.Msg.OK
+                                    });
+
+                                    me.changedsaved = true;
+                               } else{
+                                   esapp.Utils.showError(returnData.error || result.responseText);
+                               }
+                           }, // eo function onSuccess
+                           failure: function(result, request) {
+                               // The failure handler is called if there's some sort of network error,
+                               // like you've unplugged your ethernet cable, the server is down, etc.
+                           }, // eo function onFailure
+                           callback:function(callinfo,responseOK,response ){
+                               //refresh legend list
+                           }
                         });
-                   } else{
-                       this.showError(returnData.error || result.responseText);
-                   }
-               }, // eo function onSuccess
-               failure: function(result, request) {
-                   // The failure handler is called if there's some sort of network error,
-                   // like you've unplugged your ethernet cable, the server is down, etc.
-               }, // eo function onFailure
-               callback:function(callinfo,responseOK,response ){
-                   //refresh legend list
-               }
+                    }
+                }
             });
+
         }
         else {
             Ext.Msg.show({
                 title:esapp.Utils.getTranslation('warning'), // 'Warning!',
-                msg:esapp.Utils.getTranslation('check_legend_classes'), // 'Legend not saved! Please check the classes on double From/To values or overlaps!',
+                msg:esapp.Utils.getTranslation('check_legend_classes'), // 'Legend not saved! Check classes double values or overlaps!',
                 modal:true,
                 icon:Ext.Msg.ERROR,
                 buttons:Ext.Msg.OK
@@ -113,14 +126,14 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
             color_label:'',
             group_label:''
         };
-        // console.info(legendClassesStore);
         var newrecord = new esapp.model.LegendClasses(defaultData);
+        newrecord.dirty = false;
         legendClassesStore.add(newrecord);
         // if (legendClassesStore.data.length > 0) {   // Better if a method exists to insert as last
-        //     lastrecordID = legendClassesStore.last().id-1;
+        //     lastrecordID = legendClassesStore.last().id;
         // }
-        // newrecord.set('id', lastrecordID);
-        // legendClassesStore.insert(lastrecordID*-1, newrecord);
+        // newrecord.set('id', lastrecordID-1);
+        // legendClassesStore.insert(lastrecordID-1, newrecord);
         // me.lookupReference('legendclassesGrid').startEditing(legendClassesStore.indexOf(newrecord), 1);
     }
 
