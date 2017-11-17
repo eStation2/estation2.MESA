@@ -12,8 +12,8 @@ Ext.define("esapp.view.processing.Processing",{
     requires: [
         'esapp.view.processing.ProcessingModel',
         'esapp.view.processing.ProcessingController',
-        //'esapp.view.processing.ProcessInputProducts',
-        //'esapp.view.processing.ProcessFinalOutputSubProducts',
+        'esapp.view.processing.ProcessInputProducts',
+        'esapp.view.processing.ProcessFinalOutputSubProducts',
 
         'Ext.grid.column.Widget',
         'Ext.grid.column.Template',
@@ -24,7 +24,7 @@ Ext.define("esapp.view.processing.Processing",{
     ],
 
     store: 'ProcessingStore',
-    bufferedRenderer: false,
+    bufferedRenderer: true,
 
     // title: 'Processing Dashboard',
     viewConfig: {
@@ -168,17 +168,21 @@ Ext.define("esapp.view.processing.Processing",{
                     widgetattached: false
                 },
                 onWidgetAttach: function (col, widget, record) {
+                    // console.info('inputproducts');
                     // console.info(record);
                     if (!widget.widgetattached) {
-                        // Ext.suspendLayouts();
+                        Ext.suspendLayouts();
+
                         var inputproducts = record.getData().inputproducts;
+                        // console.info(inputproducts);
                         var newstore = Ext.create('Ext.data.JsonStore', {
                             model: 'InputProducts',
                             data: inputproducts
                         });
                         widget.setStore(newstore);
-                        // Ext.resumeLayouts(true);
                         widget.widgetattached = true;
+
+                        Ext.resumeLayouts(true);
                     }
                 }
             }]
@@ -254,12 +258,6 @@ Ext.define("esapp.view.processing.Processing",{
                     tooltip: esapp.Utils.getTranslation('showprocessinglog'),     // 'Show log of this Ingestion',
                     scope: me,
                     handler: function (grid, rowIndex, colIndex, icon, e, record) {
-
-                        //var rec = grid.getStore().getAt(rowIndex);
-                        //console.info(grid.getStore());
-                        //console.info(rec);
-                        //console.info(rowIndex);
-                        //console.info(colIndex);
                         var logViewWin = new esapp.view.acquisition.logviewer.LogView({
                             params: {
                                 logtype: 'processing',
@@ -317,67 +315,22 @@ Ext.define("esapp.view.processing.Processing",{
                     widgetattached: false
                 },
                 onWidgetAttach: function(col, widget, record) {
+                    // console.info('outputproducts');
+                    // console.info(record);
                     if (!widget.widgetattached) {
-                        // Ext.suspendLayouts();
+                        Ext.suspendLayouts();
+
                         var processrec = record.getData();
                         var outputproducts = processrec.outputproducts;
 
                         var newstore = Ext.create('Ext.data.JsonStore', {
                             model: 'OutputProducts',
                             data: outputproducts
-                            // ,storeId : 'OutputProductsStore' + processrec.process_id
-                            // ,autoSync: true
-                            // ,requires : [
-                            //     'esapp.model.OutputProducts'
-                            //     //'Ext.data.proxy.Rest'
-                            // ]
-                            // ,proxy: {
-                            //     type: 'ajax',
-                            //     url:'processing/update',
-                            //     appendId: false,
-                            //     //api: {
-                            //     //    read: 'processing'
-                            //     //    ,create: 'processing/create'
-                            //     //    ,update: 'processing/update'
-                            //     //    ,destroy: 'processing/delete'
-                            //     //},
-                            //     //reader: {
-                            //     //     type: 'json'
-                            //     //    ,successProperty: 'success'
-                            //     //    ,rootProperty: 'process'
-                            //     //    ,messageProperty: 'message'
-                            //     //},
-                            //     writer: {
-                            //         type: 'json',
-                            //         writeAllFields: false,
-                            //         allowSingle : false,
-                            //         encode: false,
-                            //         rootProperty: 'processoutputproduct',
-                            //         allDataOptions: {
-                            //             associated: true,
-                            //             changes: true,
-                            //             critical: true
-                            //         }
-                            //     },
-                            //     listeners: {
-                            //         exception: function(proxy, response, operation){
-                            //             // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
-                            //             console.info('PROCESSING OUTPUT PRODUCTS STORE - REMOTE EXCEPTION - Reload the processing page!');
-                            //
-                            //             // Ext.Msg.show({
-                            //             //    title: 'PROCESSING OUTPUT PRODUCTS STORE - REMOTE EXCEPTION',
-                            //             //    msg: operation.getError(),
-                            //             //    icon: Ext.Msg.ERROR,
-                            //             //    buttons: Ext.Msg.OK
-                            //             //});
-                            //         }
-                            //     }
-                            // }
                         });
                         widget.setStore(newstore);
-
-                        // Ext.resumeLayouts(true);
                         widget.widgetattached = true;
+
+                        Ext.resumeLayouts(true);
                     }
                 }
             }]

@@ -3367,16 +3367,16 @@ class GetProductColorSchemes:
                 # legend_name = legend['colorbar']
                 default_legend = legend['default_legend']
 
-                if default_legend == True:
-                    defaultlegend = 'true'
+                if default_legend or default_legend == 'true':
+                    defaultlegend = True
                 else:
-                    defaultlegend = 'false'
+                    defaultlegend = False
 
                 # if there is only 1 legend defined, this is the default legend (even if not defined as default legend).
                 if product_legends.__len__() == 1:
-                    defaultlegend = 'true'
+                    defaultlegend = True
 
-                if defaultlegend == 'true':
+                if defaultlegend:
                     defaulticon = 'x-grid3-radio-col-on'
                 else:
                     defaulticon = 'x-grid3-radio-col'
@@ -4868,13 +4868,13 @@ class GetProductLayer:
         legend_info = querydb.get_legend_info(legendid=inputparams.legendid)
         if hasattr(legend_info, "__len__") and legend_info.__len__() > 0:
             for row in legend_info:
-                minstep = int((row.min_value - scale_offset)/scale_factor)    #int(row.min_value*scale_factor+scale_offset)
-                maxstep = int((row.max_value - scale_offset)/scale_factor)    # int(row.max_value*scale_factor+scale_offset)
-                realminstep = int((row.realminstep - scale_offset)/scale_factor)
-                realmaxstep = int((row.realmaxstep - scale_offset)/scale_factor)
-                minstepwidth = int((row.minstepwidth - scale_offset)/scale_factor)
-                maxstepwidth = int((row.maxstepwidth - scale_offset)/scale_factor)
-                totwidth = int((row.totwidth - scale_offset)/scale_factor)
+                minstep = float((row.min_value - scale_offset)/scale_factor)    #int(row.min_value*scale_factor+scale_offset)
+                maxstep = float((row.max_value - scale_offset)/scale_factor)    # int(row.max_value*scale_factor+scale_offset)
+                realminstep = float((row.realminstep - scale_offset)/scale_factor)
+                realmaxstep = float((row.realmaxstep - scale_offset)/scale_factor)
+                minstepwidth = float((row.minstepwidth - scale_offset)/scale_factor)
+                maxstepwidth = float((row.maxstepwidth - scale_offset)/scale_factor)
+                totwidth = float((row.totwidth - scale_offset)/scale_factor)
                 totsteps = row.totsteps
 
             # maxstep = 255
@@ -5077,73 +5077,6 @@ class Processing:
         if 'forse' in getparams:
             forse = getparams.forse
         return webpy_esapp_helpers.getProcessing(forse)
-
-        # #   Todo JURVTK: on each call of a processing chain for a product, get the list of output (sub)products from the
-        # #   Todo JURVTK: processing chain algorithm using processing_std_precip . get_subprods_std_precip () and loop
-        # #   Todo JURVTK: this list to check the existance of the output product in the table product.process_product
-        # #   Todo JURVTK: Insert the output product in the table product.process_product if no record exists.
-        # #   Todo JURVTK:  Use: from apps . processing import processing_std_precip
-        # #   Todo JURVTK:       brachet l1, l2 brachet = processing_std_precip . get_subprods_std_precip ()
-        #
-        # processing_chains_json = '{"success":true, "message":"No processing chains defined!"}'
-        #
-        # processing_chains = querydb.get_processing_chains()
-        #
-        # if hasattr(processing_chains, "__len__") and processing_chains.__len__() > 0:
-        #     processing_chains_dict_all = []
-        #
-        #     for process in processing_chains:
-        #         process_id = process.process_id
-        #         process_dict = functions.row2dict(process)
-        #
-        #         db_process_input_products = querydb.get_processingchains_input_products(process_id)
-        #         process_dict['inputproducts'] = []
-        #         if hasattr(db_process_input_products, "__len__") and db_process_input_products.__len__() > 0:
-        #
-        #             for input_product in db_process_input_products:
-        #                 # process_id = input_product.process_id
-        #                 input_mapsetcode = input_product.mapsetcode
-        #                 process_dict['category_id'] = input_product.category_id
-        #                 process_dict['cat_descr_name'] = input_product.cat_descr_name
-        #                 process_dict['order_index'] = input_product.order_index
-        #
-        #                 input_prod_dict = functions.row2dict(input_product)
-        #                 # prod_dict = input_product.__dict__
-        #                 # del prod_dict['_labels']
-        #                 # input_prod_dict['inputproductmapset'] = []
-        #                 # mapset_info = querydb.get_mapset(mapsetcode=input_mapsetcode)
-        #                 # mapset_dict = functions.row2dict(mapset_info)
-        #                 # input_prod_dict['inputproductmapset'].append(mapset_dict)
-        #                 process_dict['inputproducts'].append(input_prod_dict)
-        #
-        #         db_process_output_products = querydb.get_processingchain_output_products(process_id)
-        #         process_dict['outputproducts'] = []
-        #         if hasattr(db_process_output_products, "__len__") and db_process_output_products.__len__() > 0:
-        #             for outputproduct in db_process_output_products:
-        #                 output_mapsetcode = outputproduct.mapsetcode
-        #                 output_product_dict = functions.row2dict(outputproduct)
-        #                 # output_product_dict = outputproduct.__dict__
-        #                 # del outputproduct_dict['_labels']
-        #
-        #                 # output_product_dict['outputproductmapset'] = []
-        #                 # mapset_info = querydb.get_mapset(mapsetcode=output_mapsetcode)
-        #                 # mapset_dict = functions.row2dict(mapset_info)
-        #                 # output_product_dict['outputproductmapset'].append(mapset_dict)
-        #                 process_dict['outputproducts'].append(output_product_dict)
-        #
-        #         processing_chains_dict_all.append(process_dict)
-        #
-        #         processes_json = json.dumps(processing_chains_dict_all,
-        #                                     ensure_ascii=False,
-        #                                     sort_keys=True,
-        #                                     indent=4,
-        #                                     separators=(', ', ': '))
-        #
-        #         processing_chains_json = '{"success":"true", "total":'\
-        #                                  + str(processing_chains.__len__())\
-        #                                  + ',"processes":'+processes_json+'}'
-        #
-        # return processing_chains_json
 
 
 class UpdateProcessing:

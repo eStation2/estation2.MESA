@@ -44,6 +44,7 @@ Ext.define('esapp.Application', {
 
     stores: [
          'LogoImages'
+        ,'ProcessingStore'
         ,'i18nStore'
         ,'LanguagesStore'
         ,'SystemSettingsStore'
@@ -63,7 +64,6 @@ Ext.define('esapp.Application', {
         ,'TimeseriesProductsStore'
         ,'TSDrawPropertiesStore'
         ,"ColorSchemesStore"
-        ,'ProcessingStore'
         ,'DataSetsStore'            // no autoload
     ],
 
@@ -129,19 +129,19 @@ Ext.define('esapp.Application', {
                     params:{lang:esapp.globals['selectedLanguage']},
                     callback: function(records, options, success){
 
-                        Ext.Loader.loadScript({
-                            url: 'app/CustomVTypes.js',
-                            onLoad: function (options) {
-                                //console.info('CustomVTypes');
-                            }
-                        });
-
                         // start the mask on the body and get a reference to the mask
                         var splashscreen = Ext.getBody().mask(esapp.Utils.getTranslation('splashscreenmessage'), 'splashscreen');
                         // fade out the body mask
                         splashscreen.fadeOut({
                             duration: 4000,
                             remove: true
+                        });
+
+                        Ext.Loader.loadScript({
+                            url: 'app/CustomVTypes.js',
+                            onLoad: function (options) {
+                                //console.info('CustomVTypes');
+                            }
                         });
 
                         //Ext.apply(Ext.form.VTypes, {
@@ -157,7 +157,11 @@ Ext.define('esapp.Application', {
                         //
                         //Ext.create('esapp.view.main.Main');
 
-                        me.launch();
+                        var taskLaunch = new Ext.util.DelayedTask(function() {
+                            me.launch();
+                        });
+                        taskLaunch.delay(500);
+
                     }
                 });
 
@@ -202,8 +206,6 @@ Ext.define('esapp.Application', {
                         }
                     });
                 }
-
-                //console.info(esapp.Utils);
             }
         });
 
@@ -240,23 +242,15 @@ Ext.define('esapp.Application', {
             Ext.data.StoreManager.lookup('DataSetsStore').load();
         }
 
-        var delay = 500;
+        // var delay = 500;
         // if (!Ext.data.StoreManager.lookup('TimeseriesProductsStore').isLoaded()){
         //     delay = 2000;
         // }
 
-        // // start the mask on the body and get a reference to the mask
-        // var splashscreen = Ext.getBody().mask(esapp.Utils.getTranslation('splashscreenmessage'), 'splashscreen');
-        // // fade out the body mask
-        // splashscreen.fadeOut({
-        //     duration: delay+1500,
-        //     remove: true
-        // });
-
-        var task = new Ext.util.DelayedTask(function() {
+        var taskMain = new Ext.util.DelayedTask(function() {
             Ext.create('esapp.view.main.Main');
         });
-        task.delay(delay);
+        taskMain.delay(500);
 
         this.callParent();
     }

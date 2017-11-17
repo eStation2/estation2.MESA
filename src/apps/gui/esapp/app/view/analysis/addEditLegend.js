@@ -53,12 +53,15 @@ Ext.define("esapp.view.analysis.addEditLegend",{
     alignTarget: 'analysismain',
 
     params: {
+        new: false,
+        view: true,
         edit: false,
         legendrecord: null
     },
 
     initComponent: function () {
         var me = this;
+        me.changedsaved = false;
 
         var colorrenderer = function(color) {
             var renderTpl = color;
@@ -99,19 +102,27 @@ Ext.define("esapp.view.analysis.addEditLegend",{
         if (me.params.edit){
             me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('editlegend') + '</span>');
         }
+        else if (me.params.view){
+            me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('viewlegend') + '</span>');
+        }
         else {
             me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('newlegend') + '</span>');
         }
 
         me.listeners = {
             afterrender: function(){
-                if (me.params.edit) {
+                if (me.params.edit || me.params.view) {
                     me.lookupReference('legenddescriptivename').setValue(me.params.legendrecord.get('legend_descriptive_name'));
                     me.lookupReference('title_in_legend').setValue(me.params.legendrecord.get('legendname'));
                     me.lookupReference('legend_minvalue').setValue(me.params.legendrecord.get('minvalue'));
                     me.lookupReference('legend_maxvalue').setValue(me.params.legendrecord.get('maxvalue'));
                 }
                 me.setY(me.getY()-75);
+            },
+            close: function(){
+                if (me.changedsaved){
+                    Ext.getCmp('legendsadministration').getController().loadLegendsStore();
+                }
             }
         };
 
@@ -123,6 +134,7 @@ Ext.define("esapp.view.analysis.addEditLegend",{
             style: {color: 'lightblue'},
             scale: 'medium',
             disabled: false,
+            hidden: me.params.view ? true : false,
             handler: 'saveLegend'
         }];
 
@@ -162,13 +174,14 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                             fieldLabel: esapp.Utils.getTranslation('legenddescriptivename'),
                             labelAlign: 'top',
                             width: 350,
-                            allowBlank: false
+                            allowBlank: false,
+                            disabled: me.params.view ? true : false
                         }, {
                             // id: 'title_in_legend',
                             reference: 'title_in_legend',
                             //bind: '{me.params.layerrecord.layername}',
                             xtype: 'htmleditor',
-                            fieldLabel: esapp.Utils.getTranslation('Title in legend'),
+                            fieldLabel: esapp.Utils.getTranslation('title_in_legend'),
                             width: 350,
                             height: 100,
                             allowBlank: false,
@@ -180,6 +193,7 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                             enableLists: false,
                             enableSourceEdit: false,
                             enableAlignments: false,
+                            disabled: me.params.view ? true : false,
                             listeners: {
                                 change: function () {
                                     // var legendClassesStore = me.getViewModel().getStore('legendClassesStore');
@@ -193,16 +207,22 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                             // id: 'legend_minvalue',
                             reference: 'legend_minvalue',
                             xtype: 'numberfield',
+                            decimalPrecision: 4,
+                            decimalSeparator: '.',
                             fieldLabel: esapp.Utils.getTranslation('minvalue'),
                             width: 80,
-                            allowBlank: false
+                            allowBlank: false,
+                            disabled: me.params.view ? true : false
                         }, {
                             // id: 'legend_maxvalue',
                             reference: 'legend_maxvalue',
                             xtype: 'numberfield',
+                            decimalPrecision: 4,
+                            decimalSeparator: '.',
                             fieldLabel: esapp.Utils.getTranslation('maxvalue'),
                             width: 80,
-                            allowBlank: false
+                            allowBlank: false,
+                            disabled: me.params.view ? true : false
                         }]
                     }]
                 }]
@@ -339,6 +359,8 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                     preserveScrollOnRefresh: true,
                     forceFit: true
                 },
+
+                // disabled: me.params.view ? true : false,
                 selModel: {
                     type: 'cellmodel'
                 },
@@ -347,6 +369,7 @@ Ext.define("esapp.view.analysis.addEditLegend",{
 
                 plugins: {
                     ptype: 'cellediting',
+                    disabled: me.params.view ? true : false,
                     clicksToEdit: 1
                 },
 
@@ -381,9 +404,10 @@ Ext.define("esapp.view.analysis.addEditLegend",{
 
                 tbar: {
                     padding: 4,
+                    hidden: me.params.view ? true : false,
                     defaults: {
                         scale: 'medium',
-                        hidden: false
+                        hidden: me.params.view ? true : false
                     },
                     items: [{
                         xtype: 'button',
@@ -420,12 +444,18 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                         hideable: false
                     },
                     items: [{
-                        xtype: 'rownumberer'
+                        xtype: 'rownumberer',
+                        width: 'auto'
+                    // },{
+                    //     header: 'id',
+                    //     dataIndex: 'id',
+                    //     width: 30
                     },{
                         xtype: 'actioncolumn',
                         width: 25,
                         align: 'center',
                         stopSelection: true,
+                        hidden: me.params.view ? true : false,
                         items: [{
                             width: 25,
                             disabled: false,
@@ -479,18 +509,19 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                     }, {
                         header: esapp.Utils.getTranslation('legendclass_label'), // 'Class label',
                         dataIndex: 'color_label',
-                        width: 100,
+                        width: 80,
                         editor: 'textfield'
                     }, {
                         header: esapp.Utils.getTranslation('legendclass_group_label'), // 'Group label',
                         dataIndex: 'group_label',
-                        width: 100,
+                        width: 105,
                         editor: 'textfield'
                     }, {
                         xtype: 'actioncolumn',
                         width: 25,
                         align: 'center',
                         stopSelection: true,
+                        hidden: me.params.view ? true : false,
                         items: [{
                             width: 25,
                             disabled: false,
