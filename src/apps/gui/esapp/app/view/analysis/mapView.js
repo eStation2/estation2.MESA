@@ -216,54 +216,46 @@ Ext.define("esapp.view.analysis.mapView",{
                         },
                         listeners: {
                             changecomplete: function(menuitem, value, oldvalue){
-                                //console.info(me.lookupReference('toggleLink_btn_'+me.id.replace(/-/g,'_')));
-                                // console.info('changecomplete called from '+me.id);
                                 //me.up().commonMapView.setProperties({zoomFactor: 1.1+(0.01*value)});
                                 //me.up().commonMapView.set('zoomFactor', 1.1+(0.01*value), false);
                                 var mapview_linked = true;
                                 var mapViewWindows = Ext.ComponentQuery.query('mapview-window');
+                                var properties = null;
 
                                 mapview_linked = !me.lookupReference('toggleLink_btn_'+me.id.replace(/-/g,'_')).pressed;
                                 if (mapview_linked){
+                                    // me.up().commonMapView =  new ol.View({
+                                    //     projection:"EPSG:4326",
+                                    //     displayProjection:"EPSG:4326",
+                                    //     center: me.up().commonMapView.getCenter(),    // [20, -2],   // [20, -4.7],
+                                    //     resolution: 0.1,
+                                    //     minResolution: 0.0001,
+                                    //     maxResolution: 0.25,
+                                    //     zoomFactor: 1.1+0.1*value   // (cioe' nel range 1.1 -> 2.1)
+                                    //     // zoom: me.up().commonMapView.getZoom()-(2*value),
+                                    //     // minZoom: 15-(2*value),
+                                    //     // maxZoom: 110,
+                                    //     // zoomFactor: 1.1+(0.01*value)
+                                    // });
+
                                     me.up().zoomFactorValue = value;
-                                    me.up().commonMapView =  new ol.View({
-                                        projection:"EPSG:4326",
-                                        displayProjection:"EPSG:4326",
-                                        center: me.up().commonMapView.getCenter(),    // [20, -2],   // [20, -4.7],
-                                        resolution: 0.1,
-                                        minResolution: 0.0001,
-                                        maxResolution: 0.25,
-                                        zoomFactor: 1.1+0.1*value   // (cioe' nel range 1.1 -> 2.1)
-                                        // zoom: me.up().commonMapView.getZoom()-(2*value),
-                                        // minZoom: 15-(2*value),
-                                        // maxZoom: 110,
-                                        // zoomFactor: 1.1+(0.01*value)
-                                    });
                                     me.up().zoomFactorSliderValue = value;
+
+                                    properties = me.up().commonMapView.getProperties();
+                                    properties['projection'] = "EPSG:4326";
+                                    properties['displayProjection'] = "EPSG:4326";
+                                    // properties['resolution'] = 0.1;
+                                    properties['minResolution'] = 0.0001;
+                                    properties['maxResolution'] = 0.25;
+                                    properties['zoomFactor'] = 1.1+0.1*value;
+                                    me.up().commonMapView = new ol.View(properties);
+                                    // me.up().commonMapView.setProperties(properties)
+
                                     me.map.setView(me.up().commonMapView);
                                     if (esapp.Utils.objectExists(me.up().map)){
                                         me.up().map.setView(me.up().commonMapView);
                                     }
-                                }
-                                else {
-                                    me.mapView = new ol.View({
-                                        projection:"EPSG:4326",
-                                        displayProjection:"EPSG:4326",
-                                        center: me.mapView.getCenter(),      // me.up().commonMapView.getCenter(),    // [20, -2],   // [20, -4.7],
-                                        resolution: 0.1,
-                                        minResolution: 0.0001,
-                                        maxResolution: 0.25,
-                                        zoomFactor: 1.1+0.1*value   // (cioe' nel range 1.1 -> 2.1)
-                                        // zoom: me.up().commonMapView.getZoom(),
-                                        // minZoom: 12,
-                                        // maxZoom: 100,
-                                        // zoomFactor: 1.1+(0.01*value)
-                                    });
-                                    me.zoomFactorSliderValue = value;
-                                    me.map.setView(me.mapView);
-                                }
 
-                                if (mapview_linked){
                                     Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
                                         var mapview_window_linked = !mapview_window.lookupReference('toggleLink_btn_'+mapview_window.id.replace(/-/g,'_')).pressed;
                                         if (me != mapview_window && mapview_window_linked){
@@ -272,20 +264,48 @@ Ext.define("esapp.view.analysis.mapView",{
                                         }
                                     });
                                 }
+                                else {
+                                    // me.mapView = new ol.View({
+                                    //     projection:"EPSG:4326",
+                                    //     displayProjection:"EPSG:4326",
+                                    //     center: me.mapView.getCenter(),      // me.up().commonMapView.getCenter(),    // [20, -2],   // [20, -4.7],
+                                    //     resolution: 0.1,
+                                    //     minResolution: 0.0001,
+                                    //     maxResolution: 0.25,
+                                    //     zoomFactor: 1.1+0.1*value   // (cioe' nel range 1.1 -> 2.1)
+                                    //     // zoom: me.up().commonMapView.getZoom(),
+                                    //     // minZoom: 12,
+                                    //     // maxZoom: 100,
+                                    //     // zoomFactor: 1.1+(0.01*value)
+                                    // });
+                                    // me.mapView.set('zoomFactor', 1.1+0.1*value, false);
 
+                                    properties = me.mapView.getProperties();
+                                    properties['projection'] = "EPSG:4326";
+                                    properties['displayProjection'] = "EPSG:4326";
+                                    // properties['resolution'] = 0.1;
+                                    properties['minResolution'] = 0.0001;
+                                    properties['maxResolution'] = 0.25;
+                                    properties['zoomFactor'] = 1.1+0.1*value;
+                                    me.mapView = new ol.View(properties);
+
+                                    me.zoomFactorSliderValue = value;
+                                    me.map.setView(me.mapView);
+                                }
+
+                                // if (mapview_linked){
+                                //     Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
+                                //         var mapview_window_linked = !mapview_window.lookupReference('toggleLink_btn_'+mapview_window.id.replace(/-/g,'_')).pressed;
+                                //         if (me != mapview_window && mapview_window_linked){
+                                //            mapview_window.map.setView(me.up().commonMapView);
+                                //            mapview_window.lookupReference('zoomfactorslider_' + mapview_window.id.replace(/-/g,'_')).setValue(value);
+                                //         }
+                                //     });
+                                // }
                             }
                         }
                     }]
                 }
-                // ,handler: function(btn , y , x ){
-                //
-                    // if (btn.pressed) {
-                    //     btn.showMenu();
-                    // }
-                    // else {
-                    //     btn.hideMenu();
-                    // }
-                // }
             }, {
                 xtype: 'button',
                 id: 'opacityslider_' + me.id.replace(/-/g,'_'),
@@ -1121,26 +1141,32 @@ Ext.define("esapp.view.analysis.mapView",{
                     //     me.map.getView().setZoom(me.map.getView().getZoom());
                     // }
 
-                    if (me.zoomextent != null && me.zoomextent.trim() != ''){
-                        var taskZoom = new Ext.util.DelayedTask(function() {
-                            var extent = me.zoomextent.split(",").map(Number);
-                            var mapsize = (me.mapsize != null && me.mapsize.trim() != '') ? me.mapsize.split(",").map(Number) : [790, 778]; // /** @type {ol.Size} */ (me.map.getSize());
-                            var mapcenter = (me.mapcenter != null && me.mapcenter.trim() != '') ? me.mapcenter.split(",").map(Number) : me.map.getView().getCenter();
-
-                            // me.map.setView(me.mapView);
-                            me.map.setSize(mapsize);
-                            me.map.getView().fit(extent, mapsize); // Zoom to saved extent   , {size: me.map.getSize()}
-                            me.map.getView().setCenter(mapcenter);
-                            // me.map.getView().setZoom(1.5);
-                        });
-                        taskZoom.delay(50);
-                    }
 
                     // Unlink Mapview window
                     var mapviewLinkToggleBtn = me.lookupReference('toggleLink_btn_'+ me.id.replace(/-/g,'_'));
                     // mapviewLinkToggleBtn.setIconCls('fa fa-chain-broken fa-2x red');
                     mapviewLinkToggleBtn.toggle(true);  // ('pressed', false);
                     // mapviewLinkToggleBtn.fireEvent('toggle');
+
+                    if (me.zoomextent != null && me.zoomextent.trim() != ''){
+                        // var taskZoom = new Ext.util.DelayedTask(function() {
+                            var extent = me.zoomextent.split(",").map(Number);
+                            var mapsize = (me.mapsize != null && me.mapsize.trim() != '') ? me.mapsize.split(",").map(Number) : [790, 778]; // /** @type {ol.Size} */ (me.map.getSize());
+                            var mapcenter = (me.mapcenter != null && me.mapcenter.trim() != '') ? me.mapcenter.split(",").map(Number) : me.map.getView().getCenter();
+
+                            // me.map.setView(me.mapView);
+                            me.map.setSize(mapsize);
+                            // console.info(me.map.getView().calculateExtent(me.map.getSize()).toString());
+                            // console.info(extent);
+                            // console.info(me.map.getSize());
+                            me.map.getView().setCenter(mapcenter);
+                            me.map.getView().fit(extent, me.map.getSize(), {constrainResolution: false}); // Zoom to saved extent   , {size: me.map.getSize()}
+                            // me.map.getView().setZoom(1.5);
+                            // console.info(me.map.getView().calculateExtent(me.map.getSize()).toString());
+                            // console.info(me.map.getSize());
+                        // });
+                        // taskZoom.delay(50);
+                    }
 
                     me.setSize(me.mapviewSize[0],me.mapviewSize[1]);
                     me.setPosition(me.mapviewPosition);
