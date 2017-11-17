@@ -368,11 +368,11 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
 
                     listeners: {
                         rowclick: 'mapsetDataSetGridRowClick'
-                        // ,scrolltoselection: function (events) {
-                        //     var record = this.getSelection();
-                        //     if (record.length > 0)
-                        //         this.ensureVisible(record[0], {focus: true});
-                        // }
+                        ,scrolltoselection: function (events) {
+                            var record = this.getSelection();
+                            if (record.length > 0)
+                                this.ensureVisible(record[0], {focus: true});
+                        }
                     },
                     defaults: {
                         sortable: true,

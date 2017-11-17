@@ -4868,13 +4868,13 @@ class GetProductLayer:
         legend_info = querydb.get_legend_info(legendid=inputparams.legendid)
         if hasattr(legend_info, "__len__") and legend_info.__len__() > 0:
             for row in legend_info:
-                minstep = int((row.min_value - scale_offset)/scale_factor)    #int(row.min_value*scale_factor+scale_offset)
-                maxstep = int((row.max_value - scale_offset)/scale_factor)    # int(row.max_value*scale_factor+scale_offset)
-                realminstep = int((row.realminstep - scale_offset)/scale_factor)
-                realmaxstep = int((row.realmaxstep - scale_offset)/scale_factor)
-                minstepwidth = int((row.minstepwidth - scale_offset)/scale_factor)
-                maxstepwidth = int((row.maxstepwidth - scale_offset)/scale_factor)
-                totwidth = int((row.totwidth - scale_offset)/scale_factor)
+                minstep = float((row.min_value - scale_offset)/scale_factor)    #int(row.min_value*scale_factor+scale_offset)
+                maxstep = float((row.max_value - scale_offset)/scale_factor)    # int(row.max_value*scale_factor+scale_offset)
+                realminstep = float((row.realminstep - scale_offset)/scale_factor)
+                realmaxstep = float((row.realmaxstep - scale_offset)/scale_factor)
+                minstepwidth = float((row.minstepwidth - scale_offset)/scale_factor)
+                maxstepwidth = float((row.maxstepwidth - scale_offset)/scale_factor)
+                totwidth = float((row.totwidth - scale_offset)/scale_factor)
                 totsteps = row.totsteps
 
             # maxstep = 255

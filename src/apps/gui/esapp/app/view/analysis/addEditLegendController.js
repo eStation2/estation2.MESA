@@ -105,7 +105,7 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
         else {
             Ext.Msg.show({
                 title:esapp.Utils.getTranslation('warning'), // 'Warning!',
-                msg:esapp.Utils.getTranslation('check_legend_classes'), // 'Legend not saved! Please check the classes on double From/To values or overlaps!',
+                msg:esapp.Utils.getTranslation('check_legend_classes'), // 'Legend not saved! Check classes double values or overlaps!',
                 modal:true,
                 icon:Ext.Msg.ERROR,
                 buttons:Ext.Msg.OK
