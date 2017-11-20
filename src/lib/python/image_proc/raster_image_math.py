@@ -2340,7 +2340,7 @@ def do_reproject(inputfile, output_file, native_mapset_name, target_mapset_name)
     mem_driver = gdal.GetDriverByName('MEM')
 
     # Assign mapset to dataset in memory
-    out_data_type_gdal = 2
+    out_data_type_gdal = in_data_type
     mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, out_data_type_gdal)
     mem_ds.SetGeoTransform(trg_mapset.geo_transform)
     mem_ds.SetProjection(out_cs.ExportToWkt())
@@ -2356,11 +2356,13 @@ def do_reproject(inputfile, output_file, native_mapset_name, target_mapset_name)
     output_ds = output_driver.Create(output_file, out_size_x, out_size_y, 1, in_data_type)
     output_ds.SetGeoTransform(trg_mapset.geo_transform)
     output_ds.SetProjection(out_cs.ExportToWkt())
-    output_ds.GetRasterBand(1).WriteArray(out_data)
+    output_ds.GetRasterBand(1).WriteArray(out_data,0,0)
 
     trg_ds = None
     mem_ds = None
     orig_ds = None
+    output_driver = None
+    output_ds = None
 
     # Copy metadata, by changing mapset only
     meta_data = metadata.SdsMetadata()
@@ -2445,6 +2447,10 @@ def do_raster_stats(fid, fidID, outDS, iband, roi, minId, maxId, nodata, operati
     ns=roi['xSize']
     nl=roi['ySize']
 
+    # For tests only
+    l_start =  0
+    l_end   =  nl-1
+
     # Npixels in Rasterfile
     nsiD = fidID.RasterXSize
 
@@ -2452,8 +2458,8 @@ def do_raster_stats(fid, fidID, outDS, iband, roi, minId, maxId, nodata, operati
     MatrixidData=N.zeros((nl,ns))
     outband = outDS.GetRasterBand(iband+1)
 
-    # print ' Identifying IDs of polygons and computing stats'
-    for il in range(0, nl-1):
+    logger.debug(' Identifying IDs of polygons and computing stats')
+    for il in range(l_start, l_end):
         # read 1 full line from image
         data   = N.ravel(fid.GetRasterBand(1).ReadAsArray( 0, il, ns, 1 ))
         # read 1 full line from idRaster
@@ -2505,7 +2511,7 @@ def do_raster_stats(fid, fidID, outDS, iband, roi, minId, maxId, nodata, operati
          for ip in range(0,ns-1):
             outdata[il,ip]=statsData[1,MatrixidData[il,ip]-minId]
     elif operation=='sum':
-      for il in range(0,nl-1):
+      for il in range(l_start, l_end):
          for ip in range(0,ns-1):
             outdata[il,ip]=statsData[0,MatrixidData[il,ip]-minId]
     elif operation=='min':
