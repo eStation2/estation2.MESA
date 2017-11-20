@@ -8,6 +8,7 @@ from database import querydb
 import unittest
 import datetime
 import webpy_esapp_helpers
+import webpy_esapp
 
 from lib.python import es_logging as log
 logger = log.my_logger(__name__)
@@ -101,4 +102,20 @@ class TestWebpy(unittest.TestCase):
             'legendid': 111
         }
         assigneddatasets_json = webpy_esapp_helpers.GetAssignedDatasets(params['legendid'])
+        self.assertEqual(1, 1)
+
+    def test_GetProductLayer(self):
+        params = {
+            'productcode': 'msg-mpe',
+            'productversion': 'undefined',
+            'subproductcode': '1dcum',
+            'mapsetcode':'SPOTV-Africa-1km',
+            'date': '20171119',
+            'WIDTH': '256',
+            'HEIGHT': '256',
+            'BBOX':"22.5,0,45,22.5",
+            'CRS':"EPSG:4326",
+            'legendid':"138"
+        }
+        result = webpy_esapp_helpers.getProductLayer(params)
         self.assertEqual(1, 1)
