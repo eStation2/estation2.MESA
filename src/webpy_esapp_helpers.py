@@ -1301,7 +1301,7 @@ def Ingestion():
 
 def getProcessing(forse):
     # import time
-    forse = True
+    # forse = True
     processinginfo_file = es_constants.base_tmp_dir + os.path.sep + 'processing_info.json'
     if forse:
         processing_chains_json = Processing().encode('utf-8')
