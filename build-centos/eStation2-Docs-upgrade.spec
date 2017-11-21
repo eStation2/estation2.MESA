@@ -16,7 +16,7 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 
 %prep
 # Get the sources from the JRC ftp and create .tgz
-lftp -e "mirror -Le /ftp/private/narma/eStation_2.0/Packages/eStation-Docs /home/adminuser/rpms/; exit" -u narmamaster:qwerty27 h05-ftp.jrc.it"" 
+lftp -e "mirror -Le /narma/eStation_2.0/Packages/eStation-Docs /home/adminuser/rpms/; exit" -u narmauser:JRCkOq7478 srv-ies-ftp.jrc.it""
 cd /home/adminuser/rpms/eStation-Docs/
 rm -f %{name}-%{version}-%{release}.rpm
 tar -cvzf %{name}-%{version}-%{release}.tgz --exclude=*.tgz *
