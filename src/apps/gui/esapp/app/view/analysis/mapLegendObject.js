@@ -23,7 +23,7 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
     layout: 'fit',
     hidden: true,
     floating: true,
-    defaultAlign: 'bl-bl',
+    defaultAlign: 'tl',
     closable: false,
     closeAction: 'hide',
     draggable: true,
@@ -64,7 +64,9 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
         //Ext.util.Observable.capture(me, function(e){console.log('maplegendobject - ' + me.id + ': ' + e);});
 
         me.legendHTML_ImageObj = new Image();
+        me.legendLayout = 'vertical';
         me.legendPosition = [0, 95];
+        me.showlegend = true;
 
         me.listeners = {
             el: {
@@ -81,7 +83,6 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
                 }
             },
             afterrender: function () {
-                // console.info('afterrender LEGEND');
                 Ext.tip.QuickTipManager.register({
                     target: this.id,
                     trackMouse: true,
@@ -121,28 +122,26 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
                 }
             }
             ,show: function(){
-                // console.info('SHOW LEGEND');
-                // console.info(me.showlegend);
-                // console.info(me.legendPosition);
+
+                if (me.legendLayout == 'horizontal') {
+                    me.setHtml(me.legendHTML);
+                }
+                else {
+                    me.setHtml(me.legendHTMLVertical);
+                }
 
                 if (!me.showlegend) {
                     me.hide();
                 }
                 else {
-
                     me.setPosition(me.legendPosition);
-
-                    if (me.legendLayout == 'horizontal') {
-                        me.setHtml(me.legendHTML);
-                    }
-                    else {
-                        me.setHtml(me.legendHTMLVertical);
-                    }
                     me.fireEvent('refreshimage');
                 }
             }
             // ,move: function(){
-            //     me.legendPosition = me.getPosition();
+            //     // me.legendPosition = me.getPosition();
+            //     console.info(me.legendPosition);
+            //     console.info(me.getPosition(true));
             // }
         };
 

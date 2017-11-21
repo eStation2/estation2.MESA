@@ -74,10 +74,10 @@ def getProductLayer(getparams):
     date_format = dataset._db_product.date_format
 
 
-    if frequency_id=='e1day' and date_format=='YYYYMMDDHHMM':
+    if frequency_id=='e1day' and date_format=='YYYYMMDD':
         regex = dataset.fullpath + filedate+'*'+'.tif'
-        filename=glob.glob(regex)
-        print filename
+        filename = glob.glob(regex)
+        # print filename
         productfile = filename[0]
     # lastdate = lastdate.replace("-", "")
     # mydate=lastdate.strftime("%Y%m%d")
