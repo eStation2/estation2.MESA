@@ -5,6 +5,7 @@ __author__ = "Jurriaan van 't Klooster"
 import lib.python.functions as functions
 from lib.python.image_proc import raster_image_math
 import json
+import os, shutil, tempfile
 
 class TestFunctions(TestCase):
 
@@ -164,16 +165,24 @@ class TestFunctions(TestCase):
         # Define the Native mapset
         input_mapset_name ='SPOTV-Africa-1km'
         grid_mapset_name = 'SPOTV-Africa-1km'
-
+        target_mapset_name='SPOTV-Africa-10km'
         grid_file='/eStation2/layers/Mask_Africa_SPOTV_10km.tif'
 
-        input_file='/data/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/tif/ndv/20160101_vgt-ndvi_ndv_SPOTV-Africa-1km_sv2-pv2.1.tif'
-        output_file='/data/temp/20160101_vgt-ndvi_ndv_SPOTV-Africa-1km_sv2-pv2.1_grid_stats.tif'
-        operation='avg'
 
-        input_file='/data/processing/modis-firms/v5.0/SPOTV-Africa-1km/derived/10dcount/20160101_modis-firms_10dcount_SPOTV-Africa-1km_v5.0.tif'
-        output_file='/data/temp/20160101_modis-firms_10dcount_SPOTV-Africa-1km_v5.0_grid_stats.tif'
+        input_file='/data/processing/modis-firms/v6.0/SPOTV-Africa-1km/derived/10dcount/20171101_modis-firms_10dcount_SPOTV-Africa-1km_v6.0.tif'
+        output_file='/data/temp/20171101_modis-firms_10dcount10k_SPOTV-Africa-1km_v6.0.tif'
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir='/tmp/eStation2/')
+
+        # Temporary (not masked) file
+        output_file_temp = tmpdir+os.path.sep+os.path.basename(output_file)
+
         operation='sum'
 
-        raster_image_math.do_stats_4_raster(input_file, grid_file, output_file, operation, input_mapset_name, grid_mapset_name,
-                                            output_format=None, nodata=None, outType=None, options=None )
+        raster_image_math.do_stats_4_raster(input_file, grid_file, output_file_temp, operation, input_mapset_name, grid_mapset_name,
+                                            output_format=None, nodata=-32768, output_type= 'Int16',options=None )
+
+        args = {"inputfile": output_file_temp, "output_file": output_file, "native_mapset_name": grid_mapset_name,
+                "target_mapset_name": target_mapset_name}
+
+        raster_image_math.do_reproject(**args)

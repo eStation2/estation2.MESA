@@ -10,6 +10,14 @@ from multiprocessing import *
 
 class TestTS(unittest.TestCase):
 
+    # ES2-105
+    x_min = ' 0.0'
+    x_max = ' 1.0'
+    y_max = ' -39.0'
+    y_min = ' -40.5'
+
+    wkt_test_ES2_105 = 'POLYGON(('+x_min+y_min+','+x_min+y_max+','+x_max+y_max+','+x_max+y_min+','+x_min+y_min+'))'
+
     # Democratic Republic of the Congo
     wkt_simple = 'POLYGON((30.0  -15.0, 34.0  -19.0, 38.0 -15.0 , 34.0 -11.0, 30.0  -15.0))'
     wkt_point = 'POINT(30.001 -14.998)'
@@ -180,6 +188,28 @@ class TestTS(unittest.TestCase):
                      'aggregation_max': 40.0}
 
         list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_sa, from_date, to_date, aggregate)
+        print list_values
+        self.assertEquals(len(list_values), 36)
+
+    def test_chla_values_ES2_105(self):
+
+        productcode="modis-chla"
+        subproductcode="chla-day"
+        version="v2013.1"
+        mapsetcode="MODIS-Africa-4km"
+
+        from_date=date(2015,01,01)
+        to_date=date(2015,01,11)
+
+        # Type can be 'none' -> average
+        #             'count' -> number of pixels in min-max range
+        #             'percent' -> (number of pixels in min-max range) / (number of valid pixels) * 100
+
+        aggregate = {'aggregation_type': 'mean',
+                     'aggregation_min': 0.0,
+                     'aggregation_max': 40.0}
+
+        list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_test_ES2_105, from_date, to_date, aggregate)
         print list_values
         self.assertEquals(len(list_values), 36)
 

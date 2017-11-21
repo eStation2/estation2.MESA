@@ -377,7 +377,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         operation='sum'
         args = {"input_file": input_file, "grid_file":grid_file, "output_file": output_file_temp,
                 "operation":operation, "input_mapset_name":input_mapset_name, "grid_mapset_name":grid_mapset_name,
-                "output_format": 'GTIFF', "options": "compress=lzw", "output_type":'Int16'}
+                "output_format": None, 'nodata':-32768,"options": "compress=lzw", "output_type":'Int16'}
 
         raster_image_math.do_stats_4_raster(**args)
 
