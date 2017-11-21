@@ -394,7 +394,7 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
                         gdal.RasterizeLayer(mem_ds, [1], outLayer, burn_values=[1])
                         # gdal.RasterizeLayer(mem_ds, [1], outLayer, None, None, [1])
 
-                    #
+                        # Read the polygon-mask
                         band = mem_ds.GetRasterBand(1)
                         geo_values = mem_ds.ReadAsArray()
 
@@ -414,6 +414,10 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
 
                     band_in = orig_ds.GetRasterBand(1)
                     data = band_in.ReadAsArray(x_offset, y_offset, x_res, y_res)
+                    #   Catch the Error ES2-105 (polygon not included in Mapset)
+                    if data is None:
+                        logger.error('ERROR: polygon extends out of file mapset for file: %s' % infile)
+                        return []
 
                     # Create a masked array from the data (considering Nodata)
                     masked_data = ma.masked_equal(data, nodata)

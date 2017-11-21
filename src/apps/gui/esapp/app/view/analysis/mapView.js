@@ -551,9 +551,9 @@ Ext.define("esapp.view.analysis.mapView",{
                     if (!scalelineObj.hidden) {
                         scalelineObj.scalelinePosition = scalelineObj.getPosition(true);
                     }
-                    if (!mapLegendObj.hidden) {
-                        mapLegendObj.legendPosition = mapLegendObj.getPosition(true);
-                    }
+                    // if (!mapLegendObj.hidden) {
+                    //     mapLegendObj.legendPosition = mapLegendObj.getPosition(true);
+                    // }
                     // console.info('beforecollapse Height to: ' + me.height-125);
                     me.setHeight(me.height-125);
                 }
@@ -573,9 +573,9 @@ Ext.define("esapp.view.analysis.mapView",{
                     if (!scalelineObj.hidden) {
                         scalelineObj.setPosition(scalelineObj.scalelinePosition);
                     }
-                    if (!mapLegendObj.hidden) {
-                        mapLegendObj.setPosition(mapLegendObj.legendPosition);
-                    }
+                    // if (!mapLegendObj.hidden) {
+                    //     mapLegendObj.setPosition(mapLegendObj.legendPosition);
+                    // }
                     var size = [document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight-8];   // -8
                     me.map.setSize(size);
                     // console.info('Collapsing map size: ' + size);
@@ -1087,7 +1087,6 @@ Ext.define("esapp.view.analysis.mapView",{
                 // });
 
 
-
                 // this.el is not created until after the Window is rendered so you need to add the mon after rendering:
                 this.mon(this.el, {
                     mouseout: function() {
@@ -1126,27 +1125,12 @@ Ext.define("esapp.view.analysis.mapView",{
                         scalelineObj = me.lookupReference('scale-line_' + me.id),
                         mapObjectToggleBtn = me.lookupReference('objectsbtn_'+me.id.replace(/-/g,'_'));
 
-                    // if (me.zoomextent != null && me.zoomextent.trim() != ''){
-                    //     var extent = me.zoomextent.split(",").map(Number);
-                    //     var mapsize = (me.mapsize != null && me.mapsize.trim() != '') ? me.mapsize.split(",").map(Number) : [790, 778]; // /** @type {ol.Size} */ (me.map.getSize());
-                    //     var mapcenter = (me.mapcenter != null && me.mapcenter.trim() != '') ? me.mapcenter.split(",").map(Number) : me.map.getView().getCenter();
-                    //     // Unlink Mapview window
-                    //     var mapviewLinkToggleBtn = me.lookupReference('toggleLink_btn_'+ me.id.replace(/-/g,'_'));
-                    //     me.map.setView(me.mapView);
-                    //     mapviewLinkToggleBtn.setIconCls('fa fa-chain-broken fa-2x red');
-                    //     mapviewLinkToggleBtn.toggle(true);  // ('pressed', false);
-                    //     me.map.setSize(mapsize);
-                    //     me.map.getView().fit(extent, mapsize); // Zoom to saved extent
-                    //     me.map.getView().setCenter(mapcenter);
-                    //     me.map.getView().setZoom(me.map.getView().getZoom());
-                    // }
-
-
                     // Unlink Mapview window
                     var mapviewLinkToggleBtn = me.lookupReference('toggleLink_btn_'+ me.id.replace(/-/g,'_'));
                     // mapviewLinkToggleBtn.setIconCls('fa fa-chain-broken fa-2x red');
                     mapviewLinkToggleBtn.toggle(true);  // ('pressed', false);
                     // mapviewLinkToggleBtn.fireEvent('toggle');
+
 
                     if (me.zoomextent != null && me.zoomextent.trim() != ''){
                         // var taskZoom = new Ext.util.DelayedTask(function() {
@@ -1156,14 +1140,8 @@ Ext.define("esapp.view.analysis.mapView",{
 
                             // me.map.setView(me.mapView);
                             me.map.setSize(mapsize);
-                            // console.info(me.map.getView().calculateExtent(me.map.getSize()).toString());
-                            // console.info(extent);
-                            // console.info(me.map.getSize());
                             me.map.getView().setCenter(mapcenter);
                             me.map.getView().fit(extent, me.map.getSize(), {constrainResolution: false}); // Zoom to saved extent   , {size: me.map.getSize()}
-                            // me.map.getView().setZoom(1.5);
-                            // console.info(me.map.getView().calculateExtent(me.map.getSize()).toString());
-                            // console.info(me.map.getSize());
                         // });
                         // taskZoom.delay(50);
                     }
@@ -1181,16 +1159,14 @@ Ext.define("esapp.view.analysis.mapView",{
                     logoObj.getViewModel().data.logoData = me.logosObjContent;
 
                     scalelineObj.scalelinePosition = me.scalelineObjPosition;
-                    mapLegendObj.legendPosition = me.legendObjPosition;
-                    mapLegendObj.legendLayout = me.legendlayout;
-                    mapLegendObj.showlegend = me.showlegend;
 
                     titleObj.titlePosition = me.titleObjPosition;
-                    titleObj.setTpl([]);    // empty template which must be an array
                     if (me.titleObjContent != null && me.titleObjContent.trim() != ''){
+                        titleObj.setTpl([]);    // empty template which must be an array
                         titleObj.setTpl(me.titleObjContent);
+                        // titleObj.tpl.push(me.titleObjContent);
+                        // titleObj.tpl.set(me.titleObjContent, true);
                     }
-                    // titleObj.tpl.set(me.titleObjContent, true);
 
                     if (me.showObjects){
                         var taskToggleObjects = new Ext.util.DelayedTask(function() {
@@ -1199,15 +1175,19 @@ Ext.define("esapp.view.analysis.mapView",{
                             me.getController().toggleObjects(mapObjectToggleBtn);
 
                         });
-                        taskToggleObjects.delay(500);
+                        taskToggleObjects.delay(0);
                     }
 
                     Ext.fly('mapview_title_templatename_' + me.id).dom.innerHTML = me.templatename;
                     //me.setTitle('<div id="mapview_title_templatename_' + me.id + '" class="map-templatename">' + me.templatename + '</div>');
 
-
                     if (me.productcode != ''){
-                        // var taskAddProductLayer = new Ext.util.DelayedTask(function() {
+                        var taskAddProductLayer = new Ext.util.DelayedTask(function() {
+
+                            mapLegendObj.legendPosition = me.legendObjPosition;
+                            mapLegendObj.legendLayout = me.legendlayout;
+                            mapLegendObj.showlegend = me.showlegend;
+
                             Ext.data.StoreManager.lookup('DataSetsStore').each(function(rec){
                                 if (rec.get('productcode')== me.productcode && rec.get('version')== me.productversion ){
                                     rec.get('productmapsets').forEach(function(mapset){
@@ -1243,8 +1223,9 @@ Ext.define("esapp.view.analysis.mapView",{
                                                                me.date_format,
                                                                me.frequency_id
                             );
-                        // });
-                        // taskAddProductLayer.delay(0);
+
+                        });
+                        taskAddProductLayer.delay(500);
                     }
 
                     if (me.vectorLayers != null && me.vectorLayers.trim() != '') {

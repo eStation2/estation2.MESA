@@ -45,6 +45,295 @@ logger = log.my_logger(__name__)
 WEBPY_COOKIE_NAME = "webpy_session_id"
 
 
+def getProductLayer(getparams):
+    #import StringIO
+    import mapscript
+    # To solve issue with Chla Legends (Tuleap ticket #10905 - see http://trac.osgeo.org/mapserver/ticket/1762)
+    import locale
+    locale.setlocale(locale.LC_NUMERIC,'C')
+
+    # getparams = web.input()
+    # print getparams
+
+    p = Product(product_code=getparams['productcode'], version=getparams['productversion'])
+    dataset = p.get_dataset(mapset=getparams['mapsetcode'], sub_product_code=getparams['subproductcode'])
+    # print dataset.fullpath
+
+    if hasattr(getparams, "date"):
+        filedate = getparams['date']
+    else:
+        dataset.get_filenames()
+        lastdate = dataset.get_dates()[-1].strftime("%Y%m%d")
+        filedate = lastdate
+
+    if dataset.no_year():
+        filedate=dataset.strip_year(filedate)
+
+    # Check the case of daily product, with time/minutes
+    frequency_id = dataset._db_product.frequency_id
+    date_format = dataset._db_product.date_format
+
+
+    if frequency_id=='e1day' and date_format=='YYYYMMDD':
+        regex = dataset.fullpath + filedate+'*'+'.tif'
+        filename = glob.glob(regex)
+        # print filename
+        productfile = filename[0]
+    # lastdate = lastdate.replace("-", "")
+    # mydate=lastdate.strftime("%Y%m%d")
+    else:
+        filename = functions.set_path_filename(filedate,
+                                               getparams['productcode'],
+                                               getparams['subproductcode'],
+                                               getparams['mapsetcode'],
+                                               getparams['productversion'],
+                                               '.tif')
+        productfile = dataset.fullpath + filename
+    # print productfile
+
+    if (hasattr(getparams, "outmask") and getparams['outmask'] == 'true'):
+        # print productfile
+        # print es_constants.base_tmp_dir
+        from greenwich import Raster, Geometry
+
+        # try:
+        #     from osgeo import gdal
+        #     from osgeo import gdal_array
+        #     from osgeo import ogr, osr
+        #     from osgeo import gdalconst
+        # except ImportError:
+        #     import gdal
+        #     import gdal_array
+        #     import ogr
+        #     import osr
+        #     import gdalconst
+
+        # try:
+
+        # ogr.UseExceptions()
+        wkt = getparams['selectedfeature']
+        theGeomWkt = ' '.join(wkt.strip().split())
+        # print wkt
+        geom = Geometry(wkt=str(theGeomWkt), srs=4326)
+        # print "wearehere"
+        with Raster(productfile) as img:
+            # Assign nodata from prod_info
+            # img._nodata = nodata
+            # print "nowwearehere"
+            with img.clip(geom) as clipped:
+                # Save clipped image (for debug only)
+                productfile = es_constants.base_tmp_dir + '/clipped_'+filename
+                # print productfile
+                clipped.save(productfile)
+
+        # except:
+        #     print 'errorrrrrrrrr!!!!!!'
+
+    #web.header('Content-type', 'image/png')
+    #web.header('Content-transfer-encoding', 'binary')
+    #buf = StringIO.StringIO()
+    #mapscript.msIO_installStdoutToBuffer()
+    #map = mapserver.getmap()
+    ##map.save to a file fname.png
+    ##web.header('Content-Disposition', 'attachment; filename="fname.png"')
+    #contents = buf.getvalue()
+    #return contents
+
+    # #logger.debug("MapServer: Installing stdout to buffer.")
+    # mapscript.msIO_installStdoutToBuffer()
+    #
+    # owsrequest = mapscript.OWSRequest()
+    #
+    # inputparams = web.input()
+    # for k, v in inputparams.iteritems():
+    #     print k + ':' + v
+    #     if k not in ('productcode', 'subproductcode', 'mapsetcode', 'productversion', 'legendid', 'date' 'TRANSPARENT'):
+    #         # if k == 'CRS':
+    #         #     owsrequest.setParameter('SRS', v)
+    #         owsrequest.setParameter(k.upper(), v)
+    #
+    # #owsrequest.setParameter(k.upper(), v)
+
+
+    # projlib = "/usr/share/proj/"
+    projlib = es_constants.proj4_lib_dir
+    # errorfile = es_constants.apps_dir+"/analysis/ms_tmp/ms_errors.log"
+    errorfile = es_constants.log_dir+"/mapserver_error.log"
+    # imagepath = es_constants.apps_dir+"/analysis/ms_tmp/"
+
+    # TEST ????
+    inputparams = getparams
+
+    filenamenoextention = functions.set_path_filename(filedate,
+                                           getparams['productcode'],
+                                           getparams['subproductcode'],
+                                           getparams['mapsetcode'],
+                                           getparams['productversion'],
+                                           '')
+    # owsrequest.setParameter("LAYERS", filenamenoextention)
+    # owsrequest.setParameter("UNIT", mapscript.MS_METERS)
+
+    productmap = mapscript.mapObj(es_constants.template_mapfile)
+    productmap.setConfigOption("PROJ_LIB", projlib)
+    productmap.setConfigOption("MS_ERRORFILE", errorfile)
+    productmap.maxsize = 4096
+
+    outputformat_png = mapscript.outputFormatObj('GD/PNG', 'png')
+    outputformat_png.setOption("INTERLACE", "OFF")
+    productmap.appendOutputFormat(outputformat_png)
+    #outputformat_gd = mapscript.outputFormatObj('GD/GIF', 'gif')
+    #productmap.appendOutputFormat(outputformat_gd)
+    productmap.selectOutputFormat('png')
+    #productmap.debug = mapscript.MS_TRUE
+    productmap.debug = 5
+    productmap.status = mapscript.MS_ON
+    productmap.units = mapscript.MS_DD
+
+    coords = map(float, inputparams['BBOX'].split(","))
+    lly = coords[0]
+    llx = coords[1]
+    ury = coords[2]
+    urx = coords[3]
+    productmap.setExtent(llx, lly, urx, ury)   # -26, -35, 60, 38
+    # productmap.setExtent(lly, llx, ury, urx)   # -26, -35, 60, 38
+    # print llx, lly, urx, ury
+
+    # epsg must be in lowercase because in unix/linux systems the proj filenames are lowercase!
+    # epsg = "+init=epsg:3857"
+    # epsg = "+init=" + inputparams.CRS.lower()   # CRS = "EPSG:4326"
+    epsg = inputparams['CRS'].lower()   # CRS = "EPSG:4326"
+    productmap.setProjection(epsg)
+
+    w = int(inputparams['WIDTH'])
+    h = int(inputparams['HEIGHT'])
+    productmap.setSize(w, h)
+
+    # General web service information
+    productmap.setMetaData("WMS_TITLE", "Product description")
+    productmap.setMetaData("WMS_SRS", inputparams['CRS'].lower())
+    # productmap.setMetaData("WMS_SRS", "epsg:3857")
+    productmap.setMetaData("WMS_ABSTRACT", "A Web Map Service returning eStation2 raster layers.")
+    productmap.setMetaData("WMS_ENABLE_REQUEST", "*")   # necessary!!
+
+    product_info = querydb.get_product_out_info(productcode=inputparams['productcode'],
+                                                subproductcode=inputparams['subproductcode'],
+                                                version=inputparams['productversion'])
+    if hasattr(product_info, "__len__") and product_info.__len__() > 0:
+        for row in product_info:
+            scale_factor = row.scale_factor
+            scale_offset = row.scale_offset
+            nodata = row.nodata
+
+    legend_info = querydb.get_legend_info(legendid=inputparams['legendid'])
+    if hasattr(legend_info, "__len__") and legend_info.__len__() > 0:
+        for row in legend_info:
+            minstep = float((row.min_value - scale_offset)/scale_factor)    #int(row.min_value*scale_factor+scale_offset)
+            maxstep = float((row.max_value - scale_offset)/scale_factor)    # int(row.max_value*scale_factor+scale_offset)
+            realminstep = float((row.realminstep - scale_offset)/scale_factor)
+            realmaxstep = float((row.realmaxstep - scale_offset)/scale_factor)
+            minstepwidth = float((row.minstepwidth - scale_offset)/scale_factor)
+            maxstepwidth = float((row.maxstepwidth - scale_offset)/scale_factor)
+            totwidth = float((row.totwidth - scale_offset)/scale_factor)
+            totsteps = row.totsteps
+
+        # maxstep = 255
+        processing_scale = 'SCALE='+str(minstep)+','+str(maxstep)  # min(legend_step.from_step) max(legend_step.to_step) example: 'SCALE=-7000,10000'
+
+        minbuckets = 256
+        maxbuckets = 5000
+        num_buckets = maxbuckets
+        if minstepwidth > 0:
+            num_buckets = round(totwidth / minstepwidth, 0)
+
+        if num_buckets < minbuckets:
+            num_buckets = minbuckets
+        elif num_buckets > maxbuckets:
+            num_buckets = maxbuckets
+
+        # num_buckets = 10000
+        if num_buckets > 0:
+            processing_buckets = 'SCALE_BUCKETS='+str(num_buckets)
+
+        # nodata = -32768     # get this value from the table products.product
+        processing_novalue = ''
+        if nodata is not None and minstep <= nodata < maxstep:
+            processing_novalue = 'NODATA='+str(nodata)
+
+        layer = mapscript.layerObj(productmap)
+        layer.name = filenamenoextention
+        layer.type = mapscript.MS_LAYER_RASTER
+        layer.status = mapscript.MS_ON     # MS_DEFAULT
+        layer.data = productfile
+        layer.units = mapscript.MS_METERS
+        # layer.setProjection("+init=epsg:4326")
+        layer.setProjection("epsg:4326")
+        layer.dump = mapscript.MS_TRUE
+
+        # scale & buckets
+        if num_buckets > 0:
+            layer.setProcessing(processing_scale)
+            layer.setProcessing(processing_buckets)
+
+        if processing_novalue != '':
+            layer.setProcessing(processing_novalue)
+
+        resample_processing = "RESAMPLE=AVERAGE"
+        layer.setProcessing(resample_processing)
+
+        legend_steps = querydb.get_legend_steps(legendid=inputparams['legendid'])
+        if hasattr(legend_steps, "__len__") and legend_steps.__len__() > 0:
+            stepcount = 0
+            for step in legend_steps:
+                stepcount += 1
+                min_step = float((step.from_step - scale_offset)/scale_factor)
+                max_step = float((step.to_step - scale_offset)/scale_factor)
+                # min_step = float(step.from_step)
+                # max_step = float(step.to_step)
+                colors = map(int, (color.strip() for color in step.color_rgb.split(" ") if color.strip()))
+
+                if stepcount == legend_steps.__len__():    # For the last step use <= max_step
+                    expression_string = '([pixel] >= '+str(min_step)+' and [pixel] <= '+str(max_step)+')'
+                else:
+                    expression_string = '([pixel] >= '+str(min_step)+' and [pixel] < '+str(max_step)+')'
+                # define class object and style
+                layerclass = mapscript.classObj(layer)
+                layerclass.name = layer.name+'_'+str(stepcount)
+                layerclass.setExpression(expression_string)
+                style = mapscript.styleObj(layerclass)
+                style.color.setRGB(colors[0], colors[1], colors[2])
+
+    # result_map_file = '/tmp/eStation2/MAP_result.map'
+    # if os.path.isfile(result_map_file):
+    #     os.remove(result_map_file)
+    # productmap.save(result_map_file)
+
+    image = productmap.draw()
+    filename_png = es_constants.base_tmp_dir+filenamenoextention+str(llx)+'_'+str(lly)+'_'+str(urx)+'_'+str(ury)+'.png'
+    image.save(filename_png)
+
+    return filename_png
+
+    # web.header('Content-type', 'image/png')
+    # f = open(filename_png, 'rb')
+    # while 1:
+    #     buf = f.read(1024 * 8)
+    #     if not buf:
+    #         break
+    #     yield buf
+    # f.close()
+    # os.remove(filename_png)
+
+    # #print owsrequest.getValueByName('BBOX')
+    # mapscript.msIO_installStdoutToBuffer()
+    # contents = productmap.OWSDispatch(owsrequest)
+    # content_type = mapscript.msIO_stripStdoutBufferContentType()
+    # content = mapscript.msIO_getStdoutBufferBytes()
+    # #web.header = "Content-Type","%s; charset=utf-8"%content_type
+    # web.header('Content-type', 'image/png')
+    # #web.header('Content-transfer-encoding', 'binary')
+    # return content
+
+
 def GetAssignedDatasets(legendid):
     assigned_datasets_dict_all = []
     legend_assigned_datasets = querydb.get_legend_assigned_datasets(legendid=legendid)
@@ -1012,7 +1301,7 @@ def Ingestion():
 
 def getProcessing(forse):
     # import time
-    forse = True
+    # forse = True
     processinginfo_file = es_constants.base_tmp_dir + os.path.sep + 'processing_info.json'
     if forse:
         processing_chains_json = Processing().encode('utf-8')
