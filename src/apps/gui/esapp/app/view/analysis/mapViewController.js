@@ -383,23 +383,23 @@ Ext.define('esapp.view.analysis.mapViewController', {
         var mapLegendObj = me.lookupReference('product-legend_' + me.getView().id);
         mapLegendObj.legendHTML = legendHTML;
         mapLegendObj.legendHTMLVertical = legendHTMLVertical;
-        mapLegendObj.hide();    // Hide first to always trigger the show event!
-        mapLegendObj.show();
-        // mapLegendObj.fireEvent('show');
 
         var maplegend_togglebtn = me.lookupReference('legendbtn_' + me.getView().id.replace(/-/g, '_')); //  + me.getView().id);
         maplegend_togglebtn.show();
+        if (mapLegendObj.showlegend ) {
+            maplegend_togglebtn.toggle(false);
+            maplegend_togglebtn.toggle(true);
+            // mapLegendObj.hide();    // Hide first to always trigger the show event!
+            // mapLegendObj.show();
+        }
+        else {
+            maplegend_togglebtn.toggle(false);
+            // mapLegendObj.hide();
+        }
 
         var opacityslider_togglebtn = me.lookupReference('opacityslider_' + me.getView().id.replace(/-/g, '_'));
         opacityslider_togglebtn.show();
         // opacityslider_togglebtn.setPosition(me.getView().getWidth() - 48, 150);
-
-
-        if (mapLegendObj.showlegend ) {
-            //maplegend_togglebtn.toggle();
-            // maplegend_togglebtn.setPressed(true);
-            maplegend_togglebtn.toggle(true);
-        }
 
         this.outmaskingPossible();
         //var outmask_togglebtn = me.lookupReference('outmaskbtn_'+ me.getView().id.replace(/-/g,'_')); //  + me.getView().id);
@@ -821,6 +821,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
     ,toggleLegend: function(btn, event) {
         var mapviewwin = btn.up().up();
+        // console.info('legend toggled');
         //var maplegendpanel = mapviewwin.lookupReference('product-legend_panel_' + mapviewwin.id);
         var mapLegendObj = mapviewwin.lookupReference('product-legend_' + mapviewwin.id);
 
@@ -829,7 +830,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             mapLegendObj.show();
         }
         else {
-            mapLegendObj.legendPosition = mapLegendObj.getPosition(true);
+            // mapLegendObj.legendPosition = mapLegendObj.getPosition(true);
             mapLegendObj.showlegend = false;
             mapLegendObj.hide();
         }
@@ -2650,7 +2651,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 iconCls: 'legends',
                 scale: 'medium',
                 enableToggle: true,
-                handler: 'toggleLegend',
+                toggleHandler: 'toggleLegend',
                 listeners: {
                     afterrender: function (me) {
                         // Register the new tip with an element's ID
