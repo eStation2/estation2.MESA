@@ -133,15 +133,21 @@ SELECT products.update_insert_thema(thema_id := 'TAFIRI', description := 'Tanzan
 
 
 
+<<<<<<< HEAD
 SELECT products.update_insert_product(  productcode := 'arc2-rain', subproductcode := '1mon', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE', description := 'SUM composite of the RainFall Estimate (RFE) over 1 MONTH time interval', provider := 'NASA-CPC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := .000000, mask_max := 10000.000000, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := '1day', display_index := 21, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'arc2-rain', subproductcode := '3mon', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '3 Month RFE', description := 'SUM composite of the RainFall Estimate (RFE) over 3 MONTH time interval', provider := 'NASA-CPC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := .000000, mask_max := 10000.000000, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := '1day', display_index := 41, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'arc2-rain', subproductcode := '6mon', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '6 Month RFE', description := 'SUM composite of the RainFall Estimate (RFE) over 6 MONTH time interval', provider := 'NASA-CPC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := .000000, mask_max := 10000.000000, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := '1day', display_index := 61, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'arc2-rain', subproductcode := '1day', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Ingest', descriptive_name := '1 Day RFE', description := 'SUM composite of the RainFall Estimate (RFE) over a 1 DAY time interval', provider := 'NASA-CPC', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := .010000, scale_offset := .000000, nodata := -32768, mask_min := .000000, mask_max := 10000.000000, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 0, full_copy := false );
+=======
+SELECT products.update_insert_product(  productcode := 'arc2-rain', subproductcode := '1year', version := '2.0', defined_by := 'JRC', activated := true, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Year RFE', description := 'SUM composite of the RainFall Estimate (RFE) over 1 YEAR time interval', provider := 'NASA-CPC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := .000000, mask_max := 10000.000000, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 50, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'arc2-rain', subproductcode := '1mon', version := '2.0', defined_by := 'JRC', activated := true, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE', description := 'SUM composite of the RainFall Estimate (RFE) over 1 MONTH time interval', provider := 'NASA-CPC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := .000000, mask_max := 10000.000000, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 20, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT products.update_insert_product(  productcode := 'arc2-rain', subproductcode := 'arc2-rain_native', version := '2.0', defined_by := 'JRC', activated := true, category_id := 'rainfall', product_type := 'Native', descriptive_name := 'ARC2 RFE', description := 'ARC2, African Rainfall Climatology version 2 is a satellite estimated daily precipitation dataset at 0.1 degree resolution from 1983 <BR>http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.FEWS/.Africa/.DAILY/.ARC2/.daily/index.html<BR>
 The ARC method combines <BR>
 - 3-hourly GPI (GOES Precipitation Index) derived from Meteosat IR measured temperature below -38dC and<BR>
 - 24 hour GTS (Global Telecommunication System) rainfall reported every day from 800 to 1200 stations in Africa,
 assuming  that daily rainfall is proportional to this cloud top temperature duration.', provider := 'NASA-CPC', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -999, mask_min := .000000, mask_max := 10000.000000, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+<<<<<<< HEAD
 SELECT products.update_insert_product(  productcode := 'arc2-rain', subproductcode := '10d', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE', description := 'SUM composite of the RainFall Estimate (RFE) over a 10 DAY time interval', provider := 'NASA-CPC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := .000000, mask_max := 10000.000000, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '1day', display_index := 1, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'arc2-rain', subproductcode := '1year', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Year RFE', description := 'SUM composite of the RainFall Estimate (RFE) over 1 YEAR time interval', provider := 'NASA-CPC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := .000000, mask_max := 10000.000000, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := '1day', display_index := 81, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '10dnp', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_NORM DIF to MIN', description := 'NORMALISED DIFFERENCE anomaly of the 10 DAY RFE:<BR>100*[(CURRENT - MIN) / ( MAX - MIN)]', provider := 'Climate Hazards Group', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 10, full_copy := false );
@@ -156,6 +162,19 @@ SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproduc
 SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '10d', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Ingest', descriptive_name := '10 Day RFE', description := 'SUM composite of the RainFall Estimate (RFE) over a 10 DAY time interval', provider := 'Climate Hazards Group', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 1, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '1mondiff', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_DIF to LTA', description := 'DIFFERENCE anomaly of the 1 MONTH RFE:<BR>DIF=[Current RFE - LTA RFE] ', provider := 'Climate Hazards Group', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 26, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '10dperc', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_REL DIF to LTA', description := 'RELATIVE DIFFERENCE anomaly of the 10 DAY RFE:<BR>100*[(Current RFE - LTA RFE)/ LTA RFE]', provider := 'Climate Hazards Group', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 7, full_copy := false );
+=======
+SELECT products.update_insert_product(  productcode := 'arc2-rain', subproductcode := '1day', version := '2.0', defined_by := 'JRC', activated := true, category_id := 'rainfall', product_type := 'Ingest', descriptive_name := '1 Day RFE', description := 'SUM composite of the RainFall Estimate (RFE) over a 1 DAY time interval', provider := 'NASA-CPC', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := .010000, scale_offset := .000000, nodata := -32768, mask_min := .000000, mask_max := 10000.000000, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 0, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'arc2-rain', subproductcode := '10d', version := '2.0', defined_by := 'JRC', activated := true, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE', description := 'SUM composite of the RainFall Estimate (RFE) over a 10 DAY time interval', provider := 'NASA-CPC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := .000000, mask_max := 10000.000000, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 10, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'arc2-rain', subproductcode := '3mon', version := '2.0', defined_by := 'JRC', activated := true, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '3 Month RFE', description := 'SUM composite of the RainFall Estimate (RFE) over 3 MONTH time interval', provider := 'NASA-CPC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := .000000, mask_max := 10000.000000, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 30, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'arc2-rain', subproductcode := '6mon', version := '2.0', defined_by := 'JRC', activated := true, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '6 Month RFE', description := 'SUM composite of the RainFall Estimate (RFE) over 6 MONTH time interval', provider := 'NASA-CPC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := .000000, mask_max := 10000.000000, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 40, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '1monavg', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_LTA', description := 'Long Term AVERAGE (LTA) of the 1 MONTH RFE', provider := 'Climate Hazards Group', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 12, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '1moncum', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE', description := 'SUM composite of the RainFall Estimate (RFE) over 1 MONTH time interval', provider := 'Climate Hazards Group', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 10, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '10davg', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_LTA', description := 'Long Term AVERAGE (LTA) of the 10 DAY RFE', provider := 'Climate Hazards Group', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 2, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '10dnp', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_NORM DIF', description := 'NORMALISED DIFFERENCE anomaly of the 10 DAY RFE:<BR>100*[(CURRENT - MIN) / ( MAX - MIN)]', provider := 'Climate Hazards Group', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 6, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '10ddiff', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_DIF to LTA', description := 'DIFFERENCE anomaly of the 10 DAY RFE:<BR>DIF=[Current RFE - LTA RFE]', provider := 'Climate Hazards Group', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 4, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '10dratio', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_RATIO to LTA', description := 'RELATIVE RATIO anomaly of the 10 DAY RFE:<BR>100*[Current RFE/ LTA RFE]', provider := 'Climate Hazards Group', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 7, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '1monnp', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_NORM DIF', description := 'NORMALISED DIFFERENCE anomaly of the 1 MONTH RFE:<BR>100*[(CURRENT - MIN) / ( MAX - MIN)]', provider := 'Climate Hazards Group', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 16, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := 'chirps-dekad_native', version := '2.0', defined_by := 'JRC', activated := true, category_id := 'rainfall', product_type := 'Native', descriptive_name := 'CHIRPS_ RFE', description := 'CHIRPS (Climate Hazards Group InfraRed Precipitation with Station data) is a RFE (RainFall Estimate) dataset from 1981.<BR>
 < http://chg.geog.ucsb.edu/data/chirps/index.html>. The algorithm:<BR>
 i) is built around a 0.05 climatology that incorporates satellite information to represent sparsely gauged locations,<BR>
@@ -166,6 +185,7 @@ iii) blends station data to produce:<BR>
 iv) uses a novel blending procedure incorporating the spatial correlation structure of CCD-estimates to assign interpolation weights.<BR>
 BE AWARE that the real time PRELIMINARY RFE are progressively replaced by the FINAL RFE when available, usually after one month.<BR>
 All the statistics are based on the CHIRPS FINAL.', provider := 'Climate Hazards Group', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'undefined', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+<<<<<<< HEAD
 SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '1monmax', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_LT MAX', description := 'Long Term MAXIMUM of the 1 MONTH RFE', provider := 'Climate Hazards Group', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 25, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '10dratio', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_RATIO to LTA', description := 'RELATIVE RATIO anomaly of the 10 DAY RFE:<BR>100*[Current RFE/ LTA RFE]', provider := 'Climate Hazards Group', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 8, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '1monmin', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_LT MIN', description := 'Long Term MINIMUM of the 1 MONTH RFE', provider := 'Climate Hazards Group', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 22, full_copy := false );
@@ -187,6 +207,35 @@ SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproduct
 SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '1mondiff', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_DIF to LTA', description := 'DIFFERENCE anomaly of the 1 MONTH RFE:<BR>DIF=[Current RFE - LTA RFE] ', provider := 'FEWSNET - JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 26, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '10davg', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_LTA', description := 'Long Term AVERAGE (LTA) of the 10 DAY RFE', provider := 'FEWSNET - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 3, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '1monmax', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_LT MAX', description := 'Long Term MAXIMUM of the 1 MONTH RFE', provider := 'FEWSNET - JRC', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 25, full_copy := false );
+=======
+SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '1monperc', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_REL DIF to LTA', description := 'RELATIVE DIFFERENCE anomaly of the 1 MONTH RFE:<BR>100*[(Current RFE - LTA RFE)/ LTA RFE]', provider := 'Climate Hazards Group', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 15, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '10dperc', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_REL DIF to LTA', description := 'RELATIVE DIFFERENCE anomaly of the 10 DAY RFE:<BR>100*[(Current RFE - LTA RFE)/ LTA RFE]', provider := 'Climate Hazards Group', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 5, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '1monmax', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_LT MAX', description := 'Long Term MAXIMUM of the 1 MONTH RFE', provider := 'Climate Hazards Group', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 13, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '1mondiff', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_DIF to LTA', description := 'DIFFERENCE anomaly of the 1 MONTH RFE:<BR>DIF=[Current RFE - LTA RFE] ', provider := 'Climate Hazards Group', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 14, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '10dmin', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_LT MIN', description := 'Long Term MINIMUM of the 10 DAY RFE', provider := 'Climate Hazards Group', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 1, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '1monmin', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_LT MIN', description := 'Long Term MINIMUM of the 1 MONTH RFE', provider := 'Climate Hazards Group', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 11, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '10d', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Ingest', descriptive_name := '10 Day RFE', description := 'SUM composite of the RainFall Estimate (RFE) over a 10 DAY time interval', provider := 'Climate Hazards Group', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 0, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'chirps-dekad', subproductcode := '10dmax', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_LT MAX', description := 'Long Term MAXIMUM of the 10 DAY RFE', provider := 'Climate Hazards Group', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 3, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'cpc-sm', subproductcode := 'cpc-sm_native', version := '1.0', defined_by := 'JRC', activated := true, category_id := 'miscellaneous', product_type := 'Native', descriptive_name := 'CPC Soil moisture', description := 'CPC (NOAA Climatic Prediction Center) Soil Moisture', provider := 'CPC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -999, mask_min := .000000, mask_max := 10000.000000, unit := NULL, data_type_id := 'Float32', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'cpc-sm', subproductcode := 'sm', version := '1.0', defined_by := 'JRC', activated := true, category_id := 'miscellaneous', product_type := 'Ingest', descriptive_name := 'CPC Soil moisture', description := 'CPC (NOAA Climatic Prediction Center) Soil Moisture', provider := 'CPC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := .000000, mask_max := 760.000000, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'ecmwf-evpt', subproductcode := '10d', version := 'OPE', defined_by := 'JRC', activated := false, category_id := 'miscellaneous', product_type := 'Ingest', descriptive_name := '10 Day ET', description := 'ECMWF Cumulated Evapotranspiration over 10 day period from daily forecasts of  ECMWF OPERATIONAL model (scaled from original resolution to 0.25 degrees by MeteoConsult)', provider := 'ECMWF/JRC-MARS', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 0, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'ecmwf-evpt', subproductcode := 'ecmwf-evpt_native', version := 'OPE', defined_by := 'JRC', activated := true, category_id := 'miscellaneous', product_type := 'Native', descriptive_name := 'ECMWF - ET', description := 'ECMWF evapotranspiration estimate based on daily forecasts from ECMWF OPERATIONAL model (scaled from original resolution to 0.25 degrees by MeteoConsult)', provider := 'ECMWF/JRC-MARS', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -9999, mask_min := .000000, mask_max := 10000.000000, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'ecmwf-rain', subproductcode := '10d', version := 'OPE', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Ingest', descriptive_name := '10 Day RFE', description := 'ECMWF SUM composite of the RainFall Estimate (RFE) over a 10 DAY time interval<BR>
+is based on daily forecasts from ECMWF OPERATIONAL model<BR>
+scaled from original resolution to 0.25 degrees<BR>
+https://www.ecmwf.int/<BR>
+http://spirits.jrc.ec.europa.eu/download/downloaddata/downloadmeteodata', provider := 'ECMWF/JRC-MARS', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 0, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'ecmwf-rain', subproductcode := 'ecmwf-rain_native', version := 'OPE', defined_by := 'JRC', activated := true, category_id := 'rainfall', product_type := 'Native', descriptive_name := 'ECMWF - RFE', description := 'ECMWF SUM composite of the RainFall Estimate (RFE) over a 10 DAY time interval<BR>
+is based on daily forecasts from ECMWF OPERATIONAL model<BR>
+scaled from original resolution to 0.25 degrees<BR>
+https://www.ecmwf.int/<BR>
+http://spirits.jrc.ec.europa.eu/download/downloaddata/downloadmeteodata', provider := 'ECMWF/JRC-MARS', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -9999, mask_min := .000000, mask_max := 10000.000000, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '1monperc', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_REL DIF to LTA', description := 'RELATIVE DIFFERENCE anomaly of the 1 MONTH RFE:<BR>100*[(Current RFE - LTA RFE)/ LTA RFE]', provider := 'FEWSNET - JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 15, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '10dmin', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_LT MIN', description := 'Long Term MINIMUM of the 10 DAY RFE', provider := 'FEWSNET - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 1, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '10dnp', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_NORM DIF', description := 'NORMALISED DIFFERENCE anomaly of the 10 DAY RFE:<BR>100*[(CURRENT - MIN) / ( MAX - MIN)]', provider := 'FEWSNET - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 6, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '1monavg', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_LTA', description := 'Long Term AVERAGE (LTA) of the 1 MONTH RFE', provider := 'FEWSNET - JRC', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 12, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '1moncum', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE', description := 'SUM composite of the RainFall Estimate (RFE) over 1 MONTH time interval', provider := 'FEWSNET - JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 10, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := 'fewsnet-rfe_native', version := '2.0', defined_by := 'JRC', activated := true, category_id := 'rainfall', product_type := 'Native', descriptive_name := 'FEWSNET - RFE', description := 'FEWSNET (Famine Early Warning Systems Network) RFE ( RainFall Estimate) version 2.0 (8 km resolution from 1983) is implemented by NOAA''s Climate Prediction Center<BR>.
 The rainfall estimation algorithm used an interpolation method to combine 3 satellites data:<BR>
 - Meteosat 7 geostationary satellite infrared data are acquired in 30-minute intervals, and areas with cloud top temperatures less than -38dC are used to estimate convective rainfall,<BR>
@@ -196,6 +245,7 @@ with the WMO GTS (Global Telecommunication System) data:<BR>
 -  around 1000 rain gauge stations measurement which are taken to be the true rainfall within 15-km radii of each station.<BR>
 All satellite data are first combined using the maximum likelihood estimation method, then GTS station data are used to remove bias<BR>
 http://www.cpc.ncep.noaa.gov/products/fews/rfe.shtml.', provider := 'FEWSNET - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'undefined', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+<<<<<<< HEAD
 SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '10dperc', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_REL DIF to LTA', description := 'RELATIVE DIFFERENCE anomaly of the 10 DAY RFE:<BR>100*[(Current RFE - LTA RFE)/ LTA RFE]', provider := 'FEWSNET - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 7, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '1monperc', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_REL DIF to LTA', description := 'RELATIVE DIFFERENCE anomaly of the 1 MONTH RFE:<BR>100*[(Current RFE - LTA RFE)/ LTA RFE]', provider := 'FEWSNET - JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 27, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '1moncum', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE', description := 'SUM composite of the RainFall Estimate (RFE) over 1 MONTH time interval', provider := 'FEWSNET - JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 21, full_copy := false );
@@ -212,15 +262,42 @@ SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproduct
 SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '1monnp', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_NORM DIF', description := 'NORMALISED DIFFERENCE anomaly of the 1 MONTH RFE:<BR>100*[(CURRENT - MIN) / ( MAX - MIN)]', provider := 'FEWSNET - JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 30, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'lsasaf-et', subproductcode := 'lsasaf-et_native', version := 'undefined', defined_by := 'JRC', activated := true, category_id := 'miscellaneous', product_type := 'Native', descriptive_name := 'EUM SAF LSA - ET', description := 'EUMETSAT Satellite Application Facility (SAF) on Land Surface Analysis (LSA) - Evapotranspiration (ET)<BR>https://landsaf.ipma.pt/algorithms.jsp?seltab=5&starttab=1<BR>Evapotranspiration (ET) accounts for<BR>- the flux of water evaporated at the Earth-atmosphere interface (soil + vegetation + water bodies) and <BR>- transpired by vegetation through stomata in its leaves as a consequence of photosynthetic processes.<BR>The 30mn ET is derived from a physical model of energy exchange using 3 sources of data:<BR>- radiative data derived from Meteosat Second Generation (MSG) satellites,<BR>- land-cover info from ECOCLIMAP, LSA-SAF VEGA,<BR>- ancillary meteorological data from ECMWF forecasts.<BR>', provider := 'EUMETSAT', frequency_id := 'e30minute', date_format := 'YYYYMMDDHHMM', scale_factor := .000100, scale_offset := .000000, nodata := -1, mask_min := NULL, mask_max := NULL, unit := 'mm/h', data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'lsasaf-et', subproductcode := 'et', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'miscellaneous', product_type := 'Ingest', descriptive_name := 'Evapotranspiration', description := 'Evapotranspiration 30 min', provider := 'EUMETSAT', frequency_id := 'e30minute', date_format := 'YYYYMMDDHHMM', scale_factor := .000100, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm/h', data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+=======
+SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '10d', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Ingest', descriptive_name := '10 Day RFE', description := 'The RFE imagery combines Meteosat infrared data, rain gauge reports from the global telecommunications system, and microwave satellite observations to provide daily rainfall estimate in mm at an approximate horizontal resolution of 10 km. These products provide input for hydrological and agrometeorological models as well as climate information e.g. compare the current state of rainfall with previous time periods.', provider := 'FEWSNET - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 0, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '1monnp', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_NORM DIF', description := 'NORMALISED DIFFERENCE anomaly of the 1 MONTH RFE:<BR>100*[(CURRENT - MIN) / ( MAX - MIN)]', provider := 'FEWSNET - JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 16, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '1monmax', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_LT MAX', description := 'Long Term MAXIMUM of the 1 MONTH RFE', provider := 'FEWSNET - JRC', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 13, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '10davg', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_LTA', description := 'Long Term AVERAGE (LTA) of the 10 DAY RFE', provider := 'FEWSNET - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 2, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := 'rain-onset', version := '2.0', defined_by := 'JRC', activated := true, category_id := 'rainfall', product_type := 'Derived', descriptive_name := 'Rain Start of the Season', description := 'Start of the rain season (onset) defined from the precipitation rated in 3 consecutive dekads.', provider := 'FEWSNET - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '10dmax', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_LT MAX', description := 'Long Term MAXIMUM of the 10 DAY RFE', provider := 'FEWSNET - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 3, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := 'seas-cum-of-10d', version := '2.0', defined_by := 'JRC', activated := true, category_id := 'rainfall', product_type := 'Derived', descriptive_name := 'Season Cum FEWSNET Rainfall Estimate', description := 'The RFE imagery combines Meteosat infrared data, rain gauge reports from the global telecommunications system, and microwave satellite observations to provide daily rainfall estimate in mm at an approximate horizontal resolution of 10 km. These products provide input for hydrological and agrometeorological models as well as climate information e.g. compare the current state of rainfall with previous time periods.', provider := 'FEWSNET - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := ' ', display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := 'cum-of-10d', version := '2.0', defined_by := 'JRC', activated := true, category_id := 'rainfall', product_type := 'Derived', descriptive_name := 'Cum of FEWSNET RFE from Season Start', description := 'Cum of FEWSNET RFE from Season Start', provider := 'FEWSNET - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := true, timeseries_role := ' ', display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '10ddiff', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_DIF to LTA', description := 'DIFFERENCE anomaly of the 10 DAY RFE:<BR>DIF=[Current RFE - LTA RFE]', provider := 'FEWSNET - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 4, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '10dratio', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_RATIO to LTA', description := 'RELATIVE RATIO anomaly of the 10 DAY RFE:<BR>100*[Current RFE/ LTA RFE]', provider := 'FEWSNET - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 5, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '1monmin', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_LT MIN', description := 'Long Term MINIMUM of the 1 MONTH RFE', provider := 'FEWSNET - JRC', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 11, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '10dperc', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_REL DIF to LTA', description := 'RELATIVE DIFFERENCE anomaly of the 10 DAY RFE:<BR>100*[(Current RFE - LTA RFE)/ LTA RFE]', provider := 'FEWSNET - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 5, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'fewsnet-rfe', subproductcode := '1mondiff', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_DIF to LTA', description := 'DIFFERENCE anomaly of the 1 MONTH RFE:<BR>DIF=[Current RFE - LTA RFE] ', provider := 'FEWSNET - JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 14, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT products.update_insert_product(  productcode := 'lsasaf-et', subproductcode := '10dcum', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'miscellaneous', product_type := 'Derived', descriptive_name := '10 Day ET', description := 'LSASAF Cumulated Evapotranspiration over 10 day period', provider := 'EUMETSAT', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .010000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm/h', data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 10, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'lsasaf-et', subproductcode := 'et', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'miscellaneous', product_type := 'Ingest', descriptive_name := 'Evapotranspiration', description := 'Evapotranspiration 30 min', provider := 'EUMETSAT', frequency_id := 'e30minute', date_format := 'YYYYMMDDHHMM', scale_factor := .000100, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm/h', data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'lsasaf-et', subproductcode := '10d30min', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'miscellaneous', product_type := 'Derived', descriptive_name := '10 Day ET_LT MIN', description := 'LSASAF Minimum Cumulated Evapotranspiration over 10 day period from 30min values', provider := 'EUMETSAT', frequency_id := 'e30minute', date_format := 'YYYYMMDDHHMM', scale_factor := .000100, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm/h', data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'lsasaf-et', subproductcode := '1moncum', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'miscellaneous', product_type := 'Derived', descriptive_name := '1 Month ET', description := 'Monthly Cumulate', provider := 'EUMETSAT', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := .010000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm/h', data_type_id := 'Int16', masked := false, timeseries_role := '10dcum', display_index := 20, full_copy := false );
+<<<<<<< HEAD
 SELECT products.update_insert_product(  productcode := 'lsasaf-lst', subproductcode := '1dmax', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'miscellaneous', product_type := 'Derived', descriptive_name := '1 Day LST_LT MAX', description := 'LSASAF Land Surface Temperature: MAXIMUM of the daily MEAN composite', provider := 'EUMETSAT', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := .010000, scale_offset := .000000, nodata := -32768, mask_min := 1.000000, mask_max := NULL, unit := 'K', data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 0, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'lsasaf-lst', subproductcode := 'lsasaf-lst_native', version := 'undefined', defined_by := 'JRC', activated := true, category_id := 'miscellaneous', product_type := 'Native', descriptive_name := 'EUM SAF LSA - LST', description := 'EUMETSAT Satellite Application Facility (SAF) on Land Surface Analysis (LSA) - Land Surface Temperatue (LST)<BR> https://landsaf.ipma.pt/algorithms.jsp?seltab=0&starttab=0<BR>LST is the radiative skin temperature over land.<BR>It is based on 15 mn clear sky measurements from MSG system in the thermal infrared window (MSG/SEVIRI channels IR10.8 and IR12.0).', provider := 'EUMETSAT', frequency_id := 'e15minute', date_format := 'YYYYMMDDHHMM', scale_factor := .000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := 'K', data_type_id := 'undefined', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'lsasaf-lst', subproductcode := '10d15min', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'miscellaneous', product_type := 'Derived', descriptive_name := '10 Day LST_LT MIN', description := '10d Maximum computed every 15min', provider := 'EUMETSAT', frequency_id := 'e15minute', date_format := 'YYYYMMDDHHMM', scale_factor := .010000, scale_offset := .000000, nodata := -32768, mask_min := 1.000000, mask_max := NULL, unit := 'K', data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'lsasaf-lst', subproductcode := '10dmin', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'miscellaneous', product_type := 'Derived', descriptive_name := '10 Day LST_LT MIN', description := 'LST 10 day Minimum', provider := 'EUMETSAT', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .010000, scale_offset := .000000, nodata := -32768, mask_min := 1.000000, mask_max := NULL, unit := 'K', data_type_id := 'Int16', masked := false, timeseries_role := '1dmax', display_index := 11, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'lsasaf-lst', subproductcode := '10dmax', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'miscellaneous', product_type := 'Derived', descriptive_name := '10 Day LST_LT MAX', description := 'LST 10 day Maximum', provider := 'EUMETSAT', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .010000, scale_offset := .000000, nodata := -32768, mask_min := 1.000000, mask_max := NULL, unit := 'K', data_type_id := 'Int16', masked := false, timeseries_role := '1dmax', display_index := 13, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'lsasaf-lst', subproductcode := 'lst', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'miscellaneous', product_type := 'Ingest', descriptive_name := '15m LST', description := 'Land Surface Temperature 15 min', provider := 'EUMETSAT', frequency_id := 'e15minute', date_format := 'YYYYMMDDHHMM', scale_factor := .010000, scale_offset := .000000, nodata := -32768, mask_min := 1.000000, mask_max := NULL, unit := 'K', data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+=======
+SELECT products.update_insert_product(  productcode := 'lsasaf-et', subproductcode := 'lsasaf-et_native', version := 'undefined', defined_by := 'JRC', activated := true, category_id := 'miscellaneous', product_type := 'Native', descriptive_name := 'EUM SAF LSA - ET', description := 'EUMETSAT Satellite Application Facility (SAF) on Land Surface Analysis (LSA) - Evapotranspiration (ET)<BR>https://landsaf.ipma.pt/algorithms.jsp?seltab=5&starttab=1<BR>Evapotranspiration (ET) accounts for<BR>- the flux of water evaporated at the Earth-atmosphere interface (soil + vegetation + water bodies) and <BR>- transpired by vegetation through stomata in its leaves as a consequence of photosynthetic processes.<BR>The 30mn ET is derived from a physical model of energy exchange using 3 sources of data:<BR>- radiative data derived from Meteosat Second Generation (MSG) satellites,<BR>- land-cover info from ECOCLIMAP, LSA-SAF VEGA,<BR>- ancillary meteorological data from ECMWF forecasts.<BR>', provider := 'EUMETSAT', frequency_id := 'e30minute', date_format := 'YYYYMMDDHHMM', scale_factor := .000100, scale_offset := .000000, nodata := -1, mask_min := NULL, mask_max := NULL, unit := 'mm/h', data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'lsasaf-lst', subproductcode := '10dmin', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'miscellaneous', product_type := 'Derived', descriptive_name := '10 Day LST_LT MIN', description := 'LST 10 day Minimum', provider := 'EUMETSAT', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .010000, scale_offset := .000000, nodata := -32768, mask_min := 1.000000, mask_max := NULL, unit := 'K', data_type_id := 'Int16', masked := false, timeseries_role := '1dmax', display_index := 11, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'lsasaf-lst', subproductcode := '10dmax', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'miscellaneous', product_type := 'Derived', descriptive_name := '10 Day LST_LT MAX', description := 'LST 10 day Maximum', provider := 'EUMETSAT', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .010000, scale_offset := .000000, nodata := -32768, mask_min := 1.000000, mask_max := NULL, unit := 'K', data_type_id := 'Int16', masked := false, timeseries_role := '1dmax', display_index := 13, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'lsasaf-lst', subproductcode := '10d15min', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'miscellaneous', product_type := 'Derived', descriptive_name := '10 Day LST_LT MIN', description := '10d Maximum computed every 15min', provider := 'EUMETSAT', frequency_id := 'e15minute', date_format := 'YYYYMMDDHHMM', scale_factor := .010000, scale_offset := .000000, nodata := -32768, mask_min := 1.000000, mask_max := NULL, unit := 'K', data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'lsasaf-lst', subproductcode := 'lsasaf-lst_native', version := 'undefined', defined_by := 'JRC', activated := true, category_id := 'miscellaneous', product_type := 'Native', descriptive_name := 'EUM SAF LSA - LST', description := 'EUMETSAT Satellite Application Facility (SAF) on Land Surface Analysis (LSA) - Land Surface Temperatue (LST)<BR> https://landsaf.ipma.pt/algorithms.jsp?seltab=0&starttab=0<BR>LST is the radiative skin temperature over land.<BR>It is based on 15 mn clear sky measurements from MSG system in the thermal infrared window (MSG/SEVIRI channels IR10.8 and IR12.0).', provider := 'EUMETSAT', frequency_id := 'e15minute', date_format := 'YYYYMMDDHHMM', scale_factor := .000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := 'K', data_type_id := 'undefined', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'lsasaf-lst', subproductcode := 'lst', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'miscellaneous', product_type := 'Ingest', descriptive_name := '15m LST', description := 'Land Surface Temperature 15 min', provider := 'EUMETSAT', frequency_id := 'e15minute', date_format := 'YYYYMMDDHHMM', scale_factor := .010000, scale_offset := .000000, nodata := -32768, mask_min := 1.000000, mask_max := NULL, unit := 'K', data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'lsasaf-lst', subproductcode := '1dmax', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'miscellaneous', product_type := 'Derived', descriptive_name := '1 Day LST_LT MAX', description := 'LSASAF Land Surface Temperature: MAXIMUM of the daily MEAN composite', provider := 'EUMETSAT', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := .010000, scale_offset := .000000, nodata := -32768, mask_min := 1.000000, mask_max := NULL, unit := 'K', data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 0, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-chla', subproductcode := '8daysavg', version := 'v2013.1', defined_by := 'JRC', activated := true, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '8 Day CHLA', description := 'MODIS Chlorophyl-A: 8 day MEAN composite', provider := 'NASA', frequency_id := 'e1modis8day', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := 'mg m^-3', data_type_id := 'Float32', masked := false, timeseries_role := 'chla-day', display_index := 1, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT products.update_insert_product(  productcode := 'modis-chla', subproductcode := 'modis-chla_native', version := 'v2013.1', defined_by := 'JRC', activated := true, category_id := 'oceanography', product_type := 'Native', descriptive_name := 'MODIS - Chla', description := 'MODIS Chlorophylle-a concentrations<BR>
 https://modis.gsfc.nasa.gov/sci_team/pubs/abstract.php?id=08327
 The algorithm takes the red-to-green remote-sensing reflectance (Rrs(lambda)) band ratio of<BR>
@@ -228,6 +305,7 @@ The algorithm takes the red-to-green remote-sensing reflectance (Rrs(lambda)) ba
 estimates Chla through the non-linear regression function:<BR>
  Ln(Chla) = 1.91Ln(x) + 3.40 (R-2 = 0.87, N = 97, p < 0.01, 1.5 < Chla < 80 mg m(-3))<BR>
  where ''x'' is the band ratio.', provider := 'NASA', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := 'mg m^-3', data_type_id := 'undefined', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+<<<<<<< HEAD
 SELECT products.update_insert_product(  productcode := 'modis-chla', subproductcode := 'monanom', version := 'v2013.1', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '1 Month CHLA_DIF to LTA', description := 'MODIS Chlorophylle A. Monthly Anomaly: CURRENT Long Term Average', provider := 'NASA', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := 'mg m^-3', data_type_id := 'Float32', masked := false, timeseries_role := 'chla-day', display_index := 26, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'modis-chla', subproductcode := 'monclim', version := 'v2013.1', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '1 Month CHLA_LTA', description := 'Monthly Climatology', provider := 'NASA', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := 'mg m^-3', data_type_id := 'Float32', masked := false, timeseries_role := 'chla-day', display_index := 23, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'modis-chla', subproductcode := 'monavg', version := 'v2013.1', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '1 Month CHLA', description := 'Monthly Average', provider := 'NASA', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := 'mg m^-3', data_type_id := 'Float32', masked := false, timeseries_role := 'chla-day', display_index := 21, full_copy := false );
@@ -245,10 +323,28 @@ SELECT products.update_insert_product(  productcode := 'modis-firms', subproduct
 SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '1day', version := 'v5.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Ingest', descriptive_name := '1 Day FIRE', description := 'MODIS Active Fire: daily COUNT composite', provider := 'NASA-FIRMS', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := 'Initial', display_index := 0, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcountdiff', version := 'v5.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE_DIF to LTA', description := '10d Active Fire Count Diff', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := '1day', display_index := 6, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcount10kmax', version := 'v5.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE 10km_LT MAX', description := '10d Active Fire Count gridded 10km MAX', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := '1day', display_index := 105, full_copy := false );
+=======
+SELECT products.update_insert_product(  productcode := 'modis-chla', subproductcode := 'chla-day', version := 'v2013.1', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Ingest', descriptive_name := '1 Day CHLA ', description := 'MODIS Chlorophyl-A: daily MEAN composite', provider := 'NASA', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := 'mg m^-3', data_type_id := 'Float32', masked := false, timeseries_role := 'Initial', display_index := 0, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-chla', subproductcode := 'monclim', version := 'v2013.1', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '1 Month CHLA_LTA', description := 'Monthly Climatology', provider := 'NASA', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := 'mg m^-3', data_type_id := 'Float32', masked := false, timeseries_role := 'chla-day', display_index := 12, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-chla', subproductcode := 'monanom', version := 'v2013.1', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '1 Month CHLA_DIF to LTA', description := 'MODIS Chlorophylle A. Monthly Anomaly: CURRENT Long Term Average', provider := 'NASA', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := 'mg m^-3', data_type_id := 'Float32', masked := false, timeseries_role := 'chla-day', display_index := 15, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-chla', subproductcode := 'monavg', version := 'v2013.1', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '1 Month CHLA', description := 'Monthly Average', provider := 'NASA', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := 'mg m^-3', data_type_id := 'Float32', masked := false, timeseries_role := 'chla-day', display_index := 10, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcount10kavg', version := 'v5.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE 10km_LTA', description := '10d Active Fire Count gridded 10km AVG', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := 'Initial', display_index := 53, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcountavg', version := 'v5.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE_LTA', description := '10d Active Fire Average Count', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Float32', masked := false, timeseries_role := '10dcount', display_index := 3, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcount', version := 'v5.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE', description := '10d Active Fire Count', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := 'Initial', display_index := 1, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcount10kmax', version := 'v5.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE 10km_LT MAX', description := '10d Active Fire Count gridded 10km MAX', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := 'Initial', display_index := 54, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcountmax', version := 'v5.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE_LT MAX', description := '10d Active Fire Maximum Count', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := '10dcount', display_index := 4, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcountmin', version := 'v5.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE_LT MIN', description := '10d Active Fire Minimum Count', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := '10dcount', display_index := 2, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcount10kperc', version := 'v5.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE 10km_REL DIF to LTA', description := '10d Active Fire Count gridded 10km PERC', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := 'Initial', display_index := 56, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcount10kmin', version := 'v5.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE 10km_LT MIN', description := '10d Active Fire Count gridded 10km MIN', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := 'Initial', display_index := 52, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcount10kdiff', version := 'v5.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE 10km_DIF to LTA', description := '10d Active Fire Count gridded 10km DIFF', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := 'Initial', display_index := 55, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcount10kratio', version := 'v5.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE 10km_RATIO', description := '10d Active Fire Count gridded 10km RATIO', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := 'Initial', display_index := 57, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcountdiff', version := 'v5.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE_DIF to LTA', description := '10d Active Fire Count Diff', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := '10dcount', display_index := 5, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := 'modis-firms_native', version := 'v5.0', defined_by := 'JRC', activated := true, category_id := 'fire', product_type := 'Native', descriptive_name := 'MODIS - FIRE', description := 'MODIS Active Fires containing the day of the fire occurrence for the pixel (first day, in case of multiple detections over the 10 day period).<BR>
 The FIRMS product detects fires in 1km pixel that are burning at the time of overpass under relatively cloud-free conditions.<BR>
 https://firms.modaps.eosdis.nasa.gov/download/
 ', provider := 'NASA-FIRMS', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := .000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'undefined', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+<<<<<<< HEAD
 SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcountmax', version := 'v5.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE_LT MAX', description := '10d Active Fire Maximum Count', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := '1day', display_index := 5, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcount10kdiff', version := 'v6.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE 10km_DIF to LTA', description := '10d Active Fire Count gridded 10km DIFF', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := '1day', display_index := 106, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcount10kperc', version := 'v6.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE 10km_REL DIF to LTA', description := '10d Active Fire Count gridded 10km PERC', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Float32', masked := false, timeseries_role := '1day', display_index := 107, full_copy := false );
@@ -295,11 +391,60 @@ SELECT products.update_insert_product(  productcode := 'modis-sst', subproductco
 SELECT products.update_insert_product(  productcode := 'modis-sst', subproductcode := 'monavg', version := 'v2013.1', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '1 Month SST', description := 'MEAN composite of the Sea Surface Temperature (SST) over 1 MONTH time interval', provider := 'NASA', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := .010000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := 'Celsius', data_type_id := 'Float32', masked := false, timeseries_role := 'sst-day', display_index := 21, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'msg-mpe', subproductcode := '10dcum', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE', description := 'SUM composite of the MSG/MPE 15 minutes RainFall Estimate (RFE) over a 10 DAY time interval', provider := 'EUMETCAST', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .100000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '1dcum', display_index := 1, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'msg-mpe', subproductcode := '1dcum', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Day RFE', description := 'SUM composite of the MSG/MPE 15 minutes RainFall Estimate (RFE) over a 1 DAY time interval', provider := 'EUMETCAST', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := .100000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 0, full_copy := false );
+=======
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcount10k', version := 'v5.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE 10km ', description := '10d Active Fire Count gridded 10km', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := 'Initial', display_index := 51, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '1day', version := 'v5.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Ingest', descriptive_name := '1 Day FIRE', description := 'MODIS Active Fire: daily COUNT composite', provider := 'NASA-FIRMS', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := NULL, display_index := 0, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcount10kratio', version := 'v6.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE 10km_RATIO', description := '10d Active Fire Count gridded 10km RATIO', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Float32', masked := false, timeseries_role := '10dcount10k', display_index := 57, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcount10kdiff', version := 'v6.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE 10km_DIF to LTA', description := '10d Active Fire Count gridded 10km DIFF', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := '10dcount10k', display_index := 55, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcount10kperc', version := 'v6.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE 10km_REL DIF to LTA', description := '10d Active Fire Count gridded 10km PERC', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Float32', masked := false, timeseries_role := '10dcount10k', display_index := 56, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcount10kmax', version := 'v6.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE 10km_LT MAX', description := '10d Active Fire Count gridded 10km MAX', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := '10dcount10k', display_index := 54, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcount', version := 'v6.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE', description := '10d Active Fire Count', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := 'Initial', display_index := 1, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcount10kmin', version := 'v6.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE 10km_LT MIN', description := '10d Active Fire Count gridded 10km MIN', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := '10dcount10k', display_index := 52, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcount10k', version := 'v6.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE 10km ', description := '10d Active Fire Count gridded 10km', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 51, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcountdiff', version := 'v6.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE_DIF to LTA', description := '10d Active Fire Count Diff', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Float32', masked := false, timeseries_role := '10dcount', display_index := 5, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcountmax', version := 'v6.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE_LT MAX', description := '10d Active Fire Maximum Count', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := '10dcount', display_index := 4, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '1day', version := 'v6.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Ingest', descriptive_name := '1 Day FIRE', description := 'MODIS Active Fire: daily COUNT composite', provider := 'NASA-FIRMS', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := NULL, display_index := 0, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcountmin', version := 'v6.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE_LT MIN', description := '10d Active Fire Minimum Count', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := '10dcount', display_index := 2, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := 'modis-firms_native', version := 'v6.0', defined_by := 'JRC', activated := true, category_id := 'fire', product_type := 'Native', descriptive_name := 'MODIS - FIRE', description := 'MODIS Active Fires containing the day of the fire occurrence for the pixel (first day, in case of multiple detections over the 10 day period).<BR>
+The FIRMS product detects fires in 1km pixel that are burning at the time of overpass under relatively cloud-free conditions.<BR>
+https://firms.modaps.eosdis.nasa.gov/download/', provider := 'NASA-FIRMS', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := .000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'undefined', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcountavg', version := 'v6.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE_LTA', description := '10d Active Fire Average Count', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Float32', masked := false, timeseries_role := '10dcount', display_index := 3, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-firms', subproductcode := '10dcount10kavg', version := 'v6.0', defined_by := 'JRC', activated := false, category_id := 'fire', product_type := 'Derived', descriptive_name := '10 Day FIRE 10km_LTA', description := '10d Active Fire Count gridded 10km AVG', provider := 'NASA-FIRMS', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Float32', masked := false, timeseries_role := '10dcount10k', display_index := 53, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-kd490', subproductcode := 'kd490-day', version := 'v2012.0', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Ingest', descriptive_name := '1 Day KD490 ', description := 'MODIS Absorption Coefficient at 490 nm: daily MEAN composite', provider := 'NASA', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := 'm^-1', data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 0, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-kd490', subproductcode := 'modis-kd490_native', version := 'v2012.0', defined_by := 'JRC', activated := true, category_id := 'oceanography', product_type := 'Native', descriptive_name := 'MODIS - Kd490', description := 'MODIS Absorption coefficient at 490 nm<BR>
+https://oceancolor.gsfc.nasa.gov/', provider := 'NASA', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := .000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := 'm^-1', data_type_id := 'undefined', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-kd490', subproductcode := 'monanom', version := 'v2012.0', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '1 Month KD490_DIF to LTA', description := 'Monthly Anomaly', provider := 'NASA', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := 'm^-1', data_type_id := 'Float32', masked := true, timeseries_role := 'kd490-day', display_index := 15, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-kd490', subproductcode := 'monclim', version := 'v2012.0', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '1 Month KD490_LTA', description := 'Monthly Anomaly', provider := 'NASA', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := 'm^-1', data_type_id := 'Float32', masked := false, timeseries_role := 'kd490-day', display_index := 12, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-kd490', subproductcode := 'monavg', version := 'v2012.0', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '1 Month KD490', description := 'Monthly Average', provider := 'NASA', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := 'm^-1', data_type_id := 'Float32', masked := false, timeseries_role := 'kd490-day', display_index := 10, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-kd490', subproductcode := '8daysavg', version := 'v2012.0', defined_by := 'JRC', activated := true, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '8 Day KD490', description := 'MODIS Absorption Coefficient at 490 nm: 8 day MEAN composite', provider := 'NASA', frequency_id := 'e1modis8day', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := 'm^-1', data_type_id := 'Float32', masked := false, timeseries_role := 'kd490-day', display_index := 1, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-par', subproductcode := '8daysavg', version := 'v2012.0', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '8 Day PAR', description := 'MODIS Photosyntetic Active Radiation: 8 day MEAN composite', provider := 'NASA', frequency_id := 'e1modis8day', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := 'Einstein m^-2 Day', data_type_id := 'Float32', masked := false, timeseries_role := 'par-day', display_index := 1, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-par', subproductcode := 'monclim', version := 'v2012.0', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '1 Month PAR_LTA', description := 'Monthly Anomaly', provider := 'NASA', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := 'Einstein m^-2 Day', data_type_id := 'Float32', masked := false, timeseries_role := 'par-day', display_index := 12, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-par', subproductcode := 'monanom', version := 'v2012.0', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '1 Month PAR_DIF to LTA', description := 'Monthly Anomaly', provider := 'NASA', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := 'Einstein m^-2 Day', data_type_id := 'Float32', masked := true, timeseries_role := 'par-day', display_index := 15, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-par', subproductcode := 'par-day', version := 'v2012.0', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Ingest', descriptive_name := '1 Day PAR ', description := 'MODIS Photosyntetic available radiation', provider := 'NASA', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := 'Einstein m^-2 Day', data_type_id := 'Float32', masked := false, timeseries_role := 'Initial', display_index := 0, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-par', subproductcode := 'monavg', version := 'v2012.0', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '1 Month PAR', description := 'Monthly PAR Average Composite', provider := 'NASA', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := 'Einstein m^-2 Day', data_type_id := 'Float32', masked := false, timeseries_role := 'par-day', display_index := 10, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-par', subproductcode := 'modis-par_native', version := 'v2012.0', defined_by := 'JRC', activated := true, category_id := 'oceanography', product_type := 'Native', descriptive_name := 'MODIS - PAR', description := 'MODIS Photosyntetic available radiation<BR>
+https://oceancolor.gsfc.nasa.gov/', provider := 'NASA', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := .000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := 'Einstein m^-2 Day', data_type_id := 'undefined', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-pp', subproductcode := 'modis-pp_native', version := 'v2013.1', defined_by := 'JRC', activated := true, category_id := 'oceanography', product_type := 'Native', descriptive_name := 'MODIS - PP', description := 'MODIS  Primary Production<BR>
+https://oceancolor.gsfc.nasa.gov/', provider := 'JRC/MOI', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := 'mgC/m2/day', data_type_id := 'Float32', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-pp', subproductcode := 'monavg', version := 'v2013.1', defined_by := 'JRC', activated := true, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '1 Month PP', description := 'Monthly Primary Production', provider := 'JRC/MOI', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := 'mgC/m2/day', data_type_id := 'Float32', masked := false, timeseries_role := 'Initial', display_index := 2, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-pp', subproductcode := '8daysavg', version := 'v2013.1', defined_by := 'JRC', activated := true, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '8 Day PP', description := 'MODIS Primary Production: 8 day MEAN composite', provider := 'JRC/MOI', frequency_id := 'e1modis8day', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := 'mgC/m2/day', data_type_id := 'Float32', masked := false, timeseries_role := 'Initial', display_index := 1, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-sst', subproductcode := '8daysavg', version := 'v2013.1', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '8 Day SST', description := 'MODIS Sea Surface Temperature: 8 day MEAN composite', provider := 'NASA', frequency_id := 'e1modis8day', date_format := 'YYYYMMDD', scale_factor := .010000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := ' ', data_type_id := 'Float32', masked := false, timeseries_role := 'sst-day', display_index := 1, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-sst', subproductcode := 'monavg', version := 'v2013.1', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '1 Month SST', description := 'MEAN composite of the Sea Surface Temperature (SST) over 1 MONTH time interval', provider := 'NASA', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := .010000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := 'Celsius', data_type_id := 'Float32', masked := false, timeseries_role := 'sst-day', display_index := 10, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-sst', subproductcode := 'sst-fronts-shp', version := 'v2013.1', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '1 Day SST FRONT', description := 'MODIS Sea Surface Temperature: Daily Fronts', provider := 'NASA', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := 'Celsius', data_type_id := 'undefined', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-sst', subproductcode := 'monanom', version := 'v2013.1', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '1 Month SST_DIF to LTA', description := 'DIFFERENCE anomaly of the 1 MONTH SST:<BR>DIF=[Current SST - LTA SST] ', provider := 'NASA', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := .010000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := 'Celsius', data_type_id := 'Float32', masked := false, timeseries_role := 'sst-day', display_index := 15, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-sst', subproductcode := 'modis-sst_native', version := 'v2013.1', defined_by := 'JRC', activated := true, category_id := 'oceanography', product_type := 'Native', descriptive_name := 'MODIS - SST', description := 'MODIS Sea Surface Temperature<BR>
+https://oceancolor.gsfc.nasa.gov/', provider := 'NASA', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := .000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := 'Celsius', data_type_id := 'undefined', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-sst', subproductcode := 'monclim', version := 'v2013.1', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := '1 Month SST_LTA', description := 'Long Term AVERAGE (LTA) of the 1 MONTH SST', provider := 'NASA', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := .010000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := 'Celsius', data_type_id := 'Float32', masked := false, timeseries_role := 'sst-day', display_index := 12, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-sst', subproductcode := 'sst-fronts', version := 'v2013.1', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := 'MODIS - SST fronts', description := 'Sea Surface Temperature Fronts', provider := 'NASA', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := 'Celsius', data_type_id := 'Byte', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'modis-sst', subproductcode := 'sst-day', version := 'v2013.1', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Ingest', descriptive_name := '1 Day SST ', description := 'MODIS Sea Surface Temperature: Daily MEAN Composite', provider := 'NASA', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := .010000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := 'Celsius', data_type_id := 'UInt16', masked := false, timeseries_role := 'Initial', display_index := 0, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'msg-mpe', subproductcode := '10dcum', version := 'undefined', defined_by := 'JRC', activated := true, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE', description := 'SUM composite of the MSG/MPE 15 minutes RainFall Estimate (RFE) over a 10 DAY time interval', provider := 'EUMETCAST', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .100000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '1dcum', display_index := 1, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT products.update_insert_product(  productcode := 'msg-mpe', subproductcode := 'msg-mpe_native', version := 'undefined', defined_by := 'JRC', activated := true, category_id := 'rainfall', product_type := 'Native', descriptive_name := 'MSG/MPE - RFE', description := 'The Multisensor Precipitation Estimate (MPE) is an instantaneous rain rate product<BR>
 It is derived from a combination of passive microwave imager measurements and infrared data from MSG geostationary satellites<BR>
 https://www.eumetsat.int/website/home/Data/Training/TrainingLibrary/DAT_2077657.html?lang=EN
 http://oiswww.eumetsat.org/IPPS/html/MSG/PRODUCTS/MPE/
 ', provider := 'EUMETCAST', frequency_id := 'e15minute', date_format := 'YYYYMMDDHHMM', scale_factor := 900.000000, scale_offset := .000000, nodata := 9999, mask_min := NULL, mask_max := NULL, unit := 'kg/[m2*sec]', data_type_id := 'undefined', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+<<<<<<< HEAD
 SELECT products.update_insert_product(  productcode := 'msg-mpe', subproductcode := 'mpe', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Ingest', descriptive_name := '15m RFE', description := '15 Minutes MSG/MPE RainFall Estimate', provider := 'EUMETCAST', frequency_id := 'e15minute', date_format := 'YYYYMMDDHHMM', scale_factor := .010000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'pml-modis-chl', subproductcode := 'chl-3day', version := '3.0', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Ingest', descriptive_name := '3 Day CHLA', description := 'MODIS/PML Chlorophyl-A: 3 day MEAN composite', provider := 'Plymouth Marine Laboratory', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Float32', masked := false, timeseries_role := 'Initial', display_index := 1, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'pml-modis-chl', subproductcode := 'pml-modis-chl_native', version := '3.0', defined_by := 'JRC', activated := true, category_id := 'oceanography', product_type := 'Native', descriptive_name := 'MODIS/PML - Chla', description := 'MODIS Chlorophylle_a from Plymouth Marine Laboratory<BR>
@@ -317,6 +462,21 @@ SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductc
 SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '10d', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Ingest', descriptive_name := '10 Day RFE', description := 'SUM composite of the RainFall Estimate (RFE) over a 10 DAY time interval', provider := 'TAMSAT - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 1, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '1monperc', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_REL DIF to LTA', description := 'RELATIVE DIFFERENCE anomaly of the 1 MONTH RFE:<BR>100*[(Current RFE - LTA RFE)/ LTA RFE]', provider := 'TAMSAT - JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 27, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '1mondiff', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_DIF to LTA', description := 'DIFFERENCE anomaly of the 1 MONTH RFE:<BR>DIF=[Current RFE - LTA RFE] ', provider := 'TAMSAT - JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 26, full_copy := false );
+=======
+SELECT products.update_insert_product(  productcode := 'msg-mpe', subproductcode := '1dcum', version := 'undefined', defined_by := 'JRC', activated := true, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Day RFE', description := 'SUM composite of the MSG/MPE 15 minutes RainFall Estimate (RFE) over a 1 DAY time interval', provider := 'EUMETCAST', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := .100000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 0, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'msg-mpe', subproductcode := 'mpe', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Ingest', descriptive_name := '15m RFE', description := '15 Minutes MSG/MPE RainFall Estimate', provider := 'EUMETCAST', frequency_id := 'e15minute', date_format := 'YYYYMMDDHHMM', scale_factor := .010000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'pml-modis-chl', subproductcode := 'chl-3day', version := '3.0', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Ingest', descriptive_name := '3 Day CHLA', description := 'MODIS/PML Chlorophyl-A: 3 day MEAN composite', provider := 'Plymouth Marine Laboratory', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Float32', masked := false, timeseries_role := NULL, display_index := 1, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'pml-modis-chl', subproductcode := 'pml-modis-chl_native', version := '3.0', defined_by := 'JRC', activated := true, category_id := 'oceanography', product_type := 'Native', descriptive_name := 'MODIS/PML - Chla', description := 'MODIS Chlorophylle_a from Plymouth Marine Laboratory<BR>
+https://rsg.pml.ac.uk/', provider := 'Plymouth Marine Laboratory', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'undefined', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'pml-modis-sst', subproductcode := 'sst-3day', version := '3.0', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Ingest', descriptive_name := '3 Day SST', description := NULL, provider := 'NASA/GSFC/OceanColor', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := .010000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'pml-modis-sst', subproductcode := 'sst-fronts-shp', version := '3.0', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := 'MODIS/PML - SST Fronts as shp', description := 'PML MODIS SST Fronts as shapefile', provider := 'PML', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'pml-modis-sst', subproductcode := 'pml-modis-sst_native', version := '3.0', defined_by := 'JRC', activated := true, category_id := 'oceanography', product_type := 'Native', descriptive_name := 'MODIS/PML - SST', description := 'MODIS Sea Surface Temperature from Plymouth Marine Laboratory<BR>
+https://rsg.pml.ac.uk/', provider := 'NASA/GSFC/OceanColor', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := .000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'undefined', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'pml-modis-sst', subproductcode := 'sst-fronts', version := '3.0', defined_by := 'JRC', activated := false, category_id := 'oceanography', product_type := 'Derived', descriptive_name := 'MODIS/PML - SST Fronts', description := 'PML MODIS SST Fronts', provider := 'PML', frequency_id := 'e1day', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32767, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '1moncum', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE', description := 'SUM composite of the RainFall Estimate (RFE) over 1 MONTH time interval', provider := 'TAMSAT - JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 10, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '10dperc', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_REL DIF to LTA', description := 'RELATIVE DIFFERENCE anomaly of the 10 DAY RFE:<BR>100*[(Current RFE - LTA RFE)/ LTA RFE]', provider := 'TAMSAT - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 5, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '1mondiff', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_DIF to LTA', description := 'DIFFERENCE anomaly of the 1 MONTH RFE:<BR>DIF=[Current RFE - LTA RFE] ', provider := 'TAMSAT - JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 14, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := 'tamsat-rfe_native', version := '2.0', defined_by := 'JRC', activated := true, category_id := 'rainfall', product_type := 'Native', descriptive_name := 'TAMSAT - RFE', description := 'TAMSAT (Tropical Applications of Meteorology using SATellite)  is a RFE (RainFall Estimate) dataset from 1983,<BR> https://www.tamsat.org.uk/about<BR>
 Rainfall in Africa originates from deep convective that have cold cloud tops.
 The method therefore assumes that:<BR>
@@ -327,6 +487,7 @@ Rain= a0+a1*CCD (CCD>0)<BR>
 - CCD  are derived  from  geostationary  TIR (Thermal Infra RED)  measurements,<BR>
 - a0 and a1 are  the  calibration  parameters.<BR>
 The optimal parameters are found by calibrating CCD to a historic  rain  gauge  archive. Convective rainfall having seasonal and regional variability, the temperature threshold and CCD_Rainfal relationship varies both spatially and temporally. ', provider := 'TAMSAT - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'undefined', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+<<<<<<< HEAD
 SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '10dratio', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_RATIO to LTA', description := 'RELATIVE RATIO anomaly of the 10 DAY RFE:<BR>100*[Current RFE/ LTA RFE]', provider := 'TAMSAT - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 8, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '10davg', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_LTA', description := 'Long Term AVERAGE (LTA) of the 10 DAY RFE', provider := 'TAMSAT - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 3, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '1monavg', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_LTA', description := 'Long Term AVERAGE (LTA) of the 1 MONTH RFE', provider := 'TAMSAT - JRC', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 23, full_copy := false );
@@ -339,6 +500,20 @@ It is an indication of the dry matter biomass increase (growth rate).<BR>
 It is directly related to the NPP (Net Primary Productivity) and<BR>
 expressed in kilograms  (kg) of dry matter per hectare (ha) per day.<BR>
 ', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDDHHMM', scale_factor := .010000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+=======
+SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '1monmin', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_LT MIN', description := 'Long Term MINIMUM of the 1 MONTH RFE', provider := 'TAMSAT - JRC', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 11, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '10ddiff', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_DIF to LTA', description := 'DIFFERENCE anomaly of the 10 DAY RFE:<BR>DIF=[Current RFE - LTA RFE]', provider := 'TAMSAT - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 4, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '10d', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Ingest', descriptive_name := '10 Day RFE', description := 'SUM composite of the RainFall Estimate (RFE) over a 10 DAY time interval', provider := 'TAMSAT - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 0, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '1monmax', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_LT MAX', description := 'Long Term MAXIMUM of the 1 MONTH RFE', provider := 'TAMSAT - JRC', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 13, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '10dmin', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_LT MIN', description := 'Long Term MINIMUM of the 10 DAY RFE', provider := 'TAMSAT - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 1, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '1monperc', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_REL DIF to LTA', description := 'RELATIVE DIFFERENCE anomaly of the 1 MONTH RFE:<BR>100*[(Current RFE - LTA RFE)/ LTA RFE]', provider := 'TAMSAT - JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 15, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '10dnp', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_NORM DIF', description := 'NORMALISED DIFFERENCE anomaly of the 10 DAY RFE:<BR>100*[(CURRENT - MIN) / ( MAX - MIN)]', provider := 'TAMSAT - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 6, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '10davg', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_LTA', description := 'Long Term AVERAGE (LTA) of the 10 DAY RFE', provider := 'TAMSAT - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 2, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '10dratio', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_RATIO to LTA', description := 'RELATIVE RATIO anomaly of the 10 DAY RFE:<BR>100*[Current RFE/ LTA RFE]', provider := 'TAMSAT - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 5, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '10dmax', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '10 Day RFE_LT MAX', description := 'Long Term MAXIMUM of the 10 DAY RFE', provider := 'TAMSAT - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 3, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '1monnp', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_NORM DIF', description := 'NORMALISED DIFFERENCE anomaly of the 1 MONTH RFE:<BR>100*[(CURRENT - MIN) / ( MAX - MIN)]', provider := 'TAMSAT - JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 16, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'tamsat-rfe', subproductcode := '1monavg', version := '2.0', defined_by := 'JRC', activated := false, category_id := 'rainfall', product_type := 'Derived', descriptive_name := '1 Month RFE_LTA', description := 'Long Term AVERAGE (LTA) of the 1 MONTH RFE', provider := 'TAMSAT - JRC', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'mm', data_type_id := 'Int16', masked := false, timeseries_role := '10d', display_index := 12, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT products.update_insert_product(  productcode := 'vgt-dmp', subproductcode := 'dmp', version := 'V1.0', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day DMP', description := 'DMP, or Dry Matter Productivity, is an indication of the dry matter biomass increase (growth rate)
                     and is directly related to the well-known NPP (Net Primary Productivity), but customized for agro-statistics and expressed in
                     kilograms of dry matter (kgDM) per hectare per day.
@@ -346,35 +521,66 @@ SELECT products.update_insert_product(  productcode := 'vgt-dmp', subproductcode
                     from measurements by the VEGETATION instruments on board the SPOT satellites and provided by the MARS-FOOD project.
                     The VGT4AFRICA DMP products cover Africa or any part thereof and are provided on a 10-daily basis. They are also part
                     of the seamless VGT4AFRICA product database and are distributed primarily via the EUMETCast satellite telecommunications system
+<<<<<<< HEAD
                     to non-commercial users in Africa.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .010000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'kg/ha/day', data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 1, full_copy := false );
+=======
+                    to non-commercial users in Africa.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .010000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := 'kg/ha/day', data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-dmp', subproductcode := 'vgt-dmp_native', version := 'V1.0', defined_by := 'JRC', activated := true, category_id := 'vegetation', product_type := 'Native', descriptive_name := 'SPOT.VGT/PROBA.V - DMP', description := 'DMP (Dry Matter Productivity) <BR> http://land.copernicus.eu/global/products/dmp<BR>
+It is an indication of the dry matter biomass increase (growth rate).<BR>
+It is directly related to the NPP (Net Primary Productivity) and<BR>
+expressed in kilograms  (kg) of dry matter per hectare (ha) per day.<BR>
+', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDDHHMM', scale_factor := .010000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT products.update_insert_product(  productcode := 'vgt-fapar', subproductcode := 'vgt-fapar_native', version := 'V1.4', defined_by := 'JRC', activated := true, category_id := 'vegetation', product_type := 'Native', descriptive_name := 'SPOT.VGT/PROBA.V - fAPAR', description := 'FAPAR (Fraction of Photosynthetic Active Radiation)<BR> http://land.copernicus.eu/global/products/fapar<BR>
 FAPAR  corresponds  to  the  fraction  of  photosynthetically  active  radiation  absorbed  by  the green elements of the
 canopy.<BR>
 The FAPAR value results directly from the radiative transfer model in the canopy  which  is  computed  instantaneously.<BR>
 It  depends  on  canopy  structure,  vegetation  element optical properties and illumination conditions. ', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := NULL, scale_offset := NULL, nodata := NULL, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+<<<<<<< HEAD
 SELECT products.update_insert_product(  productcode := 'vgt-fapar', subproductcode := 'fapar', version := 'V1.4', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day FAPAR', description := NULL, provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 1, full_copy := false );
+=======
+SELECT products.update_insert_product(  productcode := 'vgt-fapar', subproductcode := 'fapar', version := 'V1.4', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day FAPAR', description := NULL, provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := NULL, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT products.update_insert_product(  productcode := 'vgt-fapar', subproductcode := 'vgt-fapar_native', version := 'V2.0', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Native', descriptive_name := 'SPOT.VGT/PROBA.V - fAPAR', description := 'FAPAR (Fraction of Photosynthetic Active Radiation)<BR> http://land.copernicus.eu/global/products/fapar<BR>
 FAPAR  corresponds  to  the  fraction  of  photosynthetically  active  radiation  absorbed  by  the green elements of the
 canopy.<BR>
 The FAPAR value results directly from the radiative transfer model in the canopy  which  is  computed  instantaneously.<BR>
+<<<<<<< HEAD
 It  depends  on  canopy  structure,  vegetation  element optical properties and illumination conditions. ', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := NULL, scale_offset := NULL, nodata := NULL, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-fapar', subproductcode := 'fapar', version := 'V2.0', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day FAPAR', description := NULL, provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := 1, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-fcover', subproductcode := 'err_fcover', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := 'Standard deviation of the Cover fraction', description := 'The s fCover is the standard deviation computed on the fCover data', provider := 'VITO/DevCoCast', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'undefined', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-fcover', subproductcode := 'fcover', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day FCOVER', description := 'The fCover is the fraction of green vegetation covering a unit area of horizontal soil. fCover varies from 0 (bare soil) to 1 (full cover). It is used to decouple vegetation and soil contributions in energy balance processes with particular attention to temperature and evapo-transpiration. Its inter-annual variations allow monitoring the land-use changes.', provider := 'VITO/DevCoCast', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'undefined', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-fcover', subproductcode := 'fcover', version := 'V1.4', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day FCOVER', description := NULL, provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 1, full_copy := false );
+=======
+It  depends  on  canopy  structure,  vegetation  element optical properties and illumination conditions. ', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := NULL, scale_offset := NULL, nodata := NULL, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-fapar', subproductcode := 'fapar', version := 'V2.0', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day FAPAR', description := NULL, provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-fcover', subproductcode := 'fcover', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day FCOVER', description := 'The fCover is the fraction of green vegetation covering a unit area of horizontal soil. fCover varies from 0 (bare soil) to 1 (full cover). It is used to decouple vegetation and soil contributions in energy balance processes with particular attention to temperature and evapo-transpiration. Its inter-annual variations allow monitoring the land-use changes.', provider := 'VITO/DevCoCast', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'undefined', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-fcover', subproductcode := 'err_fcover', version := 'undefined', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := 'Standard deviation of the Cover fraction', description := 'The s fCover is the standard deviation computed on the fCover data', provider := 'VITO/DevCoCast', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'undefined', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-fcover', subproductcode := 'fcover', version := 'V1.4', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day FCOVER', description := NULL, provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := NULL, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT products.update_insert_product(  productcode := 'vgt-fcover', subproductcode := 'vgt-fcover_native', version := 'V1.4', defined_by := 'JRC', activated := true, category_id := 'vegetation', product_type := 'Native', descriptive_name := 'SPOT.VGT/PROBA.V - FCOVER', description := 'FCover (Fraction of vegetation cover). http://land.copernicus.eu/global/products/fcover<BR>
 FCover is defined as the fraction of ground surface covered by green vegetation as seen from the nadir  direction.<BR>
 It  is used  to  separate  vegetation  and  soil  in  energy  balance  processes,  including temperature  and  evapotranspiration.<BR>
 It  is  computed  from  the  leaf  area  index  and  other  canopy structural  variables  and  does  not  depend  on  variables  such  as  the  geometry  of  illumination  as compared to FAPAR.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := NULL, scale_offset := NULL, nodata := NULL, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+<<<<<<< HEAD
 SELECT products.update_insert_product(  productcode := 'vgt-fcover', subproductcode := 'fcover', version := 'V2.0', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day FCOVER', description := NULL, provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 1, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-fcover', subproductcode := 'vgt-fcover_native', version := 'V2.0', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Native', descriptive_name := 'SPOT.VGT/PROBA.V - FCOVER', description := 'FCover (Fraction of vegetation cover). http://land.copernicus.eu/global/products/fcover<BR>
 FCover is defined as the fraction of ground surface covered by green vegetation as seen from the nadir  direction.<BR>
 It  is used  to  separate  vegetation  and  soil  in  energy  balance  processes,  including temperature  and  evapotranspiration.<BR>
 It  is  computed  from  the  leaf  area  index  and  other  canopy structural  variables  and  does  not  depend  on  variables  such  as  the  geometry  of  illumination  as compared to FAPAR.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := NULL, scale_offset := NULL, nodata := NULL, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+=======
+SELECT products.update_insert_product(  productcode := 'vgt-fcover', subproductcode := 'fcover', version := 'V2.0', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day FCOVER', description := NULL, provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := 'Initial', display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-fcover', subproductcode := 'vgt-fcover_native', version := 'V2.0', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Native', descriptive_name := 'SPOT.VGT/PROBA.V - FCOVER', description := 'FCover (Fraction of vegetation cover). http://land.copernicus.eu/global/products/fcover<BR>
+FCover is defined as the fraction of ground surface covered by green vegetation as seen from the nadir  direction.<BR>
+It  is used  to  separate  vegetation  and  soil  in  energy  balance  processes,  including temperature  and  evapotranspiration.<BR>
+It  is  computed  from  the  leaf  area  index  and  other  canopy structural  variables  and  does  not  depend  on  variables  such  as  the  geometry  of  illumination  as compared to FAPAR.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := NULL, scale_offset := NULL, nodata := NULL, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-lai', subproductcode := 'lai', version := 'V1.4', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day LAI', description := NULL, provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := NULL, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT products.update_insert_product(  productcode := 'vgt-lai', subproductcode := 'vgt-lai_native', version := 'V1.4', defined_by := 'JRC', activated := true, category_id := 'vegetation', product_type := 'Native', descriptive_name := 'SPOT.VGT/PROBA.V - LAI', description := 'LAI (Leaf Area Index)<BR> http://land.copernicus.eu/global/products/lai <BR>
 It  is  defined  as the  developed  area  of  photosynthetically  active  elements  of  the  vegetation (mainly leafs) per  unit  horizontal  ground  area.<BR>
 It  determines  the  size  of  the  interface  for  exchange  of  energy (including radiation) and mass between the canopy and the atmosphere.<BR>
 It is a dimensionless variable [m2/m2], typically ranging from 0 for a bare ground to 6 for a dense forest.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDDHHMM', scale_factor := 1.000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+<<<<<<< HEAD
 SELECT products.update_insert_product(  productcode := 'vgt-lai', subproductcode := 'lai', version := 'V1.4', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day LAI', description := NULL, provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 1, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-lai', subproductcode := 'vgt-lai_native', version := 'V2.0', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Native', descriptive_name := 'SPOT.VGT/PROBA.V - LAI', description := 'LAI (Leaf Area Index)<BR> http://land.copernicus.eu/global/products/lai <BR>
 It  is  defined  as the  developed  area  of  photosynthetically  active  elements  of  the  vegetation (mainly leafs) per  unit  horizontal  ground  area.<BR>
@@ -387,10 +593,26 @@ The daily NDVI is calculated with RED and NEAR INFRARED spectral bands reflectan
 [NDVI = (NIR - RED)/(NIR + RED)]<BR>
 The NDVI is an indicator of the greenness of the biomes<BR>
 It is widely used for ecosystems monitoring.', provider := 'VITO/Copernicus', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+=======
+SELECT products.update_insert_product(  productcode := 'vgt-lai', subproductcode := 'vgt-lai_native', version := 'V2.0', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Native', descriptive_name := 'SPOT.VGT/PROBA.V - LAI', description := 'LAI (Leaf Area Index)<BR> http://land.copernicus.eu/global/products/lai <BR>
+It  is  defined  as the  developed  area  of  photosynthetically  active  elements  of  the  vegetation (mainly leafs) per  unit  horizontal  ground  area.<BR>
+It  determines  the  size  of  the  interface  for  exchange  of  energy (including radiation) and mass between the canopy and the atmosphere.<BR>
+It is a dimensionless variable [m2/m2], typically ranging from 0 for a bare ground to 6 for a dense forest.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDDHHMM', scale_factor := 1.000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-lai', subproductcode := 'lai', version := 'V2.0', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day LAI', description := NULL, provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := 'Initial', display_index := NULL, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'vgt-ndvi_native', version := 'proba-v2.1', defined_by := 'JRC', activated := true, category_id := 'vegetation', product_type := 'Native', descriptive_name := 'SPOT.VGT/PROBA.V - NDVI', description := 'NDVI (Normalized  Difference  Vegetation  Index) <BR>http://land.copernicus.eu/global/products/ndvi<BR>
 It is  a  dimensionless  index  that  is  indicative  for vegetation activity and density. <BR>
 It  is  calculated  by  comparing  the  visible  and  near- infrared  sunlight  reflected by the surface (reflectance).<BR>
 The Global Land NDVI product is a 10-day synthesis product derived from Top of Canopy SPOT/VEGETATION or PROBA-V data.', provider := 'VITO/Copernicus', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+<<<<<<< HEAD
+=======
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndv', version := 'proba-v2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day NDVI', description := 'Ten day Normalized Difference Vegetation Index (NDVI)<BR>
+10 Day NDVI=[MAX composite of the daily NDVI over a 10 DAY time interval]<BR>
+The daily NDVI is calculated with RED and NEAR INFRARED spectral bands reflectances:<BR>
+[NDVI = (NIR - RED)/(NIR + RED)]<BR>
+The NDVI is an indicator of the greenness of the biomes<BR>
+It is widely used for ecosystems monitoring.', provider := 'VITO/Copernicus', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'vgt-ndvi_native', version := 'proba-v2.2', defined_by := 'JRC', activated := true, category_id := 'vegetation', product_type := 'Native', descriptive_name := 'SPOT.VGT/PROBA.V - NDVI', description := 'NDVI (Normalized  Difference  Vegetation  Index) <BR>http://land.copernicus.eu/global/products/ndvi<BR>
 It is  a  dimensionless  index  that  is  indicative  for vegetation activity and density. <BR>
 It  is  calculated  by  comparing  the  visible  and  near- infrared  sunlight  reflected by the surface (reflectance).<BR>
@@ -400,13 +622,19 @@ SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcod
 The daily NDVI is calculated with RED and NEAR INFRARED spectral bands reflectances:<BR>
 [NDVI = (NIR - RED)/(NIR + RED)]<BR>
 The NDVI is an indicator of the greenness of the biomes<BR>
+<<<<<<< HEAD
 It is widely used for ecosystems monitoring.', provider := 'VITO/Copernicus', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'sm', version := 'spot-v1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := 'Status map', description := 'Status map of the NDVI', provider := 'VITO/DevCoCast - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := NULL, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndv', version := 'spot-v1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day NDVI', description := 'The NDVI can be used to measure and monitor plant growth, vegetation cover, and biomass production. It is a dimensionless variable.  The values vary between -1 and 1. Increasing positive NDVI values indicate increasing amounts of green vegetation. Moderate values represent shrub and grassland (0.2 to 0.3), while high values indicate temperate and tropical rainforests (0.6 to 0.8). NDVI values near zero and decreasing negative values indicate non-vegetated features such as barren surfaces (rock and soil) and water, snow, ice, and clouds.', provider := 'VITO/DevCoCast - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+=======
+It is widely used for ecosystems monitoring.', provider := 'VITO/Copernicus', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'sm', version := 'spot-v1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := 'Status map', description := 'Status map of the NDVI', provider := 'VITO/DevCoCast - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := NULL, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'vgt-ndvi_native', version := 'spot-v1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Native', descriptive_name := 'SPOT.VGT/PROBA.V - NDVI', description := 'NDVI (Normalized  Difference  Vegetation  Index) <BR>http://land.copernicus.eu/global/products/ndvi<BR>
 It is  a  dimensionless  index  that  is  indicative  for vegetation activity and density. <BR>
 It  is  calculated  by  comparing  the  visible  and  near- infrared  sunlight  reflected by the surface (reflectance).<BR>
 The Global Land NDVI product is a 10-day synthesis product derived from Top of Canopy SPOT/VEGETATION or PROBA-V data.', provider := 'VITO/DevCoCast - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+<<<<<<< HEAD
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'vci', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_VCI', description := 'Ten day NDVI Vegetation Condition Index<BR>VCI=100*[(Current NDVI-Max NDVI*)/(Max NDVI*-Min NDVI*)]<BR>*Long Term Min/Max NDVI for the same ''Current NDVI'' time interval period.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'year-max-linearx2', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Year NDVI filtered_LT MAX', description := 'Long Term MAXIMUM of the filtered 1 YEAR NDVI', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1year', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'sm', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := 'Status map', description := 'Status map of the NDVI', provider := 'VITO/DevCoCast - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := NULL, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
@@ -434,10 +662,16 @@ SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcod
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmed', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_LT MED', description := 'Ten day NDVI Long Term MEDIAN', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := ' ', display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmax-linearx2', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_LT MAX', description := 'Filtered Ten day NDVI Long Term MAXIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := ' ', display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmin', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_LT MIN', description := 'Ten day NDVI Long Term MINIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := ' ', display_index := NULL, full_copy := false );
+=======
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndv', version := 'spot-v1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day NDVI', description := 'The NDVI can be used to measure and monitor plant growth, vegetation cover, and biomass production. It is a dimensionless variable.  The values vary between -1 and 1. Increasing positive NDVI values indicate increasing amounts of green vegetation. Moderate values represent shrub and grassland (0.2 to 0.3), while high values indicate temperate and tropical rainforests (0.6 to 0.8). NDVI values near zero and decreasing negative values indicate non-vegetated features such as barren surfaces (rock and soil) and water, snow, ice, and clouds.', provider := 'VITO/DevCoCast - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'icn', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_NGI', description := 'Ten day NDVI Normalised Growth Index<BR>NGI=100*[(Current- Historical MINIMUM)/(Historical MAXIMUM-Historical MINIMUM)]', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'year-min-linearx2', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Year NDVI filtered_LT MIN', description := 'Long Term MINIMUM of the filtered 1 YEAR NDVI', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1year', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'vgt-ndvi_native', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Native', descriptive_name := 'SPOT.VGT/PROBA.V - NDVI', description := 'NDVI (Normalized  Difference  Vegetation  Index) <BR>http://land.copernicus.eu/global/products/ndvi<BR>
 It is  a  dimensionless  index  that  is  indicative  for vegetation activity and density. <BR>
 It  is  calculated  by  comparing  the  visible  and  near- infrared  sunlight  reflected by the surface (reflectance).<BR>
 The Global Land NDVI product is a 10-day synthesis product derived from Top of Canopy SPOT/VEGETATION or PROBA-V data.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+<<<<<<< HEAD
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'diff-linearx2', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_DIF to LTA', description := 'Filtered Ten day NDVI Difference with filtered Average', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'linearx2diff-linearx2', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_DIF to LTA', description := 'Filtered Ten day NDVI difference with filtered Average', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'icn', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_NGI', description := 'Ten day NDVI Normalised Growth Index<BR>NGI=100*[(Current- Historical MINIMUM)/(Historical MAXIMUM-Historical MINIMUM)]', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
@@ -445,15 +679,48 @@ SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcod
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10davg', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_LTA', description := 'Ten day NDVI Long Term Average', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := ' ', display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndvi-linearx1', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered 1', description := 'Filtered Ten day NDVI linearx1', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndv', version := 'spot-v2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day NDVI', description := 'Ten day Normalized Difference Vegetation Index (NDVI)<BR>
+=======
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmax-linearx2', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_LT MAX', description := 'Filtered Ten day NDVI Long Term MAXIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := ' ', display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'absol-max-linearx2', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10d NDVI filtered_Absolute Maximum', description := 'Filtered Ten day NDVI Absolute Maximum', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1year', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'sm', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := 'Status map', description := 'Status map of the NDVI', provider := 'VITO/DevCoCast - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := NULL, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmed', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_LT MED', description := 'Ten day NDVI Long Term MEDIAN', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := ' ', display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'linearx2diff-linearx2', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_DIF to LTA', description := 'Filtered Ten day NDVI difference with filtered Average', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'monndvi', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Month filtered NDVI', description := 'Filtered Monthly NDVI<BR>[MEAN composite of the 3 related filtered Ten Day NDVI]', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmax', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_LT MAX', description := 'Ten day NDVI Long Term MAXIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := ' ', display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'year-max-linearx2', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Year NDVI filtered_LT MAX', description := 'Long Term MAXIMUM of the filtered 1 YEAR NDVI', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1year', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '1monmin', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Month filtered NDVI_LT MIN', description := 'Filtered Monthly NDVI Long Term MINIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndvi-linearx2', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered', description := 'Filtered 10 day Normalized Difference Vegetation Index (NDVI)<BR>
+10 Day NDVI filtered= 2*[sliding MEAN windows of THREE 10 day NDVI]', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'baresoil-linearx2', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10d NDVI filtered_Baresoil Mask', description := 'Filtered Ten day NDVI Baresoil Mask', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10davg-linearx2', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_LTA', description := 'Filtered Ten day NDVI Long Term AVERAGE', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := ' ', display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmed-linearx2', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_LT MED', description := 'Filtered Ten day NDVI Long Term MEDIAN', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := ' ', display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '1monmax', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Month filtered NDVI_LT MAX', description := 'Filtered Monthly NDVI Long Term MAXIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmin', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_LT MIN', description := 'Ten day NDVI Long Term MINIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := ' ', display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'diff-linearx2', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_DIF to LTA', description := 'Filtered Ten day NDVI Difference with filtered Average', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'icn-linearx2', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_NGI', description := 'Filtered Ten day NDVI Normalised Growth Index<BR>NGI=100*[(Current- Historical MINIMUM)/(Historical MAXIMUM-Historical MINIMUM)]', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'absol-min-linearx2', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10d NDVI filtered_Absolute Minimum', description := 'Filtered Ten day NDVI Absolute Maximum', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1year', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmin-linearx2', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_LT MIN', description := 'Filtered Ten day NDVI Long Term MINIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := ' ', display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'vci', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_VCI', description := 'Ten day NDVI Vegetation Condition Index<BR>VCI=100*[(Current NDVI-Max NDVI*)/(Max NDVI*-Min NDVI*)]<BR>*Long Term Min/Max NDVI for the same ''Current NDVI'' time interval period.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndv', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day NDVI', description := 'Ten day Normalized Difference Vegetation Index (NDVI)<BR>
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 10 Day NDVI=[MAX composite of the daily NDVI over a 10 DAY time interval]<BR>
 The daily NDVI is calculated with RED and NEAR INFRARED spectral bands reflectances:<BR>
 [NDVI = (NIR - RED)/(NIR + RED)]<BR>
 The NDVI is an indicator of the greenness of the biomes<BR>
+<<<<<<< HEAD
 It is widely used for ecosystems monitoring.', provider := 'VITO/Copernicus', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+=======
+It is widely used for ecosystems monitoring.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndvi-linearx1', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered 1', description := 'Filtered Ten day NDVI linearx1', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10davg', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_LTA', description := 'Ten day NDVI Long Term Average', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := ' ', display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '1monavg', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Month filtered NDVI_LTA', description := 'Filtered Monthly NDVI Long Term AVERAGE', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'vci-linearx2', version := 'spot-v2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_VCI', description := 'Filtered Ten day NDVI Vegetation Condition Index<BR>VCI=100*[(Current NDVI-Max NDVI*)/(Max NDVI*-Min NDVI*)]<BR>*Long Term Min/Max NDVI for the same ''Current NDVI'' time interval period.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'vgt-ndvi_native', version := 'spot-v2.2', defined_by := 'JRC', activated := true, category_id := 'vegetation', product_type := 'Native', descriptive_name := 'SPOT.VGT/PROBA.V - NDVI', description := 'NDVI (Normalized  Difference  Vegetation  Index) <BR>http://land.copernicus.eu/global/products/ndvi<BR>
 It is  a  dimensionless  index  that  is  indicative  for vegetation activity and density. <BR>
 It  is  calculated  by  comparing  the  visible  and  near- infrared  sunlight  reflected by the surface (reflectance).<BR>
 The Global Land NDVI product is a 10-day synthesis product derived from Top of Canopy SPOT/VEGETATION or PROBA-V data.', provider := 'VITO/Copernicus', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+<<<<<<< HEAD
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ratio-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_RATIO', description := 'Filtered Ten day NDVI Ratio<BR>RATIO=100*(Current/LTA)', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndv', display_index := 8, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10davg', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_LTA', description := 'Ten day NDVI Long Term Average', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'year-max-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Year NDVI filtered_LT MAX', description := 'Long Term MAXIMUM of the filtered 1 YEAR NDVI', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1year', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
@@ -466,20 +733,58 @@ SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcod
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndvi-linearx1', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered 1', description := 'Ten day Filtered NDVI linearx1', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'baresoil-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10d NDVI filtered_Baresoil Mask', description := 'Filtered Ten day NDVI Baresoil Mask', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'year-min-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Year NDVI filtered_LT MIN', description := 'Long Term MINIMUM of the filtered 1 YEAR NDVI', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1year', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+=======
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndv', version := 'spot-v2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day NDVI', description := 'Ten day Normalized Difference Vegetation Index (NDVI)<BR>
+10 Day NDVI=[MAX composite of the daily NDVI over a 10 DAY time interval]<BR>
+The daily NDVI is calculated with RED and NEAR INFRARED spectral bands reflectances:<BR>
+[NDVI = (NIR - RED)/(NIR + RED)]<BR>
+The NDVI is an indicator of the greenness of the biomes<BR>
+It is widely used for ecosystems monitoring.', provider := 'VITO/Copernicus', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ratio-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_RATIO', description := 'Filtered Ten day NDVI Ratio<BR>RATIO=100*(Current/LTA)', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndvi-linearx2', display_index := 7, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'vci', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_VCI', description := 'Ten day NDVI Vegetation Condition Index<BR>VCI=100*[(Current NDVI-Max NDVI*)/(Max NDVI*-Min NDVI*)]<BR>*Long Term Min/Max NDVI for the same ''Current NDVI'' time interval period.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := 56, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'year-min-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Year NDVI filtered_LT MIN', description := 'Long Term MINIMUM of the filtered 1 YEAR NDVI', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1year', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := 'ndvi-linearx2', display_index := 31, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'icn', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_NGI', description := 'Ten day NDVI Normalised Growth Index<BR>NGI=100*[(Current- Historical MINIMUM)/(Historical MAXIMUM-Historical MINIMUM)]', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := 57, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmax', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_LT MAX', description := 'Ten day NDVI Long Term MAXIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := 55, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '1monmax', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Month filtered NDVI_LT MAX', description := 'Filtered Monthly NDVI Long Term MAXIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := 64, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'diff-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_DIF to LTA', description := 'Filtered Ten day NDVI Difference with filtered Average', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := 'ndvi-linearx2', display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'baresoil-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10d NDVI filtered_Baresoil Mask', description := 'Filtered Ten day NDVI Baresoil Mask', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmin', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_LT MIN', description := 'Ten day NDVI Long Term MINIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := 52, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndvi-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered', description := 'Filtered 10 day Normalized Difference Vegetation Index (NDVI)<BR>
+10 Day NDVI filtered= 2*[sliding MEAN windows of THREE 10 day NDVI]', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 1, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'vgt-ndvi_native', version := 'sv2-pv2.1', defined_by := 'JRC', activated := true, category_id := 'vegetation', product_type := 'Native', descriptive_name := 'SPOT.VGT/PROBA.V - NDVI', description := 'NDVI (Normalized  Difference  Vegetation  Index) <BR>http://land.copernicus.eu/global/products/ndvi<BR>
 It is  a  dimensionless  index  that  is  indicative  for vegetation activity and density. <BR>
 It  is  calculated  by  comparing  the  visible  and  near- infrared  sunlight  reflected by the surface (reflectance).<BR>
 The Global Land NDVI product is a 10-day synthesis product derived from Top of Canopy SPOT/VEGETATION or PROBA-V data.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'undefined', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+<<<<<<< HEAD
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'baresoil', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10d NDVI_Baresoil Mask', description := 'Ten day NDVI Baresoil Mask', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'monndvi', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Month filtered NDVI', description := 'Filtered Monthly NDVI<BR>[MEAN composite of the 3 related filtered Ten Day NDVI]', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndv', display_index := 21, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndvi-linearx2-cum', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_Season cumul', description := 'Ten day Filtered NDVI linearx2 Season Cumulation', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1year', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndvi-linearx2-agric', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_Agriculture', description := 'Ten day Filtered NDVI Masked using Crop Mask', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+=======
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'monndvi', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Month filtered NDVI', description := 'Filtered Monthly NDVI<BR>[MEAN composite of the 3 related filtered Ten Day NDVI]', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := 61, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '1monavg', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Month filtered NDVI_LTA', description := 'Filtered Monthly NDVI Long Term AVERAGE', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := 63, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmax-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_LT MAX', description := 'Filtered Ten day NDVI Long Term MAXIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndvi-linearx2', display_index := 5, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'linearx2diff-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_DIF to LTA', description := 'Filtered Ten day NDVI difference with filtered Average', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndvi-linearx2', display_index := 6, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'year-max-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Year NDVI filtered_LT MAX', description := 'Long Term MAXIMUM of the filtered 1 YEAR NDVI', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1year', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := 'ndvi-linearx2', display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndvi-linearx2-cum', version := 'sv2-pv2.1', defined_by := 'JRC', activated := true, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_Season cumul', description := 'Ten day Filtered NDVI linearx2 Season Cumulation', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1year', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := 'ndvi-linearx2', display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '1monmin', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Month filtered NDVI_LT MIN', description := 'Filtered Monthly NDVI Long Term MINIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := 62, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndvi-linearx1', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered 1', description := 'Ten day Filtered NDVI linearx1', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'baresoil', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10d NDVI_Baresoil Mask', description := 'Ten day NDVI Baresoil Mask', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmed', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_LT MED', description := 'Ten day NDVI Long Term MEDIAN', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := 54, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10davg-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_LTA', description := 'Filtered Ten day NDVI Long Term AVERAGE', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndvi-linearx2', display_index := 3, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmed-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_LT MED', description := 'Filtered Ten day NDVI Long Term MEDIAN', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndvi-linearx2', display_index := 4, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'absol-min-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10d NDVI filtered_Absolute Minimum', description := 'Filtered Ten day NDVI Absolute Maximum', provider := 'VITO/Copernicus - JRC', frequency_id := 'singlefile', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmin-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_LT MIN', description := 'Filtered Ten day NDVI Long Term MINIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndvi-linearx2', display_index := 2, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndvi-linearx2-agric', version := 'sv2-pv2.1', defined_by := 'JRC', activated := true, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_Agriculture', description := 'Ten day Filtered NDVI Masked using Crop Mask', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := 'ndvi-linearx2', display_index := NULL, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndv', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day NDVI', description := 'Ten day Normalized Difference Vegetation Index (NDVI)<BR>
 10 Day NDVI=[MAX composite of the daily NDVI over a 10 DAY time interval]<BR>
 The daily NDVI is calculated with RED and NEAR INFRARED spectral bands reflectances:<BR>
 [NDVI = (NIR - RED)/(NIR + RED)]<BR>
 The NDVI is an indicator of the greenness of the biomes<BR>
 It is widely used for ecosystems monitoring.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 0, full_copy := false );
+<<<<<<< HEAD
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'icn-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_NGI', description := 'Filtered Ten day NDVI Normalised Growth Index<BR>NGI=100*[(Current- Historical MINIMUM)/(Historical MAXIMUM-Historical MINIMUM)]', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndv', display_index := 11, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'linearx2diff-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_DIF to LTA', description := 'Filtered Ten day NDVI difference with filtered Average', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndv', display_index := 6, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmin-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_LT MIN', description := 'Filtered Ten day NDVI Long Term MINIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndv', display_index := 2, full_copy := false );
@@ -497,10 +802,50 @@ SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcod
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndvi-linearx2-cum', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_Season cumul', description := 'Ten day Filtered NDVI linearx2 Season Cumulation', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1year', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'linearx2diff-linearx2', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_DIF to LTA', description := 'Filtered Ten day NDVI difference with filtered Average<BR>DIF=[Current - LTA]', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndv', display_index := 6, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'absol-min-linearx2', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10d NDVI filtered_Absolute Minimum', description := 'Filtered Ten day NDVI Absolute Maximum', provider := 'VITO/Copernicus - JRC', frequency_id := 'singlefile', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+=======
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10davg', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_LTA', description := 'Ten day NDVI Long Term Average', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := 53, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'vci-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_VCI', description := 'Filtered Ten day NDVI Vegetation Condition Index<BR>VCI=100*[(Current NDVI-Max NDVI*)/(Max NDVI*-Min NDVI*)]<BR>*Long Term Min/Max NDVI for the same ''Current NDVI'' time interval period.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndvi-linearx2', display_index := 8, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'absol-max-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10d NDVI filtered_Absolute Maximum', description := 'Filtered Ten day NDVI Absolute Maximum', provider := 'VITO/Copernicus - JRC', frequency_id := 'singlefile', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'icn-linearx2', version := 'sv2-pv2.1', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_NGI', description := 'Filtered Ten day NDVI Normalised Growth Index<BR>NGI=100*[(Current- Historical MINIMUM)/(Historical MAXIMUM-Historical MINIMUM)]', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndvi-linearx2', display_index := 9, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmin', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_LT MIN', description := 'Ten day NDVI Long Term MINIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'year-min-linearx2', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Year NDVI filtered_LT MIN', description := 'Long Term MINIMUM of the filtered 1 YEAR NDVI', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1year', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'baresoil', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10d NDVI_Baresoil Mask', description := 'Ten day NDVI Baresoil Mask', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'monndvi', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Month filtered NDVI', description := 'Filtered Monthly NDVI<BR>[MEAN composite of the 3 related filtered Ten Day NDVI]', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := 10, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '1monavg', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Month filtered NDVI_LTA', description := 'Filtered Monthly NDVI Long Term AVERAGE', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := 12, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmin-linearx2', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_LT MIN', description := 'Filtered Ten day NDVI Long Term MINIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndvi-linearx2', display_index := 2, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmed', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_LT MED', description := 'Ten day NDVI Long Term MEDIAN', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndv', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Ingest', descriptive_name := '10 Day NDVI', description := 'Ten day Normalized Difference Vegetation Index (NDVI)<BR>
+10 Day NDVI=[MAX composite of the daily NDVI over a 10 DAY time interval]<BR>
+The daily NDVI is calculated with RED and NEAR INFRARED spectral bands reflectances:<BR>
+[NDVI = (NIR - RED)/(NIR + RED)]<BR>
+The NDVI is an indicator of the greenness of the biomes<BR>
+It is widely used for ecosystems monitoring.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 0, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'icn', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_NGI', description := 'Ten day NDVI Normalised Growth Index<BR>NGI=100*[(Current- Historical MINIMUM)/(Historical MAXIMUM-Historical MINIMUM)]', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := 22, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '1monmin', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Month filtered NDVI_LT MIN', description := 'Filtered Monthly NDVI Long Term MINIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := 11, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmax', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_LT MAX', description := 'Ten day NDVI Long Term MAXIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'icn-linearx2', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_NGI', description := 'Filtered Ten day NDVI Normalised Growth Index<BR>NGI=100*[(Current- Historical MINIMUM)/(Historical MAXIMUM-Historical MINIMUM)]', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndvi-linearx2', display_index := 9, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'vci-linearx2', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_VCI', description := 'Filtered Ten day NDVI Vegetation Condition Index<BR>VCI=100*[(Current NDVI-Max NDVI*)/(Max NDVI*-Min NDVI*)]<BR>*Long Term Min/Max NDVI for the same ''Current NDVI'' time interval period.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndvi-linearx2', display_index := 8, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10davg-linearx2', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_LTA', description := 'Filtered Ten day NDVI Long Term AVERAGE', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndvi-linearx2', display_index := 3, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '1monmax', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Month filtered NDVI_LT MAX', description := 'Filtered Monthly NDVI Long Term MAXIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := 13, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'linearx2diff-linearx2', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_DIF to LTA', description := 'Filtered Ten day NDVI difference with filtered Average<BR>DIF=[Current - LTA]', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndvi-linearx2', display_index := 6, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmed-linearx2', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_LT MED', description := 'Filtered Ten day NDVI Long Term MEDIAN', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := NULL, display_index := 4, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ratio-linearx2', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_RATIO', description := 'Filtered Ten day NDVI Ratio<BR>RATIO=100*(Current/LTA)', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndvi-linearx2', display_index := 7, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'absol-max-linearx2', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10d NDVI filtered_Absolute Maximum', description := 'Filtered Ten day NDVI Absolute Maximum', provider := 'VITO/Copernicus - JRC', frequency_id := 'singlefile', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10davg', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_LTA', description := 'Ten day NDVI Long Term Average', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'vci', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI_VCI', description := 'Ten day NDVI Vegetation Condition Index<BR>VCI=100*[(Current NDVI-Max NDVI*)/(Max NDVI*-Min NDVI*)]<BR>*Long Term Min/Max NDVI for the same ''Current NDVI'' time interval period.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := 21, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'diff-linearx2', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_DIF to LTA', description := 'Filtered Ten day NDVI Difference with filtered Average', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndvi-linearx2-cum', version := 'sv2-pv2.2', defined_by := 'JRC', activated := true, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_Season cumul', description := 'Ten day Filtered NDVI linearx2 Season Cumulation', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1year', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := 'ndvi-linearx2', display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'baresoil-linearx2', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10d NDVI filtered_Baresoil Mask', description := 'Filtered Ten day NDVI Baresoil Mask', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndvi-linearx2', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered', description := 'Filtered 10 day Normalized Difference Vegetation Index (NDVI)<BR>
+10 Day NDVI filtered= 2*[sliding MEAN windows of THREE 10 day NDVI]', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'Initial', display_index := 1, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'year-max-linearx2', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Year NDVI filtered_LT MAX', description := 'Long Term MAXIMUM of the filtered 1 YEAR NDVI', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1year', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndvi-linearx1', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered 1', description := 'Ten day Filtered NDVI linearx1', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'vgt-ndvi_native', version := 'sv2-pv2.2', defined_by := 'JRC', activated := true, category_id := 'vegetation', product_type := 'Native', descriptive_name := 'SPOT.VGT/PROBA.V - NDVI', description := 'NDVI (Normalized  Difference  Vegetation  Index) <BR>http://land.copernicus.eu/global/products/ndvi<BR>
 It is  a  dimensionless  index  that  is  indicative  for vegetation activity and density. <BR>
 It  is  calculated  by  comparing  the  visible  and  near- infrared  sunlight  reflected by the surface (reflectance).<BR>
 The Global Land NDVI product is a 10-day synthesis product derived from Top of Canopy SPOT/VEGETATION or PROBA-V data.', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'undefined', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+<<<<<<< HEAD
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'year-min-linearx2', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Year NDVI filtered_LT MIN', description := 'Long Term MINIMUM of the filtered 1 YEAR NDVI', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1year', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'diff-linearx2', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_DIF to LTA', description := 'Filtered Ten day NDVI Difference with filtered Average', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '1monmin', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '1 Month filtered NDVI_LT MIN', description := 'Filtered Monthly NDVI Long Term MINIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndv', display_index := 22, full_copy := false );
@@ -539,6 +884,15 @@ SELECT products.update_insert_product(  productcode := 'wd-gee', subproductcode 
 SELECT products.update_insert_product(  productcode := 'wd-gee', subproductcode := 'occurr_native', version := '1.0', defined_by := 'JRC', activated := true, category_id := 'inlandwater', product_type := 'Native', descriptive_name := 'LANDSAT Water Body', description := 'Water Detection from Landsat, derived on GEE platform using HSV transformation approach', provider := 'JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
 SELECT products.update_insert_product(  productcode := 'wd-gee', subproductcode := 'avg', version := '1.0', defined_by := 'JRC', activated := false, category_id := 'inlandwater', product_type := 'Ingest', descriptive_name := '1 Month WB LTA', description := 'Water Detection from Landsat, derived on GEE platform using HSV transformation approach', provider := 'JRC', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := 'occurr', display_index := 1, full_copy := false );
 
+=======
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'absol-min-linearx2', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10d NDVI filtered_Absolute Minimum', description := 'Filtered Ten day NDVI Absolute Maximum', provider := 'VITO/Copernicus - JRC', frequency_id := 'singlefile', date_format := 'YYYY', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := '10dmax-linearx2', version := 'sv2-pv2.2', defined_by := 'JRC', activated := false, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_LT MAX', description := 'Filtered Ten day NDVI Long Term MAXIMUM', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'MMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := false, timeseries_role := 'ndvi-linearx2', display_index := 5, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'vgt-ndvi', subproductcode := 'ndvi-linearx2-agric', version := 'sv2-pv2.2', defined_by := 'JRC', activated := true, category_id := 'vegetation', product_type := 'Derived', descriptive_name := '10 Day NDVI filtered_Agriculture', description := 'Ten day Filtered NDVI Masked using Crop Mask', provider := 'VITO/Copernicus - JRC', frequency_id := 'e1dekad', date_format := 'YYYYMMDD', scale_factor := .001000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Int16', masked := true, timeseries_role := 'ndvi-linearx2', display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'wd-gee', subproductcode := 'wd-gee_native', version := '1.0', defined_by := 'JRC', activated := true, category_id := 'inlandwater', product_type := 'Native', descriptive_name := 'LANDSAT Water Body', description := 'Water Detection from Landsat, derived on GEE platform using HSV transformation approach', provider := 'JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'wd-gee', subproductcode := 'avg', version := '1.0', defined_by := 'JRC', activated := false, category_id := 'inlandwater', product_type := 'Ingest', descriptive_name := '1 Month WB LTA', description := 'Water Detection from Landsat, derived on GEE platform using HSV transformation approach', provider := 'JRC', frequency_id := 'e1month', date_format := 'MMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := 'occurr', display_index := 1, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'wd-gee', subproductcode := 'occurr', version := '1.0', defined_by := 'JRC', activated := false, category_id := 'inlandwater', product_type := 'Ingest', descriptive_name := '1 Month WB OCCURENCE', description := 'Water Detection from Landsat, derived on GEE platform using HSV transformation approach', provider := 'JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := -32768, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := 'Initial', display_index := 0, full_copy := false );
+SELECT products.update_insert_product(  productcode := 'wd-gee', subproductcode := 'occurr_native', version := '1.0', defined_by := 'JRC', activated := true, category_id := 'inlandwater', product_type := 'Native', descriptive_name := 'LANDSAT Water Body', description := 'Water Detection from Landsat, derived on GEE platform using HSV transformation approach', provider := 'JRC', frequency_id := 'e1month', date_format := 'YYYYMMDD', scale_factor := 1.000000, scale_offset := .000000, nodata := 0, mask_min := NULL, mask_max := NULL, unit := NULL, data_type_id := 'Byte', masked := false, timeseries_role := NULL, display_index := NULL, full_copy := false );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 
 
 
@@ -2490,7 +2844,10 @@ BEGIN
   PERFORM analysis.update_insert_legend( legend_id := 133, legend_name := 'NRI<br>(%)', step_type := 'irregular', min_value := .000000, max_value := 100.000000, min_real_value := 'NO_LOW', max_real_value := 'NO_HIGH', colorbar := 'RFE: Anomaly by Normalized Rain Index (NRI) - p2', step := 1.000000, step_range_from := .000000, step_range_to := 100.000000, unit := 'NO_UNIT', defined_by := 'JRC' );
   PERFORM analysis.update_insert_legend( legend_id := 134, legend_name := 'RAIN<br>Anomaly<br>(%)', step_type := 'irregular', min_value := -200.000000, max_value := 200.000000, min_real_value := 'NO_LOW', max_real_value := 'NO_HIGH', colorbar := 'RFE: Anomaly by Relative Difference - p2', step := 1.000000, step_range_from := .000000, step_range_to := .000000, unit := '%', defined_by := 'JRC' );
   PERFORM analysis.update_insert_legend( legend_id := 135, legend_name := 'FIRE<br>Ratio<br>(%)', step_type := 'irregular', min_value := 1.000000, max_value := 200.000000, min_real_value := 'NO_LOW', max_real_value := 'NO_HIGH', colorbar := 'FIRE: Anomaly by Ratio - WFP ', step := 1.000000, step_range_from := 200.000000, step_range_to := 200.000000, unit := '%', defined_by := 'JRC' );
+<<<<<<< HEAD
   PERFORM analysis.update_insert_legend( legend_id := 136, legend_name := 'SST<div>FRONTS</div>', step_type := 'irregular', min_value := .000000, max_value := 10.000000, min_real_value := NULL, max_real_value := 'NULL', colorbar := 'SST FRONTS: Value', step := NULL, step_range_from := NULL, step_range_to := NULL, unit := NULL, defined_by := 'USER' );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
   PERFORM analysis.update_insert_legend( legend_id := 137, legend_name := 'RAIN<br>(mm)  ', step_type := 'irregular', min_value := .000000, max_value := 100.000000, min_real_value := 'NO_LOW', max_real_value := 'NO_HIGH', colorbar := 'RFE: Value over 1 day - TAMSAT/JRC', step := 10.000000, step_range_from := .000000, step_range_to := 10000.000000, unit := 'mm', defined_by := 'JRC' );
   PERFORM analysis.update_insert_legend( legend_id := 138, legend_name := 'RAIN<br>(mm)  ', step_type := 'irregular', min_value := .000000, max_value := 200.000000, min_real_value := 'NO_LOW', max_real_value := 'NO_HIGH', colorbar := 'RFE: Value over 10 day - USGS', step := 10.000000, step_range_from := .000000, step_range_to := 10000.000000, unit := 'mm', defined_by := 'JRC' );
   PERFORM analysis.update_insert_legend( legend_id := 139, legend_name := 'RAIN</BR>(mm)  ', step_type := 'irregular', min_value := .000000, max_value := 2000.000000, min_real_value := 'NO_LOW', max_real_value := 'NO_HIGH', colorbar := 'RFE: Values - NOAA', step := 10.000000, step_range_from := .000000, step_range_to := 10000.000000, unit := 'mm', defined_by := 'JRC' );
@@ -2518,9 +2875,12 @@ BEGIN
   PERFORM analysis.update_insert_legend( legend_id := 209, legend_name := 'PP<br>(mgC/m²/day)', step_type := 'irregular', min_value := 400.000000, max_value := 1100.000000, min_real_value := 'NO_LOW', max_real_value := 'NO_HIGH', colorbar := 'PP: Value - TAFIRI 252 colors, 400 to 1100', step := 40.000000, step_range_from := 400.000000, step_range_to := 1100.000000, unit := 'mgC/m²/day', defined_by := 'JRC' );
   PERFORM analysis.update_insert_legend( legend_id := 210, legend_name := 'SST<br>(°C)', step_type := 'irregular', min_value := 25.000000, max_value := 31.000000, min_real_value := 'NO_LOW', max_real_value := 'NO_HIGH', colorbar := 'SST: Value - TAFIRI3', step := .100000, step_range_from := 18.000000, step_range_to := 34.000000, unit := '°C', defined_by := 'JRC' );
   PERFORM analysis.update_insert_legend( legend_id := 211, legend_name := 'ChlA<br>(mg/m³)', step_type := 'irregular', min_value := .000000, max_value := 30.000000, min_real_value := 'NO_LOW', max_real_value := 'NO_HIGH', colorbar := 'CHLA: Value - MOI', step := .010000, step_range_from := .000000, step_range_to := 50.000000, unit := 'mg/m³', defined_by := 'JRC' );
+<<<<<<< HEAD
   PERFORM analysis.update_insert_legend( legend_id := 212, legend_name := 'DMP<br>(kg/ha/day)', step_type := 'irregular', min_value := .000000, max_value := 255.000000, min_real_value := 'NO_LOW', max_real_value := 'NO_HIGH', colorbar := 'DMP: Value - p1 - copy', step := 1.000000, step_range_from := .000000, step_range_to := 300.000000, unit := 'kg/ha/day', defined_by := 'USER' );
   PERFORM analysis.update_insert_legend( legend_id := 213, legend_name := 'SST<br>(°C)', step_type := 'irregular', min_value := .000000, max_value := 255.000000, min_real_value := 'NO_LOW', max_real_value := 'NO_HIGH', colorbar := 'SST: Value - TAFIRI 5', step := 1.000000, step_range_from := .000000, step_range_to := 255.000000, unit := 'mm', defined_by := 'USER' );
   PERFORM analysis.update_insert_legend( legend_id := 214, legend_name := 'SST<br>(°C)', step_type := 'irregular', min_value := .000000, max_value := 100.000000, min_real_value := 'NO_LOW', max_real_value := 'NO_HIGH', colorbar := 'SST: Value _ tafiri8', step := 1.000000, step_range_from := .000000, step_range_to := 100.000000, unit := '°C', defined_by := 'USER' );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 
 
 	IF current_legend_id >= 400 THEN
@@ -2533,7 +2893,10 @@ BEGIN
 END $$;
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 1, from_step :=  53.02734375, to_step :=  53.3203125, color_rgb := '255 163 0', color_label := '', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 1, from_step :=  0, to_step :=  0.1, color_rgb := '144 0 111', color_label := '0', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 1, from_step :=  0.1, to_step :=  0.29296875, color_rgb := '141 0 114', color_label := '', group_label := '' );
@@ -2986,8 +3349,6 @@ SELECT analysis.update_insert_legend_step( legend_id := 2, from_step :=  14.375,
 SELECT analysis.update_insert_legend_step( legend_id := 2, from_step :=  15, to_step :=  15.625, color_rgb := '255 87 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 2, from_step :=  15.625, to_step :=  16.25, color_rgb := '255 83 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 2, from_step :=  16.25, to_step :=  16.875, color_rgb := '255 79 0', color_label := NULL, group_label := NULL );
-SELECT analysis.update_insert_legend_step( legend_id := 2, from_step :=  16.875, to_step :=  17.5, color_rgb := '255 75 0', color_label := NULL, group_label := NULL );
-SELECT analysis.update_insert_legend_step( legend_id := 2, from_step :=  17.5, to_step :=  18.125, color_rgb := '255 71 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 2, from_step :=  18.125, to_step :=  19.75, color_rgb := '255 67 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 2, from_step :=  19.75, to_step :=  20.375, color_rgb := '255 63 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 2, from_step :=  20.375, to_step :=  21, color_rgb := '255 59 0', color_label := NULL, group_label := NULL );
@@ -3042,6 +3403,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 2, from_step :=  62, to_
 SELECT analysis.update_insert_legend_step( legend_id := 2, from_step :=  0, to_step :=  0.001, color_rgb := '0 0 0', color_label := '0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 2, from_step :=  0.496875, to_step :=  0.51875, color_rgb := '0 255 175', color_label := '0.5', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 2, from_step :=  50, to_step :=  51, color_rgb := '165 0 0', color_label := '50', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 2, from_step :=  4.09375, to_step :=  4.3125, color_rgb := '255 223 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 2, from_step :=  0.001, to_step :=  0.01, color_rgb := '144 0 111', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 2, from_step :=  0.01, to_step :=  0.010625, color_rgb := '141 0 114', color_label := NULL, group_label := NULL );
@@ -3067,18 +3429,54 @@ SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  0.432, 
 SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  0.752, to_step :=  1, color_rgb := '0 56 0', color_label := '0.752', group_label := '1' );
 SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  -0.2, to_step :=  0, color_rgb := '255 255 255', color_label := '-0.2', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  0, to_step :=  0.024, color_rgb := '206 197 180', color_label := '0', group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 2, from_step :=  16.875, to_step :=  17.5, color_rgb := '255 75 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 2, from_step :=  17.5, to_step :=  18.125, color_rgb := '255 71 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 2, from_step :=  0.001, to_step :=  0.01, color_rgb := '144 0 111', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 2, from_step :=  0.01, to_step :=  0.010625, color_rgb := '141 0 114', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 6, from_step :=  0.4, to_step :=  0.5, color_rgb := '75 160 30', color_label := '+0.40', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 6, from_step :=  0.5, to_step :=  0.6, color_rgb := '53 130 15', color_label := '+0.50', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 6, from_step :=  0.25, to_step :=  0.3, color_rgb := '120 200 80', color_label := '+0.25', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 6, from_step :=  0.3, to_step :=  0.4, color_rgb := '85 190 40', color_label := '+0.30', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 6, from_step :=  0.1, to_step :=  0.15, color_rgb := '205 195 146', color_label := '+0.10', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 6, from_step :=  0.05, to_step :=  0.1, color_rgb := '197 175 125', color_label := '+0.05', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 6, from_step :=  0.6, to_step :=  0.7, color_rgb := '45 100 9', color_label := '+0.60', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 6, from_step :=  0.15, to_step :=  0.2, color_rgb := '180 235 110', color_label := '+0.15', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 6, from_step :=  0.8, to_step :=  1, color_rgb := '40 60 0', color_label := '+0.80', group_label := '+1.00' );
+SELECT analysis.update_insert_legend_step( legend_id := 6, from_step :=  -0.2, to_step :=  0.05, color_rgb := '255 255 255', color_label := '-0.2', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 6, from_step :=  0.2, to_step :=  0.25, color_rgb := '150 210 90', color_label := '+0.20', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 6, from_step :=  0.7, to_step :=  0.8, color_rgb := '40 80 0', color_label := '+0.70', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  0.176, to_step :=  0.232, color_rgb := '166 195 29', color_label := '0.176', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  0.152, to_step :=  0.176, color_rgb := '144 170 60', color_label := '0.152', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  0.124, to_step :=  0.152, color_rgb := '163 181 80', color_label := '0.124', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  0.368, to_step :=  0.432, color_rgb := '78 151 0', color_label := '0.368', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  0.432, to_step :=  0.468, color_rgb := '43 132 4', color_label := '0.432', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  0.468, to_step :=  0.552, color_rgb := '12 98 1', color_label := '0.468', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  0.552, to_step :=  0.652, color_rgb := '0 90 1', color_label := '0.552', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  0.752, to_step :=  1, color_rgb := '0 56 0', color_label := '0.752', group_label := '1' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  0.024, to_step :=  0.076, color_rgb := '191 163 124', color_label := '0.024', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  0.268, to_step :=  0.332, color_rgb := '121 175 1', color_label := '0.268', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  0.332, to_step :=  0.368, color_rgb := '101 163 0', color_label := '0.332', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  0.652, to_step :=  0.752, color_rgb := '0 73 0', color_label := '0.652', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  0.232, to_step :=  0.268, color_rgb := '135 183 3', color_label := '0.232', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  0.076, to_step :=  0.124, color_rgb := '179 174 96', color_label := '0.076', group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  -0.2, to_step :=  0, color_rgb := '255 255 255', color_label := '-0.2', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  0, to_step :=  0.024, color_rgb := '206 197 180', color_label := '0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  0.076, to_step :=  0.124, color_rgb := '179 174 96', color_label := '0.076', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 7, from_step :=  0.232, to_step :=  0.268, color_rgb := '135 183 3', color_label := '0.232', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 8, from_step :=  0.125, to_step :=  1, color_rgb := '0 136 0', color_label := '+0.125', group_label := '>>' );
 SELECT analysis.update_insert_legend_step( legend_id := 8, from_step :=  -1, to_step :=  -0.125, color_rgb := '200 10 10', color_label := '<<', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 8, from_step :=  -0.05, to_step :=  0.05, color_rgb := '255 255 200', color_label := '-0.050', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 8, from_step :=  -0.125, to_step :=  -0.05, color_rgb := '255 128 0', color_label := '-0.125', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 8, from_step :=  0.05, to_step :=  0.125, color_rgb := '128 255 0', color_label := '+0.050', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 9, from_step :=  0.6, to_step :=  0.7, color_rgb := '56 168 0', color_label := '+0.6', group_label := NULL );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 9, from_step :=  0.4, to_step :=  0.5, color_rgb := '170 255 0', color_label := '+0.4', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 9, from_step :=  0.7, to_step :=  0.8, color_rgb := '112 168 0', color_label := '+0.7', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 9, from_step :=  0.5, to_step :=  0.6, color_rgb := '76 230 0', color_label := '+0.5', group_label := NULL );
@@ -3086,6 +3484,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 9, from_step :=  0.3, to
 SELECT analysis.update_insert_legend_step( legend_id := 9, from_step :=  -0.2, to_step :=  0.1, color_rgb := '215 194 158', color_label := '-0.2', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 9, from_step :=  0.2, to_step :=  0.3, color_rgb := '255 255 115', color_label := '+0.2', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 9, from_step :=  0.8, to_step :=  1, color_rgb := '76 115 0', color_label := '+0.8', group_label := '+1.0' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 9, from_step :=  0.1, to_step :=  0.2, color_rgb := '255 255 190', color_label := '+0.1', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 10, from_step :=  0.001, to_step :=  20, color_rgb := '200 10 10', color_label := '0', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 10, from_step :=  20, to_step :=  40, color_rgb := '255 128 0', color_label := '20', group_label := '' );
@@ -3101,11 +3500,30 @@ SELECT analysis.update_insert_legend_step( legend_id := 14, from_step :=  0.2, t
 SELECT analysis.update_insert_legend_step( legend_id := 14, from_step :=  -0.1, to_step :=  -0.05, color_rgb := '255 133 11', color_label := '-0.10', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 14, from_step :=  -0.05, to_step :=  0.05, color_rgb := '255 255 230', color_label := '-0.05', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 14, from_step :=  -0.2, to_step :=  -0.1, color_rgb := '255 80 0', color_label := '-0.20', group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 9, from_step :=  0.6, to_step :=  0.7, color_rgb := '56 168 0', color_label := '+0.6', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 9, from_step :=  0.1, to_step :=  0.2, color_rgb := '255 255 190', color_label := '+0.1', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 10, from_step :=  20, to_step :=  40, color_rgb := '255 128 0', color_label := '20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 10, from_step :=  40, to_step :=  60, color_rgb := '255 255 200', color_label := '40', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 10, from_step :=  60, to_step :=  80, color_rgb := '128 255 0', color_label := '60', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 10, from_step :=  80, to_step :=  100, color_rgb := '0 136 0', color_label := '80', group_label := '100' );
+SELECT analysis.update_insert_legend_step( legend_id := 10, from_step :=  0.001, to_step :=  20, color_rgb := '200 10 10', color_label := '0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 11, from_step :=  60, to_step :=  80, color_rgb := '128 255 0', color_label := '60', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 11, from_step :=  0.001, to_step :=  20, color_rgb := '200 10 10', color_label := '0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 11, from_step :=  20, to_step :=  40, color_rgb := '255 128 0', color_label := '20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 11, from_step :=  80, to_step :=  100, color_rgb := '0 136 0', color_label := '80', group_label := '100' );
+SELECT analysis.update_insert_legend_step( legend_id := 11, from_step :=  40, to_step :=  60, color_rgb := '255 255 200', color_label := '40', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 14, from_step :=  0.2, to_step :=  0.5, color_rgb := '0 128 0', color_label := '+0.20', group_label := '+0.50' );
+SELECT analysis.update_insert_legend_step( legend_id := 14, from_step :=  -0.2, to_step :=  -0.1, color_rgb := '255 80 0', color_label := '-0.20', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 14, from_step :=  -0.05, to_step :=  0.05, color_rgb := '255 255 230', color_label := '-0.05', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 14, from_step :=  -0.1, to_step :=  -0.05, color_rgb := '255 133 11', color_label := '-0.10', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 14, from_step :=  0.1, to_step :=  0.2, color_rgb := '0 200 0', color_label := '+0.10', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 14, from_step :=  0.05, to_step :=  0.1, color_rgb := '85 255 85', color_label := '+0.05', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 14, from_step :=  -0.5, to_step :=  -0.2, color_rgb := '255 0 0', color_label := '-0.50', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 15, from_step :=  50, to_step :=  70, color_rgb := '232 110 15', color_label := '50', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 15, from_step :=  70, to_step :=  80, color_rgb := '233 165 47', color_label := '70', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 15, from_step :=  110, to_step :=  120, color_rgb := '184 219 40', color_label := '110', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 15, from_step :=  80, to_step :=  90, color_rgb := '216 201 142', color_label := '80', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 15, from_step :=  90, to_step :=  110, color_rgb := '226 226 226', color_label := '90', group_label := NULL );
@@ -3119,14 +3537,34 @@ SELECT analysis.update_insert_legend_step( legend_id := 16, from_step :=  70, to
 SELECT analysis.update_insert_legend_step( legend_id := 16, from_step :=  95, to_step :=  105, color_rgb := '225 225 225', color_label := '95', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 16, from_step :=  90, to_step :=  95, color_rgb := '255 255 135', color_label := '90', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 16, from_step :=  80, to_step :=  90, color_rgb := '246 202 12', color_label := '80', group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 15, from_step :=  80, to_step :=  90, color_rgb := '216 201 142', color_label := '80', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 15, from_step :=  90, to_step :=  110, color_rgb := '226 226 226', color_label := '90', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 15, from_step :=  110, to_step :=  120, color_rgb := '184 219 40', color_label := '110', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 15, from_step :=  1, to_step :=  50, color_rgb := '122 53 14', color_label := '1', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 15, from_step :=  120, to_step :=  130, color_rgb := '0 191 10', color_label := '120', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 15, from_step :=  130, to_step :=  150, color_rgb := '8 119 14', color_label := '130', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 15, from_step :=  150, to_step :=  200, color_rgb := '12 72 15', color_label := '150', group_label := '200' );
+SELECT analysis.update_insert_legend_step( legend_id := 16, from_step :=  60, to_step :=  70, color_rgb := '214 111 43', color_label := '60', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 16, from_step :=  1, to_step :=  60, color_rgb := '115 76 0', color_label := '1', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 16, from_step :=  70, to_step :=  80, color_rgb := '237 161 19', color_label := '70', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 16, from_step :=  90, to_step :=  95, color_rgb := '255 255 135', color_label := '90', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 16, from_step :=  80, to_step :=  90, color_rgb := '246 202 12', color_label := '80', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 16, from_step :=  95, to_step :=  105, color_rgb := '225 225 225', color_label := '95', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 16, from_step :=  105, to_step :=  110, color_rgb := '136 204 102', color_label := '105', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 16, from_step :=  110, to_step :=  120, color_rgb := '59 163 88', color_label := '110', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 16, from_step :=  120, to_step :=  130, color_rgb := '26 125 117', color_label := '120', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 16, from_step :=  130, to_step :=  140, color_rgb := '22 103 138', color_label := '130', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 16, from_step :=  140, to_step :=  200, color_rgb := '11 44 122', color_label := '140', group_label := '200' );
 SELECT analysis.update_insert_legend_step( legend_id := 19, from_step :=  -0.2, to_step :=  0.1, color_rgb := '213 159 0', color_label := '-0.2', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 19, from_step :=  0.2, to_step :=  0.3, color_rgb := '234 255 234', color_label := '+0.2', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 19, from_step :=  0.1, to_step :=  0.2, color_rgb := '213 213 0', color_label := '+0.1', group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 19, from_step :=  0.1, to_step :=  0.2, color_rgb := '213 213 0', color_label := '+0.1', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 19, from_step :=  0.2, to_step :=  0.3, color_rgb := '234 255 234', color_label := '+0.2', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 19, from_step :=  0.6, to_step :=  0.7, color_rgb := '0 128 0', color_label := '+0.6', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 19, from_step :=  0.3, to_step :=  0.4, color_rgb := '191 255 191', color_label := '+0.3', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 19, from_step :=  0.4, to_step :=  0.5, color_rgb := '85 255 85', color_label := '+0.4', group_label := NULL );
@@ -3145,28 +3583,49 @@ SELECT analysis.update_insert_legend_step( legend_id := 20, from_step :=  1.2, t
 SELECT analysis.update_insert_legend_step( legend_id := 20, from_step :=  1.5, to_step :=  1.7, color_rgb := '32 72 0', color_label := '1.50', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 20, from_step :=  1.8, to_step :=  2, color_rgb := '10 40 0', color_label := '1.80', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 20, from_step :=  1.7, to_step :=  1.8, color_rgb := '27 53 0', color_label := '1.70', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 20, from_step :=  0.8, to_step :=  1, color_rgb := '64 128 0', color_label := '0.80', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 20, from_step :=  4, to_step :=  100, color_rgb := '0 10 0', color_label := '4.00', group_label := '7.00' );
 SELECT analysis.update_insert_legend_step( legend_id := 20, from_step :=  2, to_step :=  4, color_rgb := '5 35 0', color_label := '2.00', group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 20, from_step :=  4, to_step :=  100, color_rgb := '0 10 0', color_label := '4.00', group_label := '7.00' );
+SELECT analysis.update_insert_legend_step( legend_id := 20, from_step :=  2, to_step :=  4, color_rgb := '5 35 0', color_label := '2.00', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 20, from_step :=  0.8, to_step :=  1, color_rgb := '64 128 0', color_label := '0.80', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  0, to_step :=  2.5, color_rgb := '0 0 255', color_label := '0.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  2.5, to_step :=  5, color_rgb := '0 100 255', color_label := '2.5', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  5, to_step :=  7.5, color_rgb := '0 200 255', color_label := '5.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  7.5, to_step :=  10, color_rgb := '80 255 255', color_label := '7.5', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  15, to_step :=  17.5, color_rgb := '223 255 255', color_label := '15.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  10, to_step :=  12.5, color_rgb := '125 255 255', color_label := '10.0', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  20, to_step :=  22.5, color_rgb := '255 255 223', color_label := '20.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  17.5, to_step :=  20, color_rgb := '234 255 244', color_label := '17.5', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  22.5, to_step :=  25, color_rgb := '255 248 191', color_label := '22.5', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  25, to_step :=  27.5, color_rgb := '255 230 150', color_label := '25.0', group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  17.5, to_step :=  20, color_rgb := '234 255 244', color_label := '17.5', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  20, to_step :=  22.5, color_rgb := '255 255 223', color_label := '20.0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  22.5, to_step :=  25, color_rgb := '255 248 191', color_label := '22.5', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  27.5, to_step :=  30, color_rgb := '255 210 110', color_label := '27.5', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  30, to_step :=  32.5, color_rgb := '255 180 90', color_label := '30.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  35, to_step :=  37.5, color_rgb := '255 125 10', color_label := '35.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  32.5, to_step :=  35, color_rgb := '255 150 50', color_label := '32.5', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  42.5, to_step :=  45, color_rgb := '255 30 0', color_label := '42.5', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  37.5, to_step :=  40, color_rgb := '255 80 0', color_label := '37.5', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  40, to_step :=  42.5, color_rgb := '255 55 0', color_label := '40.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  45, to_step :=  47.5, color_rgb := '245 0 0', color_label := '45.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  47.5, to_step :=  50, color_rgb := '220 0 0', color_label := '47.5', group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  37.5, to_step :=  40, color_rgb := '255 80 0', color_label := '37.5', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  40, to_step :=  42.5, color_rgb := '255 55 0', color_label := '40.0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  45, to_step :=  47.5, color_rgb := '245 0 0', color_label := '45.0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  42.5, to_step :=  45, color_rgb := '255 30 0', color_label := '42.5', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  47.5, to_step :=  50, color_rgb := '220 0 0', color_label := '47.5', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  25, to_step :=  27.5, color_rgb := '255 230 150', color_label := '25.0', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  12.5, to_step :=  15, color_rgb := '170 255 255', color_label := '12.5', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  50, to_step :=  52.5, color_rgb := '200 0 0', color_label := '50.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 22, from_step :=  52.5, to_step :=  55, color_rgb := '180 0 0', color_label := '52.5', group_label := NULL );
@@ -3180,6 +3639,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 23, from_step :=  90, to
 SELECT analysis.update_insert_legend_step( legend_id := 23, from_step :=  130, to_step :=  170, color_rgb := '0 255 0', color_label := '130', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 23, from_step :=  170, to_step :=  210, color_rgb := '0 160 0', color_label := '170', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 23, from_step :=  210, to_step :=  250, color_rgb := '0 80 0', color_label := '210', group_label := '250' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 25, from_step :=  0, to_step :=  10, color_rgb := '255 255 255', color_label := '0', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 25, from_step :=  90, to_step :=  100, color_rgb := '0 120 0', color_label := '90', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 25, from_step :=  100, to_step :=  500, color_rgb := '0 50 20', color_label := '100', group_label := '>>' );
@@ -3191,6 +3651,19 @@ SELECT analysis.update_insert_legend_step( legend_id := 25, from_step :=  80, to
 SELECT analysis.update_insert_legend_step( legend_id := 25, from_step :=  30, to_step :=  40, color_rgb := '255 215 60', color_label := '30', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 25, from_step :=  60, to_step :=  70, color_rgb := '120 180 0', color_label := '60', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 25, from_step :=  70, to_step :=  80, color_rgb := '70 170 0', color_label := '70', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 25, from_step :=  60, to_step :=  70, color_rgb := '120 180 0', color_label := '60', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 25, from_step :=  50, to_step :=  60, color_rgb := '159 210 0', color_label := '50', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 25, from_step :=  70, to_step :=  80, color_rgb := '70 170 0', color_label := '70', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 25, from_step :=  10, to_step :=  20, color_rgb := '255 248 170', color_label := '10', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 25, from_step :=  30, to_step :=  40, color_rgb := '255 215 60', color_label := '30', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 25, from_step :=  20, to_step :=  30, color_rgb := '255 230 100', color_label := '20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 25, from_step :=  0, to_step :=  10, color_rgb := '255 255 255', color_label := '0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 25, from_step :=  100, to_step :=  500, color_rgb := '0 50 20', color_label := '100', group_label := '>>' );
+SELECT analysis.update_insert_legend_step( legend_id := 25, from_step :=  40, to_step :=  50, color_rgb := '190 230 60', color_label := '40', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 25, from_step :=  90, to_step :=  100, color_rgb := '0 120 0', color_label := '90', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 25, from_step :=  80, to_step :=  90, color_rgb := '25 160 0', color_label := '80', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 32, from_step :=  0, to_step :=  69, color_rgb := '200 255 255', color_label := 'Ocean / lakes', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 32, from_step :=  70, to_step :=  149, color_rgb := '0 0 248', color_label := 'Free Water', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 32, from_step :=  150, to_step :=  219, color_rgb := '0 248 0', color_label := 'Humid area', group_label := '' );
@@ -3200,6 +3673,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 32, from_step :=  255, t
 SELECT analysis.update_insert_legend_step( legend_id := 34, from_step :=  0, to_step :=  0, color_rgb := '255 255 255', color_label := 'empty', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 34, from_step :=  1, to_step :=  255, color_rgb := '11 11 255', color_label := 'filled', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 38, from_step :=  30, to_step :=  40, color_rgb := '213 186 0', color_label := '30', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 38, from_step :=  50, to_step :=  60, color_rgb := '133 255 11', color_label := '50', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 38, from_step :=  60, to_step :=  70, color_rgb := '106 213 0', color_label := '60', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 38, from_step :=  40, to_step :=  50, color_rgb := '159 213 0', color_label := '40', group_label := '' );
@@ -3235,10 +3709,47 @@ SELECT analysis.update_insert_legend_step( legend_id := 40, from_step :=  -5, to
 SELECT analysis.update_insert_legend_step( legend_id := 40, from_step :=  -4, to_step :=  -3, color_rgb := '255 149 149', color_label := '-4', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 40, from_step :=  1, to_step :=  2, color_rgb := '223 223 255', color_label := '1', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 40, from_step :=  2, to_step :=  3, color_rgb := '191 191 255', color_label := '2', group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 38, from_step :=  120, to_step :=  300, color_rgb := '0 10 0', color_label := '120', group_label := '300' );
+SELECT analysis.update_insert_legend_step( legend_id := 38, from_step :=  0, to_step :=  10, color_rgb := '255 239 191', color_label := '0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 38, from_step :=  110, to_step :=  120, color_rgb := '0 20 0', color_label := '110', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 38, from_step :=  90, to_step :=  100, color_rgb := '0 53 0', color_label := '90', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 38, from_step :=  60, to_step :=  70, color_rgb := '106 213 0', color_label := '60', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 38, from_step :=  80, to_step :=  90, color_rgb := '0 85 0', color_label := '80', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 38, from_step :=  70, to_step :=  80, color_rgb := '0 128 0', color_label := '70', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 38, from_step :=  10, to_step :=  20, color_rgb := '255 228 149', color_label := '10', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 38, from_step :=  40, to_step :=  50, color_rgb := '159 213 0', color_label := '40', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 38, from_step :=  100, to_step :=  110, color_rgb := '0 30 0', color_label := '100', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 38, from_step :=  50, to_step :=  60, color_rgb := '133 255 11', color_label := '50', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 38, from_step :=  20, to_step :=  30, color_rgb := '255 213 85', color_label := '20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 39, from_step :=  20, to_step :=  40, color_rgb := '244 234 255', color_label := '20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 39, from_step :=  100, to_step :=  120, color_rgb := '202 255 149', color_label := '100', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 39, from_step :=  160, to_step :=  180, color_rgb := '106 213 00', color_label := '160', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 39, from_step :=  40, to_step :=  60, color_rgb := '244 255 234', color_label := '40', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 39, from_step :=  250, to_step :=  300, color_rgb := '27 53 00', color_label := '250', group_label := '300' );
+SELECT analysis.update_insert_legend_step( legend_id := 39, from_step :=  0, to_step :=  20, color_rgb := '239 223 255', color_label := '0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 39, from_step :=  200, to_step :=  250, color_rgb := '43 85 00', color_label := '200', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 39, from_step :=  120, to_step :=  140, color_rgb := '170 255 85', color_label := '120', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 39, from_step :=  140, to_step :=  160, color_rgb := '133 255 11', color_label := '140', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 39, from_step :=  80, to_step :=  100, color_rgb := '223 255 191', color_label := '80', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 39, from_step :=  180, to_step :=  200, color_rgb := '64 128 00', color_label := '180', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 39, from_step :=  60, to_step :=  80, color_rgb := '239 255 223', color_label := '60', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 40, from_step :=  -3, to_step :=  -2, color_rgb := '255 191 191', color_label := '-3', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 40, from_step :=  -2, to_step :=  -1, color_rgb := '255 223 223', color_label := '-2', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 40, from_step :=  0, to_step :=  1, color_rgb := '255 255 255', color_label := '0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 40, from_step :=  -1, to_step :=  0, color_rgb := '255 234 234', color_label := '-1', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 40, from_step :=  -10, to_step :=  -5, color_rgb := '255 11 11', color_label := '-10', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 40, from_step :=  -100, to_step :=  -25, color_rgb := '128 0 0', color_label := '<<', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 40, from_step :=  -25, to_step :=  -10, color_rgb := '213 0 0', color_label := '-25', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 40, from_step :=  1, to_step :=  2, color_rgb := '223 223 255', color_label := '1', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 40, from_step :=  2, to_step :=  3, color_rgb := '191 191 255', color_label := '2', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 40, from_step :=  -5, to_step :=  -4, color_rgb := '255 85 85', color_label := '-5', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 40, from_step :=  3, to_step :=  4, color_rgb := '149 149 255', color_label := '3', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 40, from_step :=  4, to_step :=  5, color_rgb := '85 85 255', color_label := '4', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 40, from_step :=  5, to_step :=  10, color_rgb := '11 11 255', color_label := '5', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 40, from_step :=  10, to_step :=  25, color_rgb := '0 0 213', color_label := '10', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 40, from_step :=  25, to_step :=  100, color_rgb := '0 0 180', color_label := '25', group_label := '>>' );
 SELECT analysis.update_insert_legend_step( legend_id := 41, from_step :=  0.05, to_step :=  0.15, color_rgb := '255 228 149', color_label := '0.05', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 41, from_step :=  0.15, to_step :=  0.25, color_rgb := '255 224 11', color_label := '0.15', group_label := '' );
@@ -3253,35 +3764,70 @@ SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  1, to_
 SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  2, to_step :=  3, color_rgb := '244 117 4', color_label := '2.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  3, to_step :=  4, color_rgb := '216 162 10', color_label := '3.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  4, to_step :=  5, color_rgb := '179 200 21', color_label := '4.0', group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 40, from_step :=  -4, to_step :=  -3, color_rgb := '255 149 149', color_label := '-4', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 40, from_step :=  25, to_step :=  100, color_rgb := '0 0 180', color_label := '25', group_label := '>>' );
+SELECT analysis.update_insert_legend_step( legend_id := 41, from_step :=  0, to_step :=  0.05, color_rgb := '220 220 220', color_label := '0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 41, from_step :=  0.15, to_step :=  0.25, color_rgb := '255 224 11', color_label := '0.15', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 41, from_step :=  0.75, to_step :=  0.9, color_rgb := '27 53 0', color_label := '0.75', group_label := '0.90' );
+SELECT analysis.update_insert_legend_step( legend_id := 41, from_step :=  0.45, to_step :=  0.55, color_rgb := '106 213 0', color_label := '0.45', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 41, from_step :=  0.65, to_step :=  0.75, color_rgb := '43 85 0', color_label := '0.65', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 41, from_step :=  0.25, to_step :=  0.35, color_rgb := '213 213 0', color_label := '0.25', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 41, from_step :=  0.05, to_step :=  0.15, color_rgb := '255 228 149', color_label := '0.05', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 41, from_step :=  0.35, to_step :=  0.45, color_rgb := '159 213 0', color_label := '0.35', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 41, from_step :=  0.55, to_step :=  0.65, color_rgb := '64 128 0', color_label := '0.55', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  1, to_step :=  2, color_rgb := '250 70 6', color_label := '1.0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  2, to_step :=  3, color_rgb := '244 117 4', color_label := '2.0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  3, to_step :=  4, color_rgb := '216 162 10', color_label := '3.0', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  5, to_step :=  6.5, color_rgb := '136 234 37', color_label := '5.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  6.5, to_step :=  8, color_rgb := '96 251 61', color_label := '6.5', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  8, to_step :=  9.5, color_rgb := '83 252 71', color_label := '8.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  9.5, to_step :=  11, color_rgb := '57 249 101', color_label := '9.5', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  11, to_step :=  12.5, color_rgb := '49 244 122', color_label := '11.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  12.5, to_step :=  14, color_rgb := '36 232 132', color_label := '12.5', group_label := NULL );
+<<<<<<< HEAD
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  14, to_step :=  16, color_rgb := '22 209 154', color_label := '14.0', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  18, to_step :=  20, color_rgb := '11 166 210', color_label := '18.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  20, to_step :=  22, color_rgb := '14 145 233', color_label := '20.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  22, to_step :=  24, color_rgb := '0 107 241', color_label := '22.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  24, to_step :=  26.5, color_rgb := '0 101 247', color_label := '24.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  26.5, to_step :=  29, color_rgb := '0 82 254', color_label := '26.5', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  16, to_step :=  18, color_rgb := '23 196 190', color_label := '16.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  14, to_step :=  16, color_rgb := '22 209 154', color_label := '14.0', group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  4, to_step :=  5, color_rgb := '179 200 21', color_label := '4.0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  16, to_step :=  18, color_rgb := '23 196 190', color_label := '16.0', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  31.5, to_step :=  34, color_rgb := '0 38 255', color_label := '31.5', group_label := '34' );
 SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  29, to_step :=  31.5, color_rgb := '0 66 255', color_label := '29.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 43, from_step :=  0, to_step :=  1, color_rgb := '252 50 8', color_label := '0.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 46, from_step :=  0.01, to_step :=  10, color_rgb := '0 0 255', color_label := '0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 46, from_step :=  32.5, to_step :=  40, color_rgb := '250 65 10', color_label := '32.5', group_label := '40' );
 SELECT analysis.update_insert_legend_step( legend_id := 46, from_step :=  10, to_step :=  15, color_rgb := '10 80 225', color_label := '10.0', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 46, from_step :=  15, to_step :=  20, color_rgb := '25 125 220', color_label := '15.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 46, from_step :=  20, to_step :=  22.5, color_rgb := '25 150 160', color_label := '20.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 46, from_step :=  22.5, to_step :=  25, color_rgb := '50 225 120', color_label := '22.5', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 46, from_step :=  25, to_step :=  27.5, color_rgb := '115 225 150', color_label := '25.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 46, from_step :=  27.5, to_step :=  30, color_rgb := '155 225 85', color_label := '27.5', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 46, from_step :=  30, to_step :=  32.5, color_rgb := '200 115 20', color_label := '30.0', group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 46, from_step :=  22.5, to_step :=  25, color_rgb := '50 225 120', color_label := '22.5', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 46, from_step :=  20, to_step :=  22.5, color_rgb := '25 150 160', color_label := '20.0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 46, from_step :=  25, to_step :=  27.5, color_rgb := '115 225 150', color_label := '25.0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 46, from_step :=  27.5, to_step :=  30, color_rgb := '155 225 85', color_label := '27.5', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 46, from_step :=  30, to_step :=  32.5, color_rgb := '200 115 20', color_label := '30.0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 46, from_step :=  15, to_step :=  20, color_rgb := '25 125 220', color_label := '15.0', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.8828125, to_step :=  -2.859375, color_rgb := '34 0 155', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.53125, to_step :=  -2.5078125, color_rgb := '0 38 213', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.5078125, to_step :=  -2.484375, color_rgb := '0 44 216', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.90625, to_step :=  -2.8828125, color_rgb := '37 0 150', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.9296875, to_step :=  -2.90625, color_rgb := '40 0 144', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -0.140625, to_step :=  -0.1171875, color_rgb := '192 255 205', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -0.1171875, to_step :=  -0.09375, color_rgb := '200 255 210', color_label := NULL, group_label := NULL );
@@ -3290,10 +3836,21 @@ SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -0.070
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.484375, to_step :=  -2.4609375, color_rgb := '0 49 219', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -0.0234375, to_step :=  0, color_rgb := '243 255 244', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -0.046875, to_step :=  -0.0234375, color_rgb := '229 255 232', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -0.140625, to_step :=  -0.1171875, color_rgb := '192 255 205', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -0.1171875, to_step :=  -0.09375, color_rgb := '200 255 210', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.9296875, to_step :=  -2.90625, color_rgb := '40 0 144', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -0.09375, to_step :=  -0.0703125, color_rgb := '209 255 216', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -0.0703125, to_step :=  -0.046875, color_rgb := '218 255 223', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.484375, to_step :=  -2.4609375, color_rgb := '0 49 219', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -0.046875, to_step :=  -0.0234375, color_rgb := '229 255 232', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -0.0234375, to_step :=  0, color_rgb := '243 255 244', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0, to_step :=  0.0234375, color_rgb := '251 255 243', color_label := '0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.0234375, to_step :=  0.046875, color_rgb := '248 255 229', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.046875, to_step :=  0.0703125, color_rgb := '245 255 218', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.0703125, to_step :=  0.09375, color_rgb := '243 255 209', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.09375, to_step :=  0.1171875, color_rgb := '242 255 200', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.1171875, to_step :=  0.140625, color_rgb := '241 255 192', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.4609375, to_step :=  -2.4375, color_rgb := '0 55 221', color_label := NULL, group_label := NULL );
@@ -3315,6 +3872,29 @@ SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.375,
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.3671875, to_step :=  -2.34375, color_rgb := '0 78 230', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.3984375, to_step :=  0.421875, color_rgb := '244 255 122', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.3203125, to_step :=  -2.296875, color_rgb := '0 90 234', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.1171875, to_step :=  0.140625, color_rgb := '241 255 192', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.4375, to_step :=  -2.4140625, color_rgb := '0 61 224', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.09375, to_step :=  0.1171875, color_rgb := '242 255 200', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.140625, to_step :=  0.1640625, color_rgb := '240 255 185', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.1640625, to_step :=  0.1875, color_rgb := '240 255 178', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.1875, to_step :=  0.2109375, color_rgb := '239 255 172', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.4140625, to_step :=  -2.390625, color_rgb := '0 67 226', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.2109375, to_step :=  0.234375, color_rgb := '239 255 165', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.390625, to_step :=  -2.3671875, color_rgb := '0 73 228', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.234375, to_step :=  0.2578125, color_rgb := '239 255 159', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.2578125, to_step :=  0.28125, color_rgb := '240 255 154', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.28125, to_step :=  0.3046875, color_rgb := '240 255 148', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.3046875, to_step :=  0.328125, color_rgb := '241 255 142', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.4609375, to_step :=  -2.4375, color_rgb := '0 55 221', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.328125, to_step :=  0.3515625, color_rgb := '242 255 137', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.3515625, to_step :=  0.375, color_rgb := '242 255 132', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.3671875, to_step :=  -2.34375, color_rgb := '0 78 230', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.34375, to_step :=  -2.3203125, color_rgb := '0 84 232', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.3203125, to_step :=  -2.296875, color_rgb := '0 90 234', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.375, to_step :=  0.3984375, color_rgb := '243 255 127', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.3984375, to_step :=  0.421875, color_rgb := '244 255 122', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.421875, to_step :=  0.4453125, color_rgb := '245 255 117', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.296875, to_step :=  -2.2734375, color_rgb := '0 95 236', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.4453125, to_step :=  0.46875, color_rgb := '247 255 113', color_label := NULL, group_label := NULL );
@@ -3341,10 +3921,17 @@ SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.7265
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.109375, to_step :=  -2.0859375, color_rgb := '0 136 246', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.75, to_step :=  0.7734375, color_rgb := '255 241 63', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.0859375, to_step :=  -2.0625, color_rgb := '0 141 247', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.8203125, to_step :=  0.84375, color_rgb := '255 235 53', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.84375, to_step :=  0.8671875, color_rgb := '255 233 50', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.7734375, to_step :=  0.796875, color_rgb := '255 239 59', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.796875, to_step :=  0.8203125, color_rgb := '255 237 56', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.7734375, to_step :=  0.796875, color_rgb := '255 239 59', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.796875, to_step :=  0.8203125, color_rgb := '255 237 56', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.8203125, to_step :=  0.84375, color_rgb := '255 235 53', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.84375, to_step :=  0.8671875, color_rgb := '255 233 50', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.890625, to_step :=  0.9140625, color_rgb := '255 228 45', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.8671875, to_step :=  0.890625, color_rgb := '255 231 47', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.9140625, to_step :=  0.9375, color_rgb := '255 226 42', color_label := NULL, group_label := NULL );
@@ -3352,6 +3939,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.9375
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.9609375, to_step :=  0.984375, color_rgb := '255 222 37', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  0.984375, to_step :=  1.0078125, color_rgb := '255 219 34', color_label := '+1.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.0078125, to_step :=  1.03125, color_rgb := '255 217 32', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.8359375, to_step :=  -2.8125, color_rgb := '27 0 165', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.8125, to_step :=  -2.7890625, color_rgb := '23 0 169', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.7890625, to_step :=  -2.765625, color_rgb := '19 0 174', color_label := NULL, group_label := NULL );
@@ -3359,6 +3947,15 @@ SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.0312
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.0546875, to_step :=  1.078125, color_rgb := '255 212 28', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.078125, to_step :=  1.1015625, color_rgb := '255 210 25', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.1015625, to_step :=  1.125, color_rgb := '255 207 23', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.8125, to_step :=  -2.7890625, color_rgb := '23 0 169', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.8359375, to_step :=  -2.8125, color_rgb := '27 0 165', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.7890625, to_step :=  -2.765625, color_rgb := '19 0 174', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.03125, to_step :=  1.0546875, color_rgb := '255 215 30', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.0546875, to_step :=  1.078125, color_rgb := '255 212 28', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.1015625, to_step :=  1.125, color_rgb := '255 207 23', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.078125, to_step :=  1.1015625, color_rgb := '255 210 25', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.125, to_step :=  1.1484375, color_rgb := '255 204 21', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.1484375, to_step :=  1.171875, color_rgb := '255 202 20', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.171875, to_step :=  1.1953125, color_rgb := '255 199 18', color_label := NULL, group_label := NULL );
@@ -3366,6 +3963,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.1953
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.21875, to_step :=  1.2421875, color_rgb := '255 193 15', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.2421875, to_step :=  1.265625, color_rgb := '255 190 13', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.265625, to_step :=  1.2890625, color_rgb := '255 187 12', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.765625, to_step :=  -2.7421875, color_rgb := '14 0 178', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.2890625, to_step :=  1.3125, color_rgb := '255 183 10', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.3125, to_step :=  1.3359375, color_rgb := '255 180 9', color_label := NULL, group_label := NULL );
@@ -3419,22 +4017,84 @@ SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.0625
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.8046875, to_step :=  -1.78125, color_rgb := '0 188 253', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.0859375, to_step :=  2.109375, color_rgb := '246 15 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.109375, to_step :=  2.1328125, color_rgb := '245 8 0', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.2890625, to_step :=  1.3125, color_rgb := '255 183 10', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.3125, to_step :=  1.3359375, color_rgb := '255 180 9', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.765625, to_step :=  -2.7421875, color_rgb := '14 0 178', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.3359375, to_step :=  1.359375, color_rgb := '255 177 8', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.359375, to_step :=  1.3828125, color_rgb := '255 173 7', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.3828125, to_step :=  1.40625, color_rgb := '255 170 6', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.40625, to_step :=  1.4296875, color_rgb := '255 166 5', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.0625, to_step :=  -2.0390625, color_rgb := '0 145 248', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.4296875, to_step :=  1.453125, color_rgb := '255 162 4', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.453125, to_step :=  1.4765625, color_rgb := '255 158 3', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.4765625, to_step :=  1.5, color_rgb := '255 154 2', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.5, to_step :=  1.5234375, color_rgb := '254 150 2', color_label := '+1.5', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.5234375, to_step :=  1.546875, color_rgb := '254 146 1', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.546875, to_step :=  1.5703125, color_rgb := '254 142 1', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.5703125, to_step :=  1.59375, color_rgb := '254 138 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.59375, to_step :=  1.6171875, color_rgb := '254 133 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.0390625, to_step :=  -2.015625, color_rgb := '0 150 249', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.640625, to_step :=  1.6640625, color_rgb := '254 124 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.015625, to_step :=  -1.9921875, color_rgb := '0 154 249', color_label := '-2.0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.6171875, to_step :=  1.640625, color_rgb := '254 129 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.6640625, to_step :=  1.6875, color_rgb := '254 119 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.6875, to_step :=  1.7109375, color_rgb := '254 114 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.7109375, to_step :=  1.734375, color_rgb := '254 109 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.9921875, to_step :=  -1.96875, color_rgb := '0 158 250', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.734375, to_step :=  1.7578125, color_rgb := '254 104 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.7578125, to_step :=  1.78125, color_rgb := '254 99 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.78125, to_step :=  1.8046875, color_rgb := '253 94 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.8046875, to_step :=  1.828125, color_rgb := '253 88 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.96875, to_step :=  -1.9453125, color_rgb := '0 162 251', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.9453125, to_step :=  -1.921875, color_rgb := '0 166 251', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.828125, to_step :=  1.8515625, color_rgb := '253 83 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.8515625, to_step :=  1.875, color_rgb := '253 77 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.875, to_step :=  1.8984375, color_rgb := '252 71 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.8984375, to_step :=  1.921875, color_rgb := '252 65 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.921875, to_step :=  -1.8984375, color_rgb := '0 170 252', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.921875, to_step :=  1.9453125, color_rgb := '251 59 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.8984375, to_step :=  -1.875, color_rgb := '0 174 252', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.9453125, to_step :=  1.96875, color_rgb := '251 53 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.171875, to_step :=  -1.1484375, color_rgb := '20 255 239', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.96875, to_step :=  1.9921875, color_rgb := '250 47 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.578125, to_step :=  -2.5546875, color_rgb := '0 26 207', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  1.9921875, to_step :=  2.015625, color_rgb := '249 41 0', color_label := '+2.0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.875, to_step :=  -1.8515625, color_rgb := '0 178 253', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.8515625, to_step :=  -1.828125, color_rgb := '0 181 253', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.7421875, to_step :=  -2.71875, color_rgb := '10 0 182', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.015625, to_step :=  2.0390625, color_rgb := '249 34 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.0390625, to_step :=  2.0625, color_rgb := '248 28 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.0625, to_step :=  2.0859375, color_rgb := '247 21 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.828125, to_step :=  -1.8046875, color_rgb := '0 185 253', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.0859375, to_step :=  2.109375, color_rgb := '246 15 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.109375, to_step :=  2.1328125, color_rgb := '245 8 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.8046875, to_step :=  -1.78125, color_rgb := '0 188 253', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.1328125, to_step :=  2.15625, color_rgb := '244 2 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.78125, to_step :=  -1.7578125, color_rgb := '0 192 254', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.7578125, to_step :=  -1.734375, color_rgb := '0 195 254', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.734375, to_step :=  -1.7109375, color_rgb := '0 198 254', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.7109375, to_step :=  -1.6875, color_rgb := '0 201 254', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.671875, to_step :=  -2.6484375, color_rgb := '0 4 194', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.71875, to_step :=  -2.6953125, color_rgb := '5 0 186', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.6875, to_step :=  -1.6640625, color_rgb := '0 204 254', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.6640625, to_step :=  -1.640625, color_rgb := '0 208 254', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.15625, to_step :=  2.1796875, color_rgb := '243 0 4', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.1796875, to_step :=  2.203125, color_rgb := '242 0 10', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.640625, to_step :=  -1.6171875, color_rgb := '0 211 254', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.6171875, to_step :=  -1.59375, color_rgb := '0 214 254', color_label := NULL, group_label := NULL );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.203125, to_step :=  2.2265625, color_rgb := '240 0 17', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.2265625, to_step :=  2.25, color_rgb := '239 0 24', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.25, to_step :=  2.2734375, color_rgb := '237 0 30', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.2734375, to_step :=  2.296875, color_rgb := '236 0 37', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.59375, to_step :=  -1.5703125, color_rgb := '0 217 254', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.5703125, to_step :=  -1.546875, color_rgb := '1 220 254', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.6484375, to_step :=  -2.625, color_rgb := '0 10 197', color_label := NULL, group_label := NULL );
@@ -3445,6 +4105,21 @@ SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.476
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.5234375, to_step :=  -1.5, color_rgb := '2 225 254', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.4296875, to_step :=  -1.40625, color_rgb := '5 237 255', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.7421875, to_step :=  -2.71875, color_rgb := '10 0 182', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.6953125, to_step :=  -2.671875, color_rgb := '0 0 190', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.6171875, to_step :=  -1.59375, color_rgb := '0 214 254', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.671875, to_step :=  -2.6484375, color_rgb := '0 4 194', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.640625, to_step :=  -1.6171875, color_rgb := '0 211 254', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.5703125, to_step :=  -1.546875, color_rgb := '1 220 254', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.59375, to_step :=  -1.5703125, color_rgb := '0 217 254', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.5234375, to_step :=  -1.5, color_rgb := '2 225 254', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.625, to_step :=  -2.6015625, color_rgb := '0 15 201', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.546875, to_step :=  -1.5234375, color_rgb := '1 223 254', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.6484375, to_step :=  -2.625, color_rgb := '0 10 197', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.5, to_step :=  -1.4765625, color_rgb := '2 228 255', color_label := '-1.5', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.4765625, to_step :=  -1.453125, color_rgb := '3 231 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.4296875, to_step :=  -1.40625, color_rgb := '5 237 255', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.453125, to_step :=  -1.4296875, color_rgb := '4 234 255', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.40625, to_step :=  -1.3828125, color_rgb := '6 240 255', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.359375, to_step :=  -1.3359375, color_rgb := '8 246 255', color_label := NULL, group_label := NULL );
@@ -3453,11 +4128,15 @@ SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.335
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.3125, to_step :=  -1.2890625, color_rgb := '10 252 255', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.2890625, to_step :=  -1.265625, color_rgb := '12 255 254', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.3203125, to_step :=  2.34375, color_rgb := '232 0 49', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.265625, to_step :=  -1.2421875, color_rgb := '13 255 251', color_label := NULL, group_label := NULL );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.296875, to_step :=  2.3203125, color_rgb := '234 0 43', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.34375, to_step :=  2.3671875, color_rgb := '230 0 55', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.3671875, to_step :=  2.390625, color_rgb := '228 0 61', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.390625, to_step :=  2.4140625, color_rgb := '226 0 67', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.4375, to_step :=  2.4609375, color_rgb := '221 0 79', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.4140625, to_step :=  2.4375, color_rgb := '224 0 73', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.4609375, to_step :=  2.484375, color_rgb := '219 0 84', color_label := NULL, group_label := NULL );
@@ -3470,6 +4149,22 @@ SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.625,
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.671875, to_step :=  2.6953125, color_rgb := '190 0 122', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.6015625, to_step :=  2.625, color_rgb := '201 0 112', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.6484375, to_step :=  2.671875, color_rgb := '194 0 119', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.4140625, to_step :=  2.4375, color_rgb := '224 0 73', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.4609375, to_step :=  2.484375, color_rgb := '219 0 84', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.484375, to_step :=  2.5078125, color_rgb := '216 0 89', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.265625, to_step :=  -1.2421875, color_rgb := '13 255 251', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.5078125, to_step :=  2.53125, color_rgb := '213 0 94', color_label := '+2.5', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.53125, to_step :=  2.5546875, color_rgb := '210 0 99', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.5546875, to_step :=  2.578125, color_rgb := '207 0 104', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.578125, to_step :=  2.6015625, color_rgb := '204 0 108', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.6015625, to_step :=  2.625, color_rgb := '201 0 112', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.4375, to_step :=  2.4609375, color_rgb := '221 0 79', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.6484375, to_step :=  2.671875, color_rgb := '194 0 119', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.671875, to_step :=  2.6953125, color_rgb := '190 0 122', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.625, to_step :=  2.6484375, color_rgb := '197 0 116', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.21875, to_step :=  -1.1953125, color_rgb := '16 255 245', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.6953125, to_step :=  2.71875, color_rgb := '186 0 125', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.71875, to_step :=  2.7421875, color_rgb := '182 0 127', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.7421875, to_step :=  2.765625, color_rgb := '178 0 129', color_label := NULL, group_label := NULL );
@@ -3477,6 +4172,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.7656
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.7890625, to_step :=  2.8125, color_rgb := '169 0 132', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.8125, to_step :=  2.8359375, color_rgb := '165 0 132', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.8359375, to_step :=  2.859375, color_rgb := '160 0 133', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.21875, to_step :=  -1.1953125, color_rgb := '16 255 245', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -10, to_step :=  -2.9765625, color_rgb := '46 0 127', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.2421875, to_step :=  -1.21875, color_rgb := '15 255 248', color_label := NULL, group_label := NULL );
@@ -3495,6 +4191,25 @@ SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.054
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.03125, to_step :=  -1.0078125, color_rgb := '32 255 221', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.0078125, to_step :=  -0.984375, color_rgb := '34 255 218', color_label := '-1.0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.078125, to_step :=  -1.0546875, color_rgb := '28 255 227', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -10, to_step :=  -2.9765625, color_rgb := '46 0 127', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.2421875, to_step :=  -1.21875, color_rgb := '15 255 248', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.125, to_step :=  -1.1015625, color_rgb := '23 255 233', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.859375, to_step :=  2.8828125, color_rgb := '155 0 132', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.8828125, to_step :=  2.90625, color_rgb := '150 0 132', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.90625, to_step :=  2.9296875, color_rgb := '144 0 131', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.9296875, to_step :=  2.953125, color_rgb := '139 0 129', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  2.953125, to_step :=  3, color_rgb := '133 0 127', color_label := '+3.0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  3, to_step :=  10, color_rgb := '127 0 125', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.1953125, to_step :=  -1.171875, color_rgb := '18 255 242', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.1015625, to_step :=  -1.078125, color_rgb := '25 255 230', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.1484375, to_step :=  -1.125, color_rgb := '21 255 236', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.078125, to_step :=  -1.0546875, color_rgb := '28 255 227', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.0546875, to_step :=  -1.03125, color_rgb := '30 255 224', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.03125, to_step :=  -1.0078125, color_rgb := '32 255 221', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -1.0078125, to_step :=  -0.984375, color_rgb := '34 255 218', color_label := '-1.0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -0.9609375, to_step :=  -0.9375, color_rgb := '39 255 212', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -0.984375, to_step :=  -0.9609375, color_rgb := '37 255 215', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -0.9375, to_step :=  -0.9140625, color_rgb := '42 255 209', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -0.9140625, to_step :=  -0.890625, color_rgb := '45 255 206', color_label := NULL, group_label := NULL );
@@ -3517,9 +4232,15 @@ SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -0.539
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.6015625, to_step :=  -2.578125, color_rgb := '0 21 204', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -0.515625, to_step :=  -0.4921875, color_rgb := '104 255 175', color_label := '-0.5', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -0.4921875, to_step :=  -0.46875, color_rgb := '108 255 175', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.953125, to_step :=  -2.9296875, color_rgb := '43 0 139', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.5546875, to_step :=  -2.53125, color_rgb := '0 32 210', color_label := '-2.5', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.9765625, to_step :=  -2.953125, color_rgb := '45 0 133', color_label := '-3.0', group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.5546875, to_step :=  -2.53125, color_rgb := '0 32 210', color_label := '-2.5', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.9765625, to_step :=  -2.953125, color_rgb := '45 0 133', color_label := '-3.0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -2.953125, to_step :=  -2.9296875, color_rgb := '43 0 139', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -0.46875, to_step :=  -0.4453125, color_rgb := '113 255 174', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -0.421875, to_step :=  -0.3984375, color_rgb := '122 255 175', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 47, from_step :=  -0.3984375, to_step :=  -0.375, color_rgb := '127 255 175', color_label := NULL, group_label := NULL );
@@ -3545,6 +4266,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 51, from_step :=  70, to
 SELECT analysis.update_insert_legend_step( legend_id := 51, from_step :=  80, to_step :=  90, color_rgb := '2 159 27', color_label := '80', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 51, from_step :=  90, to_step :=  100, color_rgb := '0 80 0', color_label := '90', group_label := '100' );
 SELECT analysis.update_insert_legend_step( legend_id := 52, from_step :=  -10, to_step :=  10, color_rgb := '255 255 223', color_label := 'Normal', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 52, from_step :=  50, to_step :=  200, color_rgb := '0 128 0', color_label := 'Largely Above Normal', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 52, from_step :=  10, to_step :=  25, color_rgb := '85 255 85', color_label := 'Slightly Above Normal', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 52, from_step :=  -200, to_step :=  -50, color_rgb := '255 0 0', color_label := 'Largely Below Normal', group_label := '' );
@@ -3562,6 +4284,25 @@ SELECT analysis.update_insert_legend_step( legend_id := 55, from_step :=  100, t
 SELECT analysis.update_insert_legend_step( legend_id := 55, from_step :=  50, to_step :=  60, color_rgb := '159 200 0', color_label := '50', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 55, from_step :=  80, to_step :=  90, color_rgb := '20 125 0', color_label := '80', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 55, from_step :=  40, to_step :=  50, color_rgb := '190 215 60', color_label := '40', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 52, from_step :=  10, to_step :=  25, color_rgb := '85 255 85', color_label := 'Slightly Above Normal', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 52, from_step :=  -200, to_step :=  -50, color_rgb := '255 0 0', color_label := 'Largely Below Normal', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 52, from_step :=  50, to_step :=  200, color_rgb := '0 128 0', color_label := 'Largely Above Normal', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 52, from_step :=  -50, to_step :=  -25, color_rgb := '255 133 11', color_label := 'Slightly Below Normal', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 52, from_step :=  -20, to_step :=  -10, color_rgb := '255 95 0', color_label := 'Below Normal', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 52, from_step :=  25, to_step :=  50, color_rgb := '0 200 0', color_label := 'Above Normal', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 55, from_step :=  40, to_step :=  50, color_rgb := '190 215 60', color_label := '40', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 55, from_step :=  50, to_step :=  60, color_rgb := '159 200 0', color_label := '50', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 55, from_step :=  60, to_step :=  70, color_rgb := '100 175 0', color_label := '60', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 55, from_step :=  0, to_step :=  10, color_rgb := '255 255 255', color_label := '0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 55, from_step :=  80, to_step :=  90, color_rgb := '20 125 0', color_label := '80', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 55, from_step :=  20, to_step :=  30, color_rgb := '255 230 100', color_label := '20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 55, from_step :=  70, to_step :=  80, color_rgb := '70 155 0', color_label := '70', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 55, from_step :=  30, to_step :=  40, color_rgb := '255 215 60', color_label := '30', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 55, from_step :=  10, to_step :=  20, color_rgb := '255 248 170', color_label := '10', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 55, from_step :=  100, to_step :=  1000, color_rgb := '0 40 0', color_label := '100', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 55, from_step :=  90, to_step :=  100, color_rgb := '0 100 0', color_label := '90', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 56, from_step :=  -3, to_step :=  -2, color_rgb := '255 133 11', color_label := '-3', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 56, from_step :=  -2, to_step :=  -1, color_rgb := '255 180 30', color_label := '-2', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 56, from_step :=  -1, to_step :=  1, color_rgb := '255 255 223', color_label := '-1', group_label := NULL );
@@ -3569,6 +4310,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 56, from_step :=  1, to_
 SELECT analysis.update_insert_legend_step( legend_id := 56, from_step :=  2, to_step :=  3, color_rgb := '0 128 0', color_label := '+2', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 56, from_step :=  -50, to_step :=  -3, color_rgb := '255 11 11', color_label := '<<', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 56, from_step :=  3, to_step :=  50, color_rgb := '0 53 0', color_label := '+3', group_label := '>>' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 60, from_step :=  30, to_step :=  40, color_rgb := '250 65 10', color_label := '30.0', group_label := '40' );
 SELECT analysis.update_insert_legend_step( legend_id := 60, from_step :=  1, to_step :=  15, color_rgb := '0 0 255', color_label := '1', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 60, from_step :=  20, to_step :=  22, color_rgb := '25 125 220', color_label := '20.0', group_label := NULL );
@@ -3590,6 +4332,28 @@ SELECT analysis.update_insert_legend_step( legend_id := 65, from_step :=  0.3, t
 SELECT analysis.update_insert_legend_step( legend_id := 65, from_step :=  0.7, to_step :=  0.8, color_rgb := '0 80 0', color_label := '0.7', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 65, from_step :=  0.8, to_step :=  0.9, color_rgb := '0 50 0', color_label := '0.8', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  30, to_step :=  40, color_rgb := '140 253 190', color_label := '30', group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 60, from_step :=  22, to_step :=  24, color_rgb := '85 170 255', color_label := '22.0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 60, from_step :=  25, to_step :=  26, color_rgb := '50 225 120', color_label := '25.0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 60, from_step :=  27, to_step :=  28, color_rgb := '155 225 85', color_label := '27.5', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 60, from_step :=  30, to_step :=  40, color_rgb := '250 65 10', color_label := '30.0', group_label := '40' );
+SELECT analysis.update_insert_legend_step( legend_id := 60, from_step :=  1, to_step :=  15, color_rgb := '0 0 255', color_label := '1', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 60, from_step :=  20, to_step :=  22, color_rgb := '25 125 220', color_label := '20.0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 60, from_step :=  24, to_step :=  25, color_rgb := '25 150 160', color_label := '24.0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 60, from_step :=  26, to_step :=  27, color_rgb := '115 225 150', color_label := '26.5', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 60, from_step :=  28, to_step :=  30, color_rgb := '200 115 20', color_label := '28.5', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 60, from_step :=  15, to_step :=  20, color_rgb := '10 80 225', color_label := '15.0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 65, from_step :=  0.6, to_step :=  0.7, color_rgb := '0 125 0', color_label := '0.6', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 65, from_step :=  0.9, to_step :=  1, color_rgb := '0 20 0', color_label := '0.9', group_label := '1' );
+SELECT analysis.update_insert_legend_step( legend_id := 65, from_step :=  0.3, to_step :=  0.4, color_rgb := '190 213 100', color_label := '0.3', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 65, from_step :=  0.8, to_step :=  0.9, color_rgb := '0 50 0', color_label := '0.8', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 65, from_step :=  0.2, to_step :=  0.3, color_rgb := '210 230 150', color_label := '0.2', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 65, from_step :=  0.5, to_step :=  0.6, color_rgb := '50 180 0', color_label := '0.5', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 65, from_step :=  0.7, to_step :=  0.8, color_rgb := '0 80 0', color_label := '0.7', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 65, from_step :=  0.1, to_step :=  0.2, color_rgb := '255 248 191', color_label := '0.1', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 65, from_step :=  0, to_step :=  0.1, color_rgb := '220 220 220', color_label := '0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 65, from_step :=  0.4, to_step :=  0.5, color_rgb := '100 213 50', color_label := '0.4', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  60, to_step :=  80, color_rgb := '80 245 120', color_label := '60', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  80, to_step :=  90, color_rgb := '60 240 100', color_label := '80', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  90, to_step :=  100, color_rgb := '57 249 101', color_label := '90', group_label := '' );
@@ -3597,18 +4361,32 @@ SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  100, t
 SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  110, to_step :=  120, color_rgb := '36 232 132', color_label := '110', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  120, to_step :=  130, color_rgb := '22 209 154', color_label := '120', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  130, to_step :=  140, color_rgb := '23 196 190', color_label := '130', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  140, to_step :=  150, color_rgb := '11 166 210', color_label := '140', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  150, to_step :=  160, color_rgb := '14 145 233', color_label := '150', group_label := '' );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  160, to_step :=  170, color_rgb := '0 107 241', color_label := '160', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  170, to_step :=  180, color_rgb := '0 90 250', color_label := '170', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  180, to_step :=  190, color_rgb := '0 82 254', color_label := '180', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  190, to_step :=  200, color_rgb := '0 66 255', color_label := '190', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  200, to_step :=  500, color_rgb := '0 38 255', color_label := '200', group_label := '500' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  1, to_step :=  5, color_rgb := '234 255 234', color_label := '1', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  10, to_step :=  20, color_rgb := '191 255 223', color_label := '10', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  40, to_step :=  50, color_rgb := '100 250 165', color_label := '40', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  5, to_step :=  10, color_rgb := '223 255 239', color_label := '5', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  20, to_step :=  30, color_rgb := '155 255 210', color_label := '20', group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  140, to_step :=  150, color_rgb := '11 166 210', color_label := '140', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  150, to_step :=  160, color_rgb := '14 145 233', color_label := '150', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  1, to_step :=  5, color_rgb := '234 255 234', color_label := '1', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  10, to_step :=  20, color_rgb := '191 255 223', color_label := '10', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  40, to_step :=  50, color_rgb := '100 250 165', color_label := '40', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  20, to_step :=  30, color_rgb := '155 255 210', color_label := '20', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  5, to_step :=  10, color_rgb := '223 255 239', color_label := '5', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  30, to_step :=  40, color_rgb := '140 253 190', color_label := '30', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 66, from_step :=  50, to_step :=  60, color_rgb := '90 250 150', color_label := '50', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 67, from_step :=  0, to_step :=  0, color_rgb := '255 255 255', color_label := '0', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 67, from_step :=  1, to_step :=  10, color_rgb := '240 219 184', color_label := '1', group_label := '' );
@@ -3642,6 +4420,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 68, from_step :=  34, to
 SELECT analysis.update_insert_legend_step( legend_id := 68, from_step :=  36, to_step :=  38, color_rgb := '0 82 254', color_label := '36', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 68, from_step :=  40, to_step :=  100, color_rgb := '0 38 255', color_label := '40', group_label := '100' );
 SELECT analysis.update_insert_legend_step( legend_id := 68, from_step :=  38, to_step :=  40, color_rgb := '0 66 255', color_label := '38', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 69, from_step :=  25, to_step :=  25.5, color_rgb := '0 80 203', color_label := '25', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 69, from_step :=  30, to_step :=  30.5, color_rgb := '204 5 5', color_label := '30', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 69, from_step :=  28.5, to_step :=  29, color_rgb := '255 242 165', color_label := '28.5', group_label := '' );
@@ -3655,11 +4434,28 @@ SELECT analysis.update_insert_legend_step( legend_id := 69, from_step :=  0, to_
 SELECT analysis.update_insert_legend_step( legend_id := 69, from_step :=  26, to_step :=  26.5, color_rgb := '141 255 255', color_label := '26', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 69, from_step :=  30.5, to_step :=  40, color_rgb := '88 0 0', color_label := '30,5', group_label := '>>' );
 SELECT analysis.update_insert_legend_step( legend_id := 69, from_step :=  29.5, to_step :=  30, color_rgb := '255 73 73', color_label := '29,5', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 69, from_step :=  27, to_step :=  27.5, color_rgb := '81 219 85', color_label := '27', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 69, from_step :=  25, to_step :=  25.5, color_rgb := '0 80 203', color_label := '25', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 69, from_step :=  28.5, to_step :=  29, color_rgb := '255 242 165', color_label := '28.5', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 69, from_step :=  25.5, to_step :=  26, color_rgb := '65 180 255', color_label := '25.5', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 69, from_step :=  28, to_step :=  28.5, color_rgb := '255 236 66', color_label := '28', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 69, from_step :=  30.5, to_step :=  40, color_rgb := '88 0 0', color_label := '30,5', group_label := '>>' );
+SELECT analysis.update_insert_legend_step( legend_id := 69, from_step :=  29.5, to_step :=  30, color_rgb := '255 73 73', color_label := '29,5', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 69, from_step :=  26.5, to_step :=  27, color_rgb := '2 162 2', color_label := '26.5', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 69, from_step :=  26, to_step :=  26.5, color_rgb := '141 255 255', color_label := '26', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 69, from_step :=  29, to_step :=  29.5, color_rgb := '255 187 162', color_label := '29', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 69, from_step :=  0, to_step :=  25, color_rgb := '125 4 118', color_label := '<<', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 69, from_step :=  30, to_step :=  30.5, color_rgb := '204 5 5', color_label := '30', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 69, from_step :=  27.5, to_step :=  28, color_rgb := '163 255 159', color_label := '27.5', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 72, from_step :=  0, to_step :=  5, color_rgb := '0 0 255', color_label := '0', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 72, from_step :=  5, to_step :=  10, color_rgb := '80 255 255', color_label := '5', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 72, from_step :=  10, to_step :=  15, color_rgb := '170 255 255', color_label := '10', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 72, from_step :=  15, to_step :=  20, color_rgb := '234 255 244', color_label := '15', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 72, from_step :=  20, to_step :=  25, color_rgb := '255 248 191', color_label := '20', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 72, from_step :=  25, to_step :=  30, color_rgb := '255 210 110', color_label := '25', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 72, from_step :=  30, to_step :=  35, color_rgb := '255 150 50', color_label := '30', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 72, from_step :=  35, to_step :=  40, color_rgb := '255 80 0', color_label := '35', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 72, from_step :=  40, to_step :=  45, color_rgb := '255 30 0', color_label := '40', group_label := '' );
@@ -3712,6 +4508,59 @@ SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  5, to_
 SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  60, to_step :=  70, color_rgb := '0 175 255', color_label := '60', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  10, to_step :=  20, color_rgb := '130 255 255', color_label := '10', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  250, to_step :=  280, color_rgb := '0 0 135', color_label := '250', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 72, from_step :=  35, to_step :=  40, color_rgb := '255 80 0', color_label := '35', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 72, from_step :=  40, to_step :=  45, color_rgb := '255 30 0', color_label := '40', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 72, from_step :=  45, to_step :=  50, color_rgb := '220 0 0', color_label := '45', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 72, from_step :=  30, to_step :=  35, color_rgb := '255 150 50', color_label := '30', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 72, from_step :=  55, to_step :=  60, color_rgb := '120 0 0', color_label := '55', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 72, from_step :=  50, to_step :=  55, color_rgb := '180 0 0', color_label := '50', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 72, from_step :=  60, to_step :=  100, color_rgb := '80 0 0', color_label := '60', group_label := '100' );
+SELECT analysis.update_insert_legend_step( legend_id := 73, from_step :=  55, to_step :=  100, color_rgb := '255 230 230', color_label := '55', group_label := '100' );
+SELECT analysis.update_insert_legend_step( legend_id := 73, from_step :=  0, to_step :=  1, color_rgb := '255 255 255', color_label := '0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 73, from_step :=  3, to_step :=  4, color_rgb := '30 180 30', color_label := '3', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 73, from_step :=  30, to_step :=  35, color_rgb := '255 250 170', color_label := '30', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 73, from_step :=  10, to_step :=  15, color_rgb := '30 110 235', color_label := '10', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 73, from_step :=  40, to_step :=  45, color_rgb := '255 20 0', color_label := '40', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 73, from_step :=  1, to_step :=  2, color_rgb := '200 255 190', color_label := '1', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 73, from_step :=  4, to_step :=  5, color_rgb := '180 240 250', color_label := '4', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 73, from_step :=  50, to_step :=  55, color_rgb := '230 140 140', color_label := '50', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 73, from_step :=  5, to_step :=  10, color_rgb := '80 165 245', color_label := '5', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 73, from_step :=  25, to_step :=  30, color_rgb := '112 96 220', color_label := '25', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 73, from_step :=  15, to_step :=  20, color_rgb := '220 220 255', color_label := '15', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 73, from_step :=  20, to_step :=  25, color_rgb := '160 140 255', color_label := '20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 73, from_step :=  45, to_step :=  50, color_rgb := '165 0 0', color_label := '45', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 73, from_step :=  35, to_step :=  40, color_rgb := '255 160 0', color_label := '35', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 73, from_step :=  2, to_step :=  3, color_rgb := '120 245 115', color_label := '2', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 74, from_step :=  25, to_step :=  50, color_rgb := '239 94 5', color_label := '25', group_label := '
+' );
+SELECT analysis.update_insert_legend_step( legend_id := 74, from_step :=  75, to_step :=  100, color_rgb := '190 3 17', color_label := '75', group_label := '
+' );
+SELECT analysis.update_insert_legend_step( legend_id := 74, from_step :=  100, to_step :=  500, color_rgb := '128 0 64', color_label := '100', group_label := '500' );
+SELECT analysis.update_insert_legend_step( legend_id := 74, from_step :=  50, to_step :=  75, color_rgb := '255 0 0', color_label := '50', group_label := '
+' );
+SELECT analysis.update_insert_legend_step( legend_id := 74, from_step :=  10, to_step :=  25, color_rgb := '255 150 34', color_label := '10', group_label := '
+' );
+SELECT analysis.update_insert_legend_step( legend_id := 74, from_step :=  1, to_step :=  10, color_rgb := '255 255 255', color_label := '1', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  30, to_step :=  40, color_rgb := '50 255 255', color_label := '30', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  100, to_step :=  130, color_rgb := '0 40 255', color_label := '100', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  80, to_step :=  90, color_rgb := '0 100 255', color_label := '80', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  190, to_step :=  220, color_rgb := '0 0 210', color_label := '190', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  20, to_step :=  30, color_rgb := '95 255 255', color_label := '20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  1, to_step :=  5, color_rgb := '230 255 255', color_label := '1', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  130, to_step :=  160, color_rgb := '0 10 255', color_label := '130', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  10, to_step :=  20, color_rgb := '130 255 255', color_label := '10', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  50, to_step :=  60, color_rgb := '0 200 255', color_label := '50', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  5, to_step :=  10, color_rgb := '190 255 255', color_label := '5', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  280, to_step :=  310, color_rgb := '0 0 100', color_label := '280', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  70, to_step :=  80, color_rgb := '0 150 255', color_label := '70', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  220, to_step :=  250, color_rgb := '0 0 180', color_label := '220', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  310, to_step :=  500, color_rgb := '0 0 75', color_label := '310', group_label := '500' );
+SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  250, to_step :=  280, color_rgb := '0 0 135', color_label := '250', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  60, to_step :=  70, color_rgb := '0 175 255', color_label := '60', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  90, to_step :=  100, color_rgb := '0 75 255', color_label := '90', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  160, to_step :=  190, color_rgb := '0 0 245', color_label := '160', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 75, from_step :=  40, to_step :=  50, color_rgb := '0 240 255', color_label := '40', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 76, from_step :=  75, to_step :=  87, color_rgb := '255 248 223', color_label := '-0.4 -0.3', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 76, from_step :=  87, to_step :=  100, color_rgb := '245 240 190', color_label := '-0.3 -0.2', group_label := NULL );
@@ -3724,7 +4573,10 @@ SELECT analysis.update_insert_legend_step( legend_id := 76, from_step :=  163, t
 SELECT analysis.update_insert_legend_step( legend_id := 76, from_step :=  255, to_step :=  255, color_rgb := '255 255 255', color_label := 'No Data', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 76, from_step :=  175, to_step :=  254, color_rgb := '0 25 0', color_label := '?', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 76, from_step :=  0, to_step :=  75, color_rgb := '255 255 240', color_label := '?', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 80, from_step :=  3, to_step :=  5, color_rgb := '225 20 0', color_label := '+3', group_label := '' );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 80, from_step :=  -10, to_step :=  -5, color_rgb := '10 175 0', color_label := '-10', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 80, from_step :=  -5, to_step :=  -3, color_rgb := '20 225 0', color_label := '-5', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 80, from_step :=  -3, to_step :=  -2, color_rgb := '90 240 5', color_label := '-3', group_label := '' );
@@ -3732,12 +4584,18 @@ SELECT analysis.update_insert_legend_step( legend_id := 80, from_step :=  -2, to
 SELECT analysis.update_insert_legend_step( legend_id := 80, from_step :=  -1, to_step :=  1, color_rgb := '255 255 255', color_label := '-1', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 80, from_step :=  1, to_step :=  2, color_rgb := '240 150 90', color_label := '+1', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 80, from_step :=  2, to_step :=  3, color_rgb := '240 90 5', color_label := '+2', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 80, from_step :=  5, to_step :=  10, color_rgb := '175 10 0', color_label := '+5', group_label := '+10' );
 SELECT analysis.update_insert_legend_step( legend_id := 81, from_step :=  7, to_step :=  30, color_rgb := '0 0 0', color_label := '7', group_label := '10' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 80, from_step :=  3, to_step :=  5, color_rgb := '225 20 0', color_label := '+3', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 80, from_step :=  5, to_step :=  10, color_rgb := '175 10 0', color_label := '+5', group_label := '+10' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 81, from_step :=  0, to_step :=  1, color_rgb := '255 255 255', color_label := '0', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 81, from_step :=  1, to_step :=  2, color_rgb := '240 90 5', color_label := '1', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 81, from_step :=  2, to_step :=  3, color_rgb := '225 20 0', color_label := '2', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 81, from_step :=  3, to_step :=  4, color_rgb := '175 10 0', color_label := '3', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 81, from_step :=  4, to_step :=  5, color_rgb := '125 0 0', color_label := '4', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 81, from_step :=  5, to_step :=  7, color_rgb := '90 0 0', color_label := '5', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 82, from_step :=  0, to_step :=  1, color_rgb := '255 255 255', color_label := '0', group_label := '' );
@@ -3747,6 +4605,18 @@ SELECT analysis.update_insert_legend_step( legend_id := 82, from_step :=  3, to_
 SELECT analysis.update_insert_legend_step( legend_id := 82, from_step :=  4, to_step :=  5, color_rgb := '230 60 10', color_label := '4', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 82, from_step :=  5, to_step :=  6, color_rgb := '225 20 0', color_label := '5', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 82, from_step :=  6, to_step :=  10, color_rgb := '125 0 0', color_label := '6', group_label := '10' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 81, from_step :=  5, to_step :=  7, color_rgb := '90 0 0', color_label := '5', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 81, from_step :=  4, to_step :=  5, color_rgb := '125 0 0', color_label := '4', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 81, from_step :=  7, to_step :=  30, color_rgb := '0 0 0', color_label := '7', group_label := '10' );
+SELECT analysis.update_insert_legend_step( legend_id := 82, from_step :=  6, to_step :=  10, color_rgb := '125 0 0', color_label := '6', group_label := '10' );
+SELECT analysis.update_insert_legend_step( legend_id := 82, from_step :=  5, to_step :=  6, color_rgb := '225 20 0', color_label := '5', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 82, from_step :=  4, to_step :=  5, color_rgb := '230 60 10', color_label := '4', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 82, from_step :=  3, to_step :=  4, color_rgb := '240 90 30', color_label := '3', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 82, from_step :=  2, to_step :=  3, color_rgb := '240 120 50', color_label := '2', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 82, from_step :=  1, to_step :=  2, color_rgb := '240 150 90', color_label := '1', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 82, from_step :=  0, to_step :=  1, color_rgb := '255 255 255', color_label := '0', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0503125, to_step :=  0.0525, color_rgb := '21 0 234', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.02, to_step :=  0.020625, color_rgb := '96 0 159', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0415625, to_step :=  0.04375, color_rgb := '30 0 225', color_label := NULL, group_label := NULL );
@@ -3754,6 +4624,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0, to_
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.010625, to_step :=  0.01125, color_rgb := '141 0 114', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.01125, to_step :=  0.011875, color_rgb := '138 0 117', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.011875, to_step :=  0.0125, color_rgb := '135 0 120', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0125, to_step :=  0.013125, color_rgb := '132 0 123', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.013125, to_step :=  0.01375, color_rgb := '129 0 126', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.015, to_step :=  0.015625, color_rgb := '120 0 135', color_label := NULL, group_label := NULL );
@@ -3764,12 +4635,23 @@ SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0162
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.016875, to_step :=  0.0175, color_rgb := '111 0 144', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0175, to_step :=  0.018125, color_rgb := '108 0 147', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.018125, to_step :=  0.01875, color_rgb := '105 0 150', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.013125, to_step :=  0.01375, color_rgb := '129 0 126', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0125, to_step :=  0.013125, color_rgb := '132 0 123', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.01375, to_step :=  0.014375, color_rgb := '126 0 129', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.014375, to_step :=  0.015, color_rgb := '123 0 132', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.015, to_step :=  0.015625, color_rgb := '120 0 135', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.015625, to_step :=  0.01625, color_rgb := '117 0 138', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.01625, to_step :=  0.016875, color_rgb := '114 0 141', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.016875, to_step :=  0.0175, color_rgb := '111 0 144', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.019375, to_step :=  0.02, color_rgb := '99 0 156', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.01875, to_step :=  0.019375, color_rgb := '102 0 153', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.020625, to_step :=  0.02125, color_rgb := '93 0 162', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.02125, to_step :=  0.021875, color_rgb := '90 0 165', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.021875, to_step :=  0.0225, color_rgb := '87 0 168', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0225, to_step :=  0.023125, color_rgb := '84 0 171', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.023125, to_step :=  0.02375, color_rgb := '81 0 174', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.02375, to_step :=  0.024375, color_rgb := '78 0 177', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  29.5, to_step :=  30, color_rgb := '255 11 0', color_label := NULL, group_label := NULL );
@@ -3787,12 +4669,29 @@ SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0281
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.02875, to_step :=  0.029375, color_rgb := '54 0 201', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.029375, to_step :=  0.03, color_rgb := '51 0 204', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.030625, to_step :=  0.0328125, color_rgb := '45 0 210', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.02375, to_step :=  0.024375, color_rgb := '78 0 177', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.024375, to_step :=  0.025, color_rgb := '75 0 180', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.025, to_step :=  0.025625, color_rgb := '72 0 183', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.023125, to_step :=  0.02375, color_rgb := '81 0 174', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0175, to_step :=  0.018125, color_rgb := '108 0 147', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.018125, to_step :=  0.01875, color_rgb := '105 0 150', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.025625, to_step :=  0.02625, color_rgb := '69 0 186', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.02625, to_step :=  0.026875, color_rgb := '66 0 189', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.026875, to_step :=  0.0275, color_rgb := '63 0 192', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0275, to_step :=  0.028125, color_rgb := '60 0 195', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.028125, to_step :=  0.02875, color_rgb := '57 0 198', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.02875, to_step :=  0.029375, color_rgb := '54 0 201', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.030625, to_step :=  0.0328125, color_rgb := '45 0 210', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.029375, to_step :=  0.03, color_rgb := '51 0 204', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0328125, to_step :=  0.035, color_rgb := '42 0 213', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.035, to_step :=  0.0371875, color_rgb := '39 0 216', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0371875, to_step :=  0.039375, color_rgb := '36 0 219', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.039375, to_step :=  0.0415625, color_rgb := '33 0 222', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.04375, to_step :=  0.0459375, color_rgb := '27 0 228', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0459375, to_step :=  0.048125, color_rgb := '24 0 231', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0984375, to_step :=  0.1, color_rgb := '0 80 255', color_label := '0.10', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0525, to_step :=  0.0546875, color_rgb := '18 0 237', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.048125, to_step :=  0.0503125, color_rgb := '24 0 231', color_label := NULL, group_label := NULL );
@@ -3817,15 +4716,54 @@ SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0962
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.1, to_step :=  0.10625, color_rgb := '0 85 255', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.10625, to_step :=  0.1125, color_rgb := '0 90 255', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.1125, to_step :=  0.11875, color_rgb := '0 96 255', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.048125, to_step :=  0.0503125, color_rgb := '24 0 231', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0525, to_step :=  0.0546875, color_rgb := '18 0 237', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0546875, to_step :=  0.056875, color_rgb := '15 0 240', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.056875, to_step :=  0.0590625, color_rgb := '12 0 243', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  2.9375, to_step :=  3, color_rgb := '255 251 0', color_label := '3', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0634375, to_step :=  0.065625, color_rgb := '0 0 252', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.065625, to_step :=  0.0678125, color_rgb := '0 0 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  29.5, to_step :=  30, color_rgb := '255 11 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0678125, to_step :=  0.07, color_rgb := '0 5 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0721875, to_step :=  0.074375, color_rgb := '0 16 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  9.78125, to_step :=  10, color_rgb := '255 123 0', color_label := '10', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.074375, to_step :=  0.0765625, color_rgb := '0 21 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  59, to_step :=  60, color_rgb := '125 0 0', color_label := '60', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0765625, to_step :=  0.07875, color_rgb := '0 26 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.07875, to_step :=  0.0809375, color_rgb := '0 32 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.15, to_step :=  0.15625, color_rgb := '0 128 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.083125, to_step :=  0.0853125, color_rgb := '0 42 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.29375, to_step :=  0.3, color_rgb := '0 250 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0853125, to_step :=  0.0875, color_rgb := '0 48 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0875, to_step :=  0.0896875, color_rgb := '0 53 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.091875, to_step :=  0.0940625, color_rgb := '0 64 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.06125, to_step :=  0.0634375, color_rgb := '6 0 249', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0940625, to_step :=  0.09625, color_rgb := '0 69 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.09625, to_step :=  0.0984375, color_rgb := '0 74 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  5.1875, to_step :=  5.40625, color_rgb := '255 207 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.1, to_step :=  0.10625, color_rgb := '0 85 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.10625, to_step :=  0.1125, color_rgb := '0 90 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.1125, to_step :=  0.11875, color_rgb := '0 96 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0984375, to_step :=  0.1, color_rgb := '0 80 255', color_label := '0.10', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.11875, to_step :=  0.125, color_rgb := '0 101 255', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.125, to_step :=  0.13125, color_rgb := '0 106 255', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.13125, to_step :=  0.1375, color_rgb := '0 112 255', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.1375, to_step :=  0.14375, color_rgb := '0 117 255', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  15, to_step :=  15.625, color_rgb := '255 91 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.14375, to_step :=  0.15, color_rgb := '0 122 255', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.15625, to_step :=  0.1625, color_rgb := '0 133 255', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.1625, to_step :=  0.16875, color_rgb := '0 138 255', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.16875, to_step :=  0.175, color_rgb := '0 144 255', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.15625, to_step :=  0.1625, color_rgb := '0 133 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.14375, to_step :=  0.15, color_rgb := '0 122 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.1625, to_step :=  0.16875, color_rgb := '0 138 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.16875, to_step :=  0.175, color_rgb := '0 144 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  15, to_step :=  15.625, color_rgb := '255 91 0', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.175, to_step :=  0.18125, color_rgb := '0 149 255', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.18125, to_step :=  0.1875, color_rgb := '0 154 255', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.1875, to_step :=  0.19375, color_rgb := '0 160 255', color_label := NULL, group_label := NULL );
@@ -3864,8 +4802,13 @@ SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.825,
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.846875, to_step :=  0.86875, color_rgb := '0 255 55', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.86875, to_step :=  0.890625, color_rgb := '0 255 47', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.890625, to_step :=  0.9125, color_rgb := '0 255 39', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.95625, to_step :=  0.978125, color_rgb := '0 255 15', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.934375, to_step :=  0.95625, color_rgb := '0 255 23', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.934375, to_step :=  0.95625, color_rgb := '0 255 23', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.95625, to_step :=  0.978125, color_rgb := '0 255 15', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.978125, to_step :=  1, color_rgb := '0 255 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  1.0625, to_step :=  1.125, color_rgb := '16 255 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  1.125, to_step :=  1.1875, color_rgb := '24 255 0', color_label := NULL, group_label := NULL );
@@ -3873,6 +4816,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  1.1875
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  1.25, to_step :=  1.3125, color_rgb := '40 255 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  1.3125, to_step :=  1.375, color_rgb := '48 255 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  1.375, to_step :=  1.4375, color_rgb := '56 255 0', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  1.5625, to_step :=  1.625, color_rgb := '80 255 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  1.625, to_step :=  1.6875, color_rgb := '88 255 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  1.4375, to_step :=  1.5, color_rgb := '64 255 0', color_label := NULL, group_label := NULL );
@@ -3888,18 +4832,44 @@ SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  2.25, 
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  2.3125, to_step :=  2.375, color_rgb := '184 255 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  2.375, to_step :=  2.4375, color_rgb := '192 255 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  2.4375, to_step :=  2.5, color_rgb := '200 255 0', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  1.4375, to_step :=  1.5, color_rgb := '64 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  1.5625, to_step :=  1.625, color_rgb := '80 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  1.625, to_step :=  1.6875, color_rgb := '88 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  1.6875, to_step :=  1.75, color_rgb := '96 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  1.75, to_step :=  1.8125, color_rgb := '104 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  1.8125, to_step :=  1.875, color_rgb := '112 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  1.9375, to_step :=  2, color_rgb := '128 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  1.875, to_step :=  1.9375, color_rgb := '120 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  2.0625, to_step :=  2.125, color_rgb := '144 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  2.1875, to_step :=  2.25, color_rgb := '168 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  2.125, to_step :=  2.1875, color_rgb := '152 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  2.25, to_step :=  2.3125, color_rgb := '176 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  2.3125, to_step :=  2.375, color_rgb := '184 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  2.4375, to_step :=  2.5, color_rgb := '200 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  2.375, to_step :=  2.4375, color_rgb := '192 255 0', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  2.5625, to_step :=  2.625, color_rgb := '216 255 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  2.625, to_step :=  2.6875, color_rgb := '224 255 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  2.6875, to_step :=  2.75, color_rgb := '232 255 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  2.75, to_step :=  2.8125, color_rgb := '240 255 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  2.8125, to_step :=  2.875, color_rgb := '248 255 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  2.875, to_step :=  2.9375, color_rgb := '255 255 0', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  3, to_step :=  3.21875, color_rgb := '255 247 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  3.21875, to_step :=  3.4375, color_rgb := '255 243 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  3.4375, to_step :=  3.65625, color_rgb := '255 239 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  3.65625, to_step :=  3.875, color_rgb := '255 235 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  3.875, to_step :=  4.09375, color_rgb := '255 231 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.409375, to_step :=  0.43125, color_rgb := '0 255 215', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  3.21875, to_step :=  3.4375, color_rgb := '255 243 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  3, to_step :=  3.21875, color_rgb := '255 247 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  3.4375, to_step :=  3.65625, color_rgb := '255 239 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  3.65625, to_step :=  3.875, color_rgb := '255 235 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.409375, to_step :=  0.43125, color_rgb := '0 255 215', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  3.875, to_step :=  4.09375, color_rgb := '255 231 0', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0809375, to_step :=  0.083125, color_rgb := '0 37 255', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.0896875, to_step :=  0.091875, color_rgb := '0 58 255', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.2, to_step :=  0.20625, color_rgb := '0 170 255', color_label := NULL, group_label := NULL );
@@ -3990,6 +4960,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  30, to
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  23.5, to_step :=  24.125, color_rgb := '255 43 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  17.5, to_step :=  18.125, color_rgb := '255 75 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  50, to_step :=  51, color_rgb := '170 0 0', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  6.0625, to_step :=  6.28125, color_rgb := '255 191 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  8.03125, to_step :=  8.25, color_rgb := '255 155 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  40, to_step :=  41, color_rgb := '220 0 0', color_label := NULL, group_label := NULL );
@@ -4008,17 +4979,44 @@ SELECT analysis.update_insert_legend_step( legend_id := 85, from_step :=  75, to
 SELECT analysis.update_insert_legend_step( legend_id := 85, from_step :=  100, to_step :=  125, color_rgb := '80 165 245', color_label := '100', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 85, from_step :=  125, to_step :=  150, color_rgb := '30 110 235', color_label := '125', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 85, from_step :=  1, to_step :=  10, color_rgb := '240 219 184', color_label := '1', group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  55, to_step :=  56, color_rgb := '145 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  24.125, to_step :=  25.75, color_rgb := '255 39 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  8.03125, to_step :=  8.25, color_rgb := '255 155 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  6.0625, to_step :=  6.28125, color_rgb := '255 191 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  40, to_step :=  41, color_rgb := '220 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  21, to_step :=  21.625, color_rgb := '255 59 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  27, to_step :=  27.625, color_rgb := '255 27 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.03, to_step :=  0.030625, color_rgb := '48 0 207', color_label := '0.03', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 83, from_step :=  0.01, to_step :=  0.010625, color_rgb := '144 0 111', color_label := '0.01', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 85, from_step :=  75, to_step :=  100, color_rgb := '180 240 250', color_label := '75', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 85, from_step :=  25, to_step :=  50, color_rgb := '120 245 115', color_label := '25', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 85, from_step :=  0, to_step :=  1, color_rgb := '255 255 255', color_label := '0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 85, from_step :=  50, to_step :=  75, color_rgb := '55 210 60', color_label := '50', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 85, from_step :=  150, to_step :=  200, color_rgb := '255 232 120', color_label := '150', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 85, from_step :=  100, to_step :=  125, color_rgb := '80 165 245', color_label := '100', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 85, from_step :=  200, to_step :=  250, color_rgb := '255 160 0', color_label := '200', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 85, from_step :=  1, to_step :=  10, color_rgb := '240 219 184', color_label := '1', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 85, from_step :=  125, to_step :=  150, color_rgb := '30 110 235', color_label := '125', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 85, from_step :=  10, to_step :=  25, color_rgb := '180 250 170', color_label := '10', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 85, from_step :=  250, to_step :=  350, color_rgb := '255 50 0', color_label := '250', group_label := '350' );
 SELECT analysis.update_insert_legend_step( legend_id := 86, from_step :=  -1000, to_step :=  -100, color_rgb := '155 84 32', color_label := '<<', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 86, from_step :=  -100, to_step :=  -50, color_rgb := '180 118 63', color_label := '-100', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 86, from_step :=  -50, to_step :=  -25, color_rgb := '206 161 100', color_label := '-50', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 86, from_step :=  -25, to_step :=  -5, color_rgb := '231 206 144', color_label := '-25', group_label := '' );
+<<<<<<< HEAD
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 86, from_step :=  -5, to_step :=  5, color_rgb := '254 254 191', color_label := '-5', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 86, from_step :=  5, to_step :=  25, color_rgb := '180 220 250', color_label := '+5', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 86, from_step :=  25, to_step :=  50, color_rgb := '120 199 250', color_label := '+25', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 86, from_step :=  50, to_step :=  100, color_rgb := '60 150 246', color_label := '+50', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 86, from_step :=  100, to_step :=  200, color_rgb := '30 110 236', color_label := '+100', group_label := '>>' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 86, from_step :=  -5, to_step :=  5, color_rgb := '254 254 191', color_label := '-5', group_label := '' );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 87, from_step :=  -1000, to_step :=  -16, color_rgb := '170 0 0', color_label := '<<', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 87, from_step :=  -16, to_step :=  -14, color_rgb := '255 0 0', color_label := '-16', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 87, from_step :=  -14, to_step :=  -12, color_rgb := '255 60 0', color_label := '-14', group_label := '' );
@@ -4032,6 +5030,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 87, from_step :=  2, to_
 SELECT analysis.update_insert_legend_step( legend_id := 87, from_step :=  4, to_step :=  6, color_rgb := '177 239 247', color_label := '+4', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 87, from_step :=  6, to_step :=  8, color_rgb := '157 233 255', color_label := '+6', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 87, from_step :=  10, to_step :=  12, color_rgb := '21 95 255', color_label := '+10', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 87, from_step :=  12, to_step :=  14, color_rgb := '0 60 255', color_label := '+12', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 87, from_step :=  14, to_step :=  16, color_rgb := '0 35 255', color_label := '+14', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 87, from_step :=  8, to_step :=  10, color_rgb := '75 150 255', color_label := '+8', group_label := NULL );
@@ -4055,6 +5054,31 @@ SELECT analysis.update_insert_legend_step( legend_id := 89, from_step :=  -0.25,
 SELECT analysis.update_insert_legend_step( legend_id := 89, from_step :=  -0.51875, to_step :=  -0.496875, color_rgb := '32 0 190', color_label := '-0.500', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 89, from_step :=  0.015, to_step :=  0.015625, color_rgb := '255 244 229', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 89, from_step :=  -0.025, to_step :=  -0.024375, color_rgb := '181 216 255', color_label := '-0.025', group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 87, from_step :=  14, to_step :=  16, color_rgb := '0 35 255', color_label := '+14', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 87, from_step :=  16, to_step :=  1000, color_rgb := '0 0 255', color_label := '+16', group_label := '>>' );
+SELECT analysis.update_insert_legend_step( legend_id := 87, from_step :=  8, to_step :=  10, color_rgb := '75 150 255', color_label := '+8', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 87, from_step :=  12, to_step :=  14, color_rgb := '0 60 255', color_label := '+12', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 88, from_step :=  -500, to_step :=  -100, color_rgb := '115 76 0', color_label := '<<', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 88, from_step :=  -100, to_step :=  -80, color_rgb := '170 0 0', color_label := '-100', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 88, from_step :=  60, to_step :=  80, color_rgb := '157 233 255', color_label := '60', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 88, from_step :=  40, to_step :=  60, color_rgb := '177 239 247', color_label := '40', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 88, from_step :=  20, to_step :=  40, color_rgb := '214 245 255', color_label := '20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 88, from_step :=  -20, to_step :=  20, color_rgb := '255 255 255', color_label := '-20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 88, from_step :=  -40, to_step :=  -20, color_rgb := '255 232 120', color_label := '-40', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 88, from_step :=  -60, to_step :=  -40, color_rgb := '255 220 0', color_label := '-60', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 88, from_step :=  -80, to_step :=  -60, color_rgb := '255 60 0', color_label := '-80', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 88, from_step :=  160, to_step :=  1000, color_rgb := '0 0 200', color_label := '160', group_label := '>>' );
+SELECT analysis.update_insert_legend_step( legend_id := 88, from_step :=  120, to_step :=  140, color_rgb := '0 60 250', color_label := '120', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 88, from_step :=  100, to_step :=  120, color_rgb := '21 95 255', color_label := '100', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 88, from_step :=  80, to_step :=  100, color_rgb := '75 150 255', color_label := '80', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 88, from_step :=  140, to_step :=  160, color_rgb := '0 35 230', color_label := '140', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 89, from_step :=  0.015, to_step :=  0.015625, color_rgb := '255 244 229', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 89, from_step :=  -0.025, to_step :=  -0.024375, color_rgb := '181 216 255', color_label := '-0.025', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 89, from_step :=  0.025, to_step :=  0.025625, color_rgb := '255 218 184', color_label := '+0.025', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 89, from_step :=  -0.25, to_step :=  -0.24375, color_rgb := '8 0 241', color_label := '-0.250', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 89, from_step :=  -0.51875, to_step :=  -0.496875, color_rgb := '32 0 190', color_label := '-0.500', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 89, from_step :=  -0.020625, to_step :=  -0.02, color_rgb := '199 228 255', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 89, from_step :=  -0.978125, to_step :=  -0.95625, color_rgb := '42 0 130', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 89, from_step :=  -0.95625, to_step :=  -0.934375, color_rgb := '42 0 133', color_label := NULL, group_label := NULL );
@@ -4305,6 +5329,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 89, from_step :=  0.1, t
 SELECT analysis.update_insert_legend_step( legend_id := 89, from_step :=  0.25, to_step :=  0.25625, color_rgb := '244 0 6', color_label := '+0.250', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 89, from_step :=  0.496875, to_step :=  0.51875, color_rgb := '196 0 30', color_label := '+0.500', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 89, from_step :=  1, to_step :=  10, color_rgb := '127 0 42', color_label := '+1', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  -40, to_step :=  -20, color_rgb := '255 232 120', color_label := '-40', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  -1000, to_step :=  -200, color_rgb := '240 0 0', color_label := '<<', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  -200, to_step :=  -180, color_rgb := '250 40 0', color_label := '-200', group_label := '' );
@@ -4359,6 +5384,65 @@ SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  -1000,
 SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  0, to_step :=  6, color_rgb := '255 248 223', color_label := '0', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  18, to_step :=  24, color_rgb := '230 213 120', color_label := '18', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  48, to_step :=  54, color_rgb := '80 249 101', color_label := '48', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  140, to_step :=  160, color_rgb := '0 10 235', color_label := '140', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  120, to_step :=  140, color_rgb := '0 43 255', color_label := '120', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  100, to_step :=  120, color_rgb := '21 82 255', color_label := '100', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  -100, to_step :=  -80, color_rgb := '255 165 0', color_label := '-100', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  -200, to_step :=  -180, color_rgb := '250 40 0', color_label := '-200', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  -1000, to_step :=  -200, color_rgb := '240 0 0', color_label := '<<', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  -120, to_step :=  -100, color_rgb := '255 120 0', color_label := '-120', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  -180, to_step :=  -160, color_rgb := '240 60 0', color_label := '-180', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  -140, to_step :=  -120, color_rgb := '255 100 0', color_label := '-140', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  -160, to_step :=  -140, color_rgb := '245 80 0', color_label := '-160', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  80, to_step :=  100, color_rgb := '75 150 255', color_label := '80', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  -40, to_step :=  -20, color_rgb := '255 232 120', color_label := '-40', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  -60, to_step :=  -40, color_rgb := '255 200 0', color_label := '-60', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  -80, to_step :=  -60, color_rgb := '255 180 0', color_label := '-80', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  60, to_step :=  80, color_rgb := '157 223 255', color_label := '60', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  -20, to_step :=  20, color_rgb := '255 255 255', color_label := '-20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  40, to_step :=  60, color_rgb := '177 239 247', color_label := '40', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  20, to_step :=  40, color_rgb := '214 245 255', color_label := '20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  160, to_step :=  180, color_rgb := '0 5 180', color_label := '160', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  200, to_step :=  1000, color_rgb := '0 0 100', color_label := '200', group_label := '>>' );
+SELECT analysis.update_insert_legend_step( legend_id := 90, from_step :=  180, to_step :=  200, color_rgb := '0 0 150', color_label := '180', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 91, from_step :=  -100, to_step :=  -90, color_rgb := '255 110 30', color_label := '-100', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 91, from_step :=  -90, to_step :=  -80, color_rgb := '255 130 50', color_label := '-90', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 91, from_step :=  -80, to_step :=  -60, color_rgb := '255 150 70', color_label := '-80', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 91, from_step :=  -60, to_step :=  -40, color_rgb := '255 180 100', color_label := '-60', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 91, from_step :=  -40, to_step :=  -20, color_rgb := '255 200 150', color_label := '-40', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 91, from_step :=  -20, to_step :=  -5, color_rgb := '255 232 190', color_label := '-20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 91, from_step :=  -5, to_step :=  5, color_rgb := '255 255 255', color_label := '-5', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 91, from_step :=  5, to_step :=  50, color_rgb := '214 245 245', color_label := '5', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 91, from_step :=  400, to_step :=  450, color_rgb := '0 0 130', color_label := '400', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 91, from_step :=  350, to_step :=  400, color_rgb := '0 5 180', color_label := '350', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 91, from_step :=  100, to_step :=  150, color_rgb := '100 160 255', color_label := '100', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 91, from_step :=  50, to_step :=  100, color_rgb := '150 200 255', color_label := '50', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 91, from_step :=  300, to_step :=  350, color_rgb := '0 10 220', color_label := '300', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 91, from_step :=  150, to_step :=  200, color_rgb := '60 120 255', color_label := '150', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 91, from_step :=  250, to_step :=  300, color_rgb := '0 43 240', color_label := '250', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 91, from_step :=  200, to_step :=  250, color_rgb := '21 82 255', color_label := '200', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 91, from_step :=  450, to_step :=  500, color_rgb := '0 0 80', color_label := '450', group_label := '>>' );
+SELECT analysis.update_insert_legend_step( legend_id := 93, from_step :=  95, to_step :=  105, color_rgb := '225 225 225', color_label := '95', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 93, from_step :=  105, to_step :=  110, color_rgb := '136 204 102', color_label := '105', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 93, from_step :=  110, to_step :=  120, color_rgb := '59 163 88', color_label := '110', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 93, from_step :=  120, to_step :=  130, color_rgb := '26 125 117', color_label := '120', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 93, from_step :=  70, to_step :=  80, color_rgb := '237 161 19', color_label := '70', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 93, from_step :=  140, to_step :=  200, color_rgb := '11 44 122', color_label := '140', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 93, from_step :=  200, to_step :=  10000, color_rgb := '0 0 64', color_label := '200', group_label := '>>' );
+SELECT analysis.update_insert_legend_step( legend_id := 93, from_step :=  90, to_step :=  95, color_rgb := '255 255 135', color_label := '90', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 93, from_step :=  80, to_step :=  90, color_rgb := '246 202 12', color_label := '80', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 93, from_step :=  60, to_step :=  70, color_rgb := '214 111 43', color_label := '60', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 93, from_step :=  1, to_step :=  60, color_rgb := '115 76 0', color_label := '1', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 93, from_step :=  130, to_step :=  140, color_rgb := '22 103 138', color_label := '130', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  0, to_step :=  6, color_rgb := '255 248 223', color_label := '0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  -1000, to_step :=  0, color_rgb := '255 255 255', color_label := 'no data', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  48, to_step :=  54, color_rgb := '80 249 101', color_label := '48', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  18, to_step :=  24, color_rgb := '230 213 120', color_label := '18', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  54, to_step :=  60, color_rgb := '49 244 122', color_label := '54', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  12, to_step :=  18, color_rgb := '255 220 160', color_label := '12', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  6, to_step :=  12, color_rgb := '255 230 190', color_label := '6', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  42, to_step :=  48, color_rgb := '100 252 71', color_label := '42', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  24, to_step :=  30, color_rgb := '210 200 100', color_label := '24', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  36, to_step :=  42, color_rgb := '140 251 61', color_label := '36', group_label := '' );
@@ -4366,11 +5450,15 @@ SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  30, to
 SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  96, to_step :=  102, color_rgb := '0 101 247', color_label := '96', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  66, to_step :=  72, color_rgb := '22 209 154', color_label := '66', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  60, to_step :=  66, color_rgb := '36 232 132', color_label := '60', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  54, to_step :=  60, color_rgb := '49 244 122', color_label := '54', group_label := '' );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  90, to_step :=  96, color_rgb := '0 107 241', color_label := '90', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  72, to_step :=  78, color_rgb := '23 196 190', color_label := '72', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  84, to_step :=  90, color_rgb := '14 145 233', color_label := '84', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  78, to_step :=  84, color_rgb := '11 166 210', color_label := '78', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  108, to_step :=  114, color_rgb := '0 66 255', color_label := '108', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  102, to_step :=  108, color_rgb := '0 82 254', color_label := '102', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  150, to_step :=  500, color_rgb := '0 15 180', color_label := '150', group_label := '500' );
@@ -4394,6 +5482,29 @@ SELECT analysis.update_insert_legend_step( legend_id := 96, from_step :=  -8000,
 SELECT analysis.update_insert_legend_step( legend_id := 96, from_step :=  -10000, to_step :=  -8000, color_rgb := '255 230 190', color_label := '-10', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 96, from_step :=  -1000000, to_step :=  -1000000, color_rgb := '255 255 255', color_label := 'no data', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 96, from_step :=  -900000, to_step :=  -10000, color_rgb := '255 248 223', color_label := '<<', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  150, to_step :=  500, color_rgb := '0 15 180', color_label := '150', group_label := '500' );
+SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  120, to_step :=  150, color_rgb := '0 30 220', color_label := '120', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  102, to_step :=  108, color_rgb := '0 82 254', color_label := '102', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  114, to_step :=  120, color_rgb := '0 38 255', color_label := '114', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 94, from_step :=  108, to_step :=  114, color_rgb := '0 66 255', color_label := '108', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 95, from_step :=  2000, to_step :=  4000, color_rgb := '100 252 71', color_label := '2', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 95, from_step :=  1000, to_step :=  2000, color_rgb := '140 251 61', color_label := '1', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 95, from_step :=  -10000, to_step :=  -8000, color_rgb := '255 230 190', color_label := '-10', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 95, from_step :=  -900000, to_step :=  -10000, color_rgb := '255 240 200', color_label := '?', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 95, from_step :=  -1000000, to_step :=  -1000000, color_rgb := '255 255 255', color_label := 'No data', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 95, from_step :=  -1000, to_step :=  1000, color_rgb := '225 220 220', color_label := '-1', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 95, from_step :=  -8000, to_step :=  -4000, color_rgb := '255 220 160', color_label := '-8', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 95, from_step :=  -2000, to_step :=  -1000, color_rgb := '210 200 100', color_label := '-2', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 95, from_step :=  -4000, to_step :=  -2000, color_rgb := '230 213 120', color_label := '-4', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 95, from_step :=  8000, to_step :=  10000, color_rgb := '49 244 122', color_label := '8', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 95, from_step :=  4000, to_step :=  8000, color_rgb := '80 249 101', color_label := '4', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 95, from_step :=  10000, to_step :=  100000, color_rgb := '36 232 132', color_label := '?', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 96, from_step :=  -1000000, to_step :=  -1000000, color_rgb := '255 255 255', color_label := 'no data', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 96, from_step :=  -900000, to_step :=  -10000, color_rgb := '255 248 223', color_label := '<<', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 96, from_step :=  -10000, to_step :=  -8000, color_rgb := '255 230 190', color_label := '-10', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 96, from_step :=  -8000, to_step :=  -4000, color_rgb := '255 220 160', color_label := '-8', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 96, from_step :=  -4000, to_step :=  -2000, color_rgb := '230 213 120', color_label := '-4', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 96, from_step :=  -2000, to_step :=  -1000, color_rgb := '210 200 100', color_label := '-2', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 96, from_step :=  -1000, to_step :=  1000, color_rgb := '240 240 240', color_label := '-1', group_label := '' );
@@ -4402,16 +5513,28 @@ SELECT analysis.update_insert_legend_step( legend_id := 96, from_step :=  2000, 
 SELECT analysis.update_insert_legend_step( legend_id := 96, from_step :=  4000, to_step :=  8000, color_rgb := '80 249 101', color_label := '4', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 96, from_step :=  8000, to_step :=  10000, color_rgb := '49 244 122', color_label := '8', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 96, from_step :=  10000, to_step :=  100000, color_rgb := '36 232 132', color_label := '10', group_label := '>>' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 97, from_step :=  -500, to_step :=  0, color_rgb := '255 255 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 97, from_step :=  40, to_step :=  50, color_rgb := '60 200 255', color_label := '40', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 97, from_step :=  30, to_step :=  40, color_rgb := '80 230 255', color_label := '30', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 97, from_step :=  0, to_step :=  10, color_rgb := '223 255 255', color_label := '0', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 97, from_step :=  60, to_step :=  70, color_rgb := '60 130 200', color_label := '60', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 97, from_step :=  50, to_step :=  60, color_rgb := '82 165 247', color_label := '50', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 97, from_step :=  30, to_step :=  40, color_rgb := '80 230 255', color_label := '30', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 97, from_step :=  20, to_step :=  30, color_rgb := '110 255 255', color_label := '20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 97, from_step :=  -500, to_step :=  0, color_rgb := '255 255 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 97, from_step :=  10, to_step :=  20, color_rgb := '149 255 255', color_label := '10', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 97, from_step :=  0, to_step :=  10, color_rgb := '223 255 255', color_label := '0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 97, from_step :=  60, to_step :=  70, color_rgb := '60 130 200', color_label := '60', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 97, from_step :=  50, to_step :=  60, color_rgb := '82 165 247', color_label := '50', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 97, from_step :=  40, to_step :=  50, color_rgb := '60 200 255', color_label := '40', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 97, from_step :=  100, to_step :=  250, color_rgb := '90 20 95', color_label := '100', group_label := '250' );
 SELECT analysis.update_insert_legend_step( legend_id := 97, from_step :=  70, to_step :=  80, color_rgb := '40 80 200', color_label := '70', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 97, from_step :=  90, to_step :=  100, color_rgb := '0 30 90', color_label := '90', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 97, from_step :=  80, to_step :=  90, color_rgb := '20 50 150', color_label := '80', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 97, from_step :=  10, to_step :=  20, color_rgb := '149 255 255', color_label := '10', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 97, from_step :=  20, to_step :=  30, color_rgb := '110 255 255', color_label := '20', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 99, from_step :=  0, to_step :=  0.05, color_rgb := '255 255 255', color_label := '0', group_label := '' );
@@ -4424,6 +5547,18 @@ SELECT analysis.update_insert_legend_step( legend_id := 99, from_step :=  0.55, 
 SELECT analysis.update_insert_legend_step( legend_id := 99, from_step :=  0.65, to_step :=  0.75, color_rgb := '43 85 0', color_label := '0.65', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 99, from_step :=  0.85, to_step :=  1, color_rgb := '20 40 0', color_label := '0.85', group_label := '0.95' );
 SELECT analysis.update_insert_legend_step( legend_id := 99, from_step :=  0.75, to_step :=  0.85, color_rgb := '27 53 0', color_label := '0.75', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 99, from_step :=  0.45, to_step :=  0.55, color_rgb := '106 213 0', color_label := '0.45', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 99, from_step :=  0.05, to_step :=  0.15, color_rgb := '255 228 149', color_label := '0.05', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 99, from_step :=  0, to_step :=  0.05, color_rgb := '255 255 255', color_label := '0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 99, from_step :=  0.35, to_step :=  0.45, color_rgb := '159 213 0', color_label := '0.35', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 99, from_step :=  0.25, to_step :=  0.35, color_rgb := '213 213 0', color_label := '0.25', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 99, from_step :=  0.15, to_step :=  0.25, color_rgb := '255 224 11', color_label := '0.15', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 99, from_step :=  0.85, to_step :=  1, color_rgb := '20 40 0', color_label := '0.85', group_label := '0.95' );
+SELECT analysis.update_insert_legend_step( legend_id := 99, from_step :=  0.75, to_step :=  0.85, color_rgb := '27 53 0', color_label := '0.75', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 99, from_step :=  0.65, to_step :=  0.75, color_rgb := '43 85 0', color_label := '0.65', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 99, from_step :=  0.55, to_step :=  0.65, color_rgb := '64 128 0', color_label := '0.55', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  17.44313725, to_step :=  17.54509804, color_rgb := '8 213 213', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  30.49411765, to_step :=  30.59607843, color_rgb := '128 16 16', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  30.59607843, to_step :=  30.69803922, color_rgb := '123 17 17', color_label := NULL, group_label := NULL );
@@ -4457,6 +5592,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  12.54
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  31.41176471, to_step :=  31.51372549, color_rgb := '123 41 41', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  18.87058824, to_step :=  18.97254902, color_rgb := '8 230 185', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  31.51372549, to_step :=  31.61568627, color_rgb := '125 45 45', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  31.61568627, to_step :=  31.71764706, color_rgb := '127 49 48', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  18.97254902, to_step :=  19.0745098, color_rgb := '8 231 182', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  31.71764706, to_step :=  31.81960784, color_rgb := '128 53 52', color_label := NULL, group_label := NULL );
@@ -4466,6 +5602,17 @@ SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  19.17
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  19.27843137, to_step :=  19.38039216, color_rgb := '8 225 168', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  32.02352941, to_step :=  32.1254902, color_rgb := '134 64 63', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  12.65098039, to_step :=  12.75294118, color_rgb := '8 13 173', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  18.97254902, to_step :=  19.0745098, color_rgb := '8 231 182', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  31.61568627, to_step :=  31.71764706, color_rgb := '127 49 48', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  31.71764706, to_step :=  31.81960784, color_rgb := '128 53 52', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  31.81960784, to_step :=  31.92156863, color_rgb := '130 56 56', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  12.65098039, to_step :=  12.75294118, color_rgb := '8 13 173', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  19.17647059, to_step :=  19.27843137, color_rgb := '8 228 173', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  31.92156863, to_step :=  32.02352941, color_rgb := '132 60 59', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  19.27843137, to_step :=  19.38039216, color_rgb := '8 225 168', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  32.02352941, to_step :=  32.1254902, color_rgb := '134 64 63', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  32.1254902, to_step :=  32.22745098, color_rgb := '136 68 67', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  19.38039216, to_step :=  19.48235294, color_rgb := '8 222 163', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  32.22745098, to_step :=  32.32941176, color_rgb := '138 71 70', color_label := NULL, group_label := NULL );
@@ -4487,6 +5634,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  19.78
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  33.14509804, to_step :=  33.24705882, color_rgb := '154 105 104', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  19.89019608, to_step :=  19.99215686, color_rgb := '8 208 139', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  33.24705882, to_step :=  33.34901961, color_rgb := '156 108 107', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  0, to_step :=  10, color_rgb := '255 255 255', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  33.34901961, to_step :=  33.45098039, color_rgb := '158 112 111', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  19.99215686, to_step :=  20.09411765, color_rgb := '8 205 134', color_label := NULL, group_label := NULL );
@@ -4494,6 +5642,14 @@ SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  33.45
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  33.55294118, to_step :=  33.65490196, color_rgb := '162 119 118', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  33.65490196, to_step :=  33.75686275, color_rgb := '164 123 122', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  13.16078431, to_step :=  13.2627451, color_rgb := '8 37 144', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  33.34901961, to_step :=  33.45098039, color_rgb := '158 112 111', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  33.45098039, to_step :=  33.55294118, color_rgb := '160 116 115', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  33.55294118, to_step :=  33.65490196, color_rgb := '162 119 118', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  13.16078431, to_step :=  13.2627451, color_rgb := '8 37 144', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  19.99215686, to_step :=  20.09411765, color_rgb := '8 205 134', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  33.65490196, to_step :=  33.75686275, color_rgb := '164 123 122', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  20.09411765, to_step :=  20.19607843, color_rgb := '8 202 130', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  33.75686275, to_step :=  33.85882353, color_rgb := '165 126 126', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  33.85882353, to_step :=  33.96078431, color_rgb := '167 130 129', color_label := NULL, group_label := NULL );
@@ -4518,6 +5674,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  20.70
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  34.98039216, to_step :=  35.08235294, color_rgb := '140 122 122', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  35.08235294, to_step :=  35.18431373, color_rgb := '126 110 110', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  35.18431373, to_step :=  35.28627451, color_rgb := '112 98 98', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  20.80784314, to_step :=  20.90980392, color_rgb := '8 176 103', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  35.28627451, to_step :=  35.38823529, color_rgb := '98 86 86', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  20.90980392, to_step :=  21.01176471, color_rgb := '8 172 100', color_label := NULL, group_label := NULL );
@@ -4527,6 +5684,17 @@ SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  21.01
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  35.59215686, to_step :=  35.69411765, color_rgb := '56 49 49', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  35.69411765, to_step :=  35.79607843, color_rgb := '42 37 37', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  13.67058824, to_step :=  13.77254902, color_rgb := '8 60 116', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  35.28627451, to_step :=  35.38823529, color_rgb := '98 86 86', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  35.38823529, to_step :=  35.49019608, color_rgb := '84 73 73', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  13.67058824, to_step :=  13.77254902, color_rgb := '8 60 116', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  35.49019608, to_step :=  35.59215686, color_rgb := '70 61 61', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  20.80784314, to_step :=  20.90980392, color_rgb := '8 176 103', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  20.90980392, to_step :=  21.01176471, color_rgb := '8 172 100', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  21.01176471, to_step :=  21.11372549, color_rgb := '8 168 97', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  35.59215686, to_step :=  35.69411765, color_rgb := '56 49 49', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  35.69411765, to_step :=  35.79607843, color_rgb := '42 37 37', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  35.79607843, to_step :=  35.89803922, color_rgb := '28 24 24', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  21.11372549, to_step :=  21.21568627, color_rgb := '8 164 94', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  35.89803922, to_step :=  36, color_rgb := '14 12 12', color_label := NULL, group_label := NULL );
@@ -4545,20 +5713,34 @@ SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  21.82
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  21.92941176, to_step :=  22.03137255, color_rgb := '17 145 63', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  14.18039216, to_step :=  14.28235294, color_rgb := '8 80 116', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  31.00392157, to_step :=  31.10588235, color_rgb := '116 26 26', color_label := '31', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  34.0627451, to_step :=  34.16470588, color_rgb := '171 137 137', color_label := '34', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  22.03137255, to_step :=  22.13333333, color_rgb := '20 145 57', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  22.23529412, to_step :=  22.3372549, color_rgb := '26 147 46', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  14.28235294, to_step :=  14.38431373, color_rgb := '8 83 120', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  22.3372549, to_step :=  22.43921569, color_rgb := '29 147 41', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  22.03137255, to_step :=  22.13333333, color_rgb := '20 145 57', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  34.0627451, to_step :=  34.16470588, color_rgb := '171 137 137', color_label := '34', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  22.23529412, to_step :=  22.3372549, color_rgb := '26 147 46', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  14.28235294, to_step :=  14.38431373, color_rgb := '8 83 120', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  22.3372549, to_step :=  22.43921569, color_rgb := '29 147 41', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  14.38431373, to_step :=  14.48627451, color_rgb := '8 87 124', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  22.43921569, to_step :=  22.54117647, color_rgb := '32 148 35', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  22.54117647, to_step :=  22.64313725, color_rgb := '35 149 30', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  22.64313725, to_step :=  22.74509804, color_rgb := '38 149 24', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  14.48627451, to_step :=  14.58823529, color_rgb := '8 90 128', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  36, to_step :=  50, color_rgb := '0 0 0', color_label := '36', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  23.6627451, to_step :=  23.76470588, color_rgb := '81 181 8', color_label := NULL, group_label := NULL );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  22.74509804, to_step :=  22.84705882, color_rgb := '41 150 19', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  14.69019608, to_step :=  14.79215686, color_rgb := '8 96 135', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  23.05098039, to_step :=  23.15294118, color_rgb := '52 155 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  23.15294118, to_step :=  23.25490196, color_rgb := '57 160 8', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  14.79215686, to_step :=  14.89411765, color_rgb := '8 100 139', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  23.25490196, to_step :=  23.35686275, color_rgb := '62 164 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  23.35686275, to_step :=  23.45882353, color_rgb := '66 168 8', color_label := NULL, group_label := NULL );
@@ -4566,11 +5748,27 @@ SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  23.45
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  14.89411765, to_step :=  14.99607843, color_rgb := '8 103 143', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  23.56078431, to_step :=  23.6627451, color_rgb := '76 176 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  14.99607843, to_step :=  15.09803922, color_rgb := '8 106 147', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  23.25490196, to_step :=  23.35686275, color_rgb := '62 164 8', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  23.35686275, to_step :=  23.45882353, color_rgb := '66 168 8', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  0, to_step :=  10, color_rgb := '255 255 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  14.79215686, to_step :=  14.89411765, color_rgb := '8 100 139', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  14.89411765, to_step :=  14.99607843, color_rgb := '8 103 143', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  16.11764706, to_step :=  16.21960784, color_rgb := '8 157 168', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  23.45882353, to_step :=  23.56078431, color_rgb := '71 172 8', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  23.56078431, to_step :=  23.6627451, color_rgb := '76 176 8', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  14.99607843, to_step :=  15.09803922, color_rgb := '8 106 147', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  23.6627451, to_step :=  23.76470588, color_rgb := '81 181 8', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  10.10196078, to_step :=  10.20392157, color_rgb := '86 10 128', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  23.76470588, to_step :=  23.86666667, color_rgb := '86 185 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  15.09803922, to_step :=  15.2, color_rgb := '8 110 151', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  23.86666667, to_step :=  23.96862745, color_rgb := '91 189 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  23.96862745, to_step :=  24.07058824, color_rgb := '95 193 8', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  22.94901961, to_step :=  23.05098039, color_rgb := '47 151 8', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  24.07058824, to_step :=  24.17254902, color_rgb := '100 198 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  15.2, to_step :=  15.30196078, color_rgb := '8 113 155', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  15.30196078, to_step :=  15.40392157, color_rgb := '8 118 156', color_label := NULL, group_label := NULL );
@@ -4578,11 +5776,18 @@ SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  24.17
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  24.2745098, to_step :=  24.37647059, color_rgb := '110 206 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  24.37647059, to_step :=  24.47843137, color_rgb := '119 208 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  15.40392157, to_step :=  15.50588235, color_rgb := '8 123 158', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  10, to_step :=  10.10196078, color_rgb := '91 10 118', color_label := '10', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  19.0745098, to_step :=  19.17647059, color_rgb := '8 231 178', color_label := '19', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  25.09019608, to_step :=  25.19215686, color_rgb := '180 220 8', color_label := '25', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  24.47843137, to_step :=  24.58039216, color_rgb := '127 210 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  24.58039216, to_step :=  24.68235294, color_rgb := '136 211 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  15.50588235, to_step :=  15.60784314, color_rgb := '8 128 159', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  24.68235294, to_step :=  24.78431373, color_rgb := '145 213 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  24.78431373, to_step :=  24.88627451, color_rgb := '153 215 8', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  10, to_step :=  10.10196078, color_rgb := '91 10 118', color_label := '10', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  19.0745098, to_step :=  19.17647059, color_rgb := '8 231 178', color_label := '19', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  25.09019608, to_step :=  25.19215686, color_rgb := '180 220 8', color_label := '25', group_label := NULL );
@@ -4590,6 +5795,12 @@ SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  15.60
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  24.88627451, to_step :=  24.98823529, color_rgb := '162 217 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  10.20392157, to_step :=  10.30588235, color_rgb := '82 10 138', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  24.98823529, to_step :=  25.09019608, color_rgb := '171 218 8', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  24.88627451, to_step :=  24.98823529, color_rgb := '162 217 8', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  15.60784314, to_step :=  15.70980392, color_rgb := '8 133 161', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  24.98823529, to_step :=  25.09019608, color_rgb := '171 218 8', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  10.20392157, to_step :=  10.30588235, color_rgb := '82 10 138', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  15.70980392, to_step :=  15.81176471, color_rgb := '8 138 162', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  25.19215686, to_step :=  25.29411765, color_rgb := '188 222 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  25.29411765, to_step :=  25.39607843, color_rgb := '197 224 8', color_label := NULL, group_label := NULL );
@@ -4599,6 +5810,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  10.30
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  25.49803922, to_step :=  25.6, color_rgb := '214 227 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  10.40784314, to_step :=  10.50980392, color_rgb := '72 9 158', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  25.6, to_step :=  25.70196078, color_rgb := '223 229 8', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  25.70196078, to_step :=  25.80392157, color_rgb := '223 224 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  10.50980392, to_step :=  10.61176471, color_rgb := '67 9 168', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  15.91372549, to_step :=  16.01568627, color_rgb := '8 147 165', color_label := NULL, group_label := NULL );
@@ -4606,6 +5818,14 @@ SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  16.11
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  25.80392157, to_step :=  25.90588235, color_rgb := '223 219 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  10.61176471, to_step :=  10.71372549, color_rgb := '63 9 178', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  25.90588235, to_step :=  26.00784314, color_rgb := '223 213 8', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  10.50980392, to_step :=  10.61176471, color_rgb := '67 9 168', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  25.70196078, to_step :=  25.80392157, color_rgb := '223 224 8', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  15.91372549, to_step :=  16.01568627, color_rgb := '8 147 165', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  25.80392157, to_step :=  25.90588235, color_rgb := '223 219 8', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  25.90588235, to_step :=  26.00784314, color_rgb := '223 213 8', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  10.61176471, to_step :=  10.71372549, color_rgb := '63 9 178', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  10.71372549, to_step :=  10.81568627, color_rgb := '58 9 188', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  26.00784314, to_step :=  26.10980392, color_rgb := '223 208 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  16.21960784, to_step :=  16.32156863, color_rgb := '8 162 169', color_label := NULL, group_label := NULL );
@@ -4617,7 +5837,13 @@ SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  26.41
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  13.05882353, to_step :=  13.16078431, color_rgb := '8 32 150', color_label := '13', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  26.51764706, to_step :=  26.61960784, color_rgb := '224 182 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  16.01568627, to_step :=  16.11764706, color_rgb := '8 152 166', color_label := '16', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  26.61960784, to_step :=  26.72156863, color_rgb := '224 177 8', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  14.58823529, to_step :=  14.69019608, color_rgb := '8 93 131', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  26.61960784, to_step :=  26.72156863, color_rgb := '224 177 8', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  22.84705882, to_step :=  22.94901961, color_rgb := '44 150 13', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  26.72156863, to_step :=  26.82352941, color_rgb := '224 171 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  10.81568627, to_step :=  10.91764706, color_rgb := '53 9 198', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  26.82352941, to_step :=  26.9254902, color_rgb := '224 166 8', color_label := NULL, group_label := NULL );
@@ -4639,17 +5865,27 @@ SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  27.84
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  27.94509804, to_step :=  28.04705882, color_rgb := '223 85 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  28.14901961, to_step :=  28.25098039, color_rgb := '223 70 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  28.25098039, to_step :=  28.35294118, color_rgb := '220 65 8', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  28.04705882, to_step :=  28.14901961, color_rgb := '223 77 8', color_label := '28', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  28.35294118, to_step :=  28.45490196, color_rgb := '217 60 8', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  28.35294118, to_step :=  28.45490196, color_rgb := '217 60 8', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  28.04705882, to_step :=  28.14901961, color_rgb := '223 77 8', color_label := '28', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  22.13333333, to_step :=  22.23529412, color_rgb := '23 146 52', color_label := '22', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  28.45490196, to_step :=  28.55686275, color_rgb := '214 56 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  11.22352941, to_step :=  11.3254902, color_rgb := '34 8 238', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  28.55686275, to_step :=  28.65882353, color_rgb := '210 51 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  28.65882353, to_step :=  28.76078431, color_rgb := '207 46 8', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  22.94901961, to_step :=  23.05098039, color_rgb := '47 151 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  11.3254902, to_step :=  11.42745098, color_rgb := '32 8 234', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  28.76078431, to_step :=  28.8627451, color_rgb := '204 41 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  22.84705882, to_step :=  22.94901961, color_rgb := '44 150 13', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  11.3254902, to_step :=  11.42745098, color_rgb := '32 8 234', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  28.76078431, to_step :=  28.8627451, color_rgb := '204 41 8', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  16.62745098, to_step :=  16.72941176, color_rgb := '8 180 180', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  28.8627451, to_step :=  28.96470588, color_rgb := '201 37 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  11.42745098, to_step :=  11.52941176, color_rgb := '30 8 229', color_label := NULL, group_label := NULL );
@@ -4664,9 +5900,12 @@ SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  29.37
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  29.4745098, to_step :=  29.57647059, color_rgb := '182 8 8', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  16.93333333, to_step :=  17.03529412, color_rgb := '8 192 192', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  29.57647059, to_step :=  29.67843137, color_rgb := '177 9 9', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  14.38431373, to_step :=  14.48627451, color_rgb := '8 87 124', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  22.43921569, to_step :=  22.54117647, color_rgb := '32 148 35', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  14.58823529, to_step :=  14.69019608, color_rgb := '8 93 131', color_label := NULL, group_label := NULL );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  17.03529412, to_step :=  17.1372549, color_rgb := '8 196 196', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  29.67843137, to_step :=  29.78039216, color_rgb := '171 10 10', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  29.78039216, to_step :=  29.88235294, color_rgb := '166 11 11', color_label := NULL, group_label := NULL );
@@ -4681,6 +5920,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  30.18
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  30.29019608, to_step :=  30.39215686, color_rgb := '139 15 15', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  17.34117647, to_step :=  17.44313725, color_rgb := '8 209 209', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 100, from_step :=  30.39215686, to_step :=  30.49411765, color_rgb := '134 16 16', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 104, from_step :=  50, to_step :=  60, color_rgb := '82 165 247', color_label := '50', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 104, from_step :=  10, to_step :=  20, color_rgb := '149 255 255', color_label := '10', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 104, from_step :=  90, to_step :=  100, color_rgb := '0 30 90', color_label := '90', group_label := '100' );
@@ -4692,6 +5932,19 @@ SELECT analysis.update_insert_legend_step( legend_id := 104, from_step :=  40, t
 SELECT analysis.update_insert_legend_step( legend_id := 104, from_step :=  60, to_step :=  70, color_rgb := '60 130 200', color_label := '60', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 104, from_step :=  70, to_step :=  80, color_rgb := '40 80 200', color_label := '70', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 104, from_step :=  80, to_step :=  90, color_rgb := '20 50 150', color_label := '80', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 104, from_step :=  20, to_step :=  30, color_rgb := '110 255 255', color_label := '20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 104, from_step :=  60, to_step :=  70, color_rgb := '60 130 200', color_label := '60', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 104, from_step :=  80, to_step :=  90, color_rgb := '20 50 150', color_label := '80', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 104, from_step :=  0, to_step :=  1, color_rgb := '255 255 255', color_label := '0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 104, from_step :=  1, to_step :=  10, color_rgb := '235 255 255', color_label := '1', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 104, from_step :=  10, to_step :=  20, color_rgb := '149 255 255', color_label := '10', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 104, from_step :=  30, to_step :=  40, color_rgb := '80 230 255', color_label := '30', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 104, from_step :=  40, to_step :=  50, color_rgb := '60 200 255', color_label := '40', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 104, from_step :=  50, to_step :=  60, color_rgb := '82 165 247', color_label := '50', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 104, from_step :=  70, to_step :=  80, color_rgb := '40 80 200', color_label := '70', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 104, from_step :=  90, to_step :=  100, color_rgb := '0 30 90', color_label := '90', group_label := '100' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 111, from_step :=  0.2, to_step :=  0.3, color_rgb := '253 255 102', color_label := '+0.2', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 111, from_step :=  0.3, to_step :=  0.4, color_rgb := '152 254 154', color_label := '+0.3', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 111, from_step :=  0.4, to_step :=  0.5, color_rgb := '101 255 102', color_label := '+0.4', group_label := NULL );
@@ -4718,6 +5971,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 112, from_step :=  0.8, 
 SELECT analysis.update_insert_legend_step( legend_id := 112, from_step :=  0.85, to_step :=  0.9, color_rgb := '40 88 2', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 112, from_step :=  0.9, to_step :=  1, color_rgb := '23 69 1', color_label := '+0.9', group_label := '+1.0' );
 SELECT analysis.update_insert_legend_step( legend_id := 112, from_step :=  0.2, to_step :=  0.25, color_rgb := '242 238 215', color_label := '+0.2', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 128, from_step :=  150, to_step :=  175, color_rgb := '53 180 0', color_label := '150', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 128, from_step :=  250, to_step :=  300, color_rgb := '0 50 0', color_label := '250', group_label := '300' );
 SELECT analysis.update_insert_legend_step( legend_id := 128, from_step :=  125, to_step :=  150, color_rgb := '100 247 0', color_label := '125', group_label := '' );
@@ -4728,6 +5982,18 @@ SELECT analysis.update_insert_legend_step( legend_id := 128, from_step :=  175, 
 SELECT analysis.update_insert_legend_step( legend_id := 128, from_step :=  50, to_step :=  75, color_rgb := '255 194 11', color_label := '50', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 128, from_step :=  25, to_step :=  50, color_rgb := '255 248 191', color_label := '25', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 128, from_step :=  0, to_step :=  10, color_rgb := '255 255 255', color_label := '0', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 128, from_step :=  0, to_step :=  10, color_rgb := '255 255 255', color_label := '0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 128, from_step :=  250, to_step :=  300, color_rgb := '0 50 0', color_label := '250', group_label := '300' );
+SELECT analysis.update_insert_legend_step( legend_id := 128, from_step :=  25, to_step :=  50, color_rgb := '255 248 191', color_label := '25', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 128, from_step :=  200, to_step :=  250, color_rgb := '0 80 0', color_label := '200', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 128, from_step :=  50, to_step :=  75, color_rgb := '255 194 11', color_label := '50', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 128, from_step :=  175, to_step :=  200, color_rgb := '0 120 0', color_label := '175', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 128, from_step :=  100, to_step :=  125, color_rgb := '200 225 7', color_label := '100', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 128, from_step :=  150, to_step :=  175, color_rgb := '53 180 0', color_label := '150', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 128, from_step :=  75, to_step :=  100, color_rgb := '200 200 5', color_label := '75', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 128, from_step :=  125, to_step :=  150, color_rgb := '100 247 0', color_label := '125', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 128, from_step :=  10, to_step :=  25, color_rgb := '255 255 230', color_label := '10', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 130, from_step :=  1, to_step :=  50, color_rgb := '122 53 14', color_label := '1', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 130, from_step :=  50, to_step :=  70, color_rgb := '232 110 15', color_label := '50', group_label := '' );
@@ -4738,6 +6004,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 130, from_step :=  110, 
 SELECT analysis.update_insert_legend_step( legend_id := 130, from_step :=  120, to_step :=  130, color_rgb := '0 191 10', color_label := '120', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 130, from_step :=  130, to_step :=  150, color_rgb := '8 119 14', color_label := '130', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 130, from_step :=  150, to_step :=  200, color_rgb := '12 72 15', color_label := '150', group_label := '200' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  100, to_step :=  200, color_rgb := '0 0 100', color_label := '100', group_label := '>>' );
 SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  20, to_step :=  30, color_rgb := '177 239 247', color_label := '20', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  60, to_step :=  70, color_rgb := '0 43 255', color_label := '60', group_label := '' );
@@ -4761,10 +6028,38 @@ SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  70, t
 SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  80, to_step :=  90, color_rgb := '0 5 180', color_label := '80', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  90, to_step :=  100, color_rgb := '0 0 150', color_label := '90', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 133, from_step :=  50, to_step :=  60, color_rgb := '227 249 205', color_label := '50', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  70, to_step :=  80, color_rgb := '0 10 235', color_label := '70', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  -30, to_step :=  -20, color_rgb := '255 200 0', color_label := '-30', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  -80, to_step :=  -70, color_rgb := '245 80 0', color_label := '-80', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  -10, to_step :=  0, color_rgb := '255 255 191', color_label := '-10', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  50, to_step :=  60, color_rgb := '21 82 255', color_label := '50', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  30, to_step :=  40, color_rgb := '157 223 255', color_label := '30', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  -200, to_step :=  -100, color_rgb := '240 0 0', color_label := '<<', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  -90, to_step :=  -80, color_rgb := '240 60 0', color_label := '-90', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  -70, to_step :=  -60, color_rgb := '255 100 0', color_label := '-70', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  -60, to_step :=  -50, color_rgb := '255 120 0', color_label := '-60', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  -50, to_step :=  -40, color_rgb := '255 165 0', color_label := '-50', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  -40, to_step :=  -30, color_rgb := '255 180 0', color_label := '-40', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  -20, to_step :=  -10, color_rgb := '255 232 120', color_label := '-20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  0, to_step :=  10, color_rgb := '234 255 255', color_label := '0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  10, to_step :=  20, color_rgb := '214 245 255', color_label := '10', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  20, to_step :=  30, color_rgb := '177 239 247', color_label := '20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  40, to_step :=  50, color_rgb := '75 150 255', color_label := '40', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  60, to_step :=  70, color_rgb := '0 43 255', color_label := '60', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  80, to_step :=  90, color_rgb := '0 5 180', color_label := '80', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  90, to_step :=  100, color_rgb := '0 0 150', color_label := '90', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  100, to_step :=  200, color_rgb := '0 0 100', color_label := '100', group_label := '>>' );
+SELECT analysis.update_insert_legend_step( legend_id := 131, from_step :=  -100, to_step :=  -90, color_rgb := '250 40 0', color_label := '-100', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 133, from_step :=  0, to_step :=  10, color_rgb := '192 0 0', color_label := '0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 133, from_step :=  10, to_step :=  20, color_rgb := '255 41 11', color_label := '10', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 133, from_step :=  90, to_step :=  200, color_rgb := '0 80 0', color_label := '90', group_label := '100' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 133, from_step :=  40, to_step :=  50, color_rgb := '255 255 200', color_label := '40', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 133, from_step :=  30, to_step :=  40, color_rgb := '255 210 85', color_label := '30', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 133, from_step :=  20, to_step :=  30, color_rgb := '255 133 11', color_label := '20', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 133, from_step :=  80, to_step :=  90, color_rgb := '2 159 27', color_label := '80', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 133, from_step :=  70, to_step :=  80, color_rgb := '80 200 0', color_label := '70', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 133, from_step :=  60, to_step :=  70, color_rgb := '147 236 128', color_label := '60', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 133, from_step :=  90, to_step :=  200, color_rgb := '0 80 0', color_label := '90', group_label := '100' );
@@ -4791,6 +6086,32 @@ SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  100, 
 SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  140, to_step :=  160, color_rgb := '0 10 235', color_label := '140', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  160, to_step :=  180, color_rgb := '0 5 180', color_label := '160', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  180, to_step :=  200, color_rgb := '0 0 150', color_label := '180', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 133, from_step :=  50, to_step :=  60, color_rgb := '227 249 205', color_label := '50', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 133, from_step :=  70, to_step :=  80, color_rgb := '80 200 0', color_label := '70', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 133, from_step :=  60, to_step :=  70, color_rgb := '147 236 128', color_label := '60', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  100, to_step :=  120, color_rgb := '21 82 255', color_label := '100', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  140, to_step :=  160, color_rgb := '0 10 235', color_label := '140', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  180, to_step :=  200, color_rgb := '0 0 150', color_label := '180', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  60, to_step :=  80, color_rgb := '157 223 255', color_label := '60', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  -40, to_step :=  -20, color_rgb := '255 232 120', color_label := '-40', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  40, to_step :=  60, color_rgb := '177 239 247', color_label := '40', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  20, to_step :=  40, color_rgb := '214 245 255', color_label := '20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  -120, to_step :=  -100, color_rgb := '255 120 0', color_label := '-120', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  -200, to_step :=  -180, color_rgb := '250 40 0', color_label := '-200', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  -1000, to_step :=  -200, color_rgb := '240 0 0', color_label := '<<', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  -180, to_step :=  -160, color_rgb := '240 60 0', color_label := '-180', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  -160, to_step :=  -140, color_rgb := '245 80 0', color_label := '-160', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  -140, to_step :=  -120, color_rgb := '255 100 0', color_label := '-140', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  -100, to_step :=  -80, color_rgb := '255 165 0', color_label := '-100', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  -80, to_step :=  -60, color_rgb := '255 180 0', color_label := '-80', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  -60, to_step :=  -40, color_rgb := '255 200 0', color_label := '-60', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  -20, to_step :=  20, color_rgb := '255 255 255', color_label := '-20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  80, to_step :=  100, color_rgb := '75 150 255', color_label := '80', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  120, to_step :=  140, color_rgb := '0 43 255', color_label := '120', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  160, to_step :=  180, color_rgb := '0 5 180', color_label := '160', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 134, from_step :=  200, to_step :=  1000, color_rgb := '0 0 100', color_label := '200', group_label := '>>' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 135, from_step :=  1, to_step :=  50, color_rgb := '122 53 14', color_label := '1', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 135, from_step :=  50, to_step :=  70, color_rgb := '232 110 15', color_label := '50', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 135, from_step :=  70, to_step :=  80, color_rgb := '233 165 47', color_label := '70', group_label := '' );
@@ -4800,6 +6121,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 135, from_step :=  110, 
 SELECT analysis.update_insert_legend_step( legend_id := 135, from_step :=  120, to_step :=  130, color_rgb := '0 191 10', color_label := '120', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 135, from_step :=  130, to_step :=  150, color_rgb := '8 119 14', color_label := '130', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 135, from_step :=  150, to_step :=  200, color_rgb := '12 72 15', color_label := '150', group_label := '200' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 136, from_step :=  9, to_step :=  10, color_rgb := '66 229 0', color_label := '9', group_label := '10' );
 SELECT analysis.update_insert_legend_step( legend_id := 136, from_step :=  0, to_step :=  1, color_rgb := '225 225 225', color_label := '0', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 136, from_step :=  1, to_step :=  2, color_rgb := '234 25 0', color_label := '1', group_label := '' );
@@ -4810,6 +6132,8 @@ SELECT analysis.update_insert_legend_step( legend_id := 136, from_step :=  5, to
 SELECT analysis.update_insert_legend_step( legend_id := 136, from_step :=  6, to_step :=  7, color_rgb := '129 153 0', color_label := '6', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 136, from_step :=  7, to_step :=  8, color_rgb := '108 178 0', color_label := '7', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 136, from_step :=  8, to_step :=  9, color_rgb := '87 204 0', color_label := '8', group_label := '' );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 137, from_step :=  2, to_step :=  4, color_rgb := '230 230 0', color_label := '2', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 137, from_step :=  6, to_step :=  8, color_rgb := '85 255 0', color_label := '6', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 137, from_step :=  4, to_step :=  6, color_rgb := '255 255 156', color_label := '4', group_label := NULL );
@@ -4820,6 +6144,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 137, from_step :=  15, t
 SELECT analysis.update_insert_legend_step( legend_id := 137, from_step :=  10, to_step :=  15, color_rgb := '0 195 255', color_label := '10', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 137, from_step :=  20, to_step :=  30, color_rgb := '195 0 255', color_label := '20', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 137, from_step :=  0, to_step :=  1, color_rgb := '255 255 255', color_label := '0', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 138, from_step :=  15, to_step :=  20, color_rgb := '80 165 245', color_label := '15', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 138, from_step :=  10, to_step :=  15, color_rgb := '180 240 250', color_label := '10', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 138, from_step :=  75, to_step :=  200, color_rgb := '164 32 32', color_label := '75', group_label := '200' );
@@ -4847,6 +6172,35 @@ SELECT analysis.update_insert_legend_step( legend_id := 139, from_step :=  2500,
 SELECT analysis.update_insert_legend_step( legend_id := 139, from_step :=  5, to_step :=  10, color_rgb := '120 245 115', color_label := '5', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 139, from_step :=  0, to_step :=  2, color_rgb := '255 255 255', color_label := '0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 139, from_step :=  2, to_step :=  5, color_rgb := '200 255 190', color_label := '2', group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 138, from_step :=  5, to_step :=  10, color_rgb := '55 210 60', color_label := '5', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 138, from_step :=  20, to_step :=  30, color_rgb := '30 110 235', color_label := '20', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 138, from_step :=  75, to_step :=  200, color_rgb := '164 32 32', color_label := '75', group_label := '200' );
+SELECT analysis.update_insert_legend_step( legend_id := 138, from_step :=  2, to_step :=  5, color_rgb := '120 245 115', color_label := '2', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 138, from_step :=  10, to_step :=  15, color_rgb := '180 240 250', color_label := '10', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 138, from_step :=  40, to_step :=  50, color_rgb := '255 160 0', color_label := '40', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 138, from_step :=  30, to_step :=  40, color_rgb := '255 232 120', color_label := '30', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 138, from_step :=  15, to_step :=  20, color_rgb := '80 165 245', color_label := '15', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 138, from_step :=  1, to_step :=  2, color_rgb := '180 250 170', color_label := '1', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 138, from_step :=  50, to_step :=  75, color_rgb := '255 50 0', color_label := '50', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 138, from_step :=  0, to_step :=  1, color_rgb := '255 255 255', color_label := '0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 139, from_step :=  2500, to_step :=  3000, color_rgb := '255 230 230', color_label := '2500', group_label := '3000' );
+SELECT analysis.update_insert_legend_step( legend_id := 139, from_step :=  50, to_step :=  75, color_rgb := '80 165 245', color_label := '50', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 139, from_step :=  0, to_step :=  2, color_rgb := '255 255 255', color_label := '0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 139, from_step :=  25, to_step :=  50, color_rgb := '180 240 250', color_label := '25', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 139, from_step :=  10, to_step :=  25, color_rgb := '30 180 30', color_label := '10', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 139, from_step :=  2, to_step :=  5, color_rgb := '200 255 190', color_label := '2', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 139, from_step :=  5, to_step :=  10, color_rgb := '120 245 115', color_label := '5', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 139, from_step :=  500, to_step :=  750, color_rgb := '255 160 0', color_label := '500', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 139, from_step :=  100, to_step :=  150, color_rgb := '220 220 255', color_label := '100', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 139, from_step :=  75, to_step :=  100, color_rgb := '30 110 235', color_label := '75', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 139, from_step :=  300, to_step :=  500, color_rgb := '255 250 170', color_label := '300', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 139, from_step :=  150, to_step :=  200, color_rgb := '160 140 255', color_label := '150', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 139, from_step :=  200, to_step :=  300, color_rgb := '112 96 220', color_label := '200', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 139, from_step :=  1000, to_step :=  1500, color_rgb := '165 0 0', color_label := '1000', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 139, from_step :=  750, to_step :=  1000, color_rgb := '225 20 0', color_label := '750', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 139, from_step :=  1500, to_step :=  2500, color_rgb := '230 140 140', color_label := '1500', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 140, from_step :=  1, to_step :=  5, color_rgb := '159 232 249', color_label := '1', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 140, from_step :=  5, to_step :=  10, color_rgb := '80 204 254', color_label := '5', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 140, from_step :=  10, to_step :=  20, color_rgb := '0 153 255', color_label := '10', group_label := NULL );
@@ -4855,10 +6209,17 @@ SELECT analysis.update_insert_legend_step( legend_id := 140, from_step :=  30, t
 SELECT analysis.update_insert_legend_step( legend_id := 140, from_step :=  40, to_step :=  50, color_rgb := '255 51 154', color_label := '40', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 140, from_step :=  50, to_step :=  75, color_rgb := '255 1 152', color_label := '50', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 140, from_step :=  0, to_step :=  1, color_rgb := '255 255 255', color_label := '0', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 140, from_step :=  100, to_step :=  150, color_rgb := '255 101 1', color_label := '100', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 140, from_step :=  150, to_step :=  200, color_rgb := '204 102 1', color_label := '150', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 140, from_step :=  75, to_step :=  100, color_rgb := '255 51 52', color_label := '75', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 140, from_step :=  200, to_step :=  300, color_rgb := '153 51 3', color_label := '200', group_label := '300' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 140, from_step :=  200, to_step :=  300, color_rgb := '153 51 3', color_label := '200', group_label := '300' );
+SELECT analysis.update_insert_legend_step( legend_id := 140, from_step :=  100, to_step :=  150, color_rgb := '255 101 1', color_label := '100', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 140, from_step :=  75, to_step :=  100, color_rgb := '255 51 52', color_label := '75', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 140, from_step :=  150, to_step :=  200, color_rgb := '204 102 1', color_label := '150', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 141, from_step :=  0, to_step :=  1, color_rgb := '255 255 255', color_label := '0', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 141, from_step :=  1, to_step :=  10, color_rgb := '255 85 0', color_label := '1', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 141, from_step :=  10, to_step :=  20, color_rgb := '255 170 0', color_label := '10', group_label := NULL );
@@ -4890,6 +6251,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 143, from_step :=  -20, 
 SELECT analysis.update_insert_legend_step( legend_id := 143, from_step :=  -50, to_step :=  -30, color_rgb := '255 85 0', color_label := '-50', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 143, from_step :=  20, to_step :=  30, color_rgb := '114 178 255', color_label := '+20', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 143, from_step :=  30, to_step :=  50, color_rgb := '0 112 255', color_label := '+30', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 144, from_step :=  -50, to_step :=  -25, color_rgb := '255 211 126', color_label := '-50', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 144, from_step :=  25, to_step :=  50, color_rgb := '190 210 255', color_label := '+25', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 144, from_step :=  50, to_step :=  150, color_rgb := '114 178 255', color_label := '+50', group_label := NULL );
@@ -4915,10 +6277,40 @@ SELECT analysis.update_insert_legend_step( legend_id := 146, from_step :=  450, 
 SELECT analysis.update_insert_legend_step( legend_id := 146, from_step :=  -150, to_step :=  -50, color_rgb := '255 211 126', color_label := '-150', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 146, from_step :=  -1000, to_step :=  -450, color_rgb := '230 76 0', color_label := '<<', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 146, from_step :=  -300, to_step :=  -150, color_rgb := '255 170 0', color_label := '-300', group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 144, from_step :=  300, to_step :=  400, color_rgb := '0 77 168', color_label := '+300', group_label := '>>' );
+SELECT analysis.update_insert_legend_step( legend_id := 144, from_step :=  25, to_step :=  50, color_rgb := '190 210 255', color_label := '+25', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 144, from_step :=  -150, to_step :=  -50, color_rgb := '255 170 0', color_label := '-150', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 144, from_step :=  -1000, to_step :=  -300, color_rgb := '230 76 0', color_label := '<<', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 144, from_step :=  50, to_step :=  150, color_rgb := '114 178 255', color_label := '+50', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 144, from_step :=  -25, to_step :=  25, color_rgb := '255 255 255', color_label := '-25', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 144, from_step :=  -300, to_step :=  -150, color_rgb := '255 85 0', color_label := '-300', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 144, from_step :=  -50, to_step :=  -25, color_rgb := '255 211 126', color_label := '-50', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 144, from_step :=  150, to_step :=  300, color_rgb := '0 112 255', color_label := '+150', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 145, from_step :=  100, to_step :=  200, color_rgb := '60 150 245', color_label := '100', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 145, from_step :=  -50, to_step :=  -25, color_rgb := '255 232 120', color_label := '-50', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 145, from_step :=  -200, to_step :=  -100, color_rgb := '255 50 0', color_label := '-200', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 145, from_step :=  -10, to_step :=  10, color_rgb := '255 255 255', color_label := '-10', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 145, from_step :=  25, to_step :=  50, color_rgb := '180 235 250', color_label := '25', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 145, from_step :=  50, to_step :=  100, color_rgb := '120 199 250', color_label := '50', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 145, from_step :=  200, to_step :=  1000, color_rgb := '30 110 235', color_label := '200', group_label := '>>' );
+SELECT analysis.update_insert_legend_step( legend_id := 145, from_step :=  -400, to_step :=  -200, color_rgb := '164 32 32', color_label := '<<', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 145, from_step :=  -100, to_step :=  -50, color_rgb := '255 160 0', color_label := '-100', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 145, from_step :=  -25, to_step :=  -10, color_rgb := '240 219 184', color_label := '-25', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 145, from_step :=  10, to_step :=  25, color_rgb := '120 235 115', color_label := '10', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 146, from_step :=  -150, to_step :=  -50, color_rgb := '255 211 126', color_label := '-150', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 146, from_step :=  50, to_step :=  150, color_rgb := '190 210 255', color_label := '+50', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 146, from_step :=  150, to_step :=  300, color_rgb := '114 178 255', color_label := '+150', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 146, from_step :=  -50, to_step :=  50, color_rgb := '255 255 255', color_label := '-50', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 146, from_step :=  -450, to_step :=  -300, color_rgb := '255 85 0', color_label := '-450', group_label := NULL );
+<<<<<<< HEAD
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 146, from_step :=  -300, to_step :=  -150, color_rgb := '255 170 0', color_label := '-300', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 146, from_step :=  -1000, to_step :=  -450, color_rgb := '230 76 0', color_label := '<<', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 146, from_step :=  450, to_step :=  1000, color_rgb := '0 77 168', color_label := '+450', group_label := '>>' );
+SELECT analysis.update_insert_legend_step( legend_id := 146, from_step :=  300, to_step :=  450, color_rgb := '0 112 255', color_label := '+300', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 147, from_step :=  0, to_step :=  0.01, color_rgb := '255 255 255', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 147, from_step :=  0.01063, to_step :=  0.01125, color_rgb := '141 0 114 ', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 147, from_step :=  0.01125, to_step :=  0.01188, color_rgb := '138 0 117 ', color_label := NULL, group_label := NULL );
@@ -5044,6 +6436,10 @@ SELECT analysis.update_insert_legend_step( legend_id := 147, from_step :=  0.890
 SELECT analysis.update_insert_legend_step( legend_id := 147, from_step :=  0.9125, to_step :=  0.93438, color_rgb := '0 255 31 ', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 147, from_step :=  0.93438, to_step :=  0.95625, color_rgb := '0 255 23 ', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 147, from_step :=  0.95625, to_step :=  0.97813, color_rgb := '0 255 15 ', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 147, from_step :=  0.97813, to_step :=  1, color_rgb := '0 255 0 ', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 147, from_step :=  1, to_step :=  1.0625, color_rgb := '8 255 0 ', color_label := '1', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 147, from_step :=  0.3, to_step :=  0.32188, color_rgb := '0 255 255 ', color_label := '0.3', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 147, from_step :=  0.2, to_step :=  0.20625, color_rgb := '0 170 255 ', color_label := '0.2', group_label := NULL );
@@ -5051,6 +6447,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 147, from_step :=  0.1, 
 SELECT analysis.update_insert_legend_step( legend_id := 147, from_step :=  0.49688, to_step :=  0.51875, color_rgb := '0 255 183 ', color_label := '0.5', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 147, from_step :=  0.69375, to_step :=  0.71563, color_rgb := '0 255 111 ', color_label := '0.7', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.0139, to_step :=  0.01552, color_rgb := '105 0 115', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.67655, to_step :=  0.69466, color_rgb := '189 255 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.69466, to_step :=  0.71324, color_rgb := '192 255 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.62503, to_step :=  0.64175, color_rgb := '179 255 15', color_label := '', group_label := '' );
@@ -5067,6 +6464,27 @@ SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.032
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.03334, to_step :=  0.03423, color_rgb := '0 34 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.03423, to_step :=  0.03515, color_rgb := '0 41 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.03515, to_step :=  0.03609, color_rgb := '0 47 255', color_label := '', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.65892, to_step :=  0.67655, color_rgb := '185 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.62503, to_step :=  0.64175, color_rgb := '179 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.64175, to_step :=  0.65892, color_rgb := '182 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.60874, to_step :=  0.62503, color_rgb := '176 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.02688, to_step :=  0.03, color_rgb := '150 0 160', color_label := '0.03', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.03, to_step :=  0.0308, color_rgb := '0 0 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.59288, to_step :=  0.60874, color_rgb := '172 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.0308, to_step :=  0.03163, color_rgb := '0 0 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.39898, to_step :=  0.40965, color_rgb := '123 233 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.03163, to_step :=  0.03247, color_rgb := '0 19 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.40965, to_step :=  0.42061, color_rgb := '126 237 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.03247, to_step :=  0.03334, color_rgb := '0 27 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.37845, to_step :=  0.38858, color_rgb := '115 226 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.03334, to_step :=  0.03423, color_rgb := '0 34 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.38858, to_step :=  0.39898, color_rgb := '119 229 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.03423, to_step :=  0.03515, color_rgb := '0 41 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.01732, to_step :=  0.01933, color_rgb := '110 0 120', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.03515, to_step :=  0.03609, color_rgb := '0 47 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.36859, to_step :=  0.37845, color_rgb := '111 223 15', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.03609, to_step :=  0.03706, color_rgb := '0 53 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.03706, to_step :=  0.03805, color_rgb := '0 59 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.03805, to_step :=  0.03907, color_rgb := '0 65 255', color_label := '', group_label := '' );
@@ -5078,7 +6496,10 @@ SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.043
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.04458, to_step :=  0.04577, color_rgb := '0 97 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.04577, to_step :=  0.047, color_rgb := '0 102 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.047, to_step :=  0.04825, color_rgb := '0 107 255', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.28305, to_step :=  0.29063, color_rgb := '74 183 15', color_label := '', group_label := '' );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.04825, to_step :=  0.04955, color_rgb := '0 113 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.04955, to_step :=  0.05087, color_rgb := '0 118 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.05087, to_step :=  0.05223, color_rgb := '0 123 255', color_label := '', group_label := '' );
@@ -5122,6 +6543,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.131
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.13514, to_step :=  0.13875, color_rgb := '15 237 180', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.13875, to_step :=  0.14247, color_rgb := '15 233 169', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.14247, to_step :=  0.14628, color_rgb := '15 230 157', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.01116, to_step :=  0.01246, color_rgb := '90 0 110', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.14628, to_step :=  0.15019, color_rgb := '15 226 146', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.15421, to_step :=  0.15834, color_rgb := '15 220 123', color_label := '', group_label := '' );
@@ -5133,17 +6555,36 @@ SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.185
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.19048, to_step :=  0.19558, color_rgb := '15 187 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.01552, to_step :=  0.01732, color_rgb := '110 0 119', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.19558, to_step :=  0.20081, color_rgb := '15 182 15', color_label := '', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.14628, to_step :=  0.15019, color_rgb := '15 226 146', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.15019, to_step :=  0.15421, color_rgb := '15 223 133', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.15421, to_step :=  0.15834, color_rgb := '15 220 123', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.15834, to_step :=  0.16257, color_rgb := '15 217 110', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.01116, to_step :=  0.01246, color_rgb := '90 0 110', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.16257, to_step :=  0.16692, color_rgb := '15 213 97', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.16692, to_step :=  0.17139, color_rgb := '15 209 84', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.17139, to_step :=  0.17598, color_rgb := '15 205 70', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.17598, to_step :=  0.18068, color_rgb := '15 201 55', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.18552, to_step :=  0.19048, color_rgb := '15 191 27', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.19558, to_step :=  0.20081, color_rgb := '15 182 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.19048, to_step :=  0.19558, color_rgb := '15 187 15', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.20081, to_step :=  0.20619, color_rgb := '15 178 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.20619, to_step :=  0.2117, color_rgb := '20 173 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.2117, to_step :=  0.21737, color_rgb := '26 169 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.21737, to_step :=  0.22318, color_rgb := '31 165 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.22318, to_step :=  0.22915, color_rgb := '36 160 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.22915, to_step :=  0.23529, color_rgb := '40 155 15', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.23529, to_step :=  0.24158, color_rgb := '45 151 15', color_label := '', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.01552, to_step :=  0.01732, color_rgb := '110 0 119', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.24158, to_step :=  0.24805, color_rgb := '49 155 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.24805, to_step :=  0.25468, color_rgb := '54 160 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.25468, to_step :=  0.2615, color_rgb := '58 165 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.2615, to_step :=  0.26849, color_rgb := '62 169 15', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.26849, to_step :=  0.27568, color_rgb := '66 173 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.27568, to_step :=  0.28305, color_rgb := '70 178 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.2984, to_step :=  0.30639, color_rgb := '82 192 15', color_label := '0.30', group_label := '' );
@@ -5152,16 +6593,36 @@ SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.017
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.30639, to_step :=  0.31459, color_rgb := '86 196 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.31459, to_step :=  0.323, color_rgb := '90 201 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.323, to_step :=  0.33165, color_rgb := '94 205 15', color_label := '', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.77204, to_step :=  0.7927, color_rgb := '205 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.26849, to_step :=  0.27568, color_rgb := '66 173 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.75192, to_step :=  0.77204, color_rgb := '201 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.27568, to_step :=  0.28305, color_rgb := '70 178 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.28305, to_step :=  0.29063, color_rgb := '74 183 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.29063, to_step :=  0.2984, color_rgb := '78 187 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.2984, to_step :=  0.30639, color_rgb := '82 192 15', color_label := '0.30', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.30639, to_step :=  0.31459, color_rgb := '86 196 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.323, to_step :=  0.33165, color_rgb := '94 205 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.31459, to_step :=  0.323, color_rgb := '90 201 15', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.33165, to_step :=  0.34052, color_rgb := '97 209 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.34052, to_step :=  0.34963, color_rgb := '101 213 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.34963, to_step :=  0.35899, color_rgb := '104 217 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.35899, to_step :=  0.36859, color_rgb := '108 220 15', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.37845, to_step :=  0.38858, color_rgb := '115 226 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.36859, to_step :=  0.37845, color_rgb := '111 223 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.39898, to_step :=  0.40965, color_rgb := '123 233 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.38858, to_step :=  0.39898, color_rgb := '119 229 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.40965, to_step :=  0.42061, color_rgb := '126 237 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.45529, to_step :=  0.46747, color_rgb := '139 251 15', color_label := '', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.42061, to_step :=  0.43187, color_rgb := '129 242 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.43187, to_step :=  0.44342, color_rgb := '132 245 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.44342, to_step :=  0.45529, color_rgb := '136 249 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.45529, to_step :=  0.46747, color_rgb := '139 251 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.46747, to_step :=  0.47998, color_rgb := '143 255 15', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.47998, to_step :=  0.49282, color_rgb := '146 255 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.49282, to_step :=  0.50601, color_rgb := '150 255 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.50601, to_step :=  0.51955, color_rgb := '153 255 15', color_label := '', group_label := '' );
@@ -5170,6 +6631,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.533
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.54772, to_step :=  0.56238, color_rgb := '163 255 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.56238, to_step :=  0.57743, color_rgb := '166 255 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.57743, to_step :=  0.59288, color_rgb := '169 255 15', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.59288, to_step :=  0.60874, color_rgb := '172 255 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.60874, to_step :=  0.62503, color_rgb := '176 255 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.65892, to_step :=  0.67655, color_rgb := '185 255 15', color_label := '', group_label := '' );
@@ -5177,6 +6639,13 @@ SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.713
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.73233, to_step :=  0.75192, color_rgb := '198 255 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.75192, to_step :=  0.77204, color_rgb := '201 255 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.77204, to_step :=  0.7927, color_rgb := '205 255 15', color_label := '', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.67655, to_step :=  0.69466, color_rgb := '189 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.69466, to_step :=  0.71324, color_rgb := '192 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.23529, to_step :=  0.24158, color_rgb := '45 151 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.71324, to_step :=  0.73233, color_rgb := '195 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.73233, to_step :=  0.75192, color_rgb := '198 255 15', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.7927, to_step :=  0.81391, color_rgb := '210 255 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.81391, to_step :=  0.83569, color_rgb := '213 255 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.83569, to_step :=  0.85805, color_rgb := '216 255 15', color_label := '', group_label := '' );
@@ -5198,6 +6667,10 @@ SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  1.241
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  1.27504, to_step :=  1.30916, color_rgb := '255 237 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  1.30916, to_step :=  1.34419, color_rgb := '255 233 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  1.34419, to_step :=  1.38015, color_rgb := '255 230 0', color_label := '', group_label := '' );
+<<<<<<< HEAD
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.18068, to_step :=  0.18552, color_rgb := '15 196 40', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  1.38015, to_step :=  1.41708, color_rgb := '255 226 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  1.41708, to_step :=  1.455, color_rgb := '255 223 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  1.455, to_step :=  1.49393, color_rgb := '255 220 0', color_label := '', group_label := '' );
@@ -5211,7 +6684,10 @@ SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  1.750
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  1.79723, to_step :=  1.84532, color_rgb := '255 193 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  1.84532, to_step :=  1.89469, color_rgb := '255 188 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  1.89469, to_step :=  1.94539, color_rgb := '255 183 0', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.15834, to_step :=  0.16257, color_rgb := '15 217 110', color_label := '', group_label := '' );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  1.94539, to_step :=  1.99744, color_rgb := '255 180 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  1.99744, to_step :=  2.05089, color_rgb := '255 176 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  2.05089, to_step :=  2.10576, color_rgb := '255 173 0', color_label := '', group_label := '' );
@@ -5228,7 +6704,10 @@ SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  2.670
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  2.74212, to_step :=  2.81549, color_rgb := '255 126 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  2.81549, to_step :=  2.89082, color_rgb := '255 123 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  2.89082, to_step :=  2.96817, color_rgb := '255 119 0', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.01933, to_step :=  0.02158, color_rgb := '120 0 130', color_label := '', group_label := '' );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  2.96817, to_step :=  3.04759, color_rgb := '255 115 0', color_label := '3', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  3.04759, to_step :=  3.12913, color_rgb := '255 111 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  3.12913, to_step :=  3.21286, color_rgb := '255 107 0', color_label := '', group_label := '' );
@@ -5237,6 +6716,10 @@ SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  3.298
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  3.38709, to_step :=  3.47772, color_rgb := '255 91 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  3.47772, to_step :=  3.57077, color_rgb := '255 87 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  3.57077, to_step :=  3.66632, color_rgb := '255 83 0', color_label := '', group_label := '' );
+<<<<<<< HEAD
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.01933, to_step :=  0.02158, color_rgb := '120 0 130', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  3.66632, to_step :=  3.76442, color_rgb := '255 79 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  3.76442, to_step :=  3.86514, color_rgb := '255 75 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  3.86514, to_step :=  3.96856, color_rgb := '255 70 0', color_label := '', group_label := '' );
@@ -5259,8 +6742,11 @@ SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  5.897
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  6.05501, to_step :=  6.21703, color_rgb := '242 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  6.21703, to_step :=  6.38337, color_rgb := '237 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  6.38337, to_step :=  6.55417, color_rgb := '233 0 0', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.15019, to_step :=  0.15421, color_rgb := '15 223 133', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.16257, to_step :=  0.16692, color_rgb := '15 213 97', color_label := '', group_label := '' );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  6.55417, to_step :=  6.72954, color_rgb := '229 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.01246, to_step :=  0.0139, color_rgb := '100 0 110', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  6.72954, to_step :=  6.9096, color_rgb := '226 0 0', color_label := '', group_label := '' );
@@ -5271,15 +6757,21 @@ SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  7.479
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  7.67934, to_step :=  7.88481, color_rgb := '210 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  7.88481, to_step :=  8.09578, color_rgb := '207 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  8.09578, to_step :=  8.3124, color_rgb := '203 0 0', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.02158, to_step :=  0.02408, color_rgb := '130 0 140', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  8.3124, to_step :=  8.53482, color_rgb := '200 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  8.53482, to_step :=  8.76318, color_rgb := '196 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.02408, to_step :=  0.02688, color_rgb := '140 0 150', color_label := '', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  8.3124, to_step :=  8.53482, color_rgb := '200 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  8.53482, to_step :=  8.76318, color_rgb := '196 0 0', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  8.76318, to_step :=  8.99766, color_rgb := '193 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  8.99766, to_step :=  9.23841, color_rgb := '189 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  9.23841, to_step :=  9.4856, color_rgb := '183 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  9.4856, to_step :=  9.7394, color_rgb := '179 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  9.7394, to_step :=  10, color_rgb := '173 0 0', color_label := '10', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01886, to_step :=  0.01921, color_rgb := '0 0 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01786, to_step :=  0.01819, color_rgb := '123 0 229', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01921, to_step :=  0.01956, color_rgb := '0 0 255', color_label := '', group_label := '' );
@@ -5722,6 +7214,324 @@ SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.82
 SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.88, to_step :=  18.94, color_rgb := '102 0 153', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.75, to_step :=  18.82, color_rgb := '108 0 147', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.69, to_step :=  18.75, color_rgb := '111 0 144', color_label := NULL, group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.02158, to_step :=  0.02408, color_rgb := '130 0 140', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 148, from_step :=  0.02408, to_step :=  0.02688, color_rgb := '140 0 150', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.05399, to_step :=  0.05497, color_rgb := '15 233 169', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.04842, to_step :=  0.04931, color_rgb := '15 255 234', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.04755, to_step :=  0.04842, color_rgb := '0 255 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.03895, to_step :=  0.03967, color_rgb := '0 213 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.49308, to_step :=  0.5021, color_rgb := '255 91 0', color_label := '0.50', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.04931, to_step :=  0.05021, color_rgb := '15 252 223', color_label := '0.05', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.05302, to_step :=  0.05399, color_rgb := '15 237 180', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.05021, to_step :=  0.05113, color_rgb := '15 249 213', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.05206, to_step :=  0.05302, color_rgb := '15 242 192', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.05113, to_step :=  0.05206, color_rgb := '15 247 202', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.06019, to_step :=  0.06129, color_rgb := '15 213 97', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.05598, to_step :=  0.057, color_rgb := '15 226 146', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.05497, to_step :=  0.05598, color_rgb := '15 230 157', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.20652, to_step :=  0.2103, color_rgb := '234 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.08808, to_step :=  0.08969, color_rgb := '74 183 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.057, to_step :=  0.05805, color_rgb := '15 223 133', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.06129, to_step :=  0.06241, color_rgb := '15 209 84', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.05911, to_step :=  0.06019, color_rgb := '15 217 110', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.05805, to_step :=  0.05911, color_rgb := '15 220 123', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.06241, to_step :=  0.06355, color_rgb := '15 205 70', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.06355, to_step :=  0.06472, color_rgb := '15 201 55', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.06711, to_step :=  0.06834, color_rgb := '15 187 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.0659, to_step :=  0.06711, color_rgb := '15 191 27', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.06472, to_step :=  0.0659, color_rgb := '15 196 40', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.07348, to_step :=  0.07482, color_rgb := '31 165 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.06834, to_step :=  0.06959, color_rgb := '15 182 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.08494, to_step :=  0.0865, color_rgb := '66 173 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.07216, to_step :=  0.07348, color_rgb := '26 169 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.06959, to_step :=  0.07086, color_rgb := '15 178 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.07086, to_step :=  0.07216, color_rgb := '20 173 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.07758, to_step :=  0.079, color_rgb := '45 151 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.07482, to_step :=  0.07619, color_rgb := '36 160 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.0865, to_step :=  0.08808, color_rgb := '70 178 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.08342, to_step :=  0.08494, color_rgb := '62 169 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.07619, to_step :=  0.07758, color_rgb := '40 155 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.079, to_step :=  0.08045, color_rgb := '49 155 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.08192, to_step :=  0.08342, color_rgb := '58 165 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.08045, to_step :=  0.08192, color_rgb := '54 160 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.03825, to_step :=  0.03895, color_rgb := '0 209 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.09471, to_step :=  0.09644, color_rgb := '90 201 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.08969, to_step :=  0.09133, color_rgb := '78 187 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.093, to_step :=  0.09471, color_rgb := '86 196 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.09133, to_step :=  0.093, color_rgb := '82 192 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.09644, to_step :=  0.0982, color_rgb := '94 205 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.10183, to_step :=  0.10369, color_rgb := '104 217 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.1, to_step :=  0.10183, color_rgb := '101 213 15', color_label := '0.10', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.0982, to_step :=  0.1, color_rgb := '97 209 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.10752, to_step :=  0.10949, color_rgb := '115 226 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.10369, to_step :=  0.10559, color_rgb := '108 220 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.11561, to_step :=  0.11772, color_rgb := '129 242 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.10559, to_step :=  0.10752, color_rgb := '111 223 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.11772, to_step :=  0.11988, color_rgb := '132 245 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.11353, to_step :=  0.11561, color_rgb := '126 237 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.10949, to_step :=  0.11149, color_rgb := '119 229 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.11988, to_step :=  0.12207, color_rgb := '136 249 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.11149, to_step :=  0.11353, color_rgb := '123 233 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.13125, to_step :=  0.13365, color_rgb := '153 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.12207, to_step :=  0.1243, color_rgb := '139 251 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.03757, to_step :=  0.03825, color_rgb := '0 205 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.03689, to_step :=  0.03757, color_rgb := '0 201 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.1289, to_step :=  0.13125, color_rgb := '150 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.1243, to_step :=  0.12658, color_rgb := '143 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.12658, to_step :=  0.1289, color_rgb := '146 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.03623, to_step :=  0.03689, color_rgb := '0 196 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.15174, to_step :=  0.15452, color_rgb := '179 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.13365, to_step :=  0.1361, color_rgb := '156 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.14901, to_step :=  0.15174, color_rgb := '176 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.13859, to_step :=  0.14113, color_rgb := '163 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.1361, to_step :=  0.13859, color_rgb := '159 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.20281, to_step :=  0.20652, color_rgb := '231 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.14113, to_step :=  0.14371, color_rgb := '166 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.03249, to_step :=  0.03309, color_rgb := '0 169 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.19916, to_step :=  0.20281, color_rgb := '228 255 15', color_label := '0.20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.14634, to_step :=  0.14901, color_rgb := '172 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.02065, to_step :=  0.02103, color_rgb := '0 41 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.03558, to_step :=  0.03623, color_rgb := '0 192 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.03309, to_step :=  0.03369, color_rgb := '0 174 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.03494, to_step :=  0.03558, color_rgb := '0 187 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.03431, to_step :=  0.03494, color_rgb := '0 182 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.03369, to_step :=  0.03431, color_rgb := '0 178 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.14371, to_step :=  0.14634, color_rgb := '169 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.16918, to_step :=  0.17227, color_rgb := '198 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.15734, to_step :=  0.16022, color_rgb := '185 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01786, to_step :=  0.01819, color_rgb := '123 0 229', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.15452, to_step :=  0.15734, color_rgb := '182 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.19559, to_step :=  0.19916, color_rgb := '225 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.16614, to_step :=  0.16918, color_rgb := '195 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01754, to_step :=  0.01786, color_rgb := '124 0 226', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01517, to_step :=  0.01545, color_rgb := '130 0 196', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.16022, to_step :=  0.16315, color_rgb := '189 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.16315, to_step :=  0.16614, color_rgb := '192 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01723, to_step :=  0.01754, color_rgb := '126 0 223', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01632, to_step :=  0.01661, color_rgb := '128 0 211', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01692, to_step :=  0.01723, color_rgb := '127 0 219', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01661, to_step :=  0.01692, color_rgb := '128 0 215', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.17227, to_step :=  0.17543, color_rgb := '201 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01819, to_step :=  0.01852, color_rgb := '122 0 233', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.17864, to_step :=  0.1819, color_rgb := '210 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.17543, to_step :=  0.17864, color_rgb := '205 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01956, to_step :=  0.01992, color_rgb := '0 19 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01852, to_step :=  0.01886, color_rgb := '120 0 239', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01921, to_step :=  0.01956, color_rgb := '0 0 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01886, to_step :=  0.01921, color_rgb := '0 0 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.18862, to_step :=  0.19207, color_rgb := '219 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.1819, to_step :=  0.18523, color_rgb := '213 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.19207, to_step :=  0.19559, color_rgb := '222 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.18523, to_step :=  0.18862, color_rgb := '216 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01992, to_step :=  0.02028, color_rgb := '0 27 255', color_label := '0.02', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.36892, to_step :=  0.37567, color_rgb := '255 162 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.21806, to_step :=  0.22205, color_rgb := '244 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.28622, to_step :=  0.29145, color_rgb := '255 213 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.24757, to_step :=  0.2521, color_rgb := '255 242 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.21415, to_step :=  0.21806, color_rgb := '240 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.03967, to_step :=  0.04039, color_rgb := '0 218 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.04265, to_step :=  0.04343, color_rgb := '0 234 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.2103, to_step :=  0.21415, color_rgb := '237 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.0467, to_step :=  0.04755, color_rgb := '0 255 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.24312, to_step :=  0.24757, color_rgb := '255 246 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.22612, to_step :=  0.23025, color_rgb := '252 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.22205, to_step :=  0.22612, color_rgb := '249 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.0149, to_step :=  0.01517, color_rgb := '131 0 192', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.23876, to_step :=  0.24312, color_rgb := '255 249 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.23025, to_step :=  0.23447, color_rgb := '255 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.23447, to_step :=  0.23876, color_rgb := '255 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.28107, to_step :=  0.28622, color_rgb := '255 217 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.26141, to_step :=  0.26619, color_rgb := '255 230 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.02028, to_step :=  0.02065, color_rgb := '0 34 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.25671, to_step :=  0.26141, color_rgb := '255 233 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.2521, to_step :=  0.25671, color_rgb := '255 237 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.27602, to_step :=  0.28107, color_rgb := '255 220 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.26619, to_step :=  0.27106, color_rgb := '255 226 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.27106, to_step :=  0.27602, color_rgb := '255 223 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.30774, to_step :=  0.31337, color_rgb := '255 200 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.04188, to_step :=  0.04265, color_rgb := '0 230 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.04039, to_step :=  0.04113, color_rgb := '0 222 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.04113, to_step :=  0.04188, color_rgb := '0 226 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.48422, to_step :=  0.49308, color_rgb := '255 97 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.36229, to_step :=  0.36892, color_rgb := '255 166 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.30221, to_step :=  0.30774, color_rgb := '255 204 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.29145, to_step :=  0.29678, color_rgb := '255 210 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.29678, to_step :=  0.30221, color_rgb := '255 207 0', color_label := '0.30', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.33089, to_step :=  0.33695, color_rgb := '255 183 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.31337, to_step :=  0.31911, color_rgb := '255 197 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.32495, to_step :=  0.33089, color_rgb := '255 188 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.31911, to_step :=  0.32495, color_rgb := '255 193 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.33695, to_step :=  0.34311, color_rgb := '255 180 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.35578, to_step :=  0.36229, color_rgb := '255 169 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.34311, to_step :=  0.34939, color_rgb := '255 176 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.34939, to_step :=  0.35578, color_rgb := '255 173 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.47552, to_step :=  0.48422, color_rgb := '255 103 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.40392, to_step :=  0.41131, color_rgb := '255 141 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.04586, to_step :=  0.0467, color_rgb := '0 251 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.04503, to_step :=  0.04586, color_rgb := '0 247 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.39667, to_step :=  0.40392, color_rgb := '255 145 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.37567, to_step :=  0.38254, color_rgb := '255 159 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.43431, to_step :=  0.44225, color_rgb := '255 123 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.38954, to_step :=  0.39667, color_rgb := '255 150 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.38254, to_step :=  0.38954, color_rgb := '255 155 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.04343, to_step :=  0.04423, color_rgb := '0 239 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01463, to_step :=  0.0149, color_rgb := '131 0 188', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01037, to_step :=  0.01056, color_rgb := '103 0 110', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01018, to_step :=  0.01037, color_rgb := '100 0 106', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01, to_step :=  0.01018, color_rgb := '97 0 97', color_label := '0.01', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.4265, to_step :=  0.43431, color_rgb := '255 126 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.04423, to_step :=  0.04503, color_rgb := '0 243 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.41131, to_step :=  0.41884, color_rgb := '255 137 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.41884, to_step :=  0.4265, color_rgb := '255 131 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01337, to_step :=  0.01361, color_rgb := '129 0 169', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01313, to_step :=  0.01337, color_rgb := '128 0 165', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.45034, to_step :=  0.45858, color_rgb := '255 115 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01075, to_step :=  0.01095, color_rgb := '109 0 119', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01056, to_step :=  0.01075, color_rgb := '107 0 115', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01095, to_step :=  0.01115, color_rgb := '112 0 124', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.44225, to_step :=  0.45034, color_rgb := '255 119 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01437, to_step :=  0.01463, color_rgb := '131 0 185', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01386, to_step :=  0.01411, color_rgb := '130 0 177', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.46697, to_step :=  0.47552, color_rgb := '255 107 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01361, to_step :=  0.01386, color_rgb := '130 0 173', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.45858, to_step :=  0.46697, color_rgb := '255 111 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01411, to_step :=  0.01437, color_rgb := '131 0 181', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.61292, to_step :=  0.62413, color_rgb := '255 38 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.51128, to_step :=  0.52064, color_rgb := '255 83 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.03134, to_step :=  0.03191, color_rgb := '0 160 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.5021, to_step :=  0.51128, color_rgb := '255 87 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.03191, to_step :=  0.03249, color_rgb := '0 164 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.5598, to_step :=  0.57004, color_rgb := '255 66 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.53016, to_step :=  0.53986, color_rgb := '255 75 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.52064, to_step :=  0.53016, color_rgb := '255 79 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.54974, to_step :=  0.5598, color_rgb := '255 66 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.53986, to_step :=  0.54974, color_rgb := '255 70 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.6019, to_step :=  0.61292, color_rgb := '255 53 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.59109, to_step :=  0.6019, color_rgb := '255 48 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.57004, to_step :=  0.58047, color_rgb := '255 57 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.58047, to_step :=  0.59109, color_rgb := '255 53 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.68335, to_step :=  0.69586, color_rgb := '255 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.63555, to_step :=  0.64718, color_rgb := '255 22 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.62413, to_step :=  0.63555, color_rgb := '255 30 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.83418, to_step :=  0.84944, color_rgb := '217 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.81919, to_step :=  0.83418, color_rgb := '220 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.64718, to_step :=  0.65902, color_rgb := '255 16 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.67108, to_step :=  0.68335, color_rgb := '255 4 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.65902, to_step :=  0.67108, color_rgb := '255 9 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.72155, to_step :=  0.73475, color_rgb := '246 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.69586, to_step :=  0.70859, color_rgb := '255 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.80447, to_step :=  0.81919, color_rgb := '223 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.70859, to_step :=  0.72155, color_rgb := '249 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.73475, to_step :=  0.7482, color_rgb := '242 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.79002, to_step :=  0.80447, color_rgb := '226 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.7482, to_step :=  0.76189, color_rgb := '237 0 0', color_label := '0.75', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.76189, to_step :=  0.77583, color_rgb := '233 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.77583, to_step :=  0.79002, color_rgb := '229 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.91333, to_step :=  0.93004, color_rgb := '200 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.02811, to_step :=  0.02862, color_rgb := '0 132 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.84944, to_step :=  0.86498, color_rgb := '213 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.02968, to_step :=  0.03022, color_rgb := '0 147 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01545, to_step :=  0.01573, color_rgb := '130 0 200', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.0276, to_step :=  0.02811, color_rgb := '0 128 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01289, to_step :=  0.01313, color_rgb := '127 0 161', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.03022, to_step :=  0.03077, color_rgb := '0 151 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.02567, to_step :=  0.02614, color_rgb := '0 107 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.02711, to_step :=  0.0276, color_rgb := '0 123 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.03077, to_step :=  0.03134, color_rgb := '0 156 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.02662, to_step :=  0.02711, color_rgb := '0 118 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.02614, to_step :=  0.02662, color_rgb := '0 113 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.89692, to_step :=  0.91333, color_rgb := '203 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.02862, to_step :=  0.02915, color_rgb := '0 137 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.86498, to_step :=  0.88081, color_rgb := '216 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.02915, to_step :=  0.02968, color_rgb := '0 142 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.88081, to_step :=  0.89692, color_rgb := '207 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.94706, to_step :=  0.96439, color_rgb := '193 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.93004, to_step :=  0.94706, color_rgb := '196 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.96439, to_step :=  0.98203, color_rgb := '198 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.98203, to_step :=  1, color_rgb := '183 0 0', color_label := '1.00', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01156, to_step :=  0.01177, color_rgb := '118 0 136', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01266, to_step :=  0.01289, color_rgb := '125 0 157', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01221, to_step :=  0.01243, color_rgb := '122 0 149', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01243, to_step :=  0.01266, color_rgb := '124 0 153', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01199, to_step :=  0.01221, color_rgb := '121 0 146', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01135, to_step :=  0.01156, color_rgb := '116 0 132', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01115, to_step :=  0.01135, color_rgb := '114 0 128', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01177, to_step :=  0.01199, color_rgb := '120 0 141', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.02476, to_step :=  0.02521, color_rgb := '0 97 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.02521, to_step :=  0.02567, color_rgb := '0 102 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.02431, to_step :=  0.02476, color_rgb := '0 92 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.02388, to_step :=  0.02431, color_rgb := '0 86 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.02221, to_step :=  0.02261, color_rgb := '0 65 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.02181, to_step :=  0.02221, color_rgb := '0 59 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.02141, to_step :=  0.02181, color_rgb := '0 53 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01573, to_step :=  0.01602, color_rgb := '129 0 204', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.02103, to_step :=  0.02141, color_rgb := '0 47 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.01602, to_step :=  0.01632, color_rgb := '129 0 208', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.02345, to_step :=  0.02388, color_rgb := '0 81 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.02303, to_step :=  0.02345, color_rgb := '0 75 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 149, from_step :=  0.02261, to_step :=  0.02303, color_rgb := '0 70 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  30.49, to_step :=  30.55, color_rgb := '255 99 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  29.55, to_step :=  29.61, color_rgb := '255 155 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  32.75, to_step :=  32.81, color_rgb := '200 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  31.11, to_step :=  31.18, color_rgb := '255 59 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  29.36, to_step :=  29.42, color_rgb := '255 167 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  27.66, to_step :=  27.73, color_rgb := '216 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  27.41, to_step :=  27.47, color_rgb := '184 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  30.42, to_step :=  30.49, color_rgb := '255 103 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  30.36, to_step :=  30.42, color_rgb := '255 107 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  26.85, to_step :=  26.91, color_rgb := '104 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  30.3, to_step :=  30.36, color_rgb := '255 111 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  30.24, to_step :=  30.3, color_rgb := '255 115 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  30.74, to_step :=  30.8, color_rgb := '255 83 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  28.67, to_step :=  28.73, color_rgb := '255 211 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  28.29, to_step :=  28.35, color_rgb := '255 235 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  30.55, to_step :=  30.61, color_rgb := '255 95 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  29.29, to_step :=  29.36, color_rgb := '255 171 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  31.05, to_step :=  31.11, color_rgb := '255 63 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  30.67, to_step :=  30.74, color_rgb := '255 87 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  28.6, to_step :=  28.67, color_rgb := '255 215 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  28.35, to_step :=  28.42, color_rgb := '255 231 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  30.61, to_step :=  30.67, color_rgb := '255 91 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  28.54, to_step :=  28.6, color_rgb := '255 219 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  28.48, to_step :=  28.54, color_rgb := '255 223 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  30.8, to_step :=  30.86, color_rgb := '255 79 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  29.23, to_step :=  29.29, color_rgb := '255 175 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  28.79, to_step :=  28.85, color_rgb := '255 203 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  30.99, to_step :=  31.05, color_rgb := '255 67 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  28.73, to_step :=  28.79, color_rgb := '255 207 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  22.14, to_step :=  22.2, color_rgb := '0 90 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  30.93, to_step :=  30.99, color_rgb := '255 71 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  29.17, to_step :=  29.23, color_rgb := '255 179 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  29.04, to_step :=  29.11, color_rgb := '255 187 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  28.92, to_step :=  28.98, color_rgb := '255 195 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  28.85, to_step :=  28.92, color_rgb := '255 199 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  30.86, to_step :=  30.93, color_rgb := '255 75 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  29.11, to_step :=  29.17, color_rgb := '255 183 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  22.27, to_step :=  22.33, color_rgb := '0 101 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  32.68, to_step :=  32.75, color_rgb := '205 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  31.3, to_step :=  31.36, color_rgb := '255 47 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  31.74, to_step :=  31.8, color_rgb := '255 19 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  31.24, to_step :=  31.3, color_rgb := '255 51 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  31.18, to_step :=  31.24, color_rgb := '255 55 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  31.68, to_step :=  31.74, color_rgb := '255 23 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  31.43, to_step :=  31.49, color_rgb := '255 39 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  31.36, to_step :=  31.43, color_rgb := '255 43 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  31.62, to_step :=  31.68, color_rgb := '255 27 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  31.49, to_step :=  31.55, color_rgb := '255 35 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  31.55, to_step :=  31.62, color_rgb := '255 31 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  32.18, to_step :=  32.24, color_rgb := '245 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  32.62, to_step :=  32.68, color_rgb := '210 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  32.12, to_step :=  32.18, color_rgb := '250 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  31.8, to_step :=  31.87, color_rgb := '255 15 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  32.05, to_step :=  32.12, color_rgb := '255 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  31.87, to_step :=  31.93, color_rgb := '255 11 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  31.93, to_step :=  31.99, color_rgb := '255 7 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  32.56, to_step :=  32.62, color_rgb := '215 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  32.31, to_step :=  32.37, color_rgb := '235 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  32.24, to_step :=  32.31, color_rgb := '240 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  32.37, to_step :=  32.43, color_rgb := '230 0 0', color_label := NULL, group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  32.43, to_step :=  32.49, color_rgb := '225 0 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.44, to_step :=  18.5, color_rgb := '123 0 132', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.5, to_step :=  18.56, color_rgb := '120 0 135', color_label := NULL, group_label := NULL );
@@ -5732,6 +7542,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.19
 SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.25, to_step :=  18.31, color_rgb := '132 0 123', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  32.68, to_step :=  32.75, color_rgb := '205 0 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  32.49, to_step :=  32.56, color_rgb := '220 0 0', color_label := NULL, group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  32.62, to_step :=  32.68, color_rgb := '210 0 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  32.56, to_step :=  32.62, color_rgb := '215 0 0', color_label := NULL, group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  29.98, to_step :=  30.05, color_rgb := '255 127 0', color_label := '30', group_label := NULL );
@@ -5796,6 +7607,204 @@ SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  486.2
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  490.44298, to_step :=  494.69049, color_rgb := '15 237 180', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  494.69049, to_step :=  498.97478, color_rgb := '15 233 169', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  498.97478, to_step :=  503.29619, color_rgb := '15 230 157', color_label := '500', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  29.48, to_step :=  29.55, color_rgb := '255 159 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  33.06, to_step :=  33.12, color_rgb := '175 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  30.17, to_step :=  30.24, color_rgb := '255 119 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  32.81, to_step :=  32.87, color_rgb := '195 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  30.11, to_step :=  30.17, color_rgb := '255 123 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  32.93, to_step :=  33, color_rgb := '185 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  33.12, to_step :=  33.18, color_rgb := '170 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  32.87, to_step :=  32.93, color_rgb := '190 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  31.99, to_step :=  32.05, color_rgb := '255 3 0', color_label := '32', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  27.98, to_step :=  28.04, color_rgb := '255 255 0', color_label := '28', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  29.42, to_step :=  29.48, color_rgb := '255 163 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  29.98, to_step :=  30.05, color_rgb := '255 127 0', color_label := '30', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  26.97, to_step :=  27.04, color_rgb := '120 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  28.98, to_step :=  29.04, color_rgb := '255 191 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  27.6, to_step :=  27.66, color_rgb := '208 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  33, to_step :=  33.06, color_rgb := '180 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  27.54, to_step :=  27.6, color_rgb := '200 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  33.25, to_step :=  33.31, color_rgb := '160 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  29.86, to_step :=  29.92, color_rgb := '255 135 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  29.61, to_step :=  29.67, color_rgb := '255 151 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  33.18, to_step :=  33.25, color_rgb := '165 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  27.47, to_step :=  27.54, color_rgb := '192 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  33.75, to_step :=  33.81, color_rgb := '120 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  30.05, to_step :=  30.11, color_rgb := '255 123 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  33.69, to_step :=  33.75, color_rgb := '125 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  29.67, to_step :=  29.73, color_rgb := '255 147 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  33.31, to_step :=  33.37, color_rgb := '155 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  29.8, to_step :=  29.86, color_rgb := '255 139 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  33.62, to_step :=  33.69, color_rgb := '130 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  33.44, to_step :=  33.5, color_rgb := '145 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  33.37, to_step :=  33.44, color_rgb := '150 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  29.92, to_step :=  29.98, color_rgb := '255 131 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  33.5, to_step :=  33.56, color_rgb := '140 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  33.56, to_step :=  33.62, color_rgb := '135 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  33.81, to_step :=  33.87, color_rgb := '115 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  33.87, to_step :=  33.94, color_rgb := '110 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  25.97, to_step :=  26.03, color_rgb := '0 255 15', color_label := '26', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  33.94, to_step :=  34, color_rgb := '105 0 0', color_label := '34', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  23.08, to_step :=  23.15, color_rgb := '0 170 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  23.02, to_step :=  23.08, color_rgb := '0 165 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  27.79, to_step :=  27.85, color_rgb := '232 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  22.33, to_step :=  22.39, color_rgb := '0 106 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  22.96, to_step :=  23.02, color_rgb := '0 160 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  28.04, to_step :=  28.1, color_rgb := '255 251 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  27.73, to_step :=  27.79, color_rgb := '224 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  23.21, to_step :=  23.27, color_rgb := '0 181 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  27.91, to_step :=  27.98, color_rgb := '248 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  27.85, to_step :=  27.91, color_rgb := '240 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  28.23, to_step :=  28.29, color_rgb := '255 239 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  28.16, to_step :=  28.23, color_rgb := '255 243 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  28.1, to_step :=  28.16, color_rgb := '255 247 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  20.95, to_step :=  21.01, color_rgb := '6 0 249', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  19.95, to_step :=  20.01, color_rgb := '51 0 204', color_label := '20', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  26.35, to_step :=  26.41, color_rgb := '40 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  22.52, to_step :=  22.58, color_rgb := '0 122 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  26.09, to_step :=  26.16, color_rgb := '8 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  26.16, to_step :=  26.22, color_rgb := '16 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  25.91, to_step :=  25.97, color_rgb := '0 255 23', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  25.47, to_step :=  25.53, color_rgb := '0 255 79', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  25.53, to_step :=  25.59, color_rgb := '0 255 71', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  25.84, to_step :=  25.91, color_rgb := '0 255 31', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  25.59, to_step :=  25.65, color_rgb := '0 255 63', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  25.78, to_step :=  25.84, color_rgb := '0 255 39', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  25.65, to_step :=  25.72, color_rgb := '0 255 55', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  23.33, to_step :=  23.4, color_rgb := '0 192 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  23.71, to_step :=  23.77, color_rgb := '0 224 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  24.84, to_step :=  24.9, color_rgb := '0 255 159', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  25.4, to_step :=  25.47, color_rgb := '0 255 87', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18, to_step :=  18.06, color_rgb := '144 0 111', color_label := '18', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  21.95, to_step :=  22.02, color_rgb := '0 74 255', color_label := '22', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  23.96, to_step :=  24.02, color_rgb := '0 245 255', color_label := '24', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  24.9, to_step :=  24.96, color_rgb := '0 255 151', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  25.22, to_step :=  25.28, color_rgb := '0 255 111', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  25.28, to_step :=  25.34, color_rgb := '0 255 103', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  24.96, to_step :=  25.03, color_rgb := '0 255 143', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  25.15, to_step :=  25.22, color_rgb := '0 255 119', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  25.03, to_step :=  25.09, color_rgb := '0 255 135', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  23.77, to_step :=  23.84, color_rgb := '0 229 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  24.71, to_step :=  24.78, color_rgb := '0 255 175', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  24.4, to_step :=  24.46, color_rgb := '0 255 215', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  24.78, to_step :=  24.84, color_rgb := '0 255 167', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  24.46, to_step :=  24.53, color_rgb := '0 255 207', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  24.65, to_step :=  24.71, color_rgb := '0 255 183', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  24.53, to_step :=  24.59, color_rgb := '0 255 199', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  23.84, to_step :=  23.9, color_rgb := '0 234 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  24.21, to_step :=  24.27, color_rgb := '0 255 239', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  24.27, to_step :=  24.34, color_rgb := '0 255 231', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  23.9, to_step :=  23.96, color_rgb := '0 240 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  24.15, to_step :=  24.21, color_rgb := '0 255 247', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  24.02, to_step :=  24.09, color_rgb := '0 250 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  23.4, to_step :=  23.46, color_rgb := '0 197 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  23.46, to_step :=  23.52, color_rgb := '0 202 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  23.52, to_step :=  23.58, color_rgb := '0 208 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  23.65, to_step :=  23.71, color_rgb := '0 218 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  23.58, to_step :=  23.65, color_rgb := '0 213 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  22.39, to_step :=  22.45, color_rgb := '0 112 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  23.15, to_step :=  23.21, color_rgb := '0 176 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  22.45, to_step :=  22.52, color_rgb := '0 117 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  22.77, to_step :=  22.83, color_rgb := '0 144 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  22.58, to_step :=  22.64, color_rgb := '0 128 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  22.83, to_step :=  22.89, color_rgb := '0 149 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  22.89, to_step :=  22.96, color_rgb := '0 154 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  22.64, to_step :=  22.71, color_rgb := '0 133 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  22.71, to_step :=  22.77, color_rgb := '0 138 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  25.72, to_step :=  25.78, color_rgb := '0 255 47', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  20.01, to_step :=  20.07, color_rgb := '48 0 207', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  20.76, to_step :=  20.82, color_rgb := '15 0 240', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  21.83, to_step :=  21.89, color_rgb := '0 64 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  21.89, to_step :=  21.95, color_rgb := '0 69 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  22.2, to_step :=  22.27, color_rgb := '0 96 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  22.02, to_step :=  22.08, color_rgb := '0 80 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  22.08, to_step :=  22.14, color_rgb := '0 85 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  20.82, to_step :=  20.89, color_rgb := '12 0 243', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  21.7, to_step :=  21.76, color_rgb := '0 53 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  21.39, to_step :=  21.45, color_rgb := '0 26 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  21.45, to_step :=  21.51, color_rgb := '0 32 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  21.64, to_step :=  21.7, color_rgb := '0 48 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  21.51, to_step :=  21.58, color_rgb := '0 37 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  20.89, to_step :=  20.95, color_rgb := '9 0 246', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  21.2, to_step :=  21.26, color_rgb := '0 10 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  21.26, to_step :=  21.33, color_rgb := '0 16 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  21.01, to_step :=  21.07, color_rgb := '0 0 252', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  24.34, to_step :=  24.4, color_rgb := '0 255 223', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  24.09, to_step :=  24.15, color_rgb := '0 255 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  26.78, to_step :=  26.85, color_rgb := '96 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  20.13, to_step :=  20.2, color_rgb := '42 0 213', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  20.7, to_step :=  20.76, color_rgb := '18 0 237', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  20.2, to_step :=  20.26, color_rgb := '39 0 216', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  20.51, to_step :=  20.57, color_rgb := '24 0 231', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  20.64, to_step :=  20.7, color_rgb := '21 0 234', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  20.26, to_step :=  20.32, color_rgb := '36 0 219', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  20.45, to_step :=  20.51, color_rgb := '27 0 228', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  20.32, to_step :=  20.38, color_rgb := '33 0 222', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  19.63, to_step :=  19.69, color_rgb := '66 0 189', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  19.07, to_step :=  19.13, color_rgb := '93 0 162', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  19.69, to_step :=  19.76, color_rgb := '63 0 192', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  19.88, to_step :=  19.95, color_rgb := '54 0 201', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  19.76, to_step :=  19.82, color_rgb := '60 0 195', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  19.13, to_step :=  19.19, color_rgb := '90 0 165', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  19.44, to_step :=  19.51, color_rgb := '75 0 180', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  19.51, to_step :=  19.57, color_rgb := '72 0 183', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  19.19, to_step :=  19.25, color_rgb := '87 0 168', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  19.38, to_step :=  19.44, color_rgb := '78 0 177', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  19.25, to_step :=  19.32, color_rgb := '84 0 171', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  24.59, to_step :=  24.65, color_rgb := '0 255 191', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.06, to_step :=  18.13, color_rgb := '141 0 114', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.94, to_step :=  19, color_rgb := '99 0 156', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.63, to_step :=  18.69, color_rgb := '114 0 141', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.69, to_step :=  18.75, color_rgb := '111 0 144', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.88, to_step :=  18.94, color_rgb := '102 0 153', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.75, to_step :=  18.82, color_rgb := '108 0 147', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.13, to_step :=  18.19, color_rgb := '138 0 117', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.44, to_step :=  18.5, color_rgb := '123 0 132', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.5, to_step :=  18.56, color_rgb := '120 0 135', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.19, to_step :=  18.25, color_rgb := '135 0 120', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.38, to_step :=  18.44, color_rgb := '126 0 129', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.25, to_step :=  18.31, color_rgb := '132 0 123', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  25.09, to_step :=  25.15, color_rgb := '0 255 127', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  25.34, to_step :=  25.4, color_rgb := '0 255 95', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  26.66, to_step :=  26.72, color_rgb := '80 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  26.6, to_step :=  26.66, color_rgb := '72 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  26.72, to_step :=  26.78, color_rgb := '88 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  26.53, to_step :=  26.6, color_rgb := '64 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  26.47, to_step :=  26.53, color_rgb := '56 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  26.28, to_step :=  26.35, color_rgb := '32 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  26.41, to_step :=  26.47, color_rgb := '48 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  27.16, to_step :=  27.22, color_rgb := '144 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  29.73, to_step :=  29.8, color_rgb := '255 143 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  27.35, to_step :=  27.41, color_rgb := '176 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  27.22, to_step :=  27.29, color_rgb := '152 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  27.04, to_step :=  27.1, color_rgb := '128 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  27.1, to_step :=  27.16, color_rgb := '136 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  27.29, to_step :=  27.35, color_rgb := '168 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  19, to_step :=  19.07, color_rgb := '96 0 159', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  26.91, to_step :=  26.97, color_rgb := '112 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  20.57, to_step :=  20.64, color_rgb := '24 0 231', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  21.14, to_step :=  21.2, color_rgb := '0 5 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.31, to_step :=  18.38, color_rgb := '129 0 126', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  23.27, to_step :=  23.33, color_rgb := '0 186 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.56, to_step :=  18.63, color_rgb := '117 0 138', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  18.82, to_step :=  18.88, color_rgb := '105 0 150', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  26.03, to_step :=  26.09, color_rgb := '0 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  26.22, to_step :=  26.28, color_rgb := '24 255 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  21.76, to_step :=  21.83, color_rgb := '0 58 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  28.42, to_step :=  28.48, color_rgb := '255 227 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  19.32, to_step :=  19.38, color_rgb := '81 0 174', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  19.57, to_step :=  19.63, color_rgb := '69 0 186', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  20.38, to_step :=  20.45, color_rgb := '30 0 225', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  19.82, to_step :=  19.88, color_rgb := '57 0 198', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  20.07, to_step :=  20.13, color_rgb := '45 0 210', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  21.33, to_step :=  21.39, color_rgb := '0 21 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  21.07, to_step :=  21.14, color_rgb := '0 0 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 150, from_step :=  21.58, to_step :=  21.64, color_rgb := '0 42 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1029.58436, to_step :=  1038.50114, color_rgb := '255 233 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1683.17472, to_step :=  1697.75196, color_rgb := '246 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1697.75196, to_step :=  1712.45544, color_rgb := '242 0 0', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  503.29619, to_step :=  507.65501, color_rgb := '15 226 146', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  507.65501, to_step :=  512.05159, color_rgb := '15 223 133', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  512.05159, to_step :=  516.48624, color_rgb := '15 220 123', color_label := '', group_label := '' );
@@ -5818,6 +7827,11 @@ SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  587.8
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  592.89719, to_step :=  598.03201, color_rgb := '49 155 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  598.03201, to_step :=  603.21131, color_rgb := '54 160 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  603.21131, to_step :=  608.43545, color_rgb := '58 165 15', color_label := '', group_label := '' );
+<<<<<<< HEAD
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1598.30244, to_step :=  1612.14464, color_rgb := '255 16 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1074.94721, to_step :=  1084.25685, color_rgb := '255 217 0', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  608.43545, to_step :=  613.70485, color_rgb := '62 169 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  613.70485, to_step :=  619.01987, color_rgb := '66 173 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  619.01987, to_step :=  624.38093, color_rgb := '70 178 15', color_label := '', group_label := '' );
@@ -5826,7 +7840,10 @@ SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  629.7
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  635.24274, to_step :=  640.7443, color_rgb := '82 192 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  640.7443, to_step :=  646.2935, color_rgb := '86 196 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  646.2935, to_step :=  651.89077, color_rgb := '90 201 15', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1626.10671, to_step :=  1640.18971, color_rgb := '255 9 0', color_label := '', group_label := '' );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  651.89077, to_step :=  657.53651, color_rgb := '94 205 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  657.53651, to_step :=  663.23114, color_rgb := '97 209 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  663.23114, to_step :=  668.97509, color_rgb := '101 213 15', color_label := '', group_label := '' );
@@ -5836,6 +7853,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  680.6
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  686.50716, to_step :=  692.45269, color_rgb := '115 226 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  692.45269, to_step :=  698.44972, color_rgb := '119 229 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  698.44972, to_step :=  704.49869, color_rgb := '123 233 15', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1757.33436, to_step :=  1772.55386, color_rgb := '226 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1803.38943, to_step :=  1819.00779, color_rgb := '217 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1819.00779, to_step :=  1834.76141, color_rgb := '213 0 0', color_label := '', group_label := '' );
@@ -5852,6 +7870,19 @@ SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1202.
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1244.66595, to_step :=  1255.44546, color_rgb := '255 155 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1288.34735, to_step :=  1299.50516, color_rgb := '255 137 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  310.52846, to_step :=  313.21781, color_rgb := '0 34 255', color_label := '', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1932.19003, to_step :=  1948.92388, color_rgb := '189 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1948.92388, to_step :=  1965.80265, color_rgb := '183 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1982.8276, to_step :=  2000, color_rgb := '173 0 0', color_label := '2000', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1965.80265, to_step :=  1982.8276, color_rgb := '179 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1557.4849, to_step :=  1570.97359, color_rgb := '255 38 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  313.21781, to_step :=  315.93046, color_rgb := '0 41 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1428.80659, to_step :=  1441.18086, color_rgb := '255 83 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1322.11152, to_step :=  1333.56174, color_rgb := '255 123 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1345.11114, to_step :=  1356.76055, color_rgb := '255 115 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1668.72265, to_step :=  1683.17472, color_rgb := '249 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  146.5078, to_step :=  175.2572, color_rgb := '120 0 130', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  704.49869, to_step :=  710.60004, color_rgb := '126 237 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  710.60004, to_step :=  716.75423, color_rgb := '129 242 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  716.75423, to_step :=  722.96173, color_rgb := '132 245 15', color_label := '', group_label := '' );
@@ -5885,12 +7916,21 @@ SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  904.6
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  912.49686, to_step :=  920.3996, color_rgb := '225 255 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  920.3996, to_step :=  928.37077, color_rgb := '228 255 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  928.37077, to_step :=  936.41098, color_rgb := '231 255 15', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1277.28535, to_step :=  1288.34735, color_rgb := '255 141 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1266.31832, to_step :=  1277.28535, color_rgb := '255 145 0', color_label := '', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1612.14464, to_step :=  1626.10671, color_rgb := '255 12 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1626.10671, to_step :=  1640.18971, color_rgb := '255 9 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1654.39467, to_step :=  1668.72265, color_rgb := '255 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1356.76055, to_step :=  1368.51086, color_rgb := '255 111 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  986.13583, to_step :=  994.67632, color_rgb := '255 255 0', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  936.41098, to_step :=  944.52083, color_rgb := '234 255 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  944.52083, to_step :=  952.70091, color_rgb := '237 255 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  952.70091, to_step :=  960.95183, color_rgb := '240 255 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  960.95183, to_step :=  969.27421, color_rgb := '244 255 15', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  969.27421, to_step :=  977.66867, color_rgb := '249 255 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  977.66867, to_step :=  986.13583, color_rgb := '252 255 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  986.13583, to_step :=  994.67632, color_rgb := '255 255 0', color_label := '', group_label := '' );
@@ -5899,10 +7939,18 @@ SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1003.
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1011.97983, to_step :=  1020.74414, color_rgb := '255 242 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1020.74414, to_step :=  1029.58436, color_rgb := '255 237 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1029.58436, to_step :=  1038.50114, color_rgb := '255 233 0', color_label := '', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  977.66867, to_step :=  986.13583, color_rgb := '252 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  315.93046, to_step :=  318.66659, color_rgb := '0 47 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1003.29077, to_step :=  1011.97983, color_rgb := '255 246 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1011.97983, to_step :=  1020.74414, color_rgb := '255 242 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1020.74414, to_step :=  1029.58436, color_rgb := '255 237 0', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1038.50114, to_step :=  1047.49514, color_rgb := '255 230 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1047.49514, to_step :=  1056.56703, color_rgb := '255 226 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1056.56703, to_step :=  1065.71749, color_rgb := '255 223 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1065.71749, to_step :=  1074.94721, color_rgb := '255 220 0', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1074.94721, to_step :=  1084.25685, color_rgb := '255 217 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1084.25685, to_step :=  1093.64712, color_rgb := '255 213 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1122.30871, to_step :=  1132.02853, color_rgb := '255 200 0', color_label := '', group_label := '' );
@@ -5922,11 +7970,29 @@ SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1322.
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1333.56174, to_step :=  1345.11114, color_rgb := '255 119 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1345.11114, to_step :=  1356.76055, color_rgb := '255 115 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1356.76055, to_step :=  1368.51086, color_rgb := '255 111 0', color_label := '', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1084.25685, to_step :=  1093.64712, color_rgb := '255 213 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1093.64712, to_step :=  1103.11872, color_rgb := '255 210 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1103.11872, to_step :=  1112.67234, color_rgb := '255 207 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1112.67234, to_step :=  1122.30871, color_rgb := '255 204 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1504.67839, to_step :=  1517.70975, color_rgb := '255 57 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1223.38382, to_step :=  1233.97901, color_rgb := '255 162 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1233.97901, to_step :=  1244.66595, color_rgb := '255 159 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1244.66595, to_step :=  1255.44546, color_rgb := '255 155 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1255.44546, to_step :=  1266.31832, color_rgb := '255 150 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1266.31832, to_step :=  1277.28535, color_rgb := '255 145 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1277.28535, to_step :=  1288.34735, color_rgb := '255 141 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1288.34735, to_step :=  1299.50516, color_rgb := '255 137 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1299.50516, to_step :=  1310.7596, color_rgb := '255 131 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1310.7596, to_step :=  1322.11152, color_rgb := '255 126 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1333.56174, to_step :=  1345.11114, color_rgb := '255 119 0', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1368.51086, to_step :=  1380.36293, color_rgb := '255 107 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1380.36293, to_step :=  1392.31764, color_rgb := '255 103 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1392.31764, to_step :=  1404.3759, color_rgb := '255 97 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1404.3759, to_step :=  1416.53858, color_rgb := '255 91 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1416.53858, to_step :=  1428.80659, color_rgb := '255 87 0', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1428.80659, to_step :=  1441.18086, color_rgb := '255 83 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1441.18086, to_step :=  1453.66229, color_rgb := '255 79 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1466.25182, to_step :=  1478.95039, color_rgb := '255 70 0', color_label := '', group_label := '' );
@@ -5945,6 +8011,26 @@ SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1640.
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1654.39467, to_step :=  1668.72265, color_rgb := '255 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1683.17472, to_step :=  1697.75196, color_rgb := '246 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1697.75196, to_step :=  1712.45544, color_rgb := '242 0 0', color_label := '', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1441.18086, to_step :=  1453.66229, color_rgb := '255 79 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1453.66229, to_step :=  1466.25182, color_rgb := '255 75 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1466.25182, to_step :=  1478.95039, color_rgb := '255 70 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1478.95039, to_step :=  1491.75892, color_rgb := '255 66 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1491.75892, to_step :=  1504.67839, color_rgb := '255 62 0', color_label := '1500', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1517.70975, to_step :=  1530.85397, color_rgb := '255 53 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1530.85397, to_step :=  1544.11202, color_rgb := '255 48 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1544.11202, to_step :=  1557.4849, color_rgb := '255 53 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1570.97359, to_step :=  1584.5791, color_rgb := '255 30 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1584.5791, to_step :=  1598.30244, color_rgb := '255 22 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1712.45544, to_step :=  1727.28627, color_rgb := '237 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1727.28627, to_step :=  1742.24553, color_rgb := '233 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1742.24553, to_step :=  1757.33436, color_rgb := '229 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1757.33436, to_step :=  1772.55386, color_rgb := '226 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1772.55386, to_step :=  1787.90517, color_rgb := '223 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1787.90517, to_step :=  1803.38943, color_rgb := '220 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1803.38943, to_step :=  1819.00779, color_rgb := '217 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1819.00779, to_step :=  1834.76141, color_rgb := '213 0 0', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1834.76141, to_step :=  1850.65148, color_rgb := '210 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  122.47449, to_step :=  146.5078, color_rgb := '110 0 120', color_label := '', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1850.65148, to_step :=  1866.67916, color_rgb := '207 0 0', color_label := '', group_label := '' );
@@ -5952,6 +8038,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1866.
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1882.84564, to_step :=  1899.15214, color_rgb := '200 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1899.15214, to_step :=  1915.59986, color_rgb := '196 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1915.59986, to_step :=  1932.19003, color_rgb := '193 0 0', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1932.19003, to_step :=  1948.92388, color_rgb := '189 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1948.92388, to_step :=  1965.80265, color_rgb := '183 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1965.80265, to_step :=  1982.8276, color_rgb := '179 0 0', color_label := '', group_label := '' );
@@ -5960,14 +8047,33 @@ SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1093.
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1, to_step :=  59.81156, color_rgb := '80 0 100', color_label := '1', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  146.5078, to_step :=  175.2572, color_rgb := '120 0 130', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  175.2572, to_step :=  209.64814, color_rgb := '130 0 140', color_label := '', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1122.30871, to_step :=  1132.02853, color_rgb := '255 200 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1181.90501, to_step :=  1192.14097, color_rgb := '255 176 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1640.18971, to_step :=  1654.39467, color_rgb := '255 4 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1141.83253, to_step :=  1151.72144, color_rgb := '255 193 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1171.75693, to_step :=  1181.90501, color_rgb := '255 180 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1161.696, to_step :=  1171.75693, color_rgb := '255 183 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1151.72144, to_step :=  1161.696, color_rgb := '255 188 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1132.02853, to_step :=  1141.83253, color_rgb := '255 197 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1, to_step :=  59.81156, color_rgb := '80 0 100', color_label := '1', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  175.2572, to_step :=  209.64814, color_rgb := '130 0 140', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  994.67632, to_step :=  1003.29077, color_rgb := '255 249 0', color_label := '1000', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  209.64814, to_step :=  250.78764, color_rgb := '140 0 150', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  250.78764, to_step :=  300, color_rgb := '150 0 160', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  300, to_step :=  302.59817, color_rgb := '0 0 255', color_label := '300', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  302.59817, to_step :=  305.21884, color_rgb := '0 0 255', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  307.8622, to_step :=  310.52846, color_rgb := '0 27 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1233.97901, to_step :=  1244.66595, color_rgb := '255 159 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  313.21781, to_step :=  315.93046, color_rgb := '0 41 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  315.93046, to_step :=  318.66659, color_rgb := '0 47 255', color_label := '', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  305.21884, to_step :=  307.8622, color_rgb := '0 19 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  307.8622, to_step :=  310.52846, color_rgb := '0 27 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  969.27421, to_step :=  977.66867, color_rgb := '249 255 15', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  318.66659, to_step :=  321.42642, color_rgb := '0 53 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  321.42642, to_step :=  324.21015, color_rgb := '0 59 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  324.21015, to_step :=  327.018, color_rgb := '0 65 255', color_label := '', group_label := '' );
@@ -5980,11 +8086,21 @@ SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  341.4
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  344.38315, to_step :=  347.3657, color_rgb := '0 102 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  347.3657, to_step :=  350.37408, color_rgb := '0 107 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  350.37408, to_step :=  353.40852, color_rgb := '0 113 255', color_label := '', group_label := '' );
+<<<<<<< HEAD
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1192.14097, to_step :=  1202.46557, color_rgb := '255 173 0', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  102.38363, to_step :=  122.47449, color_rgb := '110 0 119', color_label := '', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  85.58849, to_step :=  102.38363, color_rgb := '105 0 115', color_label := '', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  71.54845, to_step :=  85.58849, color_rgb := '100 0 110', color_label := '', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  59.81156, to_step :=  71.54845, color_rgb := '90 0 110', color_label := '', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  305.21884, to_step :=  307.8622, color_rgb := '0 19 255', color_label := '', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  310.52846, to_step :=  313.21781, color_rgb := '0 34 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1202.46557, to_step :=  1212.8796, color_rgb := '255 169 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  1212.8796, to_step :=  1223.38382, color_rgb := '255 166 0', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  353.40852, to_step :=  356.46923, color_rgb := '0 118 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  356.46923, to_step :=  359.55645, color_rgb := '0 123 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  359.55645, to_step :=  362.67041, color_rgb := '0 128 255', color_label := '', group_label := '' );
@@ -6019,6 +8135,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  457.7
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  461.71421, to_step :=  465.71291, color_rgb := '0 255 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  465.71291, to_step :=  469.74625, color_rgb := '0 255 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  469.74625, to_step :=  473.81451, color_rgb := '15 255 234', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1772.55386, to_step :=  1803.38943, color_rgb := '220 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1093.64712, to_step :=  1112.67234, color_rgb := '255 207 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1255.44546, to_step :=  1277.28535, color_rgb := '255 145 0', color_label := '', group_label := '' );
@@ -6155,6 +8272,147 @@ SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1517.
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1074.94721, to_step :=  1112.67234, color_rgb := '255 207 0', color_label := '', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1151.72144, to_step :=  1192.14097, color_rgb := '255 176 0', color_label := '', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1368.51086, to_step :=  1416.53858, color_rgb := '255 91 0', color_label := '', group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  473.81451, to_step :=  477.91801, color_rgb := '15 252 223', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  477.91801, to_step :=  482.05705, color_rgb := '15 249 213', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  482.05705, to_step :=  486.23194, color_rgb := '15 247 202', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  486.23194, to_step :=  490.44298, color_rgb := '15 242 192', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  490.44298, to_step :=  494.69049, color_rgb := '15 237 180', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  494.69049, to_step :=  498.97478, color_rgb := '15 233 169', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 151, from_step :=  498.97478, to_step :=  503.29619, color_rgb := '15 230 157', color_label := '500', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  350.37408, to_step :=  356.46923, color_rgb := '0 118 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  375.39829, to_step :=  381.92876, color_rgb := '0 156 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1803.38943, to_step :=  1834.76141, color_rgb := '213 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1074.94721, to_step :=  1093.64712, color_rgb := '255 213 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1171.75693, to_step :=  1192.14097, color_rgb := '255 176 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1834.76141, to_step :=  1866.67916, color_rgb := '207 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  674.76879, to_step :=  686.50716, color_rgb := '111 223 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1866.67916, to_step :=  1899.15214, color_rgb := '200 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1899.15214, to_step :=  1932.19003, color_rgb := '193 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1932.19003, to_step :=  1965.80265, color_rgb := '183 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1192.14097, to_step :=  1212.8796, color_rgb := '255 169 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1392.31764, to_step :=  1416.53858, color_rgb := '255 91 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1626.10671, to_step :=  1654.39467, color_rgb := '255 4 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1654.39467, to_step :=  1683.17472, color_rgb := '249 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1683.17472, to_step :=  1712.45544, color_rgb := '242 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1416.53858, to_step :=  1441.18086, color_rgb := '255 83 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1544.11202, to_step :=  1570.97359, color_rgb := '255 38 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1570.97359, to_step :=  1598.30244, color_rgb := '255 22 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1441.18086, to_step :=  1466.25182, color_rgb := '255 75 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1466.25182, to_step :=  1491.75892, color_rgb := '255 66 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1212.8796, to_step :=  1233.97901, color_rgb := '255 162 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1345.11114, to_step :=  1368.51086, color_rgb := '255 111 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1233.97901, to_step :=  1255.44546, color_rgb := '255 155 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1368.51086, to_step :=  1392.31764, color_rgb := '255 103 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1255.44546, to_step :=  1277.28535, color_rgb := '255 145 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1277.28535, to_step :=  1299.50516, color_rgb := '255 137 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  416.32526, to_step :=  423.56771, color_rgb := '0 209 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  446.0598, to_step :=  453.81951, color_rgb := '0 243 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1056.56703, to_step :=  1074.94721, color_rgb := '255 220 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1093.64712, to_step :=  1112.67234, color_rgb := '255 207 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1112.67234, to_step :=  1132.02853, color_rgb := '255 200 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1132.02853, to_step :=  1151.72144, color_rgb := '255 193 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  587.80646, to_step :=  598.03201, color_rgb := '49 155 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1, to_step :=  71.54845, color_rgb := '90 0 110', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  102.38363, to_step :=  146.5078, color_rgb := '110 0 120', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  146.5078, to_step :=  209.64814, color_rgb := '130 0 140', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  209.64814, to_step :=  300, color_rgb := '150 0 160', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  305.21884, to_step :=  310.52846, color_rgb := '0 27 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  512.05159, to_step :=  520.9593, color_rgb := '15 217 110', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  829.91945, to_step :=  844.35683, color_rgb := '192 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  859.04537, to_step :=  873.98943, color_rgb := '205 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  889.19346, to_step :=  904.66198, color_rgb := '219 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  629.78842, to_step :=  640.7443, color_rgb := '82 192 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  748.33398, to_step :=  761.35209, color_rgb := '153 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  698.44972, to_step :=  710.60004, color_rgb := '126 237 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  722.96173, to_step :=  735.53846, color_rgb := '139 251 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  477.91801, to_step :=  486.23194, color_rgb := '15 247 202', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  530.02198, to_step :=  539.24231, color_rgb := '15 201 55', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  548.62303, to_step :=  558.16695, color_rgb := '15 182 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  494.69049, to_step :=  503.29619, color_rgb := '15 230 157', color_label := '500', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  461.71421, to_step :=  469.74625, color_rgb := '0 255 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  801.78104, to_step :=  815.72893, color_rgb := '179 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  402.20976, to_step :=  409.20665, color_rgb := '0 192 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  815.72893, to_step :=  829.91945, color_rgb := '185 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  761.35209, to_step :=  774.59667, color_rgb := '159 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  327.018, to_step :=  332.70684, color_rgb := '0 75 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  362.67041, to_step :=  368.97947, color_rgb := '0 137 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  774.59667, to_step :=  788.07165, color_rgb := '166 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  310.52846, to_step :=  315.93046, color_rgb := '0 41 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  315.93046, to_step :=  321.42642, color_rgb := '0 53 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  321.42642, to_step :=  327.018, color_rgb := '0 65 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  332.70684, to_step :=  338.49465, color_rgb := '0 86 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  338.49465, to_step :=  344.38315, color_rgb := '0 97 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  344.38315, to_step :=  350.37408, color_rgb := '0 107 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  356.46923, to_step :=  362.67041, color_rgb := '0 128 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  368.97947, to_step :=  375.39829, color_rgb := '0 147 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  381.92876, to_step :=  388.57284, color_rgb := '0 164 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  388.57284, to_step :=  395.33251, color_rgb := '0 174 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1038.50114, to_step :=  1056.56703, color_rgb := '255 226 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  395.33251, to_step :=  402.20976, color_rgb := '0 182 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  409.20665, to_step :=  416.32526, color_rgb := '0 201 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  423.56771, to_step :=  430.93615, color_rgb := '0 218 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  430.93615, to_step :=  438.43277, color_rgb := '0 226 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  438.43277, to_step :=  446.0598, color_rgb := '0 234 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  453.81951, to_step :=  461.71421, color_rgb := '0 251 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  469.74625, to_step :=  477.91801, color_rgb := '15 252 223', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  486.23194, to_step :=  494.69049, color_rgb := '15 237 180', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  503.29619, to_step :=  512.05159, color_rgb := '15 223 133', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  520.9593, to_step :=  530.02198, color_rgb := '15 209 84', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  539.24231, to_step :=  548.62303, color_rgb := '15 191 27', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  558.16695, to_step :=  567.87689, color_rgb := '20 173 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  567.87689, to_step :=  577.75575, color_rgb := '31 165 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  577.75575, to_step :=  587.80646, color_rgb := '40 155 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  598.03201, to_step :=  608.43545, color_rgb := '58 165 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  608.43545, to_step :=  619.01987, color_rgb := '66 173 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  619.01987, to_step :=  629.78842, color_rgb := '74 183 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  640.7443, to_step :=  651.89077, color_rgb := '90 201 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  651.89077, to_step :=  663.23114, color_rgb := '97 209 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  663.23114, to_step :=  674.76879, color_rgb := '104 217 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  686.50716, to_step :=  698.44972, color_rgb := '119 229 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  710.60004, to_step :=  722.96173, color_rgb := '132 245 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  735.53846, to_step :=  748.33398, color_rgb := '146 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  788.07165, to_step :=  801.78104, color_rgb := '172 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  844.35683, to_step :=  859.04537, color_rgb := '198 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  873.98943, to_step :=  889.19346, color_rgb := '213 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  920.3996, to_step :=  936.41098, color_rgb := '231 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  969.27421, to_step :=  986.13583, color_rgb := '252 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1151.72144, to_step :=  1171.75693, color_rgb := '255 183 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1322.11152, to_step :=  1345.11114, color_rgb := '255 119 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1517.70975, to_step :=  1544.11202, color_rgb := '255 48 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1742.24553, to_step :=  1772.55386, color_rgb := '226 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1299.50516, to_step :=  1322.11152, color_rgb := '255 126 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1772.55386, to_step :=  1803.38943, color_rgb := '220 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  904.66198, to_step :=  920.3996, color_rgb := '225 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  936.41098, to_step :=  952.70091, color_rgb := '237 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1491.75892, to_step :=  1517.70975, color_rgb := '255 57 0', color_label := '1500', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1598.30244, to_step :=  1626.10671, color_rgb := '255 12 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1712.45544, to_step :=  1742.24553, color_rgb := '233 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  300, to_step :=  305.21884, color_rgb := '0 0 255', color_label := '300', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1965.80265, to_step :=  2000, color_rgb := '173 0 0', color_label := '2000', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  71.54845, to_step :=  102.38363, color_rgb := '105 0 115', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  952.70091, to_step :=  969.27421, color_rgb := '244 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  986.13583, to_step :=  1003.29077, color_rgb := '255 249 0', color_label := '1000', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1003.29077, to_step :=  1020.74414, color_rgb := '255 242 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 152, from_step :=  1020.74414, to_step :=  1038.50114, color_rgb := '255 233 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  936.41098, to_step :=  969.27421, color_rgb := '244 255 15', color_label := '', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1003.29077, to_step :=  1038.50114, color_rgb := '255 233 0', color_label := '', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1038.50114, to_step :=  1074.94721, color_rgb := '255 220 0', color_label := '', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1517.70975, to_step :=  1570.97359, color_rgb := '255 38 0', color_label := '', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  761.35209, to_step :=  788.07165, color_rgb := '166 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  788.07165, to_step :=  815.72893, color_rgb := '179 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  735.53846, to_step :=  761.35209, color_rgb := '153 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  710.60004, to_step :=  735.53846, color_rgb := '139 251 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  686.50716, to_step :=  710.60004, color_rgb := '126 237 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1, to_step :=  90.85603, color_rgb := '90 0 110', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  90.85603, to_step :=  165.09636, color_rgb := '110 0 120', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  165.09636, to_step :=  300, color_rgb := '150 0 160', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  300, to_step :=  310.52846, color_rgb := '0 27 255', color_label := '300', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  310.52846, to_step :=  321.42642, color_rgb := '0 53 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  321.42642, to_step :=  332.70684, color_rgb := '0 75 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  332.70684, to_step :=  344.38315, color_rgb := '0 97 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  344.38315, to_step :=  356.46923, color_rgb := '0 118 255', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  356.46923, to_step :=  368.97947, color_rgb := '0 137 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  368.97947, to_step :=  381.92876, color_rgb := '0 156 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  381.92876, to_step :=  395.33251, color_rgb := '0 174 255', color_label := '', group_label := '' );
@@ -6174,17 +8432,34 @@ SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  598.0
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  619.01987, to_step :=  640.7443, color_rgb := '82 192 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  640.7443, to_step :=  663.23114, color_rgb := '97 209 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  663.23114, to_step :=  686.50716, color_rgb := '111 223 15', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  686.50716, to_step :=  710.60004, color_rgb := '126 237 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  710.60004, to_step :=  735.53846, color_rgb := '139 251 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  735.53846, to_step :=  761.35209, color_rgb := '153 255 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  761.35209, to_step :=  788.07165, color_rgb := '166 255 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  788.07165, to_step :=  815.72893, color_rgb := '179 255 15', color_label := '', group_label := '' );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  969.27421, to_step :=  1003.29077, color_rgb := '255 249 0', color_label := '1000', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1466.25182, to_step :=  1517.70975, color_rgb := '255 57 0', color_label := '1500', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1932.19003, to_step :=  2000, color_rgb := '173 0 0', color_label := '2000', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  815.72893, to_step :=  844.35683, color_rgb := '192 255 15', color_label := '', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  936.41098, to_step :=  969.27421, color_rgb := '244 255 15', color_label := '', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1003.29077, to_step :=  1038.50114, color_rgb := '255 233 0', color_label := '', group_label := NULL );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  844.35683, to_step :=  873.98943, color_rgb := '205 255 15', color_label := '', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  873.98943, to_step :=  904.66198, color_rgb := '219 255 15', color_label := '', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  904.66198, to_step :=  936.41098, color_rgb := '231 255 15', color_label := '', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1074.94721, to_step :=  1112.67234, color_rgb := '255 207 0', color_label := '', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1112.67234, to_step :=  1151.72144, color_rgb := '255 193 0', color_label := '', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1151.72144, to_step :=  1192.14097, color_rgb := '255 176 0', color_label := '', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1192.14097, to_step :=  1233.97901, color_rgb := '255 162 0', color_label := '', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1233.97901, to_step :=  1277.28535, color_rgb := '255 145 0', color_label := '', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1277.28535, to_step :=  1322.11152, color_rgb := '255 126 0', color_label := '', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1322.11152, to_step :=  1368.51086, color_rgb := '255 111 0', color_label := '', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1368.51086, to_step :=  1416.53858, color_rgb := '255 91 0', color_label := '', group_label := NULL );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1416.53858, to_step :=  1466.25182, color_rgb := '255 75 0', color_label := '', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1570.97359, to_step :=  1626.10671, color_rgb := '255 12 0', color_label := '', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1626.10671, to_step :=  1683.17472, color_rgb := '249 0 0', color_label := '', group_label := NULL );
@@ -6192,6 +8467,7 @@ SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1683.
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1742.24553, to_step :=  1803.38943, color_rgb := '220 0 0', color_label := '', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1803.38943, to_step :=  1866.67916, color_rgb := '207 0 0', color_label := '', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 153, from_step :=  1866.67916, to_step :=  1932.19003, color_rgb := '193 0 0', color_label := '', group_label := NULL );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 160, from_step :=  200, to_step :=  300, color_rgb := '192 255 160', color_label := '200', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 160, from_step :=  400, to_step :=  500, color_rgb := '48 224 64', color_label := '400', group_label := NULL );
 SELECT analysis.update_insert_legend_step( legend_id := 160, from_step :=  300, to_step :=  400, color_rgb := '96 255 96', color_label := '300', group_label := NULL );
@@ -6348,16 +8624,174 @@ SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.248
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.30639, to_step :=  0.34052, color_rgb := '97 209 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.34052, to_step :=  0.37845, color_rgb := '111 223 15', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.37845, to_step :=  0.42061, color_rgb := '126 237 15', color_label := '', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 160, from_step :=  100, to_step :=  200, color_rgb := '232 255 200', color_label := '100', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 160, from_step :=  500, to_step :=  600, color_rgb := '16 192 32', color_label := '500', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 160, from_step :=  400, to_step :=  500, color_rgb := '48 224 64', color_label := '400', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 160, from_step :=  200, to_step :=  300, color_rgb := '192 255 160', color_label := '200', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 160, from_step :=  0, to_step :=  100, color_rgb := '255 255 255', color_label := '0', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 160, from_step :=  300, to_step :=  400, color_rgb := '96 255 96', color_label := '300', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 160, from_step :=  600, to_step :=  1000, color_rgb := '0 160 0', color_label := '600', group_label := '1000' );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.11233, to_step :=  0.11842, color_rgb := '0 255 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.10655, to_step :=  0.11233, color_rgb := '0 251 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.34052, to_step :=  0.35899, color_rgb := '104 217 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.10107, to_step :=  0.10655, color_rgb := '0 243 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.07762, to_step :=  0.08183, color_rgb := '0 201 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.06624, to_step :=  0.06984, color_rgb := '0 174 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.07362, to_step :=  0.07762, color_rgb := '0 192 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.06984, to_step :=  0.07362, color_rgb := '0 182 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.08626, to_step :=  0.09094, color_rgb := '0 218 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.08183, to_step :=  0.08626, color_rgb := '0 209 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.09094, to_step :=  0.09587, color_rgb := '0 226 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.97915, to_step :=  1.03225, color_rgb := '237 255 15', color_label := '1', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.11842, to_step :=  0.12485, color_rgb := '15 252 223', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  6.21703, to_step :=  6.55417, color_rgb := '233 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  6.9096, to_step :=  7.28431, color_rgb := '220 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.23529, to_step :=  0.24805, color_rgb := '49 155 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.14628, to_step :=  0.15421, color_rgb := '15 223 133', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.17139, to_step :=  0.18068, color_rgb := '15 201 55', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.22318, to_step :=  0.23529, color_rgb := '40 155 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.16257, to_step :=  0.17139, color_rgb := '15 209 84', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.27568, to_step :=  0.29063, color_rgb := '74 183 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.2117, to_step :=  0.22318, color_rgb := '31 165 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.18068, to_step :=  0.19048, color_rgb := '15 191 27', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.20081, to_step :=  0.2117, color_rgb := '20 173 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.19048, to_step :=  0.20081, color_rgb := '15 182 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  5.59387, to_step :=  5.89722, color_rgb := '249 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.24805, to_step :=  0.2615, color_rgb := '58 165 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.323, to_step :=  0.34052, color_rgb := '97 209 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.2615, to_step :=  0.27568, color_rgb := '66 173 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.30639, to_step :=  0.323, color_rgb := '90 201 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  5.89722, to_step :=  6.21703, color_rgb := '242 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  7.67934, to_step :=  8.09578, color_rgb := '207 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.03, to_step :=  0.03163, color_rgb := '0 0 255', color_label := '0.03', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.13875, to_step :=  0.14628, color_rgb := '15 230 157', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  2.05089, to_step :=  2.16211, color_rgb := '255 169 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.51955, to_step :=  0.54772, color_rgb := '159 255 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  4.29572, to_step :=  4.52867, color_rgb := '255 48 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.37845, to_step :=  0.39898, color_rgb := '119 229 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.49282, to_step :=  0.51955, color_rgb := '153 255 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.35899, to_step :=  0.37845, color_rgb := '111 223 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.13162, to_step :=  0.13875, color_rgb := '15 237 180', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.64175, to_step :=  0.67655, color_rgb := '185 255 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.54772, to_step :=  0.57743, color_rgb := '166 255 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.12485, to_step :=  0.13162, color_rgb := '15 247 202', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.83569, to_step :=  0.881, color_rgb := '219 255 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  1.20945, to_step :=  1.27504, color_rgb := '255 242 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.06284, to_step :=  0.06624, color_rgb := '0 164 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  1.03225, to_step :=  1.08823, color_rgb := '244 255 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.92878, to_step :=  0.97915, color_rgb := '231 255 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.05087, to_step :=  0.05363, color_rgb := '0 128 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  1.84532, to_step :=  1.94539, color_rgb := '255 183 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.04118, to_step :=  0.04342, color_rgb := '0 86 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  1.14724, to_step :=  1.20945, color_rgb := '255 249 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.04577, to_step :=  0.04825, color_rgb := '0 107 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  1.08823, to_step :=  1.14724, color_rgb := '252 255 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.03334, to_step :=  0.03515, color_rgb := '0 41 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.03706, to_step :=  0.03907, color_rgb := '0 65 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  1.7504, to_step :=  1.84532, color_rgb := '255 193 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  1.34419, to_step :=  1.41708, color_rgb := '255 226 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  1.27504, to_step :=  1.34419, color_rgb := '255 233 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  1.41708, to_step :=  1.49393, color_rgb := '255 220 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  1.66036, to_step :=  1.7504, color_rgb := '255 200 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  1.57495, to_step :=  1.66036, color_rgb := '255 207 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  1.49393, to_step :=  1.57495, color_rgb := '255 213 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  2.67066, to_step :=  2.81549, color_rgb := '255 126 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  2.27936, to_step :=  2.40297, color_rgb := '255 155 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  2.16211, to_step :=  2.27936, color_rgb := '255 162 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  5.03317, to_step :=  5.30612, color_rgb := '255 12 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  2.53328, to_step :=  2.67066, color_rgb := '255 137 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  2.40297, to_step :=  2.53328, color_rgb := '255 145 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  3.86514, to_step :=  4.07475, color_rgb := '255 66 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  3.12913, to_step :=  3.29883, color_rgb := '255 103 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  2.81549, to_step :=  2.96817, color_rgb := '255 119 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  3.29883, to_step :=  3.47772, color_rgb := '255 91 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  3.66632, to_step :=  3.86514, color_rgb := '255 75 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  3.47772, to_step :=  3.66632, color_rgb := '255 83 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  4.77426, to_step :=  5.03317, color_rgb := '255 22 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  4.07475, to_step :=  4.29572, color_rgb := '255 57 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  9.4856, to_step :=  10, color_rgb := '173 0 0', color_label := '10', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  2.96817, to_step :=  3.12913, color_rgb := '255 111 0', color_label := '3', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  6.55417, to_step :=  6.9096, color_rgb := '226 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  5.30612, to_step :=  5.59387, color_rgb := '255 4 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.15421, to_step :=  0.16257, color_rgb := '15 217 110', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  7.28431, to_step :=  7.67934, color_rgb := '213 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.29063, to_step :=  0.30639, color_rgb := '82 192 15', color_label := '0.30', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  8.09578, to_step :=  8.53482, color_rgb := '200 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  4.52867, to_step :=  4.77426, color_rgb := '255 38 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  8.53482, to_step :=  8.99766, color_rgb := '193 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.09587, to_step :=  0.10107, color_rgb := '0 234 255', color_label := '0.10', group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  8.99766, to_step :=  9.4856, color_rgb := '183 0 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  1e-05, to_step :=  0.01246, color_rgb := '90 0 110', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.02408, to_step :=  0.03, color_rgb := '150 0 160', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.71324, to_step :=  0.75192, color_rgb := '198 255 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.01246, to_step :=  0.01552, color_rgb := '105 0 115', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.01552, to_step :=  0.01933, color_rgb := '110 0 120', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.01933, to_step :=  0.02408, color_rgb := '130 0 140', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.03163, to_step :=  0.03334, color_rgb := '0 27 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.03515, to_step :=  0.03706, color_rgb := '0 53 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.03907, to_step :=  0.04118, color_rgb := '0 75 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.04342, to_step :=  0.04577, color_rgb := '0 97 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.04825, to_step :=  0.05087, color_rgb := '0 118 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.05654, to_step :=  0.0596, color_rgb := '0 147 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.67655, to_step :=  0.71324, color_rgb := '192 255 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.05363, to_step :=  0.05654, color_rgb := '0 137 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.0596, to_step :=  0.06284, color_rgb := '0 156 255', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.7927, to_step :=  0.83569, color_rgb := '213 255 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.75192, to_step :=  0.7927, color_rgb := '205 255 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.60874, to_step :=  0.64175, color_rgb := '179 255 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.57743, to_step :=  0.60874, color_rgb := '172 255 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.881, to_step :=  0.92878, color_rgb := '225 255 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  1.94539, to_step :=  2.05089, color_rgb := '255 176 0', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.44342, to_step :=  0.46747, color_rgb := '139 251 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.42061, to_step :=  0.44342, color_rgb := '132 245 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.39898, to_step :=  0.42061, color_rgb := '126 237 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 201, from_step :=  0.46747, to_step :=  0.49282, color_rgb := '146 255 15', color_label := NULL, group_label := NULL );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.03706, to_step :=  0.04118, color_rgb := '0 75 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.13162, to_step :=  0.14628, color_rgb := '15 230 157', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.18068, to_step :=  0.20081, color_rgb := '15 182 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  3.12913, to_step :=  3.47772, color_rgb := '255 91 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  2.81549, to_step :=  3.12913, color_rgb := '255 111 0', color_label := '3', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.20081, to_step :=  0.22318, color_rgb := '31 165 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  1.84532, to_step :=  2.05089, color_rgb := '255 176 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.57743, to_step :=  0.64175, color_rgb := '179 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.71324, to_step :=  0.7927, color_rgb := '205 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.64175, to_step :=  0.71324, color_rgb := '192 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.37845, to_step :=  0.42061, color_rgb := '126 237 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.34052, to_step :=  0.37845, color_rgb := '111 223 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.30639, to_step :=  0.34052, color_rgb := '97 209 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.24805, to_step :=  0.27568, color_rgb := '66 173 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.27568, to_step :=  0.30639, color_rgb := '82 192 15', color_label := '0.30', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.11842, to_step :=  0.13162, color_rgb := '15 247 202', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.06284, to_step :=  0.06984, color_rgb := '0 174 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.06984, to_step :=  0.07762, color_rgb := '0 192 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.09587, to_step :=  0.10655, color_rgb := '0 243 255', color_label := '0.10', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.22318, to_step :=  0.24805, color_rgb := '49 155 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.10655, to_step :=  0.11842, color_rgb := '0 255 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.16257, to_step :=  0.18068, color_rgb := '15 201 55', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.42061, to_step :=  0.46747, color_rgb := '139 251 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.46747, to_step :=  0.51955, color_rgb := '153 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.51955, to_step :=  0.57743, color_rgb := '166 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.7927, to_step :=  0.881, color_rgb := '219 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.881, to_step :=  0.97915, color_rgb := '231 255 15', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.97915, to_step :=  1.08823, color_rgb := '244 255 15', color_label := '1', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  1e-05, to_step :=  0.01442, color_rgb := '90 0 110', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  1.08823, to_step :=  1.20945, color_rgb := '255 249 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  1.20945, to_step :=  1.34419, color_rgb := '255 233 0', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.16257, to_step :=  0.18068, color_rgb := '15 201 55', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  1.84532, to_step :=  2.05089, color_rgb := '255 176 0', color_label := '', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  1.34419, to_step :=  1.49393, color_rgb := '255 220 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  1.49393, to_step :=  1.66036, color_rgb := '255 207 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  1.66036, to_step :=  1.84532, color_rgb := '255 193 0', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  2.05089, to_step :=  2.27936, color_rgb := '255 162 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  2.27936, to_step :=  2.53328, color_rgb := '255 145 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.01442, to_step :=  0.0208, color_rgb := '110 0 120', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  2.53328, to_step :=  2.81549, color_rgb := '255 126 0', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  2.81549, to_step :=  3.12913, color_rgb := '255 111 0', color_label := '3', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  3.12913, to_step :=  3.47772, color_rgb := '255 91 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  3.47772, to_step :=  3.86514, color_rgb := '255 75 0', color_label := '', group_label := '' );
@@ -6365,12 +8799,26 @@ SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  4.774
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  5.30612, to_step :=  5.89722, color_rgb := '249 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  8.09578, to_step :=  8.99766, color_rgb := '193 0 0', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  8.99766, to_step :=  10, color_rgb := '173 0 0', color_label := '10', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  3.47772, to_step :=  3.86514, color_rgb := '255 75 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  3.86514, to_step :=  4.29572, color_rgb := '255 57 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  4.29572, to_step :=  4.77426, color_rgb := '255 38 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  4.77426, to_step :=  5.30612, color_rgb := '255 12 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  5.30612, to_step :=  5.89722, color_rgb := '249 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  5.89722, to_step :=  6.55417, color_rgb := '233 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  6.55417, to_step :=  7.28431, color_rgb := '220 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  7.28431, to_step :=  8.09578, color_rgb := '207 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  8.09578, to_step :=  8.99766, color_rgb := '193 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  8.99766, to_step :=  10, color_rgb := '173 0 0', color_label := '10', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.0208, to_step :=  0.03, color_rgb := '150 0 160', color_label := '0.03', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.04118, to_step :=  0.04577, color_rgb := '0 97 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.04577, to_step :=  0.05087, color_rgb := '0 118 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.05087, to_step :=  0.05654, color_rgb := '0 137 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.03334, to_step :=  0.03706, color_rgb := '0 53 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.05654, to_step :=  0.06284, color_rgb := '0 156 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.08626, to_step :=  0.09587, color_rgb := '0 226 255', color_label := '', group_label := '' );
+<<<<<<< HEAD
 SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.07762, to_step :=  0.08626, color_rgb := '0 209 255', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.54772, to_step :=  0.55517, color_rgb := '0 255 31', color_label := '', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.49834, to_step :=  0.50512, color_rgb := '0 255 87', color_label := '', group_label := '' );
@@ -7772,6 +10220,1360 @@ SELECT analysis.update_insert_legend_step( legend_id := 214, from_step :=  25.5,
 SELECT analysis.update_insert_legend_step( legend_id := 214, from_step :=  50, to_step :=  52.5, color_rgb := '200 0 0', color_label := '50.0', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 214, from_step :=  40, to_step :=  42.5, color_rgb := '255 55 0', color_label := '40.0', group_label := '' );
 SELECT analysis.update_insert_legend_step( legend_id := 214, from_step :=  26.5, to_step :=  27, color_rgb := '170 255 255', color_label := '12.5', group_label := '' );
+=======
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.14628, to_step :=  0.16257, color_rgb := '15 217 110', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.03, to_step :=  0.03334, color_rgb := '0 27 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 202, from_step :=  0.07762, to_step :=  0.08626, color_rgb := '0 209 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.35297, to_step :=  1.37135, color_rgb := '255 123 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.105, to_step :=  1.12002, color_rgb := '255 183 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.10413, to_step :=  0.10555, color_rgb := '138 0 117', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.09019, to_step :=  1.105, color_rgb := '255 187 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.03289, to_step :=  1.04693, color_rgb := '255 203 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.21449, to_step :=  1.23099, color_rgb := '255 155 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.19821, to_step :=  1.21449, color_rgb := '255 159 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.7471, to_step :=  0.75725, color_rgb := '168 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.10555, to_step :=  0.10698, color_rgb := '135 0 120', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.99191, to_step :=  1.00538, color_rgb := '255 215 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.18215, to_step :=  1.19821, color_rgb := '255 163 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.1663, to_step :=  1.18215, color_rgb := '255 167 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.01905, to_step :=  1.03289, color_rgb := '255 207 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.64402, to_step :=  0.65277, color_rgb := '72 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.15066, to_step :=  1.1663, color_rgb := '255 171 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.07557, to_step :=  1.09019, color_rgb := '255 191 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.06115, to_step :=  1.07557, color_rgb := '255 195 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.04693, to_step :=  1.06115, color_rgb := '255 199 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.13524, to_step :=  1.15066, color_rgb := '255 175 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.12002, to_step :=  1.13524, color_rgb := '255 179 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.37135, to_step :=  1.38999, color_rgb := '255 123 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.24772, to_step :=  1.26468, color_rgb := '255 147 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.23099, to_step :=  1.24772, color_rgb := '255 151 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.63539, to_step :=  0.64402, color_rgb := '64 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.1114, to_step :=  0.11292, color_rgb := '123 0 132', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.28186, to_step :=  1.29928, color_rgb := '255 139 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.26468, to_step :=  1.28186, color_rgb := '255 143 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.33483, to_step :=  1.35297, color_rgb := '255 127 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.31693, to_step :=  1.33483, color_rgb := '255 131 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.44742, to_step :=  1.46709, color_rgb := '255 107 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.63437, to_step :=  1.65658, color_rgb := '255 71 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.61246, to_step :=  1.63437, color_rgb := '255 75 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.54847, to_step :=  1.56951, color_rgb := '255 87 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.59084, to_step :=  1.61246, color_rgb := '255 79 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.56951, to_step :=  1.59084, color_rgb := '255 83 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.67909, to_step :=  1.7019, color_rgb := '255 63 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.82072, to_step :=  1.84546, color_rgb := '255 39 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.7019, to_step :=  1.72503, color_rgb := '255 59 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.79631, to_step :=  1.82072, color_rgb := '255 43 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.77223, to_step :=  1.79631, color_rgb := '255 47 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.74847, to_step :=  1.77223, color_rgb := '255 51 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.72503, to_step :=  1.74847, color_rgb := '255 55 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.05587, to_step :=  2.08381, color_rgb := '255 3 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.89595, to_step :=  1.92171, color_rgb := '255 27 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.87053, to_step :=  1.89595, color_rgb := '255 31 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.16992, to_step :=  2.1994, color_rgb := '240 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.14083, to_step :=  2.16992, color_rgb := '245 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.11213, to_step :=  2.14083, color_rgb := '250 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.29028, to_step :=  2.32141, color_rgb := '220 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.36046, to_step :=  0.36535, color_rgb := '0 240 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.62687, to_step :=  0.63539, color_rgb := '56 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.65685, to_step :=  2.69295, color_rgb := '165 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.48347, to_step :=  2.51722, color_rgb := '190 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.35562, to_step :=  0.36046, color_rgb := '0 234 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.61017, to_step :=  0.61846, color_rgb := '40 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.69295, to_step :=  2.72954, color_rgb := '160 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.80423, to_step :=  2.84233, color_rgb := '145 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.84233, to_step :=  2.88096, color_rgb := '140 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.37535, to_step :=  0.38045, color_rgb := '0 255 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.56271, to_step :=  0.57036, color_rgb := '0 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.57811, to_step :=  0.58596, color_rgb := '8 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.57036, to_step :=  0.57811, color_rgb := '0 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.76663, to_step :=  2.80423, color_rgb := '150 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.58596, to_step :=  0.59392, color_rgb := '16 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.29439, to_step :=  0.29839, color_rgb := '0 160 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.88096, to_step :=  2.9201, color_rgb := '135 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.60199, to_step :=  0.61017, color_rgb := '32 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.59392, to_step :=  0.60199, color_rgb := '24 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.55517, to_step :=  0.56271, color_rgb := '0 255 23', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.9201, to_step :=  2.95978, color_rgb := '130 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.61846, to_step :=  0.62687, color_rgb := '48 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  3, to_step :=  10, color_rgb := '112 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.95978, to_step :=  3, color_rgb := '125 0 0', color_label := '3.00', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.7272, to_step :=  0.73708, color_rgb := '144 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.72954, to_step :=  2.76663, color_rgb := '155 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.45018, to_step :=  2.48347, color_rgb := '195 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.51722, to_step :=  2.55142, color_rgb := '185 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.55142, to_step :=  2.58609, color_rgb := '180 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.58609, to_step :=  2.62123, color_rgb := '175 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.38492, to_step :=  2.41733, color_rgb := '205 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.62123, to_step :=  2.65685, color_rgb := '170 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.41733, to_step :=  2.45018, color_rgb := '200 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.40701, to_step :=  0.41254, color_rgb := '0 255 207', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.69834, to_step :=  0.70783, color_rgb := '120 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.32141, to_step :=  2.35295, color_rgb := '215 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.97861, to_step :=  0.99191, color_rgb := '255 219 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.96549, to_step :=  0.97861, color_rgb := '255 223 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.35295, to_step :=  2.38492, color_rgb := '210 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.73708, to_step :=  0.7471, color_rgb := '152 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.22929, to_step :=  2.25958, color_rgb := '230 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.68898, to_step :=  0.69834, color_rgb := '112 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.10698, to_step :=  0.10844, color_rgb := '132 0 123', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.11758, to_step :=  0.11918, color_rgb := '111 0 144', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.75725, to_step :=  0.76754, color_rgb := '176 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.76754, to_step :=  0.77797, color_rgb := '184 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.97429, to_step :=  2.00112, color_rgb := '255 15 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.10844, to_step :=  0.10991, color_rgb := '129 0 126', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.1994, to_step :=  2.22929, color_rgb := '235 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.10991, to_step :=  0.1114, color_rgb := '126 0 129', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.25958, to_step :=  2.29028, color_rgb := '225 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.11292, to_step :=  0.11445, color_rgb := '120 0 135', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.08381, to_step :=  2.11213, color_rgb := '255 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.11445, to_step :=  0.11601, color_rgb := '117 0 138', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.11601, to_step :=  0.11758, color_rgb := '114 0 141', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.12579, to_step :=  0.1275, color_rgb := '96 0 159', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.1, to_step :=  0.10413, color_rgb := '141 0 114', color_label := '0.10', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.92171, to_step :=  1.94783, color_rgb := '255 23 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.00112, to_step :=  2.02831, color_rgb := '255 11 0', color_label := '2.00', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  2.02831, to_step :=  2.05587, color_rgb := '255 7 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.94783, to_step :=  1.97429, color_rgb := '255 19 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.84546, to_step :=  1.87053, color_rgb := '255 35 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.29045, to_step :=  0.29439, color_rgb := '0 154 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.1241, to_step :=  0.12579, color_rgb := '99 0 156', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.65277, to_step :=  0.66164, color_rgb := '80 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.12244, to_step :=  0.1241, color_rgb := '102 0 153', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.28655, to_step :=  0.29045, color_rgb := '0 149 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.1208, to_step :=  0.12244, color_rgb := '105 0 150', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.12923, to_step :=  0.13099, color_rgb := '90 0 165', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.13825, to_step :=  0.14013, color_rgb := '75 0 180', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.1275, to_step :=  0.12923, color_rgb := '93 0 162', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.1364, to_step :=  0.13825, color_rgb := '78 0 177', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.13099, to_step :=  0.13277, color_rgb := '87 0 168', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.13457, to_step :=  0.1364, color_rgb := '81 0 174', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.13277, to_step :=  0.13457, color_rgb := '84 0 171', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.14013, to_step :=  0.14204, color_rgb := '72 0 183', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.67975, to_step :=  0.68898, color_rgb := '104 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.67063, to_step :=  0.67975, color_rgb := '96 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.66164, to_step :=  0.67063, color_rgb := '88 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.34151, to_step :=  0.34615, color_rgb := '0 218 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.33693, to_step :=  0.34151, color_rgb := '0 213 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.28271, to_step :=  0.28655, color_rgb := '0 144 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.21294, to_step :=  0.21583, color_rgb := '0 32 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.30245, to_step :=  0.30656, color_rgb := '0 170 255', color_label := '0.30', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.29839, to_step :=  0.30245, color_rgb := '0 165 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.32796, to_step :=  0.33242, color_rgb := '0 202 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.33242, to_step :=  0.33693, color_rgb := '0 208 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.31072, to_step :=  0.31495, color_rgb := '0 181 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.31495, to_step :=  0.31923, color_rgb := '0 186 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.32356, to_step :=  0.32796, color_rgb := '0 197 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.31923, to_step :=  0.32356, color_rgb := '0 192 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.70783, to_step :=  0.71745, color_rgb := '128 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.71745, to_step :=  0.7272, color_rgb := '136 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.15402, to_step :=  0.15611, color_rgb := '51 0 204', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.41254, to_step :=  0.41815, color_rgb := '0 255 199', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.82112, to_step :=  0.83228, color_rgb := '224 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.40155, to_step :=  0.40701, color_rgb := '0 255 215', color_label := '0.40', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.78854, to_step :=  0.79925, color_rgb := '200 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.77797, to_step :=  0.78854, color_rgb := '192 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.54772, to_step :=  0.55517, color_rgb := '0 255 31', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.81012, to_step :=  0.82112, color_rgb := '216 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.79925, to_step :=  0.81012, color_rgb := '208 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.93978, to_step :=  0.95255, color_rgb := '255 231 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.89039, to_step :=  0.90248, color_rgb := '255 247 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.87845, to_step :=  0.89039, color_rgb := '255 251 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.11918, to_step :=  0.1208, color_rgb := '108 0 147', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.34615, to_step :=  0.35086, color_rgb := '0 224 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.37032, to_step :=  0.37535, color_rgb := '0 250 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.35086, to_step :=  0.35562, color_rgb := '0 229 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.36535, to_step :=  0.37032, color_rgb := '0 245 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.38562, to_step :=  0.39086, color_rgb := '0 255 239', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.38045, to_step :=  0.38562, color_rgb := '0 255 247', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.39086, to_step :=  0.39617, color_rgb := '0 255 231', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.86667, to_step :=  0.87845, color_rgb := '255 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.85505, to_step :=  0.86667, color_rgb := '248 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.84359, to_step :=  0.85505, color_rgb := '240 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.83228, to_step :=  0.84359, color_rgb := '232 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.39617, to_step :=  0.40155, color_rgb := '0 255 223', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.42802, to_step :=  1.44742, color_rgb := '255 111 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.14791, to_step :=  0.14992, color_rgb := '60 0 195', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.16701, to_step :=  0.16928, color_rgb := '33 0 222', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.90248, to_step :=  0.91475, color_rgb := '255 243 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.21008, to_step :=  0.21294, color_rgb := '0 26 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.48703, to_step :=  1.50723, color_rgb := '255 99 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.14592, to_step :=  0.14791, color_rgb := '63 0 192', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.14204, to_step :=  0.14397, color_rgb := '69 0 186', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.52771, to_step :=  1.54847, color_rgb := '255 91 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.50723, to_step :=  1.52771, color_rgb := '255 95 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.14397, to_step :=  0.14592, color_rgb := '66 0 189', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.16477, to_step :=  0.16701, color_rgb := '36 0 219', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.15195, to_step :=  0.15402, color_rgb := '54 0 201', color_label := '0.15', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.92718, to_step :=  0.93978, color_rgb := '255 235 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.91475, to_step :=  0.92718, color_rgb := '255 239 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.14992, to_step :=  0.15195, color_rgb := '57 0 198', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.15611, to_step :=  0.15823, color_rgb := '48 0 207', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.16256, to_step :=  0.16477, color_rgb := '39 0 216', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.16038, to_step :=  0.16256, color_rgb := '42 0 213', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.40887, to_step :=  1.42802, color_rgb := '255 115 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.15823, to_step :=  0.16038, color_rgb := '45 0 210', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.30656, to_step :=  0.31072, color_rgb := '0 176 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.20727, to_step :=  0.21008, color_rgb := '0 21 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.18356, to_step :=  0.18605, color_rgb := '15 0 240', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.38999, to_step :=  1.40887, color_rgb := '255 119 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.16928, to_step :=  0.17158, color_rgb := '30 0 225', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.65658, to_step :=  1.67909, color_rgb := '255 67 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.17391, to_step :=  0.17627, color_rgb := '24 0 231', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.1811, to_step :=  0.18356, color_rgb := '18 0 237', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.17867, to_step :=  0.1811, color_rgb := '21 0 234', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.17627, to_step :=  0.17867, color_rgb := '24 0 231', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.46709, to_step :=  1.48703, color_rgb := '255 103 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.20449, to_step :=  0.20727, color_rgb := '0 16 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.19114, to_step :=  0.19374, color_rgb := '6 0 249', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.18858, to_step :=  0.19114, color_rgb := '9 0 246', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.18605, to_step :=  0.18858, color_rgb := '12 0 243', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.19374, to_step :=  0.19637, color_rgb := '0 0 252', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.20175, to_step :=  0.20449, color_rgb := '0 10 255', color_label := '0.20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.19904, to_step :=  0.20175, color_rgb := '0 5 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.19637, to_step :=  0.19904, color_rgb := '0 0 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.21583, to_step :=  0.21876, color_rgb := '0 37 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.95255, to_step :=  0.96549, color_rgb := '255 227 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.01, to_step :=  0.1, color_rgb := '88 0 69', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.54038, to_step :=  0.54772, color_rgb := '0 255 39', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.27892, to_step :=  0.28271, color_rgb := '0 138 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.17158, to_step :=  0.17391, color_rgb := '27 0 228', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.21876, to_step :=  0.22173, color_rgb := '0 42 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.2309, to_step :=  0.23403, color_rgb := '0 64 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.2278, to_step :=  0.2309, color_rgb := '0 58 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.22173, to_step :=  0.22475, color_rgb := '0 48 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.45342, to_step :=  0.45958, color_rgb := '0 255 143', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.42383, to_step :=  0.42959, color_rgb := '0 255 183', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.41815, to_step :=  0.42383, color_rgb := '0 255 191', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.22475, to_step :=  0.2278, color_rgb := '0 53 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.29928, to_step :=  1.31693, color_rgb := '255 135 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.43543, to_step :=  0.44134, color_rgb := '0 255 167', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.44734, to_step :=  0.45342, color_rgb := '0 255 151', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.44134, to_step :=  0.44734, color_rgb := '0 255 159', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.42959, to_step :=  0.43543, color_rgb := '0 255 175', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.46582, to_step :=  0.47215, color_rgb := '0 255 127', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.45958, to_step :=  0.46582, color_rgb := '0 255 135', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.23721, to_step :=  0.24044, color_rgb := '0 74 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.53314, to_step :=  0.54038, color_rgb := '0 255 47', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.23403, to_step :=  0.23721, color_rgb := '0 69 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.27518, to_step :=  0.27892, color_rgb := '0 133 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.26785, to_step :=  0.27149, color_rgb := '0 122 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.26426, to_step :=  0.26785, color_rgb := '0 117 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.24702, to_step :=  0.25037, color_rgb := '0 90 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.24371, to_step :=  0.24702, color_rgb := '0 85 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.24044, to_step :=  0.24371, color_rgb := '0 80 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.25037, to_step :=  0.25378, color_rgb := '0 96 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.26072, to_step :=  0.26426, color_rgb := '0 112 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.25722, to_step :=  0.26072, color_rgb := '0 106 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.25378, to_step :=  0.25722, color_rgb := '0 101 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.50512, to_step :=  0.51198, color_rgb := '0 255 79', color_label := '0.50', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.47215, to_step :=  0.47857, color_rgb := '0 255 119', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.27149, to_step :=  0.27518, color_rgb := '0 128 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.52599, to_step :=  0.53314, color_rgb := '0 255 55', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.47857, to_step :=  0.48507, color_rgb := '0 255 111', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.49834, to_step :=  0.50512, color_rgb := '0 255 87', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.49166, to_step :=  0.49834, color_rgb := '0 255 95', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.48507, to_step :=  0.49166, color_rgb := '0 255 103', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  1.00538, to_step :=  1.01905, color_rgb := '255 211 0', color_label := '1.00', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.51894, to_step :=  0.52599, color_rgb := '0 255 63', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 204, from_step :=  0.51198, to_step :=  0.51894, color_rgb := '0 255 71', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.11574, to_step :=  0.1168, color_rgb := '99 0 156', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.70665, to_step :=  0.71314, color_rgb := '255 43 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.59948, to_step :=  0.60499, color_rgb := '255 115 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.59403, to_step :=  0.59948, color_rgb := '255 119 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.48144, to_step :=  0.48586, color_rgb := '255 207 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.10957, to_step :=  0.11057, color_rgb := '117 0 138', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.10857, to_step :=  0.10957, color_rgb := '120 0 135', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.11469, to_step :=  0.11574, color_rgb := '102 0 153', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.10372, to_step :=  0.10467, color_rgb := '135 0 120', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.11896, to_step :=  0.12005, color_rgb := '90 0 165', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.11057, to_step :=  0.11159, color_rgb := '114 0 141', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.25629, to_step :=  0.25864, color_rgb := '0 255 215', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.1168, to_step :=  0.11788, color_rgb := '96 0 159', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.12005, to_step :=  0.12115, color_rgb := '87 0 168', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.29936, to_step :=  0.30211, color_rgb := '0 255 79', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.12115, to_step :=  0.12226, color_rgb := '84 0 171', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.14412, to_step :=  0.14544, color_rgb := '27 0 228', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.4475, to_step :=  0.45161, color_rgb := '255 239 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.23178, to_step :=  0.23391, color_rgb := '0 224 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.18111, to_step :=  0.18277, color_rgb := '0 80 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.4394, to_step :=  0.44343, color_rgb := '255 247 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.41977, to_step :=  0.42363, color_rgb := '232 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.33101, to_step :=  0.33405, color_rgb := '16 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.14544, to_step :=  0.14678, color_rgb := '24 0 231', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.76722, to_step :=  0.77426, color_rgb := '255 7 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.42752, to_step :=  0.43144, color_rgb := '248 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.17621, to_step :=  0.17783, color_rgb := '0 64 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.39018, to_step :=  0.39377, color_rgb := '168 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.41217, to_step :=  0.41596, color_rgb := '216 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.39377, to_step :=  0.39738, color_rgb := '176 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.12452, to_step :=  0.12566, color_rgb := '75 0 180', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.33405, to_step :=  0.33711, color_rgb := '24 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.36268, to_step :=  0.36601, color_rgb := '96 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.36601, to_step :=  0.36937, color_rgb := '104 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.33711, to_step :=  0.34021, color_rgb := '32 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.35611, to_step :=  0.35938, color_rgb := '80 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.12682, to_step :=  0.12798, color_rgb := '69 0 186', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.31335, to_step :=  0.31623, color_rgb := '0 255 39', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.58327, to_step :=  0.58863, color_rgb := '255 123 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.14678, to_step :=  0.14813, color_rgb := '24 0 231', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.13396, to_step :=  0.13519, color_rgb := '51 0 204', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.13154, to_step :=  0.13274, color_rgb := '57 0 198', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.6751, to_step :=  0.68129, color_rgb := '255 63 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.12915, to_step :=  0.13034, color_rgb := '63 0 192', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.13034, to_step :=  0.13154, color_rgb := '60 0 195', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.13274, to_step :=  0.13396, color_rgb := '54 0 201', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.73969, to_step :=  0.74648, color_rgb := '255 23 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.27073, to_step :=  0.27322, color_rgb := '0 255 167', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.47706, to_step :=  0.48144, color_rgb := '255 211 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.48586, to_step :=  0.49032, color_rgb := '255 203 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.27573, to_step :=  0.27826, color_rgb := '0 255 151', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.14281, to_step :=  0.14412, color_rgb := '30 0 225', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.49936, to_step :=  0.50394, color_rgb := '255 191 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.47272, to_step :=  0.47706, color_rgb := '255 215 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.14022, to_step :=  0.14151, color_rgb := '36 0 219', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.60499, to_step :=  0.61054, color_rgb := '255 111 0', color_label := '0.60', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.12226, to_step :=  0.12339, color_rgb := '81 0 174', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.17946, to_step :=  0.18111, color_rgb := '0 74 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.79578, to_step :=  0.80309, color_rgb := '245 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.13769, to_step :=  0.13895, color_rgb := '42 0 213', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.16834, to_step :=  0.16989, color_rgb := '0 37 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.80309, to_step :=  0.81046, color_rgb := '240 0 0', color_label := '0.80', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.15224, to_step :=  0.15364, color_rgb := '12 0 243', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.15364, to_step :=  0.15505, color_rgb := '9 0 246', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.15086, to_step :=  0.15224, color_rgb := '15 0 240', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.5275, to_step :=  0.53234, color_rgb := '255 167 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.16989, to_step :=  0.17145, color_rgb := '0 42 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.15505, to_step :=  0.15647, color_rgb := '6 0 249', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.15647, to_step :=  0.15791, color_rgb := '0 0 252', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.22346, to_step :=  0.22551, color_rgb := '0 202 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.24262, to_step :=  0.24484, color_rgb := '0 250 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.78854, to_step :=  0.79578, color_rgb := '250 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.24484, to_step :=  0.24709, color_rgb := '0 255 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.81046, to_step :=  0.8179, color_rgb := '235 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.11365, to_step :=  0.11469, color_rgb := '105 0 150', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.16379, to_step :=  0.16529, color_rgb := '0 21 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.77426, to_step :=  0.78137, color_rgb := '255 3 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.22551, to_step :=  0.22758, color_rgb := '0 208 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.23822, to_step :=  0.24041, color_rgb := '0 240 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.16529, to_step :=  0.16681, color_rgb := '0 26 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.22758, to_step :=  0.22967, color_rgb := '0 213 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.8179, to_step :=  0.8254, color_rgb := '230 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.19307, to_step :=  0.19484, color_rgb := '0 117 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.17783, to_step :=  0.17946, color_rgb := '0 69 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.21154, to_step :=  0.21348, color_rgb := '0 170 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.16681, to_step :=  0.16834, color_rgb := '0 32 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.21742, to_step :=  0.21942, color_rgb := '0 186 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.17461, to_step :=  0.17621, color_rgb := '0 58 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.13519, to_step :=  0.13643, color_rgb := '48 0 207', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.19844, to_step :=  0.20026, color_rgb := '0 133 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.19131, to_step :=  0.19307, color_rgb := '0 112 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.18277, to_step :=  0.18445, color_rgb := '0 85 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.20771, to_step :=  0.20962, color_rgb := '0 160 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.19484, to_step :=  0.19663, color_rgb := '0 122 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.20026, to_step :=  0.20209, color_rgb := '0 138 255', color_label := '0.20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.18957, to_step :=  0.19131, color_rgb := '0 106 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.46416, to_step :=  0.46842, color_rgb := '255 223 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.18445, to_step :=  0.18614, color_rgb := '0 90 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.78137, to_step :=  0.78854, color_rgb := '255 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.19663, to_step :=  0.19844, color_rgb := '0 128 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.18614, to_step :=  0.18785, color_rgb := '0 96 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.18785, to_step :=  0.18957, color_rgb := '0 101 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.20209, to_step :=  0.20395, color_rgb := '0 144 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.12339, to_step :=  0.12452, color_rgb := '78 0 177', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.15791, to_step :=  0.15936, color_rgb := '0 0 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.20582, to_step :=  0.20771, color_rgb := '0 154 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.63908, to_step :=  0.64495, color_rgb := '255 87 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.16082, to_step :=  0.1623, color_rgb := '0 10 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.1623, to_step :=  0.16379, color_rgb := '0 16 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.13643, to_step :=  0.13769, color_rgb := '45 0 210', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.14813, to_step :=  0.14949, color_rgb := '21 0 234', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.14949, to_step :=  0.15086, color_rgb := '18 0 237', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.20395, to_step :=  0.20582, color_rgb := '0 149 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.13895, to_step :=  0.14022, color_rgb := '39 0 216', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.12798, to_step :=  0.12915, color_rgb := '66 0 189', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.20962, to_step :=  0.21154, color_rgb := '0 165 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.12566, to_step :=  0.12682, color_rgb := '72 0 183', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.17302, to_step :=  0.17461, color_rgb := '0 53 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.51324, to_step :=  0.51795, color_rgb := '255 179 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.50857, to_step :=  0.51324, color_rgb := '255 183 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.17145, to_step :=  0.17302, color_rgb := '0 48 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.11159, to_step :=  0.11261, color_rgb := '111 0 144', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.11788, to_step :=  0.11896, color_rgb := '93 0 162', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.11261, to_step :=  0.11365, color_rgb := '108 0 147', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.10467, to_step :=  0.10564, color_rgb := '132 0 123', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.10564, to_step :=  0.10661, color_rgb := '129 0 126', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.69386, to_step :=  0.70023, color_rgb := '255 51 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.21544, to_step :=  0.21742, color_rgb := '0 181 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.55216, to_step :=  0.55723, color_rgb := '255 147 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.56234, to_step :=  0.5675, color_rgb := '255 139 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.55723, to_step :=  0.56234, color_rgb := '255 143 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.53234, to_step :=  0.53723, color_rgb := '255 163 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.5675, to_step :=  0.57271, color_rgb := '255 135 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.57271, to_step :=  0.57797, color_rgb := '255 131 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.23606, to_step :=  0.23822, color_rgb := '0 234 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.24041, to_step :=  0.24262, color_rgb := '0 245 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.21348, to_step :=  0.21544, color_rgb := '0 176 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.21942, to_step :=  0.22143, color_rgb := '0 192 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.15936, to_step :=  0.16082, color_rgb := '0 5 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.65087, to_step :=  0.65684, color_rgb := '255 79 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.23391, to_step :=  0.23606, color_rgb := '0 229 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.63327, to_step :=  0.63908, color_rgb := '255 91 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.22967, to_step :=  0.23178, color_rgb := '0 218 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.68755, to_step :=  0.69386, color_rgb := '255 55 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.68129, to_step :=  0.68755, color_rgb := '255 59 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.24709, to_step :=  0.24936, color_rgb := '0 255 247', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.24936, to_step :=  0.25165, color_rgb := '0 255 239', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.25165, to_step :=  0.25396, color_rgb := '0 255 231', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.25396, to_step :=  0.25629, color_rgb := '0 255 223', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.22143, to_step :=  0.22346, color_rgb := '0 197 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.26102, to_step :=  0.26341, color_rgb := '0 255 199', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.26827, to_step :=  0.27073, color_rgb := '0 255 175', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.25864, to_step :=  0.26102, color_rgb := '0 255 207', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.45994, to_step :=  0.46416, color_rgb := '255 227 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.14151, to_step :=  0.14281, color_rgb := '33 0 222', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.72629, to_step :=  0.73296, color_rgb := '255 31 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.46842, to_step :=  0.47272, color_rgb := '255 219 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.62751, to_step :=  0.63327, color_rgb := '255 95 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.28599, to_step :=  0.28861, color_rgb := '0 255 119', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.26583, to_step :=  0.26827, color_rgb := '0 255 183', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.28339, to_step :=  0.28599, color_rgb := '0 255 127', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.71969, to_step :=  0.72629, color_rgb := '255 35 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.27826, to_step :=  0.28081, color_rgb := '0 255 143', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.65684, to_step :=  0.66287, color_rgb := '255 75 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.26341, to_step :=  0.26583, color_rgb := '0 255 191', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.27322, to_step :=  0.27573, color_rgb := '0 255 159', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.66287, to_step :=  0.66895, color_rgb := '255 71 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.28081, to_step :=  0.28339, color_rgb := '0 255 135', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.70023, to_step :=  0.70665, color_rgb := '255 47 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.30211, to_step :=  0.30488, color_rgb := '0 255 71', color_label := '0.30', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.28861, to_step :=  0.29126, color_rgb := '0 255 111', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.66895, to_step :=  0.6751, color_rgb := '255 67 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.57797, to_step :=  0.58327, color_rgb := '255 127 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.29394, to_step :=  0.29663, color_rgb := '0 255 95', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.29663, to_step :=  0.29936, color_rgb := '0 255 87', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.32206, to_step :=  0.32502, color_rgb := '0 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.3105, to_step :=  0.31335, color_rgb := '0 255 47', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.29126, to_step :=  0.29394, color_rgb := '0 255 103', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.328, to_step :=  0.33101, color_rgb := '8 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.32502, to_step :=  0.328, color_rgb := '0 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.31623, to_step :=  0.31913, color_rgb := '0 255 31', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.37618, to_step :=  0.37963, color_rgb := '128 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.36937, to_step :=  0.37276, color_rgb := '112 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.58863, to_step :=  0.59403, color_rgb := '255 123 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.34648, to_step :=  0.34966, color_rgb := '56 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.34333, to_step :=  0.34648, color_rgb := '48 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.37276, to_step :=  0.37618, color_rgb := '120 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.34021, to_step :=  0.34333, color_rgb := '40 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.34966, to_step :=  0.35287, color_rgb := '64 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.35287, to_step :=  0.35611, color_rgb := '72 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.44343, to_step :=  0.4475, color_rgb := '255 243 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.38312, to_step :=  0.38664, color_rgb := '144 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.40471, to_step :=  0.40842, color_rgb := '200 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.37963, to_step :=  0.38312, color_rgb := '136 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.39738, to_step :=  0.40103, color_rgb := '184 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.41596, to_step :=  0.41977, color_rgb := '224 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.43144, to_step :=  0.4354, color_rgb := '255 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.40842, to_step :=  0.41217, color_rgb := '208 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.42363, to_step :=  0.42752, color_rgb := '240 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.4354, to_step :=  0.4394, color_rgb := '255 251 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.38664, to_step :=  0.39018, color_rgb := '152 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  1, to_step :=  10, color_rgb := '127 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.97296, to_step :=  0.98189, color_rgb := '135 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.9909, to_step :=  1, color_rgb := '125 0 0', color_label := '1.00', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.93804, to_step :=  0.94665, color_rgb := '155 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.95534, to_step :=  0.96411, color_rgb := '145 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.92106, to_step :=  0.92951, color_rgb := '165 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.86399, to_step :=  0.87192, color_rgb := '200 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.87992, to_step :=  0.888, color_rgb := '190 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.5227, to_step :=  0.5275, color_rgb := '255 171 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.89615, to_step :=  0.90438, color_rgb := '180 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.49482, to_step :=  0.49936, color_rgb := '255 195 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.45575, to_step :=  0.45994, color_rgb := '255 231 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.83298, to_step :=  0.84063, color_rgb := '220 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.73296, to_step :=  0.73969, color_rgb := '255 27 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.49032, to_step :=  0.49482, color_rgb := '255 199 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.71314, to_step :=  0.71969, color_rgb := '255 39 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.61614, to_step :=  0.6218, color_rgb := '255 103 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.1, to_step :=  0.10092, color_rgb := '255 255 255', color_label := '0.1', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.92951, to_step :=  0.93804, color_rgb := '160 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.85613, to_step :=  0.86399, color_rgb := '205 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.87192, to_step :=  0.87992, color_rgb := '195 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.84063, to_step :=  0.84834, color_rgb := '215 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.74648, to_step :=  0.75333, color_rgb := '255 19 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.75333, to_step :=  0.76024, color_rgb := '255 15 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.40103, to_step :=  0.40471, color_rgb := '192 255 0', color_label := '0.40', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.8254, to_step :=  0.83298, color_rgb := '225 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.888, to_step :=  0.89615, color_rgb := '185 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.76024, to_step :=  0.76722, color_rgb := '255 11 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.61054, to_step :=  0.61614, color_rgb := '255 107 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.91268, to_step :=  0.92106, color_rgb := '170 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.94665, to_step :=  0.95534, color_rgb := '150 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.96411, to_step :=  0.97296, color_rgb := '140 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.98189, to_step :=  0.9909, color_rgb := '130 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.6218, to_step :=  0.62751, color_rgb := '255 99 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.35938, to_step :=  0.36268, color_rgb := '88 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.51795, to_step :=  0.5227, color_rgb := '255 175 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.53723, to_step :=  0.54216, color_rgb := '255 159 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.54714, to_step :=  0.55216, color_rgb := '255 151 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.54216, to_step :=  0.54714, color_rgb := '255 155 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.31913, to_step :=  0.32206, color_rgb := '0 255 23', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.30488, to_step :=  0.30768, color_rgb := '0 255 63', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.30768, to_step :=  0.3105, color_rgb := '0 255 55', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.64495, to_step :=  0.65087, color_rgb := '255 83 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.10758, to_step :=  0.10857, color_rgb := '123 0 132', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.90438, to_step :=  0.91268, color_rgb := '175 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.50394, to_step :=  0.50857, color_rgb := '255 187 0', color_label := '0.50', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.10661, to_step :=  0.10758, color_rgb := '126 0 129', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.10184, to_step :=  0.10278, color_rgb := '141 0 114', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.10278, to_step :=  0.10372, color_rgb := '138 0 117', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.10092, to_step :=  0.10184, color_rgb := '144 0 111', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.45161, to_step :=  0.45575, color_rgb := '255 235 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 206, from_step :=  0.84834, to_step :=  0.85613, color_rgb := '210 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.46608, to_step :=  0.46907, color_rgb := '175 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.10524, to_step :=  0.10592, color_rgb := '123 0 132', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.11582, to_step :=  0.11657, color_rgb := '78 0 177', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.11657, to_step :=  0.11731, color_rgb := '75 0 180', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.13939, to_step :=  0.14028, color_rgb := '0 10 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.11731, to_step :=  0.11806, color_rgb := '72 0 183', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.28503, to_step :=  0.28685, color_rgb := '255 239 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.28869, to_step :=  0.29054, color_rgb := '255 231 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.11806, to_step :=  0.11882, color_rgb := '69 0 186', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.11882, to_step :=  0.11958, color_rgb := '66 0 189', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.30382, to_step :=  0.30577, color_rgb := '255 199 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.11958, to_step :=  0.12035, color_rgb := '63 0 192', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.12268, to_step :=  0.12346, color_rgb := '51 0 204', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.12189, to_step :=  0.12268, color_rgb := '54 0 201', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.31975, to_step :=  0.3218, color_rgb := '255 167 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.32802, to_step :=  0.33013, color_rgb := '255 151 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.33651, to_step :=  0.33867, color_rgb := '255 135 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.33867, to_step :=  0.34084, color_rgb := '255 131 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.34084, to_step :=  0.34302, color_rgb := '255 127 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.34522, to_step :=  0.34743, color_rgb := '255 123 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.35415, to_step :=  0.35642, color_rgb := '255 107 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.35871, to_step :=  0.361, color_rgb := '255 99 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.12505, to_step :=  0.12585, color_rgb := '42 0 213', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.10797, to_step :=  0.10866, color_rgb := '111 0 144', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.37272, to_step :=  0.37511, color_rgb := '255 75 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.37511, to_step :=  0.37751, color_rgb := '255 71 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.1066, to_step :=  0.10728, color_rgb := '117 0 138', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.14209, to_step :=  0.143, color_rgb := '0 26 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.30189, to_step :=  0.30382, color_rgb := '255 203 0', color_label := '0.30', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.1, to_step :=  0.10064, color_rgb := '255 255 255', color_label := '0.1', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.31169, to_step :=  0.31368, color_rgb := '255 183 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.3097, to_step :=  0.31169, color_rgb := '255 187 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.12993, to_step :=  0.13077, color_rgb := '24 0 231', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.29616, to_step :=  0.29806, color_rgb := '255 215 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.28685, to_step :=  0.28869, color_rgb := '255 235 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.29806, to_step :=  0.29997, color_rgb := '255 211 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.29428, to_step :=  0.29616, color_rgb := '255 219 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.29054, to_step :=  0.2924, color_rgb := '255 227 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.44286, to_step :=  0.4457, color_rgb := '215 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.28141, to_step :=  0.28321, color_rgb := '255 247 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.27784, to_step :=  0.27962, color_rgb := '255 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.28321, to_step :=  0.28503, color_rgb := '255 243 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.4457, to_step :=  0.44856, color_rgb := '210 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.27962, to_step :=  0.28141, color_rgb := '255 251 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.45723, to_step :=  0.46016, color_rgb := '190 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.31772, to_step :=  0.31975, color_rgb := '255 171 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.27607, to_step :=  0.27784, color_rgb := '248 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.27083, to_step :=  0.27256, color_rgb := '224 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.42894, to_step :=  0.43169, color_rgb := '240 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.5, to_step :=  10, color_rgb := '100 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.24452, to_step :=  0.24609, color_rgb := '88 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.26569, to_step :=  0.26739, color_rgb := '200 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.26911, to_step :=  0.27083, color_rgb := '216 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.25407, to_step :=  0.2557, color_rgb := '136 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.23383, to_step :=  0.23533, color_rgb := '32 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.2557, to_step :=  0.25734, color_rgb := '144 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.25246, to_step :=  0.25407, color_rgb := '128 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.26065, to_step :=  0.26232, color_rgb := '176 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.26232, to_step :=  0.264, color_rgb := '184 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.25899, to_step :=  0.26065, color_rgb := '168 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.24766, to_step :=  0.24925, color_rgb := '104 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.24925, to_step :=  0.25085, color_rgb := '112 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.26739, to_step :=  0.26911, color_rgb := '208 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.24609, to_step :=  0.24766, color_rgb := '96 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.23988, to_step :=  0.24142, color_rgb := '64 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.23835, to_step :=  0.23988, color_rgb := '56 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.24296, to_step :=  0.24452, color_rgb := '80 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.23234, to_step :=  0.23383, color_rgb := '24 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.16883, to_step :=  0.16991, color_rgb := '0 170 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.143, to_step :=  0.14391, color_rgb := '0 32 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.39226, to_step :=  0.39477, color_rgb := '255 43 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.17209, to_step :=  0.1732, color_rgb := '0 186 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.40241, to_step :=  0.40498, color_rgb := '255 27 0', color_label := '0.40', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.10064, to_step :=  0.10129, color_rgb := '144 0 111', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.4235, to_step :=  0.42621, color_rgb := '250 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.13674, to_step :=  0.13762, color_rgb := '0 0 252', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.49365, to_step :=  0.49682, color_rgb := '130 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.45143, to_step :=  0.45432, color_rgb := '200 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.45432, to_step :=  0.45723, color_rgb := '195 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.46311, to_step :=  0.46608, color_rgb := '180 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.13077, to_step :=  0.1316, color_rgb := '24 0 231', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.27256, to_step :=  0.27431, color_rgb := '232 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.27431, to_step :=  0.27607, color_rgb := '240 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.10592, to_step :=  0.1066, color_rgb := '120 0 135', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.38976, to_step :=  0.39226, color_rgb := '255 47 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.22793, to_step :=  0.22939, color_rgb := '0 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.13245, to_step :=  0.1333, color_rgb := '18 0 237', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.1316, to_step :=  0.13245, color_rgb := '21 0 234', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.4812, to_step :=  0.48429, color_rgb := '150 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.1333, to_step :=  0.13415, color_rgb := '15 0 240', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.2924, to_step :=  0.29428, color_rgb := '255 223 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.22939, to_step :=  0.23086, color_rgb := '8 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.23086, to_step :=  0.23234, color_rgb := '16 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.4751, to_step :=  0.47814, color_rgb := '160 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.46907, to_step :=  0.47207, color_rgb := '170 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.30773, to_step :=  0.3097, color_rgb := '255 191 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.30577, to_step :=  0.30773, color_rgb := '255 195 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.14118, to_step :=  0.14209, color_rgb := '0 21 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.1385, to_step :=  0.13939, color_rgb := '0 5 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.38236, to_step :=  0.38481, color_rgb := '255 59 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.17996, to_step :=  0.18111, color_rgb := '0 224 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.38728, to_step :=  0.38976, color_rgb := '255 51 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.29997, to_step :=  0.30189, color_rgb := '255 207 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.361, to_step :=  0.36332, color_rgb := '255 95 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.41813, to_step :=  0.4208, color_rgb := '255 3 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.49682, to_step :=  0.5, color_rgb := '125 0 0', color_label := '0.50', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.34966, to_step :=  0.3519, color_rgb := '255 115 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.34743, to_step :=  0.34966, color_rgb := '255 119 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.14953, to_step :=  0.15049, color_rgb := '0 69 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.14764, to_step :=  0.14858, color_rgb := '0 58 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.39984, to_step :=  0.40241, color_rgb := '255 31 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.15637, to_step :=  0.15737, color_rgb := '0 106 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.32386, to_step :=  0.32594, color_rgb := '255 159 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.12035, to_step :=  0.12112, color_rgb := '60 0 195', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.12112, to_step :=  0.12189, color_rgb := '57 0 198', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.43169, to_step :=  0.43446, color_rgb := '235 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.13501, to_step :=  0.13587, color_rgb := '9 0 246', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.14484, to_step :=  0.14576, color_rgb := '0 42 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.18111, to_step :=  0.18227, color_rgb := '0 229 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.21658, to_step :=  0.21797, color_rgb := '0 255 71', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.13762, to_step :=  0.1385, color_rgb := '0 0 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.10728, to_step :=  0.10797, color_rgb := '114 0 141', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.21936, to_step :=  0.22077, color_rgb := '0 255 55', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.22218, to_step :=  0.22361, color_rgb := '0 255 39', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.19554, to_step :=  0.19679, color_rgb := '0 255 199', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.20844, to_step :=  0.20977, color_rgb := '0 255 119', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.21112, to_step :=  0.21247, color_rgb := '0 255 103', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.20579, to_step :=  0.20711, color_rgb := '0 255 135', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.19805, to_step :=  0.19932, color_rgb := '0 255 183', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.2006, to_step :=  0.20189, color_rgb := '0 255 167', color_label := '0.20', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.1594, to_step :=  0.16042, color_rgb := '0 122 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.19061, to_step :=  0.19183, color_rgb := '0 255 231', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.18819, to_step :=  0.1894, color_rgb := '0 255 247', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.1858, to_step :=  0.18699, color_rgb := '0 250 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.13415, to_step :=  0.13501, color_rgb := '12 0 243', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.25734, to_step :=  0.25899, color_rgb := '152 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.10193, to_step :=  0.10259, color_rgb := '138 0 117', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.17768, to_step :=  0.17882, color_rgb := '0 213 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.38481, to_step :=  0.38728, color_rgb := '255 55 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.37751, to_step :=  0.37993, color_rgb := '255 67 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.17882, to_step :=  0.17996, color_rgb := '0 218 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.3973, to_step :=  0.39984, color_rgb := '255 35 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.40498, to_step :=  0.40758, color_rgb := '255 23 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.15049, to_step :=  0.15146, color_rgb := '0 74 255', color_label := '0.15', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.1732, to_step :=  0.17431, color_rgb := '0 192 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.17655, to_step :=  0.17768, color_rgb := '0 208 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.17431, to_step :=  0.17542, color_rgb := '0 197 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.49051, to_step :=  0.49365, color_rgb := '135 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.171, to_step :=  0.17209, color_rgb := '0 181 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.12911, to_step :=  0.12993, color_rgb := '27 0 228', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.16562, to_step :=  0.16668, color_rgb := '0 154 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.16991, to_step :=  0.171, color_rgb := '0 176 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.16775, to_step :=  0.16883, color_rgb := '0 165 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.16352, to_step :=  0.16457, color_rgb := '0 144 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.16248, to_step :=  0.16352, color_rgb := '0 138 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.16145, to_step :=  0.16248, color_rgb := '0 133 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.12828, to_step :=  0.12911, color_rgb := '30 0 225', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.37993, to_step :=  0.38236, color_rgb := '255 63 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.48739, to_step :=  0.49051, color_rgb := '140 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.47207, to_step :=  0.4751, color_rgb := '165 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.11147, to_step :=  0.11218, color_rgb := '96 0 159', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.14858, to_step :=  0.14953, color_rgb := '0 64 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.31368, to_step :=  0.31569, color_rgb := '255 179 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.36799, to_step :=  0.37035, color_rgb := '255 83 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.37035, to_step :=  0.37272, color_rgb := '255 79 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.10866, to_step :=  0.10935, color_rgb := '108 0 147', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.14391, to_step :=  0.14484, color_rgb := '0 37 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.15538, to_step :=  0.15637, color_rgb := '0 101 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.46016, to_step :=  0.46311, color_rgb := '185 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.44856, to_step :=  0.45143, color_rgb := '205 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.12666, to_step :=  0.12747, color_rgb := '36 0 219', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.35642, to_step :=  0.35871, color_rgb := '255 103 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.14576, to_step :=  0.1467, color_rgb := '0 48 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.41546, to_step :=  0.41813, color_rgb := '255 7 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.12747, to_step :=  0.12828, color_rgb := '33 0 222', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.10324, to_step :=  0.10391, color_rgb := '132 0 123', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.23684, to_step :=  0.23835, color_rgb := '48 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.11435, to_step :=  0.11509, color_rgb := '84 0 171', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.15439, to_step :=  0.15538, color_rgb := '0 96 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.1534, to_step :=  0.15439, color_rgb := '0 90 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.40758, to_step :=  0.41019, color_rgb := '255 19 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.1129, to_step :=  0.11362, color_rgb := '90 0 165', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.1467, to_step :=  0.14764, color_rgb := '0 53 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.43724, to_step :=  0.44004, color_rgb := '225 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.15146, to_step :=  0.15243, color_rgb := '0 80 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.4208, to_step :=  0.4235, color_rgb := '255 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.24142, to_step :=  0.24296, color_rgb := '72 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.43446, to_step :=  0.43724, color_rgb := '230 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.42621, to_step :=  0.42894, color_rgb := '245 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.1943, to_step :=  0.19554, color_rgb := '0 255 207', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.16042, to_step :=  0.16145, color_rgb := '0 128 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.36564, to_step :=  0.36799, color_rgb := '255 87 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.11005, to_step :=  0.11076, color_rgb := '102 0 153', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.41282, to_step :=  0.41546, color_rgb := '255 11 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.41019, to_step :=  0.41282, color_rgb := '255 15 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.39477, to_step :=  0.3973, color_rgb := '255 39 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.2152, to_step :=  0.21658, color_rgb := '0 255 79', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.36332, to_step :=  0.36564, color_rgb := '255 91 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.14028, to_step :=  0.14118, color_rgb := '0 16 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.22077, to_step :=  0.22218, color_rgb := '0 255 47', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.20977, to_step :=  0.21112, color_rgb := '0 255 111', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.13587, to_step :=  0.13674, color_rgb := '6 0 249', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.15243, to_step :=  0.1534, color_rgb := '0 85 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.19932, to_step :=  0.2006, color_rgb := '0 255 175', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.15737, to_step :=  0.15838, color_rgb := '0 112 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.12425, to_step :=  0.12505, color_rgb := '45 0 210', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.3519, to_step :=  0.35415, color_rgb := '255 111 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.34302, to_step :=  0.34522, color_rgb := '255 123 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.12585, to_step :=  0.12666, color_rgb := '39 0 216', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.12346, to_step :=  0.12425, color_rgb := '48 0 207', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.33437, to_step :=  0.33651, color_rgb := '255 139 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.10391, to_step :=  0.10457, color_rgb := '129 0 126', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.31569, to_step :=  0.31772, color_rgb := '255 175 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.33224, to_step :=  0.33437, color_rgb := '255 143 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.15838, to_step :=  0.1594, color_rgb := '0 117 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.33013, to_step :=  0.33224, color_rgb := '255 147 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.10129, to_step :=  0.10193, color_rgb := '141 0 114', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.44004, to_step :=  0.44286, color_rgb := '220 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.32594, to_step :=  0.32802, color_rgb := '255 155 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.10935, to_step :=  0.11005, color_rgb := '105 0 150', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.10259, to_step :=  0.10324, color_rgb := '135 0 120', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.47814, to_step :=  0.4812, color_rgb := '155 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.10457, to_step :=  0.10524, color_rgb := '126 0 129', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.48429, to_step :=  0.48739, color_rgb := '145 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.16457, to_step :=  0.16562, color_rgb := '0 149 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.16668, to_step :=  0.16775, color_rgb := '0 160 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.17542, to_step :=  0.17655, color_rgb := '0 202 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.18227, to_step :=  0.18344, color_rgb := '0 234 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.18344, to_step :=  0.18462, color_rgb := '0 240 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.18462, to_step :=  0.1858, color_rgb := '0 245 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.18699, to_step :=  0.18819, color_rgb := '0 255 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.1894, to_step :=  0.19061, color_rgb := '0 255 239', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.19183, to_step :=  0.19306, color_rgb := '0 255 223', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.19306, to_step :=  0.1943, color_rgb := '0 255 215', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.19679, to_step :=  0.19805, color_rgb := '0 255 191', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.20189, to_step :=  0.20318, color_rgb := '0 255 159', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.20318, to_step :=  0.20448, color_rgb := '0 255 151', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.20448, to_step :=  0.20579, color_rgb := '0 255 143', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.20711, to_step :=  0.20844, color_rgb := '0 255 127', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.21247, to_step :=  0.21383, color_rgb := '0 255 95', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.21383, to_step :=  0.2152, color_rgb := '0 255 87', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.21797, to_step :=  0.21936, color_rgb := '0 255 63', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.22361, to_step :=  0.22504, color_rgb := '0 255 31', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.22504, to_step :=  0.22648, color_rgb := '0 255 23', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.22648, to_step :=  0.22793, color_rgb := '0 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.11076, to_step :=  0.11147, color_rgb := '99 0 156', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.11218, to_step :=  0.1129, color_rgb := '93 0 162', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.23533, to_step :=  0.23684, color_rgb := '40 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.11362, to_step :=  0.11435, color_rgb := '87 0 168', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.11509, to_step :=  0.11582, color_rgb := '81 0 174', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.25085, to_step :=  0.25246, color_rgb := '120 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.3218, to_step :=  0.32386, color_rgb := '255 163 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 207, from_step :=  0.264, to_step :=  0.26569, color_rgb := '192 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  28.4, to_step :=  28.5, color_rgb := '72 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  28.9, to_step :=  29, color_rgb := '240 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  30.9, to_step :=  31, color_rgb := '190 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  29, to_step :=  29.1, color_rgb := '255 247 0', color_label := '29', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  29.1, to_step :=  29.2, color_rgb := '255 231 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  28.3, to_step :=  28.4, color_rgb := '40 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  25.9, to_step :=  26, color_rgb := '33 0 222', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  26.3, to_step :=  26.4, color_rgb := '0 21 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  28.7, to_step :=  28.8, color_rgb := '176 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  29.3, to_step :=  29.4, color_rgb := '255 199 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  26.8, to_step :=  26.9, color_rgb := '0 128 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  28.2, to_step :=  28.3, color_rgb := '8 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  26.1, to_step :=  26.2, color_rgb := '12 0 243', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  27.5, to_step :=  27.6, color_rgb := '0 255 223', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  28.1, to_step :=  28.2, color_rgb := '0 255 31', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  27.4, to_step :=  27.5, color_rgb := '0 255 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  26.7, to_step :=  26.8, color_rgb := '0 106 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  27.3, to_step :=  27.4, color_rgb := '0 234 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  26.6, to_step :=  26.7, color_rgb := '0 85 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  26.9, to_step :=  27, color_rgb := '0 149 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  27, to_step :=  27.1, color_rgb := '0 170 255', color_label := '27', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  26.4, to_step :=  26.5, color_rgb := '0 42 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  25.1, to_step :=  25.2, color_rgb := '129 0 126', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  26, to_step :=  26.1, color_rgb := '24 0 231', color_label := '26', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  25.7, to_step :=  25.8, color_rgb := '57 0 198', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  26.2, to_step :=  26.3, color_rgb := '0 0 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  27.7, to_step :=  27.8, color_rgb := '0 255 159', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  30.6, to_step :=  30.7, color_rgb := '250 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  29.8, to_step :=  29.9, color_rgb := '255 123 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  25.4, to_step :=  25.5, color_rgb := '93 0 162', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  28, to_step :=  28.1, color_rgb := '0 255 63', color_label := '28', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  27.1, to_step :=  27.2, color_rgb := '0 192 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  30.5, to_step :=  30.6, color_rgb := '255 11 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  30.2, to_step :=  30.3, color_rgb := '255 59 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  30.8, to_step :=  30.9, color_rgb := '210 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  27.8, to_step :=  27.9, color_rgb := '0 255 127', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  30.7, to_step :=  30.8, color_rgb := '230 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  30.3, to_step :=  30.4, color_rgb := '255 43 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  30.4, to_step :=  30.5, color_rgb := '255 27 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  31, to_step :=  31.1, color_rgb := '170 0 0', color_label := '31', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  29.9, to_step :=  30, color_rgb := '255 107 0', color_label := '30', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  30, to_step :=  30.1, color_rgb := '255 91 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  29.7, to_step :=  29.8, color_rgb := '255 135 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  30.1, to_step :=  30.2, color_rgb := '255 75 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  29.6, to_step :=  29.7, color_rgb := '255 151 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  25, to_step :=  25.1, color_rgb := '141 0 114', color_label := '25', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  25.8, to_step :=  25.9, color_rgb := '45 0 210', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  25.5, to_step :=  25.6, color_rgb := '81 0 174', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  27.6, to_step :=  27.7, color_rgb := '0 255 191', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  25.3, to_step :=  25.4, color_rgb := '105 0 150', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  25.2, to_step :=  25.3, color_rgb := '117 0 138', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  29.4, to_step :=  29.5, color_rgb := '255 183 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  25.6, to_step :=  25.7, color_rgb := '69 0 186', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  29.5, to_step :=  29.6, color_rgb := '255 167 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  26.5, to_step :=  26.6, color_rgb := '0 64 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  27.9, to_step :=  28, color_rgb := '0 255 95', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  27.2, to_step :=  27.3, color_rgb := '0 213 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  28.6, to_step :=  28.7, color_rgb := '136 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  29.2, to_step :=  29.3, color_rgb := '255 215 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  28.5, to_step :=  28.6, color_rgb := '104 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 208, from_step :=  28.8, to_step :=  28.9, color_rgb := '208 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  581, to_step :=  583, color_rgb := '0 229 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  600, to_step :=  602, color_rgb := '0 255 231', color_label := '600', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  598, to_step :=  600, color_rgb := '0 255 239', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1048, to_step :=  1052, color_rgb := '180 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  987, to_step :=  991, color_rgb := '255 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  679, to_step :=  682, color_rgb := '24 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  804, to_step :=  808, color_rgb := '255 199 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  952, to_step :=  956, color_rgb := '255 35 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  748, to_step :=  751, color_rgb := '224 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  956, to_step :=  960, color_rgb := '255 31 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  663, to_step :=  666, color_rgb := '0 255 31', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  563, to_step :=  565, color_rgb := '0 186 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  415, to_step :=  416, color_rgb := '120 0 135', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  904, to_step :=  907, color_rgb := '255 87 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  513, to_step :=  515, color_rgb := '0 64 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  565, to_step :=  567, color_rgb := '0 192 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  590, to_step :=  593, color_rgb := '0 250 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1032, to_step :=  1036, color_rgb := '200 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  499, to_step :=  501, color_rgb := '0 26 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  411, to_step :=  413, color_rgb := '126 0 129', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  511, to_step :=  513, color_rgb := '0 58 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  875, to_step :=  879, color_rgb := '255 119 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  410, to_step :=  411, color_rgb := '129 0 126', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  413, to_step :=  415, color_rgb := '123 0 132', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  637, to_step :=  640, color_rgb := '0 255 111', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  645, to_step :=  648, color_rgb := '0 255 87', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  440, to_step :=  442, color_rgb := '75 0 180', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  406, to_step :=  408, color_rgb := '135 0 120', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  493, to_step :=  495, color_rgb := '0 10 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  521, to_step :=  523, color_rgb := '0 85 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  702, to_step :=  704, color_rgb := '88 255 0', color_label := '700', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  788, to_step :=  791, color_rgb := '255 219 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  579, to_step :=  581, color_rgb := '0 224 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  893, to_step :=  896, color_rgb := '255 99 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  960, to_step :=  964, color_rgb := '255 27 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  464, to_step :=  466, color_rgb := '36 0 219', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  405, to_step :=  406, color_rgb := '138 0 117', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  495, to_step :=  497, color_rgb := '0 16 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  948, to_step :=  952, color_rgb := '255 39 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  669, to_step :=  671, color_rgb := '0 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  583, to_step :=  586, color_rgb := '0 234 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  576, to_step :=  579, color_rgb := '0 218 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  688, to_step :=  690, color_rgb := '48 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  770, to_step :=  773, color_rgb := '255 243 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  473, to_step :=  475, color_rgb := '24 0 231', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  751, to_step :=  754, color_rgb := '232 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  507, to_step :=  509, color_rgb := '0 48 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  808, to_step :=  811, color_rgb := '255 195 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  811, to_step :=  814, color_rgb := '255 191 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  595, to_step :=  598, color_rgb := '0 255 247', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  453, to_step :=  455, color_rgb := '54 0 201', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1082, to_step :=  1087, color_rgb := '140 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  831, to_step :=  834, color_rgb := '255 167 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  944, to_step :=  948, color_rgb := '255 43 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  964, to_step :=  967, color_rgb := '255 23 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  941, to_step :=  944, color_rgb := '255 47 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  896, to_step :=  900, color_rgb := '255 95 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  517, to_step :=  519, color_rgb := '0 74 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  795, to_step :=  798, color_rgb := '255 211 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  475, to_step :=  477, color_rgb := '21 0 234', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  716, to_step :=  719, color_rgb := '128 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1087, to_step :=  1091, color_rgb := '135 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  437, to_step :=  439, color_rgb := '81 0 174', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  821, to_step :=  824, color_rgb := '255 179 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  427, to_step :=  428, color_rgb := '99 0 156', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  999, to_step :=  1003, color_rgb := '240 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  554, to_step :=  556, color_rgb := '0 165 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  468, to_step :=  470, color_rgb := '30 0 225', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  776, to_step :=  779, color_rgb := '255 235 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  801, to_step :=  804, color_rgb := '255 203 0', color_label := '800', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  733, to_step :=  736, color_rgb := '184 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  704, to_step :=  707, color_rgb := '96 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  727, to_step :=  730, color_rgb := '168 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  658, to_step :=  661, color_rgb := '0 255 47', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  418, to_step :=  420, color_rgb := '114 0 141', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  861, to_step :=  865, color_rgb := '255 131 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1007, to_step :=  1011, color_rgb := '230 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  685, to_step :=  688, color_rgb := '40 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  674, to_step :=  677, color_rgb := '8 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  739, to_step :=  742, color_rgb := '200 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  622, to_step :=  625, color_rgb := '0 255 159', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  827, to_step :=  831, color_rgb := '255 171 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  907, to_step :=  911, color_rgb := '255 83 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  967, to_step :=  971, color_rgb := '255 19 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  983, to_step :=  987, color_rgb := '255 3 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1091, to_step :=  1096, color_rgb := '130 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  491, to_step :=  493, color_rgb := '0 5 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  428, to_step :=  430, color_rgb := '96 0 159', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  933, to_step :=  937, color_rgb := '255 55 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  995, to_step :=  999, color_rgb := '245 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  975, to_step :=  979, color_rgb := '255 11 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  615, to_step :=  617, color_rgb := '0 255 183', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  400, to_step :=  402, color_rgb := '255 255 255', color_label := '400', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  515, to_step :=  517, color_rgb := '0 69 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  865, to_step :=  868, color_rgb := '255 127 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  722, to_step :=  725, color_rgb := '144 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  627, to_step :=  630, color_rgb := '0 255 143', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1061, to_step :=  1065, color_rgb := '165 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  690, to_step :=  693, color_rgb := '56 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  572, to_step :=  574, color_rgb := '0 208 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  696, to_step :=  699, color_rgb := '72 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  736, to_step :=  739, color_rgb := '192 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  586, to_step :=  588, color_rgb := '0 240 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  408, to_step :=  410, color_rgb := '132 0 123', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  569, to_step :=  572, color_rgb := '0 202 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  602, to_step :=  605, color_rgb := '0 255 223', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  483, to_step :=  485, color_rgb := '9 0 246', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  403, to_step :=  405, color_rgb := '141 0 114', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  782, to_step :=  785, color_rgb := '255 227 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  635, to_step :=  637, color_rgb := '0 255 119', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  402, to_step :=  403, color_rgb := '144 0 111', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  926, to_step :=  929, color_rgb := '255 63 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  754, to_step :=  757, color_rgb := '240 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  416, to_step :=  418, color_rgb := '117 0 138', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  817, to_step :=  821, color_rgb := '255 183 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  872, to_step :=  875, color_rgb := '255 123 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  481, to_step :=  483, color_rgb := '12 0 243', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  868, to_step :=  872, color_rgb := '255 123 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  837, to_step :=  841, color_rgb := '255 159 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  455, to_step :=  457, color_rgb := '51 0 204', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  451, to_step :=  453, color_rgb := '57 0 198', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  487, to_step :=  489, color_rgb := '0 0 252', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  574, to_step :=  576, color_rgb := '0 213 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  929, to_step :=  933, color_rgb := '255 59 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  773, to_step :=  776, color_rgb := '255 239 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  560, to_step :=  563, color_rgb := '0 181 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1078, to_step :=  1082, color_rgb := '145 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  547, to_step :=  549, color_rgb := '0 149 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  851, to_step :=  854, color_rgb := '255 143 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  457, to_step :=  458, color_rgb := '48 0 207', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  435, to_step :=  437, color_rgb := '84 0 171', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  556, to_step :=  558, color_rgb := '0 170 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  545, to_step :=  547, color_rgb := '0 144 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  567, to_step :=  569, color_rgb := '0 197 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  779, to_step :=  782, color_rgb := '255 231 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  534, to_step :=  536, color_rgb := '0 117 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  785, to_step :=  788, color_rgb := '255 223 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1044, to_step :=  1048, color_rgb := '185 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  625, to_step :=  627, color_rgb := '0 255 151', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  713, to_step :=  716, color_rgb := '120 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1023, to_step :=  1027, color_rgb := '210 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  528, to_step :=  530, color_rgb := '0 101 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1011, to_step :=  1015, color_rgb := '225 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1015, to_step :=  1019, color_rgb := '220 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1074, to_step :=  1078, color_rgb := '150 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  671, to_step :=  674, color_rgb := '0 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1052, to_step :=  1057, color_rgb := '175 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  617, to_step :=  620, color_rgb := '0 255 175', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1003, to_step :=  1007, color_rgb := '235 0 0', color_label := '1000', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  421, to_step :=  423, color_rgb := '108 0 147', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1057, to_step :=  1061, color_rgb := '170 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  757, to_step :=  760, color_rgb := '248 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  536, to_step :=  538, color_rgb := '0 122 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  423, to_step :=  425, color_rgb := '105 0 150', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  543, to_step :=  545, color_rgb := '0 138 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  430, to_step :=  432, color_rgb := '93 0 162', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  858, to_step :=  861, color_rgb := '255 135 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  538, to_step :=  541, color_rgb := '0 128 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  742, to_step :=  745, color_rgb := '208 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  532, to_step :=  534, color_rgb := '0 112 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  693, to_step :=  696, color_rgb := '64 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  530, to_step :=  532, color_rgb := '0 106 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1070, to_step :=  1074, color_rgb := '155 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  730, to_step :=  733, color_rgb := '176 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  918, to_step :=  922, color_rgb := '255 71 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  915, to_step :=  918, color_rgb := '255 75 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  682, to_step :=  685, color_rgb := '32 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  911, to_step :=  915, color_rgb := '255 79 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  526, to_step :=  528, color_rgb := '0 96 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  763, to_step :=  766, color_rgb := '255 251 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  719, to_step :=  722, color_rgb := '136 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  922, to_step :=  926, color_rgb := '255 67 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  707, to_step :=  710, color_rgb := '104 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  466, to_step :=  468, color_rgb := '33 0 222', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  432, to_step :=  433, color_rgb := '90 0 165', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  485, to_step :=  487, color_rgb := '6 0 249', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  937, to_step :=  941, color_rgb := '255 51 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  725, to_step :=  727, color_rgb := '152 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  699, to_step :=  702, color_rgb := '80 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  588, to_step :=  590, color_rgb := '0 245 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  630, to_step :=  632, color_rgb := '0 255 135', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  549, to_step :=  551, color_rgb := '0 154 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  541, to_step :=  543, color_rgb := '0 133 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  979, to_step :=  983, color_rgb := '255 7 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1027, to_step :=  1032, color_rgb := '205 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  798, to_step :=  801, color_rgb := '255 207 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  593, to_step :=  595, color_rgb := '0 255 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  462, to_step :=  464, color_rgb := '39 0 216', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  620, to_step :=  622, color_rgb := '0 255 167', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  448, to_step :=  449, color_rgb := '63 0 192', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  420, to_step :=  421, color_rgb := '111 0 144', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1019, to_step :=  1023, color_rgb := '215 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  558, to_step :=  560, color_rgb := '0 176 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  607, to_step :=  610, color_rgb := '0 255 207', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  841, to_step :=  844, color_rgb := '255 155 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  501, to_step :=  503, color_rgb := '0 32 255', color_label := '500', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  661, to_step :=  663, color_rgb := '0 255 39', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  854, to_step :=  858, color_rgb := '255 139 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  477, to_step :=  479, color_rgb := '18 0 237', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  824, to_step :=  827, color_rgb := '255 175 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  612, to_step :=  615, color_rgb := '0 255 191', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  814, to_step :=  817, color_rgb := '255 187 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  610, to_step :=  612, color_rgb := '0 255 199', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  879, to_step :=  882, color_rgb := '255 115 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  834, to_step :=  837, color_rgb := '255 163 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  650, to_step :=  653, color_rgb := '0 255 71', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  479, to_step :=  481, color_rgb := '15 0 240', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  605, to_step :=  607, color_rgb := '0 255 215', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  640, to_step :=  642, color_rgb := '0 255 103', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  760, to_step :=  763, color_rgb := '255 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  489, to_step :=  491, color_rgb := '0 0 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  991, to_step :=  995, color_rgb := '250 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  509, to_step :=  511, color_rgb := '0 53 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  745, to_step :=  748, color_rgb := '216 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  971, to_step :=  975, color_rgb := '255 15 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  791, to_step :=  795, color_rgb := '255 215 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  460, to_step :=  462, color_rgb := '42 0 213', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  648, to_step :=  650, color_rgb := '0 255 79', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  900, to_step :=  904, color_rgb := '255 91 0', color_label := '900', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  632, to_step :=  635, color_rgb := '0 255 127', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  497, to_step :=  499, color_rgb := '0 21 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  666, to_step :=  669, color_rgb := '0 255 23', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  439, to_step :=  440, color_rgb := '78 0 177', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  642, to_step :=  645, color_rgb := '0 255 95', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  889, to_step :=  893, color_rgb := '255 103 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1096, to_step :=  1100, color_rgb := '125 0 0', color_label := '1100', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  886, to_step :=  889, color_rgb := '255 107 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  653, to_step :=  655, color_rgb := '0 255 63', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  882, to_step :=  886, color_rgb := '255 111 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1065, to_step :=  1070, color_rgb := '160 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  551, to_step :=  554, color_rgb := '0 160 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  505, to_step :=  507, color_rgb := '0 42 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  503, to_step :=  505, color_rgb := '0 37 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  425, to_step :=  427, color_rgb := '102 0 153', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  519, to_step :=  521, color_rgb := '0 80 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1040, to_step :=  1044, color_rgb := '190 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  446, to_step :=  448, color_rgb := '66 0 189', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  442, to_step :=  444, color_rgb := '72 0 183', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  449, to_step :=  451, color_rgb := '60 0 195', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  847, to_step :=  851, color_rgb := '255 147 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  444, to_step :=  446, color_rgb := '69 0 186', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  433, to_step :=  435, color_rgb := '87 0 168', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  710, to_step :=  713, color_rgb := '112 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  470, to_step :=  472, color_rgb := '27 0 228', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  472, to_step :=  473, color_rgb := '24 0 231', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  655, to_step :=  658, color_rgb := '0 255 55', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  458, to_step :=  460, color_rgb := '45 0 210', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  523, to_step :=  526, color_rgb := '0 90 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  844, to_step :=  847, color_rgb := '255 151 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  1036, to_step :=  1040, color_rgb := '195 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  677, to_step :=  679, color_rgb := '16 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 209, from_step :=  766, to_step :=  770, color_rgb := '255 247 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  26, to_step :=  26.25, color_rgb := '24 0 231', color_label := '26', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  28.25, to_step :=  28.5, color_rgb := '5 165 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  25.75, to_step :=  26, color_rgb := '69 0 186', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  27, to_step :=  27.25, color_rgb := '0 170 255', color_label := '27', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  25.25, to_step :=  25.5, color_rgb := '117 0 138', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  29.25, to_step :=  29.5, color_rgb := '255 215 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  29, to_step :=  29.25, color_rgb := '255 247 0', color_label := '29', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  29.5, to_step :=  29.75, color_rgb := '255 183 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  30.25, to_step :=  30.5, color_rgb := '255 59 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  25.5, to_step :=  25.75, color_rgb := '93 0 162', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  30.5, to_step :=  30.75, color_rgb := '255 27 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  27.5, to_step :=  27.75, color_rgb := '0 255 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  26.25, to_step :=  26.5, color_rgb := '0 0 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  30, to_step :=  30.25, color_rgb := '255 91 0', color_label := '30', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  27.75, to_step :=  28, color_rgb := '0 255 191', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  28.75, to_step :=  29, color_rgb := '201 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  20, to_step :=  25, color_rgb := '79 0 71', color_label := '<<', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  28.5, to_step :=  28.75, color_rgb := '109 255 18', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  25, to_step :=  25.25, color_rgb := '141 0 114', color_label := '25', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  30.75, to_step :=  31, color_rgb := '159 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  29.75, to_step :=  30, color_rgb := '255 151 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  31, to_step :=  31.25, color_rgb := '83 0 0', color_label := '31', group_label := '>>' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  27.25, to_step :=  27.5, color_rgb := '0 213 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  28, to_step :=  28.25, color_rgb := '6 87 0', color_label := '28', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  26.75, to_step :=  27, color_rgb := '0 85 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 210, from_step :=  26.5, to_step :=  26.75, color_rgb := '0 42 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  5.74834041, to_step :=  5.87993229, color_rgb := '255 179 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.78436103, to_step :=  0.80231674, color_rgb := '0 218 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  10.59127702, to_step :=  10.83373413, color_rgb := '255 75 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.19278158, to_step :=  0.19719477, color_rgb := '60 0 195', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.27691283, to_step :=  0.28325196, color_rgb := '15 0 240', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  2.22171801, to_step :=  2.27257792, color_rgb := '64 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  18.65067196, to_step :=  19.07762596, color_rgb := '225 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  22.86457324, to_step :=  23.3879925, color_rgb := '180 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  20.41803145, to_step :=  20.88544412, color_rgb := '205 0 0', color_label := '20.0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  29.32860513, to_step :=  30, color_rgb := '125 0 0', color_label := '30.0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  21.85261464, to_step :=  22.352868, color_rgb := '190 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  17.82521558, to_step :=  18.23327311, color_rgb := '235 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  19.07762596, to_step :=  19.51435386, color_rgb := '220 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.65539232, to_step :=  1.69328781, color_rgb := '0 255 47', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  8.25695692, to_step :=  8.44597642, color_rgb := '255 119 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  19.9610794, to_step :=  20.41803145, color_rgb := '210 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  16.28228702, to_step :=  16.65502359, color_rgb := '255 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  12.13186041, to_step :=  12.4095848, color_rgb := '255 51 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  13.89653361, to_step :=  14.21465516, color_rgb := '255 27 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.28325196, to_step :=  0.28973621, color_rgb := '12 0 243', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  12.98425223, to_step :=  13.2814897, color_rgb := '255 39 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  6.58448111, to_step :=  6.73521405, color_rgb := '255 155 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.22082316, to_step :=  0.22587828, color_rgb := '42 0 213', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.66943295, to_step :=  0.68475771, color_rgb := '0 181 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.13728334, to_step :=  0.14042605, color_rgb := '105 0 150', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.0291393, to_step :=  1.05269851, color_rgb := '0 255 215', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.11198226, to_step :=  0.11454578, color_rgb := '132 0 123', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.1788356, to_step :=  1.20582168, color_rgb := '0 255 167', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  21.36355686, to_step :=  21.85261464, color_rgb := '195 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.93958965, to_step :=  1.98399103, color_rgb := '16 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.47826299, to_step :=  1.51210361, color_rgb := '0 255 87', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  4.38111168, to_step :=  4.48140475, color_rgb := '255 227 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  23.92339397, to_step :=  24.47105192, color_rgb := '170 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  2.27257792, to_step :=  2.32460211, color_rgb := '72 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  26.78995743, to_step :=  27.40323719, color_rgb := '145 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.05269851, to_step :=  1.07679705, color_rgb := '0 255 207', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.40686513, to_step :=  0.41617915, color_rgb := '0 64 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.33947805, to_step :=  0.34724943, color_rgb := '0 21 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.22587828, to_step :=  0.23104912, color_rgb := '39 0 216', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  24.47105192, to_step :=  25.03124694, color_rgb := '165 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  19.51435386, to_step :=  19.9610794, color_rgb := '215 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  14.87291243, to_step :=  15.2133854, color_rgb := '255 15 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.07679705, to_step :=  1.10144725, color_rgb := '0 255 199', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  2.07586639, to_step :=  2.12338744, color_rgb := '40 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  16.65502359, to_step :=  17.03629291, color_rgb := '250 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  6.15222227, to_step :=  6.29305987, color_rgb := '255 167 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.29636889, to_step :=  0.30315342, color_rgb := '6 0 249', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  3.11987095, to_step :=  3.1912915, color_rgb := '192 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  7.37345081, to_step :=  7.54224496, color_rgb := '255 135 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  4.28306315, to_step :=  4.38111168, color_rgb := '255 231 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.21104979, to_step :=  0.21588117, color_rgb := '48 0 207', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.29054344, to_step :=  1.32008675, color_rgb := '0 255 135', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.7328692, to_step :=  0.74964615, color_rgb := '0 202 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.70043329, to_step :=  0.71646771, color_rgb := '0 192 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.58212664, to_step :=  1.61834492, color_rgb := '0 255 63', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.76680717, to_step :=  0.78436103, color_rgb := '0 213 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.45561677, to_step :=  0.46604682, color_rgb := '0 90 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.98399103, to_step :=  2.02940886, color_rgb := '24 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  6.88939759, to_step :=  7.04711072, color_rgb := '255 147 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  2.9817892, to_step :=  3.05004877, color_rgb := '176 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.85374574, to_step :=  1.89618197, color_rgb := '0 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.52188976, to_step :=  0.53383694, color_rgb := '0 122 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  11.59491882, to_step :=  11.86035145, color_rgb := '255 59 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  12.4095848, to_step :=  12.69366689, color_rgb := '255 47 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.10463084, to_step :=  0.10702606, color_rgb := '141 0 114', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  17.42629031, to_step :=  17.82521558, color_rgb := '240 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  25.60426603, to_step :=  26.19040277, color_rgb := '155 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.1, to_step :=  0.10228922, color_rgb := '255 255 255', color_label := '0.1', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  7.8915139, to_step :=  8.07216763, color_rgb := '255 123 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.35030638, to_step :=  1.38121779, color_rgb := '0 255 119', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.1842493, to_step :=  0.18846716, color_rgb := '66 0 189', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  11.86035145, to_step :=  12.13186041, color_rgb := '255 55 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.51020996, to_step :=  0.52188976, color_rgb := '0 117 255', color_label := '0.5', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  8.83709568, to_step :=  9.03939581, color_rgb := '255 107 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.10144725, to_step :=  1.12666175, color_rgb := '0 255 191', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  2.43225061, to_step :=  2.48793006, color_rgb := '96 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.858688, to_step :=  0.87834522, color_rgb := '0 240 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.12540027, to_step :=  0.12827095, color_rgb := '117 0 138', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.16085211, to_step :=  0.16453436, color_rgb := '84 0 171', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.38885776, to_step :=  0.39775956, color_rgb := '0 53 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.15029247, to_step :=  0.15373299, color_rgb := '93 0 162', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.39775956, to_step :=  0.40686513, color_rgb := '0 58 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  2.02940886, to_step :=  2.07586639, color_rgb := '32 255 0', color_label := '2.0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.37164739, to_step :=  0.38015519, color_rgb := '0 42 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  5.25077119, to_step :=  5.37097264, color_rgb := '255 195 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  7.54224496, to_step :=  7.71490317, color_rgb := '255 131 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  6.29305987, to_step :=  6.43712155, color_rgb := '255 163 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  8.07216763, to_step :=  8.25695692, color_rgb := '255 123 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.32008675, to_step :=  1.35030638, color_rgb := '0 255 127', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  3.26434703, to_step :=  3.33907496, color_rgb := '208 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.83947071, to_step :=  0.858688, color_rgb := '0 234 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  4.68893122, to_step :=  4.79627094, color_rgb := '255 215 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  2.32460211, to_step :=  2.37781726, color_rgb := '80 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  2.66273352, to_step :=  2.72368922, color_rgb := '128 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.74964615, to_step :=  0.76680717, color_rgb := '0 208 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.53383694, to_step :=  0.54605762, color_rgb := '0 128 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  6.73521405, to_step :=  6.88939759, color_rgb := '255 151 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.30315342, to_step :=  0.31009325, color_rgb := '0 0 252', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  4.9060679, to_step :=  5.01837835, color_rgb := '255 207 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  5.87993229, to_step :=  6.01453659, color_rgb := '255 175 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.13120735, to_step :=  0.13421097, color_rgb := '111 0 144', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.96157824, to_step :=  0.98359083, color_rgb := '0 255 239', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  4.58399374, to_step :=  4.68893122, color_rgb := '255 219 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  2.84981878, to_step :=  2.91505727, color_rgb := '152 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.98359083, to_step :=  1.00610734, color_rgb := '0 255 231', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  12.69366689, to_step :=  12.98425223, color_rgb := '255 43 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  4.48140475, to_step :=  4.58399374, color_rgb := '255 223 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  3.49370202, to_step :=  3.57368038, color_rgb := '232 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.17215368, to_step :=  0.17609465, color_rgb := '75 0 180', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  4.79627094, to_step :=  4.9060679, color_rgb := '255 211 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.42570638, to_step :=  0.43545172, color_rgb := '0 74 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.57134464, to_step :=  0.58442395, color_rgb := '0 144 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  4.18720893, to_step :=  4.28306315, color_rgb := '255 235 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.20170898, to_step :=  0.20632653, color_rgb := '54 0 201', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  8.44597642, to_step :=  8.63932299, color_rgb := '255 115 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.26166129, to_step :=  1.29054344, color_rgb := '0 255 143', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.264657, to_step :=  0.27071557, color_rgb := '21 0 234', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  3.91232651, to_step :=  4.00188808, color_rgb := '255 247 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  2.54488413, to_step :=  2.603142, color_rgb := '112 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  3.73917163, to_step :=  3.82476931, color_rgb := '255 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.23342553, to_step :=  1.26166129, color_rgb := '0 255 151', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.54671891, to_step :=  1.58212664, color_rgb := '0 255 71', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  9.24632703, to_step :=  9.45799535, color_rgb := '255 99 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.24728277, to_step :=  0.2529436, color_rgb := '27 0 228', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.15373299, to_step :=  0.15725227, color_rgb := '90 0 165', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  5.49392575, to_step :=  5.61969353, color_rgb := '255 187 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.69328781, to_step :=  1.73205081, color_rgb := '0 255 39', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  6.43712155, to_step :=  6.58448111, color_rgb := '255 159 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  5.01837835, to_step :=  5.13325983, color_rgb := '255 203 0', color_label := '5.0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  5.61969353, to_step :=  5.74834041, color_rgb := '255 183 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  5.13325983, to_step :=  5.25077119, color_rgb := '255 199 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  7.20843424, to_step :=  7.37345081, color_rgb := '255 139 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.20582168, to_step :=  1.23342553, color_rgb := '0 255 159', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.1198502, to_step :=  0.12259383, color_rgb := '123 0 132', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  3.05004877, to_step :=  3.11987095, color_rgb := '184 255 0', color_label := '3.0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  15.91789222, to_step :=  16.28228702, color_rgb := '255 3 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.13421097, to_step :=  0.13728334, color_rgb := '108 0 147', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.46604682, to_step :=  0.47671563, color_rgb := '0 96 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.8206835, to_step :=  0.83947071, color_rgb := '0 229 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.19719477, to_step :=  0.20170898, color_rgb := '57 0 198', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.36332998, to_step :=  0.37164739, color_rgb := '0 37 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.59780267, to_step :=  0.61148766, color_rgb := '0 154 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.38121779, to_step :=  1.41283684, color_rgb := '0 255 111', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  9.67450921, to_step :=  9.89597954, color_rgb := '255 91 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.49879155, to_step :=  0.51020996, color_rgb := '0 112 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.94005828, to_step :=  0.96157824, color_rgb := '0 255 247', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.10947612, to_step :=  0.11198226, color_rgb := '135 0 120', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.87834522, to_step :=  0.89845243, color_rgb := '0 245 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.48762868, to_step :=  0.49879155, color_rgb := '0 106 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.10228922, to_step :=  0.10463084, color_rgb := '144 0 111', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.21588117, to_step :=  0.22082316, color_rgb := '45 0 210', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.43545172, to_step :=  0.44542014, color_rgb := '0 80 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.15245346, to_step :=  1.1788356, color_rgb := '0 255 175', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.15725227, to_step :=  0.16085211, color_rgb := '87 0 168', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.14692895, to_step :=  0.15029247, color_rgb := '96 0 159', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  2.37781726, to_step :=  2.43225061, color_rgb := '88 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.12827095, to_step :=  0.13120735, color_rgb := '114 0 141', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  2.72368922, to_step :=  2.78604033, color_rgb := '136 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  3.41551357, to_step :=  3.49370202, color_rgb := '224 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  9.45799535, to_step :=  9.67450921, color_rgb := '255 95 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  3.33907496, to_step :=  3.41551357, color_rgb := '216 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  3.82476931, to_step :=  3.91232651, color_rgb := '255 251 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  15.2133854, to_step :=  15.56165252, color_rgb := '255 11 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  7.04711072, to_step :=  7.20843424, color_rgb := '255 143 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.61834492, to_step :=  1.65539232, color_rgb := '0 255 55', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.18846716, to_step :=  0.19278158, color_rgb := '63 0 192', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.44517972, to_step :=  1.47826299, color_rgb := '0 255 95', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.31719195, to_step :=  0.32445316, color_rgb := '0 5 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.00610734, to_step :=  1.0291393, color_rgb := '0 255 223', color_label := '1.0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.24174862, to_step :=  0.24728277, color_rgb := '30 0 225', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.12666175, to_step :=  1.15245346, color_rgb := '0 255 183', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.38015519, to_step :=  0.38885776, color_rgb := '0 48 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  5.37097264, to_step :=  5.49392575, color_rgb := '255 191 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.31009325, to_step :=  0.31719195, color_rgb := '0 0 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.65445116, to_step :=  0.66943295, color_rgb := '0 176 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.23633833, to_step :=  0.24174862, color_rgb := '33 0 222', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  23.3879925, to_step :=  23.92339397, color_rgb := '175 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.27071557, to_step :=  0.27691283, color_rgb := '18 0 237', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.55855805, to_step :=  0.57134464, color_rgb := '0 138 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.51210361, to_step :=  1.54671891, color_rgb := '0 255 79', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.89618197, to_step :=  1.93958965, color_rgb := '8 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  2.78604033, to_step :=  2.84981878, color_rgb := '144 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.47671563, to_step :=  0.48762868, color_rgb := '0 101 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.20632653, to_step :=  0.21104979, color_rgb := '51 0 204', color_label := '0.2', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.16830091, to_step :=  0.17215368, color_rgb := '78 0 177', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  28.03055624, to_step :=  28.67223597, color_rgb := '135 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.33188059, to_step :=  0.33947805, color_rgb := '0 16 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.25873402, to_step :=  0.264657, color_rgb := '24 0 231', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.54605762, to_step :=  0.55855805, color_rgb := '0 133 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  8.63932299, to_step :=  8.83709568, color_rgb := '255 111 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  6.01453659, to_step :=  6.15222227, color_rgb := '255 171 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  13.58553157, to_step :=  13.89653361, color_rgb := '255 31 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.80231674, to_step :=  0.8206835, color_rgb := '0 224 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  9.89597954, to_step :=  10.1225198, color_rgb := '255 87 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  13.2814897, to_step :=  13.58553157, color_rgb := '255 35 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  10.35424605, to_step :=  10.59127702, color_rgb := '255 79 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.2529436, to_step :=  0.25873402, color_rgb := '24 0 231', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  3.65548961, to_step :=  3.73917163, color_rgb := '248 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.62548593, to_step :=  0.63980465, color_rgb := '0 165 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  11.08174161, to_step :=  11.33542652, color_rgb := '255 67 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  14.5400592, to_step :=  14.87291243, color_rgb := '255 19 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.63980465, to_step :=  0.65445116, color_rgb := '0 170 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.41617915, to_step :=  0.42570638, color_rgb := '0 69 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  17.03629291, to_step :=  17.42629031, color_rgb := '245 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  2.17199634, to_step :=  2.22171801, color_rgb := '56 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  7.71490317, to_step :=  7.8915139, color_rgb := '255 127 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  11.33542652, to_step :=  11.59491882, color_rgb := '255 63 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  14.21465516, to_step :=  14.5400592, color_rgb := '255 23 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.12259383, to_step :=  0.12540027, color_rgb := '120 0 135', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.34724943, to_step :=  0.35519872, color_rgb := '0 26 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.32445316, to_step :=  0.33188059, color_rgb := '0 10 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.17609465, to_step :=  0.18012583, color_rgb := '72 0 183', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  18.23327311, to_step :=  18.65067196, color_rgb := '230 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  3.57368038, to_step :=  3.65548961, color_rgb := '240 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.44542014, to_step :=  0.45561677, color_rgb := '0 85 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.68475771, to_step :=  0.70043329, color_rgb := '0 186 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  15.56165252, to_step :=  15.91789222, color_rgb := '255 7 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  25.03124694, to_step :=  25.60426603, color_rgb := '160 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  22.352868, to_step :=  22.86457324, color_rgb := '185 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.58442395, to_step :=  0.59780267, color_rgb := '0 149 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.71646771, to_step :=  0.7328692, color_rgb := '0 197 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  26.19040277, to_step :=  26.78995743, color_rgb := '150 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.14042605, to_step :=  0.14364071, color_rgb := '102 0 153', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  2.91505727, to_step :=  2.9817892, color_rgb := '168 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.11454578, to_step :=  0.11716797, color_rgb := '129 0 126', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.11716797, to_step :=  0.1198502, color_rgb := '126 0 129', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  10.1225198, to_step :=  10.35424605, color_rgb := '255 83 0', color_label := '10.0', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  4.00188808, to_step :=  4.09349991, color_rgb := '255 243 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.73205081, to_step :=  1.77170118, color_rgb := '0 255 31', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  27.40323719, to_step :=  28.03055624, color_rgb := '140 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  3.1912915, to_step :=  3.26434703, color_rgb := '200 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.77170118, to_step :=  1.81225923, color_rgb := '0 255 23', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  28.67223597, to_step :=  29.32860513, color_rgb := '130 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.18012583, to_step :=  0.1842493, color_rgb := '69 0 186', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  20.88544412, to_step :=  21.36355686, color_rgb := '200 0 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  4.09349991, to_step :=  4.18720893, color_rgb := '255 239 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.28973621, to_step :=  0.29636889, color_rgb := '9 0 246', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.10702606, to_step :=  0.10947612, color_rgb := '138 0 117', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.16453436, to_step :=  0.16830091, color_rgb := '81 0 174', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.14364071, to_step :=  0.14692895, color_rgb := '99 0 156', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.61148766, to_step :=  0.62548593, color_rgb := '0 160 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.23104912, to_step :=  0.23633833, color_rgb := '36 0 219', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  10.83373413, to_step :=  11.08174161, color_rgb := '255 71 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  2.12338744, to_step :=  2.17199634, color_rgb := '48 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.81225923, to_step :=  1.85374574, color_rgb := '0 255 15', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  1.41283684, to_step :=  1.44517972, color_rgb := '0 255 103', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  2.48793006, to_step :=  2.54488413, color_rgb := '104 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.89845243, to_step :=  0.91901994, color_rgb := '0 250 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  2.603142, to_step :=  2.66273352, color_rgb := '120 255 0', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.35519872, to_step :=  0.36332998, color_rgb := '0 32 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  0.91901994, to_step :=  0.94005828, color_rgb := '0 255 255', color_label := '', group_label := '' );
+SELECT analysis.update_insert_legend_step( legend_id := 211, from_step :=  9.03939581, to_step :=  9.24632703, color_rgb := '255 103 0', color_label := '', group_label := '' );
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 
 
 
@@ -7794,7 +11596,10 @@ SELECT analysis.update_insert_product_legend( productcode := 'tamsat-rfe', subpr
 SELECT analysis.update_insert_product_legend( productcode := 'tamsat-rfe', subproductcode := '10dmin', version := '2.0', legend_id := 85, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'tamsat-rfe', subproductcode := '1monperc', version := '2.0', legend_id := 134, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'modis-chla', subproductcode := 'chla-day', version := 'v2013.1', legend_id := 207, default_legend := false );
+<<<<<<< HEAD
 SELECT analysis.update_insert_product_legend( productcode := 'modis-sst', subproductcode := 'monclim', version := 'v2013.1', legend_id := 69, default_legend := false );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_product_legend( productcode := 'vgt-ndvi', subproductcode := '10dmax-linearx2', version := 'sv2-pv2.1', legend_id := 9, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'vgt-ndvi', subproductcode := '10davg-linearx2', version := 'sv2-pv2.1', legend_id := 6, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'vgt-ndvi', subproductcode := '10dmed-linearx2', version := 'sv2-pv2.1', legend_id := 9, default_legend := true );
@@ -7883,7 +11688,10 @@ SELECT analysis.update_insert_product_legend( productcode := 'modis-chla', subpr
 SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '10dmax', version := '2.0', legend_id := 85, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'pml-modis-chl', subproductcode := 'chl-3day', version := '3.0', legend_id := 211, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'lsasaf-lst', subproductcode := '1dmax', version := 'undefined', legend_id := 22, default_legend := false );
+<<<<<<< HEAD
 SELECT analysis.update_insert_product_legend( productcode := 'modis-sst', subproductcode := 'monavg', version := 'v2013.1', legend_id := 213, default_legend := false );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_product_legend( productcode := 'lsasaf-lst', subproductcode := '10dmin', version := 'undefined', legend_id := 72, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'lsasaf-lst', subproductcode := '1dmax', version := 'undefined', legend_id := 72, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subproductcode := '10dmin', version := '2.0', legend_id := 85, default_legend := true );
@@ -8046,7 +11854,10 @@ SELECT analysis.update_insert_product_legend( productcode := 'fewsnet-rfe', subp
 SELECT analysis.update_insert_product_legend( productcode := 'tamsat-rfe', subproductcode := '10dperc', version := '2.0', legend_id := 134, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'modis-chla', subproductcode := 'monclim', version := 'v2013.1', legend_id := 211, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'pml-modis-chl', subproductcode := 'chl-3day', version := '3.0', legend_id := 201, default_legend := false );
+<<<<<<< HEAD
 SELECT analysis.update_insert_product_legend( productcode := 'pml-modis-sst', subproductcode := 'sst-fronts', version := '3.0', legend_id := 136, default_legend := false );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_product_legend( productcode := 'tamsat-rfe', subproductcode := '1monmax', version := '2.0', legend_id := 142, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'arc2-rain', subproductcode := '3mon', version := '2.0', legend_id := 142, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'vgt-ndvi', subproductcode := 'ndv', version := 'proba-v2.2', legend_id := 19, default_legend := false );
@@ -8144,7 +11955,10 @@ SELECT analysis.update_insert_product_legend( productcode := 'modis-firms', subp
 SELECT analysis.update_insert_product_legend( productcode := 'modis-firms', subproductcode := '10dcountmin', version := 'v6.0', legend_id := 73, default_legend := true );
 SELECT analysis.update_insert_product_legend( productcode := 'modis-firms', subproductcode := '10dcountmin', version := 'v6.0', legend_id := 81, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'modis-firms', subproductcode := '1day', version := 'v6.0', legend_id := 81, default_legend := true );
+<<<<<<< HEAD
 SELECT analysis.update_insert_product_legend( productcode := 'modis-sst', subproductcode := 'monavg', version := 'v2013.1', legend_id := 69, default_legend := false );
+=======
+>>>>>>> eda1b642cca7a1c9c6808a4e0c013d031a41539b
 SELECT analysis.update_insert_product_legend( productcode := 'vgt-ndvi', subproductcode := 'ndvi-linearx2', version := 'sv2-pv2.2', legend_id := 6, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'vgt-ndvi', subproductcode := 'ndvi-linearx2', version := 'sv2-pv2.2', legend_id := 111, default_legend := false );
 SELECT analysis.update_insert_product_legend( productcode := 'vgt-dmp', subproductcode := 'dmp', version := 'V1.0', legend_id := 39, default_legend := false );
