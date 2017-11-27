@@ -996,7 +996,7 @@ def getTimeseriesProducts(forse):
 
 
 def TimeseriesProducts():
-    # import copy
+    import copy
     # import time
     # t0 = time.time()
     # print 'START: ' + str(t0)
@@ -1047,14 +1047,15 @@ def TimeseriesProducts():
                     if mapset_info != []:
                         mapset_record = functions.row2dict(mapset_info)
 
-                        prod_dict['productmapsetid'] = prod_record['productid'] + '_' + mapset_record['mapsetcode']
-                        prod_dict['mapsetcode'] = mapset_record['mapsetcode']
-                        prod_dict['mapset_name'] = mapset_record['descriptive_name']
+                        tmp_prod_dict = copy.deepcopy(prod_dict)
+                        tmp_prod_dict['productmapsetid'] = prod_record['productid'] + '_' + mapset_record['mapsetcode']
+                        tmp_prod_dict['mapsetcode'] = mapset_record['mapsetcode']
+                        tmp_prod_dict['mapset_name'] = mapset_record['descriptive_name']
 
                         # t3 = time.time()
                         # print 'before getting dataset info: ' + str(t3)
 
-                        dataset = p.get_dataset(mapset=mapset, sub_product_code=prod_dict['subproductcode'])
+                        dataset = p.get_dataset(mapset=mapset, sub_product_code=tmp_prod_dict['subproductcode'])
                         # dataset.get_filenames()
                         all_present_product_dates = dataset.get_dates()
 
@@ -1070,10 +1071,10 @@ def TimeseriesProducts():
                         for product_date in all_present_product_dates:
                             if product_date.year not in distinctyears:
                                 distinctyears.append(product_date.year)
-                        prod_dict['years'] = distinctyears
+                        tmp_prod_dict['years'] = distinctyears
 
-                        if prod_dict['years'].__len__() > 0:
-                            products_dict_all.append(prod_dict)
+                        if tmp_prod_dict['years'].__len__() > 0:
+                            products_dict_all.append(tmp_prod_dict)
                             # tmp_prod_dict = copy.deepcopy(prod_dict)
                             #
                             # products_dict_all.append(tmp_prod_dict)
@@ -1115,7 +1116,7 @@ def TimeseriesProducts():
                                 dataset_dict['productcode'] = dataset_record['productcode']
                                 dataset_dict['version'] = dataset_record['version']
                                 dataset_dict['subproductcode'] = dataset_record['subproductcode']
-                                dataset_dict['productmapsetid'] = prod_dict['productmapsetid']
+                                dataset_dict['productmapsetid'] = tmp_prod_dict['productmapsetid']
                                 dataset_dict['display_index'] = dataset_record['display_index']
                                 dataset_dict['mapsetcode'] = mapset_record['mapsetcode']
                                 dataset_dict['mapset_name'] = mapset_record['descriptive_name']

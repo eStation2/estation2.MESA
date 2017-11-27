@@ -15,7 +15,7 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionModel', {
             //,autoLoad: false
             ,loadMask: true
             //
-            ,sorters: [{property: 'display_index', direction: 'ASC'}]
+            ,sorters: [{property: 'mapsetcode', direction: 'DESC'}]
 
             ,grouper:{
                      groupFn : function (item) {
