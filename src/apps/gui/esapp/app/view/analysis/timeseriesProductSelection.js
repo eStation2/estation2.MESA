@@ -1072,7 +1072,7 @@ Ext.define("esapp.view.analysis.timeseriesCategoryProducts",{
                 '</br>',
                 '<b class="smalltext" style="color:darkgrey">{productcode} - {subproductcode}</b>',
                 '<b class="smalltext"> - {mapset_name}</b>'
-                ,'<span>&nbsp;&nbsp;(display_index: <b style="color:black">{display_index}</b>)</span>'
+                // ,'<span>&nbsp;&nbsp;(display_index: <b style="color:black">{display_index}</b>)</span>'
                 //'<tpl for="productmapsets">',
                 //'<b class="smalltext"> - {descriptive_name}</b>',
                 //'</tpl>'
