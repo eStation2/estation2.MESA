@@ -1,7 +1,7 @@
 Summary: eStation 2.0 application from JRC
 Name: eStation2-Apps
 Version: 2.1.1
-Release: 1
+Release: 5
 Group: eStation
 License: GPL
 Source: /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz
