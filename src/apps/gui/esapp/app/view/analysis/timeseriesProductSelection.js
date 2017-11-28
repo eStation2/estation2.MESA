@@ -120,14 +120,17 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                         //}
                     },
                     handler: function (grid, rowIndex, colIndex, icon, e, record) {
-                        var rec = record,   // grid.getStore().getAt(rowIndex),
-                            selectedTimeseriesStore = grid.getStore();
+                        var rec = record;   // grid.getStore().getAt(rowIndex),
+                            // selectedTimeseriesStore = grid.getStore();
+                        var gridSelectedTS = 'selected-timeseries-mapset-dataset-grid_'+ me.charttype;
+                        var selectedTimeseriesStore = Ext.getCmp(gridSelectedTS).getStore();
                         var yearsData = [];
 
-                        rec.get('selected') ? rec.set('selected', false) : rec.set('selected', true);
-                        if (!rec.get('selected')) {
-                            selectedTimeseriesStore.remove(record);
-                        }
+                        selectedTimeseriesStore.remove(record);
+                        // rec.get('selected') ? rec.set('selected', false) : rec.set('selected', true);
+                        // if (!rec.get('selected')) {
+                        //     selectedTimeseriesStore.remove(record);
+                        // }
 
                         selectedTimeseriesStore.getData().each(function (product) {
                             yearsData = esapp.Utils.union_arrays(yearsData, product.get('years'));
