@@ -264,8 +264,12 @@ if [[ `su postgres -c "psql -c 'select datname from pg_database'"  2>/dev/null|g
 else
 	echo "$(date +'%Y-%m-%d %H:%M ') Bucardo package already installed. Continue"
 fi
+# Bucardo options - see also ES2-112
+bucardo stop
+mv -f /var/log/bucardo/log.bucardo /var/log/bucardo/log.bucardo.bck
 bucardo set log_level=terse
 bucardo set reason_file='/var/log/bucardo/bucardo.restart.reason'
+bucardo start
 
 # Create log and run dir for Bucardo
 mkdir -p ${log_dir}
