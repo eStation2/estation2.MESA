@@ -1,7 +1,7 @@
 Summary: eStation 2.0 application from JRC
 Name: eStation2-Apps
 Version: 2.1.1
-Release: 6
+Release: 7
 Group: eStation
 License: GPL
 Source: /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz
@@ -158,6 +158,9 @@ apache_config='/usr/local/src/tas/eStation_wsgi_srv/httpd.conf'
 sed -i "s|.*LimitRequestBody.*|LimitRequestBody 314572800|" ${apache_config}
 fi
 
+# Stop Bucardo to prevent sync during DB update - see also ES2-112
+bucardo stop
+
 # Restart postgresql 
 echo "`date +'%Y-%m-%d %H:%M '` Restart postgresql-9.3"
 /etc/init.d/postgresql-9.3 restart
@@ -264,8 +267,7 @@ if [[ `su postgres -c "psql -c 'select datname from pg_database'"  2>/dev/null|g
 else
 	echo "$(date +'%Y-%m-%d %H:%M ') Bucardo package already installed. Continue"
 fi
-# Bucardo options - see also ES2-112
-bucardo stop
+# Bucardo logfile and options - see also ES2-112
 mv -f /var/log/bucardo/log.bucardo /var/log/bucardo/log.bucardo.bck
 bucardo set log_level=terse
 bucardo set reason_file='/var/log/bucardo/bucardo.restart.reason'
@@ -278,6 +280,7 @@ chmod 777 ${log_dir}
 mkdir -p ${run_dir}
 chown adminuser:estation ${run_dir}
 chmod 777 ${run_dir}
+
 #chmod 666 /home/adminuser/.pgpass
 
 # Set the 'role' in system_settings
