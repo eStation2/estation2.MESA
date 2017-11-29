@@ -1,7 +1,7 @@
 Summary: eStation 2.0 application from JRC
 Name: eStation2-Apps
 Version: 2.1.1
-Release: 7
+Release: 8
 Group: eStation
 License: GPL
 Source: /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz
@@ -271,15 +271,15 @@ fi
 mv -f /var/log/bucardo/log.bucardo /var/log/bucardo/log.bucardo.bck
 bucardo set log_level=terse
 bucardo set reason_file='/var/log/bucardo/bucardo.restart.reason'
-bucardo start
+# bucardo start # wait eStation2:system service to start it
 
 # Create log and run dir for Bucardo
 mkdir -p ${log_dir}
-chown adminuser:estation ${log_dir}
-chmod 777 ${log_dir}
+chown adminuser:estation -R ${log_dir}
+chmod 777 -R ${log_dir}
 mkdir -p ${run_dir}
-chown adminuser:estation ${run_dir}
-chmod 777 ${run_dir}
+chown adminuser:estation -R ${run_dir}
+chmod 777 -R ${run_dir}
 
 #chmod 666 /home/adminuser/.pgpass
 
