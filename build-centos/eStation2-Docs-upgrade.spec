@@ -1,7 +1,7 @@
 Summary: eStation 2.0 Documentation
-Name: eStation2-Docs
+Name: mesa2015-eStation2-Docs
 Version: 2.1.1
-Release: 1
+Release: 2
 Group: eStation
 License: GPL
 Source: /home/adminuser/rpms/eStation-Docs/%{name}-%{version}-%{release}.tgz
@@ -16,7 +16,9 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 
 %prep
 # Get the sources from the JRC ftp and create .tgz
-# lftp -e "mirror -Le /ftp/private/narma/eStation_2.0/Packages/eStation-Docs /home/adminuser/rpms/; exit" -u narma:JRCkOq7478 srv-ies-ftp.jrc.it"" 
+# lftp -e "mirror -Le /ftp/private/narma/eStation_2.0/Packages/eStation-Docs /home/adminuser/rpms/; exit" -u narmauser:JRCkOq7478 srv-ies-ftp.jrc.it"" 
+lftp -c "open -u narmauser,JRCkOq7478 sftp://srv-ies-ftp.jrc.it; mirror -c -L -e  /FTP/pvt/narma/narma/eStation_2.0/Packages/eStation-Docs /home/adminuser/rpms/"
+
 cd /home/adminuser/rpms/eStation-Docs/
 rm -f %{name}-%{version}-%{release}.rpm
 tar -cvzf %{name}-%{version}-%{release}.tgz --exclude=*.tgz *
