@@ -1,5 +1,5 @@
 Summary: eStation 2.0 application from JRC
-Name: eStation2-Apps
+Name: mesa2015-eStation2-Apps
 Version: 2.1.1
 Release: 8
 Group: eStation
