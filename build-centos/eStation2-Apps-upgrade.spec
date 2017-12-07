@@ -1,5 +1,5 @@
 Summary: eStation 2.0 application from JRC
-Name: mesa2015-eStation2-Apps
+Name: eStation2-Apps
 Version: 2.1.1
 Release: 8
 Group: eStation
@@ -33,6 +33,8 @@ rm eStation2-Apps-%{version}-%{release}.tgz
 
 %clean
 rm -r -f $RPM_BUILD_ROOT
+echo "Renaming/copying the package under /home/adminuser/rpms"
+cp /rpm/rpmbuild/RPMS/x86_64/%{name}-%{version}-%{release}.x86_64.rpm /home/adminuser/rpms/eStation-Apps/mesa2015-%{name}-%{version}-%{release}.x86_64.rpm
 
 %files
 /var/www/eStation2-%{version}/*
