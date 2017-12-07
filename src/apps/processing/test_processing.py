@@ -457,9 +457,9 @@ from apps.processing.processing_std_msg_mpe import *
 #   Calls
 #   ---------------------------------------------------------------------
 
-# test_proc_pml_modis_fronts(pipe_run=3, pipe_print=0, touch_files_only=False)
-# test_proc_modis_firms(pipe_run=4, pipe_print=0, start_date_stats='20030101', end_date_stats='20161231')
-test_proc_chirps_dekad(pipe_run=3, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
+test_proc_pml_modis_fronts(pipe_run=4, pipe_print=0, touch_files_only=False)
+# test_proc_modis_firms(pipe_run=3, pipe_print=0, start_date_stats='20030101', end_date_stats='20030201')
+# test_proc_chirps_dekad(pipe_run=3, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
 
 # my_starting_dates_stats = proc_functions.get_list_dates_for_dataset('modis-firms', '10dcount', 'v6.0', start_date='20020701', end_date='20170821')
 # for date in my_starting_dates_stats:
