@@ -95,3 +95,8 @@ NOTE: possible issues to be solved:
 2. Copy the credential file /home/adminuser/.credentials/drive-python-quickstart.json from a 'reference' machine.
 2.a You can re-create the file as described in http://wescpy.blogspot.it/2014/09/simple-google-api-access-from-python.html under 'Google API access'
 
+I Libraries for Sentinel data management
+------------------------------------------------------------------------------------------------
+
+https://github.com/sentinelsat/sentinelsat/blob/master/README.rst
+
