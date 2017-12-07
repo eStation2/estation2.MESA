@@ -44,7 +44,7 @@ Ext.define('esapp.Application', {
 
     stores: [
          'LogoImages'
-        ,'ProcessingStore'
+        ,'ProcessingStore'          // no autoload
         ,'i18nStore'
         ,'LanguagesStore'
         ,'SystemSettingsStore'
@@ -90,29 +90,6 @@ Ext.define('esapp.Application', {
         Ext.override(Ext.data.Connection, {     timeout: Ext.Ajax.timeout });
 
         esapp.globals = [];
-
-        esapp.globals['typeinstallation'] = 'full';
-        esapp.globals['role'] = 'pc2';
-        esapp.globals['mode'] = 'nominal';
-        Ext.Ajax.request({
-            method: 'POST',
-            url: 'typeinstallation',
-            success: function(response, opts){
-                var resp = Ext.JSON.decode(response.responseText);
-                if (resp.typeinstallation != ''){
-                    esapp.globals['typeinstallation'] = resp.typeinstallation;
-                }
-                if (resp.role != ''){
-                    esapp.globals['role'] = resp.role;
-                }
-                if (resp.mode != ''){
-                    esapp.globals['mode'] = resp.mode;
-                }
-            },
-            failure: function(response, opts) {
-                console.info(response.status);
-            }
-        });
 
         // Ext.data.StoreManager.lookup('TimeseriesProductsStore').load();
 
@@ -209,6 +186,29 @@ Ext.define('esapp.Application', {
             }
         });
 
+
+        esapp.globals['typeinstallation'] = 'full';
+        esapp.globals['role'] = 'pc2';
+        esapp.globals['mode'] = 'nominal';
+        Ext.Ajax.request({
+            method: 'POST',
+            url: 'typeinstallation',
+            success: function(response, opts){
+                var resp = Ext.JSON.decode(response.responseText);
+                if (resp.typeinstallation != ''){
+                    esapp.globals['typeinstallation'] = resp.typeinstallation;
+                }
+                if (resp.role != ''){
+                    esapp.globals['role'] = resp.role;
+                }
+                if (resp.mode != ''){
+                    esapp.globals['mode'] = resp.mode;
+                }
+            },
+            failure: function(response, opts) {
+                console.info(response.status);
+            }
+        });
         //this.callParent();
     },
 
@@ -239,6 +239,7 @@ Ext.define('esapp.Application', {
                 Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
                 Ext.data.StoreManager.lookup('IngestionsStore').load();
             }
+            Ext.data.StoreManager.lookup('ProcessingStore').load();
             Ext.data.StoreManager.lookup('DataSetsStore').load();
         }
 

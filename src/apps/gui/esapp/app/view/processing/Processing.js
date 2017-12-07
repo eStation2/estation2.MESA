@@ -24,7 +24,7 @@ Ext.define("esapp.view.processing.Processing",{
     ],
 
     store: 'ProcessingStore',
-    bufferedRenderer: true,
+    bufferedRenderer: false,
 
     // title: 'Processing Dashboard',
     viewConfig: {
@@ -54,7 +54,7 @@ Ext.define("esapp.view.processing.Processing",{
         groupHeaderTpl: Ext.create('Ext.XTemplate', '<div class="group-header-style">{name} ({children.length})</div>'),
         hideGroupedHeader: true,
         enableGroupingMenu: false,
-        startCollapsed : false,
+        startCollapsed : true,
         groupByText: esapp.Utils.getTranslation('productcategories')  // 'Product category'
     }],
 
@@ -133,7 +133,7 @@ Ext.define("esapp.view.processing.Processing",{
                 menuDisabled: true,
                 variableRowHeight: true,
                 sortable: false,
-                groupable: true,
+                groupable: false,
                 draggable: false,
                 hideable: true
             },
@@ -194,7 +194,7 @@ Ext.define("esapp.view.processing.Processing",{
                 menuDisabled: true,
                 variableRowHeight : true,
                 sortable: false,
-                groupable:true,
+                groupable:false,
                 draggable:false,
                 hideable: true
             },
@@ -276,7 +276,7 @@ Ext.define("esapp.view.processing.Processing",{
                 menuDisabled: true,
                 variableRowHeight : true,
                 sortable: false,
-                groupable:true,
+                groupable:false,
                 draggable:false,
                 hideable: true
             }

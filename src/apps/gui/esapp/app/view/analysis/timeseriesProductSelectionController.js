@@ -551,7 +551,7 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
                 selectedTimeseriesStore.add(newrecord);
             }
 
-            if (me.multipleyears){
+            if (me.multipleyears || me.year){
                 selectedTimeseriesStore.getData().each(function(product) {
                     yearsData = esapp.Utils.union_arrays(yearsData, product.get('years'));
 
