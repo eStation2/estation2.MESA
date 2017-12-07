@@ -279,7 +279,7 @@ def ingest_archives_eumetcast(dry_run=False):
 
 #    Ingest the files in format MESA_JRC_<prod>_<sprod>_<date>_<mapset>_<version>
 #    disseminated by JRC through EUMETCast.
-#    Gets the list of products/version/subproducts active for ingestion and active for processing
+#    Gets the list of products/version/subproducts active for ingestion and for processing
 #    Arguments: dry_run -> if 1, read tables and report activity ONLY
 
     logger.info("Entering routine %s" % 'ingest_archives_eumetcast')
