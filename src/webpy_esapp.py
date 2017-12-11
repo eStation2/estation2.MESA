@@ -2143,7 +2143,7 @@ class GetTimeseries:
                     # print list_values
                     # list_values = sorted(list_values, key=lambda k:k['date'], reverse=True)
 
-                    if len(list_values) > 1 and not data_available:
+                    if len(list_values) > 0 and not data_available:
                         data_available = True
 
                     x = 0
@@ -2408,7 +2408,7 @@ class GetTimeseries:
                     # list_values = self.out_queue.get()
                     list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
 
-                    if len(list_values) > 1:
+                    if len(list_values) > 0:
                         data_available = True
 
                     cumulatedValue = 0
@@ -2628,7 +2628,7 @@ class GetTimeseries:
                     value.append(valdate)
                     value.append(val['meanvalue'])
                     data.append(value)
-                if len(list_values) > 1:
+                if len(data) > 0:
                     data_available = True
 
                 # Set defaults in case no entry exists in the DB
@@ -2716,7 +2716,7 @@ class GetTimeseries:
                         value.append(valdate)
                         value.append(val['meanvalue'])
                         data.append(value)
-                    if len(list_values) > 1:
+                    if len(data) > 0:
                         data_available = True
 
                     # Set defaults in case no entry exists in the DB
@@ -2768,7 +2768,7 @@ class GetTimeseries:
                     value.append(val['meanvalue'])
                     data.append(value)
 
-                if len(list_values) > 1:
+                if len(data) > 0:
                     data_available = True
 
                 # Set defaults in case no entry exists in the DB
