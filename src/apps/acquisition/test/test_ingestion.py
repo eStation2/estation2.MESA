@@ -1287,3 +1287,40 @@ class TestIngestion(unittest.TestCase):
                                                                               source_id=datasource_descrID):
             ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
 
+    def test_ingest_sadc_vci_v1(self):
+
+        # Test VCI product disseminated by BDMS
+
+        date_fileslist = glob.glob('/data/TestIngestion/AMESD_SADC_VCI________20171111_SAfri_v2.zip')
+        in_date = '20171111'
+        productcode = 'sadc-vci'
+        productversion = 'v1'
+        subproductcode = 'sadc-vci'
+        mapsetcode = 'SPOTV-SADC-1km'
+        datasource_descrID='EO:EUM:DAT:MULT:VCI'
+
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                                              source_id=datasource_descrID):
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+

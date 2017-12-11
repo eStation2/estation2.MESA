@@ -9,6 +9,8 @@
 # Import std modules
 import os
 import glob
+import tempfile
+import shutil
 
 # Import eStation2 modules
 from lib.python import functions
@@ -142,15 +144,31 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     def sst_shapefile_conversion(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
-        # Check if the output file already exists - and delete it
+        # Check if the (final) output file already exists - and delete it
         if os.path.isfile(output_file):
             files=glob.glob(output_file.replace('.shp','.*'))
             for my_file in files:
                 os.remove(my_file)
 
-        functions.check_output_dir(os.path.dirname(output_file))
-        command=es_constants.es2globals['gdal_polygonize']+' '+ input_file+' '+ output_file+' -nomask -f "ESRI Shapefile"'
+        # Create a temporary output file (see also ES2-33)
+        try:
+            tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
+        except:
+            raise NameError('Error in creating tmpdir')
+
+        # Convert to shapefile
+        tmp_output_file = tmpdir+os.path.sep+os.path.basename(output_file)
+        functions.check_output_dir(os.path.dirname(tmp_output_file))
+        command=es_constants.es2globals['gdal_polygonize']+' '+ input_file+' '+ tmp_output_file+' -nomask -f "ESRI Shapefile"'
         p = os.system(command)
+
+        # Move and remove tmpdir
+        files=glob.glob(tmp_output_file.replace('.shp','.*'))
+        for my_file in files:
+            os.rename(my_file, os.path.dirname(output_file)+os.path.sep+os.path.basename(my_file))
+
+        shutil.rmtree(tmpdir)
 
     return proc_lists
 
@@ -174,7 +192,7 @@ def processing_std_fronts(res_queue, pipeline_run_level=0, pipeline_printout_lev
         fwrite_id=None
 
     if pipeline_run_level > 0:
-        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, history_file='/eStation2/log/.ruffus_history.sqlite',touch_files_only=touch_files_only,
+        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, history_file='/eStation2/log/.ruffus_history_std_fronts.sqlite',touch_files_only=touch_files_only,
                      checksum_level=0)
 
     if pipeline_printout_level > 0:
