@@ -829,8 +829,13 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                     //console.info(timeseriesProductsStore);
                     if (timeseriesProductsStore.isStore) {
                         timeseriesProductsStore.proxy.extraParams = {forse: true};
-                        timeseriesProductsStore.reload();
-                        //me.fireEvent('afterrender');
+                        timeseriesProductsStore.reload({
+                            callback: function(records, options, success) {
+                                var productpanelitems = me.lookupReference('productcategories');
+                                productpanelitems.removeAll();
+                                productpanelitems.fireEvent('afterrender');
+                            }
+                        });
                     }
                 }
             }],
