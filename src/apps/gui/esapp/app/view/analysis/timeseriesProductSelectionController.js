@@ -90,6 +90,7 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
         if (myTSDrawPropertiesWin!=null && myTSDrawPropertiesWin!='undefined' ) {
             myTSDrawPropertiesWin.destroy();
         }
+        myTSDrawPropertiesWin = null;
 
         var colorrenderer = function(color) {
             renderTpl = color;
