@@ -607,19 +607,25 @@ class CreateTimeseriesDrawProperties:
 class UpdateTimeseriesDrawProperties:
     def __init__(self):
         self.lang = "eng"
-        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+        # self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
 
-    def PUT(self):
-        # getparams = web.input()
-        getparams = json.loads(web.data())  # get PUT data
+    def POST(self):
+        getparams = web.input()
+        # getparams = json.loads(web.data())  # get PUT data
 
         updatestatus = '{"success":"false", "message":"An error occured while updating the Timeseries Draw Properties!"}'
 
-        if 'tsdrawproperties' in getparams:
-            tsdrawproperties = getparams['tsdrawproperties']
+        if getparams.productcode != '':
+            tsdrawproperties = getparams    # getparams['tsdrawproperties']
 
-            if self.crud_db.update('timeseries_drawproperties', tsdrawproperties):
-                updatestatus = '{"success":"true", "message":"Timeseries Draw Properties updated!"}'
+            try:
+                querydb.update_timeseries_drawproperties(tsdrawproperties)
+                updatestatus = '{"success":true, "message":"Timeseries Draw Properties updated!"}'
+            except:
+                updatestatus = '{"success":false, "error":"Error saving the Timeseries Draw Properties in the database!"}'
+
+            # if self.crud_db.update('timeseries_drawproperties', tsdrawproperties):
+            #     updatestatus = '{"success":"true", "message":"Timeseries Draw Properties updated!"}'
         else:
             createstatus = '{"success":"false", "message":"No Timeseries Draw Properties given!"}'
 

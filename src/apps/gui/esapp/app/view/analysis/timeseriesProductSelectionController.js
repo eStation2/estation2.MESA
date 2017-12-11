@@ -6,9 +6,8 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
         var myNewRecord = null;
         // var TSrecord = gridview.store.getAt(recordID);
         var tsDrawPropertiesStore = this.getStore('timeseriesdrawproperties');
-
-        if (!tsDrawPropertiesStore.isLoaded())
-            tsDrawPropertiesStore.load();
+        // if (!tsDrawPropertiesStore.getSource().isLoaded())
+        tsDrawPropertiesStore.getSource().load();    // there is no load method for a chained store
 
         tsDrawPropertiesStore.clearFilter(true);
         tsDrawPropertiesStore.filterBy(function (record, id) {
@@ -77,7 +76,7 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
             tsdrawprobs_record = myNewRecord;
         }
 
-        tsDrawPropertiesStore.clearFilter(true);
+        // tsDrawPropertiesStore.clearFilter(true);
 
         return tsdrawprobs_record;
     }
@@ -89,7 +88,7 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
 
         var myTSDrawPropertiesWin = Ext.getCmp('TSDrawPropertiesWin');
         if (myTSDrawPropertiesWin!=null && myTSDrawPropertiesWin!='undefined' ) {
-            myTSDrawPropertiesWin.close();
+            myTSDrawPropertiesWin.destroy();
         }
 
         var colorrenderer = function(color) {
@@ -127,6 +126,7 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
             ,modal: true
             ,resizable: true
             ,closable:true
+            ,closeAction: 'destroy'
             ,layout: {
                  type: 'fit'
             },
@@ -134,6 +134,8 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
                 close: function(){
                     //console.info('closing window and removing filter');
                     // tsDrawPropertiesStore.clearFilter(true);
+                    tsdrawprobs_record = null;
+                    this.destroy();
                 }
             }
             ,items:[{
@@ -146,11 +148,13 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
                 sourceConfig: {
                     yaxes_id: {
                         displayName: esapp.Utils.getTranslation('yaxes_id'),   // 'Yaxe ID',
-                        //type: 'text',
                         editor: {
-                            xtype: 'textfield',
-                            selectOnFocus:false
                         }
+                        //type: 'text',
+                        // editor: {
+                        //     xtype: 'textfield',
+                        //     selectOnFocus:false
+                        // }
                     },
                     tsname_in_legend: {
                         displayName: esapp.Utils.getTranslation('tsname_in_legend'),   // 'Time series name in legend',
@@ -229,8 +233,39 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
                 },
                 listeners: {
                     propertychange: function( source, recordId, value, oldValue, eOpts ){
-                        if (value != oldValue)
-                            tsdrawprobs_record.set(recordId, value)
+
+                        if (value != oldValue) {
+                            var tsdrawprobs = {
+                                productcode: tsdrawprobs_record.get('productcode'),
+                                subproductcode: tsdrawprobs_record.get('subproductcode'),
+                                version: tsdrawprobs_record.get('version'),
+                                tsname_in_legend: source.tsname_in_legend,
+                                color: source.color,
+                                charttype: source.charttype,
+                                linestyle: source.linestyle,
+                                linewidth: source.linewidth
+                            };
+
+                            Ext.Ajax.request({
+                                url:"analysis/gettimeseriesdrawproperties/update",
+                                timeout : 300000,
+                                //scope: me,
+                                params:tsdrawprobs,
+                                method: 'POST',
+                                success: function ( result, request ) {
+                                    //console.info(Ext.util.JSON.decode(result.responseText));
+                                },
+                                failure: function ( result, request) {
+                                }
+                            });
+                            // tsdrawprobs_record.set(recordId, value)
+                            // tsdrawprobs_record.store.sync();
+                        }
+                    },
+                    beforeedit: function( editor, e, opts ) {
+                        if( e.record.get( 'name' )=='yaxes_id') {
+                            return false;
+                        }
                     }
                 }
             }]

@@ -2499,7 +2499,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                         geometrytypescombo,
                         {
                             //xtype: 'button',
-                            text: 'Save as layer...',
+                            text: esapp.Utils.getTranslation('save_as_layer'),    // 'Save as layer...',
                             iconCls: 'fa fa-save fa-lg lightblue',
                             style: { color: 'lightblue' },
                             //cls: 'x-menu-no-icon button-gray',
