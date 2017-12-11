@@ -210,6 +210,41 @@ def update_yaxe_timeseries_drawproperties(yaxe, echo=False):
             dbschema_analysis.session.close()
 
 
+def update_timeseries_drawproperties(tsdrawproperties, echo=False):
+    global dbschema_analysis
+    status = False
+    try:
+        if tsdrawproperties['linewidth'] == '':
+            tsdrawproperties['linewidth'] = '0'
+
+        query = " UPDATE analysis.timeseries_drawproperties " + \
+                " SET tsname_in_legend = '" + tsdrawproperties['tsname_in_legend'] + "'" + \
+                "   ,color = '" + tsdrawproperties['color'] + "'" + \
+                "   ,charttype = '" + tsdrawproperties['charttype'] + "'" + \
+                "   ,linestyle = '" + tsdrawproperties['linestyle'] + "'" + \
+                "   ,linewidth = " + tsdrawproperties['linewidth'] +  \
+                " WHERE productcode = '" + tsdrawproperties['productcode'] + "'" + \
+                "   AND subproductcode = '" + tsdrawproperties['subproductcode'] + "'" + \
+                "   AND version = '" + tsdrawproperties['version'] + "'"
+
+        # print query
+        result = dbschema_analysis.execute(query)
+        dbschema_analysis.commit()
+
+        status = True
+        return status
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("update_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
+        return status
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
 def get_timeseries_drawproperties(echo=False):
     global dbschema_analysis
     try:

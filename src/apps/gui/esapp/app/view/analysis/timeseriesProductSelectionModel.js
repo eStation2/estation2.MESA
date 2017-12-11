@@ -82,7 +82,7 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionModel', {
         timeseriesdrawproperties: {
             source: 'TSDrawPropertiesStore',
             model: 'esapp.model.TSDrawProperties',
-            session: true
+            session: false
         },
 
         years:{
