@@ -739,8 +739,8 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
 
                 if wtc.any():
                     dataout[wtc] = data0[wtc]/data1[wtc]
+                    dataout = dataout*100.00
 
-                dataout = dataout*100.00
                 dataout = dataout.round()
                 dataout.shape=(1,-1)
                 outDS.GetRasterBand(ib+1).WriteArray(N.array(dataout), 0, il)
