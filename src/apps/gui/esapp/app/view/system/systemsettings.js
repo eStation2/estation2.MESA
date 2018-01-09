@@ -107,6 +107,7 @@ Ext.define("esapp.view.system.systemsettings",{
 
     initComponent: function () {
         var me = this;
+        me.session = true;
         me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('systemsettings') + '</span>');
 
         me.fieldset_title_database_connection_settings = '<b>'+esapp.Utils.getTranslation('dbconnectionsettings')+'</b>';
@@ -125,8 +126,8 @@ Ext.define("esapp.view.system.systemsettings",{
         me.form_fieldlabel_archive_dir                 = esapp.Utils.getTranslation('archivedir');   // 'Archive directory';
         me.form_fieldlabel_eumetcast_files_dir         = esapp.Utils.getTranslation('eumetcastfilesdir');   // 'Eumetcast files directory';
         //me.form_fieldlabel_ingest_server_in_dir        = esapp.Utils.getTranslation('ingestserverindir');   // 'Ingest server in directory';
-        me.form_fieldlabel_get_internet_output_dir     = esapp.Utils.getTranslation('geteumetcastoutputdir');   // 'Get Eumetcast output directory';
-        me.form_fieldlabel_get_eumetcast_output_dir    = esapp.Utils.getTranslation('getinternetoutputdir');   // 'Get Internet output directory';
+        me.form_fieldlabel_get_internet_output_dir     = esapp.Utils.getTranslation('getinternetoutputdir');   // 'Get Eumetcast output directory';
+        me.form_fieldlabel_get_eumetcast_output_dir    = esapp.Utils.getTranslation('geteumetcastoutputdir');   // 'Get Internet output directory';
 
         me.fieldset_title_system_settings              = '<b>'+esapp.Utils.getTranslation('systemsettings')+'</b>';
         me.form_fieldlabel_ip_pc1                      = esapp.Utils.getTranslation('pc1');   // 'PC1';
@@ -139,6 +140,12 @@ Ext.define("esapp.view.system.systemsettings",{
         me.form_fieldlabel_thema                       = esapp.Utils.getTranslation('thema');   // 'Thema';
         me.form_fieldlabel_loglevel                    = esapp.Utils.getTranslation('loglevel');   // 'Log level';
         me.fieldset_title_ipaddresses                  = '<b>'+esapp.Utils.getTranslation('ipaddresses')+'</b>';  // '<b>IP addresses</b>';
+
+
+        var hiddenForWindowsVersion = false;
+        if (esapp.globals['typeinstallation'] === 'windows'){
+            hiddenForWindowsVersion = true;
+        }
 
         me.tools = [
         {
@@ -157,12 +164,19 @@ Ext.define("esapp.view.system.systemsettings",{
                             formpanel.loadRecord(systemsettingsrecord);
                             formpanel.updateRecord();
 
-                            if (record.data.thema != ''){
-                                Ext.getCmp('modify-thema-btn').hide();
-                            }
-                            else {
+                            // IN WINDOWS VERSION THEMA MUST BE CHANGEABLE!
+                            if (esapp.globals['typeinstallation'] === 'windows'){
                                 Ext.getCmp('modify-thema-btn').show();
                             }
+                            else {
+                                if (record.data.thema != ''){
+                                    Ext.getCmp('modify-thema-btn').hide();
+                                }
+                                else {
+                                    Ext.getCmp('modify-thema-btn').show();
+                                }
+                            }
+
                             Ext.toast({ html: esapp.Utils.getTranslation('systemsettingsrefreshed'), title: esapp.Utils.getTranslation('systemsettingsrefreshed'), width: 200, align: 't' });
                         }
                     }
@@ -249,8 +263,11 @@ Ext.define("esapp.view.system.systemsettings",{
                     Ext.getCmp('modify-role-btn').fireHandler();
                 }
 
-                if (me.thema != ''){
-                    Ext.getCmp('modify-thema-btn').hide();
+                // IN WINDOWS VERSION THEMA MUST BE CHANGEABLE!
+                if (esapp.globals['typeinstallation'] != 'windows'){
+                    if (me.thema != ''){
+                        Ext.getCmp('modify-thema-btn').hide();
+                    }
                 }
 
                 //var ipadresses_fieldset = Ext.getCmp('ipaddresses');
@@ -274,6 +291,7 @@ Ext.define("esapp.view.system.systemsettings",{
             items : [{
                 text: esapp.Utils.getTranslation('createsystemreport'), // 'Create System Report',
                 scope: me,
+                hidden:  hiddenForWindowsVersion,
                 iconCls: 'fa fa-download fa-2x',
                 style: { color: 'blue' },
                 scale: 'medium',
@@ -325,6 +343,7 @@ Ext.define("esapp.view.system.systemsettings",{
             },{
                 text: esapp.Utils.getTranslation('createinstallreport'), // 'Create Install Report',
                 scope:me,
+                hidden:  hiddenForWindowsVersion,
                 iconCls: 'fa fa-download fa-2x',
                 style: { color: 'blue' },
                 scale: 'medium',
@@ -417,6 +436,7 @@ Ext.define("esapp.view.system.systemsettings",{
                 },
                 items: [{
                     xtype: 'fieldset',
+                    hidden:  hiddenForWindowsVersion,
                     title: '',
                     collapsible:false,
                     padding: 5,
@@ -477,6 +497,7 @@ Ext.define("esapp.view.system.systemsettings",{
                     items:[{
                        items:[{
                            id: 'current_mode',
+                           hidden:  hiddenForWindowsVersion,
                            name: 'current_mode',
                            bind: '{system_setting.current_mode}',
                            xtype: 'displayfield',
@@ -505,6 +526,7 @@ Ext.define("esapp.view.system.systemsettings",{
                        items:[{
                            id: 'active_version',
                            name: 'active_version',
+                           hidden:  hiddenForWindowsVersion,
                            bind: '{system_setting.active_version}',
                            xtype: 'displayfield',
                            fieldLabel: me.form_fieldlabel_active_verion,
@@ -512,6 +534,7 @@ Ext.define("esapp.view.system.systemsettings",{
                            flex: 2.2
                         },{
                             xtype: 'button',
+                            hidden:  hiddenForWindowsVersion,
                             text: esapp.Utils.getTranslation('modify'),    // 'Modify',
                             flex: 0.8,
                             iconCls: 'fa fa-pencil-square-o',
@@ -631,6 +654,7 @@ Ext.define("esapp.view.system.systemsettings",{
                 },{
                    id: 'ingest_dir',
                    name: 'ingest_dir',
+                   hidden:  hiddenForWindowsVersion,
                    bind: '{system_setting.ingest_dir}',
                    xtype: 'textfield',
                    fieldLabel: me.form_fieldlabel_ingest_dir,
@@ -639,6 +663,7 @@ Ext.define("esapp.view.system.systemsettings",{
                 },{
                    id: 'static_data_dir',
                    name: 'static_data_dir',
+                   hidden:  hiddenForWindowsVersion,
                    bind: '{system_setting.static_data_dir}',
                    xtype: 'textfield',
                    fieldLabel: me.form_fieldlabel_static_data_dir,
@@ -652,6 +677,7 @@ Ext.define("esapp.view.system.systemsettings",{
                    items:[{
                         id: 'archive_dir',
                         name: 'archive_dir',
+                        disabled:  hiddenForWindowsVersion,
                         bind: '{system_setting.archive_dir}',
                         xtype: 'textfield',
                         vtype: 'directory',
@@ -704,6 +730,7 @@ Ext.define("esapp.view.system.systemsettings",{
                     },{
                         xtype: 'splitbutton',
                         text: esapp.Utils.getTranslation('ingest_archive'),
+                        disabled:  hiddenForWindowsVersion,
                         width: 140,
                         iconCls: '',    // 'fa fa-spinner',
                         style: { color: 'white'},
@@ -714,12 +741,14 @@ Ext.define("esapp.view.system.systemsettings",{
                         service: 'ingestarchive',
                         task: 'status',
                         menu: {
+                            disabled:  hiddenForWindowsVersion,
                             width: 150,
                             margin: '0 0 10 0',
                             floating: true,  // usually you want this set to True (default)
                             collapseDirection: 'right',
                             defaults: {
-                              align: 'right'
+                                disabled:  hiddenForWindowsVersion,
+                                align: 'right'
                             },
                             items: [
                                 // these will render as dropdown menu items when the arrow is clicked:
@@ -833,6 +862,7 @@ Ext.define("esapp.view.system.systemsettings",{
                 },{
                    id: 'eumetcast_files_dir',
                    name: 'eumetcast_files_dir',
+                   hidden:  hiddenForWindowsVersion,
                    bind: '{system_setting.eumetcast_files_dir}',
                    xtype: 'textfield',
                    fieldLabel: me.form_fieldlabel_eumetcast_files_dir,
@@ -841,6 +871,7 @@ Ext.define("esapp.view.system.systemsettings",{
                 },{
                    id: 'get_eumetcast_output_dir',
                    name: 'get_eumetcast_output_dir',
+                   hidden:  hiddenForWindowsVersion,
                    bind: '{system_setting.get_eumetcast_output_dir}',
                    xtype: 'textfield',
                    fieldLabel: me.form_fieldlabel_get_eumetcast_output_dir,
@@ -849,6 +880,7 @@ Ext.define("esapp.view.system.systemsettings",{
                 },{
                    id: 'get_internet_output_dir',
                    name: 'get_internet_output_dir',
+                   hidden:  hiddenForWindowsVersion,
                    bind: '{system_setting.get_internet_output_dir}',
                    xtype: 'textfield',
                    fieldLabel: me.form_fieldlabel_get_internet_output_dir,

@@ -58,6 +58,7 @@ urls = (
     "/users", "Users",
     "/login", "Login",
     "/register", "Register",
+    "/checkECASlogin", "checkECASlogin",
 
     "/help", "GetHelp",
     "/help/getfile", "GetHelpFile",
@@ -558,6 +559,94 @@ class Login:
                 login_json = '{"success":false, "error":"Error reading login data in DB!"}'
         else:
             login_json = '{"success":false, "error":"No user name given!"}'
+
+        return login_json
+
+
+
+class checkECASlogin:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def POST(self):
+        import pycurl
+        import StringIO
+        import xml.etree.ElementTree as ET
+        userInfoDict = {}
+
+        params = web.input()
+
+        ECAS_ticketPage = 'https://webgate.ec.europa.eu/cas/laxValidate?ticket='+str(params.ticket)+'&userDetails=true&service='+str(params.strCall)
+
+        try:
+            c = pycurl.Curl()
+            # c.setopt(c.VERBOSE, True)
+            c.setopt(pycurl.URL, ECAS_ticketPage)
+            b = StringIO.StringIO()
+            c.setopt(pycurl.WRITEFUNCTION, b.write)
+            c.perform()
+
+            c.close()
+            data = b.getvalue()
+            root = ET.fromstring(data)
+
+            arrayValues = ['{https://ecas.ec.europa.eu/cas/schemas}uid',
+                           '{https://ecas.ec.europa.eu/cas/schemas}user',
+                           '{https://ecas.ec.europa.eu/cas/schemas}moniker',
+                           '{https://ecas.ec.europa.eu/cas/schemas}lastName',
+                           '{https://ecas.ec.europa.eu/cas/schemas}firstName',
+                           '{https://ecas.ec.europa.eu/cas/schemas}domain',
+                           '{https://ecas.ec.europa.eu/cas/schemas}email',
+                           '{https://ecas.ec.europa.eu/cas/schemas}departmentNumber']
+            for xx in range(0, len(arrayValues)):
+                strNode = arrayValues[xx]
+                strNodeValue = strNode[strNode.index("}") + 1:]
+                strValue = ''
+                for node in root.iter(arrayValues[xx]):
+                    try:
+                        strValue = node.text
+                    except:
+                        strValue = ''
+                userInfoDict[strNodeValue] = strValue
+
+        except:
+            exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+            # Exit the script and print an error telling what happened.
+            logger.error("checkECASlogin: Error!\n -> {}".format(exceptionvalue))
+            login_json = '{"success":false, "error":"ECAS login error!"}'
+
+        if 'uid' not in userInfoDict:
+            login_json = '{"success":false, "error":"No user name given!"}'
+        else:
+            try:
+                user_info = {
+                    'userid': userInfoDict.get('uid'),
+                    'username': userInfoDict.get('firstName', 'User name') + ' ' + userInfoDict.get('lastName', 'User lastname'),
+                    'password': userInfoDict.get('uid'),
+                    'userlevel': 2,
+                    'email': userInfoDict.get('email', 'User email')
+                }
+
+                userExists = querydb.checkUser(user_info)
+                if userExists is None:
+                    userExists = querydb.checkUser(user_info)
+
+                message = ',"message":"User exists!"'
+                if userExists is not None and not userExists:
+                    if self.crud_db.create('users', user_info):
+                        message = ',"message":"User created!"'
+
+                user_info_json = json.dumps(user_info,
+                                            ensure_ascii=False,
+                                            encoding='utf-8',
+                                            sort_keys=True,
+                                            indent=4,
+                                            separators=(', ', ': '))
+
+                login_json = '{"success":true, "user":'+ user_info_json + message + '}'
+            except:
+                login_json = '{"success":false, "error":"Error reading login data!"}'
 
         return login_json
 
@@ -3815,14 +3904,22 @@ class ChangeVersion:
             base = es_constants.es2globals['base_dir']  # +"-"
 
             if os.path.exists(base):
-                if os.path.islink(base):
-                    os.unlink(base)
-                    # print base+"-"+getparams['version']
-                    os.symlink(base+"-"+getparams['version'], base)
-                elif os.path.isdir(base):
-                    error = 'The base is a directory and should be a symbolic link!'
+                if sys.platform != 'win32':
+                    if os.path.islink(base):
+                        os.unlink(base)
+                        # print base+"-"+getparams['version']
+                        os.symlink(base+"-"+getparams['version'], base)
+                        changeversion_json = '{"success":"true", "message":"Version changed!"}'
+                    elif os.path.isdir(base):
+                        changeversion_json = '{"success":"false", "message":"The base is a directory and should be a symbolic link!"}'
+                else:
+                    base = base.replace('\\', '/')
+                    os.unlink(base)  # Todo:  NO PERMISSIONS on windows version
+                    os.symlink(base + "-" + getparams['version'], base)
+                    changeversion_json = '{"success":true, "message":"Version changed!"}'
+            else:
+                changeversion_json = '{"success":false, "message":"Version path does not exist!"}'
 
-            changeversion_json = '{"success":"true", "message":"Version changed!"}'
         else:
             changeversion_json = '{"success":false, "error":"No version given!"}'
 
@@ -4446,8 +4543,13 @@ class UpdateUserSettings:
     def PUT(self):
         import ConfigParser
 
+        systemsettings = functions.getSystemSettings()
+
         if sys.platform != 'win32':
-            factory_settings_filename = 'factory_settings.ini'
+            if systemsettings['type_installation'] == 'jrc_online':
+                factory_settings_filename = 'factory_settings_jrc_online.ini'
+            else:
+                factory_settings_filename = 'factory_settings.ini'
         else:
             factory_settings_filename = 'factory_settings_windows.ini'
 
@@ -4490,8 +4592,13 @@ class UserSettings:
     def GET(self):
         import ConfigParser
 
+        systemsettings = functions.getSystemSettings()
+
         if sys.platform != 'win32':
-            factory_settings_filename = 'factory_settings.ini'
+            if systemsettings['type_installation'] == 'jrc_online':
+                factory_settings_filename = 'factory_settings_jrc_online.ini'
+            else:
+                factory_settings_filename = 'factory_settings.ini'
         else:
             factory_settings_filename = 'factory_settings_windows.ini'
 
@@ -4511,7 +4618,7 @@ class UserSettings:
             else:
                 settings[setting] = config_factorysettings.get('FACTORY_SETTINGS', setting, 0)
 
-        systemsettings = functions.getSystemSettings()
+
         settings['id'] = 0
         # settings['ip_pc1'] = systemsettings['ip_pc1']
         # settings['ip_pc2'] = systemsettings['ip_pc2']

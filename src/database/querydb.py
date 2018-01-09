@@ -152,6 +152,31 @@ def checklogin(login=None, echo=False):
             dbschema_analysis.session.close()
 
 
+def checkUser(userinfo=None, echo=False):
+    global dbschema_analysis
+    try:
+        if userinfo is None:
+            return False
+
+        query = "SELECT * FROM analysis.users WHERE userid = '" + userinfo.get('userid') + "'"
+        result = dbschema_analysis.execute(query)
+        result = result.fetchall()
+        if hasattr(result, "__len__") and result.__len__() > 0:
+            return True
+        else:
+            return False
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("checkUser: Database query error!\n -> {}".format(exceptionvalue))
+        return None
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
 def update_yaxe_timeseries_drawproperties(yaxe, echo=False):
     global dbschema_analysis
     status = False
