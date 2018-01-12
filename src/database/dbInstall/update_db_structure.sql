@@ -175,34 +175,48 @@ COMMENT ON TABLE products.geoserver
 
 
 
+/**********************************************************
+  FROM version 2.1.0-11
+ *********************************************************/
+
+ALTER TABLE products.product ADD COLUMN display_index integer;
+
+ALTER TABLE products.thema ADD COLUMN activated boolean DEFAULT FALSE::boolean;
+
+UPDATE products.thema set activated = FALSE;
+-- In Postinst of RPM, READ themaid from /eStation2/settings/system_settings.ini
+-- systemsettings = functions.getSystemSettings()
+-- themaid = systemsettings['thema'];
+-- UPDATE products.thema set activated = TRUE WHERE thema_id = themaid;
+-- SELECT * FROM products.set_thema(themaid);
+
+ALTER TABLE analysis.timeseries_drawproperties ADD COLUMN aggregation_type character varying DEFAULT 'mean';
+ALTER TABLE analysis.timeseries_drawproperties ADD COLUMN aggregation_min double precision;
+ALTER TABLE analysis.timeseries_drawproperties ADD COLUMN aggregation_max double precision;
+
+
 
 /**********************************************************
   For version 2.1.1
  *********************************************************/
 
-ALTER TABLE analysis.legend
-  ADD COLUMN defined_by character varying DEFAULT 'USER';
+ALTER TABLE analysis.legend ADD COLUMN defined_by character varying DEFAULT 'USER';
+ALTER TABLE analysis.legend ALTER COLUMN step_type SET DEFAULT 'irregular';
 
+ALTER TABLE analysis.chart_drawproperties ADD COLUMN yaxe4_font_size integer;
+UPDATE analysis.chart_drawproperties SET yaxe4_font_size = 26;
 
-ALTER TABLE analysis.chart_drawproperties
-  ADD COLUMN yaxe4_font_size integer;
+ALTER TABLE analysis.map_templates ALTER COLUMN vectorlayers TYPE character varying;
+ALTER TABLE analysis.map_templates ADD COLUMN zoomextent character varying;
+ALTER TABLE analysis.map_templates ADD COLUMN mapsize character varying;
+ALTER TABLE analysis.map_templates ADD COLUMN mapcenter character varying;
 
-UPDATE analysis.chart_drawproperties
-SET yaxe4_font_size = 26;
+-- The following columns in the analysis.layers table are not added when going from version 2.0.3 to 2.1.x
+-- These columns were added in version 2.0.4 and thus will give errors with the layers because of these missing columns.
+ALTER TABLE analysis.layers ADD COLUMN defined_by character varying DEFAULT 'USER'::character varying;
+ALTER TABLE analysis.layers ADD COLUMN open_in_mapview boolean DEFAULT false;
+ALTER TABLE analysis.layers ADD COLUMN provider character varying;
 
-ALTER TABLE analysis.map_templates
-   ALTER COLUMN vectorlayers TYPE character varying;
-ALTER TABLE analysis.map_templates
-  ADD COLUMN zoomextent character varying;
-
-ALTER TABLE analysis.map_templates
-  ADD COLUMN mapsize character varying;
-
-ALTER TABLE analysis.map_templates
-  ADD COLUMN mapcenter character varying;
-
-ALTER TABLE analysis.legend
-   ALTER COLUMN step_type SET DEFAULT 'irregular';
 
 
 CREATE OR REPLACE FUNCTION analysis.update_insert_legend(
@@ -412,34 +426,6 @@ ALTER FUNCTION analysis.update_insert_chart_drawproperties(character varying, in
   OWNER TO estation;
 
 
-
-/**********************************************************
-  FROM version 2.1.0-11
- *********************************************************/
-
-ALTER TABLE products.product
-  ADD COLUMN display_index integer;
-
-
-ALTER TABLE products.thema
-  ADD COLUMN activated boolean DEFAULT FALSE::boolean;
-
-UPDATE products.thema set activated = FALSE;
--- READ themaid from /eStation2/settings/system_settings.ini
--- systemsettings = functions.getSystemSettings()
--- themaid = systemsettings['thema'];
--- UPDATE products.thema set activated = TRUE WHERE thema_id = themaid;
--- SELECT * FROM products.set_thema(themaid);
-
-
-ALTER TABLE analysis.timeseries_drawproperties
-  ADD COLUMN aggregation_type character varying DEFAULT 'mean';
-
-ALTER TABLE analysis.timeseries_drawproperties
-  ADD COLUMN aggregation_min double precision;
-
-ALTER TABLE analysis.timeseries_drawproperties
-  ADD COLUMN aggregation_max double precision;
 
 
 
@@ -889,7 +875,6 @@ $BODY$
 		_frequency_id   			ALIAS FOR  $16;
 		_start_date   				ALIAS FOR  $17;
 		_end_date   				ALIAS FOR  $18;
-
 		_full_copy   				ALIAS FOR  $19;
 	BEGIN
 		PERFORM * FROM products.internet_source i WHERE i.internet_id = TRIM(_internet_id) AND i.defined_by = 'JRC';
