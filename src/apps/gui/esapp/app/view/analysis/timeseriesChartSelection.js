@@ -39,8 +39,8 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
     width:530,
     minWidth:530,
     autoHeight: true,
-    height: Ext.getBody().getViewSize().height-65,
-
+    // height: Ext.getBody().getViewSize().height-65,
+    // height: Ext.getCmp('analysismain').getBody().height,
     alignTarget: Ext.getCmp('backgroundmap'),
     defaultAlign: 'tr-tr',
     // glyph : 'xf080@FontAwesome',
@@ -58,6 +58,7 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
         // me.maxHeight = Ext.getBody().getViewSize().height-65;
         // me.defaultAlign = 'tr-tr';
         // me.alignTarget = Ext.getCmp('backgroundmap');
+        // me.height = Ext.getCmp('analysismain').getBody().height;
 
         me.viewConfig = {
             defaultAlign: 'tr-tr',
@@ -82,7 +83,8 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                     // me.expand();
                     me.alignTo(Ext.getCmp('analysismain').lookupReference('backgroundmap'), 'tr-tr');
                     // me.alignTo(Ext.getCmp('analysismain'), 'tr-tr');
-                    me.height = Ext.getBody().getViewSize().height-65;
+                    // me.height = Ext.getBody().getViewSize().height-65;
+                    me.height = Ext.getCmp('analysismain').body.getHeight();
                     me.updateLayout();
                 });
                 if (!me.hidden) {

@@ -325,6 +325,43 @@ Ext.define('esapp.view.main.Main', {
                 }
             }
         }
+        else if (esapp.globals['typeinstallation'] == 'windows'){
+            me.loginview = 'loginview';
+
+            me.northheader = {
+                region: 'north',
+                id: 'headerlogos',
+                // xtype:'container',
+                height: 68,
+                titleAlign: 'center',
+                items:[{
+                    xtype : 'headerLogos'
+                }],
+                split: true,
+                alwaysOnTop: true,
+                hideCollapseTool: true,
+                header: false,
+                collapsible: true,
+                collapsed: false,
+                autoScroll:false,
+                floatable: false,
+
+                listeners: {
+                    collapse: function (headercontainer) {
+                        // Ext.util.Observable.capture(headercontainer, function(e){console.log(headercontainer.id + ': ' + e);});
+                        headercontainer.header =  true;
+                        headercontainer.setTitle('<span class="panel-title-style">'+esapp.Utils.getTranslation('eStation 2 - EARTH OBSERVATION PROCESSING SERVICE')+'</span>');
+                    },
+                    expand: function (headercontainer) {
+                        headercontainer.header =  false;
+                        headercontainer.setTitle('');
+                    },
+                    focusenter: function(){
+                        // Ext.getCmp('headerlogos').collapse();
+                    }
+                }
+            }
+        }
         else {
             me.loginview = 'loginview';
 

@@ -2252,13 +2252,16 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 var borderVectorLayerItems = me.getController().createLayersMenuItems('border');
                 var marineVectorLayerMenuItems = me.getController().createLayersMenuItems('marine');
                 var otherVectorLayerMenuItems = me.getController().createLayersMenuItems('other');
-
+                this.suspendEvents();
                 this.down('[name=border]').menu.removeAll();
                 this.down('[name=border]').menu.add(borderVectorLayerItems);
                 this.down('[name=marine]').menu.removeAll();
                 this.down('[name=marine]').menu.add(marineVectorLayerMenuItems);
                 this.down('[name=other]').menu.removeAll();
                 this.down('[name=other]').menu.add(otherVectorLayerMenuItems);
+                this.resumeEvents();
+                this.menu.hidden = false;
+                this.down().show();
             },
             menu: {
                 hideOnClick: false,
