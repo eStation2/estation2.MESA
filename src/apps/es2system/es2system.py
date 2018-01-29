@@ -879,7 +879,6 @@ def push_data_ftp(dry_run=False):
     # Create an ad-hoc file for the lftp command output (beside the standard logger)
     logfile=es_constants.es2globals['log_dir']+'push_data_ftp.log'
     message=time.strftime("%Y-%m-%d %H:%M")+' INFO: Running the ftp sync now ... \n'
-    log_id=open(logfile,'a')
 
     logger.debug("Entering routine %s" % 'push_data_ftp')
 
@@ -943,7 +942,6 @@ def push_data_ftp(dry_run=False):
                         dataset_dict['mapsetcode'] = mapset
 
                         logger.debug('Working on {}/{}/{}/{}'.format(productcode,version,mapset,subproductcode))
-                        log_id.write('Working on {}/{}/{}/{}'.format(productcode,version,mapset,subproductcode))
 
                         subdir = functions.set_path_sub_directory(productcode, subproductcode,  dataset_dict['product_type'], version, mapset)
                         source = data_dir+subdir
@@ -959,8 +957,6 @@ def push_data_ftp(dry_run=False):
                                 logger.error("Error in executing %s" % command)
                         except:
                             logger.error('Error in executing command: {}'.format(command))
-
-    log_id.close()
 
 class SystemDaemon(DaemonDryRunnable):
     def run(self):
