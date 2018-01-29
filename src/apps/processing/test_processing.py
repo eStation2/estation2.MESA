@@ -221,7 +221,7 @@ def test_proc_chirps_dekad(pipe_run=0, pipe_print=3, start_date=None, end_date=N
 
     # Create the list of dates -> returns empty if start==end==None
     if start_date is not None and end_date is not None:
-        starting_dates = proc_functions.get_list_dates_for_dataset('modis-firms', '1day', 'v6.0', start_date=start_date, end_date=end_date)
+        starting_dates = proc_functions.get_list_dates_for_dataset('chirps-dekad', '10d', '2.0', start_date=start_date, end_date=end_date)
     else:
         starting_dates = None
 
@@ -295,7 +295,7 @@ def test_proc_chirps_dekad(pipe_run=0, pipe_print=3, start_date=None, end_date=N
 # modis-firms
 #   ---------------------------------------------------------------------
 from apps.processing.processing_std_modis_firms import *
-def test_proc_modis_firms(start_date=None, end_date=None, pipe_run=0, pipe_print=3, start_date_stats=None, end_date_stats=None):
+def test_proc_modis_firms(start_date=None, end_date=None, pipe_run=0, pipe_print=3, start_date_stats=None, end_date_stats=None, touch_files_only=False):
 
     # Create the list of dates -> returns empty if start==end==None
     if start_date is not None and end_date is not None:
@@ -457,8 +457,8 @@ from apps.processing.processing_std_msg_mpe import *
 #   Calls
 #   ---------------------------------------------------------------------
 
-test_proc_pml_modis_fronts(pipe_run=4, pipe_print=0, touch_files_only=False)
-# test_proc_modis_firms(pipe_run=3, pipe_print=0, start_date_stats='20030101', end_date_stats='20030201')
+#test_proc_pml_modis_fronts(pipe_run=4, pipe_print=0, touch_files_only=False)
+test_proc_modis_firms(pipe_run=4, pipe_print=0, start_date_stats='20030101', end_date_stats='20161221', touch_files_only=True)
 # test_proc_chirps_dekad(pipe_run=3, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
 
 # my_starting_dates_stats = proc_functions.get_list_dates_for_dataset('modis-firms', '10dcount', 'v6.0', start_date='20020701', end_date='20170821')
