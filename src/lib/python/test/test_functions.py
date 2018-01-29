@@ -40,7 +40,7 @@ class TestFunctions(TestCase):
         print status_PC1
 
     def test_internet_connection(self):
-        status = functions._internet_on()
+        status = functions.internet_on()
         print status
 
     def test_manage_netcdf_scaling(self):
