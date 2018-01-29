@@ -446,7 +446,7 @@ def _proxy_defined():
 def _proxy_internet_on():
     import urllib2
 
-    test_url = 'http://google.com'
+    test_url = 'http://www.google.com'
     # Case 1: proxy
     if _proxy_defined():
         try:
@@ -468,20 +468,6 @@ def _proxy_internet_on():
             pass
 
     return False
-
-# Obsolete (to be deleted?)
-def _internet_on():
-    import os
-    command = 'ping -c 1 -W 2 8.8.8.8'
-    try:
-        response = os.system(command)
-    except: 
-        pass    #  ping error
-        return False
-    if response == 0:
-        return True
-    else:
-        return False
 
 def internet_on():     # is_connected():
 
