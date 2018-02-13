@@ -18,16 +18,16 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
     xtype: 'timeseriesproductselection',
 
     //layout: 'fit',
-    layout: {
-        type: 'vbox'
-        ,align: 'stretch'
-    },
+    // layout: {
+    //     type: 'vbox'
+    //     ,align: 'stretch'
+    // },
     defaults: {
-        margin: '5 0 5 0'
+        margin: '5 3 5 3'
     },
     border: false,
 
-    charttype: 'xy',
+    graphtype: 'xy',
     cumulative: false,
     ranking: false,
     matrix: false,
@@ -43,17 +43,11 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
 
         me.selectedtimeseries = {
             xtype: 'grid',
-            id: 'selected-timeseries-mapset-dataset-grid_'+me.charttype,
-            reference: 'selected-timeseries-mapset-dataset-grid_'+me.charttype,
-            //autoWidth: true,
-            //width: 395,
-            maxHeight: 255,
-            //margin:'10 0 10 0',
+            id: 'selected-timeseries-mapset-dataset-grid_'+me.graphtype,
+            reference: 'selected-timeseries-mapset-dataset-grid_'+me.graphtype,
+            maxHeight: 225,
             autoScroll: true,
             hidden: false,
-            //store: {
-            //    bind: '{selectedtimeseriesmapsetdatasets}'
-            //},
             bind: '{selectedtimeseriesmapsetdatasets}',
             layout: 'fit',
 
@@ -66,14 +60,6 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 disableSelection: false,
                 trackOver: true
             },
-
-            //selType: 'checkboxmodel',
-            //selModel: {
-            //    allowDeselect: true,
-            //    checkOnly: false,
-            //    mode: 'SIMPLE'
-            //    //,listeners: {}
-            //},
             collapsible: false,
             enableColumnMove: false,
             enableColumnResize: false,
@@ -86,9 +72,6 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
             forceFit: true,
             reserveScrollbar: true,
 
-            //listeners: {
-            //    //rowclick: 'mapsetDataSetGridRowClick'
-            //},
             defaults: {
                 menuDisabled: true,
                 sortable: false,
@@ -100,7 +83,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
             columns: [{
                 xtype: 'actioncolumn',
                 hidden: false,
-                width: 10,
+                maxWidth: 30,
                 align: 'center',
                 shrinkWrap: 0,
                 menuDisabled: true,
@@ -122,7 +105,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                     handler: function (grid, rowIndex, colIndex, icon, e, record) {
                         var rec = record;   // grid.getStore().getAt(rowIndex),
                             // selectedTimeseriesStore = grid.getStore();
-                        var gridSelectedTS = 'selected-timeseries-mapset-dataset-grid_'+ me.charttype;
+                        var gridSelectedTS = 'selected-timeseries-mapset-dataset-grid_'+ me.graphtype;
                         var selectedTimeseriesStore = Ext.getCmp(gridSelectedTS).getStore();
                         var yearsData = [];
 
@@ -147,8 +130,8 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                         //     yearsDataDict.push({'year': year});
                         // });
                         //
-                        // //if (Ext.isObject(Ext.getCmp('ts_selectyearstocompare_'+me.charttype).searchPopup)) {
-                        // //    Ext.getCmp('ts_selectyearstocompare_'+me.charttype).searchPopup.lookupReference('searchGrid').getSelectionModel().deselectAll();
+                        // //if (Ext.isObject(Ext.getCmp('ts_selectyearstocompare_'+me.graphtype).searchPopup)) {
+                        // //    Ext.getCmp('ts_selectyearstocompare_'+me.graphtype).searchPopup.lookupReference('searchGrid').getSelectionModel().deselectAll();
                         // //}
                         // //Ext.getCmp('timeserieschartselection').getViewModel().getStore('years').setData(yearsDataDict);
                         // me.getViewModel().getStore('years').setData(yearsDataDict);
@@ -167,14 +150,14 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                     '<span class="smalltext"><b style="color:darkgrey">{productcode} - {subproductcode}</b> - <b>{mapsetcode}</b>' +
                     '</span>'
                 ),
-                //minWidth: 415,
+                maxWidth: 365,
                 menuDisabled: true,
                 cellWrap: true
             }, {
                 xtype: 'actioncolumn',
                 dataIndex: 'reference',
-                header: esapp.Utils.getTranslation('Reference'),
-                width: 30,
+                text: '<span style="font-size:12px;">' + esapp.Utils.getTranslation('Reference') + '</span>',
+                maxWidth: 80,
                 align: 'center',
                 shrinkWrap: 0,
                 stopSelection: false,
@@ -224,7 +207,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 xtype: 'actioncolumn',
                 dataIndex: 'difference',
                 header: esapp.Utils.getTranslation('difference'),   // Diff
-                width: 20,
+                maxWidth: 45,
                 align: 'center',
                 shrinkWrap: 0,
                 stopSelection: false,
@@ -271,7 +254,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 xtype: 'checkcolumn',
                 dataIndex: 'zscore',
                 header: esapp.Utils.getTranslation('zccore'),  // 'Z-Score'
-                width: 30,
+                maxWidth: 80,
                 align: 'center',
                 stopSelection: false,
                 menuDisabled: true,
@@ -281,7 +264,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 xtype: 'checkcolumn',
                 dataIndex: 'colorramp',
                 header: esapp.Utils.getTranslation('gradient'), // 'Gradient'
-                width: 30,
+                maxWidth: 80,
                 align: 'center',
                 stopSelection: false,
                 menuDisabled: true,
@@ -290,14 +273,15 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
             }, {
                 xtype: 'actioncolumn',
                 //header: esapp.Utils.getTranslation('actions'),   // 'Edit draw properties',
-                width: 10,
-                align: 'center',
+                maxWidth: 35,
+                align: 'left',
                 stopSelection: false,
                 menuDisabled: true,
 
                 items: [{
                     // scope: me,
                     //width: '35',
+                    margin: 3,
                     disabled: false,
                     getClass: function (v, meta, rec) {
                         return 'chart-curve_edit';
@@ -317,10 +301,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 id: 'colorschemesMatrixTSProductGrid',
                 reference: 'colorschemesMatrixTSProductGrid',
                 autoWidth: true,
-                //flex: 1,
-                //width: 530,
-                //height: 150,
-                maxHeight: 165,
+                maxHeight: 170,
                 scrollable: 'vertical',
                 hidden: true,
                 bind: '{productcolorschemes}',
@@ -340,7 +321,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 selModel: {
                     allowDeselect: true
                 },
-
+                reserveScrollbar: true,
                 collapsible: false,
                 enableColumnMove: false,
                 enableColumnResize: false,
@@ -350,7 +331,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 frame: false,
                 border: true,
                 bodyBorder: false,
-                //forceFit: true,
+                forceFit: true,
 
                 listeners: {
                     rowclick: 'onRadioColumnAction'
@@ -365,7 +346,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 },
                 columns: [{
                     xtype: 'actioncolumn',
-                    width: 30,
+                    maxWidth: 30,
                     align: 'center',
                     //shrinkWrap: 0,
                     items: [{
@@ -378,7 +359,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 }, {
                     xtype: 'templatecolumn',
                     text: '<div class="grid-header-style">' + esapp.Utils.getTranslation('colorschemes') + '</div>',
-                    width: 475,
+                    maxWidth: 400,
                     sortable: false,
                     menuDisabled: true,
                     //shrinkWrap: 0,
@@ -392,12 +373,12 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
 
         me.timeframeselection =  Ext.create('Ext.form.FieldSet', {
             xtype: 'fieldset',
-            id: 'ts_timeframe_'+me.charttype,
-            reference: 'ts_timeframe_'+me.charttype,
+            id: 'ts_timeframe_'+me.graphtype,
+            reference: 'ts_timeframe_'+me.graphtype,
             title: '<b style="font-size:16px; color:#0065A2; line-height: 18px;">' + esapp.Utils.getTranslation('timeframe') + '</b>',
             hidden: false,
             //autoWidth: true,
-            //width: 395,
+            // width: 395,
             autoHeight: true,
             border: 2,
             padding: 5,
@@ -414,15 +395,15 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
             margin: 5,
             items: [{
                 xtype: 'radio',
-                id: 'radio-fromto_'+me.charttype,
+                id: 'radio-fromto_'+me.graphtype,
                 checked: true,
-                name: 'ts-period_'+me.charttype,
+                name: 'ts-period_'+me.graphtype,
                 //inputValue: 'year',
                 style: {"margin-right": "5px"},
                 disabled: false
             }, {
                 xtype: 'datefield',
-                id: 'ts_from_period_'+me.charttype,
+                id: 'ts_from_period_'+me.graphtype,
                 fieldLabel: esapp.Utils.getTranslation('from'),    // 'From',
                 labelAlign: 'left',
                 labelWidth: 35,
@@ -434,12 +415,12 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 maxValue: new Date(),
                 listeners: {
                     change: function () {
-                        Ext.getCmp("radio-fromto_"+me.charttype).setValue(true);
+                        Ext.getCmp("radio-fromto_"+me.graphtype).setValue(true);
                     }
                 }
             }, {
                 xtype: 'datefield',
-                id: 'ts_to_period_'+me.charttype,
+                id: 'ts_to_period_'+me.graphtype,
                 fieldLabel: esapp.Utils.getTranslation('to'),    // 'To',
                 labelAlign: 'left',
                 labelWidth: 20,
@@ -452,7 +433,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 //,value: new Date()
                 listeners: {
                     change: function () {
-                        Ext.getCmp("radio-fromto_"+me.charttype).setValue(true);
+                        Ext.getCmp("radio-fromto_"+me.graphtype).setValue(true);
                     }
                 }
             }]
@@ -465,18 +446,18 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
             hidden: false,
             items: [{
                 xtype: 'radio',
-                id: 'radio-year_'+me.charttype,
+                id: 'radio-year_'+me.graphtype,
                 checked: false,
                 align: 'middle',
-                name: 'ts-period_'+me.charttype,
+                name: 'ts-period_'+me.graphtype,
                 //inputValue: 'year',
                 //style: {"margin-right": "5px"},
                 margin: '8 5 0 0',
                 disabled: false
             }, {
                 xtype: 'combobox',
-                id: 'YearTimeseries_'+me.charttype,
-                name: 'YearTimeseries_'+me.charttype,
+                id: 'YearTimeseries_'+me.graphtype,
+                name: 'YearTimeseries_'+me.graphtype,
                 bind: {
                     store: '{years}'        // me.getViewModel().get('years')   //
                 },
@@ -485,7 +466,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 labelWidth: 40,
                 labelAlign: 'left',
                 width: 155,
-                margin: '9 0 0 0',
+                margin: '5 20 0 0',
                 //colspan: 2,
                 valueField: 'year',
                 displayField: 'year',
@@ -495,32 +476,24 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 emptyText: esapp.Utils.getTranslation('select'),    // 'Select...',
                 listeners: {
                     select: function () {
-                        Ext.getCmp("radio-year_"+me.charttype).setValue(true);
+                        Ext.getCmp("radio-year_"+me.graphtype).setValue(true);
                     }
                 }
             }, {
                 xtype: 'fieldset',
-                //flex: 2,
                 title: '<b>' + esapp.Utils.getTranslation('season') + '</b>',
-                layout: 'hbox',
-                layoutConfig: {columns: 2, rows: 1},
-                margin: '0 0 0 20',
-                defaults: {
-                    margin: 10
-                    //anchor: '100%',
-                    //hideEmptyLabel: false
-                    //layout: 'form',
-                    //xtype: 'container'
-                    //style: 'width: 50%'
-                },
+                layout: 'vbox',
+                layoutConfig: {columns: 1, rows: 2},
+                // margin: '0 0 0 20',
+                width: 160,
                 items: [{
                     xtype: 'datefield',
-                    id: 'ts_from_season_'+me.charttype,
+                    id: 'ts_from_season_'+me.graphtype,
                     fieldLabel: esapp.Utils.getTranslation('from'),    // 'From',
                     labelAlign: 'left',
                     labelWidth: 35,
                     style: {"margin-right": "10px"},
-                    width: 120,
+                    width: 130,
                     format: "d/m",
                     emptyText: 'dd/mm ',
                     allowBlank: true,
@@ -528,17 +501,17 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                     //maxValue: new Date(),
                     listeners: {
                         change: function () {
-                            Ext.getCmp("radio-year_"+me.charttype).setValue(true);
+                            Ext.getCmp("radio-year_"+me.graphtype).setValue(true);
                         }
                     }
                 }, {
                     xtype: 'datefield',
-                    id: 'ts_to_season_'+me.charttype,
+                    id: 'ts_to_season_'+me.graphtype,
                     fieldLabel: esapp.Utils.getTranslation('to'),    // 'To',
                     labelAlign: 'left',
-                    labelWidth: 20,
+                    labelWidth: 35,
                     style: {"margin-right": "10px"},
-                    width: 120,
+                    width: 130,
                     format: "d/m",
                     emptyText: 'dd/mm',
                     allowBlank: true,
@@ -547,7 +520,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                     //,value: new Date()
                     listeners: {
                         change: function () {
-                            Ext.getCmp("radio-year_"+me.charttype).setValue(true);
+                            Ext.getCmp("radio-year_"+me.graphtype).setValue(true);
                         }
                     }
                 }]
@@ -560,15 +533,15 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
             margin: 5,
             items: [{
                 xtype: 'radio',
-                id: 'radio-compareyears_'+me.charttype,
+                id: 'radio-compareyears_'+me.graphtype,
                 checked: false,
-                name: 'ts-period_'+me.charttype,
+                name: 'ts-period_'+me.graphtype,
                 //inputValue: 'year',
                 style: {"margin-right": "5px"},
                 disabled: false
             }, {
                 xtype: 'multiselector',
-                id: 'ts_selectyearstocompare_'+me.charttype,
+                id: 'ts_selectyearstocompare_'+me.graphtype,
                 title: esapp.Utils.getTranslation('years_of_interest'),    // 'Year(s) of interest',
                 cls: 'newpanelstyle',
                 style: { "margin-right": "20px" },
@@ -602,19 +575,19 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                     minHeight: 100,
                     listeners: {
                         activate: function () {
-                            Ext.getCmp("radio-compareyears_"+me.charttype).setValue(true);
+                            Ext.getCmp("radio-compareyears_"+me.graphtype).setValue(true);
                         },
                         show: function () {
-                            Ext.getCmp("radio-compareyears_"+me.charttype).setValue(true);
+                            Ext.getCmp("radio-compareyears_"+me.graphtype).setValue(true);
                         }
                     }
                 },
                 listeners: {
                     containerclick: function () {
-                        Ext.getCmp("radio-compareyears_"+me.charttype).setValue(true);
+                        Ext.getCmp("radio-compareyears_"+me.graphtype).setValue(true);
                     },
                     itemclick: function () {
-                        Ext.getCmp("radio-compareyears_"+me.charttype).setValue(true);
+                        Ext.getCmp("radio-compareyears_"+me.graphtype).setValue(true);
                     }
                 }
 
@@ -634,7 +607,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 items: [{
                     items: [{
                         xtype: 'datefield',
-                        id: 'ts_from_seasoncompare_'+me.charttype,
+                        id: 'ts_from_seasoncompare_'+me.graphtype,
                         fieldLabel: esapp.Utils.getTranslation('from'),    // 'From',
                         labelAlign: 'left',
                         labelWidth: 35,
@@ -647,12 +620,12 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                         //maxValue: new Date(),
                         listeners: {
                             change: function () {
-                                Ext.getCmp("radio-compareyears_"+me.charttype).setValue(true);
+                                Ext.getCmp("radio-compareyears_"+me.graphtype).setValue(true);
                             }
                         }
                     }, {
                         xtype: 'datefield',
-                        id: 'ts_to_seasoncompare_'+me.charttype,
+                        id: 'ts_to_seasoncompare_'+me.graphtype,
                         fieldLabel: esapp.Utils.getTranslation('to'),    // 'To',
                         labelAlign: 'left',
                         labelWidth: 20,
@@ -666,7 +639,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                         //,value: new Date()
                         listeners: {
                             change: function () {
-                                Ext.getCmp("radio-compareyears_"+me.charttype).setValue(true);
+                                Ext.getCmp("radio-compareyears_"+me.graphtype).setValue(true);
                             }
                         }
                     }]
@@ -680,16 +653,25 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
             margin: 5,
             items: [{
                 xtype: 'radio',
-                id: 'radio-multiyears_'+me.charttype,
+                id: 'radio-multiyears_'+me.graphtype,
                 checked: !me.fromto,
-                name: 'ts-period_'+me.charttype,
+                name: 'ts-period_'+me.graphtype,
                 //inputValue: 'year',
                 style: {"margin-right": "5px"},
                 disabled: false
             }, {
                 xtype: 'grid',
-                id: 'ts_selectmultiyears_'+me.charttype,
+                id: 'ts_selectmultiyears_'+me.graphtype,
                 //title: 'Year(s) of interest',
+                sortableColumns: true,
+                reserveScrollbar: true,
+                columnLines: true,
+                frame: true,
+                border: false,
+                cls: 'newpanelstyle',
+                style: { "margin-right": "20px" },
+                width: 160,
+                height: 140,
                 selType: 'checkboxmodel',
                 selModel: {
                     allowDeselect:false,
@@ -697,7 +679,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                     mode:'SIMPLE',
                     listeners: {
                         selectionchange: function () {
-                            Ext.getCmp("radio-multiyears_"+me.charttype).setValue(true);
+                            Ext.getCmp("radio-multiyears_"+me.graphtype).setValue(true);
                         }
                     }
                 },
@@ -710,75 +692,57 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 columns: [
                     {
                         text: '<span class="smalltext">' + esapp.Utils.getTranslation('available_years')+ '</span>',     // 'Available Years',
-                        width: 132,
+                        width: 115,
                         dataIndex: 'year',
                         menuDisabled: true,
                         sortable: true,
                         shrinkWrap: 0,
                         stopSelection: false
                     }
-                ],
-                sortableColumns: true,
-                reserveScrollbar: true,
-                columnLines: true,
-                frame: true,
-                border: false,
-                cls: 'newpanelstyle',
-                style: { "margin-right": "20px" },
-                width: 175,
-                height: 140
+                ]
             }, {
                 xtype: 'fieldset',
-                //flex: 1,
                 title: '<b>' + esapp.Utils.getTranslation('season') + '</b>',   // '<b>Season</b>',
-                layout: 'column',
-                //layoutConfig: {columns: 2, rows: 2},
-                defaults: {
-                    //anchor: '100%',
-                    //hideEmptyLabel: false
-                    layout: 'form',
-                    xtype: 'container',
-                    style: 'width: 50%'
-                },
+                layout: 'vbox',
+                layoutConfig: {columns: 1, rows: 2},
+                width: 160,
                 items: [{
-                    items: [{
-                        xtype: 'datefield',
-                        id: 'ts_from_seasonmulti_'+me.charttype,
-                        fieldLabel: esapp.Utils.getTranslation('from'),    // 'From',
-                        labelAlign: 'left',
-                        labelWidth: 35,
-                        style: {"margin-right": "10px"},
-                        width: 160,
-                        format: "d/m",
-                        emptyText: 'dd/mm ',
-                        allowBlank: true,
-                        showToday: false,
-                        //maxValue: new Date(),
-                        listeners: {
-                            change: function () {
-                                Ext.getCmp("radio-multiyears_"+me.charttype).setValue(true);
-                            }
+                    xtype: 'datefield',
+                    id: 'ts_from_seasonmulti_'+me.graphtype,
+                    fieldLabel: esapp.Utils.getTranslation('from'),    // 'From',
+                    labelAlign: 'left',
+                    labelWidth: 35,
+                    style: {"margin-right": "10px"},
+                    width: 130,
+                    format: "d/m",
+                    emptyText: 'dd/mm ',
+                    allowBlank: true,
+                    showToday: false,
+                    //maxValue: new Date(),
+                    listeners: {
+                        change: function () {
+                            Ext.getCmp("radio-multiyears_"+me.graphtype).setValue(true);
                         }
-                    }, {
-                        xtype: 'datefield',
-                        id: 'ts_to_seasonmulti_'+me.charttype,
-                        fieldLabel: esapp.Utils.getTranslation('to'),    // 'To',
-                        labelAlign: 'left',
-                        labelWidth: 20,
-                        style: {"margin-right": "10px"},
-                        width: 160,
-                        format: "d/m",
-                        emptyText: 'dd/mm',
-                        allowBlank: true,
-                        showToday: false,
-                        //maxValue: new Date(),
-                        //,value: new Date()
-                        listeners: {
-                            change: function () {
-                                Ext.getCmp("radio-multiyears_"+me.charttype).setValue(true);
-                            }
+                    }
+                }, {
+                    xtype: 'datefield',
+                    id: 'ts_to_seasonmulti_'+me.graphtype,
+                    fieldLabel: esapp.Utils.getTranslation('to'),    // 'To',
+                    labelAlign: 'left',
+                    labelWidth: 35,
+                    style: {"margin-right": "10px"},
+                    width: 130,
+                    format: "d/m",
+                    emptyText: 'dd/mm',
+                    allowBlank: true,
+                    showToday: false,
+                    //maxValue: new Date(),
+                    //,value: new Date()
+                    listeners: {
+                        change: function () {
+                            Ext.getCmp("radio-multiyears_"+me.graphtype).setValue(true);
                         }
-                    }]
+                    }
                 }]
             }]
         };
@@ -789,9 +753,9 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
         if (me.year){
             me.timeframeselection.add(me.yearSelection);
         }
-        if (me.compareyears){
-            me.timeframeselection.add(me.compareyearsSelection);
-        }
+        // if (me.compareyears){
+        //     me.timeframeselection.add(me.compareyearsSelection);
+        // }
         if (me.multipleyears){
             me.timeframeselection.add(me.multipleyearsSelection);
         }
@@ -807,7 +771,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
             collapsible: true,
             bodyPadding: '0 0 0 0',
             style: {
-                "font-size": 18
+                "font-size": 16
             },
             layout: {
                 // layout-specific configs
@@ -870,7 +834,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                                     categoryid: record.get('category_id'),
                                     categoryname: record.get('descriptive_name'),
                                     title: '<span class="categorytitle"> ' + record.get('descriptive_name') + '</span>',
-                                    charttype: me.charttype,
+                                    graphtype: me.graphtype,
                                     cumulative: me.cumulative,
                                     multiplevariables: me.multiplevariables
                                 });
@@ -881,10 +845,10 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 }
             }
         },
-        me.selectedtimeseries,
-        me.colorschemesProduct,
-        me.timeframeselection
-       ];
+            me.selectedtimeseries,
+            me.colorschemesProduct,
+            me.timeframeselection
+        ];
 
         me.callParent();
     }
@@ -1010,7 +974,7 @@ Ext.define("esapp.view.analysis.timeseriesCategoryProducts",{
 
     categoryid: null,
     categoryname: null,
-    charttype: '',
+    graphtype: '',
     cumulative: false,
     multiplevariables: false,
 

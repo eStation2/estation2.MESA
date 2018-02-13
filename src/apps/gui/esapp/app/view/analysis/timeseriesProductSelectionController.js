@@ -4,31 +4,46 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
 
     ,getTSDrawProperties: function(TSrecord){
         var myNewRecord = null;
-        // var TSrecord = gridview.store.getAt(recordID);
-        var tsDrawPropertiesStore = this.getStore('timeseriesdrawproperties');
-        // if (!tsDrawPropertiesStore.getSource().isLoaded())
-        tsDrawPropertiesStore.getSource().load();    // there is no load method for a chained store
+        var tsdrawprobs_record = null;
+        var tsDrawPropertiesStore  = Ext.data.StoreManager.lookup('TSDrawPropertiesStore');
+        // var tsDrawPropertiesStore = this.getStore('timeseriesdrawproperties');
+        // tsDrawPropertiesStore.getSource().load();    // there is no load method for a chained store
 
-        tsDrawPropertiesStore.clearFilter(true);
-        tsDrawPropertiesStore.filterBy(function (record, id) {
-            if (record.get("productcode") == TSrecord.get('productcode') && record.get("version") == TSrecord.get('version') && record.get("subproductcode") == TSrecord.get('subproductcode')) {
-                return true;
+
+        if (!tsDrawPropertiesStore.isLoaded()){
+            var user = esapp.getUser();
+            if (user != 'undefined' && user != null){
+                tsDrawPropertiesStore.proxy.extraParams = {userid: user.userid, graph_tpl_name: 'default'};
             }
-            return false;
-        });
+            tsDrawPropertiesStore.load({
+                callback: function(records, options, success) {
+                    tsDrawPropertiesStore.clearFilter(true);
+                    tsDrawPropertiesStore.filterBy(function (record, id) {
+                        if (record.get("productcode") == TSrecord.get('productcode') && record.get("version") == TSrecord.get('version') && record.get("subproductcode") == TSrecord.get('subproductcode')) {
+                            return true;
+                        }
+                        return false;
+                    });
 
-        var tsdrawprobs_record = tsDrawPropertiesStore.findRecord('productcode', TSrecord.get('productcode'));
+                    tsdrawprobs_record = tsDrawPropertiesStore.findRecord('productcode', TSrecord.get('productcode'));
+                }
+            });
+            esapp.Utils.sleepFor(350);
+        }
+        else {
+            tsDrawPropertiesStore.clearFilter(true);
+            tsDrawPropertiesStore.filterBy(function (record, id) {
+                if (record.get("productcode") == TSrecord.get('productcode') && record.get("version") == TSrecord.get('version') && record.get("subproductcode") == TSrecord.get('subproductcode')) {
+                    return true;
+                }
+                return false;
+            });
 
-        //console.info(tsdrawprobs_record);
+            tsdrawprobs_record = tsDrawPropertiesStore.findRecord('productcode', TSrecord.get('productcode'));
+        }
         if (tsdrawprobs_record == null) {
-            var newtitle = '',
-                newunit = '',
-                newmin = null,
-                newmax = null,
-                newoposite = false,
-                newcharttype = 'line',
-                newyaxes_id = TSrecord.get('productcode') + ' - ' + TSrecord.get('version'),
-                newtitle_color = esapp.Utils.convertRGBtoHex('0 0 0');
+            var newcharttype = 'line',
+                newyaxes_id = TSrecord.get('productcode') + ' - ' + TSrecord.get('version');
 
             tsDrawPropertiesStore.clearFilter(true);
             tsDrawPropertiesStore.filterBy(function (record, id) {
@@ -40,14 +55,8 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
 
             var similarTSrecord = tsDrawPropertiesStore.getAt(0);
             if (similarTSrecord != null) {
-                newtitle = similarTSrecord.get('title');
-                newunit = similarTSrecord.get('unit');
-                newmin = similarTSrecord.get('min');
-                newmax = similarTSrecord.get('max');
-                newoposite = similarTSrecord.get('oposite');
                 newcharttype = similarTSrecord.get('charttype');
-                newyaxes_id = similarTSrecord.get('yaxes_id');
-                newtitle_color = similarTSrecord.get('title_color');
+                newyaxes_id = similarTSrecord.get('yaxe_id');
             }
 
             //myNewRecord = new tsDrawPropertiesStore.recordType({
@@ -55,34 +64,22 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
                 productcode: TSrecord.get('productcode'),
                 subproductcode: TSrecord.get('subproductcode'),
                 version: TSrecord.get('version'),
-                title: newtitle,
-                unit: newunit,
-                min: newmin,
-                max: newmax,
-                oposite: newoposite,
                 tsname_in_legend: TSrecord.get('productcode') + ' - ' + TSrecord.get('version') + ' - ' + TSrecord.get('subproductcode'),
                 charttype: newcharttype,
                 linestyle: 'Solid',
                 linewidth: 2,
                 color: esapp.Utils.convertRGBtoHex('0 0 0'),
-                yaxes_id: newyaxes_id,
-                title_color: newtitle_color,
-                aggregation_type: 'mean',
-                aggregation_min: null,
-                aggregation_max: null
+                yaxe_id: newyaxes_id
             });
 
             tsDrawPropertiesStore.add(myNewRecord);
             tsdrawprobs_record = myNewRecord;
         }
 
-        // tsDrawPropertiesStore.clearFilter(true);
-
         return tsdrawprobs_record;
     }
 
     ,editTSDrawProperties: function(gridview, recordID){
-        // var tsDrawPropertiesStore = this.getStore('timeseriesdrawproperties');
         var TSrecord = gridview.store.getAt(recordID);
         var tsdrawprobs_record = this.getTSDrawProperties(TSrecord);
 
@@ -105,23 +102,20 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
         };
 
         var source = {
-            yaxes_id: tsdrawprobs_record.get('yaxes_id'),
+            yaxe_id: tsdrawprobs_record.get('yaxe_id'),
             tsname_in_legend: tsdrawprobs_record.get('tsname_in_legend'),
-            //oposite: tsdrawprobs_record.get('oposite'),
-            //unit: tsdrawprobs_record.get('unit'),
             charttype: tsdrawprobs_record.get('charttype'),
             linestyle: tsdrawprobs_record.get('linestyle'),
             linewidth: tsdrawprobs_record.get('linewidth'),
             color: esapp.Utils.convertRGBtoHex(tsdrawprobs_record.get('color'))
-            //aggregation_type: tsdrawprobs_record.get('aggregation_type'),
-            //aggregation_min: tsdrawprobs_record.get('aggregation_min'),
-            //aggregation_max: tsdrawprobs_record.get('aggregation_max')
         };
 
         var TSDrawPropertiesWin = new Ext.Window({
              id:'TSDrawPropertiesWin'
             ,title: esapp.Utils.getTranslation('ts_draw_properties_for') + ' '   // 'Time series draw properties for'
-                    + tsdrawprobs_record.get('productcode') + ' - ' + tsdrawprobs_record.get('version') + ' - ' +  tsdrawprobs_record.get('subproductcode')
+                    + tsdrawprobs_record.get('productcode')
+                    + ' - ' + tsdrawprobs_record.get('version')
+                    + ' - ' +  tsdrawprobs_record.get('subproductcode')
             ,width:450
             ,plain: true
             ,modal: true
@@ -147,10 +141,9 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
                 sortableColumns: false,
                 source: source,
                 sourceConfig: {
-                    yaxes_id: {
+                    yaxe_id: {
                         displayName: esapp.Utils.getTranslation('yaxes_id'),   // 'Yaxe ID',
-                        editor: {
-                        }
+                        editor: {}
                         //type: 'text',
                         // editor: {
                         //     xtype: 'textfield',
@@ -165,19 +158,6 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
                             selectOnFocus:false
                         }
                     },
-
-                    //oposite: {
-                    //    displayName: esapp.Utils.getTranslation('oposite'),   // 'Oposite',
-                    //    type: 'boolean'
-                    //},
-                    //unit: {
-                    //    displayName: esapp.Utils.getTranslation('unit'),   // 'Unit',
-                    //    //type: 'text',
-                    //    editor: {
-                    //        xtype: 'textfield',
-                    //        selectOnFocus:false
-                    //    }
-                    //},
                     charttype: {
                         displayName: esapp.Utils.getTranslation('charttype'),   // 'Chart type',
                         editor: {
@@ -215,56 +195,47 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
                         }
                         ,renderer: colorrenderer
                     }
-                    //,aggregation_type: {
-                    //    displayName: esapp.Utils.getTranslation('aggregation_type'),   // 'Aggregation type',
-                    //    editor: {
-                    //        xtype: 'combobox',
-                    //        store: ['mean', 'count'],
-                    //        forceSelection: true
-                    //    }
-                    //},
-                    //aggregation_min: {
-                    //    displayName: esapp.Utils.getTranslation('aggregation_min'),   // 'Aggregation min',
-                    //    type: 'number'
-                    //},
-                    //aggregation_max: {
-                    //    displayName: esapp.Utils.getTranslation('aggregation_max'),   // 'Aggregation max',
-                    //    type: 'number'
-                    //}
                 },
                 listeners: {
                     propertychange: function( source, recordId, value, oldValue, eOpts ){
 
                         if (value != oldValue) {
-                            var tsdrawprobs = {
-                                productcode: tsdrawprobs_record.get('productcode'),
-                                subproductcode: tsdrawprobs_record.get('subproductcode'),
-                                version: tsdrawprobs_record.get('version'),
-                                tsname_in_legend: source.tsname_in_legend,
-                                color: source.color,
-                                charttype: source.charttype,
-                                linestyle: source.linestyle,
-                                linewidth: source.linewidth
-                            };
+                            var user = esapp.getUser();
+                            if (user != 'undefined' && user != null){
 
-                            Ext.Ajax.request({
-                                url:"analysis/gettimeseriesdrawproperties/update",
-                                timeout : 300000,
-                                //scope: me,
-                                params:tsdrawprobs,
-                                method: 'POST',
-                                success: function ( result, request ) {
-                                    //console.info(Ext.util.JSON.decode(result.responseText));
-                                },
-                                failure: function ( result, request) {
-                                }
-                            });
-                            // tsdrawprobs_record.set(recordId, value)
-                            // tsdrawprobs_record.store.sync();
+                                var tsdrawprobs = {
+                                    productcode: tsdrawprobs_record.get('productcode'),
+                                    subproductcode: tsdrawprobs_record.get('subproductcode'),
+                                    version: tsdrawprobs_record.get('version'),
+                                    tsname_in_legend: source.tsname_in_legend,
+                                    color: source.color,
+                                    charttype: source.charttype,
+                                    linestyle: source.linestyle,
+                                    linewidth: source.linewidth,
+                                    yaxe_id: source.yaxe_id,
+                                    userid: user.userid,
+                                    graph_tpl_name: 'default'
+                                };
+
+                                Ext.Ajax.request({
+                                    url:"analysis/gettimeseriesdrawproperties/update",
+                                    timeout : 300000,
+                                    //scope: me,
+                                    params:tsdrawprobs,
+                                    method: 'POST',
+                                    success: function ( result, request ) {
+                                        //console.info(Ext.util.JSON.decode(result.responseText));
+                                    },
+                                    failure: function ( result, request) {
+                                    }
+                                });
+                                // tsdrawprobs_record.set(recordId, value)
+                                // tsdrawprobs_record.store.sync();
+                            }
                         }
                     },
                     beforeedit: function( editor, e, opts ) {
-                        if( e.record.get( 'name' )=='yaxes_id') {
+                        if( e.record.get( 'name' )=='yaxe_id') {
                             return false;
                         }
                     }
@@ -275,250 +246,11 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
         TSDrawPropertiesWin.show();
         TSDrawPropertiesWin.alignTo(gridview.getEl(),"r-tr", [-6, 0]);  // See: http://www.extjs.com/deploy/dev/docs/?class=Ext.Window&member=alignTo
 
-        // var source = {};
-        // var myNewRecord = null;
-        // var TSrecord = gridview.store.getAt(recordID);
-        // var tsDrawPropertiesStore = this.getStore('timeseriesdrawproperties');
-        //
-        // if (!tsDrawPropertiesStore.isLoaded())
-        //     tsDrawPropertiesStore.load();
-        //
-        // tsDrawPropertiesStore.clearFilter(true);
-        // tsDrawPropertiesStore.filterBy(function (record, id) {
-        //     if (record.get("productcode") == TSrecord.get('productcode') && record.get("version") == TSrecord.get('version') && record.get("subproductcode") == TSrecord.get('subproductcode')) {
-        //         return true;
-        //     }
-        //     return false;
-        // });
-        //
-        // var tsdrawprobs_record = tsDrawPropertiesStore.findRecord('productcode', TSrecord.get('productcode'));
-        //
-        // //console.info(tsdrawprobs_record);
-        // if (tsdrawprobs_record == null){
-        //     var newtitle = '',
-        //         newunit = '',
-        //         newmin = null,
-        //         newmax = null,
-        //         newoposite = false,
-        //         newcharttype = 'line',
-        //         newyaxes_id = TSrecord.get('productcode') + ' - ' + TSrecord.get('version'),
-        //         newtitle_color = esapp.Utils.convertRGBtoHex('0 0 0');
-        //
-        //     tsDrawPropertiesStore.clearFilter(true);
-        //     tsDrawPropertiesStore.filterBy(function (record, id) {
-        //         if (record.get("productcode") == TSrecord.get('productcode') && record.get("version") == TSrecord.get('version')) {
-        //             return true;
-        //         }
-        //         return false;
-        //     });
-        //
-        //     var similarTSrecord = tsDrawPropertiesStore.getAt(0);
-        //     if (similarTSrecord != null){
-        //         newtitle = similarTSrecord.get('title');
-        //         newunit = similarTSrecord.get('unit');
-        //         newmin = similarTSrecord.get('min');
-        //         newmax = similarTSrecord.get('max');
-        //         newoposite = similarTSrecord.get('oposite');
-        //         newcharttype = similarTSrecord.get('charttype');
-        //         newyaxes_id = similarTSrecord.get('yaxes_id');
-        //         newtitle_color = similarTSrecord.get('title_color');
-        //     }
-        //
-        //     //myNewRecord = new tsDrawPropertiesStore.recordType({
-        //     myNewRecord = new esapp.model.TSDrawProperties({
-        //         productcode: TSrecord.get('productcode'),
-        //         subproductcode: TSrecord.get('subproductcode'),
-        //         version: TSrecord.get('version'),
-        //         title: newtitle,
-        //         unit: newunit,
-        //         min: newmin,
-        //         max: newmax,
-        //         oposite: newoposite,
-        //         tsname_in_legend: TSrecord.get('productcode') + ' - ' + TSrecord.get('version') + ' - ' + TSrecord.get('subproductcode'),
-        //         charttype: newcharttype,
-        //         linestyle: 'Solid',
-        //         linewidth: 2,
-        //         color: esapp.Utils.convertRGBtoHex('0 0 0'),
-        //         yaxes_id: newyaxes_id,
-        //         title_color: newtitle_color,
-        //         aggregation_type: 'mean',
-        //         aggregation_min: null,
-        //         aggregation_max: null
-        //     });
-        //
-        //     tsDrawPropertiesStore.add(myNewRecord);
-        //     tsdrawprobs_record = myNewRecord;
-        //
-        //     createTSDrawPropertiesWin();
-        //
-        // }
-        // else {
-        //     createTSDrawPropertiesWin();
-        // }
-        //
-        //
-        // //var texteditor = new Ext.grid.GridEditor(new Ext.form.TextField({allowBlank: false,selectOnFocus: true}));
-        // //var numbereditor = new Ext.grid.GridEditor(new Ext.form.NumberField({allowBlank: false,selectOnFocus: true}));
-        // //var cedit = new Ext.grid.GridEditor(new Ext.ux.ColorField({allowBlank: false,selectOnFocus: true}));
-        //
-        // function createTSDrawPropertiesWin(tsdrawprobs_record){
-        //     var myTSDrawPropertiesWin = Ext.getCmp('TSDrawPropertiesWin');
-        //     if (myTSDrawPropertiesWin!=null && myTSDrawPropertiesWin!='undefined' ) {
-        //         myTSDrawPropertiesWin.close();
-        //     }
-        //
-        //     var colorrenderer = function(color) {
-        //         renderTpl = color;
-        //
-        //         if (color.trim()==''){
-        //             renderTpl = 'transparent';
-        //         }
-        //         else {
-        //             renderTpl = '<span style="background:rgb(' + esapp.Utils.HexToRGB(color) + '); color:' + esapp.Utils.invertHexToRGB(color) + ';">' + esapp.Utils.HexToRGB(color) + '</span>';
-        //         }
-        //         return renderTpl;
-        //     };
-        //
-        //     var source = {
-        //         yaxes_id: tsdrawprobs_record.get('yaxes_id'),
-        //         tsname_in_legend: tsdrawprobs_record.get('tsname_in_legend'),
-        //         //oposite: tsdrawprobs_record.get('oposite'),
-        //         //unit: tsdrawprobs_record.get('unit'),
-        //         charttype: tsdrawprobs_record.get('charttype'),
-        //         linestyle: tsdrawprobs_record.get('linestyle'),
-        //         linewidth: tsdrawprobs_record.get('linewidth'),
-        //         color: esapp.Utils.convertRGBtoHex(tsdrawprobs_record.get('color'))
-        //         //aggregation_type: tsdrawprobs_record.get('aggregation_type'),
-        //         //aggregation_min: tsdrawprobs_record.get('aggregation_min'),
-        //         //aggregation_max: tsdrawprobs_record.get('aggregation_max')
-        //     };
-        //
-        //     var TSDrawPropertiesWin = new Ext.Window({
-        //          id:'TSDrawPropertiesWin'
-        //         ,title: esapp.Utils.getTranslation('ts_draw_properties_for') + ' '   // 'Time series draw properties for'
-        //                 + tsdrawprobs_record.get('productcode') + ' - ' + tsdrawprobs_record.get('version') + ' - ' +  tsdrawprobs_record.get('subproductcode')
-        //         ,width:450
-        //         ,plain: true
-        //         ,modal: true
-        //         ,resizable: true
-        //         ,closable:true
-        //         ,layout: {
-        //              type: 'fit'
-        //         },
-        //         listeners: {
-        //             close: function(){
-        //                 //console.info('closing window and removing filter');
-        //                 tsDrawPropertiesStore.clearFilter(true);
-        //             }
-        //         }
-        //         ,items:[{
-        //             xtype: 'propertygrid',
-        //             //nameField: 'Property',
-        //             //width: 400,
-        //             nameColumnWidth: 160,
-        //             sortableColumns: false,
-        //             source: source,
-        //             sourceConfig: {
-        //                 yaxes_id: {
-        //                     displayName: esapp.Utils.getTranslation('yaxes_id'),   // 'Yaxe ID',
-        //                     //type: 'text',
-        //                     editor: {
-        //                         xtype: 'textfield',
-        //                         selectOnFocus:false
-        //                     }
-        //                 },
-        //                 tsname_in_legend: {
-        //                     displayName: esapp.Utils.getTranslation('tsname_in_legend'),   // 'Time series name in legend',
-        //                     //type: 'text',
-        //                     editor: {
-        //                         xtype: 'textfield',
-        //                         selectOnFocus:false
-        //                     }
-        //                 },
-        //
-        //                 //oposite: {
-        //                 //    displayName: esapp.Utils.getTranslation('oposite'),   // 'Oposite',
-        //                 //    type: 'boolean'
-        //                 //},
-        //                 //unit: {
-        //                 //    displayName: esapp.Utils.getTranslation('unit'),   // 'Unit',
-        //                 //    //type: 'text',
-        //                 //    editor: {
-        //                 //        xtype: 'textfield',
-        //                 //        selectOnFocus:false
-        //                 //    }
-        //                 //},
-        //                 charttype: {
-        //                     displayName: esapp.Utils.getTranslation('charttype'),   // 'Chart type',
-        //                     editor: {
-        //                         xtype: 'combobox',
-        //                         store: ['line', 'column'],
-        //                         forceSelection: true
-        //                     }
-        //                 },
-        //                 linestyle: {
-        //                     displayName: esapp.Utils.getTranslation('linestyle'),   // 'Line style',
-        //                     editor: {
-        //                         xtype: 'combobox',
-        //                         store: ['Solid',
-        //                                 'ShortDash',
-        //                                 'ShortDot',
-        //                                 'ShortDashDot',
-        //                                 'ShortDashDotDot',
-        //                                 'Dot',
-        //                                 'Dash',
-        //                                 'LongDash',
-        //                                 'DashDot',
-        //                                 'LongDashDot',
-        //                                 'LongDashDotDot'],
-        //                         forceSelection: true
-        //                     }
-        //                 },
-        //                 linewidth: {
-        //                     displayName: esapp.Utils.getTranslation('linewidth'),   // Line width',
-        //                     type: 'number'
-        //                 },
-        //                 color: {
-        //                     displayName: esapp.Utils.getTranslation('color'),   // 'Colour',
-        //                     editor: {
-        //                         xtype: 'mycolorpicker'
-        //                     }
-        //                     ,renderer: colorrenderer
-        //                 }
-        //                 //,aggregation_type: {
-        //                 //    displayName: esapp.Utils.getTranslation('aggregation_type'),   // 'Aggregation type',
-        //                 //    editor: {
-        //                 //        xtype: 'combobox',
-        //                 //        store: ['mean', 'count'],
-        //                 //        forceSelection: true
-        //                 //    }
-        //                 //},
-        //                 //aggregation_min: {
-        //                 //    displayName: esapp.Utils.getTranslation('aggregation_min'),   // 'Aggregation min',
-        //                 //    type: 'number'
-        //                 //},
-        //                 //aggregation_max: {
-        //                 //    displayName: esapp.Utils.getTranslation('aggregation_max'),   // 'Aggregation max',
-        //                 //    type: 'number'
-        //                 //}
-        //             },
-        //             listeners: {
-        //                 propertychange: function( source, recordId, value, oldValue, eOpts ){
-        //                     if (value != oldValue)
-        //                         tsdrawprobs_record.set(recordId, value)
-        //                 }
-        //             }
-        //         }]
-        //
-        //     });
-        //     TSDrawPropertiesWin.show();
-        //     TSDrawPropertiesWin.alignTo(gridview.getEl(),"r-tr", [-6, 0]);  // See: http://www.extjs.com/deploy/dev/docs/?class=Ext.Window&member=alignTo
-        // }
     }
 
     ,TimeseriesProductsGridRowClick: function(gridview, record, colIndex, icon, e, rec) {
         var me = this.getView();
-        var gridSelectedTS = 'selected-timeseries-mapset-dataset-grid_'+ me.charttype;
+        var gridSelectedTS = 'selected-timeseries-mapset-dataset-grid_'+ me.graphtype;
         var selectedTimeseriesStore = Ext.getCmp(gridSelectedTS).getStore();
         var yearsData = [];
         //var record = me.getSelection()[0];
@@ -528,20 +260,19 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
         //record.get('selected') ? record.set('selected', false) : record.set('selected', true);
         //record.get('selected') ? selectedTimeseriesStore.add(record) : selectedTimeseriesStore.remove(record);
         //
-        if (me.charttype == 'xy'){
+        if (me.graphtype == 'xy'){
             var yAxes = [];
             var tsdrawprobs_new_selected_record = this.getTSDrawProperties(record);
-            yAxes.push(tsdrawprobs_new_selected_record.get('yaxes_id'));
+            yAxes.push(tsdrawprobs_new_selected_record.get('yaxe_id'));
             if (selectedTimeseriesStore.count() > 0){
                 selectedTimeseriesStore.getData().each(function(selectedproduct) {
-                    var yaxeid = me.getController().getTSDrawProperties(selectedproduct).get('yaxes_id');
+                    var yaxeid = me.getController().getTSDrawProperties(selectedproduct).get('yaxe_id');
                     if (!Ext.Array.contains(yAxes, yaxeid)){
                         yAxes.push(yaxeid);
                     }
                 });
             }
             if (yAxes.length > 4){
-
                 Ext.toast({
                     html: esapp.Utils.getTranslation('more_than_4_yaxes_message'),    // "You have selected products that will create more than 4 y-Axes in the Profile Graph, which is not supported!<BR><BR>Last selected product is not added.",
                     title: esapp.Utils.getTranslation('more_than_4_yaxes_title'), // 'Warning! More than 4 Y-axes!'
@@ -637,8 +368,8 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
             //     yearsDataDict.push({'year': year});
             // });
             //
-            // //if (!record.get('selected') && Ext.isObject(Ext.getCmp('ts_selectyearstocompare_'+me.charttype).searchPopup)){
-            // //    Ext.getCmp('ts_selectyearstocompare_'+me.charttype).searchPopup.lookupReference('searchGrid').getSelectionModel().deselectAll();
+            // //if (!record.get('selected') && Ext.isObject(Ext.getCmp('ts_selectyearstocompare_'+me.graphtype).searchPopup)){
+            // //    Ext.getCmp('ts_selectyearstocompare_'+me.graphtype).searchPopup.lookupReference('searchGrid').getSelectionModel().deselectAll();
             // //}
             // //Ext.getCmp('timeserieschartselection').getViewModel().getStore('years').setData(yearsDataDict);
             // me.getViewModel().get('years').setData(yearsDataDict);
@@ -646,8 +377,8 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
             //Ext.getCmp('selected-timeseries-mapset-dataset-grid').show();
             //Ext.getCmp('ts_timeframe').show();
             //Ext.getCmp('gettimeseries_btn').setDisabled(false);
-            //console.info(me.charttype);
-            if (me.charttype == 'matrix'){
+            //console.info(me.graphtype);
+            if (me.graphtype == 'matrix'){
                 this.getColorSchemes(record);
             }
         }
@@ -730,7 +461,7 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
     //    //console.info(gridview);
     //    //console.info(record);
     //    var gridSelectedTS = 'selected-timeseries-mapset-dataset-grid_xy';
-    //    if (gridview.up().charttype == 'cumulative'){
+    //    if (gridview.up().graphtype == 'cumulative'){
     //        gridSelectedTS = 'selected-timeseries-mapset-dataset-grid_cum';
     //    }
     //    var selectedTimeseriesStore = Ext.getCmp(gridSelectedTS).getStore();

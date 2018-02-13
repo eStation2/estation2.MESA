@@ -50,21 +50,21 @@ Ext.define("esapp.view.analysis.analysisMain",{
             items: [{
                 xtype: 'button',
                 name: 'newmapbtn',
-                text: esapp.Utils.getTranslation('newmap'),  // 'New map',
+                text: esapp.Utils.getTranslation('newmap'),  // 'MAPS',
                 iconCls: 'map_add',
                 style: { color: 'gray' },
                 scale: 'small',
                 handler: 'newMapView'
-            },{
+            }, {
                 xtype: 'button',
                 id: 'analysismain_maptemplatebtn',
                 name: 'analysismain_maptemplatebtn',
                 reference: 'analysismain_maptemplatebtn',
                 text: esapp.Utils.getTranslation('map_template'), // 'MY MAPS'
                 iconCls: 'map_tpl',
-                style: { color: 'gray' },
+                style: {color: 'gray'},
                 scale: 'small',
-                hidden:  (esapp.getUser() == 'undefined' || esapp.getUser() == null ? true : false),
+                hidden: (esapp.getUser() == 'undefined' || esapp.getUser() == null ? true : false),
                 // floating: false,  // usually you want this set to True (default)
                 handler: 'showUserMaptemplates',
                 listeners: {
@@ -97,11 +97,38 @@ Ext.define("esapp.view.analysis.analysisMain",{
                 //         // ,hidden: false
                 //     }]
                 // }
+            },{ xtype: 'tbseparator'
+            },{
+                xtype: 'button',
+                name: 'analysismain_timeseriesbtn',
+                reference: 'analysismain_timeseriesbtn',
+                text: esapp.Utils.getTranslation('graphs'),  // 'GRAPHS',
+                iconCls: 'chart-curve_medium',
+                scale: 'small',
+                handler: 'showTimeseriesChartSelection'
+            },{
+                xtype: 'button',
+                id: 'analysismain_graph_templatebtn',
+                name: 'analysismain_graph_templatebtn',
+                reference: 'analysismain_graph_templatebtn',
+                text: esapp.Utils.getTranslation('my_graphs'), // 'MY GRAPHS'
+                iconCls: 'graph_tpl',
+                style: { color: 'gray' },
+                scale: 'small',
+                hidden:  (esapp.getUser() == 'undefined' || esapp.getUser() == null ? true : false),
+                // floating: false,  // usually you want this set to True (default)
+                handler: 'showUserGraphTemplates',
+                listeners: {
+                    afterrender: function (btn) {
+                        btn.graphTemplateAdminPanel = new esapp.view.analysis.graphTemplateAdmin();
+                    }
+                }
+            },{ xtype: 'tbseparator'
             },{
                 xtype: 'button',
                 name: 'analysismain_legendsbtn',
                 reference: 'analysismain_legendsbtn',
-                text: esapp.Utils.getTranslation('legends'),  // 'Legends',
+                text: esapp.Utils.getTranslation('legends'),  // 'LEGENDS',
                 iconCls: 'legends',
                 style: { color: 'gray' },
                 scale: 'small',
@@ -110,20 +137,11 @@ Ext.define("esapp.view.analysis.analysisMain",{
                 xtype: 'button',
                 name: 'analysismain_layersbtn',
                 reference: 'analysismain_layersbtn',
-                text: esapp.Utils.getTranslation('layers'),  // 'Layers',
+                text: esapp.Utils.getTranslation('layers'),  // 'LAYERS',
                 iconCls: 'layers',
                 style: { color: 'gray' },
                 scale: 'small',
                 handler: 'layerAdmin'
-            },{
-                xtype: 'button',
-                name: 'analysismain_timeseriesbtn',
-                reference: 'analysismain_timeseriesbtn',
-                text: esapp.Utils.getTranslation('timeseries'),  // 'TIME SERIES',
-                iconCls: 'chart-curve_medium',
-                scale: 'small',
-                handler: 'showTimeseriesChartSelection'
-
             },
             '->',
             {

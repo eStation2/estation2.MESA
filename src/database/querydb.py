@@ -177,7 +177,382 @@ def checkUser(userinfo=None, echo=False):
             dbschema_analysis.session.close()
 
 
-def update_yaxe_timeseries_drawproperties(yaxe, echo=False):
+def get_user_graph_templates(userid, echo=False):
+    global dbschema_analysis
+    try:
+        query = "SELECT * FROM analysis.user_graph_templates WHERE userid = '" + userid + "' AND graph_tpl_name != 'default'"
+
+        result = dbschema_analysis.execute(query)
+        result = result.fetchall()
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_user_graph_templates: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+######################################################################################
+#   get_product_timeseries_drawproperties(prodcut, echo=False)
+#   Purpose: get the timeseries drawproperties for the subproduct passed
+#   Author: Jurriaan van 't Klooster
+#   Date: 2015/05/11
+#   Input: echo                 - If True echo the query result in the console for debugging purposes. Default=False
+#          product              - List of productcode, subproductcode, version
+#
+#   Output: Return all the timeseries drawproperties for the requested subproducts.
+def get_product_timeseries_drawproperties(product, user='', graph_tpl_name='', echo=False):
+
+    global dbschema_analysis
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    try:
+        product_ts_properties = []
+
+        if user != '':
+            query = " SELECT '' as userid, '' as graph_tpl_name, tdp.*, yaxe.* " + \
+                    " FROM analysis.timeseries_drawproperties_new tdp " + \
+                    "     left outer join (" + \
+                    "   		SELECT '' as userid, '' as graph_tpl_name, * FROM analysis.graph_yaxes " + \
+                    "           WHERE yaxe_id NOT IN ( SELECT yaxe_id FROM analysis.user_tpl_graph_yaxes " + \
+                    "                                  WHERE userid = '" + user + "' " + \
+                    "                                    AND graph_tpl_name = '" + graph_tpl_name + "' )" + \
+                    "           UNION " + \
+                    "           SELECT * FROM analysis.user_tpl_graph_yaxes " + \
+                    "           WHERE userid = '" + user + "' AND graph_tpl_name = '" + graph_tpl_name + "' " + \
+                    "       ) yaxe " \
+                    "  ON tdp.yaxe_id = yaxe.yaxe_id " + \
+                    " WHERE (productcode, subproductcode, version) NOT IN " + \
+                    "	(SELECT productcode, subproductcode, version " + \
+                    "	 FROM analysis.user_tpl_timeseries_drawproperties uts " + \
+                    "	 WHERE uts.userid = '" + user + "' " + \
+                    "      AND uts.productcode = '" + product['productcode'] + "'" + \
+                    "      AND uts.subproductcode = '" + product['subproductcode'] + "'" + \
+                    "      AND uts.version ='" + product['version'] + "'" + \
+                    "      AND uts.userid ='" + user + "'" + \
+                    "	   AND uts.graph_tpl_name = '" + graph_tpl_name + "') " + \
+                    "  AND tdp.productcode = '" + product['productcode'] + "' " + \
+                    "  AND tdp.subproductcode = '" + product['subproductcode'] + "' " + \
+                    "  AND tdp.version = '" + product['version'] + "' " + \
+                    " UNION " + \
+                    " SELECT tdp.*, yaxe.* " + \
+                    " FROM analysis.user_tpl_timeseries_drawproperties tdp " + \
+                    "    left join ( " + \
+                    "        SELECT '' as userid, '' as graph_tpl_name, * FROM analysis.graph_yaxes " + \
+                    "        WHERE yaxe_id NOT IN ( SELECT yaxe_id FROM analysis.user_tpl_graph_yaxes " + \
+                    "                               WHERE userid = '" + user + "' " + \
+                    "                                 AND graph_tpl_name = '" + graph_tpl_name + "' ) " + \
+                    "        UNION " + \
+                    "        SELECT * FROM analysis.user_tpl_graph_yaxes " + \
+                    "        WHERE userid = '" + user + "' AND graph_tpl_name = '" + graph_tpl_name + "' " + \
+                    "    ) yaxe " + \
+                    "   ON tdp.yaxe_id = yaxe.yaxe_id " + \
+                    " WHERE  tdp.userid ='" + user + "' " + \
+                    "   AND tdp.graph_tpl_name = '" + graph_tpl_name + "' " + \
+                    "   AND tdp.productcode = '" + product['productcode'] + "' " + \
+                    "   AND tdp.subproductcode = '" + product['subproductcode'] + "' " + \
+                    "   AND tdp.version ='" + product['version'] + "' "
+
+
+                    # " SELECT productcode, subproductcode, version, tsname_in_legend, charttype, linestyle, linewidth, color, yaxe_id " + \
+                    # " FROM analysis.user_tpl_timeseries_drawproperties uts " + \
+                    # " WHERE uts.userid = '" + user + "' " + \
+                    # "   AND uts.graph_tpl_name = '" + graph_tpl_name + "' " + \
+                    # " ORDER BY productcode ASC, subproductcode ASC, version ASC"
+        else:
+            query = "select '' as userid, '' as graph_tpl_name, tdp.*, yaxe.* " + \
+                    "from analysis.timeseries_drawproperties_new tdp " + \
+                    "     left outer join analysis.graph_yaxes yaxe on tdp.yaxe_id = yaxe.yaxe_id " + \
+                    "where tdp.productcode = '" + product['productcode'] + "'" + \
+                    "  and tdp.subproductcode = '" + product['subproductcode'] + "'" + \
+                    "  and tdp.version ='" + product['version'] + "'"
+
+        where = and_(dbschema_analysis.timeseries_drawproperties_new.productcode == product['productcode'],
+                     dbschema_analysis.timeseries_drawproperties_new.subproductcode == product['subproductcode'],
+                     dbschema_analysis.timeseries_drawproperties_new.version == product['version'])
+
+        if dbschema_analysis.timeseries_drawproperties_new.filter(where).count() >= 1:
+            product_ts_properties = dbschema_analysis.execute(query).fetchall()
+            # timeseries_drawproperties = dbschema_analysis.timeseries_drawproperties_new.filter(where).all()
+        else:
+            # Insert a new record in the table timeseries_drawproperties for the product with default values
+            default_ts_drawproperties = {
+                "productcode": product['productcode'],
+                "subproductcode": product['subproductcode'],
+                "version": product['version'],
+                "tsname_in_legend": product['productcode'] + '-' + product['version'] + '-' + product['subproductcode'],
+                "charttype": 'line',
+                "linestyle": 'Solid',
+                "linewidth": 4,
+                "color": '#000000',
+                "yaxes_id": 'default'   # product['productcode'] + '-' + product['version']
+            }
+
+            if crud_db.create('timeseries_drawproperties_new', default_ts_drawproperties):
+                product_ts_properties = dbschema_analysis.execute(query).fetchall()
+                # product_ts_properties = product_ts_properties.fetchall()
+                # timeseries_drawproperties = dbschema_analysis.timeseries_drawproperties_new.filter(where).all()
+
+        return product_ts_properties
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_product_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+        #dbschema_analysis = None
+
+
+def __get_product_timeseries_drawproperties(product, echo=False):
+
+    global dbschema_analysis
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    try:
+        timeseries_drawproperties = []
+
+        where = and_(dbschema_analysis.timeseries_drawproperties.productcode == product['productcode'],
+                     dbschema_analysis.timeseries_drawproperties.subproductcode == product['subproductcode'],
+                     dbschema_analysis.timeseries_drawproperties.version == product['version'])
+
+        if dbschema_analysis.timeseries_drawproperties.filter(where).count() >= 1:
+            timeseries_drawproperties = dbschema_analysis.timeseries_drawproperties.filter(where).all()
+        else:
+            # Insert a new record in the table timeseries_drawproperties for the product with default values
+            default_ts_drawproperties = {
+                "productcode": product['productcode'],
+                "subproductcode": product['subproductcode'],
+                "version": product['version'],
+                "title": product['productcode'],
+                "unit": '',
+                "min": None,
+                "max": None,
+                "oposite": False,
+                "tsname_in_legend": product['productcode'] + '-' + product['version'] + '-' + product['subproductcode'],
+                "charttype": 'line',
+                "linestyle": 'Solid',
+                "linewidth": 4,
+                "color": '#000000',
+                "yaxes_id": product['productcode'] + '-' + product['version'],
+                "title_color": '#0000FF',
+                "aggregation_type": 'mean',
+                "aggregation_min": None,
+                "aggregation_max": None
+            }
+
+            if crud_db.create('timeseries_drawproperties', default_ts_drawproperties):
+                timeseries_drawproperties = dbschema_analysis.timeseries_drawproperties.filter(where).all()
+
+        return timeseries_drawproperties
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_product_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+        #dbschema_analysis = None
+
+
+def get_timeseries_yaxes(products, user='', graph_tpl_name='', echo=False):
+
+    global dbschema_analysis
+
+    try:
+        timeseries_yaxes = []
+        if user != '':
+            query = " SELECT DISTINCT yaxe.* " + \
+                    " FROM analysis.timeseries_drawproperties_new tdp " + \
+                    "     LEFT OUTER JOIN (" + \
+                    "   		SELECT '' AS userid, '' AS graph_tpl_name, * FROM analysis.graph_yaxes " + \
+                    "           WHERE yaxe_id NOT IN ( SELECT yaxe_id FROM analysis.user_tpl_graph_yaxes " + \
+                    "                                  WHERE userid = '" + user + "' " + \
+                    "                                    AND graph_tpl_name = '" + graph_tpl_name + "' )" + \
+                    "           UNION " + \
+                    "           SELECT * FROM analysis.user_tpl_graph_yaxes " + \
+                    "           WHERE userid = '" + user + "' AND graph_tpl_name = '" + graph_tpl_name + "' " + \
+                    "       ) yaxe " \
+                    "  ON tdp.yaxe_id = yaxe.yaxe_id "
+        else:
+            query = " SELECT distinct yaxe.* " + \
+                    " FROM analysis.timeseries_drawproperties_new tdp " + \
+                    "     LEFT OUTER JOIN analysis.graph_yaxes yaxe ON tdp.yaxe_id = yaxe.yaxe_id "
+
+        whereall = ' WHERE (tdp.productcode, tdp.subproductcode, tdp.version) IN ('
+        count = 0
+        for myproduct in products:
+            count += 1
+            where = "('"+myproduct['productcode']+"','"+myproduct['subproductcode']+"','"+myproduct['version']+"')"
+            if count == len(products):
+                whereall += where + ')'
+            else:
+                whereall += where + ','
+        query += whereall
+
+        timeseries_yaxes = db.execute(query).fetchall()
+
+        return timeseries_yaxes
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_timeseries_yaxes: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+        #dbschema_analysis = None
+
+
+def __get_timeseries_yaxes(products, echo=False):
+
+    global dbschema_analysis
+
+    try:
+        timeseries_yaxes = []
+
+        session = dbschema_analysis.session
+        ts_drawprobs = aliased(dbschema_analysis.timeseries_drawproperties)
+
+        timeseries_drawproperties = session.query(
+                                                  ts_drawprobs.yaxes_id,
+                                                  ts_drawprobs.title,
+                                                  ts_drawprobs.unit,
+                                                  ts_drawprobs.min,
+                                                  ts_drawprobs.max,
+                                                  ts_drawprobs.oposite,
+                                                  ts_drawprobs.title_color,
+                                                  ts_drawprobs.aggregation_type,
+                                                  ts_drawprobs.aggregation_min,
+                                                  ts_drawprobs.aggregation_max)
+
+        whereall = ''
+        count = 0
+        for myproduct in products:
+            count += 1
+            where = and_(ts_drawprobs.productcode == myproduct['productcode'],
+                         ts_drawprobs.subproductcode == myproduct['subproductcode'],
+                         ts_drawprobs.version == myproduct['version'])
+            if count == 1:
+                whereall = where
+            else:
+                whereall = or_(where, whereall)
+
+        if timeseries_drawproperties.filter(whereall).distinct().count() >= 1:
+            timeseries_yaxes = timeseries_drawproperties.filter(whereall).distinct().all()
+            # if echo:
+            #     for row in timeseries_yaxes:
+            #         print row
+        return timeseries_yaxes
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_timeseries_yaxes: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+        #dbschema_analysis = None
+
+
+def update_yaxe(yaxe, echo=False):
+    global dbschema_analysis
+    status = False
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    try:
+        yaxe['yaxe_id'] = yaxe['id']        # the key id is passed but in the table the key name is yaxe_id
+
+        if yaxe['opposite'] == "false":
+            yaxe['opposite'] = 'f'
+        else:
+            yaxe['opposite'] = 't'
+
+        # unit = "'" + yaxe['unit'] + "'"
+        if yaxe['unit'] == "":
+            yaxe['unit'] = None
+
+        # max = yaxe['max']
+        if yaxe['max'] == "":
+            yaxe['max'] = None
+
+        # min = yaxe['min']
+        if yaxe['min'] == "":
+            yaxe['min'] = None
+
+        # aggregation_min = yaxe['aggregation_min']
+        if yaxe['aggregation_min'] == "":
+            yaxe['aggregation_min'] = None
+
+        # aggregation_max = yaxe['aggregation_max']
+        if yaxe['aggregation_max'] == "":
+            yaxe['aggregation_max'] = None
+
+        # query = " UPDATE analysis.graph_yaxes " + \
+        #         " SET max = " + str(max) + \
+        #         "   ,min = " + str(min) + \
+        #         "   ,oposite = '" + opposite + "'" + \
+        #         "   ,unit = " + unit + \
+        #         "   ,title = '" + yaxe['title'] + "'" + \
+        #         "   ,title_color = '" + yaxe['title_color'] + "'" + \
+        #         "   ,title_font_size = " + str(yaxe['title_font_size']) + \
+        #         "   ,aggregation_type = '" + yaxe['aggregation_type'] + "'" + \
+        #         "   ,aggregation_min = " + str(aggregation_min) + \
+        #         "   ,aggregation_max = " + str(aggregation_max) + \
+        #         " WHERE yaxe_id = '" + yaxe['id'] + "'"
+        # # print query
+        # result = dbschema_analysis.execute(query)
+        # dbschema_analysis.commit()
+
+        if yaxe['graph_tpl_name'] == 'default':
+            where = and_(dbschema_analysis.user_graph_templates.userid == yaxe['userid'],
+                         dbschema_analysis.user_graph_templates.graph_tpl_name == yaxe['graph_tpl_name'])
+            if dbschema_analysis.user_graph_templates.filter(where).count() == 0:
+                default_user_graph_template = {
+                    "userid": yaxe['userid'],
+                    "graph_tpl_name": yaxe['graph_tpl_name']
+                }
+                crud_db.create('user_graph_templates', default_user_graph_template)
+
+        where = and_(dbschema_analysis.user_tpl_graph_yaxes.userid == yaxe['userid'],
+                     dbschema_analysis.user_tpl_graph_yaxes.graph_tpl_name == yaxe['graph_tpl_name'])
+
+        if dbschema_analysis.user_tpl_graph_yaxes.filter(where).count() >= 1:
+            if crud_db.update('user_tpl_graph_yaxes', yaxe):
+                status = True
+            else:
+                status = False
+        else:
+            if crud_db.create('user_tpl_graph_yaxes', yaxe):
+                status = True
+            else:
+                status = False
+
+        return status
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("update_yaxe_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
+        return status
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def __update_yaxe_timeseries_drawproperties(yaxe, echo=False):
     global dbschema_analysis
     status = False
     try:
@@ -235,7 +610,102 @@ def update_yaxe_timeseries_drawproperties(yaxe, echo=False):
             dbschema_analysis.session.close()
 
 
-def update_timeseries_drawproperties(tsdrawproperties, echo=False):
+def get_timeseries_drawproperties(params, echo=False):
+    global dbschema_analysis
+    try:
+        if hasattr(params, "userid") and params.userid != '':
+            query = " SELECT productcode, subproductcode, version, tsname_in_legend, charttype, linestyle, linewidth, color, yaxe_id " + \
+                    " FROM analysis.timeseries_drawproperties_new " + \
+                    " WHERE (productcode, subproductcode, version) NOT IN " + \
+                    "	(SELECT productcode, subproductcode, version " + \
+                    "	 FROM analysis.user_tpl_timeseries_drawproperties uts " + \
+                    "	 WHERE uts.userid = '" + params.userid + "' " + \
+                    "	   AND uts.graph_tpl_name = '" + params.graph_tpl_name + "') " + \
+                    " UNION " + \
+                    " SELECT productcode, subproductcode, version, tsname_in_legend, charttype, linestyle, linewidth, color, yaxe_id " + \
+                    " FROM analysis.user_tpl_timeseries_drawproperties uts " + \
+                    " WHERE uts.userid = '" + params.userid + "' " + \
+                    "   AND uts.graph_tpl_name = '" + params.graph_tpl_name + "' " + \
+                    " ORDER BY productcode ASC, subproductcode ASC, version ASC"
+        else:
+            query = "SELECT * FROM analysis.timeseries_drawproperties_new order by productcode asc, subproductcode asc, version asc"
+
+        result = dbschema_analysis.execute(query)
+        result = result.fetchall()
+        # print result
+        return result
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_timeseries_drawproperties_new: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def update_user_tpl_timeseries_drawproperties(tsdrawproperties, echo=False):
+    global dbschema_analysis
+    status = False
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    try:
+        if tsdrawproperties['linewidth'] == '':
+            tsdrawproperties['linewidth'] = '0'
+
+        if tsdrawproperties['graph_tpl_name'] == 'default':
+            where = and_(dbschema_analysis.user_tpl_timeseries_drawproperties.userid == tsdrawproperties['userid'],
+                         dbschema_analysis.user_tpl_timeseries_drawproperties.graph_tpl_name == tsdrawproperties['graph_tpl_name'])
+            if dbschema_analysis.user_graph_templates.filter(where).count() == 0:
+                default_user_graph_template = {
+                    "userid": tsdrawproperties['userid'],
+                    "graph_tpl_name": tsdrawproperties['graph_tpl_name']
+                }
+                crud_db.create('user_graph_templates', default_user_graph_template)
+
+        where = and_(dbschema_analysis.user_tpl_timeseries_drawproperties.userid == tsdrawproperties['userid'],
+                     dbschema_analysis.user_tpl_timeseries_drawproperties.graph_tpl_name == tsdrawproperties['graph_tpl_name'],
+                     dbschema_analysis.user_tpl_timeseries_drawproperties.productcode == tsdrawproperties['productcode'],
+                     dbschema_analysis.user_tpl_timeseries_drawproperties.subproductcode == tsdrawproperties['subproductcode'],
+                     dbschema_analysis.user_tpl_timeseries_drawproperties.version == tsdrawproperties['version'])
+
+        if dbschema_analysis.user_tpl_timeseries_drawproperties.filter(where).count() >= 1:
+            query = " UPDATE analysis.user_tpl_timeseries_drawproperties " + \
+                    " SET tsname_in_legend = '" + tsdrawproperties['tsname_in_legend'] + "'" + \
+                    "   ,color = '" + tsdrawproperties['color'] + "'" + \
+                    "   ,charttype = '" + tsdrawproperties['charttype'] + "'" + \
+                    "   ,linestyle = '" + tsdrawproperties['linestyle'] + "'" + \
+                    "   ,linewidth = " + tsdrawproperties['linewidth'] + \
+                    "   ,yaxe_id = '" + tsdrawproperties['yaxe_id'] + "'" + \
+                    " WHERE userid = '" + tsdrawproperties['userid'] + "'" + \
+                    "   AND graph_tpl_name = '" + tsdrawproperties['graph_tpl_name'] + "'" + \
+                    "   AND productcode = '" + tsdrawproperties['productcode'] + "'" + \
+                    "   AND subproductcode = '" + tsdrawproperties['subproductcode'] + "'" + \
+                    "   AND version = '" + tsdrawproperties['version'] + "'"
+
+            # print query
+            result = dbschema_analysis.execute(query)
+            dbschema_analysis.commit()
+        else:
+            crud_db.create('user_tpl_timeseries_drawproperties', tsdrawproperties)
+
+        status = True
+        return status
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("user_tpl_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
+        return status
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def __update_timeseries_drawproperties(tsdrawproperties, echo=False):
     global dbschema_analysis
     status = False
     try:
@@ -270,67 +740,113 @@ def update_timeseries_drawproperties(tsdrawproperties, echo=False):
             dbschema_analysis.session.close()
 
 
-def get_timeseries_drawproperties(echo=False):
+def get_graph_drawproperties(params, echo=False):
     global dbschema_analysis
     try:
-        query = "SELECT * FROM analysis.timeseries_drawproperties order by productcode asc, subproductcode asc, version asc"
+
+        if hasattr(params, "userid") and params.userid != '':
+            query = " SELECT graph_type, graph_width, graph_height, graph_title, graph_title_font_size, " + \
+                    "        graph_title_font_color, graph_subtitle, graph_subtitle_font_size, " + \
+                    "        graph_subtitle_font_color, legend_position, legend_font_size, legend_font_color, " + \
+                    "        xaxe_font_size, xaxe_font_color " + \
+                    " FROM analysis.graph_drawproperties " + \
+                    " WHERE graph_type = '" + params.graphtype + "' " + \
+                    "   AND (graph_type) NOT IN " + \
+                    "	(SELECT graph_type " + \
+                    "	 FROM analysis.user_tpl_graph_drawproperties ugp " + \
+                    "	 WHERE ugp.userid = '" + params.userid + "' " + \
+                    "	   AND ugp.graph_tpl_name = '" + params.graph_tpl_name + "') " + \
+                    " UNION " + \
+                    " SELECT graph_type, graph_width, graph_height, graph_title, graph_title_font_size, " + \
+                    "        graph_title_font_color, graph_subtitle, graph_subtitle_font_size, " + \
+                    "        graph_subtitle_font_color, legend_position, legend_font_size, legend_font_color, " + \
+                    "        xaxe_font_size, xaxe_font_color " + \
+                    " FROM analysis.user_tpl_graph_drawproperties ugp " + \
+                    " WHERE ugp.userid = '" + params.userid + "' " + \
+                    "   AND ugp.graph_tpl_name = '" + params.graph_tpl_name + "' " + \
+                    "   AND ugp.graph_type = '" + params.graphtype + "' " + \
+                    " ORDER BY graph_type ASC"
+        else:
+            query = "SELECT * FROM analysis.graph_drawproperties WHERE graph_type = '" + params.graphtype + "'"
+
         result = dbschema_analysis.execute(query)
         result = result.fetchall()
-        # print result
+
         return result
-        # timeseries_drawproperties = []
-        #
-        # if dbschema_analysis.timeseries_drawproperties.count() >= 1:
-        #     timeseries_drawproperties = dbschema_analysis.timeseries_drawproperties.\
-        #         order_by(asc(dbschema_analysis.timeseries_drawproperties.productcode),
-        #                  asc(dbschema_analysis.timeseries_drawproperties.subproductcode),
-        #                  asc(dbschema_analysis.timeseries_drawproperties.version)).all()
-        #
-        # print timeseries_drawproperties
-        # return timeseries_drawproperties
-
-        # p = dbschema_analysis.timeseries_drawproperties._table
-        #
-        # s = select([p.c.productcode,
-        #             p.c.subproductcode,
-        #             p.c.version,
-        #             p.c.title,
-        #             p.c.unit,
-        #             p.c.max,
-        #             p.c.min,
-        #             p.c.oposite,
-        #             p.c.tsname_in_legend,
-        #             p.c.charttype,
-        #             p.c.linestyle,
-        #             p.c.linewidth,
-        #             p.c.color,
-        #             p.c.yaxes_id,
-        #             p.c.title_color,
-        #             p.c.aggregation_type,
-        #             p.c.aggregation_min,
-        #             p.c.aggregation_max
-        #             ])
-        #
-        # s = s.alias('pl')
-        # pl = db.map(s, primary_key=[s.c.productcode, s.c.subproductcode, s.c.version])
-        #
-        # tsdrawproperties = pl.order_by(asc(pl.c.productcode), asc(pl.c.subproductcode), asc(pl.c.version)).all()
-        #
-        # print tsdrawproperties
-        # return tsdrawproperties
-
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         if echo:
             print traceback.format_exc()
         # Exit the script and print an error telling what happened.
-        logger.error("get_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
+        logger.error("get_graph_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
 
 
-def get_chart_drawproperties(charttype='default', echo=False):
+def update_user_tpl_graph_drawproperties(graphdrawprobs, echo=False):
+    global dbschema_analysis
+    status = False
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    try:
+
+        # graphdrawprobs = {'userid': graphdrawprobs['userid'],
+        #                   'graph_tpl_name': graphdrawprobs['graph_tpl_name'],
+        #                   'graph_type': graphdrawprobs['graph_type'],
+        #                   'graph_width': graphdrawprobs['graph_width'],
+        #                   'graph_height': graphdrawprobs['graph_height'],
+        #                   'graph_title': graphdrawprobs['graph_title'],
+        #                   'graph_title_font_size': graphdrawprobs['graph_title_font_size'],
+        #                   'graph_title_font_color': graphdrawprobs['graph_title_font_color'],
+        #                   'graph_subtitle': graphdrawprobs['graph_subtitle'],
+        #                   'graph_subtitle_font_size': graphdrawprobs['graph_subtitle_font_size'],
+        #                   'graph_subtitle_font_color': graphdrawprobs['graph_subtitle_font_color'],
+        #                   'legend_position': '',
+        #                   'legend_font_size': graphdrawprobs['legend_font_size'],
+        #                   'legend_font_color': graphdrawprobs['legend_font_color'],
+        #                   'xaxe_font_size': graphdrawprobs['xaxe_font_size'],
+        #                   'xaxe_font_color': graphdrawprobs['xaxe_font_color']
+        #                   }
+
+        if graphdrawprobs['graph_tpl_name'] == 'default':
+            where = and_(dbschema_analysis.user_graph_templates.userid == graphdrawprobs['userid'],
+                         dbschema_analysis.user_graph_templates.graph_tpl_name == graphdrawprobs['graph_tpl_name'])
+            if dbschema_analysis.user_graph_templates.filter(where).count() == 0:
+                default_user_graph_template = {
+                    "userid": graphdrawprobs['userid'],
+                    "graph_tpl_name": graphdrawprobs['graph_tpl_name']
+                }
+                crud_db.create('user_graph_templates', default_user_graph_template)
+
+        where = and_(dbschema_analysis.user_tpl_graph_drawproperties.userid == graphdrawprobs['userid'],
+                     dbschema_analysis.user_tpl_graph_drawproperties.graph_tpl_name == graphdrawprobs['graph_tpl_name'])
+
+        if dbschema_analysis.user_tpl_graph_drawproperties.filter(where).count() >= 1:
+            if crud_db.update('user_tpl_graph_drawproperties', graphdrawprobs):
+                status = True
+            else:
+                status = False
+        else:
+            if crud_db.create('user_tpl_graph_drawproperties', graphdrawprobs):
+                status = True
+            else:
+                status = False
+
+        return status
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        if echo:
+            print traceback.format_exc()
+        # Exit the script and print an error telling what happened.
+        logger.error("update_user_tpl_graph_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
+        return status
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def __get_chart_drawproperties(charttype='default', echo=False):
     global dbschema_analysis
     try:
         query = "SELECT * FROM analysis.chart_drawproperties WHERE chart_type = '" + charttype + "'"
@@ -748,120 +1264,6 @@ def get_languages(echo=False):
 
 
 ######################################################################################
-#   get_product_timeseries_drawproperties(prodcut, echo=False)
-#   Purpose: get the timeseries drawproperties for the subproduct passed
-#   Author: Jurriaan van 't Klooster
-#   Date: 2015/05/11
-#   Input: echo                 - If True echo the query result in the console for debugging purposes. Default=False
-#          product              - List of productcode, subproductcode, version
-#
-#   Output: Return all the timeseries drawproperties for the requested subproducts.
-def get_product_timeseries_drawproperties(product, echo=False):
-
-    global dbschema_analysis
-    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
-
-    try:
-        timeseries_drawproperties = []
-
-        where = and_(dbschema_analysis.timeseries_drawproperties.productcode == product['productcode'],
-                     dbschema_analysis.timeseries_drawproperties.subproductcode == product['subproductcode'],
-                     dbschema_analysis.timeseries_drawproperties.version == product['version'])
-
-        if dbschema_analysis.timeseries_drawproperties.filter(where).count() >= 1:
-            timeseries_drawproperties = dbschema_analysis.timeseries_drawproperties.filter(where).all()
-        else:
-            # Insert a new record in the table timeseries_drawproperties for the product with default values
-            default_ts_drawproperties = {
-                "productcode": product['productcode'],
-                "subproductcode": product['subproductcode'],
-                "version": product['version'],
-                "title": product['productcode'],
-                "unit": '',
-                "min": None,
-                "max": None,
-                "oposite": False,
-                "tsname_in_legend": product['productcode'] + '-' + product['version'] + '-' + product['subproductcode'],
-                "charttype": 'line',
-                "linestyle": 'Solid',
-                "linewidth": 4,
-                "color": '#000000',
-                "yaxes_id": product['productcode'] + '-' + product['version'],
-                "title_color": '#0000FF',
-                "aggregation_type": 'mean',
-                "aggregation_min": None,
-                "aggregation_max": None
-            }
-
-            if crud_db.create('timeseries_drawproperties', default_ts_drawproperties):
-                timeseries_drawproperties = dbschema_analysis.timeseries_drawproperties.filter(where).all()
-
-        return timeseries_drawproperties
-    except:
-        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
-        # Exit the script and print an error telling what happened.
-        logger.error("get_product_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
-    finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
-        #dbschema_analysis = None
-
-
-def get_timeseries_yaxes(products, echo=False):
-
-    global dbschema_analysis
-
-    try:
-        timeseries_yaxes = []
-
-        session = dbschema_analysis.session
-        ts_drawprobs = aliased(dbschema_analysis.timeseries_drawproperties)
-
-        timeseries_drawproperties = session.query(
-                                                  ts_drawprobs.yaxes_id,
-                                                  ts_drawprobs.title,
-                                                  ts_drawprobs.unit,
-                                                  ts_drawprobs.min,
-                                                  ts_drawprobs.max,
-                                                  ts_drawprobs.oposite,
-                                                  ts_drawprobs.title_color,
-                                                  ts_drawprobs.aggregation_type,
-                                                  ts_drawprobs.aggregation_min,
-                                                  ts_drawprobs.aggregation_max)
-
-        whereall = ''
-        count = 0
-        for myproduct in products:
-            count += 1
-            where = and_(ts_drawprobs.productcode == myproduct['productcode'],
-                         ts_drawprobs.subproductcode == myproduct['subproductcode'],
-                         ts_drawprobs.version == myproduct['version'])
-            if count == 1:
-                whereall = where
-            else:
-                whereall = or_(where, whereall)
-
-        if timeseries_drawproperties.filter(whereall).distinct().count() >= 1:
-            timeseries_yaxes = timeseries_drawproperties.filter(whereall).distinct().all()
-            # if echo:
-            #     for row in timeseries_yaxes:
-            #         print row
-        return timeseries_yaxes
-    except:
-        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
-        # Exit the script and print an error telling what happened.
-        logger.error("get_timeseries_yaxes: Database query error!\n -> {}".format(exceptionvalue))
-    finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
-        #dbschema_analysis = None
-
-
-######################################################################################
 #   get_timeseries_subproducts(echo=False, productcode=None,version='undefined', subproductcode=None, masked=None)
 #   Purpose: Query the database to get the sub product list of the selected product.
 #            with their product category that are available for time series.
@@ -1157,7 +1559,6 @@ def createlegend(params):
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
             # dbschema_analysis = None
-
 
 
 ######################################################################################
@@ -2610,6 +3011,7 @@ def get_processingchain_output_products(process_id=None):
             db.session.close()
         # db = None
 
+
 ######################################################################################
 #   get_processing_chains(echo=False)
 #   Purpose: Query the database to get all the defined processing chain definitions
@@ -2786,7 +3188,6 @@ def get_processing_chain_products(process_id,echo=False, type='All'):
         if db.session:
             db.session.close()
         # db = None
-
 
 
 ######################################################################################

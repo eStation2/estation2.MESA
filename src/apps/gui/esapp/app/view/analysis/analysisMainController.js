@@ -38,6 +38,10 @@ Ext.define('esapp.view.analysis.analysisMainController', {
         // }
     }
 
+    ,showUserGraphTemplates: function(btn){
+        btn.graphTemplateAdminPanel.show();
+    }
+
     ,showTimeseriesChartSelection: function(){
         var timeseriesChartSelectionWindow = this.getView().lookupReference('timeserieschartselection');
         // timeseriesChartSelectionWindow.setHeight(Ext.getBody().getViewSize().height-65);

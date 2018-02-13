@@ -61,7 +61,7 @@ Ext.define('esapp.Application', {
         ,'ProductsActiveStore'      // no autoload
         ,'DataAcquisitionsStore'    // no autoload
         ,'IngestionsStore'          // no autoload
-        ,'TimeseriesProductsStore'
+        ,'TimeseriesProductsStore'  // no autoload
         ,'TSDrawPropertiesStore'
         ,"ColorSchemesStore"
         ,'DataSetsStore'            // no autoload
@@ -91,16 +91,54 @@ Ext.define('esapp.Application', {
 
         esapp.globals = [];
 
-        // Ext.data.StoreManager.lookup('TimeseriesProductsStore').load();
+        esapp.globals['typeinstallation'] = 'full';
+        esapp.globals['role'] = 'pc2';
+        esapp.globals['mode'] = 'nominal';
+        Ext.Ajax.request({
+            method: 'POST',
+            url: 'typeinstallation',
+            success: function(response, opts){
+                var resp = Ext.JSON.decode(response.responseText);
+                if (resp.typeinstallation != ''){
+                    esapp.globals['typeinstallation'] = resp.typeinstallation;
+                }
+                if (resp.role != ''){
+                    esapp.globals['role'] = resp.role;
+                }
+                if (resp.mode != ''){
+                    esapp.globals['mode'] = resp.mode;
+                }
+            },
+            failure: function(response, opts) {
+                console.info(response.status);
+            }
+        });
+
 
         esapp.globals['selectedLanguage'] = 'eng';
         Ext.data.StoreManager.lookup('LanguagesStore').load({
             callback: function(records, options, success){
-                records.forEach(function(language) {
-                    if (language.get('selected') == true){
-                        esapp.globals['selectedLanguage'] = language.get('langcode')
+                var getParams = document.URL.split("?");    // separating the GET parameters from the current URL
+                var params = Ext.urlDecode(getParams[getParams.length - 1]);    // transforming the GET parameters into a dictionnary
+                if (esapp.Utils.objectExists(params.lang) && params.lang != ''){
+                    esapp.globals['selectedLanguage'] = params.lang;
+                    // Removing the url parameter lang= from the current url is the browsers address bar
+                    window.history.pushState({}, "", window.location.href.split("?")[0]);
+
+                    if (Ext.util.Cookies.get('estation2_userid') != null){
+                        Ext.util.Cookies.set('estation2_userlanguage', params.lang);
                     }
-                });
+                }
+                else if (Ext.util.Cookies.get('estation2_userid') != null){
+                    esapp.globals['selectedLanguage'] = Ext.util.Cookies.get('estation2_userlanguage')
+                }
+                else {
+                    records.forEach(function (language) {
+                        if (language.get('selected') == true) {
+                            esapp.globals['selectedLanguage'] = language.get('langcode')
+                        }
+                    });
+                }
 
                 Ext.data.StoreManager.lookup('i18nStore').load({
                     params:{lang:esapp.globals['selectedLanguage']},
@@ -186,29 +224,6 @@ Ext.define('esapp.Application', {
             }
         });
 
-
-        esapp.globals['typeinstallation'] = 'full';
-        esapp.globals['role'] = 'pc2';
-        esapp.globals['mode'] = 'nominal';
-        Ext.Ajax.request({
-            method: 'POST',
-            url: 'typeinstallation',
-            success: function(response, opts){
-                var resp = Ext.JSON.decode(response.responseText);
-                if (resp.typeinstallation != ''){
-                    esapp.globals['typeinstallation'] = resp.typeinstallation;
-                }
-                if (resp.role != ''){
-                    esapp.globals['role'] = resp.role;
-                }
-                if (resp.mode != ''){
-                    esapp.globals['mode'] = resp.mode;
-                }
-            },
-            failure: function(response, opts) {
-                console.info(response.status);
-            }
-        });
         //this.callParent();
     },
 

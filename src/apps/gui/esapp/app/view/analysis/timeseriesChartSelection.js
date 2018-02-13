@@ -31,33 +31,28 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
     collapsible: true,
     collapsed: false,
     resizable: false,
-    autoScroll: true,
     floating: true,
     floatable: true,
     alwaysOnTop: false,
-
-    width:530,
-    minWidth:530,
-    autoHeight: true,
-    // height: Ext.getBody().getViewSize().height-65,
-    // height: Ext.getCmp('analysismain').getBody().height,
-    alignTarget: Ext.getCmp('backgroundmap'),
-    defaultAlign: 'tr-tr',
-    // glyph : 'xf080@FontAwesome',
-    margin: '0 0 0 0',
-    padding: '0 0 0 0',
-    frame: true,
-    border: true,
+    autoScroll: true,
+    scrollable: 'vertical',
+    shrinkWrap: 3, // both width and height depend on content (shrink wrap).
+    width:470,
+    // maxWidth:470,
+    // autoWidth: true,
+    // autoHeight: true,
     // layout: {
     //     type: 'fit'
     // },
-
+    alignTarget: Ext.getCmp('backgroundmap'),
+    defaultAlign: 'tr-tr',
+    frame: false,
+    border: false,
+    shadow: false,
+    componentCls: 'rounded-box',
 
     initComponent: function () {
         var me = this;
-        // me.maxHeight = Ext.getBody().getViewSize().height-65;
-        // me.defaultAlign = 'tr-tr';
-        // me.alignTarget = Ext.getCmp('backgroundmap');
         // me.height = Ext.getCmp('analysismain').getBody().height;
 
         me.viewConfig = {
@@ -95,6 +90,10 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
 
         me.title = esapp.Utils.getTranslation('TIME_SERIES_GRAPHS');  // 'TIME SERIES GRAPHS',
 
+        me.defaults = {
+            margin: '8 3 8 3'
+        };
+
         me.items = [{
             xtype: 'fieldset',
             id: 'fieldset_selectedregion',
@@ -105,7 +104,6 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
             maxHeight: 60,
             border: 2,
             padding: '5 5 5 15',
-            margin: '10 0 10 0',
             style: {
                 borderColor: '#157FCC',
                 borderStyle: 'solid'
@@ -127,33 +125,25 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
         }, {
             xtype: 'tabpanel',
             id: 'graphs_tabpanel_'+me.id,
-            //width: 440,
-            //minWidth: 440,
-            //maxWidth : 500,
-            //minTabWidth: 210,
             hideCollapseTool: true,
             header: false,
             autoScroll:false,
-            reserveScrollbar: true,
+            reserveScrollbar: false,
             frame: false,
             border: false,
-            margin: '10px 0 0 0',
+            // bodyPadding: '3 3 3 3',
+            componentCls: 'rounded-box',
             layout: {
                 type: 'fit'
             },
             items: [{
                 title: esapp.Utils.getTranslation('PROFILE'),  // 'DEFAULT X/Y GRAPH',
                 id: 'ts_xy_graph_tab_' + me.id,
-                margin: 4,
-                //minHeight: 800,
                 autoHeight: true,
                 autoScroll: true,
                 layout: {
                     type: 'vbox'
-                    , align: 'stretch'
-                },
-                defaults: {
-                    margin: '0 0 0 0'
+                    ,align: 'stretch'
                 },
                 tbar: {
                     padding: '0 0 0 0',
@@ -168,34 +158,29 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                         //width: 150,
                         autoWidth: true,
                         margin: '0 0 5 0',
-                        charttype: 'xy',
+                        graphtype: 'xy',
                         handler: 'generateTimeseriesChart'
                     }]
                 },
                 items: [{
                     xtype: 'timeseriesproductselection',
-                    charttype: 'xy',
+                    graphtype: 'xy',
                     cumulative: false,
                     multiplevariables: true,
                     fromto: true,
                     year: false,
-                    compareyears: false,
+                    // compareyears: false,
                     multipleyears: true
                 }]
             },{
 
                 title: esapp.Utils.getTranslation('CUMULATIVE'),  // 'CUMULATIVE',
                 id: 'ts_cumulative_graph_tab_' + me.id,
-                margin: 4,
-                //minHeight: 800,
                 autoHeight: true,
                 autoScroll: true,
                 layout: {
                     type: 'vbox'
                     , align: 'stretch'
-                },
-                defaults: {
-                    margin: '0 0 0 0'
                 },
                 tbar: {
                     padding: '0 0 0 0',
@@ -210,33 +195,28 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                         //width: 150,
                         autoWidth: true,
                         margin: '0 0 5 0',
-                        charttype: 'cumulative',
+                        graphtype: 'cumulative',
                         handler: 'generateTimeseriesChart'
                     }]
                 },
                 items: [{
                     xtype: 'timeseriesproductselection',
-                    charttype: 'cumulative',
+                    graphtype: 'cumulative',
                     cumulative: true,
                     multiplevariables: true,
                     fromto: true,
                     year: true,
-                    compareyears: false,
+                    // compareyears: false,
                     multipleyears: false
                 }]
             },{
                 title: esapp.Utils.getTranslation('RANKING_ZSCORE'),  // 'RANKING / Z-SCORE',
                 id: 'ts_ranking_graph_tab_'+me.id,
-                margin:4,
-                //minHeight: 800,
                 autoHeight: true,
                 autoScroll:true,
                 layout: {
                     type: 'vbox'
                     ,align: 'stretch'
-                },
-                defaults: {
-                    margin: '5 0 15 0'
                 },
                 tbar: {
                     padding: '0 0 0 0',
@@ -250,34 +230,29 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                         disabled: false,
                         autoWidth: true,
                         margin: '0 0 5 0',
-                        charttype: 'ranking',
+                        graphtype: 'ranking',
                         handler: 'generateTimeseriesChart'
                     }]
                 },
                 items: [{
                     xtype: 'timeseriesproductselection',
-                    charttype: 'ranking',
+                    graphtype: 'ranking',
                     cumulative: false,
                     ranking: true,
                     multiplevariables: false,
                     fromto: false,
                     year: false,
-                    compareyears: false,
+                    // compareyears: false,
                     multipleyears: true
                 }]
             },{
                 title: esapp.Utils.getTranslation('MATRIX'),  // 'MATRIX',
                 id: 'ts_matrix_graph_tab_'+me.id,
-                margin: 4,
-                //minHeight: 800,
                 autoHeight: true,
                 autoScroll:true,
                 layout: {
                     type: 'vbox'
                     ,align: 'stretch'
-                },
-                defaults: {
-                    margin: '5 0 15 0'
                 },
                 tbar: {
                     padding: '0 0 0 0',
@@ -291,19 +266,19 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                         disabled: false,
                         autoWidth: true,
                         margin: '0 0 5 0',
-                        charttype: 'matrix',
+                        graphtype: 'matrix',
                         handler: 'generateTimeseriesChart'
                     }]
                 },
                 items: [{
                     xtype: 'timeseriesproductselection',
-                    charttype: 'matrix',
+                    graphtype: 'matrix',
                     cumulative: false,
                     matrix: true,
                     multiplevariables: false,
                     fromto: false,
                     year: false,
-                    compareyears: false,
+                    // compareyears: false,
                     multipleyears: true
                 }]
             },{

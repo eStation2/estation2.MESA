@@ -1,10 +1,3 @@
-/**********************************************************
-  FIRST TABLE CREATION, then alter table adding columns
- *********************************************************/
-
-/**********************************************************
-  From version 2.1.0-11
- *********************************************************/
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
@@ -12,6 +5,276 @@ SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 
+
+/**********************************************************
+  For version 2.2.0
+ *********************************************************/
+
+ALTER TABLE analysis.users
+  ADD COLUMN prefered_language character varying DEFAULT 'eng';
+
+
+/**********************************************************
+  BEGIN NEW TIMSERIES AND GRAPH TABLE STUCTURE
+ *********************************************************/
+
+DROP TABLE analysis.graph_drawproperties;
+
+CREATE TABLE analysis.graph_drawproperties
+(
+  graph_type character varying NOT NULL,
+  graph_width integer,
+  graph_height integer,
+  graph_title character varying,  -- new
+  graph_title_font_size integer,
+  graph_title_font_color character varying,
+  graph_subtitle character varying,  -- new
+  graph_subtitle_font_size integer,
+  graph_subtitle_font_color character varying,
+  legend_position character varying,  -- new
+  legend_font_size integer,
+  legend_font_color character varying,
+  xaxe_font_size integer,
+  xaxe_font_color character varying,
+
+  CONSTRAINT graph_drawproperties_pk PRIMARY KEY (graph_type)
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE analysis.graph_drawproperties
+  OWNER TO estation;
+
+INSERT INTO analysis.graph_drawproperties
+  (
+	graph_type,
+	graph_width,
+	graph_height,
+	graph_title,
+	graph_title_font_size,
+	graph_title_font_color,
+	graph_subtitle,
+	graph_subtitle_font_size,
+	graph_subtitle_font_color,
+	legend_position,
+	legend_font_size,
+	legend_font_color,
+	xaxe_font_size,
+	xaxe_font_color
+  )
+SELECT  chart_type, chart_width, chart_height,
+	NULL, chart_title_font_size, chart_title_font_color,
+	NULL, chart_subtitle_font_size, chart_subtitle_font_color,
+	NULL, legend_font_size, legend_font_color,
+	xaxe_font_size, xaxe_font_color
+FROM analysis.chart_drawproperties;
+
+
+DROP TABLE analysis.timeseries_drawproperties_new;
+
+CREATE TABLE analysis.timeseries_drawproperties_new
+(
+  productcode character varying NOT NULL,
+  subproductcode character varying NOT NULL,
+  version character varying NOT NULL,
+  tsname_in_legend character varying,
+  charttype character varying,
+  linestyle character varying,
+  linewidth integer,
+  color character varying,
+  yaxe_id character varying,
+
+  CONSTRAINT timeseries_drawproperties_new_pk PRIMARY KEY (productcode, subproductcode, version),
+  CONSTRAINT timeseries_drawproperties_new_yaxe_id_fkey FOREIGN KEY (yaxe_id)
+      REFERENCES analysis.graph_yaxes (yaxe_id) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE RESTRICT
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE analysis.timeseries_drawproperties_new
+  OWNER TO estation;
+
+INSERT INTO analysis.timeseries_drawproperties_new
+  (productcode, subproductcode, version, tsname_in_legend, charttype, linestyle, linewidth, color, yaxe_id)
+SELECT  productcode, subproductcode, version, tsname_in_legend, charttype, linestyle, linewidth, color, yaxes_id
+FROM analysis.timeseries_drawproperties;
+
+
+DROP TABLE analysis.graph_yaxes;
+
+CREATE TABLE analysis.graph_yaxes
+(
+  yaxe_id character varying,
+  title character varying,
+  title_color character varying,
+  title_font_size integer,
+  min double precision,
+  max double precision,
+  unit character varying,
+  opposite boolean NOT NULL DEFAULT false,
+  aggregation_type character varying DEFAULT 'mean'::character varying,
+  aggregation_min double precision,
+  aggregation_max double precision,
+
+  CONSTRAINT graph_yaxes_pk PRIMARY KEY (yaxe_id)
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE analysis.graph_yaxes
+  OWNER TO estation;
+
+INSERT INTO analysis.graph_yaxes
+  (yaxe_id, title, title_color, title_font_size, min, max, unit, opposite, aggregation_type, aggregation_min, aggregation_max)
+SELECT DISTINCT yaxes_id, title, title_color, 26 as title_font_size, min, max, unit, oposite, aggregation_type, aggregation_min, aggregation_max
+FROM  analysis.timeseries_drawproperties tdp
+ORDER BY yaxes_id;
+
+
+
+
+-- DROP TABLE analysis.user_graph_templates;
+
+CREATE TABLE analysis.user_graph_templates
+(
+  userid character varying(50) NOT NULL,
+  graph_tpl_name character varying(80) NOT NULL,
+  graphviewposition character varying(10),
+  graphviewsize character varying(10),
+  graph_type character varying,
+  selectedtimeseries character varying,
+  yearts character varying,
+  tsfromperiod character varying,
+  tstoperiod character varying,
+  yearstocompare character varying,
+  tsfromseason character varying,
+  tstoseason character varying,
+  wkt_geom character varying,
+  selectedregionname character varying,
+  disclaimerobjposition character varying(10),
+  disclaimerobjcontent text,
+  logosobjposition character varying(10),
+  logosobjcontent text,
+  showobjects boolean NOT NULL DEFAULT false,
+  auto_open boolean DEFAULT false,
+  CONSTRAINT user_graph_templates_pkey PRIMARY KEY (userid, graph_tpl_name),
+  CONSTRAINT user_graph_templates_fkey FOREIGN KEY (userid)
+      REFERENCES analysis.users (userid) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE CASCADE
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE analysis.user_graph_templates
+  OWNER TO estation;
+
+
+-- DROP TABLE analysis.user_tpl_graph_drawproperties;
+
+CREATE TABLE analysis.user_tpl_graph_drawproperties
+(
+  userid character varying(50) NOT NULL,
+  graph_tpl_name character varying(80) NOT NULL,
+  graph_type character varying NOT NULL,
+  graph_width integer,
+  graph_height integer,
+  graph_title character varying,
+  graph_title_font_size integer,
+  graph_title_font_color character varying,
+  graph_subtitle character varying,
+  graph_subtitle_font_size integer,
+  graph_subtitle_font_color character varying,
+  legend_position character varying,
+  legend_font_size integer,
+  legend_font_color character varying,
+  xaxe_font_size integer,
+  xaxe_font_color character varying,
+  CONSTRAINT user_tpl_graph_drawproperties_pk PRIMARY KEY (userid, graph_tpl_name, graph_type),
+  CONSTRAINT user_tpl_graph_drawproperties_fkey FOREIGN KEY (userid, graph_tpl_name)
+      REFERENCES analysis.user_graph_templates (userid, graph_tpl_name) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE CASCADE
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE analysis.user_tpl_graph_drawproperties
+  OWNER TO estation;
+
+
+-- DROP TABLE analysis.user_tpl_graph_yaxes;
+
+CREATE TABLE analysis.user_tpl_graph_yaxes
+(
+  userid character varying(50) NOT NULL,
+  graph_tpl_name character varying(80) NOT NULL,
+  yaxe_id character varying NOT NULL,
+  title character varying,
+  title_color character varying,
+  title_font_size integer,
+  min double precision,
+  max double precision,
+  unit character varying,
+  opposite boolean NOT NULL DEFAULT false,
+  aggregation_type character varying DEFAULT 'mean'::character varying,
+  aggregation_min double precision,
+  aggregation_max double precision,
+  CONSTRAINT user_tpl_graph_yaxes_pk PRIMARY KEY (userid, graph_tpl_name, yaxe_id),
+  CONSTRAINT user_tpl_graph_fkey FOREIGN KEY (userid, graph_tpl_name)
+      REFERENCES analysis.user_graph_templates (userid, graph_tpl_name) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE CASCADE
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE analysis.user_tpl_graph_yaxes
+  OWNER TO estation;
+
+
+-- DROP TABLE analysis.user_tpl_timeseries_drawproperties;
+
+CREATE TABLE analysis.user_tpl_timeseries_drawproperties
+(
+  userid character varying(50) NOT NULL,
+  graph_tpl_name character varying(80) NOT NULL,
+  productcode character varying NOT NULL,
+  subproductcode character varying NOT NULL,
+  version character varying NOT NULL,
+  tsname_in_legend character varying,
+  charttype character varying,
+  linestyle character varying,
+  linewidth integer,
+  color character varying,
+  yaxe_id character varying,
+  CONSTRAINT user_tpl_timeseries_drawproperties_pk PRIMARY KEY (userid, graph_tpl_name, productcode, subproductcode, version),
+  CONSTRAINT user_tpl_timeseries_drawproperties_fkey FOREIGN KEY (userid, graph_tpl_name)
+      REFERENCES analysis.user_graph_templates (userid, graph_tpl_name) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT user_tpl_timeseries_drawproperties_yaxe_id_fkey FOREIGN KEY (yaxe_id)
+      REFERENCES analysis.graph_yaxes (yaxe_id) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE RESTRICT
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE analysis.user_tpl_timeseries_drawproperties
+  OWNER TO estation;
+
+
+/**********************************************************
+  END NEW TIMSERIES AND GRAPH TABLE STUCTURE
+ *********************************************************/
+
+
+
+/**********************************************************
+  For version 2.1.0-11
+ *********************************************************/
+
+
+/**********************************************************
+  FIRST TABLE CREATION, then alter table adding columns
+ *********************************************************/
 
 -- Table: analysis.users
 -- DROP TABLE analysis.users;

@@ -416,7 +416,12 @@ Ext.define('esapp.view.main.Main', {
                         listeners: {
                             select: function (languagecombo, record) {
                                 //console.info(languagecombo.getValue());
-                                window.location = '?lang=' + languagecombo.getValue();
+                                if (esapp.getUser() != null && esapp.getUser() != 'undefined'){
+                                    window.location = '?lang=' + languagecombo.getValue() + '&usr='+esapp.getUser().userid;
+                                }
+                                else {
+                                    window.location = '?lang=' + languagecombo.getValue();
+                                }
                             }
                         }
                     }]);

@@ -16,6 +16,37 @@ logger = log.my_logger(__name__)
 
 class TestWebpy(unittest.TestCase):
 
+    def test_getGraphTimeseries(self):
+        params = {
+            "graphtype": 'xy',
+            'selectedTimeseries': '[{"productcode": "vgt-ndvi", "version": "sv2-pv2.1", "subproductcode": "ndvi-linearx2", ' + \
+                                  '"mapsetcode": "SPOTV-Africa-1km", "date_format": "YYYYMMDD", ' + \
+                                  '"frequency_id": "e1dekad", "cumulative": "false", "difference": "false", ' + \
+                                  '"reference": "false", "colorramp": "false", "legend_id": "null", "zscore": "false"}, ' + \
+                                  '{"productcode": "vgt-ndvi", "version": "sv2-pv2.1", ' + \
+                                  '"subproductcode": "10davg-linearx2", "mapsetcode": "SPOTV-Africa-1km", ' + \
+                                  '"date_format": "MMDD", "frequency_id": "e1dekad", "cumulative": "false", ' + \
+                                  '"difference": "false", "reference": "false", "colorramp": "false", "legend_id": "null", "zscore": "false"}, ' + \
+                                  '{"productcode": "chirps-dekad", "version": "2.0", "subproductcode": "10d", ' + \
+                                  '"mapsetcode": "CHIRP-Africa-5km", "date_format": "YYYYMMDD", ' + \
+                                  '"frequency_id": "e1dekad", "cumulative": "false", "difference": "false", ' + \
+                                  '"reference": "false", "colorramp": "false", "legend_id": "null", "zscore": "false"}, ' + \
+                                  '{"productcode": "chirps-dekad", "version": "2.0", "subproductcode": "10davg", ' + \
+                                  '"mapsetcode": "CHIRP-Africa-5km", "date_format": "MMDD", "frequency_id": "e1dekad", ' + \
+                                  '"cumulative": "false", "difference": "false", "reference": "false", "colorramp": "false", ' + \
+                                  '"legend_id": "null", "zscore": "false"}] ',
+            'yearTS': "",
+            'tsFromPeriod': "",
+            'tsToPeriod': "",
+            'yearsToCompare':"[2017]",
+            'tsFromSeason': "",
+            'tsToSeason': "",
+            'WKT': "POLYGON((16.74152372288516 -9.266614142688914, 16.74152372288516 -8.839151632855637, 16.314061213051883 -8.839151632855637, 16.314061213051883 -9.266614142688914, 16.74152372288516 -9.266614142688914))"
+        }
+        ts = webpy_esapp_helpers.getGraphTimeseries(params)
+        print ts
+        self.assertEqual(1, 1)
+
     def test_ProductNavigatorDataSets(self):
         products = webpy_esapp_helpers.ProductNavigatorDataSets()
         print products

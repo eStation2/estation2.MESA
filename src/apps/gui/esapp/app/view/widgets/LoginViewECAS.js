@@ -79,7 +79,8 @@ Ext.define("esapp.view.widgets.LoginViewECAS",{
                     var userinfo = {
                         userid: Ext.util.Cookies.get('estation2_userid'),
                         username: Ext.util.Cookies.get('estation2_username'),
-                        email: Ext.util.Cookies.get('estation2_useremail')
+                        email: Ext.util.Cookies.get('estation2_useremail'),
+                        prefered_language: Ext.util.Cookies.get('estation2_userlanguage')
                     };
 
                     esapp.setUser(userinfo);
@@ -303,9 +304,11 @@ Ext.define("esapp.view.widgets.LoginViewECAS",{
     } // eo function onKeyPress
 
     ,toggleUserFunctionality:function() {
-        var  me = this;
+        var me = this;
         var mapTemplateBtn = Ext.getCmp('analysismain').lookupReference('analysismain_maptemplatebtn');
         var mapViewWindows = Ext.ComponentQuery.query('mapview-window');
+        var tsChartTemplateBtn = Ext.getCmp('analysismain').lookupReference('analysismain_tsChart_templatebtn');
+        var tsChartWindows = Ext.ComponentQuery.query('timeserieschart-window');
 
         if (esapp.getUser() != null && esapp.getUser() != 'undefined'){
             mapTemplateBtn.show();
@@ -313,12 +316,22 @@ Ext.define("esapp.view.widgets.LoginViewECAS",{
             Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
                 mapview_window.lookupReference('saveMapTemplate_'+mapview_window.id.replace(/-/g,'_')).show();
             });
+
+            tsChartTemplateBtn.show();
+            Ext.Object.each(tsChartWindows, function(id, tschart_window, thisObj) {
+                tschart_window.lookupReference('saveGraphTemplate_'+tschart_window.id.replace(/-/g,'_')).show();
+            });
         }
         else {
             mapTemplateBtn.hide();
 
             Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
                 mapview_window.lookupReference('saveMapTemplate_'+mapview_window.id.replace(/-/g,'_')).hide();
+            });
+
+            tsChartTemplateBtn.hide();
+            Ext.Object.each(tsChartWindows, function(id, tschart_window, thisObj) {
+                tschart_window.lookupReference('saveGraphTemplate_'+tschart_window.id.replace(/-/g,'_')).hide();
             });
         }
 
