@@ -45,9 +45,16 @@ Ext.define('esapp.view.system.ThemaAdminController', {
             success: function(response, opts){
                 var result = Ext.JSON.decode(response.responseText);
                 if (result.success){
-                    Ext.toast({ html: esapp.Utils.getTranslation('systemthemasetto') + " " + newthema.thema + "</BR>" + result.message,
-                                title: esapp.Utils.getTranslation('themachanged'),
-                                width: 300, align: 't' });
+                    if (esapp.globals['typeinstallation'] === 'windows'){
+                        Ext.toast({ html: esapp.Utils.getTranslation('systemthemasetto') + " " + newthema.thema,
+                                    title: esapp.Utils.getTranslation('themachanged'),
+                                    width: 300, align: 't' });
+                    }
+                    else {
+                        Ext.toast({ html: esapp.Utils.getTranslation('systemthemasetto') + " " + newthema.thema + "</BR>" + result.message,
+                                    title: esapp.Utils.getTranslation('themachanged'),
+                                    width: 300, align: 't' });
+                    }
                 }
                 var systemsettingsstore  = Ext.data.StoreManager.lookup('SystemSettingsStore');
                 var systemsettingsrecord = systemsettingsstore.getModel().load(0, {
@@ -61,11 +68,18 @@ Ext.define('esapp.view.system.ThemaAdminController', {
                         systemsettingview.loadRecord(systemsettingsrecord);
                         systemsettingview.updateRecord();
 
-                        if (record.data.thema != ''){
-                            Ext.getCmp('modify-thema-btn').hide();
+                        // IN WINDOWS VERSION THE THEMA MUST BE CHANGEABLE!
+                        if (esapp.globals['typeinstallation'] === 'windows'){
+                            Ext.getCmp('modify-thema-btn').show();
                         }
                         else {
-                            Ext.getCmp('modify-thema-btn').show();
+
+                            if (record.data.thema != ''){
+                                Ext.getCmp('modify-thema-btn').hide();
+                            }
+                            else {
+                                Ext.getCmp('modify-thema-btn').show();
+                            }
                         }
                         me.closeView();
                     }

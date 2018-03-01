@@ -1,0 +1,47 @@
+language: python
+python:
+- '2.7'
+- '3.4'
+- '3.5'
+- '3.6'
+os:
+- linux
+before_install:
+- source travis/linux_install.sh
+install:
+- pip install -U pip
+- pip install -U setuptools
+- pip install .
+- pip install h5py
+- pip install coveralls
+- pip install pyorbital
+- pip install behave
+- pip install h5netcdf
+- pip install python-hdf4
+- "pip install --no-binary :all: netCDF4"
+- pip install gdal==1.10.0
+addons:
+  apt_packages:
+    - libgdal-dev
+    - libhdf5-serial-dev
+    - libhdf4-alt-dev
+    - netcdf-bin
+    - libnetcdf-dev
+    - cython
+script:
+- coverage run --source=satpy setup.py test
+- coverage run -a --source=satpy -m behave satpy/tests/features --tags=-download
+after_success: coveralls
+deploy:
+  provider: pypi
+  user: Martin.Raspaud
+  password:
+    secure: RuQzdaLTY4sryIzG8Hz1KWEsyYRxrLvbyfm7DurXDPcj2vsujRwJicNwBrJajIBkzZWwdmWE8db55BPWZwCsJtVUbE53vc742wSAcci2zzCgizSb/jjlDkwk1CE/PoMl4t3JsuIU6bklgw1Y1d4Xn4+BeZe8Blol5PD/FUovxfo=
+  on:
+    tags: true
+    repo: pytroll/satpy
+sudo: true
+notifications:
+  slack:
+    rooms:
+      - pytroll:96mNSYSI1dBjGyzVXkBT6qFt#satpy

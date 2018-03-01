@@ -196,8 +196,6 @@ class MapSet:
         larger_mapset=None
 
         # SPOTV case
-        if self.short_name == 'SPOTV-IOC-1km':
-            larger_mapset =  'SPOTV-Africa-1km'
 
         if self.short_name == 'SPOTV-CEMAC-1km':
             larger_mapset =  'SPOTV-Africa-1km'
@@ -211,8 +209,13 @@ class MapSet:
         if self.short_name == 'SPOTV-SADC-1km':
             larger_mapset =  'SPOTV-Africa-1km'
 
-        if self.short_name == 'SPOTV-UoG-1km':
-            larger_mapset =  'SPOTV-Africa-1km'
+        # These two mapsets apply to PML only, and they should considered 'independent' from the Africa 'one', as the 'larger' is not created
+        # See also byg in ftp_data_push ES2-209 - 15.2.2018
+
+        # if self.short_name == 'SPOTV-UoG-1km':
+        #     larger_mapset =  'SPOTV-Africa-1km'
+        # if self.short_name == 'SPOTV-IOC-1km':
+        #     larger_mapset =  'SPOTV-Africa-1km'
 
         # MODIS Africa case
         if self.short_name == 'MODIS-IOC-4km':

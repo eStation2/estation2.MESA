@@ -43,7 +43,8 @@ Ext.define('esapp.view.system.PCVersionAdminController', {
             },
             success: function(response, opts){
                 // ToDo: reload window!
-                window.location = '?versionchanged=true';
+                // window.location = '?versionchanged=true';
+                window.location.reload(true);
             },
             failure: function(response, opts) {
                 console.info(response.status);

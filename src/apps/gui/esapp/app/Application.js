@@ -224,8 +224,7 @@ Ext.define('esapp.Application', {
         link.sizes = '16x16';
         document.getElementsByTagName('head')[0].appendChild(link);
 
-
-        if (esapp.globals['typeinstallation'] == 'windows'){
+        if (esapp.globals['typeinstallation'] == 'windows' || esapp.globals['typeinstallation'] == 'jrc_online'){
             Ext.data.StoreManager.lookup('DataSetsStore').load();
         }
         else {

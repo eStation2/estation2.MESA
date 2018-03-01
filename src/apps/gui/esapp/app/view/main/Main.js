@@ -21,8 +21,8 @@ Ext.define('esapp.view.main.Main', {
         //'esapp.view.analysis.analysisMain',
         //'esapp.view.system.systemsettings',
         //'esapp.view.help.help',
-        //'esapp.view.widgets.LoginView',
-
+        'esapp.view.widgets.LoginView',
+        'esapp.view.widgets.LoginViewECAS',
         'Ext.layout.container.Center',
         'Ext.form.field.ComboBox'
     ],
@@ -213,7 +213,13 @@ Ext.define('esapp.view.main.Main', {
             }],
             listeners: {
                 activate: function (analysistab) {
-                    if (esapp.globals['typeinstallation'] != 'windows'){
+                    // Ext.util.Observable.capture(analysistab, function(e){console.log(analysistab.id + ': ' + e);});
+                    if (esapp.globals['typeinstallation'] == 'jrc_online'){
+                        if (analysistab.layoutCounter > 0){
+                            // Ext.getCmp('headerlogos').collapse();
+                        }
+                    }
+                    else if (esapp.globals['typeinstallation'] != 'windows'){
                         var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
                         headerlogos.setHidden(true);
                     }
@@ -269,11 +275,111 @@ Ext.define('esapp.view.main.Main', {
             }],
             listeners: {
                 activate: function (helptab) {
-                    var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
-                    headerlogos.setHidden(false);
+                    if (esapp.globals['typeinstallation'] == 'jrc_online'){
+                        Ext.getCmp('headerlogos').expand();
+                    }
+                    else {
+                        var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
+                        headerlogos.setHidden(false);
+                    }
                 }
             }
         };
+
+
+        if (esapp.globals['typeinstallation'] == 'jrc_online'){
+            me.loginview = 'loginviewECAS';
+
+            me.northheader = {
+                region: 'north',
+                id: 'headerlogos',
+                // xtype:'container',
+                minHeight: 165,
+                maxHeight: 165,
+                titleAlign: 'center',
+                items:[{
+                    xtype : 'headerLogos'
+                }],
+                split: true,
+                alwaysOnTop: true,
+                hideCollapseTool: true,
+                header: false,
+                collapsible: true,
+                collapsed: false,
+                autoScroll:false,
+                floatable: false,
+
+                listeners: {
+                    collapse: function (headercontainer) {
+                        // Ext.util.Observable.capture(headercontainer, function(e){console.log(headercontainer.id + ': ' + e);});
+                        headercontainer.header =  true;
+                        headercontainer.setTitle('<span class="panel-title-style">'+esapp.Utils.getTranslation('Joint Research Centre - eStation 2 - EARTH OBSERVATION PROCESSING SERVICE')+'</span>');
+                    },
+                    expand: function (headercontainer) {
+                        headercontainer.header =  false;
+                        headercontainer.setTitle('');
+                    },
+                    focusenter: function(){
+                        // Ext.getCmp('headerlogos').collapse();
+                    }
+                }
+            }
+        }
+        else if (esapp.globals['typeinstallation'] == 'windows'){
+            me.loginview = 'loginview';
+
+            me.northheader = {
+                region: 'north',
+                id: 'headerlogos',
+                // xtype:'container',
+                height: 68,
+                titleAlign: 'center',
+                items:[{
+                    xtype : 'headerLogos'
+                }],
+                split: true,
+                alwaysOnTop: true,
+                hideCollapseTool: true,
+                header: false,
+                collapsible: true,
+                collapsed: false,
+                autoScroll:false,
+                floatable: false,
+
+                listeners: {
+                    collapse: function (headercontainer) {
+                        // Ext.util.Observable.capture(headercontainer, function(e){console.log(headercontainer.id + ': ' + e);});
+                        headercontainer.header =  true;
+                        headercontainer.setTitle('<span class="panel-title-style">'+esapp.Utils.getTranslation('eStation 2 - EARTH OBSERVATION PROCESSING SERVICE')+'</span>');
+                    },
+                    expand: function (headercontainer) {
+                        headercontainer.header =  false;
+                        headercontainer.setTitle('');
+                    },
+                    focusenter: function(){
+                        // Ext.getCmp('headerlogos').collapse();
+                    }
+                }
+            }
+        }
+        else {
+            me.loginview = 'loginview';
+
+            me.northheader = {
+                region: 'north',
+                id: 'headerlogos',
+                xtype: 'container',
+                title: '',
+                height: 71,
+                items: [{
+                    xtype: 'headerLogos'
+                }],
+                split: false,
+                collapsible: false,
+                collapsed: false
+            }
+        }
+
 
         me.maintabpanel = Ext.create('Ext.tab.Panel', {
             region: 'center',
@@ -283,7 +389,6 @@ Ext.define('esapp.view.main.Main', {
             deferredRender: false,
             layoutOnTabChange: true,
             // activeTab: 'dashboardtab',     // first tab initially active
-
             // defaults:{hideMode: 'offsets'}, // For performance resons to pre-render in the background.
 
             listeners: {
@@ -293,7 +398,7 @@ Ext.define('esapp.view.main.Main', {
                         xtype: 'component',
                         flex: 1
                     }, {
-                        xtype: 'loginview'
+                        xtype: me.loginview     // 'loginview'
                     }, {
                         xtype: 'combo',
                         id: 'languageCombo',
@@ -327,6 +432,11 @@ Ext.define('esapp.view.main.Main', {
             me.maintabpanel.add(me.help);
             // me.maintabpanel.setActiveTab('analysistab');
         }
+        else if (esapp.globals['typeinstallation'] == 'jrc_online'){
+            me.maintabpanel.add(me.analysis);
+            // me.maintabpanel.add(me.system);
+            me.maintabpanel.add(me.help);
+        }
         else {
             me.maintabpanel.add(me.dashboard);
             me.maintabpanel.add(me.acquisition);
@@ -338,19 +448,8 @@ Ext.define('esapp.view.main.Main', {
             // me.maintabpanel.setActiveTab('dashboardtab');
         }
 
-        me.items = [{
-            region: 'north',
-            id: 'headerlogos',
-            xtype: 'container',
-            title: '',
-            height: 71,
-            items: [{
-                xtype: 'headerLogos'
-            }],
-            split: false,
-            collapsible: false,
-            collapsed: false
-        },
+        me.items = [
+            me.northheader,
             me.maintabpanel
         ];
             // //},{
@@ -581,6 +680,9 @@ Ext.define('esapp.view.main.Main', {
         me.callParent();
 
         if (esapp.globals['typeinstallation'] == 'windows'){
+            me.maintabpanel.setActiveTab('analysistab');
+        }
+        else if (esapp.globals['typeinstallation'] == 'jrc_online'){
             me.maintabpanel.setActiveTab('analysistab');
         }
         else {

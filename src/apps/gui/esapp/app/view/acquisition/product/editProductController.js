@@ -250,7 +250,7 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
                 Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
 
                 // var daStore = me.getViewModel().get('productdatasources');
-                console.info(daStore);
+                // console.info(daStore);
 
                 daStore.setFilters({
                      property:'productid'

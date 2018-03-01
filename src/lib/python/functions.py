@@ -221,6 +221,7 @@ def getListVersions():
         if os.path.isdir(ver):
             if sys.platform == 'win32':
                 ver = ver.replace('\\','/')
+                base = base.replace('\\', '/')
             v = ver.replace(base, '')
             versions.append(v)
 
