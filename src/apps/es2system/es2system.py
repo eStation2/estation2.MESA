@@ -503,9 +503,13 @@ def check_delay_time(operation, delay_minutes=None, time=None, write=False):
                to_be_executed = True
 
     elif time is not None:
-        now = datetime.datetime.now()
-        if now.minute == int(time[3:5]) and now.minute == int(time[3:5]):
+        # Time to indicate
+        if time == '99:99':
             to_be_executed = True
+        else:
+            now = datetime.datetime.now()
+        if now.minute == int(time[3:5]) and now.minute == int(time[3:5]):
+                to_be_executed = True
     else:
         logger.warning("Either delay_minutes or time has to be defined!")
 
@@ -777,12 +781,6 @@ def loop_system(dry_run=False):
                 output_dir = es_constants.es2globals['spirits_output_dir']
                 conv.convert_driver(output_dir)
 
-        # Clean temporary directory
-        operation = 'clean_temp'
-        if do_clean_tmp:
-            logger.info("Cleaning Temporary dirs")
-            clean_temp_dir()
-
         # Push data to ftp server
         operation = 'push_to_ftp'
         if do_push_ftp:
@@ -790,6 +788,12 @@ def loop_system(dry_run=False):
             if check_time:
                 logger.info("Push data to remote ftp server")
                 status = push_data_ftp()
+
+        # Clean temporary directory
+        operation = 'clean_temp'
+        if do_clean_tmp:
+            logger.info("Cleaning Temporary dirs")
+            clean_temp_dir()
 
 
         # Exit in case of dry_run
@@ -865,6 +869,8 @@ def push_data_ftp(dry_run=False):
 #                            -u narma:JRCVRw2960 sftp://srv-ies-ftp.jrc.it"" >> /eStation2/log/push_data_ftp.log
 #
 
+    spec_logger = log.my_logger('apps.es2system.push_data_ftp')
+
     try:
         from config import server_ftp
     except:
@@ -884,12 +890,14 @@ def push_data_ftp(dry_run=False):
 
     # Loop over 'not-masked' products
     products = querydb.get_products(masked=False)
-
+    # produts=products[21:23]               # test a subset
     for row in products:
 
         prod_dict = functions.row2dict(row)
         productcode = prod_dict['productcode']
         version = prod_dict['version']
+        spec_logger.info('Working on product {}/{}'.format(productcode,version))
+
 
         # Check it if is in the list of 'exclusions' defined in ./config/server_ftp.py
         key ='{}/{}'.format(productcode,version)
@@ -947,7 +955,8 @@ def push_data_ftp(dry_run=False):
                         source = data_dir+subdir
                         target = trg_dir + subdir
 
-                        command = 'lftp -e "mirror -RLe {} {};exit" -u {}:{} {}"" >> {}'.format(source,target,user,psw,url,logfile)
+                        # command = 'lftp -e "mirror -RLe {} {};exit" -u {}:{} {}"" >> {}'.format(source,target,user,psw,url,logfile)
+                        command = 'lftp -e "mirror -RLe {} {};exit" -u {}:{} {}"" >> /dev/null'.format(source,target,user,psw,url)
                         logger.debug("Executing %s" % command)
 
                         # return
@@ -955,8 +964,11 @@ def push_data_ftp(dry_run=False):
                             status = os.system(command)
                             if status:
                                 logger.error("Error in executing %s" % command)
+                                spec_logger.error("Error in executing %s" % command)
                         except:
                             logger.error('Error in executing command: {}'.format(command))
+                            spec_logger.error('Error in executing command: {}'.format(command))
+
 
 class SystemDaemon(DaemonDryRunnable):
     def run(self):
