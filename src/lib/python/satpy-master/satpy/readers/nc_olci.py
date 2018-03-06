@@ -228,6 +228,7 @@ class NCOLCI2Refl(BaseFileHandler):
                      variable.attrs['add_offset'])
 
         # units = variable.attrs['units']
+        units = ''
 
         if key.calibration == 'reflectance':
             solar_flux = self.cal['solar_flux'][:]
