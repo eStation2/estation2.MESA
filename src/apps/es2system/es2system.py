@@ -508,7 +508,7 @@ def check_delay_time(operation, delay_minutes=None, time=None, write=False):
             to_be_executed = True
         else:
             now = datetime.datetime.now()
-        if now.minute == int(time[3:5]) and now.minute == int(time[3:5]):
+            if now.hour == int(time[0:2]) and now.minute == int(time[3:5]):
                 to_be_executed = True
     else:
         logger.warning("Either delay_minutes or time has to be defined!")
