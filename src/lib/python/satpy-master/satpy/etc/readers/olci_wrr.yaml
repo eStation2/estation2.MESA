@@ -9,9 +9,6 @@ file_types:
     esa_l2_refl:
         file_reader: !!python/name:satpy.readers.nc_olci.NCOLCI2Refl
         file_patterns: ['{mission_id:3s}_OL_{processing_level:1s}_{datatype_id:_<6s}_{start_time:%Y%m%dT%H%M%S}_{end_time:%Y%m%dT%H%M%S}_{creation_time:%Y%m%dT%H%M%S}_{duration:4d}_{cycle:3d}_{relative_orbit:3d}______{centre:3s}_{mode:1s}_{timeliness:2s}_{collection:3s}.SEN3/O{dataset_name}_reflectance.nc']
-    esa_l2_prod:
-        file_reader: !!python/name:satpy.readers.nc_olci.NCOLCI2Prod
-        file_patterns: ['{mission_id:3s}_OL_{processing_level:1s}_{datatype_id:_<6s}_{start_time:%Y%m%dT%H%M%S}_{end_time:%Y%m%dT%H%M%S}_{creation_time:%Y%m%dT%H%M%S}_{duration:4d}_{cycle:3d}_{relative_orbit:3d}______{centre:3s}_{mode:1s}_{timeliness:2s}_{collection:3s}.SEN3/{dataset_name}.nc']
     esa_angles:
         file_reader: !!python/name:satpy.readers.nc_olci.NCOLCIAngles
         file_patterns: ['{mission_id:3s}_OL_{processing_level:1s}_{datatype_id:_<6s}_{start_time:%Y%m%dT%H%M%S}_{end_time:%Y%m%dT%H%M%S}_{creation_time:%Y%m%dT%H%M%S}_{duration:4d}_{cycle:3d}_{relative_orbit:3d}______{centre:3s}_{mode:1s}_{timeliness:2s}_{collection:3s}.SEN3/tie_geometries.nc']
@@ -348,13 +345,6 @@ datasets:
         standard_name: toa_bidirectional_reflectance
         units: "%"
     file_type: esa_l2_refl
-
-  chl_nn:
-    name: chl_nn
-    sensor: olci
-    resolution: 1200
-    coordinates: [longitude, latitude]
-    file_type: esa_l2_prod
 
   solar_zenith_angle:
     name: solar_zenith_angle
