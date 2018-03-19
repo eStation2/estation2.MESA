@@ -38,6 +38,13 @@ datasets:
     coordinates: [longitude, latitude]
     file_type: esa_l2_prod
 
+  wqsf:
+    name: wqsf
+    sensor: olci
+    resolution: 1200
+    coordinates: [longitude, latitude]
+    file_type: esa_l2_prod
+
   solar_zenith_angle:
     name: solar_zenith_angle
     sensor: olci
