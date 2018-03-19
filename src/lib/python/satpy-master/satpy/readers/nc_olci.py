@@ -154,24 +154,30 @@ class NCOLCI2Prod(BaseFileHandler):
         if self.channel != key.name:
             return
         logger.debug('Reading %s.', key.name)
+
         # M.C. 01.03.2018 variable = self.nc[self.channel + '_radiance']
         my_channel=self.channel.upper()
         variable = self.nc[my_channel]
-        radiances = (np.ma.masked_equal(variable[:],
-                                        variable.attrs['_FillValue'], copy=False) *
-                     variable.attrs['scale_factor'] +
-                     variable.attrs['add_offset'])
-        units = variable.attrs['units']
-        if key.calibration == 'reflectance':
-            solar_flux = self.cal['solar_flux'][:]
-            d_index = np.ma.masked_equal(self.cal['detector_index'][:],
-                                         self.cal['detector_index'].attrs[
-                                             '_FillValue'],
-                                         copy=False)
-            idx = int(key.name[2:]) - 1
-            radiances /= solar_flux[idx, d_index]
-            radiances *= np.pi * 100
-            units = '%'
+
+        if my_channel=='WQSF':
+            radiances =  np.ma.masked_equal(variable[:],-1, copy=False)
+            units=''
+        else:
+            radiances = (np.ma.masked_equal(variable[:],
+                                            variable.attrs['_FillValue'], copy=False) *
+                         variable.attrs['scale_factor'] +
+                         variable.attrs['add_offset'])
+            units = variable.attrs['units']
+            if key.calibration == 'reflectance':
+                solar_flux = self.cal['solar_flux'][:]
+                d_index = np.ma.masked_equal(self.cal['detector_index'][:],
+                                             self.cal['detector_index'].attrs[
+                                                 '_FillValue'],
+                                             copy=False)
+                idx = int(key.name[2:]) - 1
+                radiances /= solar_flux[idx, d_index]
+                radiances *= np.pi * 100
+                units = '%'
 
         proj = Dataset(radiances,
                        copy=False,
