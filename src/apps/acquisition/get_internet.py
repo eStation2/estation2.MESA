@@ -385,7 +385,7 @@ def loop_get_internet(dry_run=False):
         while 1:
 
             # Check internet connection (or continue)
-            if not True:        #functions.internet_on():
+            if not functions.internet_on():
                 logger.error("The computer is not currently connected to the internet. Wait 1 minute.")
                 time.sleep(60)
 
