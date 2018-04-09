@@ -1324,3 +1324,42 @@ class TestIngestion(unittest.TestCase):
                                                                               source_id=datasource_descrID):
             ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
 
+    def test_ingest_s3_olci_wrr(self):
+
+        # Test the ingestion of the Sentinel-3/OLCI Level-2 WRR product (on d6-dev-vm19 !!!!!)
+
+        date_fileslist = glob.glob('/data/ingest/S3A_OL_2_WRR____20180309T231811*tar')
+        in_date = '20180309'
+        productcode = 'olci-wrr'
+        productversion = 'V02.0'
+        subproductcode = 'chl-nn'
+        mapsetcode = 'SPOTV-Africa-1km'
+        datasource_descrID='EO:EUM:DAT:SENTINEL-3:OL_2_WRR___NRT'
+
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                                              source_id=datasource_descrID):
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+
+
