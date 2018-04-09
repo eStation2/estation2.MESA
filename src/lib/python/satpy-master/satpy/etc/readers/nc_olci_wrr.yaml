@@ -6,9 +6,9 @@ reader:
   reader: !!python/name:satpy.readers.yaml_reader.FileYAMLReader
 
 file_types:
-    esa_l2_prod:
-        file_reader: !!python/name:satpy.readers.nc_olci.NCOLCI2Prod
-        file_patterns: ['{mission_id:3s}_OL_{processing_level:1s}_{datatype_id:_<6s}_{start_time:%Y%m%dT%H%M%S}_{end_time:%Y%m%dT%H%M%S}_{creation_time:%Y%m%dT%H%M%S}_{duration:4d}_{cycle:3d}_{relative_orbit:3d}______{centre:3s}_{mode:1s}_{timeliness:2s}_{collection:3s}.SEN3/{dataset_name}.nc']
+    esa_l2_refl:
+        file_reader: !!python/name:satpy.readers.nc_olci.NCOLCI2Refl
+        file_patterns: ['{mission_id:3s}_OL_{processing_level:1s}_{datatype_id:_<6s}_{start_time:%Y%m%dT%H%M%S}_{end_time:%Y%m%dT%H%M%S}_{creation_time:%Y%m%dT%H%M%S}_{duration:4d}_{cycle:3d}_{relative_orbit:3d}______{centre:3s}_{mode:1s}_{timeliness:2s}_{collection:3s}.SEN3/{dataset_name}_reflectance.nc']
     esa_angles:
         file_reader: !!python/name:satpy.readers.nc_olci.NCOLCIAngles
         file_patterns: ['{mission_id:3s}_OL_{processing_level:1s}_{datatype_id:_<6s}_{start_time:%Y%m%dT%H%M%S}_{end_time:%Y%m%dT%H%M%S}_{creation_time:%Y%m%dT%H%M%S}_{duration:4d}_{cycle:3d}_{relative_orbit:3d}______{centre:3s}_{mode:1s}_{timeliness:2s}_{collection:3s}.SEN3/tie_geometries.nc']
@@ -31,19 +31,320 @@ datasets:
     standard_name: latitude
     units: degree
 
-  chl_nn:
-    name: chl_nn
+  Oa01:
+    name: Oa01
     sensor: olci
+    wavelength: [0.3925,0.4,0.4075]
     resolution: 1200
+    calibration:
+      radiance:
+        standard_name: toa_outgoing_radiance_per_unit_wavelength
+        units: W m-2 um-1 sr-1
+      reflectance:
+        standard_name: toa_bidirectional_reflectance
+        units: "%"
     coordinates: [longitude, latitude]
-    file_type: esa_l2_prod
+    file_type: esa_l2_refl
 
-  wqsf:
-    name: wqsf
+  Oa02:
+    name: Oa02
     sensor: olci
+    wavelength: [0.4075, 0.4125, 0.4175]
+    resolution: 1200
+    calibration:
+      radiance:
+        standard_name: toa_outgoing_radiance_per_unit_wavelength
+        units: W m-2 um-1 sr-1
+      reflectance:
+        standard_name: toa_bidirectional_reflectance
+        units: "%"
+    coordinates: [longitude, latitude]
+    file_type: esa_l2_refl
+
+  Oa03:
+    name: Oa03
+    sensor: olci
+    wavelength: [0.4375,0.4425,0.4475]
+    resolution: 1200
+    calibration:
+      radiance:
+        standard_name: toa_outgoing_radiance_per_unit_wavelength
+        units: W m-2 um-1 sr-1
+      reflectance:
+        standard_name: toa_bidirectional_reflectance
+        units: "%"
+    coordinates: [longitude, latitude]
+    file_type: esa_l2_refl
+
+  Oa04:
+    name: Oa04
+    sensor: olci
+    wavelength: [0.485,0.49,0.495]
     resolution: 1200
     coordinates: [longitude, latitude]
-    file_type: esa_l2_prod
+    calibration:
+      radiance:
+        standard_name: toa_outgoing_radiance_per_unit_wavelength
+        units: W m-2 um-1 sr-1
+      reflectance:
+        standard_name: toa_bidirectional_reflectance
+        units: "%"
+    file_type: esa_l2_refl
+
+  Oa05:
+    name: Oa05
+    sensor: olci
+    wavelength: [0.505,0.51,0.515]
+    resolution: 1200
+    coordinates: [longitude, latitude]
+    calibration:
+      radiance:
+        standard_name: toa_outgoing_radiance_per_unit_wavelength
+        units: W m-2 um-1 sr-1
+      reflectance:
+        standard_name: toa_bidirectional_reflectance
+        units: "%"
+    file_type: esa_l2_refl
+
+  Oa06:
+    name: Oa06
+    sensor: olci
+    wavelength: [0.555,0.56,0.565]
+    resolution: 1200
+    coordinates: [longitude, latitude]
+    calibration:
+      radiance:
+        standard_name: toa_outgoing_radiance_per_unit_wavelength
+        units: W m-2 um-1 sr-1
+      reflectance:
+        standard_name: toa_bidirectional_reflectance
+        units: "%"
+    file_type: esa_l2_refl
+
+  Oa07:
+    name: Oa07
+    sensor: olci
+    wavelength: [0.615,0.62,0.625]
+    resolution: 1200
+    coordinates: [longitude, latitude]
+    calibration:
+      radiance:
+        standard_name: toa_outgoing_radiance_per_unit_wavelength
+        units: W m-2 um-1 sr-1
+      reflectance:
+        standard_name: toa_bidirectional_reflectance
+        units: "%"
+    file_type: esa_l2_refl
+
+  Oa08:
+    name: Oa08
+    sensor: olci
+    wavelength: [0.66,0.665,0.67]
+    resolution: 1200
+    coordinates: [longitude, latitude]
+    calibration:
+      radiance:
+        standard_name: toa_outgoing_radiance_per_unit_wavelength
+        units: W m-2 um-1 sr-1
+      reflectance:
+        standard_name: toa_bidirectional_reflectance
+        units: "%"
+    file_type: esa_l2_refl
+
+  Oa09:
+    name: Oa09
+    sensor: olci
+    wavelength: [0.67,0.67375,0.6775]
+    resolution: 1200
+    coordinates: [longitude, latitude]
+    calibration:
+      radiance:
+        standard_name: toa_outgoing_radiance_per_unit_wavelength
+        units: W m-2 um-1 sr-1
+      reflectance:
+        standard_name: toa_bidirectional_reflectance
+        units: "%"
+    file_type: esa_l2_refl
+
+  Oa10:
+    name: Oa10
+    sensor: olci
+    wavelength: [0.6775,0.68125,0.685]
+    resolution: 1200
+    coordinates: [longitude, latitude]
+    calibration:
+      radiance:
+        standard_name: toa_outgoing_radiance_per_unit_wavelength
+        units: W m-2 um-1 sr-1
+      reflectance:
+        standard_name: toa_bidirectional_reflectance
+        units: "%"
+    file_type: esa_l2_refl
+
+  Oa11:
+    name: Oa11
+    sensor: olci
+    wavelength: [0.70375,0.70875,0.71375]
+    resolution: 1200
+    coordinates: [longitude, latitude]
+    calibration:
+      radiance:
+        standard_name: toa_outgoing_radiance_per_unit_wavelength
+        units: W m-2 um-1 sr-1
+      reflectance:
+        standard_name: toa_bidirectional_reflectance
+        units: "%"
+    file_type: esa_l2_refl
+
+  Oa12:
+    name: Oa12
+    sensor: olci
+    wavelength: [0.75,0.75375,0.7575]
+    resolution: 1200
+    coordinates: [longitude, latitude]
+    calibration:
+      radiance:
+        standard_name: toa_outgoing_radiance_per_unit_wavelength
+        units: W m-2 um-1 sr-1
+      reflectance:
+        standard_name: toa_bidirectional_reflectance
+        units: "%"
+    file_type: esa_l2_refl
+
+  Oa13:
+    name: Oa13
+    sensor: olci
+    wavelength: [0.76,0.76125,0.7625]
+    resolution: 1200
+    coordinates: [longitude, latitude]
+    calibration:
+      radiance:
+        standard_name: toa_outgoing_radiance_per_unit_wavelength
+        units: W m-2 um-1 sr-1
+      reflectance:
+        standard_name: toa_bidirectional_reflectance
+        units: "%"
+    file_type: esa_l2_refl
+
+  Oa14:
+    name: Oa14
+    sensor: olci
+    wavelength: [0.760625, 0.764375, 0.768125]
+    resolution: 1200
+    coordinates: [longitude, latitude]
+    calibration:
+      radiance:
+        standard_name: toa_outgoing_radiance_per_unit_wavelength
+        units: W m-2 um-1 sr-1
+      reflectance:
+        standard_name: toa_bidirectional_reflectance
+        units: "%"
+    file_type: esa_l2_refl
+
+  Oa15:
+    name: Oa15
+    sensor: olci
+    wavelength: [0.76625, 0.7675, 0.76875]
+    resolution: 1200
+    coordinates: [longitude, latitude]
+    calibration:
+      radiance:
+        standard_name: toa_outgoing_radiance_per_unit_wavelength
+        units: W m-2 um-1 sr-1
+      reflectance:
+        standard_name: toa_bidirectional_reflectance
+        units: "%"
+    file_type: esa_l2_refl
+
+  Oa16:
+    name: Oa16
+    sensor: olci
+    wavelength: [0.77125, 0.77875, 0.78625]
+    resolution: 1200
+    coordinates: [longitude, latitude]
+    calibration:
+      radiance:
+        standard_name: toa_outgoing_radiance_per_unit_wavelength
+        units: W m-2 um-1 sr-1
+      reflectance:
+        standard_name: toa_bidirectional_reflectance
+        units: "%"
+    file_type: esa_l2_refl
+
+  Oa17:
+    name: Oa17
+    sensor: olci
+    wavelength: [0.855, 0.865, 0.875]
+    resolution: 1200
+    coordinates: [longitude, latitude]
+    calibration:
+      radiance:
+        standard_name: toa_outgoing_radiance_per_unit_wavelength
+        units: W m-2 um-1 sr-1
+      reflectance:
+        standard_name: toa_bidirectional_reflectance
+        units: "%"
+    file_type: esa_l2_refl
+
+  Oa18:
+    name: Oa18
+    sensor: olci
+    wavelength: [0.88, 0.885, 0.89]
+    resolution: 1200
+    coordinates: [longitude, latitude]
+    calibration:
+      radiance:
+        standard_name: toa_outgoing_radiance_per_unit_wavelength
+        units: W m-2 um-1 sr-1
+      reflectance:
+        standard_name: toa_bidirectional_reflectance
+        units: "%"
+    file_type: esa_l2_refl
+
+  Oa19:
+    name: Oa19
+    sensor: olci
+    wavelength: [0.895, 0.9, 0.905]
+    resolution: 1200
+    coordinates: [longitude, latitude]
+    calibration:
+      radiance:
+        standard_name: toa_outgoing_radiance_per_unit_wavelength
+        units: W m-2 um-1 sr-1
+      reflectance:
+        standard_name: toa_bidirectional_reflectance
+        units: "%"
+    file_type: esa_l2_refl
+
+  Oa20:
+    name: Oa20
+    sensor: olci
+    wavelength: [0.93, 0.94, 0.95]
+    resolution: 1200
+    coordinates: [longitude, latitude]
+    calibration:
+      radiance:
+        standard_name: toa_outgoing_radiance_per_unit_wavelength
+        units: W m-2 um-1 sr-1
+      reflectance:
+        standard_name: toa_bidirectional_reflectance
+        units: "%"
+    file_type: esa_l2_refl
+
+  Oa21:
+    name: Oa21
+    sensor: olci
+    wavelength: [1.0, 1.02, 1.04]
+    resolution: 1200
+    coordinates: [longitude, latitude]
+    calibration:
+      radiance:
+        standard_name: toa_outgoing_radiance_per_unit_wavelength
+        units: W m-2 um-1 sr-1
+      reflectance:
+        standard_name: toa_bidirectional_reflectance
+        units: "%"
+    file_type: esa_l2_refl
 
   solar_zenith_angle:
     name: solar_zenith_angle
