@@ -6,30 +6,49 @@ from multiprocessing import Queue
 #   ---------------------------------------------------------------------
 # vgt-ndvi
 #   ---------------------------------------------------------------------
+# from apps.processing.processing_std_fronts import *
+# def test_proc_pml_modis_fronts(pipe_run=0, pipe_print=3, touch_files_only=False):
+#
+#     args = {'pipeline_run_level':pipe_run, \
+#             'pipeline_printout_level':pipe_print, \
+#             'pipeline_printout_graph_level': 0, \
+#             'prod': 'pml-modis-sst',\
+#             'starting_sprod':'sst-3day',\
+#             'mapset': 'SPOTV-IOC-1km',\
+#             'version':'3.0',
+#             'logfile':'pml-modis-sst',
+#             'touch_files_only':touch_files_only
+#             }
+#
+#
 
-# from apps.processing.processing_std_ndvi import *
-# productcode='vgt-ndvi'
-# subproductcode='ndv'
-# version='sv2-pv2.2'
-# start_date='19990101'
-# end_date='20161231'
-#
-# list_dates = proc_functions.get_list_dates_for_dataset(productcode, subproductcode, version, start_date=start_date, end_date=end_date)
-#
-# args = {'pipeline_run_level':1, \
-#         'pipeline_printout_level':0, \
-#         'pipeline_printout_graph_level': 0, \
-#         'prod': productcode,\
-#         'starting_sprod':subproductcode,\
-#         'mapset': 'SPOTV-Africa-1km',\
-#         'version': version,
-#         'starting_dates': list_dates,
-#         'logfile':'test_processing_ndvi',
-#         'touch_files_only':False}
-#
-#
-# res_queue = None
-# processing_std_ndvi_prods_only(res_queue,**args)
+from apps.processing.processing_std_ndvi import *
+def test_proc_std_ndvi(pipe_run=0, pipe_print=3, touch_files_only=False):
+    #(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False):
+
+    productcode='vgt-ndvi'
+    subproductcode='ndv'
+    version='sv2-pv2.2'
+    start_date='19990101'
+    end_date='20171231'
+
+    list_dates = proc_functions.get_list_dates_for_dataset(productcode, subproductcode, version, start_date=start_date, end_date=end_date)
+
+    args = {'pipeline_run_level':pipe_run, \
+            'pipeline_printout_level':pipe_print, \
+            'pipeline_printout_graph_level': 0, \
+            'prod': productcode,\
+            'starting_sprod':subproductcode,\
+            'mapset': 'SPOTV-Africa-1km',\
+            'version': version,
+            'starting_dates': list_dates,
+            'logfile':'test_processing_ndvi',
+            'touch_files_only':False}
+
+    #res_queue = Queue()
+    res_queue = None
+    #proc_lists = processing_std_ndvi_prods_only(res_queue,**args)
+    proc_lists = processing_std_ndvi_stats_only(res_queue,**args)
 
 #   ---------------------------------------------------------------------
 # vgt-ndvi merge (for sv2-pv2.2)
@@ -52,21 +71,21 @@ from multiprocessing import Queue
 #   ---------------------------------------------------------------------
 # pml-modis-sst
 #   ---------------------------------------------------------------------
-# from apps.processing.processing_std_fronts import *
-# def test_proc_pml_modis_fronts(pipe_run=0, pipe_print=3, touch_files_only=False):
-#
-#     args = {'pipeline_run_level':pipe_run, \
-#             'pipeline_printout_level':pipe_print, \
-#             'pipeline_printout_graph_level': 0, \
-#             'prod': 'pml-modis-sst',\
-#             'starting_sprod':'sst-3day',\
-#             'mapset': 'SPOTV-IOC-1km',\
-#             'version':'3.0',
-#             'logfile':'pml-modis-sst',
-#             'touch_files_only':touch_files_only
-#             }
-#     res_queue = None
-#     processing_std_fronts(res_queue, **args)
+from apps.processing.processing_std_fronts import *
+def test_proc_pml_modis_fronts(pipe_run=0, pipe_print=3, touch_files_only=False):
+
+    args = {'pipeline_run_level':pipe_run, \
+            'pipeline_printout_level':pipe_print, \
+            'pipeline_printout_graph_level': 0, \
+            'prod': 'pml-modis-sst',\
+            'starting_sprod':'sst-3day',\
+            'mapset': 'SPOTV-IOC-1km',\
+            'version':'3.0',
+            'logfile':'pml-modis-sst',
+            'touch_files_only':touch_files_only
+            }
+    res_queue = None
+    processing_std_fronts(res_queue, **args)
 #   ---------------------------------------------------------------------
 # modis-sst
 #   ---------------------------------------------------------------------
@@ -237,7 +256,7 @@ def test_proc_chirps_dekad(pipe_run=0, pipe_print=3, start_date=None, end_date=N
             'touch_only':touch_files_only}
 
     request_queue = Queue()
-    proc_lists=processing_std_precip_all(request_queue, **args)
+    proc_lists=processing_std_precip_stats_only(request_queue, **args)
 
 #   ---------------------------------------------------------------------
 # lsasaf-et
@@ -458,8 +477,11 @@ from apps.processing.processing_std_msg_mpe import *
 #   ---------------------------------------------------------------------
 
 #test_proc_pml_modis_fronts(pipe_run=4, pipe_print=0, touch_files_only=False)
+
 #test_proc_modis_firms(pipe_run=4, pipe_print=0, start_date_stats='20030101', end_date_stats='20161221', touch_files_only=True)
-test_proc_chirps_dekad(pipe_run=3, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
+
+test_proc_chirps_dekad(pipe_run=4, pipe_print=0, start_date='19810101', end_date='20171231', touch_files_only=False)
+#test_proc_std_ndvi(pipe_run=0, pipe_print=8, touch_files_only=False)
 
 # my_starting_dates_stats = proc_functions.get_list_dates_for_dataset('modis-firms', '10dcount', 'v6.0', start_date='20020701', end_date='20170821')
 # for date in my_starting_dates_stats:
