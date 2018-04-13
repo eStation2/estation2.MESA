@@ -259,6 +259,38 @@ def test_proc_chirps_dekad(pipe_run=0, pipe_print=3, start_date=None, end_date=N
     proc_lists=processing_std_precip_stats_only(request_queue, **args)
 
 #   ---------------------------------------------------------------------
+# chirps-lp
+#   ---------------------------------------------------------------------
+from apps.processing.processing_std_precip_lp import *
+def test_proc_chirps_lp(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False, type=''):
+
+    # Create the list of dates -> returns empty if start==end==None
+    if start_date is not None and end_date is not None:
+        starting_dates = proc_functions.get_list_dates_for_dataset('chirps-dekad', '1moncum', '2.0', start_date=start_date, end_date=end_date)
+    else:
+        starting_dates = None
+
+    args = {'pipeline_run_level':pipe_run, \
+            'pipeline_printout_level':pipe_print, \
+            'pipeline_printout_graph_level': 0, \
+            'prod': 'chirps-dekad',\
+            'starting_sprod':'1moncum',\
+            'starting_dates': starting_dates,\
+            'mapset': 'CHIRP-Africa-5km',\
+            'version':'2.0',
+            'logfile':'ruffus-chirps',
+            'touch_only':touch_files_only}
+
+    request_queue = Queue()
+    if type == 'prods':
+        proc_lists=processing_std_precip_lp_prods(request_queue, **args)
+    elif type == 'stats':
+        proc_lists=processing_std_precip_lp_stats(request_queue, **args)
+    elif type == 'anoms':
+        proc_lists=processing_std_precip_lp_anoms(request_queue, **args)
+
+
+#   ---------------------------------------------------------------------
 # lsasaf-et
 #   ---------------------------------------------------------------------
 # from apps.processing.processing_std_lsasaf_et import *
@@ -480,10 +512,12 @@ from apps.processing.processing_std_msg_mpe import *
 
 #test_proc_modis_firms(pipe_run=4, pipe_print=0, start_date_stats='20030101', end_date_stats='20161221', touch_files_only=True)
 
-test_proc_chirps_dekad(pipe_run=4, pipe_print=0, start_date='19810101', end_date='20171231', touch_files_only=False)
+#test_proc_chirps_dekad(pipe_run=4, pipe_print=0, start_date='19810101', end_date='20171231', touch_files_only=False)
 #test_proc_std_ndvi(pipe_run=0, pipe_print=8, touch_files_only=False)
 
 # my_starting_dates_stats = proc_functions.get_list_dates_for_dataset('modis-firms', '10dcount', 'v6.0', start_date='20020701', end_date='20170821')
 # for date in my_starting_dates_stats:
 #     filename='/data/processing/modis-firms/v6.0/SPOTV-Africa-10km/derived/10dcount10k/'+date+'_modis-firms_10dcount10k_SPOTV-Africa-10km_v6.0.tif'
 #     st=os.system('touch '+filename)
+
+test_proc_chirps_lp(pipe_run=0, pipe_print=3, start_date='19810101', end_date='20171231', touch_files_only=False, type='stats')
