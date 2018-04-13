@@ -74,7 +74,7 @@ def create_archives_from_dir(req_directory):
 
 if __name__=='__main__':
 
-    req_directory='/data/processing/exchange/Requests/RefStat_07.11.17/'
+    req_directory='/data/processing/exchange/Requests_RefMach_2018.04.11/'
 
     create_archives_from_dir(req_directory)
 #
