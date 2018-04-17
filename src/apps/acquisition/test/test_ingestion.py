@@ -10,7 +10,9 @@ import glob
 import tempfile
 import shutil
 import csv
-import numpy as N
+import numpy as np
+import h5py
+
 from osgeo import gdal
 
 # Overwrite Dirs
@@ -1328,7 +1330,7 @@ class TestIngestion(unittest.TestCase):
 
         # Test the ingestion of the Sentinel-3/OLCI Level-2 WRR product (on d6-dev-vm19 !!!!!)
 
-        date_fileslist = glob.glob('/data/ingest/S3A_OL_2_WRR____20180309T231811*tar')
+        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_OL_2_WRR/S3A_OL_2_WRR____20180125*tar')
         in_date = '20180309'
         productcode = 'olci-wrr'
         productversion = 'V02.0'
