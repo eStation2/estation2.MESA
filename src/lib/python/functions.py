@@ -1581,6 +1581,26 @@ def load_obj_from_pickle(filename):
     return obj
 
 
+
+######################################################################################
+#   sentinel_get_footprint()
+#   Purpose: Read the foot print from the xfdumanifest.xml file of SAFE format, and
+#            return the boundary box
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2018/04/17
+#   Inputs: input directory
+#   Output: Boundary Box (lat_min, lon_min, lat_max, lon_max)
+#
+def sentinel_get_footprint(dir, filename=None):
+
+    bbox = []
+    if filename is None:
+        filename='xfdumanifest.xml'
+
+
+    return bbox
+
+
 ######################################################################################
 #   modis_latlon_to_hv_tile
 #   Purpose: Given a lat/lon coordinate, converts it to hv tile
@@ -1611,7 +1631,6 @@ def modis_latlon_to_hv_tile(latitude, longitude):
     v1 = 8 - round(y_val / t_size - 0.5)
 
     return h1, v1
-
 
 ######################################################################################
 #   get_modis_tiles_list
@@ -1770,7 +1789,6 @@ def previous_files(file_t0, step='dekad', extension='.tif'):
         logger.warning('Time step (%s) not yet foreseen. Exit. ' % step)
         return None
 
-
 ######################################################################################
 #
 #   Purpose: return the machine address
@@ -1866,6 +1884,69 @@ def read_netcdf_scaling(preproc_file):
         logger.debug('Error in reading scaling')
         raise Exception('Error in reading scaling')
 
+
+######################################################################################
+#
+#   Purpose: write a vrt file for S3 Level 2 products ingestion
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2018/04/13
+#   Inputs: pre-proc file -> tmp dir where to save the .tmp file
+#   Output: none
+#
+def write_vrt_georef(output_dir, band_file, n_lines=None, n_cols=None, lat_file=None, long_file=None):
+
+    # Check/complete arguments
+    if lat_file is None:
+        lat_file='latitude.tif'
+    if long_file is None:
+        long_file='longitude.tif'
+    if n_lines is None:
+        n_lines=1217
+    if n_cols is None:
+        n_cols=14952
+
+
+    # Define variable filename
+    var_file=os.path.dirname(band_file)+os.path.sep+'scaling.txt'
+
+    file_vrt = output_dir + 'reflectance.vrt'
+    un_proj_filepath = output_dir + band_file
+    with open(file_vrt,'w') as outFile:
+        # TODO: parametrize the line below with n_lines/cols
+        outFile.write('<VRTDataset rasterXSize="1217" rasterYSize="14952">\n')
+        outFile.write('    <Metadata domain="GEOLOCATION">\n')
+        outFile.write('        <MDI key="X_DATASET">'+output_dir+'longitude.tif</MDI>\n')
+        outFile.write('        <MDI key="X_BAND">1</MDI>\n')
+        outFile.write('        <MDI key="Y_DATASET">'+output_dir+'latitude.tif</MDI>\n')
+        outFile.write('        <MDI key="Y_BAND">1</MDI>\n')
+        outFile.write('        <MDI key="PIXEL_OFFSET">0</MDI>\n')
+        outFile.write('        <MDI key="LINE_OFFSET">0</MDI>\n')
+        outFile.write('        <MDI key="PIXEL_STEP">1</MDI>\n')
+        outFile.write('        <MDI key="LINE_STEP">1</MDI>\n')
+        outFile.write('    </Metadata>\n')
+        outFile.write('    <VRTRasterBand dataType="UInt16" band="1">\n')
+        outFile.write('        <Metadata />\n')
+        outFile.write('        <SimpleSource>\n')
+        outFile.write('            <MDI key="LINE_STEP">1</MDI>\n')
+        outFile.write('            <SourceFilename>'+un_proj_filepath+'</SourceFilename>\n')
+        outFile.write('            <SourceBand>1</SourceBand>\n')
+        outFile.write('        </SimpleSource>\n')
+        outFile.write('    </VRTRasterBand>\n')
+        outFile.write('</VRTDataset>\n')
+
+    # Save scale_factor and scale_offset to file
+    try:
+        my_file = open(var_file,'r')
+        for line in my_file:
+            if 'Scale_factor' in line:
+                scale_factor = float(line.split('=')[1])
+            if 'Scale_offset' in line:
+                scale_offset = float(line.split('=')[1])
+
+        return file_vrt
+    except:
+        logger.debug('Error in reading scaling')
+        raise Exception('Error in reading scaling')
 
 ######################################################################################
 #                            PROCESSING CHAINS
