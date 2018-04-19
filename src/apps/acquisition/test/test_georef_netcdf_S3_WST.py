@@ -183,7 +183,7 @@ def pre_process_slstr_sst(subproducts=None, input_file=None, output_dir=None, in
         input_vrt = output_dir + 'seasurfacetemp.vrt'
         output_tif = output_dir + sprod + '.tif'
 
-        command = 'gdalwarp -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
+        command = 'gdalwarp -dstnodata "-32768" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
             lon_min, lat_min, lon_max, lat_max, x_size, y_size, input_vrt, output_tif)
 
         print(command)
