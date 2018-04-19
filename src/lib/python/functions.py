@@ -32,7 +32,7 @@ import urllib2
 import ast
 import sys
 from osgeo import gdal, osr
-
+from xml.dom import minidom
 # Import eStation2 modules
 from lib.python import es_logging as log
 from config import es_constants
@@ -1597,6 +1597,53 @@ def sentinel_get_footprint(dir, filename=None):
     if filename is None:
         filename='xfdumanifest.xml'
 
+    # parse the xml file
+    xml_doc = minidom.parse(dir + filename)
+
+    # Namespace declaration
+    # xmlns:sentinel-safe="http://www.esa.int/safe/sentinel/1.1"
+    nsSentinelSafe = "http://www.esa.int/safe/sentinel/1.1"
+    # xmlns:gml="http://www.opengis.net/gml"
+    nsGML = "http://www.opengis.net/gml"
+
+    # <metadataSection>
+    metadataSectionElem = xml_doc.getElementsByTagName("metadataSection")[0]
+
+    # <metadataObject ID="measurementFrameSet" classification="DESCRIPTION" category="DMD">
+    metadataObjectsElemList = metadataSectionElem.getElementsByTagName("metadataObject")
+
+    for metadataObject in metadataObjectsElemList:
+        mid = metadataObject.getAttribute("ID")
+        if mid == "measurementFrameSet":
+            # metadataWrap = metadataObject.getElementsByTagName("metadataWrap")[0]
+            # xmlData = metadataObject.getElementsByTagName("xmlData")[0]
+            # frameSet = metadataObject.getElementsByTagNameNS(nsSentinelSafe, "frameSet")[0]
+            footPrintElem = metadataObject.getElementsByTagNameNS(nsSentinelSafe, "footPrint")[0]
+            posList = footPrintElem.getElementsByTagNameNS(nsGML, "posList")[0]
+
+            print(posList.firstChild.data)
+            footPrintString = posList.firstChild.data
+            listFootPrint = footPrintString.split(' ')
+
+            arrLat = []
+            arrLon = []
+
+            for i, coord in enumerate(listFootPrint):
+                if i % 2 == 0:
+                    # even--lat
+                    arrLat.append(coord)
+                else:
+                    # odd--lon
+                    arrLon.append(coord)
+
+            lon_min = min(arrLon)
+            lat_min = min(arrLat)
+            lon_max = max(arrLon)
+            lat_max = max(arrLat)
+
+            # bbox = left, bottom, right, top
+            # bbox = min Longitude, min Latitude, max Longitude, max Latitude
+            bbox = [lon_min, lat_min, lon_max, lat_max]
 
     return bbox
 
@@ -1909,15 +1956,15 @@ def write_vrt_georef(output_dir, band_file, n_lines=None, n_cols=None, lat_file=
     # Define variable filename
     var_file=os.path.dirname(band_file)+os.path.sep+'scaling.txt'
 
-    file_vrt = output_dir + 'reflectance.vrt'
-    un_proj_filepath = output_dir + band_file
+    file_vrt = output_dir + os.path.sep+ 'reflectance.vrt'
+    un_proj_filepath = output_dir + os.path.sep+ band_file
     with open(file_vrt,'w') as outFile:
         # TODO: parametrize the line below with n_lines/cols
-        outFile.write('<VRTDataset rasterXSize="1217" rasterYSize="14952">\n')
+        outFile.write('<VRTDataset rasterXSize="'+str(n_lines)+'" rasterYSize="'+str(n_cols)+'">\n')
         outFile.write('    <Metadata domain="GEOLOCATION">\n')
-        outFile.write('        <MDI key="X_DATASET">'+output_dir+'longitude.tif</MDI>\n')
+        outFile.write('        <MDI key="X_DATASET">'+output_dir+ os.path.sep+'longitude.tif</MDI>\n')
         outFile.write('        <MDI key="X_BAND">1</MDI>\n')
-        outFile.write('        <MDI key="Y_DATASET">'+output_dir+'latitude.tif</MDI>\n')
+        outFile.write('        <MDI key="Y_DATASET">'+output_dir+ os.path.sep+'latitude.tif</MDI>\n')
         outFile.write('        <MDI key="Y_BAND">1</MDI>\n')
         outFile.write('        <MDI key="PIXEL_OFFSET">0</MDI>\n')
         outFile.write('        <MDI key="LINE_OFFSET">0</MDI>\n')
@@ -1935,18 +1982,18 @@ def write_vrt_georef(output_dir, band_file, n_lines=None, n_cols=None, lat_file=
         outFile.write('</VRTDataset>\n')
 
     # Save scale_factor and scale_offset to file
-    try:
-        my_file = open(var_file,'r')
-        for line in my_file:
-            if 'Scale_factor' in line:
-                scale_factor = float(line.split('=')[1])
-            if 'Scale_offset' in line:
-                scale_offset = float(line.split('=')[1])
-
-        return file_vrt
-    except:
-        logger.debug('Error in reading scaling')
-        raise Exception('Error in reading scaling')
+    # try:
+    #     my_file = open(var_file,'r')
+    #     for line in my_file:
+    #         if 'Scale_factor' in line:
+    #             scale_factor = float(line.split('=')[1])
+    #         if 'Scale_offset' in line:
+    #             scale_offset = float(line.split('=')[1])
+    #
+    #     return file_vrt
+    # except:
+    #     logger.debug('Error in reading scaling')
+    #     raise Exception('Error in reading scaling')
 
 ######################################################################################
 #                            PROCESSING CHAINS

@@ -1330,8 +1330,8 @@ class TestIngestion(unittest.TestCase):
 
         # Test the ingestion of the Sentinel-3/OLCI Level-2 WRR product (on d6-dev-vm19 !!!!!)
 
-        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_OL_2_WRR/S3A_OL_2_WRR____20180125*tar')
-        in_date = '20180309'
+        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_OL_2_WRR/S3A_OL_2_WRR____20180306T092820_20180306T101211_20180306T115859_2631_028_307______MAR_O_NR_002.SEN3.tar')
+        in_date = '201803060928'
         productcode = 'olci-wrr'
         productversion = 'V02.0'
         subproductcode = 'chl-nn'
@@ -1357,6 +1357,42 @@ class TestIngestion(unittest.TestCase):
                              're_process': re_process}
 
         subproducts=[]
+        subproducts.append(sprod)
+
+        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                                              source_id=datasource_descrID):
+            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+    def test_ingest_s3_slstr_sst(self):
+
+        # Test the ingestion of the Sentinel-3/SLSTR Level-2 WST product (on d6-dev-vm19 !!!!!)
+
+        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/S3A_SL_2_WST____20180410T102207_20180410T102507_20180410T120233_0179_030_036_5400_MAR_O_NR_003.SEN3.tar')
+        in_date = '201804101022'
+        productcode = 'slstr-sst'
+        productversion = '1.0'
+        subproductcode = 'wst'
+        mapsetcode = 'SPOTV-Africa-1km'
+        datasource_descrID = 'EO:EUM:DAT:SENTINEL-3:SL_2_WST___NRT'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(echo=1, **args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
+
+        subproducts = []
         subproducts.append(sprod)
 
         for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
