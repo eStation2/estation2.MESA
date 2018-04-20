@@ -1505,7 +1505,7 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         pass
 
     # Assign output file
-    interm_files_list.append(output_file_mapset)
+    # interm_files_list.append(output_file_mapset)
 
     return interm_files_list
 
@@ -1819,13 +1819,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
 
     re_process = subproducts[0]['re_process']
     target_mapset=subproducts[0]['mapsetcode']
-    # Get them from target_mapset
-    x_size = 0.00892857
-    y_size = 0.00892857
 
-    # input_filenames = input_file.split("/")
-    # inputfilename = input_filenames[-1]
-    # foldername = os.path.splitext(inputfilename)
     # Unzip the .tar file in 'tmpdir'
     geo_fullname= tmpdir + os.path.sep + geo_file
 
@@ -1833,14 +1827,37 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
     print(command)
     status = os.system(command)
 
+    #get map set
+    mapset_info = querydb.get_mapset(mapsetcode=target_mapset)
+
+    x_size = mapset_info.pixel_shift_long  #0.00892857
+    y_size = mapset_info.pixel_shift_lat  #0.00892857
+
+    upper_left_long= mapset_info.upper_left_long
+    upper_left_lat= mapset_info.upper_left_lat
+    lower_right_long = upper_left_long + (x_size * mapset_info.pixel_size_x)
+    lower_right_lat= upper_left_lat + (y_size * mapset_info.pixel_size_y)
+
+    lon_min = min(upper_left_long, lower_right_long)
+    lon_max = max(upper_left_long, lower_right_long)
+    lat_min = min(upper_left_lat,lower_right_lat)
+    lat_max = max(upper_left_lat,lower_right_lat)
+
+    mapset_bbox = [lon_min, lat_min, lon_max, lat_max]
+
+    #get data footprint
+    data_bbox= functions.sentinel_get_footprint(dir=tmpdir)
+
     # Test the overlap of the footprint with the BB of mapset
-    overlap = False
+    overlap =functions.check_polygons_intersects(mapset_bbox, data_bbox)
+
+    if not overlap:
+        return
 
     # ------------------------------------------------------------------------------------------
     # Extract there latitude and longitude as geotiff
     # ------------------------------------------------------------------------------------------
-    if not overlap:
-        print('No overlap')
+
 
     fd=h5py.File(geo_fullname,'r')
 
@@ -1910,10 +1927,10 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
     # ------------------------------------------------------------------------------------------
 
     # TODO: replace the part below with info from mapset
-    lon_min = N.min(longitude)
-    lat_min = N.min(latitude)
-    lon_max = N.max(longitude)
-    lat_max = N.max(latitude)
+    # lon_min = N.min(longitude)
+    # lat_min = N.min(latitude)
+    # lon_max = N.max(longitude)
+    # lat_max = N.max(latitude)
 
     functions.write_vrt_georef(output_dir=tmpdir, band_file=un_proj_filename)
 
@@ -1933,7 +1950,6 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process the Sentinel 3 Level 2 product from OLCI - WRR
 #
-
     # Insert a loop on input_files[]
     input_file=input_files[0]
 
@@ -1950,8 +1966,8 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
     re_process = subproducts[0]['re_process']
     target_mapset=subproducts[0]['mapsetcode']
     # Get them from target_mapset
-    x_size = 0.00892857
-    y_size = 0.00892857
+    # x_size = 0.00892857
+    # y_size = 0.00892857
 
     # Unzip the .tar file in 'tmpdir'
 
@@ -1962,13 +1978,32 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
     status = os.system(command)
 
     # Test the overlap of the footprint with the BB of mapset
-    overlap = False
+    # get map set
+    mapset_info = querydb.get_mapset(mapsetcode=target_mapset)
 
-    # ------------------------------------------------------------------------------------------
-    # Extract there latitude and longitude as geotiff
-    # ------------------------------------------------------------------------------------------
+    x_size = mapset_info.pixel_shift_long  # 0.00892857
+    y_size = mapset_info.pixel_shift_lat  # 0.00892857
+
+    upper_left_long = mapset_info.upper_left_long
+    upper_left_lat = mapset_info.upper_left_lat
+    lower_right_long = upper_left_long + (x_size * mapset_info.pixel_size_x)
+    lower_right_lat = upper_left_lat + (y_size * mapset_info.pixel_size_y)
+
+    lon_min = min(upper_left_long, lower_right_long)
+    lon_max = max(upper_left_long, lower_right_long)
+    lat_min = min(upper_left_lat, lower_right_lat)
+    lat_max = max(upper_left_lat, lower_right_lat)
+
+    mapset_bbox = [lon_min, lat_min, lon_max, lat_max]
+
+    # get data footprint
+    data_bbox = functions.sentinel_get_footprint(dir=tmpdir)
+
+    # Test the overlap of the footprint with the BB of mapset
+    overlap = functions.check_polygons_intersects(mapset_bbox, data_bbox)
+
     if not overlap:
-        print('No overlap')
+        return
 
     for ifile in os.listdir(tmpdir):
 

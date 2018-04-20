@@ -1581,6 +1581,23 @@ def load_obj_from_pickle(filename):
     return obj
 
 
+######################################################################################
+#   check_polygons_intersects()
+#   Purpose: Check whether two polygon interects and return Boolean value
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2018/04/20
+#   Inputs: polygon 1 and Polygon two as bounding box = min Longitude, min Latitude, max Longitude, max Latitude
+#   Output: True or False
+#
+def check_polygons_intersects(poly1, poly2):
+    intersects = False
+    dx = min(poly1[2], poly2[2]) - max(poly1[0], poly2[0])
+    dy = min(poly1[3], poly2[3]) - max(poly1[1], poly2[1])
+    if (dx>=0) and (dy>=0):
+        intersects = True
+
+    return intersects
+
 
 ######################################################################################
 #   sentinel_get_footprint()
@@ -1589,7 +1606,7 @@ def load_obj_from_pickle(filename):
 #   Author: Marco Clerici, JRC, European Commission
 #   Date: 2018/04/17
 #   Inputs: input directory
-#   Output: Boundary Box (lat_min, lon_min, lat_max, lon_max)
+#   Output: Boundary Box (lon_min, lat_min, lon_max, lat_max)
 #
 def sentinel_get_footprint(dir, filename=None):
 
@@ -1598,7 +1615,7 @@ def sentinel_get_footprint(dir, filename=None):
         filename='xfdumanifest.xml'
 
     # parse the xml file
-    xml_doc = minidom.parse(dir + filename)
+    xml_doc = minidom.parse(dir+os.path.sep+filename)
 
     # Namespace declaration
     # xmlns:sentinel-safe="http://www.esa.int/safe/sentinel/1.1"
@@ -1631,10 +1648,10 @@ def sentinel_get_footprint(dir, filename=None):
             for i, coord in enumerate(listFootPrint):
                 if i % 2 == 0:
                     # even--lat
-                    arrLat.append(coord)
+                    arrLat.append(float(coord))
                 else:
                     # odd--lon
-                    arrLon.append(coord)
+                    arrLon.append(float(coord))
 
             lon_min = min(arrLon)
             lat_min = min(arrLat)

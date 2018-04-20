@@ -1367,8 +1367,8 @@ class TestIngestion(unittest.TestCase):
 
         # Test the ingestion of the Sentinel-3/SLSTR Level-2 WST product (on d6-dev-vm19 !!!!!)
 
-        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/S3A_SL_2_WST____20180410T102207_20180410T102507_20180410T120233_0179_030_036_5400_MAR_O_NR_003.SEN3.tar')
-        in_date = '201804101022'
+        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/S3A_SL_2_WST____20180306T095629_20180306T095929_20180306T114727_0179_028_307_3420_MAR_O_NR_002.SEN3.tar')
+        in_date = '201803060956'
         productcode = 'slstr-sst'
         productversion = '1.0'
         subproductcode = 'wst'
