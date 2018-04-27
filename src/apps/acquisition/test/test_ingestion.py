@@ -1329,9 +1329,9 @@ class TestIngestion(unittest.TestCase):
     def test_ingest_s3_olci_wrr(self):
 
         # Test the ingestion of the Sentinel-3/OLCI Level-2 WRR product (on d6-dev-vm19 !!!!!)
-
-        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_OL_2_WRR/S3A_OL_2_WRR____20180306T092820_20180306T101211_20180306T115859_2631_028_307______MAR_O_NR_002.SEN3.tar')
-        in_date = '201803060928'
+        #date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_OL_2_WRR/S3A_OL_2_WRR____20180306T092820_20180306T101211_20180306T115859_2631_028_307______MAR_O_NR_002.SEN3.tar')
+        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_OL_2_WRR/march03/S3A_OL_2_WRR____20180303*.SEN3.tar')
+        in_date = '201803030000'
         productcode = 'olci-wrr'
         productversion = 'V02.0'
         subproductcode = 'chl-nn'
@@ -1366,9 +1366,9 @@ class TestIngestion(unittest.TestCase):
     def test_ingest_s3_slstr_sst(self):
 
         # Test the ingestion of the Sentinel-3/SLSTR Level-2 WST product (on d6-dev-vm19 !!!!!)
-
-        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/S3A_SL_2_WST____20180306T095629_20180306T095929_20180306T114727_0179_028_307_3420_MAR_O_NR_002.SEN3.tar')
-        in_date = '201803060956'
+        #date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/S3A_SL_2_WST____20180306T095629_20180306T095929_20180306T114727_0179_028_307_3420_MAR_O_NR_002.SEN3.tar')
+        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/march08/S3A_SL_2_WST____20180308*.SEN3.tar')
+        in_date = '201803080000'
         productcode = 'slstr-sst'
         productversion = '1.0'
         subproductcode = 'wst'
