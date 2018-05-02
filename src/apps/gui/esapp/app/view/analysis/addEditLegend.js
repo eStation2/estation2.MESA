@@ -50,7 +50,7 @@ Ext.define("esapp.view.analysis.addEditLegend",{
     layout: 'vbox',
     // pack: 'center',
     defaultAlign: 't-t',
-    alignTarget: 'analysismain',
+    // alignTarget: 'analysismain',
 
     params: {
         new: false,

@@ -61,7 +61,7 @@ def loop_ingestion(dry_run=False):
 #    Arguments: dry_run -> if 1, read tables and report activity ONLY
 
     logger.info("Entering routine %s" % 'drive_ingestion')
-    echo_query = False
+    # echo_query = False
 
     while True:
 
@@ -72,7 +72,7 @@ def loop_ingestion(dry_run=False):
             logger.error("Error in executing ingest_archives_eumetcast")
 
         # Get all active product ingestion records with a subproduct count.
-        active_product_ingestions = querydb.get_ingestion_product(allrecs=True, echo=echo_query)
+        active_product_ingestions = querydb.get_ingestion_product(allrecs=True)
 
         for active_product_ingest in active_product_ingestions:
 
@@ -93,7 +93,7 @@ def loop_ingestion(dry_run=False):
                               "subproductcode": productcode + "_native",
                               "version": productversion}
 
-            sources_list = querydb.get_product_sources(echo=echo_query, **native_product)
+            sources_list = querydb.get_product_sources(**native_product)
 
             logger.debug("For product [%s] N. %s  source is/are found" % (productcode,len(sources_list)))
 
@@ -106,8 +106,7 @@ def loop_ingestion(dry_run=False):
                 files = []
                 # Get the 'filenaming' info (incl. 'area-type') from the acquisition source
                 if source.type == 'EUMETCAST':
-                    for eumetcast_filter, datasource_descr in querydb.get_datasource_descr(echo=echo_query,
-                                                                                           source_type=source.type,
+                    for eumetcast_filter, datasource_descr in querydb.get_datasource_descr(source_type=source.type,
                                                                                            source_id=source.data_source_id):
                         # TODO-M.C.: check the most performing options in real-cases
                         files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(eumetcast_filter, os.path.basename(f))]
@@ -116,8 +115,7 @@ def loop_ingestion(dry_run=False):
 
                 if source.type == 'INTERNET':
                     # Implement file name filtering for INTERNET data source.
-                    for internet_filter, datasource_descr in querydb.get_datasource_descr(echo=echo_query,
-                                                                                          source_type=source.type,
+                    for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type=source.type,
                                                                                           source_id=source.data_source_id):
                     # TODO-Jurvtk: complete/verified
                         temp_internet_filter = internet_filter.files_filter_expression
@@ -130,7 +128,7 @@ def loop_ingestion(dry_run=False):
                 logger_spec.info("Number of files found for product [%s] is: %s" % (active_product_ingest[0], len(files)))
                 if len(files) > 0:
                     # Get list of ingestions triggers [prod/subprod/mapset]
-                    ingestions = querydb.get_ingestion_subproduct(allrecs=False, echo=echo_query, **product)
+                    ingestions = querydb.get_ingestion_subproduct(allrecs=False, **product)
 
                     # Loop over ingestion triggers
                     subproducts = list()
@@ -145,7 +143,7 @@ def loop_ingestion(dry_run=False):
                                 "subproductcode": ingest.subproductcode,
                                 "datasource_descr_id": datasource_descr.datasource_descr_id,
                                 "version": product['version']}
-                        product_in_info = querydb.get_product_in_info(echo=echo_query, **args)
+                        product_in_info = querydb.get_product_in_info(**args)
                         try:
                             re_process = product_in_info.re_process
                             re_extract = product_in_info.re_extract
@@ -228,7 +226,7 @@ def loop_ingestion(dry_run=False):
                         # Pass list of files to ingestion routine
                         if (not dry_run):
                             try:
-                                result = ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger_spec, echo_query=echo_query)
+                                result = ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger_spec)
                             except:
                                 logger.error("Error in ingestion of file [%s] " % (functions.conv_list_2_string(date_fileslist)))
                             else:
@@ -283,10 +281,10 @@ def ingest_archives_eumetcast(dry_run=False):
 #    Arguments: dry_run -> if 1, read tables and report activity ONLY
 
     logger.info("Entering routine %s" % 'ingest_archives_eumetcast')
-    echo_query = False
+    # echo_query = False
 
     # Get all active product ingestion records with a subproduct count.
-    active_product_ingestions = querydb.get_ingestion_product(allrecs=True, echo=echo_query)
+    active_product_ingestions = querydb.get_ingestion_product(allrecs=True)
     for active_product_ingest in active_product_ingestions:
 
         productcode = active_product_ingest[0]
@@ -302,11 +300,11 @@ def ingest_archives_eumetcast(dry_run=False):
         native_product = {"productcode": productcode,
                               "subproductcode": productcode + "_native",
                               "version": productversion}
-        sources_list = querydb.get_product_sources(echo=echo_query, **native_product)
+        sources_list = querydb.get_product_sources(**native_product)
 
         logger.debug("For product [%s] N. %s  source is/are found" % (productcode,len(sources_list)))
 
-        ingestions = querydb.get_ingestion_subproduct(allrecs=False, echo=echo_query, **product)
+        ingestions = querydb.get_ingestion_subproduct(allrecs=False, **product)
         for ingest in ingestions:
             logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (productcode, productversion,ingest.subproductcode,ingest.mapsetcode))
             ingest_archives_eumetcast_product(productcode, productversion,ingest.subproductcode,ingest.mapsetcode,dry_run=dry_run)
@@ -371,12 +369,12 @@ def ingest_archives_eumetcast_product(product_code, version, subproduct_code, ma
                 logger.info("Found file: %s" % in_file)
             else:
                 try:
-                    ingest_file_archive(in_file, mapset_id, echo_query=False, no_delete=no_delete)
+                    ingest_file_archive(in_file, mapset_id, no_delete=no_delete)
                 except:
                     logger.warning("Error in ingesting file %s" % in_file)
 
 
-def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_logger, echo_query=False):
+def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_logger):
 #   Manages ingestion of 1/more file/files for a given date
 #   Arguments:
 #       input_files: input file full names
@@ -458,8 +456,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
         composed_file_list = input_files
 
     try:
-        ingest_file(composed_file_list, in_date, product, subproducts, datasource_descr, my_logger, in_files=input_files,
-                echo_query=echo_query)
+        ingest_file(composed_file_list, in_date, product, subproducts, datasource_descr, my_logger, in_files=input_files)
     except:
         my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
         # Move files to 'error/storage' directory
@@ -1950,7 +1947,7 @@ def pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=None):
 
     return interm_files_list
 
-def ingest_file(interm_files_list, in_date, product, subproducts, datasource_descr, my_logger, in_files='', echo_query=False):
+def ingest_file(interm_files_list, in_date, product, subproducts, datasource_descr, my_logger, in_files=''):
 # -------------------------------------------------------------------------------------------------------
 #   Ingest one or more files (a file for each subproduct)
 #   Arguments:
@@ -2011,7 +2008,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
                 "version": product['version']}
 
         # Get information from sub_dataset_source table
-        product_in_info = querydb.get_product_in_info(echo=echo_query, **args)
+        product_in_info = querydb.get_product_in_info(**args)
 
         # Check if the scaling has been read/save to .tmp dir (MC. 26.7.2016: Issue for MODIS SST .nc files)
         try:
@@ -2029,7 +2026,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         # Get information from 'product' table
         args = {"productcode": product['productcode'], "subproductcode": subproducts[ii]['subproduct'], "version":product['version']}
-        product_info = querydb.get_product_out_info(echo=echo_query, **args)
+        product_info = querydb.get_product_out_info(**args)
         product_info = functions.list_to_element(product_info)
 
         out_data_type = product_info.data_type_id
@@ -2335,7 +2332,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # Loop on interm_files
         ii += 1
 
-def ingest_file_vers_1_0(input_file, in_date, product_def, target_mapset, my_logger, product_in_info, echo_query=False):
+def ingest_file_vers_1_0(input_file, in_date, product_def, target_mapset, my_logger, product_in_info):
 # -------------------------------------------------------------------------------------------------------
 #   Convert 1 file from 1.0 to 2.0 eStation format
 #   Arguments:
@@ -2384,7 +2381,7 @@ def ingest_file_vers_1_0(input_file, in_date, product_def, target_mapset, my_log
 
     # Get information from 'product' table
     args = {"productcode": product_def['productcode'], "subproductcode": product_def['subproductcode'], "version":product_def['version']}
-    product_info = querydb.get_product_out_info(echo=echo_query, **args)
+    product_info = querydb.get_product_out_info(**args)
     product_info = functions.list_to_element(product_info)
 
     out_data_type = product_info.data_type_id
@@ -2496,7 +2493,7 @@ def ingest_file_vers_1_0(input_file, in_date, product_def, target_mapset, my_log
     sds_meta.write_to_ds(trg_ds)
     trg_ds = None
 
-def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete=False):
+def ingest_file_archive(input_file, target_mapsetid, no_delete=False):
 # -------------------------------------------------------------------------------------------------------
 #   Ingest a file of type MESA_JRC_
 #   Arguments:

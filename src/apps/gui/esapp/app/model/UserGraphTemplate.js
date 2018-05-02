@@ -2,8 +2,12 @@ Ext.define('esapp.model.UserGraphTemplate', {
     extend : 'esapp.model.Base',
 
     fields: [
+        {name: 'workspaceid', mapping: 'workspaceid'},
         {name: 'userid', mapping: 'userid'},
+        {name: 'graph_tpl_id', mapping: 'graph_tpl_id'},
+        {name: 'parent_tpl_id', mapping: 'parent_tpl_id'},
         {name: 'graph_tpl_name', type: 'string', mapping: 'templatename'},
+        {name: 'istemplate', mapping: 'istemplate'},
         {name: 'graphviewposition', mapping: 'graphviewposition'},
         {name: 'graphviewsize', mapping: 'graphviewsize'},
         {name: 'graph_type', mapping: 'graph_type'},
@@ -21,6 +25,7 @@ Ext.define('esapp.model.UserGraphTemplate', {
         {name: 'logosobjposition', mapping: 'logosobjposition'},
         {name: 'logosobjcontent', mapping: 'logosobjcontent'},
         {name: 'showobjects',  type: 'boolean', mapping: 'showobjects'},
+        {name: 'showtoolbar',  type: 'boolean', mapping: 'showtoolbar'},
         {name: 'auto_open',  type: 'boolean', mapping: 'auto_open'}
     ]
 });

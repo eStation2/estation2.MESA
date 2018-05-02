@@ -230,25 +230,17 @@
 
 }
 
+.pin_red {
+    color: red;
+}
 
+.pin_green {
+    color: lime;
+}
 
-/*.x-grid-header-ct {*/
-    /*height: 70px !important;*/
-/*}*/
-
-/*.x-column-header {*/
-    /*height: 70px !important;*/
-/*}*/
-
-/*.custom-row-selector .x-grid-row-selected .x-grid-cell {*/
-    /*background-color: #ff0 !important;*/
-    /*border-bottom-color: #999;*/
-    /*border-bottom-style: solid;*/
-    /*border-top-color: #999;*/
-    /*border-top-style: solid;*/
-/*}*/
-
-
+.newworkspacetab .x-tab-inner-workspace{
+    color: darkred !important;
+}
 
 
 .table-header-rotated{
@@ -457,6 +449,22 @@ p {
 }
 
 .chartfitlayout{width:100% !important; height:100% !important;}
+
+
+.change-region-link {
+    background-image:url(../img/change-region-geom-linked2.png);
+    background-repeat: no-repeat;
+}
+
+.change-region-unlink {
+    background-image:url(../img/change-region-geom-unlinked3.png);
+    background-repeat: no-repeat;
+}
+
+.change-region-icon {
+    background-image:url(../img/change-region-geom.png);
+    background-repeat: no-repeat;
+}
 
 .download_png {
     background-image:url(../img/download_png.png);
@@ -817,21 +825,49 @@ p {
 /*#logo{position:relative;z-index:10;min-height:0;max-width:435px;padding:2px;background-color:#fff;}*/
 #logo{position:relative;z-index:10;min-height:0;padding:2px;background-color:#fff;}
 
+.mapview-regionname {
+    line-height: 14px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: bold;
+    margin-right: 5px;
+    width: 185px;
+    height: 25px;
+    float: left;
+    /*display: inline-block;*/
+    word-wrap: break-word;
+    line-height: 13px;
+    white-space: pre-wrap;
+}
 
 .map-templatename {
     font-size:10px;
     color: orange;
     font-weight: bold;
-    margin-right: 25px;
-    display:inline;
+    margin-right: 10px;
+    /*display:inline;*/
+    width: 150px;
+    height: 25px;
+    float: left;
+    /*display: inline-block;*/
+    word-wrap: break-word;
+    line-height: 13px;
+    white-space: pre-wrap;
 }
 
 .graph-templatename {
     font-size:10px;
     color: greenyellow;
     font-weight: bold;
-    margin-right: 25px;
-    display:inline;
+    margin-right: 10px;
+    /*display:inline;*/
+    width: 150px;
+    height: 25px;
+    float: left;
+    /*display: inline-block;*/
+    word-wrap: break-word;
+    line-height: 13px;
+    white-space: pre-wrap;
 }
 
 .smalltext {font-size:10px;}
@@ -978,10 +1014,32 @@ p {
     padding: 0px;
 }
 
+.rounded-box .x-panel-default-outer-border-rbl .x-panel-default-outer-border-trl{
+    border-right-color: lightslategray !important;
+    border-right-width: 1px !important;
+    border-bottom-color: lightslategray !important;
+    border-bottom-width: 1px !important;
+    border-left-color: lightslategray !important;
+    border-left-width: 1px !important;
+}
+
+/*.rounded-box-header .x-panel-header-default {*/
+    /*border: 1px solid lightslategray !important;*/
+    /*background-color: #A9DEEC !important;*/
+    /*font-weight:bold;*/
+    /*color:#000;*/
+    /*font-size:13px;*/
+/*}*/
+
+.rounded-box-header .x-tool-img {
+    background-color: #A9DEEC !important;
+}
+
 .rounded-box-gray-header {
     color: #0e90d2 !important;
     background-color: lightgrey !important;
 }
+
 
 /* .x-panel-header-text-default .x-panel-header-text  "border","1px solid #333"*/
 
@@ -990,7 +1048,7 @@ p {
     border-radius: 4px;
 }
 
-.newpanelstyle .x-panel-default-outer-border-rbl {
+.newpanelstyle .x-panel-default-outer-border-rbl .x-panel-default-outer-border-trl{
     border-right-color: #BABABA !important;
     border-right-width: 1px !important;
     border-bottom-color:#BABABA !important;
@@ -1077,7 +1135,7 @@ p {
 
 .mapsets div.mapset {
     float: left;
-    padding: 8px 10px 8px 10px;
+    /*padding: 5px 5px 5px 5px;*/
     margin: 5px;
 /*    margin: 10px 0 0 25px;*/
     text-align: center;
@@ -1085,7 +1143,7 @@ p {
     color: #333;
     font-size: 12px;
     font-family: "Helvetica Neue",sans-serif;
-    height: 155px;
+    /*height: 155px;*/
     /*width: 140px;*/
     overflow: hidden;
     border-top: 1px solid transparent;

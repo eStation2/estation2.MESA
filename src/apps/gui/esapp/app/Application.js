@@ -62,9 +62,10 @@ Ext.define('esapp.Application', {
         ,'DataAcquisitionsStore'    // no autoload
         ,'IngestionsStore'          // no autoload
         ,'TimeseriesProductsStore'  // no autoload
-        ,'TSDrawPropertiesStore'
+        // ,'TSDrawPropertiesStore'
         ,"ColorSchemesStore"
         ,'DataSetsStore'            // no autoload
+        ,'UserWorkspacesStore'      // no autoload
     ],
 
     // create a reference in Ext.application so we can access it from multiple functions
@@ -77,17 +78,25 @@ Ext.define('esapp.Application', {
         //console.info(me);
 
         Ext.override(Ext.tip.QuickTip, {
-            dismissDelay: 20000
+            // dismissDelay: 20000
+            shadow: false
         });
 
         Ext.tip.QuickTipManager.init();
+        // Apply a set of config properties to the singleton
+        // Ext.apply(Ext.tip.QuickTipManager.getQuickTip(), {
+        //     shadow: false,
+        //     frame: true,
+        //     showDelay: 50      // Show 50ms after entering target
+        // });
+
+
         Ext.setGlyphFontFamily('FontAwesome');
         Ext.state.Manager.setProvider(Ext.create('Ext.state.CookieProvider'));
 
         Ext.Ajax.timeout = 300000; // 300 seconds
-        //Ext.override(Ext.form.Basic, {     timeout: Ext.Ajax.timeout / 1000 });
-        Ext.override(Ext.data.proxy.Server, {     timeout: Ext.Ajax.timeout });
-        Ext.override(Ext.data.Connection, {     timeout: Ext.Ajax.timeout });
+        Ext.override(Ext.data.proxy.Server, { timeout: Ext.Ajax.timeout });
+        Ext.override(Ext.data.Connection, { timeout: Ext.Ajax.timeout });
 
         esapp.globals = [];
 
@@ -175,7 +184,7 @@ Ext.define('esapp.Application', {
                         var taskLaunch = new Ext.util.DelayedTask(function() {
                             me.launch();
                         });
-                        taskLaunch.delay(500);
+                        taskLaunch.delay(50);
 
                     }
                 });

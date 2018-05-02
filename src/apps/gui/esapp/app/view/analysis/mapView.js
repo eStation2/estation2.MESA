@@ -31,16 +31,17 @@ Ext.define("esapp.view.analysis.mapView",{
     constrainHeader: true,
     //constrain: true,
     autoShow : false,
-    closeable: true,
+    closable: true,
     closeAction: 'destroy', // 'hide',
     maximizable: true,
     collapsible: true,
     resizable: true,
+    focusable: true,
 
-    width:800,
-    height: Ext.getBody().getViewSize().height < 700 ? Ext.getBody().getViewSize().height-100 : 700,
+    width:650,
+    height: Ext.getBody().getViewSize().height < 650 ? Ext.getBody().getViewSize().height-100 : 650,
 
-    minWidth:630,
+    minWidth:603,
     minHeight:550,
 
     x: 20,
@@ -53,18 +54,29 @@ Ext.define("esapp.view.analysis.mapView",{
         type: 'border'
     },
 
-    isTemplate: false,
-    layers: [],
-    projection: 'EPSG:4326',
-    link_product_layer: true,
-
     publishes: ['titleData'],       // , 'logoData'
     config: {
         titleData: null,
         // logoData: null,
-        showTimeline: true,
+        productcode: '',
+        productname: '',
+        productdate: '',
+        link_product_layer: true,
+        showlegend: true,
+        showObjects: false,
+        showtoolbar: true,
+        showgraticule: false,
+        showtimeline: true,
+        nozoom: false,
+        isTemplate: false,
         isNewTemplate: true,
-        showlegend: true
+        map_tpl_id: null,
+        parent_tpl_id: null,
+        templatename: '',
+        workspace: null,
+        layers: [],
+        draw: null,
+        projection: 'EPSG:4326'
     },
     bind:{
         titleData:'{titleData}'
@@ -73,16 +85,11 @@ Ext.define("esapp.view.analysis.mapView",{
 
     initComponent: function () {
         var me = this;
-        me.link_product_layer = true;
-        me.layers = [];
-        me.draw = null;
         me.frame = false;
         me.border= false;
         me.bodyBorder = false;
         me.highlight = null;
         me.toplayer = null;
-        me.productname = '';
-        me.productdate = '';
         me.selectedarea = '';
         me.selectedfeature = null;
         me.featureOverlay = null;
@@ -90,36 +97,62 @@ Ext.define("esapp.view.analysis.mapView",{
         me.selectedFeatureFromDrawLayer = false;
 
         me.title = '<span id="mapview_title_templatename_' + me.id + '" class="map-templatename"></span><span id="mapview_title_productname_' + me.id + '"></span>';
-        me.height = Ext.getBody().getViewSize().height < 700 ? Ext.getBody().getViewSize().height-100 : 700;
+        me.height = Ext.getBody().getViewSize().height < 650 ? Ext.getBody().getViewSize().height-100 : 650;
 
         me.controller.createToolBar();
 
-
-        me.tools = [
-        {
+        me.tools = [{
             type: 'gear',
             tooltip: esapp.Utils.getTranslation('maptoolsmenu'), // 'Map tools menu',
             callback: function (mapwin) {
-                // toggle hide/show toolbar and adjust map size.
-                var sizeWinBody = [];
+                // toggle hide/show toolbar, without the adjusting the map size, with repositioning the object.
+                var mapLegendObj = me.lookupReference('product-legend_' + me.id),
+                    titleObj = me.lookupReference('title_obj_' + me.id),
+                    disclaimerObj = me.lookupReference('disclaimer_obj_' + me.id),
+                    logoObj = me.lookupReference('logo_obj_' + me.id),
+                    scalelineObj = me.lookupReference('scale-line_' + me.id),
+                    mapObjectToggleBtn = me.lookupReference('objectsbtn_'+me.id.replace(/-/g,'_'));
+
+                if (mapObjectToggleBtn.pressed) {
+                    disclaimerObj.disclaimerPosition = disclaimerObj.getPosition(true);
+                    titleObj.titlePosition = titleObj.getPosition(true);
+                    logoObj.logoPosition = logoObj.getPosition(true);
+                }
+                if (!scalelineObj.hidden) {
+                    scalelineObj.scalelinePosition = scalelineObj.getPosition(true);
+                }
+
+                // var sizeWinBody = [];
                 var mapToolbar = mapwin.getDockedItems('toolbar[dock="top"]')[0];
-                var widthToolbar = mapToolbar.getWidth();
-                var heightToolbar = mapToolbar.getHeight();
+                // var widthToolbar = mapToolbar.getWidth();
+                // var heightToolbar = mapToolbar.getHeight();
+                // console.info(heightToolbar);
                 if (mapToolbar.hidden == false) {
+                    mapwin.setHeight(mapwin.height-39);
                     mapToolbar.setHidden(true);
-                    sizeWinBody = [document.getElementById(mapwin.id + "-body").offsetWidth, document.getElementById(mapwin.id + "-body").offsetHeight+heightToolbar];
+                    if (mapObjectToggleBtn.pressed) {
+                        disclaimerObj.setPosition(disclaimerObj.disclaimerPosition);
+                        titleObj.setPosition(titleObj.titlePosition);
+                        logoObj.setPosition(logoObj.logoPosition);
+                    }
+                    if (!scalelineObj.hidden) {
+                        scalelineObj.setPosition(scalelineObj.scalelinePosition);
+                    }
+                    // sizeWinBody = [document.getElementById(mapwin.id + "-body").offsetWidth, document.getElementById(mapwin.id + "-body").offsetHeight+heightToolbar];
                 }
                 else {
+                    mapwin.setHeight(mapwin.height+39);
                     mapToolbar.setHidden(false);
-                    sizeWinBody = [document.getElementById(mapwin.id + "-body").offsetWidth, document.getElementById(mapwin.id + "-body").offsetHeight-heightToolbar];
+                    // sizeWinBody = [document.getElementById(mapwin.id + "-body").offsetWidth, document.getElementById(mapwin.id + "-body").offsetHeight-heightToolbar];
                 }
-                mapwin.map.setSize(sizeWinBody);
+                // mapwin.map.setSize(sizeWinBody);
+                mapwin.map.updateSize();
             }
         }];
 
         me.mapView = new ol.View({
-            projection:"EPSG:4326",
-            displayProjection:"EPSG:4326",
+            projection:me.projection,
+            displayProjection:me.projection,
             center: [16.4, -0.5],   // [20, -4.7],   // ol.proj.transform([20, 4.5], 'EPSG:3857', 'EPSG:4326'),
             resolution: 0.1,
             minResolution: 0.0001,
@@ -142,7 +175,8 @@ Ext.define("esapp.view.analysis.mapView",{
                 xtype: 'container',
                 reference: 'mapcontainer_' + me.id,
                 id: 'mapcontainer_' + me.id,
-                layout: 'fit'
+                layout: 'fit',
+                margin: 0
                 // ,html: '<div id="mapview_' + me.id + '"></div>'
             },{
                 xtype: 'button',
@@ -167,7 +201,7 @@ Ext.define("esapp.view.analysis.mapView",{
                 shadow: false,
                 // alignTarget : me,
                 defaultAlign: 'tr-tr',  // 'c-c',
-                alwaysOnTop: true,
+                alwaysOnTop: false,
                 constrain: true,
                 enableToggle: true,
                 padding: 0,
@@ -224,26 +258,12 @@ Ext.define("esapp.view.analysis.mapView",{
 
                                 mapview_linked = !me.lookupReference('toggleLink_btn_'+me.id.replace(/-/g,'_')).pressed;
                                 if (mapview_linked){
-                                    // me.up().commonMapView =  new ol.View({
-                                    //     projection:"EPSG:4326",
-                                    //     displayProjection:"EPSG:4326",
-                                    //     center: me.up().commonMapView.getCenter(),    // [20, -2],   // [20, -4.7],
-                                    //     resolution: 0.1,
-                                    //     minResolution: 0.0001,
-                                    //     maxResolution: 0.25,
-                                    //     zoomFactor: 1.1+0.1*value   // (cioe' nel range 1.1 -> 2.1)
-                                    //     // zoom: me.up().commonMapView.getZoom()-(2*value),
-                                    //     // minZoom: 15-(2*value),
-                                    //     // maxZoom: 110,
-                                    //     // zoomFactor: 1.1+(0.01*value)
-                                    // });
-
                                     me.up().zoomFactorValue = value;
                                     me.up().zoomFactorSliderValue = value;
 
                                     properties = me.up().commonMapView.getProperties();
-                                    properties['projection'] = "EPSG:4326";
-                                    properties['displayProjection'] = "EPSG:4326";
+                                    properties['projection'] = me.projection;
+                                    properties['displayProjection'] = me.projection;
                                     // properties['resolution'] = 0.1;
                                     properties['minResolution'] = 0.0001;
                                     properties['maxResolution'] = 0.25;
@@ -281,8 +301,8 @@ Ext.define("esapp.view.analysis.mapView",{
                                     // me.mapView.set('zoomFactor', 1.1+0.1*value, false);
 
                                     properties = me.mapView.getProperties();
-                                    properties['projection'] = "EPSG:4326";
-                                    properties['displayProjection'] = "EPSG:4326";
+                                    properties['projection'] = me.projection;
+                                    properties['displayProjection'] = me.projection;
                                     // properties['resolution'] = 0.1;
                                     properties['minResolution'] = 0.0001;
                                     properties['maxResolution'] = 0.25;
@@ -316,7 +336,7 @@ Ext.define("esapp.view.analysis.mapView",{
                 shadow: false,
                 // alignTarget : me,
                 defaultAlign: 'tr-tr',  // 'c-c',
-                alwaysOnTop: true,
+                alwaysOnTop: false,
                 constrain: true,
                 // width: 150,
                 // value: 100,
@@ -407,11 +427,11 @@ Ext.define("esapp.view.analysis.mapView",{
                 reference: 'title_obj_' + me.id
             }, {
                 xtype: 'mapdisclaimerobject',
-                id: 'disclaimer_obj_' + me.id,
+                // id: 'disclaimer_obj_' + me.id,
                 reference: 'disclaimer_obj_' + me.id
             }, {
                 xtype: 'maplogoobject',
-                id: 'logo_obj_' + me.id,
+                // id: 'logo_obj_' + me.id,
                 reference: 'logo_obj_' + me.id
             }]
         },{
@@ -425,7 +445,7 @@ Ext.define("esapp.view.analysis.mapView",{
             padding:0,
             height: 125,
             maxHeight: 125,
-            hidden: true,
+            hidden: me.showtimeline ? false : true,
             hideMode : 'display',    //'display', 'visibility' 'offsets'
             frame:  false,
             shadow: false,
@@ -436,12 +456,12 @@ Ext.define("esapp.view.analysis.mapView",{
             // },
             header : false,
             collapsible: true,
-            collapsed: true,
+            collapsed: me.showtimeline ? false : true,
             // collapseFirst: true,
             collapseDirection: 'bottom',
             collapseMode : "mini",  // The Panel collapses without a visible header.
             //headerPosition: 'left',
-            hideCollapseTool: true,
+            // hideCollapseTool: false,        // me.productcode != '' ? false : true,
             split: true,
             splitterResize : false,
             dockedItems: [{
@@ -519,21 +539,32 @@ Ext.define("esapp.view.analysis.mapView",{
                 }]
             }],
             listeners: {
-                show: function () {
-                    // Ext.util.Observable.capture(this, function(e){console.log('timeline - ' + this.id + ': ' + e);});
-                    this.expand();
+                // beforerender: function(timeline){
+                //     Ext.util.Observable.capture(timeline, function(e){console.log('timeline - ' + timeline.id + ': ' + e);});
+                // },
+                show: function (timeline) {
+                    // console.info(me);
+                    var mapviewtimeline = me.lookupReference('product-time-line_' + me.id);
+                    if (me.showtimeline) {
+                        mapviewtimeline.fireEvent('beforeexpand');
+                        mapviewtimeline.fireEvent('expand');
+                        // mapviewtimeline.expand();
+                        // me.getController().redrawTimeLine(me);
+                    }
                     // console.info('show');
-                    me.getController().redrawTimeLine(me);
+                    // console.info(timeline);
                 }
                 ,beforeexpand: function () {
                     // console.info('beforeexpand Height to: ' + me.height+125);
                     me.setHeight(me.height+125);
+                    // me.map.updateSize();
                 }
                 ,expand: function () {
-                    var size = [document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight-133];
-                    me.map.setSize(size);
+                    // var size = [document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight-133];
+                    // me.map.setSize(size);
+                    me.map.updateSize();
                     // console.info('Expanding map size: ' + size);
-                    me.getController().redrawTimeLine(me);
+                    me.getController().redrawTimeLine();
                 }
                 ,beforecollapse: function () {
                     var mapLegendObj = me.lookupReference('product-legend_' + me.id),
@@ -551,9 +582,9 @@ Ext.define("esapp.view.analysis.mapView",{
                     if (!scalelineObj.hidden) {
                         scalelineObj.scalelinePosition = scalelineObj.getPosition(true);
                     }
-                    // if (!mapLegendObj.hidden) {
-                    //     mapLegendObj.legendPosition = mapLegendObj.getPosition(true);
-                    // }
+                    if (!mapLegendObj.hidden) {
+                        mapLegendObj.legendPosition = mapLegendObj.getPosition(true);
+                    }
                     // console.info('beforecollapse Height to: ' + me.height-125);
                     me.setHeight(me.height-125);
                 }
@@ -573,11 +604,12 @@ Ext.define("esapp.view.analysis.mapView",{
                     if (!scalelineObj.hidden) {
                         scalelineObj.setPosition(scalelineObj.scalelinePosition);
                     }
-                    // if (!mapLegendObj.hidden) {
-                    //     mapLegendObj.setPosition(mapLegendObj.legendPosition);
-                    // }
-                    var size = [document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight-8];   // -8
-                    me.map.setSize(size);
+                    if (!mapLegendObj.hidden) {
+                        mapLegendObj.setPosition(mapLegendObj.legendPosition);
+                    }
+                    // var size = [document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight-8];   // -8
+                    // me.map.setSize(size);
+                    me.map.updateSize();
                     // console.info('Collapsing map size: ' + size);
                 }
             }
@@ -588,6 +620,7 @@ Ext.define("esapp.view.analysis.mapView",{
                 layout: 'fit'
             }]
         }];
+
 
         me.listeners = {
             beforedestroy: function(){
@@ -603,7 +636,7 @@ Ext.define("esapp.view.analysis.mapView",{
                         var stringifyFunc = ol.coordinate.createStringXY(3);
                         return ol.coordinate.toStringHDMS(coord) + ' (' + stringifyFunc(coord) + ')';
                     },
-                    projection: 'EPSG:4326',
+                    projection: me.projection,
                     // comment the following two lines to have the mouse position be placed within the map.
                     // className: 'ol-full-screen',
                     className: 'ol-custom-mouse-position',
@@ -611,15 +644,14 @@ Ext.define("esapp.view.analysis.mapView",{
                     undefinedHTML: '&nbsp;'
                 });
 
-
-                this.map = new ol.Map({
-                    target: 'mapcontainer_'+ this.id,
+                me.map = new ol.Map({
+                    target: 'mapcontainer_'+ me.id,
                     projection: me.projection,
                     displayProjection:"EPSG:4326",
                     //interactions: ol.interaction.defaults().extend([select]),
                     interactions : ol.interaction.defaults({doubleClickZoom :false}),
                     //layers: [blanklayer],
-                    view: this.up().commonMapView,
+                    view: me.up().commonMapView,
                     controls: ol.control.defaults({
                         attribution:false,
                         attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
@@ -628,11 +660,22 @@ Ext.define("esapp.view.analysis.mapView",{
                     }).extend([mousePositionControl])
                 });
 
-                this.map.addInteraction(new ol.interaction.MouseWheelZoom({
+                // var graticule = new ol.Graticule({
+                //     strokeStyle: new ol.style.Stroke({
+                //       color: 'rgba(255,120,0,0.9)',
+                //       width: 2,
+                //       lineDash: [0.5, 4]
+                //     }),
+                //     showLabels: true,
+                //     labelled: true
+                // });
+                // graticule.setMap(me.map);
+
+                me.map.addInteraction(new ol.interaction.MouseWheelZoom({
                     duration: 25
                 }));
 
-                this.map.on('pointermove', function(evt) {
+                me.map.on('pointermove', function(evt) {
                     if (evt.dragging) {
                         return;
                     }
@@ -647,7 +690,7 @@ Ext.define("esapp.view.analysis.mapView",{
                     //});
                 });
 
-                this.map.on('click', function(evt) {
+                me.map.on('click', function(evt) {
                     //var coordinate = evt.coordinate;
                     //overlay.setPosition(coordinate);
                     var drawgeometry_togglebtn = me.lookupReference('drawgeometry_'+me.id.replace(/-/g,'_'));
@@ -657,7 +700,7 @@ Ext.define("esapp.view.analysis.mapView",{
                     }
                 });
 
-                this.map.on('dblclick', function(evt) {
+                me.map.on('dblclick', function(evt) {
                     var drawgeometry_togglebtn = me.lookupReference('drawgeometry_'+me.id.replace(/-/g,'_'));
                     //if (!drawgeometry_togglebtn.pressed && me.map.getLayers().getArray().length > 2) {
                     if (!drawgeometry_togglebtn.pressed) {
@@ -681,22 +724,22 @@ Ext.define("esapp.view.analysis.mapView",{
                 });
 
 
-                this.productlayer = new ol.layer.Tile({       // Image
+                me.productlayer = new ol.layer.Tile({       // Image
                     layer_id: 'productlayer',
                     layerorderidx: 100,
                     type: 'base',
                     visible: false
                 });
-                this.map.getLayers().insertAt(0, this.productlayer);
+                me.map.getLayers().insertAt(0, me.productlayer);
 
 
-                this.drawfeatures = new ol.Collection();
-                this.drawvectorlayer_source = new ol.source.Vector({
-                    features: this.drawfeatures,
+                me.drawfeatures = new ol.Collection();
+                me.drawvectorlayer_source = new ol.source.Vector({
+                    features: me.drawfeatures,
                     wrapX: false
                 });
-                this.drawvectorlayer = new ol.layer.Vector({
-                    source: this.drawvectorlayer_source,
+                me.drawvectorlayer = new ol.layer.Vector({
+                    source: me.drawvectorlayer_source,
                     layer_id: 'drawvectorlayer',
                     layerorderidx: 1,
                     layertype: 'drawvector',
@@ -717,7 +760,7 @@ Ext.define("esapp.view.analysis.mapView",{
                       })
                     })
                 });
-                this.map.getLayers().insertAt(10, this.drawvectorlayer);
+                me.map.getLayers().insertAt(10, me.drawvectorlayer);
 
                 var featureOverlayStyle = (function() {
                     var styles = {};
@@ -782,7 +825,7 @@ Ext.define("esapp.view.analysis.mapView",{
                     };
                 })();
 
-                this.highlightfeatureOverlay_drawvectorlayer = new ol.layer.Vector({      //new ol.FeatureOverlay({
+                me.highlightfeatureOverlay_drawvectorlayer = new ol.layer.Vector({      //new ol.FeatureOverlay({
                     layer_id: 'highlightfeatureOverlay_drawvectorlayer',
                     source: new ol.source.Vector({
                         features: new ol.Collection(),
@@ -796,7 +839,7 @@ Ext.define("esapp.view.analysis.mapView",{
                     map: me.map,
                     style: featureOverlayStyle
                 });
-                me.map.getLayers().insertAt(50, this.highlightfeatureOverlay_drawvectorlayer);
+                me.map.getLayers().insertAt(50, me.highlightfeatureOverlay_drawvectorlayer);
 
                 var feature_selected_outlinecolor = '#FF0000'
                    ,feature_selected_outlinewidth = 2;
@@ -851,7 +894,7 @@ Ext.define("esapp.view.analysis.mapView",{
                     };
                 })();
 
-                this.selectedfeatureOverlay_drawvectorlayer = new ol.layer.Vector({      //new ol.FeatureOverlay({
+                me.selectedfeatureOverlay_drawvectorlayer = new ol.layer.Vector({      //new ol.FeatureOverlay({
                     layer_id: 'selectedfeatureOverlay_drawvectorlayer',
                     source: new ol.source.Vector({
                         features: new ol.Collection(),
@@ -865,230 +908,10 @@ Ext.define("esapp.view.analysis.mapView",{
                     map: me.map,
                     style: selectedFeatureOverlayStyle
                 });
-                me.map.getLayers().insertAt(60, this.selectedfeatureOverlay_drawvectorlayer);
+                me.map.getLayers().insertAt(60, me.selectedfeatureOverlay_drawvectorlayer);
 
-                //me.getController().addLayerSwitcher(me.map);
-                //var selectDrawfeatures = new ol.interaction.Select({
-                //    wrapX: false,
-                //    style: overlayStyle
-                //});
-                //this.map.addInteraction(selectDrawfeatures);
-                //
-                //var modifyDrawfeatures = new ol.interaction.Modify({
-                //    //features: this.drawfeatures,
-                //    features: selectDrawfeatures.getFeatures(),
-                //    style: overlayStyle,
-                //    // the SHIFT key must be pressed to delete vertices, so
-                //    // that new vertices can be drawn at the same position
-                //    // of existing vertices
-                //    deleteCondition: function(event) {
-                //      return ol.events.condition.shiftKeyOnly(event) &&
-                //          ol.events.condition.singleClick(event);
-                //    }
-                //});
-                //this.map.addInteraction(modifyDrawfeatures);
-                //
-                //
-                // var fillopacity = (10/100).toString().replace(",", ".")
-                //     ,highlight_fillcolor_opacity = 'rgba(' + esapp.Utils.HexToRGB('#319FD3') + ',' + fillopacity + ')'
-                //     ,pointfillopacity = (80/100).toString().replace(",", ".")
-                //     ,pointhighlight_fillcolor_opacity = 'rgba(' + esapp.Utils.HexToRGB('#319FD3') + ',' + pointfillopacity + ')'
-                //     ,feature_highlight_outlinecolor = '#319FD3'
-                //     ,feature_highlight_outlinewidth = 2;
-                // var featureOverlayStyle = (function() {
-                //     var styles = {};
-                //     styles['Polygon'] = [
-                //       new ol.style.Style({
-                //         fill: new ol.style.Fill({
-                //           color: highlight_fillcolor_opacity    // 'Transparent'  // [255, 255, 255, 0.5]
-                //         })
-                //       }),
-                //       new ol.style.Style({
-                //         stroke: new ol.style.Stroke({
-                //           color: feature_highlight_outlinecolor, // [255, 0, 0, 1],
-                //           width: feature_highlight_outlinewidth
-                //         })
-                //       })
-                //       //,new ol.style.Style({
-                //       //  stroke: new ol.style.Stroke({
-                //       //    color: [0, 153, 255, 1],
-                //       //    width: 3
-                //       //  })
-                //       //})
-                //     ];
-                //     styles['MultiPolygon'] = styles['Polygon'];
-                //
-                //     styles['LineString'] = [
-                //       new ol.style.Style({
-                //         stroke: new ol.style.Stroke({
-                //           color: feature_highlight_outlinecolor, // [255, 0, 0, 1],
-                //           width: feature_highlight_outlinewidth
-                //         })
-                //       })
-                //       //,new ol.style.Style({
-                //       //  stroke: new ol.style.Stroke({
-                //       //    color: [0, 153, 255, 1],
-                //       //    width: 3
-                //       //  })
-                //       //})
-                //     ];
-                //     styles['MultiLineString'] = styles['LineString'];
-                //
-                //     styles['Point'] = [
-                //       new ol.style.Style({
-                //         image: new ol.style.Circle({
-                //           radius: 6,
-                //           fill: new ol.style.Fill({
-                //             color: pointhighlight_fillcolor_opacity  // [0, 153, 255, 1]
-                //           }),
-                //           stroke: new ol.style.Stroke({
-                //             color: feature_highlight_outlinecolor,   //[255, 0, 0, 0.75],
-                //             width: feature_highlight_outlinewidth
-                //           })
-                //         }),
-                //         zIndex: 100000
-                //       })
-                //     ];
-                //     styles['MultiPoint'] = styles['Point'];
-                //
-                //     styles['GeometryCollection'] = styles['Polygon'].concat(styles['Point']);
-                //
-                //     return function(feature) {
-                //       return styles[feature.getGeometry().getType()];
-                //     };
-                // })();
-                //
-                // this.featureOverlay = new ol.layer.Vector({      //new ol.FeatureOverlay({
-                //         name: 'highlightfeatureOverlay_',       // + layerrecord.get('layername'),
-                //         source: new ol.source.Vector({
-                //             features: new ol.Collection(),
-                //             useSpatialIndex: false, // optional, might improve performance
-                //             wrapX: false,
-                //             noWrap: true
-                //         }),
-                //         updateWhileAnimating: true, // optional, for instant visual feedback
-                //         updateWhileInteracting: true, // optional, for instant visual feedback
-                //
-                //         map: this.map,
-                //         style: featureOverlayStyle
-                //         //style: function (feature, resolution) {
-                //         //    var text = resolution < 5000 ? feature.get(namefield) : '';
-                //         //    //var highlightStyleCache = {};
-                //         //    if (!highlightStyleCache[text]) {
-                //         //        highlightStyleCache[text] = [new ol.style.Style({
-                //         //            stroke: new ol.style.Stroke({
-                //         //                color: layerrecord.get('feature_highlight_outlinecolor'),    // '#319FD3',
-                //         //                width: layerrecord.get('feature_highlight_outlinewidth')
-                //         //            })
-                //         //            , fill: new ol.style.Fill({
-                //         //                color: highlight_fillcolor_opacity    // 'rgba(49,159,211,0.1)'
-                //         //            })
-                //         //            //,text: new ol.style.Text({
-                //         //            //  font: '12px Calibri,sans-serif',
-                //         //            //  text: text,
-                //         //            //  fill: new ol.style.Fill({
-                //         //            //    color: '#000'
-                //         //            //  }),
-                //         //            //  stroke: new ol.style.Stroke({
-                //         //            //    color: '#f00',
-                //         //            //    width: 3
-                //         //            //  })
-                //         //            //})
-                //         //        })];
-                //         //    }
-                //         //    return highlightStyleCache[text];
-                //         //}
-                //     });
-                //
-                //
-                // var feature_selected_outlinecolor = '#FF0000'
-                //    ,feature_selected_outlinewidth = 2;
-                // var selectedFeatureOverlayStyle = (function() {
-                //     var styles = {};
-                //     styles['Polygon'] = [
-                //       new ol.style.Style({
-                //         fill: new ol.style.Fill({
-                //           color: 'Transparent'  // [255, 255, 255, 0.5]
-                //         })
-                //       }),
-                //       new ol.style.Style({
-                //         stroke: new ol.style.Stroke({
-                //           color: feature_selected_outlinecolor,         // layerrecord.get('feature_selected_outlinecolor'), // [255, 0, 0, 1],
-                //           width: feature_selected_outlinewidth          // layerrecord.get('feature_selected_outlinewidth')  // 3
-                //         })
-                //       })
-                //     ];
-                //     styles['MultiPolygon'] = styles['Polygon'];
-                //
-                //     styles['LineString'] = [
-                //       new ol.style.Style({
-                //         stroke: new ol.style.Stroke({
-                //           color: feature_selected_outlinecolor,         // layerrecord.get('feature_selected_outlinecolor'), // [255, 0, 0, 1],
-                //           width: feature_selected_outlinewidth          // layerrecord.get('feature_selected_outlinewidth')  // 3
-                //         })
-                //       })
-                //     ];
-                //     styles['MultiLineString'] = styles['LineString'];
-                //
-                //     styles['Point'] = [
-                //       new ol.style.Style({
-                //         image: new ol.style.Circle({
-                //           radius: 6,
-                //           fill: new ol.style.Fill({
-                //             color: 'Transparent'  // [0, 153, 255, 1]
-                //           }),
-                //           stroke: new ol.style.Stroke({
-                //             color: feature_selected_outlinecolor,       // layerrecord.get('feature_selected_outlinecolor'),   //[255, 0, 0, 0.75],
-                //             width: feature_selected_outlinewidth        // layerrecord.get('feature_highlight_outlinewidth')
-                //           })
-                //         }),
-                //         zIndex: 100000
-                //       })
-                //     ];
-                //     styles['MultiPoint'] = styles['Point'];
-                //
-                //     styles['GeometryCollection'] = styles['Polygon'].concat(styles['Point']);
-                //
-                //     return function(feature) {
-                //       return styles[feature.getGeometry().getType()];
-                //     };
-                // })();
-                //
-                // var selectStyleCache = {};
-                // this.selectedFeatureOverlay = new ol.layer.Vector({      //new ol.FeatureOverlay({
-                //     name: 'selectedfeatureOverlay',        //  + layerrecord.get('layername'),
-                //     source: new ol.source.Vector({
-                //         features: new ol.Collection(),
-                //         useSpatialIndex: false, // optional, might improve performance
-                //         wrapX: false,
-                //         noWrap: true
-                //     }),
-                //     updateWhileAnimating: true, // optional, for instant visual feedback
-                //     updateWhileInteracting: true, // optional, for instant visual feedback
-                //
-                //     map: this.map,
-                //     style: selectedFeatureOverlayStyle
-                //     //style: function (feature, resolution) {
-                //     //    var text = resolution < 5000 ? feature.get(namefield) : '';
-                //     //    //var selectStyleCache = {};
-                //     //    if (!selectStyleCache[text]) {
-                //     //        selectStyleCache[text] = [new ol.style.Style({
-                //     //            stroke: new ol.style.Stroke({
-                //     //                color: layerrecord.get('feature_selected_outlinecolor'),   // '#f00',
-                //     //                width: layerrecord.get('feature_selected_outlinewidth')
-                //     //            })
-                //     //            , fill: new ol.style.Fill({
-                //     //                color: 'Transparent' // 'rgba(255,0,0,0.1)'
-                //     //            })
-                //     //        })];
-                //     //    }
-                //     //    return selectStyleCache[text];
-                //     //}
-                // });
-
-
-                // this.el is not created until after the Window is rendered so you need to add the mon after rendering:
-                this.mon(this.el, {
+                // me.el is not created until after the Window is rendered so you need to add the mon after rendering:
+                me.mon(me.el, {
                     mouseout: function() {
                         //console.info(me);
                         if (esapp.Utils.objectExists(me.featureOverlay) && esapp.Utils.objectExists(me.highlight)){
@@ -1101,13 +924,15 @@ Ext.define("esapp.view.analysis.mapView",{
                         if(e.getKey() == 46){ //delete key pressed
                             //delete feature from draw vector layer if selected feature is a feature from the draw vector layer
                             if (me.selectedfeature != null && me.selectedFeatureFromDrawLayer) {
-                                var selectedregion = Ext.getCmp('selectedregionname');
-                                var wkt_polygon = Ext.getCmp('wkt_polygon');
+                                // var selectedregion = Ext.getCmp('selectedregionname');
+                                // var wkt_polygon = Ext.getCmp('wkt_polygon');
+                                var selectedregion = me.workspace.lookupReference('timeserieschartselection'+me.workspace.id).lookupReference('selectedregionname');
+                                var wkt_polygon = me.workspace.lookupReference('timeserieschartselection'+me.workspace.id).lookupReference('wkt_polygon');
                                 //me.selectedFeatureOverlay.getSource().removeFeature(me.selectedfeature);
                                 me.drawvectorlayer.getSource().removeFeature(me.selectedfeature);
                                 wkt_polygon.setValue('');
                                 selectedregion.setValue('&nbsp;');
-                                Ext.getCmp('fieldset_selectedregion').hide();
+                                // Ext.getCmp('fieldset_selectedregion').hide();
                                 me.selectedFeatureOverlay.getSource().clear();
                                 me.selectedfeature = null;
                                 me.getController().outmaskingPossible();
@@ -1117,22 +942,26 @@ Ext.define("esapp.view.analysis.mapView",{
                 });
 
 
-                if (me.isTemplate){
-                    var mapLegendObj = me.lookupReference('product-legend_' + me.id),
-                        titleObj = me.lookupReference('title_obj_' + me.id),
-                        disclaimerObj = me.lookupReference('disclaimer_obj_' + me.id),
-                        logoObj = me.lookupReference('logo_obj_' + me.id),
-                        scalelineObj = me.lookupReference('scale-line_' + me.id),
-                        mapObjectToggleBtn = me.lookupReference('objectsbtn_'+me.id.replace(/-/g,'_'));
+                var mapLegendObj = me.lookupReference('product-legend_' + me.id),
+                    titleObj = me.lookupReference('title_obj_' + me.id),
+                    disclaimerObj = me.lookupReference('disclaimer_obj_' + me.id),
+                    logoObj = me.lookupReference('logo_obj_' + me.id),
+                    scalelineObj = me.lookupReference('scale-line_' + me.id),
+                    mapObjectToggleBtn = me.lookupReference('objectsbtn_'+me.id.replace(/-/g,'_')),
+                    mapviewLinkToggleBtn = me.lookupReference('toggleLink_btn_'+ me.id.replace(/-/g,'_'));
 
+                if (me.isNewTemplate && me.workspace.workspaceid == "defaultworkspace"){
+                    // Link Mapview window
+                    mapviewLinkToggleBtn.toggle(false);
+                }
+                else {
                     // Unlink Mapview window
-                    var mapviewLinkToggleBtn = me.lookupReference('toggleLink_btn_'+ me.id.replace(/-/g,'_'));
-                    // mapviewLinkToggleBtn.setIconCls('fa fa-chain-broken fa-2x red');
                     mapviewLinkToggleBtn.toggle(true);  // ('pressed', false);
-                    // mapviewLinkToggleBtn.fireEvent('toggle');
+                    // mapviewLinkToggleBtn.setIconCls('fa fa-chain-broken fa-2x red');
+                }
 
-
-                    if (me.zoomextent != null && me.zoomextent.trim() != ''){
+                if (!me.nozoom){
+                    if (esapp.Utils.objectExists(me.zoomextent) && me.zoomextent != null && me.zoomextent.trim() != ''){
                         // var taskZoom = new Ext.util.DelayedTask(function() {
                             var extent = me.zoomextent.split(",").map(Number);
                             var mapsize = (me.mapsize != null && me.mapsize.trim() != '') ? me.mapsize.split(",").map(Number) : [790, 778]; // /** @type {ol.Size} */ (me.map.getSize());
@@ -1145,152 +974,187 @@ Ext.define("esapp.view.analysis.mapView",{
                         // });
                         // taskZoom.delay(50);
                     }
+                }
 
+                var mapviewtimeline = me.lookupReference('product-time-line_' + me.id);
+                if (esapp.Utils.objectExists(me.productcode) && me.productcode != ''){
+                    mapviewtimeline.show();
+                }
+                else {
+                    mapviewtimeline.hide();
+                }
+
+                if (esapp.Utils.objectExists(me.mapviewSize)){
                     me.setSize(me.mapviewSize[0],me.mapviewSize[1]);
+                }
+                if (esapp.Utils.objectExists(me.mapviewPosition)){
                     me.setPosition(me.mapviewPosition);
+                }
 
+                var mapToolbar = me.getDockedItems('toolbar[dock="top"]')[0];
+                if (me.showtoolbar) {
+                    mapToolbar.show();
+                }
+                else {
+                    mapToolbar.hide();
+                }
+
+                if (esapp.Utils.objectExists(me.disclaimerObjPosition)){
                     disclaimerObj.disclaimerPosition = me.disclaimerObjPosition;
                     disclaimerObj.setHtml(me.disclaimerObjContent);
                     disclaimerObj.setContent(me.disclaimerObjContent);
+                }
 
+                if (esapp.Utils.objectExists(me.logosObjPosition)) {
                     logoObj.logoPosition = me.logosObjPosition;
                     // me.setLogoData(me.logosObjContent);
                     // logoObj.setLogoData(me.logosObjContent);
                     logoObj.getViewModel().data.logoData = me.logosObjContent;
-
+                }
+                if (esapp.Utils.objectExists(me.scalelineObjPosition)) {
                     scalelineObj.scalelinePosition = me.scalelineObjPosition;
+                }
 
+                if (esapp.Utils.objectExists(me.titleObjPosition)){
                     titleObj.titlePosition = me.titleObjPosition;
-                    if (me.titleObjContent != null && me.titleObjContent.trim() != ''){
-                        titleObj.setTpl([]);    // empty template which must be an array
-                        titleObj.setTpl(me.titleObjContent);
-                        // titleObj.tpl.push(me.titleObjContent);
-                        // titleObj.tpl.set(me.titleObjContent, true);
-                    }
-
-                    if (me.showObjects){
-                        var taskToggleObjects = new Ext.util.DelayedTask(function() {
-                            //console.info(mapObjectToggleBtn);
-                            mapObjectToggleBtn.toggle(true);
-                            me.getController().toggleObjects(mapObjectToggleBtn);
-
-                        });
-                        taskToggleObjects.delay(0);
-                    }
-
-                    Ext.fly('mapview_title_templatename_' + me.id).dom.innerHTML = me.templatename;
-                    //me.setTitle('<div id="mapview_title_templatename_' + me.id + '" class="map-templatename">' + me.templatename + '</div>');
-
-                    if (me.productcode != ''){
-                        var taskAddProductLayer = new Ext.util.DelayedTask(function() {
-
-                            mapLegendObj.legendPosition = me.legendObjPosition;
-                            mapLegendObj.legendLayout = me.legendlayout;
-                            mapLegendObj.showlegend = me.showlegend;
-
-                            Ext.data.StoreManager.lookup('DataSetsStore').each(function(rec){
-                                if (rec.get('productcode')== me.productcode && rec.get('version')== me.productversion ){
-                                    rec.get('productmapsets').forEach(function(mapset){
-                                        if (mapset.mapsetcode==me.mapsetcode){
-                                            mapset.mapsetdatasets.forEach(function(mapsetdataset){
-                                                if (mapsetdataset.subproductcode==me.subproductcode){
-                                                    me.productname = mapsetdataset.descriptive_name;
-                                                    me.date_format = mapsetdataset.date_format;
-                                                    me.frequency_id = mapsetdataset.frequency_id;
-                                                }
-                                            },this);
-                                        }
-                                    },this);
-                                }
-                            },this);
-
-                            Ext.data.StoreManager.lookup('ColorSchemesStore').each(function(rec){
-                                if (rec.get('legend_id')==me.legendid){
-                                    //me.colorschemeHTML = rec.get('colorschemeHTML');
-                                    me.legendHTML = rec.get('legendHTML');
-                                    me.legendHTMLVertical = rec.get('legendHTMLVertical');
-                                }
-                            },this);
-
-                            me.getController().addProductLayer(me.productcode,
-                                                               me.productversion,
-                                                               me.mapsetcode,
-                                                               me.subproductcode,
-                                                               me.legendid,
-                                                               me.legendHTML,
-                                                               me.legendHTMLVertical,
-                                                               me.productname,
-                                                               me.date_format,
-                                                               me.frequency_id
-                            );
-
-                        });
-                        taskAddProductLayer.delay(500);
-                    }
-
-                    if (me.vectorLayers != null && me.vectorLayers.trim() != '') {
-                        this.getController().loadLayersByID(me.vectorLayers.split(",").map(Number));
-                    }
                 }
-                else {
-                    this.getController().loadDefaultLayers();
+                if (esapp.Utils.objectExists(me.titleObjContent) && me.titleObjContent.trim() != ''){
+                    titleObj.setTpl([]);    // empty template which must be an array
+                    titleObj.setTpl(me.titleObjContent);
+                    // titleObj.tpl.push(me.titleObjContent);
+                    // titleObj.tpl.set(me.titleObjContent, true);
                 }
 
-                //Ext.EventManager.on(this,'keypress',function(e){ alert( e.getKey() ) });
+                if (me.showObjects){
+                    var taskToggleObjects = new Ext.util.DelayedTask(function() {
+                        //console.info(mapObjectToggleBtn);
+                        mapObjectToggleBtn.toggle(true);
+                        me.getController().toggleObjects(mapObjectToggleBtn);
+
+                    });
+                    taskToggleObjects.delay(200);
+                }
+
+                Ext.fly('mapview_title_templatename_' + me.id).dom.innerHTML = me.templatename;
+                //me.setTitle('<div id="mapview_title_templatename_' + me.id + '" class="map-templatename">' + me.templatename + '</div>');
+
+                if (esapp.Utils.objectExists(me.productcode) && me.productcode != ''){
+                    var taskAddProductLayer = new Ext.util.DelayedTask(function() {
+
+                        mapLegendObj.legendPosition = me.legendObjPosition;
+                        mapLegendObj.legendLayout = me.legendlayout;
+                        mapLegendObj.showlegend = me.showlegend;
+
+                        Ext.data.StoreManager.lookup('DataSetsStore').each(function(rec){
+                            if (rec.get('productcode')== me.productcode && rec.get('version')== me.productversion ){
+                                rec.get('productmapsets').forEach(function(mapset){
+                                    if (mapset.mapsetcode==me.mapsetcode){
+                                        mapset.mapsetdatasets.forEach(function(mapsetdataset){
+                                            if (mapsetdataset.subproductcode==me.subproductcode){
+                                                me.productname = mapsetdataset.descriptive_name;
+                                                me.date_format = mapsetdataset.date_format;
+                                                me.frequency_id = mapsetdataset.frequency_id;
+                                            }
+                                        },this);
+                                    }
+                                },this);
+                            }
+                        },this);
+
+                        Ext.data.StoreManager.lookup('ColorSchemesStore').each(function(rec){
+                            if (rec.get('legend_id')==me.legendid){
+                                //me.colorschemeHTML = rec.get('colorschemeHTML');
+                                me.legendHTML = rec.get('legendHTML');
+                                me.legendHTMLVertical = rec.get('legendHTMLVertical');
+                            }
+                        },this);
+
+                        me.getController().addProductLayer(me.productcode,
+                                                           me.productversion,
+                                                           me.mapsetcode,
+                                                           me.subproductcode,
+                                                           me.legendid,
+                                                           me.legendHTML,
+                                                           me.legendHTMLVertical,
+                                                           me.productname,
+                                                           me.date_format,
+                                                           me.frequency_id
+                        );
+
+                    });
+                    taskAddProductLayer.delay(500);
+                }
+
+                if (me.vectorLayers != null && me.vectorLayers.trim() != '') {
+                    me.getController().loadLayersByID(me.vectorLayers.split(",").map(Number));
+                }
+
+
+                if (!me.isTemplate && me.isNewTemplate) {
+                    me.getController().loadDefaultLayers();
+                }
+
+                //Ext.EventManager.on(me,'keypress',function(e){ alert( e.getKey() ) });
             }
 
             // The resize handle is necessary to set the map size!
             ,resize: function () {
                 var size = [];
-                if (this.productname == '' && this.productdate == '') {
-                    size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight];
-                    // console.info('No product');
-                    // console.info('map size: ' + size);
+                if (me.productname == '' && me.productdate == '') {
+                    size = [document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight];
                 }
                 else {
-                    // console.info(this.lookupReference('product-time-line_' + me.id).collapsed);
-                    if (this.lookupReference('product-time-line_' + me.id).collapsed != 'bottom' && !this.lookupReference('product-time-line_' + me.id).collapsed) {
-                        size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight-133];
-                        // console.info('Expanded');
-                        // console.info('map size: ' + size);
+                    if (me.lookupReference('product-time-line_' + me.id).collapsed != 'bottom' && !me.lookupReference('product-time-line_' + me.id).collapsed) {
+                        size = [document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight-133];
                     }
                     else {
-                        size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight];
-                        // console.info('Collapsed');
-                        // console.info('map size: ' + size);
+                        size = [document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight];
                     }
                 }
                 // size = [document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight];
-                // size = [document.getElementById('mapcontainer_'+this.id).offsetWidth, document.getElementById('mapcontainer_'+this.id).offsetHeight];
-                // console.info('map size final: ' + size);
+                // size = [document.getElementById('mapcontainer_'+me.id).offsetWidth, document.getElementById('mapcontainer_'+me.id).offsetHeight];
+                // console.info('resize map size final: ' + size);
                 me.map.setSize(size);
+                me.map.updateSize();
 
-                me.getController().redrawTimeLine(me);
+                me.getController().redrawTimeLine();
 
                 if (!me.lookupReference('opacityslider_' + me.id.replace(/-/g,'_')).hidden) {
                     me.lookupReference('opacityslider_' + me.id.replace(/-/g, '_')).setPosition(me.getWidth() - 48, 155);
                 }
-                //this.lookupReference('opacityslider_' + this.id.replace(/-/g,'_')).doConstrain();
+                //me.lookupReference('opacityslider_' + me.id.replace(/-/g,'_')).doConstrain();
 
                 me.lookupReference('zoomFactorBtn_' + me.id.replace(/-/g, '_')).setPosition(me.getWidth() - 48, 120);
                 me.updateLayout();
             }
+
             ,move: function () {
-                this.getController().redrawTimeLine(this);
-                //this.updateLayout();
-                //console.info(this.getPosition(true));
+                me.getController().redrawTimeLine();
+                // var productNavigatorBtn = me.lookupReference('productNavigatorBtn_'+me.id.replace(/-/g,'_'));
+                // if (!me.mapViewProductNavigator.hidden){
+                //     me.mapViewProductNavigator.hide();
+                // }
+                me.updateLayout();
+                //console.info(me.getPosition(true));
             }
             ,maximize: function () {
-                this.updateLayout();
+                me.updateLayout();
             }
             ,restore: function () {
-                //console.info(this.getPosition());
-                //this.setPosition(this.getPosition()+1);
-                this.updateLayout();
-                var maplegendpanel = me.lookupReference('product-legend_panel_' + this.id);
+                //console.info(me.getPosition());
+                //me.setPosition(me.getPosition()+1);
+                me.updateLayout();
+                var maplegendpanel = me.lookupReference('product-legend_panel_' + me.id);
                 if (maplegendpanel != null){
                     maplegendpanel.doConstrain();
                 }
+            }
+            ,close: function(){
+                // var productNavigatorBtn = me.lookupReference('productNavigatorBtn_'+me.id.replace(/-/g,'_'));
+                // if (!me.mapViewProductNavigator.hidden){
+                //     me.mapViewProductNavigator.destroy();
+                // }
+                me.destroy();
             }
 
         };

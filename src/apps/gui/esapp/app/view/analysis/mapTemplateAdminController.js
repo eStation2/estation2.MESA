@@ -5,20 +5,18 @@ Ext.define('esapp.view.analysis.mapTemplateAdminController', {
     ,openMapTemplates: function(){
         var me = this.getView();
         var selectedMapTemplates = me.getSelectionModel().getSelection();
-        var analysisMain = Ext.getCmp('analysismain');
+        // var analysisMain = Ext.getCmp('analysismain');
+        var workspace = me.owner.up().up();
 
-        //console.info(me.getSelectionModel().getSelection());
-        //console.info(Ext.getCmp('analysismain'));
-
-        //analysisMain.getController().openSelectedMapTemplate(selections);
-
-       for (var i = 0; i < selectedMapTemplates.length; i++) {
-           // console.info(selectedMapTemplates[i]);
+        for (var i = 0; i < selectedMapTemplates.length; i++) {
             var mapTemplate = {
+                workspace : me.owner.up().up(),
                 isTemplate: true,
                 isNewTemplate: false,
                 userid: selectedMapTemplates[i].data.userid,
-                templatename: selectedMapTemplates[i].data.templatename,
+                map_tpl_id: selectedMapTemplates[i].data.map_tpl_id,
+                parent_tpl_id: selectedMapTemplates[i].data.parent_tpl_id,
+                templatename: selectedMapTemplates[i].data.map_tpl_name,
                 mapviewPosition: selectedMapTemplates[i].data.mapviewposition.split(",").map(function(x){return parseInt(x)}),      // .filter(Boolean)
                 mapviewSize: selectedMapTemplates[i].data.mapviewsize.split(",").map(function(x){return parseInt(x)}),
                 productcode: selectedMapTemplates[i].data.productcode,
@@ -36,6 +34,10 @@ Ext.define('esapp.view.analysis.mapTemplateAdminController', {
                 logosObjPosition: selectedMapTemplates[i].data.logosobjposition.split(",").map(function(x){return parseInt(x)}),
                 logosObjContent: Ext.decode(selectedMapTemplates[i].data.logosobjcontent),
                 showObjects: selectedMapTemplates[i].data.showobjects,
+                showtoolbar: selectedMapTemplates[i].data.showtoolbar,
+                showgraticule: selectedMapTemplates[i].data.showgraticule,
+                showtimeline: selectedMapTemplates[i].data.showtimeline,
+                nozoom: true,  // Opening a real map template and not a workspace template will not zoom to saved zoomextent
                 scalelineObjPosition: selectedMapTemplates[i].data.scalelineobjposition.split(",").map(function(x){return parseInt(x)}),
                 vectorLayers: selectedMapTemplates[i].data.vectorlayers,
                 outmask: selectedMapTemplates[i].data.outmask,
@@ -45,45 +47,11 @@ Ext.define('esapp.view.analysis.mapTemplateAdminController', {
                 mapcenter: selectedMapTemplates[i].data.mapcenter
             };
 
-            //mapTemplate = {
-            //    userid: 'jurvtk',
-            //    isTemplate: true,
-            //    templatename: '',
-            //    mapviewPosition: [10, 5],
-            //    mapviewSize: [1000, 900],
-            //    productcode: 'vgt-fapar',
-            //    subproductcode: 'fapar',
-            //    productversion: 'V2.0',
-            //    mapsetcode: 'SPOTV-Africa-1km',
-            //    legendid: 99,
-            //    legendlayout: 'vertical',
-            //    legendObjPosition: [5, 210],
-            //    showlegend: true,
-            //    titleObjPosition: [35, 20],
-            //    titleObjContent: '<font size="3" style="color: rgb(0, 0, 0);"><b>{selected_area}</b></font><div><font size="3" style="color: rgb(0, 0, 0);"><b>{product_name}&nbsp;</b></font><div><font size="3"><b>Decade of <font color="#3366ff">{product_date}</font></b></font></div></div>',
-            //    disclaimerObjPosition: [330, 695],
-            //    disclaimerObjContent: '<font size="1">​Geographical map, WGS 84 - Resolution 5km</font><div><font size="1">Sources: 1) Image NDVI &nbsp;2) Vectors FAO GAUL 2015</font></div>',
-            //    logosObjPosition: [585, 677],
-            //    logosObjContent: [
-            //        { src:'resources/img/logo/MESA_logo.png', width:'65', height:'50' },
-            //        { src:'resources/img/logo/AfricanUnion_logo.jpg', width:'65', height:'50' },
-            //        { src:'resources/img/logo/logo_en.gif', width:'65', height:'50' }
-            //    ],
-            //    showObjects: true,
-            //    scalelineObjPosition: [0, 710],
-            //    vectorLayers: '',
-            //    outmask: false,
-            //    outmaskFeature: ''
-            //}
-
-            //console.info(mapTemplate);
             var newMapViewWin = new esapp.view.analysis.mapView(mapTemplate);
 
-            analysisMain.add(newMapViewWin);
+            workspace.add(newMapViewWin);
             newMapViewWin.show();
         }
-
-       // me.hide();
     }
 
 

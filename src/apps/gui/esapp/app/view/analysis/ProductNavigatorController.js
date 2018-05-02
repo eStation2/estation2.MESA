@@ -260,6 +260,9 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
         myLoadMask.show();
 
         this.getStore('products').load({
+            params: {
+                forse: true
+            },
             callback:function(){
                 myLoadMask.hide();
             }

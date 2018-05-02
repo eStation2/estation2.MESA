@@ -13,11 +13,11 @@ cur_dir = os.path.dirname(__file__)
 if cur_dir not in sys.path:
     sys.path.append(cur_dir)
 
-import web
+# import web
 import datetime
 import json
 import glob
-import time
+# import time
 import calendar
 import numpy as NP
 
@@ -25,16 +25,16 @@ from config import es_constants
 from database import querydb
 from database import crud
 
-from apps.acquisition import get_eumetcast
-from apps.acquisition import acquisition
-from apps.processing import processing      # Comment in WINDOWS version!
+# from apps.acquisition import get_eumetcast
+# from apps.acquisition import acquisition
+# from apps.processing import processing      # Comment in WINDOWS version!
 from apps.productmanagement.datasets import Dataset
-from apps.es2system import es2system
+# from apps.es2system import es2system
 # from apps.productmanagement.datasets import Frequency
 from apps.productmanagement.products import Product
 from apps.analysis import generateLegendHTML
 from apps.analysis.getTimeseries import (getTimeseries, getFilesList)
-from multiprocessing import (Process, Queue)
+# from multiprocessing import (Process, Queue)
 
 from lib.python import functions
 from lib.python import es_logging as log
@@ -45,7 +45,564 @@ logger = log.my_logger(__name__)
 WEBPY_COOKIE_NAME = "webpy_session_id"
 
 
+def getWorkspaceMaps(workspaceid):
+    wsmaps = querydb.get_workspace_maps(workspaceid)
+    maps = []
+    if hasattr(wsmaps, "__len__") and wsmaps.__len__() > 0:
+        for row_dict in wsmaps:
+            wsmap = {
+                'workspaceid': row_dict['workspaceid'],
+                'userid': row_dict['userid'],
+                'map_tpl_id': row_dict['map_tpl_id'],
+                'parent_tpl_id': row_dict['parent_tpl_id'],
+                'map_tpl_name': row_dict['map_tpl_name'],
+                'istemplate': row_dict['istemplate'],
+                'mapviewposition': row_dict['mapviewposition'],
+                'mapviewsize': row_dict['mapviewsize'],
+                'productcode': row_dict['productcode'],
+                'subproductcode': row_dict['subproductcode'],
+                'productversion': row_dict['productversion'],
+                'mapsetcode': row_dict['mapsetcode'],
+                'legendid': row_dict['legendid'],
+                'legendlayout': row_dict['legendlayout'],
+                'legendobjposition': row_dict['legendobjposition'],
+                'showlegend': row_dict['showlegend'],
+                'titleobjposition': row_dict['titleobjposition'],
+                'titleobjcontent': row_dict['titleobjcontent'],
+                'disclaimerobjposition': row_dict['disclaimerobjposition'],
+                'disclaimerobjcontent': row_dict['disclaimerobjcontent'],
+                'logosobjposition': row_dict['logosobjposition'],
+                'logosobjcontent': row_dict['logosobjcontent'],
+                'showobjects': row_dict['showobjects'],
+                'showtoolbar': row_dict['showtoolbar'],
+                'showgraticule': row_dict['showgraticule'],
+                'showtimeline': row_dict['showtimeline'],
+                'scalelineobjposition': row_dict['scalelineobjposition'],
+                'vectorlayers': row_dict['vectorlayers'],
+                'outmask': row_dict['outmask'],
+                'outmaskfeature': row_dict['outmaskfeature'],
+                'auto_open': row_dict['auto_open'],
+                'zoomextent': row_dict['zoomextent'],
+                'mapsize': row_dict['mapsize'],
+                'mapcenter': row_dict['mapcenter']
+            }
+            maps.append(wsmap)
+    return maps
+
+
+def getWorkspaceGraphs(workspaceid):
+    wsgraphs = querydb.get_workspace_graphs(workspaceid)
+    graphs = []
+    if hasattr(wsgraphs, "__len__") and wsgraphs.__len__() > 0:
+        for row_dict in wsgraphs:
+            graph = {
+                'userid': row_dict['userid'],
+                'workspaceid': row_dict['workspaceid'],
+                'graph_tpl_id': row_dict['graph_tpl_id'],
+                'parent_tpl_id': row_dict['parent_tpl_id'],
+                'graph_tpl_name': row_dict['graph_tpl_name'],
+                'istemplate': row_dict['istemplate'],
+                'graphviewposition': row_dict['graphviewposition'],
+                'graphviewsize': row_dict['graphviewsize'],
+                'graph_type': row_dict['graph_type'],
+                'selectedtimeseries': row_dict['selectedtimeseries'],
+                'yearts': row_dict['yearts'],
+                'tsfromperiod': row_dict['tsfromperiod'],
+                'tstoperiod': row_dict['tstoperiod'],
+                'yearstocompare': row_dict['yearstocompare'],
+                'tsfromseason': row_dict['tsfromseason'],
+                'tstoseason': row_dict['tstoseason'],
+                'wkt_geom': row_dict['wkt_geom'],
+                'selectedregionname': row_dict['selectedregionname'],
+                'disclaimerobjposition': row_dict['disclaimerobjposition'],
+                'disclaimerobjcontent': row_dict['disclaimerobjcontent'],
+                'logosobjposition': row_dict['logosobjposition'],
+                'logosobjcontent': row_dict['logosobjcontent'],
+                'showobjects': row_dict['showobjects'],
+                'showtoolbar': row_dict['showtoolbar'],
+                'auto_open': row_dict['auto_open']
+            }
+            graphs.append(graph)
+    return graphs
+
+
+def getUserWorkspaces(params):
+    workspaces_dict_all = []
+
+    if 'userid' in params:
+        userworkspaces = querydb.get_user_workspaces(params['userid'])
+        if hasattr(userworkspaces, "__len__") and userworkspaces.__len__() > 0:
+            for row_dict in userworkspaces:
+                maps = getWorkspaceMaps(row_dict['workspaceid'])
+                graphs = getWorkspaceGraphs(row_dict['workspaceid'])
+
+                workspace = {
+                    'userid': row_dict['userid'],
+                    'workspaceid': row_dict['workspaceid'],
+                    'workspacename': row_dict['workspacename'],
+                    'pinned': row_dict['pinned'],
+                    'shownewgraph': row_dict['shownewgraph'],
+                    'showbackgroundlayer': row_dict['showbackgroundlayer'],
+                    'maps': maps,
+                    'graphs': graphs
+                }
+
+                workspaces_dict_all.append(workspace)
+
+            workspaces_json = json.dumps(workspaces_dict_all, ensure_ascii=False, encoding='utf-8',
+                                         sort_keys=True, indent=4, separators=(', ', ': '))
+
+            workspaces_json = '{"success":"true", "total":' \
+                              + str(userworkspaces.__len__()) \
+                              + ',"userworkspaces":' + workspaces_json + '}'
+
+        else:
+            workspaces_json = '{"success":"true", "total":' \
+                              + str(userworkspaces.__len__()) \
+                              + ',"userworkspaces":[]}'
+    else:
+        workspaces_json = '{"success":false, "error":"Userid not given!"}'
+
+    return workspaces_json
+
+
+def saveWorkspaceGraphs(wsgraphs, workspaceid):
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    for wsgraph in wsgraphs:
+        wsgraphSettings = {
+            'userid': wsgraph['userid'],
+            'workspaceid': int(workspaceid),
+            # 'graph_tpl_id': wsgraph['graph_tpl_id'],
+            'parent_tpl_id': wsgraph['parent_tpl_id'],
+            'graph_tpl_name': wsgraph['graph_tpl_name'],
+            'istemplate': wsgraph['istemplate'],
+            'graphviewposition': wsgraph['graphviewposition'],
+            'graphviewsize': wsgraph['graphviewsize'],
+            'graph_type': wsgraph['graph_type'],
+            'selectedtimeseries': wsgraph['selectedtimeseries'],
+            'yearts': wsgraph['yearts'],
+            'tsfromperiod': wsgraph['tsfromperiod'],
+            'tstoperiod': wsgraph['tstoperiod'],
+            'yearstocompare': wsgraph['yearstocompare'],
+            'tsfromseason': wsgraph['tsfromseason'],
+            'tstoseason': wsgraph['tstoseason'],
+            'wkt_geom': wsgraph['wkt_geom'],
+            'selectedregionname': wsgraph['selectedregionname'],
+            'disclaimerobjposition': wsgraph['disclaimerObjPosition'],
+            'disclaimerobjcontent': wsgraph['disclaimerObjContent'],
+            'logosobjposition': wsgraph['logosObjPosition'],
+            'logosobjcontent': wsgraph['logosObjContent'],
+            'showobjects': wsgraph['showObjects'],
+            'showtoolbar': wsgraph['showtoolbar']
+        }
+
+        graphproperties = json.loads(wsgraph['graphproperties'])
+        yaxes = json.loads(wsgraph['yAxes'])
+        tsdrawprops = json.loads(wsgraph['tsdrawprops'])
+
+        createstatus = '{"success":false, "message":"Error saving the workspace Graph!"}'
+        if crud_db.create('user_graph_templates', wsgraphSettings):
+
+            createdGraphTpl = querydb.get_last_graph_tpl_id(wsgraph['userid'], int(workspaceid))
+            graphproperties['graph_tpl_id'] = createdGraphTpl[0]['graph_tpl_id']
+            crud_db.create('user_graph_tpl_drawproperties', graphproperties)
+
+            for yaxe in yaxes:
+                # print yaxe
+                yaxe['graph_tpl_id'] = createdGraphTpl[0]['graph_tpl_id']
+                yaxe['yaxe_id'] = yaxe['id']
+                if yaxe['min'] == '':
+                    yaxe['min'] = None
+                if yaxe['max'] == '':
+                    yaxe['max'] = None
+                crud_db.create('user_graph_tpl_yaxes', yaxe)
+
+            for tsdrawprop in tsdrawprops:
+                tsdrawprop['graph_tpl_id'] = createdGraphTpl[0]['graph_tpl_id']
+                crud_db.create('user_graph_tpl_timeseries_drawproperties', tsdrawprop)
+
+            # Todo: use logger!
+            createstatus = '{"success":true, "message":"Workspace Graph saved."}'
+
+
+def saveWorkspaceMaps(wsmaps, workspaceid):
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    for wsmap in wsmaps:
+        legendid = wsmap['legendid']
+        if wsmap['legendid'] == '':
+            legendid = None
+
+        wsmapSettings = {
+            'userid': wsmap['userid'],
+            'workspaceid': int(workspaceid),
+            # 'map_tpl_id': None,
+            'parent_tpl_id': wsmap['parent_tpl_id'],
+            'map_tpl_name': wsmap['map_tpl_name'],
+            'istemplate': wsmap['istemplate'],
+            'mapviewposition': wsmap['mapviewPosition'],
+            'mapviewsize': wsmap['mapviewSize'],
+            'productcode': wsmap['productcode'],
+            'subproductcode': wsmap['subproductcode'],
+            'productversion': wsmap['productversion'],
+            'mapsetcode': wsmap['mapsetcode'],
+            'legendid': legendid,
+            'legendlayout': wsmap['legendlayout'],
+            'legendobjposition': wsmap['legendObjPosition'],
+            'showlegend': wsmap['showlegend'],
+            'titleobjposition': wsmap['titleObjPosition'],
+            'titleobjcontent': wsmap['titleObjContent'],
+            'disclaimerobjposition': wsmap['disclaimerObjPosition'],
+            'disclaimerobjcontent': wsmap['disclaimerObjContent'],
+            'logosobjposition': wsmap['logosObjPosition'],
+            'logosobjcontent': wsmap['logosObjContent'],
+            'showobjects': wsmap['showObjects'],
+            'showtoolbar': wsmap['showtoolbar'],
+            'showgraticule': wsmap['showgraticule'],
+            'showtimeline': wsmap['showtimeline'],
+            'scalelineobjposition': wsmap['scalelineObjPosition'],
+            'vectorlayers': wsmap['vectorLayers'],
+            'outmask': wsmap['outmask'],
+            'outmaskfeature': wsmap['outmaskFeature'],
+            'auto_open': wsmap['auto_open'],
+            'zoomextent': wsmap['zoomextent'],
+            'mapsize': wsmap['mapsize'],
+            'mapcenter': wsmap['mapcenter']
+        }
+
+        if not crud_db.create('user_map_templates', wsmapSettings):
+            # Todo: use logger!
+            createstatus = '{"success":false, "message":"Error saving the workspace Map!"}'
+
+
+def saveWorkspace(params):
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+    # ToDo: Better error handling.
+    createstatus = '{"success":false, "message":"An error occured while saving the Workspace!"}'
+
+    if 'userid' in params and 'workspacename' in params:
+        workspace = {
+            'userid': params['userid'],
+            'workspacename': params['workspacename'],
+            'pinned': params['pinned'],
+            'shownewgraph': 'true',
+            'showbackgroundlayer': 'false'
+        }
+        wsmaps = json.loads(params['maps'])
+        wsgraphs = json.loads(params['graphs'])
+
+        # If new user workspace, create new user workspace and get its workspaceid
+        #   Insert all open/passed maps and graphs in the new workspace
+        if params['isNewWorkspace'] == 'true':
+            if crud_db.create('user_workspaces', workspace):
+                createdWorkspace = querydb.getCreatedUserWorkspace(params['userid'])
+                for row in createdWorkspace:
+                    newworkspaceid = row['lastworkspaceid']
+
+                saveWorkspaceMaps(wsmaps, newworkspaceid)
+                saveWorkspaceGraphs(wsgraphs, newworkspaceid)
+
+                createstatus = '{"success":true, "message":"Workspace created!", "workspaceid": ' + str(newworkspaceid) + '}'
+            else:
+                createstatus = '{"success":false, "message":"Error creating the new Workspace!"}'
+        # Else, it is an existing user workspace, update workspace settings
+        #   Delete all the workspace maps and graphs
+        #   Insert all open/passed maps and graphs in the workspace
+        else:
+            workspace['workspaceid'] = int(params['workspaceid'])
+            if crud_db.update('user_workspaces', workspace):
+                workspaceinfo = {
+                    'userid': params['userid'],
+                    'workspaceid': int(params['workspaceid'])
+                }
+                if crud_db.delete('user_map_templates', **workspaceinfo):
+                    saveWorkspaceMaps(wsmaps, params['workspaceid'])
+                if crud_db.delete('user_graph_templates', **workspaceinfo):
+                    saveWorkspaceGraphs(wsgraphs, params['workspaceid'])
+
+                createstatus = '{"success":true, "message":"Workspace updated!", "workspaceid": ' + str(params['workspaceid']) + '}'
+
+    else:
+        createstatus = '{"success":false, "message":"No Workspace data given!"}'
+
+    return createstatus
+
+
+def saveWorkspacePin(params):
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+    # ToDo: Better error handling.
+    createstatus = '{"success":false, "message":"An error occured while saving the Workspace pin change!"}'
+
+    if 'userid' in params and 'workspaceid' in params:
+        workspace = {
+            'userid': params['userid'],
+            'workspacename': params['workspacename'],
+            'pinned': params['pinned']
+        }
+
+        if params['isNewWorkspace'] == 'true':
+            if crud_db.create('user_workspaces', workspace):
+                createdWorkspace = querydb.getCreatedUserWorkspace(params['userid'])
+                for row in createdWorkspace:
+                    newworkspaceid = row['lastworkspaceid']
+
+                createstatus = '{"success":true, "message":"Workspace created on pin setting change!", "workspaceid": ' + str(newworkspaceid) + '}'
+            else:
+                createstatus = '{"success":false, "message":"Error creating the new Workspace on pin setting change!"}'
+        else:
+            workspace['workspaceid'] = int(params['workspaceid'])
+            if crud_db.update('user_workspaces', workspace):
+                createstatus = '{"success":true, "message":"Workspace pin setting changed!", "workspaceid": ' + str(params['workspaceid']) + '}'
+
+    else:
+        createstatus = '{"success":false, "message":"No user data given when changing the workspace pin setting!"}'
+
+    return createstatus
+
+
+def saveWorkspaceName(params):
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+    # ToDo: Better error handling.
+    createstatus = '{"success":false, "message":"An error occured while saving the Workspace when changing the workspace name!"}'
+
+    if 'userid' in params and 'workspaceid' in params:
+        workspace = {
+            'userid': params['userid'],
+            'workspacename': params['workspacename']
+        }
+
+        if params['isNewWorkspace'] == 'true':
+            if crud_db.create('user_workspaces', workspace):
+                createdWorkspace = querydb.getCreatedUserWorkspace(params['userid'])
+                for row in createdWorkspace:
+                    newworkspaceid = row['lastworkspaceid']
+
+                createstatus = '{"success":true, "message":"Workspace created when changing the workspace name!", "workspaceid": ' + str(newworkspaceid) + '}'
+            else:
+                createstatus = '{"success":false, "message":"Error creating the new Workspace when changing the workspace name!"}'
+        else:
+            workspace['workspaceid'] = int(params['workspaceid'])
+            if crud_db.update('user_workspaces', workspace):
+                createstatus = '{"success":true, "message":"Workspace name updated!", "workspaceid": ' + str(params['workspaceid']) + '}'
+
+    else:
+        createstatus = '{"success":false, "message":"No user data given when changing the workspace name!"}'
+
+    return createstatus
+
+
+def getMapTemplates(params):
+    maptemplate_dict_all = []
+    if 'userid' in params:
+        usermaptemplates = querydb.get_user_map_templates(params['userid'])
+        if hasattr(usermaptemplates, "__len__") and usermaptemplates.__len__() > 0:
+            for row_dict in usermaptemplates:
+                # row_dict = functions.row2dict(row)
+
+                mapTemplate = {
+                    'workspaceid': row_dict['workspaceid'],
+                    'userid': row_dict['userid'],
+                    'map_tpl_id': row_dict['map_tpl_id'],
+                    'parent_tpl_id': row_dict['parent_tpl_id'],
+                    'map_tpl_name': row_dict['map_tpl_name'],
+                    'istemplate': row_dict['istemplate'],
+                    'mapviewposition': row_dict['mapviewposition'],
+                    'mapviewsize': row_dict['mapviewsize'],
+                    'productcode': row_dict['productcode'],
+                    'subproductcode': row_dict['subproductcode'],
+                    'productversion': row_dict['productversion'],
+                    'mapsetcode': row_dict['mapsetcode'],
+                    'legendid': row_dict['legendid'],
+                    'legendlayout': row_dict['legendlayout'],
+                    'legendobjposition': row_dict['legendobjposition'],
+                    'showlegend': row_dict['showlegend'],
+                    'titleobjposition': row_dict['titleobjposition'],
+                    'titleobjcontent': row_dict['titleobjcontent'],
+                    'disclaimerobjposition': row_dict['disclaimerobjposition'],
+                    'disclaimerobjcontent': row_dict['disclaimerobjcontent'],
+                    'logosobjposition': row_dict['logosobjposition'],
+                    'logosobjcontent': row_dict['logosobjcontent'],
+                    'showobjects': row_dict['showobjects'],
+                    'showtoolbar': row_dict['showtoolbar'],
+                    'showgraticule': row_dict['showgraticule'],
+                    'showtimeline': row_dict['showtimeline'],
+                    'scalelineobjposition': row_dict['scalelineobjposition'],
+                    'vectorlayers': row_dict['vectorlayers'],
+                    'outmask': row_dict['outmask'],
+                    'outmaskfeature': row_dict['outmaskfeature'],
+                    'auto_open': row_dict['auto_open'],
+                    'zoomextent': row_dict['zoomextent'],
+                    'mapsize': row_dict['mapsize'],
+                    'mapcenter': row_dict['mapcenter']
+                }
+
+                maptemplate_dict_all.append(mapTemplate)
+
+            maptemplates_json = json.dumps(maptemplate_dict_all,
+                                           ensure_ascii=False,
+                                           encoding='utf-8',
+                                           sort_keys=True,
+                                           indent=4,
+                                           separators=(', ', ': '))
+
+            maptemplates_json = '{"success":"true", "total":' \
+                                + str(usermaptemplates.__len__()) \
+                                + ',"usermaptemplates":' + maptemplates_json + '}'
+
+        else:
+            maptemplates_json = '{"success":true, "total":' \
+                                + str(usermaptemplates.__len__()) \
+                                + ',"usermaptemplates":[]}'
+            # maptemplates_json = '{"success":true, "error":"No Map Templates defined for user!"}'   # OR RETURN A DEFAULT MAP TEMPLATE?????
+
+    else:
+        maptemplates_json = '{"success":false, "error":"Userid not given!"}'
+
+    return maptemplates_json
+
+
+def saveMapTemplate(params):
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    createstatus = '{"success":false, "message":"An error occured while saving the Map Template!"}'
+
+    if 'userid' in params and 'map_tpl_name' in params:
+        legendid = params['legendid']
+        if params['legendid'] == '':
+            legendid = None
+
+        defaultworkspaceid = querydb.getDefaultUserWorkspaceID(params['userid'])
+        if not defaultworkspaceid:
+            return createstatus
+
+        mapTemplate = {
+            'userid': params['userid'],
+            'workspaceid': defaultworkspaceid,
+            # 'map_tpl_id': None,
+            'map_tpl_name': params['map_tpl_name'],
+            'istemplate': params['istemplate'],
+            'mapviewposition': params['mapviewPosition'],
+            'mapviewsize': params['mapviewSize'],
+            'productcode': params['productcode'],
+            'subproductcode': params['subproductcode'],
+            'productversion': params['productversion'],
+            'mapsetcode': params['mapsetcode'],
+            'legendid': legendid,
+            'legendlayout': params['legendlayout'],
+            'legendobjposition': params['legendObjPosition'],
+            'showlegend': params['showlegend'],
+            'titleobjposition': params['titleObjPosition'],
+            'titleobjcontent': params['titleObjContent'],
+            'disclaimerobjposition': params['disclaimerObjPosition'],
+            'disclaimerobjcontent': params['disclaimerObjContent'],
+            'logosobjposition': params['logosObjPosition'],
+            'logosobjcontent': params['logosObjContent'],
+            'scalelineobjposition': params['scalelineObjPosition'],
+            'showobjects': params['showObjects'],
+            'showtoolbar': params['showtoolbar'],
+            'showgraticule': params['showgraticule'],
+            'showtimeline': params['showtimeline'],
+            'vectorlayers': params['vectorLayers'],
+            'outmask': params['outmask'],
+            'outmaskfeature': params['outmaskFeature'],
+            'auto_open': params['auto_open'],
+            'zoomextent': params['zoomextent'],
+            'mapsize': params['mapsize'],
+            'mapcenter': params['mapcenter']
+        }
+
+        # print params
+        if params['newtemplate'] == 'true':
+            if crud_db.create('user_map_templates', mapTemplate):
+                # createdMapTpl = crud_db.read('user_map_templates', **mapTemplate)
+                createdMapTpl = querydb.get_last_map_tpl_id(params['userid'], defaultworkspaceid)
+                updateMapTemplate = {
+                    'userid': params['userid'],
+                    'workspaceid': defaultworkspaceid,
+                    'map_tpl_id': createdMapTpl[0]['map_tpl_id'],
+                    'parent_tpl_id': createdMapTpl[0]['map_tpl_id']
+                }
+                # mapTemplate['map_tpl_id'] = createdMapTpl[0]['map_tpl_id']
+                # mapTemplate['parent_tpl_id'] = createdMapTpl[0]['map_tpl_id']
+                crud_db.update('user_map_templates', updateMapTemplate)
+                createstatus = '{"success":true, "message":"Map Template created!", "map_tpl_id": ' + str(createdMapTpl[0]['map_tpl_id']) + '}'
+            else:
+                createstatus = '{"success":false, "message":"Error saving the Map Template!"}'
+        else:
+            mapTemplate['map_tpl_id'] = params['parent_tpl_id']
+            if crud_db.update('user_map_templates', mapTemplate):
+                createstatus = '{"success":true, "message":"Map Template updated!"}'
+
+    else:
+        createstatus = '{"success":false, "message":"No Map Template data given!"}'
+
+    return createstatus
+
+
 def getGraphTemplates(params):
+    graphtemplate_dict_all = []
+
+    if 'userid' in params:
+        usergraphtemplates = querydb.get_user_graph_templates(params['userid'])
+        if hasattr(usergraphtemplates, "__len__") and usergraphtemplates.__len__() > 0:
+            for row_dict in usergraphtemplates:
+                # row_dict = functions.row2dict(row)
+
+                graphTemplate = {
+                    'userid': row_dict['userid'],
+                    'workspaceid': row_dict['workspaceid'],
+                    'graph_tpl_id': row_dict['graph_tpl_id'],
+                    'parent_tpl_id': row_dict['parent_tpl_id'],
+                    'graph_tpl_name': row_dict['graph_tpl_name'],
+                    'istemplate': row_dict['istemplate'],
+                    'graphviewposition': row_dict['graphviewposition'],
+                    'graphviewsize': row_dict['graphviewsize'],
+                    'graph_type': row_dict['graph_type'],
+                    'selectedtimeseries': row_dict['selectedtimeseries'],
+                    'yearts': row_dict['yearts'],
+                    'tsfromperiod': row_dict['tsfromperiod'],
+                    'tstoperiod': row_dict['tstoperiod'],
+                    'yearstocompare': row_dict['yearstocompare'],
+                    'tsfromseason': row_dict['tsfromseason'],
+                    'tstoseason': row_dict['tstoseason'],
+                    'wkt_geom': row_dict['wkt_geom'],
+                    'selectedregionname': row_dict['selectedregionname'],
+                    'disclaimerobjposition': row_dict['disclaimerobjposition'],
+                    'disclaimerobjcontent': row_dict['disclaimerobjcontent'],
+                    'logosobjposition': row_dict['logosobjposition'],
+                    'logosobjcontent': row_dict['logosobjcontent'],
+                    'showobjects': row_dict['showobjects'],
+                    'showtoolbar': row_dict['showtoolbar'],
+                    'auto_open': row_dict['auto_open']
+                }
+
+                graphtemplate_dict_all.append(graphTemplate)
+
+            graphtemplates_json = json.dumps(graphtemplate_dict_all,
+                                           ensure_ascii=False,
+                                           encoding='utf-8',
+                                           sort_keys=True,
+                                           indent=4,
+                                           separators=(', ', ': '))
+
+            graphtemplates_json = '{"success":"true", "total":' \
+                                  + str(usergraphtemplates.__len__()) \
+                                  + ',"usergraphtemplates":' + graphtemplates_json + '}'
+
+        else:
+            graphtemplates_json = '{"success":"true", "total":' \
+                                  + str(usergraphtemplates.__len__()) \
+                                  + ',"usergraphtemplates":[]}'
+            # graphtemplates_json = '{"success":true, "error":"No Graph Templates defined for user!"}'  # OR RETURN A DEFAULT GRAPH TEMPLATE?????
+
+    else:
+        graphtemplates_json = '{"success":false, "error":"Userid not given!"}'
+
+    return graphtemplates_json
+
+
+def __getGraphTemplates(params):
     graphtemplate_dict_all = []
 
     if 'userid' in params:
@@ -109,6 +666,110 @@ def saveGraphTemplate(params):
 
     if 'userid' in params and 'graph_tpl_name' in params:
 
+        defaultworkspaceid = querydb.getDefaultUserWorkspaceID(params['userid'])
+        if not defaultworkspaceid:
+            return createstatus
+
+        graphTemplate = {
+            'userid': params['userid'],
+            'workspaceid': defaultworkspaceid,
+            # 'graph_tpl_id': params['graph_tpl_id'],
+            'graph_tpl_name': params['graph_tpl_name'],
+            'istemplate': params['istemplate'],
+            'graphviewposition': params['graphviewposition'],
+            'graphviewsize': params['graphviewsize'],
+            'graph_type': params['graph_type'],
+            'selectedtimeseries': params['selectedtimeseries'],
+            'yearts': params['yearts'],
+            'tsfromperiod': params['tsfromperiod'],
+            'tstoperiod': params['tstoperiod'],
+            'yearstocompare': params['yearstocompare'],
+            'tsfromseason': params['tsfromseason'],
+            'tstoseason': params['tstoseason'],
+            'wkt_geom': params['wkt_geom'],
+            'selectedregionname': params['selectedregionname'],
+            'disclaimerobjposition': params['disclaimerObjPosition'],
+            'disclaimerobjcontent': params['disclaimerObjContent'],
+            'logosobjposition': params['logosObjPosition'],
+            'logosobjcontent': params['logosObjContent'],
+            'showobjects': params['showObjects'],
+            'showtoolbar': params['showtoolbar']
+        }
+
+        graphproperties = json.loads(params['graphproperties'])
+        yaxes = json.loads(params['yAxes'])
+        tsdrawprops = json.loads(params['tsdrawprops'])
+
+        # print params
+        if params['newtemplate'] == 'true':
+            if crud_db.create('user_graph_templates', graphTemplate):
+                # createdGraphTpl = crud_db.read('user_graph_templates', **graphTemplate)
+                createdGraphTpl = querydb.get_last_graph_tpl_id(params['userid'], defaultworkspaceid)
+                updateGraphTemplate = {
+                    'userid': params['userid'],
+                    'workspaceid': defaultworkspaceid,
+                    'graph_tpl_id': createdGraphTpl[0]['graph_tpl_id'],
+                    'parent_tpl_id': createdGraphTpl[0]['graph_tpl_id']
+                }
+
+                crud_db.update('user_graph_templates', updateGraphTemplate)
+
+                graphproperties['graph_tpl_id'] = createdGraphTpl[0]['graph_tpl_id']
+                crud_db.create('user_graph_tpl_drawproperties', graphproperties)
+
+                for yaxe in yaxes:
+                    yaxe['graph_tpl_id'] = createdGraphTpl[0]['graph_tpl_id']
+                    yaxe['yaxe_id'] = yaxe['id']
+                    if yaxe['min'] == '':
+                        yaxe['min'] = None
+                    if yaxe['max'] == '':
+                        yaxe['max'] = None
+                    crud_db.create('user_graph_tpl_yaxes', yaxe)
+
+                for tsdrawprop in tsdrawprops:
+                    tsdrawprop['graph_tpl_id'] = createdGraphTpl[0]['graph_tpl_id']
+                    crud_db.create('user_graph_tpl_timeseries_drawproperties', tsdrawprop)
+
+                createstatus = '{"success":true, "message":"Graph Template created!", "graph_tpl_id": ' + str(createdGraphTpl[0]['graph_tpl_id']) + '}'
+            else:
+                createstatus = '{"success":false, "message":"Error creating the Graph Template!"}'
+        else:
+            graphTemplate['graph_tpl_id'] = params['parent_tpl_id']
+            if crud_db.update('user_graph_templates', graphTemplate):
+                graphproperties['graph_tpl_id'] = params['parent_tpl_id']
+                crud_db.update('user_graph_tpl_drawproperties', graphproperties)
+
+                crud_db.delete('user_graph_tpl_yaxes', **{'graph_tpl_id': params['parent_tpl_id']})
+                for yaxe in yaxes:
+                    yaxe['graph_tpl_id'] = params['parent_tpl_id']
+                    yaxe['yaxe_id'] = yaxe['id']
+                    if yaxe['min'] == '':
+                        yaxe['min'] = None
+                    if yaxe['max'] == '':
+                        yaxe['max'] = None
+                    crud_db.create('user_graph_tpl_yaxes', yaxe)
+
+                crud_db.delete('user_graph_tpl_timeseries_drawproperties', **{'graph_tpl_id': params['parent_tpl_id']})
+                for tsdrawprop in tsdrawprops:
+                    tsdrawprop['graph_tpl_id'] = params['parent_tpl_id']
+                    crud_db.create('user_graph_tpl_timeseries_drawproperties', tsdrawprop)
+
+                createstatus = '{"success":true, "message":"Graph Template updated!"}'
+            else:
+                createstatus = '{"success":false, "message":"Error updating the Graph Template!"}'
+    else:
+        createstatus = '{"success":false, "message":"No Graph Template data given!"}'
+
+    return createstatus
+
+
+def __saveGraphTemplate(params):
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    createstatus = '{"success":false, "message":"An error occured while saving the Graph Template!"}'
+
+    if 'userid' in params and 'graph_tpl_name' in params:
+
         # graphProperties:{"localRefresh": false, "title": "Polygon", "subtitle": 2017, "filename": "Polygon_2017",
         #                  "graph_title_font_size": "26", "graph_title_font_color": "#000000",
         #                  "graph_subtitle_font_size": "22", "graph_subtitle_font_color": "#808080",
@@ -134,16 +795,16 @@ def saveGraphTemplate(params):
             'tsfromseason': params['tsfromseason'],
             'tstoseason': params['tstoseason'],
             'wkt_geom': params['wkt_geom'],
-            'selectedregionname': params['selectedregionname']
+            'selectedregionname': params['selectedregionname'],
 
-            # 'disclaimerobjposition': getparams['disclaimerObjPosition'],
-            # 'disclaimerobjcontent': getparams['disclaimerObjContent'],
-            # 'logosobjposition': getparams['logosObjPosition'],
-            # 'logosobjcontent': getparams['logosObjContent'],
-            # 'showobjects': getparams['showObjects']
+            'disclaimerobjposition': params['disclaimerObjPosition'],
+            'disclaimerobjcontent': params['disclaimerObjContent'],
+            'logosobjposition': params['logosObjPosition'],
+            'logosobjcontent': params['logosObjContent'],
+            'showobjects': params['showObjects']
         }
 
-        # print getparams
+        # print params
         if params['newtemplate'] == 'true':
             if crud_db.create('user_graph_templates', graphTemplate):
                 createstatus = '{"success":true, "message":"Graph Template created!"}'
@@ -168,26 +829,37 @@ def getGraphTimeseries(params):
 
 
 def matrixTimeseries(params):
-    # getparams = web.input()
-    yearts = params.yearTS
+    # params = web.input()
+    # yearts = params.yearTS
+    # tsFromPeriod = params.tsFromPeriod
+    # tsToPeriod = params.tsToPeriod
+    # showYearInTicks = True
+
     wkt = params.WKT
     requestedtimeseries = json.loads(params.selectedTimeseries)
-    tsFromPeriod = params.tsFromPeriod
-    tsToPeriod = params.tsToPeriod
+    passedyaxes = None
+    if params['yAxes']:
+        passedyaxes = json.loads(params['yAxes'])
+    passedtsdrawprops = None
+    if params['tsdrawprops']:
+        passedtsdrawprops = json.loads(params['tsdrawprops'])
     yearsToCompare = sorted(json.loads(params.yearsToCompare))
     tsFromSeason = params.tsFromSeason
     tsToSeason = params.tsToSeason
-    showYearInTicks = True
     data_available = False
     colorramp = False
     legend_id = None
     overTwoYears = False
 
-    user = ''
-    graph_tpl_name = ''
-    if hasattr(params, "userid") and params.userid != '':
-        user = params.userid
-        graph_tpl_name = params.graph_tpl_name
+    userid = params.userid
+    istemplate = params.istemplate
+    graphtype = params.graphtype
+    graph_tpl_id = params.graph_tpl_id
+    graph_tpl_name = params.graph_tpl_name
+
+    # if hasattr(params, "userid") and params.userid != '':
+    #     user = params.userid
+    #     graph_tpl_name = params.graph_tpl_name
 
     timeseries = []
     for timeserie in requestedtimeseries:
@@ -205,26 +877,40 @@ def matrixTimeseries(params):
                    "version": version}
 
         # Set defaults in case no entry exists in the DB
-        aggregate = { 'aggregation_type': 'mean',
-                      'aggregation_min': None,
-                      'aggregation_max': None }
-        timeseries_drawproperties = querydb.get_product_timeseries_drawproperties(product, user, graph_tpl_name)
-        for ts_drawprops in timeseries_drawproperties:
-            aggregate = { 'aggregation_type': ts_drawprops.aggregation_type,
-                          'aggregation_min': ts_drawprops.aggregation_min,
-                          'aggregation_max': ts_drawprops.aggregation_max}
-            tscolor = ts_drawprops.color.replace("  ", " ")
+        aggregate = {'aggregation_type': 'mean',
+                     'aggregation_min': None,
+                     'aggregation_max': None}
+
+        product_yaxe = querydb.get_product_yaxe(product, userid, istemplate, graphtype, graph_tpl_id, graph_tpl_name)
+        for yaxe_info in product_yaxe:
+            if passedyaxes is not None:
+                for passedyaxe in passedyaxes:
+                    if passedyaxe['id'] == yaxe_info.yaxe_id:
+                        aggregate = {'aggregation_type': passedyaxe['aggregation_type'],
+                                     'aggregation_min': passedyaxe['aggregation_min'],
+                                     'aggregation_max': passedyaxe['aggregation_max']}
+            else:
+                aggregate = {'aggregation_type': yaxe_info.aggregation_type,
+                             'aggregation_min': yaxe_info.aggregation_min,
+                             'aggregation_max': yaxe_info.aggregation_max}
+
+        ts_drawprops = None
+        if passedtsdrawprops is not None:
+            for passedtsdrawprop in passedtsdrawprops:
+                if passedtsdrawprop['productcode'] == product['productcode'] and \
+                   passedtsdrawprop['subproductcode'] == product['subproductcode'] and \
+                   passedtsdrawprop['version'] == product['version']:
+                    ts_drawprops = passedtsdrawprop
+        else:
+            product_ts_drawproperties = querydb.get_product_timeseries_drawproperties(product, userid, istemplate, graphtype, graph_tpl_id, graph_tpl_name)
+            for ts_drawprop in product_ts_drawproperties:
+                ts_drawprops = ts_drawprop
 
         nodata = None
         subproductinfo = querydb.get_subproduct(productcode, version, subproductcode)
         if subproductinfo != []:
             subproductinfo_rec = functions.row2dict(subproductinfo)
             nodata = subproductinfo_rec['nodata']
-
-        # mapset_info = querydb.get_mapset(mapsetcode=mapsetcode)
-        # product_info = querydb.get_product_out_info(productcode=productcode,
-        #                                             subproductcode=subproductcode,
-        #                                             version=version)
 
         if len(yearsToCompare) > 0:
             data = []
@@ -246,15 +932,7 @@ def matrixTimeseries(params):
                         to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
                         overTwoYears = True
 
-                # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, from_date, to_date)
-                # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate, mapset_info, product_info, list_files, dates_list]
-                # p = Process(target=getTimeseries, args=args)
-                # p.start()
-                # p.join()
-                # list_values = self.out_queue.get()
                 list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
-                # print list_values
-                # list_values = sorted(list_values, key=lambda k:k['date'], reverse=True)
 
                 if len(list_values) > 0 and not data_available:
                     data_available = True
@@ -289,32 +967,42 @@ def matrixTimeseries(params):
                     x += 1
                 y += 1
 
-            # Set defaults in case no entry exists in the DB
-            ts = {
-                'name': productcode + '-' + version + '-' + subproductcode,
-                'frequency_id': frequency_id,
-                # 'type': 'heatmap',
-                'yAxis': productcode + ' - ' + version,
-                'data': data
-                # 'visible': True,
-                # 'borderWidth': 1,
-                # 'dataLabels': {
-                #     'enabled': True,
-                #     'color': '#000000'
-                # }
-            }
-            for ts_drawprops in timeseries_drawproperties:
+            if ts_drawprops is None:
+                # Set defaults in case no entry exists in the DB
                 ts = {
-                    'name': ts_drawprops.tsname_in_legend,
+                    'name': productcode + '-' + version + '-' + subproductcode,
                     'frequency_id': frequency_id,
                     # 'type': 'heatmap',
-                    'yAxis': ts_drawprops.yaxe_id,
+                    'yAxis': productcode + ' - ' + version,
+                    'data': data
+                    # 'visible': True,
+                    # 'borderWidth': 1,
+                    # 'dataLabels': {
+                    #     'enabled': True,
+                    #     'color': '#000000'
+                    # }
+                }
+            else:
+                # for ts_drawprops in product_ts_drawproperties:
+                # print ts_drawprops
+                ts = {
+                    'name': ts_drawprops['tsname_in_legend'],
+                    'frequency_id': frequency_id,
+                    # 'type': 'heatmap',
+                    'yAxis': ts_drawprops['yaxe_id'],
                     'data': data
                 }
             timeseries.append(ts)
 
+    legend_info = querydb.get_legend_info(legendid=legend_id)
+    step_type = 'linear'
+    if hasattr(legend_info, "__len__") and legend_info.__len__() > 0:
+        for row in legend_info:
+            step_type = row.step_type
 
-    # legend_steps = querydb.get_product_default_legend_steps(productcode=productcode,version=version, subproductcode=subproductcode)
+        if step_type != 'logarithmic':
+            step_type = 'linear'
+
     legend_steps = querydb.get_legend_steps(legendid=legend_id)
     if hasattr(legend_steps, "__len__") and legend_steps.__len__() > 0:
         minimizeSteps = False
@@ -322,9 +1010,25 @@ def matrixTimeseries(params):
             colorramp = True
             minimizeSteps = True
 
+        firstStep = 0.01
+        roundTo = 2
+        if legend_steps.__len__() >= 100:
+            firstStep = 0.001
+            roundTo = 3
+
         # min = float((legend_steps[0].from_step - legend_steps[0].scale_offset)/legend_steps[0].scale_factor)
         # max = float((legend_steps[legend_steps.__len__()-1].to_step - legend_steps[legend_steps.__len__()-1].scale_offset)/legend_steps[legend_steps.__len__()-1].scale_factor)
-        min = legend_steps[0].from_step
+
+        if step_type == 'logarithmic':
+            if legend_steps[0].from_step <= 0:
+                min = legend_steps[0].to_step
+                minColorSecondRow = True
+            else:
+                min = legend_steps[0].from_step
+                minColorSecondRow = False
+        else:
+            min = legend_steps[0].from_step
+
         max = legend_steps[legend_steps.__len__()-1].to_step
 
         stops = []
@@ -342,20 +1046,48 @@ def matrixTimeseries(params):
             colorRGB = map(int, (color.strip() for color in step.color_rgb.split(" ") if color.strip()))
             colorHex = functions.rgb2html(colorRGB)
 
+            if step_type == 'logarithmic':
+                if rownr == 1 and not minColorSecondRow:
+                    mincolor = colorHex
+                    if step.color_label is None or (step.color_label is not None and step.color_label.strip() == ''):
+                        # stop.append(firstStep)
+                        stop.append(round(rownr / float(legend_steps.__len__()), roundTo))
+                        stop.append(colorHex)
+                        stops.append(stop)
+
+                if rownr == 2 and minColorSecondRow:
+                    mincolor = colorHex
+                    if step.color_label is None or (step.color_label is not None and step.color_label.strip() == ''):
+                        # stop.append(firstStep)
+                        stop.append(round(rownr / float(legend_steps.__len__()), roundTo))
+                        stop.append(colorHex)
+                        stops.append(stop)
+            else:
+                if rownr == 1:
+                    mincolor = colorHex
+                    if step.color_label is None or (step.color_label is not None and step.color_label.strip() == ''):
+                        # stop.append(firstStep)
+                        stop.append(round(rownr / float(legend_steps.__len__()), roundTo))
+                        stop.append(colorHex)
+                        stops.append(stop)
+
+            if rownr == legend_steps.__len__():
+                maxcolor = colorHex
+
             if minimizeSteps:
-                if step.color_label != None and step.color_label.strip() != '':
-                    colors.append(colorHex)
-                    if rownr == 1:
-                        stop.append(0.000)
-                    else:
-                        stop.append((from_step-min)/(max-min))
-                        # stop.append(round(float(rownr)/legend_steps.__len__(), 3))
+                if step.color_label is not None and step.color_label.strip() != '':
+                    # stop.append(round(to_step / max, roundTo))
+                    # stop.append(round((from_step-min)/(max-min), roundTo))
+                    stop.append(round(rownr/float(legend_steps.__len__()), roundTo))
+                    # stop.append(round(rownr * firstStep, 3))
+                    # stop.append(round(rownr/max, 2))
                     stop.append(colorHex)
                     stops.append(stop)
             else:
                 colors.append(colorHex)
-                stop.append((from_step-min)/(max-min))
-                # stop.append(round(float(rownr)/(legend_steps.__len__()), 3))
+                # stop.append((from_step-min)/(max-min))
+                stop.append(round(rownr / float(legend_steps.__len__()), roundTo))
+                # stop.append(round(rownr * firstStep, 3))
                 stop.append(colorHex)
                 stops.append(stop)
 
@@ -366,7 +1098,6 @@ def matrixTimeseries(params):
                 'name': step.color_label
             }
             dataClasses.append(dataClass)
-
 
     if colorramp:
         if minimizeSteps:
@@ -379,25 +1110,28 @@ def matrixTimeseries(params):
             # tickInterval = tickPixelInterval
 
         colorAxis = {
-            'stops': stops,
-            # 'colors': colors,
             'min': min,
             'max': max,
-            # 'maxColor': '#09ea3d',
-            # 'minColor': '#690000',
-            'minPadding': 0.0,
-            'maxPadding': 0.0,
-            'startOnTick': False,
-            'endOnTick': False,
-            'tickWidth': 1,
-            'tickInterval': None,
-            'tickPixelInterval': tickPixelInterval,
+            # 'floor': min,
+            'ceiling': max,
+            'stops': stops,
+            # 'colors': colors,
+            'maxColor': maxcolor,
+            'minColor': mincolor,
+            # 'minPadding': 0.05,
+            # 'maxPadding': 0.5,
+            'startOnTick': True,
+            'endOnTick': True,
+            'tickWidth': 2,
+            'tickmarkPlacement': 'on',
+            # 'tickInterval': None,
+            # 'tickPixelInterval': tickPixelInterval,
             # 'tickLength': tickInterval,
             'gridLineWidth': 0,
             # 'gridLineColor': 'white',
             # 'minorTickInterval': 0.1,
             # 'minorGridLineColor': 'white',
-            'type': 'linear'   # 'logarithmic'   #
+            'type': step_type   # 'logarithmic'  'linear'  #
         }
     else:
         colorAxis = {
@@ -407,38 +1141,50 @@ def matrixTimeseries(params):
             'endOnTick': False
         }
 
+    if overTwoYears:
+        yearsToCompare.append(yearsToCompare[-1] + 1)  # Add extra year
+        # for year in yearsToCompare:
+        #     categories.append(str(year) + '-' + str(year+1))
+    categories = yearsToCompare
+    min = yearsToCompare[0]  # yaxe.min
+    max = yearsToCompare[-1]  # yaxe.max
+
     yaxes = []
-    count = 0
-    timeseries_yaxes = querydb.get_timeseries_yaxes(requestedtimeseries, user, graph_tpl_name)
-    axes = len(timeseries_yaxes)
-    for yaxe in timeseries_yaxes:
-        # count += 1
-        # opposite = "false"
-        #
-        # if axes >= 2:
-        #     if yaxe.opposite:
-        #         opposite = "true"
-        # if axes == 1:
-        #     opposite = "false"
+    if passedyaxes is not None:
+        for passedyaxe in passedyaxes:
+            yaxe = {'id': passedyaxe['id'],
+                    'categories': categories,
+                    'title': passedyaxe['title'],
+                    'title_color': passedyaxe['title_color'].replace("  ", " "),
+                    'title_font_size': passedyaxe['title_font_size'],
+                    'unit': passedyaxe['unit'],
+                    'opposite': passedyaxe['opposite'],
+                    'min': min,
+                    'max': max,
+                    'aggregation_type': passedyaxe['aggregation_type'],
+                    'aggregation_min': passedyaxe['aggregation_min'],
+                    'aggregation_max': passedyaxe['aggregation_max']}
+            yaxes.append(yaxe)
+    else:
+        timeseries_yaxes = querydb.get_timeseries_yaxes(requestedtimeseries, userid, istemplate, graphtype, graph_tpl_id, graph_tpl_name)
+        for yaxe in timeseries_yaxes:
+            # min = yearsToCompare[0]    # yaxe.min
+            # max = yearsToCompare[-1]    # yaxe.max
 
-        # categories = []
-        if overTwoYears:
-            yearsToCompare.append(yearsToCompare[-1]+1)     # Add extra year
-            # for year in yearsToCompare:
-            #     categories.append(str(year) + '-' + str(year+1))
-        categories = yearsToCompare
-
-        min = yearsToCompare[0]    # yaxe.min
-        max = yearsToCompare[-1]    # yaxe.max
-
-        yaxe = {'id': yaxe.yaxe_id,
-                'categories': categories,
-                'title': yaxe.title, 'title_color': yaxe.title_color, 'title_font_size': yaxe.title_font_size,
-                'unit': yaxe.unit, 'opposite': yaxe.opposite, 'min': min, 'max': max,
-                'aggregation_type': yaxe.aggregation_type, 'aggregation_min': yaxe.aggregation_min, 'aggregation_max': yaxe.aggregation_max
-                }
-        yaxes.append(yaxe)
-
+            yaxe = {'id': yaxe.yaxe_id,
+                    'categories': categories,
+                    'title': yaxe.title,
+                    'title_color': yaxe.title_color.replace("  ", " "),
+                    'title_font_size': yaxe.title_font_size,
+                    'unit': yaxe.unit,
+                    'opposite': yaxe.opposite,
+                    'min': min,
+                    'max': max,
+                    'aggregation_type': yaxe.aggregation_type,
+                    'aggregation_min': yaxe.aggregation_min,
+                    'aggregation_max': yaxe.aggregation_max
+                    }
+            yaxes.append(yaxe)
 
     ts_json = {"data_available": data_available,
                "showYearInTicks": False,
@@ -456,23 +1202,33 @@ def matrixTimeseries(params):
 
 
 def rankTimeseries(params):
-    # getparams = web.input()
-    yearts = params.yearTS
+    # params = web.input()
+    # yearts = params.yearTS
+    # tsFromPeriod = params.tsFromPeriod
+    # tsToPeriod = params.tsToPeriod
     wkt = params.WKT
     requestedtimeseries = json.loads(params.selectedTimeseries)
-    tsFromPeriod = params.tsFromPeriod
-    tsToPeriod = params.tsToPeriod
+    passedyaxes = None
+    if params['yAxes']:
+        passedyaxes = json.loads(params['yAxes'])
+    passedtsdrawprops = None
+    if params['tsdrawprops']:
+        passedtsdrawprops = json.loads(params['tsdrawprops'])
     yearsToCompare = sorted(json.loads(params.yearsToCompare))
     tsFromSeason = params.tsFromSeason
     tsToSeason = params.tsToSeason
     showYearInTicks = True
     data_available = False
 
-    user = ''
-    graph_tpl_name = ''
-    if hasattr(params, "userid") and params.userid != '':
-        user = params.userid
-        graph_tpl_name = params.graph_tpl_name
+    userid = params.userid
+    istemplate = params.istemplate
+    graphtype = params.graphtype
+    graph_tpl_id = params.graph_tpl_id
+    graph_tpl_name = params.graph_tpl_name
+
+    # if hasattr(params, "userid") and params.userid != '':
+    #     user = params.userid
+    #     graph_tpl_name = params.graph_tpl_name
 
     timeseries = []
     for timeserie in requestedtimeseries:
@@ -480,37 +1236,54 @@ def rankTimeseries(params):
         subproductcode = timeserie['subproductcode']
         version = timeserie['version']
         mapsetcode = timeserie['mapsetcode']
-        date_format = timeserie['date_format']
+        # date_format = timeserie['date_format']
         zscore = timeserie['zscore']
+        tscolor = "#000000"
 
         product = {"productcode": productcode,
                    "subproductcode": subproductcode,
                    "version": version}
 
         # Set defaults in case no entry exists in the DB
-        aggregate = { 'aggregation_type': 'mean',
-                      'aggregation_min': None,
-                      'aggregation_max': None }
-        timeseries_drawproperties = querydb.get_product_timeseries_drawproperties(product, user, graph_tpl_name)
-        for ts_drawprops in timeseries_drawproperties:
-            aggregate = { 'aggregation_type': ts_drawprops.aggregation_type,
-                          'aggregation_min': ts_drawprops.aggregation_min,
-                          'aggregation_max': ts_drawprops.aggregation_max}
-            tscolor = ts_drawprops.color.replace("  ", " ")
+        aggregate = {'aggregation_type': 'mean',
+                     'aggregation_min': None,
+                     'aggregation_max': None}
 
-        # mapset_info = querydb.get_mapset(mapsetcode=mapsetcode)
-        # product_info = querydb.get_product_out_info(productcode=productcode,
-        #                                             subproductcode=subproductcode,
-        #                                             version=version)
+        product_yaxe = querydb.get_product_yaxe(product, userid, istemplate, graphtype, graph_tpl_id, graph_tpl_name)
+        for yaxe_info in product_yaxe:
+            if passedyaxes is not None:
+                for passedyaxe in passedyaxes:
+                    if passedyaxe['id'] == yaxe_info.yaxe_id:
+                        aggregate = {'aggregation_type': passedyaxe['aggregation_type'],
+                                     'aggregation_min': passedyaxe['aggregation_min'],
+                                     'aggregation_max': passedyaxe['aggregation_max']}
+            else:
+                aggregate = {'aggregation_type': yaxe_info.aggregation_type,
+                             'aggregation_min': yaxe_info.aggregation_min,
+                             'aggregation_max': yaxe_info.aggregation_max}
+
+        ts_drawprops = None
+        if passedtsdrawprops is not None:
+            for passedtsdrawprop in passedtsdrawprops:
+                if passedtsdrawprop['productcode'] == product['productcode'] and \
+                   passedtsdrawprop['subproductcode'] == product['subproductcode'] and \
+                   passedtsdrawprop['version'] == product['version']:
+                    ts_drawprops = passedtsdrawprop
+        else:
+            product_ts_drawproperties = querydb.get_product_timeseries_drawproperties(product, userid, istemplate, graphtype, graph_tpl_id, graph_tpl_name)
+            for ts_drawprop in product_ts_drawproperties:
+                ts_drawprops = ts_drawprop
+
+        tscolor = ts_drawprops['color'].replace("  ", " ")
 
         if len(yearsToCompare) > 1:
             dataRanking = []
             dataZScore = []
             yearDataZScoreForAVGSTD = []
-            # print yearsToCompare
+
             for year in yearsToCompare:
                 showYearInTicks = False
-                # print year
+
                 from_date = datetime.date(int(year), 1, 1)
                 to_date = datetime.date(int(year), 12, 31)
 
@@ -520,12 +1293,6 @@ def rankTimeseries(params):
                     if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
                         to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
 
-                # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, from_date, to_date)
-                # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate, mapset_info, product_info, list_files, dates_list]
-                # p = Process(target=getTimeseries, args=args)
-                # p.start()
-                # p.join()
-                # list_values = self.out_queue.get()
                 list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
 
                 if len(list_values) > 0:
@@ -572,51 +1339,49 @@ def rankTimeseries(params):
             else:
                 data = dataRanking
 
-            # Set defaults in case no entry exists in the DB
-            ts = {'name': productcode + '-' + version + '-' + subproductcode,
-                  'type': 'column',
-                  'color': '#000000',
-                  'yAxis': productcode + ' - ' + version,
-                  'data': data,
-                  'visible': True
-                  }
-            for ts_drawprops in timeseries_drawproperties:
-                ts = {'name': ts_drawprops.tsname_in_legend,
-                      'type': 'column', # ts_drawprops.graphtype,
-                      'color': ts_drawprops.color.replace("  ", " "),
-                      'yAxis': ts_drawprops.yaxe_id,
+            if ts_drawprops is None:
+                # Set defaults in case no entry exists in the DB
+                ts = {'name': productcode + '-' + version + '-' + subproductcode,
+                      'type': 'column',
+                      'color': '#000000',
+                      'yAxis': productcode + ' - ' + version,
+                      'data': data,
+                      'visible': True
+                      }
+            else:
+                # for ts_drawprops in product_ts_drawproperties:
+                ts = {'name': ts_drawprops['tsname_in_legend'],
+                      'type': 'column',  # ts_drawprops.graphtype,
+                      'color': ts_drawprops['color'].replace("  ", " "),
+                      'yAxis': ts_drawprops['yaxe_id'],
                       'data': data,
                       'visible': True
                       }
             timeseries.append(ts)
 
-
     yaxes = []
-    count = 0
-    timeseries_yaxes = querydb.get_timeseries_yaxes(requestedtimeseries, user, graph_tpl_name)
-    axes = len(timeseries_yaxes)
-    for yaxe in timeseries_yaxes:
-        # count += 1
-        # opposite = "false"
-        # # if axes >= 2 and count % 2 == 0:   # and yaxe.opposite == "f"
-        # #     opposite = "false"
-        # # if axes >= 2 and count % 2 != 0:   # and yaxe.opposite == "t"
-        # #     opposite = "true"
-        # if axes >= 2:
-        #     if yaxe.opposite:
-        #         opposite = "true"
-        # if axes == 1:
-        #     opposite = "false"
+    if passedyaxes is not None:
+        for passedyaxe in passedyaxes:
+            min = None
+            max = None
+            yaxe = {'id': passedyaxe['id'], 'title': passedyaxe['title'], 'title_color': passedyaxe['title_color'].replace("  ", " "),
+                    'title_font_size': passedyaxe['title_font_size'], 'unit': passedyaxe['unit'], 'opposite': passedyaxe['opposite'],
+                    'min': min, 'max': max,
+                    'aggregation_type': passedyaxe['aggregation_type'],
+                    'aggregation_min': passedyaxe['aggregation_min'],
+                    'aggregation_max': passedyaxe['aggregation_max']}
+            yaxes.append(yaxe)
+    else:
+        timeseries_yaxes = querydb.get_timeseries_yaxes(requestedtimeseries, userid, istemplate, graphtype, graph_tpl_id, graph_tpl_name)
+        for yaxe in timeseries_yaxes:
+            min = None    # yaxe.min
+            max = None    # yaxe.max
 
-        min = ''    # yaxe.min
-        max = ''    # yaxe.max
-
-        yaxe = {'id': yaxe.yaxe_id,
-                'title': yaxe.title, 'title_color': yaxe.title_color.replace("  ", " "), 'title_font_size': yaxe.title_font_size,
-                'unit': yaxe.unit, 'opposite': yaxe.opposite, 'min': min, 'max': max,
-                'aggregation_type': yaxe.aggregation_type, 'aggregation_min': yaxe.aggregation_min, 'aggregation_max': yaxe.aggregation_max}
-        yaxes.append(yaxe)
-
+            yaxe = {'id': yaxe.yaxe_id,
+                    'title': yaxe.title, 'title_color': yaxe.title_color.replace("  ", " "), 'title_font_size': yaxe.title_font_size,
+                    'unit': yaxe.unit, 'opposite': yaxe.opposite, 'min': min, 'max': max,
+                    'aggregation_type': yaxe.aggregation_type, 'aggregation_min': yaxe.aggregation_min, 'aggregation_max': yaxe.aggregation_max}
+            yaxes.append(yaxe)
 
     ts_json = {"data_available": data_available,
                "showYearInTicks": showYearInTicks,
@@ -632,11 +1397,15 @@ def rankTimeseries(params):
 
 
 def classicTimeseries(params):
-    # getparams = web.input()
     yearts = params['yearTS']
     wkt = params['WKT']
     requestedtimeseries = json.loads(params['selectedTimeseries'])
-    # requestedtimeseries = params['selectedTimeseries']
+    passedyaxes = None
+    if params['yAxes']:
+        passedyaxes = json.loads(params['yAxes'])
+    passedtsdrawprops = None
+    if params['tsdrawprops']:
+        passedtsdrawprops = json.loads(params['tsdrawprops'])
     tsFromPeriod = params['tsFromPeriod']
     tsToPeriod = params['tsToPeriod']
     yearsToCompare = params['yearsToCompare']
@@ -646,17 +1415,16 @@ def classicTimeseries(params):
     data_available = False
     cumulative = False
     if params['graphtype'] == 'cumulative':
-         cumulative = True
-    user = ''
-    graph_tpl_name = ''
-    if hasattr(params, "userid") and params.userid != '':
-        user = params.userid
-        graph_tpl_name = params.graph_tpl_name
+        cumulative = True
+    userid = params.userid
+    istemplate = params.istemplate
+    graphtype = params.graphtype
+    graph_tpl_id = params.graph_tpl_id
+    graph_tpl_name = params.graph_tpl_name
 
-    # if isinstance(yearsToCompare, basestring):  # One year passed but is not a list so make it a list.
-    #     # yearsToCompare = list(yearsToCompare)
-    #     yearsToCompare = []
-    #     yearsToCompare.append(params['yearsToCgraph_tpl_nameompare'])
+    # if hasattr(params, "userid") and params.userid != '':
+    #     userid = params.userid
+    #     graph_tpl_name = params.graph_tpl_name
 
     if tsFromSeason != '' and tsToSeason != '' and yearsToCompare != '':
         yearsToCompare = json.loads(yearsToCompare)
@@ -713,19 +1481,35 @@ def classicTimeseries(params):
                      'aggregation_min': None,
                      'aggregation_max': None}
 
-        product_ts_drawproperties = querydb.get_product_timeseries_drawproperties(product, user, graph_tpl_name)
-
-        for ts_drawprops in product_ts_drawproperties:
-            aggregate = {'aggregation_type': ts_drawprops.aggregation_type,
-                         'aggregation_min': ts_drawprops.aggregation_min,
-                         'aggregation_max': ts_drawprops.aggregation_max}
+        product_yaxe = querydb.get_product_yaxe(product, userid, istemplate, graphtype, graph_tpl_id, graph_tpl_name)
+        for yaxe_info in product_yaxe:
+            if passedyaxes is not None:
+                for passedyaxe in passedyaxes:
+                    if passedyaxe['id'] == yaxe_info.yaxe_id:
+                        aggregate = {'aggregation_type': passedyaxe['aggregation_type'],
+                                     'aggregation_min': passedyaxe['aggregation_min'],
+                                     'aggregation_max': passedyaxe['aggregation_max']}
+            else:
+                aggregate = {'aggregation_type': yaxe_info.aggregation_type,
+                             'aggregation_min': yaxe_info.aggregation_min,
+                             'aggregation_max': yaxe_info.aggregation_max}
             if cumulative:
-                cum_yaxe.append(ts_drawprops.yaxe_id)
+                cum_yaxe.append(yaxe_info.yaxe_id)
 
-        # mapset_info = querydb.get_mapset(mapsetcode=mapsetcode)
-        # product_info = querydb.get_product_out_info(productcode=productcode,
-        #                                             subproductcode=subproductcode,
-        #                                             version=version)
+        ts_drawprops = None
+        if passedtsdrawprops is not None:
+            for passedtsdrawprop in passedtsdrawprops:
+                if passedtsdrawprop['productcode'] == product['productcode'] and \
+                   passedtsdrawprop['subproductcode'] == product['subproductcode'] and \
+                   passedtsdrawprop['version'] == product['version']:
+                    ts_drawprops = passedtsdrawprop
+        else:
+            product_ts_drawproperties = querydb.get_product_timeseries_drawproperties(product, userid, istemplate,
+                                                                                      graphtype, graph_tpl_id,
+                                                                                      graph_tpl_name)
+            for ts_drawprop in product_ts_drawproperties:
+                ts_drawprops = ts_drawprop
+
 
         if date_format == 'MMDD' and len(yearsToCompare) > 1:
             year = yearsToCompare[0]
@@ -746,6 +1530,8 @@ def classicTimeseries(params):
             # p.join()
             # list_values = self.out_queue.get()
             list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
+            # print list_values
+            # list_values = sorted(list_values, key=lambda k:k['date'], reverse=True)
 
             data = []
             for val in list_values:
@@ -759,29 +1545,29 @@ def classicTimeseries(params):
             if len(data) > 0:
                 data_available = True
 
-            # Set defaults in case no entry exists in the DB
-            ts = {'name': productcode + '-' + version + '-' + subproductcode,
-                  'type': 'line',
-                  'dashStyle': 'Solid',
-                  'lineWidth': 2,
-                  'color': '#000000',
-                  # 'xAxis': str(year),
-                  'yAxis': productcode + ' - ' + version,
-                  'data': data,
-                  'visible': True,
-                  'cumulative': cumulative,     # timeserie['cumulative'],
-                  'difference': timeserie['difference'],
-                  'reference': timeserie['reference']
-                  }
-            for ts_drawprops in product_ts_drawproperties:
-                # print ts_drawprops.color
-                ts = {'name': ts_drawprops.tsname_in_legend,
-                      'type': ts_drawprops.charttype,
-                      'dashStyle': ts_drawprops.linestyle,
-                      'lineWidth': ts_drawprops.linewidth,
-                      'color': ts_drawprops.color.replace("  ", " "),
+            if ts_drawprops is None:
+                # Set defaults in case no entry exists in the DB
+                ts = {'name': productcode + '-' + version + '-' + subproductcode,
+                      'type': 'line',
+                      'dashStyle': 'Solid',
+                      'lineWidth': 2,
+                      'color': '#000000',
                       # 'xAxis': str(year),
-                      'yAxis': ts_drawprops.yaxe_id,
+                      'yAxis': productcode + ' - ' + version,
+                      'data': data,
+                      'visible': True,
+                      'cumulative': cumulative,     # timeserie['cumulative'],
+                      'difference': timeserie['difference'],
+                      'reference': timeserie['reference']
+                      }
+            else:
+                ts = {'name': ts_drawprops['tsname_in_legend'],
+                      'type': ts_drawprops['charttype'],
+                      'dashStyle': ts_drawprops['linestyle'],
+                      'lineWidth': ts_drawprops['linewidth'],
+                      'color': ts_drawprops['color'].replace("  ", " "),
+                      # 'xAxis': str(year),
+                      'yAxis': ts_drawprops['yaxe_id'],
                       'data': data,
                       'visible': True,
                       'cumulative': cumulative,     # timeserie['cumulative'],
@@ -805,20 +1591,18 @@ def classicTimeseries(params):
                     if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
                         to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
 
-                if ts_drawprops.color[0] == '#':        # Transform HTML HEX color code to RGB
-                    h = ts_drawprops.color.lstrip('#')
-                    rgb = tuple(int(h[i:i+2], 16) for i in (0, 2 ,4))
+                if ts_drawprops['color'][0] == '#':        # Transform HTML HEX color code to RGB
+                    h = ts_drawprops['color'].lstrip('#')
+                    rgb = tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
                     rgb = list(rgb)
                 else:
-                    # print ts_drawprops.color
-                    # rgb = ts_drawprops.color.replace("  ", " ").split(' ')
-                    if functions.isValidRGB(ts_drawprops.color.replace("  ", " ")):
-                        rgb = ts_drawprops.color.replace("  ", " ").split(' ')
+                    if functions.isValidRGB(ts_drawprops['color'].replace("  ", " ")):
+                        rgb = ts_drawprops['color'].replace("  ", " ").split(' ')
                     else:
                         # RGB value stored in the database is not correct so define as default value BLACK.
                         rgb = "0 0 0".split(' ')
-                # print rgb
-                rgb = map(int,rgb)
+
+                rgb = map(int, rgb)
                 rgb[-1] = rgb[-1]+colorAdd
                 rgb[-2] = rgb[-2]+colorAdd
                 rgb[-3] = rgb[-3]-colorSubstract
@@ -847,28 +1631,29 @@ def classicTimeseries(params):
                 if len(data) > 0:
                     data_available = True
 
-                # Set defaults in case no entry exists in the DB
-                ts = {'name': str(year) + ' ' + productcode + '-' + version + '-' + subproductcode,
-                      'type': 'line',
-                      'dashStyle': 'Solid',
-                      'lineWidth': 2,
-                      'color': '#000000',
-                      'xAxis': str(year),
-                      'yAxis': productcode + ' - ' + version,
-                      'data': data,
-                      'visible': True,
-                      'cumulative': cumulative,     # timeserie['cumulative'],
-                      'difference': timeserie['difference'],
-                      'reference': timeserie['reference']
-                      }
-                for ts_drawprops in product_ts_drawproperties:
-                    ts = {'name': str(year) + ' ' + ts_drawprops.tsname_in_legend,
-                          'type': ts_drawprops.charttype,
-                          'dashStyle': ts_drawprops.linestyle,
-                          'lineWidth': ts_drawprops.linewidth,
+                if ts_drawprops is None:
+                    # Set defaults in case no entry exists in the DB
+                    ts = {'name': str(year) + ' ' + productcode + '-' + version + '-' + subproductcode,
+                          'type': 'line',
+                          'dashStyle': 'Solid',
+                          'lineWidth': 2,
+                          'color': '#000000',
+                          'xAxis': str(year),
+                          'yAxis': productcode + ' - ' + version,
+                          'data': data,
+                          'visible': True,
+                          'cumulative': cumulative,     # timeserie['cumulative'],
+                          'difference': timeserie['difference'],
+                          'reference': timeserie['reference']
+                          }
+                else:
+                    ts = {'name': str(year) + ' ' + ts_drawprops['tsname_in_legend'],
+                          'type': ts_drawprops['charttype'],
+                          'dashStyle': ts_drawprops['linestyle'],
+                          'lineWidth': ts_drawprops['linewidth'],
                           'color': tsColor,
                           'xAxis': str(year),
-                          'yAxis': ts_drawprops.yaxe_id,
+                          'yAxis': ts_drawprops['yaxe_id'],
                           'data': data,
                           'visible': True,
                           'cumulative': cumulative,     # timeserie['cumulative'],
@@ -884,6 +1669,11 @@ def classicTimeseries(params):
             # p.start()
             # p.join()
             # list_values = self.out_queue.get()
+
+            if cumulative:
+                if to_date > datetime.date.today():
+                    to_date = datetime.date.today()
+
             list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
 
             data = []
@@ -899,26 +1689,26 @@ def classicTimeseries(params):
             if len(data) > 0:
                 data_available = True
 
-            # Set defaults in case no entry exists in the DB
-            ts = {'name': productcode + '-' + version + '-' + subproductcode,
-                  'type': 'line',
-                  'dashStyle': 'Solid',
-                  'lineWidth': 2,
-                  'color': '#000000',
-                  'yAxis': productcode + ' - ' + version,
-                  'data': data,
-                  'cumulative': cumulative,     # timeserie['cumulative'],
-                  'difference': timeserie['difference'],
-                  'reference': timeserie['reference']
-                  }
-            for ts_drawprops in product_ts_drawproperties:
-                # print ts_drawprops.color
-                ts = {'name': ts_drawprops.tsname_in_legend,
-                      'type': ts_drawprops.charttype,
-                      'dashStyle': ts_drawprops.linestyle,
-                      'lineWidth': ts_drawprops.linewidth,
-                      'color': ts_drawprops.color.replace("  ", " "),
-                      'yAxis': ts_drawprops.yaxe_id,
+            if ts_drawprops is None:
+                # Set defaults in case no entry exists in the DB
+                ts = {'name': productcode + '-' + version + '-' + subproductcode,
+                      'type': 'line',
+                      'dashStyle': 'Solid',
+                      'lineWidth': 2,
+                      'color': '#000000',
+                      'yAxis': productcode + ' - ' + version,
+                      'data': data,
+                      'cumulative': cumulative,     # timeserie['cumulative'],
+                      'difference': timeserie['difference'],
+                      'reference': timeserie['reference']
+                      }
+            else:
+                ts = {'name': ts_drawprops['tsname_in_legend'],
+                      'type': ts_drawprops['charttype'],
+                      'dashStyle': ts_drawprops['linestyle'],
+                      'lineWidth': ts_drawprops['linewidth'],
+                      'color': ts_drawprops['color'].replace("  ", " "),
+                      'yAxis': ts_drawprops['yaxe_id'],
                       'data': data,
                       'cumulative': cumulative,     # timeserie['cumulative'],
                       'difference': timeserie['difference'],
@@ -927,31 +1717,51 @@ def classicTimeseries(params):
             timeseries.append(ts)
 
     yaxes = []
-    count = 0
-    timeseries_yaxes = querydb.get_timeseries_yaxes(requestedtimeseries, user, graph_tpl_name)
-    axes = len(timeseries_yaxes)
-    for yaxe in timeseries_yaxes:
-        # count += 1
-        # opposite = "false"
-        # # if axes >= 2 and count % 2 == 0:   # and yaxe.opposite == "f"
-        # #     opposite = "false"
-        # # if axes >= 2 and count % 2 != 0:   # and yaxe.opposite == "t"
-        # #     opposite = "true"
-        # if axes >= 2:
-        #     if yaxe.opposite:
-        #         opposite = "true"
-        # if axes == 1:
-        #     opposite = "false"
+    if passedyaxes is not None:
+        for passedyaxe in passedyaxes:
+            if passedyaxe['id'] in cum_yaxe:
+                min = None
+                max = None
+            else:
+                min = passedyaxe['min']
+                max = passedyaxe['max']
+            yaxe = {'id': passedyaxe['id'], 'title': passedyaxe['title'], 'title_color': passedyaxe['title_color'].replace("  ", " "),
+                    'title_font_size': passedyaxe['title_font_size'], 'unit': passedyaxe['unit'], 'opposite': passedyaxe['opposite'],
+                    'min': min, 'max': max,
+                    'aggregation_type': passedyaxe['aggregation_type'],
+                    'aggregation_min': passedyaxe['aggregation_min'],
+                    'aggregation_max': passedyaxe['aggregation_max']}
+            yaxes.append(yaxe)
+    else:
+        timeseries_yaxes = querydb.get_timeseries_yaxes(requestedtimeseries, userid, istemplate, graphtype, graph_tpl_id, graph_tpl_name)
+        # axes = len(timeseries_yaxes)
+        # count = 0
+        for yaxe in timeseries_yaxes:
+            # count += 1
+            # opposite = "false"
+            # # if axes >= 2 and count % 2 == 0:   # and yaxe.opposite == "f"
+            # #     opposite = "false"
+            # # if axes >= 2 and count % 2 != 0:   # and yaxe.opposite == "t"
+            # #     opposite = "true"
+            # if axes >= 2:
+            #     if yaxe.opposite:
+            #         opposite = "true"
+            # if axes == 1:
+            #     opposite = "false"
 
-        if yaxe.yaxe_id in cum_yaxe:
-            min = ''
-            max = ''
-        else:
-            min = yaxe.min
-            max = yaxe.max
-        yaxe = {'id': yaxe.yaxe_id, 'title': yaxe.title, 'title_color': yaxe.title_color.replace("  ", " "), 'title_font_size': yaxe.title_font_size, 'unit': yaxe.unit, 'opposite': yaxe.opposite,
-                'min': min, 'max': max, 'aggregation_type': yaxe.aggregation_type, 'aggregation_min': yaxe.aggregation_min, 'aggregation_max': yaxe.aggregation_max}
-        yaxes.append(yaxe)
+            if yaxe.yaxe_id in cum_yaxe:
+                min = None
+                max = None
+            else:
+                min = yaxe.min
+                max = yaxe.max
+            yaxe = {'id': yaxe.yaxe_id, 'title': yaxe.title, 'title_color': yaxe.title_color.replace("  ", " "),
+                    'title_font_size': yaxe.title_font_size, 'unit': yaxe.unit, 'opposite': yaxe.opposite,
+                    'min': min, 'max': max,
+                    'aggregation_type': yaxe.aggregation_type,
+                    'aggregation_min': yaxe.aggregation_min,
+                    'aggregation_max': yaxe.aggregation_max}
+            yaxes.append(yaxe)
 
     ts_json = {"data_available": data_available,
                "showYearInTicks": showYearInTicks,
@@ -959,20 +1769,13 @@ def classicTimeseries(params):
                "yaxes": yaxes,
                "timeseries": timeseries}
 
-    ts_json = json.dumps(ts_json,
-                         ensure_ascii=False,
-                         sort_keys=True,
-                         # indent=4,
-                         separators=(', ', ': '))
+    ts_json = json.dumps(ts_json, ensure_ascii=False, sort_keys=True, separators=(', ', ': '))
 
-    # print ts_json
-    # timeseries_json = '{"success":"true", "total":' + str(timeline.__len__()) + ',"timeline":'+timeline_json+'}'
-    # timeline_json = '{"success":"true"}'
     return ts_json
 
 
 def __classicTimeseries(params):
-    # getparams = web.input()
+    # params = web.input()
     yearts = params.yearTS
     wkt = params.WKT
     requestedtimeseries = json.loads(params.selectedTimeseries)
@@ -1309,14 +2112,14 @@ def __classicTimeseries(params):
     return ts_json
 
 
-def updateGraphProperties(params):
+def updateGraphProperties(params, graphtpl_info):
     updatestatus = '{"success":false, "message":"An error occured while updating the graph draw properties!"}'
 
     if 'graphproperty' in params:  # hasattr(getparams, "graphproperty")
-        graphdrawprobs = params['graphproperty']  # getparams['tsdrawproperties']
+        graphdrawprobs = params['graphproperty']
 
         try:
-            querydb.update_user_tpl_graph_drawproperties(graphdrawprobs)
+            querydb.update_user_graph_tpl_drawproperties(graphdrawprobs, graphtpl_info)
             updatestatus = '{"success":true, "message":"Graph draw properties updated!"}'
         except:
             updatestatus = '{"success":false, "error":"Error saving the Graph Draw Properties in the database!"}'
@@ -1367,9 +2170,11 @@ def getGraphProperties(params):
 
     if hasattr(graphproperties, "__len__") and graphproperties.__len__() > 0:
         for row in graphproperties:
-            row_dict = functions.row2dict(row)
+            # row_dict = functions.row2dict(row)
+            row_dict = row
 
-            graphproperty = {'graph_type': row_dict['graph_type'],
+            graphproperty = {'graph_tpl_id': row_dict['graph_tpl_id'],
+                             'graph_type': row_dict['graph_type'],
                              'graph_width': row_dict['graph_width'],
                              'graph_height': row_dict['graph_height'],
                              'graph_title': row_dict['graph_title'],
@@ -1580,14 +2385,10 @@ def __getTimeseriesDrawProperties():
 
 
 def getProductLayer(getparams):
-    #import StringIO
     import mapscript
     # To solve issue with Chla Legends (Tuleap ticket #10905 - see http://trac.osgeo.org/mapserver/ticket/1762)
     import locale
-    locale.setlocale(locale.LC_NUMERIC,'C')
-
-    # getparams = web.input()
-    # print getparams
+    locale.setlocale(locale.LC_NUMERIC, 'C')
 
     p = Product(product_code=getparams['productcode'], version=getparams['productversion'])
     dataset = p.get_dataset(mapset=getparams['mapsetcode'], sub_product_code=getparams['subproductcode'])
@@ -1611,7 +2412,6 @@ def getProductLayer(getparams):
     if frequency_id=='e1day' and date_format=='YYYYMMDD':
         regex = dataset.fullpath + filedate+'*'+'.tif'
         filename = glob.glob(regex)
-        # print filename
         productfile = filename[0]
     # lastdate = lastdate.replace("-", "")
     # mydate=lastdate.strftime("%Y%m%d")
@@ -1623,46 +2423,45 @@ def getProductLayer(getparams):
                                                getparams['productversion'],
                                                '.tif')
         productfile = dataset.fullpath + filename
-    # print productfile
 
-    if (hasattr(getparams, "outmask") and getparams['outmask'] == 'true'):
-        # print productfile
-        # print es_constants.base_tmp_dir
-        from greenwich import Raster, Geometry
-
-        # try:
-        #     from osgeo import gdal
-        #     from osgeo import gdal_array
-        #     from osgeo import ogr, osr
-        #     from osgeo import gdalconst
-        # except ImportError:
-        #     import gdal
-        #     import gdal_array
-        #     import ogr
-        #     import osr
-        #     import gdalconst
-
-        # try:
-
-        # ogr.UseExceptions()
-        wkt = getparams['selectedfeature']
-        theGeomWkt = ' '.join(wkt.strip().split())
-        # print wkt
-        geom = Geometry(wkt=str(theGeomWkt), srs=4326)
-        # print "wearehere"
-        with Raster(productfile) as img:
-            # Assign nodata from prod_info
-            # img._nodata = nodata
-            # print "nowwearehere"
-            with img.clip(geom) as clipped:
-                # Save clipped image (for debug only)
-                productfile = es_constants.base_tmp_dir + '/clipped_'+filename
-                # print productfile
-                clipped.save(productfile)
-
-        # except:
-        #     print 'errorrrrrrrrr!!!!!!'
-
+    # if (hasattr(getparams, "outmask") and getparams['outmask'] == 'true'):
+    #     # print productfile
+    #     # print es_constants.base_tmp_dir
+    #     from greenwich import Raster, Geometry
+    #
+    #     # try:
+    #     #     from osgeo import gdal
+    #     #     from osgeo import gdal_array
+    #     #     from osgeo import ogr, osr
+    #     #     from osgeo import gdalconst
+    #     # except ImportError:
+    #     #     import gdal
+    #     #     import gdal_array
+    #     #     import ogr
+    #     #     import osr
+    #     #     import gdalconst
+    #
+    #     # try:
+    #
+    #     # ogr.UseExceptions()
+    #     wkt = getparams['selectedfeature']
+    #     theGeomWkt = ' '.join(wkt.strip().split())
+    #     # print wkt
+    #     geom = Geometry(wkt=str(theGeomWkt), srs=4326)
+    #     # print "wearehere"
+    #     with Raster(productfile) as img:
+    #         # Assign nodata from prod_info
+    #         # img._nodata = nodata
+    #         # print "nowwearehere"
+    #         with img.clip(geom) as clipped:
+    #             # Save clipped image (for debug only)
+    #             productfile = es_constants.base_tmp_dir + '/clipped_'+filename
+    #             # print productfile
+    #             clipped.save(productfile)
+    #
+    #     # except:
+    #     #     print 'errorrrrrrrrr!!!!!!'
+    #
     #web.header('Content-type', 'image/png')
     #web.header('Content-transfer-encoding', 'binary')
     #buf = StringIO.StringIO()
@@ -1690,12 +2489,12 @@ def getProductLayer(getparams):
 
 
     # projlib = "/usr/share/proj/"
+
     projlib = es_constants.proj4_lib_dir
     # errorfile = es_constants.apps_dir+"/analysis/ms_tmp/ms_errors.log"
     errorfile = es_constants.log_dir+"/mapserver_error.log"
     # imagepath = es_constants.apps_dir+"/analysis/ms_tmp/"
 
-    # TEST ????
     inputparams = getparams
 
     filenamenoextention = functions.set_path_filename(filedate,
@@ -1715,10 +2514,10 @@ def getProductLayer(getparams):
     outputformat_png = mapscript.outputFormatObj('GD/PNG', 'png')
     outputformat_png.setOption("INTERLACE", "OFF")
     productmap.appendOutputFormat(outputformat_png)
-    #outputformat_gd = mapscript.outputFormatObj('GD/GIF', 'gif')
-    #productmap.appendOutputFormat(outputformat_gd)
+    # outputformat_gd = mapscript.outputFormatObj('GD/GIF', 'gif')
+    # productmap.appendOutputFormat(outputformat_gd)
     productmap.selectOutputFormat('png')
-    #productmap.debug = mapscript.MS_TRUE
+    # productmap.debug = mapscript.MS_TRUE
     productmap.debug = 5
     productmap.status = mapscript.MS_ON
     productmap.units = mapscript.MS_DD
@@ -2240,8 +3039,61 @@ def ColorSchemes():
     return colorschemes
 
 
+def getProductNavigatorDataSets(forse):
+    # import time
+    datasetsinfo_file = es_constants.base_tmp_dir + os.path.sep + 'product_navigator_datasets_info.json'
+    if forse:
+        dataset_json = ProductNavigatorDataSets().encode('utf-8')
+        try:
+            with open(datasetsinfo_file, "w") as text_file:
+                text_file.write(dataset_json)
+        except IOError:
+            try:
+                os.remove(datasetsinfo_file)  # remove file and recreate next call
+            except OSError:
+                pass
+
+    elif os.path.isfile(datasetsinfo_file):
+        # now = time.time()
+        # nowdatetime = datetime.datetime.fromtimestamp(now)   # .strftime('%Y-%m-%d %H:%M:%S')
+        lastmodfified = os.path.getmtime(datasetsinfo_file)
+        lastmodfifieddatetime = datetime.datetime.fromtimestamp(lastmodfified)  # .strftime('%Y-%m-%d %H:%M:%S')
+        if lastmodfifieddatetime < datetime.datetime.now() - datetime.timedelta(hours=3):  # seconds=5
+            dataset_json = ProductNavigatorDataSets().encode('utf-8')
+            try:
+                with open(datasetsinfo_file, "w") as text_file:
+                    text_file.write(dataset_json)
+            except IOError:
+                try:
+                    os.remove(datasetsinfo_file)  # remove file and recreate next call
+                except OSError:
+                    pass
+        else:
+            try:
+                with open(datasetsinfo_file) as text_file:
+                    dataset_json = text_file.read()
+            except IOError:
+                dataset_json = ProductNavigatorDataSets().encode('utf-8')
+                try:
+                    os.remove(datasetsinfo_file)  # remove file and recreate next call
+                except OSError:
+                    pass
+
+    else:
+        dataset_json = ProductNavigatorDataSets().encode('utf-8')
+        try:
+            with open(datasetsinfo_file, "w") as text_file:
+                text_file.write(dataset_json)
+        except IOError:
+            try:
+                os.remove(datasetsinfo_file)  # remove file and recreate next call
+            except OSError:
+                pass
+    return dataset_json
+
+
 def ProductNavigatorDataSets():
-    db_products = querydb.get_products(echo=False, activated=None, masked=False)
+    db_products = querydb.get_products(activated=None, masked=False)
 
     if hasattr(db_products, "__len__") and db_products.__len__() > 0:
         products_dict_all = []
@@ -2259,7 +3111,7 @@ def ProductNavigatorDataSets():
             if all_prod_mapsets.__len__() > 0 and all_prod_subproducts.__len__() > 0:
                 prod_dict['productmapsets'] = []
                 for mapset in all_prod_mapsets:
-                    mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
+                    mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False)
                     if mapset_info != []:
                         mapset_dict = functions.row2dict(mapset_info)
                         mapset_dict['mapsetdatasets'] = []
@@ -2269,7 +3121,6 @@ def ProductNavigatorDataSets():
                             dataset_info = querydb.get_subproduct(productcode=productcode,
                                                                   version=version,
                                                                   subproductcode=subproductcode,
-                                                                  echo=False,
                                                                   masked=True)
 
                             if dataset_info is not None:
@@ -2291,14 +3142,14 @@ def ProductNavigatorDataSets():
                                indent=4,
                                separators=(', ', ': '))
 
-        datamanagement_json = '{"success":"true", "total":'\
+        dataset_json = '{"success":"true", "total":'\
                               + str(db_products.__len__())\
                               + ',"products":'+prod_json+'}'
 
     else:
-        datamanagement_json = '{"success":false, "error":"No data sets defined!"}'
+        dataset_json = '{"success":false, "error":"No data sets defined!"}'
 
-    return datamanagement_json
+    return dataset_json
 
 
 def getDataSets(forse):
@@ -2377,7 +3228,7 @@ def DataSets():
                 for mapset in all_prod_mapsets:
                     mapset_dict = []
                     # print mapset
-                    mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
+                    mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False)
                     if mapset_info != []:
                         mapset_dict = functions.row2dict(mapset_info)
                         # print mapset_dict
@@ -2393,8 +3244,7 @@ def DataSets():
                             # print 'subproductcode: ' + subproductcode
                             dataset_info = querydb.get_subproduct(productcode=productcode,
                                                                   version=version,
-                                                                  subproductcode=subproductcode,
-                                                                  echo=False)
+                                                                  subproductcode=subproductcode)
                             # print dataset_info
                             # dataset_info = querydb.db.product.get(productcode, version, subproductcode)
                             # dataset_dict = {}
@@ -2577,7 +3427,7 @@ def TimeseriesProducts():
             all_prod_mapsets = p.mapsets
             if hasattr(all_prod_mapsets, "__len__") and all_prod_mapsets.__len__() > 0:
                 for mapset in all_prod_mapsets:
-                    mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
+                    mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False)
                     if mapset_info != []:
                         mapset_record = functions.row2dict(mapset_info)
 
@@ -2724,7 +3574,7 @@ def __TimeseriesProducts():
             if hasattr(all_prod_mapsets, "__len__") and all_prod_mapsets.__len__() > 0:
                 prod_dict['productmapsets'] = []
                 for mapset in all_prod_mapsets:
-                    mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
+                    mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False)
                     mapset_dict = functions.row2dict(mapset_info)
                     mapset_dict['timeseriesmapsetdatasets'] = []
                     timeseries_mapset_datasets = querydb.get_timeseries_subproducts(productcode=productcode,
@@ -2815,7 +3665,7 @@ def __TimeseriesProductsTree():
                 prod_dict['productmapsets'] = []
                 # prod_dict['children'] = []
                 for mapset in all_prod_mapsets:
-                    mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
+                    mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False)
                     if mapset_info != []:
                         mapset_record = functions.row2dict(mapset_info)
                         # print mapset_record
@@ -2958,7 +3808,7 @@ def Ingestion():
     from dateutil.relativedelta import relativedelta
 
     # return web.ctx
-    ingestions = querydb.get_ingestions(echo=False)
+    ingestions = querydb.get_ingestions()
     # print ingestions
 
     if hasattr(ingestions, "__len__") and ingestions.__len__() > 0:

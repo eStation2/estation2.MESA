@@ -11,7 +11,41 @@ logger = log.my_logger(__name__)
 from database import querydb
 from lib.python import functions
 
+
 class TestQuerydb(TestCase):
+
+    def test_update_yaxe(self):
+        params = {
+            "aggregation_max": '',
+            "aggregation_min": '',
+            "aggregation_type": 'mean',
+            "id": 'ndvi',
+            "max": '',
+            "min": '',
+            "opposite": 'true',
+            "title": 'NDVI',
+            "title_color": '#008000',
+            "title_font_size": '20',
+            "unit": '',
+            "userid": 'jurvtk',
+            "istemplate": 'false',
+            "graph_tpl_id": '-1',
+            "graph_tpl_name": 'default',
+            "graphtype": 'cumulative'
+        }
+        result = querydb.update_yaxe(params)
+        print result
+        self.assertEqual(1, 1)
+
+
+    def test_get_product_timeseries_drawproperties(self):
+        product = {"productcode": 'vgt-lai',
+                   "subproductcode": 'lai',
+                   "version": 'V1.4'}
+
+        result = querydb.get_product_timeseries_drawproperties(product, 'jurvtk', 'false', 'xy', '-1', 'default')
+        print result
+        self.assertEqual(1, 1)
 
     def Test_get_chart_drawproperties(self):
         charttype = 'default'

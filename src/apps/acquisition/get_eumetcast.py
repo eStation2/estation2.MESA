@@ -36,7 +36,7 @@ input_dir = es_constants.eumetcast_files_dir
 output_dir = es_constants.get_eumetcast_output_dir
 user_def_sleep = es_constants.get_eumetcast_sleep_time_sec
 
-echo_query = False
+# echo_query = False
 
 def find_files(directory, pattern):
     lst = []
@@ -265,7 +265,7 @@ def loop_eumetcast_ftp(dry_run=False):
 
             # try:
             logger.debug("Reading active EUMETCAST data sources from database")
-            eumetcast_sources_list = querydb.get_eumetcast_sources(echo=echo_query)
+            eumetcast_sources_list = querydb.get_eumetcast_sources()
             logger.debug("N. %i active EUMETCAST data sources found", len(eumetcast_sources_list))
 
             # Get the EUMETCast MESA_JRC files
@@ -386,7 +386,7 @@ def loop_eumetcast(dry_run=False):
 
             # try:
             logger.debug("Reading active EUMETCAST data sources from database")
-            eumetcast_sources_list = querydb.get_eumetcast_sources(echo=echo_query)
+            eumetcast_sources_list = querydb.get_eumetcast_sources()
             logger.debug("N. %i active EUMETCAST data sources found", len(eumetcast_sources_list))
 
             # Get the EUMETCast MESA_JRC files

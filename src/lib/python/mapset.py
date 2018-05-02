@@ -32,7 +32,7 @@ class MapSet:
         self.short_name = ''
 
     def assigndb(self, mapsetcode):
-        mapset = querydb.get_mapset(mapsetcode, echo=False)
+        mapset = querydb.get_mapset(mapsetcode)
         spatial_ref_wkt = mapset.srs_wkt
         geo_transform = [mapset.upper_left_long,
                          mapset.pixel_shift_long,

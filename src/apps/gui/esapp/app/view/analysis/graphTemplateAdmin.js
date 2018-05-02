@@ -16,8 +16,8 @@ Ext.define("esapp.view.analysis.graphTemplateAdmin",{
 
     xtype  : 'usergraphtpladmin',
 
-    id: 'userGraphTemplates',
-    reference: 'userGraphTemplates',
+    // id: 'userGraphTemplates',
+    // reference: 'userGraphTemplates',
     title: esapp.Utils.getTranslation('my_saved_graphs'),
     header: {
         hidden: false,
@@ -35,8 +35,8 @@ Ext.define("esapp.view.analysis.graphTemplateAdmin",{
     floating: true,
     // floatable: true,
     // alwaysOnTop: true,
-    closable: false,
-    // closeAction: 'hide',
+    closable: true,
+    closeAction: 'hide',
     maximizable: false,
     collapsible: false,
     resizable: false,
@@ -56,7 +56,7 @@ Ext.define("esapp.view.analysis.graphTemplateAdmin",{
     //     type  : 'fit',
     //     padding: 0
     // },
-    alignTarget: Ext.getCmp('analysismain_graph_templatebtn'),
+    // alignTarget: Ext.getCmp('analysismain_graph_templatebtn'),
     defaultAlign: 'tl-bc',
     bind: '{usergraphtemplates}',
     //session:true,
@@ -91,7 +91,7 @@ Ext.define("esapp.view.analysis.graphTemplateAdmin",{
 
         me.viewConfig = {
             defaultAlign: 'tl-bc',
-            alignTarget: Ext.getCmp('analysismain_graph_templatebtn'),
+            // alignTarget: Ext.getCmp('analysismain_graph_templatebtn'),
             stripeRows: false,
             enableTextSelection: true,
             draggable: false,
@@ -118,19 +118,23 @@ Ext.define("esapp.view.analysis.graphTemplateAdmin",{
         });
 
         me.listeners = {
+            afterrender: function(){
+                me.alignTarget = me.owner;
+            },
             show: function(){
                 me.fireEvent('loadstore');
-                me.fireEvent('align');
+                // me.fireEvent('align');
             },
-            align: function() {
-                // var task = new Ext.util.DelayedTask(function() {
-                    me.alignTo(Ext.getCmp('analysismain').lookupReference('analysismain_graph_templatebtn'), 'tl-bc');
-                    me.updateLayout();
-                // });
-                // if (!me.hidden) {
-                //     task.delay(50);
-                // }
-            },
+            // align: function() {
+            //     // var task = new Ext.util.DelayedTask(function() {
+            //         me.alignTo(me.owner, 'tl-bc');
+            //         // me.alignTo(Ext.getCmp('analysismain').lookupReference('analysismain_graph_templatebtn'), 'tl-bc');
+            //         me.updateLayout();
+            //     // });
+            //     // if (!me.hidden) {
+            //     //     task.delay(50);
+            //     // }
+            // },
             focusleave: function(){
                 me.hide();
             }
@@ -148,7 +152,7 @@ Ext.define("esapp.view.analysis.graphTemplateAdmin",{
         }];
 
         me.bbar = Ext.create('Ext.toolbar.Toolbar', {
-            focusable: true,
+            // focusable: true,
             items: [{
                 xtype: 'button',
                 text: esapp.Utils.getTranslation('openselected'),    // 'Open selected',

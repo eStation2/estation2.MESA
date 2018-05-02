@@ -3,7 +3,7 @@ Ext.define('esapp.view.analysis.legendAdminController', {
     alias: 'controller.analysis-legendadmin'
 
     ,onClose: function(win, ev) {
-        Ext.getCmp('analysismain').lookupReference('analysismain_legendsbtn').enable();
+        // Ext.getCmp('analysismain').lookupReference('analysismain_legendsbtn').enable();
     }
 
     ,loadLegendsStore: function(win, ev) {

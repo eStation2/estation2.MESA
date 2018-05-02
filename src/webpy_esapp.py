@@ -142,6 +142,13 @@ urls = (
     "/analysis/savegraphtemplate", "saveGraphTemplate",
     "/analysis/usergraphtemplates", "getGraphTemplates",
     "/analysis/usergraphtemplates/delete", "DeleteGraphTemplate",
+    "/analysis/saveworkspace", "SaveWorkspace",
+
+    "/analysis/saveworkspacepin", "SaveWorkspacePin",
+    "/analysis/saveworkspacename", "SaveWorkspaceName",
+
+    "/analysis/userworkspaces", "getUserWorkspaces",
+    "/analysis/userworkspaces/delete", "DeleteWorkspace",
 
     "/layers", "GetLayers",
     "/layers/create", "CreateLayer",
@@ -198,6 +205,7 @@ class EsApp:
                 crud_db.update('users', user_info)
 
         render = web.template.render(es_constants.es2globals['base_dir']+'/apps/gui/esapp')
+        # render = web.template.render(es_constants.es2globals['base_dir'] + '/apps/gui/esapp/build/production/esapp')
 
         return render.index()
 
@@ -210,259 +218,6 @@ class EsApp:
         #     return render.index_fr()
         # else:
         #     return render.index()
-
-
-class GetAssignedDatasets:
-    def __init__(self):
-        self.lang = "eng"
-
-    def GET(self):
-        params = web.input()
-        if hasattr(params, "legendid") and params['legendid'] != '':
-            assigneddatasets_json = webpy_esapp_helpers.GetAssignedDatasets(params['legendid'])
-        else:
-            assigneddatasets_json = '{"success":false, "error":"No Legend ID passed!"}'
-
-        return assigneddatasets_json
-
-
-class UnassignLegend:
-    def __init__(self):
-        self.lang = "eng"
-
-    def POST(self):
-        params = web.input()
-        return webpy_esapp_helpers.UnassignLegend(params)
-
-
-class AssignLegends:
-    def __init__(self):
-        self.lang = "eng"
-
-    def POST(self):
-        params = web.input()
-        return webpy_esapp_helpers.AssignLegends(params)
-
-
-class copyLegend:
-    def __init__(self):
-        self.lang = "eng"
-
-    def POST(self):
-        params = web.input()
-        return webpy_esapp_helpers.copyLegend(params)
-
-
-class DeleteLegend:
-    def __init__(self):
-        self.lang = "eng"
-
-    def DELETE(self):
-        params = json.loads(web.data())
-        return webpy_esapp_helpers.DeleteLegend(params)
-
-
-class SaveLegend:
-    def __init__(self):
-        self.lang = "eng"
-
-    def POST(self):
-        params = web.input()
-        return webpy_esapp_helpers.SaveLegend(params)
-
-
-class GetLegends:
-    def __init__(self):
-        self.lang = "eng"
-
-    def GET(self):
-        getparams = web.input()
-        return webpy_esapp_helpers.GetLegends()
-
-
-class GetLegendClasses:
-    def __init__(self):
-        self.lang = "eng"
-
-    def GET(self):
-        getparams = web.input()
-        if hasattr(getparams, "legendid") and getparams['legendid'] != '':
-            legendclasses_json = webpy_esapp_helpers.GetLegendClasses(getparams['legendid'])
-        else:
-            legendclasses_json = '{"success":false, "error":"No Legend ID passed!"}'
-
-        return legendclasses_json
-
-
-class GetInstallationType:
-    def __init__(self):
-        self.lang = "eng"
-
-    def POST(self):
-        #return web.ctx
-        getparams = web.input()
-        systemsettings = functions.getSystemSettings()
-
-        typeinstallation_json = '{"success":"true", "typeinstallation":"'+systemsettings['type_installation'].lower() + \
-                                '", "role":"'+systemsettings['role'].lower() + '", "mode":"'+systemsettings['mode'].lower()+'"}'
-
-        return typeinstallation_json
-
-
-class GetMapTemplates:
-    def __init__(self):
-        self.lang = "eng"
-
-    def GET(self):
-        maptemplate_dict_all = []
-        getparams = web.input()
-
-        if 'userid' in getparams:
-            usermaptemplates = querydb.get_user_map_templates(getparams['userid'])
-            if hasattr(usermaptemplates, "__len__") and usermaptemplates.__len__() > 0:
-                for row_dict in usermaptemplates:
-                    # row_dict = functions.row2dict(row)
-
-                    mapTemplate = {
-                        'userid': row_dict['userid'],
-                        'templatename': row_dict['templatename'],
-                        'mapviewposition': row_dict['mapviewposition'],
-                        'mapviewsize': row_dict['mapviewsize'],
-                        'productcode': row_dict['productcode'],
-                        'subproductcode': row_dict['subproductcode'],
-                        'productversion': row_dict['productversion'],
-                        'mapsetcode': row_dict['mapsetcode'],
-                        'legendid': row_dict['legendid'],
-                        'legendlayout': row_dict['legendlayout'],
-                        'legendobjposition': row_dict['legendobjposition'],
-                        'showlegend': row_dict['showlegend'],
-                        'titleobjposition': row_dict['titleobjposition'],
-                        'titleobjcontent': row_dict['titleobjcontent'],
-                        'disclaimerobjposition': row_dict['disclaimerobjposition'],
-                        'disclaimerobjcontent': row_dict['disclaimerobjcontent'],
-                        'logosobjposition': row_dict['logosobjposition'],
-                        'logosobjcontent': row_dict['logosobjcontent'],
-                        'showobjects': row_dict['showobjects'],
-                        'scalelineobjposition': row_dict['scalelineobjposition'],
-                        'vectorlayers': row_dict['vectorlayers'],
-                        'outmask': row_dict['outmask'],
-                        'outmaskfeature': row_dict['outmaskfeature'],
-                        'auto_open': row_dict['auto_open'],
-                        'zoomextent': row_dict['zoomextent'],
-                        'mapsize': row_dict['mapsize'],
-                        'mapcenter': row_dict['mapcenter']
-                    }
-
-                    maptemplate_dict_all.append(mapTemplate)
-
-                maptemplates_json = json.dumps(maptemplate_dict_all,
-                                                  ensure_ascii=False,
-                                                  encoding='utf-8',
-                                                  sort_keys=True,
-                                                  indent=4,
-                                                  separators=(', ', ': '))
-
-                maptemplates_json = '{"success":"true", "total":'\
-                                       + str(usermaptemplates.__len__())\
-                                       + ',"usermaptemplates":'+maptemplates_json+'}'
-
-            else:
-                maptemplates_json = '{"success":true, "total":'\
-                                       + str(usermaptemplates.__len__())\
-                                       + ',"usermaptemplates":[]}'
-                # maptemplates_json = '{"success":true, "error":"No Map Templates defined for user!"}'   # OR RETURN A DEFAULT MAP TEMPLATE?????
-
-        else:
-            maptemplates_json = '{"success":false, "error":"Userid not given!"}'
-
-        return maptemplates_json
-
-
-class DeleteMapTemplate:
-    def __init__(self):
-        self.lang = "eng"
-        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
-
-    def DELETE(self):
-        getparams = json.loads(web.data())  # get PUT data
-        # getparams = web.input() # get POST data
-        if 'usermaptemplate' in getparams:      # hasattr(getparams, "layer")
-            maptemplatePK = {
-                'userid': getparams['usermaptemplate']['userid'],
-                'templatename': getparams['usermaptemplate']['templatename'],
-             }
-
-            if self.crud_db.delete('map_templates', **maptemplatePK):
-                status = '{"success":"true", "message":"Map Template deleted!"}'
-            else:
-                status = '{"success":false, "message":"An error occured while deleting the Map Template!"}'
-
-        else:
-            status = '{"success":false, "message":"No Map Template info passed!"}'
-
-        return status
-
-
-class SaveMapTemplate:
-    def __init__(self):
-        self.lang = "eng"
-        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
-
-    def POST(self):
-        getparams = web.input()
-        # getparams = json.loads(web.data())  # get PUT data
-
-        createstatus = '{"success":false, "message":"An error occured while saving the Map Template!"}'
-
-        if 'userid' in getparams and 'templatename' in getparams:
-            legendid = getparams['legendid']
-            if getparams['legendid'] == '':
-                legendid = None
-
-            mapTemplate = {
-                'userid': getparams['userid'],
-                'templatename': getparams['templatename'],
-                'mapviewposition': getparams['mapviewPosition'],
-                'mapviewsize': getparams['mapviewSize'],
-                'productcode': getparams['productcode'],
-                'subproductcode': getparams['subproductcode'],
-                'productversion': getparams['productversion'],
-                'mapsetcode': getparams['mapsetcode'],
-                'legendid': legendid,
-                'legendlayout': getparams['legendlayout'],
-                'legendobjposition': getparams['legendObjPosition'],
-                'showlegend': getparams['showlegend'],
-                'titleobjposition': getparams['titleObjPosition'],
-                'titleobjcontent': getparams['titleObjContent'],
-                'disclaimerobjposition': getparams['disclaimerObjPosition'],
-                'disclaimerobjcontent': getparams['disclaimerObjContent'],
-                'logosobjposition': getparams['logosObjPosition'],
-                'logosobjcontent': getparams['logosObjContent'],
-                'showobjects': getparams['showObjects'],
-                'scalelineobjposition': getparams['scalelineObjPosition'],
-                'vectorlayers': getparams['vectorLayers'],
-                'outmask': getparams['outmask'],
-                'outmaskfeature': getparams['outmaskFeature'],
-                'auto_open': getparams['auto_open'],
-                'zoomextent': getparams['zoomextent'],
-                'mapsize': getparams['mapsize'],
-                'mapcenter': getparams['mapcenter']
-            }
-
-            # print getparams
-            if getparams['newtemplate'] == 'true':
-                if self.crud_db.create('map_templates', mapTemplate):
-                    createstatus = '{"success":true, "message":"Map Template created!"}'
-                else:
-                    createstatus = '{"success":false, "message":"Error saving the Map Template! Name already exists!"}'
-            else:
-                if self.crud_db.update('map_templates', mapTemplate):
-                    createstatus = '{"success":true, "message":"Map Template updated!"}'
-
-        else:
-            createstatus = '{"success":false, "message":"No Map Template data given!"}'
-
-        return createstatus
 
 
 class Register:
@@ -664,47 +419,101 @@ class checkECASlogin:
         return login_json
 
 
-class getGraphTemplates:
+class GetAssignedDatasets:
     def __init__(self):
         self.lang = "eng"
 
     def GET(self):
         params = web.input()
-        return webpy_esapp_helpers.getGraphTemplates(params)
-
-
-class DeleteGraphTemplate:
-    def __init__(self):
-        self.lang = "eng"
-        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
-
-    def DELETE(self):
-        getparams = json.loads(web.data())  # get PUT data
-        # getparams = web.input() # get POST data
-        if 'usergraphtemplate' in getparams:      # hasattr(getparams, "layer")
-            graphtemplatePK = {
-                'userid': getparams['usergraphtemplate']['userid'],
-                'graph_tpl_name': getparams['usergraphtemplate']['graph_tpl_name'],
-             }
-
-            if self.crud_db.delete('user_graph_templates', **graphtemplatePK):
-                status = '{"success":"true", "message":"Graph template deleted!"}'
-            else:
-                status = '{"success":false, "message":"An error occured while deleting the Graph template!"}'
-
+        if hasattr(params, "legendid") and params['legendid'] != '':
+            assigneddatasets_json = webpy_esapp_helpers.GetAssignedDatasets(params['legendid'])
         else:
-            status = '{"success":false, "message":"No Graph template info passed!"}'
+            assigneddatasets_json = '{"success":false, "error":"No Legend ID passed!"}'
 
-        return status
+        return assigneddatasets_json
 
 
-class saveGraphTemplate:
+class UnassignLegend:
     def __init__(self):
         self.lang = "eng"
 
     def POST(self):
         params = web.input()
-        return webpy_esapp_helpers.saveGraphTemplate(params)
+        return webpy_esapp_helpers.UnassignLegend(params)
+
+
+class AssignLegends:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        params = web.input()
+        return webpy_esapp_helpers.AssignLegends(params)
+
+
+class copyLegend:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        params = web.input()
+        return webpy_esapp_helpers.copyLegend(params)
+
+
+class DeleteLegend:
+    def __init__(self):
+        self.lang = "eng"
+
+    def DELETE(self):
+        params = json.loads(web.data())
+        return webpy_esapp_helpers.DeleteLegend(params)
+
+
+class SaveLegend:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        params = web.input()
+        return webpy_esapp_helpers.SaveLegend(params)
+
+
+class GetLegends:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        getparams = web.input()
+        return webpy_esapp_helpers.GetLegends()
+
+
+class GetLegendClasses:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        getparams = web.input()
+        if hasattr(getparams, "legendid") and getparams['legendid'] != '':
+            legendclasses_json = webpy_esapp_helpers.GetLegendClasses(getparams['legendid'])
+        else:
+            legendclasses_json = '{"success":false, "error":"No Legend ID passed!"}'
+
+        return legendclasses_json
+
+
+class GetInstallationType:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        #return web.ctx
+        getparams = web.input()
+        systemsettings = functions.getSystemSettings()
+
+        typeinstallation_json = '{"success":"true", "typeinstallation":"'+systemsettings['type_installation'].lower() + \
+                                '", "role":"'+systemsettings['role'].lower() + '", "mode":"'+systemsettings['mode'].lower()+'"}'
+
+        return typeinstallation_json
 
 
 class GetTimeseries:
@@ -730,17 +539,267 @@ class TimeseriesProducts:
         return webpy_esapp_helpers.getTimeseriesProducts(forse)
 
 
+class getUserWorkspaces:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        params = web.input()
+        return webpy_esapp_helpers.getUserWorkspaces(params)
+
+
+class SaveWorkspacePin:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        params = web.input()
+        return webpy_esapp_helpers.saveWorkspacePin(params)
+
+
+class SaveWorkspaceName:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        params = web.input()
+        return webpy_esapp_helpers.saveWorkspaceName(params)
+
+
+class SaveWorkspace:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        params = web.input()
+        return webpy_esapp_helpers.saveWorkspace(params)
+
+
+class DeleteWorkspace:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def DELETE(self):
+        params = json.loads(web.data())  # get PUT data
+        status = '{"success":false, "message":"An error occured while deleting the Workspace!"}'
+
+        if 'userworkspace' in params:
+
+            workspacePK = {
+                'userid': params['userworkspace']['userid'],
+                'workspaceid': params['userworkspace']['workspaceid']
+            }
+
+            if self.crud_db.delete('user_workspaces', **workspacePK):
+                status = '{"success":"true", "message":"Workspace deleted!"}'
+            else:
+                status = '{"success":false, "message":"An error occured while deleting the Workspace!"}'
+
+        else:
+            status = '{"success":false, "message":"No Workspace info passed!"}'
+
+        return status
+
+
+class GetMapTemplates:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        params = web.input()
+        return webpy_esapp_helpers.getMapTemplates(params)
+
+
+class DeleteMapTemplate:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def DELETE(self):
+        params = json.loads(web.data())  # get PUT data
+        status = '{"success":false, "message":"An error occured while deleting the Map Template!"}'
+
+        if 'usermaptemplate' in params:
+            defaultworkspaceid = querydb.getDefaultUserWorkspaceID(params['usermaptemplate']['userid'])
+            if not defaultworkspaceid:
+                return status
+
+            maptemplatePK = {
+                'userid': params['usermaptemplate']['userid'],
+                'workspaceid': defaultworkspaceid,
+                'map_tpl_id': params['usermaptemplate']['map_tpl_id']
+             }
+
+            if self.crud_db.delete('user_map_templates', **maptemplatePK):
+                status = '{"success":"true", "message":"Map Template deleted!"}'
+            else:
+                status = '{"success":false, "message":"An error occured while deleting the Map Template!"}'
+
+        else:
+            status = '{"success":false, "message":"No Map Template info passed!"}'
+
+        return status
+
+
+class __DeleteMapTemplate:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def DELETE(self):
+        getparams = json.loads(web.data())  # get PUT data
+        # getparams = web.input() # get POST data
+        if 'usermaptemplate' in getparams:      # hasattr(getparams, "layer")
+            maptemplatePK = {
+                'userid': getparams['usermaptemplate']['userid'],
+                'templatename': getparams['usermaptemplate']['templatename'],
+             }
+
+            if self.crud_db.delete('map_templates', **maptemplatePK):
+                status = '{"success":"true", "message":"Map Template deleted!"}'
+            else:
+                status = '{"success":false, "message":"An error occured while deleting the Map Template!"}'
+
+        else:
+            status = '{"success":false, "message":"No Map Template info passed!"}'
+
+        return status
+
+
+class SaveMapTemplate:
+    def __init__(self):
+        self.lang = "eng"
+        # self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def POST(self):
+        params = web.input()
+        return webpy_esapp_helpers.saveMapTemplate(params)
+
+
+class __SaveMapTemplate:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def POST(self):
+        getparams = web.input()
+        # getparams = json.loads(web.data())  # get PUT data
+
+        createstatus = '{"success":false, "message":"An error occured while saving the Map Template!"}'
+
+        if 'userid' in getparams and 'templatename' in getparams:
+            legendid = getparams['legendid']
+            if getparams['legendid'] == '':
+                legendid = None
+
+            mapTemplate = {
+                'userid': getparams['userid'],
+                'templatename': getparams['templatename'],
+                'mapviewposition': getparams['mapviewPosition'],
+                'mapviewsize': getparams['mapviewSize'],
+                'productcode': getparams['productcode'],
+                'subproductcode': getparams['subproductcode'],
+                'productversion': getparams['productversion'],
+                'mapsetcode': getparams['mapsetcode'],
+                'legendid': legendid,
+                'legendlayout': getparams['legendlayout'],
+                'legendobjposition': getparams['legendObjPosition'],
+                'showlegend': getparams['showlegend'],
+                'titleobjposition': getparams['titleObjPosition'],
+                'titleobjcontent': getparams['titleObjContent'],
+                'disclaimerobjposition': getparams['disclaimerObjPosition'],
+                'disclaimerobjcontent': getparams['disclaimerObjContent'],
+                'logosobjposition': getparams['logosObjPosition'],
+                'logosobjcontent': getparams['logosObjContent'],
+                'showobjects': getparams['showObjects'],
+                'scalelineobjposition': getparams['scalelineObjPosition'],
+                'vectorlayers': getparams['vectorLayers'],
+                'outmask': getparams['outmask'],
+                'outmaskfeature': getparams['outmaskFeature'],
+                'auto_open': getparams['auto_open'],
+                'zoomextent': getparams['zoomextent'],
+                'mapsize': getparams['mapsize'],
+                'mapcenter': getparams['mapcenter']
+            }
+
+            # print getparams
+            if getparams['newtemplate'] == 'true':
+                if self.crud_db.create('map_templates', mapTemplate):
+                    createstatus = '{"success":true, "message":"Map Template created!"}'
+                else:
+                    createstatus = '{"success":false, "message":"Error saving the Map Template! Name already exists!"}'
+            else:
+                if self.crud_db.update('map_templates', mapTemplate):
+                    createstatus = '{"success":true, "message":"Map Template updated!"}'
+
+        else:
+            createstatus = '{"success":false, "message":"No Map Template data given!"}'
+
+        return createstatus
+
+
+class getGraphTemplates:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        params = web.input()
+        return webpy_esapp_helpers.getGraphTemplates(params)
+
+
+class DeleteGraphTemplate:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def DELETE(self):
+        params = json.loads(web.data())  # get PUT data
+        status = '{"success":false, "message":"An error occured while deleting the Graph template!"}'
+
+        if 'usergraphtemplate' in params:
+            defaultworkspaceid = querydb.getDefaultUserWorkspaceID(params['usergraphtemplate']['userid'])
+            if not defaultworkspaceid:
+                return status
+
+            graphtemplatePK = {
+                'userid': params['usergraphtemplate']['userid'],
+                'workspaceid': defaultworkspaceid,
+                'graph_tpl_id': params['usergraphtemplate']['graph_tpl_id'],
+             }
+
+            if self.crud_db.delete('user_graph_templates', **graphtemplatePK):
+                status = '{"success":"true", "message":"Graph template deleted!"}'
+            else:
+                status = '{"success":false, "message":"An error occured while deleting the Graph template!"}'
+
+        else:
+            status = '{"success":false, "message":"No Graph template info passed!"}'
+
+        return status
+
+
+class saveGraphTemplate:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        params = web.input()
+        return webpy_esapp_helpers.saveGraphTemplate(params)
+
+
 class UpdateYaxe:
     def __init__(self):
         self.lang = "eng"
 
     def POST(self):
         yaxe = web.input()
-
-        if 'id' in yaxe: # to check if the file-object is created
+        if 'id' in yaxe and 'userid' in yaxe and yaxe['userid'] != '':
             try:
-                querydb.update_yaxe(yaxe)
-                yaxeproperties_json = '{"success":true, "message":"Yaxe updated"}'
+                if querydb.update_yaxe(yaxe):
+                    yaxeproperties_json = '{"success":true, "message":"Yaxe updated"}'
+                else:
+                    yaxeproperties_json = '{"success":false, "error":"Error saving the Yaxe properties in the database!"}'
             except:
                 yaxeproperties_json = '{"success":false, "error":"Error saving the Yaxe properties in the database!"}'
         else:
@@ -794,10 +853,10 @@ class UpdateGraphProperties:
 
     def PUT(self):
         params = json.loads(web.data())  # get PUT data
-        extraparams = web.input()        # get userid and graph_tpl_name from GET data
-        params['graphproperty']['userid'] = extraparams.userid
-        params['graphproperty']['graph_tpl_name'] = extraparams.graph_tpl_name
-        return webpy_esapp_helpers.updateGraphProperties(params)
+        extraparams = web.input()        # get userid, graph_tpl_id, graph_tpl_name and isTemplate parameters from GET data
+        # params['graphproperty']['userid'] = extraparams.userid
+        # params['graphproperty']['graph_tpl_name'] = extraparams.graph_tpl_name
+        return webpy_esapp_helpers.updateGraphProperties(params, extraparams)
 
 
 class GetHelpFile:
@@ -1135,8 +1194,6 @@ class AssignInternetSource:
             'defined_by': 'USER',
             'type': 'INTERNET'
         }
-
-        # datasourceinserted = querydb.insert_product_acquisition_datasource(productinfo, echo=False)
 
         if self.crud_db.create('product_acquisition_data_source', productinfo):
             insertstatus = '{"success":"true", "message":"Internet source assigned!"}'
@@ -1554,7 +1611,7 @@ class GetDashboard:
         self.lang = "eng"
 
     def GET(self):
-        # getparams = web.input()
+        getparams = web.input()
 
         PC1_connection = False
         PC23_connection = False
@@ -1588,9 +1645,6 @@ class GetDashboard:
         systemsettings = functions.getSystemSettings()
         status_services = functions.getStatusAllServices()
 
-        # T o D o: Use port 80?
-        # IP_port = ':22'
-        # PC1_connection = functions.check_connection(systemsettings['ip_pc1'] + IP_port)
         PC1_connection = functions.check_connection('mesa-pc1')
 
         status_PC1 = []
@@ -1626,7 +1680,6 @@ class GetDashboard:
                 PC1_fts_status = True
             else:
                 PC1_fts_status = False
-
 
         if systemsettings['type_installation'].lower() == 'full':
             if systemsettings['role'].lower() == 'pc1':
@@ -1717,7 +1770,6 @@ class GetDashboard:
                     else:
                         PC2_Webserver_Status = False
 
-
         if systemsettings['type_installation'].lower() in ['singlepc', 'server']:
             if systemsettings['role'].lower() == 'pc1':
                 PC1_mode = systemsettings['mode'].lower()
@@ -1735,7 +1787,6 @@ class GetDashboard:
                 PC2_service_ingest = status_services['ingest']
                 PC2_service_processing = status_services['process']
                 PC2_service_system = status_services['system']
-
 
         if PC2_DBAutoSync in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
             PC2_DBAutoSync = True
@@ -1809,19 +1860,19 @@ class GetDashboard:
         #     "PC2_service_internet": "true",
         #     "PC2_service_processing": "true",
         #     "PC2_service_system": "true",
-        #     "PC2_version": "2.0.4",
+        #     "PC2_version": "2.1.1",
         #     "PC3_DBAutoSync": False,
         #     "PC3_DataAutoSync": False,
         #     "PC3_disk_status": "true",
         #     "PC3_internet_status": "true",
-        #     "PC3_mode": "nominal",
+        #     "PC3_mode": "recovery",
         #     "PC3_postgresql_status": "true",
         #     "PC3_service_eumetcast": "false",
         #     "PC3_service_ingest": "false",
         #     "PC3_service_internet": "false",
         #     "PC3_service_processing": "false",
         #     "PC3_service_system": "true",
-        #     "PC3_version": "2.0.4",
+        #     "PC3_version": "2.1.1",
         #     "activePC": "pc3",
         #     "type_installation": "full"
         # }
@@ -2216,8 +2267,11 @@ class ProductNavigatorDataSets:
         self.lang = "eng"
 
     def GET(self):
-
-        return webpy_esapp_helpers.ProductNavigatorDataSets()
+        getparams = web.input()
+        forse = False
+        if 'forse' in getparams:
+            forse = getparams.forse
+        return webpy_esapp_helpers.getProductNavigatorDataSets(forse)
 
 
 class GetLogFile:
@@ -3603,7 +3657,6 @@ class DataSets:
         return webpy_esapp_helpers.getDataSets(forse)
 
 
-
 class CheckStatusAllServices:
     def __init__(self):
         self.lang = "eng"
@@ -3790,7 +3843,7 @@ class UpdateProductInfo:
             'description': getparams['description'],
             'category_id': getparams['category_id']}
 
-        productupdated = querydb.update_product_info(productinfo, echo=False)
+        productupdated = querydb.update_product_info(productinfo)
 
         if productupdated:
             updatestatus = '{"success":"true", "message":"Product updated!"}'
@@ -3941,7 +3994,6 @@ class Ingestion:
         return webpy_esapp_helpers.getIngestion(forse)
 
 
-
 class DataAcquisition:
     def __init__(self):
         self.lang = "eng"
@@ -3949,7 +4001,7 @@ class DataAcquisition:
     def GET(self):
         # return web.ctx
 
-        dataacquisitions = querydb.get_dataacquisitions(echo=False)
+        dataacquisitions = querydb.get_dataacquisitions()
 
         if hasattr(dataacquisitions, "__len__") and dataacquisitions.__len__() > 0:
             # dataacquisitions_json = tojson(dataacquisitions)
@@ -3995,7 +4047,7 @@ class ProductAcquisition:
     def GET(self, params):
         # return web.ctx
         getparams = web.input()
-        products = querydb.get_products_acquisition(echo=False, activated=getparams.activated)
+        products = querydb.get_products_acquisition(activated=getparams.activated)
         products_json = functions.tojson(products)
         products_json = '{"success":"true", "total":'+str(products.__len__())+',"products":['+products_json+']}'
         return products_json

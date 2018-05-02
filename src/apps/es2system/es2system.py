@@ -911,7 +911,7 @@ def push_data_ftp(dry_run=False):
             if len(all_prod_mapsets) > 1:
                 mapset_to_use = []
                 for my_mapset in all_prod_mapsets:
-                    mapset_info = querydb.get_mapset(mapsetcode=my_mapset, allrecs=False, echo=False)
+                    mapset_info = querydb.get_mapset(mapsetcode=my_mapset, allrecs=False)
                     if hasattr(mapset_info, "mapsetcode"):
                         my_mapobj = MapSet()
                         my_mapobj.assigndb(my_mapset)
@@ -935,7 +935,6 @@ def push_data_ftp(dry_run=False):
                     dataset_info = querydb.get_subproduct(productcode=productcode,
                                                           version=version,
                                                           subproductcode=subproductcode,
-                                                          echo=False,
                                                           masked=True)  # -> this means sprod NOT masked
 
                     if dataset_info is not None:

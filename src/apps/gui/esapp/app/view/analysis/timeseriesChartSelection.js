@@ -1,5 +1,5 @@
 Ext.define("esapp.view.analysis.timeseriesChartSelection",{
-    extend: "Ext.panel.Panel",      // "Ext.window.Window",
+    extend: "Ext.panel.Panel",
  
     requires: [
         "esapp.view.analysis.timeseriesChartSelectionController",
@@ -32,86 +32,92 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
     collapsed: false,
     resizable: false,
     floating: true,
-    floatable: true,
+    // floatable: true,
     alwaysOnTop: false,
-    autoScroll: true,
-    scrollable: 'vertical',
     shrinkWrap: 3, // both width and height depend on content (shrink wrap).
-    width:470,
-    // maxWidth:470,
+    width:455,
+    // maxWidth:500,
     // autoWidth: true,
     // autoHeight: true,
-    // layout: {
-    //     type: 'fit'
-    // },
-    alignTarget: Ext.getCmp('backgroundmap'),
+    layout: {
+        type: 'vbox',
+        pack: 'start',
+        align: 'stretch'
+    },
+    margin: '0 3 0 0',
+    // alignTarget: Ext.getCmp('backgroundmap'),
     defaultAlign: 'tr-tr',
     frame: false,
     border: false,
     shadow: false,
     componentCls: 'rounded-box',
 
+    config: {
+        workspace: null
+    },
+
+
     initComponent: function () {
         var me = this;
         // me.height = Ext.getCmp('analysismain').getBody().height;
 
         me.viewConfig = {
-            defaultAlign: 'tr-tr',
-            alignTarget: Ext.getCmp('backgroundmap')
+            defaultAlign: 'tr-tr'
+            // alignTarget: Ext.getCmp(me.workspace.id).body      // Ext.getCmp('backgroundmap')
         };
 
         me.listeners = {
-            // afterrender: function(){
-            //     Ext.util.Observable.capture(me, function (e) { console.log('timeserieschartselection - ' + e);});
-            //     // me.fireEvent('align');
-            // },
-            show: function(){
-                // console.info('show tschartselection');
-                me.hidden = false;
-                me.fireEvent('align');
-                me.expand();
+            afterrender: function(){
+                // Ext.util.Observable.capture(me, function (e) { console.log('timeserieschartselection - ' + e);});
+                // console.info(Ext.getCmp(me.workspace.id));
+                me.alignTarget = Ext.getCmp(me.workspace.id).body;
+                // me.fireEvent('align');
             },
-            align: function() {
-                // console.info('align tschartselection');
-                var task = new Ext.util.DelayedTask(function() {
-                    // me.show();
-                    // me.expand();
-                    me.alignTo(Ext.getCmp('analysismain').lookupReference('backgroundmap'), 'tr-tr');
-                    // me.alignTo(Ext.getCmp('analysismain'), 'tr-tr');
-                    // me.height = Ext.getBody().getViewSize().height-65;
-                    me.height = Ext.getCmp('analysismain').body.getHeight();
-                    me.updateLayout();
-                });
-                if (!me.hidden) {
-                    task.delay(50);
-                }
+            show: function(){
+                me.hidden = false;
+                // me.fireEvent('align');
+                me.height = Ext.getCmp(me.workspace.id).body.getHeight()-3;
+                me.updateLayout();
+                me.expand();
             }
+            // align: function() {
+            //     var task = new Ext.util.DelayedTask(function() {
+            //         me.alignTo(Ext.getCmp(me.workspace.id).body, 'tr-tr');
+            //         me.height = Ext.getCmp(me.workspace.id).body.getHeight()-3;
+            //         me.updateLayout();
+            //     });
+            //     if (!me.hidden) {
+            //         task.delay(50);
+            //     }
+            // }
         };
 
         me.title = esapp.Utils.getTranslation('TIME_SERIES_GRAPHS');  // 'TIME SERIES GRAPHS',
 
         me.defaults = {
-            margin: '8 3 8 3'
+            margin: '5 3 2 3'
         };
 
         me.items = [{
             xtype: 'fieldset',
-            id: 'fieldset_selectedregion',
+            // id: 'fieldset_selectedregion',
             title: '<b style="font-size:16px; color:#0065A2; line-height: 18px;">' + esapp.Utils.getTranslation('selectedregion') + '</b>',
             hidden: false,
-            autoHeight: false,   // 65,
-            height: 60,
-            maxHeight: 60,
+            autoHeight: true,   // 65,
+            height: 65,
+            flex: 1,
+            maxHeight: 80,
             border: 2,
-            padding: '5 5 5 15',
+            padding: '3 5 3 10',
             style: {
                 borderColor: '#157FCC',
                 borderStyle: 'solid'
             },
             items: [{
                 xtype: 'displayfield',
-                id: 'selectedregionname',
+                // id: 'selectedregionname_'+me.workspace.id,
                 reference: 'selectedregionname',
+                height: 40,
                 fieldLabel: '',
                 labelAlign: 'left',
                 fieldCls: 'ts_selectedfeature_name_font',
@@ -120,37 +126,49 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                     //"font-weight": 'bold',
                     //"font-size": 24
                 },
-                value: ''
+                value: '',
+                listeners: {
+                    change: function(field,newValue, oldValue){
+                        var new_wkt_polygon = me.lookupReference('wkt_polygon').getValue();
+                        var new_selectedregionname = me.lookupReference('selectedregionname').getValue();
+
+                        if (new_wkt_polygon.trim() != '' && new_selectedregionname.trim() != '') {
+                            var graphViewWindows = Ext.ComponentQuery.query('timeserieschart-window');
+
+                            Ext.Object.each(graphViewWindows, function(id, graphview_window, thisObj) {
+                                if (graphview_window.link_region_change){
+                                    graphview_window.getController().changeSelectedRegion();
+                                }
+                            });
+                        }
+                    }
+                }
             }]
         }, {
             xtype: 'tabpanel',
-            id: 'graphs_tabpanel_'+me.id,
+            // id: 'graphs_tabpanel_' + me.id,
             hideCollapseTool: true,
             header: false,
-            autoScroll:false,
-            reserveScrollbar: false,
             frame: false,
             border: false,
+            flex: 5,
             // bodyPadding: '3 3 3 3',
             componentCls: 'rounded-box',
-            layout: {
-                type: 'fit'
+            resizable: false,
+            defaults: {
+                layout: {
+                    type: 'fit'
+                }
             },
             items: [{
                 title: esapp.Utils.getTranslation('PROFILE'),  // 'DEFAULT X/Y GRAPH',
-                id: 'ts_xy_graph_tab_' + me.id,
-                autoHeight: true,
-                autoScroll: true,
-                layout: {
-                    type: 'vbox'
-                    ,align: 'stretch'
-                },
+                // id: 'ts_xy_graph_tab_' + me.id,
                 tbar: {
                     padding: '0 0 0 0',
                     items: [{
                         xtype: 'button',
                         text: esapp.Utils.getTranslation('gettimeseries'),    // 'Get timeseries',
-                        id: 'gettimeseries_btn_xy',
+                        // id: 'gettimeseries_btn_xy',
                         reference: 'gettimeseries_btn_xy',
                         iconCls: 'chart-curve_medium',
                         scale: 'medium',
@@ -172,22 +190,15 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                     // compareyears: false,
                     multipleyears: true
                 }]
-            },{
-
+            }, {
                 title: esapp.Utils.getTranslation('CUMULATIVE'),  // 'CUMULATIVE',
-                id: 'ts_cumulative_graph_tab_' + me.id,
-                autoHeight: true,
-                autoScroll: true,
-                layout: {
-                    type: 'vbox'
-                    , align: 'stretch'
-                },
+                // id: 'ts_cumulative_graph_tab_' + me.id,
                 tbar: {
                     padding: '0 0 0 0',
                     items: [{
                         xtype: 'button',
                         text: esapp.Utils.getTranslation('gettimeseries'),    // 'Get timeseries',
-                        id: 'gettimeseries_btn_cum',
+                        // id: 'gettimeseries_btn_cum',
                         reference: 'gettimeseries_btn_cum',
                         iconCls: 'chart-curve_medium',
                         scale: 'medium',
@@ -209,21 +220,15 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                     // compareyears: false,
                     multipleyears: false
                 }]
-            },{
+            }, {
                 title: esapp.Utils.getTranslation('RANKING_ZSCORE'),  // 'RANKING / Z-SCORE',
-                id: 'ts_ranking_graph_tab_'+me.id,
-                autoHeight: true,
-                autoScroll:true,
-                layout: {
-                    type: 'vbox'
-                    ,align: 'stretch'
-                },
+                // id: 'ts_ranking_graph_tab_' + me.id,
                 tbar: {
                     padding: '0 0 0 0',
                     items: [{
                         xtype: 'button',
                         text: esapp.Utils.getTranslation('gettimeseries'),    // 'Get timeseries',
-                        id: 'gettimeseries_btn_ranking',
+                        // id: 'gettimeseries_btn_ranking',
                         reference: 'gettimeseries_btn_ranking',
                         iconCls: 'chart-curve_medium',
                         scale: 'medium',
@@ -245,21 +250,15 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                     // compareyears: false,
                     multipleyears: true
                 }]
-            },{
+            }, {
                 title: esapp.Utils.getTranslation('MATRIX'),  // 'MATRIX',
-                id: 'ts_matrix_graph_tab_'+me.id,
-                autoHeight: true,
-                autoScroll:true,
-                layout: {
-                    type: 'vbox'
-                    ,align: 'stretch'
-                },
+                // id: 'ts_matrix_graph_tab_' + me.id,
                 tbar: {
                     padding: '0 0 0 0',
                     items: [{
                         xtype: 'button',
                         text: esapp.Utils.getTranslation('gettimeseries'),    // 'Get timeseries',
-                        id: 'gettimeseries_btn_matrix',
+                        // id: 'gettimeseries_btn_matrix',
                         reference: 'gettimeseries_btn_matrix',
                         iconCls: 'chart-curve_medium',
                         scale: 'medium',
@@ -281,45 +280,45 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                     // compareyears: false,
                     multipleyears: true
                 }]
-            },{
+            }, {
                 title: 'Debug info',
-                id: 'debug_info_tab_'+me.id,
+                // id: 'debug_info_tab_' + me.id,
                 hidden: true,
                 items: [{
                     xtype: 'displayfield',
-                    id: 'regionname',
+                    // id: 'regionname',
                     reference: 'regionname',
                     fieldLabel: 'Region name',
-                    labelAlign : 'top',
+                    labelAlign: 'top',
                     value: '<span style="color:green;">value</span>'
                 }, {
-                    xtype: 'displayfield',
-                    id: 'admin0name',
-                    reference: 'admin0name',
-                    fieldLabel: 'Admin level 0 country name',
-                    labelAlign : 'top',
-                    value: '<span style="color:green;">value</span>'
-                }, {
-                    xtype: 'displayfield',
-                    id: 'admin1name',
-                    reference: 'admin1name',
-                    fieldLabel: 'Admin level 1 region name',
-                    labelAlign : 'top',
-                    value: '<span style="color:green;">value</span>'
-                }, {
-                    xtype: 'displayfield',
-                    id: 'admin2name',
-                    reference: 'admin2name',
-                    fieldLabel: 'Admin level 2 region name',
-                    labelAlign : 'top',
-                    value: '<span style="color:green;">value</span>'
-                }, {
+                //     xtype: 'displayfield',
+                //     // id: 'admin0name',
+                //     reference: 'admin0name',
+                //     fieldLabel: 'Admin level 0 country name',
+                //     labelAlign: 'top',
+                //     value: '<span style="color:green;">value</span>'
+                // }, {
+                //     xtype: 'displayfield',
+                //     // id: 'admin1name',
+                //     reference: 'admin1name',
+                //     fieldLabel: 'Admin level 1 region name',
+                //     labelAlign: 'top',
+                //     value: '<span style="color:green;">value</span>'
+                // }, {
+                //     xtype: 'displayfield',
+                //     // id: 'admin2name',
+                //     reference: 'admin2name',
+                //     fieldLabel: 'Admin level 2 region name',
+                //     labelAlign: 'top',
+                //     value: '<span style="color:green;">value</span>'
+                // }, {
                     title: 'WKT of Polygon',
                     xtype: 'displayfield',
-                    id: 'wkt_polygon',
+                    // id: 'wkt_polygon_'+ me.workspace.id,
                     reference: 'wkt_polygon',
                     fieldLabel: 'WKT of Polygon',
-                    labelAlign : 'top',
+                    labelAlign: 'top',
                     value: ''
                 }]
             }]

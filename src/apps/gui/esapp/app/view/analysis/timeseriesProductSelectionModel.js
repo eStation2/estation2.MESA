@@ -4,7 +4,8 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionModel', {
 
     stores: {
         categories: {
-            source: 'CategoriesStore'
+            source: 'CategoriesStore',
+            session: true
         },
         products: {
             source: 'TimeseriesProductsStore',
@@ -19,7 +20,8 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionModel', {
 
             ,grouper:{
                      groupFn : function (item) {
-                         return item.get('group_product_descriptive_name') + ' - <b class="smalltext" style="color:black">' +  item.get('version') + ' - ' + item.get('productcode') + '</b>';
+                         var version = item.get('version') != 'undefined' ? item.get('version') : '';
+                         return item.get('group_product_descriptive_name') + ' - <b class="smalltext" style="color:black">' +  version + ' - ' + item.get('productcode') + '</b>';
                          // return item.get('group_product_descriptive_name');
                          //return esapp.Utils.getTranslation(item.get('category_id'));
                          //return "<span style='display: none;'>" + item.get('order_index') + "</span>" + esapp.Utils.getTranslation(item.get('category_id'))
@@ -79,55 +81,55 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionModel', {
             //}
         },
 
-        // timeseriesdrawproperties: {
-        //     // source: 'TSDrawPropertiesStore',
-        //     model: 'esapp.model.TSDrawProperties',
-        //     session: false,
-        //     autoLoad: false,
-        //     autoSync: false,
-        //
-        //     proxy: {
-        //         type: 'rest',
-        //
-        //         appendId: false,
-        //
-        //         api: {
-        //             read: 'analysis/gettimeseriesdrawproperties',
-        //             create: 'analysis/gettimeseriesdrawproperties/create',
-        //             update: 'analysis/gettimeseriesdrawproperties/update',
-        //             destroy: 'analysis/gettimeseriesdrawproperties/delete'
-        //         },
-        //         reader: {
-        //              type: 'json'
-        //             ,successProperty: 'success'
-        //             ,rootProperty: 'tsdrawproperties'
-        //             ,messageProperty: 'message'
-        //         },
-        //         writer: {
-        //             type: 'json',
-        //             writeAllFields: true,
-        //             rootProperty: 'tsdrawproperties'
-        //         },
-        //         listeners: {
-        //             exception: function(proxy, response, operation){
-        //                 console.info('TIMESERIES DRAW PROPERTIES VIEW MODEL - REMOTE EXCEPTION - Error querying the time series draw properties!');
-        //             }
-        //         }
-        //     }
-        //     ,listeners: {
-        //         update: function(store, record, operation, modifiedFieldNames, details, eOpts  ){
-        //             // This event is triggered on every change made in a record!
-        //             //console.info('record updated!');
-        //         },
-        //         write: function(store, operation){
-        //             var result = Ext.JSON.decode(operation.getResponse().responseText);
-        //             if (!operation.success) {
-        //                 //console.info(store);
-        //                 //console.info(operation);
-        //             }
-        //         }
-        //     }
-        // },
+        timeseriesdrawproperties: {
+            // source: 'TSDrawPropertiesStore',
+            model: 'esapp.model.TSDrawProperties',
+            session: true,
+            autoLoad: false,
+            autoSync: false,
+
+            proxy: {
+                type: 'rest',
+
+                appendId: false,
+
+                api: {
+                    read: 'analysis/gettimeseriesdrawproperties',
+                    create: 'analysis/gettimeseriesdrawproperties/create',
+                    update: 'analysis/gettimeseriesdrawproperties/update',
+                    destroy: 'analysis/gettimeseriesdrawproperties/delete'
+                },
+                reader: {
+                     type: 'json'
+                    ,successProperty: 'success'
+                    ,rootProperty: 'tsdrawproperties'
+                    ,messageProperty: 'message'
+                },
+                writer: {
+                    type: 'json',
+                    writeAllFields: true,
+                    rootProperty: 'tsdrawproperties'
+                },
+                listeners: {
+                    exception: function(proxy, response, operation){
+                        console.info('TIMESERIES DRAW PROPERTIES VIEW MODEL - REMOTE EXCEPTION - Error querying the time series draw properties!');
+                    }
+                }
+            }
+            ,listeners: {
+                update: function(store, record, operation, modifiedFieldNames, details, eOpts  ){
+                    // This event is triggered on every change made in a record!
+                    //console.info('record updated!');
+                },
+                write: function(store, operation){
+                    var result = Ext.JSON.decode(operation.getResponse().responseText);
+                    if (!operation.success) {
+                        //console.info(store);
+                        //console.info(operation);
+                    }
+                }
+            }
+        },
 
         years:{
             model: 'esapp.model.Year',

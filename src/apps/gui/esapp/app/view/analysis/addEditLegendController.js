@@ -2,7 +2,6 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.analysis-addeditlegend'
 
-
     ,validateClasses: function(){
         var me = this.getView();
         var legendClassesStore = me.getViewModel().getStore('legendClassesStore');
@@ -697,7 +696,6 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
 
         Ext.getCmp('legendpreview').setHtml(legendHTMLVertical);
     }
-
 
     ,setLegendPreviewOld:function() {
 //        var tempStore = this.store;

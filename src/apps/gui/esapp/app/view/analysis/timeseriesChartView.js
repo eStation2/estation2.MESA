@@ -11,7 +11,8 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
     requires: [
         'esapp.view.analysis.timeseriesChartViewModel',
         'esapp.view.analysis.timeseriesChartViewController',
-        // 'esapp.model.GraphProperties',
+        'esapp.view.analysis.mapDisclaimerObject',
+        "esapp.view.analysis.mapLogoObject",
 
         'Ext.window.Window',
         'Ext.toolbar.Toolbar'
@@ -25,14 +26,14 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
     constrainHeader: true,
     //constrain: true,
     autoShow : false,
-    closeable: true,
+    closable: true,
     closeAction: 'destroy', // 'hide',
     maximizable: true,
     collapsible: true,
     resizable: true,
 
     width:700,
-    height: Ext.getBody().getViewSize().height < 700 ? Ext.getBody().getViewSize().height-80 : 700,
+    height: Ext.getBody().getViewSize().height < 600 ? Ext.getBody().getViewSize().height-80 : 600,
     minWidth:400,
     minHeight:350,
     x: 50,
@@ -46,9 +47,13 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
     },
 
     config: {
+        workspace: null,
         isNewTemplate: true,
         isTemplate: false,
+        graph_tpl_id: null,
+        parent_tpl_id: null,
         graph_tpl_name: '',
+        link_region_change: false,
 
         tsgraph: null,
         selectedTimeseries: null,
@@ -66,15 +71,62 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
     },
 
     listeners: {
+        beforerender: function () {
+            var me = this,
+                selectedProductsAndTimeFramePanel = me.getController().createSelectedProductsAndTimeFramePanel();
+            me.add(selectedProductsAndTimeFramePanel);
 
+            selectedProductsAndTimeFramePanel.down('timeseriesproductselection').fireEvent('beforerender');
+        },
         afterrender: function () {
-            var me = this;
-            if (me.isTemplate){
-                me.setSize(me.graphviewsize[0],me.graphviewsize[1]);
-                me.setPosition(me.graphviewposition);
+            var me = this,
+                disclaimerObj = me.lookupReference('disclaimer_obj_' + me.id),
+                logoObj = me.lookupReference('logo_obj_' + me.id),
+                graphObjectToggleBtn = me.lookupReference('objectsbtn_'+me.id.replace(/-/g,'_'));
+
+            // if (me.isTemplate){
+                if (esapp.Utils.objectExists(me.graphviewsize)){
+                    me.setSize(me.graphviewsize[0],me.graphviewsize[1]);
+                }
+                if (esapp.Utils.objectExists(me.graphviewposition)){
+                   me.setPosition(me.graphviewposition);
+                }
+
                 me.updateLayout();
-            }
-            me.getController().generateChart();
+
+                if (esapp.Utils.objectExists(me.disclaimerObjPosition) && esapp.Utils.objectExists(me.disclaimerObjContent)) {
+                    disclaimerObj.disclaimerPosition = me.disclaimerObjPosition;
+                    disclaimerObj.setHtml(me.disclaimerObjContent);
+                    disclaimerObj.setContent(me.disclaimerObjContent);
+                }
+
+                if (esapp.Utils.objectExists(me.logosObjPosition)) {
+                    logoObj.logoPosition = me.logosObjPosition;
+                    if (esapp.Utils.objectExists(me.logosObjContent)) {
+                        logoObj.getViewModel().data.logoData = me.logosObjContent;
+                    }
+                }
+
+                // titleObj.titlePosition = me.titleObjPosition;
+                // if (me.titleObjContent != null && me.titleObjContent.trim() != ''){
+                //     titleObj.setTpl([]);    // empty template which must be an array
+                //     titleObj.setTpl(me.titleObjContent);
+                //     // titleObj.tpl.push(me.titleObjContent);
+                //     // titleObj.tpl.set(me.titleObjContent, true);
+                // }
+                // if (me.showObjects){
+                //     var taskToggleObjects = new Ext.util.DelayedTask(function() {
+                //         graphObjectToggleBtn.toggle(true);
+                //         me.getController().toggleObjects(graphObjectToggleBtn);
+                //     });
+                //     taskToggleObjects.delay(1000);
+                // }
+
+                me.getController().generateChart();
+            // }
+            // else {
+            //     me.getController().generateChart();
+            // }
         }
         // The resize handle is necessary to set the map!
         ,resize: function () {
@@ -95,6 +147,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
 
     initComponent: function () {
         var me = this;
+        // Ext.util.Observable.capture(me, function(e){console.log('grapview - ' + me.id + ': ' + e);});
 
         // me.title = '<span class="panel-title-style">'+esapp.Utils.getTranslation('timeseries')+'</span>';
         me.title = '<span id="graphview_title_templatename_' + me.id + '" class="graph-templatename"></span>' +
@@ -104,6 +157,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
         me.border= true;
         me.bodyBorder = false;
 
+        me.link_region_change = false;
         me.wkt_geom = this.wkt_geom;
 
         me.tools = [
@@ -134,6 +188,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             id: 'tbar_'+me.id,
+            reference: 'tbar_'+me.id,
             dock: 'top',
             autoShow: true,
             alwaysOnTop: true,
@@ -146,13 +201,32 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                 margin: 2
             },
             items: [{
+                text: '<div style="font-size: 11px;">' + esapp.Utils.getTranslation('PRODUCTS').toUpperCase() + '</div>',   // 'Products',
+                reference: 'changeSelectedProductsAndTimeframe_'+me.id.replace(/-/g,'_'),
+                tooltip: esapp.Utils.getTranslation('change_selected_products'), //  'Change Selected products',
+                iconCls: 'fa fa-calendar fa-2x',
+                style: {color: '#748FFC'},
+                scale: 'medium',
+                // hidden:  ((esapp.getUser() == 'undefined' || esapp.getUser() == null) || !me.isTemplate ? true : false),
+                handler: 'changeSelectedProductsAndTimeFrame'
+            // }, {
+            //     xtype: 'button',
+            //     tooltip: esapp.Utils.getTranslation('change_timeframe'),   //  'Change Time frame',
+            //     iconCls: 'fa fa-calendar fa-2x',
+            //     style: {color: '#748FFC'},
+            //     enableToggle: false,
+            //     scale: 'medium',
+            //     hidden:  (esapp.getUser() == 'undefined' || esapp.getUser() == null ? true : false),
+            //     handler: 'changeSelectedProductsAndTimeFrame'
+            },{
                 // text: esapp.Utils.getTranslation('properties'),    // 'Graph properties',
                 tooltip: esapp.Utils.getTranslation('graph_edit_properties'), //  'Edit graph properties',
                 iconCls: 'chart-curve_edit',
                 scale: 'medium'
                 ,handler: 'openChartProperties'
-            },
-            {
+            }, {
+                xtype: 'tbseparator'
+            }, ' ', {
                 // text: esapp.Utils.getTranslation('values'),    // downloadtimeseries = 'Download timeseries',
                 tooltip: esapp.Utils.getTranslation('graph_download_values'),   //  'Download time series values',
                 iconCls: 'download-values_excel',   // 'fa fa-file-excel-o fa-2x',    // 'fa fa-download fa-2x',
@@ -164,7 +238,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                 tooltip: esapp.Utils.getTranslation('graph_download_png'),   //  'Download graph as PNG',
                 iconCls: 'download_png',    // 'fa fa-floppy-o fa-2x',
                 scale: 'medium'
-                ,handler: 'saveChart'
+                ,handler: 'saveChartAsPNG'
             },{
                 xtype: 'splitbutton',
                 reference: 'saveGraphTemplate_'+me.id.replace(/-/g,'_'),
@@ -174,7 +248,18 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                 cls: 'nopadding-splitbtn',
                 scale: 'medium',
                 hidden:  (esapp.getUser() == 'undefined' || esapp.getUser() == null ? true : false),
+                arrowVisible: (!me.isNewTemplate ? true : false),
                 handler: 'setGraphTemplateName',
+                listeners: {
+                    afterrender: function (me) {
+                        // Register the new tip with an element's ID
+                        Ext.tip.QuickTipManager.register({
+                            target: me.getId(), // Target button's ID
+                            title: '',
+                            text: esapp.Utils.getTranslation('save_graph_template')
+                        });
+                    }
+                },
                 menu: {
                     hideOnClick: false,
                     alwaysOnTop: true,
@@ -203,6 +288,38 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
             },
             '->',
             {
+                reference: 'objectsbtn_'+me.id.replace(/-/g,'_'),
+                hidden: false,
+                iconCls: 'fa fa-object-group',
+                style: {
+                    "font-size": '1.70em'
+                },
+                scale: 'medium',
+                enableToggle: true,
+                handler: 'toggleObjects',
+                listeners: {
+                    afterrender: function (me) {
+                        // Register the new tip with an element's ID
+                        Ext.tip.QuickTipManager.register({
+                            target: me.getId(), // Target button's ID
+                            title: '',
+                            text: esapp.Utils.getTranslation('show_hide_title_logo_discalaimer_objects')
+                        });
+                    }
+                }
+            },{
+                xtype: 'button',
+                tooltip: esapp.Utils.getTranslation('change_selected_region'),   //  'Change selected region',
+                iconCls: 'change-region-unlink',
+                // style: {color: '#748FFC'},
+                enableToggle: true,
+                pressed: false,
+                margin: 0,
+                scale: 'medium',
+                handler: 'toggleRegionLink'
+            },
+            ' ',
+            {
                 xtype: 'button',
                 tooltip: esapp.Utils.getTranslation('graph_refresh'),   //  'Refresh graph',
                 iconCls: 'fa fa-refresh fa-2x',
@@ -217,10 +334,20 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
         me.name ='tsgraphwindow_' + me.id;
 
         me.items = [{
-                xtype: 'container',
-                layout:'fit',
-                reference:'tsgraph_'+me.id,
-                id: 'tsgraph_' + me.id
+            xtype: 'container',
+            layout:'fit',
+            reference:'tsgraph_'+me.id,
+            id: 'tsgraph_' + me.id
+        }, {
+            xtype: 'mapdisclaimerobject',
+            id: 'disclaimer_obj_' + me.id,
+            reference: 'disclaimer_obj_' + me.id,
+            alwaysOnTop: false
+        }, {
+            xtype: 'maplogoobject',
+            id: 'logo_obj_' + me.id,
+            reference: 'logo_obj_' + me.id,
+            alwaysOnTop: false
         }];
 
         me.callParent();

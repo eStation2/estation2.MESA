@@ -14,8 +14,8 @@ Ext.define("esapp.view.analysis.mapScaleLineObject",{
 
     xtype: 'mapscalelineobject',
 
-    id: 'scale-line',
-    reference: 'scale-line',
+    // id: 'scale-line',
+    // reference: 'scale-line',
     autoWidth: true,
     autoHeight: true,
     minWidth: 70,
@@ -28,7 +28,7 @@ Ext.define("esapp.view.analysis.mapScaleLineObject",{
     closeAction: 'hide',
     draggable: true,
     constrain: true,
-    alwaysOnTop: true,
+    alwaysOnTop: false,
     autoShow: true,
     resizable: false,
     frame: false,
@@ -43,11 +43,11 @@ Ext.define("esapp.view.analysis.mapScaleLineObject",{
     margin: 0,
     padding: 0,
 
-    scaleline_ImageObj: new Image(),
-    scalelinePosition: [217,611],
+
     config: {
-        // html: '',
-        mapView: null
+        mapView: null,
+        scaleline_ImageObj: new Image(),
+        scalelinePosition: [7,543]
     },
 
     //html: '<div id="scale-line_' + me.id + '">Hallooooooooooooooo</div>',
@@ -55,7 +55,7 @@ Ext.define("esapp.view.analysis.mapScaleLineObject",{
     initComponent: function () {
         var me = this;
         me.scaleline_ImageObj = new Image();
-        me.scalelinePosition = [217,611];
+        // me.scalelinePosition = [217,611];
 
         // me.items = [{
         //     xtype: 'box',
@@ -64,6 +64,7 @@ Ext.define("esapp.view.analysis.mapScaleLineObject",{
         //     autoWidth: true,
         //     autoHeight: true
         // }];
+
         me.listeners = {
             el: {
                 dblclick: function () {
@@ -80,11 +81,9 @@ Ext.define("esapp.view.analysis.mapScaleLineObject",{
 
                 var element = document.getElementById(me.getEl().dom.lastChild.id);
                 new ResizeSensor(element, function() {
-                    // console.info(element);
-                    // console.log('Changed to ' + element.clientWidth);
                     me.setWidth(element.clientWidth);
                 });
-                me.fireEvent('refreshimage');
+                // me.fireEvent('refreshimage');
             },
             refreshimage: function(){
                 if(!me.hidden) {
@@ -96,7 +95,8 @@ Ext.define("esapp.view.analysis.mapScaleLineObject",{
                             }
                         });
                     });
-                    task.delay(350);
+                    // console.info('refreshimage scalelineObj');
+                    task.delay(20);
                 }
             },
             show: function(){

@@ -2,8 +2,12 @@ Ext.define('esapp.model.UserMapTemplate', {
     extend : 'esapp.model.Base',
 
     fields: [
-        {name: 'templatename', type: 'string', mapping: 'templatename'},
+        {name: 'workspaceid', mapping: 'workspaceid'},
         {name: 'userid', mapping: 'userid'},
+        {name: 'map_tpl_id', mapping: 'map_tpl_id'},
+        {name: 'parent_tpl_id', mapping: 'parent_tpl_id'},
+        {name: 'templatename', type: 'string', mapping: 'map_tpl_name'},
+        {name: 'istemplate', mapping: 'istemplate'},
         {name: 'mapviewposition', mapping: 'mapviewposition'},
         {name: 'mapviewsize', mapping: 'mapviewsize'},
         {name: 'productcode', mapping: 'productcode'},
@@ -21,6 +25,8 @@ Ext.define('esapp.model.UserMapTemplate', {
         {name: 'logosobjposition', mapping: 'logosobjposition'},
         {name: 'logosobjcontent', mapping: 'logosobjcontent'},
         {name: 'showobjects',  type: 'boolean', mapping: 'showobjects'},
+        {name: 'showtoolbar',  type: 'boolean', mapping: 'showtoolbar'},
+        {name: 'showgraticule',  type: 'boolean', mapping: 'showgraticule'},
         {name: 'scalelineobjposition', mapping: 'scalelineobjposition'},
         {name: 'vectorlayers', mapping: 'vectorlayers'},
         {name: 'outmask',  type: 'boolean', mapping: 'outmask'},

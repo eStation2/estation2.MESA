@@ -74,9 +74,15 @@ def create_archives_from_dir(req_directory):
 
 if __name__=='__main__':
 
-    req_directory='/data/processing/exchange/Requests/RefStat_07.11.17/'
-
+    # req_directory='/data/processing/exchange/Requests/RefStat_07.11.17/'
+    # req_file = '/home/esuser/Jur/requests/chirps-dekad_2.0_CHIRP-Africa-5km_10d_2018-03-19_1056.req'
+    # create_archive_from_file(req_file)
+    # req_directory = '/home/esuser/Jur/requests/'
+    # req_directory = '/home/analyst/requests/'
+    req_directory = '/data/processing/exchange/Requests_Daniel/'
     create_archives_from_dir(req_directory)
+
+
 #
 #     debug = 0
 #     req_file = None

@@ -5,7 +5,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewModel', {
         graphproperties: {
             model: 'esapp.model.GraphProperties',
             autoLoad: false,
-            autoSync: true,
+            autoSync: false,
             session: true,
 
             proxy: {

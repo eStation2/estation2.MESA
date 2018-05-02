@@ -18,18 +18,176 @@ from lib.python import es_logging as log
 from database import connectdb
 from database import crud
 from config import es_constants
+
 logger = log.my_logger(__name__)
 
 db = connectdb.ConnectDB(schema='products').db
 dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
-# print db
+
+
+def get_last_map_tpl_id(userid, workspaceid):
+    global dbschema_analysis
+    try:
+        query = "SELECT max(map_tpl_id) as map_tpl_id FROM analysis.user_map_templates WHERE workspaceid = " + str(
+            workspaceid) + " AND userid = '" + userid + "'"
+
+        result = dbschema_analysis.execute(query)
+        result = result.fetchall()
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        logger.error("get_last_map_tpl_id: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def get_last_graph_tpl_id(userid, workspaceid):
+    global dbschema_analysis
+    try:
+        query = "SELECT max(graph_tpl_id) as graph_tpl_id FROM analysis.user_graph_templates WHERE workspaceid = " + str(
+            workspaceid) + " AND userid = '" + userid + "'"
+
+        result = dbschema_analysis.execute(query)
+        result = result.fetchall()
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        logger.error("get_last_graph_tpl_id: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def get_workspace_maps(workspaceid):
+    global dbschema_analysis
+    try:
+        query = "SELECT * FROM analysis.user_map_templates WHERE workspaceid = " + str(workspaceid)
+
+        result = dbschema_analysis.execute(query)
+        result = result.fetchall()
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        logger.error("get_workspace_maps: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def get_workspace_graphs(workspaceid):
+    global dbschema_analysis
+    try:
+        query = "SELECT * FROM analysis.user_graph_templates WHERE workspaceid = " + str(workspaceid)
+
+        result = dbschema_analysis.execute(query)
+        result = result.fetchall()
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        logger.error("get_workspace_graphs: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def get_user_workspaces(userid):
+    global dbschema_analysis
+    try:
+        query = " SELECT * FROM analysis.user_workspaces WHERE isdefault = FALSE AND userid = '" + userid + "'"
+
+        result = dbschema_analysis.execute(query)
+        result = result.fetchall()
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        logger.error("get_user_workspaces: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def getCreatedUserWorkspace(userid):
+    global dbschema_analysis
+    try:
+        query = "SELECT max(workspaceid) as lastworkspaceid FROM analysis.user_workspaces WHERE userid = '" + userid + "'"
+        result = dbschema_analysis.execute(query)
+        result = result.fetchall()
+
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("getCreatedUserWorkspace: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def getDefaultUserGraphTemplateID(userid, graph_type, istemplate='false', graph_tpl_name='default'):
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+    defaultworkspaceid = getDefaultUserWorkspaceID(userid)
+    if not defaultworkspaceid:
+        return False
+
+    where = and_(dbschema_analysis.user_graph_templates.userid == userid,
+                 dbschema_analysis.user_graph_templates.workspaceid == defaultworkspaceid,
+                 dbschema_analysis.user_graph_templates.graph_type == graph_type,
+                 dbschema_analysis.user_graph_templates.istemplate == istemplate,
+                 dbschema_analysis.user_graph_templates.graph_tpl_name == graph_tpl_name)
+
+    defaultgraphtpl = dbschema_analysis.user_graph_templates.filter(where).all()
+
+    if defaultgraphtpl.__len__() == 0:
+        default_user_graph_template = {
+            "userid": userid,
+            "workspaceid": defaultworkspaceid,
+            "graph_tpl_name": graph_tpl_name,
+            "istemplate": istemplate,
+            "graph_type": graph_type
+        }
+        if crud_db.create('user_graph_templates', default_user_graph_template):
+            defaultgraphtpl = dbschema_analysis.user_graph_templates.filter(where).all()
+            if defaultgraphtpl.__len__() > 0:
+                graph_tpl_id = defaultgraphtpl[0].graph_tpl_id
+            else:
+                return False
+        else:
+            return False
+    else:
+        graph_tpl_id = defaultgraphtpl[0].graph_tpl_id
+
+    return graph_tpl_id
+
+
+def getDefaultUserWorkspaceID(userid):
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    userinfo = {'userid': userid, 'isdefault': True}
+    defaultworkspace = crud_db.read('user_workspaces', **userinfo)
+    if hasattr(defaultworkspace, "__len__") and defaultworkspace.__len__() > 0:
+        defaultworkspaceid = defaultworkspace[0]['workspaceid']
+    else:
+        userdefaultworkspace = {
+            'userid': userid,
+            'workspacename': 'default',
+            'isdefault': True
+        }
+        if crud_db.create('user_workspaces', userdefaultworkspace):
+            defaultworkspace = crud_db.read('user_workspaces', **userinfo)
+            defaultworkspaceid = defaultworkspace[0]['workspaceid']
+        else:
+            return False
+
+    return defaultworkspaceid
 
 
 def copylegend(legendid=-1, legend_descriptive_name=''):
     global dbschema_analysis
     try:
         if legendid != -1:
-            query = "SELECT * FROM analysis.copylegend(" + str(legendid) + ", '" + legend_descriptive_name + "'" + "); "  # COMMIT;
+            query = "SELECT * FROM analysis.copylegend(" + str(
+                legendid) + ", '" + legend_descriptive_name + "'" + "); "  # COMMIT;
             result = dbschema_analysis.execute(query)
             newlegendid = result.fetchall()
             newlegendid = newlegendid[0]._row[0]
@@ -57,7 +215,8 @@ def copylegend(legendid=-1, legend_descriptive_name=''):
 def activate_deactivate_product(productcode='', version='', activate=False, forse=False):
     global db
     try:
-        query = "SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('" + productcode + "', '" + version + "', " + str(activate).upper() + ", " + str(forse).upper() + "); COMMIT;"
+        query = "SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('" + productcode + "', '" + version + "', " + str(
+            activate).upper() + ", " + str(forse).upper() + "); COMMIT;"
         product_updated = db.execute(query)
 
         return True
@@ -71,7 +230,7 @@ def activate_deactivate_product(productcode='', version='', activate=False, fors
             db.session.close()
 
 
-def get_product_default_legend_steps(productcode, version, subproductcode, echo=False):
+def get_product_default_legend_steps(productcode, version, subproductcode):
     global dbschema_analysis
     try:
         query = " SELECT ls.from_step, ls.to_step, ls.color_rgb, ls.color_label, p.scale_factor, p.scale_offset FROM analysis.product_legend pl " + \
@@ -88,8 +247,6 @@ def get_product_default_legend_steps(productcode, version, subproductcode, echo=
         return result
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_product_default_legend_steps: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -97,26 +254,25 @@ def get_product_default_legend_steps(productcode, version, subproductcode, echo=
             dbschema_analysis.session.close()
 
 
-def get_user_map_templates(userid, echo=False):
+def get_user_map_templates(userid):
     global dbschema_analysis
     try:
-        query = "SELECT * FROM analysis.map_templates WHERE userid = '" + userid + "'"
+        query = " SELECT * FROM analysis.user_map_templates umt " + \
+                " JOIN analysis.user_workspaces uw ON umt.workspaceid = uw.workspaceid AND uw.isdefault = TRUE " + \
+                " WHERE umt.userid = '" + userid + "'"
 
         result = dbschema_analysis.execute(query)
         result = result.fetchall()
         return result
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
-        # Exit the script and print an error telling what happened.
         logger.error("get_user_map_templates: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
 
 
-def getusers(echo=False):
+def getusers():
     global dbschema_analysis
     try:
         query = "SELECT * FROM analysis.users"
@@ -125,8 +281,6 @@ def getusers(echo=False):
         return result
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("getusers: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -134,7 +288,7 @@ def getusers(echo=False):
             dbschema_analysis.session.close()
 
 
-def checklogin(login=None, echo=False):
+def checklogin(login=None):
     global dbschema_analysis
     try:
         query = "SELECT * FROM analysis.users WHERE userid = '" + login.username + "' AND password = '" + login.password + "'"
@@ -143,16 +297,13 @@ def checklogin(login=None, echo=False):
         return result
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
-        # Exit the script and print an error telling what happened.
         logger.error("checklogin: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
 
 
-def checkUser(userinfo=None, echo=False):
+def checkUser(userinfo=None):
     global dbschema_analysis
     try:
         if userinfo is None:
@@ -167,9 +318,6 @@ def checkUser(userinfo=None, echo=False):
             return False
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
-        # Exit the script and print an error telling what happened.
         logger.error("checkUser: Database query error!\n -> {}".format(exceptionvalue))
         return None
     finally:
@@ -177,18 +325,21 @@ def checkUser(userinfo=None, echo=False):
             dbschema_analysis.session.close()
 
 
-def get_user_graph_templates(userid, echo=False):
+def get_user_graph_templates(userid):
     global dbschema_analysis
     try:
-        query = "SELECT * FROM analysis.user_graph_templates WHERE userid = '" + userid + "' AND graph_tpl_name != 'default'"
+        query = " SELECT * FROM analysis.user_graph_templates ugt " + \
+                " JOIN analysis.user_workspaces uw ON ugt.workspaceid = uw.workspaceid AND uw.isdefault = TRUE " + \
+                " WHERE ugt.userid = '" + userid + "'" + \
+                "  AND ugt.istemplate = TRUE " + \
+                "  AND ugt.graph_tpl_name != 'default'"
 
+        # print query
         result = dbschema_analysis.execute(query)
         result = result.fetchall()
         return result
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_user_graph_templates: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -196,17 +347,135 @@ def get_user_graph_templates(userid, echo=False):
             dbschema_analysis.session.close()
 
 
-######################################################################################
-#   get_product_timeseries_drawproperties(prodcut, echo=False)
-#   Purpose: get the timeseries drawproperties for the subproduct passed
-#   Author: Jurriaan van 't Klooster
-#   Date: 2015/05/11
-#   Input: echo                 - If True echo the query result in the console for debugging purposes. Default=False
-#          product              - List of productcode, subproductcode, version
-#
-#   Output: Return all the timeseries drawproperties for the requested subproducts.
-def get_product_timeseries_drawproperties(product, user='', graph_tpl_name='', echo=False):
+def get_product_timeseries_drawproperties(product, userid='', istemplate='false', graph_type='', graph_tpl_id='-1',
+                                          graph_tpl_name='default'):
+    global dbschema_analysis
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
 
+    try:
+        product_ts_properties = []
+
+        # where = and_(dbschema_analysis.timeseries_drawproperties_new.productcode == product['productcode'],
+        #              dbschema_analysis.timeseries_drawproperties_new.subproductcode == product['subproductcode'],
+        #              dbschema_analysis.timeseries_drawproperties_new.version == product['version'])
+
+        # if dbschema_analysis.timeseries_drawproperties_new.filter(where).count() >= 1:
+        product_key = {
+            "productcode": product['productcode'],
+            "subproductcode": product['subproductcode'],
+            "version": product['version']
+        }
+        if crud_db.read('timeseries_drawproperties_new', **product_key).__len__ == 0:
+            # timeseries_drawproperties = dbschema_analysis.timeseries_drawproperties_new.filter(where).all()
+            # Insert a new record in the table timeseries_drawproperties for the product with default values
+            default_ts_drawproperties = {
+                "productcode": product['productcode'],
+                "subproductcode": product['subproductcode'],
+                "version": product['version'],
+                "tsname_in_legend": product['productcode'] + '-' + product['version'] + '-' + product['subproductcode'],
+                "charttype": 'line',
+                "linestyle": 'Solid',
+                "linewidth": 4,
+                "color": '#000000',
+                "yaxes_id": 'default'  # product['productcode'] + '-' + product['version']
+            }
+
+            if not crud_db.create('timeseries_drawproperties_new', default_ts_drawproperties):
+                return product_ts_properties
+                # product_ts_properties = dbschema_analysis.execute(query).fetchall()
+
+        if userid != '':
+            if graph_tpl_name == 'default' and graph_tpl_id == '-1' and istemplate == 'false':
+                graph_tpl_id = getDefaultUserGraphTemplateID(userid, graph_type)
+                if not graph_tpl_id:
+                    return False
+
+            query = " SELECT -1 as graph_tpl_id, tdp.*" + \
+                    " FROM analysis.timeseries_drawproperties_new tdp " + \
+                    " WHERE (productcode, subproductcode, version) NOT IN " + \
+                    "	(SELECT productcode, subproductcode, version " + \
+                    "	 FROM analysis.user_graph_tpl_timeseries_drawproperties uts " + \
+                    "	 WHERE uts.graph_tpl_id = " + str(graph_tpl_id) + \
+                    "      AND uts.productcode = '" + product['productcode'] + "'" + \
+                    "      AND uts.subproductcode = '" + product['subproductcode'] + "'" + \
+                    "      AND uts.version ='" + product['version'] + "')" + \
+                    "  AND tdp.productcode = '" + product['productcode'] + "' " + \
+                    "  AND tdp.subproductcode = '" + product['subproductcode'] + "' " + \
+                    "  AND tdp.version = '" + product['version'] + "' " + \
+                    " UNION " + \
+                    " SELECT tdp.*" + \
+                    " FROM analysis.user_graph_tpl_timeseries_drawproperties tdp " + \
+                    " WHERE  tdp.graph_tpl_id =" + str(graph_tpl_id) + \
+                    "   AND tdp.productcode = '" + product['productcode'] + "' " + \
+                    "   AND tdp.subproductcode = '" + product['subproductcode'] + "' " + \
+                    "   AND tdp.version ='" + product['version'] + "' "
+
+        else:
+            query = "select '' as userid, '' as graph_tpl_name, tdp.*" + \
+                    "from analysis.timeseries_drawproperties_new tdp " + \
+                    "where tdp.productcode = '" + product['productcode'] + "'" + \
+                    "  and tdp.subproductcode = '" + product['subproductcode'] + "'" + \
+                    "  and tdp.version ='" + product['version'] + "'"
+        #     query = " SELECT -1 as graph_tpl_id, tdp.*, yaxe.* " + \
+        #             " FROM analysis.timeseries_drawproperties_new tdp " + \
+        #             "     left outer join (" + \
+        #             "   		SELECT -1 as graph_tpl_id, * FROM analysis.graph_yaxes " + \
+        #             "           WHERE yaxe_id NOT IN ( SELECT yaxe_id FROM analysis.user_graph_tpl_yaxes " + \
+        #             "                                  WHERE graph_tpl_id = " + str(graph_tpl_id) + ") " + \
+        #             "           UNION " + \
+        #             "           SELECT * FROM analysis.user_graph_tpl_yaxes " + \
+        #             "           WHERE graph_tpl_id = " + str(graph_tpl_id) + \
+        #             "       ) yaxe " + \
+        #             "  ON tdp.yaxe_id = yaxe.yaxe_id " + \
+        #             " WHERE (productcode, subproductcode, version) NOT IN " + \
+        #             "	(SELECT productcode, subproductcode, version " + \
+        #             "	 FROM analysis.user_graph_tpl_timeseries_drawproperties uts " + \
+        #             "	 WHERE uts.graph_tpl_id = " + str(graph_tpl_id) + \
+        #             "      AND uts.productcode = '" + product['productcode'] + "'" + \
+        #             "      AND uts.subproductcode = '" + product['subproductcode'] + "'" + \
+        #             "      AND uts.version ='" + product['version'] + "')" + \
+        #             "  AND tdp.productcode = '" + product['productcode'] + "' " + \
+        #             "  AND tdp.subproductcode = '" + product['subproductcode'] + "' " + \
+        #             "  AND tdp.version = '" + product['version'] + "' " + \
+        #             " UNION " + \
+        #             " SELECT tdp.*, yaxe.* " + \
+        #             " FROM analysis.user_graph_tpl_timeseries_drawproperties tdp " + \
+        #             "    left join ( " + \
+        #             "        SELECT -1 as graph_tpl_id, * FROM analysis.graph_yaxes " + \
+        #             "        WHERE yaxe_id NOT IN ( SELECT yaxe_id FROM analysis.user_graph_tpl_yaxes " + \
+        #             "                               WHERE graph_tpl_id = " + str(graph_tpl_id) + ")" + \
+        #             "        UNION " + \
+        #             "        SELECT * FROM analysis.user_graph_tpl_yaxes " + \
+        #             "        WHERE graph_tpl_id = " + str(graph_tpl_id) + \
+        #             "    ) yaxe " + \
+        #             "   ON tdp.yaxe_id = yaxe.yaxe_id " + \
+        #             " WHERE  tdp.graph_tpl_id =" + str(graph_tpl_id) + \
+        #             "   AND tdp.productcode = '" + product['productcode'] + "' " + \
+        #             "   AND tdp.subproductcode = '" + product['subproductcode'] + "' " + \
+        #             "   AND tdp.version ='" + product['version'] + "' "
+        #
+        # else:
+        #     query = "select '' as userid, '' as graph_tpl_name, tdp.*, yaxe.* " + \
+        #             "from analysis.timeseries_drawproperties_new tdp " + \
+        #             "     left outer join analysis.graph_yaxes yaxe on tdp.yaxe_id = yaxe.yaxe_id " + \
+        #             "where tdp.productcode = '" + product['productcode'] + "'" + \
+        #             "  and tdp.subproductcode = '" + product['subproductcode'] + "'" + \
+        #             "  and tdp.version ='" + product['version'] + "'"
+
+        # print query
+        product_ts_properties = dbschema_analysis.execute(query).fetchall()
+
+        return product_ts_properties
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_product_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def __get_product_timeseries_drawproperties(product, user='', graph_tpl_name=''):
     global dbschema_analysis
     crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
 
@@ -257,12 +526,11 @@ def get_product_timeseries_drawproperties(product, user='', graph_tpl_name='', e
                     "   AND tdp.subproductcode = '" + product['subproductcode'] + "' " + \
                     "   AND tdp.version ='" + product['version'] + "' "
 
-
-                    # " SELECT productcode, subproductcode, version, tsname_in_legend, charttype, linestyle, linewidth, color, yaxe_id " + \
-                    # " FROM analysis.user_tpl_timeseries_drawproperties uts " + \
-                    # " WHERE uts.userid = '" + user + "' " + \
-                    # "   AND uts.graph_tpl_name = '" + graph_tpl_name + "' " + \
-                    # " ORDER BY productcode ASC, subproductcode ASC, version ASC"
+            # " SELECT productcode, subproductcode, version, tsname_in_legend, charttype, linestyle, linewidth, color, yaxe_id " + \
+            # " FROM analysis.user_tpl_timeseries_drawproperties uts " + \
+            # " WHERE uts.userid = '" + user + "' " + \
+            # "   AND uts.graph_tpl_name = '" + graph_tpl_name + "' " + \
+            # " ORDER BY productcode ASC, subproductcode ASC, version ASC"
         else:
             query = "select '' as userid, '' as graph_tpl_name, tdp.*, yaxe.* " + \
                     "from analysis.timeseries_drawproperties_new tdp " + \
@@ -289,7 +557,7 @@ def get_product_timeseries_drawproperties(product, user='', graph_tpl_name='', e
                 "linestyle": 'Solid',
                 "linewidth": 4,
                 "color": '#000000',
-                "yaxes_id": 'default'   # product['productcode'] + '-' + product['version']
+                "yaxes_id": 'default'  # product['productcode'] + '-' + product['version']
             }
 
             if crud_db.create('timeseries_drawproperties_new', default_ts_drawproperties):
@@ -300,18 +568,15 @@ def get_product_timeseries_drawproperties(product, user='', graph_tpl_name='', e
         return product_ts_properties
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_product_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
-        #dbschema_analysis = None
+        # dbschema_analysis = None
 
 
-def __get_product_timeseries_drawproperties(product, echo=False):
-
+def __get_product_timeseries_drawproperties_orig(product):
     global dbschema_analysis
     crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
 
@@ -353,34 +618,82 @@ def __get_product_timeseries_drawproperties(product, echo=False):
         return timeseries_drawproperties
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_product_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
-        #dbschema_analysis = None
+        # dbschema_analysis = None
 
 
-def get_timeseries_yaxes(products, user='', graph_tpl_name='', echo=False):
+def get_product_yaxe(product, userid='', istemplate='false', graph_type='', graph_tpl_id='-1', graph_tpl_name='default'):
+    global dbschema_analysis
 
+    try:
+        product_yaxe = []
+        if userid != '':
+            if graph_tpl_name == 'default' and graph_tpl_id == '-1' and istemplate == 'false':
+                graph_tpl_id = getDefaultUserGraphTemplateID(userid, graph_type)
+                if not graph_tpl_id:
+                    return False
+
+            query = " SELECT DISTINCT yaxe.* " + \
+                    " FROM analysis.timeseries_drawproperties_new tdp " + \
+                    "     LEFT OUTER JOIN (" + \
+                    "   		SELECT -1 AS graph_tpl_id, * FROM analysis.graph_yaxes " + \
+                    "           WHERE yaxe_id NOT IN ( SELECT yaxe_id FROM analysis.user_graph_tpl_yaxes " + \
+                    "                                  WHERE graph_tpl_id = " + str(graph_tpl_id) + " )" + \
+                    "           UNION " + \
+                    "           SELECT * FROM analysis.user_graph_tpl_yaxes " + \
+                    "           WHERE graph_tpl_id = " + str(graph_tpl_id) + \
+                    "       ) yaxe " + \
+                    "  ON tdp.yaxe_id = yaxe.yaxe_id "
+        else:
+            query = " SELECT distinct yaxe.* " + \
+                    " FROM analysis.timeseries_drawproperties_new tdp " + \
+                    "     LEFT OUTER JOIN analysis.graph_yaxes yaxe ON tdp.yaxe_id = yaxe.yaxe_id "
+
+        where = " WHERE tdp.productcode = '" + product['productcode'] + "'" + \
+                "   AND tdp.subproductcode = '" + product['subproductcode'] + "'" + \
+                "   AND tdp.version = '" + product['version'] + "'"
+        query += where
+
+        product_yaxe = db.execute(query).fetchall()
+
+        return product_yaxe
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_product_yaxe: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+        # dbschema_analysis = None
+
+
+def get_timeseries_yaxes(products, userid='', istemplate='false', graph_type='', graph_tpl_id='-1',
+                         graph_tpl_name='default'):
     global dbschema_analysis
 
     try:
         timeseries_yaxes = []
-        if user != '':
+        if userid != '':
+            if graph_tpl_name == 'default' and graph_tpl_id == '-1' and istemplate == 'false':
+                graph_tpl_id = getDefaultUserGraphTemplateID(userid, graph_type)
+                if not graph_tpl_id:
+                    return False
+
             query = " SELECT DISTINCT yaxe.* " + \
                     " FROM analysis.timeseries_drawproperties_new tdp " + \
                     "     LEFT OUTER JOIN (" + \
-                    "   		SELECT '' AS userid, '' AS graph_tpl_name, * FROM analysis.graph_yaxes " + \
-                    "           WHERE yaxe_id NOT IN ( SELECT yaxe_id FROM analysis.user_tpl_graph_yaxes " + \
-                    "                                  WHERE userid = '" + user + "' " + \
-                    "                                    AND graph_tpl_name = '" + graph_tpl_name + "' )" + \
+                    "   		SELECT -1 AS graph_tpl_id, * FROM analysis.graph_yaxes " + \
+                    "           WHERE yaxe_id NOT IN ( SELECT yaxe_id FROM analysis.user_graph_tpl_yaxes " + \
+                    "                                  WHERE graph_tpl_id = " + str(graph_tpl_id) + " )" + \
                     "           UNION " + \
-                    "           SELECT * FROM analysis.user_tpl_graph_yaxes " + \
-                    "           WHERE userid = '" + user + "' AND graph_tpl_name = '" + graph_tpl_name + "' " + \
-                    "       ) yaxe " \
+                    "           SELECT * FROM analysis.user_graph_tpl_yaxes " + \
+                    "           WHERE graph_tpl_id = " + str(graph_tpl_id) + \
+                    "       ) yaxe " + \
                     "  ON tdp.yaxe_id = yaxe.yaxe_id "
         else:
             query = " SELECT distinct yaxe.* " + \
@@ -391,7 +704,8 @@ def get_timeseries_yaxes(products, user='', graph_tpl_name='', echo=False):
         count = 0
         for myproduct in products:
             count += 1
-            where = "('"+myproduct['productcode']+"','"+myproduct['subproductcode']+"','"+myproduct['version']+"')"
+            where = "('" + myproduct['productcode'] + "','" + myproduct['subproductcode'] + "','" + myproduct[
+                'version'] + "')"
             if count == len(products):
                 whereall += where + ')'
             else:
@@ -404,18 +718,15 @@ def get_timeseries_yaxes(products, user='', graph_tpl_name='', echo=False):
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_timeseries_yaxes: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
-        #dbschema_analysis = None
+        # dbschema_analysis = None
 
 
-def __get_timeseries_yaxes(products, echo=False):
-
+def __get_timeseries_yaxes(products):
     global dbschema_analysis
 
     try:
@@ -425,16 +736,16 @@ def __get_timeseries_yaxes(products, echo=False):
         ts_drawprobs = aliased(dbschema_analysis.timeseries_drawproperties)
 
         timeseries_drawproperties = session.query(
-                                                  ts_drawprobs.yaxes_id,
-                                                  ts_drawprobs.title,
-                                                  ts_drawprobs.unit,
-                                                  ts_drawprobs.min,
-                                                  ts_drawprobs.max,
-                                                  ts_drawprobs.oposite,
-                                                  ts_drawprobs.title_color,
-                                                  ts_drawprobs.aggregation_type,
-                                                  ts_drawprobs.aggregation_min,
-                                                  ts_drawprobs.aggregation_max)
+            ts_drawprobs.yaxes_id,
+            ts_drawprobs.title,
+            ts_drawprobs.unit,
+            ts_drawprobs.min,
+            ts_drawprobs.max,
+            ts_drawprobs.oposite,
+            ts_drawprobs.title_color,
+            ts_drawprobs.aggregation_type,
+            ts_drawprobs.aggregation_min,
+            ts_drawprobs.aggregation_max)
 
         whereall = ''
         count = 0
@@ -450,29 +761,99 @@ def __get_timeseries_yaxes(products, echo=False):
 
         if timeseries_drawproperties.filter(whereall).distinct().count() >= 1:
             timeseries_yaxes = timeseries_drawproperties.filter(whereall).distinct().all()
-            # if echo:
-            #     for row in timeseries_yaxes:
-            #         print row
+
         return timeseries_yaxes
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_timeseries_yaxes: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
-        #dbschema_analysis = None
+        # dbschema_analysis = None
 
 
-def update_yaxe(yaxe, echo=False):
+def update_yaxe(yaxe_info):
     global dbschema_analysis
     status = False
     crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
 
     try:
-        yaxe['yaxe_id'] = yaxe['id']        # the key id is passed but in the table the key name is yaxe_id
+        yaxe = {'yaxe_id': yaxe_info['id'], 'title': yaxe_info['title'], 'title_color': yaxe_info['title_color'],
+                'title_font_size': yaxe_info['title_font_size']}
+
+        if yaxe_info['min'] == "":
+            yaxe['min'] = None
+        else:
+            yaxe['min'] = yaxe_info['min']
+
+        if yaxe_info['max'] == "":
+            yaxe['max'] = None
+        else:
+            yaxe['max'] = yaxe_info['max']
+
+        if yaxe_info['unit'] == "":
+            yaxe['unit'] = None
+        else:
+            yaxe['unit'] = yaxe_info['unit']
+
+        if yaxe_info['opposite'] == "false":
+            yaxe['opposite'] = 'f'
+        else:
+            yaxe['opposite'] = 't'
+
+        yaxe['aggregation_type'] = yaxe_info['aggregation_type']
+
+        if yaxe_info['aggregation_min'] == "":
+            yaxe['aggregation_min'] = None
+        else:
+            yaxe['aggregation_min'] = yaxe_info['aggregation_min']
+
+        if yaxe_info['aggregation_max'] == "":
+            yaxe['aggregation_max'] = None
+        else:
+            yaxe['aggregation_max'] = yaxe_info['aggregation_max']
+
+        graph_tpl_id = yaxe_info['graph_tpl_id']
+        if yaxe_info['graph_tpl_name'] == 'default' and yaxe_info['graph_tpl_id'] == '-1' and yaxe_info[
+            'istemplate'] == 'false':
+            graph_tpl_id = getDefaultUserGraphTemplateID(yaxe_info['userid'], yaxe_info['graphtype'])
+            if not graph_tpl_id:
+                return status
+
+        where = and_(dbschema_analysis.user_graph_tpl_yaxes.graph_tpl_id == graph_tpl_id,
+                     dbschema_analysis.user_graph_tpl_yaxes.yaxe_id == yaxe_info['id'])
+
+        yaxe['graph_tpl_id'] = graph_tpl_id
+        if dbschema_analysis.user_graph_tpl_yaxes.filter(where).count() > 0:
+            if crud_db.update('user_graph_tpl_yaxes', yaxe):
+                status = True
+            else:
+                status = False
+        else:
+            if crud_db.create('user_graph_tpl_yaxes', yaxe):
+                status = True
+            else:
+                status = False
+
+        return status
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("update_yaxe: Database query error!\n -> {}".format(exceptionvalue))
+        return status
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def __update_yaxe(yaxe):
+    global dbschema_analysis
+    status = False
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    try:
+        yaxe['yaxe_id'] = yaxe['id']  # the key id is passed but in the table the key name is yaxe_id
 
         if yaxe['opposite'] == "false":
             yaxe['opposite'] = 'f'
@@ -542,17 +923,15 @@ def update_yaxe(yaxe, echo=False):
         return status
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
-        logger.error("update_yaxe_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
+        logger.error("update_yaxe: Database query error!\n -> {}".format(exceptionvalue))
         return status
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
 
 
-def __update_yaxe_timeseries_drawproperties(yaxe, echo=False):
+def __update_yaxe_timeseries_drawproperties(yaxe):
     global dbschema_analysis
     status = False
     try:
@@ -600,8 +979,6 @@ def __update_yaxe_timeseries_drawproperties(yaxe, echo=False):
         return status
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("update_yaxe_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
         return status
@@ -610,7 +987,48 @@ def __update_yaxe_timeseries_drawproperties(yaxe, echo=False):
             dbschema_analysis.session.close()
 
 
-def get_timeseries_drawproperties(params, echo=False):
+def get_timeseries_drawproperties(params):
+    global dbschema_analysis
+    try:
+        if hasattr(params, "userid") and params.userid != '':
+            graph_tpl_id = params.graph_tpl_id
+            if params.graph_tpl_name == 'default' and params.graph_tpl_id == '-1' and params.istemplate == 'false':
+                graph_tpl_id = getDefaultUserGraphTemplateID(params.userid, params.graph_type)
+                if not graph_tpl_id:
+                    return False
+
+            query = " SELECT productcode, subproductcode, version, tsname_in_legend, " \
+                    "        charttype, linestyle, linewidth, color, yaxe_id " + \
+                    " FROM analysis.timeseries_drawproperties_new " + \
+                    " WHERE (productcode, subproductcode, version) NOT IN " + \
+                    "	(SELECT productcode, subproductcode, version " + \
+                    "	 FROM analysis.user_graph_tpl_timeseries_drawproperties uts " + \
+                    "	 WHERE uts.graph_tpl_id = " + str(graph_tpl_id) + ") " + \
+                    " UNION " + \
+                    " SELECT productcode, subproductcode, version, tsname_in_legend, " \
+                    "        charttype, linestyle, linewidth, color, yaxe_id " + \
+                    " FROM analysis.user_graph_tpl_timeseries_drawproperties uts " + \
+                    " WHERE uts.graph_tpl_id = " + str(graph_tpl_id) + \
+                    " ORDER BY productcode ASC, subproductcode ASC, version ASC"
+        else:
+            query = "SELECT * FROM analysis.timeseries_drawproperties_new " \
+                    "ORDER BY productcode ASC, subproductcode ASC, version ASC"
+
+        result = dbschema_analysis.execute(query)
+        result = result.fetchall()
+        # print result
+        return result
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def __get_timeseries_drawproperties(params):
     global dbschema_analysis
     try:
         if hasattr(params, "userid") and params.userid != '':
@@ -637,8 +1055,6 @@ def get_timeseries_drawproperties(params, echo=False):
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_timeseries_drawproperties_new: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -646,7 +1062,71 @@ def get_timeseries_drawproperties(params, echo=False):
             dbschema_analysis.session.close()
 
 
-def update_user_tpl_timeseries_drawproperties(tsdrawproperties, echo=False):
+def update_user_tpl_timeseries_drawproperties(tsdrawproperties):
+    global dbschema_analysis
+    status = False
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    try:
+        if tsdrawproperties['linewidth'] == '':
+            tsdrawproperties['linewidth'] = '0'
+
+        graph_tpl_id = tsdrawproperties['graph_tpl_id']
+        if tsdrawproperties['graph_tpl_name'] == 'default' and tsdrawproperties['graph_tpl_id'] == '-1' and \
+                tsdrawproperties['istemplate'] == 'false':
+            graph_tpl_id = getDefaultUserGraphTemplateID(tsdrawproperties['userid'], tsdrawproperties['graph_type'])
+
+        where = and_(dbschema_analysis.user_graph_tpl_timeseries_drawproperties.graph_tpl_id == graph_tpl_id,
+                     dbschema_analysis.user_graph_tpl_timeseries_drawproperties.productcode == tsdrawproperties[
+                         'productcode'],
+                     dbschema_analysis.user_graph_tpl_timeseries_drawproperties.subproductcode == tsdrawproperties[
+                         'subproductcode'],
+                     dbschema_analysis.user_graph_tpl_timeseries_drawproperties.version == tsdrawproperties['version'])
+
+        if dbschema_analysis.user_graph_tpl_timeseries_drawproperties.filter(where).count() >= 1:
+            query = " UPDATE analysis.user_graph_tpl_timeseries_drawproperties " + \
+                    " SET tsname_in_legend = '" + tsdrawproperties['tsname_in_legend'] + "'" + \
+                    "   ,color = '" + tsdrawproperties['color'] + "'" + \
+                    "   ,charttype = '" + tsdrawproperties['charttype'] + "'" + \
+                    "   ,linestyle = '" + tsdrawproperties['linestyle'] + "'" + \
+                    "   ,linewidth = " + tsdrawproperties['linewidth'] + \
+                    "   ,yaxe_id = '" + tsdrawproperties['yaxe_id'] + "'" + \
+                    " WHERE graph_tpl_id = " + str(graph_tpl_id) + \
+                    "   AND productcode = '" + tsdrawproperties['productcode'] + "'" + \
+                    "   AND subproductcode = '" + tsdrawproperties['subproductcode'] + "'" + \
+                    "   AND version = '" + tsdrawproperties['version'] + "'"
+
+            # print query
+            result = dbschema_analysis.execute(query)
+            dbschema_analysis.commit()
+        else:
+            tsdrawprops = {
+                'graph_tpl_id': graph_tpl_id,
+                'productcode': tsdrawproperties['productcode'],
+                'subproductcode': tsdrawproperties['subproductcode'],
+                'version': tsdrawproperties['version'],
+                'tsname_in_legend': tsdrawproperties['tsname_in_legend'],
+                'charttype': tsdrawproperties['charttype'],
+                'linestyle': tsdrawproperties['linestyle'],
+                'linewidth': tsdrawproperties['linewidth'],
+                'color': tsdrawproperties['color'],
+                'yaxe_id': tsdrawproperties['yaxe_id']
+            }
+            crud_db.create('user_graph_tpl_timeseries_drawproperties', tsdrawprops)
+
+        status = True
+        return status
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("update_user_tpl_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
+        return status
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def __update_user_tpl_timeseries_drawproperties(tsdrawproperties):
     global dbschema_analysis
     status = False
     crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
@@ -657,7 +1137,8 @@ def update_user_tpl_timeseries_drawproperties(tsdrawproperties, echo=False):
 
         if tsdrawproperties['graph_tpl_name'] == 'default':
             where = and_(dbschema_analysis.user_tpl_timeseries_drawproperties.userid == tsdrawproperties['userid'],
-                         dbschema_analysis.user_tpl_timeseries_drawproperties.graph_tpl_name == tsdrawproperties['graph_tpl_name'])
+                         dbschema_analysis.user_tpl_timeseries_drawproperties.graph_tpl_name == tsdrawproperties[
+                             'graph_tpl_name'])
             if dbschema_analysis.user_graph_templates.filter(where).count() == 0:
                 default_user_graph_template = {
                     "userid": tsdrawproperties['userid'],
@@ -666,9 +1147,12 @@ def update_user_tpl_timeseries_drawproperties(tsdrawproperties, echo=False):
                 crud_db.create('user_graph_templates', default_user_graph_template)
 
         where = and_(dbschema_analysis.user_tpl_timeseries_drawproperties.userid == tsdrawproperties['userid'],
-                     dbschema_analysis.user_tpl_timeseries_drawproperties.graph_tpl_name == tsdrawproperties['graph_tpl_name'],
-                     dbschema_analysis.user_tpl_timeseries_drawproperties.productcode == tsdrawproperties['productcode'],
-                     dbschema_analysis.user_tpl_timeseries_drawproperties.subproductcode == tsdrawproperties['subproductcode'],
+                     dbschema_analysis.user_tpl_timeseries_drawproperties.graph_tpl_name == tsdrawproperties[
+                         'graph_tpl_name'],
+                     dbschema_analysis.user_tpl_timeseries_drawproperties.productcode == tsdrawproperties[
+                         'productcode'],
+                     dbschema_analysis.user_tpl_timeseries_drawproperties.subproductcode == tsdrawproperties[
+                         'subproductcode'],
                      dbschema_analysis.user_tpl_timeseries_drawproperties.version == tsdrawproperties['version'])
 
         if dbschema_analysis.user_tpl_timeseries_drawproperties.filter(where).count() >= 1:
@@ -695,8 +1179,6 @@ def update_user_tpl_timeseries_drawproperties(tsdrawproperties, echo=False):
         return status
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("user_tpl_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
         return status
@@ -705,7 +1187,7 @@ def update_user_tpl_timeseries_drawproperties(tsdrawproperties, echo=False):
             dbschema_analysis.session.close()
 
 
-def __update_timeseries_drawproperties(tsdrawproperties, echo=False):
+def __update_timeseries_drawproperties(tsdrawproperties):
     global dbschema_analysis
     status = False
     try:
@@ -717,7 +1199,7 @@ def __update_timeseries_drawproperties(tsdrawproperties, echo=False):
                 "   ,color = '" + tsdrawproperties['color'] + "'" + \
                 "   ,charttype = '" + tsdrawproperties['charttype'] + "'" + \
                 "   ,linestyle = '" + tsdrawproperties['linestyle'] + "'" + \
-                "   ,linewidth = " + tsdrawproperties['linewidth'] +  \
+                "   ,linewidth = " + tsdrawproperties['linewidth'] + \
                 " WHERE productcode = '" + tsdrawproperties['productcode'] + "'" + \
                 "   AND subproductcode = '" + tsdrawproperties['subproductcode'] + "'" + \
                 "   AND version = '" + tsdrawproperties['version'] + "'"
@@ -730,8 +1212,6 @@ def __update_timeseries_drawproperties(tsdrawproperties, echo=False):
         return status
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("update_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
         return status
@@ -740,7 +1220,87 @@ def __update_timeseries_drawproperties(tsdrawproperties, echo=False):
             dbschema_analysis.session.close()
 
 
-def get_graph_drawproperties(params, echo=False):
+def get_graph_drawproperties(params):
+    global dbschema_analysis
+    try:
+        if hasattr(params, "userid") and params.userid != '':
+            if hasattr(params, "graph_tpl_id"):
+                query = " SELECT -1 as graph_tpl_id, * " + \
+                        " FROM analysis.graph_drawproperties " + \
+                        " WHERE graph_type = '" + params.graphtype + "' " + \
+                        "   AND (graph_type) NOT IN " + \
+                        "       (SELECT graph_type FROM analysis.user_graph_tpl_drawproperties ugp " + \
+                        "        WHERE ugp.graph_type = '" + params.graphtype + "' " + \
+                        "        AND ugp.graph_tpl_id = " + params.graph_tpl_id + ")" + \
+                        " UNION " + \
+                        " SELECT * " + \
+                        " FROM analysis.user_graph_tpl_drawproperties ugp " + \
+                        " WHERE ugp.graph_type = '" + params.graphtype + "' " + \
+                        "   AND ugp.graph_tpl_id = " + params.graph_tpl_id
+
+                # query = " SELECT -1 as graph_tpl_id, * " + \
+                #         " FROM analysis.graph_drawproperties " + \
+                #         " WHERE graph_type = '" + params.graphtype + "' " + \
+                #         "   AND (graph_type) NOT IN " + \
+                #         "       (SELECT graph_type FROM analysis.user_graph_tpl_drawproperties ugp " + \
+                #         "        WHERE ugp.graph_type =  '" + params.graphtype + "' " + \
+                #         "         AND ugp.graph_tpl_id = (SELECT graph_tpl_id " + \
+                #         "                                 FROM analysis.user_graph_templates " + \
+                #         "                                 WHERE userid = '" + params.userid + "' " + \
+                #         "                                  AND graph_tpl_name = 'default' " + \
+                #         "                                  AND graph_type = '" + params.graphtype + "' " + \
+                #         "                                  AND workspaceid = (SELECT workspaceid " \
+                #         "                                                     FROM analysis.user_workspaces " \
+                #         "                                                     WHERE userid = '" + params.userid + "'" + \
+                #         "                                                       AND isdefault = TRUE) " + \
+                #         "                                  )) " + \
+                #         "   AND (graph_type) NOT IN " + \
+                #         "       (SELECT graph_type FROM analysis.user_graph_tpl_drawproperties ugp " + \
+                #         "        WHERE ugp.graph_type = '" + params.graphtype + "' " + \
+                #         "        AND ugp.graph_tpl_id = " + params.graph_tpl_id + ")" + \
+                #         " UNION " + \
+                #         " SELECT * " + \
+                #         " FROM analysis.user_graph_tpl_drawproperties ugp " + \
+                #         " WHERE ugp.graph_type = '" + params.graphtype + "' " + \
+                #         "   AND ugp.graph_tpl_id = (SELECT graph_tpl_id " + \
+                #         "                           FROM analysis.user_graph_templates " + \
+                #         "                           WHERE userid = '" + params.userid + "' " + \
+                #         "                             AND graph_tpl_name = 'default' " + \
+                #         "                             AND graph_type = '" + params.graphtype + "' " + \
+                #         "                             AND workspaceid = (SELECT workspaceid " \
+                #         "                                                FROM analysis.user_workspaces " \
+                #         "                                                WHERE userid = '" + params.userid + "' " \
+                #         "                                                  AND isdefault = TRUE) " + \
+                #         "                           ) " + \
+                #         "   AND (graph_type) NOT IN " + \
+                #         "       (SELECT graph_type FROM analysis.user_graph_tpl_drawproperties ugp " + \
+                #         "        WHERE ugp.graph_type = '" + params.graphtype + "' " + \
+                #         "        AND ugp.graph_tpl_id = " + params.graph_tpl_id + ")" + \
+                #         " UNION " + \
+                #         " SELECT * " + \
+                #         " FROM analysis.user_graph_tpl_drawproperties ugp " + \
+                #         " WHERE ugp.graph_type = '" + params.graphtype + "' " + \
+                #         "   AND ugp.graph_tpl_id = " + params.graph_tpl_id
+        else:
+            query = " SELECT -1 as graph_tpl_id, * " \
+                    " FROM analysis.graph_drawproperties " \
+                    " WHERE graph_type = '" + params.graphtype + "'"
+
+        # print query
+        result = dbschema_analysis.execute(query)
+        result = result.fetchall()
+
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_graph_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def __get_graph_drawproperties(params):
     global dbschema_analysis
     try:
 
@@ -775,8 +1335,6 @@ def get_graph_drawproperties(params, echo=False):
         return result
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_graph_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -784,7 +1342,61 @@ def get_graph_drawproperties(params, echo=False):
             dbschema_analysis.session.close()
 
 
-def update_user_tpl_graph_drawproperties(graphdrawprobs, echo=False):
+def __get_chart_drawproperties(charttype='default'):
+    global dbschema_analysis
+    try:
+        query = "SELECT * FROM analysis.chart_drawproperties WHERE chart_type = '" + charttype + "'"
+        result = dbschema_analysis.execute(query)
+        result = result.fetchall()
+
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_chart_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def update_user_graph_tpl_drawproperties(graphdrawprobs, graphtpl_info):
+    global dbschema_analysis
+    status = False
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    try:
+        graph_tpl_id = graphtpl_info['graph_tpl_id']
+        if graphtpl_info['graph_tpl_name'] == 'default' and graphtpl_info['graph_tpl_id'] == '-1' and graphtpl_info[
+            'istemplate'] == 'false':
+            graph_tpl_id = getDefaultUserGraphTemplateID(graphtpl_info['userid'], graphdrawprobs['graph_type'])
+
+        where = and_(dbschema_analysis.user_graph_tpl_drawproperties.graph_tpl_id == graph_tpl_id,
+                     dbschema_analysis.user_graph_tpl_drawproperties.graph_type == graphdrawprobs['graph_type'])
+
+        graphdrawprobs['graph_tpl_id'] = graph_tpl_id
+        if dbschema_analysis.user_graph_tpl_drawproperties.filter(where).count() >= 1:
+            if crud_db.update('user_graph_tpl_drawproperties', graphdrawprobs):
+                status = True
+            else:
+                status = False
+        else:
+            if crud_db.create('user_graph_tpl_drawproperties', graphdrawprobs):
+                status = True
+            else:
+                status = False
+
+        return status
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("update_user_graph_tpl_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
+        return status
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+
+
+def __update_user_tpl_graph_drawproperties(graphdrawprobs):
     global dbschema_analysis
     status = False
     crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
@@ -836,8 +1448,6 @@ def update_user_tpl_graph_drawproperties(graphdrawprobs, echo=False):
         return status
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("update_user_tpl_graph_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
         return status
@@ -846,26 +1456,7 @@ def update_user_tpl_graph_drawproperties(graphdrawprobs, echo=False):
             dbschema_analysis.session.close()
 
 
-def __get_chart_drawproperties(charttype='default', echo=False):
-    global dbschema_analysis
-    try:
-        query = "SELECT * FROM analysis.chart_drawproperties WHERE chart_type = '" + charttype + "'"
-        result = dbschema_analysis.execute(query)
-        result = result.fetchall()
-
-        return result
-    except:
-        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
-        # Exit the script and print an error telling what happened.
-        logger.error("get_chart_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
-    finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
-
-
-def get_layers(echo=False):
+def get_layers():
     global dbschema_analysis
     try:
         query = "SELECT * FROM analysis.layers order by menu asc, submenu asc, layerlevel asc"
@@ -875,8 +1466,6 @@ def get_layers(echo=False):
         return result
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_layers: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -884,7 +1473,7 @@ def get_layers(echo=False):
             dbschema_analysis.session.close()
 
 
-def get_legend_totals(legendid, echo=False):
+def get_legend_totals(legendid):
     global dbschema_analysis
     try:
 
@@ -898,8 +1487,6 @@ def get_legend_totals(legendid, echo=False):
         return legendtotals
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_legend_totals: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -907,7 +1494,7 @@ def get_legend_totals(legendid, echo=False):
             dbschema_analysis.session.close()
 
 
-def get_spirits(echo=False):
+def get_spirits():
     global db
     try:
         query = "SELECT * FROM products.spirits WHERE activated = true ORDER BY productcode, version, subproductcode, mapsetcode"
@@ -917,8 +1504,6 @@ def get_spirits(echo=False):
         return spirits
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_spirits: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -926,14 +1511,14 @@ def get_spirits(echo=False):
             db.session.close()
 
 
-def get_enabled_ingest_derived_of_product(productcode, version, mapsetcode=None, echo=False):
+def get_enabled_ingest_derived_of_product(productcode, version, mapsetcode=None):
     global db
     try:
         if mapsetcode is None:
             query = "select p.productcode, p.version, i.mapsetcode, p.subproductcode, p.product_type " + \
                     "from products.product p " + \
                     "     inner join products.ingestion i on p.productcode = i.productcode and p.subproductcode = i.subproductcode and p.version = i.version " + \
-                    "where p.productcode = '"+productcode+"' and p.version = '"+version+"' and p.product_type = 'Ingest' and i.enabled = true " + \
+                    "where p.productcode = '" + productcode + "' and p.version = '" + version + "' and p.product_type = 'Ingest' and i.enabled = true " + \
                     " union " + \
                     "select p.productcode, p.version, derived.mapsetcode, p.subproductcode, p.product_type " + \
                     "from products.product p " + \
@@ -943,14 +1528,14 @@ def get_enabled_ingest_derived_of_product(productcode, version, mapsetcode=None,
                     "             inner join products.processing proc on pp.process_id = proc.process_id where proc.enabled = true and pp.type = 'OUTPUT' and pp.final = true " + \
                     "        ) derived " + \
                     "     on p.productcode = derived.productcode and p.subproductcode = derived.subproductcode and p.version = derived.version " + \
-                    "where p.productcode = '"+productcode+"' and p.version = '"+version+"' and p.product_type = 'Derived' " + \
+                    "where p.productcode = '" + productcode + "' and p.version = '" + version + "' and p.product_type = 'Derived' " + \
                     "order by mapsetcode"
         else:
             query = "select p.productcode, p.version, i.mapsetcode, p.subproductcode, p.product_type " + \
                     "from products.product p " + \
                     "     inner join products.ingestion i on p.productcode = i.productcode and p.subproductcode = i.subproductcode and p.version = i.version " + \
-                    "where p.productcode = '"+productcode+"' and p.version = '"+version+"' and p.product_type = 'Ingest' and i.enabled = true " + \
-                    " and i.mapsetcode = '"+mapsetcode+"'" + \
+                    "where p.productcode = '" + productcode + "' and p.version = '" + version + "' and p.product_type = 'Ingest' and i.enabled = true " + \
+                    " and i.mapsetcode = '" + mapsetcode + "'" + \
                     " union " + \
                     "select p.productcode, p.version, derived.mapsetcode, p.subproductcode, p.product_type " + \
                     "from products.product p " + \
@@ -960,8 +1545,8 @@ def get_enabled_ingest_derived_of_product(productcode, version, mapsetcode=None,
                     "             inner join products.processing proc on pp.process_id = proc.process_id where proc.enabled = true and pp.type = 'OUTPUT' and pp.final = true " + \
                     "        ) derived " + \
                     "     on p.productcode = derived.productcode and p.subproductcode = derived.subproductcode and p.version = derived.version " + \
-                    "where p.productcode = '"+productcode+"' and p.version = '"+version+"' and p.product_type = 'Derived' " + \
-                    "and derived.mapsetcode = '"+mapsetcode+"' " + \
+                    "where p.productcode = '" + productcode + "' and p.version = '" + version + "' and p.product_type = 'Derived' " + \
+                    "and derived.mapsetcode = '" + mapsetcode + "' " + \
                     "order by mapsetcode"
 
         result = db.execute(query)
@@ -970,8 +1555,6 @@ def get_enabled_ingest_derived_of_product(productcode, version, mapsetcode=None,
         return result
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_enabled_ingest_derived_of_product: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -979,7 +1562,7 @@ def get_enabled_ingest_derived_of_product(productcode, version, mapsetcode=None,
             db.session.close()
 
 
-def update_product_info(productinfo, echo=False):
+def update_product_info(productinfo):
     global db
     status = False
     try:
@@ -1010,8 +1593,6 @@ def update_product_info(productinfo, echo=False):
         return status
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("update_product_info: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -1020,7 +1601,7 @@ def update_product_info(productinfo, echo=False):
         return status
 
 
-def get_mapsets_for_ingest(productcode, version, subproductcode, echo=False):
+def get_mapsets_for_ingest(productcode, version, subproductcode):
     global db
     try:
         query = "SELECT * FROM products.mapset " \
@@ -1038,8 +1619,6 @@ def get_mapsets_for_ingest(productcode, version, subproductcode, echo=False):
         return mapsets
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_mapsets_for_ingest: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -1047,7 +1626,7 @@ def get_mapsets_for_ingest(productcode, version, subproductcode, echo=False):
             db.session.close()
 
 
-def get_categories(echo=False):
+def get_categories():
     global db
     try:
         # query = "SELECT * FROM products.product_category ORDER BY category_id"
@@ -1058,8 +1637,6 @@ def get_categories(echo=False):
         return categories
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_categories: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -1067,7 +1644,7 @@ def get_categories(echo=False):
             db.session.close()
 
 
-def get_frequencies(echo=False):
+def get_frequencies():
     global db
     try:
         query = "SELECT * FROM products.frequency ORDER BY frequency_id"
@@ -1077,8 +1654,6 @@ def get_frequencies(echo=False):
         return result
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_frequencies: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -1086,7 +1661,7 @@ def get_frequencies(echo=False):
             db.session.close()
 
 
-def get_dateformats(echo=False):
+def get_dateformats():
     global db
     try:
         query = "SELECT * FROM products.date_format ORDER BY date_format"
@@ -1096,8 +1671,6 @@ def get_dateformats(echo=False):
         return result
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_dateformats: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -1105,7 +1678,7 @@ def get_dateformats(echo=False):
             db.session.close()
 
 
-def get_datatypes(echo=False):
+def get_datatypes():
     global db
     try:
         query = "SELECT * FROM products.data_type ORDER BY data_type_id"
@@ -1115,8 +1688,6 @@ def get_datatypes(echo=False):
         return result
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_datatypes: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -1124,7 +1695,7 @@ def get_datatypes(echo=False):
             db.session.close()
 
 
-def get_eumetcastsources(echo=False):
+def get_eumetcastsources():
     global db
     try:
         query = "SELECT * FROM products.eumetcast_source e LEFT OUTER JOIN products.datasource_description dsd " + \
@@ -1136,8 +1707,6 @@ def get_eumetcastsources(echo=False):
         return eumetcastsources
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_eumetcastsources: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -1145,7 +1714,7 @@ def get_eumetcastsources(echo=False):
             db.session.close()
 
 
-def get_internetsources(echo=False):
+def get_internetsources():
     global db
     try:
         query = "SELECT * FROM products.internet_source i LEFT OUTER JOIN products.datasource_description dsd " + \
@@ -1157,8 +1726,6 @@ def get_internetsources(echo=False):
         return internetsources
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_internetsources: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -1166,7 +1733,7 @@ def get_internetsources(echo=False):
             db.session.close()
 
 
-def get_themas(echo=False):
+def get_themas():
     global db
     try:
         query = "SELECT thema_id, description FROM products.thema ORDER BY thema_id ASC"
@@ -1176,8 +1743,6 @@ def get_themas(echo=False):
         return themas
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_themas: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -1185,18 +1750,16 @@ def get_themas(echo=False):
             db.session.close()
 
 
-def set_thema(themaid='', echo=False):
+def set_thema(themaid=''):
     global db
     try:
         query = "select * from products.set_thema('" + themaid + "'); COMMIT;"
         setthema = db.execute(query)
         # setthemaresult = setthema.fetchall()
 
-        return True     # setthemaresult[0]
+        return True  # setthemaresult[0]
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("set_thema: Database query error!\n -> {}".format(exceptionvalue))
         return False
@@ -1205,8 +1768,7 @@ def set_thema(themaid='', echo=False):
             db.session.close()
 
 
-def get_i18n(lang='eng', echo=False):
-
+def get_i18n(lang='eng'):
     global dbschema_analysis
     try:
         query = "SELECT DISTINCT label, CASE WHEN " + lang + " is null or trim(" + lang + ")='' THEN " + 'eng' + \
@@ -1217,62 +1779,59 @@ def get_i18n(lang='eng', echo=False):
         return i18n
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_i18n: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
-        #dbschema_analysis = None
+        # dbschema_analysis = None
 
 
-def get_languages(echo=False):
-
+def get_languages():
     global dbschema_analysis
 
     try:
-        l = dbschema_analysis.languages._table
-
-        s = select([l.c.langcode,
-                    l.c.langdescription,
-                    l.c.active])
-
-        s = s.alias('lang')
-        lang = dbschema_analysis.map(s, primary_key=[s.c.langcode])
-
-        where = and_(lang.active == 't')
-
-        languages = []
-        if lang.filter(where).count() >= 1:
-            languages = lang.filter(where).all()
-            # if echo:
-            #     for row in languages:
-            #         print row
+        query = "SELECT langcode, langdescription, active FROM analysis.languages WHERE active = TRUE"
+        languages = dbschema_analysis.execute(query)
+        languages = languages.fetchall()
 
         return languages
+
+        # l = dbschema_analysis.languages._table
+        #
+        # s = select([l.c.langcode,
+        #             l.c.langdescription,
+        #             l.c.active])
+        #
+        # s = s.alias('lang')
+        # lang = dbschema_analysis.map(s, primary_key=[s.c.langcode])
+        #
+        # where = and_(lang.active == 't')
+        #
+        # languages = []
+        # if lang.filter(where).count() >= 1:
+        #     languages = lang.filter(where).all()
+        #
+        # return languages
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_languages: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
-        #dbschema_analysis = None
+        # dbschema_analysis = None
 
 
 ######################################################################################
-#   get_timeseries_subproducts(echo=False, productcode=None,version='undefined', subproductcode=None, masked=None)
+#   get_timeseries_subproducts(productcode=None,version='undefined', subproductcode=None, masked=None)
 #   Purpose: Query the database to get the sub product list of the selected product.
 #            with their product category that are available for time series.
 #            The passed product is of type "Ingest" and must have the timeseries_role set to "Initial".
 #            Mainly used in the GUI Analysis tab.
 #   Author: Jurriaan van 't Klooster
 #   Date: 2015/04/15
-#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
-#          productcode      - The productcode of the specific product requested. Default=None
+#   Input: productcode      - The productcode of the specific product requested. Default=None
 #          subproductcode   - The subproductcode of the specific product requested. Default=None
 #          version          - The version of the specific product requested. Default='undefined'
 #          masked           - If given, the result with contain all sub products which are not masked!
@@ -1289,8 +1848,7 @@ def get_languages(echo=False):
 #     AND (p.timeseries_role = '10d' or p.subproductcode = '10d')
 #   ORDER BY p.productcode
 #
-def get_timeseries_subproducts(echo=False,  productcode=None, version='undefined', subproductcode=None, masked=None):
-
+def get_timeseries_subproducts(productcode=None, version='undefined', subproductcode=None, masked=None):
     global db
 
     try:
@@ -1305,7 +1863,7 @@ def get_timeseries_subproducts(echo=False,  productcode=None, version='undefined
                     # p.c.activated,
                     p.c.date_format,
                     p.c.frequency_id,
-                    p.c.descriptive_name.label('descriptive_name'),        # prod_descriptive_name
+                    p.c.descriptive_name.label('descriptive_name'),  # prod_descriptive_name
                     p.c.description,
                     p.c.masked,
                     p.c.timeseries_role
@@ -1318,33 +1876,27 @@ def get_timeseries_subproducts(echo=False,  productcode=None, version='undefined
             where = and_(pl.c.productcode == productcode,
                          pl.c.version == version,
                          pl.c.timeseries_role == subproductcode)
-                         # or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
+            # or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
         else:
             if not masked:
                 where = and_(pl.c.masked == 'f',
                              pl.c.productcode == productcode,
                              pl.c.version == version,
                              pl.c.timeseries_role == subproductcode)
-                             # or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
+                # or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
             else:
                 where = and_(pl.c.masked == 't',
                              pl.c.productcode == productcode,
                              pl.c.version == version,
                              pl.c.timeseries_role == subproductcode)
-                             # or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
+                # or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
 
         productslist = pl.filter(where).order_by(asc(pl.c.productcode), asc(pl.c.subproductcode)).all()
-
-        # if echo:
-        #     for row in productslist:
-        #         print row
 
         return productslist
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and log the error telling what happened.
         logger.error("get_timeseries_subproducts: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -1354,14 +1906,13 @@ def get_timeseries_subproducts(echo=False,  productcode=None, version='undefined
 
 
 ######################################################################################
-#   get_timeseries_products(echo=False, masked=None)
+#   get_timeseries_products(masked=None)
 #   Purpose: Query the database to get the product list with their product category that are available for time series.
 #            The products are in general of type "Ingest" and must have the timeseries_role set to "Initial"
 #            Mainly used in the GUI Analysis tab.
 #   Author: Jurriaan van 't Klooster
 #   Date: 2015/04/15
-#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
-#          masked           - If given, the result with contain all Native products which are not masked!
+#   Input: masked           - If given, the result with contain all Native products which are not masked!
 #                             (used by the Analysis tool in the Product Navigator)
 #
 #   Output: Product list with their product category.
@@ -1373,8 +1924,7 @@ def get_timeseries_subproducts(echo=False,  productcode=None, version='undefined
 #   WHERE p.timeseries_role = 'Initial'
 #   ORDER BY pc.order_index, productcode
 #
-def get_timeseries_products(echo=False,  masked=None):
-
+def get_timeseries_products(masked=None):
     global db
     try:
 
@@ -1447,16 +1997,10 @@ def get_timeseries_products(echo=False,  masked=None):
         #
         # productslist = pl.filter(where).order_by(asc(pl.c.order_index), asc(pl.c.productcode)).all()
         #
-        # # if echo:
-        # #     for row in productslist:
-        # #         print row
-        #
         # return productslist
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and log the error telling what happened.
         logger.error("get_timeseries_products: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -1466,18 +2010,16 @@ def get_timeseries_products(echo=False,  masked=None):
 
 
 ######################################################################################
-#   get_all_legends(echo=False)
+#   get_all_legends()
 #   Purpose: Query the database to get all the difined legends.
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/07/31
-#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
 #
 #   Output: Return all the difined legends.
 #
 #   SELECT * FROM analysis.product_legend
 #
-def get_all_legends(echo=False):
-
+def get_all_legends():
     global dbschema_analysis
     try:
 
@@ -1496,14 +2038,12 @@ def get_all_legends(echo=False):
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and log the error telling what happened.
         logger.error("get_all_legends: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
-        #dbschema_analysis = None
+        # dbschema_analysis = None
 
 
 def deletelegendsteps(legendid):
@@ -1531,7 +2071,6 @@ def deletelegendsteps(legendid):
 
 
 def createlegend(params):
-
     global dbschema_analysis
     try:
 
@@ -1562,11 +2101,10 @@ def createlegend(params):
 
 
 ######################################################################################
-#   get_product_legends(productcode=None, subproductcode=None, version=None, echo=False)
+#   get_product_legends(productcode=None, subproductcode=None, version=None)
 #   Purpose: Query the database to get the legends assigned the given sub product.
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/07/31
-#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
 #
 #   Output: Return legends assigned the given sub product.
 #
@@ -1579,8 +2117,7 @@ def createlegend(params):
 #     AND version = param_version
 #     AND subproductcode = param_subproductcode
 #
-def get_product_legends(productcode=None, subproductcode=None, version=None, echo=False):
-
+def get_product_legends(productcode=None, subproductcode=None, version=None):
     global dbschema_analysis
     try:
 
@@ -1598,7 +2135,6 @@ def get_product_legends(productcode=None, subproductcode=None, version=None, ech
 
         result = dbschema_analysis.execute(query)
         productlegends = result.fetchall()
-
 
         # legend = dbschema_analysis.legend._table
         # product_legend = dbschema_analysis.product_legend._table
@@ -1621,7 +2157,6 @@ def get_product_legends(productcode=None, subproductcode=None, version=None, ech
         #              pl.c.version == version)
         # productlegends = pl.filter(where).all()
 
-
         # session = dbschema_analysis.session
         # legend = aliased(dbschema_analysis.legend)
         #
@@ -1637,26 +2172,19 @@ def get_product_legends(productcode=None, subproductcode=None, version=None, ech
         #              product_legend.c.version == version)
         # productlegends = productlegends.filter(where).all()
 
-        # if echo:
-        #     for row in productlegends:
-        #         print row
-
         return productlegends
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and log the error telling what happened.
         logger.error("get_product_legends: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
-        #dbschema_analysis = None
+        # dbschema_analysis = None
 
 
-def get_legend_assigned_datasets(legendid, echo=False):
-
+def get_legend_assigned_datasets(legendid):
     global dbschema_analysis
     try:
 
@@ -1680,8 +2208,6 @@ def get_legend_assigned_datasets(legendid, echo=False):
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and log the error telling what happened.
         logger.error("get_legend_assigned_datasets: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -1691,11 +2217,10 @@ def get_legend_assigned_datasets(legendid, echo=False):
 
 
 ######################################################################################
-#   get_legend_steps(legendid, echo=False)
+#   get_legend_steps(legendid)
 #   Purpose: Query the database to get the legend info needed for mapserver mapfile SCALE_BUCKETS setting.
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/07/31
-#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
 #
 #   Output: Return legend steps of the given legendid, needed for mapserver mapfile LAYER CLASS settings.
 #
@@ -1704,52 +2229,53 @@ def get_legend_assigned_datasets(legendid, echo=False):
 #    WHERE ls.legend_id = legendid
 #    ORDER BY from_step
 #
-def get_legend_steps(legendid=None, echo=False):
-
+def get_legend_steps(legendid=None):
     global dbschema_analysis
     try:
+        query = " SELECT legend_id,  from_step,  to_step, color_rgb, color_label, group_label " + \
+                " FROM analysis.legend_step " + \
+                " WHERE legend_id = " + str(legendid) + \
+                " ORDER BY from_step ASC "
 
-        ls = dbschema_analysis.legend_step._table
-
-        s = select([ls.c.legend_id,
-                    ls.c.from_step,
-                    ls.c.to_step,
-                    ls.c.color_rgb,
-                    ls.c.color_label,
-                    ls.c.group_label
-                    ]
-                   )
-
-        s = s.alias('legend_steps')
-        ls = dbschema_analysis.map(s, primary_key=[s.c.legend_id, s.c.from_step, s.c.to_step])
-
-        where = and_(ls.c.legend_id == legendid)
-        legend_steps = ls.filter(where).order_by(asc(ls.c.from_step)).all()
-
-        # if echo:
-        #     for row in legend_steps:
-        #         print row
+        result = dbschema_analysis.execute(query)
+        legend_steps = result.fetchall()
 
         return legend_steps
 
+        # ls = dbschema_analysis.legend_step._table
+        #
+        # s = select([ls.c.legend_id,
+        #             ls.c.from_step,
+        #             ls.c.to_step,
+        #             ls.c.color_rgb,
+        #             ls.c.color_label,
+        #             ls.c.group_label
+        #             ]
+        #            )
+        #
+        # s = s.alias('legend_steps')
+        # ls = dbschema_analysis.map(s, primary_key=[s.c.legend_id, s.c.from_step, s.c.to_step])
+        #
+        # where = and_(ls.c.legend_id == legendid)
+        # legend_steps = ls.filter(where).order_by(asc(ls.c.from_step)).all()
+        #
+        # return legend_steps
+
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and log the error telling what happened.
         logger.error("get_legend_steps: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
-        #dbschema_analysis = None
+        # dbschema_analysis = None
 
 
 ######################################################################################
-#   get_legend_info(legendid, echo=False)
+#   get_legend_info(legendid)
 #   Purpose: Query the database to get the legend info needed for mapserver mapfile SCALE_BUCKETS setting.
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/07/31
-#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
 #
 #   Output: Return legend info of the given legendid, needed for mapserver mapfile SCALE_BUCKETS setting.
 #
@@ -1764,8 +2290,7 @@ def get_legend_steps(legendid=None, echo=False):
 #    WHERE analysis.legend_step.legend_id = legendid
 #    GROUP BY analysis.legend_step.legend_id
 #
-def get_legend_info(legendid=None, echo=False):
-
+def get_legend_info(legendid=None):
     global dbschema_analysis
     try:
 
@@ -1784,7 +2309,8 @@ def get_legend_info(legendid=None, echo=False):
                 "       analysis.legend.max_real_value, " + \
                 "       analysis.legend.step_range_from, " + \
                 "       analysis.legend.step_range_to, " + \
-                "       analysis.legend.unit " + \
+                "       analysis.legend.unit, " + \
+                "       analysis.legend.step_type " + \
                 " FROM analysis.legend_step JOIN analysis.legend ON legend_step.legend_id = legend.legend_id " + \
                 " WHERE analysis.legend_step.legend_id = " + str(legendid) + \
                 " GROUP BY analysis.legend_step.legend_id, " + \
@@ -1796,7 +2322,8 @@ def get_legend_info(legendid=None, echo=False):
                 "       analysis.legend.max_real_value, " + \
                 "       analysis.legend.step_range_from, " + \
                 "       analysis.legend.step_range_to, " + \
-                "       analysis.legend.unit "
+                "       analysis.legend.unit, " + \
+                "       analysis.legend.step_type "
 
         result = dbschema_analysis.execute(query)
         legend_info = result.fetchall()
@@ -1841,31 +2368,27 @@ def get_legend_info(legendid=None, echo=False):
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and log the error telling what happened.
         logger.error("get_legend_info: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
-        #dbschema_analysis = None
+        # dbschema_analysis = None
 
 
 ######################################################################################
-#   get_ingestions(echo=False)
+#   get_ingestions()
 #   Purpose: Query the database to get the product ingestion list of all products.
 #            Mainly used in the GUI Acquisition tab.
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/07/31
-#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
 #
 #   Output: Return the product ingestion list of all products ordered by productcode.
 #
 #    SELECT productcode, subproductcode, version, mapsetcode, defined_by,  activated, mapsetname
 #    FROM products.ingestion;
 #
-def get_ingestions(echo=False):
-
+def get_ingestions():
     global db
     try:
         query = " SELECT p.productcode || '_' || p.version as productid, " + \
@@ -1925,8 +2448,6 @@ def get_ingestions(echo=False):
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and log the error telling what happened.
         logger.error("get_ingestions: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -1936,19 +2457,18 @@ def get_ingestions(echo=False):
 
 
 ######################################################################################
-#   get_dataacquisitions(echo=False)
+#   get_dataacquisitions()
 #   Purpose: Query the database to get the product data acquisition list of all products.
 #            Mainly used in the GUI Acquisition tab.
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/07/15
-#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
 #
 #   Output: Return the product data acquisition list of all products ordered by productcode.
 #
 #    SELECT productcode, subproductcode, version, data_source_id, defined_by, type, activated, store_original_data
 #    FROM products.product_acquisition_data_source;
 #
-def get_dataacquisitions(echo=False):
+def get_dataacquisitions():
     global db
     try:
         # pa = db.product_acquisition_data_source._table
@@ -1981,16 +2501,10 @@ def get_dataacquisitions(echo=False):
         dataacquisitions = db.execute(query)
         dataacquisitions = dataacquisitions.fetchall()
 
-        if echo:
-            for row in dataacquisitions:
-                print row
-
         return dataacquisitions
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and log the error telling what happened.
         logger.error("get_dataacquisitions: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -1999,7 +2513,7 @@ def get_dataacquisitions(echo=False):
         # db = None
 
 
-def get_products_acquisition(echo=False, activated=None):
+def get_products_acquisition(activated=None):
     global db
     try:
         pc = db.product_category._table
@@ -2010,10 +2524,10 @@ def get_products_acquisition(echo=False, activated=None):
                     pads.c.productcode.label('pads_productcode'),
                     pads.c.subproductcode.label('pads_subproductcode'),
                     pads.c.version.label('pads_version')],
-                    group_by=[pads.c.productcode,
-                              pads.c.subproductcode,
-                              pads.c.version],
-                    from_obj=[pads])
+                   group_by=[pads.c.productcode,
+                             pads.c.subproductcode,
+                             pads.c.version],
+                   from_obj=[pads])
 
         s = s.alias('pa')
         db.pa = db.map(s, primary_key=[pads.c.productcode,
@@ -2058,16 +2572,10 @@ def get_products_acquisition(echo=False, activated=None):
 
         productslist = productslist.filter(where).order_by(asc(db.pl.c.order_index), asc(db.pl.c.productcode)).all()
 
-        # if echo:
-        #     for row in productslist:
-        #         print row
-
         return productslist
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and log the error telling what happened.
         logger.error("get_products_acquisition: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -2077,13 +2585,12 @@ def get_products_acquisition(echo=False, activated=None):
 
 
 ######################################################################################
-#   get_products(echo=False, activated=None, masked=None)
+#   get_products(activated=None, masked=None)
 #   Purpose: Query the database to get the (Native) product list with their product category.
 #            Mainly used in the GUI Acquisition tab.
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/07/08
-#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
-#          activated        - If not given the result with contain all Native products
+#   Input: activated        - If not given the result with contain all Native products
 #                             (used for acquisition, ingestion and processing)
 #          masked           - If given, the result with contain all Native products which are not masked!
 #                             (used by the Analysis tool in the Product Navigator)
@@ -2096,7 +2603,7 @@ def get_products_acquisition(echo=False, activated=None):
 #   WHERE p.product_type = 'Native'
 #   ORDER BY pc.order_index, productcode
 #
-def get_products(echo=False, activated=None, masked=None):
+def get_products(activated=None, masked=None):
     global db
     try:
         pc = db.product_category._table
@@ -2134,16 +2641,10 @@ def get_products(echo=False, activated=None, masked=None):
 
         productslist = pl.filter(where).order_by(asc(pl.c.order_index), asc(pl.c.productcode)).all()
 
-        # if echo:
-        #     for row in productslist:
-        #         print row
-
         return productslist
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and log the error telling what happened.
         logger.error("get_products: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -2153,26 +2654,23 @@ def get_products(echo=False, activated=None, masked=None):
 
 
 ######################################################################################
-#   get_frequency(frequency_id='', echo=False)
+#   get_frequency(frequency_id='')
 #   Purpose: Query the database to get the record of a specific frequency
 #            given its frequency_id, from the table frequency.
 #   Author: Jurriaan van 't Klooster
 #   Date: 2015/01/22
 #   Input: frequency_id     - The frequency_id of the specific frequency info requested. Default=''
-#          echo             - If True echo the query result in the console for debugging purposes. Default=False
 #   Output: Return the fields of all or a specific product record with product_type='Native' from the table product.
-def get_frequency(frequency_id='', echo=False):
+def get_frequency(frequency_id=''):
     global db
     try:
-        #where = and_(db.frequency.frequency_id == frequency_id)
-        #frequency = db.frequency.filter(where).one()
+        # where = and_(db.frequency.frequency_id == frequency_id)
+        # frequency = db.frequency.filter(where).one()
         frequency = db.frequency.get(frequency_id)
 
         return frequency
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_frequency: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -2182,83 +2680,69 @@ def get_frequency(frequency_id='', echo=False):
 
 
 ######################################################################################
-#   get_product_out_info(allrecs=False, echo=False, productcode='', subproductcode='', version='undefined')
+#   get_product_out_info(allrecs=False, productcode='', subproductcode='', version='undefined')
 #   Purpose: Query the database to get the records of all or a specific product from the table product
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/05/16
 #   Input: allrecs          - If True return all products. Default=False
-#          echo             - If True echo the query result in the console for debugging purposes. Default=False
 #          productcode      - The productcode of the specific product info requested.
 #                             If given also subproductcode and version have to be given. Default=''
 #          subproductcode   - The subproductcode of the specific product info requested. Default=''
 #          version          - The version of the specific product info requested. Default='undefined'
 #   Output: Return the fields of all or a specific product record from the table product.
-def get_product_out_info(allrecs=False, echo=False, productcode='', subproductcode='', version='undefined'):
+def get_product_out_info(allrecs=False, productcode='', subproductcode='', version='undefined'):
     global db
     # my_db = connectdb.ConnectDB().db
     try:
         if allrecs:
             product_out_info = db.product.order_by(asc(db.product.productcode)).all()
-            # if echo:
-            #     for row in product_out_info:
-            #         print row
         else:
             where = and_(db.product.productcode == productcode,
                          db.product.subproductcode == subproductcode,
                          db.product.version == version)
             product_out_info = db.product.filter(where).all()
-            # if echo:
-            #     print product_out_info
+
         return product_out_info
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_product_out_info: Database query error!\n -> {}".format(exceptionvalue))
-        #raise Exception("get_product_out_info: Database query error!\n ->%s" % exceptionvalue)
+        # raise Exception("get_product_out_info: Database query error!\n ->%s" % exceptionvalue)
     finally:
         if db.session:
             db.session.close()
         # my_db = None
 
+
 ######################################################################################
-#   get_product_out_info_connect(allrecs=False, echo=False, productcode='', subproductcode='', version='undefined')
+#   get_product_out_info_connect(allrecs=False, productcode='', subproductcode='', version='undefined')
 #   Purpose: Duplicate the get_product_out_info, by establishing a dedicated connection
 #            This is used by processing_merge, which is forked and the connection terminated afterwards
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/05/16
 #   Input: allrecs          - If True return all products. Default=False
-#          echo             - If True echo the query result in the console for debugging purposes. Default=False
 #          productcode      - The productcode of the specific product info requested.
 #                             If given also subproductcode and version have to be given. Default=''
 #          subproductcode   - The subproductcode of the specific product info requested. Default=''
 #          version          - The version of the specific product info requested. Default='undefined'
 #   Output: Return the fields of all or a specific product record from the table product.
-def get_product_out_info_connect(allrecs=False, echo=False, productcode='', subproductcode='', version='undefined'):
-
+def get_product_out_info_connect(allrecs=False, productcode='', subproductcode='', version='undefined'):
     my_db = connectdb.ConnectDB().db
     try:
         if allrecs:
             product_out_info = my_db.product.order_by(asc(db.product.productcode)).all()
-            # if echo:
-            #     for row in product_out_info:
-            #         print row
         else:
             where = and_(my_db.product.productcode == productcode,
                          my_db.product.subproductcode == subproductcode,
                          my_db.product.version == version)
             product_out_info = my_db.product.filter(where).all()
-            # if echo:
-            #     print product_out_info
+
         return product_out_info
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_product_out_info: Database query error!\n -> {}".format(exceptionvalue))
-        #raise Exception("get_product_out_info: Database query error!\n ->%s" % exceptionvalue)
+        # raise Exception("get_product_out_info: Database query error!\n ->%s" % exceptionvalue)
     finally:
         if my_db.session:
             my_db.session.close()
@@ -2266,14 +2750,13 @@ def get_product_out_info_connect(allrecs=False, echo=False, productcode='', subp
 
 
 ######################################################################################
-#   get_product_in_info(allrecs=False, echo=False, productcode='', subproductcode='',
+#   get_product_in_info(allrecs=False, productcode='', subproductcode='',
 #                       version='undefined', datasource_descr_id='')
 #   Purpose: Query the database to get the fields scale_factor, scale_offset, no_data, mask_min,
 #            mask_max and data_type_id of all or a specific product datasource from the table sub_datasource_description
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/05/16
 #   Input: allrecs              - If True return all products. Default=False
-#          echo                 - If True echo the query result in the console for debugging purposes. Default=False
 #          productcode          - The productcode of the specific product datasource info requested.
 #                                 If given also subproductcode, version and datasource_descr_id have to be given.
 #                                 Default=''
@@ -2281,13 +2764,12 @@ def get_product_out_info_connect(allrecs=False, echo=False, productcode='', subp
 #          version              - The version of the specific product info requested. Default='undefined'
 #          datasource_descr_id  - The version of the specific product info requested. Default='undefined'
 #   Output: Return the fields of all [or a specific product record} from the sub_datasource_description table.
-def get_product_in_info(allrecs=False, echo=False,
-                        productcode='', subproductcode='',
-                        version='undefined', datasource_descr_id=''):
+def get_product_in_info(allrecs=False, productcode='', subproductcode='', version='undefined', datasource_descr_id=''):
     global db
     try:
         if allrecs:
-            product_in_info = db.sub_datasource_description.order_by(asc(db.sub_datasource_description.productcode)).all()
+            product_in_info = db.sub_datasource_description.order_by(
+                asc(db.sub_datasource_description.productcode)).all()
         else:
             where = and_(db.sub_datasource_description.productcode == productcode,
                          db.sub_datasource_description.subproductcode == subproductcode,
@@ -2299,8 +2781,6 @@ def get_product_in_info(allrecs=False, echo=False,
         return product_in_info
     except exc.NoResultFound:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_product_in_info: Database query error!\n -> {}".format(exceptionvalue))
         product_in_info = []
@@ -2312,7 +2792,7 @@ def get_product_in_info(allrecs=False, echo=False,
 
 
 ######################################################################################
-#   get_product_native(productcode='', version='undefined', allrecs=False, echo=False)
+#   get_product_native(productcode='', version='undefined', allrecs=False)
 #   Purpose: Query the database to get the records of all products or one specific product
 #            with product_type='Native' from the table product.
 #   Author: Jurriaan van 't Klooster
@@ -2320,26 +2800,37 @@ def get_product_in_info(allrecs=False, echo=False,
 #   Input: productcode      - The productcode of the specific product info requested. Default=''
 #          version          - The product version
 #          allrecs          - If True return all products. Default=False
-#          echo             - If True echo the query result in the console for debugging purposes. Default=False
 #   Output: Return the fields of all or a specific product record with product_type='Native' from the table product.
-def get_product_native(productcode='', version='undefined', allrecs=False, echo=False):
+def get_product_native(productcode='', version='undefined', allrecs=False):
     global db
     try:
+
         if allrecs:
-            where = db.product.product_type == 'Native'
-            product = db.product.filter(where).order_by(asc(db.product.productcode)).all()
+            query = " SELECT * FROM products.product WHERE product_type == 'Native' ORDER BY productcode ASC"
         else:
-            where = and_(db.product.productcode == productcode,
-                         db.product.product_type == 'Native',
-                         db.product.version == version)
-            product = db.product.filter(where).first()
-        if product is None:
-            product = []
+            query = " SELECT * FROM products.product " \
+                    " WHERE product_type = 'Native' " \
+                    "   AND productcode = '" + productcode + "'" \
+                    "   AND version = '" + version + "'" \
+                    " ORDER BY productcode ASC"
+        product = db.execute(query)
+        product = product.fetchall()
+
         return product
+
+        # if allrecs:
+        #     where = db.product.product_type == 'Native'
+        #     product = db.product.filter(where).order_by(asc(db.product.productcode)).all()
+        # else:
+        #     where = and_(db.product.productcode == productcode,
+        #                  db.product.product_type == 'Native',
+        #                  db.product.version == version)
+        #     product = db.product.filter(where).first()
+        # if product is None:
+        #     product = []
+        # return product
     except exc.NoResultFound:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_product_native : Database query error!\n -> {}".format(exceptionvalue))
         product = []
@@ -2351,7 +2842,7 @@ def get_product_native(productcode='', version='undefined', allrecs=False, echo=
 
 
 ######################################################################################
-#   get_subproduct(productcode='', version='undefined', subproductcode='', echo=False)
+#   get_subproduct(productcode='', version='undefined', subproductcode='')
 #   Purpose: Query the database to get the records of all products or one specific product
 #            with product_type='Native' from the table product.
 #   Author: Jurriaan van 't Klooster
@@ -2359,9 +2850,8 @@ def get_product_native(productcode='', version='undefined', allrecs=False, echo=
 #   Input: productcode      - The productcode of the specific product info requested. Default=''
 #          version          - The product version
 #          allrecs          - If True return all products. Default=False
-#          echo             - If True echo the query result in the console for debugging purposes. Default=False
 #   Output: Return the fields of all or a specific product record with product_type='Native' from the table product.
-def get_subproduct(productcode='', version='undefined', subproductcode='', masked=False, echo=False):
+def get_subproduct(productcode='', version='undefined', subproductcode='', masked=False):
     global db
     try:
         if masked:
@@ -2374,13 +2864,11 @@ def get_subproduct(productcode='', version='undefined', subproductcode='', maske
                          db.product.subproductcode == subproductcode,
                          db.product.version == version)
         subproduct = db.product.filter(where).first()
-        #if subproduct is None:
+        # if subproduct is None:
         #    subproduct = []
         return subproduct
     except exc.NoResultFound:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_subproduct: Database query error!\n -> {}".format(exceptionvalue))
         subproduct = []
@@ -2392,16 +2880,15 @@ def get_subproduct(productcode='', version='undefined', subproductcode='', maske
 
 
 ######################################################################################
-#   get_eumetcast(source_id='', allrecs=False, echo=False)
+#   get_eumetcast(source_id='', allrecs=False)
 #   Purpose: Query the database to get the records of all eumetcast sources or one specific eumetcast source
 #            from the table eumetcast_source.
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/05/16
 #   Input: source_id        - The eumetcast_id of the specific eumetcast source requested. Default=''
 #          allrecs          - If True return all products. Default=False
-#          echo             - If True echo the query result in the console for debugging purposes. Default=False
 #   Output: Return the fields of all or a specific eumetcast source record from the table eumetcast_source.
-def get_eumetcast(source_id='', allrecs=False, echo=False):
+def get_eumetcast(source_id='', allrecs=False):
     global db
     try:
         if allrecs:
@@ -2414,8 +2901,6 @@ def get_eumetcast(source_id='', allrecs=False, echo=False):
         return eumetcasts
     except exc.NoResultFound:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_eumetcast: Database query error!\n -> {}".format(exceptionvalue))
         eumetcasts = []
@@ -2427,16 +2912,15 @@ def get_eumetcast(source_id='', allrecs=False, echo=False):
 
 
 ######################################################################################
-#   get_internet(internet_id='', allrecs=False, echo=False)
+#   get_internet(internet_id='', allrecs=False)
 #   Purpose: Query the database to get the records of all internet sources or one specific internet source
 #            from the table internet_source.
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/05/16
 #   Input: internet_id      - The internet_id of the specific internet source requested. Default=''
 #          allrecs          - If True return all products. Default=False
-#          echo             - If True echo the query result in the console for debugging purposes. Default=False
 #   Output: Return the fields of all or a specific internet source record from the table internet_source.
-def get_internet(internet_id='', allrecs=False, echo=False):
+def get_internet(internet_id='', allrecs=False):
     global db
     try:
         if allrecs:
@@ -2449,8 +2933,6 @@ def get_internet(internet_id='', allrecs=False, echo=False):
         return internet
     except exc.NoResultFound:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_internet: Database query error!\n -> {}".format(exceptionvalue))
         internet = []
@@ -2462,16 +2944,15 @@ def get_internet(internet_id='', allrecs=False, echo=False):
 
 
 ######################################################################################
-#   get_mapset(mapsetcode='', allrecs=False, echo=False)
+#   get_mapset(mapsetcode='', allrecs=False)
 #   Purpose: Query the database to get the records of all mapsets or one specific mapset
 #            from the table mapset.
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/05/16
 #   Input: mapsetcode       - The mapsetcode of the specific mapset requested. Default=''
 #          allrecs          - If True return all products. Default=False
-#          echo             - If True echo the query result in the console for debugging purposes. Default=False
 #   Output: Return the fields of all or a specific mapset record from the table mapset.
-def get_mapset(mapsetcode='', allrecs=False, echo=False):
+def get_mapset(mapsetcode='', allrecs=False):
     global db
     # my_db = connectdb.ConnectDB().db
     try:
@@ -2487,11 +2968,9 @@ def get_mapset(mapsetcode='', allrecs=False, echo=False):
         return mapset
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         raise logger.error("get_mapset: Database query error!\n -> {}".format(exceptionvalue))
-        #raise Exception("get_mapset: Database query error!\n ->%s" % exceptionvalue)
+        # raise Exception("get_mapset: Database query error!\n ->%s" % exceptionvalue)
     finally:
         if db.session:
             db.session.close()
@@ -2499,18 +2978,17 @@ def get_mapset(mapsetcode='', allrecs=False, echo=False):
 
 
 ######################################################################################
-#   get_ingestion_product(allrecs=False, echo=False, productcode_in='', version_in='')
+#   get_ingestion_product(allrecs=False, productcode_in='', version_in='')
 #   Purpose: Query the database to get all product ingestion (allrecs==True) definitions or one specific
 #            product ingestion definition at product level from the table ingestion.
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/05/16
 #   Input: allrecs          - If True return all products. Default=False
-#          echo             - If True echo the query result in the console for debugging purposes. Default=False
 #          productcode      - The productcode of the specific product ingestion definition requested. Default=''
 #          version          - The version of the specific product ingestion definition requested. Default='undefined'
 #   Output: Return the productcode, version and count() of subproducts of all
 #           [or a specific product ingestion definition] from the table ingestion.
-def get_ingestion_product(allrecs=False, echo=False, productcode='', version='undefined'):
+def get_ingestion_product(allrecs=False, productcode='', version='undefined'):
     global db
     try:
         session = db.session
@@ -2526,27 +3004,20 @@ def get_ingestion_product(allrecs=False, echo=False, productcode='', version='un
         if allrecs:
             ingestion_product = ingestion_product.filter(ingest.activated == True)
 
-            if ingestion_product.count() >= 1:      # At least 1 product ingestion definition has to exist.
+            if ingestion_product.count() >= 1:  # At least 1 product ingestion definition has to exist.
                 active_ingestions = ingestion_product.all()
-                # if echo:
-                #     for row in active_ingestions:
-                #         print row
         else:
             where = and_(ingest.productcode == productcode,
                          ingest.activated == True,
                          ingest.version == version)
-            if ingestion_product.filter(where).count() == 1:    # Exactly 1 product ingestion definition has to exist.
+            if ingestion_product.filter(where).count() == 1:  # Exactly 1 product ingestion definition has to exist.
                 active_ingestions = ingestion_product.filter(where).one()
-                # if echo:
-                #     print active_ingestions
         return active_ingestions
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_ingestion_product: Database query error!\n -> {}".format(exceptionvalue))
-        #raise Exception("get_ingestion_product: Database query error!\n ->%s" % exceptionvalue)
+        # raise Exception("get_ingestion_product: Database query error!\n ->%s" % exceptionvalue)
     finally:
         if db.session:
             db.session.close()
@@ -2554,44 +3025,37 @@ def get_ingestion_product(allrecs=False, echo=False, productcode='', version='un
 
 
 ######################################################################################
-#   get_ingestion_subproduct(allrecs=False, echo=False, productcode='', version='')
+#   get_ingestion_subproduct(allrecs=False, productcode='', version='')
 #   Purpose: Query the database to get the records of all product ingestion definitions or one specific
 #            product ingestion definition  at subproduct level (not product level) from the table ingestion.
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/05/16
 #   Input: allrecs          - If True return all products. Default=False
-#          echo             - If True echo the query result in the console for debugging purposes. Default=False
 #          productcode      - The productcode of the specific product ingestion definition requested. Default=''
 #          version          - The version of the specific product ingestion definition requested. Default='undefined'
 #   Output: Return all relevant fields of all [or a specific ingestion definition record] from the table ingestion.
-def get_ingestion_subproduct(allrecs=False, echo=False, productcode='', version=''):
+def get_ingestion_subproduct(allrecs=False, productcode='', version=''):
     global db
     try:
         ingestion = []
         if allrecs:
             if db.ingestion.filter(db.ingestion.activated is True).count() >= 1:
-                ingestion = db.ingestion.filter(db.ingestion.activated is True).\
+                ingestion = db.ingestion.filter(db.ingestion.activated is True). \
                     order_by(asc(db.ingestion.productcode)).all()
-                # if echo:
-                #     for row in ingestion:
-                #         print row
         else:
             where = and_(db.ingestion.productcode == productcode,
                          db.ingestion.activated,
-                         #db.ingestion.subproductcode == subproductcode,
+                         # db.ingestion.subproductcode == subproductcode,
                          db.ingestion.version == version)
             if db.ingestion.filter(where).count() >= 1:
                 ingestion = db.ingestion.filter(where).all()
-                # if echo:
-                #     print ingestion
+
         return ingestion
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_ingestion_subproduct: Database query error!\n -> {}".format(exceptionvalue))
-        #raise Exception("get_ingestion_subproduct: Database query error!\n ->%s" % exceptionvalue)
+        # raise Exception("get_ingestion_subproduct: Database query error!\n ->%s" % exceptionvalue)
     finally:
         if db.session:
             db.session.close()
@@ -2599,20 +3063,19 @@ def get_ingestion_subproduct(allrecs=False, echo=False, productcode='', version=
 
 
 ######################################################################################
-#   get_product_sources(echo=False, productcode='', subproductcode='', version='')
+#   get_product_sources(productcode='', subproductcode='', version='')
 #   Purpose: Query the database to get all the activated data sources defined for a specific product (INTERNET
 #            and EUMETCAST), from the table product_acquisition_data_source
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/05/16
-#   Input: echo                 - If True echo the query result in the console for debugging purposes. Default=False
-#          productcode          - The productcode of the specific product datasource info requested.
+#   Input: productcode          - The productcode of the specific product datasource info requested.
 #                                 If given also subproductcode, version have to be given. Default=''
 #          subproductcode       - The subproductcode of the specific product info requested. Default=''
 #          version              - The version of the specific product info requested. Default='undefined'
 #
 #   Output: Return all the activated data sources defined for a specific product
 #           from the table product_acquisition_data_source.
-def get_product_sources(echo=False, productcode='', subproductcode='', version=''):
+def get_product_sources(productcode='', subproductcode='', version=''):
     global db
     try:
         sources = []
@@ -2623,17 +3086,13 @@ def get_product_sources(echo=False, productcode='', subproductcode='', version='
         if db.product_acquisition_data_source.filter(where).count() >= 1:
             sources = db.product_acquisition_data_source.filter(where). \
                 order_by(asc(db.product_acquisition_data_source.type)).all()
-            # if echo:
-            #     for row in sources:
-            #         print row
+
         return sources
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_product_sources: Database query error!\n -> {}".format(exceptionvalue))
-        #raise Exception("get_product_sources: Database query error!\n ->%s" % exceptionvalue)
+        # raise Exception("get_product_sources: Database query error!\n ->%s" % exceptionvalue)
     finally:
         if db.session:
             db.session.close()
@@ -2641,18 +3100,17 @@ def get_product_sources(echo=False, productcode='', subproductcode='', version='
 
 
 ######################################################################################
-#   get_datasource_descr(echo=False, source_type='', source_id='')
+#   get_datasource_descr(source_type='', source_id='')
 #   Purpose: Query the database to get the datasource description and filter expression of a specific datasource
 #            (INTERNET or EUMETCAST).
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/05/16
-#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
-#          source_type      - The data source type. Values: INTERNET or EUMETCAST   Default=''
+#   Input: source_type      - The data source type. Values: INTERNET or EUMETCAST   Default=''
 #          source_id        - The eumetcast_id or internet_id of the specific data source description requested.
 #                             Default=''
 #
 #   Output: Return the datasource description and filter expression of the requested data source.
-def get_datasource_descr(echo=False, source_type='', source_id=''):
+def get_datasource_descr(source_type='', source_id=''):
     global db
     try:
         session = db.session
@@ -2662,22 +3120,17 @@ def get_datasource_descr(echo=False, source_type='', source_id=''):
             datasource_descr = session.query(es.filter_expression_jrc, dsd).join(dsd). \
                 filter(es.eumetcast_id == source_id).all()
 
-        else:   # source_type == 'INTERNET'
+        else:  # source_type == 'INTERNET'
             datasource_descr = session.query(db.internet_source, db.datasource_description). \
                 join(db.datasource_description). \
                 filter(db.internet_source.internet_id == source_id).all()
 
-        # if echo:
-        #     for row in datasource_descr:
-        #         print row
         return datasource_descr
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_datasource_descr: Database query error!\n -> {}".format(exceptionvalue))
-        #raise Exception("get_ingestion: Database query error!\n ->%s" % exceptionvalue)
+        # raise Exception("get_ingestion: Database query error!\n ->%s" % exceptionvalue)
     finally:
         if db.session:
             db.session.close()
@@ -2685,15 +3138,14 @@ def get_datasource_descr(echo=False, source_type='', source_id=''):
 
 
 ######################################################################################
-#   get_eumetcast_sources(echo=False)
+#   get_eumetcast_sources()
 #   Purpose: Query the database to get the filter_expression of all the active product EUMETCAST data sources.
 #            Mainly used in get_eumetcast.py
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/05/16
-#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
 #
 #   Output: Return the filter_expression of all the active product EUMETCAST data sources.
-def get_eumetcast_sources(echo=False):
+def get_eumetcast_sources():
     global db
     try:
         session = db.session
@@ -2703,20 +3155,14 @@ def get_eumetcast_sources(echo=False):
 
         # The columns on the subquery "es" are accessible through an attribute called "c"
         # e.g. es.c.filter_expression_jrc
-        eumetcast_sources = session.query(pads, es.c.eumetcast_id, es.c.filter_expression_jrc).\
-            outerjoin(es, pads.data_source_id == es.c.eumetcast_id).\
+        eumetcast_sources = session.query(pads, es.c.eumetcast_id, es.c.filter_expression_jrc). \
+            outerjoin(es, pads.data_source_id == es.c.eumetcast_id). \
             filter(and_(pads.type == 'EUMETCAST', pads.activated)).all()
-
-        # if echo:
-        #     for row in eumetcast_sources:
-        #         print row
 
         return eumetcast_sources
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_eumetcast_sources: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -2726,16 +3172,14 @@ def get_eumetcast_sources(echo=False):
 
 
 ######################################################################################
-#   get_active_internet_sources(echo=False)
+#   get_active_internet_sources()
 #   Purpose: Query the database to get the internet_id of all the active product INTERNET data sources.
 #            Mainly used in get_internet.py
 #   Author: Marco Clerici
 #   Date: 2014/09/03
-#   Input: echo             - If True echo the query result in the console for debugging purposes. Default=False
 #
 #   Output: Return the internet of all the active product INTERNET data sources.
-def get_active_internet_sources(echo=False):
-
+def get_active_internet_sources():
     global db
 
     try:
@@ -2772,16 +3216,10 @@ def get_active_internet_sources(echo=False):
             outerjoin(p, and_(pads.productcode == p.productcode, pads.version == p.version)). \
             filter(and_(pads.type == 'INTERNET', pads.activated, p.product_type == 'Native', p.activated)).all()
 
-        # if echo:
-        #     for row in internet_sources:
-        #         print row
-
         return internet_sources
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_active_internet_sources: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -2791,12 +3229,11 @@ def get_active_internet_sources(echo=False):
 
 
 ######################################################################################
-#   __get_processing_chains(echo=False)
+#   __get_processing_chains()
 #   Purpose: Query the database to get all the processing chains definitions or one specific
 #            product definition at product level from the table processing (and related).
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/12/17
-#   Input: echo   - If True echo the query result in the console for debugging purposes. Default=False
 #   Output: Return a list of all the processing chains definitions and it's input product
 #
 #   SELECT p.*, pin.*
@@ -2804,7 +3241,7 @@ def get_active_internet_sources(echo=False):
 #   INNER JOIN (SELECT * FROM products.process_product WHERE type = 'INPUT') pin
 #   ON p.process_id = pin.process_id
 #
-def __get_processing_chains(echo=False):
+def __get_processing_chains():
     global db
 
     active_processing_chains = []
@@ -2829,16 +3266,14 @@ def __get_processing_chains(echo=False):
                                                  processinput.c.mapsetcode,
                                                  processinput.c.date_format,
                                                  processinput.c.start_date,
-                                                 processinput.c.end_date).\
-            outerjoin(processinput, process.process_id == processinput.c.process_id).\
+                                                 processinput.c.end_date). \
+            outerjoin(processinput, process.process_id == processinput.c.process_id). \
             filter(and_(processinput.c.type == 'INPUT', process.activated == True)).all()
 
         return active_processing_chains
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_processing_chains: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -2853,7 +3288,6 @@ def __get_processing_chains(echo=False):
 #            product definition at product level from the table processing (and related).
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/12/17
-#   Input: echo   - If True echo the query result in the console for debugging purposes. Default=False
 #   Output: Return a list of all the processing chains definitions and it's input product
 #
 #   SELECT p.*, pin.*
@@ -2868,8 +3302,8 @@ def get_processingchains_input_products(process_id=None):
 
         process = db.processing._table
         processinput = db.process_product._table  # session.query(db.process_product).subquery()
-        product = db.product._table   # session.query(db.product).subquery()
-        pc = db.product_category._table     # session.query(db.product_category).subquery()
+        product = db.product._table  # session.query(db.product).subquery()
+        pc = db.product_category._table  # session.query(db.product_category).subquery()
 
         s = select([process.c.process_id,
                     process.c.defined_by.label('process_defined_by'),
@@ -2886,7 +3320,7 @@ def get_processingchains_input_products(process_id=None):
                     processinput.c.date_format,
                     processinput.c.start_date,
                     processinput.c.end_date,
-                    processinput.c.type]).\
+                    processinput.c.type]). \
             select_from(process.outerjoin(processinput, process.c.process_id == processinput.c.process_id))
 
         s = s.alias('pi')
@@ -2904,7 +3338,7 @@ def get_processingchains_input_products(process_id=None):
 
                     pc.c.category_id,
                     pc.c.descriptive_name.label('cat_descr_name'),
-                    pc.c.order_index]).\
+                    pc.c.order_index]). \
             select_from(product.outerjoin(pc, product.c.category_id == pc.c.category_id))
 
         s = s.alias('p')
@@ -2912,8 +3346,8 @@ def get_processingchains_input_products(process_id=None):
         db.p = p
 
         processing_chains = db.join(db.pi, db.p, and_(db.pi.productcode == db.p.prod_productcode,
-                                    db.pi.subproductcode == db.p.prod_subproductcode,
-                                    db.pi.version == db.p.prod_version), isouter=True)
+                                                      db.pi.subproductcode == db.p.prod_subproductcode,
+                                                      db.pi.version == db.p.prod_version), isouter=True)
 
         if in_process_id is not None:
             where = and_(db.pi.c.process_id == in_process_id,
@@ -2926,7 +3360,7 @@ def get_processingchains_input_products(process_id=None):
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        #if echo:
+        # if echo:
         #    print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_processingchains_input_products: Database query error!\n -> {}".format(exceptionvalue))
@@ -2937,12 +3371,12 @@ def get_processingchains_input_products(process_id=None):
 
 
 ######################################################################################
-#   get_processingchain_output_products(process_id=None, echo=False)
+#   get_processingchain_output_products(process_id=None)
 #   Purpose: Query the database to get the final output (sub) products of a given processing chain (process_id)
 #            from the table process_product (and product table).
 #   Author: Jurriaan van 't Klooster
 #   Date: 2015/01/02
-#   Input: echo   - If True echo the query result in the console for debugging purposes. Default=False
+#   Input: process_id   - The process_id to query
 #   Output: Return a list of the final output (sub) products of a given processing chain (process_id)
 #
 def get_processingchain_output_products(process_id=None):
@@ -2982,7 +3416,7 @@ def get_processingchain_output_products(process_id=None):
                         product.c.description,
                         pc.c.category_id,
                         pc.c.descriptive_name.label('cat_descr_name'),
-                        pc.c.order_index]).\
+                        pc.c.order_index]). \
                 select_from(product.outerjoin(pc, product.c.category_id == pc.c.category_id))
 
             s = s.alias('p')
@@ -2994,16 +3428,15 @@ def get_processingchain_output_products(process_id=None):
                          db.pfo.c.final == True)
 
             processing_chain_output_products = db.join(db.pfo, db.p, and_(db.pfo.productcode == db.p.prod_productcode,
-                                                       db.pfo.subproductcode == db.p.prod_subproductcode,
-                                                       db.pfo.version == db.p.prod_version), isouter=True)
+                                                                          db.pfo.subproductcode == db.p.prod_subproductcode,
+                                                                          db.pfo.version == db.p.prod_version),
+                                                       isouter=True)
             processing_chain_output_products = processing_chain_output_products.filter(where).all()
 
         return processing_chain_output_products
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        #if echo:
-        #    print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_processingchain_output_products: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -3013,17 +3446,15 @@ def get_processingchain_output_products(process_id=None):
 
 
 ######################################################################################
-#   get_processing_chains(echo=False)
+#   get_processing_chains()
 #   Purpose: Query the database to get all the defined processing chain definitions
 #   Author: Jur van 't Klooster
 #   Date: 2015/02/26
-#   Input: echo   - If True echo the query result in the console for debugging purposes. Default=False
 #   Output: Return a list of all the processing chains definitions
 #
 #   SELECT * FROM products.processing
 #
-def get_processing_chains(echo=False):
-
+def get_processing_chains():
     global db
     try:
         p = db.processing._table
@@ -3056,8 +3487,6 @@ def get_processing_chains(echo=False):
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_active_processing_chains: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -3067,11 +3496,10 @@ def get_processing_chains(echo=False):
 
 
 ######################################################################################
-#   get_active_processing_chains(echo=False)
+#   get_active_processing_chains()
 #   Purpose: Query the database to get all the active processing chains definitions or one specific
 #   Author: M. Clerici
 #   Date: 2015/02/26
-#   Input: echo   - If True echo the query result in the console for debugging purposes. Default=False
 #   Output: Return a list of all the processing chains definitions
 #
 #   SELECT p.*, pin.*
@@ -3079,15 +3507,14 @@ def get_processing_chains(echo=False):
 #   INNER JOIN (SELECT * FROM products.process_product WHERE type = 'INPUT') pin
 #   ON p.process_id = pin.process_id
 #
-def get_active_processing_chains(echo=False):
-
+def get_active_processing_chains():
     global db
     active_processing_chains = []
     try:
         session = db.session
         process = aliased(db.processing)
 
-        #processinput = session.query(db.process_product).subquery()
+        # processinput = session.query(db.process_product).subquery()
 
         # The columns on the subquery "processinput" are accessible through an attribute called "c"
         # e.g. es.c.productcode
@@ -3096,15 +3523,13 @@ def get_active_processing_chains(echo=False):
                                                  process.output_mapsetcode,
                                                  process.derivation_method,
                                                  process.algorithm,
-                                                 process.priority).\
+                                                 process.priority). \
             filter(process.activated == True).all()
 
         return active_processing_chains
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_active_processing_chains: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -3114,11 +3539,12 @@ def get_active_processing_chains(echo=False):
 
 
 ######################################################################################
-#   get_processing_chains_products(process_id,echo=False, type='')
+#   get_processing_chains_products(process_id, type='')
 #   Purpose: Query the database to get all input products for a processing chains
 #   Author: M. Clerici
 #   Date: 2015/02/26
-#   Input: echo   - If True echo the query result in the console for debugging purposes. Default=False
+#   Input: process_id   - The process_id to query
+#          type         - All, input or output
 #   Output: Return a list of all the processing chains definitions and it's input product
 #
 #   SELECT p.*, pin.*
@@ -3126,8 +3552,7 @@ def get_active_processing_chains(echo=False):
 #   INNER JOIN (SELECT * FROM products.process_product WHERE type = 'INPUT') pin
 #   ON p.process_id = pin.process_id
 #
-def get_processing_chain_products(process_id,echo=False, type='All'):
-
+def get_processing_chain_products(process_id, type='All'):
     global db
     products = []
     try:
@@ -3140,38 +3565,38 @@ def get_processing_chain_products(process_id,echo=False, type='All'):
         # e.g. es.c.productcode
         if type == 'All':
             products = session.query(process.process_id,
-                                                 processinput.c.productcode,
-                                                 processinput.c.subproductcode,
-                                                 processinput.c.version,
-                                                 processinput.c.mapsetcode,
-                                                 processinput.c.date_format,
-                                                 processinput.c.start_date,
-                                                 processinput.c.end_date).\
+                                     processinput.c.productcode,
+                                     processinput.c.subproductcode,
+                                     processinput.c.version,
+                                     processinput.c.mapsetcode,
+                                     processinput.c.date_format,
+                                     processinput.c.start_date,
+                                     processinput.c.end_date). \
                 outerjoin(processinput, process.process_id == processinput.c.process_id)
 
         elif type == 'input':
             products = session.query(process.process_id,
-                                                 processinput.c.productcode,
-                                                 processinput.c.subproductcode,
-                                                 processinput.c.version,
-                                                 processinput.c.mapsetcode,
-                                                 processinput.c.date_format,
-                                                 processinput.c.start_date,
-                                                 processinput.c.end_date).\
-                outerjoin(processinput, process.process_id == processinput.c.process_id).\
-                filter(and_(processinput.c.type == 'INPUT',processinput.c.process_id == process_id)).all()
+                                     processinput.c.productcode,
+                                     processinput.c.subproductcode,
+                                     processinput.c.version,
+                                     processinput.c.mapsetcode,
+                                     processinput.c.date_format,
+                                     processinput.c.start_date,
+                                     processinput.c.end_date). \
+                outerjoin(processinput, process.process_id == processinput.c.process_id). \
+                filter(and_(processinput.c.type == 'INPUT', processinput.c.process_id == process_id)).all()
 
         elif type == 'output':
             products = session.query(process.process_id,
-                                                 processinput.c.productcode,
-                                                 processinput.c.subproductcode,
-                                                 processinput.c.version,
-                                                 processinput.c.mapsetcode,
-                                                 processinput.c.date_format,
-                                                 processinput.c.start_date,
-                                                 processinput.c.end_date).\
-                outerjoin(processinput, process.process_id == processinput.c.process_id).\
-                filter(and_(processinput.c.type == 'OUTPUT',processinput.c.process_id == process_id)).all()
+                                     processinput.c.productcode,
+                                     processinput.c.subproductcode,
+                                     processinput.c.version,
+                                     processinput.c.mapsetcode,
+                                     processinput.c.date_format,
+                                     processinput.c.start_date,
+                                     processinput.c.end_date). \
+                outerjoin(processinput, process.process_id == processinput.c.process_id). \
+                filter(and_(processinput.c.type == 'OUTPUT', processinput.c.process_id == process_id)).all()
 
         else:
             logger.error("get_processing_chain_products: type must be all/input/output")
@@ -3180,8 +3605,6 @@ def get_processing_chain_products(process_id,echo=False, type='All'):
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_processing_chain_products: Database query error!\n -> {}".format(exceptionvalue))
     finally:
@@ -3203,32 +3626,31 @@ def get_processing_chain_products(process_id,echo=False, type='All'):
 #   Output: OK / error
 #
 def update_processing_chain_products(process_id, productcode, version, mapsetcode, proc_sub_product, product_out_info):
-
     crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
 
     # 'Hard-coded' definitions
-    product_type='Derived'
-    defined_by= 'JRC'                       # TEMP: To be changed !???????
+    product_type = 'Derived'
+    defined_by = 'JRC'  # TEMP: To be changed !???????
 
     # Extract info from proc_sub_product
-    subproductcode=proc_sub_product.sprod
-    final=proc_sub_product.final
-    descriptive_name=proc_sub_product.descriptive_name
-    description= proc_sub_product.description
-    frequency_id=proc_sub_product.frequency_id
-    date_format=proc_sub_product.date_format
-    masked=proc_sub_product.masked
-    timeseries_role=proc_sub_product.timeseries_role
-    activated=proc_sub_product.active_user
+    subproductcode = proc_sub_product.sprod
+    final = proc_sub_product.final
+    descriptive_name = proc_sub_product.descriptive_name
+    description = proc_sub_product.description
+    frequency_id = proc_sub_product.frequency_id
+    date_format = proc_sub_product.date_format
+    masked = proc_sub_product.masked
+    timeseries_role = proc_sub_product.timeseries_role
+    activated = proc_sub_product.active_user
 
     # Extract info from input_sub_product
-    category_id=product_out_info[0].category_id
-    provider=product_out_info[0].provider
-    scale_factor=product_out_info[0].scale_factor
-    scale_offset=product_out_info[0].scale_offset
-    nodata=product_out_info[0].nodata
-    unit=product_out_info[0].unit
-    data_type_id=product_out_info[0].data_type_id
+    category_id = product_out_info[0].category_id
+    provider = product_out_info[0].provider
+    scale_factor = product_out_info[0].scale_factor
+    scale_offset = product_out_info[0].scale_offset
+    nodata = product_out_info[0].nodata
+    unit = product_out_info[0].unit
+    data_type_id = product_out_info[0].data_type_id
 
     try:
         productinfo = {'productcode': productcode,
@@ -3246,20 +3668,20 @@ def update_processing_chain_products(process_id, productcode, version, mapsetcod
                                'defined_by': defined_by,
                                'activated': activated,
                                'category_id': category_id,
-                               'product_type':product_type,
-                               'descriptive_name':descriptive_name,
-                               'description':description,
-                               'provider':provider,
-                               'frequency_id':frequency_id,
-                               'date_format':date_format,
-                               'scale_factor':scale_factor,
-                               'scale_offset':scale_offset,
-                               'nodata':nodata,
-                               'unit':unit,
-                               'data_type_id':data_type_id,
-                               'masked':masked,
-                               'timeseries_role':timeseries_role}
-                crud_db.create('product',productinfo)
+                               'product_type': product_type,
+                               'descriptive_name': descriptive_name,
+                               'description': description,
+                               'provider': provider,
+                               'frequency_id': frequency_id,
+                               'date_format': date_format,
+                               'scale_factor': scale_factor,
+                               'scale_offset': scale_offset,
+                               'nodata': nodata,
+                               'unit': unit,
+                               'data_type_id': data_type_id,
+                               'masked': masked,
+                               'timeseries_role': timeseries_role}
+                crud_db.create('product', productinfo)
                 updatestatus = '{"success":true, "message":"Product created in products table!"}'
             except:
                 updatestatus = '{"success":false, "message":"Error in creating prod in products table!"}'
@@ -3269,8 +3691,8 @@ def update_processing_chain_products(process_id, productcode, version, mapsetcod
                                     'productcode': productcode,
                                     'version': version,
                                     'subproductcode': subproductcode,
-                                    'mapsetcode':mapsetcode,
-                                    'type':"OUTPUT"}
+                                    'mapsetcode': mapsetcode,
+                                    'type': "OUTPUT"}
 
         if crud_db.read('process_product', **process_productinfo_pkey):
             updatestatus = '{"success":true, "message":"Product already exist in products table!"}'
@@ -3280,20 +3702,18 @@ def update_processing_chain_products(process_id, productcode, version, mapsetcod
                                        'productcode': productcode,
                                        'version': version,
                                        'subproductcode': subproductcode,
-                                       'mapsetcode':mapsetcode,
-                                       'type':"OUTPUT",
+                                       'mapsetcode': mapsetcode,
+                                       'type': "OUTPUT",
                                        'activated': activated,
                                        'final': final,
                                        'date_format': date_format}
-                crud_db.create('process_product',process_productinfo)
+                crud_db.create('process_product', process_productinfo)
                 updatestatus = '{"success":true, "message":"Product created in products table!"}'
             except:
                 updatestatus = '{"success":false, "message":"Error in creating prod in products table!"}'
 
     # except:
     #     exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-    #     if echo:
-    #         print traceback.format_exc()
     #     # Exit the script and print an error telling what happened.
     #     logger.error("get_processing_chain_products: Database query error!\n -> {}".format(exceptionvalue))
     finally:
