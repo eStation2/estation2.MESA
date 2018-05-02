@@ -249,7 +249,13 @@ Ext.define('esapp.Application', {
         document.getElementsByTagName('head')[0].appendChild(link);
 
         if (esapp.globals['typeinstallation'] == 'windows' || esapp.globals['typeinstallation'] == 'jrc_online'){
-            Ext.data.StoreManager.lookup('DataSetsStore').load();
+            var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
+
+            if (datasetsstore.isStore) {
+                datasetsstore.proxy.extraParams = {forse: true};
+                datasetsstore.load();
+            }
+            // Ext.data.StoreManager.lookup('DataSetsStore').load();
         }
         else {
             if (esapp.globals['role'] == 'pc2') {

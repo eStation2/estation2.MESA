@@ -205,6 +205,7 @@ Ext.define('esapp.view.main.Main', {
             xtype:'container',
             autoScroll: true,
             layout : 'fit',
+            hidden: false,
             disabled: false,
             items: [{
                 xtype  : 'analysis-main',

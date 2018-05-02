@@ -356,6 +356,12 @@ Ext.define("esapp.view.system.systemsettings",{
                     if (me.getSession().getChanges() != null){
                         me.getSession().getSaveBatch().start();
                         Ext.toast({ html: esapp.Utils.getTranslation('systemsettingssaved'), title: esapp.Utils.getTranslation('systemsettingssaved'), width: 200, align: 't' });
+
+                        var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
+                        if (datasetsstore.isStore) {
+                            datasetsstore.proxy.extraParams = {forse: true};
+                            datasetsstore.load();
+                        }
                     }
                 }
             }]

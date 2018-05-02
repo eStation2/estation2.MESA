@@ -234,9 +234,10 @@ ALTER TABLE analysis.users
   BEGIN NEW WORKSPACE AND GRAPH TEMPLATE TABLE STUCTURE
  *********************************************************/
 
+
 -- DROP TABLE analysis.user_workspaces;
 
-CREATE TABLE analysis.user_workspaces
+CREATE TABLE IF NOT EXISTS analysis.user_workspaces
 (
   userid character varying(50) NOT NULL,
   workspaceid serial NOT NULL,
@@ -260,7 +261,7 @@ ALTER TABLE analysis.user_workspaces
 
 -- DROP TABLE analysis.user_map_templates;
 
-CREATE TABLE analysis.user_map_templates
+CREATE TABLE IF NOT EXISTS analysis.user_map_templates
 (
   userid character varying(50) NOT NULL,
   workspaceid bigint NOT NULL,
@@ -312,7 +313,7 @@ ALTER TABLE analysis.user_map_templates
 
 -- DROP TABLE analysis.graph_drawproperties;
 -- Replaces the old table chart_drawproperties, which is not deleted for backwards compatibility
-CREATE TABLE analysis.graph_drawproperties
+CREATE TABLE IF NOT EXISTS analysis.graph_drawproperties
 (
   graph_type character varying NOT NULL,
   graph_width integer,
@@ -341,7 +342,7 @@ ALTER TABLE analysis.graph_drawproperties
 
 -- DROP TABLE analysis.graph_yaxes;
 
-CREATE TABLE analysis.graph_yaxes
+CREATE TABLE IF NOT EXISTS analysis.graph_yaxes
 (
   yaxe_id character varying NOT NULL,
   title character varying,
@@ -367,7 +368,7 @@ ALTER TABLE analysis.graph_yaxes
 
 -- DROP TABLE analysis.timeseries_drawproperties_new;
 
-CREATE TABLE analysis.timeseries_drawproperties_new
+CREATE TABLE IF NOT EXISTS analysis.timeseries_drawproperties_new
 (
   productcode character varying NOT NULL,
   subproductcode character varying NOT NULL,
@@ -394,11 +395,11 @@ ALTER TABLE analysis.timeseries_drawproperties_new
 
 -- DROP TABLE analysis.user_graph_templates;
 
-CREATE TABLE analysis.user_graph_templates
+CREATE TABLE IF NOT EXISTS analysis.user_graph_templates
 (
   userid character varying(50) NOT NULL,
   workspaceid bigint NOT NULL,
-  graph_tpl_id integer NOT NULL DEFAULT nextval('analysis.user_graph_templates_new_graph_tpl_id_seq'::regclass),
+  graph_tpl_id serial NOT NULL,
   graph_tpl_name character varying(80),
   istemplate boolean NOT NULL DEFAULT true,
   graphviewposition character varying(10),
@@ -421,11 +422,11 @@ CREATE TABLE analysis.user_graph_templates
   showtoolbar boolean NOT NULL DEFAULT true,
   auto_open boolean DEFAULT false,
   parent_tpl_id bigint,
-  CONSTRAINT user_graph_templates_new_pkey PRIMARY KEY (userid, workspaceid, graph_tpl_id),
-  CONSTRAINT user_graph_templates_new_user_workspaces_fkey FOREIGN KEY (userid, workspaceid)
+  CONSTRAINT user_graph_templates_pkey PRIMARY KEY (userid, workspaceid, graph_tpl_id),
+  CONSTRAINT user_graph_templates_user_workspaces_fkey FOREIGN KEY (userid, workspaceid)
       REFERENCES analysis.user_workspaces (userid, workspaceid) MATCH SIMPLE
       ON UPDATE CASCADE ON DELETE CASCADE,
-  CONSTRAINT user_graph_templates_new_graph_tpl_id_unique UNIQUE (graph_tpl_id)
+  CONSTRAINT user_graph_templates_graph_tpl_id_unique UNIQUE (graph_tpl_id)
 )
 WITH (
   OIDS=FALSE
@@ -436,7 +437,7 @@ ALTER TABLE analysis.user_graph_templates
 
 -- DROP TABLE analysis.user_tpl_graph_drawproperties;
 
-CREATE TABLE analysis.user_graph_tpl_drawproperties
+CREATE TABLE IF NOT EXISTS analysis.user_graph_tpl_drawproperties
 (
   graph_tpl_id bigint NOT NULL,
   graph_type character varying NOT NULL,
@@ -454,8 +455,8 @@ CREATE TABLE analysis.user_graph_tpl_drawproperties
   xaxe_font_size integer,
   xaxe_font_color character varying,
   CONSTRAINT user_graph_tpl_drawproperties_pk PRIMARY KEY (graph_tpl_id, graph_type),
-  CONSTRAINT user_graph_tpl_drawproperties_user_graph_templates_new_fkey FOREIGN KEY (graph_tpl_id)
-      REFERENCES analysis.user_graph_templates_new (graph_tpl_id) MATCH SIMPLE
+  CONSTRAINT user_graph_tpl_drawproperties_user_graph_templates_fkey FOREIGN KEY (graph_tpl_id)
+      REFERENCES analysis.user_graph_templates (graph_tpl_id) MATCH SIMPLE
       ON UPDATE CASCADE ON DELETE CASCADE
 )
 WITH (
@@ -467,7 +468,7 @@ ALTER TABLE analysis.user_graph_tpl_drawproperties
 
 -- DROP TABLE analysis.user_tpl_graph_yaxes;
 
-CREATE TABLE analysis.user_graph_tpl_yaxes
+CREATE TABLE IF NOT EXISTS analysis.user_graph_tpl_yaxes
 (
   graph_tpl_id bigint NOT NULL,
   yaxe_id character varying NOT NULL,
@@ -482,7 +483,7 @@ CREATE TABLE analysis.user_graph_tpl_yaxes
   aggregation_min double precision,
   aggregation_max double precision,
   CONSTRAINT user_graph_tpl_yaxes_pk PRIMARY KEY (graph_tpl_id, yaxe_id),
-  CONSTRAINT user_graph_tpl_yaxes_user_graph_templates_new_fkey FOREIGN KEY (graph_tpl_id)
+  CONSTRAINT user_graph_tpl_yaxes_user_graph_templates_fkey FOREIGN KEY (graph_tpl_id)
       REFERENCES analysis.user_graph_templates (graph_tpl_id) MATCH SIMPLE
       ON UPDATE CASCADE ON DELETE CASCADE
 )
@@ -496,7 +497,7 @@ ALTER TABLE analysis.user_graph_tpl_yaxes
 
 -- DROP TABLE analysis.user_tpl_timeseries_drawproperties;
 
-CREATE TABLE analysis.user_graph_tpl_timeseries_drawproperties
+CREATE TABLE IF NOT EXISTS analysis.user_graph_tpl_timeseries_drawproperties
 (
   graph_tpl_id bigint NOT NULL,
   productcode character varying NOT NULL,
@@ -512,7 +513,7 @@ CREATE TABLE analysis.user_graph_tpl_timeseries_drawproperties
   CONSTRAINT user_graph_tpl_timeseries_drawproperties_graph_yaxes_fkey FOREIGN KEY (yaxe_id)
       REFERENCES analysis.graph_yaxes (yaxe_id) MATCH SIMPLE
       ON UPDATE CASCADE ON DELETE RESTRICT,
-  CONSTRAINT user_graph_tpl_ts_drawproperties_user_graph_tpl_new_fkey FOREIGN KEY (graph_tpl_id)
+  CONSTRAINT user_graph_tpl_ts_drawproperties_user_graph_tpl_fkey FOREIGN KEY (graph_tpl_id)
       REFERENCES analysis.user_graph_templates (graph_tpl_id) MATCH SIMPLE
       ON UPDATE CASCADE ON DELETE CASCADE
 )
