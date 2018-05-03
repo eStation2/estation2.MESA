@@ -1960,10 +1960,10 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             # ------------------------------------------------------------------------------------------
 
             # TODO: replace the part below with info from mapset
-            # lon_min = N.min(longitude)
-            # lat_min = N.min(latitude)
-            # lon_max = N.max(longitude)
-            # lat_max = N.max(latitude)
+            lon_min = N.min(longitude)
+            lat_min = N.min(latitude)
+            lon_max = N.max(longitude)
+            lat_max = N.max(latitude)
 
             functions.write_vrt_georef(output_dir=tmpdir_untar, band_file=un_proj_filename, n_lines=orig_size_x,
                                        n_cols=orig_size_y)
@@ -1971,7 +1971,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             input_vrt = tmpdir_untar + os.path.sep + 'reflectance.vrt'
             output_tif = tmpdir + os.path.sep + untar_file+bandname_without_ext + '.tif'
 
-            command = 'gdalwarp -dstnodata "-32767" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
+            command = 'gdalwarp -srcnodata "255" -dstnodata "255" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
                 lon_min, lat_min, lon_max, lat_max, abs(x_size), abs(y_size), input_vrt, output_tif)
 
             os.system(command)
@@ -1994,7 +1994,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
     # command += out_tmp_file_gtiff
 
     ###Take gdal_merge.py from es2globals
-    command = es_constants.gdal_merge + ' -n 0 -a_nodata -32767' + ' -o '   #-co \"compress=lzw\" -ot Float32
+    command = es_constants.gdal_merge + ' -n 255 -a_nodata 255' + ' -o '   #-co \"compress=lzw\" -ot Float32
 
     out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
 
@@ -2217,6 +2217,9 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
 
             mapset_bbox = [lon_min, lat_min, lon_max, lat_max]
 
+            if untar_file == "S3A_SL_2_WST____20180306T103829_20180306T104028_20180306T120121_0119_028_307_5940_MAR_O_NR_002.SEN3":
+                print("check")
+
             # get data footprint
             data_bbox = functions.sentinel_get_footprint(dir=tmpdir + os.path.sep + untar_file)
 
@@ -2224,6 +2227,12 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
             overlap = functions.check_polygons_intersects(mapset_bbox, data_bbox)
 
             if not overlap:
+                continue
+
+            #Check if the dataset has positive and negative longitude value; if yes skip it.
+            check_min_lon = data_bbox[0]
+            check_max_lon = data_bbox[2]
+            if check_min_lon * check_max_lon < -9999:
                 continue
 
             tmpdir_untar = tmpdir + os.path.sep + untar_file
@@ -2314,14 +2323,18 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
                                        n_cols=orig_size_y)
             input_vrt_filename = 'reflectance.vrt'
             input_vrt = tmpdir_untar + os.path.sep + input_vrt_filename
-            output_tif = tmpdir_untar + os.path.sep + re_process + '.tif'
+            #output_tif = tmpdir_untar + os.path.sep + re_process + '.tif'
 
-            command = 'gdalwarp -dstnodata "-32768" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
+            output_tif = tmpdir + os.path.sep + untar_file + re_process + '.tif'
+
+            command = 'gdalwarp -srcnodata "-32768" -dstnodata "-32768" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
                 lon_min, lat_min, lon_max, lat_max, abs(x_size), abs(y_size), input_vrt, output_tif)
 
             os.system(command)
 
             interm_files_list.append(output_tif)
+
+
     #geo_fullname= tmpdir + os.path.sep+ bandname
 
 

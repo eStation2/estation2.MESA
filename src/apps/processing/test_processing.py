@@ -503,7 +503,29 @@ from apps.processing.processing_std_msg_mpe import *
 #         }
 # res_queue = None
 # processing_std_gsod(res_queue, **args)
+from apps.processing.processing_std_msg_mpe import *
+def test_proc_msg_mpe(start_date=None, end_date=None, pipe_run=0, pipe_print=3, start_date_stats=None, end_date_stats=None, touch_files_only=False):
 
+    # Create the list of dates -> returns empty if start==end==None
+    if start_date is not None and end_date is not None:
+        starting_dates = proc_functions.get_list_dates_for_dataset('msg-mpe', '10dcum', 'undefined', start_date=start_date, end_date=end_date)
+    else:
+        starting_dates = None
+
+    args = {'pipeline_run_level':pipe_run, \
+            'pipeline_printout_level':pipe_print, \
+            'pipeline_printout_graph_level': 0, \
+            'prod': 'msg-mpe',\
+            'starting_sprod':'10dcum',\
+            'starting_dates': starting_dates,\
+            'mapset': 'SPOTV-Africa-1km',\
+            'version':'undefined',
+            'logfile':'ruffus-chirps',
+            'touch_only':touch_files_only}
+
+    res_queue = None
+    proc_lists=processing_std_msg_mpe(res_queue,**args)
+    print(proc_lists)
 #   ---------------------------------------------------------------------
 #   Calls
 #   ---------------------------------------------------------------------

@@ -12,6 +12,7 @@ import shutil
 import csv
 import numpy as np
 import h5py
+from lib.python import functions
 
 from osgeo import gdal
 
@@ -1330,8 +1331,20 @@ class TestIngestion(unittest.TestCase):
 
         # Test the ingestion of the Sentinel-3/OLCI Level-2 WRR product (on d6-dev-vm19 !!!!!)
         #date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_OL_2_WRR/S3A_OL_2_WRR____20180306T092820_20180306T101211_20180306T115859_2631_028_307______MAR_O_NR_002.SEN3.tar')
-        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_OL_2_WRR/march03/S3A_OL_2_WRR____20180303*.SEN3.tar')
-        in_date = '201803030000'
+        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_OL_2_WRR/march06/S3A_OL_2_WRR____20180306*.SEN3.tar')
+        date_fileslist_day = []
+
+        in_date = '201803080000'
+        for one_file in date_fileslist:
+
+            one_filename = os.path.basename(one_file)
+            in_date = one_filename.split('_')[7]
+            day_data = functions.is_data_captured_during_day(in_date)
+
+            if day_data:
+                date_fileslist_day.append(one_file)
+
+        in_date = in_date.split('T')[0] #+ '0000'
         productcode = 'olci-wrr'
         productversion = 'V02.0'
         subproductcode = 'chl-nn'
@@ -1361,14 +1374,26 @@ class TestIngestion(unittest.TestCase):
 
         for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
                                                                               source_id=datasource_descrID):
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+            ingestion.ingestion(date_fileslist_day, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
 
     def test_ingest_s3_slstr_sst(self):
 
         # Test the ingestion of the Sentinel-3/SLSTR Level-2 WST product (on d6-dev-vm19 !!!!!)
         #date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/S3A_SL_2_WST____20180306T095629_20180306T095929_20180306T114727_0179_028_307_3420_MAR_O_NR_002.SEN3.tar')
-        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/march08/S3A_SL_2_WST____20180308*.SEN3.tar')
-        in_date = '201803080000'
+        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/march03/S3A_SL_2_WST____20180303*.SEN3.tar')
+        date_fileslist_day = []
+
+        in_date = '201803060000'
+        for one_file in date_fileslist:
+
+            one_filename = os.path.basename(one_file)
+            in_date = one_filename.split('_')[7]
+            day_data = functions.is_data_captured_during_day(in_date)
+
+            if day_data:
+                date_fileslist_day.append(one_file)
+
+        in_date = in_date.split('T')[0] #+ '0000'    #'201803060000'
         productcode = 'slstr-sst'
         productversion = '1.0'
         subproductcode = 'wst'
@@ -1397,7 +1422,7 @@ class TestIngestion(unittest.TestCase):
 
         for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
                                                                               source_id=datasource_descrID):
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+            ingestion.ingestion(date_fileslist_day, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
 
 
 
