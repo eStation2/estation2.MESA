@@ -127,8 +127,8 @@ def loop_ingestion(dry_run=False):
                         files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(temp_internet_filter, os.path.basename(f))]
                         my_filter_expr = temp_internet_filter
                         logger.info("Internet Source: looking for files in %s - named like: %s" % (ingest_dir_in, temp_internet_filter))
-
-                logger_spec.info("Number of files found for product [%s] is: %s" % (active_product_ingest[0], len(files)))
+                # See ES2-204
+                logger_spec.debug("Number of files found for product [%s] is: %s" % (active_product_ingest[0], len(files)))
                 if len(files) > 0:
                     # Get list of ingestions triggers [prod/subprod/mapset]
                     ingestions = querydb.get_ingestion_subproduct(allrecs=False, echo=echo_query, **product)
