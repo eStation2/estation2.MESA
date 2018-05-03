@@ -87,7 +87,7 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
 
                     tsdrawprobs_record = tsDrawPropertiesStore.findRecord('productcode', TSrecord.get('productcode'));
                     if (tsdrawprobs_record == null) {
-                        tsdrawprobs_record = this.createNewTSDrawPropertiesRecord(TSrecord);
+                        tsdrawprobs_record = me.getController().createNewTSDrawPropertiesRecord(TSrecord);
                     }
                 }
             });
@@ -106,7 +106,7 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
 
             tsdrawprobs_record = tsDrawPropertiesStore.findRecord('productcode', TSrecord.get('productcode'));
             if (tsdrawprobs_record == null) {
-                tsdrawprobs_record = this.createNewTSDrawPropertiesRecord(TSrecord);
+                tsdrawprobs_record = me.getController().createNewTSDrawPropertiesRecord(TSrecord);
             }
             return tsdrawprobs_record;
         }

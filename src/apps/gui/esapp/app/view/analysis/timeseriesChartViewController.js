@@ -288,12 +288,25 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 newGraphTemplateName = me.getView().graph_tpl_name + ' - copy';
             }
             else {
-                if (esapp.Utils.objectExists(me.getView().selectedregionname) && me.getView().selectedregionname != ''){
-                    newGraphTemplateName = newGraphTemplateName + me.getView().selectedregionname;
-                    if (esapp.Utils.objectExists(me.getView().productversion) && me.getView().productversion != ''){
-                        newGraphTemplateName = newGraphTemplateName + ' - ' + me.getView().productversion;
-                    }
+                // if (esapp.Utils.objectExists(me.getView().selectedregionname) && me.getView().selectedregionname != ''){
+                //     newGraphTemplateName = newGraphTemplateName + me.getView().selectedregionname;
+                //     if (esapp.Utils.objectExists(me.getView().productversion) && me.getView().productversion != ''){
+                //         newGraphTemplateName = newGraphTemplateName + ' - ' + me.getView().productversion;
+                //     }
+                // }
+                if (me.getView().graphtype == 'cumulative'){
+                    newGraphTemplateName = esapp.Utils.getTranslation('CUMULATIVE') + ' - ';
                 }
+                else if (me.getView().graphtype == 'ranking'){
+                    newGraphTemplateName = esapp.Utils.getTranslation('RANKING_ZSCORE') + ' - ';
+                }
+                else if (me.getView().graphtype == 'matrix'){
+                    newGraphTemplateName = esapp.Utils.getTranslation('MATRIX') + ' - ';
+                }
+                else {
+                    newGraphTemplateName = esapp.Utils.getTranslation('PROFILE') + ' - ';
+                }
+
             }
 
             Ext.MessageBox.prompt(esapp.Utils.getTranslation('graph_tpl_name'), esapp.Utils.getTranslation('graph_tpl_save_message') + ':', function(btn, text){   // 'Graph Template Name'   'Please give a unique name for the new graph template'

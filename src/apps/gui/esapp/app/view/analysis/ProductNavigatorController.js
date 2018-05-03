@@ -305,9 +305,9 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
             direction: 'ASC'
         }];
 
-        var colorschemesgrid = this.lookupReference('colorschemesGrid');
-        colorschemesgrid.columns[1].setText('<div class="grid-header-style">'+esapp.Utils.getTranslation('colorschemes')+'</div>');
-        colorschemesgrid.show();
+        // var colorschemesgrid = this.lookupReference('colorschemesGrid');
+        // colorschemesgrid.columns[1].setText('<div class="grid-header-style">'+esapp.Utils.getTranslation('colorschemes')+'</div>');
+        // colorschemesgrid.show();
 
         this.getStore('mapsetdatasets').setSorters(sorters);
         this.getStore('mapsetdatasets').sort(sorters);
@@ -336,7 +336,7 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
         };
 
         colorschemesgrid.columns[1].setText('<div class="grid-header-style">' + esapp.Utils.getTranslation('colorschemes') +
-            ' <b class="smalltext">' + esapp.Utils.getTranslation('fordataset') + ' ' + record.get('descriptive_name') +
+            ' <b class="smalltext">' + esapp.Utils.getTranslation('for') + ' ' + record.get('descriptive_name') +
             ' ' + record.get('version') + ' - ' + record.get('subproductcode') + '</b></div>');
 
         if (colorschemesgrid.hidden) {
