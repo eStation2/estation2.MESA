@@ -1810,6 +1810,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
     #input_file=input_files[0]
 
     interm_files_list = []
+    list_input_files = []
 
     # Build a list of subdatasets to be extracted
     # list_to_extr = []
@@ -1820,11 +1821,17 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
 
     # Make sure input is a list (if only a string is received, it loops over chars)
     if isinstance(input_files, list):
-        list_input_files = input_files
+        temp_list_input_files = input_files
     else:
-        list_input_files = []
-        list_input_files.append(input_files)
+        temp_list_input_files = []
+        temp_list_input_files.append(input_files)
 
+    for one_file in temp_list_input_files:
+        one_filename = os.path.basename(one_file)
+        in_date = one_filename.split('_')[7]
+        day_data = functions.is_data_captured_during_day(in_date)
+        if day_data:
+            list_input_files.append(one_file)
 
     # Hard-coded definitions:
     geo_file = 'geo_coordinates.nc'
