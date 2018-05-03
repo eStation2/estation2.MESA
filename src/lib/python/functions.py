@@ -1200,6 +1200,21 @@ def set_path_filename_eumetcast(date_str, product_code, sub_product_code, mapset
     return filename
 
 ######################################################################################
+#   is_file_exists_in_path
+#   Purpose: Check whether file exists in the path
+#   Author: VIJAY CHARAN VENKATACHALAM
+#   Date: 2018/05/03
+#   Inputs: file_path
+#   Output: Boolean
+#
+def is_file_exists_in_path(file_path):
+    is_file_exists = False
+    if os.path.exists(file_path):
+        is_file_exists = True
+
+    return is_file_exists
+
+######################################################################################
 #   get_from_path_dir
 #   Purpose: From full_dir -> prod, subprod, version, mapset
 #   Author: Marco Clerici, JRC, European Commission
