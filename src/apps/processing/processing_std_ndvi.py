@@ -171,7 +171,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     prod_ident_10davg = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_10davg = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
-    formatter_in = "[0-9]{4}(?P<MMDD>Entering routine processing_std_ndvi[0-9]{4})"+in_prod_ident
+    formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident
     formatter_out = ["{subpath[0][5]}"+os.path.sep+subdir_10davg+"{MMDD[0]}"+prod_ident_10davg]
 
     @active_if(group_no_filter_stats, activate_10davg_no_filter)

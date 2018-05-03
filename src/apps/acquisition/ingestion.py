@@ -1803,153 +1803,361 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process the Sentinel 3 Level 2 product from OLCI - WRR
 #
-
+    unzipped_input_files = []
+    # Prepare the output file list
+    pre_processed_list = []
     # Insert a loop on input_files[]
-    input_file=input_files[0]
+    #input_file=input_files[0]
 
     interm_files_list = []
 
+    # Build a list of subdatasets to be extracted
+    # list_to_extr = []
+    # for sprod in subproducts:
+    #     if sprod != 0:
+    #         list_to_extr.append(sprod['re_extract'])
+
+
+    # Make sure input is a list (if only a string is received, it loops over chars)
+    if isinstance(input_files, list):
+        list_input_files = input_files
+    else:
+        list_input_files = []
+        list_input_files.append(input_files)
+
+
     # Hard-coded definitions:
-    geo_file='geo_coordinates.nc'
-    coord_scale=1000000.0
-    lat_file='latitude.tif'
-    long_file='longitude.tif'
-    # Definitions below to be changed
-    bandname=subproducts[0]['re_extract']
+    geo_file = 'geo_coordinates.nc'
+    coord_scale = 1000000.0
+    lat_file = 'latitude.tif'
+    long_file = 'longitude.tif'
 
-    re_process = subproducts[0]['re_process']
-    target_mapset=subproducts[0]['mapsetcode']
+    # Unzips the file
+    for input_file in list_input_files:
 
-    # Unzip the .tar file in 'tmpdir'
-    geo_fullname= tmpdir + os.path.sep + geo_file
-
-    command='tar -xvf '+input_file+' -C '+tmpdir+os.path.sep +' --strip-components 1'
-    print(command)
-    status = os.system(command)
-
-    #get map set
-    mapset_info = querydb.get_mapset(mapsetcode=target_mapset)
-
-    x_size = mapset_info.pixel_shift_long  #0.00892857
-    y_size = mapset_info.pixel_shift_lat  #0.00892857
-
-    upper_left_long= mapset_info.upper_left_long
-    upper_left_lat= mapset_info.upper_left_lat
-    lower_right_long = upper_left_long + (x_size * mapset_info.pixel_size_x)
-    lower_right_lat= upper_left_lat + (y_size * mapset_info.pixel_size_y)
-
-    lon_min = min(upper_left_long, lower_right_long)
-    lon_max = max(upper_left_long, lower_right_long)
-    lat_min = min(upper_left_lat,lower_right_lat)
-    lat_max = max(upper_left_lat,lower_right_lat)
-
-    mapset_bbox = [lon_min, lat_min, lon_max, lat_max]
-
-    #get data footprint
-    data_bbox= functions.sentinel_get_footprint(dir=tmpdir)
-
-    # Test the overlap of the footprint with the BB of mapset
-    overlap =functions.check_polygons_intersects(mapset_bbox, data_bbox)
-
-    if not overlap:
-        return
-
-    # ------------------------------------------------------------------------------------------
-    # Extract there latitude and longitude as geotiff
-    # ------------------------------------------------------------------------------------------
+        # Unzip the .tar file in 'tmpdir'
+        command = 'tar -xvf ' + input_file + ' -C ' + tmpdir + os.path.sep # ' --strip-components 1'
+        print(command)
+        status = os.system(command)
 
 
-    fd=h5py.File(geo_fullname,'r')
+    # Loop over subproducts and extract associated files
+    for sprod in subproducts:
 
-    ds=fd['latitude']
-    data_read64=N.zeros(ds.shape,dtype=float)
-    ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
-    latitude=ds.value/coord_scale
-    my_logger.debug('The min/avg/max for latitude in {} are: {}/{}/{}'.format(geo_file, N.min(latitude),N.mean(latitude),N.max(latitude)))
+        # In each unzipped folder preprocess the dataset and store the list of files to be merged
+        for untar_file in os.listdir(tmpdir):
 
-    output_file = tmpdir+ os.path.sep+lat_file
-    output_driver = gdal.GetDriverByName('GTiff')
-    orig_size_x = latitude.shape[1]
-    orig_size_y = latitude.shape[0]
-    in_data_type= gdal.GDT_Float32
-    output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
-    output_ds.GetRasterBand(1).WriteArray(latitude)
-    output_ds = None
+            # Define the re_expr for extracting files
+            bandname = sprod['re_extract']
+            re_process = sprod['re_process']
+            target_mapset = sprod['mapsetcode']
 
-    ds=fd['longitude']
-    data_read64=N.zeros(ds.shape,dtype=float)
-    ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
-    longitude=ds.value/coord_scale
-    my_logger.debug('The min/avg/max for longitude in {} are: {}/{}/{}'.format(geo_file, N.min(longitude),N.mean(longitude),N.max(longitude)))
+            # get map set
+            mapset_info = querydb.get_mapset(mapsetcode=target_mapset)
 
-    output_file = tmpdir+ os.path.sep + long_file
-    output_driver = gdal.GetDriverByName('GTiff')
-    orig_size_x = longitude.shape[1]
-    orig_size_y = longitude.shape[0]
-    in_data_type= gdal.GDT_Float32
-    output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
-    output_ds.GetRasterBand(1).WriteArray(longitude)
-    output_ds = None
+            x_size = mapset_info.pixel_shift_long  # 0.00892857
+            y_size = mapset_info.pixel_shift_lat  # -0.00892857
 
-    fd.close()
+            upper_left_long = mapset_info.upper_left_long
+            upper_left_lat = mapset_info.upper_left_lat
+            lower_right_long = upper_left_long + (x_size * mapset_info.pixel_size_x)
+            lower_right_lat = upper_left_lat + (y_size * mapset_info.pixel_size_y)
 
-    # ------------------------------------------------------------------------------------------
-    # Extract the requested band and
-    # ------------------------------------------------------------------------------------------
+            lon_min = min(upper_left_long, lower_right_long)
+            lon_max = max(upper_left_long, lower_right_long)
+            lat_min = min(upper_left_lat, lower_right_lat)
+            lat_max = max(upper_left_lat, lower_right_lat)
 
-    bandpath = tmpdir + os.path.sep +  bandname
-    if bandpath is None:
-        return
+            mapset_bbox = [lon_min, lat_min, lon_max, lat_max]
 
-    fd = h5py.File(bandpath, 'r')
+            # get data footprint
+            data_bbox = functions.sentinel_get_footprint(dir=tmpdir+ os.path.sep + untar_file)
 
-    bandname_without_ext = os.path.splitext(bandname)[0]
-    ds = fd[re_process]
-    data_read64 = N.zeros(ds.shape, dtype=float)
-    ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
-    bandvalues = ds.value
-    my_logger.debug('The min/avg/max for reflectance in {} are: {}/{}/{}'.format(geo_file, N.min(bandvalues), N.mean(bandvalues),
-                                                                       N.max(bandvalues)))
+            # Test the overlap of the footprint with the BB of mapset
+            overlap = functions.check_polygons_intersects(mapset_bbox, data_bbox)
 
-    un_proj_filename = bandname_without_ext + '_un_proj.tif'
-    output_file = tmpdir+ os.path.sep + un_proj_filename
-    output_driver = gdal.GetDriverByName('GTiff')
-    orig_size_x = bandvalues.shape[1]
-    orig_size_y = bandvalues.shape[0]
-    in_data_type = gdal.GDT_Float32
-    output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
-    output_ds.GetRasterBand(1).WriteArray(bandvalues)
-    output_ds = None
-    del output_ds
+            if not overlap:
+                continue
 
-    # ------------------------------------------------------------------------------------------
-    # Write a vrt file and Reproject to lat/long
-    # ------------------------------------------------------------------------------------------
+            # ------------------------------------------------------------------------------------------
+            # Extract there latitude and longitude as geotiff
+            # ------------------------------------------------------------------------------------------
+            tmpdir_untar = tmpdir + os.path.sep + untar_file
 
-    # TODO: replace the part below with info from mapset
-    # lon_min = N.min(longitude)
-    # lat_min = N.min(latitude)
-    # lon_max = N.max(longitude)
-    # lat_max = N.max(latitude)
+            geo_fullname = tmpdir_untar+ os.path.sep + geo_file
 
-    functions.write_vrt_georef(output_dir=tmpdir, band_file=un_proj_filename)
+            fd = h5py.File(geo_fullname, 'r')
 
-    input_vrt = tmpdir + os.path.sep+ 'reflectance.vrt'
-    output_tif = tmpdir + os.path.sep + bandname_without_ext + '.tif'
+            ds = fd['latitude']
+            data_read64 = N.zeros(ds.shape, dtype=float)
+            ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
+            latitude = ds.value / coord_scale
+            my_logger.debug('The min/avg/max for latitude in {} are: {}/{}/{}'.format(geo_file, N.min(latitude),
+                                                                                      N.mean(latitude),
+                                                                                      N.max(latitude)))
 
-    command = 'gdalwarp -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
-        lon_min, lat_min, lon_max, lat_max, x_size, y_size, input_vrt, output_tif)
+            output_file = tmpdir_untar + os.path.sep + lat_file
+            output_driver = gdal.GetDriverByName('GTiff')
+            orig_size_x = latitude.shape[1]
+            orig_size_y = latitude.shape[0]
+            in_data_type = gdal.GDT_Float32
+            output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
+            output_ds.GetRasterBand(1).WriteArray(latitude)
+            output_ds = None
 
+            ds = fd['longitude']
+            data_read64 = N.zeros(ds.shape, dtype=float)
+            ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
+            longitude = ds.value / coord_scale
+            my_logger.debug('The min/avg/max for longitude in {} are: {}/{}/{}'.format(geo_file, N.min(longitude),
+                                                                                       N.mean(longitude),
+                                                                                       N.max(longitude)))
+
+            output_file = tmpdir_untar + os.path.sep + long_file
+            output_driver = gdal.GetDriverByName('GTiff')
+            orig_size_x = longitude.shape[1]
+            orig_size_y = longitude.shape[0]
+            in_data_type = gdal.GDT_Float32
+            output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
+            output_ds.GetRasterBand(1).WriteArray(longitude)
+            output_ds = None
+
+            fd.close()
+
+            # ------------------------------------------------------------------------------------------
+            # Extract the requested band and
+            # ------------------------------------------------------------------------------------------
+
+            bandpath = tmpdir_untar + os.path.sep + bandname
+            if bandpath is None:
+                return
+
+            fd = h5py.File(bandpath, 'r')
+
+            bandname_without_ext = os.path.splitext(bandname)[0]
+            ds = fd[re_process]
+            data_read64 = N.zeros(ds.shape, dtype=float)
+            ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
+            bandvalues = ds.value
+            my_logger.debug(
+                'The min/avg/max for reflectance in {} are: {}/{}/{}'.format(geo_file, N.min(bandvalues),
+                                                                             N.mean(bandvalues),
+                                                                             N.max(bandvalues)))
+
+            un_proj_filename = bandname_without_ext + '_un_proj.tif'
+            output_file = tmpdir_untar + os.path.sep + un_proj_filename
+            output_driver = gdal.GetDriverByName('GTiff')
+            orig_size_x = bandvalues.shape[1]
+            orig_size_y = bandvalues.shape[0]
+            in_data_type = gdal.GDT_Float32
+            output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
+            output_ds.GetRasterBand(1).WriteArray(bandvalues)
+            output_ds = None
+            del output_ds
+
+            # ------------------------------------------------------------------------------------------
+            # Write a vrt file and Reproject to lat/long
+            # ------------------------------------------------------------------------------------------
+
+            # TODO: replace the part below with info from mapset
+            lon_min = N.min(longitude)
+            lat_min = N.min(latitude)
+            lon_max = N.max(longitude)
+            lat_max = N.max(latitude)
+
+            functions.write_vrt_georef(output_dir=tmpdir_untar, band_file=un_proj_filename, n_lines=orig_size_x,
+                                       n_cols=orig_size_y)
+
+            input_vrt = tmpdir_untar + os.path.sep + 'reflectance.vrt'
+            output_tif = tmpdir + os.path.sep + untar_file+bandname_without_ext + '.tif'
+
+            command = 'gdalwarp -srcnodata "255" -dstnodata "255" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
+                lon_min, lat_min, lon_max, lat_max, abs(x_size), abs(y_size), input_vrt, output_tif)
+
+            os.system(command)
+
+            interm_files_list.append(output_tif)
+    #Check whether the interm files list is not empty and Composite the processed files
+    #
+    #nodata_value = sprod['nodata']
+    #
+    # command = es_constants.gdalwrap +'gdalwarp -srcnodata -32767 -dstnodata -32767 -te '
+    #
+    # command += lon_min +' '+ lat_min+' '+ lon_max+' '+ lat_max
+    # command += ' -r near -s_srs epsg:4326 -tr '
+    # command += abs(x_size)+' '+ abs(y_size)
+    # for file_add in interm_files_list:
+    #     command += ' '
+    #     command += file_add
+    #
+    # out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
+    # command += out_tmp_file_gtiff
+
+    ###Take gdal_merge.py from es2globals
+    command = es_constants.gdal_merge + ' -n 255 -a_nodata 255' + ' -o '   #-co \"compress=lzw\" -ot Float32
+
+    out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
+
+    command += out_tmp_file_gtiff
+
+    for file_add in interm_files_list:
+        command += ' '
+        command += file_add
+    my_logger.info('Command for merging is: ' + command)
     os.system(command)
+    pre_processed_list.append(out_tmp_file_gtiff)
+    #return interm_files_list
+    return pre_processed_list
 
-    interm_files_list.append(output_tif)
-
-    return interm_files_list
+    # # Hard-coded definitions:
+    # geo_file='geo_coordinates.nc'
+    # coord_scale=1000000.0
+    # lat_file='latitude.tif'
+    # long_file='longitude.tif'
+    # # Definitions below to be changed
+    # bandname=subproducts[0]['re_extract']
+    #
+    # re_process = subproducts[0]['re_process']
+    # target_mapset=subproducts[0]['mapsetcode']
+    #
+    # # Unzip the .tar file in 'tmpdir'
+    # geo_fullname= tmpdir + os.path.sep + geo_file
+    #
+    # command='tar -xvf '+input_file+' -C '+tmpdir+os.path.sep +' --strip-components 1'
+    # print(command)
+    # status = os.system(command)
+    #
+    # #get map set
+    # mapset_info = querydb.get_mapset(mapsetcode=target_mapset)
+    #
+    # x_size = mapset_info.pixel_shift_long  #0.00892857
+    # y_size = mapset_info.pixel_shift_lat  #-0.00892857
+    #
+    # upper_left_long= mapset_info.upper_left_long
+    # upper_left_lat= mapset_info.upper_left_lat
+    # lower_right_long = upper_left_long + (x_size * mapset_info.pixel_size_x)
+    # lower_right_lat= upper_left_lat + (y_size * mapset_info.pixel_size_y)
+    #
+    # lon_min = min(upper_left_long, lower_right_long)
+    # lon_max = max(upper_left_long, lower_right_long)
+    # lat_min = min(upper_left_lat,lower_right_lat)
+    # lat_max = max(upper_left_lat,lower_right_lat)
+    #
+    # mapset_bbox = [lon_min, lat_min, lon_max, lat_max]
+    #
+    # #get data footprint
+    # data_bbox= functions.sentinel_get_footprint(dir=tmpdir)
+    #
+    # # Test the overlap of the footprint with the BB of mapset
+    # overlap =functions.check_polygons_intersects(mapset_bbox, data_bbox)
+    #
+    # if not overlap:
+    #     return
+    #
+    # # ------------------------------------------------------------------------------------------
+    # # Extract there latitude and longitude as geotiff
+    # # ------------------------------------------------------------------------------------------
+    #
+    #
+    # fd=h5py.File(geo_fullname,'r')
+    #
+    # ds=fd['latitude']
+    # data_read64=N.zeros(ds.shape,dtype=float)
+    # ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
+    # latitude=ds.value/coord_scale
+    # my_logger.debug('The min/avg/max for latitude in {} are: {}/{}/{}'.format(geo_file, N.min(latitude),N.mean(latitude),N.max(latitude)))
+    #
+    # output_file = tmpdir+ os.path.sep+lat_file
+    # output_driver = gdal.GetDriverByName('GTiff')
+    # orig_size_x = latitude.shape[1]
+    # orig_size_y = latitude.shape[0]
+    # in_data_type= gdal.GDT_Float32
+    # output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
+    # output_ds.GetRasterBand(1).WriteArray(latitude)
+    # output_ds = None
+    #
+    # ds=fd['longitude']
+    # data_read64=N.zeros(ds.shape,dtype=float)
+    # ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
+    # longitude=ds.value/coord_scale
+    # my_logger.debug('The min/avg/max for longitude in {} are: {}/{}/{}'.format(geo_file, N.min(longitude),N.mean(longitude),N.max(longitude)))
+    #
+    # output_file = tmpdir+ os.path.sep + long_file
+    # output_driver = gdal.GetDriverByName('GTiff')
+    # orig_size_x = longitude.shape[1]
+    # orig_size_y = longitude.shape[0]
+    # in_data_type= gdal.GDT_Float32
+    # output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
+    # output_ds.GetRasterBand(1).WriteArray(longitude)
+    # output_ds = None
+    #
+    # fd.close()
+    #
+    # # ------------------------------------------------------------------------------------------
+    # # Extract the requested band and
+    # # ------------------------------------------------------------------------------------------
+    #
+    # bandpath = tmpdir + os.path.sep +  bandname
+    # if bandpath is None:
+    #     return
+    #
+    # fd = h5py.File(bandpath, 'r')
+    #
+    # bandname_without_ext = os.path.splitext(bandname)[0]
+    # ds = fd[re_process]
+    # data_read64 = N.zeros(ds.shape, dtype=float)
+    # ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
+    # bandvalues = ds.value
+    # my_logger.debug('The min/avg/max for reflectance in {} are: {}/{}/{}'.format(geo_file, N.min(bandvalues), N.mean(bandvalues),
+    #                                                                    N.max(bandvalues)))
+    #
+    # un_proj_filename = bandname_without_ext + '_un_proj.tif'
+    # output_file = tmpdir+ os.path.sep + un_proj_filename
+    # output_driver = gdal.GetDriverByName('GTiff')
+    # orig_size_x = bandvalues.shape[1]
+    # orig_size_y = bandvalues.shape[0]
+    # in_data_type = gdal.GDT_Float32
+    # output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
+    # output_ds.GetRasterBand(1).WriteArray(bandvalues)
+    # output_ds = None
+    # del output_ds
+    #
+    # # ------------------------------------------------------------------------------------------
+    # # Write a vrt file and Reproject to lat/long
+    # # ------------------------------------------------------------------------------------------
+    #
+    # # TODO: replace the part below with info from mapset
+    # # lon_min = N.min(longitude)
+    # # lat_min = N.min(latitude)
+    # # lon_max = N.max(longitude)
+    # # lat_max = N.max(latitude)
+    #
+    # functions.write_vrt_georef(output_dir=tmpdir, band_file=un_proj_filename)
+    #
+    # input_vrt = tmpdir + os.path.sep+ 'reflectance.vrt'
+    # output_tif = tmpdir + os.path.sep + bandname_without_ext + '.tif'
+    #
+    # command = 'gdalwarp -dstnodata "-32767" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
+    #     lon_min, lat_min, lon_max, lat_max, abs(x_size), abs(y_size), input_vrt, output_tif)
+    #
+    # os.system(command)
+    #
+    # interm_files_list.append(output_tif)
+    #
+    # return interm_files_list
 
 def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=None):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process the Sentinel 3 Level 2 product from OLCI - WRR
 #
+
+    unzipped_input_files = []
+    # Prepare the output file list
+    pre_processed_list = []
+    # Insert a loop on input_files[]
+    # input_file=input_files[0]
+
+    interm_files_list = []
     # Insert a loop on input_files[]
     input_file=input_files[0]
 
@@ -1971,129 +2179,303 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
 
     # Unzip the .tar file in 'tmpdir'
 
+
+    # Unzips the file
+    for input_file in input_files:
+        # Unzip the .tar file in 'tmpdir'
+        command = 'tar -xvf ' + input_file + ' -C ' + tmpdir + os.path.sep  # ' --strip-components 1'
+        print(command)
+        status = os.system(command)
+
+
+    # Loop over subproducts and extract associated files
+    for sprod in subproducts:
+
+        # In each unzipped folder preprocess the dataset and store the list of files to be merged
+        for untar_file in os.listdir(tmpdir):
+
+            # Define the re_expr for extracting files
+            bandname = sprod['re_extract']
+            re_process = sprod['re_process']
+            target_mapset = sprod['mapsetcode']
+
+            # get map set
+            mapset_info = querydb.get_mapset(mapsetcode=target_mapset)
+
+            x_size = mapset_info.pixel_shift_long  # 0.00892857
+            y_size = mapset_info.pixel_shift_lat  # -0.00892857
+
+            upper_left_long = mapset_info.upper_left_long
+            upper_left_lat = mapset_info.upper_left_lat
+            lower_right_long = upper_left_long + (x_size * mapset_info.pixel_size_x)
+            lower_right_lat = upper_left_lat + (y_size * mapset_info.pixel_size_y)
+
+            lon_min = min(upper_left_long, lower_right_long)
+            lon_max = max(upper_left_long, lower_right_long)
+            lat_min = min(upper_left_lat, lower_right_lat)
+            lat_max = max(upper_left_lat, lower_right_lat)
+
+            mapset_bbox = [lon_min, lat_min, lon_max, lat_max]
+
+            if untar_file == "S3A_SL_2_WST____20180306T103829_20180306T104028_20180306T120121_0119_028_307_5940_MAR_O_NR_002.SEN3":
+                print("check")
+
+            # get data footprint
+            data_bbox = functions.sentinel_get_footprint(dir=tmpdir + os.path.sep + untar_file)
+
+            # Test the overlap of the footprint with the BB of mapset
+            overlap = functions.check_polygons_intersects(mapset_bbox, data_bbox)
+
+            if not overlap:
+                continue
+
+            #Check if the dataset has positive and negative longitude value; if yes skip it.
+            check_min_lon = data_bbox[0]
+            check_max_lon = data_bbox[2]
+            if check_min_lon * check_max_lon < -9999:
+                continue
+
+            tmpdir_untar = tmpdir + os.path.sep + untar_file
+            for ifile in os.listdir(tmpdir_untar):
+
+                # Unzip to tmpdir and add to list
+                if re.match('.*' + bandname + '*.', ifile):
+                    geo_fullname = tmpdir_untar + os.path.sep + ifile
+
+            if geo_fullname is None:
+                return
+            # ------------------------------------------------------------------------------------------
+            # Extract there latitude and longitude as geotiff
+            # ------------------------------------------------------------------------------------------
+            fd = h5py.File(geo_fullname, 'r')
+
+            ds = fd['lat']
+            data_read64 = N.zeros(ds.shape, dtype=float)
+            ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
+            latitude = ds.value
+            my_logger.debug(
+                'The min/avg/max for latitude in {} are: {}/{}/{}'.format(bandname, N.min(latitude), N.mean(latitude),
+                                                                          N.max(latitude)))
+
+            output_file = tmpdir_untar + os.path.sep + lat_file
+            output_driver = gdal.GetDriverByName('GTiff')
+            orig_size_x = latitude.shape[1]
+            orig_size_y = latitude.shape[0]
+            in_data_type = gdal.GDT_Float32
+            output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
+            output_ds.GetRasterBand(1).WriteArray(latitude)
+            output_ds = None
+
+            ds = fd['lon']
+            data_read64 = N.zeros(ds.shape, dtype=float)
+            ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
+            longitude = ds.value
+            my_logger.debug('The min/avg/max for longitude in {} are: {}/{}/{}'.format(bandname, N.min(longitude),
+                                                                                       N.mean(longitude),
+                                                                                       N.max(longitude)))
+
+            output_file = tmpdir_untar + os.path.sep + long_file
+            output_driver = gdal.GetDriverByName('GTiff')
+            orig_size_x = longitude.shape[1]
+            orig_size_y = longitude.shape[0]
+            in_data_type = gdal.GDT_Float32
+            output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
+            output_ds.GetRasterBand(1).WriteArray(longitude)
+            output_ds = None
+
+            # ------------------------------------------------------------------------------------------
+            # Extract the requested band and
+            # ------------------------------------------------------------------------------------------
+
+
+            ds = fd[re_process]
+            data_read64 = N.zeros(ds.shape, dtype=float)
+            ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
+            bandvalues = ds.value
+            my_logger.debug('The min/avg/max for reflectance in {} are: {}/{}/{}'.format(bandname, N.min(bandvalues),
+                                                                                         N.mean(bandvalues),
+                                                                                         N.max(bandvalues)))
+
+            un_proj_filename = re_process + '_un_proj.tif'
+            output_file = tmpdir_untar + os.path.sep + un_proj_filename
+            output_driver = gdal.GetDriverByName('GTiff')
+            orig_size_x = bandvalues.shape[2]
+            orig_size_y = bandvalues.shape[1]
+            in_data_type = gdal.GDT_Float32
+            output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
+            # If the dataset is three dimension use this case(In this case sst is skin sst so there is just single ds)
+            for i, bandvalue in enumerate(bandvalues, 1):
+                output_ds.GetRasterBand(i).WriteArray(bandvalue)
+            output_ds = None
+            del output_ds
+
+            # ------------------------------------------------------------------------------------------
+            # Write a vrt file and Reproject to lat/long
+            # ------------------------------------------------------------------------------------------
+
+            # TODO: replace the part below with info from mapset
+            lon_min = N.min(longitude)
+            lat_min = N.min(latitude)
+            lon_max = N.max(longitude)
+            lat_max = N.max(latitude)
+
+            functions.write_vrt_georef(output_dir=tmpdir_untar, band_file=un_proj_filename, n_lines=orig_size_x,
+                                       n_cols=orig_size_y)
+            input_vrt_filename = 'reflectance.vrt'
+            input_vrt = tmpdir_untar + os.path.sep + input_vrt_filename
+            #output_tif = tmpdir_untar + os.path.sep + re_process + '.tif'
+
+            output_tif = tmpdir + os.path.sep + untar_file + re_process + '.tif'
+
+            command = 'gdalwarp -srcnodata "-32768" -dstnodata "-32768" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
+                lon_min, lat_min, lon_max, lat_max, abs(x_size), abs(y_size), input_vrt, output_tif)
+
+            os.system(command)
+
+            interm_files_list.append(output_tif)
+
+
     #geo_fullname= tmpdir + os.path.sep+ bandname
 
-    command='tar -xvf '+input_file+' -C '+tmpdir+os.path.sep +' --strip-components 1'
-    print(command)
-    status = os.system(command)
 
-    # Test the overlap of the footprint with the BB of mapset
-    # get map set
-    mapset_info = querydb.get_mapset(mapsetcode=target_mapset)
+    # Take gdal_merge.py from es2globals
+    command = es_constants.gdal_merge + ' -n -32768 -a_nodata -32768' + ' -o '     #-ot Float32    -co \"compress=lzw\"  -n -32768
 
-    x_size = mapset_info.pixel_shift_long  # 0.00892857
-    y_size = mapset_info.pixel_shift_lat  # 0.00892857
+    out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
 
-    upper_left_long = mapset_info.upper_left_long
-    upper_left_lat = mapset_info.upper_left_lat
-    lower_right_long = upper_left_long + (x_size * mapset_info.pixel_size_x)
-    lower_right_lat = upper_left_lat + (y_size * mapset_info.pixel_size_y)
+    command += out_tmp_file_gtiff
 
-    lon_min = min(upper_left_long, lower_right_long)
-    lon_max = max(upper_left_long, lower_right_long)
-    lat_min = min(upper_left_lat, lower_right_lat)
-    lat_max = max(upper_left_lat, lower_right_lat)
-
-    mapset_bbox = [lon_min, lat_min, lon_max, lat_max]
-
-    # get data footprint
-    data_bbox = functions.sentinel_get_footprint(dir=tmpdir)
-
-    # Test the overlap of the footprint with the BB of mapset
-    overlap = functions.check_polygons_intersects(mapset_bbox, data_bbox)
-
-    if not overlap:
-        return
-
-    for ifile in os.listdir(tmpdir):
-
-        # Unzip to tmpdir and add to list
-        if re.match('.*' + bandname + '*.', ifile):
-            geo_fullname = tmpdir + os.path.sep + ifile
-
-    if geo_fullname is None:
-        return
-
-    fd=h5py.File(geo_fullname,'r')
-
-    ds=fd['lat']
-    data_read64=N.zeros(ds.shape,dtype=float)
-    ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
-    latitude=ds.value
-    my_logger.debug('The min/avg/max for latitude in {} are: {}/{}/{}'.format(bandname, N.min(latitude),N.mean(latitude),N.max(latitude)))
-
-    output_file = tmpdir+ os.path.sep+lat_file
-    output_driver = gdal.GetDriverByName('GTiff')
-    orig_size_x = latitude.shape[1]
-    orig_size_y = latitude.shape[0]
-    in_data_type= gdal.GDT_Float32
-    output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
-    output_ds.GetRasterBand(1).WriteArray(latitude)
-    output_ds = None
-
-    ds=fd['lon']
-    data_read64=N.zeros(ds.shape,dtype=float)
-    ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
-    longitude=ds.value
-    my_logger.debug('The min/avg/max for longitude in {} are: {}/{}/{}'.format(bandname, N.min(longitude),N.mean(longitude),N.max(longitude)))
-
-    output_file = tmpdir+ os.path.sep+long_file
-    output_driver = gdal.GetDriverByName('GTiff')
-    orig_size_x = longitude.shape[1]
-    orig_size_y = longitude.shape[0]
-    in_data_type= gdal.GDT_Float32
-    output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
-    output_ds.GetRasterBand(1).WriteArray(longitude)
-    output_ds = None
-
-    # ------------------------------------------------------------------------------------------
-    # Extract the requested band and
-    # ------------------------------------------------------------------------------------------
-
-
-    ds = fd[re_process]
-    data_read64 = N.zeros(ds.shape, dtype=float)
-    ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
-    bandvalues = ds.value
-    my_logger.debug('The min/avg/max for reflectance in {} are: {}/{}/{}'.format(bandname, N.min(bandvalues), N.mean(bandvalues),
-                                                                       N.max(bandvalues)))
-
-    un_proj_filename = re_process + '_un_proj.tif'
-    output_file = tmpdir+ os.path.sep + un_proj_filename
-    output_driver = gdal.GetDriverByName('GTiff')
-    orig_size_x = bandvalues.shape[2]
-    orig_size_y = bandvalues.shape[1]
-    in_data_type = gdal.GDT_Float32
-    output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
-    #If the dataset is three dimension use this case(In this case sst is skin sst so there is just single ds)
-    for i, bandvalue in enumerate(bandvalues, 1):
-        output_ds.GetRasterBand(i).WriteArray(bandvalue)
-    output_ds = None
-    del output_ds
-
-    # ------------------------------------------------------------------------------------------
-    # Write a vrt file and Reproject to lat/long
-    # ------------------------------------------------------------------------------------------
-
-    # TODO: replace the part below with info from mapset
-    lon_min = N.min(longitude)
-    lat_min = N.min(latitude)
-    lon_max = N.max(longitude)
-    lat_max = N.max(latitude)
-
-    functions.write_vrt_georef(output_dir=tmpdir, band_file=un_proj_filename,n_lines=orig_size_x, n_cols=orig_size_y)
-    input_vrt_filename = 'reflectance.vrt'
-    input_vrt = tmpdir + os.path.sep+ input_vrt_filename
-    output_tif = tmpdir+ os.path.sep + re_process + '.tif'
-
-    command = 'gdalwarp -dstnodata "-32768" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
-        lon_min, lat_min, lon_max, lat_max, x_size, y_size, input_vrt, output_tif)
-
+    for file_add in interm_files_list:
+            command += ' '
+            command += file_add
+    my_logger.info('Command for merging is: ' + command)
     os.system(command)
+    pre_processed_list.append(out_tmp_file_gtiff)
 
-    interm_files_list.append(output_tif)
+    return pre_processed_list
 
-    return interm_files_list
+
+    # command='tar -xvf '+input_file+' -C '+tmpdir+os.path.sep +' --strip-components 1'
+    # print(command)
+    # status = os.system(command)
+    #
+    # # Test the overlap of the footprint with the BB of mapset
+    # # get map set
+    # mapset_info = querydb.get_mapset(mapsetcode=target_mapset)
+    #
+    # x_size = mapset_info.pixel_shift_long  # 0.00892857
+    # y_size = mapset_info.pixel_shift_lat  # 0.00892857
+    #
+    # upper_left_long = mapset_info.upper_left_long
+    # upper_left_lat = mapset_info.upper_left_lat
+    # lower_right_long = upper_left_long + (x_size * mapset_info.pixel_size_x)
+    # lower_right_lat = upper_left_lat + (y_size * mapset_info.pixel_size_y)
+    #
+    # lon_min = min(upper_left_long, lower_right_long)
+    # lon_max = max(upper_left_long, lower_right_long)
+    # lat_min = min(upper_left_lat, lower_right_lat)
+    # lat_max = max(upper_left_lat, lower_right_lat)
+    #
+    # mapset_bbox = [lon_min, lat_min, lon_max, lat_max]
+    #
+    # # get data footprint
+    # data_bbox = functions.sentinel_get_footprint(dir=tmpdir)
+    #
+    # # Test the overlap of the footprint with the BB of mapset
+    # overlap = functions.check_polygons_intersects(mapset_bbox, data_bbox)
+    #
+    # if not overlap:
+    #     return
+    #
+    # for ifile in os.listdir(tmpdir):
+    #
+    #     # Unzip to tmpdir and add to list
+    #     if re.match('.*' + bandname + '*.', ifile):
+    #         geo_fullname = tmpdir + os.path.sep + ifile
+    #
+    # if geo_fullname is None:
+    #     return
+    #
+    # fd=h5py.File(geo_fullname,'r')
+    #
+    # ds=fd['lat']
+    # data_read64=N.zeros(ds.shape,dtype=float)
+    # ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
+    # latitude=ds.value
+    # my_logger.debug('The min/avg/max for latitude in {} are: {}/{}/{}'.format(bandname, N.min(latitude),N.mean(latitude),N.max(latitude)))
+    #
+    # output_file = tmpdir+ os.path.sep+lat_file
+    # output_driver = gdal.GetDriverByName('GTiff')
+    # orig_size_x = latitude.shape[1]
+    # orig_size_y = latitude.shape[0]
+    # in_data_type= gdal.GDT_Float32
+    # output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
+    # output_ds.GetRasterBand(1).WriteArray(latitude)
+    # output_ds = None
+    #
+    # ds=fd['lon']
+    # data_read64=N.zeros(ds.shape,dtype=float)
+    # ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
+    # longitude=ds.value
+    # my_logger.debug('The min/avg/max for longitude in {} are: {}/{}/{}'.format(bandname, N.min(longitude),N.mean(longitude),N.max(longitude)))
+    #
+    # output_file = tmpdir+ os.path.sep+long_file
+    # output_driver = gdal.GetDriverByName('GTiff')
+    # orig_size_x = longitude.shape[1]
+    # orig_size_y = longitude.shape[0]
+    # in_data_type= gdal.GDT_Float32
+    # output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
+    # output_ds.GetRasterBand(1).WriteArray(longitude)
+    # output_ds = None
+    #
+    # # ------------------------------------------------------------------------------------------
+    # # Extract the requested band and
+    # # ------------------------------------------------------------------------------------------
+    #
+    #
+    # ds = fd[re_process]
+    # data_read64 = N.zeros(ds.shape, dtype=float)
+    # ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
+    # bandvalues = ds.value
+    # my_logger.debug('The min/avg/max for reflectance in {} are: {}/{}/{}'.format(bandname, N.min(bandvalues), N.mean(bandvalues),
+    #                                                                    N.max(bandvalues)))
+    #
+    # un_proj_filename = re_process + '_un_proj.tif'
+    # output_file = tmpdir+ os.path.sep + un_proj_filename
+    # output_driver = gdal.GetDriverByName('GTiff')
+    # orig_size_x = bandvalues.shape[2]
+    # orig_size_y = bandvalues.shape[1]
+    # in_data_type = gdal.GDT_Float32
+    # output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
+    # #If the dataset is three dimension use this case(In this case sst is skin sst so there is just single ds)
+    # for i, bandvalue in enumerate(bandvalues, 1):
+    #     output_ds.GetRasterBand(i).WriteArray(bandvalue)
+    # output_ds = None
+    # del output_ds
+    #
+    # # ------------------------------------------------------------------------------------------
+    # # Write a vrt file and Reproject to lat/long
+    # # ------------------------------------------------------------------------------------------
+    #
+    # # TODO: replace the part below with info from mapset
+    # lon_min = N.min(longitude)
+    # lat_min = N.min(latitude)
+    # lon_max = N.max(longitude)
+    # lat_max = N.max(latitude)
+    #
+    # functions.write_vrt_georef(output_dir=tmpdir, band_file=un_proj_filename,n_lines=orig_size_x, n_cols=orig_size_y)
+    # input_vrt_filename = 'reflectance.vrt'
+    # input_vrt = tmpdir + os.path.sep+ input_vrt_filename
+    # output_tif = tmpdir+ os.path.sep + re_process + '.tif'
+    #
+    # command = 'gdalwarp -dstnodata "-32768" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
+    #     lon_min, lat_min, lon_max, lat_max, abs(x_size), abs(y_size), input_vrt, output_tif)
+    #
+    # os.system(command)
+    #
+    # interm_files_list.append(output_tif)
+    #
+    # return interm_files_list
 
 
 def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files, tmpdir, my_logger, in_date=None):
@@ -2327,6 +2709,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             # Take from DB
             in_scale_factor = product_in_info.scale_factor
             in_offset = product_in_info.scale_offset
+            in_scale_type = product_in_info.scale_type
 
         in_nodata = product_in_info.no_data
         in_mask_min = product_in_info.mask_min
@@ -2544,7 +2927,8 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
             # Apply rescale to data
             scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
-                                       out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger)
+                                       out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger,
+                                       in_scale_type)
 
             # Create a copy to output_file
             trg_ds = out_driver.CreateCopy(my_output_filename, out_ds, 0, [es_constants.ES2_OUTFILE_OPTIONS])
@@ -2567,7 +2951,8 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
             # Apply rescale to data
             scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
-                                   out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger)
+                                       out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger,
+                                       in_scale_type)
             trg_ds.GetRasterBand(1).WriteArray(scaled_data)
 
             orig_ds = None
@@ -2779,7 +3164,7 @@ def ingest_file_vers_1_0(input_file, in_date, product_def, target_mapset, my_log
 
         # Apply rescale to data
         scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
-                                   out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger)
+                                   out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger, "linear")
 
         trg_ds.GetRasterBand(1).WriteArray(scaled_data)
 
@@ -3131,9 +3516,8 @@ def mosaic_lsasaf_msg(in_files, output_file, format):
     outband.WriteArray(N.array(dataOut), 0, 0)
 
 
-def rescale_data(in_data,
-                 in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
-                 out_data_type, out_scale_factor, out_offset, out_nodata, my_logger):
+def rescale_data(in_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max, out_data_type,
+                 out_scale_factor, out_offset, out_nodata, my_logger, in_scale_type):
 #
 #   Format/scale the output data taking into account input/output properties
 #   Args:
@@ -3188,6 +3572,9 @@ def rescale_data(in_data,
         phys_value = in_data * in_scale_factor + in_offset
     else:
         phys_value = in_data
+
+    if in_scale_type=='log10':
+        phys_value =  N.power(10,phys_value)
 
     # Assign to the output array
     trg_data = (phys_value - out_offset) / out_scale_factor

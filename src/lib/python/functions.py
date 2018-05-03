@@ -1200,6 +1200,21 @@ def set_path_filename_eumetcast(date_str, product_code, sub_product_code, mapset
     return filename
 
 ######################################################################################
+#   is_file_exists_in_path
+#   Purpose: Check whether file exists in the path
+#   Author: VIJAY CHARAN VENKATACHALAM
+#   Date: 2018/05/03
+#   Inputs: file_path
+#   Output: Boolean
+#
+def is_file_exists_in_path(file_path):
+    is_file_exists = False
+    if os.path.exists(file_path):
+        is_file_exists = True
+
+    return is_file_exists
+
+######################################################################################
 #   get_from_path_dir
 #   Purpose: From full_dir -> prod, subprod, version, mapset
 #   Author: Marco Clerici, JRC, European Commission
@@ -1580,11 +1595,46 @@ def load_obj_from_pickle(filename):
 
     return obj
 
+######################################################################################
+#   is_S3data_captured_during_day()
+#   Purpose: Check whether Sentinel 3 OL sensor data captured during day time and return Boolean value
+#   Author: VIJAY CHARAN VENKATACHALAM
+#   Date: 2018/04/30
+#   Inputs: filename(example: S3A_OL_2_WRR____20180428T163216_20180428T171635_20180428T191407_2659_030_297______MAR_O_NR_002.SEN3.tar)
+#   Output: True or False
+#
+def is_S3_OL_data_captured_during_day(filename):
+    day_data = False
+    # filename example = S3A_OL_2_WRR____20180428T163216_20180428T171635_20180428T191407_2659_030_297______MAR_O_NR_002
+    hour = int(filename[25]+filename[26])
+    if 8 <= hour <= 16:
+        day_data = True
+
+    return day_data
+
+
+######################################################################################
+#   is_data_captured_during_day()
+#   Purpose: Check whether  data captured during day time and return Boolean value
+#   Author: VIJAY CHARAN VENKATACHALAM
+#   Date: 2018/05/01
+#   Inputs: in_date(example: 20180428T163216)
+#   Output: True or False
+#
+def is_data_captured_during_day(in_date):
+    day_data = False
+    # in_date example = 20180428T163216
+    hhmmss = in_date.split("T")[1]
+    hour = int(hhmmss[0] + hhmmss[1])
+    if 8 <= hour <= 16:
+        day_data = True
+
+    return day_data
 
 ######################################################################################
 #   check_polygons_intersects()
 #   Purpose: Check whether two polygon interects and return Boolean value
-#   Author: Marco Clerici, JRC, European Commission
+#   Author: VIJAY CHARAN VENKATACHALAM
 #   Date: 2018/04/20
 #   Inputs: polygon 1 and Polygon two as bounding box = min Longitude, min Latitude, max Longitude, max Latitude
 #   Output: True or False
@@ -1603,7 +1653,7 @@ def check_polygons_intersects(poly1, poly2):
 #   sentinel_get_footprint()
 #   Purpose: Read the foot print from the xfdumanifest.xml file of SAFE format, and
 #            return the boundary box
-#   Author: Marco Clerici, JRC, European Commission
+#   Author: VIJAY CHARAN VENKATACHALAM
 #   Date: 2018/04/17
 #   Inputs: input directory
 #   Output: Boundary Box (lon_min, lat_min, lon_max, lat_max)
