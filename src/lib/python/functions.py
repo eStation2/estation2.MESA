@@ -1607,7 +1607,7 @@ def is_S3_OL_data_captured_during_day(filename):
     day_data = False
     # filename example = S3A_OL_2_WRR____20180428T163216_20180428T171635_20180428T191407_2659_030_297______MAR_O_NR_002
     hour = int(filename[25]+filename[26])
-    if 8 <= hour <= 16:
+    if 5 <= hour <= 16:
         day_data = True
 
     return day_data
@@ -1626,7 +1626,7 @@ def is_data_captured_during_day(in_date):
     # in_date example = 20180428T163216
     hhmmss = in_date.split("T")[1]
     hour = int(hhmmss[0] + hhmmss[1])
-    if 8 <= hour <= 16:
+    if 5 <= hour <= 16:
         day_data = True
 
     return day_data
