@@ -35,8 +35,8 @@ ext=es_constants.ES2_OUTFILE_EXTENSION
 #   A list of 'final' (i.e. User selected) output products are defined (now hard-coded)
 #   According to the dependencies, if set, they force the various groups
 
-def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, proc_lists=None, update_stats=False,
-                    nrt_products=True, logger=None):
+def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, proc_lists=None, nrt_products=True,
+                    logger=None):
 
 
     #   ---------------------------------------------------------------------
@@ -56,14 +56,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   Define input files (chl)
     in_prod_ident = functions.set_path_filename_no_date(prod, starting_sprod,mapset, version, ext)
     input_dir = es2_data_dir+ functions.set_path_sub_directory(prod, starting_sprod, 'Ingest', version, mapset)
-    starting_files = input_dir+"*"+in_prod_ident
+    #starting_files = input_dir+"*"+in_prod_ident
 
     # ----------------------------------------------------------------------------------------------------------------
     # 3davg
     # 3 Day average of the 1 day Chl, re-projected on target mapset
-    output_sprod=proc_lists.proc_add_subprod("3davg", "olci-wrr", final=False,
-                                             descriptive_name='3d Average',
-                                             description='Three day Average',
+    output_sprod=proc_lists.proc_add_subprod("3daysavg", "olci-wrr", final=False,
+                                             descriptive_name='3day chl-nn',
+                                             description='mean 3 day composite',
                                              frequency_id='e1day',
                                              date_format='YYYYMMDD',
                                              masked=False,
@@ -72,9 +72,6 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     prod_ident_3davg = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_3davg = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
-
-    # formatter_in = "[0-9]{4}(?P<MMDD>Entering routine processing_olci_wrr[0-9]{4})"+in_prod_ident
-    # formatter_out = ["{subpath[0][5]}"+os.path.sep+subdir_3davg+"{MMDD[0]}"+prod_ident_3davg]
 
     # Use a specific function, to skip the current day
     def generate_parameters_3davg():
@@ -103,7 +100,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         day_list = sorted(day_list)
 
         # Compute the 'julian' dakad for the current day
-        today = datetime.date.today()
+        today = datetime.today()
         yesterday = today - timedelta(1)
         today_str = today.strftime('%Y%m%d')
         yesterday_str = yesterday.strftime('%Y%m%d')
@@ -118,9 +115,9 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
                     basename = os.path.basename(input_file)
                     # Date is in format YYYYMMDD
                     mydate_yyyymmdd = functions.get_date_from_path_filename(basename)
-                    yyyy = int(mydate_yyyymmdd[0:3])
-                    mm = int(mydate_yyyymmdd[4:5])
-                    dd = int(mydate_yyyymmdd[6:7])
+                    yyyy = int(mydate_yyyymmdd[0:4])
+                    mm = int(mydate_yyyymmdd[4:6])
+                    dd = int(mydate_yyyymmdd[6:8])
                     day2 = datetime(yyyy,mm,dd) + timedelta(1)
                     day2_filepath = input_dir + day2.strftime('%Y%m%d') + in_prod_ident
                     if not functions.is_file_exists_in_path(day2_filepath):
@@ -148,23 +145,24 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "", "input_nodata":255, "output_nodata":255}
         raster_image_math.do_avg_image(**args)
 
 
     return proc_lists
-
+#   ---------------------------------------------------------------------
+#   Run the pipeline
 
 def processing_olci_wrr(res_queue, pipeline_run_level=0, pipeline_printout_level=0, pipeline_printout_graph_level=0,
-                        prod='', starting_sprod='', mapset='', version='', starting_dates_linearx2=None,
-                        update_stats=False, nrt_products=True, write2file=None, logfile=None, touch_files_only=False):
+                        prod='', starting_sprod='', mapset='', version='', starting_dates=None,
+                        nrt_products=True, write2file=None, logfile=None, touch_files_only=False):
 
     spec_logger = log.my_logger(logfile)
     spec_logger.info("Entering routine %s" % 'processing_olci_wrr')
 
     proc_lists = None
-    proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
-                                 update_stats=update_stats, nrt_products=nrt_products, logger=spec_logger)
+    proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version, starting_dates=starting_dates,
+                                 nrt_products=nrt_products, logger=spec_logger)
 
     if write2file is not None:
         fwrite_id=open(write2file,'w')
