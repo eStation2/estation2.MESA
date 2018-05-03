@@ -307,9 +307,9 @@ def loop_eumetcast_ftp(dry_run=False):
                     current_list = []
                     time.sleep(60)
 
-                #logger.debug("Number of files currently on PC1 for trigger %s is %i", eumetcast_source.eumetcast_id, len(current_list))
                 if len(current_list) > 0:
-                    logger_spec.info("Number of files currently on PC1 for trigger %s is %i", eumetcast_source.eumetcast_id, len(current_list))
+                    # See ES2-204
+                    logger_spec.debug("Number of files currently on PC1 for trigger %s is %i", eumetcast_source.eumetcast_id, len(current_list))
 
                     #logger.debug("Number of files already copied for trigger %s is %i", eumetcast_source.eumetcast_id, len(processed_list))
                     logger_spec.debug("Number of files already copied for trigger %s is %i", eumetcast_source.eumetcast_id, len(processed_list))
