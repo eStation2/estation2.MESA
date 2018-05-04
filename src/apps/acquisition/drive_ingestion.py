@@ -37,5 +37,5 @@ if service:
             logger.info('Ingest process is running: Stop it.')
             daemon.stop()
 else:
-    ingestion.loop_ingestion(dry_run=dry_run)
+    ingestion.loop_ingestion(dry_run=dry_run,test_one_product='olci-wrr')
 
