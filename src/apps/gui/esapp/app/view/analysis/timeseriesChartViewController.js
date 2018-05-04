@@ -2,78 +2,548 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.analysis-timeserieschartview',
 
+    getGraphSettings: function(){
+        var me = this.getView(),
+            graphObjectToggleBtn = me.lookupReference('objectsbtn_'+ me.id.replace(/-/g,'_')),
+            disclaimerObj = me.lookupReference('disclaimer_obj_' + me.id),
+            logoObj = me.lookupReference('logo_obj_' + me.id),
+            graphviewSize = me.getSize().width.toString() + "," + me.getSize().height.toString();
+
+        var selectedYears = me.yearsToCompare;
+        if (me.yearsToCompare != '')
+            selectedYears = Ext.util.JSON.encode(me.yearsToCompare);
+
+        var graphproperties = {
+            "graph_type": me.graphtype,
+            "graph_width": me.getSize().width.toString(),
+            "graph_height": me.getSize().height.toString(),
+            "graph_title": me.graphProperties.title,
+            "graph_title_font_size": me.graphProperties.graph_title_font_size,
+            "graph_title_font_color": me.graphProperties.graph_title_font_color,
+            "graph_subtitle": me.graphProperties.subtitle,
+            "graph_subtitle_font_size": me.graphProperties.graph_subtitle_font_size,
+            "graph_subtitle_font_color": me.graphProperties.graph_subtitle_font_color,
+            "legend_position": 'bottom',
+            "legend_font_size": me.graphProperties.legend_title_font_size,
+            "legend_font_color": me.graphProperties.legend_title_font_color,
+            "xaxe_font_size": me.graphProperties.xaxe_font_size,
+            "xaxe_font_color": me.graphProperties.xaxe_font_color
+        }
+        // delete graphproperties.localRefresh;
+        // graphproperties.splice('localRefresh', 1);
+
+        var selectedProductsAndTimeFramePanel = Ext.getCmp(me.getId()+'-select_products_timeframe');
+        var tsdrawprops = selectedProductsAndTimeFramePanel.down('timeseriesproductselection').getController().getSelectedTSDrawProperties();
+
+        var graphSettings = {
+            newtemplate: me.isNewTemplate,
+            userid: esapp.getUser().userid,
+            graph_tpl_id: me.graph_tpl_id,
+            parent_tpl_id: me.parent_tpl_id,
+            graph_tpl_name: me.graph_tpl_name,
+            istemplate: me.isTemplate,
+            graphviewposition: me.getPosition(true).toString(),
+            graphviewsize: graphviewSize,
+            graphproperties: Ext.util.JSON.encode(graphproperties),
+            yAxes: Ext.util.JSON.encode(me.timeseriesGraph.yaxes),
+
+            graph_type: me.graphtype,
+            selectedtimeseries: me.selectedTimeseries,
+            tsdrawprops: tsdrawprops,
+            yearts: me.yearTS,
+            tsfromperiod: me.tsFromPeriod,
+            tstoperiod: me.tsToPeriod,
+            yearstocompare: selectedYears,
+            tsfromseason: me.tsFromSeason,
+            tstoseason: me.tsToSeason,
+            wkt_geom: me.wkt_geom,
+            selectedregionname: me.selectedregionname,
+
+            disclaimerObjPosition: (esapp.Utils.objectExists(disclaimerObj) && disclaimerObj.rendered) ? disclaimerObj.getPosition(true).toString() : disclaimerObj.disclaimerPosition.toString(),
+            disclaimerObjContent: disclaimerObj.getContent(),
+            logosObjPosition: (esapp.Utils.objectExists(logoObj) && logoObj.rendered) ? logoObj.getPosition(true).toString() : logoObj.logoPosition.toString(),
+            logosObjContent: Ext.encode(logoObj.getLogoData()),
+            showObjects: graphObjectToggleBtn.pressed,
+            showtoolbar: !me.getDockedItems('toolbar[dock="top"]')[0].hidden
+        }
+
+        return graphSettings;
+    },
+
+    toggleObjects: function(btn, event) {
+        var graphviewwin = btn.up().up(),
+            // titleObj = graphviewwin.lookupReference('title_obj_' + graphviewwin.id),
+            disclaimerObj = graphviewwin.lookupReference('disclaimer_obj_' + graphviewwin.id),
+            logoObj = graphviewwin.lookupReference('logo_obj_' + graphviewwin.id);
+
+        if (btn.pressed) {
+            graphviewwin.showObjects = true;
+            // titleObj.show();
+            disclaimerObj.show();
+            logoObj.show();
+            btn.setStyle({ color: 'green' });
+            if (graphviewwin.graphtype == 'matrix'){
+                graphviewwin.tsgraph.options.chart.spacingBottom = 65;
+            }
+            else {
+                graphviewwin.tsgraph.options.chart.spacingBottom = 45;
+            }
+            // graphviewwin.tsgraph.options.chart.marginBottom = 60+graphviewwin.tsgraph.options.chart.spacingBottom;
+            // graphviewwin.tsgraph.options.chart.spacingTop = 60;
+        }
+        else {
+            graphviewwin.showObjects = false;
+            // titleObj.hide();
+            // titleObj.titlePosition = titleObj.getPosition(true);
+            disclaimerObj.disclaimerPosition = disclaimerObj.getPosition(true);
+            disclaimerObj.hide();
+            logoObj.logoPosition = logoObj.getPosition(true);
+            logoObj.hide();
+            btn.setStyle({ color: 'black' });
+            graphviewwin.tsgraph.options.chart.spacingBottom = 10;
+            // graphviewwin.tsgraph.options.chart.spacingTop = 10;
+        }
+        graphviewwin.fireEvent('move');
+        // graphviewwin.tsgraph.isDirtyBox = true;  // Not working, does not refresh legend and title!
+        // graphviewwin.tsgraph.isDirtyLegend = true;
+        // graphviewwin.tsgraph.redraw();
+        // console.info(graphviewwin.tsgraph);
+    },
+
+    toggleRegionLink: function(btn, event) {
+        var me = this.getView();
+        var tschartviewwin = btn.up().up();
+
+        if (btn.pressed) {
+            var regionselected = this.changeSelectedRegion();
+            if (regionselected){
+                btn.setIconCls('change-region-link');
+                me.link_region_change = true;
+            }
+        }
+        else {
+            btn.setIconCls('change-region-unlink');
+            me.link_region_change = false;
+        }
+    },
+
+    createSelectedProductsAndTimeFramePanel: function(){
+        var me = this.getView();
+
+        return Ext.create('Ext.panel.Panel', {
+            title: esapp.Utils.getTranslation('graphtemplate_products_timeframe_selections'),     // 'Graph template product and time frame selections',
+            id: me.getId()+'-select_products_timeframe',
+            reference: me.getId()+'-select_products_timeframe',
+            width: 765, // document.getElementById(me.id + "-body").offsetWidth-3,
+            minHeight: 430, // document.getElementById(me.id + "-body").offsetHeight-3,
+            // autoWidth: true,
+            // autoHeight: true,
+            margin: '2 2 2 5',
+            maximizable: false,
+            collapsible: true,
+            resizable: false,
+            // layout: 'fit',
+            // forceFit: true,
+            hidden: true,
+            floating: true,
+            defaultAlign: 'tl-tl',
+            closable: true,
+            closeAction: 'hide',
+            draggable: true,
+            // constrain: true,
+            constrainHeader: true,
+            alwaysOnTop: true,
+            autoShow: false,
+            frame: false,
+            frameHeader : false,
+            border: false,
+            shadow: false,
+            componentCls: 'rounded-box',
+            header: {
+                cls: 'rounded-box-header',
+                style: {
+                    'background-color': '#A9DEEC !important;',
+                    'font-weight':'bold',
+                    'color':'#000',
+                    'font-size': '13px;'
+                }
+            },
+            dockedItems:  [{
+                dock: 'bottom',
+                xtype: 'toolbar',
+                items : ['->',{
+                    text: esapp.Utils.getTranslation('update_graph'), // 'Update graph',
+                    // scope:me,
+                    iconCls: 'fa fa-save fa-2x',    // 'icon-disk',
+                    style: { color: 'lightblue' },
+                    scale: 'medium',
+                    disabled: false,
+                    handler: function(){
+                        // console.info(me.lookupReference('timeseriesproductselection_'+me.id));
+                        var idpostfix = me.isTemplate ? me.id : me.graphtype;
+                        var timeseriesselections = me.lookupReference('timeseriesproductselection_'+idpostfix).getController().getSelections();
+                        // console.info(timeseriesselections);
+                        if (timeseriesselections != null ){
+                            me.selectedTimeseries = timeseriesselections.selectedTimeseries;
+                            me.tsdrawprops = timeseriesselections.tsdrawprops;
+                            me.yearTS = timeseriesselections.yearTS;
+                            me.tsFromSeason =  timeseriesselections.tsFromSeason instanceof Date ? Ext.Date.format(timeseriesselections.tsFromSeason, 'm-d') : timeseriesselections.tsFromSeason;
+                            me.tsToSeason = timeseriesselections.tsToSeason instanceof Date ? Ext.Date.format(timeseriesselections.tsToSeason, 'm-d') : timeseriesselections.tsToSeason;
+                            me.tsFromPeriod = timeseriesselections.tsFromPeriod instanceof Date ? Ext.Date.format(timeseriesselections.tsFromPeriod, 'Y-m-d') : timeseriesselections.tsFromPeriod;
+                            me.tsToPeriod = timeseriesselections.tsToPeriod instanceof Date ? Ext.Date.format(timeseriesselections.tsToPeriod, 'Y-m-d') : timeseriesselections.tsToPeriod;
+                            me.yearsToCompare = timeseriesselections.yearsToCompare;
+                            me.timeseriesGraph.yaxes = null;    // No yaxes passed to getTimeseries forces to refresh the yaxes info on server
+                            me.getController().refreshChart();
+                            this.up().up().close();     // this=save button up1=toolbar up2=panel
+                        }
+                    }
+                }]
+            }],
+            listeners: {
+                close : function (){
+                    me.lookupReference('tbar_'+me.id).enable();
+                }
+                // focusleave: function(){
+                //     this.close();
+                // }
+            },
+
+            items: [{
+                xtype: 'timeseriesproductselection',
+                id: me.getId()+'-timeseriesproductselection',
+                isTemplate: me.isTemplate,
+                tplChartView: me,
+                graphtype: me.graphtype,
+                cumulative: me.graphtype == 'cumulative' ? true : false,
+                ranking: me.graphtype == 'ranking' ? true : false,
+                matrix: me.graphtype == 'matrix' ? true : false,
+                multiplevariables: (me.graphtype == 'xy' || me.graphtype == 'cumulative') ? true : false,
+                fromto: (me.graphtype == 'xy' || me.graphtype == 'cumulative') ? true : false,
+                year: me.graphtype == 'cumulative' ? true : false,
+                multipleyears: me.graphtype != 'cumulative' ? true : false
+            }]
+        });
+    },
+
+    changeSelectedProductsAndTimeFrame: function(btn){
+        var me = this.getView();
+        var selectedProductsAndTimeFramePanel = Ext.getCmp(me.getId()+'-select_products_timeframe');
+        me.lookupReference('tbar_'+me.id).disable();
+
+        //if (Ext.isObject(selectedProductsAndTimeFramePanel)) {}
+        if (!selectedProductsAndTimeFramePanel){
+            selectedProductsAndTimeFramePanel = this.createSelectedProductsAndTimeFramePanel();
+
+            me.add(selectedProductsAndTimeFramePanel);
+            selectedProductsAndTimeFramePanel.show();
+            // selectedProductsAndTimeFramePanel.doConstrain();
+        }
+        else {
+            selectedProductsAndTimeFramePanel.show();
+            // selectedProductsAndTimeFramePanel.doConstrain();
+        }
+    },
+
+    changeSelectedRegion: function(){
+        var me = this.getView();
+        // var new_wkt_polygon = Ext.getCmp('timeserieschartselection').lookupReference('wkt_polygon').getValue();
+        // var new_selectedregionname = Ext.getCmp('timeserieschartselection').lookupReference('selectedregionname').getValue();
+        // console.info(me.workspace);
+        var new_selectedregionname = me.workspace.lookupReference('timeserieschartselection'+me.workspace.id).lookupReference('selectedregionname').getValue();
+        var new_wkt_polygon = me.workspace.lookupReference('timeserieschartselection'+me.workspace.id).lookupReference('wkt_polygon').getValue();
+        var graphpropertiesRecord = this.getStore('graphproperties').getData().items[0].data;
+        var response = false;
+
+        if (new_wkt_polygon.trim() == '') {
+            Ext.Msg.show({
+               title: esapp.Utils.getTranslation('selectapolygon'),    // 'Select a polygon!',
+               msg: esapp.Utils.getTranslation('pleaseselectapolygon'),    // 'Please select or draw a polygon in a MapView!',
+               width: 300,
+               buttons: Ext.Msg.OK,
+               animEl: '',
+               icon: Ext.Msg.WARNING
+            });
+        }
+        else {
+            if (new_wkt_polygon.trim() != me.wkt_geom.trim()){
+                me.wkt_geom = new_wkt_polygon;
+                me.selectedregionname = new_selectedregionname;
+                graphpropertiesRecord.graph_title = new_selectedregionname;
+                this.refreshChart();
+            }
+            response = true;
+        }
+        return response;
+    },
+
+    setGraphTemplateName: function(){
+        var me = this;
+        var newGraphTemplateName = '';
+
+        if (me.getView().isNewTemplate){
+            // open dialog asking to give a unique template name
+            // If Save as... then the graphView has a templatename which will be proposed
+            // Ext.MessageBox.prompt( title , message , [fn] , [scope] , [multiline] , [value] )
+            if (esapp.Utils.objectExists(me.getView().graph_tpl_name) && me.getView().graph_tpl_name != ''){
+                newGraphTemplateName = me.getView().graph_tpl_name + ' - copy';
+            }
+            else {
+                // if (esapp.Utils.objectExists(me.getView().selectedregionname) && me.getView().selectedregionname != ''){
+                //     newGraphTemplateName = newGraphTemplateName + me.getView().selectedregionname;
+                //     if (esapp.Utils.objectExists(me.getView().productversion) && me.getView().productversion != ''){
+                //         newGraphTemplateName = newGraphTemplateName + ' - ' + me.getView().productversion;
+                //     }
+                // }
+                if (me.getView().graphtype == 'cumulative'){
+                    newGraphTemplateName = esapp.Utils.getTranslation('CUMULATIVE') + ' - ';
+                }
+                else if (me.getView().graphtype == 'ranking'){
+                    newGraphTemplateName = esapp.Utils.getTranslation('RANKING_ZSCORE') + ' - ';
+                }
+                else if (me.getView().graphtype == 'matrix'){
+                    newGraphTemplateName = esapp.Utils.getTranslation('MATRIX') + ' - ';
+                }
+                else {
+                    newGraphTemplateName = esapp.Utils.getTranslation('PROFILE') + ' - ';
+                }
+
+            }
+
+            Ext.MessageBox.prompt(esapp.Utils.getTranslation('graph_tpl_name'), esapp.Utils.getTranslation('graph_tpl_save_message') + ':', function(btn, text){   // 'Graph Template Name'   'Please give a unique name for the new graph template'
+                if (btn == 'ok'){
+                    // process text value and close...
+                    me.getView().graph_tpl_name = text;
+                    me.saveGraphTemplate();
+                }
+            }, this, false, newGraphTemplateName);
+        }
+        else {
+            me.saveGraphTemplate();
+        }
+    },
+
+    saveGraphTemplate: function(){
+        var me = this.getView(),
+            graphObjectToggleBtn = me.lookupReference('objectsbtn_'+ me.id.replace(/-/g,'_')),
+            disclaimerObj = me.lookupReference('disclaimer_obj_' + me.id),
+            logoObj = me.lookupReference('logo_obj_' + me.id),
+            graphviewSize = me.getSize().width.toString() + "," + me.getSize().height.toString();
+
+        var selectedYears = me.yearsToCompare;
+        if (me.yearsToCompare != '')
+            selectedYears = Ext.util.JSON.encode(me.yearsToCompare);
+
+        me.isTemplate = true;
+        var graphTemplate = this.getGraphSettings();
+
+        Ext.Ajax.request({
+            method: 'POST',
+            url: 'analysis/savegraphtemplate',
+            params: graphTemplate,
+            scope: me,
+            success: function (response, request) {
+                var responseJSON = Ext.util.JSON.decode(response.responseText);
+
+                if (responseJSON.success){
+                    Ext.toast({hideDuration: 2000, html: responseJSON.message, title: esapp.Utils.getTranslation('save_graph_tpl'), width: 300, align: 't'});     // "Save Graph template"
+
+                    if (me.getTitle() != null && me.getTitle() != ''){
+                        Ext.fly('graphview_title_templatename_' + me.id).dom.innerHTML = me.graph_tpl_name;
+                        //me.getView().setTitle('<div class="map-templatename">' + text + '</div>' + me.getView().getTitle());
+                    }
+                    me.isTemplate = true;
+                    if (me.isNewTemplate) {  // Created new template, else existing template is updated so do not set id's
+                        me.isNewTemplate = false;
+                        me.graph_tpl_id = responseJSON.graph_tpl_id;
+                        me.parent_tpl_id = responseJSON.graph_tpl_id;
+                        me.lookupReference('saveGraphTemplate_'+me.id.replace(/-/g,'_')).setArrowVisible(true);
+                        me.lookupReference('saveGraphTemplate_'+me.id.replace(/-/g,'_')).up().up().updateLayout();
+                    }
+                    me.workspace.lookupReference('graphtemplateadminbtn_'+me.workspace.id.replace(/-/g,'_')).graphTemplateAdminPanel.setDirtyStore(true);
+                    // Ext.getCmp('userGraphTemplates').setDirtyStore(true);
+                    me.lookupReference('changeSelectedProductsAndTimeframe_'+me.id.replace(/-/g,'_')).show();
+                }
+                else {
+                    Ext.toast({hideDuration: 2000, html: responseJSON.message, title: esapp.Utils.getTranslation('error_save_graph_tpl'), width: 300, align: 't'});     // "ERROR saving the Graph template"
+                    me.graph_tpl_name = '';
+                }
+
+            },
+            //callback: function ( callinfo,responseOK,response ) {},
+            failure: function (response, request) {
+                var responseJSON = Ext.util.JSON.decode(response.responseText);
+                Ext.toast({hideDuration: 2000, html: responseJSON.message, title: esapp.Utils.getTranslation('error_save_graph_tpl'), width: 300, align: 't'});     // "ERROR saving the Graph template"
+                me.graph_tpl_name = '';
+            }
+        });
+    },
+
+    __saveGraphTemplate: function(){
+        var me = this.getView(),
+            graphObjectToggleBtn = me.lookupReference('objectsbtn_'+ me.id.replace(/-/g,'_')),
+            disclaimerObj = me.lookupReference('disclaimer_obj_' + me.id),
+            logoObj = me.lookupReference('logo_obj_' + me.id),
+            graphviewSize = me.getSize().width.toString() + "," + me.getSize().height.toString();
+
+        var selectedYears = me.yearsToCompare;
+        if (me.yearsToCompare != '')
+            selectedYears = Ext.util.JSON.encode(me.yearsToCompare);
+
+        var graphTemplate = {
+            newtemplate: me.isNewTemplate,
+            userid: esapp.getUser().userid,
+            graph_tpl_name: me.graph_tpl_name,
+            graphviewposition: me.getPosition(true).toString(),
+            graphviewsize: graphviewSize,
+            graphsroperties: Ext.util.JSON.encode(me.graphProperties),
+
+            graph_type: me.graphtype,
+            selectedtimeseries: me.selectedTimeseries,
+            yearts: me.yearTS,
+            tsfromperiod: me.tsFromPeriod,
+            tstoperiod: me.tsToPeriod,
+            yearstocompare: selectedYears,
+            tsfromseason: me.tsFromSeason,
+            tstoseason: me.tsToSeason,
+            wkt_geom: me.wkt_geom,
+            selectedregionname: me.selectedregionname,
+
+            disclaimerObjPosition: disclaimerObj.rendered ? disclaimerObj.getPosition(true).toString() : disclaimerObj.disclaimerPosition.toString(),
+            disclaimerObjContent: disclaimerObj.getContent(),
+            logosObjPosition: logoObj.rendered ? logoObj.getPosition(true).toString() : logoObj.logoPosition.toString(),
+            logosObjContent: Ext.encode(logoObj.getLogoData()),
+            showObjects: graphObjectToggleBtn.pressed
+        }
+        //console.info(graphTemplate);
+
+        Ext.Ajax.request({
+            method: 'POST',
+            url: 'analysis/savegraphtemplate',
+            params: graphTemplate,
+            scope: me,
+            success: function (response, request) {
+                var responseJSON = Ext.util.JSON.decode(response.responseText);
+
+                if (responseJSON.success){
+                    Ext.toast({hideDuration: 2000, html: responseJSON.message, title: esapp.Utils.getTranslation('save_graph_tpl'), width: 300, align: 't'});     // "Save Graph template"
+
+                    if (me.getTitle() != null && me.getTitle() != ''){
+                        Ext.fly('graphview_title_templatename_' + me.id).dom.innerHTML = me.graph_tpl_name;
+                        //me.getView().setTitle('<div class="map-templatename">' + text + '</div>' + me.getView().getTitle());
+                    }
+                    me.isTemplate = true;
+                    me.isNewTemplate = false;
+                    me.workspace.lookupReference('graphtemplateadminbtn_'+me.workspace.id.replace(/-/g,'_')).graphTemplateAdminPanel.setDirtyStore(true);
+                    // Ext.getCmp('userGraphTemplates').setDirtyStore(true);
+                    me.lookupReference('changeSelectedProductsAndTimeframe_'+me.id.replace(/-/g,'_')).show();
+                }
+                else {
+                    Ext.toast({hideDuration: 2000, html: responseJSON.message, title: esapp.Utils.getTranslation('error_save_graph_tpl'), width: 300, align: 't'});     // "ERROR saving the Graph template"
+                    me.graph_tpl_name = '';
+                }
+
+            },
+            //callback: function ( callinfo,responseOK,response ) {},
+            failure: function (response, request) {
+                var responseJSON = Ext.util.JSON.decode(response.responseText);
+                Ext.toast({hideDuration: 2000, html: responseJSON.message, title: esapp.Utils.getTranslation('error_save_graph_tpl'), width: 300, align: 't'});     // "ERROR saving the Graph template"
+                me.graph_tpl_name = '';
+            }
+        });
+    },
+
     getTimeseries: function(callback){
         var me = this.getView();
+        var params = {};
+        var user = esapp.getUser();
         //var chartpropertiesStore = this.getStore('chartproperties');
 
         var myLoadMask = new Ext.LoadMask({
             msg    : esapp.Utils.getTranslation('generatingtimeseries'), // 'Generating requested time series...',
-            target : Ext.getCmp('tschart_'+me.id)
+            target : Ext.getCmp('tsgraph_'+me.id)
             ,toFrontOnShow: true
             ,useTargetEl:true
         });
         myLoadMask.show();
 
-        //console.info(me.yearsToCompare);
         var selectedYears = me.yearsToCompare;
         if (me.yearsToCompare != '')
             selectedYears = Ext.util.JSON.encode(me.yearsToCompare);
 
-        Ext.Ajax.request({
+
+        params = {
+            userid : (user != 'undefined' && user != null) ? user.userid : '',
+            istemplate : me.isTemplate,
+            graph_tpl_id : esapp.Utils.objectExists(me.graph_tpl_id) ? me.graph_tpl_id : -1,
+            graph_tpl_name : me.isTemplate ? me.graph_tpl_name : 'default',
+            graphtype: me.graphtype,
+            selectedTimeseries: me.selectedTimeseries,
+            tsdrawprops: me.tsdrawprops,
+            yAxes: Ext.util.JSON.encode(me.timeseriesGraph.yaxes),
+            yearTS: me.yearTS,
+            tsFromPeriod: me.tsFromPeriod,
+            tsToPeriod: me.tsToPeriod,
+            yearsToCompare: selectedYears,
+            tsFromSeason: me.tsFromSeason,
+            tsToSeason:me.tsToSeason,
+            WKT:me.wkt_geom
+        }
+
+        var requestId = Ext.Ajax.request({
             url:"analysis/gettimeseries",
-            timeout : 300000,
+            timeout : 120000,
+            // autoAbort: true,
             scope: me,
-            params:{
-                charttype: me.charttype,
-                selectedTimeseries: me.selectedTimeseries,
-                yearTS: me.yearTS,
-                tsFromPeriod: Ext.Date.format(me.tsFromPeriod, 'Y-m-d'),
-                tsToPeriod: Ext.Date.format(me.tsToPeriod, 'Y-m-d'),
-                yearsToCompare: selectedYears,
-                tsFromSeason: Ext.Date.format(me.tsFromSeason, 'm-d'),
-                tsToSeason: Ext.Date.format(me.tsToSeason, 'm-d'),
-                WKT:me.wkt
-            },
+            params: params,
             method: 'POST',
             success: function ( result, request ) {
                 myLoadMask.hide();
                 me.timeseriesGraph = Ext.util.JSON.decode(result.responseText);
+                me.lookupReference('tbar_'+me.id).enable();
+
+                // GENERATE REQUESTED GRAPH IN HIGHCHARTS
                 callback(me);
-                //chartpropertiesStore.load({
-                //    params: {
-                //        charttype: me.charttype
-                //    },
-                //    callback:function(){
-                //        me.getController().setChartDrawProperties(callback);
-                //
-                //        callback(me);
-                //    }
-                //});
+
+
             },
             failure: function ( result, request) {
                myLoadMask.hide();
+               me.lookupReference('tbar_'+me.id).enable();
             }
         });
+        // Ext.Ajax.abort(requestId);
+
     },
 
-    setDefaultChartDrawProperties: function() {
+    setGraphProperties: function() {
         var me = this.getView();
-        var chartpropertiesStore = this.getStore('chartproperties');
-        me.timeseriesChart = {};
-        me.timeseriesChart.localRefresh = false;
+        // var user = esapp.getUser();
+        var graphpropertiesStore = this.getStore('graphproperties');
+        var graphpropertiesRecord = graphpropertiesStore.getData().items[0].data;
 
-        me.timeseriesChart.title = Ext.getCmp('selectedregionname').getValue();
-        me.timeseriesChart.subtitle = '';
+        me.graphProperties = {};
+        // me.graphProperties.localRefresh = false;
+        // me.selectedregionname = me.isTemplate ? me.selectedregionname : me.workspace.lookupReference('timeserieschartselection'+me.workspace.id).lookupReference('selectedregionname').getValue();
+
+        me.graphProperties.title = esapp.Utils.objectExists(graphpropertiesRecord.graph_title) && graphpropertiesRecord.graph_title != '' ? graphpropertiesRecord.graph_title : me.selectedregionname;
+        me.graphProperties.subtitle = '';
+
+        // if (me.graphtype == 'matrix'){
+        //     var selectedProductsAndTimeFramePanel = Ext.getCmp(me.getId()+'-select_products_timeframe');
+        //     var tsdrawprops = selectedProductsAndTimeFramePanel.down('timeseriesproductselection').getController().getSelectedTSDrawProperties();
+        //     me.graphProperties.subtitle = tsdrawprops[0]['tsname_in_legend'];
+        // }
+
         //if (Ext.isObject(Ext.getCmp('radio-year')) &&  Ext.getCmp('radio-year').getValue() && me.yearTS != '') {
         if (me.yearTS != '') {
-            me.timeseriesChart.subtitle = me.yearTS;
-            if ( me.tsFromSeason != null && me.tsToSeason != null){
-                if (parseInt(Ext.Date.format(me.tsFromSeason, 'm')) > parseInt(Ext.Date.format(me.tsToSeason, 'm'))) {
-                    me.timeseriesChart.subtitle = esapp.Utils.getTranslation('from') + ' ' + me.timeseriesChart.subtitle + '/' + Ext.Date.format(me.tsFromSeason, 'm/d') + '  ' + esapp.Utils.getTranslation('to') + ' ' + (parseInt(me.timeseriesChart.subtitle)+1) + '/' + Ext.Date.format(me.tsToSeason, 'm/d');
+            me.graphProperties.subtitle = me.yearTS;
+            if ( (me.tsFromSeason != null && me.tsFromSeason != "") && (me.tsToSeason != null && me.tsToSeason != "")){
+                if (parseInt(me.tsFromSeason.substring(0, 2)) > parseInt(me.tsToSeason.substring(0, 2))) {
+                    me.graphProperties.subtitle = esapp.Utils.getTranslation('from') + ' ' + me.graphProperties.subtitle + '/' + me.tsFromSeason + '  ' + esapp.Utils.getTranslation('to') + ' ' + (parseInt(me.graphProperties.subtitle)+1) + '/' + me.tsToSeason;
                 }
                 else {
-                    // me.timeseriesChart.subtitle = esapp.Utils.getTranslation('season') + ' ' +  Ext.Date.format(me.tsFromSeason, 'm/d') + ' - ' + Ext.Date.format(me.tsToSeason, 'm/d') + ' ' + esapp.Utils.getTranslation('of') + ' ' + me.timeseriesChart.subtitle;
-                    me.timeseriesChart.subtitle = esapp.Utils.getTranslation('from') + ' ' + me.timeseriesChart.subtitle + '/' + Ext.Date.format(me.tsFromSeason, 'm/d') + '  ' + esapp.Utils.getTranslation('to') + ' ' + me.timeseriesChart.subtitle + '/' + Ext.Date.format(me.tsToSeason, 'm/d');
+                    // me.graphProperties.subtitle = esapp.Utils.getTranslation('season') + ' ' +  Ext.Date.format(me.tsFromSeason, 'm/d') + ' - ' + Ext.Date.format(me.tsToSeason, 'm/d') + ' ' + esapp.Utils.getTranslation('of') + ' ' + me.graphProperties.subtitle;
+                    me.graphProperties.subtitle = esapp.Utils.getTranslation('from') + ' ' + me.graphProperties.subtitle + '/' +me.tsFromSeason + '  ' + esapp.Utils.getTranslation('to') + ' ' + me.graphProperties.subtitle + '/' + me.tsToSeason;
                 }
             }
         }
@@ -82,57 +552,46 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             //me.yearsToCompare = Ext.util.JSON.decode(me.yearsToCompare);
             if (me.yearsToCompare.length == 1){
                 me.yearsToCompare.forEach(function(year){
-                    me.timeseriesChart.subtitle = year;
+                    me.graphProperties.subtitle = year;
                 })
-                if ( me.tsFromSeason != null && me.tsToSeason != null){
-                    if (parseInt(Ext.Date.format(me.tsFromSeason, 'm')) > parseInt(Ext.Date.format(me.tsToSeason, 'm'))) {
-                        me.timeseriesChart.subtitle = esapp.Utils.getTranslation('from') + ' ' + me.timeseriesChart.subtitle + '/' + Ext.Date.format(me.tsFromSeason, 'm/d') + '  ' + esapp.Utils.getTranslation('to') + ' ' + (parseInt(me.timeseriesChart.subtitle)+1) + '/' + Ext.Date.format(me.tsToSeason, 'm/d');
+                if ( (me.tsFromSeason != null && me.tsFromSeason != "") && (me.tsToSeason != null && me.tsToSeason != "")){
+                    if (parseInt(me.tsFromSeason.substring(0, 2)) > parseInt(me.tsToSeason.substring(0, 2))) {      // Ext.Date.format(me.tsFromSeason, 'm')
+                        me.graphProperties.subtitle = esapp.Utils.getTranslation('from') + ' ' + me.graphProperties.subtitle + '/' + me.tsFromSeason + '  ' + esapp.Utils.getTranslation('to') + ' ' + (parseInt(me.graphProperties.subtitle)+1) + '/' + me.tsToSeason;
                     }
                     else {
-                        // me.timeseriesChart.subtitle = esapp.Utils.getTranslation('season') + ' ' +  Ext.Date.format(me.tsFromSeason, 'm/d') + ' - ' + Ext.Date.format(me.tsToSeason, 'm/d') + ' ' + esapp.Utils.getTranslation('of') + ' ' + me.timeseriesChart.subtitle;
-                        me.timeseriesChart.subtitle = esapp.Utils.getTranslation('from') + ' ' + me.timeseriesChart.subtitle + '/' + Ext.Date.format(me.tsFromSeason, 'm/d') + '  ' + esapp.Utils.getTranslation('to') + ' ' + me.timeseriesChart.subtitle + '/' + Ext.Date.format(me.tsToSeason, 'm/d');
+                        // me.graphProperties.subtitle = esapp.Utils.getTranslation('season') + ' ' +  Ext.Date.format(me.tsFromSeason, 'm/d') + ' - ' + Ext.Date.format(me.tsToSeason, 'm/d') + ' ' + esapp.Utils.getTranslation('of') + ' ' + me.graphProperties.subtitle;
+                        me.graphProperties.subtitle = esapp.Utils.getTranslation('from') + ' ' + me.graphProperties.subtitle + '/' + me.tsFromSeason + '  ' + esapp.Utils.getTranslation('to') + ' ' + me.graphProperties.subtitle + '/' + me.tsToSeason;
                     }
                 }
             }
             else {
-                if ( me.tsFromSeason != null && me.tsToSeason != null){
-                    me.timeseriesChart.subtitle = esapp.Utils.getTranslation('from') + ' ' + Ext.Date.format(me.tsFromSeason, 'm/d') + '  ' + esapp.Utils.getTranslation('to') + ' ' +  Ext.Date.format(me.tsToSeason, 'm/d');
+                if ( (me.tsFromSeason != null && me.tsFromSeason != "") && (me.tsToSeason != null && me.tsToSeason != "")){
+                    me.graphProperties.subtitle = esapp.Utils.getTranslation('from') + ' ' + me.tsFromSeason + '  ' + esapp.Utils.getTranslation('to') + ' ' +  me.tsToSeason;
                 }
             }
         }
         //else if ( Ext.getCmp('radio-fromto').getValue() ){
         else if ( me.tsFromPeriod != '' && me.tsToPeriod != ''){
-            me.timeseriesChart.subtitle = esapp.Utils.getTranslation('from') + ' ' + Ext.Date.format(me.tsFromPeriod, 'Y-m-d') + '  ' + esapp.Utils.getTranslation('to') + ' ' + Ext.Date.format(me.tsToPeriod, 'Y-m-d');
+            me.graphProperties.subtitle = esapp.Utils.getTranslation('from') + ' ' + me.tsFromPeriod + '  ' + esapp.Utils.getTranslation('to') + ' ' + me.tsToPeriod;
         }
 
-        me.timeseriesChart.filename = me.timeseriesChart.title + '_' + me.timeseriesChart.subtitle.toString().replace(' ', '_');
+        // me.graphProperties.filename = me.graphProperties.title + '_' + me.graphProperties.subtitle.toString().replace(' ', '_');
 
-        chartpropertiesStore.each(function(chartproperties) {   // Should always be 1 record!!
-            me.timeseriesChart.chart_title_font_size = chartproperties.get('chart_title_font_size');
-            me.timeseriesChart.chart_title_font_color = esapp.Utils.convertRGBtoHex(chartproperties.get('chart_title_font_color'));
+        graphpropertiesStore.each(function(graphproperties) {   // Should always be 1 record!!
+            me.graphProperties.graph_title_font_size = graphproperties.get('graph_title_font_size');
+            me.graphProperties.graph_title_font_color = esapp.Utils.convertRGBtoHex(graphproperties.get('graph_title_font_color'));
 
-            me.timeseriesChart.chart_subtitle_font_size = chartproperties.get('chart_subtitle_font_size');
-            me.timeseriesChart.chart_subtitle_font_color = esapp.Utils.convertRGBtoHex(chartproperties.get('chart_subtitle_font_color'));
+            me.graphProperties.graph_subtitle_font_size = graphproperties.get('graph_subtitle_font_size');
+            me.graphProperties.graph_subtitle_font_color = esapp.Utils.convertRGBtoHex(graphproperties.get('graph_subtitle_font_color'));
 
-            me.timeseriesChart.xaxe_font_size = chartproperties.get('xaxe_font_size');
-            me.timeseriesChart.xaxe_font_color = esapp.Utils.convertRGBtoHex(chartproperties.get('xaxe_font_color'));
+            me.graphProperties.xaxe_font_size = graphproperties.get('xaxe_font_size');
+            me.graphProperties.xaxe_font_color = esapp.Utils.convertRGBtoHex(graphproperties.get('xaxe_font_color'));
 
-            me.timeseriesChart.yaxe1_font_size = chartproperties.get('yaxe1_font_size');
-            me.timeseriesChart.yaxe2_font_size = chartproperties.get('yaxe2_font_size');
-            me.timeseriesChart.yaxe3_font_size = chartproperties.get('yaxe3_font_size');
-            me.timeseriesChart.yaxe4_font_size = chartproperties.get('yaxe4_font_size');
+            me.graphProperties.legend_title_font_size = graphproperties.get('legend_font_size');
+            me.graphProperties.legend_title_font_color = esapp.Utils.convertRGBtoHex(graphproperties.get('legend_font_color'));
 
-            //for (var yaxescount = 0; yaxescount < me.timeseriesChart.yaxes.length; yaxescount++) {
-            //    if (yaxescount == 0) me.timeseriesChart.yaxes[yaxescount].yaxe_title_font_size = chartproperties.get('yaxe1_font_size');
-            //    if (yaxescount == 1) me.timeseriesChart.yaxes[yaxescount].yaxe_title_font_size = chartproperties.get('yaxe2_font_size');
-            //    //if (yaxescount == 2) me.timeseriesChart.yaxes[yaxescount].yaxe_title_font_size = chartproperties.get('yaxe3_font_size');
-            //}
-
-            me.timeseriesChart.legend_title_font_size = chartproperties.get('legend_font_size');
-            me.timeseriesChart.legend_title_font_color = esapp.Utils.convertRGBtoHex(chartproperties.get('legend_font_color'));
-
-            me.timeseriesChart.width = chartproperties.get('chart_width');
-            me.timeseriesChart.height = chartproperties.get('chart_height');
+            me.graphProperties.width = graphproperties.get('graph_width');
+            me.graphProperties.height = graphproperties.get('graph_height');
         });
     },
 
@@ -143,15 +602,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
         var categories = [];
         //var categories = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-        if (me.timeseriesGraph.data_available) {
-            //var cats = me.timeseriesGraph.xaxis.categories;
-            //for (var i = 0; i < cats.length; i++) {
-            //    var year = cats[i].substring(0,4);
-            //    var month = cats[i].substring(4,6);
-            //    var day = cats[i].substring(6,8);
-            //    categories[i] = Date.UTC(year, month-1, day); // Date.UTC(year, month-1, day);
-            //}
-        } else {
+        if (!me.timeseriesGraph.data_available) {
             plotBackgroundImage = 'resources/img/no_data.gif';
         }
 
@@ -163,16 +614,16 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 autoRotationLimit: -40,
                 //step: 2,
                 //autoRotation: [0,-90],
-                y: 34,
+                y: 25,
                 padding: 10,
                 //useHTML: false,
                 //reserveSpace: false,
                 style: {
-                    color: me.timeseriesChart.xaxe_font_color,
+                    color: me.graphProperties.xaxe_font_color,
                     "font-family": 'Arial, Verdana, Helvetica, sans-serif',
                     "fontWeight": 'bold',
-                    //fontSize: me.timeseriesChart.xaxe_font_size-6,
-                    "fontSize": me.timeseriesChart.xaxe_font_size + 'px'
+                    //fontSize: me.graphProperties.xaxe_font_size-6,
+                    "fontSize": me.graphProperties.xaxe_font_size + 'px'
                     ,margin: '0 0 0 0'
                 },
                 formatter: function () {
@@ -182,13 +633,13 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
         } else {
             xAxisLabels = {
                 enabled: 1,
-                y: 34,
+                y: 25,
                 //step: 3,
                 style: {
-                    color: me.timeseriesChart.xaxe_font_color,
+                    color: me.graphProperties.xaxe_font_color,
                     "font-family": 'Arial, Verdana, Helvetica, sans-serif',
                     "fontWeight": 'bold',
-                    "fontSize": me.timeseriesChart.xaxe_font_size + 'px',
+                    "fontSize": me.graphProperties.xaxe_font_size + 'px',
                     margin: '0 0 0 0'
                 },
                 formatter: function () {
@@ -205,11 +656,11 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             var maxPeriod = '/12/31';     //      Ext.Date.format(me.tsToSeason, 'm-d');
 
             me.yearsToCompare.forEach(function(year){
-                if (me.tsFromSeason != null && me.tsToSeason != null){
-                    minPeriod = new Date(year + Ext.Date.format(me.tsFromSeason, '/m/d')).getTime();
-                    maxPeriod = new Date(year + Ext.Date.format(me.tsToSeason, '/m/d')).getTime();
-                    if (Ext.Date.format(me.tsToSeason, 'm') < Ext.Date.format(me.tsFromSeason, 'm')){
-                        maxPeriod = new Date(year+1 + Ext.Date.format(me.tsToSeason, '/m/d')).getTime();
+                if (me.tsFromSeason != null && me.tsFromSeason != '' && me.tsToSeason != null && me.tsToSeason != ''){
+                    minPeriod = new Date(year + '/' + me.tsFromSeason.replace('-', '/')).getTime();
+                    maxPeriod = new Date(year + '/' + me.tsToSeason.replace('-', '/')).getTime();
+                    if (me.tsToSeason.substring(0,2) < me.tsFromSeason.substring(0,2)){
+                        maxPeriod = new Date(year+1 + '/' + me.tsToSeason.replace('-', '/')).getTime();
                     }
                 }
                 else {
@@ -260,10 +711,54 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             }]
         }
 
-        if (me.charttype == 'cumulative' && !me.timeseriesChart.localRefresh) {
+        if (me.graphtype == 'cumulative' && !me.graphProperties.localRefresh) {
             var TimeseriesCumulatedAverages = null;
             var TimeseriesCumulatedData = null;
             var aboveAvgColor = '#009E00';
+            var diffProdName = '';
+            var refProdName = '';
+
+            var lastItemsToRemove = 0;
+            me.timeseriesGraph.timeseries.forEach(function (timeserie) {
+                if (timeserie.reference == true){
+                    for (var i = timeserie.data.length - 1; i >= 0; --i) {
+                        if (timeserie.data[i][1] == null) {
+                            timeserie.data.splice(i, 1);
+                            lastItemsToRemove += 1;
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                }
+            });
+
+            me.timeseriesGraph.timeseries.forEach(function (timeserie) {
+                if (timeserie.reference != true){
+                    for (var i = lastItemsToRemove; i >= 1; --i) {
+                        timeserie.data.pop();
+                    }
+                }
+            });
+
+            // var nullValueArrayIndexes = [];
+            var refNullValuesChangedToDiffValue = false;
+            me.timeseriesGraph.timeseries.forEach(function (timeserie) {
+                if (timeserie.reference == true){
+                    timeserie.data.forEach(function (datarecord, idx) {
+                        if (datarecord[1] == null) {
+                            // nullValueArrayIndexes.push(idx);
+                            refNullValuesChangedToDiffValue = true;
+                            me.timeseriesGraph.timeseries.forEach(function (timeserie) {
+                                if (timeserie.difference == true){
+                                    datarecord[1]  = timeserie.data[idx][1];
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
             me.timeseriesGraph.timeseries.forEach(function (timeserie) {
                 //if (timeserie.cumulative) {
                     //me.timeseriesGraph.cumulative = true;
@@ -277,28 +772,14 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                         cumulated = datarecord[1];
                     })
 
-                    //TimeseriesCumulatedData = Ext.clone(timeserie.data);
-                    //aboveAvgColor = timeserie.color;
-                    //
-                    //me.timeseriesGraph.timeseries.forEach(function (AVGtimeserie) {
-                    //    if (AVGtimeserie.cumulative && AVGtimeserie.yAxis == timeserie.yAxis && AVGtimeserie.average == true) {
-                    //        AVGtimeserie.type = 'line';
-                    //        AVGtimeserie.dashStyle = 'Solid';
-                    //        AVGtimeserie.lineWidth = 1;
-                    //        var cumulated = 0;
-                    //        AVGtimeserie.data.forEach(function (datarecord) {
-                    //            datarecord[1] += cumulated;
-                    //            cumulated = datarecord[1];
-                    //        })
-                    //        TimeseriesCumulatedAverages = Ext.clone(AVGtimeserie.data);
-                    //    }
-                    //});
-
                     if (timeserie.difference == true) {
+                        diffProdName = timeserie.name;
+                        timeserie.name = timeserie.name + ' ('+esapp.Utils.getTranslation('diff')+')';
                         TimeseriesCumulatedAverages = Ext.clone(timeserie.data);
                     }
                     else if (timeserie.reference == true){
-                        //console.info(timeserie);
+                        refProdName = timeserie.name;
+                        timeserie.name = timeserie.name + ' ('+esapp.Utils.getTranslation('ref')+')';
                         TimeseriesCumulatedData = Ext.clone(timeserie.data);
                         // aboveAvgColor = timeserie.color;
                     }
@@ -324,7 +805,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                     fillColor: aboveAvgColor,
                     color: aboveAvgColor,
                     id: "Above",
-                    name: "Above",
+                    name: esapp.Utils.getTranslation('above') + ' ' + esapp.Utils.getTranslation('diff'),
                     type: "area",
                     showInLegend: true,
                     enableMouseTracking: false
@@ -344,7 +825,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                     fillColor: "#ff0000",  // "#ff0000",   // "#009E00",  //
                     color: "#ff0000",  // "#ff0000",       // "#009E00",  //
                     id: "Below",
-                    name: "Below",
+                    name: esapp.Utils.getTranslation('below') + ' ' + esapp.Utils.getTranslation('diff'),
                     type: "area",
                     showInLegend: true,
                     enableMouseTracking: false
@@ -441,32 +922,19 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             else unit = ' (' + unit + ')'
 
             var min = me.timeseriesGraph.yaxes[yaxescount].min;
-            if (min == null || min == '' || min == 'null'){
-                min = null
-            }
-            else {
+            if (min != null && min != ''){
                 min =  parseFloat(me.timeseriesGraph.yaxes[yaxescount].min)
             }
             var max = me.timeseriesGraph.yaxes[yaxescount].max;
-            if (max == null || max == '' || max == 'null') {
-                max = null
-            }
-            else {
+            if (max != null && max != '') {
                 max = parseFloat(me.timeseriesGraph.yaxes[yaxescount].max)
             }
-
-            //if (me.timeseriesGraph.cumulative){
+            // if (me.timeseriesGraph.cumulative){
             //    min = null;
             //    max = null;
-            //}
+            // }
 
             me.timeseriesGraph.yaxes[yaxescount].title_color = esapp.Utils.convertRGBtoHex(me.timeseriesGraph.yaxes[yaxescount].title_color);
-
-            if (yaxescount == 0) me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size = me.timeseriesChart.yaxe1_font_size;
-            if (yaxescount == 1) me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size = me.timeseriesChart.yaxe2_font_size;
-            if (yaxescount == 2) me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size = me.timeseriesChart.yaxe3_font_size;
-            if (yaxescount == 3) me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size = me.timeseriesChart.yaxe4_font_size;
-
 
             //if (titlecolor.charAt(0) != "#") { // convert RBG to HEX if RGB value is given. Highcharts excepts only HEX.
             //    var rgb_arr = [];
@@ -485,7 +953,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
 
             gridLineWidth = 1;
             if (opposite) {
-                gridLineWidth = 0;
+                gridLineWidth = 1;
             }
             var yaxe = {
                 id: me.timeseriesGraph.yaxes[yaxescount].id,
@@ -498,7 +966,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                         color: me.timeseriesGraph.yaxes[yaxescount].title_color,  // Highcharts.getOptions().colors[yaxescount],
                         "font-family": 'Arial, Verdana, Helvetica, sans-serif',
                         "fontWeight": 'bold',
-                        "fontSize": me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size + 'px'
+                        "fontSize": me.timeseriesGraph.yaxes[yaxescount].title_font_size + 'px'
                     }
                 },
                 title: {
@@ -507,39 +975,47 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                         color: me.timeseriesGraph.yaxes[yaxescount].title_color,  // Highcharts.getOptions().colors[yaxescount],
                         "font-family": 'Arial, Verdana, Helvetica, sans-serif',
                         "fontWeight": 'bold',
-                        "fontSize": me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size + 'px'
+                        "fontSize": me.timeseriesGraph.yaxes[yaxescount].title_font_size + 'px'
                     }
                 },
-                opposite: opposite
-                ,min: min
-                ,max: max
+                opposite: opposite,
+                min: min,
+                max: max
             };
             Yaxes.push(yaxe);
             timeseries_names += me.timeseriesGraph.yaxes[yaxescount].title.replace(' ', '_') + '_';
         }
         // console.info(Yaxes);
-        me.filename = timeseries_names + me.timeseriesChart.title.replace(' ', '_') + '_' + me.timeseriesChart.subtitle.toString().replace(' ', '_');
+        me.filename = timeseries_names + (me.graphtype == 'xy' ? esapp.Utils.getTranslation('PROFILE') : me.graphtype)
+        if (esapp.Utils.objectExists(me.graphProperties.title)){
+            me.filename += '_' + me.graphProperties.title.replace(' ', '_');
+        }
+        if (esapp.Utils.objectExists(me.graphProperties.subtitle)){
+            me.filename += '_' + me.graphProperties.subtitle.toString().replace(' ', '_');
+        }
 
         var timeseries = me.timeseriesGraph.timeseries;
         //console.info(timeseries);
 
         var spacingRight = 10;
         if (me.timeseriesGraph.yaxes.length == 1) {
-            spacingRight = 40;
+            spacingRight = 30;
         }
 
         var seriesMarkerEnabled = true;
-        if (me.charttype == 'cumulative'){
+        if (me.graphtype == 'cumulative'){
             seriesMarkerEnabled = false;
         }
-        me.tschart = new Highcharts.Chart({
-            //colors: ['#006600', '#000000', '#0070CC', '#00008A', '#8C8C8C', '#1EB611', '#FF9655', '#FFF263', '#6AF9C4'],
+        me.tsgraph = new Highcharts.Chart({
             chart: {
-                renderTo: 'tschart_' + me.id,
+                renderTo: 'tsgraph_' + me.id,
                 className: 'chartfitlayout',
                 zoomType: 'xy',
-                // spacingRight: spacingRight,
                 alignTicks: true,
+                // spacingBottom: 50,      // set when logo and disclamer objects are shown under togglebutton
+                // spacingTop: 60,         // set when logo and disclamer objects are shown under togglebutton
+                spacingLeft: 25,
+                spacingRight: spacingRight,
                 //margin: chartMargin, // [35, 15, 65, 65],  // for legend on the bottom of the chart
                 //marginTop:top,
                 //marginRight: marginright,
@@ -559,19 +1035,6 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
 
                 }
             },
-            //exporting: {
-            //    //chartOptions: { // specific options for the exported image
-            //    //    plotOptions: {
-            //    //        series: {
-            //    //            dataLabels: {
-            //    //                enabled: false
-            //    //            }
-            //    //        }
-            //    //    }
-            //    //},
-            //    scale: 1,
-            //    fallbackToExportServer: false
-            //},
             credits: {
                 enabled: false
             },
@@ -619,50 +1082,28 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 }
             },
             title: {
-                text: me.timeseriesChart.title,
+                text: me.graphProperties.title,
                 align: 'center',
                 //y: 50,
                 style: {
-                    color: me.timeseriesChart.chart_title_font_color,
+                    color: me.graphProperties.graph_title_font_color,
                     "font-family": 'Arial, Verdana, Helvetica, sans-serif',
                     "fontWeight": 'bold',
-                    "fontSize": me.timeseriesChart.chart_title_font_size + 'px'
+                    "fontSize": me.graphProperties.graph_title_font_size + 'px'
                 }
             },
             subtitle: {
-                text: me.timeseriesChart.subtitle,
+                text: me.graphProperties.subtitle,
                 align: 'center',
                 //y: 65,
                 style: {
-                    color: me.timeseriesChart.chart_subtitle_font_color,
+                    color: me.graphProperties.graph_subtitle_font_color,
                     "font-family": 'Arial, Verdana, Helvetica, sans-serif',
                     "fontWeight": 'bold',
-                    "fontSize": me.timeseriesChart.chart_subtitle_font_size + 'px'
+                    "fontSize": me.graphProperties.graph_subtitle_font_size + 'px'
                 }
             },
             xAxis: xAxis,
-            //xAxis: [{
-            //    type: 'datetime',
-            //    //tickmarkPlacement: 'on', // on between  - For categorized axes only!
-            //    startOnTick: false,
-            //    labels: xAxisLabels,
-            //    tickInterval: 30 * 24 * 3600 * 1000
-            //
-            //    //labels: {
-            //    //    enabled: 1,
-            //    //    y:28,
-            //    //    //step: 1,
-            //    //    style: xaxis_labelstyle,
-            //    //    formatter: function() {
-            //    //        return Highcharts.dateFormat('%b', this.value);
-            //    //    }
-            //    //}
-            //    //,minorTickInterval: 3
-            //    //dateTimeLabelFormats: {
-            //    //    day: '%e %b'
-            //    //},
-            //    //categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            //}],
             yAxis: Yaxes,
             tooltip: {
                 shared: true,
@@ -680,23 +1121,25 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             legend: {
                 layout: 'horizontal',  // horizontal vertical
                 align: 'center', // center left right
-                verticalAlign: 'bottom',
+                verticalAlign: 'bottom',  // top, middle or bottom
+                // x:0,
+                // y:-5,
                 //x: 80,
                 //y: 55,
                 floating: false,
                 backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF',
                 //borderColor: Highcharts.theme.legendBackgroundColor || '#FFFFFF',
                 symbolPadding: 3,
-                symbolWidth: 35,
-                symbolHeight: 25,
+                symbolWidth: 30,
+                symbolHeight: 20,
                 borderRadius: 3,
                 borderWidth: 0,
                 itemMarginBottom: 10,
                 itemStyle: {
                     "font-family": 'Arial, Verdana, Helvetica, sans-serif',
                     "fontWeight": 'bold',
-                    "fontSize": me.timeseriesChart.legend_title_font_size + 'px',     // '18px',
-                    color: me.timeseriesChart.legend_title_font_color     //'black'
+                    "fontSize": me.graphProperties.legend_title_font_size + 'px',     // '18px',
+                    color: me.graphProperties.legend_title_font_color     //'black'
                 },
                 itemHiddenStyle: {
                     color: 'gray'
@@ -705,9 +1148,20 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             series: timeseries
         });
 
-        me.tschart.setSize(document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight);
-        me.tschart.redraw();
-        //console.info(me.tschart);
+        if (me.showObjects){
+            var graphObjectToggleBtn = me.lookupReference('objectsbtn_'+me.id.replace(/-/g,'_'));
+            graphObjectToggleBtn.toggle(true);
+            me.getController().toggleObjects(graphObjectToggleBtn);
+        }
+
+        me.tsgraph.setSize(document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight);
+        me.tsgraph.redraw();
+
+        if (me.graphtype == 'cumulative' && refNullValuesChangedToDiffValue){
+            Ext.toast({anchor: me, hideDuration: 4000, html: esapp.Utils.getTranslation('warning_cumul_values_changed'), title: '', width: 350, align: 't'});
+        }
+
+        // console.info(me.tsgraph);
     },
 
     createRankingChart: function(mecallback) {
@@ -721,12 +1175,17 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
 
         var xAxisLabels = {
             enabled: 1,
-            y: 34,
+            // autoRotation: -90,
+            autoRotation: [-10, -20, -30, -40, -50, -60, -70, -80, -90],
+            // staggerLines: 2,
+            // autoRotationLimit: 30,
+            // x: 0,
+            // y: 25,
             style: {
-                color: me.timeseriesChart.xaxe_font_color,
+                color: me.graphProperties.xaxe_font_color,
                 "font-family": 'Arial, Verdana, Helvetica, sans-serif',
                 "fontWeight": 'bold',
-                "fontSize": me.timeseriesChart.xaxe_font_size + 'px',
+                "fontSize": me.graphProperties.xaxe_font_size + 'px',
                 margin: '0 0 0 0'
             }
         };
@@ -751,10 +1210,10 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
         var timeseries_names = '';
         for (var yaxescount = 0; yaxescount < me.timeseriesGraph.yaxes.length; yaxescount++) {
             var opposite = false;
-            if (me.timeseriesGraph.yaxes[yaxescount].opposite === 'true' ||
-                me.timeseriesGraph.yaxes[yaxescount].opposite == true ||
-                me.timeseriesGraph.yaxes[yaxescount].opposite == 'true')
-                opposite = true;
+            // if (me.timeseriesGraph.yaxes[yaxescount].opposite === 'true' ||
+            //     me.timeseriesGraph.yaxes[yaxescount].opposite == true ||
+            //     me.timeseriesGraph.yaxes[yaxescount].opposite == 'true')
+            //     opposite = true;
 
             var unit = me.timeseriesGraph.yaxes[yaxescount].unit;
             if (unit == null || unit.trim() == '')
@@ -762,25 +1221,15 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             else unit = ' (' + unit + ')'
 
             var min = me.timeseriesGraph.yaxes[yaxescount].min;
-            if (min == null || min == '' || min == 'null'){
-                min = null
-            }
-            else {
+            if (min != null){
                 min =  parseFloat(me.timeseriesGraph.yaxes[yaxescount].min)
             }
             var max = me.timeseriesGraph.yaxes[yaxescount].max;
-            if (max == null || max == '' || max == 'null') {
-                max = null
-            }
-            else {
+            if (max != null) {
                 max = parseFloat(me.timeseriesGraph.yaxes[yaxescount].max)
             }
 
             me.timeseriesGraph.yaxes[yaxescount].title_color = esapp.Utils.convertRGBtoHex(me.timeseriesGraph.yaxes[yaxescount].title_color);
-
-            if (yaxescount == 0) me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size = me.timeseriesChart.yaxe1_font_size;
-            if (yaxescount == 1) me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size = me.timeseriesChart.yaxe2_font_size;
-            if (yaxescount == 2) me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size = me.timeseriesChart.yaxe3_font_size;
 
             var yaxe = {
                 id: me.timeseriesGraph.yaxes[yaxescount].id,
@@ -793,7 +1242,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                         color: me.timeseriesGraph.yaxes[yaxescount].title_color,  // Highcharts.getOptions().colors[yaxescount],
                         "font-family": 'Arial, Verdana, Helvetica, sans-serif',
                         "fontWeight": 'bold',
-                        "fontSize": me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size + 'px'
+                        "fontSize": me.timeseriesGraph.yaxes[yaxescount].title_font_size + 'px'
                     }
                 },
                 title: {
@@ -802,7 +1251,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                         color: me.timeseriesGraph.yaxes[yaxescount].title_color,  // Highcharts.getOptions().colors[yaxescount],
                         "font-family": 'Arial, Verdana, Helvetica, sans-serif',
                         "fontWeight": 'bold',
-                        "fontSize": me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size + 'px'
+                        "fontSize": me.timeseriesGraph.yaxes[yaxescount].title_font_size + 'px'
                     }
                 },
                 opposite: opposite
@@ -813,22 +1262,29 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             timeseries_names += me.timeseriesGraph.yaxes[yaxescount].title.replace(' ', '_') + '_';
         }
 
-        me.filename = timeseries_names + me.timeseriesChart.title.replace(' ', '_') + '_' + me.timeseriesChart.subtitle.toString().replace(' ', '_');
+        me.filename = timeseries_names + (me.graphtype == 'xy' ? esapp.Utils.getTranslation('PROFILE') : me.graphtype)
+        if (esapp.Utils.objectExists(me.graphProperties.title)){
+            me.filename += '_' + me.graphProperties.title.replace(' ', '_');
+        }
+        if (esapp.Utils.objectExists(me.graphProperties.subtitle)){
+            me.filename += '_' + me.graphProperties.subtitle.toString().replace(' ', '_');
+        }
 
         var timeseries = me.timeseriesGraph.timeseries;
         //console.info(timeseries);
 
-        var spacingRight = 10;
+        var spacingRight = 25;
         if (me.timeseriesGraph.yaxes.length == 1) {
-            spacingRight = 40;
+            spacingRight = 30;
         }
 
 
-        me.tschart = new Highcharts.Chart({
+        me.tsgraph = new Highcharts.Chart({
             chart: {
-                renderTo: 'tschart_' + me.id,
+                renderTo: 'tsgraph_' + me.id,
                 className: 'chartfitlayout',
                 zoomType: 'xy',
+                spacingLeft: 10,
                 spacingRight: spacingRight,
                 alignTicks: true,
                 plotBackgroundImage: plotBackgroundImage
@@ -854,7 +1310,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                     point: {
                         events: {
                             click: function(event) {
-                                var series = me.tschart.series[0];
+                                var series = me.tsgraph.series[0];
                                 series.data.forEach(function(point) {
                                     point.update({ color: series.color }, true, false);
                                 });
@@ -866,23 +1322,23 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 }
             },
             title: {
-                text: me.timeseriesChart.title,
+                text: me.graphProperties.title,
                 align: 'center',
                 style: {
-                    color: me.timeseriesChart.chart_title_font_color,
+                    color: me.graphProperties.graph_title_font_color,
                     "font-family": 'Arial, Verdana, Helvetica, sans-serif',
                     "fontWeight": 'bold',
-                    "fontSize": me.timeseriesChart.chart_title_font_size + 'px'
+                    "fontSize": me.graphProperties.graph_title_font_size + 'px'
                 }
             },
             subtitle: {
-                text: me.timeseriesChart.subtitle,
+                text: me.graphProperties.subtitle,
                 align: 'center',
                 style: {
-                    color: me.timeseriesChart.chart_subtitle_font_color,
+                    color: me.graphProperties.graph_subtitle_font_color,
                     "font-family": 'Arial, Verdana, Helvetica, sans-serif',
                     "fontWeight": 'bold',
-                    "fontSize": me.timeseriesChart.chart_subtitle_font_size + 'px'
+                    "fontSize": me.graphProperties.graph_subtitle_font_size + 'px'
                 }
             },
             xAxis: xAxis,
@@ -915,17 +1371,24 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 itemStyle: {
                     "font-family": 'Arial, Verdana, Helvetica, sans-serif',
                     "fontWeight": 'bold',
-                    "fontSize": me.timeseriesChart.legend_title_font_size + 'px',     // '18px',
-                    color: me.timeseriesChart.legend_title_font_color
+                    "fontSize": me.graphProperties.legend_title_font_size + 'px',     // '18px',
+                    color: me.graphProperties.legend_title_font_color
+                },
+                itemHiddenStyle: {
+                    color: 'gray'
                 }
-
             },
             series: timeseries
         });
 
-        me.tschart.setSize(document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight);
-        me.tschart.redraw();
-        //console.info(me.tschart);
+        if (me.showObjects){
+            var graphObjectToggleBtn = me.lookupReference('objectsbtn_'+me.id.replace(/-/g,'_'));
+            graphObjectToggleBtn.toggle(true);
+            me.getController().toggleObjects(graphObjectToggleBtn);
+        }
+        me.tsgraph.setSize(document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight);
+        me.tsgraph.redraw();
+        //console.info(me.tsgraph);
     },
 
     createMatrixChart: function(mecallback) {
@@ -938,7 +1401,6 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             plotBackgroundImage = 'resources/img/no_data.gif';
         }
         var timeseries = me.timeseriesGraph.timeseries[0];
-        //console.info(timeseries);
 
         var colsize = 11 * 24 * 36e5; // 10 days    Dekad
         if (me.timeseriesGraph.data_available){
@@ -961,39 +1423,48 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
         var series = [];
         if (me.timeseriesGraph.data_available) {
             series = [{
-                //type: 'heatmap',
-                //colorByPoint: true,
-                //colors: ['#90006F', '#3300CC', '#004AFF', '#00F5FF', '#00FF00', '#FFFF00', '#FF7F00', '#FF0000', '#690000'],    // me.timeseriesGraph.colors
                 name: timeseries.name,
                 borderWidth: 0,
                 borderColor: "#ffffff",
                 nullColor: 'transparent',
-                colsize: colsize,   // 2 * 24 * 36e5, // 11 days     // 30 * me.timeseriesGraph.yaxes[0].categories.length,  // (me.tschart.plotWidth / (timeseries.data.length / me.timeseriesGraph.categories.length)),    //
+                colsize: colsize,   // 2 * 24 * 36e5, // 11 days     // 30 * me.timeseriesGraph.yaxes[0].categories.length,  // (me.tsgraph.plotWidth / (timeseries.data.length / me.timeseriesGraph.categories.length)),    //
                 data: timeseries.data
             }]
         }
-
 
         var colorAxis = me.timeseriesGraph.colorAxis;
 
         if (Ext.isDefined(colorAxis.stops)) {
             legend = {
-                layout: 'horizontal',  // horizontal vertical
-                align: 'center', // center left right
+                layout: 'horizontal',       // horizontal vertical
+                align: 'center',            // center left right
                 verticalAlign: 'bottom',    // bottom
-                width: 460,
-                symbolWidth: 450,
-                itemStyle: {
-                    "font-family": 'Arial, Verdana, Helvetica, sans-serif',
-                    "fontWeight": 'bold',
-                    "fontSize": me.timeseriesChart.legend_title_font_size + 'px'
-                }
+                title: {
+                    text: timeseries.name,
+                    margin: 0,
+                    padding: 0,
+                    style: {
+                        fontStyle: 'italic',
+                        fontSize: me.graphProperties.legend_title_font_size + 'px'
+                    }
+                },
+                // padding: 50,
+                // width: 460,
+                symbolWidth: 500
+                // itemStyle: {
+                //     "font-family": 'Arial, Verdana, Helvetica, sans-serif',
+                //     "fontWeight": 'bold',
+                //     "fontSize": me.graphProperties.legend_title_font_size + 'px'
+                // }
             };
 
             colorAxis.labels = {
+                style: {
+                    "font-family": 'Arial, Verdana, Helvetica, sans-serif',
+                    "fontWeight": 'bold',
+                    "fontSize": me.graphProperties.legend_title_font_size + 'px'
+                },
                 formatter: function () {
-                    //console.info(this.value);
-                    //console.info(this.value.toFixed(2));
                     if (this.value % 1 === 0)
                         return this.value;
                     else
@@ -1003,27 +1474,38 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
         }
         else {
             legend = {
-                layout: 'vertical',  // horizontal vertical
-                align: 'right', // center left right
+                layout: 'vertical',      // horizontal vertical
+                align: 'right',          // center left right
                 verticalAlign: 'top',    // bottom
                 x: 0,
                 y: 100,
+                width: 100,
+                margin: 10,
                 itemStyle: {
                     "font-family": 'Arial, Verdana, Helvetica, sans-serif',
                     "fontWeight": 'bold',
-                    "fontSize": me.timeseriesChart.legend_title_font_size + 'px'
+                    "fontSize": me.graphProperties.legend_title_font_size + 'px'
+                },
+                title: {
+                    text: timeseries.name,
+                    style: {
+                        fontStyle: 'italic',
+                        "fontSize": me.graphProperties.legend_title_font_size + 'px',
+                        width: 100
+                    }
                 }
             };
         }
 
         var xAxisLabels = {
             enabled: 1,
-            y: 34,
+            // autoRotationLimit: -40,
+            y: 20,
             style: {
-                color: me.timeseriesChart.xaxe_font_color,
+                color: me.graphProperties.xaxe_font_color,
                 "font-family": 'Arial, Verdana, Helvetica, sans-serif',
                 "fontWeight": 'bold',
-                "fontSize": me.timeseriesChart.xaxe_font_size + 'px',
+                "fontSize": me.graphProperties.xaxe_font_size + 'px',
                 margin: '0 0 0 0'
             },
             format: '{value:%b}' // long month
@@ -1051,15 +1533,14 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
         //    timeserie.color = esapp.Utils.convertRGBtoHex(timeserie.color);
         //});
 
-
         var Yaxes = [];
         var timeseries_names = '';
         for (var yaxescount = 0; yaxescount < me.timeseriesGraph.yaxes.length; yaxescount++) {
             var opposite = false;
-            if (me.timeseriesGraph.yaxes[yaxescount].opposite === 'true' ||
-                me.timeseriesGraph.yaxes[yaxescount].opposite == true ||
-                me.timeseriesGraph.yaxes[yaxescount].opposite == 'true')
-                opposite = true;
+            // if (me.timeseriesGraph.yaxes[yaxescount].opposite === 'true' ||
+            //     me.timeseriesGraph.yaxes[yaxescount].opposite == true ||
+            //     me.timeseriesGraph.yaxes[yaxescount].opposite == 'true')
+            //     opposite = true;
 
             var unit = me.timeseriesGraph.yaxes[yaxescount].unit;
             if (unit == null || unit.trim() == '')
@@ -1067,50 +1548,40 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             else unit = ' (' + unit + ')'
 
             var min = me.timeseriesGraph.yaxes[yaxescount].min;
-            if (min == null || min == '' || min == 'null'){
-                min = null
-            }
-            else {
+            if (min != null){
                 min =  parseFloat(me.timeseriesGraph.yaxes[yaxescount].min)
             }
             var max = me.timeseriesGraph.yaxes[yaxescount].max;
-            if (max == null || max == '' || max == 'null') {
-                max = null
-            }
-            else {
+            if (max != null) {
                 max = parseFloat(me.timeseriesGraph.yaxes[yaxescount].max)
             }
 
             me.timeseriesGraph.yaxes[yaxescount].title_color = esapp.Utils.convertRGBtoHex(me.timeseriesGraph.yaxes[yaxescount].title_color);
 
-            if (yaxescount == 0) me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size = me.timeseriesChart.yaxe1_font_size;
-            if (yaxescount == 1) me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size = me.timeseriesChart.yaxe2_font_size;
-            if (yaxescount == 2) me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size = me.timeseriesChart.yaxe3_font_size;
-
             var yaxe = {
                 id: me.timeseriesGraph.yaxes[yaxescount].id,
-                //categories: me.timeseriesGraph.yaxes[yaxescount].categories,
-                //tickAmount: 8,
                 gridLineWidth: 1,
                 startOnTick: false,
                 endOnTick: false,
                 offset: 10,
                 labels: {
                     format: '{value} ',
+                    // padding: 10,
                     style: {
                         color: me.timeseriesGraph.yaxes[yaxescount].title_color,  // Highcharts.getOptions().colors[yaxescount],
                         "font-family": 'Arial, Verdana, Helvetica, sans-serif',
                         "fontWeight": 'bold',
-                        "fontSize": me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size + 'px'
+                        "fontSize": me.timeseriesGraph.yaxes[yaxescount].title_font_size + 'px'
                     }
                 },
                 title: {
                     text: me.timeseriesGraph.yaxes[yaxescount].title + unit,
+                    padding: 10,
                     style: {
                         color: me.timeseriesGraph.yaxes[yaxescount].title_color,  // Highcharts.getOptions().colors[yaxescount],
                         "font-family": 'Arial, Verdana, Helvetica, sans-serif',
                         "fontWeight": 'bold',
-                        "fontSize": me.timeseriesGraph.yaxes[yaxescount].yaxe_title_font_size + 'px'
+                        "fontSize": me.timeseriesGraph.yaxes[yaxescount].title_font_size + 'px'
                     }
                 },
                 opposite: opposite
@@ -1121,37 +1592,34 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             timeseries_names += me.timeseriesGraph.yaxes[yaxescount].title.replace(' ', '_') + '_';
         }
 
-        me.filename = timeseries_names + me.timeseriesChart.title.replace(' ', '_') + '_' + me.timeseriesChart.subtitle.toString().replace(' ', '_');
 
-        var spacingRight = 10;
-        //if (me.timeseriesGraph.yaxes.length == 1) {
-        //    spacingRight = 40;
-        //}
+        me.filename = timeseries_names + (me.graphtype == 'xy' ? esapp.Utils.getTranslation('PROFILE') : me.graphtype)
+        if (esapp.Utils.objectExists(me.graphProperties.title)){
+            me.filename += '_' + me.graphProperties.title.replace(' ', '_');
+        }
+        if (esapp.Utils.objectExists(me.graphProperties.subtitle)){
+            me.filename += '_' + me.graphProperties.subtitle.toString().replace(' ', '_');
+        }
 
-        //console.info(me.timeseriesGraph.colors);
-        //
-        //Highcharts.setOptions({
-        //    series: {
-        //        colors: ['#90006F', '#3300CC', '#004AFF', '#00F5FF', '#00FF00', '#FFFF00', '#FF7F00', '#FF0000', '#690000']    // me.timeseriesGraph.colors
-        //    }
-        //});
-        //
+        var spacingRight = 20;
+        if (Ext.isDefined(colorAxis.stops)) {
+           spacingRight = 30;
+        }
+
         //Highcharts.theme = {
         //    colors: ['#90006F', '#3300CC', '#004AFF', '#00F5FF', '#00FF00', '#FFFF00', '#FF7F00', '#FF0000', '#690000']    // me.timeseriesGraph.colors
         //}
         //
         //Highcharts.setOptions(Highcharts.theme);
         //
-        //me.tschart = new Highcharts.Chart(Highcharts.merge(Highcharts.theme,{
-        me.tschart = new Highcharts.Chart({
-            //colorByPoint: true,
-            //colors: ['#90006F', '#3300CC', '#004AFF', '#00F5FF', '#00FF00', '#FFFF00', '#FF7F00', '#FF0000', '#690000'],    // me.timeseriesGraph.colors
-            //colors: ['rgba(64,19,117,0.05)', 'rgba(64,19,117,0.2)', 'rgba(64,19,117,0.4)', 'rgba(64,19,117,0.5)', 'rgba(64,19,117,0.6)', 'rgba(64,19,117,0.8)', 'rgba(64,19,117,1)'],
+        //me.tsgraph = new Highcharts.Chart(Highcharts.merge(Highcharts.theme,{
+        me.tsgraph = new Highcharts.Chart({
 
             chart: {
                 type: 'heatmap',
-                renderTo: 'tschart_' + me.id,
+                renderTo: 'tsgraph_' + me.id,
                 className: 'chartfitlayout',
+                spacingLeft: 10,
                 spacingRight: spacingRight,
                 plotBackgroundImage: plotBackgroundImage
             },
@@ -1174,24 +1642,24 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             },
 
             title: {
-                text: me.timeseriesChart.title,
+                text: me.graphProperties.title,
                 align: 'center',
                 style: {
-                    color: me.timeseriesChart.chart_title_font_color,
+                    color: me.graphProperties.graph_title_font_color,
                     "font-family": 'Arial, Verdana, Helvetica, sans-serif',
                     "fontWeight": 'bold',
-                    "fontSize": me.timeseriesChart.chart_title_font_size + 'px'
+                    "fontSize": me.graphProperties.graph_title_font_size + 'px'
                 }
             },
 
             subtitle: {
-                text: me.timeseriesChart.subtitle,
+                text: me.graphProperties.subtitle,
                 align: 'center',
                 style: {
-                    color: me.timeseriesChart.chart_subtitle_font_color,
+                    color: me.graphProperties.graph_subtitle_font_color,
                     "font-family": 'Arial, Verdana, Helvetica, sans-serif',
                     "fontWeight": 'bold',
-                    "fontSize": me.timeseriesChart.chart_subtitle_font_size + 'px'
+                    "fontSize": me.graphProperties.graph_subtitle_font_size + 'px'
                 }
             },
 
@@ -1214,22 +1682,9 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             //},
 
             series: series,
-
             xAxis: xAxis,
-
             yAxis: Yaxes,
-
             colorAxis: colorAxis,
-
-            //legend: {
-            //    align: 'right',
-            //    layout: 'vertical',
-            //    margin: 0,
-            //    verticalAlign: 'top',
-            //    y: 25,
-            //    symbolHeight: 280
-            //},
-
             legend: legend,
 
             tooltip: {
@@ -1250,45 +1705,84 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
         });
         //}));
 
-        me.tschart.setSize(document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight);
-        me.tschart.redraw();
-        //console.info(me.tschart);
+        if (me.showObjects){
+            var graphObjectToggleBtn = me.lookupReference('objectsbtn_'+me.id.replace(/-/g,'_'));
+            graphObjectToggleBtn.toggle(true);
+            me.getController().toggleObjects(graphObjectToggleBtn);
+        }
+
+        me.tsgraph.setSize(document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight);
+        me.tsgraph.redraw();
+        //console.info(me.tsgraph);
     },
 
     generateChart: function(){
         var me = this.getView();
-        var chartpropertiesStore = this.getStore('chartproperties');
+        var user = esapp.getUser();
+        var graphpropertiesStore = this.getStore('graphproperties');
 
-        if (me.charttype == 'cumulative'){
-            me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('CUMULATIVE')+ ' ' + esapp.Utils.getTranslation('GRAPH')+ ' - ' + Ext.getCmp('selectedregionname').getValue() +'</span>');
+        me.tsFromSeason =  me.tsFromSeason instanceof Date ? Ext.Date.format(me.tsFromSeason, 'm-d') : me.tsFromSeason;          // !(me.tsFromSeason instanceof Date)
+        me.tsToSeason = me.tsToSeason instanceof Date ? Ext.Date.format(me.tsToSeason, 'm-d') : me.tsToSeason;
+        me.tsFromPeriod = me.tsFromPeriod instanceof Date ? Ext.Date.format(me.tsFromPeriod, 'Y-m-d') : me.tsFromPeriod;
+        me.tsToPeriod = me.tsToPeriod instanceof Date ? Ext.Date.format(me.tsToPeriod, 'Y-m-d') : me.tsToPeriod;
+
+        if (user != 'undefined' && user != null){
+            Ext.fly('graphview_title_templatename_' + me.id).dom.innerHTML = me.isTemplate ? me.graph_tpl_name : '';
+            // me.selectedregionname = me.isTemplate ? me.selectedregionname : me.workspace.lookupReference('timeserieschartselection'+me.workspace.id).lookupReference('selectedregionname').getValue();
         }
-        else if (me.charttype == 'ranking'){
-            me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('RANKING_ZSCORE')+ ' ' + esapp.Utils.getTranslation('GRAPH')+ ' - ' + Ext.getCmp('selectedregionname').getValue() +'</span>');
+        // else {
+        //     me.selectedregionname = me.workspace.lookupReference('timeserieschartselection'+me.workspace.id).lookupReference('selectedregionname').getValue();
+        // }
+
+        if (me.graphtype == 'cumulative'){
+            // me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('CUMULATIVE')+ ' ' + esapp.Utils.getTranslation('GRAPH')+ ' - ' + Ext.getCmp('selectedregionname').getValue() +'</span>');
+            Ext.fly('graphview_title_' + me.id).dom.innerHTML = esapp.Utils.getTranslation('CUMULATIVE');
+                                                                // + ' ' + esapp.Utils.getTranslation('GRAPH');
+                                                                // me.selectedregionname;
         }
-        else if (me.charttype == 'matrix'){
-            me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('MATRIX')+ ' ' + esapp.Utils.getTranslation('GRAPH')+ ' - ' + Ext.getCmp('selectedregionname').getValue() +'</span>');
+        else if (me.graphtype == 'ranking'){
+            // me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('RANKING_ZSCORE')+ ' ' + esapp.Utils.getTranslation('GRAPH')+ ' - ' + Ext.getCmp('selectedregionname').getValue() +'</span>');
+            Ext.fly('graphview_title_' + me.id).dom.innerHTML = esapp.Utils.getTranslation('RANKING_ZSCORE');
+                                                                // + ' ' + esapp.Utils.getTranslation('GRAPH');
+                                                                // me.selectedregionname;
+        }
+        else if (me.graphtype == 'matrix'){
+            // me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('MATRIX')+ ' ' + esapp.Utils.getTranslation('GRAPH')+ ' - ' + Ext.getCmp('selectedregionname').getValue() +'</span>');
+            Ext.fly('graphview_title_' + me.id).dom.innerHTML = esapp.Utils.getTranslation('MATRIX');
+                                                                // + ' ' + esapp.Utils.getTranslation('GRAPH');
+                                                                // me.selectedregionname;
         }
         else {
-            me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('PROFILE')+ ' ' + esapp.Utils.getTranslation('GRAPH')+ ' - ' + Ext.getCmp('selectedregionname').getValue() +'</span>');
+            // me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('PROFILE')+ ' ' + esapp.Utils.getTranslation('GRAPH')+ ' - ' + Ext.getCmp('selectedregionname').getValue() +'</span>');
+            Ext.fly('graphview_title_' + me.id).dom.innerHTML = esapp.Utils.getTranslation('PROFILE');
+                                                                // + ' ' + esapp.Utils.getTranslation('GRAPH');
+                                                                // me.selectedregionname;
         }
 
-        chartpropertiesStore.load({
-            params: {
-                charttype: me.charttype
-            },
+        var storeparams = {
+                graphtype: me.graphtype
+            }
+        if (user != 'undefined' && user != null){
+            storeparams.userid = user.userid;
+            storeparams.graph_tpl_id = esapp.Utils.objectExists(me.graph_tpl_id) ? me.graph_tpl_id : -1;
+            storeparams.graph_tpl_name = me.isTemplate ? me.graph_tpl_name : 'default';
+        }
+        me.lookupReference('tbar_'+me.id).disable();
+        graphpropertiesStore.load({
+            params: storeparams,
             callback:function(){
-                me.getController().setDefaultChartDrawProperties();
-                chartpropertiesStore.each(function(chartproperties) {
-                    var height = parseInt(chartproperties.get('chart_height'));
-                    if (height > Ext.getBody().getViewSize().height-80){
-                        height = Ext.getBody().getViewSize().height-80
-                    }
-                    me.setSize(parseInt(chartproperties.get('chart_width')), height);
-                });
-                if (me.charttype == 'ranking'){
+                me.getController().setGraphProperties();
+                // graphpropertiesStore.each(function(graphproperties) {
+                //     var height = parseInt(graphproperties.get('graph_height'));
+                //     if (height > Ext.getBody().getViewSize().height-80){
+                //         height = Ext.getBody().getViewSize().height-80
+                //     }
+                //     me.setSize(parseInt(graphproperties.get('graph_width')), height);
+                // });
+                if (me.graphtype == 'ranking'){
                     me.getController().getTimeseries(me.getController().createRankingChart);
                 }
-                else if (me.charttype == 'matrix'){
+                else if (me.graphtype == 'matrix'){
                     me.getController().getTimeseries(me.getController().createMatrixChart);
                 }
                 else {
@@ -1300,32 +1794,53 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
 
     refreshChart: function(){
         var me = this.getView();
-        var chartpropertiesStore = this.getStore('chartproperties');
-        var timeseriesselections = Ext.getCmp('timeserieschartselection').getController().getTimeseriesSelections(me.charttype);
+        // var graphpropertiesStore = this.getStore('graphproperties');
+        // var timeseriesselections = null;
+
+        var selectedProductsAndTimeFramePanel = Ext.getCmp(me.getId()+'-select_products_timeframe');
+        me.tsdrawprops = selectedProductsAndTimeFramePanel.down('timeseriesproductselection').getController().getSelectedTSDrawProperties();
+
         var chartdrawpropertiespanel = this.lookupReference('chart_draw_properties_' + me.id);
-
         if (chartdrawpropertiespanel != null){
-            chartdrawpropertiespanel.close();
+            chartdrawpropertiespanel.destroy();
         }
 
-        if (timeseriesselections != null) {
-            //console.info(timeseriesselections);
-            me.selectedTimeseries = timeseriesselections.selectedTimeseries;
-            me.yearTS = timeseriesselections.yearTS;
-            me.tsFromPeriod = timeseriesselections.tsFromPeriod;
-            me.tsToPeriod = timeseriesselections.tsToPeriod;
-            me.yearsToCompare = timeseriesselections.yearsToCompare;
-            me.tsFromSeason = timeseriesselections.tsFromSeason;
-            me.tsToSeason = timeseriesselections.tsToSeason;
-            me.wkt = timeseriesselections.wkt;
-
-            if( me.tschart instanceof Highcharts.Chart) {
-                me.tschart.destroy();
-            }
-            me.tschart = null;
-
-            this.generateChart();
+        // if (!me.isTemplate){
+        //     timeseriesselections = me.workspace.lookupReference('timeserieschartselection'+me.workspace.id).getController().getTimeseriesSelections(me.graphtype);
+        //     if (timeseriesselections != null) {
+        //         //console.info(timeseriesselections);
+        //         me.selectedTimeseries = timeseriesselections.selectedTimeseries;
+        //         me.yearTS = timeseriesselections.yearTS;
+        //         me.tsFromPeriod = timeseriesselections.tsFromPeriod;
+        //         me.tsToPeriod = timeseriesselections.tsToPeriod;
+        //         me.yearsToCompare = timeseriesselections.yearsToCompare;
+        //         me.tsFromSeason = timeseriesselections.tsFromSeason;
+        //         me.tsToSeason = timeseriesselections.tsToSeason;
+        //         me.wkt_geom = timeseriesselections.wkt_geom;
+        //     }
+        // }
+        if( me.tsgraph instanceof Highcharts.Chart) {
+            me.tsgraph.destroy();
         }
+        me.tsgraph = null;
+
+        me.lookupReference('tbar_'+me.id).disable();
+        me.getController().setGraphProperties();
+        me.graphProperties.localRefresh = false;
+        if (me.graphtype == 'ranking') {
+            // me.getController().createRankingChart(me);
+            me.getController().getTimeseries(me.getController().createRankingChart);
+
+        }
+        else if (me.graphtype == 'matrix') {
+            // me.getController().createMatrixChart(me);
+            me.getController().getTimeseries(me.getController().createMatrixChart);
+        }
+        else {
+            // me.getController().createDefaultChart(me);
+            me.getController().getTimeseries(me.getController().createDefaultChart);
+        }
+        // this.generateChart();
     },
 
     openChartProperties: function() {
@@ -1336,775 +1851,837 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             yaxe2 = {},
             yaxe3 = {}
 
-        var crenderer = function(color) {
-            renderTpl = color;
+        var chartDrawPropertiesPanel = Ext.getCmp('chart_draw_properties_'+me.id);
+        me.lookupReference('tbar_'+me.id).disable();
 
-            if (color.trim()==''){
-                renderTpl = 'transparent';
+        if (!chartDrawPropertiesPanel) {
+            var crenderer = function (color) {
+                renderTpl = color;
+
+                if (color.trim() == '') {
+                    renderTpl = 'transparent';
+                }
+                else {
+                    renderTpl = '<span style="background:rgb(' + esapp.Utils.HexToRGB(color) + '); color:' + esapp.Utils.invertHexToRGB(color) + ';">' + esapp.Utils.HexToRGB(color) + '</span>';
+                }
+                return renderTpl;
+            };
+
+            var fontsizes = Ext.create('Ext.data.Store', {      // [8,9,10,11,12,14,16,18,20,22,24,26,28,30,32,34,36,48,72]
+                fields: ['fontsize'],
+                data: [
+                    {'fontsize': 8},
+                    {'fontsize': 9},
+                    {'fontsize': 10},
+                    {'fontsize': 11},
+                    {'fontsize': 12},
+                    {'fontsize': 14},
+                    {'fontsize': 16},
+                    {'fontsize': 18},
+                    {'fontsize': 20},
+                    {'fontsize': 22},
+                    {'fontsize': 24},
+                    {'fontsize': 26},
+                    {'fontsize': 28},
+                    {'fontsize': 30},
+                    {'fontsize': 32},
+                    {'fontsize': 34},
+                    {'fontsize': 36},
+                    {'fontsize': 48},
+                    {'fontsize': 72}
+                ]
+            });
+
+            var fontsizesCombo = {
+                xtype: 'combobox',
+                store: fontsizes,
+                queryMode: 'local',
+                displayField: 'fontsize',
+                valueField: 'fontsize',
+                forceSelection: true,
+                triggerAction: 'all',
+                allowBlank: false,
+                editable: false
             }
-            else {
-                renderTpl = '<span style="background:rgb('+esapp.Utils.HexToRGB(color)+'); color:'+esapp.Utils.invertHexToRGB(color)+';">'+esapp.Utils.HexToRGB(color)+'</span>';
+
+            source = {
+                // graph_width: me.graphProperties.width,
+                // graph_height: me.graphProperties.height,
+
+                graph_title: me.graphProperties.title,
+                graph_title_font_color: esapp.Utils.convertRGBtoHex(me.graphProperties.graph_title_font_color),
+                graph_title_font_size: me.graphProperties.graph_title_font_size,
+
+                graph_subtitle: me.graphProperties.subtitle,
+                graph_subtitle_font_color: esapp.Utils.convertRGBtoHex(me.graphProperties.graph_subtitle_font_color),
+                graph_subtitle_font_size: me.graphProperties.graph_subtitle_font_size,
+
+                legend_font_size: me.graphProperties.legend_title_font_size,
+                legend_font_color: esapp.Utils.convertRGBtoHex(me.graphProperties.legend_title_font_color),
+
+                xaxe_font_size: me.graphProperties.xaxe_font_size,
+                xaxe_font_color: esapp.Utils.convertRGBtoHex(me.graphProperties.xaxe_font_color)
             }
-            return renderTpl;
-        };
 
-        var fontsizes = Ext.create('Ext.data.Store', {      // [8,9,10,11,12,14,16,18,20,22,24,26,28,30,32,34,36,48,72]
-            fields: ['fontsize'],
-            data : [
-                {'fontsize': 8},
-                {'fontsize': 9},
-                {'fontsize': 10},
-                {'fontsize': 11},
-                {'fontsize': 12},
-                {'fontsize': 14},
-                {'fontsize': 16},
-                {'fontsize': 18},
-                {'fontsize': 20},
-                {'fontsize': 22},
-                {'fontsize': 24},
-                {'fontsize': 26},
-                {'fontsize': 28},
-                {'fontsize': 30},
-                {'fontsize': 32},
-                {'fontsize': 34},
-                {'fontsize': 36},
-                {'fontsize': 48},
-                {'fontsize': 72}
-            ]
-        });
+            source.yaxe1_id = me.timeseriesGraph.yaxes[0].id;
+            source.yaxe1_title = me.timeseriesGraph.yaxes[0].title;
+            // source.yaxe1_font_size = me.graphProperties.yaxe1_font_size;    // from TABLE!
+            source.yaxe1_font_size = me.timeseriesGraph.yaxes[0].title_font_size;    // from TABLE!
+            source.yaxe1_color = esapp.Utils.convertRGBtoHex(me.timeseriesGraph.yaxes[0].title_color);
+            source.yaxe1_min = me.timeseriesGraph.yaxes[0].min;
+            source.yaxe1_max = me.timeseriesGraph.yaxes[0].max;
+            source.yaxe1_opposite = me.timeseriesGraph.yaxes[0].opposite;
+            source.yaxe1_unit = me.timeseriesGraph.yaxes[0].unit;
+            source.yaxe1_aggregation_type = me.timeseriesGraph.yaxes[0].aggregation_type;
+            source.yaxe1_aggregation_min = me.timeseriesGraph.yaxes[0].aggregation_min;
+            source.yaxe1_aggregation_max = me.timeseriesGraph.yaxes[0].aggregation_max;
 
-        var fontsizesCombo = {
-            xtype: 'combobox',
-            store: fontsizes,
-            queryMode: 'local',
-            displayField: 'fontsize',
-            valueField: 'fontsize',
-            forceSelection: true,
-            triggerAction: 'all',
-            allowBlank: false,
-            editable: false
-        }
+            if (me.timeseriesGraph.yaxes.length > 1) {
+                source.yaxe2_id = me.timeseriesGraph.yaxes[1].id;
+                source.yaxe2_title = me.timeseriesGraph.yaxes[1].title;
+                // source.yaxe2_font_size = me.graphProperties.yaxe2_font_size;    // from TABLE!
+                source.yaxe2_font_size = me.timeseriesGraph.yaxes[1].title_font_size;    // from TABLE!
+                source.yaxe2_color = esapp.Utils.convertRGBtoHex(me.timeseriesGraph.yaxes[1].title_color);
+                source.yaxe2_min = me.timeseriesGraph.yaxes[1].min;
+                source.yaxe2_max = me.timeseriesGraph.yaxes[1].max;
+                source.yaxe2_opposite = me.timeseriesGraph.yaxes[1].opposite;
+                source.yaxe2_unit = me.timeseriesGraph.yaxes[1].unit;
+                source.yaxe2_aggregation_type = me.timeseriesGraph.yaxes[1].aggregation_type;
+                source.yaxe2_aggregation_min = me.timeseriesGraph.yaxes[1].aggregation_min;
+                source.yaxe2_aggregation_max = me.timeseriesGraph.yaxes[1].aggregation_max;
 
-        source = {
-            chart_width: me.timeseriesChart.width,
-            chart_height: me.timeseriesChart.height,
+            }
+            if (me.timeseriesGraph.yaxes.length > 2) {
+                source.yaxe3_id = me.timeseriesGraph.yaxes[2].id;
+                source.yaxe3_title = me.timeseriesGraph.yaxes[2].title;
+                // source.yaxe3_font_size = me.graphProperties.yaxe3_font_size;    // from TABLE!
+                source.yaxe3_font_size = me.timeseriesGraph.yaxes[2].title_font_size;    // from TABLE!
+                source.yaxe3_color = esapp.Utils.convertRGBtoHex(me.timeseriesGraph.yaxes[2].title_color);
+                source.yaxe3_min = me.timeseriesGraph.yaxes[2].min;
+                source.yaxe3_max = me.timeseriesGraph.yaxes[2].max;
+                source.yaxe3_opposite = me.timeseriesGraph.yaxes[2].opposite;
+                source.yaxe3_unit = me.timeseriesGraph.yaxes[2].unit;
+                source.yaxe3_aggregation_type = me.timeseriesGraph.yaxes[2].aggregation_type;
+                source.yaxe3_aggregation_min = me.timeseriesGraph.yaxes[2].aggregation_min;
+                source.yaxe3_aggregation_max = me.timeseriesGraph.yaxes[2].aggregation_max;
+            }
+            if (me.timeseriesGraph.yaxes.length > 3) {
+                source.yaxe4_id = me.timeseriesGraph.yaxes[3].id;
+                source.yaxe4_title = me.timeseriesGraph.yaxes[3].title;
+                // source.yaxe4_font_size = me.graphProperties.yaxe4_font_size;    // from TABLE!
+                source.yaxe4_font_size = me.timeseriesGraph.yaxes[3].title_font_size;    // from TABLE!
+                source.yaxe4_color = esapp.Utils.convertRGBtoHex(me.timeseriesGraph.yaxes[3].title_color);
+                source.yaxe4_min = me.timeseriesGraph.yaxes[3].min;
+                source.yaxe4_max = me.timeseriesGraph.yaxes[3].max;
+                source.yaxe4_opposite = me.timeseriesGraph.yaxes[3].opposite;
+                source.yaxe4_unit = me.timeseriesGraph.yaxes[3].unit;
+                source.yaxe4_aggregation_type = me.timeseriesGraph.yaxes[3].aggregation_type;
+                source.yaxe4_aggregation_min = me.timeseriesGraph.yaxes[3].aggregation_min;
+                source.yaxe4_aggregation_max = me.timeseriesGraph.yaxes[3].aggregation_max;
+            }
 
-            chart_title:  me.timeseriesChart.title,
-            chart_title_font_color:  esapp.Utils.convertRGBtoHex(me.timeseriesChart.chart_title_font_color),
-            chart_title_font_size:  me.timeseriesChart.chart_title_font_size,
-
-            chart_subtitle:  me.timeseriesChart.subtitle,
-            chart_subtitle_font_color:  esapp.Utils.convertRGBtoHex(me.timeseriesChart.chart_subtitle_font_color),
-            chart_subtitle_font_size:  me.timeseriesChart.chart_subtitle_font_size,
-
-            legend_font_size: me.timeseriesChart.legend_title_font_size,
-            legend_font_color: esapp.Utils.convertRGBtoHex(me.timeseriesChart.legend_title_font_color),
-
-            xaxe_font_size: me.timeseriesChart.xaxe_font_size,
-            xaxe_font_color: esapp.Utils.convertRGBtoHex(me.timeseriesChart.xaxe_font_color)
-        }
-
-        source.yaxe1_id = me.timeseriesGraph.yaxes[0].id;
-        source.yaxe1_title = me.timeseriesGraph.yaxes[0].title;
-        source.yaxe1_font_size = me.timeseriesChart.yaxe1_font_size;    // from TABLE!
-        source.yaxe1_color = esapp.Utils.convertRGBtoHex(me.timeseriesGraph.yaxes[0].title_color);
-        source.yaxe1_min = me.timeseriesGraph.yaxes[0].min;
-        source.yaxe1_max = me.timeseriesGraph.yaxes[0].max;
-        source.yaxe1_opposite = me.timeseriesGraph.yaxes[0].opposite;
-        source.yaxe1_unit = me.timeseriesGraph.yaxes[0].unit;
-        source.yaxe1_aggregation_type = me.timeseriesGraph.yaxes[0].aggregation_type;
-        source.yaxe1_aggregation_min = me.timeseriesGraph.yaxes[0].aggregation_min;
-        source.yaxe1_aggregation_max = me.timeseriesGraph.yaxes[0].aggregation_max;
-
-        if (me.timeseriesGraph.yaxes.length > 1) {
-            source.yaxe2_id = me.timeseriesGraph.yaxes[1].id;
-            source.yaxe2_title = me.timeseriesGraph.yaxes[1].title;
-            source.yaxe2_font_size = me.timeseriesChart.yaxe2_font_size;    // from TABLE!
-            source.yaxe2_color = esapp.Utils.convertRGBtoHex(me.timeseriesGraph.yaxes[1].title_color);
-            source.yaxe2_min = me.timeseriesGraph.yaxes[1].min;
-            source.yaxe2_max = me.timeseriesGraph.yaxes[1].max;
-            source.yaxe2_opposite = me.timeseriesGraph.yaxes[1].opposite;
-            source.yaxe2_unit = me.timeseriesGraph.yaxes[1].unit;
-            source.yaxe2_aggregation_type = me.timeseriesGraph.yaxes[1].aggregation_type;
-            source.yaxe2_aggregation_min = me.timeseriesGraph.yaxes[1].aggregation_min;
-            source.yaxe2_aggregation_max = me.timeseriesGraph.yaxes[1].aggregation_max;
-
-        }
-        if (me.timeseriesGraph.yaxes.length > 2) {
-            source.yaxe3_id = me.timeseriesGraph.yaxes[2].id;
-            source.yaxe3_title = me.timeseriesGraph.yaxes[2].title;
-            source.yaxe3_font_size = me.timeseriesChart.yaxe3_font_size;    // from TABLE!
-            source.yaxe3_color = esapp.Utils.convertRGBtoHex(me.timeseriesGraph.yaxes[2].title_color);
-            source.yaxe3_min = me.timeseriesGraph.yaxes[2].min;
-            source.yaxe3_max = me.timeseriesGraph.yaxes[2].max;
-            source.yaxe3_opposite = me.timeseriesGraph.yaxes[2].opposite;
-            source.yaxe3_unit = me.timeseriesGraph.yaxes[2].unit;
-            source.yaxe3_aggregation_type = me.timeseriesGraph.yaxes[2].aggregation_type;
-            source.yaxe3_aggregation_min = me.timeseriesGraph.yaxes[2].aggregation_min;
-            source.yaxe3_aggregation_max = me.timeseriesGraph.yaxes[2].aggregation_max;
-        }
-        if (me.timeseriesGraph.yaxes.length > 3) {
-            source.yaxe4_id = me.timeseriesGraph.yaxes[3].id;
-            source.yaxe4_title = me.timeseriesGraph.yaxes[3].title;
-            source.yaxe4_font_size = me.timeseriesChart.yaxe4_font_size;    // from TABLE!
-            source.yaxe4_color = esapp.Utils.convertRGBtoHex(me.timeseriesGraph.yaxes[3].title_color);
-            source.yaxe4_min = me.timeseriesGraph.yaxes[3].min;
-            source.yaxe4_max = me.timeseriesGraph.yaxes[3].max;
-            source.yaxe4_opposite = me.timeseriesGraph.yaxes[3].opposite;
-            source.yaxe4_unit = me.timeseriesGraph.yaxes[3].unit;
-            source.yaxe4_aggregation_type = me.timeseriesGraph.yaxes[3].aggregation_type;
-            source.yaxe4_aggregation_min = me.timeseriesGraph.yaxes[3].aggregation_min;
-            source.yaxe4_aggregation_max = me.timeseriesGraph.yaxes[3].aggregation_max;
-        }
-        //var cellEditing = Ext.create('Ext.grid.plugin.CellEditing', {
-        //    clicksToEdit: 1
-        //});
-
-
-        var drawproperties = Ext.create('Ext.panel.Panel', {
-            title: esapp.Utils.getTranslation('chart_properties'),     // 'Chart properties',
-            reference: 'chart_draw_properties_'+me.id,
-            width: 400,
-            height: 650,
-            //autoHeight: true,
-            margin: '0 0 10 0',
-            maximizable: false,
-            collapsible: true,
-            resizable: true,
-            layout: 'fit',
-            hidden: true,
-            floating: true,
-            defaultAlign: 'bl-bl',
-            closable: true,
-            closeAction: 'destroy',
-            draggable: true,
-            constrain: true,
-            alwaysOnTop: true,
-            autoShow: false,
-            frame: true,
-            frameHeader : false,
-            border: false,
-            shadow: false,
-            defaults: {
-              //align: 'right'
-            },
-            items: [
-                {   text: esapp.Utils.getTranslation('Chart draw properties'),
-                    xtype: 'propertygrid',
-                    //plugins: [ cellEditing ],
-                    nameColumnWidth: 180,
-                    sortableColumns: false,
-                    source: source,
-                    sourceConfig: {
-                        chart_width: {
-                            displayName: esapp.Utils.getTranslation('chartwidth'),   // 'Chart width (in px)',
-                            //type: 'number',
-                            editor: {
-                                xtype: 'numberfield',
-                                selectOnFocus:true
-                            }
-                        },
-                        chart_height: {
-                            displayName: esapp.Utils.getTranslation('chartheight'),   // 'Chart height (in px)',
-                            //type: 'number',
-                            editor: {
-                                xtype: 'numberfield',
-                                selectOnFocus:true
-                            }
-                        },
-                        chart_title: {
-                            displayName: esapp.Utils.getTranslation('title'),   // 'Title',
-                            //type: 'text',
-                            editor: {
-                                xtype: 'textfield',
-                                selectOnFocus:true
-                            }
-                        },
-                        chart_title_font_color: {
-                            displayName: esapp.Utils.getTranslation('titlecolor'),   // 'Title color',
-                            editor: {
-                                xtype: 'mycolorpicker'
-                            }
-                            ,renderer: crenderer
-                        },
-                        chart_title_font_size: {
-                            displayName: esapp.Utils.getTranslation('titlefontsize'),   // 'Title font size',
-                            //type: 'number',
-                            editor: fontsizesCombo
-                        },
-                        chart_subtitle: {
-                            displayName: esapp.Utils.getTranslation('subtitle'),   // 'Sub title',
-                            //type: 'text',
-                            editor: {
-                                xtype: 'textfield',
-                                selectOnFocus:true
-                            }
-                        },
-                        chart_subtitle_font_color: {
-                            displayName: esapp.Utils.getTranslation('subtitlecolor'),   // 'Sub title color',
-                            editor: {
-                                xtype: 'mycolorpicker'
-                                //,floating: false
-                            }
-                            ,renderer: crenderer
-                        },
-                        chart_subtitle_font_size: {
-                            displayName: esapp.Utils.getTranslation('subtitlefontsize'),   // 'Sub title font size',
-                            editor: fontsizesCombo
-                        },
-                        legend_font_size: {
-                            displayName: esapp.Utils.getTranslation('legendfontsize'),   // 'Legend font size',
-                            editor: fontsizesCombo
-                        },
-                        legend_font_color: {
-                            displayName: esapp.Utils.getTranslation('legendfontcolor'),   // 'Legend font colour',
-                            editor: {
-                                xtype: 'mycolorpicker'
-                            }
-                            ,renderer: crenderer
-                        },
-                        xaxe_font_size: {
-                            displayName: esapp.Utils.getTranslation('xaxefontsize'),   // 'xAxe font size',
-                            editor: fontsizesCombo
-                        },
-                        xaxe_font_color: {
-                            displayName: esapp.Utils.getTranslation('xaxefontcolor'),   // 'xAxe font color',
-                            editor: {
-                                xtype: 'mycolorpicker'
-                            }
-                            ,renderer: crenderer
-                        },
-
-
-                        yaxe1_id: {
-                            displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('id')
-                            //type: null
-                            //editor: null,
-                            //editable: false,
-                            //disabled: true,
-                            //cls: 'highlightYaxe',
-                            //style: {
-                            //    "background-color": '#C1DDF1'
-                            //},
-                            //listener: {
-                            //    afterrender: function(field, eOpts){ console.info('id field rendered'); field.setEditable(false);}
-                            //}
-                        },
-                        yaxe1_title: {
-                            displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('title'),
-                            //type: 'text',
-                            editor: {
-                                xtype: 'textfield',
-                                selectOnFocus:true
-                            }
-                        },
-                        yaxe1_font_size: {
-                            displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('fontsize'),
-                            editor: fontsizesCombo
-                        },
-                        yaxe1_color: {
-                            displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('color'),
-                            editor: {
-                                xtype: 'mycolorpicker'
-                            }
-                            ,renderer: crenderer
-                        },
-                        yaxe1_min: {
-                            displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('min'),
-                            //type: 'number',
-                            editor: {
-                                xtype: 'numberfield',
-                                selectOnFocus:true
-                            }
-                        },
-                        yaxe1_max: {
-                            displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('max'),
-                            //type: 'number',
-                            editor: {
-                                xtype: 'numberfield',
-                                selectOnFocus:true
-                            }
-                        },
-                        yaxe1_opposite: {
-                            displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('opposite'),   // 'Opposite',
-                            type: 'boolean'
-                        },
-                        yaxe1_unit: {
-                            displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('unit'),   // 'Unit',
-                            editor: {
-                                xtype: 'textfield',
-                                selectOnFocus: true
-                            }
-                        },
-                        yaxe1_aggregation_type: {
-                            displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('aggregation_type'),   // 'Aggregation type',
-                            editor: {
-                                xtype: 'combobox',
-                                store: ['mean', 'count', 'percent', 'cumulate', 'surface'],
-                                forceSelection: true
-                            }
-                        },
-                        yaxe1_aggregation_min: {
-                            displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('aggregation_min'),   // 'Aggregation min',
-                            type: 'number'
-                        },
-                        yaxe1_aggregation_max: {
-                            displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('aggregation_max'),   // 'Aggregation max',
-                            type: 'number'
-                        },
-
-
-                        yaxe2_id: {
-                            displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('id'),
-                            editor: {
-                            }
-                        },
-                        yaxe2_title: {
-                            displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('title'),
-                            //type: 'text',
-                            editor: {
-                                xtype: 'textfield',
-                                selectOnFocus: true
-                            }
-                        },
-                        yaxe2_font_size: {
-                            displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('fontsize'),
-                            editor: fontsizesCombo
-                        },
-                        yaxe2_color: {
-                            displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('color'),
-                            editor: {
-                                xtype: 'mycolorpicker'
-                            }
-                            ,renderer: crenderer
-                        },
-                        yaxe2_min: {
-                            displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('min'),
-                            //type: 'number',
-                            editor: {
-                                xtype: 'numberfield',
-                                selectOnFocus: true
-                            }
-                        },
-                        yaxe2_max: {
-                            displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('max'),
-                            //type: 'number',
-                            editor: {
-                                xtype: 'numberfield',
-                                selectOnFocus: true
-                            }
-                        },
-                        yaxe2_opposite: {
-                            displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('opposite'),   // 'Opposite',
-                            type: 'boolean'
-                        },
-                        yaxe2_unit: {
-                            displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('unit'),   // 'Unit',
-                            editor: {
-                                xtype: 'textfield',
-                                selectOnFocus: true
-                            }
-                        },
-                        yaxe2_aggregation_type: {
-                            displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('aggregation_type'),   // 'Aggregation type',
-                            editor: {
-                                xtype: 'combobox',
-                                store: ['mean', 'count', 'percent', 'cumulate', 'surface'],
-                                forceSelection: true
-                            }
-                        },
-                        yaxe2_aggregation_min: {
-                            displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('aggregation_min'),   // 'Aggregation min',
-                            type: 'number'
-                        },
-                        yaxe2_aggregation_max: {
-                            displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('aggregation_max'),   // 'Aggregation max',
-                            type: 'number'
-                        },
-
-
-                        yaxe3_id: {
-                            displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('id'),
-                            editor: {
-                            }
-                        },
-                        yaxe3_title: {
-                            displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('title'),
-                            //type: 'text',
-                            editor: {
-                                xtype: 'textfield',
-                                selectOnFocus: true
-                            }
-                        },
-                        yaxe3_font_size: {
-                            displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('fontsize'),
-                            editor: fontsizesCombo
-                        },
-                        yaxe3_color: {
-                            displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('color'),
-                            editor: {
-                                xtype: 'mycolorpicker'
-                            }
-                            ,renderer: crenderer
-                        },
-                        yaxe3_min: {
-                            displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('min'),
-                            //type: 'number',
-                            editor: {
-                                xtype: 'numberfield',
-                                selectOnFocus: true
-                            }
-                        },
-                        yaxe3_max: {
-                            displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('max'),
-                            //type: 'number',
-                            editor: {
-                                xtype: 'numberfield',
-                                selectOnFocus: true
-                            }
-                        },
-                        yaxe3_opposite: {
-                            displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('opposite'),   // 'Opposite',
-                            type: 'boolean'
-                        },
-                        yaxe3_unit: {
-                            displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('unit'),   // 'Unit',
-                            editor: {
-                                xtype: 'textfield',
-                                selectOnFocus:true
-                            }
-                        },
-                        yaxe3_aggregation_type: {
-                            displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('aggregation_type'),   // 'Aggregation type',
-                            editor: {
-                                xtype: 'combobox',
-                                store: ['mean', 'count', 'percent', 'cumulate', 'surface'],
-                                forceSelection: true
-                            }
-                        },
-                        yaxe3_aggregation_min: {
-                            displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('aggregation_min'),   // 'Aggregation min',
-                            type: 'number'
-                        },
-                        yaxe3_aggregation_max: {
-                            displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('aggregation_max'),   // 'Aggregation max',
-                            type: 'number'
-                        },
-
-
-                        yaxe4_id: {
-                            displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('id'),
-                            editor: {
-                            }
-                        },
-                        yaxe4_title: {
-                            displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('title'),
-                            //type: 'text',
-                            editor: {
-                                xtype: 'textfield',
-                                selectOnFocus: true
-                            }
-                        },
-                        yaxe4_font_size: {
-                            displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('fontsize'),
-                            editor: fontsizesCombo
-                        },
-                        yaxe4_color: {
-                            displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('color'),
-                            editor: {
-                                xtype: 'mycolorpicker'
-                            }
-                            ,renderer: crenderer
-                        },
-                        yaxe4_min: {
-                            displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('min'),
-                            //type: 'number',
-                            editor: {
-                                xtype: 'numberfield',
-                                selectOnFocus: true
-                            }
-                        },
-                        yaxe4_max: {
-                            displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('max'),
-                            //type: 'number',
-                            editor: {
-                                xtype: 'numberfield',
-                                selectOnFocus: true
-                            }
-                        },
-                        yaxe4_opposite: {
-                            displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('opposite'),   // 'Opposite',
-                            type: 'boolean'
-                        },
-                        yaxe4_unit: {
-                            displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('unit'),   // 'Unit',
-                            editor: {
-                                xtype: 'textfield',
-                                selectOnFocus:true
-                            }
-                        },
-                        yaxe4_aggregation_type: {
-                            displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('aggregation_type'),   // 'Aggregation type',
-                            editor: {
-                                xtype: 'combobox',
-                                store: ['mean', 'count', 'percent', 'cumulate', 'surface'],
-                                forceSelection: true
-                            }
-                        },
-                        yaxe4_aggregation_min: {
-                            displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('aggregation_min'),   // 'Aggregation min',
-                            type: 'number'
-                        },
-                        yaxe4_aggregation_max: {
-                            displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('aggregation_max'),   // 'Aggregation max',
-                            type: 'number'
-                        }
+            chartDrawPropertiesPanel = Ext.create('Ext.panel.Panel', {
+                title: esapp.Utils.getTranslation('graph_properties'),     // 'Graph properties',
+                id: 'chart_draw_properties_' + me.id,
+                reference: 'chart_draw_properties_' + me.id,
+                width: 400,
+                maxHeight: document.getElementById(me.id + "-body").offsetHeight - 3,
+                autoHeight: true,
+                margin: '0 0 10 0',
+                maximizable: false,
+                collapsible: true,
+                resizable: true,
+                layout: 'fit',
+                hidden: true,
+                floating: true,
+                defaultAlign: 'tl-tl',
+                closable: true,
+                closeAction: 'hide',
+                draggable: true,
+                constrain: true,
+                alwaysOnTop: true,
+                autoShow: false,
+                frame: false,
+                frameHeader: false,
+                border: false,
+                shadow: false,
+                componentCls: 'newpanelstyle',
+                listeners: {
+                    close : function (){
+                        me.lookupReference('tbar_'+me.id).enable();
                     },
+                    focusleave: function(){
+                        this.close();
+                    }
+                },
+                items: [
+                    {
+                        text: esapp.Utils.getTranslation('Chart draw properties'),
+                        xtype: 'propertygrid',
+                        nameColumnWidth: 180,
+                        sortableColumns: false,
+                        source: source,
+                        sourceConfig: {
+                            // graph_width: {
+                            //     displayName: esapp.Utils.getTranslation('chartwidth'),   // 'graph width (in px)',
+                            //     //type: 'number',
+                            //     editor: {
+                            //         xtype: 'numberfield',
+                            //         selectOnFocus:true
+                            //     }
+                            // },
+                            // graph_height: {
+                            //     displayName: esapp.Utils.getTranslation('chartheight'),   // 'graph height (in px)',
+                            //     //type: 'number',
+                            //     editor: {
+                            //         xtype: 'numberfield',
+                            //         selectOnFocus:true
+                            //     }
+                            // },
+                            graph_title: {
+                                displayName: esapp.Utils.getTranslation('title'),   // 'Title',
+                                editor: {
+                                    xtype: 'textfield',
+                                    selectOnFocus: true
+                                }
+                            },
+                            graph_title_font_color: {
+                                displayName: esapp.Utils.getTranslation('titlecolor'),   // 'Title color',
+                                editor: {
+                                    xtype: 'mycolorpicker'
+                                }
+                                , renderer: crenderer
+                            },
+                            graph_title_font_size: {
+                                displayName: esapp.Utils.getTranslation('titlefontsize'),   // 'Title font size',
+                                editor: fontsizesCombo
+                            },
+                            graph_subtitle: {
+                                displayName: esapp.Utils.getTranslation('subtitle'),   // 'Sub title',
+                                editor: {
+                                    xtype: 'textfield',
+                                    selectOnFocus: true
+                                }
+                            },
+                            graph_subtitle_font_color: {
+                                displayName: esapp.Utils.getTranslation('subtitlecolor'),   // 'Sub title color',
+                                editor: {
+                                    xtype: 'mycolorpicker'
+                                    //,floating: false
+                                }
+                                , renderer: crenderer
+                            },
+                            graph_subtitle_font_size: {
+                                displayName: esapp.Utils.getTranslation('subtitlefontsize'),   // 'Sub title font size',
+                                editor: fontsizesCombo
+                            },
+                            legend_font_size: {
+                                displayName: esapp.Utils.getTranslation('legendfontsize'),   // 'Legend font size',
+                                editor: fontsizesCombo
+                            },
+                            legend_font_color: {
+                                displayName: esapp.Utils.getTranslation('legendfontcolor'),   // 'Legend font colour',
+                                editor: {
+                                    xtype: 'mycolorpicker'
+                                }
+                                , renderer: crenderer
+                            },
+                            xaxe_font_size: {
+                                displayName: esapp.Utils.getTranslation('xaxefontsize'),   // 'xAxe font size',
+                                editor: fontsizesCombo
+                            },
+                            xaxe_font_color: {
+                                displayName: esapp.Utils.getTranslation('xaxefontcolor'),   // 'xAxe font color',
+                                editor: {
+                                    xtype: 'mycolorpicker'
+                                }
+                                , renderer: crenderer
+                            },
 
-                    listeners: {
-                        propertychange: function( source, recordId, value, oldValue, eOpts ){
-                            //console.info(source);
-                            //console.info(recordId);
-                            //console.info(value);
-                            //console.info(oldValue.toLowerCase());
-                            function saveChartProperty(property, newvalue){
-                                var chartpropertiesStore = thiscontroller.getStore('chartproperties');
-                                chartpropertiesStore.each(function(chartproperties) {
-                                    if (chartproperties.data.hasOwnProperty(property)){
-                                        //console.info('Property "' + property + '" exists in record!');
-                                        chartproperties.set(property, newvalue);
-                                    }
-                                });
+
+                            yaxe1_id: {
+                                displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('id')
+                                //type: null
+                                //editor: null,
+                                //editable: false,
+                                //disabled: true,
+                                //cls: 'highlightYaxe',
+                                //style: {
+                                //    "background-color": '#C1DDF1'
+                                //},
+                                //listener: {
+                                //    afterrender: function(field, eOpts){ console.info('id field rendered'); field.setEditable(false);}
+                                //}
+                            },
+                            yaxe1_title: {
+                                displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('title'),
+                                editor: {
+                                    xtype: 'textfield',
+                                    selectOnFocus: true
+                                }
+                            },
+                            yaxe1_font_size: {
+                                displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('fontsize'),
+                                editor: fontsizesCombo
+                            },
+                            yaxe1_color: {
+                                displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('color'),
+                                editor: {
+                                    xtype: 'mycolorpicker'
+                                }
+                                , renderer: crenderer
+                            },
+                            yaxe1_min: {
+                                displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('min'),
+                                editor: {
+                                    xtype: 'numberfield',
+                                    selectOnFocus: true
+                                }
+                            },
+                            yaxe1_max: {
+                                displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('max'),
+                                editor: {
+                                    xtype: 'numberfield',
+                                    selectOnFocus: true
+                                }
+                            },
+                            yaxe1_opposite: {
+                                displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('opposite'),   // 'Opposite',
+                                type: 'boolean'
+                            },
+                            yaxe1_unit: {
+                                displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('unit'),   // 'Unit',
+                                editor: {
+                                    xtype: 'textfield',
+                                    selectOnFocus: true
+                                }
+                            },
+                            yaxe1_aggregation_type: {
+                                displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('aggregation_type'),   // 'Aggregation type',
+                                editor: {
+                                    xtype: 'combobox',
+                                    store: ['mean', 'count', 'percent', 'cumulate', 'surface'],
+                                    forceSelection: true
+                                }
+                            },
+                            yaxe1_aggregation_min: {
+                                displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('aggregation_min'),   // 'Aggregation min',
+                                type: 'number'
+                            },
+                            yaxe1_aggregation_max: {
+                                displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('aggregation_max'),   // 'Aggregation max',
+                                type: 'number'
+                            },
+
+
+                            yaxe2_id: {
+                                displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('id'),
+                                editor: {}
+                            },
+                            yaxe2_title: {
+                                displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('title'),
+                                editor: {
+                                    xtype: 'textfield',
+                                    selectOnFocus: true
+                                }
+                            },
+                            yaxe2_font_size: {
+                                displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('fontsize'),
+                                editor: fontsizesCombo
+                            },
+                            yaxe2_color: {
+                                displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('color'),
+                                editor: {
+                                    xtype: 'mycolorpicker'
+                                }
+                                , renderer: crenderer
+                            },
+                            yaxe2_min: {
+                                displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('min'),
+                                editor: {
+                                    xtype: 'numberfield',
+                                    selectOnFocus: true
+                                }
+                            },
+                            yaxe2_max: {
+                                displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('max'),
+                                editor: {
+                                    xtype: 'numberfield',
+                                    selectOnFocus: true
+                                }
+                            },
+                            yaxe2_opposite: {
+                                displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('opposite'),   // 'Opposite',
+                                type: 'boolean'
+                            },
+                            yaxe2_unit: {
+                                displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('unit'),   // 'Unit',
+                                editor: {
+                                    xtype: 'textfield',
+                                    selectOnFocus: true
+                                }
+                            },
+                            yaxe2_aggregation_type: {
+                                displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('aggregation_type'),   // 'Aggregation type',
+                                editor: {
+                                    xtype: 'combobox',
+                                    store: ['mean', 'count', 'percent', 'cumulate', 'surface'],
+                                    forceSelection: true
+                                }
+                            },
+                            yaxe2_aggregation_min: {
+                                displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('aggregation_min'),   // 'Aggregation min',
+                                type: 'number'
+                            },
+                            yaxe2_aggregation_max: {
+                                displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('aggregation_max'),   // 'Aggregation max',
+                                type: 'number'
+                            },
+
+
+                            yaxe3_id: {
+                                displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('id'),
+                                editor: {}
+                            },
+                            yaxe3_title: {
+                                displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('title'),
+                                editor: {
+                                    xtype: 'textfield',
+                                    selectOnFocus: true
+                                }
+                            },
+                            yaxe3_font_size: {
+                                displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('fontsize'),
+                                editor: fontsizesCombo
+                            },
+                            yaxe3_color: {
+                                displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('color'),
+                                editor: {
+                                    xtype: 'mycolorpicker'
+                                }
+                                , renderer: crenderer
+                            },
+                            yaxe3_min: {
+                                displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('min'),
+                                editor: {
+                                    xtype: 'numberfield',
+                                    selectOnFocus: true
+                                }
+                            },
+                            yaxe3_max: {
+                                displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('max'),
+                                editor: {
+                                    xtype: 'numberfield',
+                                    selectOnFocus: true
+                                }
+                            },
+                            yaxe3_opposite: {
+                                displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('opposite'),   // 'Opposite',
+                                type: 'boolean'
+                            },
+                            yaxe3_unit: {
+                                displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('unit'),   // 'Unit',
+                                editor: {
+                                    xtype: 'textfield',
+                                    selectOnFocus: true
+                                }
+                            },
+                            yaxe3_aggregation_type: {
+                                displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('aggregation_type'),   // 'Aggregation type',
+                                editor: {
+                                    xtype: 'combobox',
+                                    store: ['mean', 'count', 'percent', 'cumulate', 'surface'],
+                                    forceSelection: true
+                                }
+                            },
+                            yaxe3_aggregation_min: {
+                                displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('aggregation_min'),   // 'Aggregation min',
+                                type: 'number'
+                            },
+                            yaxe3_aggregation_max: {
+                                displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('aggregation_max'),   // 'Aggregation max',
+                                type: 'number'
+                            },
+
+
+                            yaxe4_id: {
+                                displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('id'),
+                                editor: {}
+                            },
+                            yaxe4_title: {
+                                displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('title'),
+                                editor: {
+                                    xtype: 'textfield',
+                                    selectOnFocus: true
+                                }
+                            },
+                            yaxe4_font_size: {
+                                displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('fontsize'),
+                                editor: fontsizesCombo
+                            },
+                            yaxe4_color: {
+                                displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('color'),
+                                editor: {
+                                    xtype: 'mycolorpicker'
+                                }
+                                , renderer: crenderer
+                            },
+                            yaxe4_min: {
+                                displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('min'),
+                                //type: 'number',
+                                editor: {
+                                    xtype: 'numberfield',
+                                    selectOnFocus: true
+                                }
+                            },
+                            yaxe4_max: {
+                                displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('max'),
+                                editor: {
+                                    xtype: 'numberfield',
+                                    selectOnFocus: true
+                                }
+                            },
+                            yaxe4_opposite: {
+                                displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('opposite'),   // 'Opposite',
+                                type: 'boolean'
+                            },
+                            yaxe4_unit: {
+                                displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('unit'),   // 'Unit',
+                                editor: {
+                                    xtype: 'textfield',
+                                    selectOnFocus: true
+                                }
+                            },
+                            yaxe4_aggregation_type: {
+                                displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('aggregation_type'),   // 'Aggregation type',
+                                editor: {
+                                    xtype: 'combobox',
+                                    store: ['mean', 'count', 'percent', 'cumulate', 'surface'],
+                                    forceSelection: true
+                                }
+                            },
+                            yaxe4_aggregation_min: {
+                                displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('aggregation_min'),   // 'Aggregation min',
+                                type: 'number'
+                            },
+                            yaxe4_aggregation_max: {
+                                displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('aggregation_max'),   // 'Aggregation max',
+                                type: 'number'
                             }
+                        },
 
-                            function saveYaxeProperty(yaxe){
-                                //console.info(yaxe);
-                                // AJAX call to save yaxe!
-                                Ext.Ajax.request({
-                                    url:"analysis/updateyaxe",
-                                    timeout : 300000,
-                                    //scope: me,
-                                    params:yaxe,
-                                    method: 'POST',
-                                    success: function ( result, request ) {
-                                        //console.info(Ext.util.JSON.decode(result.responseText));
-                                    },
-                                    failure: function ( result, request) {
-                                    }
-                                });
-                            }
+                        listeners: {
+                            propertychange: function (source, recordId, value, oldValue, eOpts) {
 
-                            if (value != oldValue) {
-                                //if (me.charttype == 'default') {
-                                    if (recordId == 'chart_width') {
-                                        me.timeseriesChart.width = value;
-                                        me.setSize(parseInt(me.timeseriesChart.width), parseInt(me.timeseriesChart.height));
-                                    }
-                                    if (recordId == 'chart_height') {
-                                        me.timeseriesChart.height = value;
-                                        me.setSize(parseInt(me.timeseriesChart.width), parseInt(me.timeseriesChart.height));
-                                    }
-                                    if (recordId == 'chart_title') me.timeseriesChart.title = value;
-                                    if (recordId == 'chart_title_font_color')  me.timeseriesChart.chart_title_font_color = value;
-                                    if (recordId == 'chart_title_font_size')  me.timeseriesChart.chart_title_font_size = value;
+                                function saveGraphProperty(property, newvalue) {
+                                    var user = esapp.getUser();
+                                    var extraParams = {
+                                        userid: '',
+                                        istemplate: false,
+                                        graph_tpl_id: -1,
+                                        graph_tpl_name: ''
+                                    };
+                                    var graphpropertiesStore = thiscontroller.getStore('graphproperties');
 
-                                    if (recordId == 'chart_subtitle')  me.timeseriesChart.subtitle = value;
-                                    if (recordId == 'chart_subtitle_font_color')  me.timeseriesChart.chart_subtitle_font_color = value;
-                                    if (recordId == 'chart_subtitle_font_size')  me.timeseriesChart.chart_subtitle_font_size = value;
+                                    if (user != 'undefined' && user != null) {
+                                        extraParams.userid = user.userid;
+                                        extraParams.istemplate = me.isTemplate;
+                                        extraParams.graph_tpl_id = me.isTemplate ? me.parent_tpl_id : -1;
+                                        extraParams.graph_tpl_name = me.isTemplate ? me.graph_tpl_name : 'default';
+                                        graphpropertiesStore.proxy.extraParams = extraParams;
 
-                                    if (recordId == 'legend_font_size')  me.timeseriesChart.legend_title_font_size = value;
-                                    if (recordId == 'legend_font_color')  me.timeseriesChart.legend_title_font_color = value;
+                                        graphpropertiesStore.each(function (graphproperties) {
+                                            if (graphproperties.get('graph_type') == me.graphtype) {
+                                                if (graphproperties.data.hasOwnProperty(property)) {
+                                                    //console.info('Property "' + property + '" exists in record!');
+                                                    graphproperties.set(property, newvalue);
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
 
-                                    if (recordId == 'xaxe_font_size')  me.timeseriesChart.xaxe_font_size = value;
-                                    if (recordId == 'xaxe_font_color')  me.timeseriesChart.xaxe_font_color = value;
+                                // function saveYaxeProperty(yaxe) {
+                                //     var user = esapp.getUser();
+                                //
+                                //     if (user != 'undefined' && user != null) {
+                                //         yaxe.userid = user.userid;
+                                //         yaxe.istemplate = me.isTemplate;
+                                //         yaxe.graph_tpl_id = me.isTemplate ? me.parent_tpl_id : -1;
+                                //         yaxe.graph_tpl_name = me.isTemplate ? me.graph_tpl_name : 'default';
+                                //         yaxe.graphtype = me.graphtype;
+                                //
+                                //         // Save yaxe changes!
+                                //         Ext.Ajax.request({
+                                //             url: "analysis/updateyaxe",
+                                //             timeout: 300000,
+                                //             params: yaxe,
+                                //             method: 'POST',
+                                //             success: function (result, request) {
+                                //                 //console.info(Ext.util.JSON.decode(result.responseText));
+                                //             },
+                                //             failure: function (result, request) {
+                                //             }
+                                //         });
+                                //     }
+                                // }
 
-                                    if (recordId == 'yaxe1_title')  {
-                                        me.timeseriesGraph.yaxes[0].title = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[0]);
+                                if (value != oldValue) {
+                                    var graph_settings_fields = [
+                                        'graph_width',
+                                        'graph_height',
+                                        'graph_title',
+                                        'graph_title_font_color',
+                                        'graph_title_font_size',
+                                        'graph_subtitle',
+                                        'graph_subtitle_font_color',
+                                        'graph_subtitle_font_size',
+                                        'legend_font_size',
+                                        'legend_font_color',
+                                        'xaxe_font_size',
+                                        'xaxe_font_color'
+                                    ]
+
+                                    me.graphProperties.localRefresh = true;
+
+                                    if (Ext.Array.contains(graph_settings_fields, recordId)) {
+                                        if (recordId == 'graph_width') {
+                                            me.graphProperties.width = value;
+                                            me.setSize(parseInt(me.graphProperties.width), parseInt(me.graphProperties.height));
+                                        }
+                                        if (recordId == 'graph_height') {
+                                            me.graphProperties.height = value;
+                                            me.setSize(parseInt(me.graphProperties.width), parseInt(me.graphProperties.height));
+                                        }
+                                        if (recordId == 'graph_title') me.graphProperties.title = value;
+                                        if (recordId == 'graph_title_font_color') me.graphProperties.graph_title_font_color = value;
+                                        if (recordId == 'graph_title_font_size') me.graphProperties.graph_title_font_size = value;
+
+                                        if (recordId == 'graph_subtitle') me.graphProperties.subtitle = value;
+                                        if (recordId == 'graph_subtitle_font_color') me.graphProperties.graph_subtitle_font_color = value;
+                                        if (recordId == 'graph_subtitle_font_size') me.graphProperties.graph_subtitle_font_size = value;
+
+                                        if (recordId == 'legend_font_size') me.graphProperties.legend_title_font_size = value;
+                                        if (recordId == 'legend_font_color') me.graphProperties.legend_title_font_color = value;
+
+                                        if (recordId == 'xaxe_font_size') me.graphProperties.xaxe_font_size = value;
+                                        if (recordId == 'xaxe_font_color') me.graphProperties.xaxe_font_color = value;
+
+                                        saveGraphProperty(recordId, value);
                                     }
-                                    if (recordId == 'yaxe1_font_size')  me.timeseriesChart.yaxe1_font_size = value;    // from TABLE!
-                                    if (recordId == 'yaxe1_color')  {
-                                        me.timeseriesGraph.yaxes[0].title_color = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[0]);
-                                    }
-                                    if (recordId == 'yaxe1_min')  {
-                                        me.timeseriesGraph.yaxes[0].min = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[0]);
-                                    }
-                                    if (recordId == 'yaxe1_max')  {
-                                        me.timeseriesGraph.yaxes[0].max = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[0]);
-                                    }
-                                    if (recordId == 'yaxe1_opposite')  {
-                                        me.timeseriesGraph.yaxes[0].opposite = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[0]);
-                                    }
-                                    if (recordId == 'yaxe1_unit')  {
-                                        me.timeseriesGraph.yaxes[0].unit = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[0]);
-                                    }
-                                    if (recordId == 'yaxe1_aggregation_type')  {
-                                        me.timeseriesGraph.yaxes[0].aggregation_type = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[0]);
-                                    }
-                                    if (recordId == 'yaxe1_aggregation_min')  {
-                                        me.timeseriesGraph.yaxes[0].aggregation_min = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[0]);
-                                    }
-                                    if (recordId == 'yaxe1_aggregation_max')  {
-                                        me.timeseriesGraph.yaxes[0].aggregation_max = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[0]);
-                                    }
+                                    else {
+                                        if (recordId == 'yaxe1_title') {
+                                            me.timeseriesGraph.yaxes[0].title = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[0]);
+                                        }
+                                        // if (recordId == 'yaxe1_font_size')  me.timeseriesGraph.yaxes[0].title_font_size = value;    // from TABLE!
+                                        if (recordId == 'yaxe1_font_size') {
+                                            me.timeseriesGraph.yaxes[0].title_font_size = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[0]);
+                                        }
+                                        if (recordId == 'yaxe1_color') {
+                                            me.timeseriesGraph.yaxes[0].title_color = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[0]);
+                                        }
+                                        if (recordId == 'yaxe1_min') {
+                                            me.timeseriesGraph.yaxes[0].min = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[0]);
+                                        }
+                                        if (recordId == 'yaxe1_max') {
+                                            me.timeseriesGraph.yaxes[0].max = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[0]);
+                                        }
+                                        if (recordId == 'yaxe1_opposite') {
+                                            me.timeseriesGraph.yaxes[0].opposite = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[0]);
+                                        }
+                                        if (recordId == 'yaxe1_unit') {
+                                            me.timeseriesGraph.yaxes[0].unit = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[0]);
+                                        }
+                                        if (recordId == 'yaxe1_aggregation_type') {
+                                            me.timeseriesGraph.yaxes[0].aggregation_type = value;
+                                            me.graphProperties.localRefresh = false;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[0]);
+                                        }
+                                        if (recordId == 'yaxe1_aggregation_min') {
+                                            me.timeseriesGraph.yaxes[0].aggregation_min = value;
+                                            me.graphProperties.localRefresh = false;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[0]);
+                                        }
+                                        if (recordId == 'yaxe1_aggregation_max') {
+                                            me.timeseriesGraph.yaxes[0].aggregation_max = value;
+                                            me.graphProperties.localRefresh = false;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[0]);
+                                        }
 
 
-                                    if (recordId == 'yaxe2_title')  {
-                                        me.timeseriesGraph.yaxes[1].title = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[1]);
-                                    }
-                                    if (recordId == 'yaxe2_font_size')  me.timeseriesChart.yaxe2_font_size = value;     // from TABLE!
-                                    if (recordId == 'yaxe2_color')  {
-                                        me.timeseriesGraph.yaxes[1].title_color = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[1]);
-                                    }
-                                    if (recordId == 'yaxe2_min')  {
-                                        me.timeseriesGraph.yaxes[1].min = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[1]);
-                                    }
-                                    if (recordId == 'yaxe2_max')  {
-                                        me.timeseriesGraph.yaxes[1].max = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[1]);
-                                    }
-                                    if (recordId == 'yaxe2_opposite')  {
-                                        me.timeseriesGraph.yaxes[1].opposite = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[1]);
-                                    }
-                                    if (recordId == 'yaxe2_unit')  {
-                                        me.timeseriesGraph.yaxes[1].unit = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[1]);
-                                    }
-                                    if (recordId == 'yaxe2_aggregation_type')  {
-                                        me.timeseriesGraph.yaxes[1].aggregation_type = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[1]);
-                                    }
-                                    if (recordId == 'yaxe2_aggregation_min')  {
-                                        me.timeseriesGraph.yaxes[1].aggregation_min = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[1]);
-                                    }
-                                    if (recordId == 'yaxe2_aggregation_max')  {
-                                        me.timeseriesGraph.yaxes[1].aggregation_max = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[1]);
-                                    }
+                                        if (recordId == 'yaxe2_title') {
+                                            me.timeseriesGraph.yaxes[1].title = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[1]);
+                                        }
+                                        // if (recordId == 'yaxe2_font_size')  me.timeseriesGraph.yaxes[1].title_font_size;     // from TABLE!
+                                        if (recordId == 'yaxe2_font_size') {
+                                            me.timeseriesGraph.yaxes[1].title_font_size = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[1]);
+                                        }
+                                        if (recordId == 'yaxe2_color') {
+                                            me.timeseriesGraph.yaxes[1].title_color = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[1]);
+                                        }
+                                        if (recordId == 'yaxe2_min') {
+                                            me.timeseriesGraph.yaxes[1].min = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[1]);
+                                        }
+                                        if (recordId == 'yaxe2_max') {
+                                            me.timeseriesGraph.yaxes[1].max = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[1]);
+                                        }
+                                        if (recordId == 'yaxe2_opposite') {
+                                            me.timeseriesGraph.yaxes[1].opposite = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[1]);
+                                        }
+                                        if (recordId == 'yaxe2_unit') {
+                                            me.timeseriesGraph.yaxes[1].unit = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[1]);
+                                        }
+                                        if (recordId == 'yaxe2_aggregation_type') {
+                                            me.timeseriesGraph.yaxes[1].aggregation_type = value;
+                                            me.graphProperties.localRefresh = false;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[1]);
+                                        }
+                                        if (recordId == 'yaxe2_aggregation_min') {
+                                            me.timeseriesGraph.yaxes[1].aggregation_min = value;
+                                            me.graphProperties.localRefresh = false;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[1]);
+                                        }
+                                        if (recordId == 'yaxe2_aggregation_max') {
+                                            me.timeseriesGraph.yaxes[1].aggregation_max = value;
+                                            me.graphProperties.localRefresh = false;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[1]);
+                                        }
 
 
-                                    if (recordId == 'yaxe3_title')  {
-                                        me.timeseriesGraph.yaxes[2].title = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[2]);
-                                    }
-                                    if (recordId == 'yaxe3_font_size')  me.timeseriesChart.yaxe3_font_size = value;    // from TABLE!
-                                    if (recordId == 'yaxe3_color')  {
-                                        me.timeseriesGraph.yaxes[2].title_color = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[2]);
-                                    }
-                                    if (recordId == 'yaxe3_min')  {
-                                        me.timeseriesGraph.yaxes[2].min = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[2]);
-                                    }
-                                    if (recordId == 'yaxe3_max')  {
-                                        me.timeseriesGraph.yaxes[2].max = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[2]);
-                                    }
-                                    if (recordId == 'yaxe3_opposite')  {
-                                        me.timeseriesGraph.yaxes[2].opposite = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[2]);
-                                    }
-                                    if (recordId == 'yaxe3_unit')  {
-                                        me.timeseriesGraph.yaxes[2].unit = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[2]);
-                                    }
-                                    if (recordId == 'yaxe3_aggregation_type')  {
-                                        me.timeseriesGraph.yaxes[2].aggregation_type = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[2]);
-                                    }
-                                    if (recordId == 'yaxe3_aggregation_min')  {
-                                        me.timeseriesGraph.yaxes[2].aggregation_min = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[2]);
-                                    }
-                                    if (recordId == 'yaxe3_aggregation_max')  {
-                                        me.timeseriesGraph.yaxes[2].aggregation_max = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[2]);
+                                        if (recordId == 'yaxe3_title') {
+                                            me.timeseriesGraph.yaxes[2].title = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[2]);
+                                        }
+                                        // if (recordId == 'yaxe3_font_size')  me.timeseriesGraph.yaxes[2].title_font_size;   // from TABLE!
+                                        if (recordId == 'yaxe3_font_size') {
+                                            me.timeseriesGraph.yaxes[2].title_font_size = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[2]);
+                                        }
+                                        if (recordId == 'yaxe3_color') {
+                                            me.timeseriesGraph.yaxes[2].title_color = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[2]);
+                                        }
+                                        if (recordId == 'yaxe3_min') {
+                                            me.timeseriesGraph.yaxes[2].min = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[2]);
+                                        }
+                                        if (recordId == 'yaxe3_max') {
+                                            me.timeseriesGraph.yaxes[2].max = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[2]);
+                                        }
+                                        if (recordId == 'yaxe3_opposite') {
+                                            me.timeseriesGraph.yaxes[2].opposite = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[2]);
+                                        }
+                                        if (recordId == 'yaxe3_unit') {
+                                            me.timeseriesGraph.yaxes[2].unit = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[2]);
+                                        }
+                                        if (recordId == 'yaxe3_aggregation_type') {
+                                            me.timeseriesGraph.yaxes[2].aggregation_type = value;
+                                            me.graphProperties.localRefresh = false;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[2]);
+                                        }
+                                        if (recordId == 'yaxe3_aggregation_min') {
+                                            me.timeseriesGraph.yaxes[2].aggregation_min = value;
+                                            me.graphProperties.localRefresh = false;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[2]);
+                                        }
+                                        if (recordId == 'yaxe3_aggregation_max') {
+                                            me.timeseriesGraph.yaxes[2].aggregation_max = value;
+                                            me.graphProperties.localRefresh = false;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[2]);
+                                        }
+
+                                        if (recordId == 'yaxe4_title') {
+                                            me.timeseriesGraph.yaxes[3].title = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[3]);
+                                        }
+                                        // if (recordId == 'yaxe4_font_size')  me.timeseriesGraph.yaxes[3].title_font_size;    // from TABLE!
+                                        if (recordId == 'yaxe4_font_size') {
+                                            me.timeseriesGraph.yaxes[3].title_font_size = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[3]);
+                                        }
+                                        if (recordId == 'yaxe4_color') {
+                                            me.timeseriesGraph.yaxes[3].title_color = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[3]);
+                                        }
+                                        if (recordId == 'yaxe4_min') {
+                                            me.timeseriesGraph.yaxes[3].min = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[3]);
+                                        }
+                                        if (recordId == 'yaxe4_max') {
+                                            me.timeseriesGraph.yaxes[3].max = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[3]);
+                                        }
+                                        if (recordId == 'yaxe4_opposite') {
+                                            me.timeseriesGraph.yaxes[3].opposite = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[3]);
+                                        }
+                                        if (recordId == 'yaxe4_unit') {
+                                            me.timeseriesGraph.yaxes[3].unit = value;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[3]);
+                                        }
+                                        if (recordId == 'yaxe4_aggregation_type') {
+                                            me.timeseriesGraph.yaxes[3].aggregation_type = value;
+                                            me.graphProperties.localRefresh = false;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[3]);
+                                        }
+                                        if (recordId == 'yaxe4_aggregation_min') {
+                                            me.timeseriesGraph.yaxes[3].aggregation_min = value;
+                                            me.graphProperties.localRefresh = false;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[3]);
+                                        }
+                                        if (recordId == 'yaxe4_aggregation_max') {
+                                            me.timeseriesGraph.yaxes[3].aggregation_max = value;
+                                            me.graphProperties.localRefresh = false;
+                                            // saveYaxeProperty(me.timeseriesGraph.yaxes[3]);
+                                        }
                                     }
 
-                                    if (recordId == 'yaxe4_title')  {
-                                        me.timeseriesGraph.yaxes[3].title = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[3]);
-                                    }
-                                    if (recordId == 'yaxe4_font_size')  me.timeseriesChart.yaxe4_font_size = value;    // from TABLE!
-                                    if (recordId == 'yaxe4_color')  {
-                                        me.timeseriesGraph.yaxes[3].title_color = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[3]);
-                                    }
-                                    if (recordId == 'yaxe4_min')  {
-                                        me.timeseriesGraph.yaxes[3].min = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[3]);
-                                    }
-                                    if (recordId == 'yaxe4_max')  {
-                                        me.timeseriesGraph.yaxes[3].max = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[3]);
-                                    }
-                                    if (recordId == 'yaxe4_opposite')  {
-                                        me.timeseriesGraph.yaxes[3].opposite = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[3]);
-                                    }
-                                    if (recordId == 'yaxe4_unit')  {
-                                        me.timeseriesGraph.yaxes[3].unit = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[3]);
-                                    }
-                                    if (recordId == 'yaxe4_aggregation_type')  {
-                                        me.timeseriesGraph.yaxes[3].aggregation_type = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[3]);
-                                    }
-                                    if (recordId == 'yaxe4_aggregation_min')  {
-                                        me.timeseriesGraph.yaxes[3].aggregation_min = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[3]);
-                                    }
-                                    if (recordId == 'yaxe4_aggregation_max')  {
-                                        me.timeseriesGraph.yaxes[3].aggregation_max = value;
-                                        saveYaxeProperty(me.timeseriesGraph.yaxes[3]);
-                                    }
-
-                                    me.timeseriesChart.localRefresh = true;
-                                    saveChartProperty(recordId, value);
-
-                                    if (me.charttype == 'ranking'){
+                                    if (me.graphtype == 'ranking') {
                                         me.getController().createRankingChart(me);
                                     }
-                                    else if (me.charttype == 'matrix'){
+                                    else if (me.graphtype == 'matrix') {
                                         me.getController().createMatrixChart(me);
                                     }
                                     else {
                                         me.getController().createDefaultChart(me);
                                     }
-
-                                //}
-                            }
-                        },
-                        beforeedit: function( editor, e, opts ) {
-                            //console.info(e.record.get( 'name' ));
-                            if( e.record.get( 'name' )=='yaxe1_id' || e.record.get( 'name' )=='yaxe2_id' || e.record.get( 'name' )=='yaxe3_id' || e.record.get( 'name' )=='yaxe4_id') {
-                                return false;
+                                }
+                            },
+                            beforeedit: function (editor, e, opts) {
+                                //console.info(e.record.get( 'name' ));
+                                if (e.record.get('name') == 'yaxe1_id' || e.record.get('name') == 'yaxe2_id' || e.record.get('name') == 'yaxe3_id' || e.record.get('name') == 'yaxe4_id') {
+                                    return false;
+                                }
                             }
                         }
                     }
-                }
-            ]
-        });
+                ]
+            });
 
-        me.add(drawproperties);
-        drawproperties.show();
-
+            me.add(chartDrawPropertiesPanel);
+        }
+        chartDrawPropertiesPanel.show();
+        chartDrawPropertiesPanel.doConstrain();
     },
 
-    saveChart: function() {
+    saveChartAsPNG: function() {
 
         //function saveImageAs (imgOrURL) {
         //    if (typeof imgOrURL == 'object')
@@ -2124,10 +2701,17 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
 
         var EXPORT_WIDTH = 1200;
         var me = this.getView();
-        var chart = me.tschart;
+        var chart = me.tsgraph,
+            ObjectToggleBtn = me.lookupReference('objectsbtn_'+me.id.replace(/-/g,'_')),
+            disclaimerObj = me.lookupReference('disclaimer_obj_' + me.id),
+            logosObj = me.lookupReference('logo_obj_' + me.id),
+            disclaimerObjPosition = [],
+            logosObjPosition = [];
 
-        var render_width = EXPORT_WIDTH;
-        var render_height = render_width * chart.chartHeight / chart.chartWidth;
+        if (ObjectToggleBtn.pressed) {
+            disclaimerObjPosition = disclaimerObj.getPosition(true);
+            logosObjPosition = logosObj.getPosition(true);
+        }
 
         // Get the cart's SVG code          getSVGForLocalExport() if using modules/offline-exporting.js
         var svg = chart.getSVG({
@@ -2137,19 +2721,29 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             }
         });
 
+        // var render_width = EXPORT_WIDTH;
+        // var render_height = render_width * chart.chartHeight / chart.chartWidth;
+        var render_width = chart.chartWidth;
+        var render_height = chart.chartHeight;
         // Create a canvas
-        var canvas = document.createElement('canvas');
+        var canvas = document.createElement('canvas'),
+            context = canvas.getContext('2d');
         canvas.height =  render_height;
         canvas.width = render_width;
         //document.body.appendChild(canvas);
 
         // Create an image and draw the SVG onto the canvas
         var image = new Image;
-            image.onload = function() {
-                canvas.getContext('2d').drawImage(this, 0, 0, render_width, render_height);
-                var data = canvas.toDataURL("image/png");
-                download(data, me.filename + '.png');
-            };
+        image.onload = function() {
+            context.drawImage(this, 0, 0, render_width, render_height);
+
+            if (ObjectToggleBtn.pressed) {
+                context.drawImage(disclaimerObj.disclaimer_ImageObj, disclaimerObjPosition[0], disclaimerObjPosition[1]);
+                context.drawImage(logosObj.logos_ImageObj, logosObjPosition[0], logosObjPosition[1]);
+            }
+            var data = canvas.toDataURL("image/png");
+            download(data, me.filename + '.png');
+        };
         //image.src = 'data:image/svg+xml;base64,' + window.btoa(svg);
         image.src = 'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent(svg)));
 
@@ -2164,7 +2758,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
 
     tsDownload: function() {
 
-        var chart = this.getView().tschart;
+        var chart = this.getView().tsgraph;
         var type = Highcharts.exporting.MIME_TYPES.XLS;
         chart.exportChartLocal({ type: type, filename: this.getView().filename});
     }
@@ -2191,7 +2785,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
     //        a.remove();
     //    }
     //
-    //    var chart = this.getView().tschart;
+    //    var chart = this.getView().tsgraph;
     //
     //    var render_width = 1000;
     //    var render_height = render_width * chart.chartHeight / chart.chartWidth;

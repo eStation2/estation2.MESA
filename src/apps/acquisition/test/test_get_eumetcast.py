@@ -14,7 +14,7 @@ class TestGetEumetcast(unittest.TestCase):
 #     #   ---------------------------------------------------------------------------
 #     def TestGetEumetcastInfo(self):
 #         db = querydb.db
-#         data_acquisitions = querydb.get_dataacquisitions(echo=True, toJSON=False)
+#         data_acquisitions = querydb.get_dataacquisitions(toJSON=False)
 #
 #         for row in data_acquisitions:
 #             print row.data_source_id

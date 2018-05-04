@@ -28,7 +28,7 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
     closeAction: 'hide',
     draggable: true,
     constrain: true,
-    alwaysOnTop: true,
+    alwaysOnTop: false,
     autoShow: false,
     resizable: false,
     frame: false,
@@ -118,7 +118,8 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
                             }
                         });
                     });
-                    task.delay(250);
+                    // console.info('refreshimage legendObj');
+                    task.delay(20);
                 }
             }
             ,show: function(){
@@ -135,7 +136,7 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
                 }
                 else {
                     me.setPosition(me.legendPosition);
-                    me.fireEvent('refreshimage');
+                    // me.fireEvent('refreshimage');
                 }
             }
             // ,move: function(){

@@ -2,10 +2,10 @@ Ext.define('esapp.view.analysis.timeseriesChartViewModel', {
     extend: 'Ext.app.ViewModel',
     alias: 'viewmodel.analysis-timeserieschartview',
     stores: {
-        chartproperties: {
-            model: 'esapp.model.ChartProperties',
+        graphproperties: {
+            model: 'esapp.model.GraphProperties',
             autoLoad: false,
-            autoSync: true,
+            autoSync: false,
             session: true,
 
             proxy: {
@@ -14,25 +14,25 @@ Ext.define('esapp.view.analysis.timeseriesChartViewModel', {
                 appendId: false,
 
                 api: {
-                    read: 'analysis/getchartproperties',
-                    create: 'analysis/getchartproperties/create',
-                    update: 'analysis/getchartproperties/update',
-                    destroy: 'analysis/getchartproperties/delete'
+                    read: 'analysis/getgraphproperties',
+                    create: 'analysis/getgraphproperties/create',
+                    update: 'analysis/getgraphproperties/update',
+                    destroy: 'analysis/getgraphproperties/delete'
                 },
                 reader: {
                      type: 'json'
                     ,successProperty: 'success'
-                    ,rootProperty: 'chartproperties'
+                    ,rootProperty: 'graphproperties'
                     ,messageProperty: 'message'
                 },
                 writer: {
                     type: 'json',
                     writeAllFields: true,
-                    rootProperty: 'chartproperty'
+                    rootProperty: 'graphproperty'
                 },
                 listeners: {
                     exception: function(proxy, response, operation){
-                        console.info('CHART PROPERTIES VIEW MODEL - REMOTE EXCEPTION - Error querying the chart properties!');
+                        console.info('GRAPH PROPERTIES VIEW MODEL - REMOTE EXCEPTION - Error querying the graph properties!');
                     }
                 }
             }

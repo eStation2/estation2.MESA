@@ -90,11 +90,11 @@ class TestProducts(unittest.TestCase):
             return d
 
         # get full distinct list of products (native only)
-        db_products = querydb.get_products(echo=False)
+        db_products = querydb.get_products()
         try:
             db_products.__len__()
         except AttributeError:
-            db_products = querydb.get_product_native(allrecs=True, echo=False)
+            db_products = querydb.get_product_native(allrecs=True)
         self.assertTrue(db_products.__len__() > 0)
         products_dict_all = []
         # loop the products list
@@ -110,15 +110,14 @@ class TestProducts(unittest.TestCase):
             if all_prod_mapsets.__len__() > 0 and all_prod_subproducts.__len__() > 0:
                 prod_dict['productmapsets'] = []
                 for mapset in all_prod_mapsets:
-                    mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
+                    mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False)
                     mapset_dict = row2dict(mapset_info)
                     mapset_dict['mapsetdatasets'] = []
                     all_mapset_datasets = p.get_subproducts(mapset=mapset)
                     for subproductcode in all_mapset_datasets:
                         dataset_info = querydb.get_subproduct(productcode=productcode,
                                                               version=version,
-                                                              subproductcode=subproductcode,
-                                                              echo=False)
+                                                              subproductcode=subproductcode)
 
                         dataset_dict = row2dict(dataset_info)
                         dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
@@ -252,15 +251,14 @@ class TestProducts4UI(unittest.TestCase):
         all_prod_subproducts = product.subproducts
         if all_prod_mapsets.__len__() > 0 and all_prod_subproducts.__len__() > 0:
                 for mapset in all_prod_mapsets:
-                    mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
+                    mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False)
                     mapset_dict = row2dict(mapset_info)
                     mapset_dict['mapsetdatasets'] = []
                     all_mapset_datasets = product.get_subproducts(mapset=mapset)
                     for subproductcode in all_mapset_datasets:
                         dataset_info = querydb.get_subproduct(productcode=productcode,
                                                               version=version,
-                                                              subproductcode=subproductcode,
-                                                              echo=False)
+                                                              subproductcode=subproductcode)
 
                         dataset_dict = row2dict(dataset_info)
                         dataset = product.get_dataset(mapset=mapset, sub_product_code=subproductcode)
@@ -351,7 +349,7 @@ class TestProducts4UI(unittest.TestCase):
                     for mapset in all_prod_mapsets:
                         mapset_dict = []
                         # print mapset
-                        mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
+                        mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False)
                         # if mapset_info.__len__() > 0:
                         mapset_dict = functions.row2dict(mapset_info)
                         # else:
@@ -364,8 +362,7 @@ class TestProducts4UI(unittest.TestCase):
                             # print 'subproductcode: ' + subproductcode
                             dataset_info = querydb.get_subproduct(productcode=productcode,
                                                                   version=version,
-                                                                  subproductcode=subproductcode,
-                                                                  echo=False)
+                                                                  subproductcode=subproductcode)
                             # print dataset_info
                             # dataset_info = querydb.db.product.get(productcode, version, subproductcode)
                             # dataset_dict = {}

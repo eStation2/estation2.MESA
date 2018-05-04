@@ -16,8 +16,8 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
 
     xtype: 'maplogoobject',
 
-    id: 'logo_obj',
-    reference: 'logo_obj',
+    // id: 'logo_obj',
+    // reference: 'logo_obj',
     autoWidth: true,
     autoHeight: true,
     minWidth: 100,
@@ -30,7 +30,7 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
     closeAction: 'hide',
     draggable: true,
     constrain: true,
-    alwaysOnTop: true,
+    alwaysOnTop: false,
     autoShow: false,
     resizable: false,
     frame: false,
@@ -43,12 +43,18 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
     //bodyStyle:  'background:transparent;',
     margin: 0,
     padding: 0,
-    html: '',
-    logos_ImageObj: new Image(),
-    logoPosition: [434, 583],
-    changesmade: false,
+
     config: {
-        logoData: []
+        logoData: [
+            { src:'resources/img/logo/MESA_h110.jpg', width:'65', height:'50' },
+            { src:'resources/img/logo/AUC_h110.jpg', width:'65', height:'50' },
+            { src:'resources/img/logo/ACP_h110.jpg', width:'65', height:'50' },
+            { src:'resources/img/logo/logo_en.gif', width:'65', height:'50' }
+        ],
+        html: '',
+        logos_ImageObj: new Image(),
+        logoPosition: [290,518],
+        changesmade: false
     },
 
     //bind: {
@@ -74,7 +80,7 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
         // me.logoData = me.getViewModel().data.logoData;
 
         me.logos_ImageObj = new Image();
-        me.logoPosition = [434, 583];
+        // me.logoPosition = [434, 583];
 
         me.listeners = {
             //element  : 'el',
@@ -125,19 +131,23 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                             }
                         });
                     });
-
-                    if ((me.getViewModel().data.logoData != null && me.getViewModel().data.logoData.length > 0) && (me.changesmade || me.logos_ImageObj.src == '')){
+                    // console.info('refreshimage logosObj');
+                    // console.info(me.getViewModel().data.logoData);
+                    // console.info(me.changesmade);
+                    // console.info(me.logos_ImageObj.src);
+                    // if ((me.getViewModel().data.logoData != null && me.getViewModel().data.logoData.length > 0) && (me.changesmade || me.logos_ImageObj.src == '')){
+                    if ((me.getViewModel().data.logoData != null && me.getViewModel().data.logoData.length > 0)){
                         // console.info('refresh the logo image');
-                        task.delay(500);
+                        task.delay(20);
                     }
-                    else {
-                        me.logos_ImageObj = new Image();
-                    }
+                    // else {
+                    //     me.logos_ImageObj = new Image();
+                    // }
                 }
             },
             show: function(){
                 me.setPosition(me.logoPosition);
-                me.fireEvent('refreshimage');
+                // me.fireEvent('refreshimage');
             }
             // ,move: function(){
             //     me.logoPosition = me.getPosition();
@@ -150,9 +160,6 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
 
         me.items = [{
             xtype: 'dataview',
-            // minHeight: 125,
-            // maxWidth: 240,
-            // maxHeight: 90,
             itemSelector: 'img',
             bind: {
                 data: '{logoData}'
@@ -162,7 +169,6 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                 '<div id="maplogos">',
                 '<tpl for=".">',
                     '<span style="vertical-align: middle;"></span>',
-                    // '<img src="{src}" width="{width}" height="{height}" style="padding: 0px 5px 0px 0px;"/>',
                     '<img src="{src}" height="{height}"  style="vertical-align: middle; padding: 0px 5px 0px 0px;"/>',
                 '</tpl>',
                 '</div>'
@@ -178,7 +184,7 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
             width: 568,
             minHeight: 400,
             layout: 'vbox',
-            modal: true,
+            modal: false,
             hidden: true,
             floating: true,
             defaultAlign: 'br-br',

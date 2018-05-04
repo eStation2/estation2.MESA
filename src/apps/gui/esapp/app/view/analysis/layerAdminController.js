@@ -3,7 +3,7 @@ Ext.define('esapp.view.analysis.layerAdminController', {
     alias: 'controller.analysis-layeradmin'
 
     ,onClose: function(win, ev) {
-        Ext.getCmp('analysismain').lookupReference('analysismain_layersbtn').enable();
+        // Ext.getCmp('analysismain').lookupReference('analysismain_layersbtn').enable();
     }
 
     // ,onShow: function(win, ev) {

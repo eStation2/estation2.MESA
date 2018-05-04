@@ -61,10 +61,11 @@ Ext.define('esapp.Application', {
         ,'ProductsActiveStore'      // no autoload
         ,'DataAcquisitionsStore'    // no autoload
         ,'IngestionsStore'          // no autoload
-        ,'TimeseriesProductsStore'
-        ,'TSDrawPropertiesStore'
+        ,'TimeseriesProductsStore'  // no autoload
+        // ,'TSDrawPropertiesStore'
         ,"ColorSchemesStore"
         ,'DataSetsStore'            // no autoload
+        ,'UserWorkspacesStore'      // no autoload
     ],
 
     // create a reference in Ext.application so we can access it from multiple functions
@@ -77,30 +78,76 @@ Ext.define('esapp.Application', {
         //console.info(me);
 
         Ext.override(Ext.tip.QuickTip, {
-            dismissDelay: 20000
+            // dismissDelay: 20000
+            shadow: false
         });
 
         Ext.tip.QuickTipManager.init();
+        // Apply a set of config properties to the singleton
+        // Ext.apply(Ext.tip.QuickTipManager.getQuickTip(), {
+        //     shadow: false,
+        //     frame: true,
+        //     showDelay: 50      // Show 50ms after entering target
+        // });
+
+
         Ext.setGlyphFontFamily('FontAwesome');
         Ext.state.Manager.setProvider(Ext.create('Ext.state.CookieProvider'));
 
         Ext.Ajax.timeout = 300000; // 300 seconds
-        //Ext.override(Ext.form.Basic, {     timeout: Ext.Ajax.timeout / 1000 });
-        Ext.override(Ext.data.proxy.Server, {     timeout: Ext.Ajax.timeout });
-        Ext.override(Ext.data.Connection, {     timeout: Ext.Ajax.timeout });
+        Ext.override(Ext.data.proxy.Server, { timeout: Ext.Ajax.timeout });
+        Ext.override(Ext.data.Connection, { timeout: Ext.Ajax.timeout });
 
         esapp.globals = [];
 
-        // Ext.data.StoreManager.lookup('TimeseriesProductsStore').load();
+        esapp.globals['typeinstallation'] = 'full';
+        esapp.globals['role'] = 'pc2';
+        esapp.globals['mode'] = 'nominal';
+        Ext.Ajax.request({
+            method: 'POST',
+            url: 'typeinstallation',
+            success: function(response, opts){
+                var resp = Ext.JSON.decode(response.responseText);
+                if (resp.typeinstallation != ''){
+                    esapp.globals['typeinstallation'] = resp.typeinstallation;
+                }
+                if (resp.role != ''){
+                    esapp.globals['role'] = resp.role;
+                }
+                if (resp.mode != ''){
+                    esapp.globals['mode'] = resp.mode;
+                }
+            },
+            failure: function(response, opts) {
+                console.info(response.status);
+            }
+        });
+
 
         esapp.globals['selectedLanguage'] = 'eng';
         Ext.data.StoreManager.lookup('LanguagesStore').load({
             callback: function(records, options, success){
-                records.forEach(function(language) {
-                    if (language.get('selected') == true){
-                        esapp.globals['selectedLanguage'] = language.get('langcode')
+                var getParams = document.URL.split("?");    // separating the GET parameters from the current URL
+                var params = Ext.urlDecode(getParams[getParams.length - 1]);    // transforming the GET parameters into a dictionnary
+                if (esapp.Utils.objectExists(params.lang) && params.lang != ''){
+                    esapp.globals['selectedLanguage'] = params.lang;
+                    // Removing the url parameter lang= from the current url is the browsers address bar
+                    window.history.pushState({}, "", window.location.href.split("?")[0]);
+
+                    if (Ext.util.Cookies.get('estation2_userid') != null){
+                        Ext.util.Cookies.set('estation2_userlanguage', params.lang);
                     }
-                });
+                }
+                else if (Ext.util.Cookies.get('estation2_userid') != null){
+                    esapp.globals['selectedLanguage'] = Ext.util.Cookies.get('estation2_userlanguage')
+                }
+                else {
+                    records.forEach(function (language) {
+                        if (language.get('selected') == true) {
+                            esapp.globals['selectedLanguage'] = language.get('langcode')
+                        }
+                    });
+                }
 
                 Ext.data.StoreManager.lookup('i18nStore').load({
                     params:{lang:esapp.globals['selectedLanguage']},
@@ -137,7 +184,7 @@ Ext.define('esapp.Application', {
                         var taskLaunch = new Ext.util.DelayedTask(function() {
                             me.launch();
                         });
-                        taskLaunch.delay(500);
+                        taskLaunch.delay(50);
 
                     }
                 });
@@ -186,29 +233,6 @@ Ext.define('esapp.Application', {
             }
         });
 
-
-        esapp.globals['typeinstallation'] = 'full';
-        esapp.globals['role'] = 'pc2';
-        esapp.globals['mode'] = 'nominal';
-        Ext.Ajax.request({
-            method: 'POST',
-            url: 'typeinstallation',
-            success: function(response, opts){
-                var resp = Ext.JSON.decode(response.responseText);
-                if (resp.typeinstallation != ''){
-                    esapp.globals['typeinstallation'] = resp.typeinstallation;
-                }
-                if (resp.role != ''){
-                    esapp.globals['role'] = resp.role;
-                }
-                if (resp.mode != ''){
-                    esapp.globals['mode'] = resp.mode;
-                }
-            },
-            failure: function(response, opts) {
-                console.info(response.status);
-            }
-        });
         //this.callParent();
     },
 
@@ -225,7 +249,13 @@ Ext.define('esapp.Application', {
         document.getElementsByTagName('head')[0].appendChild(link);
 
         if (esapp.globals['typeinstallation'] == 'windows' || esapp.globals['typeinstallation'] == 'jrc_online'){
-            Ext.data.StoreManager.lookup('DataSetsStore').load();
+            var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
+
+            if (datasetsstore.isStore) {
+                // datasetsstore.proxy.extraParams = {forse: true};
+                datasetsstore.load();
+            }
+            // Ext.data.StoreManager.lookup('DataSetsStore').load();
         }
         else {
             if (esapp.globals['role'] == 'pc2') {

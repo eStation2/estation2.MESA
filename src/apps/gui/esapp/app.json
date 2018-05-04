@@ -124,6 +124,9 @@
         },{
             "path": "/eStation2/lib/js/OL3/build/ol.js",
             "remote": true
+//        },{
+//            "path": "/eStation2/lib/js/OL4.6.5/ol.js",
+//            "remote": true
         },{
             "path": "/eStation2/lib/js/ol3-layerswitcher-master/src/ol3-layerswitcher.js",
             "remote": true
@@ -271,6 +274,9 @@
             },{
                 "path": "/eStation2/lib/js/OL3/css/ol.css",
                 "remote": true
+//            },{
+//                "path": "/eStation2/lib/js/OL4.6.5/ol.css",
+//                "remote": true
             },{
                 "path": "/eStation2/lib/js/ol3-layerswitcher-master/src/ol3-layerswitcher.css",
                 "remote": true

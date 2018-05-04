@@ -201,13 +201,13 @@ Ext.define('esapp.Utils', {
     },
 
     colorrenderer: function(color) {
-        renderTpl = color;
+        var renderTpl = color;
 
         if (color.trim()==''){
             renderTpl = 'transparent';
         }
         else {
-            renderTpl = '<span style="background:rgb(' + this.HexToRGB(color) + '); color:' + this.invertHexToRGB(color) + ';">' + this.HexToRGB(color) + '</span>';
+            renderTpl = '<span style="background:rgb(' + esapp.Utils.HexToRGB(color) + '); color:' + esapp.Utils.invertHexToRGB(color) + ';">' + esapp.Utils.HexToRGB(color) + '</span>';
         }
         return renderTpl;
     },

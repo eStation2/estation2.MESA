@@ -6,7 +6,7 @@ Ext.define('esapp.view.analysis.ProductNavigatorModel', {
         products: {
             model: 'esapp.model.ProductNavigator'
             ,session: true
-            ,autoLoad: false
+            ,autoLoad: true
             ,loadMask: false
 
             ,sorters: {property: 'order_index', direction: 'DESC'}

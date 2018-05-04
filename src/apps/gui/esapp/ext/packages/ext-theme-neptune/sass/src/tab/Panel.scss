@@ -1,0 +1,55 @@
+@include extjs-tab-panel-ui(
+    $ui: 'workspace',
+    $ui-tab-background-color: #cbcbcb,      // transparent,
+    $ui-tab-background-color-over: #E1E1E1,    // #505050,
+    $ui-tab-background-color-active: #8f8f8f,
+
+    $ui-tab-background-gradient: 'none',
+    $ui-tab-background-gradient-over: 'none',
+    $ui-tab-background-gradient-active: 'none',
+
+    $ui-tab-color: #fff,
+    $ui-tab-color-over: #000,
+    $ui-tab-color-active: #fff,
+
+    $ui-tab-glyph-color: #acacac,
+    $ui-tab-glyph-color-over: #c4c4c4,
+    $ui-tab-glyph-color-active: #fff,
+    $ui-tab-glyph-opacity: 1,
+
+    $ui-tab-border-radius: 3px 3px 0 0,
+    $ui-tab-border-color: #fff,  // transparent,
+    $ui-tab-border-color-over: #fff, // transparent,     #ADD2ED
+    $ui-tab-border-color-focus : #fff,
+    $ui-tab-border-width: 0px,
+
+    $ui-tab-inner-border-color: #E1E1E1,  // transparent,
+    $ui-tab-inner-border-color-over: #fff, // transparent,
+    $ui-tab-inner-border-color-focus : #fff,
+    $ui-tab-inner-border-color-active : #fff,
+    $ui-tab-inner-border-width: 1px 1px 0px 1px,
+
+    $ui-tab-padding: 3px 12px 0px ,  // 24px,
+    $ui-tab-margin: 0 1px 0 0,
+
+    $ui-tab-line-height: 16px,
+    $ui-tab-font-size: 12px,
+    $ui-tab-font-size-over: 12px,
+    $ui-tab-font-size-active: 12px,
+    $ui-tab-font-weight: bold,
+    $ui-tab-font-weight-over: bold,
+    $ui-tab-font-weight-active: bold,
+
+    $ui-tab-icon-width: 10px,
+    $ui-tab-icon-height: 24px,
+    $ui-tab-icon-spacing: 3px,
+
+    $ui-bar-background-color: #E1E1E1,
+    $ui-bar-background-gradient: 'none',
+    $ui-bar-padding: 0px 0px 0px 10px,
+    $ui-strip-height: 2px,
+    $ui-strip-background-color: #8f8f8f
+
+    //$ui-tabbar-strip-height: 5px
+
+);

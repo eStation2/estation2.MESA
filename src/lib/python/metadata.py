@@ -181,7 +181,7 @@ class SdsMetadata:
     def assign_from_product(self, product, subproduct, version):
     #
         try:
-            product_out_info = querydb_meta.get_product_out_info(productcode=product,subproductcode=subproduct,version=version, echo=False)
+            product_out_info = querydb_meta.get_product_out_info(productcode=product,subproductcode=subproduct,version=version)
         except:
             logger.error('The product is not defined in the DB')
             return 1

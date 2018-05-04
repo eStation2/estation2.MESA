@@ -16,13 +16,10 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
 
     xtype: 'maptitleobject',
 
-    id: 'title_obj',
-    reference: 'title_obj',
-    // autoWidth: true,
-    // autoHeight: true,
+    // id: 'title_obj',
+    // reference: 'title_obj',
     minWidth: 150,
     minHeight: 50,
-    // height: 'auto',
     layout: 'fit',
     liquidLayout: false,
     hidden: true,
@@ -32,7 +29,7 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
     closeAction: 'hide',
     draggable: true,
     constrain: true,
-    alwaysOnTop: true,
+    alwaysOnTop: false,
     autoShow: false,
     resizable: true,
     frame: false,
@@ -45,39 +42,31 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
     //bodyStyle:  'background:transparent;',
     margin: 0,
     padding: 3,
-    html: '',
-    title_ImageObj: new Image(),
-    titlePosition: [0,0],
-    changesmade: false,
 
     config: {
-        tpl: [
-            // '<div><b style="color:rgb(0,0,0);"><font size="3">{selected_area}</font></b></div><div><b style="color:rgb(0,0,0);"><font size="3">{product_name}</font></b></div><div><b style="color:rgb(51,102,255);"><font size="3">{product_date}</font></b></div>'
-            // '<div><span style="color:rgb(0,0,0); font-size: 20px; font-weight: bold;">{selected_area}</span></div><div><span style="color:rgb(0,0,0); font-size: 20px;">{product_name}</span></div><div><span style="color:rgb(51,102,255); font-size: 20px;">{product_date}</span></div>'
-        ],
-        titleData: null
+        tpl: ['<div><span style="color:rgb(0,0,0); font-size: 20px; font-weight: bold;">{selected_area}</span></div><div><span style="color:rgb(0,0,0); font-size: 20px;">{product_name}</span></div><div><span style="color:rgb(51,102,255); font-size: 20px;">{product_date}</span></div>'],
+        titleData: null,
+        html: '<div><span style="color:rgb(0,0,0); font-size: 20px; font-weight: bold;">{selected_area}</span></div><div><span style="color:rgb(0,0,0); font-size: 20px;">{product_name}</span></div><div><span style="color:rgb(51,102,255); font-size: 20px;">{product_date}</span></div>',
+        title_ImageObj: new Image(),
+        titlePosition: [0,0],
+        changesmade: false
         // ,content: ''
     },
-    //bind:{
-    //    titleData:'{titleData}'
-    //},
+
     bind:{
         data:'{titleData}'
     },
 
     initComponent: function () {
         var me = this;
-
-        // me.autoWidth = true;
-        // me.autoHeight = true;
-        me.setMinWidth(150);
-        me.setMinHeight(50);
-        // me.height = 'auto';
-        me.layout = 'fit';
         me.title_ImageObj = new Image();
-        me.titlePosition = [0,0];
-        me.defaultTpl = '<div><span style="color:rgb(0,0,0); font-size: 20px; font-weight: bold;">{selected_area}</span></div><div><span style="color:rgb(0,0,0); font-size: 20px;">{product_name}</span></div><div><span style="color:rgb(51,102,255); font-size: 20px;">{product_date}</span></div>';
-        me.tpl.push(me.defaultTpl);
+
+        // me.setMinWidth(150);
+        // me.setMinHeight(50);
+        // me.layout = 'fit';
+        // me.titlePosition = [0,0];
+        // me.defaultTpl = '<div><span style="color:rgb(0,0,0); font-size: 20px; font-weight: bold;">{selected_area}</span></div><div><span style="color:rgb(0,0,0); font-size: 20px;">{product_name}</span></div><div><span style="color:rgb(51,102,255); font-size: 20px;">{product_date}</span></div>';
+        // me.tpl.push(me.defaultTpl);
 
         me.listeners = {
             //element  : 'el',
@@ -131,9 +120,10 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
                             }
                         });
                     });
+                    // console.info('refreshimage titleObj');
                     // console.info(me.getContent());
                     if (me.tpl.html != '' && (me.changesmade || me.title_ImageObj.src == '')){
-                        task.delay(250);
+                        task.delay(20);
                     }
                     else {
                         me.title_ImageObj = new Image();
@@ -142,7 +132,7 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
             },
             show: function(){
                 me.setPosition(me.titlePosition);
-                me.fireEvent('refreshimage');
+                // me.fireEvent('refreshimage');
             }
             // ,move: function(){
             //     console.info('moving title object');
@@ -233,7 +223,7 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
             autoWidth: true,
             autoHeight: true,
             layout: 'fit',
-            modal: true,
+            modal: false,
             hidden: true,
             floating: true,
             defaultAlign: 'tl-tl',

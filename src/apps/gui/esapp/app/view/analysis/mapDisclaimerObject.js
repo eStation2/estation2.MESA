@@ -16,8 +16,8 @@ Ext.define("esapp.view.analysis.mapDisclaimerObject",{
 
     xtype: 'mapdisclaimerobject',
 
-    id: 'disclaimer_obj',
-    reference: 'disclaimer_obj',
+    // id: 'disclaimer_obj',
+    // reference: 'disclaimer_obj',
     autoWidth: true,
     autoHeight: true,
     minWidth: 150,
@@ -30,7 +30,7 @@ Ext.define("esapp.view.analysis.mapDisclaimerObject",{
     closeAction: 'hide',
     draggable: true,
     constrain: true,
-    alwaysOnTop: true,
+    alwaysOnTop: false,
     autoShow: false,
     resizable: false,
     frame: false,
@@ -44,18 +44,18 @@ Ext.define("esapp.view.analysis.mapDisclaimerObject",{
     //bodyStyle:  'background:transparent;',
     margin: 0,
     padding: 0,
-    disclaimer_ImageObj: new Image(),
-    disclaimerPosition: [0,611],
-    changesmade: false,
+
     config: {
-        // html: '',
-        content: ''
+        content: '',
+        disclaimer_ImageObj: new Image(),
+        disclaimerPosition: [137,540],
+        changesmade: false
     },
 
     initComponent: function () {
         var me = this;
         me.disclaimer_ImageObj = new Image();
-        me.disclaimerPosition = [0,611];
+        // me.disclaimerPosition = [0,611];
 
         //me.defaultContent = '<font size="1">​Geographical map, WGS 84 - Resolution 5km</font><div><font size="1">Sources: 1) Image NDVI &nbsp;2) Vectors FAO GAUL 2015</font></div>';
         //me.html = me.defaultContent;
@@ -104,18 +104,23 @@ Ext.define("esapp.view.analysis.mapDisclaimerObject",{
                             }
                         });
                     });
+                    // console.info('refreshimage disclaimerObj');
 
-                    if ( (me.disclaimer_ImageObj.src == '' && me.getContent().trim() != '') || (me.getContent().trim() != '' && me.changesmade) ){
-                        task.delay(250);
+                    if ( me.getContent().trim() != '' || me.changesmade ){
+                        // console.info('refresh the disclaimer image');
+                        task.delay(20);
                     }
-                    else {
-                        me.disclaimer_ImageObj = new Image();
-                    }
+                    // if ( (me.disclaimer_ImageObj.src == '' && me.getContent().trim() != '') || (me.getContent().trim() != '' && me.changesmade) ){
+                    //     task.delay(250);
+                    // }
+                    // else {
+                    //     me.disclaimer_ImageObj = new Image();
+                    // }
                 }
             },
             show: function(){
                 me.setPosition(me.disclaimerPosition);
-                me.fireEvent('refreshimage');
+                // me.fireEvent('refreshimage');
             }
         };
 
@@ -123,7 +128,7 @@ Ext.define("esapp.view.analysis.mapDisclaimerObject",{
             autoWidth: true,
             autoHeight: true,
             layout: 'fit',
-            modal: true,
+            modal: false,
             hidden: true,
             floating: true,
             defaultAlign: 'bl-bl',
