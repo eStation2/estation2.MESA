@@ -53,7 +53,7 @@ ingest_dir_in = es_constants.ingest_dir
 ingest_error_dir = es_constants.ingest_error_dir
 data_dir_out = es_constants.processing_dir
 
-def loop_ingestion(dry_run=False):
+def loop_ingestion(dry_run=False, test_one_product=None):
 
 #    Driver of the ingestion process
 #    Reads configuration from the database
@@ -82,6 +82,12 @@ def loop_ingestion(dry_run=False):
             productcode = active_product_ingest[0]
             productversion = active_product_ingest[1]
 
+            # Verify the test-one-product case
+            do_ingest_source = True
+            if test_one_product:
+                if productcode != test_one_product:
+                    do_ingest_source = False
+
             # For the current active product ingestion: get all
             product = {"productcode": productcode,
                        "version": productversion}
@@ -98,178 +104,178 @@ def loop_ingestion(dry_run=False):
 
             logger.debug("For product [%s] N. %s  source is/are found" % (productcode,len(sources_list)))
 
-            for source in sources_list:
+            if do_ingest_source:
+                for source in sources_list:
 
-                logger_spec = log.my_logger('apps.ingestion.'+productcode+'.'+productversion)
-                logger.debug("Processing Source type [%s] with id [%s]" % (source.type, source.data_source_id))
-                # Re-initialize the datasource_descr
-                datasource_descr = None
-                files = []
-                # Get the 'filenaming' info (incl. 'area-type') from the acquisition source
-                if source.type == 'EUMETCAST':
-                    for eumetcast_filter, datasource_descr in querydb.get_datasource_descr(echo=echo_query,
-                                                                                           source_type=source.type,
-                                                                                           source_id=source.data_source_id):
-                        # TODO-M.C.: check the most performing options in real-cases
-                        files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(eumetcast_filter, os.path.basename(f))]
-                        my_filter_expr = eumetcast_filter
-                        logger.info("Eumetcast Source: looking for files in %s - named like: %s" % (ingest_dir_in, eumetcast_filter))
+                    logger_spec = log.my_logger('apps.ingestion.'+productcode+'.'+productversion)
+                    logger.debug("Processing Source type [%s] with id [%s]" % (source.type, source.data_source_id))
+                    # Re-initialize the datasource_descr
+                    datasource_descr = None
+                    files = []
+                    # Get the 'filenaming' info (incl. 'area-type') from the acquisition source
+                    if source.type == 'EUMETCAST':
+                        for eumetcast_filter, datasource_descr in querydb.get_datasource_descr(echo=echo_query,
+                                                                                               source_type=source.type,
+                                                                                               source_id=source.data_source_id):
+                            # TODO-M.C.: check the most performing options in real-cases
+                            files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(eumetcast_filter, os.path.basename(f))]
+                            my_filter_expr = eumetcast_filter
+                            logger.info("Eumetcast Source: looking for files in %s - named like: %s" % (ingest_dir_in, eumetcast_filter))
 
-                if source.type == 'INTERNET':
-                    # Implement file name filtering for INTERNET data source.
-                    for internet_filter, datasource_descr in querydb.get_datasource_descr(echo=echo_query,
-                                                                                          source_type=source.type,
-                                                                                          source_id=source.data_source_id):
-                    # TODO-Jurvtk: complete/verified
-                        temp_internet_filter = internet_filter.files_filter_expression
-                        # TODO-M.C.: check the most performing options in real-cases
-                        #files = [f for f in os.listdir(ingest_dir_in) if re.match(temp_internet_filter, f)]
-                        files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(temp_internet_filter, os.path.basename(f))]
-                        my_filter_expr = temp_internet_filter
-                        logger.info("Internet Source: looking for files in %s - named like: %s" % (ingest_dir_in, temp_internet_filter))
-                # See ES2-204
-                logger_spec.debug("Number of files found for product [%s] is: %s" % (active_product_ingest[0], len(files)))
-                if len(files) > 0:
-                    # Get list of ingestions triggers [prod/subprod/mapset]
-                    ingestions = querydb.get_ingestion_subproduct(allrecs=False, echo=echo_query, **product)
+                    if source.type == 'INTERNET':
+                        # Implement file name filtering for INTERNET data source.
+                        for internet_filter, datasource_descr in querydb.get_datasource_descr(echo=echo_query,
+                                                                                              source_type=source.type,
+                                                                                              source_id=source.data_source_id):
+                        # TODO-Jurvtk: complete/verified
+                            temp_internet_filter = internet_filter.files_filter_expression
+                            # TODO-M.C.: check the most performing options in real-cases
+                            #files = [f for f in os.listdir(ingest_dir_in) if re.match(temp_internet_filter, f)]
+                            files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(temp_internet_filter, os.path.basename(f))]
+                            my_filter_expr = temp_internet_filter
+                            logger.info("Internet Source: looking for files in %s - named like: %s" % (ingest_dir_in, temp_internet_filter))
+                    # See ES2-204
+                    logger_spec.debug("Number of files found for product [%s] is: %s" % (active_product_ingest[0], len(files)))
+                    if len(files) > 0:
+                        # Get list of ingestions triggers [prod/subprod/mapset]
+                        ingestions = querydb.get_ingestion_subproduct(allrecs=False, echo=echo_query, **product)
 
-                    # Loop over ingestion triggers
-                    subproducts = list()
-                    for ingest in ingestions:
+                        # Loop over ingestion triggers
+                        subproducts = list()
+                        for ingest in ingestions:
 
-                        dates_not_in_filename = False
-                        if ingest.input_to_process_re == 'dates_not_in_filename':
-                            dates_not_in_filename = True
+                            dates_not_in_filename = False
+                            if ingest.input_to_process_re == 'dates_not_in_filename':
+                                dates_not_in_filename = True
 
-                        logger.debug(" --> processing subproduct: %s" % ingest.subproductcode)
-                        args = {"productcode": product['productcode'],
-                                "subproductcode": ingest.subproductcode,
-                                "datasource_descr_id": datasource_descr.datasource_descr_id,
-                                "version": product['version']}
-                        product_in_info = querydb.get_product_in_info(echo=echo_query, **args)
-                        try:
-                            re_process = product_in_info.re_process
-                            re_extract = product_in_info.re_extract
-                            nodata_value=product_in_info.no_data
-                            sprod = {'subproduct': ingest.subproductcode,
-                                     'mapsetcode': ingest.mapsetcode,
-                                     're_extract': re_extract,
-                                     're_process': re_process,
-                                     'nodata': nodata_value}
-                            subproducts.append(sprod)
-                        except:
-                            logger.warning("Subproduct %s not defined for source %s" % (ingest.subproductcode,datasource_descr.datasource_descr_id))
-
-
-                    # Get the list of unique dates by extracting the date from all files.
-                    dates_list = []
-
-                    #   Check the case 'dates_not_in_filename' (e.g. GSOD -> yearly files continuously updated)
-                    if dates_not_in_filename:
-
-                        # Build the list of dates from datasource description
-                        start_datetime=datetime.datetime.strptime(str(internet_filter.start_date),"%Y%m%d")
-                        if internet_filter.end_date is None:
-                            end_datetime = datetime.date.today()
-                        else:
-                            end_datetime=datetime.datetime.strptime(str(internet_filter.end_date),"%Y%m%d")
-
-                        all_starting_dates = proc_functions.get_list_dates_for_dataset(product_in_info.productcode,\
-                                                                                   product_in_info.subproductcode,\
-                                                                                   product_in_info.version,\
-                                                                                   start_date=internet_filter.start_date,
-                                                                                   end_date=internet_filter.end_date)
-
-                        my_dataset = products.Dataset(product_in_info.productcode,
-                                                      product_in_info.subproductcode,
-                                                      ingest.mapsetcode,
-                                                      version=product_in_info.version,
-                                                      from_date=start_datetime,
-                                                      to_date=end_datetime)
-                        my_dates = my_dataset.get_dates()
-
-                        my_formatted_dates = []
-                        for my_date in my_dates:
-                            my_formatted_dates.append(my_dataset._frequency.format_date(my_date))
-
-                        my_missing_dates = []
-                        for curr_date in all_starting_dates:
-                            if curr_date not in my_formatted_dates:
-                                my_missing_dates.append(curr_date)
-
-                        dates_list = sorted(my_missing_dates, reverse=False)
-
-                    else:
-                        # Build the list of dates from filenames
-                        for filename in files:
-                            date_position = int(datasource_descr.date_position)
-                            if datasource_descr.format_type == 'delimited':
-                                splitted_fn = re.split(datasource_descr.delimiter, filename)
-                                date_string = splitted_fn[date_position]
-                                if len(date_string) > len(datasource_descr.date_format):
-                                    date_string=date_string[0:len(datasource_descr.date_format)]
-                                dates_list.append(date_string)
-                            else:
-                                dates_list.append(filename[date_position:date_position + len(datasource_descr.date_format)])
-
-                        dates_list = set(dates_list)
-                        dates_list = sorted(dates_list, reverse=False)
-
-                    # Loop over dates and get list of files
-                    for in_date in dates_list:
-                        if dates_not_in_filename:
-                            date_fileslist = [ingest_dir_in + l for l in files]
-                        else:
-                            # Refresh the files list (some files have been deleted)
-                            files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(my_filter_expr, os.path.basename(f))]
-                            logger_spec.debug("     --> processing date, in native format: %s" % in_date)
-                            # Get the list of existing files for that date
-                            regex = re.compile(".*(" + in_date + ").*")
-                            date_fileslist = [ingest_dir_in + m.group(0) for l in files for m in [regex.search(l)] if m]
-                        # Pass list of files to ingestion routine
-                        if (not dry_run):
+                            logger.debug(" --> processing subproduct: %s" % ingest.subproductcode)
+                            args = {"productcode": product['productcode'],
+                                    "subproductcode": ingest.subproductcode,
+                                    "datasource_descr_id": datasource_descr.datasource_descr_id,
+                                    "version": product['version']}
+                            product_in_info = querydb.get_product_in_info(echo=echo_query, **args)
                             try:
-                                result = ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger_spec, echo_query=echo_query)
+                                re_process = product_in_info.re_process
+                                re_extract = product_in_info.re_extract
+                                nodata_value=product_in_info.no_data
+                                sprod = {'subproduct': ingest.subproductcode,
+                                         'mapsetcode': ingest.mapsetcode,
+                                         're_extract': re_extract,
+                                         're_process': re_process,
+                                         'nodata': nodata_value}
+                                subproducts.append(sprod)
                             except:
-                                logger.error("Error in ingestion of file [%s] " % (functions.conv_list_2_string(date_fileslist)))
-                            else:
-                                # Result is None means we are still waiting for some files to be received. Keep files in /data/ingest
-                                # dates_not_in_filename means the input files contains many dates (e.g. GSOD precip)
-                                if result is not None and not dates_not_in_filename:
-                                    if source.store_original_data:
-                                    # Copy to 'Archive' directory
-                                        output_directory = data_dir_out + functions.set_path_sub_directory(product['productcode'],
-                                                                                                       sprod['subproduct'],
-                                                                                                       'Native',
-                                                                                                       product['version'],
-                                                                                                       'dummy_mapset_arg' )
-                                        functions.check_output_dir(output_directory)
-                                        # Archive the files
-                                        for file_to_move in date_fileslist:
-                                            logger_spec.debug("     --> now archiving input files: %s" % file_to_move)
-                                            new_location=output_directory+os.path.basename(file_to_move)
-                                            try:
-                                                if os.path.isfile(file_to_move):
-                                                    shutil.move(file_to_move, new_location)
-                                                else:
-                                                    logger_spec.debug("     --> file to be archived cannot be found: %s" % file_to_move)
-                                            except:
-                                                logger_spec.debug("     --> error in archiving file: %s" % file_to_move)
+                                logger.warning("Subproduct %s not defined for source %s" % (ingest.subproductcode,datasource_descr.datasource_descr_id))
 
-                                    else:
-                                        # Delete the files
-                                        for file_to_remove in date_fileslist:
-                                            logger_spec.debug("     --> now deleting input files: %s" % file_to_remove)
-                                            try:
-                                                if os.path.isfile(file_to_remove):
-                                                    os.remove(file_to_remove)
-                                                else:
-                                                    logger_spec.debug("     --> file to be deleted cannot be found: %s" % file_to_remove)
-                                            except:
-                                                logger_spec.debug("     --> error in deleting file: %s" % file_to_remove)
+                        # Get the list of unique dates by extracting the date from all files.
+                        dates_list = []
+
+                        #   Check the case 'dates_not_in_filename' (e.g. GSOD -> yearly files continuously updated)
+                        if dates_not_in_filename:
+
+                            # Build the list of dates from datasource description
+                            start_datetime=datetime.datetime.strptime(str(internet_filter.start_date),"%Y%m%d")
+                            if internet_filter.end_date is None:
+                                end_datetime = datetime.date.today()
+                            else:
+                                end_datetime=datetime.datetime.strptime(str(internet_filter.end_date),"%Y%m%d")
+
+                            all_starting_dates = proc_functions.get_list_dates_for_dataset(product_in_info.productcode,\
+                                                                                       product_in_info.subproductcode,\
+                                                                                       product_in_info.version,\
+                                                                                       start_date=internet_filter.start_date,
+                                                                                       end_date=internet_filter.end_date)
+
+                            my_dataset = products.Dataset(product_in_info.productcode,
+                                                          product_in_info.subproductcode,
+                                                          ingest.mapsetcode,
+                                                          version=product_in_info.version,
+                                                          from_date=start_datetime,
+                                                          to_date=end_datetime)
+                            my_dates = my_dataset.get_dates()
+
+                            my_formatted_dates = []
+                            for my_date in my_dates:
+                                my_formatted_dates.append(my_dataset._frequency.format_date(my_date))
+
+                            my_missing_dates = []
+                            for curr_date in all_starting_dates:
+                                if curr_date not in my_formatted_dates:
+                                    my_missing_dates.append(curr_date)
+
+                            dates_list = sorted(my_missing_dates, reverse=False)
 
                         else:
-                            time.sleep(10)
+                            # Build the list of dates from filenames
+                            for filename in files:
+                                date_position = int(datasource_descr.date_position)
+                                if datasource_descr.format_type == 'delimited':
+                                    splitted_fn = re.split(datasource_descr.delimiter, filename)
+                                    date_string = splitted_fn[date_position]
+                                    if len(date_string) > len(datasource_descr.date_format):
+                                        date_string=date_string[0:len(datasource_descr.date_format)]
+                                    dates_list.append(date_string)
+                                else:
+                                    dates_list.append(filename[date_position:date_position + len(datasource_descr.date_format)])
+
+                            dates_list = set(dates_list)
+                            dates_list = sorted(dates_list, reverse=False)
+
+                        # Loop over dates and get list of files
+                        for in_date in dates_list:
+                            if dates_not_in_filename:
+                                date_fileslist = [ingest_dir_in + l for l in files]
+                            else:
+                                # Refresh the files list (some files have been deleted)
+                                files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(my_filter_expr, os.path.basename(f))]
+                                logger_spec.debug("     --> processing date, in native format: %s" % in_date)
+                                # Get the list of existing files for that date
+                                regex = re.compile(".*(" + in_date + ").*")
+                                date_fileslist = [ingest_dir_in + m.group(0) for l in files for m in [regex.search(l)] if m]
+                            # Pass list of files to ingestion routine
+                            if (not dry_run):
+                                try:
+                                    result = ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger_spec, echo_query=echo_query)
+                                except:
+                                    logger.error("Error in ingestion of file [%s] " % (functions.conv_list_2_string(date_fileslist)))
+                                else:
+                                    # Result is None means we are still waiting for some files to be received. Keep files in /data/ingest
+                                    # dates_not_in_filename means the input files contains many dates (e.g. GSOD precip)
+                                    if result is not None and not dates_not_in_filename:
+                                        if source.store_original_data:
+                                        # Copy to 'Archive' directory
+                                            output_directory = data_dir_out + functions.set_path_sub_directory(product['productcode'],
+                                                                                                           sprod['subproduct'],
+                                                                                                           'Native',
+                                                                                                           product['version'],
+                                                                                                           'dummy_mapset_arg' )
+                                            functions.check_output_dir(output_directory)
+                                            # Archive the files
+                                            for file_to_move in date_fileslist:
+                                                logger_spec.debug("     --> now archiving input files: %s" % file_to_move)
+                                                new_location=output_directory+os.path.basename(file_to_move)
+                                                try:
+                                                    if os.path.isfile(file_to_move):
+                                                        shutil.move(file_to_move, new_location)
+                                                    else:
+                                                        logger_spec.debug("     --> file to be archived cannot be found: %s" % file_to_move)
+                                                except:
+                                                    logger_spec.debug("     --> error in archiving file: %s" % file_to_move)
+
+                                        else:
+                                            # Delete the files
+                                            for file_to_remove in date_fileslist:
+                                                logger_spec.debug("     --> now deleting input files: %s" % file_to_remove)
+                                                try:
+                                                    if os.path.isfile(file_to_remove):
+                                                        os.remove(file_to_remove)
+                                                    else:
+                                                        logger_spec.debug("     --> file to be deleted cannot be found: %s" % file_to_remove)
+                                                except:
+                                                    logger_spec.debug("     --> error in deleting file: %s" % file_to_remove)
+
+                            else:
+                                time.sleep(10)
 
         # Wait at the end of the loop
         logger.info("Entering sleep time of  %s seconds" % str(10))
@@ -1803,11 +1809,15 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process the Sentinel 3 Level 2 product from OLCI - WRR
 #
-    unzipped_input_files = []
+
+    # Hard-coded definitions:
+    geo_file = 'geo_coordinates.nc'
+    coord_scale = 1000000.0
+    lat_file = 'latitude.tif'
+    long_file = 'longitude.tif'
+
     # Prepare the output file list
     pre_processed_list = []
-    # Insert a loop on input_files[]
-    #input_file=input_files[0]
 
     interm_files_list = []
     list_input_files = []
@@ -1826,6 +1836,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
         temp_list_input_files = []
         temp_list_input_files.append(input_files)
 
+    # Select only the 'day-time' files
     for one_file in temp_list_input_files:
         one_filename = os.path.basename(one_file)
         in_date = one_filename.split('_')[7]
@@ -1833,25 +1844,19 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
         if day_data:
             list_input_files.append(one_file)
 
-    # Hard-coded definitions:
-    geo_file = 'geo_coordinates.nc'
-    coord_scale = 1000000.0
-    lat_file = 'latitude.tif'
-    long_file = 'longitude.tif'
-
-    # Unzips the file
+    # Unzips the files
     for input_file in list_input_files:
 
         # Unzip the .tar file in 'tmpdir'
         command = 'tar -xvf ' + input_file + ' -C ' + tmpdir + os.path.sep # ' --strip-components 1'
-        print(command)
+        # print(command)
         status = os.system(command)
 
 
     # Loop over subproducts and extract associated files
     for sprod in subproducts:
 
-        # In each unzipped folder preprocess the dataset and store the list of files to be merged
+        # In each unzipped folder pre-process the dataset and store the list of files to be merged
         for untar_file in os.listdir(tmpdir):
 
             # Define the re_expr for extracting files
@@ -1887,7 +1892,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
                 continue
 
             # ------------------------------------------------------------------------------------------
-            # Extract there latitude and longitude as geotiff
+            # Extract latitude and longitude as geotiff in tmp_dir
             # ------------------------------------------------------------------------------------------
             tmpdir_untar = tmpdir + os.path.sep + untar_file
 
@@ -1899,9 +1904,9 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             data_read64 = N.zeros(ds.shape, dtype=float)
             ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
             latitude = ds.value / coord_scale
-            my_logger.debug('The min/avg/max for latitude in {} are: {}/{}/{}'.format(geo_file, N.min(latitude),
-                                                                                      N.mean(latitude),
-                                                                                      N.max(latitude)))
+            # my_logger.debug('The min/avg/max for latitude in {} are: {}/{}/{}'.format(geo_file, N.min(latitude),
+            #                                                                           N.mean(latitude),
+            #                                                                           N.max(latitude)))
 
             output_file = tmpdir_untar + os.path.sep + lat_file
             output_driver = gdal.GetDriverByName('GTiff')
@@ -1916,9 +1921,9 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             data_read64 = N.zeros(ds.shape, dtype=float)
             ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
             longitude = ds.value / coord_scale
-            my_logger.debug('The min/avg/max for longitude in {} are: {}/{}/{}'.format(geo_file, N.min(longitude),
-                                                                                       N.mean(longitude),
-                                                                                       N.max(longitude)))
+            # my_logger.debug('The min/avg/max for longitude in {} are: {}/{}/{}'.format(geo_file, N.min(longitude),
+            #                                                                            N.mean(longitude),
+            #                                                                            N.max(longitude)))
 
             output_file = tmpdir_untar + os.path.sep + long_file
             output_driver = gdal.GetDriverByName('GTiff')
@@ -1946,10 +1951,10 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             data_read64 = N.zeros(ds.shape, dtype=float)
             ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
             bandvalues = ds.value
-            my_logger.debug(
-                'The min/avg/max for reflectance in {} are: {}/{}/{}'.format(geo_file, N.min(bandvalues),
-                                                                             N.mean(bandvalues),
-                                                                             N.max(bandvalues)))
+            # my_logger.debug(
+            #     'The min/avg/max for reflectance in {} are: {}/{}/{}'.format(geo_file, N.min(bandvalues),
+            #                                                                  N.mean(bandvalues),
+            #                                                                  N.max(bandvalues)))
 
             un_proj_filename = bandname_without_ext + '_un_proj.tif'
             output_file = tmpdir_untar + os.path.sep + un_proj_filename
@@ -1966,7 +1971,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             # Write a vrt file and Reproject to lat/long
             # ------------------------------------------------------------------------------------------
 
-            # TODO: replace the part below with info from mapset
+            # TODO: replace the part below with info from mapset -> comment ?
             lon_min = N.min(longitude)
             lat_min = N.min(latitude)
             lon_max = N.max(longitude)
@@ -1984,23 +1989,8 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             os.system(command)
 
             interm_files_list.append(output_tif)
-    #Check whether the interm files list is not empty and Composite the processed files
-    #
-    #nodata_value = sprod['nodata']
-    #
-    # command = es_constants.gdalwrap +'gdalwarp -srcnodata -32767 -dstnodata -32767 -te '
-    #
-    # command += lon_min +' '+ lat_min+' '+ lon_max+' '+ lat_max
-    # command += ' -r near -s_srs epsg:4326 -tr '
-    # command += abs(x_size)+' '+ abs(y_size)
-    # for file_add in interm_files_list:
-    #     command += ' '
-    #     command += file_add
-    #
-    # out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
-    # command += out_tmp_file_gtiff
 
-    ###Take gdal_merge.py from es2globals
+    # Take gdal_merge.py from es2globals
     command = es_constants.gdal_merge + ' -n 255 -a_nodata 255' + ' -o '   #-co \"compress=lzw\" -ot Float32
 
     out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
@@ -2010,148 +2000,10 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
     for file_add in interm_files_list:
         command += ' '
         command += file_add
-    my_logger.info('Command for merging is: ' + command)
+    my_logger.info('Doing the merging of geo-referenced files')
     os.system(command)
     pre_processed_list.append(out_tmp_file_gtiff)
-    #return interm_files_list
     return pre_processed_list
-
-    # # Hard-coded definitions:
-    # geo_file='geo_coordinates.nc'
-    # coord_scale=1000000.0
-    # lat_file='latitude.tif'
-    # long_file='longitude.tif'
-    # # Definitions below to be changed
-    # bandname=subproducts[0]['re_extract']
-    #
-    # re_process = subproducts[0]['re_process']
-    # target_mapset=subproducts[0]['mapsetcode']
-    #
-    # # Unzip the .tar file in 'tmpdir'
-    # geo_fullname= tmpdir + os.path.sep + geo_file
-    #
-    # command='tar -xvf '+input_file+' -C '+tmpdir+os.path.sep +' --strip-components 1'
-    # print(command)
-    # status = os.system(command)
-    #
-    # #get map set
-    # mapset_info = querydb.get_mapset(mapsetcode=target_mapset)
-    #
-    # x_size = mapset_info.pixel_shift_long  #0.00892857
-    # y_size = mapset_info.pixel_shift_lat  #-0.00892857
-    #
-    # upper_left_long= mapset_info.upper_left_long
-    # upper_left_lat= mapset_info.upper_left_lat
-    # lower_right_long = upper_left_long + (x_size * mapset_info.pixel_size_x)
-    # lower_right_lat= upper_left_lat + (y_size * mapset_info.pixel_size_y)
-    #
-    # lon_min = min(upper_left_long, lower_right_long)
-    # lon_max = max(upper_left_long, lower_right_long)
-    # lat_min = min(upper_left_lat,lower_right_lat)
-    # lat_max = max(upper_left_lat,lower_right_lat)
-    #
-    # mapset_bbox = [lon_min, lat_min, lon_max, lat_max]
-    #
-    # #get data footprint
-    # data_bbox= functions.sentinel_get_footprint(dir=tmpdir)
-    #
-    # # Test the overlap of the footprint with the BB of mapset
-    # overlap =functions.check_polygons_intersects(mapset_bbox, data_bbox)
-    #
-    # if not overlap:
-    #     return
-    #
-    # # ------------------------------------------------------------------------------------------
-    # # Extract there latitude and longitude as geotiff
-    # # ------------------------------------------------------------------------------------------
-    #
-    #
-    # fd=h5py.File(geo_fullname,'r')
-    #
-    # ds=fd['latitude']
-    # data_read64=N.zeros(ds.shape,dtype=float)
-    # ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
-    # latitude=ds.value/coord_scale
-    # my_logger.debug('The min/avg/max for latitude in {} are: {}/{}/{}'.format(geo_file, N.min(latitude),N.mean(latitude),N.max(latitude)))
-    #
-    # output_file = tmpdir+ os.path.sep+lat_file
-    # output_driver = gdal.GetDriverByName('GTiff')
-    # orig_size_x = latitude.shape[1]
-    # orig_size_y = latitude.shape[0]
-    # in_data_type= gdal.GDT_Float32
-    # output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
-    # output_ds.GetRasterBand(1).WriteArray(latitude)
-    # output_ds = None
-    #
-    # ds=fd['longitude']
-    # data_read64=N.zeros(ds.shape,dtype=float)
-    # ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
-    # longitude=ds.value/coord_scale
-    # my_logger.debug('The min/avg/max for longitude in {} are: {}/{}/{}'.format(geo_file, N.min(longitude),N.mean(longitude),N.max(longitude)))
-    #
-    # output_file = tmpdir+ os.path.sep + long_file
-    # output_driver = gdal.GetDriverByName('GTiff')
-    # orig_size_x = longitude.shape[1]
-    # orig_size_y = longitude.shape[0]
-    # in_data_type= gdal.GDT_Float32
-    # output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
-    # output_ds.GetRasterBand(1).WriteArray(longitude)
-    # output_ds = None
-    #
-    # fd.close()
-    #
-    # # ------------------------------------------------------------------------------------------
-    # # Extract the requested band and
-    # # ------------------------------------------------------------------------------------------
-    #
-    # bandpath = tmpdir + os.path.sep +  bandname
-    # if bandpath is None:
-    #     return
-    #
-    # fd = h5py.File(bandpath, 'r')
-    #
-    # bandname_without_ext = os.path.splitext(bandname)[0]
-    # ds = fd[re_process]
-    # data_read64 = N.zeros(ds.shape, dtype=float)
-    # ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
-    # bandvalues = ds.value
-    # my_logger.debug('The min/avg/max for reflectance in {} are: {}/{}/{}'.format(geo_file, N.min(bandvalues), N.mean(bandvalues),
-    #                                                                    N.max(bandvalues)))
-    #
-    # un_proj_filename = bandname_without_ext + '_un_proj.tif'
-    # output_file = tmpdir+ os.path.sep + un_proj_filename
-    # output_driver = gdal.GetDriverByName('GTiff')
-    # orig_size_x = bandvalues.shape[1]
-    # orig_size_y = bandvalues.shape[0]
-    # in_data_type = gdal.GDT_Float32
-    # output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
-    # output_ds.GetRasterBand(1).WriteArray(bandvalues)
-    # output_ds = None
-    # del output_ds
-    #
-    # # ------------------------------------------------------------------------------------------
-    # # Write a vrt file and Reproject to lat/long
-    # # ------------------------------------------------------------------------------------------
-    #
-    # # TODO: replace the part below with info from mapset
-    # # lon_min = N.min(longitude)
-    # # lat_min = N.min(latitude)
-    # # lon_max = N.max(longitude)
-    # # lat_max = N.max(latitude)
-    #
-    # functions.write_vrt_georef(output_dir=tmpdir, band_file=un_proj_filename)
-    #
-    # input_vrt = tmpdir + os.path.sep+ 'reflectance.vrt'
-    # output_tif = tmpdir + os.path.sep + bandname_without_ext + '.tif'
-    #
-    # command = 'gdalwarp -dstnodata "-32767" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
-    #     lon_min, lat_min, lon_max, lat_max, abs(x_size), abs(y_size), input_vrt, output_tif)
-    #
-    # os.system(command)
-    #
-    # interm_files_list.append(output_tif)
-    #
-    # return interm_files_list
 
 def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=None):
 # -------------------------------------------------------------------------------------------------------
