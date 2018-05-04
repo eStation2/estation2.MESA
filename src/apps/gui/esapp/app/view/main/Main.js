@@ -225,6 +225,12 @@ Ext.define('esapp.view.main.Main', {
                         var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
                         headerlogos.setHidden(true);
                     }
+
+                    var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
+                    if (datasetsstore.isStore && (!datasetsstore.isLoaded() || datasetsstore.count() < 1)) {
+                        datasetsstore.proxy.extraParams = {forse: true};
+                        datasetsstore.load();
+                    }
                     // console.info('analysis tab activated!');
                     // var timeseriesChartSelectionWindow = this.down().lookupReference('timeserieschartselection');
                     // timeseriesChartSelectionWindow.fireEvent('align');

@@ -252,7 +252,7 @@ Ext.define('esapp.Application', {
             var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
 
             if (datasetsstore.isStore) {
-                datasetsstore.proxy.extraParams = {forse: true};
+                // datasetsstore.proxy.extraParams = {forse: true};
                 datasetsstore.load();
             }
             // Ext.data.StoreManager.lookup('DataSetsStore').load();

@@ -597,64 +597,78 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
     ,setTemplateSelections: function(){
         var me = this.getView();
         var timeseriesProductsStore = Ext.getStore('TimeseriesProductsStore');
+		if (!timeseriesProductsStore.isLoaded() || timeseriesProductsStore.count() < 1) {
+			timeseriesProductsStore.proxy.extraParams = {forse: true};
+			timeseriesProductsStore.reload({
+				callback: function (records, options, success) {
+					setSelections(me);
+				}
+			});						
+		}
+		else {
+			setSelections(me);
+		}
+		
+		function setSelections(me){
+		
+			if (esapp.Utils.objectExists(me.tplChartView)){
+				// Loop tplSelectedTimeseries and find product record in timeseriesProductsStore.
+				// When product record found, clone record and change settings to template product settings
+				// Call this.TimeseriesProductsGridRowClick(newrecord)
+				Ext.util.JSON.decode(me.tplChartView.selectedTimeseries).forEach( function (product){
+					var prodrec = null;
+					prodrec = timeseriesProductsStore.queryBy(function(record,id){
+						return (record.get('productcode') == product.productcode &&
+								record.get('version') == product.version &&
+								record.get('subproductcode') == product.subproductcode &&
+								record.get('mapsetcode') == product.mapsetcode
+							);
+					}).items;
+					var newrecord = Ext.clone(prodrec[0]);
+					newrecord.set('cumulative', product.cumulative);
+					newrecord.set('difference', product.difference);
+					newrecord.set('reference', product.reference);
+					newrecord.set('colorramp', product.colorramp);
+					newrecord.set('legend_id', product.legend_id);
+					newrecord.set('zscore', product.zscore);
 
-        if (esapp.Utils.objectExists(me.tplChartView)){
-            // Loop tplSelectedTimeseries and find product record in timeseriesProductsStore.
-            // When product record found, clone record and change settings to template product settings
-            // Call this.TimeseriesProductsGridRowClick(newrecord)
-            Ext.util.JSON.decode(me.tplChartView.selectedTimeseries).forEach( function (product){
-                var prodrec = null;
-                prodrec = timeseriesProductsStore.queryBy(function(record,id){
-                    return (record.get('productcode') == product.productcode &&
-                            record.get('version') == product.version &&
-                            record.get('subproductcode') == product.subproductcode &&
-                            record.get('mapsetcode') == product.mapsetcode
-                        );
-                }).items;
-                var newrecord = Ext.clone(prodrec[0]);
-                newrecord.set('cumulative', product.cumulative);
-                newrecord.set('difference', product.difference);
-                newrecord.set('reference', product.reference);
-                newrecord.set('colorramp', product.colorramp);
-                newrecord.set('legend_id', product.legend_id);
-                newrecord.set('zscore', product.zscore);
+					me.getController().TimeseriesProductsGridRowClick(null, newrecord);
+				});
 
-                me.getController().TimeseriesProductsGridRowClick(null, newrecord);
-            });
+				if (me.tplChartView.yearTS != ''){
+					me.lookupReference('radio_year').setValue(true);
+					me.lookupReference("YearTimeseries").setValue(me.tplChartView.yearTS);
+					if (me.tplChartView.tsFromSeason != '' && me.tplChartView.tsToSeason != ''){
+						me.lookupReference("ts_from_season").setValue(me.tplChartView.tsFromSeason);
+						me.lookupReference("ts_to_season").setValue(me.tplChartView.tsToSeason);
+					}
+				}
+				if (me.tplChartView.tsFromPeriod != ''){
+					me.lookupReference('radio_fromto').setValue(true);
+					me.lookupReference("ts_from_period").setValue(me.tplChartView.tsFromPeriod);
+					me.lookupReference("ts_to_period").setValue(me.tplChartView.tsToPeriod);
+				}
+				if (me.tplChartView.yearsToCompare != ''){
+					me.lookupReference('radio_multiyears').setValue(true);
+					var multiYearsGrid = me.lookupReference("ts_selectmultiyears");
+					var selectedYearRecords = [];
+					me.getViewModel().get('years').getData().each(function(yearInStore) {
+						if (Ext.Array.contains(me.tplChartView.yearsToCompare, yearInStore.get('year'))){
+							selectedYearRecords.push(yearInStore);
+							// console.info(yearInStore);
+						}
+					});
+					if (selectedYearRecords.length > 0){
+						multiYearsGrid.getSelectionModel().select(selectedYearRecords);
+					}
 
-            if (me.tplChartView.yearTS != ''){
-                me.lookupReference('radio_year').setValue(true);
-                me.lookupReference("YearTimeseries").setValue(me.tplChartView.yearTS);
-                if (me.tplChartView.tsFromSeason != '' && me.tplChartView.tsToSeason != ''){
-                    me.lookupReference("ts_from_season").setValue(me.tplChartView.tsFromSeason);
-                    me.lookupReference("ts_to_season").setValue(me.tplChartView.tsToSeason);
-                }
-            }
-            if (me.tplChartView.tsFromPeriod != ''){
-                me.lookupReference('radio_fromto').setValue(true);
-                me.lookupReference("ts_from_period").setValue(me.tplChartView.tsFromPeriod);
-                me.lookupReference("ts_to_period").setValue(me.tplChartView.tsToPeriod);
-            }
-            if (me.tplChartView.yearsToCompare != ''){
-                me.lookupReference('radio_multiyears').setValue(true);
-                var multiYearsGrid = me.lookupReference("ts_selectmultiyears");
-                var selectedYearRecords = [];
-                me.getViewModel().get('years').getData().each(function(yearInStore) {
-                    if (Ext.Array.contains(me.tplChartView.yearsToCompare, yearInStore.get('year'))){
-                        selectedYearRecords.push(yearInStore);
-                        // console.info(yearInStore);
-                    }
-                });
-                if (selectedYearRecords.length > 0){
-                    multiYearsGrid.getSelectionModel().select(selectedYearRecords);
-                }
-
-                if (me.tplChartView.tsFromSeason != '' && me.tplChartView.tsToSeason != ''){
-                    me.lookupReference("ts_from_seasonmulti").setValue(me.tplChartView.tsFromSeason);
-                    me.lookupReference("ts_to_seasonmulti").setValue(me.tplChartView.tsToSeason);
-                }
-            }
-        }
+					if (me.tplChartView.tsFromSeason != '' && me.tplChartView.tsToSeason != ''){
+						me.lookupReference("ts_from_seasonmulti").setValue(me.tplChartView.tsFromSeason);
+						me.lookupReference("ts_to_seasonmulti").setValue(me.tplChartView.tsToSeason);
+					}
+				}
+			}
+		}
     }
 
     ,TimeseriesProductsGridRowClick: function(grid, record) {

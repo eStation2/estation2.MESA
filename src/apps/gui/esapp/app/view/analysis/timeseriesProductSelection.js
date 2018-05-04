@@ -878,6 +878,13 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                         delay = 500;
                         // myLoadMask.show();
                     }
+                    else if (timeseriesProductsStore.count() < 1){
+                        timeseriesProductsStore.proxy.extraParams = {forse: true};
+                        timeseriesProductsStore.reload({
+                            callback: function (records, options, success) {
+                            }
+                        });
+                    }
 
                     var task = new Ext.util.DelayedTask(function () {
                         if (!timeseriesProductsStore.isLoaded()) {
