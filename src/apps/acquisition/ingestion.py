@@ -1990,19 +1990,22 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
 
             interm_files_list.append(output_tif)
 
-    # Take gdal_merge.py from es2globals
-    command = es_constants.gdal_merge + ' -n 255 -a_nodata 255' + ' -o '   #-co \"compress=lzw\" -ot Float32
+    if len(interm_files_list) != 1:
+        ###Take gdal_merge.py from es2globals
+        command = es_constants.gdal_merge + ' -n 255 -a_nodata 255' + ' -o '   #-co \"compress=lzw\" -ot Float32
 
-    out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
+        out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
 
-    command += out_tmp_file_gtiff
+        command += out_tmp_file_gtiff
 
-    for file_add in interm_files_list:
-        command += ' '
-        command += file_add
-    my_logger.info('Doing the merging of geo-referenced files')
-    os.system(command)
-    pre_processed_list.append(out_tmp_file_gtiff)
+        for file_add in interm_files_list:
+            command += ' '
+            command += file_add
+        my_logger.info('Command for merging is: ' + command)
+        os.system(command)
+        pre_processed_list.append(out_tmp_file_gtiff)
+    else:
+        pre_processed_list.append(interm_files_list[0])
     return pre_processed_list
 
 def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=None):
@@ -2075,9 +2078,6 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
             lat_max = max(upper_left_lat, lower_right_lat)
 
             mapset_bbox = [lon_min, lat_min, lon_max, lat_max]
-
-            if untar_file == "S3A_SL_2_WST____20180306T103829_20180306T104028_20180306T120121_0119_028_307_5940_MAR_O_NR_002.SEN3":
-                print("check")
 
             # get data footprint
             data_bbox = functions.sentinel_get_footprint(dir=tmpdir + os.path.sep + untar_file)
