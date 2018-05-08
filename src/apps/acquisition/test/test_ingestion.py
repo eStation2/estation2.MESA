@@ -1331,7 +1331,7 @@ class TestIngestion(unittest.TestCase):
 
         # Test the ingestion of the Sentinel-3/OLCI Level-2 WRR product (on d6-dev-vm19 !!!!!)
         #date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_OL_2_WRR/S3A_OL_2_WRR____20180306T092820_20180306T101211_20180306T115859_2631_028_307______MAR_O_NR_002.SEN3.tar')
-        date_fileslist = glob.glob('//data/processing/exchange/Sentinel-3/S3A_OL_2_WRR/2018.04.02/S3A_OL_2_WRR____20180402*.SEN3.tar')
+        date_fileslist = glob.glob('//data/processing/exchange/Sentinel-3/S3A_OL_2_WRR/20180421/S3A_OL_2_WRR____201804*.SEN3.tar')
         single_date =  os.path.basename(date_fileslist[0])
         in_date = single_date.split('_')[7]
         in_date = in_date.split('T')[0] #+ '0000'

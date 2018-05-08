@@ -1972,10 +1972,10 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             # ------------------------------------------------------------------------------------------
 
             # TODO: replace the part below with info from mapset -> comment ?
-            lon_min = N.min(longitude)
-            lat_min = N.min(latitude)
-            lon_max = N.max(longitude)
-            lat_max = N.max(latitude)
+            d_lon_min = N.min(longitude)
+            d_lat_min = N.min(latitude)
+            d_lon_max = N.max(longitude)
+            d_lat_max = N.max(latitude)
 
             functions.write_vrt_georef(output_dir=tmpdir_untar, band_file=un_proj_filename, n_lines=orig_size_x,
                                        n_cols=orig_size_y)
@@ -1984,23 +1984,31 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             output_tif = tmpdir + os.path.sep + untar_file+bandname_without_ext + '.tif'
 
             command = 'gdalwarp -srcnodata "255" -dstnodata "255" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
-                lon_min, lat_min, lon_max, lat_max, abs(x_size), abs(y_size), input_vrt, output_tif)
+                d_lon_min, d_lat_min, d_lon_max, d_lat_max, abs(x_size), abs(y_size), input_vrt, output_tif)
 
             os.system(command)
 
             interm_files_list.append(output_tif)
 
     if len(interm_files_list) != 1:
-        ###Take gdal_merge.py from es2globals
-        command = es_constants.gdal_merge + ' -n 255 -a_nodata 255' + ' -o '   #-co \"compress=lzw\" -ot Float32
-
         out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
-
-        command += out_tmp_file_gtiff
-
+        input_files_str = ''
         for file_add in interm_files_list:
-            command += ' '
-            command += file_add
+            input_files_str += ' '
+            input_files_str += file_add
+
+        command = 'gdalwarp -srcnodata "255" -dstnodata "255" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
+            lon_min, lat_min, lon_max, lat_max, abs(x_size), abs(y_size), input_files_str, out_tmp_file_gtiff)
+        ###Take gdal_merge.py from es2globals
+        # command = es_constants.gdal_merge + ' -n 255 -a_nodata 255' + ' -o '   #-co \"compress=lzw\" -ot Float32
+        #
+        # out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
+        #
+        # command += out_tmp_file_gtiff
+        #
+        # for file_add in interm_files_list:
+        #     command += ' '
+        #     command += file_add
         my_logger.info('Command for merging is: ' + command)
         os.system(command)
         pre_processed_list.append(out_tmp_file_gtiff)
