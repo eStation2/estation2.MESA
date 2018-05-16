@@ -108,35 +108,41 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
         for myday in day_list:
             # Exclude the current day and yesterday
-            if myday != today_str or myday != yesterday_str:
-                file_list = []
-                for input_file in input_files:
+            #if myday != today_str or myday != yesterday_str:
 
-                    basename = os.path.basename(input_file)
-                    # Date is in format YYYYMMDD
-                    mydate_yyyymmdd = functions.get_date_from_path_filename(basename)
-                    yyyy = int(mydate_yyyymmdd[0:4])
-                    mm = int(mydate_yyyymmdd[4:6])
-                    dd = int(mydate_yyyymmdd[6:8])
-                    day2 = datetime(yyyy,mm,dd) + timedelta(1)
-                    day2_filepath = input_dir + day2.strftime('%Y%m%d') + in_prod_ident
-                    if not functions.is_file_exists_in_path(day2_filepath):
-                        continue
+                #some_list = ['abc-123', 'def-456', 'ghi-789', 'abc-456']
+            input_file = [s for s in input_files if myday in s]
+            file_list = []
+                #for input_file in input_files:
+                #for i, input_file in enumerate(input_files, 1):
 
-                    day3 = datetime(yyyy, mm, dd) + timedelta(2)
-                    day3_filepath = input_dir + day3.strftime('%Y%m%d') + in_prod_ident
-                    if not functions.is_file_exists_in_path(day3_filepath):
-                        continue
+            basename = os.path.basename(input_file[0])
+            # Date is in format YYYYMMDD
+            mydate_yyyymmdd = functions.get_date_from_path_filename(basename)
 
-                    file_list.append(input_file)
-                    file_list.append(day2_filepath)
-                    file_list.append(day3_filepath)
+            #if mydate_yyyymmdd != day_list[i]:
+            yyyy = int(mydate_yyyymmdd[0:4])
+            mm = int(mydate_yyyymmdd[4:6])
+            dd = int(mydate_yyyymmdd[6:8])
+            day2 = datetime(yyyy,mm,dd) + timedelta(1)
+            day2_filepath = input_dir + day2.strftime('%Y%m%d') + in_prod_ident
+            if not functions.is_file_exists_in_path(day2_filepath):
+                continue
 
-                output_file = es_constants.processing_dir + subdir_3davg + os.path.sep + mydate_yyyymmdd + prod_ident_3davg
-                file_list = sorted(file_list)
-                # Check here the number of missing files (for optimization)
-                if len(file_list) == 3:
-                    yield (file_list, output_file)
+            day3 = datetime(yyyy, mm, dd) + timedelta(2)
+            day3_filepath = input_dir + day3.strftime('%Y%m%d') + in_prod_ident
+            if not functions.is_file_exists_in_path(day3_filepath):
+                continue
+
+            file_list.append(input_file[0])
+            file_list.append(day2_filepath)
+            file_list.append(day3_filepath)
+
+            output_file = es_constants.processing_dir + subdir_3davg + os.path.sep + mydate_yyyymmdd + prod_ident_3davg
+            file_list = sorted(file_list)
+            # Check here the number of missing files (for optimization)
+            if len(file_list) == 3:
+                yield (file_list, output_file)
 
 
     @active_if(activate_3davg_comput)
