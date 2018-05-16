@@ -203,8 +203,8 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_modis_kd490_netcdf(self):
 
-        date_fileslist = ['/data/ingest/A2015189.L3m_DAY_KD490_Kd_490_4km.nc']
-        in_date = '2015189'
+        date_fileslist = ['/data/ingest/A2018121.L3m_DAY_KD490_Kd_490_4km.nc']
+        in_date = '2018121'
         productcode = 'modis-kd490'
         productversion = 'v2012.0'
         subproductcode = 'kd490-day'
@@ -1372,8 +1372,9 @@ class TestIngestion(unittest.TestCase):
         #date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/S3A_SL_2_WST____20180306T095629_20180306T095929_20180306T114727_0179_028_307_3420_MAR_O_NR_002.SEN3.tar')
         date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/march03/S3A_SL_2_WST____20180303*.SEN3.tar')
         date_fileslist_day = []
-
-        in_date = '201803060000'
+        single_date =  os.path.basename(date_fileslist[0])
+        in_date = single_date.split('_')[7]
+        in_date = in_date.split('T')[0] #+ '0000'
         # for one_file in date_fileslist:
         #
         #     one_filename = os.path.basename(one_file)
@@ -1382,8 +1383,6 @@ class TestIngestion(unittest.TestCase):
         #
         #     if day_data:
         #         date_fileslist_day.append(one_file)
-
-        in_date = in_date.split('T')[0] #+ '0000'    #'201803060000'
         productcode = 'slstr-sst'
         productversion = '1.0'
         subproductcode = 'wst'

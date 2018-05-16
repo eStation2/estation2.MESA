@@ -2020,43 +2020,43 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process the Sentinel 3 Level 2 product from OLCI - WRR
 #
-
-    unzipped_input_files = []
-    # Prepare the output file list
-    pre_processed_list = []
-    # Insert a loop on input_files[]
-    # input_file=input_files[0]
-
-    interm_files_list = []
-    # Insert a loop on input_files[]
-    input_file=input_files[0]
-
-    interm_files_list = []
-
     # Hard-coded definitions:
-    #geo_file='geo_coordinates.nc'
-    coord_scale=1000000.0
-    lat_file='latitude.tif'
-    long_file='longitude.tif'
+    # geo_file='geo_coordinates.nc'
+    coord_scale = 1000000.0
+    lat_file = 'latitude.tif'
+    long_file = 'longitude.tif'
     # Definitions below to be changed
-    bandname=subproducts[0]['re_extract']
+    bandname = subproducts[0]['re_extract']
 
     re_process = subproducts[0]['re_process']
-    target_mapset=subproducts[0]['mapsetcode']
-    # Get them from target_mapset
-    # x_size = 0.00892857
-    # y_size = 0.00892857
+    target_mapset = subproducts[0]['mapsetcode']
 
-    # Unzip the .tar file in 'tmpdir'
+    # Prepare the output file list
+    pre_processed_list = []
+    interm_files_list = []
+    list_input_files = []
 
+    # Make sure input is a list (if only a string is received, it loops over chars)
+    if isinstance(input_files, list):
+        temp_list_input_files = input_files
+    else:
+        temp_list_input_files = []
+        temp_list_input_files.append(input_files)
+
+        # Select only the 'day-time' files
+    for one_file in temp_list_input_files:
+        one_filename = os.path.basename(one_file)
+        in_date = one_filename.split('_')[7]
+        day_data = functions.is_data_captured_during_day(in_date)
+        if day_data:
+            list_input_files.append(one_file)
 
     # Unzips the file
-    for input_file in input_files:
+    for input_file in list_input_files:
         # Unzip the .tar file in 'tmpdir'
         command = 'tar -xvf ' + input_file + ' -C ' + tmpdir + os.path.sep  # ' --strip-components 1'
         print(command)
         status = os.system(command)
-
 
     # Loop over subproducts and extract associated files
     for sprod in subproducts:
@@ -2181,10 +2181,10 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
             # ------------------------------------------------------------------------------------------
 
             # TODO: replace the part below with info from mapset
-            lon_min = N.min(longitude)
-            lat_min = N.min(latitude)
-            lon_max = N.max(longitude)
-            lat_max = N.max(latitude)
+            d_lon_min = N.min(longitude)
+            d_lat_min = N.min(latitude)
+            d_lon_max = N.max(longitude)
+            d_lat_max = N.max(latitude)
 
             functions.write_vrt_georef(output_dir=tmpdir_untar, band_file=un_proj_filename, n_lines=orig_size_x,
                                        n_cols=orig_size_y)
@@ -2195,31 +2195,43 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
             output_tif = tmpdir + os.path.sep + untar_file + re_process + '.tif'
 
             command = 'gdalwarp -srcnodata "-32768" -dstnodata "-32768" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
-                lon_min, lat_min, lon_max, lat_max, abs(x_size), abs(y_size), input_vrt, output_tif)
+                d_lon_min, d_lat_min, d_lon_max, d_lat_max, abs(x_size), abs(y_size), input_vrt, output_tif)
 
             os.system(command)
 
             interm_files_list.append(output_tif)
 
+    if len(interm_files_list) != 1:
+        out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
+        input_files_str = ''
+        for file_add in interm_files_list:
+            input_files_str += ' '
+            input_files_str += file_add
 
-    #geo_fullname= tmpdir + os.path.sep+ bandname
+        command = 'gdalwarp -srcnodata "-32768" -dstnodata "-32768" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
+            lon_min, lat_min, lon_max, lat_max, abs(x_size), abs(y_size), input_files_str, out_tmp_file_gtiff)
 
-
-    # Take gdal_merge.py from es2globals
-    command = es_constants.gdal_merge + ' -n -32768 -a_nodata -32768' + ' -o '     #-ot Float32    -co \"compress=lzw\"  -n -32768
-
-    out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
-
-    command += out_tmp_file_gtiff
-
-    for file_add in interm_files_list:
-            command += ' '
-            command += file_add
-    my_logger.info('Command for merging is: ' + command)
-    os.system(command)
-    pre_processed_list.append(out_tmp_file_gtiff)
-
+        my_logger.info('Command for merging is: ' + command)
+        os.system(command)
+        pre_processed_list.append(out_tmp_file_gtiff)
+    else:
+        pre_processed_list.append(interm_files_list[0])
     return pre_processed_list
+    # Take gdal_merge.py from es2globals
+    # command = es_constants.gdal_merge + ' -n -32768 -a_nodata -32768' + ' -o '     #-ot Float32    -co \"compress=lzw\"  -n -32768
+    #
+    # out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
+    #
+    # command += out_tmp_file_gtiff
+    #
+    # for file_add in interm_files_list:
+    #         command += ' '
+    #         command += file_add
+    # my_logger.info('Command for merging is: ' + command)
+    # os.system(command)
+    # pre_processed_list.append(out_tmp_file_gtiff)
+    #
+    # return pre_processed_list
 
 
     # command='tar -xvf '+input_file+' -C '+tmpdir+os.path.sep +' --strip-components 1'
