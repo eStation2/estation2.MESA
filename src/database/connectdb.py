@@ -43,7 +43,7 @@ class ConnectDB(object):
             if usesqlsoup:
                 dburl = self.get_db_url()
                 self.db = sqlsoup.SQLSoup(dburl)
-                myengine = self.db.engine
+                # myengine = self.db.engine
                 self.session = sqlsoup.Session    # self.db.session
             else:
                 self.db = self.get_db_engine()

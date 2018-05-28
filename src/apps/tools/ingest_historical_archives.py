@@ -27,13 +27,13 @@ def ingest_historical_archives(input_dir=None, dry_run=False):
         input_dir = input_dir_def
 
     logger.info("Entering routine %s" % 'ingest_historical_archives')
-    echo_query = False
+    # echo_query = False
 
     # time.sleep(30)
     logger.info("Entering loop")
     # exit(1)
     # Get all active product ingestion records with a subproduct count.
-    active_product_ingestions = querydb.get_ingestion_product(allrecs=True, echo=echo_query)
+    active_product_ingestions = querydb.get_ingestion_product(allrecs=True)
     for active_product_ingest in active_product_ingestions:
 
         productcode = active_product_ingest[0]
@@ -49,11 +49,11 @@ def ingest_historical_archives(input_dir=None, dry_run=False):
         native_product = {"productcode": productcode,
                               "subproductcode": productcode + "_native",
                               "version": productversion}
-        sources_list = querydb.get_product_sources(echo=echo_query, **native_product)
+        sources_list = querydb.get_product_sources(**native_product)
 
         logger.debug("For product [%s] N. %s  source is/are found" % (productcode,len(sources_list)))
 
-        ingestions = querydb.get_ingestion_subproduct(allrecs=False, echo=echo_query, **product)
+        ingestions = querydb.get_ingestion_subproduct(allrecs=False, **product)
         for ingest in ingestions:
             logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (productcode, productversion,ingest.subproductcode,ingest.mapsetcode))
             ingest_archives_eumetcast_product(productcode, productversion,ingest.subproductcode,ingest.mapsetcode,dry_run=dry_run, input_dir=input_dir, no_delete=True)

@@ -37,7 +37,7 @@ def ingest_jrc_wbd(input_dir, in_date=None, avg=None):
             "datasource_descr_id": datasource_descrID,
             "version": productversion}
 
-    product_in_info = querydb.get_product_in_info(echo=1, **args)
+    product_in_info = querydb.get_product_in_info(**args)
 
     re_process = product_in_info.re_process
     re_extract = product_in_info.re_extract

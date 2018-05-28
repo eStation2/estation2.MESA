@@ -16,45 +16,38 @@ from lib.python import es_logging as log
 from database import connectdb
 logger = log.my_logger(__name__)
 
+
 ######################################################################################
-#   get_product_out_info(allrecs=False, echo=False, productcode='', subproductcode='', version='undefined')
+#   get_product_out_info(allrecs=False, productcode='', subproductcode='', version='undefined')
 #   Purpose: Query the database to get the records of all or a specific product from the table product
 #   Author: Jurriaan van 't Klooster
 #   Date: 2014/05/16
 #   Input: allrecs          - If True return all products. Default=False
-#          echo             - If True echo the query result in the console for debugging purposes. Default=False
 #          productcode      - The productcode of the specific product info requested.
 #                             If given also subproductcode and version have to be given. Default=''
 #          subproductcode   - The subproductcode of the specific product info requested. Default=''
 #          version          - The version of the specific product info requested. Default='undefined'
 #   Output: Return the fields of all or a specific product record from the table product.
-def get_product_out_info(allrecs=False, echo=False, productcode='', subproductcode='', version='undefined'):
+def get_product_out_info(allrecs=False, productcode='', subproductcode='', version='undefined'):
 
     db = connectdb.ConnectDB().db
     try:
         if allrecs:
             product_out_info = db.product.order_by(asc(db.product.productcode)).all()
-            # if echo:
-            #     for row in product_out_info:
-            #         print row
         else:
             where = and_(db.product.productcode == productcode,
                          db.product.subproductcode == subproductcode,
                          db.product.version == version)
             product_out_info = db.product.filter(where).all()
-            # if echo:
-            #     print product_out_info
+
         return product_out_info
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_product_out_info: Database query error!\n -> {}".format(exceptionvalue))
         #raise Exception("get_product_out_info: Database query error!\n ->%s" % exceptionvalue)
     finally:
         if db.session:
             db.session.close()
-
-    db = None
+        db = None
 

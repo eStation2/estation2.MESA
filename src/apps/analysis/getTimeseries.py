@@ -266,6 +266,7 @@ def getTimeseries_green(productcode, subproductcode, version, mapsetcode, wkt, s
         logger.debug('ERROR: product not registered in the products table! - %s %s %s' % (productcode, subproductcode, version))
         return []
 
+
 def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_date, end_date, aggregate):
 
     #    Extract timeseries from a list of files and return as JSON object
@@ -334,7 +335,7 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
         idField = ogr.FieldDefn("id", ogr.OFTInteger)
         outLayer.CreateField(idField)
 
-        featureDefn  = outLayer.GetLayerDefn()
+        featureDefn = outLayer.GetLayerDefn()
         feature = ogr.Feature(featureDefn)
         feature.SetGeometry(geom)
         feature.SetField("id", 1)
@@ -434,12 +435,17 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
                         if mxnodata.count() == 0:
                             meanResult = None
                         else:
+                            mxrange = mxnodata
                             min_val = aggregate['aggregation_min']
                             max_val = aggregate['aggregation_max']
-                            # Scale threshold from physical to digital value
-                            min_val_scaled = (min_val-scale_offset)/scale_factor
-                            max_val_scaled = (max_val-scale_offset)/scale_factor
-                            mxrange = ma.masked_outside(mxnodata, min_val_scaled, max_val_scaled)
+
+                            if min_val is not None:
+                                min_val_scaled = (min_val - scale_offset) / scale_factor
+                                mxrange = ma.masked_less(mxnodata, min_val_scaled)
+                            if max_val is not None:
+                                # Scale threshold from physical to digital value
+                                max_val_scaled = (max_val - scale_offset) / scale_factor
+                                mxrange = ma.masked_greater(mxnodata, max_val_scaled)
 
                             if aggregate['aggregation_type'] == 'percent':
                                 # 'percent'
@@ -447,7 +453,7 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
 
                             elif aggregate['aggregation_type'] == 'surface':
                                 # 'surface'
-                                meanResult = float(mxrange.count())* pixelArea
+                                meanResult = float(mxrange.count()) * pixelArea
                             else:
                                 # 'count'
                                 meanResult = float(mxrange.count())
@@ -455,7 +461,7 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
                         # Both results are equal
                         finalvalue = meanResult
 
-                    else:   #if aggregate['type'] == 'mean' or if aggregate['type'] == 'cumulate':
+                    else:   # if aggregate['type'] == 'mean' or if aggregate['type'] == 'cumulate':
                         if mxnodata.count() == 0:
                             finalvalue = None
                             meanResult = None

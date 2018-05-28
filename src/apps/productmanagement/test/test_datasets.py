@@ -292,7 +292,7 @@ class TestDatasets4UI(unittest.TestCase):
     # Re-produce what done in webpy_esapp for the Data Management page
         from apps.productmanagement.products import *
         # return web.ctx
-        db_products = querydb.get_products(echo=False)
+        db_products = querydb.get_products()
 
         if db_products.__len__() > 0:
             products_dict_all = []
@@ -312,7 +312,7 @@ class TestDatasets4UI(unittest.TestCase):
                     for mapset in all_prod_mapsets:
                         mapset_dict = []
                         # print mapset
-                        mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False, echo=False)
+                        mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False)
                         # if mapset_info.__len__() > 0:
                         mapset_dict = functions.row2dict(mapset_info)
                         # else:
@@ -325,8 +325,7 @@ class TestDatasets4UI(unittest.TestCase):
                             # print 'subproductcode: ' + subproductcode
                             dataset_info = querydb.get_subproduct(productcode=productcode,
                                                                   version=version,
-                                                                  subproductcode=subproductcode,
-                                                                  echo=False)
+                                                                  subproductcode=subproductcode)
                             # print dataset_info
                             # dataset_info = querydb.db.product.get(productcode, version, subproductcode)
                             # dataset_dict = {}

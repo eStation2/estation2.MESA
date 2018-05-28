@@ -49,7 +49,8 @@ Ext.define("esapp.view.widgets.LoginView",{
                     var userinfo = {
                         userid: Ext.util.Cookies.get('estation2_userid'),
                         username: Ext.util.Cookies.get('estation2_username'),
-                        email: Ext.util.Cookies.get('estation2_useremail')
+                        email: Ext.util.Cookies.get('estation2_useremail'),
+                        prefered_language: Ext.util.Cookies.get('estation2_userlanguage')
                     };
 
                     esapp.setUser(userinfo);
@@ -248,24 +249,121 @@ Ext.define("esapp.view.widgets.LoginView",{
     } // eo function onKeyPress
 
     ,toggleUserFunctionality:function() {
-        var  me = this;
-        var mapTemplateBtn = Ext.getCmp('analysismain').lookupReference('analysismain_maptemplatebtn');
+        var me = this;
+        var user = esapp.getUser();
+        var analysisWorkspaces = Ext.ComponentQuery.query('analysisworkspace');
         var mapViewWindows = Ext.ComponentQuery.query('mapview-window');
+        var tsChartWindows = Ext.ComponentQuery.query('timeserieschart-window');
+        var addWorkspaceBtn = Ext.getCmp('analysismain').lookupReference('analysismain_addworkspacebtn');
+        // var mapTemplateBtn = Ext.getCmp('analysismain').lookupReference('analysismain_maptemplatebtn');
+        // var tsChartTemplateBtn = Ext.getCmp('analysismain').lookupReference('analysismain_graph_templatebtn');
+        // var tsDrawPropertiesStore  = Ext.data.StoreManager.lookup('TSDrawPropertiesStore');
 
-        if (esapp.getUser() != null && esapp.getUser() != 'undefined'){
-            mapTemplateBtn.show();
+        if (user != null && user != 'undefined'){
+            // tsDrawPropertiesStore.proxy.extraParams = {userid: user.userid, graph_tpl_name: 'default'};
+            // tsDrawPropertiesStore.load();
+            if (addWorkspaceBtn != null){
+                addWorkspaceBtn.show();
+            }
+            var UserWorkspacesStore = Ext.StoreManager.lookup('UserWorkspacesStore');
+            UserWorkspacesStore.proxy.extraParams = {userid: esapp.getUser().userid};
+            UserWorkspacesStore.load({
+                callback: function (records, options, success) {
+                    var activateTab = false;
+                    records.forEach(function(workspace,id){
+                        if (workspace.get('pinned')){
+                            // open workspace
+                            Ext.getCmp('analysismain').getController().openWorkspace(workspace,activateTab);
+                        }
+                    });
+                }
+            });
+            // UserWorkspacesStore.each(function(workspace,id){
+            //     console.info(workspace);
+            // });
 
+            Ext.Object.each(analysisWorkspaces, function(id, workspace, thisObj) {
+                workspace.lookupReference('maptemplateadminbtn_'+workspace.id.replace(/-/g,'_')).show();
+                workspace.lookupReference('graphtemplateadminbtn_'+workspace.id.replace(/-/g,'_')).show();
+                if (workspace.workspaceid != 'defaultworkspace'){
+                    workspace.lookupReference('saveWorkspaceBtn').show();
+                }
+                else {
+                    workspace.lookupReference('saveDefaultWorkspaceAsBtn').show();
+                }
+
+                if (Ext.isObject(workspace.lookupReference('maptemplateadminbtn_'+workspace.id.replace(/-/g,'_')).mapTemplateAdminPanel)){
+                    workspace.lookupReference('maptemplateadminbtn_'+workspace.id.replace(/-/g,'_')).mapTemplateAdminPanel.setDirtyStore(true);
+                }
+                if (Ext.isObject(workspace.lookupReference('graphtemplateadminbtn_'+workspace.id.replace(/-/g,'_')).graphTemplateAdminPanel)){
+                    workspace.lookupReference('graphtemplateadminbtn_'+workspace.id.replace(/-/g,'_')).graphTemplateAdminPanel.setDirtyStore(true);
+                }
+            });
+            // mapTemplateBtn.show();
             Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
+                if (mapview_window.templatename != ''){
+                    mapview_window.isTemplate = true;
+                    Ext.fly('mapview_title_templatename_' + mapview_window.id).dom.innerHTML = mapview_window.templatename;
+                }
                 mapview_window.lookupReference('saveMapTemplate_'+mapview_window.id.replace(/-/g,'_')).show();
             });
+            // Ext.getCmp('userMapTemplates').setDirtyStore(true);
+
+            // tsChartTemplateBtn.show();
+            Ext.Object.each(tsChartWindows, function(id, tschart_window, thisObj) {
+                if (tschart_window.graph_tpl_name != '' && tschart_window.graph_tpl_name != 'default'){
+                    tschart_window.isTemplate = true;
+                    Ext.fly('graphview_title_templatename_' + tschart_window.id).dom.innerHTML = tschart_window.graph_tpl_name;
+                }
+                tschart_window.lookupReference('changeSelectedProductsAndTimeframe_'+tschart_window.id.replace(/-/g,'_')).show();
+                tschart_window.lookupReference('saveGraphTemplate_'+tschart_window.id.replace(/-/g,'_')).show();
+            });
+            // Ext.getCmp('userGraphTemplates').setDirtyStore(true);
         }
         else {
-            mapTemplateBtn.hide();
+            // tsDrawPropertiesStore.proxy.extraParams = {};
+            // tsDrawPropertiesStore.load();
+            if (addWorkspaceBtn != null){
+                addWorkspaceBtn.hide();
+            }
 
-            Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
-                mapview_window.lookupReference('saveMapTemplate_'+mapview_window.id.replace(/-/g,'_')).hide();
+            Ext.Object.each(analysisWorkspaces, function(id, workspace, thisObj) {
+                if (workspace.workspaceid != 'defaultworkspace'){
+                    workspace.close();
+                }
+                else {
+                    // mapTemplateBtn.hide();
+                    Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
+                        if (mapview_window.isTemplate){
+                            mapview_window.isTemplate = false;
+                            Ext.fly('mapview_title_templatename_' + mapview_window.id).dom.innerHTML = '';
+                        }
+                        mapview_window.lookupReference('saveMapTemplate_'+mapview_window.id.replace(/-/g,'_')).hide();
+                    });
+                    // Ext.getCmp('userMapTemplates').hide();
+
+                    // tsChartTemplateBtn.hide();
+                    Ext.Object.each(tsChartWindows, function(id, tschart_window, thisObj) {
+                        if (tschart_window.isTemplate){
+                            tschart_window.isTemplate = false;
+                            Ext.fly('graphview_title_templatename_' + tschart_window.id).dom.innerHTML = '';
+                        }
+                        tschart_window.lookupReference('changeSelectedProductsAndTimeframe_'+tschart_window.id.replace(/-/g,'_')).hide();
+                        tschart_window.lookupReference('saveGraphTemplate_'+tschart_window.id.replace(/-/g,'_')).hide();
+                    });
+                    // Ext.getCmp('userGraphTemplates').hide();
+
+                    workspace.lookupReference('maptemplateadminbtn_'+workspace.id.replace(/-/g,'_')).hide();
+                    workspace.lookupReference('graphtemplateadminbtn_'+workspace.id.replace(/-/g,'_')).hide();
+                    workspace.lookupReference('saveDefaultWorkspaceAsBtn').hide();
+                    if (Ext.isObject(workspace.lookupReference('maptemplateadminbtn_'+workspace.id.replace(/-/g,'_')).mapTemplateAdminPanel)){
+                        workspace.lookupReference('maptemplateadminbtn_'+workspace.id.replace(/-/g,'_')).mapTemplateAdminPanel.hide();
+                    }
+                    if (Ext.isObject(workspace.lookupReference('graphtemplateadminbtn_'+workspace.id.replace(/-/g,'_')).graphTemplateAdminPanel)){
+                        workspace.lookupReference('graphtemplateadminbtn_'+workspace.id.replace(/-/g,'_')).graphTemplateAdminPanel.hide();
+                    }
+                }
             });
         }
-
     } // eo function failLogin
 });

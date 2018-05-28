@@ -8,6 +8,7 @@ Ext.define("esapp.view.widgets.LoginViewECAS",{
 
         'Ext.layout.container.Fit',
         'Ext.app.ViewModel'
+        ,'Ext.util.Cookies'
     ],
 
     controller: "widgets-loginview-ecas",
@@ -79,7 +80,8 @@ Ext.define("esapp.view.widgets.LoginViewECAS",{
                     var userinfo = {
                         userid: Ext.util.Cookies.get('estation2_userid'),
                         username: Ext.util.Cookies.get('estation2_username'),
-                        email: Ext.util.Cookies.get('estation2_useremail')
+                        email: Ext.util.Cookies.get('estation2_useremail'),
+                        prefered_language: Ext.util.Cookies.get('estation2_userlanguage')
                     };
 
                     esapp.setUser(userinfo);
@@ -303,23 +305,63 @@ Ext.define("esapp.view.widgets.LoginViewECAS",{
     } // eo function onKeyPress
 
     ,toggleUserFunctionality:function() {
-        var  me = this;
+        var me = this;
         var mapTemplateBtn = Ext.getCmp('analysismain').lookupReference('analysismain_maptemplatebtn');
         var mapViewWindows = Ext.ComponentQuery.query('mapview-window');
+        var tsChartTemplateBtn = Ext.getCmp('analysismain').lookupReference('analysismain_graph_templatebtn');
+        var tsChartWindows = Ext.ComponentQuery.query('timeserieschart-window');
+        var tsDrawPropertiesStore  = Ext.data.StoreManager.lookup('TSDrawPropertiesStore');
+        var user = esapp.getUser();
 
         if (esapp.getUser() != null && esapp.getUser() != 'undefined'){
+            tsDrawPropertiesStore.proxy.extraParams = {userid: user.userid, graph_tpl_name: 'default'};
+            tsDrawPropertiesStore.load();
+
             mapTemplateBtn.show();
 
             Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
+                if (mapview_window.templatename != ''){
+                    mapview_window.isTemplate = true;
+                    Ext.fly('mapview_title_templatename_' + mapview_window.id).dom.innerHTML = mapview_window.templatename;
+                }
                 mapview_window.lookupReference('saveMapTemplate_'+mapview_window.id.replace(/-/g,'_')).show();
             });
+            Ext.getCmp('userMapTemplates').setDirtyStore(true);
+
+            tsChartTemplateBtn.show();
+            Ext.Object.each(tsChartWindows, function(id, tschart_window, thisObj) {
+                if (tschart_window.graph_tpl_name != '' && tschart_window.graph_tpl_name != 'default'){
+                    tschart_window.isTemplate = true;
+                    Ext.fly('graphview_title_templatename_' + tschart_window.id).dom.innerHTML = tschart_window.graph_tpl_name;
+                }
+                tschart_window.lookupReference('saveGraphTemplate_'+tschart_window.id.replace(/-/g,'_')).show();
+            });
+            Ext.getCmp('userGraphTemplates').setDirtyStore(true);
         }
         else {
+            tsDrawPropertiesStore.proxy.extraParams = {};
+            tsDrawPropertiesStore.load();
+
             mapTemplateBtn.hide();
 
             Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
+                if (mapview_window.isTemplate){
+                    mapview_window.isTemplate = false;
+                    Ext.fly('mapview_title_templatename_' + mapview_window.id).dom.innerHTML = '';
+                }
                 mapview_window.lookupReference('saveMapTemplate_'+mapview_window.id.replace(/-/g,'_')).hide();
             });
+            Ext.getCmp('userMapTemplates').hide();
+
+            tsChartTemplateBtn.hide();
+            Ext.Object.each(tsChartWindows, function(id, tschart_window, thisObj) {
+                if (tschart_window.isTemplate){
+                    tschart_window.isTemplate = false;
+                    Ext.fly('graphview_title_templatename_' + tschart_window.id).dom.innerHTML = '';
+                }
+                tschart_window.lookupReference('saveGraphTemplate_'+tschart_window.id.replace(/-/g,'_')).hide();
+            });
+            Ext.getCmp('userGraphTemplates').hide();
         }
 
     } // eo function failLogin

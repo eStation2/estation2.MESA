@@ -336,7 +336,7 @@ class TestGetInternet(unittest.TestCase):
     def TestRemoteHttp_TAMSAT_1(self):
 
         internet_id='READINGS:TAMSAT:10D:NC'
-        internet_sources = querydb.get_active_internet_sources(echo=False)
+        internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
             if s.internet_id == internet_id:
                 internet_source = s
@@ -399,7 +399,7 @@ class TestGetInternet(unittest.TestCase):
     def TestRemoteHttp_FEWSNET_2(self):
 
         internet_id='USGS:EARLWRN:FEWSNET'
-        internet_sources = querydb.get_active_internet_sources(echo=False)
+        internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
             if s.internet_id == internet_id:
                 internet_source = s
@@ -606,7 +606,7 @@ class TestGetInternet(unittest.TestCase):
         internet_id='UCSB:CHIRPS:PREL:DEKAD'
 
 
-        internet_sources = querydb.get_active_internet_sources(echo=False)
+        internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
             if s.internet_id == internet_id:
                 internet_source = s
@@ -632,7 +632,7 @@ class TestGetInternet(unittest.TestCase):
         internet_id='GSFC:CGI:MODIS:CHLA:1D'
 
 
-        internet_sources = querydb.get_active_internet_sources(echo=False)
+        internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
             if s.internet_id == internet_id:
                 internet_source = s
@@ -676,7 +676,7 @@ class TestGetInternet(unittest.TestCase):
         internet_id='USGS:EARLWRN:FEWSNET'
 
 
-        internet_sources = querydb.get_active_internet_sources(echo=False)
+        internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
             if s.internet_id == internet_id:
                 internet_source = s
@@ -701,7 +701,7 @@ class TestGetInternet(unittest.TestCase):
 
         internet_id='ECMWF:MARS:EVPT:OPE'
 
-        internet_sources = querydb.get_active_internet_sources(echo=False)
+        internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
             if s.internet_id == internet_id:
                 internet_source = s
@@ -726,7 +726,7 @@ class TestGetInternet(unittest.TestCase):
 
         internet_id='CPC:NOAA:RAIN:ARC2'
 
-        internet_sources = querydb.get_active_internet_sources(echo=False)
+        internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
             if s.internet_id == internet_id:
                 internet_source = s
@@ -751,7 +751,7 @@ class TestGetInternet(unittest.TestCase):
 
         internet_id='CPC:NCEP:NOAA:SM'
 
-        internet_sources = querydb.get_active_internet_sources(echo=False)
+        internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
             if s.internet_id == internet_id:
                 internet_source = s
@@ -780,7 +780,7 @@ class TestGetInternet(unittest.TestCase):
         # remote_url = 'https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/A2016005.L3m_DAY_SST_sst_4km.nc'
         # status = get_file_from_url(remote_url,  '/tmp/', target_file=None, userpwd='anonymous:anonymous')
 
-        internet_sources = querydb.get_active_internet_sources(echo=False)
+        internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
             if s.internet_id == internet_id:
                 internet_source = s
@@ -805,7 +805,7 @@ class TestGetInternet(unittest.TestCase):
 
         internet_id='CPC:NCEP:NOAA:SM'
 
-        internet_sources = querydb.get_active_internet_sources(echo=False)
+        internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
             if s.internet_id == internet_id:
                 internet_source = s
@@ -830,7 +830,7 @@ class TestGetInternet(unittest.TestCase):
 
         internet_id='MODAPS:EOSDIS:FIRMS:NASA'
 
-        internet_sources = querydb.get_active_internet_sources(echo=False)
+        internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
             if s.internet_id == internet_id:
                 internet_source = s

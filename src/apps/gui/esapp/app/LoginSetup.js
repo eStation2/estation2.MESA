@@ -55,7 +55,13 @@ Ext.define('esapp.LoginSetup', {
                     Ext.util.Cookies.set('estation2_userid', user.userid);
                     Ext.util.Cookies.set('estation2_username', user.username);
                     Ext.util.Cookies.set('estation2_useremail', user.email);
-                    me.fireEvent('setupready')
+                    Ext.util.Cookies.set('estation2_userlanguage', user.prefered_language);
+                    if (user.prefered_language != esapp.globals['selectedLanguage']){
+                        window.location = '?lang=' + user.prefered_language;
+                    }
+                    else {
+                        me.fireEvent('setupready')
+                    }
                 }
             } // eo function success
 
@@ -121,6 +127,7 @@ Ext.define('esapp.LoginSetup', {
                 Ext.util.Cookies.set('estation2_userid', user.userid);
                 Ext.util.Cookies.set('estation2_username', user.username);
                 Ext.util.Cookies.set('estation2_useremail', user.email);
+                Ext.util.Cookies.set('estation2_userlanguage', user.prefered_language);
             } // eo function getUser
 
             /**
@@ -143,6 +150,7 @@ Ext.define('esapp.LoginSetup', {
                 Ext.util.Cookies.clear('estation2_userid');
                 Ext.util.Cookies.clear('estation2_username');
                 Ext.util.Cookies.clear('estation2_useremail');
+                Ext.util.Cookies.clear('estation2_userlanguage');
             } // eo function logout
 
         });

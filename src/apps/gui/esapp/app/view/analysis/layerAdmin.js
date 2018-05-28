@@ -97,7 +97,7 @@ Ext.define("esapp.view.analysis.layerAdmin",{
                 enableTextSelection: true,
                 draggable: false,
                 markDirty: false,
-                resizable: true,
+                resizable: false,
                 disableSelection: false,
                 trackOver: true,
                 forceFit:true

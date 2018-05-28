@@ -36,6 +36,7 @@ logger = log.my_logger(__name__)
 #                   and dateformat (date/datetime)
 #
 
+
 class Product(object):
     def __init__(self, product_code, version=None):
         self.product_code = product_code
@@ -257,7 +258,8 @@ class Product(object):
         for missing in missing_info:
             try:
                 product = Product(missing['product'], version=missing['version'],)
-                filenames.extend(product.get_missing_filenames(missing,existing_only=False))
+                # Change existing_only to True 21.3.18
+                filenames.extend(product.get_missing_filenames(missing,existing_only=True))
             except NoProductFound:
                 pass
             orig_mapset = missing['mapset']
@@ -540,11 +542,11 @@ def reproject_output(input_file, native_mapset_id, target_mapset_id, output_dir=
     if re.search('.*derived.*',sub_dir):
         product_type = 'Derived'
     elif re.search('.*tif.*',sub_dir):
-        product_type = 'Native'
+        product_type = 'Ingest'
     # product_type = functions.get_product_type_from_subdir(sub_dir)
 
     out_prod_ident = functions.set_path_filename_no_date(product_code, sub_product_code, target_mapset_id, version, ext)
-    output_subdir  = functions.set_path_sub_directory   (product_code, sub_product_code, product_type, version, target_mapset_id)
+    output_subdir = functions.set_path_sub_directory(product_code, sub_product_code, product_type, version, target_mapset_id)
 
     output_file = output_dir+\
                   output_subdir +\

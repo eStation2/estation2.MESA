@@ -25,8 +25,6 @@ Ext.define("esapp.view.system.systemsettings",{
         'Ext.tip.ToolTip'
     ],
 
-//    store: 'SystemSettingsStore',
-//    bind:'{system_setting}',
     session:true,
 
     title: '', // 'System settings',
@@ -44,66 +42,6 @@ Ext.define("esapp.view.system.systemsettings",{
     viewConfig:{forceFit:true},
     layout:'hbox',
 
-    //fieldset_title_database_connection_settings : '<b>'+esapp.Utils.getTranslation('dbconnectionsettings')+'</b>',
-    //form_fieldlabel_dbhost                      : esapp.Utils.getTranslation('host'),   // 'Host',
-    //form_fieldlabel_dbport                      : esapp.Utils.getTranslation('port'),   // 'Port',
-    //form_fieldlabel_dbuser                      : esapp.Utils.getTranslation('username'),   // 'User name',
-    //form_fieldlabel_dbpassword                  : esapp.Utils.getTranslation('password'),   // 'Password',
-    //form_fieldlabel_dbname                      : esapp.Utils.getTranslation('databasename'),   // 'Database name',
-    //
-    //fieldset_title_path_settings                : '<b>'+esapp.Utils.getTranslation('directorypaths')+'</b>',
-    //form_fieldlabel_base_dir                    : esapp.Utils.getTranslation('basedir'),   // 'Base directory',
-    //form_fieldlabel_base_tmp_dir                : esapp.Utils.getTranslation('basetmpdir'),   // 'Base temporary directory',
-    //form_fieldlabel_data_dir                    : esapp.Utils.getTranslation('datadir'),   // 'Data directory',
-    //form_fieldlabel_ingest_dir                  : esapp.Utils.getTranslation('ingestdir'),   // 'Ingest directory',
-    //form_fieldlabel_static_data_dir             : esapp.Utils.getTranslation('staticdatadir'),   // 'Static data directory',
-    //form_fieldlabel_archive_dir                 : esapp.Utils.getTranslation('archivedir'),   // 'Archive directory',
-    //form_fieldlabel_eumetcast_files_dir         : esapp.Utils.getTranslation('eumetcastfilesdir'),   // 'Eumetcast files directory',
-    ////form_fieldlabel_ingest_server_in_dir        : esapp.Utils.getTranslation('ingestserverindir'),   // 'Ingest server in directory',
-    //form_fieldlabel_get_internet_output_dir     : esapp.Utils.getTranslation('geteumetcastoutputdir'),   // 'Get Eumetcast output directory',
-    //form_fieldlabel_get_eumetcast_output_dir    : esapp.Utils.getTranslation('getinternetoutputdir'),   // 'Get Internet output directory',
-    //
-    //fieldset_title_system_settings              : '<b>'+esapp.Utils.getTranslation('systemsettings')+'</b>',
-    //form_fieldlabel_ip_pc1                      : esapp.Utils.getTranslation('pc1'),   // 'PC1',
-    //form_fieldlabel_ip_pc2                      : esapp.Utils.getTranslation('pc2'),   // 'PC2',
-    //form_fieldlabel_ip_pc3                      : esapp.Utils.getTranslation('pc3'),   // 'PC3',
-    //form_fieldlabel_current_mode                : esapp.Utils.getTranslation('currentmode'),   // 'Current mode',
-    //form_fieldlabel_active_verion               : esapp.Utils.getTranslation('activeversion'),   // 'Active version',
-    //form_fieldlabel_type_of_install             : esapp.Utils.getTranslation('typeofinstall'),   // 'Type of Install',
-    //form_fieldlabel_role                        : esapp.Utils.getTranslation('role'),   // 'Role',
-    //form_fieldlabel_thema                       : esapp.Utils.getTranslation('thema'),   // 'Thema',
-    //form_fieldlabel_loglevel                    : esapp.Utils.getTranslation('loglevel'),   // 'Log level',
-    //fieldset_title_ipaddresses                  : '<b>'+esapp.Utils.getTranslation('ipaddresses')+'</b>',  // '<b>IP addresses</b>',
-
-    //tools: [
-    //{
-    //    type: 'refresh',
-    //    tooltip: esapp.Utils.getTranslation('reloadsystemparams'),   // 'Reload system parameters.',
-    //    callback: function (formpanel) {
-    //        var systemsettingsstore  = Ext.data.StoreManager.lookup('SystemSettingsStore');
-    //        var systemsettingsrecord = systemsettingsstore.getModel().load(0, {
-    //            scope: formpanel,
-    //            loadmask: true,
-    //            failure: function(record, operation) {
-    //                //console.info('failure');
-    //            },
-    //            success: function(record, operation) {
-    //                if (operation.success){
-    //                    formpanel.loadRecord(systemsettingsrecord);
-    //                    formpanel.updateRecord();
-    //
-    //                    if (record.data.thema != ''){
-    //                        Ext.getCmp('modify-thema-btn').hide();
-    //                    }
-    //                    else {
-    //                        Ext.getCmp('modify-thema-btn').show();
-    //                    }
-    //                    Ext.toast({ html: esapp.Utils.getTranslation('systemsettingsrefreshed'), title: esapp.Utils.getTranslation('systemsettingsrefreshed'), width: 200, align: 't' });
-    //                }
-    //            }
-    //        });
-    //    }
-    //}],
 
     initComponent: function () {
         var me = this;
@@ -418,6 +356,12 @@ Ext.define("esapp.view.system.systemsettings",{
                     if (me.getSession().getChanges() != null){
                         me.getSession().getSaveBatch().start();
                         Ext.toast({ html: esapp.Utils.getTranslation('systemsettingssaved'), title: esapp.Utils.getTranslation('systemsettingssaved'), width: 200, align: 't' });
+
+                        var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
+                        if (datasetsstore.isStore) {
+                            datasetsstore.proxy.extraParams = {forse: true};
+                            datasetsstore.load();
+                        }
                     }
                 }
             }]

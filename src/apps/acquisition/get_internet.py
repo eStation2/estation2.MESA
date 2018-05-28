@@ -398,7 +398,7 @@ def loop_get_internet(dry_run=False):
                         time_sleep = 60
 
                     logger.info("Reading active INTERNET data sources from database")
-                    internet_sources_list = querydb.get_active_internet_sources(echo=echo_query)
+                    internet_sources_list = querydb.get_active_internet_sources()
 
                     # Loop over active triggers
                     for internet_source in internet_sources_list:

@@ -1,5 +1,5 @@
 Ext.define("esapp.view.analysis.timeseriesChartSelection",{
-    extend: "Ext.panel.Panel",      // "Ext.window.Window",
+    extend: "Ext.panel.Panel",
  
     requires: [
         "esapp.view.analysis.timeseriesChartSelectionController",
@@ -31,89 +31,93 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
     collapsible: true,
     collapsed: false,
     resizable: false,
-    autoScroll: true,
     floating: true,
-    floatable: true,
+    // floatable: true,
     alwaysOnTop: false,
-
-    width:530,
-    minWidth:530,
-    autoHeight: true,
-    // height: Ext.getBody().getViewSize().height-65,
-    // height: Ext.getCmp('analysismain').getBody().height,
-    alignTarget: Ext.getCmp('backgroundmap'),
+    shrinkWrap: 3, // both width and height depend on content (shrink wrap).
+    width:455,
+    // maxWidth:500,
+    // autoWidth: true,
+    // autoHeight: true,
+    layout: {
+        type: 'vbox',
+        pack: 'start',
+        align: 'stretch'
+    },
+    margin: '0 3 0 0',
+    // alignTarget: Ext.getCmp('backgroundmap'),
     defaultAlign: 'tr-tr',
-    // glyph : 'xf080@FontAwesome',
-    margin: '0 0 0 0',
-    padding: '0 0 0 0',
-    frame: true,
-    border: true,
-    // layout: {
-    //     type: 'fit'
-    // },
+    frame: false,
+    border: false,
+    shadow: false,
+    componentCls: 'rounded-box',
+
+    config: {
+        workspace: null
+    },
 
 
     initComponent: function () {
         var me = this;
-        // me.maxHeight = Ext.getBody().getViewSize().height-65;
-        // me.defaultAlign = 'tr-tr';
-        // me.alignTarget = Ext.getCmp('backgroundmap');
         // me.height = Ext.getCmp('analysismain').getBody().height;
 
         me.viewConfig = {
-            defaultAlign: 'tr-tr',
-            alignTarget: Ext.getCmp('backgroundmap')
+            defaultAlign: 'tr-tr'
+            // alignTarget: Ext.getCmp(me.workspace.id).body      // Ext.getCmp('backgroundmap')
         };
 
         me.listeners = {
-            // afterrender: function(){
-            //     Ext.util.Observable.capture(me, function (e) { console.log('timeserieschartselection - ' + e);});
-            //     // me.fireEvent('align');
-            // },
-            show: function(){
-                // console.info('show tschartselection');
-                me.hidden = false;
-                me.fireEvent('align');
-                me.expand();
+            afterrender: function(){
+                // Ext.util.Observable.capture(me, function (e) { console.log('timeserieschartselection - ' + e);});
+                // console.info(Ext.getCmp(me.workspace.id));
+                me.alignTarget = Ext.getCmp(me.workspace.id).body;
+                // me.fireEvent('align');
             },
-            align: function() {
-                // console.info('align tschartselection');
-                var task = new Ext.util.DelayedTask(function() {
-                    // me.show();
-                    // me.expand();
-                    me.alignTo(Ext.getCmp('analysismain').lookupReference('backgroundmap'), 'tr-tr');
-                    // me.alignTo(Ext.getCmp('analysismain'), 'tr-tr');
-                    // me.height = Ext.getBody().getViewSize().height-65;
-                    me.height = Ext.getCmp('analysismain').body.getHeight();
-                    me.updateLayout();
-                });
-                if (!me.hidden) {
-                    task.delay(50);
-                }
+            show: function(){
+                me.hidden = false;
+                // me.fireEvent('align');
+                me.height = Ext.getCmp(me.workspace.id).body.getHeight()-3;
+                me.updateLayout();
+                me.expand();
             }
+            // align: function() {
+            //     var task = new Ext.util.DelayedTask(function() {
+            //         me.alignTo(Ext.getCmp(me.workspace.id).body, 'tr-tr');
+            //         me.height = Ext.getCmp(me.workspace.id).body.getHeight()-3;
+            //         me.updateLayout();
+            //     });
+            //     if (!me.hidden) {
+            //         task.delay(50);
+            //     }
+            // }
         };
 
         me.title = esapp.Utils.getTranslation('TIME_SERIES_GRAPHS');  // 'TIME SERIES GRAPHS',
 
+        me.defaults = {
+            margin: '5 3 2 3'
+        };
+
         me.items = [{
             xtype: 'fieldset',
-            id: 'fieldset_selectedregion',
+            // id: 'fieldset_selectedregion',
             title: '<b style="font-size:16px; color:#0065A2; line-height: 18px;">' + esapp.Utils.getTranslation('selectedregion') + '</b>',
             hidden: false,
-            autoHeight: false,   // 65,
-            height: 60,
-            maxHeight: 60,
+            autoHeight: true,   // 65,
+            height: 65,
+            flex: 1,
+            maxHeight: 80,
             border: 2,
-            padding: '5 5 5 15',
-            margin: '10 0 10 0',
+            padding: '3 5 3 10',
             style: {
                 borderColor: '#157FCC',
                 borderStyle: 'solid'
             },
             items: [{
                 xtype: 'displayfield',
-                id: 'selectedregionname',
+                // id: 'selectedregionname_'+me.workspace.id,
                 reference: 'selectedregionname',
+                height: 40,
                 fieldLabel: '',
                 labelAlign: 'left',
                 fieldCls: 'ts_selectedfeature_name_font',
@@ -122,45 +126,49 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                     //"font-weight": 'bold',
                     //"font-size": 24
                 },
-                value: ''
+                value: '',
+                listeners: {
+                    change: function(field,newValue, oldValue){
+                        var new_wkt_polygon = me.lookupReference('wkt_polygon').getValue();
+                        var new_selectedregionname = me.lookupReference('selectedregionname').getValue();
+
+                        if (new_wkt_polygon.trim() != '' && new_selectedregionname.trim() != '') {
+                            var graphViewWindows = Ext.ComponentQuery.query('timeserieschart-window');
+
+                            Ext.Object.each(graphViewWindows, function(id, graphview_window, thisObj) {
+                                if (graphview_window.link_region_change){
+                                    graphview_window.getController().changeSelectedRegion();
+                                }
+                            });
+                        }
+                    }
+                }
             }]
         }, {
             xtype: 'tabpanel',
-            id: 'graphs_tabpanel_'+me.id,
-            //width: 440,
-            //minWidth: 440,
-            //maxWidth : 500,
-            //minTabWidth: 210,
+            // id: 'graphs_tabpanel_' + me.id,
             hideCollapseTool: true,
             header: false,
-            autoScroll:false,
-            reserveScrollbar: true,
             frame: false,
             border: false,
-            margin: '10px 0 0 0',
-            layout: {
-                type: 'fit'
+            flex: 5,
+            // bodyPadding: '3 3 3 3',
+            componentCls: 'rounded-box',
+            resizable: false,
+            defaults: {
+                layout: {
+                    type: 'fit'
+                }
             },
             items: [{
                 title: esapp.Utils.getTranslation('PROFILE'),  // 'DEFAULT X/Y GRAPH',
-                id: 'ts_xy_graph_tab_' + me.id,
-                margin: 4,
-                //minHeight: 800,
-                autoHeight: true,
-                autoScroll: true,
-                layout: {
-                    type: 'vbox'
-                    , align: 'stretch'
-                },
-                defaults: {
-                    margin: '0 0 0 0'
-                },
+                // id: 'ts_xy_graph_tab_' + me.id,
                 tbar: {
                     padding: '0 0 0 0',
                     items: [{
                         xtype: 'button',
                         text: esapp.Utils.getTranslation('gettimeseries'),    // 'Get timeseries',
-                        id: 'gettimeseries_btn_xy',
+                        // id: 'gettimeseries_btn_xy',
                         reference: 'gettimeseries_btn_xy',
                         iconCls: 'chart-curve_medium',
                         scale: 'medium',
@@ -168,41 +176,29 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                         //width: 150,
                         autoWidth: true,
                         margin: '0 0 5 0',
-                        charttype: 'xy',
+                        graphtype: 'xy',
                         handler: 'generateTimeseriesChart'
                     }]
                 },
                 items: [{
                     xtype: 'timeseriesproductselection',
-                    charttype: 'xy',
+                    graphtype: 'xy',
                     cumulative: false,
                     multiplevariables: true,
                     fromto: true,
                     year: false,
-                    compareyears: false,
+                    // compareyears: false,
                     multipleyears: true
                 }]
-            },{
-
+            }, {
                 title: esapp.Utils.getTranslation('CUMULATIVE'),  // 'CUMULATIVE',
-                id: 'ts_cumulative_graph_tab_' + me.id,
-                margin: 4,
-                //minHeight: 800,
-                autoHeight: true,
-                autoScroll: true,
-                layout: {
-                    type: 'vbox'
-                    , align: 'stretch'
-                },
-                defaults: {
-                    margin: '0 0 0 0'
-                },
+                // id: 'ts_cumulative_graph_tab_' + me.id,
                 tbar: {
                     padding: '0 0 0 0',
                     items: [{
                         xtype: 'button',
                         text: esapp.Utils.getTranslation('gettimeseries'),    // 'Get timeseries',
-                        id: 'gettimeseries_btn_cum',
+                        // id: 'gettimeseries_btn_cum',
                         reference: 'gettimeseries_btn_cum',
                         iconCls: 'chart-curve_medium',
                         scale: 'medium',
@@ -210,141 +206,119 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                         //width: 150,
                         autoWidth: true,
                         margin: '0 0 5 0',
-                        charttype: 'cumulative',
+                        graphtype: 'cumulative',
                         handler: 'generateTimeseriesChart'
                     }]
                 },
                 items: [{
                     xtype: 'timeseriesproductselection',
-                    charttype: 'cumulative',
+                    graphtype: 'cumulative',
                     cumulative: true,
                     multiplevariables: true,
                     fromto: true,
                     year: true,
-                    compareyears: false,
+                    // compareyears: false,
                     multipleyears: false
                 }]
-            },{
+            }, {
                 title: esapp.Utils.getTranslation('RANKING_ZSCORE'),  // 'RANKING / Z-SCORE',
-                id: 'ts_ranking_graph_tab_'+me.id,
-                margin:4,
-                //minHeight: 800,
-                autoHeight: true,
-                autoScroll:true,
-                layout: {
-                    type: 'vbox'
-                    ,align: 'stretch'
-                },
-                defaults: {
-                    margin: '5 0 15 0'
-                },
+                // id: 'ts_ranking_graph_tab_' + me.id,
                 tbar: {
                     padding: '0 0 0 0',
                     items: [{
                         xtype: 'button',
                         text: esapp.Utils.getTranslation('gettimeseries'),    // 'Get timeseries',
-                        id: 'gettimeseries_btn_ranking',
+                        // id: 'gettimeseries_btn_ranking',
                         reference: 'gettimeseries_btn_ranking',
                         iconCls: 'chart-curve_medium',
                         scale: 'medium',
                         disabled: false,
                         autoWidth: true,
                         margin: '0 0 5 0',
-                        charttype: 'ranking',
+                        graphtype: 'ranking',
                         handler: 'generateTimeseriesChart'
                     }]
                 },
                 items: [{
                     xtype: 'timeseriesproductselection',
-                    charttype: 'ranking',
+                    graphtype: 'ranking',
                     cumulative: false,
                     ranking: true,
                     multiplevariables: false,
                     fromto: false,
                     year: false,
-                    compareyears: false,
+                    // compareyears: false,
                     multipleyears: true
                 }]
-            },{
+            }, {
                 title: esapp.Utils.getTranslation('MATRIX'),  // 'MATRIX',
-                id: 'ts_matrix_graph_tab_'+me.id,
-                margin: 4,
-                //minHeight: 800,
-                autoHeight: true,
-                autoScroll:true,
-                layout: {
-                    type: 'vbox'
-                    ,align: 'stretch'
-                },
-                defaults: {
-                    margin: '5 0 15 0'
-                },
+                // id: 'ts_matrix_graph_tab_' + me.id,
                 tbar: {
                     padding: '0 0 0 0',
                     items: [{
                         xtype: 'button',
                         text: esapp.Utils.getTranslation('gettimeseries'),    // 'Get timeseries',
-                        id: 'gettimeseries_btn_matrix',
+                        // id: 'gettimeseries_btn_matrix',
                         reference: 'gettimeseries_btn_matrix',
                         iconCls: 'chart-curve_medium',
                         scale: 'medium',
                         disabled: false,
                         autoWidth: true,
                         margin: '0 0 5 0',
-                        charttype: 'matrix',
+                        graphtype: 'matrix',
                         handler: 'generateTimeseriesChart'
                     }]
                 },
                 items: [{
                     xtype: 'timeseriesproductselection',
-                    charttype: 'matrix',
+                    graphtype: 'matrix',
                     cumulative: false,
                     matrix: true,
                     multiplevariables: false,
                     fromto: false,
                     year: false,
-                    compareyears: false,
+                    // compareyears: false,
                     multipleyears: true
                 }]
-            },{
+            }, {
                 title: 'Debug info',
-                id: 'debug_info_tab_'+me.id,
+                // id: 'debug_info_tab_' + me.id,
                 hidden: true,
                 items: [{
                     xtype: 'displayfield',
-                    id: 'regionname',
+                    // id: 'regionname',
                     reference: 'regionname',
                     fieldLabel: 'Region name',
-                    labelAlign : 'top',
+                    labelAlign: 'top',
                     value: '<span style="color:green;">value</span>'
                 }, {
-                    xtype: 'displayfield',
-                    id: 'admin0name',
-                    reference: 'admin0name',
-                    fieldLabel: 'Admin level 0 country name',
-                    labelAlign : 'top',
-                    value: '<span style="color:green;">value</span>'
-                }, {
-                    xtype: 'displayfield',
-                    id: 'admin1name',
-                    reference: 'admin1name',
-                    fieldLabel: 'Admin level 1 region name',
-                    labelAlign : 'top',
-                    value: '<span style="color:green;">value</span>'
-                }, {
-                    xtype: 'displayfield',
-                    id: 'admin2name',
-                    reference: 'admin2name',
-                    fieldLabel: 'Admin level 2 region name',
-                    labelAlign : 'top',
-                    value: '<span style="color:green;">value</span>'
-                }, {
+                //     xtype: 'displayfield',
+                //     // id: 'admin0name',
+                //     reference: 'admin0name',
+                //     fieldLabel: 'Admin level 0 country name',
+                //     labelAlign: 'top',
+                //     value: '<span style="color:green;">value</span>'
+                // }, {
+                //     xtype: 'displayfield',
+                //     // id: 'admin1name',
+                //     reference: 'admin1name',
+                //     fieldLabel: 'Admin level 1 region name',
+                //     labelAlign: 'top',
+                //     value: '<span style="color:green;">value</span>'
+                // }, {
+                //     xtype: 'displayfield',
+                //     // id: 'admin2name',
+                //     reference: 'admin2name',
+                //     fieldLabel: 'Admin level 2 region name',
+                //     labelAlign: 'top',
+                //     value: '<span style="color:green;">value</span>'
+                // }, {
                     title: 'WKT of Polygon',
                     xtype: 'displayfield',
-                    id: 'wkt_polygon',
+                    // id: 'wkt_polygon_'+ me.workspace.id,
                     reference: 'wkt_polygon',
                     fieldLabel: 'WKT of Polygon',
-                    labelAlign : 'top',
+                    labelAlign: 'top',
                     value: ''
                 }]
             }]

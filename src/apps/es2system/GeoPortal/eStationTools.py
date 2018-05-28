@@ -362,7 +362,7 @@ from database import connectdb
 
 db = connectdb.ConnectDB().db
 
-def get_activated_geoserver(echo=False):
+def get_activated_geoserver():
     global db
     try:
         session = db.session
@@ -384,8 +384,6 @@ def get_activated_geoserver(echo=False):
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        if echo:
-            print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_activated_geoserver: Database query error!\n -> {}".format(exceptionvalue))
     finally:

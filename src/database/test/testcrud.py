@@ -12,6 +12,17 @@ crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
 
 class TestCrud(unittest.TestCase):
 
+    def test_read_with_where(self):
+        crud_dbanalysis = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+        product_key = {
+            "productcode": 'vgt-ndvi',
+            "subproductcode": 'ndvi-linearx2',
+            "version": 'sv2-pv2.2'
+        }
+        crud_dbanalysis.read('timeseries_drawproperties_new', **product_key)
+
+
     def test_crud(self):
         records = len(crud_db.read('date_format'))
         self.assertTrue(records > 0)
@@ -33,11 +44,11 @@ class TestCrud(unittest.TestCase):
         productinfo = {'productcode': 'vgt_fapar', 'subproductcode': 'vgt_fapar_native', 'version': 'V1.3', 'defined_by': 'JRC', 'activated': False}
         crud_db.update('product', productinfo)
 
-        produpdated = querydb.get_product_native(productcode='vgt_fapar', version='V1.3', allrecs=False, echo=False)
+        produpdated = querydb.get_product_native(productcode='vgt_fapar', version='V1.3', allrecs=False)
         self.assertEquals(produpdated.activated, False)
 
         productinfo = {'productcode': 'vgt_fapar', 'subproductcode': 'vgt_fapar_native', 'version': 'V1.3', 'defined_by': 'JRC', 'activated': True}
         crud_db.update('product', productinfo)
 
-        produpdated = querydb.get_product_native(productcode='vgt_fapar', version='V1.3', allrecs=False, echo=False)
+        produpdated = querydb.get_product_native(productcode='vgt_fapar', version='V1.3', allrecs=False)
         self.assertEquals(produpdated.activated, True)
