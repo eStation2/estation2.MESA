@@ -37,7 +37,7 @@ Ext.define('esapp.view.analysis.mapTemplateAdminController', {
                 showtoolbar: selectedMapTemplates[i].data.showtoolbar,
                 showgraticule: selectedMapTemplates[i].data.showgraticule,
                 showtimeline: selectedMapTemplates[i].data.showtimeline,
-                nozoom: true,  // Opening a real map template and not a workspace template will not zoom to saved zoomextent
+                nozoom: false,  // true = Opening a real map template and not a workspace template will not zoom to saved zoomextent
                 scalelineObjPosition: selectedMapTemplates[i].data.scalelineobjposition.split(",").map(function(x){return parseInt(x)}),
                 vectorLayers: selectedMapTemplates[i].data.vectorlayers,
                 outmask: selectedMapTemplates[i].data.outmask,

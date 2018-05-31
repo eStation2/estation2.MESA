@@ -26,7 +26,7 @@ import gzip
 import psutil
 import csv
 import sys
-import h5py
+# import h5py
 
 from multiprocessing import *
 
@@ -1809,6 +1809,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process the Sentinel 3 Level 2 product from OLCI - WRR
 #
+    import h5py
 
     # Hard-coded definitions:
     geo_file = 'geo_coordinates.nc'
@@ -2020,6 +2021,8 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process the Sentinel 3 Level 2 product from OLCI - WRR
 #
+    import h5py
+
     # Hard-coded definitions:
     # geo_file='geo_coordinates.nc'
     coord_scale = 1000000.0
