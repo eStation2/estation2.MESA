@@ -2493,7 +2493,7 @@ BEGIN
 	SELECT INTO current_legend_id nextval('analysis.legend_legend_id_seq');
 	-- raise notice 'current_legend_id set to: %', current_legend_id;
 
-	DELETE CASCADE FROM analysis.legend WHERE legend_id < 400;
+	DELETE FROM analysis.legend WHERE legend_id < 400;
 
 	ALTER SEQUENCE analysis.legend_legend_id_seq RESTART WITH 1;
 
