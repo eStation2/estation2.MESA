@@ -2819,6 +2819,8 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             # Take from DB
             in_scale_factor = product_in_info.scale_factor
             in_offset = product_in_info.scale_offset
+
+        # See ES2-241 - remove indent to be always applied
         in_scale_type = product_in_info.scale_type
 
         in_nodata = product_in_info.no_data
