@@ -62,7 +62,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     # 3davg
     # 3 Day average of the 1 day Chl, re-projected on target mapset
     output_sprod=proc_lists.proc_add_subprod("3daysavg", "olci-wrr", final=False,
-                                             descriptive_name='3day chl-nn',
+                                             descriptive_name='3day chl-oc4me',
                                              description='mean 3 day composite',
                                              frequency_id='e1day',
                                              date_format='YYYYMMDD',

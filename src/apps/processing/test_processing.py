@@ -534,7 +534,8 @@ def test_proc_olci_wrr(start_date=None, end_date=None, pipe_run=0, pipe_print=3,
 
     # Create the list of dates -> returns empty if start==end==None
     if start_date is not None and end_date is not None:
-        starting_dates = proc_functions.get_list_dates_for_dataset('olci-wrr', 'chl-nn', 'V02.0', start_date=start_date, end_date=end_date)
+        #starting_dates = proc_functions.get_list_dates_for_dataset('olci-wrr', 'chl-nn', 'V02.0', start_date=start_date, end_date=end_date)
+        starting_dates = proc_functions.get_list_dates_for_dataset('olci-wrr', 'chl-oc4me', 'V02.0', start_date=start_date, end_date=end_date)
     else:
         starting_dates = None
 
@@ -542,7 +543,7 @@ def test_proc_olci_wrr(start_date=None, end_date=None, pipe_run=0, pipe_print=3,
             'pipeline_printout_level':pipe_print, \
             'pipeline_printout_graph_level': 0, \
             'prod': 'olci-wrr',\
-            'starting_sprod':'chl-nn',\
+            'starting_sprod':'chl-oc4me',\
             'starting_dates': starting_dates,\
             'mapset': 'SPOTV-Africa-1km',\
             'version':'V02.0',

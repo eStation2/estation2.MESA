@@ -2062,6 +2062,249 @@ def write_vrt_georef(output_dir, band_file, n_lines=None, n_cols=None, lat_file=
     #     logger.debug('Error in reading scaling')
     #     raise Exception('Error in reading scaling')
 
+#####################################################################################
+#   Purpose: write a graph file for S3 Level 2 products ingestion
+#   Author: Vijay Charan Venkatachalam, JRC, European Commission
+#   Date: 2018/06/18
+#   Inputs: output_dir and bandname
+#   Output: none
+#
+def write_graph_xml_band_math_subset(output_dir, band_name):
+
+    # Check/complete arguments
+    if band_name is None:
+        band_name = 'CHL_NN'
+
+    file_xml = output_dir + os.path.sep+ band_name  + os.path.sep+ 'graph_xml_subset.xml'
+
+    with open(file_xml, 'w') as outFile:
+        outFile.write('<graph id="Graph">\n')
+        outFile.write('  <version>1.0</version>\n')
+        outFile.write('  <node id="Read">\n')
+        outFile.write('    <operator>Read</operator>\n')
+        outFile.write('    <sources/>\n')
+        outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
+        outFile.write('      <file>'+output_dir+ os.path.sep+'xfdumanifest.xml</file>\n')
+        outFile.write('    </parameters>\n')
+        outFile.write('  </node>\n')
+        outFile.write('  <node id="BandMaths">\n')
+        outFile.write('    <operator>BandMaths</operator>\n')
+        outFile.write('    <sources>\n')
+        outFile.write('      <sourceProduct refid="Read"/>\n')
+        outFile.write('    </sources>\n')
+        outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
+        outFile.write('     <targetBands>\n')
+        outFile.write('        <targetBand>\n')
+        outFile.write('          <name>'+band_name+'_MASKED</name>\n')
+        outFile.write('          <type>byte</type>\n')
+        outFile.write(
+            '          <expression>(WQSF_msb_ANNOT_ABSO_D or WQSF_msb_ANNOT_MIXR1 or WQSF_msb_ANNOT_DROUT or WQSF_msb_ANNOT_TAU06 or WQSF_msb_RWNEG_O2 or WQSF_msb_RWNEG_O3 or WQSF_msb_RWNEG_O4 or WQSF_msb_RWNEG_O6 or WQSF_msb_RWNEG_O5 or WQSF_msb_RWNEG_O7 or WQSF_msb_RWNEG_O8 or WQSF_lsb_AC_FAIL or WQSF_lsb_WHITECAPS) ? NaN : '+band_name+'</expression>\n')
+        outFile.write('          <description/>\n')
+        outFile.write('          <unit/>\n')
+        outFile.write('          <noDataValue>NaN</noDataValue>\n')
+        outFile.write('        </targetBand>\n')
+        outFile.write('      </targetBands>\n')
+        outFile.write('      <variables/>\n')
+        outFile.write('    </parameters>\n')
+        outFile.write('  </node>\n')
+        outFile.write('  <node id="Subset">\n')
+        outFile.write('    <operator>Subset</operator>\n')
+        outFile.write('    <sources>\n')
+        outFile.write('     <sourceProduct refid="BandMaths"/>\n')
+        outFile.write('    </sources>\n')
+        outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
+        outFile.write('      <sourceBands>'+band_name+'_MASKED</sourceBands>\n')
+        outFile.write('      <region>0,0,1217,14952</region>\n')
+        outFile.write(
+            '     <geoRegion>POLYGON ((-33.23047637939453 41.53836441040039, 65.0774154663086 41.53836441040039, 65.0774154663086 -42.923343658447266, -33.23047637939453 -42.923343658447266, -33.23047637939453 41.53836441040039, -33.23047637939453 41.53836441040039))</geoRegion>\n')
+        outFile.write('      <subSamplingX>1</subSamplingX>\n')
+        outFile.write('      <subSamplingY>1</subSamplingY>\n')
+        outFile.write('      <fullSwath>false</fullSwath>\n')
+        outFile.write('      <tiePointGridNames/>\n')
+        outFile.write('      <copyMetadata>true</copyMetadata>\n')
+        outFile.write('    </parameters>\n')
+        outFile.write('  </node>\n')
+        outFile.write('  <node id="Write">\n')
+        outFile.write('    <operator>Write</operator>\n')
+        outFile.write('    <sources>\n')
+        outFile.write('      <sourceProduct refid="Subset"/>\n')
+        outFile.write('    </sources>\n')
+        outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
+        outFile.write('      <file>'+output_dir+ os.path.sep+ band_name + os.path.sep+'band_subset.tif</file>\n')
+        outFile.write('      <formatName>GeoTIFF</formatName>\n')
+        outFile.write('    </parameters>\n')
+        outFile.write('  </node>\n')
+        outFile.write('  <applicationData id="Presentation">\n')
+        outFile.write('    <Description/>\n')
+        outFile.write('    <node id="Read">\n')
+        outFile.write('            <displayPosition x="37.0" y="133.0"/>\n')
+        outFile.write('   </node>\n')
+        outFile.write('    <node id="BandMaths">\n')
+        outFile.write('      <displayPosition x="153.0" y="133.0"/>\n')
+        outFile.write('    </node>\n')
+        outFile.write('    <node id="Subset">\n')
+        outFile.write('      <displayPosition x="319.0" y="132.0"/>\n')
+        outFile.write('    </node>\n')
+        outFile.write('    <node id="Write">\n')
+        outFile.write('            <displayPosition x="492.0" y="135.0"/>\n')
+        outFile.write('    </node>\n')
+        outFile.write('  </applicationData>\n')
+        outFile.write('</graph>\n')
+
+
+
+######################################################################################
+#   Purpose: write a graph file for S3 Level 2 products ingestion
+#   Author: Vijay Charan Venkatachalam, JRC, European Commission
+#   Date: 2018/05/23
+#   Inputs: output_dir and bandname
+#   Output: none
+#
+def write_graph_xml_subset(output_dir, band_name):
+
+    # Check/complete arguments
+    if band_name is None:
+        band_name = 'CHL_NN'
+
+    file_xml = output_dir + os.path.sep+ band_name  + os.path.sep+ 'graph_xml_subset.xml'
+
+    with open(file_xml, 'w') as outFile:
+        outFile.write('<graph id="Graph">\n')
+        outFile.write('  <version>1.0</version>\n')
+        outFile.write('  <node id="Read">\n')
+        outFile.write('    <operator>Read</operator>\n')
+        outFile.write('    <sources/>\n')
+        outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
+        outFile.write('      <file>'+output_dir+ os.path.sep+'xfdumanifest.xml</file>\n')
+        outFile.write('    </parameters>\n')
+        outFile.write('  </node>\n')
+        outFile.write('  <node id="Subset">\n')
+        outFile.write('    <operator>Subset</operator>\n')
+        outFile.write('    <sources>\n')
+        outFile.write('      <sourceProduct refid="Read"/>\n')
+        outFile.write('    </sources>\n')
+        outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
+        outFile.write('      <sourceBands>'+band_name+'</sourceBands>\n')
+        # outFile.write('      <region>0,0,1217,15037</region>\n')
+        outFile.write('      <region>0,0,1217,14952</region>\n')
+        # outFile.write(
+        #     '      <geoRegion>POLYGON ((-22.15353012084961 42.92298126220703, 63.69279479980469 42.92298126220703, 63.69279479980469 -41.53872299194336, -22.15353012084961 -41.53872299194336, -22.15353012084961 42.92298126220703, -22.15353012084961 42.92298126220703))</geoRegion>\n')
+        outFile.write(
+            '     <geoRegion>POLYGON ((-33.23047637939453 41.53836441040039, 65.0774154663086 41.53836441040039, 65.0774154663086 -42.923343658447266, -33.23047637939453 -42.923343658447266, -33.23047637939453 41.53836441040039, -33.23047637939453 41.53836441040039))</geoRegion>\n')
+
+        outFile.write('      <subSamplingX>1</subSamplingX>\n')
+        outFile.write('      <subSamplingY>1</subSamplingY>\n')
+        outFile.write('      <fullSwath>false</fullSwath>\n')
+        outFile.write('      <tiePointGridNames/>\n')
+        outFile.write('      <copyMetadata>true</copyMetadata>\n')
+        outFile.write('    </parameters>\n')
+        outFile.write('  </node>\n')
+        outFile.write('  <node id="Write">\n')
+        outFile.write('    <operator>Write</operator>\n')
+        outFile.write('    <sources>\n')
+        outFile.write('      <sourceProduct refid="Subset"/>\n')
+        outFile.write('    </sources>\n')
+        outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
+        outFile.write('      <file>'+output_dir+ os.path.sep+ band_name + os.path.sep+'band_subset.tif</file>\n')
+        outFile.write('      <formatName>GeoTIFF</formatName>\n')
+        outFile.write('    </parameters>\n')
+        outFile.write('  </node>\n')
+        outFile.write('  <applicationData id="Presentation">\n')
+        outFile.write('    <Description/>\n')
+        outFile.write('    <node id="Read">\n')
+        outFile.write('            <displayPosition x="39.0" y="135.0"/>\n')
+        outFile.write('    </node>\n')
+        outFile.write('    <node id="Subset">\n')
+        outFile.write('      <displayPosition x="247.0" y="137.0"/>\n')
+        outFile.write('    </node>\n')
+        outFile.write('    <node id="Write">\n')
+        outFile.write('            <displayPosition x="455.0" y="135.0"/>\n')
+        outFile.write('    </node>\n')
+        outFile.write('  </applicationData>\n')
+        outFile.write('</graph>\n')
+
+######################################################################################
+#   Purpose: write a graph file for S3 Level 2 products ingestion
+#   Author: Vijay Charan Venkatachalam, JRC, European Commission
+#   Date: 2018/05/23
+#   Inputs: output_dir
+#   Output: none
+#
+def write_graph_xml_reproject(output_dir, nodata_value):
+
+    # Check/complete arguments
+    if nodata_value is None:
+        nodata_value = 'NaN'
+
+    file_xml = output_dir + os.path.sep + 'graph_xml_reproject.xml'
+
+    with open(file_xml, 'w') as outFile:
+        outFile.write('<graph id="Graph">\n')
+        outFile.write('  <version>1.0</version>\n')
+        outFile.write('  <node id="Read">\n')
+        outFile.write('    <operator>Read</operator>\n')
+        outFile.write('    <sources/>\n')
+        outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
+        outFile.write('      <file>'+output_dir+ os.path.sep+'band_subset.tif</file>\n')
+        outFile.write('    </parameters>\n')
+        outFile.write('  </node>\n')
+        outFile.write('  <node id="Reproject">\n')
+        outFile.write('   <operator>Reproject</operator>\n')
+        outFile.write('    <sources>\n')
+        outFile.write('      <sourceProduct refid="Read"/>\n')
+        outFile.write('    </sources>\n')
+        outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
+        outFile.write('     <wktFile/>\n')
+        outFile.write('      <crs>GEOGCS[&quot;WGS84(DD)&quot;, &#xd;\n')
+        outFile.write('  DATUM[&quot;WGS84&quot;, &#xd;\n')
+        outFile.write('    SPHEROID[&quot;WGS84&quot;, 6378137.0, 298.257223563]], &#xd;\n')
+        outFile.write('  PRIMEM[&quot;Greenwich&quot;, 0.0], &#xd;\n')
+        outFile.write('  UNIT[&quot;degree&quot;, 0.017453292519943295], &#xd;\n')
+        outFile.write('  AXIS[&quot;Geodetic longitude&quot;, EAST], &#xd;\n')
+        outFile.write('  AXIS[&quot;Geodetic latitude&quot;, NORTH]]</crs>\n')
+        outFile.write('      <resampling>Nearest</resampling>\n')
+        outFile.write('     <!--  <referencePixelX>2157.5</referencePixelX> -->\n')
+        outFile.write('     <!--  <referencePixelY>5083.0</referencePixelY> -->\n')
+        outFile.write('     <!-- <easting>42.68515736284194</easting> -->\n')
+        outFile.write('     <!--  <northing>0.14452142813079405</northing> -->\n')
+        outFile.write('      <orientation>0.0</orientation>\n')
+        outFile.write('      <pixelSizeX>0.0089</pixelSizeX>\n')
+        outFile.write('     <pixelSizeY>0.0089</pixelSizeY>\n')
+        outFile.write('     <!--  <width>4315</width> -->\n')
+        outFile.write('     <!--  <height>10166</height> -->\n')
+        outFile.write('      <tileSizeX/>\n')
+        outFile.write('      <tileSizeY/>\n')
+        outFile.write('      <orthorectify>false</orthorectify>\n')
+        outFile.write('      <elevationModelName/>\n')
+        outFile.write('      <noDataValue>'+str(nodata_value)+'</noDataValue>\n')
+        outFile.write('     <includeTiePointGrids>false</includeTiePointGrids>\n')
+        outFile.write('      <addDeltaBands>false</addDeltaBands>\n')
+        outFile.write('    </parameters>\n')
+        outFile.write('  </node>\n')
+        outFile.write('  <node id="Write">\n')
+        outFile.write('    <operator>Write</operator>\n')
+        outFile.write('    <sources>\n')
+        outFile.write('      <sourceProduct refid="Reproject"/>\n')
+        outFile.write('    </sources>\n')
+        outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
+        outFile.write('      <file>'+output_dir+ os.path.sep+'reprojected.tif</file>\n')
+        outFile.write('      <formatName>GeoTIFF</formatName>\n')
+        outFile.write('    </parameters>\n')
+        outFile.write('  </node>\n')
+        outFile.write('  <applicationData id="Presentation">\n')
+        outFile.write('    <Description/>\n')
+        outFile.write('    <node id="Read">\n')
+        outFile.write('            <displayPosition x="37.0" y="134.0"/>\n')
+        outFile.write('    </node>\n')
+        outFile.write('    <node id="Reproject">\n')
+        outFile.write('      <displayPosition x="249.0" y="138.0"/>\n')
+        outFile.write('    </node>\n')
+        outFile.write('    <node id="Write">\n')
+        outFile.write('            <displayPosition x="455.0" y="135.0"/>\n')
+        outFile.write('    </node>\n')
+        outFile.write('  </applicationData>\n')
+        outFile.write('</graph>\n')
+
 ######################################################################################
 #                            PROCESSING CHAINS
 ######################################################################################
