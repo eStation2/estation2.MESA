@@ -39,7 +39,9 @@ class TestCreateRequests(unittest.TestCase):
         # version = 'undefined'
 
         productcode = 'vgt-ndvi'
-        version = 'spot-v1'
+        version = 'sv2-pv2.2'
+        mapsetcode = 'SPOTV-IGAD-1km'
+        subproductcode = 'absol-min-linearx2'
 
         request = requests.create_request(productcode, version, mapsetcode=mapsetcode, subproductcode=subproductcode)
         request_json = json.dumps(request,

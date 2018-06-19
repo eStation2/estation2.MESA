@@ -3113,19 +3113,36 @@ def get_product_sources(productcode='', subproductcode='', version=''):
 def get_datasource_descr(source_type='', source_id=''):
     global db
     try:
-        session = db.session
-        if source_type == 'EUMETCAST':
-            es = aliased(db.eumetcast_source)
-            dsd = aliased(db.datasource_description)
-            datasource_descr = session.query(es.filter_expression_jrc, dsd).join(dsd). \
-                filter(es.eumetcast_id == source_id).all()
 
-        else:  # source_type == 'INTERNET'
-            datasource_descr = session.query(db.internet_source, db.datasource_description). \
-                join(db.datasource_description). \
-                filter(db.internet_source.internet_id == source_id).all()
+        if source_type == 'EUMETCAST':
+            query = "SELECT es.filter_expression_jrc, dsd.* \
+                     FROM products.eumetcast_source es JOIN products.datasource_description dsd \
+                         ON es.datasource_descr_id = dsd.datasource_descr_id \
+                     WHERE es.datasource_descr_id = '" + source_id + "'"
+        else:   # source_type == 'INTERNET'
+            query = "SELECT ints.*, dsd.* \
+                     FROM products.internet_source ints JOIN products.datasource_description dsd \
+                         ON ints.datasource_descr_id = dsd.datasource_descr_id \
+                     WHERE ints.datasource_descr_id = '" + source_id + "'"
+
+        result = dbschema_analysis.execute(query)
+        datasource_descr = result.fetchall()
 
         return datasource_descr
+
+        # session = db.session
+        # if source_type == 'EUMETCAST':
+        #     es = aliased(db.eumetcast_source)
+        #     dsd = aliased(db.datasource_description)
+        #     datasource_descr = session.query(es.filter_expression_jrc, dsd).join(dsd). \
+        #         filter(es.eumetcast_id == source_id).all()
+        #
+        # else:  # source_type == 'INTERNET'
+        #     datasource_descr = session.query(db.internet_source, db.datasource_description). \
+        #         join(db.datasource_description). \
+        #         filter(db.internet_source.internet_id == source_id).all()
+        #
+        # return datasource_descr
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
@@ -3183,38 +3200,49 @@ def get_active_internet_sources():
     global db
 
     try:
-        session = db.session
+        query = "SELECT * FROM products.internet_source i \
+                 WHERE i.internet_id IN (  \
+                    SELECT data_source_id FROM products.product_acquisition_data_source pads JOIN products.product p \
+                    ON pads.productcode = p.productcode AND pads.subproductcode = p.subproductcode AND pads.version = p.version \
+                       AND p.product_type = 'Native' AND p.activated = TRUE \
+                    WHERE pads.type = 'INTERNET')"
 
-        intsrc = session.query(db.internet_source).subquery()
-        pads = aliased(db.product_acquisition_data_source)
-        p = aliased(db.product)
-        # The columns on the subquery "intsrc" are accessible through an attribute called "c"
-        # e.g. intsrc.c.filter_expression_jrc
+        result = dbschema_analysis.execute(query)
+        internet_sources = result.fetchall()
 
-        args = tuple(x for x in (pads,
-                                 intsrc.c.internet_id,
-                                 intsrc.c.defined_by,
-                                 intsrc.c.descriptive_name,
-                                 intsrc.c.description,
-                                 intsrc.c.modified_by,
-                                 intsrc.c.update_datetime,
-                                 intsrc.c.url,
-                                 intsrc.c.user_name,
-                                 intsrc.c.password,
-                                 intsrc.c.type,
-                                 intsrc.c.frequency_id,
-                                 intsrc.c.start_date,
-                                 intsrc.c.end_date,
-                                 intsrc.c.include_files_expression,
-                                 intsrc.c.files_filter_expression,
-                                 intsrc.c.status,
-                                 intsrc.c.pull_frequency,
-                                 intsrc.c.datasource_descr_id)
-                     if x != intsrc.c.update_datetime)
 
-        internet_sources = session.query(*args).outerjoin(intsrc, pads.data_source_id == intsrc.c.internet_id). \
-            outerjoin(p, and_(pads.productcode == p.productcode, pads.version == p.version)). \
-            filter(and_(pads.type == 'INTERNET', pads.activated, p.product_type == 'Native', p.activated)).all()
+        # session = db.session
+        #
+        # intsrc = session.query(db.internet_source).subquery()
+        # pads = aliased(db.product_acquisition_data_source)
+        # p = aliased(db.product)
+        # # The columns on the subquery "intsrc" are accessible through an attribute called "c"
+        # # e.g. intsrc.c.filter_expression_jrc
+        #
+        # args = tuple(x for x in (pads,
+        #                          intsrc.c.internet_id,
+        #                          intsrc.c.defined_by,
+        #                          intsrc.c.descriptive_name,
+        #                          intsrc.c.description,
+        #                          intsrc.c.modified_by,
+        #                          intsrc.c.update_datetime,
+        #                          intsrc.c.url,
+        #                          intsrc.c.user_name,
+        #                          intsrc.c.password,
+        #                          intsrc.c.type,
+        #                          intsrc.c.frequency_id,
+        #                          intsrc.c.start_date,
+        #                          intsrc.c.end_date,
+        #                          intsrc.c.include_files_expression,
+        #                          intsrc.c.files_filter_expression,
+        #                          intsrc.c.status,
+        #                          intsrc.c.pull_frequency,
+        #                          intsrc.c.datasource_descr_id)
+        #              if x != intsrc.c.update_datetime)
+        #
+        # internet_sources = session.query(*args).outerjoin(intsrc, pads.data_source_id == intsrc.c.internet_id). \
+        #     outerjoin(p, and_(pads.productcode == p.productcode, pads.version == p.version)). \
+        #     filter(and_(pads.type == 'INTERNET', pads.activated, p.product_type == 'Native', p.activated)).all()
 
         return internet_sources
 

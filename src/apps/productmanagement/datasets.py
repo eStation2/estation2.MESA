@@ -414,11 +414,16 @@ class Dataset(object):
     def get_dataset_normalized_info(self, from_date=None, to_date=None):
         refresh = False
         if self._frequency.frequency_type == 'n':
+            missingfiles = 0
+            totfilespresent = len(self.get_basenames(regex='*'))
+            if totfilespresent == 0:
+                missingfiles = 1
+
             return {
                 'firstdate': '',
                 'lastdate': '',
                 'totfiles': 1,
-                'missingfiles': 0,
+                'missingfiles': missingfiles,
                 'intervals': ''
             }
 

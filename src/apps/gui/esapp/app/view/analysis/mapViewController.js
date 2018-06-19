@@ -430,7 +430,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 mapviewtimeline.show();
                 // mapviewtimeline.fireEvent('show');
 
-                if (frequency_id == 'e1day'){
+                if (frequency_id == 'e1day' && dataLength > 30){
                     mapview_timelinechart_container.timelinechart.rangeSelector.setSelected(1);
                     mapview_timelinechart_container.timelinechart.rangeSelector.clickButton(1); // setSelected(2);
                     // mapview_timelinechart_container.timelinechart.rangeSelector.updateButtonStates();

@@ -591,8 +591,7 @@ def getGraphTemplates(params):
                                   + ',"usergraphtemplates":' + graphtemplates_json + '}'
 
         else:
-            graphtemplates_json = '{"success":"true", "total":' \
-                                  + str(usergraphtemplates.__len__()) \
+            graphtemplates_json = '{"success":"true", "total":0' \
                                   + ',"usergraphtemplates":[]}'
             # graphtemplates_json = '{"success":true, "error":"No Graph Templates defined for user!"}'  # OR RETURN A DEFAULT GRAPH TEMPLATE?????
 
