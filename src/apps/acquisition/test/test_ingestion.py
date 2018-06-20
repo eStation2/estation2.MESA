@@ -1364,15 +1364,15 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                                              source_id=datasource_descrID):
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
     def test_ingest_s3_olci_wrr_chl_oc4me(self):
 
         # Test the ingestion of the Sentinel-3/OLCI Level-2 WRR product (on d6-dev-vm19 !!!!!)
         #date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_OL_2_WRR/S3A_OL_2_WRR____20180306T092820_20180306T101211_20180306T115859_2631_028_307______MAR_O_NR_002.SEN3.tar')
-        date_fileslist = glob.glob('//data/processing/exchange/Sentinel-3/S3A_OL_2_WRR/20180423/S3A_OL_2_WRR____201804*.SEN3.tar')
+        date_fileslist = glob.glob('//data/processing/exchange/Sentinel-3/S3A_OL_2_WRR/20180420/S3A_OL_2_WRR____201804*.SEN3.tar')
         single_date =  os.path.basename(date_fileslist[0])
         in_date = single_date.split('_')[7]
         in_date = in_date.split('T')[0] #+ '0000'
@@ -1390,7 +1390,7 @@ class TestIngestion(unittest.TestCase):
                 "datasource_descr_id": datasource_descrID,
                 "version": productversion}
 
-        product_in_info = querydb.get_product_in_info(echo=1, **args)
+        product_in_info = querydb.get_product_in_info(**args)
 
         re_process = product_in_info.re_process
         re_extract = product_in_info.re_extract
@@ -1405,15 +1405,17 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                                              source_id=datasource_descrID):
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                         source_id=datasource_descrID)
+        # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
+        #                                                                       source_id=datasource_descrID):
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
     def test_ingest_s3_slstr_sst(self):
 
         # Test the ingestion of the Sentinel-3/SLSTR Level-2 WST product (on d6-dev-vm19 !!!!!)
         #date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/S3A_SL_2_WST____20180306T095629_20180306T095929_20180306T114727_0179_028_307_3420_MAR_O_NR_002.SEN3.tar')
-        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/march06/S3A_SL_2_WST____20180306*.SEN3.tar')
+        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/march06/S3A_SL_2_WST____20180306T08*.SEN3.tar')
         single_date =  os.path.basename(date_fileslist[0])
         in_date = single_date.split('_')[7]
         in_date = in_date.split('T')[0] #+ '0000'
@@ -1438,7 +1440,7 @@ class TestIngestion(unittest.TestCase):
                 "datasource_descr_id": datasource_descrID,
                 "version": productversion}
 
-        product_in_info = querydb.get_product_in_info(echo=1, **args)
+        product_in_info = querydb.get_product_in_info(**args)
 
         re_process = product_in_info.re_process
         re_extract = product_in_info.re_extract
@@ -1453,9 +1455,12 @@ class TestIngestion(unittest.TestCase):
         subproducts = []
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                                              source_id=datasource_descrID):
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+
+        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                         source_id=datasource_descrID)
+        # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
+        #                                                                       source_id=datasource_descrID):
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
 
 
