@@ -26,7 +26,7 @@ import gzip
 import psutil
 import csv
 import sys
-#import h5py
+# import h5py
 
 from multiprocessing import *
 
@@ -67,13 +67,13 @@ def loop_ingestion(dry_run=False, test_one_product=None):
     while True:
 
         # Manage the ingestion of Historical Archives (e.g. eStation prods disseminated via EUMETCast - MESA_JRC_*.tif)
-        try:
-            status = ingest_archives_eumetcast(dry_run=dry_run)
-        except:
-            logger.error("Error in executing ingest_archives_eumetcast")
+        # try:
+        #     status = ingest_archives_eumetcast(dry_run=dry_run)
+        # except:
+        #     logger.error("Error in executing ingest_archives_eumetcast")
 
         # Get all active product ingestion records with a subproduct count.
-        active_product_ingestions = querydb.get_ingestion_product(allrecs=True, echo=echo_query)
+        active_product_ingestions = querydb.get_ingestion_product(allrecs=True)
 
         for active_product_ingest in active_product_ingestions:
 
@@ -100,7 +100,7 @@ def loop_ingestion(dry_run=False, test_one_product=None):
                               "subproductcode": productcode + "_native",
                               "version": productversion}
 
-            sources_list = querydb.get_product_sources(echo=echo_query, **native_product)
+            sources_list = querydb.get_product_sources(**native_product)
 
             logger.debug("For product [%s] N. %s  source is/are found" % (productcode,len(sources_list)))
 
@@ -114,31 +114,36 @@ def loop_ingestion(dry_run=False, test_one_product=None):
                     files = []
                     # Get the 'filenaming' info (incl. 'area-type') from the acquisition source
                     if source.type == 'EUMETCAST':
-                        for eumetcast_filter, datasource_descr in querydb.get_datasource_descr(echo=echo_query,
-                                                                                               source_type=source.type,
-                                                                                               source_id=source.data_source_id):
-                            # TODO-M.C.: check the most performing options in real-cases
-                            files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(eumetcast_filter, os.path.basename(f))]
-                            my_filter_expr = eumetcast_filter
-                            logger.info("Eumetcast Source: looking for files in %s - named like: %s" % (ingest_dir_in, eumetcast_filter))
+                        datasource_descr = querydb.get_datasource_descr(source_type=source.type, source_id=source.data_source_id)
+                        datasource_descr = datasource_descr[0]
+                        eumetcast_filter = datasource_descr.filter_expression_jrc
+                        # for eumetcast_filter, datasource_descr in querydb.get_datasource_descr(source_type=source.type,
+                        #                                                                        source_id=source.data_source_id):
+                        # TODO-M.C.: check the most performing options in real-cases
+                        files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(eumetcast_filter, os.path.basename(f))]
+                        my_filter_expr = eumetcast_filter
+                        logger.info("Eumetcast Source: looking for files in %s - named like: %s" % (ingest_dir_in, eumetcast_filter))
 
                     if source.type == 'INTERNET':
                         # Implement file name filtering for INTERNET data source.
-                        for internet_filter, datasource_descr in querydb.get_datasource_descr(echo=echo_query,
-                                                                                              source_type=source.type,
-                                                                                              source_id=source.data_source_id):
-                        # TODO-Jurvtk: complete/verified
-                            temp_internet_filter = internet_filter.files_filter_expression
-                            # TODO-M.C.: check the most performing options in real-cases
-                            #files = [f for f in os.listdir(ingest_dir_in) if re.match(temp_internet_filter, f)]
-                            files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(temp_internet_filter, os.path.basename(f))]
-                            my_filter_expr = temp_internet_filter
-                            logger.info("Internet Source: looking for files in %s - named like: %s" % (ingest_dir_in, temp_internet_filter))
+                        # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type=source.type,
+                        #                                                                       source_id=source.data_source_id):
+                        datasource_descr = querydb.get_datasource_descr(source_type=source.type, source_id=source.data_source_id)
+                        datasource_descr = datasource_descr[0]
+                        internet_filter = datasource_descr.files_filter_expression
+
+                        # temp_internet_filter = internet_filter.files_filter_expression
+                        temp_internet_filter = internet_filter
+                        # TODO-M.C.: check the most performing options in real-cases
+                        #files = [f for f in os.listdir(ingest_dir_in) if re.match(temp_internet_filter, f)]
+                        files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(temp_internet_filter, os.path.basename(f))]
+                        my_filter_expr = temp_internet_filter
+                        logger.info("Internet Source: looking for files in %s - named like: %s" % (ingest_dir_in, temp_internet_filter))
                     # See ES2-204
                     logger_spec.debug("Number of files found for product [%s] is: %s" % (active_product_ingest[0], len(files)))
                     if len(files) > 0:
                         # Get list of ingestions triggers [prod/subprod/mapset]
-                        ingestions = querydb.get_ingestion_subproduct(allrecs=False, echo=echo_query, **product)
+                        ingestions = querydb.get_ingestion_subproduct(allrecs=False, **product)
 
                         # Loop over ingestion triggers
                         subproducts = list()
@@ -153,7 +158,7 @@ def loop_ingestion(dry_run=False, test_one_product=None):
                                     "subproductcode": ingest.subproductcode,
                                     "datasource_descr_id": datasource_descr.datasource_descr_id,
                                     "version": product['version']}
-                            product_in_info = querydb.get_product_in_info(echo=echo_query, **args)
+                            product_in_info = querydb.get_product_in_info(**args)
                             try:
                                 re_process = product_in_info.re_process
                                 re_extract = product_in_info.re_extract
@@ -174,17 +179,17 @@ def loop_ingestion(dry_run=False, test_one_product=None):
                         if dates_not_in_filename:
 
                             # Build the list of dates from datasource description
-                            start_datetime=datetime.datetime.strptime(str(internet_filter.start_date),"%Y%m%d")
-                            if internet_filter.end_date is None:
+                            start_datetime=datetime.datetime.strptime(str(datasource_descr.start_date),"%Y%m%d")
+                            if datasource_descr.end_date is None:
                                 end_datetime = datetime.date.today()
                             else:
-                                end_datetime=datetime.datetime.strptime(str(internet_filter.end_date),"%Y%m%d")
+                                end_datetime=datetime.datetime.strptime(str(datasource_descr.end_date),"%Y%m%d")
 
                             all_starting_dates = proc_functions.get_list_dates_for_dataset(product_in_info.productcode,\
                                                                                        product_in_info.subproductcode,\
                                                                                        product_in_info.version,\
-                                                                                       start_date=internet_filter.start_date,
-                                                                                       end_date=internet_filter.end_date)
+                                                                                       start_date=datasource_descr.start_date,
+                                                                                       end_date=datasource_descr.end_date)
 
                             my_dataset = products.Dataset(product_in_info.productcode,
                                                           product_in_info.subproductcode,
@@ -293,7 +298,7 @@ def ingest_archives_eumetcast(dry_run=False):
     echo_query = False
 
     # Get all active product ingestion records with a subproduct count.
-    active_product_ingestions = querydb.get_ingestion_product(allrecs=True, echo=echo_query)
+    active_product_ingestions = querydb.get_ingestion_product(allrecs=True)
     for active_product_ingest in active_product_ingestions:
 
         productcode = active_product_ingest[0]
@@ -309,11 +314,11 @@ def ingest_archives_eumetcast(dry_run=False):
         native_product = {"productcode": productcode,
                               "subproductcode": productcode + "_native",
                               "version": productversion}
-        sources_list = querydb.get_product_sources(echo=echo_query, **native_product)
+        sources_list = querydb.get_product_sources(**native_product)
 
         logger.debug("For product [%s] N. %s  source is/are found" % (productcode,len(sources_list)))
 
-        ingestions = querydb.get_ingestion_subproduct(allrecs=False, echo=echo_query, **product)
+        ingestions = querydb.get_ingestion_subproduct(allrecs=False, **product)
         for ingest in ingestions:
             logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (productcode, productversion,ingest.subproductcode,ingest.mapsetcode))
             ingest_archives_eumetcast_product(productcode, productversion,ingest.subproductcode,ingest.mapsetcode,dry_run=dry_run)
@@ -1887,7 +1892,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
 
             if os.path.exists(output_subset_tif):
                 #subset_files_list.append(output_subset_tif)
-                functions.write_graph_xml_reproject(output_dir=tmpdir_untar_band, nodata_value="NaN")
+                functions.write_graph_xml_reproject(output_dir=tmpdir_untar_band, nodata_value=no_data)
 
                 graph_xml_reproject = tmpdir_untar_band + os.path.sep + 'graph_xml_reproject.xml'
                 output_reproject_tif = tmpdir_untar_band + os.path.sep + 'reprojected.tif'
@@ -1898,7 +1903,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
 
                 if os.path.exists(output_reproject_tif):
                     output_vrt = tmpdir_untar_band + os.path.sep + 'single_band_vrt.vrt'
-                    command_translate = 'gdal_translate -b 1 -of VRT '+output_reproject_tif+ ' '+output_vrt
+                    command_translate = 'gdal_translate -b 1 -a_nodata 3 -of VRT '+output_reproject_tif+ ' '+output_vrt
                     os.system(command_translate)
                     interm_files_list.append(output_vrt)
 
@@ -1908,7 +1913,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             for file_add in interm_files_list:
                 input_files_str += ' '
                 input_files_str += file_add
-            command = 'gdalwarp -srcnodata "nan" -dstnodata "nan" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
+            command = 'gdalwarp -srcnodata "3" -dstnodata "3" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
                  input_files_str, out_tmp_file_gtiff)
             # command = 'gdalwarp -srcnodata "nan" -dstnodata "nan" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
             #     lon_min, lat_min, lon_max, lat_max, abs(x_size), abs(y_size), input_files_str, out_tmp_file_gtiff)
@@ -2243,210 +2248,6 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
         else:
             pre_processed_list.append(interm_files_list[0])
     return pre_processed_list
-
-
-
-# def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=None):
-# # -------------------------------------------------------------------------------------------------------
-# #   Pre-process the Sentinel 3 Level 2 product from OLCI - WRR
-# #
-#     # Hard-coded definitions:
-#     # geo_file='geo_coordinates.nc'
-#     coord_scale = 1000000.0
-#     lat_file = 'latitude.tif'
-#     long_file = 'longitude.tif'
-#     # Definitions below to be changed
-#     bandname = subproducts[0]['re_extract']
-#
-#     re_process = subproducts[0]['re_process']
-#     target_mapset = subproducts[0]['mapsetcode']
-#
-#     # Prepare the output file list
-#     pre_processed_list = []
-#     interm_files_list = []
-#     list_input_files = []
-#
-#     # Make sure input is a list (if only a string is received, it loops over chars)
-#     if isinstance(input_files, list):
-#         temp_list_input_files = input_files
-#     else:
-#         temp_list_input_files = []
-#         temp_list_input_files.append(input_files)
-#
-#         # Select only the 'day-time' files
-#     for one_file in temp_list_input_files:
-#         one_filename = os.path.basename(one_file)
-#         in_date = one_filename.split('_')[7]
-#         day_data = functions.is_data_captured_during_day(in_date)
-#         if day_data:
-#             list_input_files.append(one_file)
-#
-#     # Unzips the file
-#     for input_file in list_input_files:
-#         # Unzip the .tar file in 'tmpdir'
-#         command = 'tar -xvf ' + input_file + ' -C ' + tmpdir + os.path.sep  # ' --strip-components 1'
-#         print(command)
-#         status = os.system(command)
-#
-#     # Loop over subproducts and extract associated files
-#     for sprod in subproducts:
-#
-#         # In each unzipped folder preprocess the dataset and store the list of files to be merged
-#         for untar_file in os.listdir(tmpdir):
-#
-#             # Define the re_expr for extracting files
-#             bandname = sprod['re_extract']
-#             re_process = sprod['re_process']
-#             target_mapset = sprod['mapsetcode']
-#
-#             # get map set
-#             mapset_info = querydb.get_mapset(mapsetcode=target_mapset)
-#
-#             x_size = mapset_info.pixel_shift_long  # 0.00892857
-#             y_size = mapset_info.pixel_shift_lat  # -0.00892857
-#
-#             upper_left_long = mapset_info.upper_left_long
-#             upper_left_lat = mapset_info.upper_left_lat
-#             lower_right_long = upper_left_long + (x_size * mapset_info.pixel_size_x)
-#             lower_right_lat = upper_left_lat + (y_size * mapset_info.pixel_size_y)
-#
-#             lon_min = min(upper_left_long, lower_right_long)
-#             lon_max = max(upper_left_long, lower_right_long)
-#             lat_min = min(upper_left_lat, lower_right_lat)
-#             lat_max = max(upper_left_lat, lower_right_lat)
-#
-#             mapset_bbox = [lon_min, lat_min, lon_max, lat_max]
-#
-#             # get data footprint
-#             data_bbox = functions.sentinel_get_footprint(dir=tmpdir + os.path.sep + untar_file)
-#
-#             # Test the overlap of the footprint with the BB of mapset
-#             overlap = functions.check_polygons_intersects(mapset_bbox, data_bbox)
-#
-#             if not overlap:
-#                 continue
-#
-#             #Check if the dataset has positive and negative longitude value; if yes skip it.
-#             check_min_lon = data_bbox[0]
-#             check_max_lon = data_bbox[2]
-#             if check_min_lon * check_max_lon < -9999:
-#                 continue
-#
-#             tmpdir_untar = tmpdir + os.path.sep + untar_file
-#             for ifile in os.listdir(tmpdir_untar):
-#
-#                 # Unzip to tmpdir and add to list
-#                 if re.match('.*' + bandname + '*.', ifile):
-#                     geo_fullname = tmpdir_untar + os.path.sep + ifile
-#
-#             if geo_fullname is None:
-#                 return
-#             # ------------------------------------------------------------------------------------------
-#             # Extract there latitude and longitude as geotiff
-#             # ------------------------------------------------------------------------------------------
-#             fd = h5py.File(geo_fullname, 'r')
-#
-#             ds = fd['lat']
-#             data_read64 = N.zeros(ds.shape, dtype=float)
-#             ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
-#             latitude = ds.value
-#             my_logger.debug(
-#                 'The min/avg/max for latitude in {} are: {}/{}/{}'.format(bandname, N.min(latitude), N.mean(latitude),
-#                                                                           N.max(latitude)))
-#
-#             output_file = tmpdir_untar + os.path.sep + lat_file
-#             output_driver = gdal.GetDriverByName('GTiff')
-#             orig_size_x = latitude.shape[1]
-#             orig_size_y = latitude.shape[0]
-#             in_data_type = gdal.GDT_Float32
-#             output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
-#             output_ds.GetRasterBand(1).WriteArray(latitude)
-#             output_ds = None
-#
-#             ds = fd['lon']
-#             data_read64 = N.zeros(ds.shape, dtype=float)
-#             ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
-#             longitude = ds.value
-#             my_logger.debug('The min/avg/max for longitude in {} are: {}/{}/{}'.format(bandname, N.min(longitude),
-#                                                                                        N.mean(longitude),
-#                                                                                        N.max(longitude)))
-#
-#             output_file = tmpdir_untar + os.path.sep + long_file
-#             output_driver = gdal.GetDriverByName('GTiff')
-#             orig_size_x = longitude.shape[1]
-#             orig_size_y = longitude.shape[0]
-#             in_data_type = gdal.GDT_Float32
-#             output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
-#             output_ds.GetRasterBand(1).WriteArray(longitude)
-#             output_ds = None
-#
-#             # ------------------------------------------------------------------------------------------
-#             # Extract the requested band and
-#             # ------------------------------------------------------------------------------------------
-#
-#
-#             ds = fd[re_process]
-#             data_read64 = N.zeros(ds.shape, dtype=float)
-#             ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
-#             bandvalues = ds.value
-#             my_logger.debug('The min/avg/max for reflectance in {} are: {}/{}/{}'.format(bandname, N.min(bandvalues),
-#                                                                                          N.mean(bandvalues),
-#                                                                                          N.max(bandvalues)))
-#
-#             un_proj_filename = re_process + '_un_proj.tif'
-#             output_file = tmpdir_untar + os.path.sep + un_proj_filename
-#             output_driver = gdal.GetDriverByName('GTiff')
-#             orig_size_x = bandvalues.shape[2]
-#             orig_size_y = bandvalues.shape[1]
-#             in_data_type = gdal.GDT_Float32
-#             output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
-#             # If the dataset is three dimension use this case(In this case sst is skin sst so there is just single ds)
-#             for i, bandvalue in enumerate(bandvalues, 1):
-#                 output_ds.GetRasterBand(i).WriteArray(bandvalue)
-#             output_ds = None
-#             del output_ds
-#
-#             # ------------------------------------------------------------------------------------------
-#             # Write a vrt file and Reproject to lat/long
-#             # ------------------------------------------------------------------------------------------
-#
-#             # TODO: replace the part below with info from mapset
-#             d_lon_min = N.min(longitude)
-#             d_lat_min = N.min(latitude)
-#             d_lon_max = N.max(longitude)
-#             d_lat_max = N.max(latitude)
-#
-#             functions.write_vrt_georef(output_dir=tmpdir_untar, band_file=un_proj_filename, n_lines=orig_size_x,
-#                                        n_cols=orig_size_y)
-#             input_vrt_filename = 'reflectance.vrt'
-#             input_vrt = tmpdir_untar + os.path.sep + input_vrt_filename
-#             #output_tif = tmpdir_untar + os.path.sep + re_process + '.tif'
-#
-#             output_tif = tmpdir + os.path.sep + untar_file + re_process + '.tif'
-#
-#             command = 'gdalwarp -srcnodata "-32768" -dstnodata "-32768" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
-#                 d_lon_min, d_lat_min, d_lon_max, d_lat_max, abs(x_size), abs(y_size), input_vrt, output_tif)
-#
-#             os.system(command)
-#
-#             interm_files_list.append(output_tif)
-#
-#     if len(interm_files_list) != 1:
-#         out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
-#         input_files_str = ''
-#         for file_add in interm_files_list:
-#             input_files_str += ' '
-#             input_files_str += file_add
-#
-#         command = 'gdalwarp -srcnodata "-32768" -dstnodata "-32768" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
-#             lon_min, lat_min, lon_max, lat_max, abs(x_size), abs(y_size), input_files_str, out_tmp_file_gtiff)
-#
-#         my_logger.info('Command for merging is: ' + command)
-#         os.system(command)
-#         pre_processed_list.append(out_tmp_file_gtiff)
-#     else:
-#         pre_processed_list.append(interm_files_list[0])
-#     return pre_processed_list
     # Take gdal_merge.py from es2globals
     # command = es_constants.gdal_merge + ' -n -32768 -a_nodata -32768' + ' -o '     #-ot Float32    -co \"compress=lzw\"  -n -32768
     #
@@ -2688,7 +2489,6 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
             interm_files = pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
 
         elif preproc_type == 'NETCDF_S3_WRR':
-            #interm_files = pre_process_netcdf_s3_wrr_gdal(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
             interm_files = pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
 
         elif preproc_type == 'NETCDF_S3_WST':
@@ -2810,7 +2610,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
                 "version": product['version']}
 
         # Get information from sub_dataset_source table
-        product_in_info = querydb.get_product_in_info(echo=echo_query, **args)
+        product_in_info = querydb.get_product_in_info(**args)
 
         # Check if the scaling has been read/save to .tmp dir (MC. 26.7.2016: Issue for MODIS SST .nc files)
         try:
@@ -2831,7 +2631,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         # Get information from 'product' table
         args = {"productcode": product['productcode'], "subproductcode": subproducts[ii]['subproduct'], "version":product['version']}
-        product_info = querydb.get_product_out_info(echo=echo_query, **args)
+        product_info = querydb.get_product_out_info(**args)
         product_info = functions.list_to_element(product_info)
 
         out_data_type = product_info.data_type_id
@@ -3188,7 +2988,7 @@ def ingest_file_vers_1_0(input_file, in_date, product_def, target_mapset, my_log
 
     # Get information from 'product' table
     args = {"productcode": product_def['productcode'], "subproductcode": product_def['subproductcode'], "version":product_def['version']}
-    product_info = querydb.get_product_out_info(echo=echo_query, **args)
+    product_info = querydb.get_product_out_info(**args)
     product_info = functions.list_to_element(product_info)
 
     out_data_type = product_info.data_type_id
