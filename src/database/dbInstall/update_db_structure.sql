@@ -1165,6 +1165,124 @@ ALTER FUNCTION products.populate_geoserver(boolean)
 /**********************************
  Functions of SCHEMA "products"
 ***********************************/
+CREATE OR REPLACE FUNCTION products.update_insert_sub_datasource_description(
+    productcode character varying,
+    subproductcode character varying,
+    version character varying,
+    datasource_descr_id character varying,
+    scale_factor double precision,
+    scale_offset double precision,
+    no_data double precision,
+    data_type_id character varying,
+    mask_min double precision,
+    mask_max double precision,
+    re_process character varying,
+    re_extract character varying,
+    scale_type character varying,
+    full_copy boolean DEFAULT false)
+  RETURNS boolean AS
+$BODY$
+	DECLARE
+		_productcode 	  		ALIAS FOR  $1;
+		_subproductcode  		ALIAS FOR  $2;
+		_version 				ALIAS FOR  $3;
+		_datasource_descr_id   	ALIAS FOR  $4;
+		_scale_factor 	  		ALIAS FOR  $5;
+		_scale_offset 	  		ALIAS FOR  $6;
+		_no_data  				ALIAS FOR  $7;
+		_data_type_id 			ALIAS FOR  $8;
+		_mask_min  				ALIAS FOR  $9;
+		_mask_max  				ALIAS FOR  $10;
+		_re_process				ALIAS FOR  $11;
+		_re_extract  			ALIAS FOR  $12;
+		_scale_type  			ALIAS FOR  $13;
+		_full_copy  			ALIAS FOR  $14;
+	BEGIN
+		PERFORM * FROM products.sub_datasource_description sdd
+		WHERE sdd.productcode = TRIM(_productcode)
+		  AND sdd.subproductcode = TRIM(_subproductcode)
+		  AND sdd.version = TRIM(_version)
+		  AND sdd.datasource_descr_id = TRIM(_datasource_descr_id);
+		  -- AND join with product and check if defined_by == 'JRC'
+		  -- AND join with datasource_description and join with internet_source and check if defined_by == 'JRC'
+
+		IF FOUND THEN
+			IF _full_copy THEN
+				UPDATE products.sub_datasource_description sdd
+				SET scale_factor = _scale_factor,
+					scale_offset = _scale_offset,
+					no_data = _no_data,
+					data_type_id = TRIM(_data_type_id),
+					mask_min = _mask_min,
+					mask_max = _mask_max,
+					re_process = TRIM(_re_process),
+					re_extract = TRIM(_re_extract),
+					scale_type = TRIM(_scale_type)
+				WHERE sdd.productcode = TRIM(_productcode)
+				  AND sdd.subproductcode = TRIM(_subproductcode)
+				  AND sdd.version = TRIM(_version)
+				  AND sdd.datasource_descr_id = TRIM(_datasource_descr_id);
+			ELSE
+				RAISE NOTICE 'Of existing JRC sub_datasource_descriptions all columns can be updated by the User, do not overwrite!';
+				/*
+				UPDATE products.sub_datasource_description sdd
+				SET -- scale_factor = _scale_factor,
+					-- scale_offset = _scale_offset,
+					-- no_data = _no_data,
+					-- data_type_id = TRIM(_data_type_id),
+					-- mask_min = _mask_min,
+					-- mask_max = _mask_max,
+					re_process = TRIM(_re_process),
+					re_extract = TRIM(_re_extract)
+				WHERE sdd.productcode = TRIM(_productcode)
+				  AND sdd.subproductcode = TRIM(_subproductcode)
+				  AND sdd.version = TRIM(_version)
+				  AND sdd.datasource_descr_id = TRIM(_datasource_descr_id);
+				*/
+			END IF;
+		ELSE
+			INSERT INTO products.sub_datasource_description (
+			  productcode,
+			  subproductcode,
+			  version,
+			  datasource_descr_id,
+			  scale_factor,
+			  scale_offset,
+			  no_data,
+			  data_type_id,
+			  mask_min,
+			  mask_max,
+			  re_process,
+			  re_extract,
+			  scale_type
+			)
+			VALUES (
+				TRIM(_productcode),
+				TRIM(_subproductcode),
+				TRIM(_version),
+				TRIM(_datasource_descr_id),
+				_scale_factor,
+				_scale_offset,
+				_no_data,
+				TRIM(_data_type_id),
+			    _mask_min,
+			    _mask_max,
+				TRIM(_re_process),
+				TRIM(_re_extract),
+				TRIM(_scale_type)
+			);
+		END IF;
+		RETURN TRUE;
+	END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION products.update_insert_sub_datasource_description(character varying, character varying, character varying, character varying, double precision, double precision, double precision, character varying, double precision, double precision, character varying, character varying, character varying, boolean)
+  OWNER TO estation;
+
+
+
+
 CREATE OR REPLACE FUNCTION products.update_insert_internet_source(internet_id character varying, defined_by character varying, descriptive_name character varying, description character varying, modified_by character varying, update_datetime timestamp without time zone, url character varying, user_name character varying, password character varying, type character varying, include_files_expression character varying, files_filter_expression character varying, status boolean, pull_frequency integer, datasource_descr_id character varying, frequency_id character varying, start_date bigint, end_date bigint, full_copy boolean DEFAULT false)
   RETURNS boolean AS
 $BODY$
@@ -1846,6 +1964,10 @@ ALTER FUNCTION analysis.update_insert_chart_drawproperties(character varying, in
 
 -- DROP FUNCTION products.export_jrc_data(boolean);
 
+-- Function: products.export_jrc_data(boolean)
+
+-- DROP FUNCTION products.export_jrc_data(boolean);
+
 CREATE OR REPLACE FUNCTION products.export_jrc_data(full_copy boolean DEFAULT false)
   RETURNS SETOF text AS
 $BODY$
@@ -1930,7 +2052,6 @@ BEGIN
 	RETURN QUERY SELECT 'SELECT products.update_insert_thema('
 		|| 'thema_id := ''' || thema_id || ''''
 		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
-		|| ', activated := FALSE'
 		|| ' );'  as inserts
 	FROM products.thema;
 
@@ -2136,6 +2257,7 @@ BEGIN
 		|| ', mask_max := ' || COALESCE(TRIM(to_char(mask_max, '99999999D999999')), 'NULL')
 		|| ', re_process := ' || COALESCE('''' || re_process || '''', 'NULL')
 		|| ', re_extract := ' || COALESCE('''' || re_extract || '''', 'NULL')
+		|| ', scale_type := ' || COALESCE('''' || scale_type || '''', 'NULL')
 		|| ', full_copy := ' || _full_copy
 		|| ' );'  as inserts
 	FROM products.sub_datasource_description sdd
@@ -2412,6 +2534,7 @@ $BODY$
   ROWS 1000;
 ALTER FUNCTION products.export_jrc_data(boolean)
   OWNER TO estation;
+
 
 
 
