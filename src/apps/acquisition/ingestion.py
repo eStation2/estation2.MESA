@@ -1865,7 +1865,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             # Define the re_expr for extracting files
             bandname = sprod['re_extract']
             re_process = sprod['re_process']
-            no_data = sprod['no_data']
+            no_data = sprod['nodata']
             target_mapset = sprod['mapsetcode']
 
             # ------------------------------------------------------------------------------------------
@@ -1907,7 +1907,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
                     os.system(command_translate)
                     interm_files_list.append(output_vrt)
 
-        if len(interm_files_list) != 1:
+        if len(interm_files_list) > 1 :
             out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
             input_files_str = ''
             for file_add in interm_files_list:
@@ -2120,7 +2120,7 @@ def pre_process_netcdf_s3_wrr_gdal(subproducts, tmpdir, input_files, my_logger, 
 
             interm_files_list.append(output_tif)
 
-    if len(interm_files_list) != 1:
+    if len(interm_files_list) > 1 :
         out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
         input_files_str = ''
         for file_add in interm_files_list:
@@ -2195,7 +2195,7 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
             # Define the re_expr for extracting files
             bandname = sprod['re_extract']
             re_process = sprod['re_process']
-            no_data = sprod['no_data']
+            no_data = sprod['nodata']
             target_mapset = sprod['mapsetcode']
 
             tmpdir_untar = tmpdir + os.path.sep + untar_file
@@ -2232,7 +2232,7 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
                     os.system(command_translate)
                     interm_files_list.append(output_vrt)
 
-        if len(interm_files_list) != 1:
+        if len(interm_files_list) > 1 :
             command = es_constants.gdal_merge + ' -n -32768 -a_nodata -32768 -ot Float32 ' + ' -o '  # -co \"compress=lzw\" -ot Float32  -n -32768 -a_nodata -32768
 
             out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
