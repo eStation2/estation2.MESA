@@ -96,7 +96,7 @@ class Product(object):
                 'to_end': to_date is None,
                 }
         dataset = Dataset(self.product_code, sub_product_code=sub_product_code,
-                mapset=mapset, version=self.version, from_date=from_date, to_date=to_date)
+                          mapset=mapset, version=self.version, from_date=from_date, to_date=to_date)
         missing['info'] = dataset.get_dataset_normalized_info(from_date, to_date)
         return missing
 
@@ -112,7 +112,7 @@ class Product(object):
                     missings.append(self.get_missing_dataset_subproduct(mapset, sub_product_code, from_date, to_date))
         return missings
 
-    def get_missing_filenames(self, missing, existing_only=True):
+    def get_missing_filenames(self, missing, existing_only=True, for_request_creation=False):
 
         # NOTES:    by default, it returns the existing filenames ONLY
         #           In case the requested mapset does not exist, but a larger one is available, returns the latter
@@ -124,11 +124,12 @@ class Product(object):
         subproduct = missing['subproduct']
         dataset = product.get_dataset(mapset=mapset, sub_product_code=missing['subproduct'])
 
-        missing_filenames=[]
+        missing_filenames = []
 
         # Manage the mapset: if the required one does not exist, use a 'larger' one (if exists)
         existing_files = dataset.get_filenames()
-        if len(existing_files) == 0:
+        # Usage 1: creating archive from request - old style - look at larger mapset
+        if len(existing_files) == 0 and not for_request_creation:
 
             logger.warning("No any file found for original mapset: %s. Return" % mapset)
             my_mapset = MapSet()

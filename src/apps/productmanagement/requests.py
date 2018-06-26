@@ -11,22 +11,22 @@
 # from .mapsets import Mapset
 
 import os
-import glob
+# import glob
 import tarfile
 import shutil
-import tempfile
+# import tempfile
 import json
-import pprint
+# import pprint
 from apps.productmanagement.products import *
-from lib.python import functions
-from database import querydb
+# from lib.python import functions
+# from database import querydb
 from config import es_constants
 from .mapsets import Mapset
 
 from lib.python import es_logging as log
 logger = log.my_logger(__name__)
 
-def create_request(productcode, version, mapsetcode=None, subproductcode=None):
+def __create_request(productcode, version, mapsetcode=None, subproductcode=None):
 
     # Define the 'request' object
     request = {'product': productcode,
@@ -54,8 +54,8 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
                         # Loop over missing objects
                         for missing in missing_info:
                             try:
-                                product = Product(missing['product'], version=missing['version'], )
-                                filenames.extend(product.get_missing_filenames(missing, existing_only=False))
+                                # product = Product(missing['product'], version=missing['version'], )
+                                filenames.extend(product.get_missing_filenames(missing, existing_only=False, for_request_creation=True))
                             except NoProductFound:
                                 pass
 
@@ -79,8 +79,8 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
                 # Loop over missing objects
                 for missing in missing_info:
                     try:
-                        product = Product(missing['product'], version=missing['version'], )
-                        filenames.extend(product.get_missing_filenames(missing, existing_only=False))
+                        # product = Product(missing['product'], version=missing['version'], )
+                        filenames.extend(product.get_missing_filenames(missing, existing_only=False, for_request_creation=True))
                     except NoProductFound:
                         pass
                 dataset_dict = {'subproductcode': subproductcode,
@@ -100,8 +100,8 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
             # Loop over missing objects
             for missing in missing_info:
                 try:
-                    product = Product(missing['product'], version=missing['version'], )
-                    filenames.extend(product.get_missing_filenames(missing, existing_only=False))
+                    # product = Product(missing['product'], version=missing['version'], )
+                    filenames.extend(product.get_missing_filenames(missing, existing_only=False, for_request_creation=True))
                 except NoProductFound:
                     pass
             dataset_dict = {'subproductcode': subproductcode, 'missingfiles': filenames}
@@ -110,8 +110,7 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
     return request
     # Dump the request object to JSON
 
-
-def __create_request(productcode, version, mapsetcode=None, subproductcode=None):
+def create_request(productcode, version, mapsetcode=None, subproductcode=None):
 
     # Define the 'request' object
     request = {'product': productcode,
@@ -179,7 +178,6 @@ def __create_request(productcode, version, mapsetcode=None, subproductcode=None)
             request['productmapsets'].append(mapset_dict)
     return request
     # Dump the request object to JSON
-
 
 def create_archive_from_request(request_file):
 
