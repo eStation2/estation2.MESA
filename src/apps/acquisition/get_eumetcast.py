@@ -136,7 +136,7 @@ def get_archives_eumetcast_ftp():
     functions.dump_obj_to_pickle(processed_list, processed_list_filename)
     functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
-def _get_archives_eumetcast():
+def get_archives_eumetcast():
 
     input_dir='/eumetcast_test/'
 
@@ -346,7 +346,7 @@ def loop_eumetcast_ftp(dry_run=False):
 
     exit(0)
 
-def _loop_eumetcast(dry_run=False):
+def loop_eumetcast(dry_run=False):
 
     global processed_list_filename, processed_list
     global processed_info_filename, processed_info
