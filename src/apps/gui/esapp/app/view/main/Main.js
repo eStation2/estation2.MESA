@@ -76,6 +76,7 @@ Ext.define('esapp.view.main.Main', {
             xtype:'container',
             closable: false,
             autoScroll: true,
+            hidden: false,
             layout: 'fit',
             items: [{
                 // html: '<img alt="Mockup Acquisition" width="100%" height="100%" src="../resources/img/mockup_acquisition.png">'
@@ -151,6 +152,7 @@ Ext.define('esapp.view.main.Main', {
             id:'processingmaintab',
             xtype:'container',
             autoScroll: true,
+            hidden: false,
             layout: 'fit',
             items: [{
                xtype  : 'processing-main',
@@ -170,6 +172,7 @@ Ext.define('esapp.view.main.Main', {
             id:'datamanagementmaintab',
             xtype:'container',
             autoScroll: true,
+            hidden: false,
             layout: 'fit',
             items: [{
                xtype  : 'datamanagement-main',
