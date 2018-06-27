@@ -11,7 +11,7 @@ import tempfile
 import shutil
 import csv
 import numpy as np
-import h5py
+# import h5py
 from lib.python import functions
 
 from osgeo import gdal
@@ -24,7 +24,8 @@ logger = log.my_logger(__name__)
 class TestIngestion(unittest.TestCase):
 
     def TestDriveAll(self):
-        ingestion.drive_ingestion()
+        dry_run = True
+        ingestion.loop_ingestion(dry_run=dry_run)
         self.assertEqual(1, 1)
 
     def test_ingest_modis_firms_nasa(self):
