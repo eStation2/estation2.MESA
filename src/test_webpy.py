@@ -299,17 +299,22 @@ class TestWebpy(unittest.TestCase):
         self.assertEqual(1, 1)
 
     def test_GetProductLayer(self):
+        import os
         params = {
-            'productcode': 'msg-mpe',
-            'productversion': 'undefined',
-            'subproductcode': '1dcum',
-            'mapsetcode':'SPOTV-Africa-1km',
-            'date': '20171119',
+            'productcode': 'pml-modis-sst',
+            'productversion': '3.0',
+            'subproductcode': 'sst-fronts',
+            'mapsetcode':'SPOTV-IOC-1km',
+            'date': '20150517',
             'WIDTH': '256',
             'HEIGHT': '256',
-            'BBOX':"22.5,0,45,22.5",
+            'BBOX':"-22.5,36.5625,-19.6875,39.375",
             'CRS':"EPSG:4326",
-            'legendid':"138"
+            'legendid':"136"
         }
         result = webpy_esapp_helpers.getProductLayer(params)
+        print(result)
+        # Copy the file for analysis in Windows
+        command='cp '+result+' /data/processing/exchange/Tests/mapscript/'
+        os.system(command)
         self.assertEqual(1, 1)

@@ -1815,21 +1815,11 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
 #   Pre-process the Sentinel 3 Level 2 product from OLCI - WRR
 #
 
-    # Hard-coded definitions:
-    geo_file = 'geo_coordinates.nc'
-    coord_scale = 1000000.0
-    lat_file = 'latitude.tif'
-    long_file = 'longitude.tif'
 
     # Prepare the output file list
     pre_processed_list = []
 
     list_input_files = []
-    # Build a list of subdatasets to be extracted
-    # list_to_extr = []
-    # for sprod in subproducts:
-    #     if sprod != 0:
-    #         list_to_extr.append(sprod['re_extract'])
 
 
     # Make sure input is a list (if only a string is received, it loops over chars)
@@ -1854,7 +1844,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
         command = 'tar -xvf ' + input_file + ' -C ' + tmpdir + os.path.sep # ' --strip-components 1'
         # print(command)
         status = os.system(command)
-
+        # ToDo : check the status or use try/except
 
     # Loop over subproducts and extract associated files
     for sprod in subproducts:
@@ -1865,8 +1855,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             # Define the re_expr for extracting files
             bandname = sprod['re_extract']
             re_process = sprod['re_process']
-            no_data = sprod['no_data']
-            target_mapset = sprod['mapsetcode']
+            no_data = sprod['nodata']
 
             # ------------------------------------------------------------------------------------------
             # Extract latitude and longitude as geotiff in tmp_dir
@@ -1886,18 +1875,18 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             graph_xml_subset = tmpdir_untar_band + os.path.sep + 'graph_xml_subset.xml'
             output_subset_tif = tmpdir_untar_band + os.path.sep + 'band_subset.tif'
 
-            command = '/home/webvenkavi/snap/bin/gpt '+ graph_xml_subset
+            command = es_constants.gpt_exec+' '+ graph_xml_subset
             print(command)
-            os.system(command)
+            status=os.system(command)
+            # ToDo : check the status or use try/except
 
             if os.path.exists(output_subset_tif):
-                #subset_files_list.append(output_subset_tif)
                 functions.write_graph_xml_reproject(output_dir=tmpdir_untar_band, nodata_value=no_data)
 
                 graph_xml_reproject = tmpdir_untar_band + os.path.sep + 'graph_xml_reproject.xml'
                 output_reproject_tif = tmpdir_untar_band + os.path.sep + 'reprojected.tif'
 
-                command_reproject = '/home/webvenkavi/snap/bin/gpt ' + graph_xml_reproject
+                command_reproject = es_constants.gpt_exec+' '+ graph_xml_reproject
                 print(command_reproject)
                 os.system(command_reproject)
 
@@ -1907,7 +1896,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
                     os.system(command_translate)
                     interm_files_list.append(output_vrt)
 
-        if len(interm_files_list) != 1:
+        if len(interm_files_list) > 1 :
             out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
             input_files_str = ''
             for file_add in interm_files_list:
@@ -1915,18 +1904,6 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
                 input_files_str += file_add
             command = 'gdalwarp -srcnodata "3" -dstnodata "3" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
                  input_files_str, out_tmp_file_gtiff)
-            # command = 'gdalwarp -srcnodata "nan" -dstnodata "nan" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
-            #     lon_min, lat_min, lon_max, lat_max, abs(x_size), abs(y_size), input_files_str, out_tmp_file_gtiff)
-            ###Take gdal_merge.py from es2globals
-            # command = es_constants.gdal_merge + ' -n -32768' + ' -o '   #-co \"compress=lzw\" -ot Float32 -ot Int16 -n 255 -a_nodata 255
-            #
-            # out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
-            #
-            # command += out_tmp_file_gtiff
-            #
-            # for file_add in interm_files_list:
-            #     command += ' '
-            #     command += file_add
             my_logger.info('Command for merging is: ' + command)
             os.system(command)
             pre_processed_list.append(out_tmp_file_gtiff)
@@ -2120,7 +2097,7 @@ def pre_process_netcdf_s3_wrr_gdal(subproducts, tmpdir, input_files, my_logger, 
 
             interm_files_list.append(output_tif)
 
-    if len(interm_files_list) != 1:
+    if len(interm_files_list) > 1 :
         out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
         input_files_str = ''
         for file_add in interm_files_list:
@@ -2195,7 +2172,7 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
             # Define the re_expr for extracting files
             bandname = sprod['re_extract']
             re_process = sprod['re_process']
-            no_data = sprod['no_data']
+            no_data = sprod['nodata']
             target_mapset = sprod['mapsetcode']
 
             tmpdir_untar = tmpdir + os.path.sep + untar_file
@@ -2232,7 +2209,7 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
                     os.system(command_translate)
                     interm_files_list.append(output_vrt)
 
-        if len(interm_files_list) != 1:
+        if len(interm_files_list) > 1 :
             command = es_constants.gdal_merge + ' -n -32768 -a_nodata -32768 -ot Float32 ' + ' -o '  # -co \"compress=lzw\" -ot Float32  -n -32768 -a_nodata -32768
 
             out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
