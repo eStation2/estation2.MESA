@@ -2151,13 +2151,6 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process the Sentinel 3 Level 2 product from OLCI - WRR
 #
-    # Hard-coded definitions:
-    coord_scale = 1000000.0
-    lat_file = 'latitude.tif'
-    long_file = 'longitude.tif'
-    # Definitions below to be changed
-    bandname = subproducts[0]['re_extract']
-
     # Prepare the output file list
     pre_processed_list = []
 
@@ -2206,7 +2199,8 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
             # ------------------------------------------------------------------------------------------
             # Write a graph xml and subset the product for specific band
             # ------------------------------------------------------------------------------------------
-            functions.write_graph_xml_subset(output_dir=tmpdir_untar, band_name=re_process)
+            #functions.write_graph_xml_subset(output_dir=tmpdir_untar, band_name=re_process)
+            functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process, expression='l2p_flags_cloud ? NaN : sea_surface_temperature')
 
             graph_xml_subset = tmpdir_untar_band + os.path.sep + 'graph_xml_subset.xml'
             output_subset_tif = tmpdir_untar_band + os.path.sep + 'band_subset.tif'
@@ -2217,7 +2211,7 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
 
             if os.path.exists(output_subset_tif):
                 # subset_files_list.append(output_subset_tif)
-                functions.write_graph_xml_reproject(output_dir=tmpdir_untar_band, nodata_value=no_data)
+                functions.write_graph_xml_reproject(output_dir=tmpdir_untar_band, nodata_value="-54.53")
 
                 graph_xml_reproject = tmpdir_untar_band + os.path.sep + 'graph_xml_reproject.xml'
                 output_reproject_tif = tmpdir_untar_band + os.path.sep + 'reprojected.tif'
@@ -2233,7 +2227,7 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
                     interm_files_list.append(output_vrt)
 
         if len(interm_files_list) > 1 :
-            command = es_constants.gdal_merge + ' -n -32768 -a_nodata -32768 -ot Float32 ' + ' -o '  # -co \"compress=lzw\" -ot Float32  -n -32768 -a_nodata -32768
+            command = es_constants.gdal_merge + ' -n -54.53 -a_nodata -32768 -ot Float32 ' + ' -o '  # -co \"compress=lzw\" -ot Float32  -n -32768 -a_nodata -32768
 
             out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
 
