@@ -1450,7 +1450,7 @@ class TestIngestion(unittest.TestCase):
                  'mapsetcode': mapsetcode,
                  're_extract': re_extract,
                  're_process': re_process,
-                 'no_data': no_data}
+                 'nodata': no_data}
 
         subproducts = []
         subproducts.append(sprod)
