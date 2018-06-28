@@ -2069,11 +2069,17 @@ def write_vrt_georef(output_dir, band_file, n_lines=None, n_cols=None, lat_file=
 #   Inputs: output_dir and bandname
 #   Output: none
 #
-def write_graph_xml_band_math_subset(output_dir, band_name):
+def write_graph_xml_band_math_subset(output_dir, band_name, expression):
 
     # Check/complete arguments
     if band_name is None:
         band_name = 'CHL_NN'
+
+    # if band_name == 'CHL_OC4ME':
+    #     expression = '(WQSF_msb_ANNOT_ABSO_D or WQSF_msb_ANNOT_MIXR1 or WQSF_msb_ANNOT_DROUT or WQSF_msb_ANNOT_TAU06 or WQSF_msb_RWNEG_O2 or WQSF_msb_RWNEG_O3 or WQSF_msb_RWNEG_O4 or WQSF_msb_RWNEG_O6 or WQSF_msb_RWNEG_O5 or WQSF_msb_RWNEG_O7 or WQSF_msb_RWNEG_O8 or WQSF_lsb_AC_FAIL or WQSF_lsb_WHITECAPS) ? NaN : '+band_name
+
+    if expression is None:
+        expression = 'l2p_flags_cloud ? NaN : '+band_name
 
     file_xml = output_dir + os.path.sep+ band_name  + os.path.sep+ 'graph_xml_subset.xml'
 
@@ -2096,9 +2102,11 @@ def write_graph_xml_band_math_subset(output_dir, band_name):
         outFile.write('     <targetBands>\n')
         outFile.write('        <targetBand>\n')
         outFile.write('          <name>'+band_name+'_MASKED</name>\n')
-        outFile.write('          <type>byte</type>\n')
+        outFile.write('          <type>float32</type>\n')
         outFile.write(
-            '          <expression>(WQSF_msb_ANNOT_ABSO_D or WQSF_msb_ANNOT_MIXR1 or WQSF_msb_ANNOT_DROUT or WQSF_msb_ANNOT_TAU06 or WQSF_msb_RWNEG_O2 or WQSF_msb_RWNEG_O3 or WQSF_msb_RWNEG_O4 or WQSF_msb_RWNEG_O6 or WQSF_msb_RWNEG_O5 or WQSF_msb_RWNEG_O7 or WQSF_msb_RWNEG_O8 or WQSF_lsb_AC_FAIL or WQSF_lsb_WHITECAPS) ? NaN : '+band_name+'</expression>\n')
+            '          <expression>'+expression+'</expression>\n')
+        # outFile.write(
+        #     '          <expression>(WQSF_msb_ANNOT_ABSO_D or WQSF_msb_ANNOT_MIXR1 or WQSF_msb_ANNOT_DROUT or WQSF_msb_ANNOT_TAU06 or WQSF_msb_RWNEG_O2 or WQSF_msb_RWNEG_O3 or WQSF_msb_RWNEG_O4 or WQSF_msb_RWNEG_O6 or WQSF_msb_RWNEG_O5 or WQSF_msb_RWNEG_O7 or WQSF_msb_RWNEG_O8 or WQSF_lsb_AC_FAIL or WQSF_lsb_WHITECAPS) ? NaN : '+band_name+'</expression>\n')
         outFile.write('          <description/>\n')
         outFile.write('          <unit/>\n')
         outFile.write('          <noDataValue>NaN</noDataValue>\n')
