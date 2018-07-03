@@ -16,7 +16,6 @@ logger = log.my_logger(__name__)
 
 class TestWebpy(unittest.TestCase):
 
-
     def test_SaveWorkspace(self):
         params = {
             "userid": 'jurvtk',
@@ -159,7 +158,6 @@ class TestWebpy(unittest.TestCase):
         print maptemplates
         self.assertEqual(1, 1)
 
-
     def test_Workspace(self):
         crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
         userinfo = {'userid': 'jurvtk', 'isdefault': True}
@@ -209,7 +207,6 @@ class TestWebpy(unittest.TestCase):
         print ts
         self.assertEqual(1, 1)
 
-
     def test_ProductNavigatorDataSets(self):
         products = webpy_esapp_helpers.ProductNavigatorDataSets()
         print products
@@ -229,16 +226,13 @@ class TestWebpy(unittest.TestCase):
         result = webpy_esapp_helpers.getAllColorSchemes()
         self.assertEqual(1, 1)
 
-
     def test_getProcessing(self):
         result = webpy_esapp_helpers.getProcessing(False)
         self.assertEqual(1, 1)
 
-
     def test_GetLegends(self):
         result = webpy_esapp_helpers.GetLegends()
         self.assertEqual(1, 1)
-
 
     def test_SaveLegend(self):
         params = {
@@ -253,7 +247,6 @@ class TestWebpy(unittest.TestCase):
         }
         result = webpy_esapp_helpers.SaveLegend(params)
         self.assertEqual(1, 1)
-
 
     def test_DeleteLegend(self):
         params = {
@@ -270,7 +263,6 @@ class TestWebpy(unittest.TestCase):
         result = webpy_esapp_helpers.DeleteLegend(params)
         self.assertEqual(1, 1)
 
-
     def test_CopyLegend(self):
         params = {
             'legendid': 237,
@@ -278,7 +270,6 @@ class TestWebpy(unittest.TestCase):
         }
         result = webpy_esapp_helpers.copyLegend(params)
         self.assertEqual(1, 1)
-
 
     def test_AssignLegends(self):
         params = {
@@ -290,7 +281,6 @@ class TestWebpy(unittest.TestCase):
         result = webpy_esapp_helpers.AssignLegends(params)
         self.assertEqual(1, 1)
 
-
     def test_GetAssignedDatasets(self):
         params = {
             'legendid': 111
@@ -300,21 +290,35 @@ class TestWebpy(unittest.TestCase):
 
     def test_GetProductLayer(self):
         import os
+
         params = {
-            'productcode': 'pml-modis-sst',
-            'productversion': '3.0',
-            'subproductcode': 'sst-fronts',
-            'mapsetcode':'SPOTV-IOC-1km',
-            'date': '20150517',
+            'productcode': 'modis-chla',
+            'productversion': 'v2013.1',
+            'subproductcode': 'chla-day',
+            'mapsetcode': 'MODIS-Africa-4km',
+            'date': '20180626',
             'WIDTH': '256',
             'HEIGHT': '256',
-            'BBOX':"-22.5,36.5625,-19.6875,39.375",
-            'CRS':"EPSG:4326",
-            'legendid':"136"
+            'BBOX': "-45,-22.5,-22.5,0",
+            'CRS': "EPSG:4326",
+            'legendid': "211"
         }
+
+        # params = {
+        #     'productcode': 'pml-modis-sst',
+        #     'productversion': '3.0',
+        #     'subproductcode': 'sst-fronts',
+        #     'mapsetcode': 'SPOTV-IOC-1km',
+        #     'date': '20150517',
+        #     'WIDTH': '256',
+        #     'HEIGHT': '256',
+        #     'BBOX': "-22.5,36.5625,-19.6875,39.375",
+        #     'CRS': "EPSG:4326",
+        #     'legendid': "136"
+        # }
         result = webpy_esapp_helpers.getProductLayer(params)
         print(result)
         # Copy the file for analysis in Windows
-        command='cp '+result+' /data/processing/exchange/Tests/mapscript/'
-        os.system(command)
+        # command='cp '+result+' /data/processing/exchange/Tests/mapscript/'
+        # os.system(command)
         self.assertEqual(1, 1)
