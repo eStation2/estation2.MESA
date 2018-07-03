@@ -11,6 +11,8 @@ logger = log.my_logger(__name__)
 do_start = True
 dry_run  = False
 service  = False
+only_prod='olci-wrr'
+only_prod=None
 
 if service:
     # Make sure the pid dir exists
@@ -37,5 +39,8 @@ if service:
             logger.info('Ingest process is running: Stop it.')
             daemon.stop()
 else:
-    ingestion.loop_ingestion(dry_run=dry_run,test_one_product='olci-wrr')
-
+    if only_prod is not None:
+        ingestion.loop_ingestion(dry_run=dry_run,test_one_product=only_prod)
+        logger.warning('Ingestion running for a single product: %s', only_prod)
+    else:
+        ingestion.loop_ingestion(dry_run=dry_run)

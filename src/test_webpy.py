@@ -300,17 +300,29 @@ class TestWebpy(unittest.TestCase):
 
     def test_GetProductLayer(self):
         import os
+        # params = {
+        #     'productcode': 'pml-modis-sst',
+        #     'productversion': '3.0',
+        #     'subproductcode': 'sst-fronts',
+        #     'mapsetcode':'SPOTV-IOC-1km',
+        #     'date': '20150517',
+        #     'WIDTH': '256',
+        #     'HEIGHT': '256',
+        #     'BBOX':"-22.5,36.5625,-19.6875,39.375",
+        #     'CRS':"EPSG:4326",
+        #     'legendid':"136"
+        # }
         params = {
-            'productcode': 'pml-modis-sst',
-            'productversion': '3.0',
-            'subproductcode': 'sst-fronts',
-            'mapsetcode':'SPOTV-IOC-1km',
-            'date': '20150517',
+            'productcode': 'modis-chla',
+            'productversion': '1.0',
+            'subproductcode': 'wst',
+            'mapsetcode':'SPOTV-Africa-1km',
+            'date': '20180306',
             'WIDTH': '256',
             'HEIGHT': '256',
-            'BBOX':"-22.5,36.5625,-19.6875,39.375",
+            'BBOX':"-35.0,15.0,-30.0,20.0",
             'CRS':"EPSG:4326",
-            'legendid':"136"
+            'legendid':"150"
         }
         result = webpy_esapp_helpers.getProductLayer(params)
         print(result)

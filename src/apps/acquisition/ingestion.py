@@ -1876,7 +1876,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             output_subset_tif = tmpdir_untar_band + os.path.sep + 'band_subset.tif'
 
             command = es_constants.gpt_exec+' '+ graph_xml_subset
-            print(command)
+            #print(command)
             status=os.system(command)
             # ToDo : check the status or use try/except
 
@@ -2182,7 +2182,7 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
             graph_xml_subset = tmpdir_untar_band + os.path.sep + 'graph_xml_subset.xml'
             output_subset_tif = tmpdir_untar_band + os.path.sep + 'band_subset.tif'
 
-            command = '/home/webvenkavi/snap/bin/gpt ' + graph_xml_subset
+            command = es_constants.gpt_exec+' '+ graph_xml_subset
             print(command)
             os.system(command)
 
@@ -2193,7 +2193,7 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
                 graph_xml_reproject = tmpdir_untar_band + os.path.sep + 'graph_xml_reproject.xml'
                 output_reproject_tif = tmpdir_untar_band + os.path.sep + 'reprojected.tif'
 
-                command_reproject = '/home/webvenkavi/snap/bin/gpt ' + graph_xml_reproject
+                command_reproject = es_constants.gpt_exec + ' ' + graph_xml_reproject
                 print(command_reproject)
                 os.system(command_reproject)
 
