@@ -3081,7 +3081,8 @@ def get_product_sources(productcode='', subproductcode='', version=''):
         sources = []
         where = and_(db.product_acquisition_data_source.productcode == productcode,
                      db.product_acquisition_data_source.subproductcode == subproductcode,
-                     db.product_acquisition_data_source.version == version)
+                     db.product_acquisition_data_source.version == version,
+                     db.product_acquisition_data_source.activated)
 
         if db.product_acquisition_data_source.filter(where).count() >= 1:
             sources = db.product_acquisition_data_source.filter(where). \

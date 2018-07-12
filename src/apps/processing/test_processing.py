@@ -165,26 +165,29 @@ def test_proc_pml_modis_fronts(pipe_run=0, pipe_print=3, touch_files_only=False)
 #   ---------------------------------------------------------------------
 # modis-pp computation - NON standard
 #   ---------------------------------------------------------------------
-# from apps.processing.processing_modis_pp import *
-#
-# derivation_method = 'modis_pp'
-# algorithm = 'modis_pp'
-# mapset = 'MODIS-Africa-4km'
-# process_id = 62
-#
-# # Get input products
-# input_products = querydb.get_processing_chain_products(process_id,type='input')
-# output_products = querydb.get_processing_chain_products(process_id,type='output')
-#
-# # Prepare arguments
-# args = {'pipeline_run_level':3,
-#         'pipeline_printout_level':0,
-#         'input_products': input_products,
-#         'output_product': output_products,
-#         'logfile': 'test_processing.log'}
-#
-# res_queue = None
-# processing_modis_pp(res_queue, **args)
+from apps.processing.processing_modis_pp import *
+
+def test_proc_modis_pp(pipe_run=0, pipe_print=3, touch_files_only=False):
+    derivation_method = 'modis_pp'
+    algorithm = 'modis_pp'
+    mapset = 'MODIS-Africa-4km'
+    process_id = 62
+
+    # Get input products
+    input_products = querydb.get_processing_chain_products(process_id,type='input')
+    output_products = querydb.get_processing_chain_products(process_id,type='output')
+
+    # Prepare arguments
+    args = {'pipeline_run_level':pipe_run,
+            'pipeline_printout_level':pipe_print,
+            'prod': 'modis-pp',
+            'input_products': input_products,
+            'output_product' : output_products,
+            'starting_sprod': 'monavg',
+            'logfile': 'test_processing.log'}
+
+    res_queue = None
+    processing_modis_pp_stats_only(res_queue,  **args)
 
 # #
 #   ---------------------------------------------------------------------
@@ -373,7 +376,7 @@ def test_proc_modis_firms(start_date=None, end_date=None, pipe_run=0, pipe_print
             'mapset': target_mapset,
             'version':'v6.0',
             'logfile':'log-modis-firms.log',
-            'update_stats' : False,
+            'update_stats' : True,
             'nrt_products' : True,
             'touch_files_only':touch_files_only}
 
@@ -529,29 +532,29 @@ def test_proc_msg_mpe(start_date=None, end_date=None, pipe_run=0, pipe_print=3, 
 #   ---------------------------------------------------------------------
 #   Calls
 #   ---------------------------------------------------------------------
-from apps.processing.processing_olci_wrr import *
-def test_proc_olci_wrr(start_date=None, end_date=None, pipe_run=0, pipe_print=3, start_date_stats=None, end_date_stats=None, touch_files_only=False):
-
-    # Create the list of dates -> returns empty if start==end==None
-    if start_date is not None and end_date is not None:
-        #starting_dates = proc_functions.get_list_dates_for_dataset('olci-wrr', 'chl-nn', 'V02.0', start_date=start_date, end_date=end_date)
-        starting_dates = proc_functions.get_list_dates_for_dataset('olci-wrr', 'chl-oc4me', 'V02.0', start_date=start_date, end_date=end_date)
-    else:
-        starting_dates = None
-
-    args = {'pipeline_run_level':pipe_run, \
-            'pipeline_printout_level':pipe_print, \
-            'pipeline_printout_graph_level': 0, \
-            'prod': 'olci-wrr',\
-            'starting_sprod':'chl-oc4me',\
-            'starting_dates': starting_dates,\
-            'mapset': 'SPOTV-Africa-1km',\
-            'version':'V02.0',
-            'logfile':'ruffus-chirps'}
-
-    res_queue = None
-    proc_lists=processing_olci_wrr(res_queue,**args)
-    print(proc_lists)
+# from apps.processing.processing_olci_wrr import *
+# def test_proc_olci_wrr(start_date=None, end_date=None, pipe_run=0, pipe_print=3, start_date_stats=None, end_date_stats=None, touch_files_only=False):
+#
+#     # Create the list of dates -> returns empty if start==end==None
+#     if start_date is not None and end_date is not None:
+#         #starting_dates = proc_functions.get_list_dates_for_dataset('olci-wrr', 'chl-nn', 'V02.0', start_date=start_date, end_date=end_date)
+#         starting_dates = proc_functions.get_list_dates_for_dataset('olci-wrr', 'chl-oc4me', 'V02.0', start_date=start_date, end_date=end_date)
+#     else:
+#         starting_dates = None
+#
+#     args = {'pipeline_run_level':pipe_run, \
+#             'pipeline_printout_level':pipe_print, \
+#             'pipeline_printout_graph_level': 0, \
+#             'prod': 'olci-wrr',\
+#             'starting_sprod':'chl-oc4me',\
+#             'starting_dates': starting_dates,\
+#             'mapset': 'SPOTV-Africa-1km',\
+#             'version':'V02.0',
+#             'logfile':'ruffus-chirps'}
+#
+#     res_queue = None
+#     proc_lists=processing_olci_wrr(res_queue,**args)
+#     print(proc_lists)
 #test_proc_pml_modis_fronts(pipe_run=4, pipe_print=0, touch_files_only=False)
 
 #test_proc_modis_firms(pipe_run=4, pipe_print=0, start_date_stats='20030101', end_date_stats='20161221', touch_files_only=True)
@@ -564,4 +567,8 @@ def test_proc_olci_wrr(start_date=None, end_date=None, pipe_run=0, pipe_print=3,
 #     filename='/data/processing/modis-firms/v6.0/SPOTV-Africa-10km/derived/10dcount10k/'+date+'_modis-firms_10dcount10k_SPOTV-Africa-10km_v6.0.tif'
 #     st=os.system('touch '+filename)
 
-test_proc_olci_wrr(pipe_run=4, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
+#test_proc_olci_wrr(pipe_run=4, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
+#test_proc_modis_pp(pipe_run=4, pipe_print=```````````````````````
+
+# 0, touch_files_only=False)
+test_proc_modis_firms(pipe_run=4, pipe_print=0, touch_files_only=False)

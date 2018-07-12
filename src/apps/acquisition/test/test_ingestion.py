@@ -879,8 +879,8 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_msg_mpe(self):
 
-        date_fileslist = glob.glob('/data/ingest/L-000-MSG3__-MPEF________-MPEG_____-00000?___-201609301200-__')
-        in_date = '201609301200'
+        date_fileslist = glob.glob('/data/ingest/L-000-MSG3__-MPEF________-MPEG_____-000002___-201711*')
+        in_date = '201711282230'
         productcode = 'msg-mpe'
         productversion = 'undefined'
         subproductcode = 'mpe'
@@ -907,10 +907,12 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                                              source_id=datasource_descrID):
+        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                         source_id=datasource_descrID)
+        #for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
+         #                                                                     source_id=datasource_descrID):
 
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
     def test_ingest_arc2_rain(self):
 
