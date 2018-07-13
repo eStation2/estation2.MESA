@@ -238,7 +238,7 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
     starting_files = es2_data_dir + in_prod_subdir + "*" + in_prod_ident
 
     output_sprod_group = proc_lists.proc_add_subprod_group("monstat")
-    output_sprod = proc_lists.proc_add_subprod("pp1monavg", "monstat", final=False,
+    output_sprod = proc_lists.proc_add_subprod("1monavg", "monstat", final=False,
                                                descriptive_name='1 Month PP_LTA',
                                                description='Long Term Average for 1 Month MODIS Primary Production',
                                                frequency_id='e1month',
@@ -350,14 +350,17 @@ def processing_modis_pp(res_queue, pipeline_run_level=0, pipeline_printout_level
 
 def processing_modis_pp_stats_only(res_queue, pipeline_run_level=0, pipeline_printout_level=0,
                                    pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                                   starting_dates=None, write2file=None, logfile=None):
+                                   starting_dates=None, write2file=None, logfile=None, input_products='',
+                                   output_product=''):
     result = processing_modis_pp(res_queue, pipeline_run_level=pipeline_run_level,
                                  pipeline_printout_level=pipeline_printout_level,
                                  pipeline_printout_graph_level=pipeline_printout_graph_level,
                                  write2file=write2file,
                                  logfile=logfile,
                                  nrt_products=False,
-                                 update_stats=True
+                                 update_stats=True,
+                                 input_products=input_products,
+                                 output_product=output_product
                                  )
 
     return result
@@ -365,29 +368,33 @@ def processing_modis_pp_stats_only(res_queue, pipeline_run_level=0, pipeline_pri
 
 def processing_modis_pp_only(res_queue, pipeline_run_level=0, pipeline_printout_level=0,
                              pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                             starting_dates=None, write2file=None, logfile=None):
+                             starting_dates=None, write2file=None, logfile=None, input_products='', output_product=''):
     result = processing_modis_pp(res_queue, pipeline_run_level=pipeline_run_level,
                                  pipeline_printout_level=pipeline_printout_level,
                                  pipeline_printout_graph_level=pipeline_printout_graph_level,
                                  write2file=write2file,
                                  logfile=logfile,
                                  nrt_products=True,
-                                 update_stats=False
+                                 update_stats=False,
+                                 input_products=input_products,
+                                 output_product=output_product
                                  )
 
     return result
 
 
 def processing_modis_pp_all(res_queue, pipeline_run_level=0, pipeline_printout_level=0, pipeline_printout_graph_level=0,
-                            prod='', starting_sprod='', mapset='', version='',
-                            starting_dates=None, write2file=None, logfile=None):
+                            prod='', starting_sprod='', mapset='', version='', starting_dates=None, write2file=None,
+                            logfile=None, input_products='', output_product=''):
     result = processing_modis_pp(res_queue, pipeline_run_level=pipeline_run_level,
                                  pipeline_printout_level=pipeline_printout_level,
                                  pipeline_printout_graph_level=pipeline_printout_graph_level,
                                  write2file=write2file,
                                  logfile=logfile,
                                  nrt_products=True,
-                                 update_stats=True
+                                 update_stats=True,
+                                 input_products=input_products,
+                                 output_product=output_product
                                  )
 
     return result

@@ -187,7 +187,7 @@ def test_proc_modis_pp(pipe_run=0, pipe_print=3, touch_files_only=False):
             'logfile': 'test_processing.log'}
 
     res_queue = None
-    processing_modis_pp_stats_only(res_queue,  **args)
+    processing_modis_pp_stats_only(res_queue, **args)
 
 # #
 #   ---------------------------------------------------------------------
@@ -568,7 +568,6 @@ def test_proc_msg_mpe(start_date=None, end_date=None, pipe_run=0, pipe_print=3, 
 #     st=os.system('touch '+filename)
 
 #test_proc_olci_wrr(pipe_run=4, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
-#test_proc_modis_pp(pipe_run=4, pipe_print=```````````````````````
+test_proc_modis_pp(pipe_run=4, pipe_print=0, touch_files_only=False)
 
-# 0, touch_files_only=False)
-test_proc_modis_firms(pipe_run=4, pipe_print=0, touch_files_only=False)
+#test_proc_modis_firms(pipe_run=4, pipe_print=0, touch_files_only=False)
