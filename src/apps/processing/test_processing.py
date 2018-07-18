@@ -171,7 +171,7 @@ def test_proc_modis_pp(pipe_run=0, pipe_print=3, touch_files_only=False):
     derivation_method = 'modis_pp'
     algorithm = 'modis_pp'
     mapset = 'MODIS-Africa-4km'
-    process_id = 62
+    process_id = 63
 
     # Get input products
     input_products = querydb.get_processing_chain_products(process_id,type='input')
@@ -193,25 +193,28 @@ def test_proc_modis_pp(pipe_run=0, pipe_print=3, touch_files_only=False):
 #   ---------------------------------------------------------------------
 # tamsat-rfe
 #   ---------------------------------------------------------------------
-# from apps.processing.processing_std_precip import *
-# # # Create the list of dates -> returns empty if start==end==None
-# # #start_date='20010101'
-# # #end_date='20141221'
-# # #starting_dates = proc_functions.get_list_dates_for_dataset('fewsnet-rfe', '10d', '2.0', start_date=start_date, end_date=end_date)
-# starting_dates = None
-# args = {'pipeline_run_level':0, \
-#         'pipeline_printout_level':3, \
-#         'pipeline_printout_graph_level': 0, \
-#         'prod': 'tamsat-rfe',\
-#         'starting_sprod':'10d',\
-#         'starting_dates': starting_dates,\
-#         'mapset': 'TAMSAT-Africa-4km',\
-#         'version':'2.0',
-#         'logfile':'log-tamsat.log'}
-#
-# res_queue = None
-# proc_lists=processing_std_precip_prods_only(res_queue,**args)
-# print(proc_lists)
+from apps.processing.processing_std_precip import *
+def test_proc_tamsat_rfe(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False):
+
+    # Create the list of dates -> returns empty if start==end==None
+    if start_date is not None and end_date is not None:
+        starting_dates = proc_functions.get_list_dates_for_dataset('tamsat-rfe', '10d', '3.0', start_date=start_date, end_date=end_date)
+    else:
+        starting_dates = None
+
+    args = {'pipeline_run_level':pipe_run, \
+            'pipeline_printout_level':pipe_print, \
+            'pipeline_printout_graph_level': 0, \
+            'prod': 'tamsat-rfe',\
+            'starting_sprod':'10d',\
+            'starting_dates': starting_dates,\
+            'mapset': 'TAMSAT-Africa-4km',\
+            'version':'3.0',
+            'logfile':'log-tamsat.log'}
+
+    res_queue = None
+    proc_lists=processing_std_precip_stats_only(res_queue,**args)
+    print(proc_lists)
 
 #   ---------------------------------------------------------------------
 # fewsnet-rfe
@@ -569,5 +572,5 @@ def test_proc_msg_mpe(start_date=None, end_date=None, pipe_run=0, pipe_print=3, 
 
 #test_proc_olci_wrr(pipe_run=4, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
 test_proc_modis_pp(pipe_run=4, pipe_print=0, touch_files_only=False)
-
+#test_proc_tamsat_rfe(pipe_run=4, pipe_print=0, start_date='19830101', end_date='20171231', touch_files_only=False)
 #test_proc_modis_firms(pipe_run=4, pipe_print=0, touch_files_only=False)
