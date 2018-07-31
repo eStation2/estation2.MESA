@@ -1626,7 +1626,7 @@ def is_data_captured_during_day(in_date):
     # in_date example = 20180428T163216
     hhmmss = in_date.split("T")[1]
     hour = int(hhmmss[0] + hhmmss[1])
-    if 5 <= hour <= 16:
+    if 3 <= hour <= 16:
         day_data = True
 
     return day_data
