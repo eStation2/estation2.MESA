@@ -857,7 +857,7 @@ def get_status_PC1():
 
     return status_PC1
 
-def push_data_ftp(dry_run=False):
+def push_data_ftp(dry_run=False, user=None, psw=None, url=None, trg_dir=None):
 
 #   Synchronized data towards an ftp server (only for JRC)
 #   It replaces, since the new srv-ies-ftp.jrc.it ftp is set, the bash script: mirror_to_ftp.sh
@@ -877,10 +877,14 @@ def push_data_ftp(dry_run=False):
         logger.warning('Configuration file for ftp sync not found. Exit')
         return 1
 
-    user = server_ftp.server['user']
-    psw  = server_ftp.server['psw']
-    url=server_ftp.server['url']
-    trg_dir=server_ftp.server['data_dir']
+    if user is None:
+        user = server_ftp.server['user']
+    if psw is None:
+        psw  = server_ftp.server['psw']
+    if url is None:
+        url=server_ftp.server['url']
+    if trg_dir is None:
+        trg_dir=server_ftp.server['data_dir']
 
     # Create an ad-hoc file for the lftp command output (beside the standard logger)
     logfile=es_constants.es2globals['log_dir']+'push_data_ftp.log'
@@ -957,6 +961,7 @@ def push_data_ftp(dry_run=False):
                         # command = 'lftp -e "mirror -RLe {} {};exit" -u {}:{} {}"" >> {}'.format(source,target,user,psw,url,logfile)
                         command = 'lftp -e "mirror -RLe {} {};exit" -u {}:{} {}"" >> /dev/null'.format(source,target,user,psw,url)
                         logger.debug("Executing %s" % command)
+                        spec_logger.info('Working on mapset/subproduct {}/{}'.format(mapset, subproductcode))
 
                         # return
                         try:
