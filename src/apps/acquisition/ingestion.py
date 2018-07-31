@@ -2126,8 +2126,21 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
 
 def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=None):
 # -------------------------------------------------------------------------------------------------------
-#   Pre-process the Sentinel 3 Level 2 product from OLCI - WRR
+#   Pre-process the Sentinel 3 Level 2 product from SLSTR - WST
 #
+#   Description: the current implementation is based on GPT, and includes the following steps
+#
+#       1. Unzipping into a temp dir
+#       2. Write a 'subset' graph xml in order to:
+#           a. Subset geographically:
+#           b. Band subset (SST only)
+#           c. Apply a flag (band math)
+#       3. Write a reprojection ..
+#       4. Merge by applying input and output nodata (-n -54.53 -a_nodata -32768)
+#
+#   NOTE: now we mask by using l2p_flags_cloud ('True' means cloud detected -> reject)
+#
+
     # Prepare the output file list
     pre_processed_list = []
 
@@ -2219,7 +2232,12 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
         else:
             pre_processed_list.append(interm_files_list[0])
     return pre_processed_list
-    # Take gdal_merge.py from es2globals
+
+
+    # ------------------------------------------------------------------------------------------------------------
+    # The part below is the GDAL (rather then GPT) implementation, which we keep for possible re-use in the future.
+    # ------------------------------------------------------------------------------------------------------------
+
     # command = es_constants.gdal_merge + ' -n -32768 -a_nodata -32768' + ' -o '     #-ot Float32    -co \"compress=lzw\"  -n -32768
     #
     # out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
