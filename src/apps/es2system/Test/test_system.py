@@ -163,5 +163,10 @@ class TestSystem(unittest.TestCase):
 
     def test_push_ftp(self):
 
+        url='sftp://94.177.222.148'
+        user='jrc-user'
+        psw='M@rc0-Jur1'
+        trg_dir='/home/jrc-user/data/processing/'
+
         # Should get here the role of my machine ...
-        status = es2system.push_data_ftp()
+        status = es2system.push_data_ftp(url=url, user=user, psw=psw, trg_dir=trg_dir)
