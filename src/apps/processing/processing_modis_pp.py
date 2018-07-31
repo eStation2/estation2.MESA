@@ -49,27 +49,23 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
     spec_logger.info("Entering routine %s" % 'processing_modis_pp')
 
     # Set DEFAULTS: all off
-    activate_pp_1mon_comput = 0  # 10d stats
-    activate_pp_comput = 0  # 10d anomalies
+    activate_pp_comput = 0          # PP from Chla, SST, Kd490 and PAR
 
-    activate_monthly_comput = 0  # monthly cumulation
-    activate_monstats_comput = 0  # monthly stats
-    activate_monanomalies_comput = 0  # monthly anomalies
+    activate_stats_comput = 0       # Stats computation (inter-annual clim, min, max)
+    activate_anomalies_comput = 0   # Anomalies computation (not yet done!!)
 
     #   switch wrt groups - according to options
     if nrt_products:
-        activate_pp_1mon_comput = 1  # Primary Production Monthly
-
-        activate_pp_comput = 1  # monthly cumulation
-        activate_monanomalies_comput = 1  # monthly anomalies
+        activate_pp_comput = 1          # PP from Chla, SST, Kd490 and PAR
 
     if update_stats:
-        activate_pp_8dstats_comput = 1  # 10d stats
-        activate_pp_monstats_comput = 1  # monthly stats
+        activate_stats_comput = 1
+        activate_anomalies_comput = 1
 
-    activate_pp_1monavg_comput = 1
-    activate_pp_1monmin_comput = 1
-    activate_pp_1monmax_comput = 1
+    activate_pp_prod_comput = 1
+    activate_pp_stats_clim_comput = 1
+    activate_pp_stats_min_comput = 1
+    activate_pp_stats_max_comput = 1
 
     #   ---------------------------------------------------------------------
     #   Create lists
@@ -215,7 +211,7 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
 
     @active_if(activate_pp_comput)
     @files(generate_input_files_pp)
-    def modis_pp_1mon(input_file, output_file):
+    def modis_pp_comp(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
@@ -228,7 +224,8 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
         raster_image_math.do_compute_primary_production(**args)
 
     #   ---------------------------------------------------------------------
-    #   Monthly Average
+    #   Climatology (inter-annual average)
+
     prod = output_prod
     mapset = output_mapset
     new_input_subprod = output_sprod
@@ -252,8 +249,8 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
     formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})" + in_prod_ident
     formatter_out = ["{subpath[0][5]}" + os.path.sep + output_subdir + "{MMDD[0]}" + out_prod_ident]
 
-    @follows(modis_pp_1mon)
-    @active_if(activate_monstats_comput, activate_pp_1monavg_comput)
+    @follows(modis_pp_comp)
+    @active_if(activate_stats_comput, activate_pp_stats_clim_comput)
     @collate(starting_files, formatter(formatter_in), formatter_out)
     def std_precip_1monavg(input_file, output_file):
 
@@ -265,7 +262,7 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
         raster_image_math.do_avg_image(**args)
 
     #   ---------------------------------------------------------------------
-    #   Monthly Minimum
+    #   Minimum
     output_sprod = proc_lists.proc_add_subprod("1monmin", "monstat", final=False,
                                                descriptive_name='1 Month PP_LT Min',
                                                description='Long Term Minimum for 1 Month MODIS Primary Production',
@@ -280,8 +277,8 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
     formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})" + in_prod_ident
     formatter_out = ["{subpath[0][5]}" + os.path.sep + output_subdir + "{MMDD[0]}" + out_prod_ident]
 
-    @follows(modis_pp_1mon)
-    @active_if(activate_pp_monstats_comput, activate_pp_1monmin_comput)
+    @follows(modis_pp_comp)
+    @active_if(activate_stats_comput, activate_pp_stats_min_comput)
     @collate(starting_files, formatter(formatter_in), formatter_out)
     def std_precip_1monmin(input_file, output_file):
 
@@ -310,8 +307,8 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
     formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})" + in_prod_ident
     formatter_out = ["{subpath[0][5]}" + os.path.sep + output_subdir + "{MMDD[0]}" + out_prod_ident]
 
-    @follows(modis_pp_1mon)
-    @active_if(activate_pp_monstats_comput, activate_pp_1monmax_comput)
+    @follows(modis_pp_comp)
+    @active_if(activate_stats_comput, activate_pp_stats_max_comput)
     @collate(starting_files, formatter(formatter_in), formatter_out)
     def std_precip_1monmax(input_file, output_file):
 
