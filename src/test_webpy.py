@@ -216,7 +216,7 @@ class TestWebpy(unittest.TestCase):
         self.assertEqual(1, 1)
 
     def test_DataSets(self):
-        datasets = webpy_esapp_helpers.DataSets()
+        datasets = webpy_esapp_helpers.getDataSets(True)
         print datasets
         self.assertEqual(1, 1)
 
@@ -313,20 +313,37 @@ class TestWebpy(unittest.TestCase):
         #     'legendid':"136"
         # }
         params = {
-            'productcode': 'modis-chla',
-            'productversion': '1.0',
-            'subproductcode': 'wst',
+            'productcode': 'vgt-ndvi',
+            'productversion': 'sv2-pv2.2',
+            'subproductcode': 'ndv',
             'mapsetcode':'SPOTV-Africa-1km',
-            'date': '20180306',
-            'WIDTH': '256',
-            'HEIGHT': '256',
-            'BBOX':"-35.0,15.0,-30.0,20.0",
+            'date': '20180301',
+            'WIDTH': '0',
+            'HEIGHT': '1024',
+            'BBOX':"0,0,35,60",     # Lat min, Lon min, Lat max, Lon max)
             'CRS':"EPSG:4326",
-            'legendid':"150"
+            'legendid':"9"
         }
-        result = webpy_esapp_helpers.getProductLayer(params)
-        print(result)
-        # Copy the file for analysis in Windows
-        command='cp '+result+' /data/processing/exchange/Tests/mapscript/'
-        os.system(command)
+        params = {
+            'productcode': 'olci-wrr',
+            'productversion': 'V02.0',
+            'subproductcode': 'chl-oc4me',
+            'mapsetcode':'SPOTV-Africa-1km',
+            'date': '20180724',
+            'WIDTH': '0',
+            'HEIGHT': '1024',
+            'BBOX':"-35.0,-26,38.0,60",
+            'CRS':"EPSG:4326",
+            'legendid':"211"
+        }
+
+        # Adjust height by using image ratio
+        vals=params['BBOX'].split(',')
+        ratio=(float(vals[3])-float(vals[1]))/(float(vals[2])-float(vals[0]))       # ratio width/height (X/Y)
+        params['WIDTH'] = str(int(float(params['HEIGHT']) * ratio))
+        # result = webpy_esapp_helpers.getProductLayer(params)
+
+        # # Copy the file for analysis in Windows
+        # command='cp '+result+' /data/processing/exchange/Tests/mapscript/'
+        # os.system(command)
         self.assertEqual(1, 1)
