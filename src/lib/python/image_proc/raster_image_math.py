@@ -200,6 +200,163 @@ def do_avg_image(input_file='', output_file='', input_nodata=None, output_nodata
                 os.remove(output_stddev)
 
 # _____________________________
+def do_stddev_image(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
+           output_type=None, options='', output_stddev='', ):
+
+    # Note: no 'update' functionality is foreseen -> creates output EVERY TIME
+    # In this method make sure you pass the output_file as avg_file and output_stddev as output file to ease calculation
+    try:
+        # Force input to be a list
+        #input_list = return_as_list(input_file)
+
+        # Manage options
+        options_list = [es_constants.ES2_OUTFILE_OPTIONS]
+        options_list.append(options)
+
+        # Try and assign input_nodata if it is UNDEF
+        if input_nodata is None:
+            sds_meta = metadata.SdsMetadata()
+            if os.path.exists(input_file):
+                input_nodata=float(sds_meta.get_nodata_value(input_file))
+            else:
+                logger.info('Test file not existing: do not assign metadata')
+
+        # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
+        if output_nodata is None and input_nodata is not None:
+            output_nodata = input_nodata
+
+        # Get info from first file
+        fidT=gdal.Open(input_file, GA_ReadOnly)
+        nb=fidT.RasterCount
+        ns=fidT.RasterXSize
+        nl=fidT.RasterYSize
+        dataType=fidT.GetRasterBand(1).DataType
+        geotransform=fidT.GetGeoTransform()
+        projection=fidT.GetProjection()
+        driver_type=fidT.GetDriver().ShortName
+
+        # Get info from avg file
+        avgFID = gdal.Open(output_file, GA_ReadOnly)
+
+        # manage out_type (take the input one as default)
+        if output_type is None:
+            outType=dataType
+        else:
+            outType=ParseType(output_type)
+
+        # manage out_format (take the input one as default)
+        if output_format is None:
+            outFormat=driver_type
+        else:
+            outFormat=output_format
+
+        # instantiate output/sll
+        # outDrv=gdal.GetDriverByName(outFormat)
+        # outDS=outDrv.Create(output_file, ns, nl, nb, outType, options_list)
+        # outDS.SetProjection(projection)
+        # outDS.SetGeoTransform(geotransform)
+
+        #if output_stddev != None:
+        outStd = gdal.GetDriverByName(output_format)
+        stdDs = outStd.Create(output_stddev, ns, nl, nb, outType, options_list)
+        stdDs.SetProjection(projection)
+        stdDs.SetGeoTransform(geotransform)
+
+        # pre-open input files
+        rangenl = range(nl)
+        rangeFile = range(1)
+        fid = []
+        for ifid in rangeFile:
+            fid.append(gdal.Open(input_file, GA_ReadOnly))
+
+        # Loop over bands
+        for ib in range(nb):
+            #outband = outDS.GetRasterBand(ib+1)
+            inavg = avgFID.GetRasterBand(ib+1)
+
+            # parse image by line
+            for il in rangenl:
+                counter = N.zeros(ns)
+                accum = N.zeros(ns)
+                # for all files:
+                for ifile in rangeFile:
+                    data = N.ravel(fid[ifile].GetRasterBand(ib+1).ReadAsArray(0, il, ns, 1).astype(float))
+                    avgVal = N.ravel(inavg.ReadAsArray(0, il, inavg.XSize, 1))
+                    #avgVal = N.ravel(fid[ifile].GetRasterBand(ib + 1).ReadAsArray(0, il, ns, 1).astype(float))
+
+                    # variable initialization
+                    if (ifile==0):
+                        if input_nodata is None:
+                            #avgData = data
+                            avgData = avgVal
+                            stdData = N.multiply(data , data)
+                            counter[:] = 1.0
+                        else:
+                            wts = (data != input_nodata) *  (avgVal != input_nodata)
+                            avgData = N.zeros(data.shape)
+                            stdData = N.zeros(data.shape)
+                            if wts.any():
+                                counter[wts] = 1.0
+                                avgData[wts] = avgVal[wts]
+                                stdData[wts] = N.multiply(data[wts], data[wts])
+
+                    else:
+                        if input_nodata is None:
+                            avgData = avgVal
+                            counter = counter + 1.0
+                            stdData = stdData + N.multiply(data, data)
+                        else:
+                            wts = (data != input_nodata) *  (avgVal != input_nodata)
+                            if wts.any():
+                                avgData[wts] = avgVal[wts]
+                                #avgData[wts] = avgData[wts] + data[wts]
+                                counter[wts] = counter[wts] + 1.0
+                                stdData[wts] = stdData[wts] + N.multiply(data[wts], data[wts])
+
+                wnz = (counter != 0)
+                outData = N.zeros(ns)
+                if wnz.any():
+                    outData[wnz] = avgData[wnz]/(counter[wnz])
+
+                if output_nodata != None:
+                    wzz = (counter == 0)
+                    if wzz.any():
+                        outData[wzz] = output_nodata
+
+                # Check if stddev also required
+                #if output_stddev != None:
+                outDataStd = N.zeros(ns)
+                if wnz.any():
+                    outDataStd[wnz] = N.sqrt( stdData[wnz]/(counter[wnz]) - N.multiply(outData[wnz],outData[wnz]) )
+                if output_nodata != None:
+                    wzz = (counter == 0)
+                    if wzz.any():
+                        outDataStd[wzz] = output_nodata
+
+                outDataStd.shape = (1, -1)
+                stdDs.GetRasterBand(ib+1).WriteArray(N.array(outDataStd), 0, il)
+
+                # reshape before writing
+                # outData.shape = (1, -1)
+                # outband.WriteArray(N.array(outData), 0, il)
+
+        #   ----------------------------------------------------------------------------------------------------
+        #   Close outputs
+        outStd = None
+        stdDs = None
+
+        #   Writes metadata to output
+        assign_metadata_processing(input_file, output_stddev)
+
+    except:
+        logger.warning('Error in do_stddev_image. Remove outputs')
+        # if os.path.isfile(output_file):
+        #     os.remove(output_file)
+        # if output_stddev != None:
+        if os.path.isfile(output_stddev):
+            os.remove(output_stddev)
+
+# _____________________________
 def do_min_image(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
            output_type=None, options='', index_file=None):
     #
@@ -663,7 +820,7 @@ def do_oper_subtraction(input_file='', output_file='', input_nodata=None, output
 
 # _____________________________
 def do_oper_division_perc(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
-           output_type=None, options=''):
+                          output_type=None, options=''):
     
     # Returns the IN1/IN2 * 100; IN1/IN2 might have various datatype (int, float, ...) but internally treated as float
     # Notes:'The command expects exactly 2 files in input.'
@@ -741,6 +898,7 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
                 if wtc.any():
                     dataout[wtc] = data0[wtc]/data1[wtc]
                     dataout[wtc] = dataout[wtc]*100.00
+
 
                 dataout = dataout.round()
                 dataout.shape=(1,-1)
