@@ -451,6 +451,12 @@ p {
 .chartfitlayout{width:100% !important; height:100% !important;}
 
 
+
+.logarithm_icon {
+    background-image:url(../img/logarithm.png);
+    background-repeat: no-repeat;
+}
+
 .change-region-link {
     background-image:url(../img/change-region-geom-linked2.png);
     background-repeat: no-repeat;
@@ -1006,21 +1012,29 @@ p {
     /*border-radius: 5px;*/
 }
 
+.rounded-box-win {
+    background-color: #fff;
+    border: 2px solid lightslategray !important;
+    /*border-radius: 6px;*/
+    /*box-shadow: 2px 2px 2px #bbb;*/
+    padding: 0px;
+}
+
 .rounded-box {
     background-color: #fff;
     border: 1px solid lightslategray !important;
-    border-radius: 5px;
+    border-radius: 6px;
     /*box-shadow: 2px 2px 2px #bbb;*/
     padding: 0px;
 }
 
 .rounded-box .x-panel-default-outer-border-rbl .x-panel-default-outer-border-trl{
     border-right-color: lightslategray !important;
-    border-right-width: 1px !important;
+    border-right-width: 2px !important;
     border-bottom-color: lightslategray !important;
-    border-bottom-width: 1px !important;
+    border-bottom-width: 2px !important;
     border-left-color: lightslategray !important;
-    border-left-width: 1px !important;
+    border-left-width: 2px !important;
 }
 
 /*.rounded-box-header .x-panel-header-default {*/

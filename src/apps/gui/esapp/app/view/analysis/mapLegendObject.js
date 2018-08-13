@@ -136,7 +136,7 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
                 }
                 else {
                     me.setPosition(me.legendPosition);
-                    // me.fireEvent('refreshimage');
+                    me.fireEvent('refreshimage');
                 }
             }
             // ,move: function(){

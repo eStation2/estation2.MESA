@@ -1129,7 +1129,7 @@ def set_path_filename_no_date(product_code, sub_product_code, mapset_id, version
 
     filename_nodate =     "_" + str(product_code) + '_' \
                               + str(sub_product_code) + "_" \
-                              + mapset_id +  "_" \
+                              + mapset_id + "_" \
                               + version + extension
 
     return filename_nodate

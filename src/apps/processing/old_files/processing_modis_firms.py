@@ -270,7 +270,7 @@ def processing_modis_firms(res_queue, pipeline_run_level=0,pipeline_printout_lev
 
     if pipeline_run_level > 0:
         spec_logger.info("Run the pipeline %s" % 'processing_modis_firms')
-        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger, history_file='/eStation2/log/.ruffus_history.sqlite')
+        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger, history_file=os.path.join(es_constants.log_dir,'.ruffus_history.sqlite'))
         spec_logger.info("After running the pipeline %s" % 'processing_modis_firms')
 
     if pipeline_printout_level > 0:

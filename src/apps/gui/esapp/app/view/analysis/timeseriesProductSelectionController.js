@@ -91,7 +91,7 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
                     }
                 }
             });
-            esapp.Utils.sleepFor(1000);
+            // esapp.Utils.sleepFor(500);
 
             return tsdrawprobs_record;
         }
@@ -296,7 +296,6 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
         }
     }
 
-
     ,getSelectedTSDrawProperties: function(){
         var me = this.getView(),
         // selectedTimeSeries = me.lookupReference("selected-timeseries-mapset-dataset-grid_"+me.idpostfix).getStore().getData(),
@@ -333,6 +332,7 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
         tsdrawprops = Ext.util.JSON.encode(tsdrawprops);
         return tsdrawprops
     }
+
     ,getSelections: function(){
         var me = this.getView(),
             selectedTimeSeries = null,
@@ -610,7 +610,6 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
 		}
 		
 		function setSelections(me){
-		
 			if (esapp.Utils.objectExists(me.tplChartView)){
 				// Loop tplSelectedTimeseries and find product record in timeseriesProductsStore.
 				// When product record found, clone record and change settings to template product settings
@@ -673,22 +672,23 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
 
     ,TimeseriesProductsGridRowClick: function(grid, record) {
         var me = this.getView();
-        // var gridSelectedTS = me.lookupReference('selected-timeseries-mapset-dataset-grid_'+ me.idpostfix);
-
-        // var selectedTimeseriesStore = Ext.getCmp(gridSelectedTS).getStore();
         var selectedTimeseriesStore = me.getViewModel().getStore('selectedtimeseriesmapsetdatasets')
         var yearsData = [];
-        //var record = me.getSelection()[0];
         var newrecord = Ext.clone(record);
         var addProduct = true;
+        // var gridSelectedTS = me.lookupReference('selected-timeseries-mapset-dataset-grid_'+ me.idpostfix);
+        // var selectedTimeseriesStore = Ext.getCmp(gridSelectedTS).getStore();
+        // var record = me.getSelection()[0];
+        // record.get('selected') ? record.set('selected', false) : record.set('selected', true);
+        // record.get('selected') ? selectedTimeseriesStore.add(record) : selectedTimeseriesStore.remove(record);
 
-        //record.get('selected') ? record.set('selected', false) : record.set('selected', true);
-        //record.get('selected') ? selectedTimeseriesStore.add(record) : selectedTimeseriesStore.remove(record);
-        //
         if (me.graphtype == 'xy'){
             var yAxes = [];
             var tsdrawprobs_new_selected_record = this.getTSDrawProperties(record);
+
+            // esapp.Utils.sleepFor(1200);
             yAxes.push(tsdrawprobs_new_selected_record.get('yaxe_id'));
+
             if (selectedTimeseriesStore.count() > 0){
                 selectedTimeseriesStore.getData().each(function(selectedproduct) {
                     var yaxeid = me.getController().getTSDrawProperties(selectedproduct).get('yaxe_id');
@@ -697,6 +697,7 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
                     }
                 });
             }
+
             if (yAxes.length > 4){
                 Ext.toast({
                     html: esapp.Utils.getTranslation('more_than_4_yaxes_message'),    // "You have selected products that will create more than 4 y-Axes in the Profile Graph, which is not supported!<BR><BR>Last selected product is not added.",

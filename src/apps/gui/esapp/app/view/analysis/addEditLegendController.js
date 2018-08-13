@@ -513,11 +513,8 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
                             format: "#HEX6",
                             listeners: {
                                 change: function(colorbtn, hexvalue) {
-                                    // console.info(colorbtn);
-                                    // console.info(hexvalue);
                                     var rgbvalue = esapp.Utils.HexToRGB(hexvalue);
                                     rgbvalue = rgbvalue.replace(/,/g, ' ');
-                                    // console.info(rgbvalue);
                                     Ext.getCmp('endcolour').setValue(rgbvalue);
                                 }
                             }
@@ -540,12 +537,130 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
         // generateClassesWin.alignTo(this.getGridEl(),"br-l", [-6, 0]);
     }
 
+    ,showGenerateLogValuesPanel: function(btn){
+        btn.generateLogValuesPanel.show();
+    }
+
+    ,generateLogValuesPanel: function(btn){
+        var me = this.getView();
+
+        var generateLogValuesPanel = new Ext.panel.Panel({
+            //  reference:'generateLogValuesWin'
+             referenceHolder: true
+            ,layout:'fit'
+            ,autoShow : false
+            ,hidden: true
+            ,autoHeight: true
+            ,width: 250
+            ,collapsible: false
+            ,resizable: false
+            ,maximizable: false
+            ,focusable: true
+            ,floating: true
+            ,closable: true
+            ,closeAction: 'hide'
+            ,title: esapp.Utils.getTranslation('win_title_logarithmic_values') // 'Generate logarithmic values for existing classes'
+            ,plain: true
+            // ,modal:true
+            ,frame: false
+            ,border: false
+            ,bodyBorder: true
+            ,cls: 'newpanelstyle'
+            ,defaultAlign: 'tl-bc'
+            ,header: {
+                hidden: false,
+                titlePosition: 0,
+                focusable: true
+            }
+            ,bodyStyle: 'padding: 15px 3px 0 3px;'
+            ,owner: btn
+            ,config: {
+                owner: btn
+            }
+            ,listeners : {
+                afterrender: function(){
+                    var legendminvalue = me.lookupReference('legend_minvalue');
+                    var legendmaxvalue = me.lookupReference('legend_maxvalue');
+                    this.lookupReference('minvalue').setValue(legendminvalue.getValue())
+                    this.lookupReference('maxvalue').setValue(legendmaxvalue.getValue())
+                    this.alignTarget = this.owner;
+                },
+                focusleave: function(){
+                    this.hide();
+                },
+                show: function(){
+                    this.alignTo(this.owner,'tl-bc');
+                    // this.fireEvent('align');
+                }
+            }
+            ,bbar: ['->',{
+                // reference: 'GenerateClassesBtn',
+                text: esapp.Utils.getTranslation('generate'), // 'Generate'
+                iconCls:'fa fa-cogs',   // fa fa-cogs fa-2x
+                handler: function(){
+                    var precision = 8;
+                    var legendClassesStore = me.getViewModel().getStore('legendClassesStore');
+                    var generateLogValuesWindow = this.up().up();
+                    var minvalue = generateLogValuesWindow.lookupReference('minvalue').getValue();
+                    var maxvalue = generateLogValuesWindow.lookupReference('maxvalue').getValue();
+                    var logminvalue = parseFloat(Math.log10(minvalue).toFixed(precision));
+                    var logmaxvalue = parseFloat(Math.log10(maxvalue).toFixed(precision));
+                    var maxmindiff = logmaxvalue-logminvalue;
+                    var totsteps = legendClassesStore.getCount();
+                    var onestep = maxmindiff/totsteps;
+
+                    var to = null;
+                    var from = minvalue;
+                    var previouslog = logminvalue;
+
+                    legendClassesStore.suspendEvents();
+                    legendClassesStore.each(function(legendclass, id){
+                        to = parseFloat(Math.pow(10, previouslog+onestep).toFixed(precision));
+                        if (id == 0) from = 0;
+                        if (id == totsteps-1) to = maxvalue;
+                        legendclass.set('from_step', from);     // parseFloat(from.toFixed(precision))
+                        legendclass.set('to_step', to);
+                        from=to;
+                        previouslog+=onestep;
+                    },this);
+                    legendClassesStore.resumeEvents();
+
+                    me.getController().setLegendPreview();
+                    generateLogValuesWindow.close();
+                }
+            }]
+            ,items: [{
+                xtype: 'fieldset',
+                title: '',
+                labelWidth:60,
+                collapseable:false,
+                border:false,
+                margins:{top:15, right:5, bottom:0, left:5},
+                items:[{
+                    xtype:'numberfield',
+                    reference:'minvalue',
+                    fieldLabel: esapp.Utils.getTranslation('minvalue'), // 'Min value',
+                    width:90+90,
+                    minValue: 0
+                },{
+                    xtype:'numberfield',
+                    reference:'maxvalue',
+                    fieldLabel: esapp.Utils.getTranslation('maxvalue'), // 'MAx value',
+                    width:90+90,
+                    minValue: 0
+                }]
+            }]
+        });
+
+        return generateLogValuesPanel;
+
+    }
+
     ,setLegendPreview: function(){
         var me = this.getView();
         var legendClassesStore = me.getViewModel().getStore('legendClassesStore');
         var TotClasses = parseInt(legendClassesStore.getCount());
         var legendname = me.lookupReference('title_in_legend').getValue();
-
         var fontSizeLabels = 20;
         var legendHTMLVertical = '';
         var TotColorLabels = 0;

@@ -31,6 +31,8 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
     maximizable: true,
     collapsible: true,
     resizable: true,
+    shadow: false,
+    componentCls: 'rounded-box-win',
 
     width:700,
     height: Ext.getBody().getViewSize().height < 600 ? Ext.getBody().getViewSize().height-80 : 600,
@@ -154,7 +156,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                    '<span id="graphview_title_' + me.id + '">'+esapp.Utils.getTranslation('timeseries')+'</span>';
         //me.height = Ext.getBody().getViewSize().height-80;
         me.frame = false;
-        me.border= true;
+        me.border= false;
         me.bodyBorder = false;
 
         me.link_region_change = false;

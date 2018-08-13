@@ -41,7 +41,7 @@ class TestCreateRequests(unittest.TestCase):
         productcode = 'vgt-ndvi'
         version = 'sv2-pv2.2'
         mapsetcode = 'SPOTV-IGAD-1km'
-        subproductcode = 'absol-min-linearx2'
+        subproductcode = 'ndvi-linearx2'
 
         request = requests.create_request(productcode, version, mapsetcode=mapsetcode, subproductcode=subproductcode)
         request_json = json.dumps(request,

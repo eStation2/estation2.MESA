@@ -120,7 +120,7 @@ Ext.define("esapp.view.analysis.mapDisclaimerObject",{
             },
             show: function(){
                 me.setPosition(me.disclaimerPosition);
-                // me.fireEvent('refreshimage');
+                me.fireEvent('refreshimage');
             }
         };
 

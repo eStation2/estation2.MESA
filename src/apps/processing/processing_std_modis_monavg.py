@@ -258,7 +258,7 @@ def processing_std_modis_monavg(res_queue, pipeline_run_level=0,pipeline_printou
     spec_logger = log.my_logger(logfile)
     spec_logger.info("Entering routine %s" % 'processing_std_modis_monavg')
 
-    history_file = '/eStation2/log/.ruffus_history_{0}_{1}.sqlite'.format(prod,starting_sprod)
+    history_file = os.path.join(es_constants.log_dir,'.ruffus_history_{0}_{1}.sqlite').format(prod,starting_sprod)
     proc_lists = None
     proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
                                  starting_dates=starting_dates, logger=spec_logger)

@@ -40,6 +40,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             subproductcode: me.subproductcode,
             productversion: me.productversion,
             mapsetcode: me.mapsetcode,
+            productdate: me.productdate,
             legendid: me.legendid,
             legendlayout:  mapLegendObj.legendLayout,
             legendObjPosition: me.productcode != '' && mapLegendObj.html != '' ? mapLegendObj.getPosition(true).toString() : mapLegendObj.legendPosition.toString(),
@@ -323,7 +324,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
         // mapTitleObj.fireEvent('refreshimage');
     }
 
-    ,addProductLayer: function(productcode, productversion, mapsetcode, subproductcode, legendid, legendHTML, legendHTMLVertical, productname, date_format, frequency_id) {
+    ,addProductLayer: function(productcode, productversion, mapsetcode, subproductcode, tpl_productdate, legendid, legendHTML, legendHTMLVertical, productname, date_format, frequency_id) {
         var me = this.getView();
         var params = {
                productcode:productcode,
@@ -398,6 +399,10 @@ Ext.define('esapp.view.analysis.mapViewController', {
                     }
                 }
 
+
+                if (esapp.Utils.objectExists(tpl_productdate) &&  tpl_productdate != ''){
+                    me.productdate = tpl_productdate
+                }
                 // Set the MapView window title to the selected product and date
                 var versiontitle = '';
                 if (productversion !== 'undefined'){
@@ -429,98 +434,101 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 // me.redrawTimeLine(me.getView());
                 mapviewtimeline.show();
                 // mapviewtimeline.fireEvent('show');
+                me.getController().redrawTimeLine();
 
                 if (frequency_id == 'e1day' && dataLength > 30){
-                    mapview_timelinechart_container.timelinechart.rangeSelector.setSelected(1);
-                    mapview_timelinechart_container.timelinechart.rangeSelector.clickButton(1); // setSelected(2);
+                    mapview_timelinechart_container.timelinechart.rangeSelector.setSelected(0);
+                    mapview_timelinechart_container.timelinechart.rangeSelector.clickButton(0);
                     // mapview_timelinechart_container.timelinechart.rangeSelector.updateButtonStates();
                 }
                 // else {
                 //     mapview_timelinechart_container.timelinechart.rangeSelector.setSelected(4);
                 //     mapview_timelinechart_container.timelinechart.rangeSelector.clickButton(4);
                 // }
-                me.getController().redrawTimeLine();
+
+
+                //var mapviewtimeline = this.getView().getDockedItems('toolbar[dock="bottom"]')[0];
+                //var searchtimeline = 'container[id="product-time-line_' + this.getView().id + '"]'
+                //var mapviewtimeline = this.getView().down(searchtimeline);
+                //var mapviewtimeline = me.lookupReference('product-time-line_' + me.id);
+                //mapviewtimeline.setHidden(false);
+                //mapviewtimeline.expand();
+
+                me.productlayer = new ol.layer.Tile({       // ol.layer.Tile   or  ol.layer.Image
+                    title: esapp.Utils.getTranslation('productlayer'),  // 'Product layer',
+                    layer_id: 'productlayer',
+                    layerorderidx: 0,
+                    layertype: 'raster',
+                    type: 'base',
+                    visible: true,
+                    source: new ol.source.TileWMS({    // ol.source.TileWMS or ol.source.ImageWMS
+                        url: 'analysis/getproductlayer',
+                        type: 'base',
+                        wrapX: false,
+                        noWrap: true,
+                        crossOrigin: '', // 'anonymous',
+                        attributions: [new ol.Attribution({
+                            html: '&copy; <a href="https://ec.europa.eu/jrc/">'+esapp.Utils.getTranslation('estation2')+'</a>'
+                        })],
+                        params: {
+                            productcode:productcode,
+                            productversion:productversion,
+                            subproductcode:subproductcode,
+                            mapsetcode:mapsetcode,
+                            legendid:legendid,
+                            date: me.productdate,
+                            'FORMAT': 'image/jpg'
+                            // ,'time': new Date().getTime()    // Force openlayers to not use browser cache for tiles refresh
+                        },
+                        serverType: 'mapserver' /** @type {ol.source.wms.ServerType}  ('mapserver') */
+                    })
+                });
+
+
+                var productlayer_idx = me.getController().findlayer(me.map, 'productlayer');
+                if (productlayer_idx != -1)
+                    me.map.getLayers().removeAt(productlayer_idx);
+                //me.map.removeLayer(me.map.getLayers().a[0]);
+                //me.map.addLayer(me.productlayer);
+                me.map.getLayers().insertAt(0, me.productlayer);
+
+                me.getController().addLayerSwitcher(me.map);
+
+                // me.map.updateSize();
+
+                // Show legend panel with selected legend and show view legend toggle button.
+                var mapLegendObj = me.lookupReference('product-legend_' + me.id);
+                mapLegendObj.legendHTML = legendHTML;
+                mapLegendObj.legendHTMLVertical = legendHTMLVertical;
+
+                var maplegend_togglebtn = me.lookupReference('legendbtn_' + me.id.replace(/-/g, '_')); //  + me.id);
+                maplegend_togglebtn.show();
+                if (mapLegendObj.showlegend ) {
+                    maplegend_togglebtn.toggle(false);
+                    maplegend_togglebtn.toggle(true);
+                    // mapLegendObj.hide();    // Hide first to always trigger the show event!
+                    // mapLegendObj.show();
+                }
+                else {
+                    maplegend_togglebtn.toggle(false);
+                    // mapLegendObj.hide();
+                }
+
+                var opacityslider_togglebtn = me.lookupReference('opacityslider_' + me.id.replace(/-/g, '_'));
+                opacityslider_togglebtn.show();
+                // opacityslider_togglebtn.setPosition(me.getWidth() - 48, 150);
+
+                me.getController().outmaskingPossible();
+                //var outmask_togglebtn = me.lookupReference('outmaskbtn_'+ me.id.replace(/-/g,'_')); //  + me.id);
+                //if (me.getController().outmaskingPossible(me.map)){
+                //    outmask_togglebtn.show();
+                //}
+                //else outmask_togglebtn.hide();
+
             },
             //callback: function ( callinfo,responseOK,response ) {},
             failure: function ( result, request) {}
         });
-
-        //var mapviewtimeline = this.getView().getDockedItems('toolbar[dock="bottom"]')[0];
-        //var searchtimeline = 'container[id="product-time-line_' + this.getView().id + '"]'
-        //var mapviewtimeline = this.getView().down(searchtimeline);
-        //var mapviewtimeline = me.lookupReference('product-time-line_' + me.id);
-        //mapviewtimeline.setHidden(false);
-        //mapviewtimeline.expand();
-
-        me.productlayer = new ol.layer.Tile({       // ol.layer.Tile   or  ol.layer.Image
-            title: esapp.Utils.getTranslation('productlayer'),  // 'Product layer',
-            layer_id: 'productlayer',
-            layerorderidx: 0,
-            layertype: 'raster',
-            type: 'base',
-            visible: true,
-            source: new ol.source.TileWMS({    // ol.source.TileWMS or ol.source.ImageWMS
-                url: 'analysis/getproductlayer',
-                type: 'base',
-                wrapX: false,
-                noWrap: true,
-                crossOrigin: '', // 'anonymous',
-                attributions: [new ol.Attribution({
-                    html: '&copy; <a href="https://ec.europa.eu/jrc/">'+esapp.Utils.getTranslation('estation2')+'</a>'
-                })],
-                params: {
-                    productcode:productcode,
-                    productversion:productversion,
-                    subproductcode:subproductcode,
-                    mapsetcode:mapsetcode,
-                    legendid:legendid,
-                    'FORMAT': 'image/png'
-                    // ,'time': new Date().getTime()    // Force openlayers to not use browser cache for tiles refresh
-                },
-                serverType: 'mapserver' /** @type {ol.source.wms.ServerType}  ('mapserver') */
-            })
-        });
-
-
-        var productlayer_idx = me.getController().findlayer(me.map, 'productlayer');
-        if (productlayer_idx != -1)
-            me.map.getLayers().removeAt(productlayer_idx);
-        //me.map.removeLayer(me.map.getLayers().a[0]);
-        //me.map.addLayer(me.productlayer);
-        me.map.getLayers().insertAt(0, me.productlayer);
-
-        me.getController().addLayerSwitcher(me.map);
-
-        // me.map.updateSize();
-
-        // Show legend panel with selected legend and show view legend toggle button.
-        var mapLegendObj = me.lookupReference('product-legend_' + me.id);
-        mapLegendObj.legendHTML = legendHTML;
-        mapLegendObj.legendHTMLVertical = legendHTMLVertical;
-
-        var maplegend_togglebtn = me.lookupReference('legendbtn_' + me.id.replace(/-/g, '_')); //  + me.id);
-        maplegend_togglebtn.show();
-        if (mapLegendObj.showlegend ) {
-            maplegend_togglebtn.toggle(false);
-            maplegend_togglebtn.toggle(true);
-            // mapLegendObj.hide();    // Hide first to always trigger the show event!
-            // mapLegendObj.show();
-        }
-        else {
-            maplegend_togglebtn.toggle(false);
-            // mapLegendObj.hide();
-        }
-
-        var opacityslider_togglebtn = me.lookupReference('opacityslider_' + me.id.replace(/-/g, '_'));
-        opacityslider_togglebtn.show();
-        // opacityslider_togglebtn.setPosition(me.getWidth() - 48, 150);
-
-        this.outmaskingPossible();
-        //var outmask_togglebtn = me.lookupReference('outmaskbtn_'+ me.id.replace(/-/g,'_')); //  + me.id);
-        //if (me.getController().outmaskingPossible(me.map)){
-        //    outmask_togglebtn.show();
-        //}
-        //else outmask_togglebtn.hide();
 
     }
 
@@ -586,7 +594,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             mapsetcode: me.mapsetcode,
             legendid: me.legendid,
             date: me.productdate,
-            'FORMAT': 'image/png',
+            'FORMAT': 'image/jpg',
             time_to_nocache: (new Date()).getTime()
             //,REASPECT:'TRUE'
         };
@@ -884,7 +892,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             downloadlink.click();
             mapimage_url = null;
         });
-        taskSaveMap.delay(1000);
+        taskSaveMap.delay(1500);
 
         //if(typeof Promise !== "undefined" && Promise.toString().indexOf("[native code]") !== -1){
         //   console.info('Browser supports Promise natively!');
@@ -988,9 +996,9 @@ Ext.define('esapp.view.analysis.mapViewController', {
         var mapviewwin = btn.up().up();
 
         if (btn.pressed) {
-            if (Ext.isDefined(mapviewwin.selectedfeature)){
+            if (esapp.Utils.objectExists(mapviewwin.selectedfeature)){
                 mapviewwin.getController().outmaskFeature();
-                if (Ext.isDefined(mapviewwin.selectedFeatureOverlay)) {
+                if (esapp.Utils.objectExists(mapviewwin.selectedFeatureOverlay)) {
                     mapviewwin.selectedFeatureOverlay.setVisible(false);
                 }
                // mapviewwin.getController().updateProductLayer();
@@ -998,7 +1006,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
         }
         else {
             mapviewwin.getController().removeOutmaskLayer();
-            if (Ext.isDefined(mapviewwin.selectedFeatureOverlay)) {
+            if (esapp.Utils.objectExists(mapviewwin.selectedFeatureOverlay)) {
                 mapviewwin.selectedFeatureOverlay.setVisible(true);
             }
             // mapviewwin.getController().updateProductLayer();

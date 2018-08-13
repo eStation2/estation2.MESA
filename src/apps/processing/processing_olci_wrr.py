@@ -176,7 +176,7 @@ def processing_olci_wrr(res_queue, pipeline_run_level=0, pipeline_printout_level
         fwrite_id=None
 
     if pipeline_run_level > 0:
-        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, touch_files_only=touch_files_only, history_file='/eStation2/log/.ruffus_history_'+prod+'_'+version+'.sqlite',
+        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, touch_files_only=touch_files_only, history_file=os.path.join(es_constants.log_dir,'.ruffus_history_'+prod+'_'+version+'.sqlite'),
                      checksum_level=0)
 
     if pipeline_printout_level > 0:

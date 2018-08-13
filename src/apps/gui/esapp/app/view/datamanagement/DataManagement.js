@@ -31,7 +31,9 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         markDirty: false,
         resizable: false,
         disableSelection: true,
-        trackOver: false
+        trackOver: false,
+        preserveScrollOnRefresh: true,
+        variableRowHeight : true
     },
     //selType: 'cellmodel',
     //selModel: {
@@ -48,8 +50,10 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
     rowLines: true,
     frame: false,
     border: false,
+    focusable: false,
+    margin: '0 0 10 0',    // (top, right, bottom, left).
 
-    //layout: 'fit',
+    layout: 'fit',
 
     features: [{
         id: 'prodcat',
@@ -58,6 +62,7 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         hideGroupedHeader: true,
         enableGroupingMenu: false,
         startCollapsed : true,
+        focusable: false,
         groupByText: esapp.Utils.getTranslation('productcategories')  // 'Product category'
     }],
 
@@ -130,6 +135,11 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                 scale: 'medium',
                 handler:  function(btn) {
                     var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
+                    var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
+
+                    Ext.each(completenessTooltips, function(item) {
+                        item.hide();
+                    });
 
                     if (datasetsstore.isStore) {
                         datasetsstore.proxy.extraParams = {forse: true};
@@ -139,6 +149,35 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
             }]
         });
 
+        me.listeners = {
+            groupexpand: function(view, node, group){
+                // var groupFeature = view.getFeature('prodcat');
+                //
+                var task = new Ext.util.DelayedTask(function() {
+                    view.refresh();
+                });
+                task.delay(300);
+
+                // Ext.util.Observable.capture(view, function (e) { console.log('groupexpand - ' + e);});
+                // view.refresh();
+                // groupFeature.expand(group, true);
+                // groupFeature.expand(group, true);
+                // view.ownerCt.updateLayout();
+                // groupFeature.fireEvent('expand', group, true);
+            },
+            afterrender: function(){
+                // console.info(me.view.getScrollable());
+                var scroller = me.view.getScrollable();
+
+                scroller.on('scroll', function(){
+                    var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
+                    Ext.each(completenessTooltips, function(item) {
+                       // item.disable();
+                       item.hide();
+                    });
+                }, scroller, {single: false});
+            }
+        }
         //me.listeners = {
         //    viewready: function(gridpanel,func){
         //        //Ext.toast({ html: 'viewready', title: 'viewready', width: 200, align: 't' });
@@ -266,29 +305,33 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                 '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('actions') + '</span>' +
                 '           </div>' +
                 '       </div>',
-                listeners: {
-                  render: function(column){
-                      //column.titleEl.removeCls('x-column-header-inner');
-                  }
-                },
+                // listeners: {
+                //   render: function(column){
+                //       //column.titleEl.removeCls('x-column-header-inner');
+                //   }
+                // },
                 widget: {
                     xtype: 'productmapsetgrid',
                     widgetattached: false
                 }
                 ,onWidgetAttach: function(col,widget, record) {
-                    Ext.suspendLayouts();
+
                     if (!widget.widgetattached) {
+                        Ext.suspendLayouts();
                         widget.getStore().setData(record.getData().productmapsets);
                         widget.widgetattached = true;
+                        Ext.resumeLayouts(true);
                     }
-                    //me.updateLayout();
+                    // else {
+                    //     me.ownerGrid.updateLayout();
+                    // }
+
                     //var productmapsets = record.getData().productmapsets;
                     //var newstore = Ext.create('Ext.data.JsonStore', {
                     //    model: 'ProductMapSet',
                     //    data: productmapsets
                     //});
                     //widget.setStore(newstore);
-                    Ext.resumeLayouts(true);
                 }
             }]
         }];

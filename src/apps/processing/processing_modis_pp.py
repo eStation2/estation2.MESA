@@ -335,9 +335,8 @@ def processing_modis_pp(res_queue, pipeline_run_level=0, pipeline_printout_level
     spec_logger.info("Entering routine %s" % 'processing modis - Primary Production')
     if pipeline_run_level > 0:
         spec_logger.info("Now calling pipeline_run")
-        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger,
-                     history_file='/eStation2/log/.ruffus_history_modis_pp.sqlite', checksum_level=0)
-
+        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger, history_file=os.path.join(es_constants.log_dir,'.ruffus_history_modis_pp.sqlite'), checksum_level=0)
+    
     if pipeline_printout_level > 0:
         pipeline_printout(verbose=pipeline_printout_level)
 

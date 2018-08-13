@@ -286,6 +286,7 @@ class Dataset(object):
                                                       version,
                                                       mapset)
         self.fullpath = os.path.join(es_constants.es2globals['processing_dir'], self._path)
+
         # self._db_frequency = querydb.db.frequency.get(self._db_product.frequency_id)
         # self._db_frequency = querydb.get_frequency(self._db_product.frequency_id)
         # if self._db_frequency is None:
@@ -294,7 +295,11 @@ class Dataset(object):
         #                            unit=self._db_frequency.time_unit,
         #                            frequency_type=self._db_frequency.frequency_type,
         #                            dateformat=self._db_product.date_format)
-        self._frequency = Dataset.get_frequency(self._db_product.frequency_id, self._db_product.date_format)
+
+        self.frequency_id = self._db_product.frequency_id
+        self.date_format = self._db_product.date_format
+        self._frequency = self.get_frequency(self._db_product.frequency_id, self._db_product.date_format)
+
         if not from_date and self.no_year():
             from_date = datetime.date(datetime.date.today().year, 1, 1)
         if not to_date and self.no_year():

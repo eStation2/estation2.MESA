@@ -47,7 +47,8 @@ Ext.define('esapp.view.acquisition.Acquisition',{
         draggable:false,
         markDirty: false,
         resizable:false,
-        trackOver:true
+        trackOver:true,
+        scrollable: true
         //focusOnToFront: false,
         //preserveScrollOnRefresh: false,
         //focusable: false
@@ -70,7 +71,8 @@ Ext.define('esapp.view.acquisition.Acquisition',{
     bufferedRenderer: false,
     variableRowHeight:true,
     forceFit: false,
-
+    focusable: false,
+    margin: '0 0 10 0',    // (top, right, bottom, left).
     session:true,
 
     // listeners: {
@@ -104,7 +106,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
     initComponent: function () {
         var me = this;
 
-        //Ext.util.Observable.capture(this, function(e){console.log('Acquisition - ' + this.id + ': ' + e);});
+        // Ext.util.Observable.capture(this, function(e){console.log('Acquisition - ' + this.id + ': ' + e);});
 
         me.features = [{
             id: 'productcategories',
@@ -386,6 +388,11 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                     var eumetcastsourcestore = Ext.data.StoreManager.lookup('EumetcastSourceStore');
                     var internetsourcestore = Ext.data.StoreManager.lookup('InternetSourceStore');
                     //var view = btn.up().up().getView();
+                    var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
+
+                    Ext.each(completenessTooltips, function(item) {
+                        item.hide();
+                    });
 
                     var myLoadMask = new Ext.LoadMask({
                         msg    : esapp.Utils.getTranslation('loading'), // 'Loading...',
@@ -433,6 +440,29 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                 }
             }]
         });
+
+        me.listeners = {
+            groupexpand: function(view, node, group){
+                // var groupFeature = view.getFeature('prodcat');
+                //
+                // var task = new Ext.util.DelayedTask(function() {
+                //     view.refresh();
+                // });
+                // task.delay(5);
+            },
+            afterrender: function(){
+                // console.info(me.view.getScrollable());
+                var scroller = me.view.getScrollable();
+
+                scroller.on('scroll', function(){
+                    var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
+                    Ext.each(completenessTooltips, function(item) {
+                       item.disable();
+                       // item.hide();
+                    });
+                }, scroller, {single: false});
+            }
+        }
 
         //me.listeners = {
         //    viewready: function(gridpanel,func){

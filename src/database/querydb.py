@@ -3166,18 +3166,30 @@ def get_datasource_descr(source_type='', source_id=''):
 def get_eumetcast_sources():
     global db
     try:
-        session = db.session
 
-        es = session.query(db.eumetcast_source.eumetcast_id, db.eumetcast_source.filter_expression_jrc).subquery()
-        pads = aliased(db.product_acquisition_data_source)
+        query = "SELECT pads.*, es.eumetcast_id, es.filter_expression_jrc \
+                 FROM products.eumetcast_source es JOIN products.product_acquisition_data_source pads \
+                   ON pads.data_source_id = es.eumetcast_id \
+                 WHERE pads.type = 'EUMETCAST' \
+                   AND pads.activated"
 
-        # The columns on the subquery "es" are accessible through an attribute called "c"
-        # e.g. es.c.filter_expression_jrc
-        eumetcast_sources = session.query(pads, es.c.eumetcast_id, es.c.filter_expression_jrc). \
-            outerjoin(es, pads.data_source_id == es.c.eumetcast_id). \
-            filter(and_(pads.type == 'EUMETCAST', pads.activated)).all()
+        result = dbschema_analysis.execute(query)
+        eumetcast_sources = result.fetchall()
 
         return eumetcast_sources
+
+        # session = db.session
+        #
+        # es = session.query(db.eumetcast_source.eumetcast_id, db.eumetcast_source.filter_expression_jrc).subquery()
+        # pads = aliased(db.product_acquisition_data_source)
+        #
+        # # The columns on the subquery "es" are accessible through an attribute called "c"
+        # # e.g. es.c.filter_expression_jrc
+        # eumetcast_sources = session.query(pads, es.c.eumetcast_id, es.c.filter_expression_jrc). \
+        #     outerjoin(es, pads.data_source_id == es.c.eumetcast_id). \
+        #     filter(and_(pads.type == 'EUMETCAST', pads.activated)).all()
+        #
+        # return eumetcast_sources
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
@@ -3206,7 +3218,7 @@ def get_active_internet_sources():
                     SELECT data_source_id FROM products.product_acquisition_data_source pads JOIN products.product p \
                     ON pads.productcode = p.productcode AND pads.subproductcode = p.subproductcode AND pads.version = p.version \
                        AND p.product_type = 'Native' AND p.activated = TRUE \
-                    WHERE pads.type = 'INTERNET')"
+                    WHERE pads.type = 'INTERNET' AND pads.activated = TRUE)"
 
         result = dbschema_analysis.execute(query)
         internet_sources = result.fetchall()

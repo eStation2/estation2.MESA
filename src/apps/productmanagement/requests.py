@@ -10,13 +10,18 @@
 # from .datasets import Dataset
 # from .mapsets import Mapset
 
-import os
+
 # import glob
+# import tempfile
+# import pprint
+
+import os
 import tarfile
 import shutil
-# import tempfile
 import json
-# import pprint
+import datetime
+from dateutil.relativedelta import relativedelta
+
 from apps.productmanagement.products import *
 # from lib.python import functions
 # from database import querydb
@@ -26,13 +31,59 @@ from .mapsets import Mapset
 from lib.python import es_logging as log
 logger = log.my_logger(__name__)
 
-def __create_request(productcode, version, mapsetcode=None, subproductcode=None):
+
+def get_from_date(frequency_id, dateformat):
+    if frequency_id in ['e15minute', 'e30minute']:
+        today = datetime.date.today()
+        from_date = today - relativedelta(months=3)
+
+    elif frequency_id in ['e1day', '2pday']:
+        today = datetime.date.today()
+        from_date = today - relativedelta(years=1)
+
+    elif frequency_id in ['e1dekad', 'e1modis16day', 'e1modis8day', 'e1modis8day']:
+        if dateformat == 'MMDD':
+            years_back = 1
+        elif dateformat == 'YYYYMMDD':
+            years_back = 5
+        else:
+            years_back = 1
+
+        today = datetime.date.today()
+        # for decad always start on the 1st of the month (here the 1st of january of the current year)
+        first_day_of_year = str(today.year) + '-01-01'
+        year, month, day = map(int, first_day_of_year.split("-"))
+        first_day_of_year = datetime.date(year, month, day)
+        from_date = first_day_of_year - relativedelta(years=years_back)
+
+    elif frequency_id in ['e1month', 'e3month', 'e6month', 'e1year']:
+        if dateformat in ['MMDD', 'YYYY']:
+            years_back = 1
+        elif dateformat == 'YYYYMMDD':
+            years_back = 5
+        else:
+            years_back = 1
+
+        today = datetime.date.today()
+        # for decad always start on the 1st of the month (here the 1st of january of the current year)
+        first_day_of_year = str(today.year) + '-01-01'
+        year, month, day = map(int, first_day_of_year.split("-"))
+        first_day_of_year = datetime.date(year, month, day)
+        from_date = first_day_of_year - relativedelta(years=years_back)
+    else:
+        from_date = None
+
+    return from_date
+
+
+def create_request(productcode, version, mapsetcode=None, subproductcode=None):
 
     # Define the 'request' object
     request = {'product': productcode,
                'version': version}
 
     product = Product(product_code=productcode, version=version)
+
     # Check the level of the request
     if mapsetcode is None:
         if subproductcode is not None:
@@ -49,13 +100,24 @@ def __create_request(productcode, version, mapsetcode=None, subproductcode=None)
 
                     all_mapset_datasets = product.get_subproducts(mapset=mapset)
                     for subproductcode in all_mapset_datasets:
-                        missing_info = product.get_missing_datasets(mapset=mapset, sub_product_code=subproductcode, from_date=None, to_date=None)
+                        dataset = product.get_dataset(mapset=mapset, sub_product_code=subproductcode,
+                                                      from_date=None, to_date=None)
+                        from_date = None
+                        to_date = None
+                        dataset_info = dataset.get_dataset_normalized_info()
+                        tot_files = dataset_info['totfiles']
+                        if tot_files == 0:
+                            from_date = get_from_date(dataset.frequency_id, dataset.date_format)
+                            to_date = datetime.date.today()
+
+                        missing_info = product.get_missing_datasets(mapset=mapset, sub_product_code=subproductcode,
+                                                                    from_date=from_date, to_date=to_date)
                         filenames = []
                         # Loop over missing objects
                         for missing in missing_info:
                             try:
-                                # product = Product(missing['product'], version=missing['version'], )
-                                filenames.extend(product.get_missing_filenames(missing, existing_only=False, for_request_creation=True))
+                                filenames.extend(product.get_missing_filenames(missing, existing_only=False,
+                                                                               for_request_creation=True))
                             except NoProductFound:
                                 pass
 
@@ -74,13 +136,24 @@ def __create_request(productcode, version, mapsetcode=None, subproductcode=None)
 
             all_mapset_datasets = product.get_subproducts(mapset=mapsetcode)
             for subproductcode in all_mapset_datasets:
-                missing_info = product.get_missing_datasets(mapset=mapsetcode, sub_product_code=subproductcode, from_date=None, to_date=None)
+                dataset = product.get_dataset(mapset=mapsetcode, sub_product_code=subproductcode,
+                                              from_date=None, to_date=None)
+                from_date = None
+                to_date = None
+                dataset_info = dataset.get_dataset_normalized_info()
+                tot_files = dataset_info['totfiles']
+                if tot_files == 0:
+                    from_date = get_from_date(dataset.frequency_id, dataset.date_format)
+                    to_date = datetime.date.today()
+
+                missing_info = product.get_missing_datasets(mapset=mapsetcode, sub_product_code=subproductcode,
+                                                            from_date=from_date, to_date=to_date)
                 filenames = []
                 # Loop over missing objects
                 for missing in missing_info:
                     try:
-                        # product = Product(missing['product'], version=missing['version'], )
-                        filenames.extend(product.get_missing_filenames(missing, existing_only=False, for_request_creation=True))
+                        filenames.extend(product.get_missing_filenames(missing, existing_only=False,
+                                                                       for_request_creation=True))
                     except NoProductFound:
                         pass
                 dataset_dict = {'subproductcode': subproductcode,
@@ -91,8 +164,19 @@ def __create_request(productcode, version, mapsetcode=None, subproductcode=None)
 
         else:
             # All variable defined -> get missing object
-            # product = Product(product_code=productcode, version=version)
-            missing_info = product.get_missing_datasets(mapset=mapsetcode, sub_product_code=subproductcode, from_date=None, to_date=None)
+            dataset = product.get_dataset(mapset=mapsetcode, sub_product_code=subproductcode, from_date=None,
+                                          to_date=None)
+
+            from_date = None
+            to_date = None
+            dataset_info = dataset.get_dataset_normalized_info()
+            tot_files = dataset_info['totfiles']
+            if tot_files == 0:
+                from_date = get_from_date(dataset.frequency_id, dataset.date_format)
+                to_date = datetime.date.today()
+
+            missing_info = product.get_missing_datasets(mapset=mapsetcode, sub_product_code=subproductcode,
+                                                        from_date=from_date, to_date=to_date)
             request['productmapsets'] = []
             mapset_obj = Mapset(mapset_code=mapsetcode)
             mapset_dict = {'mapset': mapset_obj.to_dict(), 'mapsetdatasets': []}
@@ -100,8 +184,8 @@ def __create_request(productcode, version, mapsetcode=None, subproductcode=None)
             # Loop over missing objects
             for missing in missing_info:
                 try:
-                    # product = Product(missing['product'], version=missing['version'], )
-                    filenames.extend(product.get_missing_filenames(missing, existing_only=False, for_request_creation=True))
+                    filenames.extend(product.get_missing_filenames(missing, existing_only=False,
+                                                                   for_request_creation=True))
                 except NoProductFound:
                     pass
             dataset_dict = {'subproductcode': subproductcode, 'missingfiles': filenames}
@@ -110,7 +194,7 @@ def __create_request(productcode, version, mapsetcode=None, subproductcode=None)
     return request
     # Dump the request object to JSON
 
-def create_request(productcode, version, mapsetcode=None, subproductcode=None):
+def __create_request(productcode, version, mapsetcode=None, subproductcode=None):
 
     # Define the 'request' object
     request = {'product': productcode,

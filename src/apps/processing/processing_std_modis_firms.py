@@ -674,12 +674,12 @@ def processing_std_modis_firms(res_queue, pipeline_run_level=0,pipeline_printout
 
     if pipeline_run_level > 0:
         spec_logger.info("Run the pipeline %s" % 'processing_modis_firms')
-        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger, history_file='/eStation2/log/.ruffus_history_modis_firms.sqlite',\
+        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger, history_file=os.path.join(es_constants.log_dir,'.ruffus_history_modis_firms.sqlite'),\
                      checksum_level=0, touch_files_only=touch_files_only)
         spec_logger.info("After running the pipeline %s" % 'processing_modis_firms')
 
     if pipeline_printout_level > 0:
-        pipeline_printout(verbose=pipeline_printout_level, output_stream=fwrite_id, history_file='/eStation2/log/.ruffus_history_modis_firms.sqlite',\
+        pipeline_printout(verbose=pipeline_printout_level, output_stream=fwrite_id, history_file=os.path.join(es_constants.log_dir,'.ruffus_history_modis_firms.sqlite'),\
                      checksum_level=0)
 
     if pipeline_printout_graph_level > 0:

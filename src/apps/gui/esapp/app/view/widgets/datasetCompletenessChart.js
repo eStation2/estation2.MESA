@@ -139,7 +139,7 @@ Ext.define("esapp.view.widgets.datasetCompletenessChart",{
             afterrender: function(){
 
                 me.tooltip =  Ext.create('Ext.tip.ToolTip', {
-                    id: me.getId() + '_tooltip',
+                    id: me.getId() + '_completness_tooltip',
                     target: me.getId(),
                     //floating: true,
                     //constrain: true,

@@ -255,7 +255,8 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     reference: 'addtomapbtn_'+me.mapviewid.replace(/-/g,'_'),
                     disabled: true,
                     handler: function(btn) {
-                        //console.info(me.getViewModel().getStore('colorschemes'));
+                        var productdate = null;
+
                         me.getViewModel().getStore('colorschemes').each(function(rec){
                             if (rec.get('default_legend')==true || rec.get('default_legend')=="true"){
                                 //console.info(rec);
@@ -270,6 +271,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                                                                                  me.selectedproduct.productversion,
                                                                                  me.selectedproduct.mapsetcode,
                                                                                  me.selectedproduct.subproductcode,
+                                                                                 productdate,
                                                                                  me.selectedproduct.legendid,
                                                                                  //me.selectedproduct.colorschemeHTML,
                                                                                  me.selectedproduct.legendHTML,

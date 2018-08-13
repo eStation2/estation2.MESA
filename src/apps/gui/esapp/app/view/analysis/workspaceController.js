@@ -62,6 +62,7 @@ Ext.define('esapp.view.analysis.workspaceController', {
                 subproductcode: maps[i].subproductcode,
                 productversion: maps[i].productversion,
                 mapsetcode: maps[i].mapsetcode,
+                productdate: maps[i].productdate,
                 legendid: maps[i].legendid,
                 legendlayout: maps[i].legendlayout,
                 legendObjPosition: maps[i].legendobjposition.split(",").map(function(x){return parseInt(x)}),

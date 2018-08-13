@@ -24,7 +24,8 @@ from lib.python.mapset import MapSet
 from .exceptions import (NoProductFound, MissingMapset)
 from .datasets import Dataset
 from .mapsets import Mapset
-from .helpers import str_to_date
+from .helpers import *
+# from .helpers import str_to_date
 
 logger = log.my_logger(__name__)
 
@@ -118,11 +119,11 @@ class Product(object):
         #           In case the requested mapset does not exist, but a larger one is available, returns the latter
         #           -> the calling routine should perform the re-projection
 
-        product = Product(missing['product'], version=missing['version'])
+        # product = Product(missing['product'], version=missing['version'])
         version = missing['version']
         mapset = missing['mapset']
         subproduct = missing['subproduct']
-        dataset = product.get_dataset(mapset=mapset, sub_product_code=missing['subproduct'])
+        dataset = self.get_dataset(mapset=mapset, sub_product_code=missing['subproduct'])
 
         missing_filenames = []
 
@@ -139,7 +140,7 @@ class Product(object):
             if not larger_mapset:
                 logger.warning("No larger mapset found for original mapset: %s. Return" % mapset)
                 return missing_filenames
-            new_dataset = product.get_dataset(mapset=larger_mapset, sub_product_code=missing['subproduct'])
+            new_dataset = self.get_dataset(mapset=larger_mapset, sub_product_code=missing['subproduct'])
             new_existing_files = new_dataset.get_filenames()
 
             if len(new_existing_files) > 0:
@@ -156,7 +157,7 @@ class Product(object):
             # Check if the 'single' file was missing
             info = missing['info']
             if info['missingfiles']:
-                missing_filenames=dataset.get_filenames()
+                missing_filenames = dataset.get_filenames()
         else:
             dates = dataset.get_dates()
             missing_dates = []
@@ -164,12 +165,18 @@ class Product(object):
             last_date = None
             info = missing['info']
             for interval in info['intervals']:
+                # if for_request_creation and len(info['intervals']) == 1 and interval['fromdate'] == interval['todate'] and interval['missing']:
+                #     first_date = add_years(str_to_date(interval['fromdate']), -1)
+                #     last_date = str_to_date(interval['todate'])
+                #     missing_dates.extend(dataset.get_interval_dates(first_date, last_date))
+                # else:
                 if first_date is None:
                     first_date = str_to_date(interval['fromdate'])
                 last_date = str_to_date(interval['todate'])
                 if interval['missing']:
                     missing_dates.extend(dataset.get_interval_dates(
                         str_to_date(interval['fromdate']), str_to_date(interval['todate'])))
+
             if len(info['intervals']) == 0:
                 missing_dates = dates[:]
             else:
@@ -179,7 +186,7 @@ class Product(object):
                 if False:
                     if first_date > dataset.get_first_date():
                         missing_dates.extend(dataset.get_interval_dates(dataset.get_first_date(),
-                            first_date, last_included=False))
+                                                                        first_date, last_included=False))
                 if missing['to_end']:
                     if last_date < dataset.get_last_date():
                         missing_dates.extend(dataset.get_interval_dates(last_date,
@@ -192,7 +199,8 @@ class Product(object):
 
             for date in dates_to_add:
                 date_str = dataset._frequency.format_date(date)
-                filename=dataset.fullpath+functions.set_path_filename(date_str, missing['product'], subproduct, use_mapset, version,'.tif')
+                filename = dataset.fullpath+functions.set_path_filename(date_str, missing['product'],
+                                                                        subproduct, use_mapset, version,'.tif')
                 missing_filenames.append(filename)
 
         return missing_filenames

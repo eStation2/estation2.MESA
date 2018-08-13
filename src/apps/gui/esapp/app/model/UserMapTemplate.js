@@ -14,6 +14,7 @@ Ext.define('esapp.model.UserMapTemplate', {
         {name: 'subproductcode', mapping: 'subproductcode'},
         {name: 'productversion', mapping: 'productversion'},
         {name: 'mapsetcode', mapping: 'mapsetcode'},
+        {name: 'productdate', mapping: 'productdate'},
         {name: 'legendid', mapping: 'legendid'},
         {name: 'legendlayout', mapping: 'legendlayout'},
         {name: 'legendobjposition', mapping: 'legendobjposition'},

@@ -15,6 +15,14 @@ Ext.define('esapp.store.ProductsActiveStore', {
     ,remoteSort: false
     ,remoteGroup: false
 
+    ,sorters: [{
+    //     property: 'display_index',
+    //     direction: 'ASC'
+    // // }, {
+        property: 'prod_descriptive_name',
+        direction: 'ASC'
+    }]
+
     ,proxy: {
         type: 'rest',
         // url: 'pa',

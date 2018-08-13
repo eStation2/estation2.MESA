@@ -103,7 +103,7 @@ Ext.define("esapp.view.analysis.mapScaleLineObject",{
                 if (me.scalelinePosition != null){
                     me.setPosition(me.scalelinePosition);
                 }
-                // me.fireEvent('refreshimage');
+                me.fireEvent('refreshimage');
             }
             // ,move: function(){
             //     me.scalelinePosition = me.getPosition();

@@ -59,15 +59,18 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 }
                 tsDrawPropertiesStore.load({
                     callback: function (records, options, success) {
-                        // if (me.isTemplate){
+                        if (me.tplChartView){
                             me.getController().setTemplateSelections();
-                        // }
+                        }
                     }
                 });
             }
             else {
-                me.getController().setTemplateSelections();
+                if (me.tplChartView) {
+                    me.getController().setTemplateSelections();
+                }
             }
+
         }
     },
 
@@ -251,8 +254,8 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 },{
                     xtype: 'actioncolumn',
                     dataIndex: 'difference',
-                    header: '<span style="font-size:12px;">' + esapp.Utils.getTranslation('diff') + '</span>',   // Diff
-                    width: 45,
+                    header: '<span style="font-size:12px;">' + esapp.Utils.getTranslation('curr') + '</span>',   // Diff
+                    width: 50,
                     align: 'center',
                     hidden: !me.cumulative,
                     disabled: !me.cumulative,
@@ -441,7 +444,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 xtype: 'radio',
                 reference: 'radio_fromto',
                 checked: true,
-                name: 'ts-period_'+me.idpostfix,
+                name: 'ts-period_'+me.id,
                 //inputValue: 'year',
                 style: {"margin-right": "5px"},
                 disabled: false
@@ -495,7 +498,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 reference: 'radio_year',
                 checked: false,
                 align: 'middle',
-                name: 'ts-period_'+me.idpostfix,
+                name: 'ts-period_'+me.id,
                 //inputValue: 'year',
                 //style: {"margin-right": "5px"},
                 margin: '8 5 0 0',
@@ -576,131 +579,8 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
             }]
         };
 
-        me.compareyearsSelection = {
-            layout: 'hbox',
-            layoutConfig: {columns: 3, rows: 1},
-            margin: 5,
-            items: [{
-                xtype: 'radio',
-                reference: 'radio_compareyears',
-                checked: false,
-                name: 'ts-period_'+me.idpostfix,
-                //inputValue: 'year',
-                style: {"margin-right": "5px"},
-                disabled: false
-            }, {
-                xtype: 'multiselector',
-                reference: 'ts_selectyearstocompare',
-                title: esapp.Utils.getTranslation('years_of_interest'),    // 'Year(s) of interest',
-                cls: 'newpanelstyle',
-                style: { "margin-right": "20px" },
-                width: 160,
-                height: 105,
-                border: false,
-                fieldName: 'year',
-                viewConfig: {
-                    deferEmptyText: false,
-                    emptyText: esapp.Utils.getTranslation('no_years_selected')  // 'No years selected'
-                },
-                search: {
-                    field: 'year',
-                    searchText: '',
-                    bind: {
-                        store: '{years}'
-                    },
-                    cls: 'newpanelstyle',
-                    modal: false,
-                    shadow: false,
-                    border: false,
-                    frame: false,
-                    layout: '',
-                    floating: true,
-                    resizable: false,
-                    width: 110,
-                    height: 100,
-                    minWidth: 110,
-                    minHeight: 100,
-                    listeners: {
-                        activate: function () {
-                            me.lookupReference("radio_compareyears").setValue(true);
-                            // Ext.getCmp("radio_compareyears_"+me.idpostfix).setValue(true);
-                        },
-                        show: function () {
-                            me.lookupReference("radio_compareyears").setValue(true);
-                            // Ext.getCmp("radio_compareyears_"+me.idpostfix).setValue(true);
-                        }
-                    }
-                },
-                listeners: {
-                    containerclick: function () {
-                        me.lookupReference("radio_compareyears").setValue(true);
-                        // Ext.getCmp("radio_compareyears_"+me.idpostfix).setValue(true);
-                    },
-                    itemclick: function () {
-                        me.lookupReference("radio_compareyears").setValue(true);
-                        // Ext.getCmp("radio_compareyears_"+me.idpostfix).setValue(true);
-                    }
-                }
-
-            }, {
-                xtype: 'fieldset',
-                //flex: 1,
-                title: '<b>' + esapp.Utils.getTranslation('compare_seasons') + '</b>',  // 'Compare seasons'
-                layout: 'column',
-                //layoutConfig: {columns: 2, rows: 2},
-                defaults: {
-                    //anchor: '100%',
-                    //hideEmptyLabel: false
-                    layout: 'form',
-                    xtype: 'container',
-                    style: 'width: 50%'
-                },
-                items: [{
-                    items: [{
-                        xtype: 'datefield',
-                        reference: 'ts_from_seasoncompare',
-                        fieldLabel: esapp.Utils.getTranslation('from'),    // 'From',
-                        labelAlign: 'left',
-                        labelWidth: 35,
-                        style: {"margin-right": "10px"},
-                        width: 160,
-                        format: "d/m",
-                        emptyText: 'dd/mm ',
-                        allowBlank: true,
-                        showToday: false,
-                        //maxValue: new Date(),
-                        listeners: {
-                            change: function () {
-                                me.lookupReference("radio_compareyears").setValue(true);
-                                // Ext.getCmp("radio_compareyears_"+me.idpostfix).setValue(true);
-                            }
-                        }
-                    }, {
-                        xtype: 'datefield',
-                        reference: 'ts_to_seasoncompare',
-                        fieldLabel: esapp.Utils.getTranslation('to'),    // 'To',
-                        labelAlign: 'left',
-                        labelWidth: 20,
-                        style: {"margin-right": "10px"},
-                        width: 160,
-                        format: "d/m",
-                        emptyText: 'dd/mm',
-                        allowBlank: true,
-                        showToday: false,
-                        //maxValue: new Date(),
-                        //,value: new Date()
-                        listeners: {
-                            change: function () {
-                                me.lookupReference("radio_compareyears").setValue(true);
-                                // Ext.getCmp("radio_compareyears_"+me.idpostfix).setValue(true);
-                            }
-                        }
-                    }]
-                }]
-            }]
-        };
-
         me.multipleyearsSelection = {
+            reference: 'multiyears_selection',
             layout: 'hbox',
             layoutConfig: {columns: 3, rows: 1},
             margin: 5,
@@ -708,7 +588,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 xtype: 'radio',
                 reference: 'radio_multiyears',
                 checked: !me.fromto,
-                name: 'ts-period_'+me.idpostfix,
+                name: 'ts-period_'+me.id,
                 //inputValue: 'year',
                 style: {"margin-right": "5px"},
                 disabled: false
@@ -734,6 +614,8 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                     listeners: {
                         selectionchange: function () {
                             me.lookupReference("radio_multiyears").setValue(true);
+                            // console.info(me.lookupReference('multiyears_selection').down('radio'));
+                            // me.lookupReference('multiyears_selection').down('radio').setValue(true);
                             // Ext.getCmp("radio_multiyears_"+me.idpostfix).setValue(true);
                         }
                     }
@@ -803,6 +685,130 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                 }]
             }]
         };
+
+        // me.compareyearsSelection = {
+        //     layout: 'hbox',
+        //     layoutConfig: {columns: 3, rows: 1},
+        //     margin: 5,
+        //     items: [{
+        //         xtype: 'radio',
+        //         reference: 'radio_compareyears',
+        //         checked: false,
+        //         name: 'ts-period_'+me.idpostfix,
+        //         //inputValue: 'year',
+        //         style: {"margin-right": "5px"},
+        //         disabled: false
+        //     }, {
+        //         xtype: 'multiselector',
+        //         reference: 'ts_selectyearstocompare',
+        //         title: esapp.Utils.getTranslation('years_of_interest'),    // 'Year(s) of interest',
+        //         cls: 'newpanelstyle',
+        //         style: { "margin-right": "20px" },
+        //         width: 160,
+        //         height: 105,
+        //         border: false,
+        //         fieldName: 'year',
+        //         viewConfig: {
+        //             deferEmptyText: false,
+        //             emptyText: esapp.Utils.getTranslation('no_years_selected')  // 'No years selected'
+        //         },
+        //         search: {
+        //             field: 'year',
+        //             searchText: '',
+        //             bind: {
+        //                 store: '{years}'
+        //             },
+        //             cls: 'newpanelstyle',
+        //             modal: false,
+        //             shadow: false,
+        //             border: false,
+        //             frame: false,
+        //             layout: '',
+        //             floating: true,
+        //             resizable: false,
+        //             width: 110,
+        //             height: 100,
+        //             minWidth: 110,
+        //             minHeight: 100,
+        //             listeners: {
+        //                 activate: function () {
+        //                     me.lookupReference("radio_compareyears").setValue(true);
+        //                     // Ext.getCmp("radio_compareyears_"+me.idpostfix).setValue(true);
+        //                 },
+        //                 show: function () {
+        //                     me.lookupReference("radio_compareyears").setValue(true);
+        //                     // Ext.getCmp("radio_compareyears_"+me.idpostfix).setValue(true);
+        //                 }
+        //             }
+        //         },
+        //         listeners: {
+        //             containerclick: function () {
+        //                 me.lookupReference("radio_compareyears").setValue(true);
+        //                 // Ext.getCmp("radio_compareyears_"+me.idpostfix).setValue(true);
+        //             },
+        //             itemclick: function () {
+        //                 me.lookupReference("radio_compareyears").setValue(true);
+        //                 // Ext.getCmp("radio_compareyears_"+me.idpostfix).setValue(true);
+        //             }
+        //         }
+        //
+        //     }, {
+        //         xtype: 'fieldset',
+        //         //flex: 1,
+        //         title: '<b>' + esapp.Utils.getTranslation('compare_seasons') + '</b>',  // 'Compare seasons'
+        //         layout: 'column',
+        //         //layoutConfig: {columns: 2, rows: 2},
+        //         defaults: {
+        //             //anchor: '100%',
+        //             //hideEmptyLabel: false
+        //             layout: 'form',
+        //             xtype: 'container',
+        //             style: 'width: 50%'
+        //         },
+        //         items: [{
+        //             items: [{
+        //                 xtype: 'datefield',
+        //                 reference: 'ts_from_seasoncompare',
+        //                 fieldLabel: esapp.Utils.getTranslation('from'),    // 'From',
+        //                 labelAlign: 'left',
+        //                 labelWidth: 35,
+        //                 style: {"margin-right": "10px"},
+        //                 width: 160,
+        //                 format: "d/m",
+        //                 emptyText: 'dd/mm ',
+        //                 allowBlank: true,
+        //                 showToday: false,
+        //                 //maxValue: new Date(),
+        //                 listeners: {
+        //                     change: function () {
+        //                         me.lookupReference("radio_compareyears").setValue(true);
+        //                         // Ext.getCmp("radio_compareyears_"+me.idpostfix).setValue(true);
+        //                     }
+        //                 }
+        //             }, {
+        //                 xtype: 'datefield',
+        //                 reference: 'ts_to_seasoncompare',
+        //                 fieldLabel: esapp.Utils.getTranslation('to'),    // 'To',
+        //                 labelAlign: 'left',
+        //                 labelWidth: 20,
+        //                 style: {"margin-right": "10px"},
+        //                 width: 160,
+        //                 format: "d/m",
+        //                 emptyText: 'dd/mm',
+        //                 allowBlank: true,
+        //                 showToday: false,
+        //                 //maxValue: new Date(),
+        //                 //,value: new Date()
+        //                 listeners: {
+        //                     change: function () {
+        //                         me.lookupReference("radio_compareyears").setValue(true);
+        //                         // Ext.getCmp("radio_compareyears_"+me.idpostfix).setValue(true);
+        //                     }
+        //                 }
+        //             }]
+        //         }]
+        //     }]
+        // };
 
         if (me.fromto){
             me.timeframeselection.add(me.fromtoSelection);
