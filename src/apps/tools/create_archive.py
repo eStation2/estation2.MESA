@@ -410,20 +410,20 @@ class Create():
         mapset='WD-GEE-ECOWAS-AVG'
         product='wd-gee'
         version='1.0'
-        start_date=datetime.date(2016, 1, 1)
-        end_date=datetime.date(2016, 10, 1)
+        start_date=datetime.date(2014, 1, 1)
+        end_date=datetime.date(2018, 6, 1)
 
         # occurr: since 01.01.2014
         subproduct='occurr'
         target_dir = base_target_dir + product+ os.path.sep + subproduct
         functions.check_output_dir(target_dir)
-        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir, tgz=True)
 
         # LTA
         # subproduct='avg'
         # target_dir = base_target_dir + product+ os.path.sep + subproduct
         # functions.check_output_dir(target_dir)
-        # create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
+        # create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir, tgz=True)
 
     def CreateArchive_all(self):
 
@@ -445,4 +445,4 @@ class Create():
 if __name__=='__main__':
 
     tc = Create()
-    #tc.CreateArchive_all()
+    tc.CreateArchive_wbd_gee()
