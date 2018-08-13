@@ -48,8 +48,8 @@ def test_proc_std_ndvi(pipe_run=0, pipe_print=3, touch_files_only=False):
     #res_queue = Queue()
     res_queue = None
     #proc_lists = processing_std_ndvi_prods_only(res_queue,**args)
-    proc_lists = processing_std_ndvi_stats_only(res_queue,**args)
-
+    #proc_lists = processing_std_ndvi_stats_only(res_queue,**args)
+    proc_lists = processing_std_ndvi_all(res_queue,**args)
 #   ---------------------------------------------------------------------
 # vgt-ndvi merge (for sv2-pv2.2)
 #   ---------------------------------------------------------------------
@@ -532,6 +532,23 @@ def test_proc_msg_mpe(start_date=None, end_date=None, pipe_run=0, pipe_print=3, 
     res_queue = None
     proc_lists=processing_std_msg_mpe(res_queue,**args)
     print(proc_lists)
+#
+#   Test Ruffus for completeness bars
+#
+from apps.processing.processing_completeness import *
+def test_proc_completeness():
+
+    args = {'prod': 'modis-firms',\
+            'subprod':'1day',\
+            'starting_dates': None,\
+            'mapset': 'SPOTV-Africa-1km',\
+            'version':'v6.0',
+            'product_type':"Ingest",
+            'touch_only':False,
+            'logfile':"apps.processing.test_completeness"}
+
+    status=processing_completeness(**args)
+
 #   ---------------------------------------------------------------------
 #   Calls
 #   ---------------------------------------------------------------------
@@ -563,7 +580,7 @@ def test_proc_msg_mpe(start_date=None, end_date=None, pipe_run=0, pipe_print=3, 
 #test_proc_modis_firms(pipe_run=4, pipe_print=0, start_date_stats='20030101', end_date_stats='20161221', touch_files_only=True)
 
 #test_proc_chirps_dekad(pipe_run=4, pipe_print=0, start_date='19810101', end_date='20171231', touch_files_only=False)
-#test_proc_std_ndvi(pipe_run=0, pipe_print=8, touch_files_only=False)
+test_proc_std_ndvi(pipe_run=0, pipe_print=3, touch_files_only=False)
 
 # my_starting_dates_stats = proc_functions.get_list_dates_for_dataset('modis-firms', '10dcount', 'v6.0', start_date='20020701', end_date='20170821')
 # for date in my_starting_dates_stats:
@@ -571,6 +588,6 @@ def test_proc_msg_mpe(start_date=None, end_date=None, pipe_run=0, pipe_print=3, 
 #     st=os.system('touch '+filename)
 
 #test_proc_olci_wrr(pipe_run=4, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
-test_proc_modis_pp(pipe_run=4, pipe_print=0, touch_files_only=False)
+# test_proc_completeness()
 #test_proc_tamsat_rfe(pipe_run=4, pipe_print=0, start_date='19830101', end_date='20171231', touch_files_only=False)
 #test_proc_modis_firms(pipe_run=4, pipe_print=0, touch_files_only=False)
