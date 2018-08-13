@@ -15,7 +15,7 @@ from apps.productmanagement.datasets import Dataset
 
 logger = log.my_logger(__name__)
 
-def create_archive_eumetcast(product, version, subproducts, mapset, start_date=None, end_date=None, target_dir=None, overwrite=False):
+def create_archive_eumetcast(product, version, subproducts, mapset, start_date=None, end_date=None, target_dir=None, overwrite=False, tgz=False):
 
     # Rename and copy to target dir (/data/archives by default) the eStation2 files
 
@@ -43,10 +43,16 @@ def create_archive_eumetcast(product, version, subproducts, mapset, start_date=N
         filenames.sort()
         for filename in filenames:
             # Derive MESA_JRC_ filename
-            archive_name=functions.convert_name_to_eumetcast(filename)
+            archive_name=functions.convert_name_to_eumetcast(filename, tgz=tgz)
             # Check if the target_file already exist
             if not os.path.isfile(target_dir+os.path.sep+archive_name) or overwrite:
-                # Copy to target_dir
-                status=shutil.copyfile(filename,target_dir+os.path.sep+archive_name)
+
+                target_file=target_dir+os.path.sep+archive_name
+                if not tgz:
+                    # Copy only to target_dir
+                    status=shutil.copyfile(filename,target_file)
+                else:
+                    command='tar -cvzf '+target_file+' -C '+os.path.dirname(filename)+' '+os.path.basename(filename)
+                    status=os.system(command)
 
         logger.info("Files copied for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" %(product, version, subproduct, mapset))
