@@ -1408,9 +1408,13 @@ def get_product_type_from_subdir(subdir):
 #   Output: filename_eumetccast
 #   Description: returns information form the fullpath
 #
-def convert_name_to_eumetcast(filename):
+def convert_name_to_eumetcast(filename, tgz=False):
 
-    extension = '.tif'
+    if tgz:
+        extension = '.tgz'
+    else:
+        extension = '.tif'
+
     [dir, name] = os.path.split(filename)
 
     [str_date, product_code, sub_product_code, mapset, version] = get_all_from_filename(name)
