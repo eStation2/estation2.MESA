@@ -1408,9 +1408,13 @@ def get_product_type_from_subdir(subdir):
 #   Output: filename_eumetccast
 #   Description: returns information form the fullpath
 #
-def convert_name_to_eumetcast(filename):
+def convert_name_to_eumetcast(filename, tgz=False):
 
-    extension = '.tif'
+    if tgz:
+        extension = '.tgz'
+    else:
+        extension = '.tif'
+
     [dir, name] = os.path.split(filename)
 
     [str_date, product_code, sub_product_code, mapset, version] = get_all_from_filename(name)
@@ -1626,7 +1630,7 @@ def is_data_captured_during_day(in_date):
     # in_date example = 20180428T163216
     hhmmss = in_date.split("T")[1]
     hour = int(hhmmss[0] + hhmmss[1])
-    if 5 <= hour <= 16:
+    if 3 <= hour <= 16:
         day_data = True
 
     return day_data

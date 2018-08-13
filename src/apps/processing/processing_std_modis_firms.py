@@ -227,7 +227,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32768}
+        #args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32768}
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':0}
         raster_image_math.do_avg_image(**args)
 
     #   ---------------------------------------------------------------------
@@ -332,7 +333,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32768}
+        #args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32768}
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type': 'Float32', 'input_nodata': 0,  'output_nodata': -32768}
         raster_image_math.do_oper_subtraction(**args)
 
 
@@ -422,7 +424,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32768}
+        #args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32768}
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type': 'Float32', 'input_nodata': 0}
         raster_image_math.do_avg_image(**args)
 
     #   ---------------------------------------------------------------------
@@ -452,7 +455,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Int16', 'input_nodata':-32768}
+        #args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Int16', 'input_nodata':-32768}
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type': 'Int16', 'input_nodata': 0}
         raster_image_math.do_min_image(**args)
 
     #   ---------------------------------------------------------------------
@@ -482,7 +486,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Int16', 'input_nodata':-32768}
+        #args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Int16', 'input_nodata':-32768}
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type': 'Int16', 'input_nodata': 0}
         raster_image_math.do_max_image(**args)
 
     #   ---------------------------------------------------------------------
@@ -529,7 +534,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32768}
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF',"options": "compress=lzw", 'output_type': 'Float32', 'input_nodata': 0, 'output_nodata': -32768}
+        #args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32768}
         raster_image_math.do_oper_subtraction(**args)
 
     #   ---------------------------------------------------------------------
@@ -565,7 +571,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file[0], "avg_file": input_file[1], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32768}
+        #args = {"input_file": input_file[0], "avg_file": input_file[1], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32768}
+        args = {"input_file": input_file[0], "avg_file": input_file[1], "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type': 'Float32', 'input_nodata': 0, 'output_nodata': -32768}
         raster_image_math.do_compute_perc_diff_vs_avg(**args)
 
     #   ---------------------------------------------------------------------
@@ -601,7 +608,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32768}
+        #args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type':'Float32', 'input_nodata':-32768}
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw", 'output_type': 'Float32', 'input_nodata': 0, 'output_nodata': -32768}
         raster_image_math.do_oper_division_perc(**args)
 
     #

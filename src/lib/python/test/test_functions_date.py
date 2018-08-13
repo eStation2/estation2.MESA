@@ -105,3 +105,8 @@ class TestFunctionsDate(TestCase):
         self.assertEqual(f.dekad_nbr_in_season('1201',start), 10)
         self.assertEqual(f.dekad_nbr_in_season('0101',start), 13)
         self.assertEqual(f.dekad_nbr_in_season('0401', start),22)
+
+    def test_convert_date_get_number_days_month(self):
+        import lib.python.functions as f
+        self.assertEqual(f.get_number_days_month('20180201'), 28)
+

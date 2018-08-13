@@ -38,6 +38,7 @@ from lib.python import metadata
 from lib.python import mapset
 from lib.python import functions
 from config import es_constants
+from database import querydb
 
 # Import third-party modules
 from osgeo.gdalconst import *
@@ -2411,6 +2412,99 @@ def getRasterBox(fid, xstart, xend, ystart, yend, band):
                 maxValGrid = thisMaxValGrid
 
     return [minValGrid, maxValGrid]
+
+#   -------------------------------------------------------------------------------------------
+#   Computes surface area of each pixel for an given mapset or the given image
+
+#   Argument:
+#       inputfile:      input file ( if input file is passed then the geotransform , projection, raster xsize and y size are take from the input
+#       output_file:    output file name
+#       output_format:  output format (GTIFF by default)
+#       output_type:    output type (by default the same as in the input file
+#       mapsetcode:      Mapset code ( computes projection, geotransform, x and y size from the mapset)
+#       args:           list of additional arguments (FTTB only 1, used for density)
+def create_surface_area_raster(input_file=None, output_file='', output_format=None, output_type=None, mapsetcode=None):
+    #
+    # Notes:
+
+    try:
+
+        if input_file is not None:
+            f1Fid = gdal.Open(input_file, GA_ReadOnly)
+            nb = f1Fid.RasterCount
+            ns = f1Fid.RasterXSize
+            nl = f1Fid.RasterYSize
+            dataType = f1Fid.GetRasterBand(1).DataType
+            geoTransform = f1Fid.GetGeoTransform()
+            projection = f1Fid.GetProjection()
+            driver_type=f1Fid.GetDriver().ShortName
+
+        if mapsetcode is not None:
+            # Create Mapset object and test
+            native_mapset = mapset.MapSet()
+            native_mapset.assigndb(mapsetcode)
+
+            if native_mapset.validate():
+                return 1
+
+            mapset_info = querydb.get_mapset(mapsetcode=mapsetcode)
+            ymin = mapset_info.upper_left_lat
+            nl = mapset_info.pixel_size_y
+            ns = mapset_info.pixel_size_x
+            geoTransform =  native_mapset.geo_transform
+            projection = native_mapset.spatial_ref.ExportToWkt()
+
+        # manage out_type (take the input one as default)
+        if output_type is None:
+            outType= 'Int16'
+        else:
+            outType=ParseType(output_type)
+
+        # manage out_format
+        if output_format is None:
+            outFormat='GTIFF'
+        else:
+            outFormat=output_format
+
+        # instantiate output(s)
+        outDrv = gdal.GetDriverByName(outFormat)
+        outDS = outDrv.Create(output_file, ns, nl, 1, outType)
+        outDS.SetGeoTransform(geoTransform)
+        outDS.SetProjection(projection)
+
+        # pre-open files, to speed up processing
+        #fidList=[]
+        #fidList.append(gdal.Open(input_file, GA_ReadOnly))
+
+        outband = outDS.GetRasterBand(1)
+
+        for il in range(nl):
+
+            nl_lat_value = ymin + (il * mapset_info.pixel_shift_lat)
+            d= abs(mapset_info.pixel_shift_lat) #0.008928571428571
+            const_d2km = 12364.35
+            area_deg = d * d * math.cos(nl_lat_value / 180 * math.pi)
+            area_km = area_deg * const_d2km
+
+            #if (nl_lat_value != 0):
+            surface_area = N.zeros(ns)
+            surface_area.fill(area_km)
+
+            surface_area.shape = (1,-1)
+
+            outband.WriteArray(N.array(surface_area),0,il)
+
+
+        #   ----------------------------------------------------------------------------------------------------
+        #   Close outputs
+        outDrv = None
+        outDS = None
+        #   Writes metadata to output
+        #assign_metadata_processing(input_list, output_file)
+    except:
+        logger.warning('Error in create_surface_area_raster. Remove outputs')
+        if os.path.isfile(output_file):
+            os.remove(output_file)
 
 #   -------------------------------------------------------------------------------------------
 def do_raster_stats(fid, fidID, outDS, iband, roi, minId, maxId, nodata, operation, args=None):

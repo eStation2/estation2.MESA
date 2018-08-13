@@ -850,3 +850,35 @@ class TestGetInternet(unittest.TestCase):
 
         # Check last 90 days (check list length = 9)
         result = get_one_source(my_source)
+
+
+    def TestRemoteHttps_DMP_2(self):
+
+        internet_id='PDF:GLS:PROBA-V2.0:DMP'
+
+        # Direct test !
+        if False:
+            filename='c_gls_DMP-RT6_201801100000_GLOBE_PROBAV_V2.0.1.nc'
+            remote_url = 'https://land.copernicus.vgt.vito.be/PDF/datapool/Vegetation/Dry_Matter_Productivity/DMP_1km_V2/2018/1/10/DMP-RT6_201801100000_GLOBE_PROBAV_V2.0/'+filename
+            status = get_file_from_url(remote_url,  '/tmp/', target_file=filename, userpwd='estation:estation2018')
+            return
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':20170110,
+                         'end_date':20170111,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type}
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)

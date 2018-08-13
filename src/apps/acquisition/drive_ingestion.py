@@ -12,7 +12,7 @@ do_start = True
 dry_run  = False
 service  = False
 only_prod='olci-wrr'
-only_prod=None
+only_prod='wd-gee'
 
 if service:
     # Make sure the pid dir exists
@@ -35,6 +35,7 @@ if service:
     else:
         if not daemon.status():
             logger.info('Ingest process is NOT running: Exit')
+
         else:
             logger.info('Ingest process is running: Stop it.')
             daemon.stop()

@@ -28,7 +28,8 @@ Ext.define('esapp.store.LogosMapView', {
         { src:'resources/img/logo/EC_h110.jpg', width:'20%', height:'50px' },
         { src:'resources/img/logo/logo_en.gif', width:'20%', height:'50px' },
         { src:'resources/img/logo/logo_fr.gif', width:'20%', height:'50px' },
-        { src:'resources/img/logo/GMES.png', width:'20%', height:'50px' }
+        { src:'resources/img/logo/GMES.png', width:'20%', height:'50px' },
+        { src:'resources/img/logo/ECOAGRIS.jpg', width:'20%', height:'50px' }
         // { src:'resources/img/logo/TAFIRI_logo_H110.png', width:'20%', height:'50px' },
         // { src:'resources/img/logo/IOTC-logo_110.PNG', width:'20%', height:'50px' },
         // { src:'resources/img/logo/DSFA-logo_90.png', width:'20%', height:'33px' },
