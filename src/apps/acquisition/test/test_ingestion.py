@@ -1412,7 +1412,7 @@ class TestIngestion(unittest.TestCase):
     def test_ingest_s3_olci_wrr_chl_oc4me(self):
 
         # Test the ingestion of the Sentinel-3/OLCI Level-2 WRR product (on d6-dev-vm19 !!!!!)
-        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_OL_2_WRR/march08/S3A_OL_2_WRR____*.SEN3.tar')
+        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/wrr/20180605/S3A_OL_2_WRR____*.SEN3.tar')
         single_date =  os.path.basename(date_fileslist[0])
         in_date = single_date.split('_')[7]
         in_date = in_date.split('T')[0] #+ '0000'

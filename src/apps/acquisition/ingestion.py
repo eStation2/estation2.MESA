@@ -1869,8 +1869,11 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             # ------------------------------------------------------------------------------------------
             # Write a graph xml and subset the product for specific band
             # ------------------------------------------------------------------------------------------
-            functions.write_graph_xml_subset(output_dir=tmpdir_untar, band_name=re_process)
+            #functions.write_graph_xml_subset(output_dir=tmpdir_untar, band_name=re_process)
+            expression='(WQSF_lsb_CLOUD or WQSF_lsb_CLOUD_AMBIGUOUS or WQSF_lsb_CLOUD_MARGIN or WQSF_lsb_INVALID or WQSF_lsb_COSMETIC or WQSF_lsb_SATURATED or WQSF_lsb_SUSPECT or WQSF_lsb_HISOLZEN or WQSF_lsb_HIGHGLINT or WQSF_lsb_SNOW_ICE) ? NaN : CHL_OC4ME'
+            functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process, expression= expression)     #'l2p_flags_cloud ? NaN : sea_surface_temperature')
             #functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process)
+
 
             graph_xml_subset = tmpdir_untar_band + os.path.sep + 'graph_xml_subset.xml'
             output_subset_tif = tmpdir_untar_band + os.path.sep + 'band_subset.tif'
@@ -1881,7 +1884,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             # ToDo : check the status or use try/except
 
             if os.path.exists(output_subset_tif):
-                functions.write_graph_xml_reproject(output_dir=tmpdir_untar_band, nodata_value=no_data)
+                functions.write_graph_xml_reproject(output_dir=tmpdir_untar_band, nodata_value="103.69266")
 
                 graph_xml_reproject = tmpdir_untar_band + os.path.sep + 'graph_xml_reproject.xml'
                 output_reproject_tif = tmpdir_untar_band + os.path.sep + 'reprojected.tif'
@@ -1892,7 +1895,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
 
                 if os.path.exists(output_reproject_tif):
                     output_vrt = tmpdir_untar_band + os.path.sep + 'single_band_vrt.vrt'
-                    command_translate = 'gdal_translate -b 1 -a_nodata 3 -of VRT '+output_reproject_tif+ ' '+output_vrt
+                    command_translate = 'gdal_translate -b 1 -a_nodata 103.69266 -of VRT '+output_reproject_tif+ ' '+output_vrt
                     os.system(command_translate)
                     interm_files_list.append(output_vrt)
 
@@ -1902,7 +1905,9 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             for file_add in interm_files_list:
                 input_files_str += ' '
                 input_files_str += file_add
-            command = 'gdalwarp -srcnodata "3" -dstnodata "3" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
+            # command = 'gdalwarp -srcnodata "3" -dstnodata "3" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
+            #      input_files_str, out_tmp_file_gtiff)
+            command = 'gdalwarp -srcnodata "103.69266" -dstnodata "1000" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
                  input_files_str, out_tmp_file_gtiff)
             my_logger.info('Command for merging is: ' + command)
             os.system(command)
