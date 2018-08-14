@@ -12,7 +12,7 @@ do_start = True
 dry_run  = False
 service  = False
 only_prod='olci-wrr'
-only_prod='wd-gee'
+# only_prod='wd-gee'
 
 if service:
     # Make sure the pid dir exists
