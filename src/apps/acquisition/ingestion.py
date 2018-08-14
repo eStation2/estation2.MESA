@@ -434,11 +434,18 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
         try:
             composed_file_list = pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files, tmpdir,
                                                     my_logger, in_date=in_date)
+
             # Pre-process returns None if there are not enough files for continuing
             if composed_file_list is None:
                 logger.debug('Waiting for additional files to be received. Return')
                 shutil.rmtree(tmpdir)
                 return None
+
+            # Check if -1 is returned, i.e. nothing to do on the passed files (e.g. S3A night-files)
+            if composed_file_list is -1:
+                logger.debug('Nothing to do on the passed files. Return')
+                shutil.rmtree(tmpdir)
+                return -1
         except:
             # Error occurred and was NOT detected in pre_process routine
             my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
@@ -1842,8 +1849,8 @@ def pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=None):
 def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=None):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process the Sentinel 3 Level 2 product from OLCI - WRR
+#   Returns -1 if nothing has to be done on the passed files
 #
-
 
     # Prepare the output file list
     pre_processed_list = []
@@ -1865,6 +1872,11 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
         day_data = functions.is_data_captured_during_day(in_date)
         if day_data:
             list_input_files.append(one_file)
+
+    # Check at least 1 day-time file is there
+    if len(list_input_files) == 0:
+        my_logger.debug('No any file captured during the day. Return')
+        return -1
 
     # Unzips the files
     for input_file in list_input_files:
@@ -1908,7 +1920,6 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             output_subset_tif = tmpdir_untar_band + os.path.sep + 'band_subset.tif'
 
             command = es_constants.gpt_exec+' '+ graph_xml_subset
-            #print(command)
             status=os.system(command)
             # ToDo : check the status or use try/except
 
@@ -1919,7 +1930,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
                 output_reproject_tif = tmpdir_untar_band + os.path.sep + 'reprojected.tif'
 
                 command_reproject = es_constants.gpt_exec+' '+ graph_xml_reproject
-                print(command_reproject)
+                # print(command_reproject)
                 os.system(command_reproject)
 
                 if os.path.exists(output_reproject_tif):
@@ -1928,14 +1939,17 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
                     os.system(command_translate)
                     interm_files_list.append(output_vrt)
 
+        # Check at least 1 day-time file is there
+        if len(interm_files_list) == 0:
+            my_logger.debug('No any file overlapping the ROI. Return')
+            return -1
+
         if len(interm_files_list) > 1 :
             out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
             input_files_str = ''
             for file_add in interm_files_list:
                 input_files_str += ' '
                 input_files_str += file_add
-            # command = 'gdalwarp -srcnodata "3" -dstnodata "3" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
-            #      input_files_str, out_tmp_file_gtiff)
             command = 'gdalwarp -srcnodata "103.69266" -dstnodata "1000" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
                  input_files_str, out_tmp_file_gtiff)
             my_logger.info('Command for merging is: ' + command)
@@ -2446,6 +2460,9 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 #       input_files: list of input files
 #   Returned:
 #       output_file: temporary created output file[s]
+#       None: wait for additional files (e.g. MSG_MPE - in 4 segments)
+#       -1: nothing to do on the passed files (e.g. for S3A night-files or out-of-ROI).
+#
 
     my_logger.info("Input files pre-processing by using method: %s" % preproc_type)
 
@@ -2534,6 +2551,11 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
     if interm_files is None:
         my_logger.info('Waiting for additional files to be received. Exit')
         return None
+
+    # Check if -1 is returned (i.e. nothing to do on the passed files)
+    if interm_files is -1:
+        my_logger.info('Nothing to do on the passed files. Exit')
+        return -1
 
     # Make sure it is a list (if only a string is returned, it loops over chars)
     if isinstance(interm_files, list):
