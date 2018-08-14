@@ -80,8 +80,8 @@ Ext.define('esapp.view.main.Main', {
             layout: 'fit',
             items: [{
                 // html: '<img alt="Mockup Acquisition" width="100%" height="100%" src="../resources/img/mockup_acquisition.png">'
-                xtype : 'acquisition-main',
-                id:'acquisitionmain'
+                xtype: 'acquisition-main',
+                id: 'acquisitionmain'
             }],
             listeners: {
                activate: function (acquisitiontab) {
@@ -139,7 +139,8 @@ Ext.define('esapp.view.main.Main', {
                    //acquisitionmain.getView().refresh();
                },
                beforedeactivate: function (acquisitiontab) {
-                   var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("datasetchart-") != -1}');
+                   var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
+                   // var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("datasetchart-") != -1}');
                    Ext.each(completenessTooltips, function(item) {
                        item.hide();
                    });
@@ -194,7 +195,8 @@ Ext.define('esapp.view.main.Main', {
                    //datamanagementmain.getView().refresh();
                },
                beforedeactivate: function (acquisitiontab) {
-                   var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("datasetchart-") != -1}');
+                   var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
+                   // var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("datasetchart-") != -1}');
                    Ext.each(completenessTooltips, function(item) {
                        item.hide();
                    });

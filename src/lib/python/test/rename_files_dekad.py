@@ -14,4 +14,4 @@ def rename(dir):
         os.rename(os.path.join(dir,pathAndFilename), os.path.join(dir, dekad_yyymmdd + prod_ext + ext))
 
 
-rename("/data/processing/vgt-dmp/V2.0/SPOTV-Africa-1km/tif/dmp/")
+rename("/data/processing/exchange/DMPv2/dmp/")

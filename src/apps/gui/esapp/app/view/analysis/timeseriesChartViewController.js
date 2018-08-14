@@ -596,11 +596,9 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
     },
 
     createDefaultChart: function(mecallback) {
-        //var me = mecallback.getView();
         var me = mecallback;
         var plotBackgroundImage = '';
         var categories = [];
-        //var categories = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
         if (!me.timeseriesGraph.data_available) {
             plotBackgroundImage = 'resources/img/no_data.gif';
@@ -610,12 +608,11 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
         if (me.timeseriesGraph.showYearInTicks) {      //  === 'true'
             xAxisLabels = {
                 enabled: 1,
-                //autoRotation: [-3, -5],
                 autoRotationLimit: -40,
-                //step: 2,
-                //autoRotation: [0,-90],
                 y: 25,
                 padding: 10,
+                //step: 2,
+                //autoRotation: [0,-90],
                 //useHTML: false,
                 //reserveSpace: false,
                 style: {
@@ -634,7 +631,6 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             xAxisLabels = {
                 enabled: 1,
                 y: 25,
-                //step: 3,
                 style: {
                     color: me.graphProperties.xaxe_font_color,
                     "font-family": 'Arial, Verdana, Helvetica, sans-serif',
@@ -693,21 +689,6 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 lineWidth: 2,
                 labels: xAxisLabels,
                 tickInterval: 30 * 24 * 3600 * 1000
-
-                //labels: {
-                //    enabled: 1,
-                //    y:28,
-                //    //step: 1,
-                //    style: xaxis_labelstyle,
-                //    formatter: function() {
-                //        return Highcharts.dateFormat('%b', this.value);
-                //    }
-                //}
-                //,minorTickInterval: 3
-                //dateTimeLabelFormats: {
-                //    day: '%e %b'
-                //},
-                //categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
             }]
         }
 
@@ -774,7 +755,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
 
                     if (timeserie.difference == true) {
                         diffProdName = timeserie.name;
-                        timeserie.name = timeserie.name + ' ('+esapp.Utils.getTranslation('diff')+')';
+                        timeserie.name = timeserie.name + ' ('+esapp.Utils.getTranslation('curr')+')';
                         TimeseriesCumulatedAverages = Ext.clone(timeserie.data);
                     }
                     else if (timeserie.reference == true){
@@ -796,51 +777,47 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                     if (newDataValue[1] > 0) newDataValue[1] = 0;
                     else newDataValue[1] = newDataValue[1] * -1;
                     cumulatedPositive.push(newDataValue);
-                    //newDataValue = [];
                 }
-                //console.info(aboveAvgColor);
+
                 aboveAvgColor = esapp.Utils.convertRGBtoHex(aboveAvgColor);
                 var aboveAvg = {
                     data: cumulatedPositive,
-                    fillColor: aboveAvgColor,
-                    color: aboveAvgColor,
+                    fillColor: "#ff0000",
+                    color: "#ff0000",
                     id: "Above",
-                    name: esapp.Utils.getTranslation('above') + ' ' + esapp.Utils.getTranslation('diff'),
+                    // name: esapp.Utils.getTranslation('above') + ' ' + esapp.Utils.getTranslation('diff'),
+                    name: esapp.Utils.getTranslation('curr') + ' < ' + esapp.Utils.getTranslation('ref'),
                     type: "area",
                     showInLegend: true,
                     enableMouseTracking: false
                 }
 
-                //newDataValue = [];
                 for (i = 0; i < TimeseriesCumulatedData.length; i++) {
                     newDataValue = Ext.clone(TimeseriesCumulatedData[i]);
                     newDataValue[1] = TimeseriesCumulatedAverages[i][1] - TimeseriesCumulatedData[i][1];
                     if (newDataValue[1] < 0) newDataValue[1] = 0;
                     cumulatedNegative.push(newDataValue);
-                    //newDataValue = [];
                 }
 
                 var belowAvg = {
                     data: cumulatedNegative,
-                    fillColor: "#ff0000",  // "#ff0000",   // "#009E00",  //
-                    color: "#ff0000",  // "#ff0000",       // "#009E00",  //
+                    fillColor: aboveAvgColor,
+                    color: aboveAvgColor,
                     id: "Below",
-                    name: esapp.Utils.getTranslation('below') + ' ' + esapp.Utils.getTranslation('diff'),
+                    // name: esapp.Utils.getTranslation('below') + ' ' + esapp.Utils.getTranslation('diff'),
+                    name: esapp.Utils.getTranslation('curr') + ' > ' + esapp.Utils.getTranslation('ref'),
                     type: "area",
                     showInLegend: true,
                     enableMouseTracking: false
                 }
 
-                //newDataValue = [];
                 for (i = 0; i < TimeseriesCumulatedData.length; i++) {
                     newDataValue = Ext.clone(TimeseriesCumulatedAverages[i]);
                     if (TimeseriesCumulatedData[i][1] < TimeseriesCumulatedAverages[i][1]) {
                         newDataValue = TimeseriesCumulatedData[i];
                     }
                     cumulatedMinValue.push(newDataValue);
-                    //newDataValue = [];
                 }
-                //console.info(cumulatedMinValue);
 
                 var transparentAvg = {
                     data: cumulatedMinValue,
@@ -856,7 +833,6 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 me.timeseriesGraph.timeseries.push(aboveAvg);
                 me.timeseriesGraph.timeseries.push(belowAvg);
                 me.timeseriesGraph.timeseries.push(transparentAvg);
-                //console.info(me.timeseriesGraph.timeseries);
             }
         }
 
@@ -985,7 +961,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             Yaxes.push(yaxe);
             timeseries_names += me.timeseriesGraph.yaxes[yaxescount].title.replace(' ', '_') + '_';
         }
-        // console.info(Yaxes);
+
         me.filename = timeseries_names + (me.graphtype == 'xy' ? esapp.Utils.getTranslation('PROFILE') : me.graphtype)
         if (esapp.Utils.objectExists(me.graphProperties.title)){
             me.filename += '_' + me.graphProperties.title.replace(' ', '_');
@@ -995,7 +971,6 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
         }
 
         var timeseries = me.timeseriesGraph.timeseries;
-        //console.info(timeseries);
 
         var spacingRight = 10;
         if (me.timeseriesGraph.yaxes.length == 1) {
@@ -1012,16 +987,16 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 className: 'chartfitlayout',
                 zoomType: 'xy',
                 alignTicks: true,
-                // spacingBottom: 50,      // set when logo and disclamer objects are shown under togglebutton
-                // spacingTop: 60,         // set when logo and disclamer objects are shown under togglebutton
                 spacingLeft: 25,
                 spacingRight: spacingRight,
-                //margin: chartMargin, // [35, 15, 65, 65],  // for legend on the bottom of the chart
-                //marginTop:top,
-                //marginRight: marginright,
-                //marginBottom: 160,
-                //marginLeft:left,
                 plotBackgroundImage: plotBackgroundImage
+                // spacingBottom: 50,      // set when logo and disclamer objects are shown under togglebutton
+                // spacingTop: 60,         // set when logo and disclamer objects are shown under togglebutton
+                // margin: chartMargin, // [35, 15, 65, 65],  // for legend on the bottom of the chart
+                // marginTop:top,
+                // marginRight: marginright,
+                // marginBottom: 160,
+                // marginLeft:left,
             },
             exporting: {
                 enabled: false,
@@ -1084,7 +1059,6 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             title: {
                 text: me.graphProperties.title,
                 align: 'center',
-                //y: 50,
                 style: {
                     color: me.graphProperties.graph_title_font_color,
                     "font-family": 'Arial, Verdana, Helvetica, sans-serif',
@@ -1122,10 +1096,6 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 layout: 'horizontal',  // horizontal vertical
                 align: 'center', // center left right
                 verticalAlign: 'bottom',  // top, middle or bottom
-                // x:0,
-                // y:-5,
-                //x: 80,
-                //y: 55,
                 floating: false,
                 backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF',
                 //borderColor: Highcharts.theme.legendBackgroundColor || '#FFFFFF',
@@ -1160,8 +1130,6 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
         if (me.graphtype == 'cumulative' && refNullValuesChangedToDiffValue){
             Ext.toast({anchor: me, hideDuration: 4000, html: esapp.Utils.getTranslation('warning_cumul_values_changed'), title: '', width: 350, align: 't'});
         }
-
-        // console.info(me.tsgraph);
     },
 
     createRankingChart: function(mecallback) {
@@ -1175,18 +1143,18 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
 
         var xAxisLabels = {
             enabled: 1,
-            // autoRotation: -90,
             autoRotation: [-10, -20, -30, -40, -50, -60, -70, -80, -90],
+            // autoRotation: -90,
             // staggerLines: 2,
             // autoRotationLimit: 30,
             // x: 0,
             // y: 25,
             style: {
+                margin: '0 0 0 0',
                 color: me.graphProperties.xaxe_font_color,
                 "font-family": 'Arial, Verdana, Helvetica, sans-serif',
                 "fontWeight": 'bold',
-                "fontSize": me.graphProperties.xaxe_font_size + 'px',
-                margin: '0 0 0 0'
+                "fontSize": me.graphProperties.xaxe_font_size + 'px'
             }
         };
 
@@ -1194,7 +1162,8 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 type: 'category',
                 tickmarkPlacement: 'between',      // on between  - For categorized axes only!
                 startOnTick: true,
-                //lineWidth: 2,
+                endOnTick: false,
+                maxPadding: 0.25,
                 labels: xAxisLabels
             }]
 
@@ -1233,7 +1202,6 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
 
             var yaxe = {
                 id: me.timeseriesGraph.yaxes[yaxescount].id,
-                //tickAmount: 8,
                 gridLineWidth: 1,
                 offset: 10,
                 labels: {
@@ -1273,20 +1241,21 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
         var timeseries = me.timeseriesGraph.timeseries;
         //console.info(timeseries);
 
-        var spacingRight = 25;
+        var spacingRight = 15;
         if (me.timeseriesGraph.yaxes.length == 1) {
-            spacingRight = 30;
+            spacingRight = 20;
         }
 
 
         me.tsgraph = new Highcharts.Chart({
             chart: {
+                // type: 'column',
                 renderTo: 'tsgraph_' + me.id,
                 className: 'chartfitlayout',
                 zoomType: 'xy',
                 spacingLeft: 10,
                 spacingRight: spacingRight,
-                alignTicks: true,
+                alignTicks: false,
                 plotBackgroundImage: plotBackgroundImage
             },
             exporting: {
@@ -1305,6 +1274,10 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 enabled: false
             },
             plotOptions: {
+                // column: {
+                //     pointPadding: 0.2,
+                //     borderWidth: 0
+                // },
                 series: {
                     cursor: 'pointer',
                     point: {

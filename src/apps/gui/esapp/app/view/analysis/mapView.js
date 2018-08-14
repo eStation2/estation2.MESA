@@ -47,11 +47,16 @@ Ext.define("esapp.view.analysis.mapView",{
     x: 20,
     y: 20,
 
-    // glyph : 'xf080@FontAwesome',
     margin: '0 0 0 0',
     shadow: false,
     layout: {
         type: 'border'
+    },
+    componentCls: 'rounded-box-win',
+    // componentCls: 'newpanelstyle',
+
+    bodyStyle: {
+        background: '#d3d1d1 !important'
     },
 
     publishes: ['titleData'],       // , 'logoData'
@@ -76,7 +81,8 @@ Ext.define("esapp.view.analysis.mapView",{
         workspace: null,
         layers: [],
         draw: null,
-        projection: 'EPSG:4326'
+        projection: 'EPSG:4326',
+        defaultzoomfactor: 1
     },
     bind:{
         titleData:'{titleData}'
@@ -88,6 +94,7 @@ Ext.define("esapp.view.analysis.mapView",{
         me.frame = false;
         me.border= false;
         me.bodyBorder = false;
+
         me.highlight = null;
         me.toplayer = null;
         me.selectedarea = '';
@@ -157,14 +164,14 @@ Ext.define("esapp.view.analysis.mapView",{
             resolution: 0.1,
             minResolution: 0.0001,
             maxResolution: 0.25,
-            zoomFactor: 1.1+0.1*5   // (cioe' nel range 1.1 -> 2.1)
+            zoomFactor: 1.1+0.1*me.defaultzoomfactor   // (cioe' nel range 1.1 -> 2.1)
             // zoom: 22,
             // minZoom: 12,
             // maxZoom: 100,
             // zoomFactor: 1.12 // 1.0+(0.075*1)
         });
         me.mapView.setZoom(1.5);
-        me.zoomFactorSliderValue = 5;
+        me.zoomFactorSliderValue = me.defaultzoomfactor;
 
         me.name ='mapviewwindow_' + me.id;
 
@@ -240,7 +247,7 @@ Ext.define("esapp.view.analysis.mapView",{
                         width: 180,
                         maxWidth: 180,
                         allowDecimals: false,
-                        value: 5,
+                        value: 1,
                         //step: 1,
                         increment: 1,
                         minValue: 1,
@@ -1032,7 +1039,7 @@ Ext.define("esapp.view.analysis.mapView",{
                         me.getController().toggleObjects(mapObjectToggleBtn);
 
                     });
-                    taskToggleObjects.delay(200);
+                    taskToggleObjects.delay(0);
                 }
 
                 Ext.fly('mapview_title_templatename_' + me.id).dom.innerHTML = me.templatename;
@@ -1073,6 +1080,7 @@ Ext.define("esapp.view.analysis.mapView",{
                                                            me.productversion,
                                                            me.mapsetcode,
                                                            me.subproductcode,
+                                                           me.productdate,
                                                            me.legendid,
                                                            me.legendHTML,
                                                            me.legendHTMLVertical,

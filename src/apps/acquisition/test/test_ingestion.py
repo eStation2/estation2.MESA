@@ -11,7 +11,7 @@ import tempfile
 import shutil
 import csv
 import numpy as np
-import h5py
+# import h5py
 from lib.python import functions
 
 from osgeo import gdal
@@ -24,7 +24,8 @@ logger = log.my_logger(__name__)
 class TestIngestion(unittest.TestCase):
 
     def TestDriveAll(self):
-        ingestion.drive_ingestion()
+        dry_run = True
+        ingestion.loop_ingestion(dry_run=dry_run)
         self.assertEqual(1, 1)
 
     def test_ingest_modis_firms_nasa(self):
@@ -710,6 +711,47 @@ class TestIngestion(unittest.TestCase):
             ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
 
             #self.assertEqual(1, 1)
+
+    def test_ingest_fewsnet_rfe(self):
+
+        # Test the ingestion of the Sentinel-3/SLSTR Level-2 WST product (on d6-dev-vm19 !!!!!)
+        #date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/S3A_SL_2_WST____20180306T095629_20180306T095929_20180306T114727_0179_028_307_3420_MAR_O_NR_002.SEN3.tar')
+        date_fileslist = glob.glob('/data/TestIngestion/a18073rb.zip')
+        in_date = '18073'
+        productcode = 'fewsnet-rfe'
+        productversion = '2.0'
+        subproductcode = '10d'
+        mapsetcode = 'FEWSNET-Africa-8km'
+        datasource_descrID = 'USGS:EARLWRN:FEWSNET'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(**args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+        no_data = product_in_info.no_data
+
+        sprod = {'subproduct': subproductcode,
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process,
+                 'nodata': no_data}
+
+        subproducts = []
+        subproducts.append(sprod)
+
+
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+
+
 
     def test_ingest_jrc_wbd(self):
 

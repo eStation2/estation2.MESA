@@ -266,7 +266,7 @@ def processing_std_msg_mpe(res_queue, pipeline_run_level=0,pipeline_printout_lev
     if pipeline_run_level > 0:
         spec_logger.info("Run the pipeline %s" % 'processing_std_msg_mpe')
         # Option to be added to pipeline_run to force files to appear up-to-date: touch_files_only = True
-        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger, history_file='/eStation2/log/.ruffus_history_msg_mpe.sqlite', checksum_level=0)
+        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger, history_file=os.path.join(es_constants.log_dir,'.ruffus_history_msg_mpe.sqlite'), checksum_level=0)
         tasks = pipeline_get_task_names()
         spec_logger.info("After running the pipeline %s" % 'processing_std_msg_mpe')
 

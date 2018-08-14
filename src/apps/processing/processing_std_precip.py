@@ -558,13 +558,13 @@ def processing_std_precip(res_queue, pipeline_run_level=0,pipeline_printout_leve
 
     if pipeline_run_level > 0:
         spec_logger.info("Run the pipeline %s" % 'processing_std_precip')
-        pipeline_run(touch_files_only=touch_only, verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger, history_file='/eStation2/log/.ruffus_history_{0}_{1}.sqlite'.format(prod,starting_sprod))
+        pipeline_run(touch_files_only=touch_only, verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger, history_file=os.path.join(es_constants.log_dir,'.ruffus_history_{0}_{1}.sqlite').format(prod,starting_sprod))
         tasks = pipeline_get_task_names()
         spec_logger.info("Run the pipeline %s" % tasks[0])
         spec_logger.info("After running the pipeline %s" % 'processing_std_precip')
 
     if pipeline_printout_level > 0:
-        pipeline_printout(verbose=pipeline_printout_level, output_stream=fwrite_id,  history_file='/eStation2/log/.ruffus_history_{0}_{1}.sqlite'.format(prod,starting_sprod))
+        pipeline_printout(verbose=pipeline_printout_level, output_stream=fwrite_id,  history_file=os.path.join(es_constants.log_dir,'.ruffus_history_{0}_{1}.sqlite').format(prod,starting_sprod))
 
     if pipeline_printout_graph_level > 0:
         pipeline_printout_graph('flowchart.jpg')

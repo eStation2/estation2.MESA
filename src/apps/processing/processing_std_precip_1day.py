@@ -493,12 +493,12 @@ def processing_std_precip_1day(res_queue, pipeline_run_level=0,pipeline_printout
 
     if pipeline_run_level > 0:
         spec_logger.info("Run the pipeline %s" % 'processing_precip_1day')
-        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger, history_file='/eStation2/log/.ruffus_history_precip_1day.sqlite',\
+        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger, history_file=os.path.join(es_constants.log_dir,'.ruffus_history_precip_1day.sqlite'),\
                      checksum_level=0)
         spec_logger.info("After running the pipeline %s" % 'processing_precip_1day')
 
     if pipeline_printout_level > 0:
-        pipeline_printout(verbose=pipeline_printout_level, output_stream=fwrite_id, history_file='/eStation2/log/.ruffus_history_precip_1day.sqlite',\
+        pipeline_printout(verbose=pipeline_printout_level, output_stream=fwrite_id, history_file=os.path.join(es_constants.log_dir,'.ruffus_history_precip_1day.sqlite'),\
                      checksum_level=0)
 
     if pipeline_printout_graph_level > 0:

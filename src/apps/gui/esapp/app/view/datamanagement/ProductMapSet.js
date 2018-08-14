@@ -29,10 +29,12 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
         markDirty: false,
         resizable: false,
         disableSelection: true,
-        trackOver: false
+        trackOver: false,
+        preserveScrollOnRefresh: false,
+        variableRowHeight : true
     },
 
-    //layout: 'fit',
+    layout: 'fit',
 
     //selType: 'cellmodel',
     //selModel: {listeners:{}},
@@ -50,6 +52,7 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
     columnLines: false,
     rowLines: false,
     minHeight: 60,
+    focusable: false,
 
     //listeners: {
     //    beforerender:  function () {
@@ -71,6 +74,13 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
 
     initComponent: function () {
         var me = this;
+
+        // me.listeners = {
+        //     beforerender: function () {
+        //         Ext.util.Observable.capture(me, function (e) { console.log('productmapsetgrid - ' + e);});
+        //         // me.ownerGrid.updateLayout();
+        //     }
+        // };
 
         me.defaults = {
             menuDisabled: true,
@@ -115,24 +125,25 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
                 widgetattached: false
             },
             onWidgetAttach: function(col, widget, record) {
-                Ext.suspendLayouts();
                 if (!widget.widgetattached) {
+                    Ext.suspendLayouts();
                     widget.getStore().setData(record.getData().mapsetdatasets);
                     var sorters = widget.getStore().getSorters();
                     sorters.add('display_index');
 
                     widget.widgetattached = true;
+                    Ext.resumeLayouts(true);
                 }
-                Ext.resumeLayouts(true);
+                // else {
+                //     me.ownerGrid.updateLayout();
+                // }
 
-                //me.updateLayout();
                 //var mapsetdatasets = record.getData().mapsetdatasets;
                 //var newstore = Ext.create('Ext.data.JsonStore', {
                 //    model: 'MapSetDataSet',
                 //    data: mapsetdatasets
                 //});
                 //widget.setStore(newstore);
-
             }
         }];
 

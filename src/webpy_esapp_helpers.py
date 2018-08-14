@@ -21,6 +21,12 @@ import glob
 import calendar
 import numpy as NP
 
+import base64
+import matplotlib as mpl
+mpl.use('agg')
+import matplotlib.pyplot as plt
+
+
 from config import es_constants
 from database import querydb
 from database import crud
@@ -63,6 +69,7 @@ def getWorkspaceMaps(workspaceid):
                 'subproductcode': row_dict['subproductcode'],
                 'productversion': row_dict['productversion'],
                 'mapsetcode': row_dict['mapsetcode'],
+                'productdate': row_dict['productdate'],
                 'legendid': row_dict['legendid'],
                 'legendlayout': row_dict['legendlayout'],
                 'legendobjposition': row_dict['legendobjposition'],
@@ -247,6 +254,7 @@ def saveWorkspaceMaps(wsmaps, workspaceid):
             'subproductcode': wsmap['subproductcode'],
             'productversion': wsmap['productversion'],
             'mapsetcode': wsmap['mapsetcode'],
+            'productdate': wsmap['productdate'],
             'legendid': legendid,
             'legendlayout': wsmap['legendlayout'],
             'legendobjposition': wsmap['legendObjPosition'],
@@ -488,6 +496,7 @@ def saveMapTemplate(params):
             'subproductcode': params['subproductcode'],
             'productversion': params['productversion'],
             'mapsetcode': params['mapsetcode'],
+            'productdate': params['productdate'],
             'legendid': legendid,
             'legendlayout': params['legendlayout'],
             'legendobjposition': params['legendObjPosition'],
@@ -1321,6 +1330,13 @@ def rankTimeseries(params):
             dataRanking[0]['color'] = '#ff0000'
             dataRanking = sorted(dataRanking, key=lambda k:k['y'], reverse=False)
 
+            emptyDataRanking = {
+                'name': '',
+                'color': '',
+                'y': ''
+            }
+            dataRanking.append(emptyDataRanking)
+
             # from operator import itemgetter, attrgetter
             # data = sorted(data, key=attrgetter('y'), reverse=False)
             # data = sorted(data, key=itemgetter(2), reverse=False)
@@ -1332,6 +1348,13 @@ def rankTimeseries(params):
                 yearData['y'] = zScoreValue
                 if zScoreValue < 0:
                     yearData['color'] = '#ff0000'
+
+            emptyDataZScore = {
+                'name': '',
+                'color': '',
+                'y': ''
+            }
+            dataZScore.append(emptyDataZScore)
 
             if zscore:
                 data = dataZScore
@@ -2393,7 +2416,7 @@ def getProductLayer(getparams):
     dataset = p.get_dataset(mapset=getparams['mapsetcode'], sub_product_code=getparams['subproductcode'])
     # print dataset.fullpath
 
-    if hasattr(getparams, "date"):
+    if 'date' in getparams:
         filedate = getparams['date']
     else:
         dataset.get_filenames()
@@ -2401,14 +2424,13 @@ def getProductLayer(getparams):
         filedate = lastdate
 
     if dataset.no_year():
-        filedate=dataset.strip_year(filedate)
+        filedate = dataset.strip_year(filedate)
 
     # Check the case of daily product, with time/minutes
     frequency_id = dataset._db_product.frequency_id
     date_format = dataset._db_product.date_format
 
-
-    if frequency_id=='e1day' and date_format=='YYYYMMDD':
+    if frequency_id == 'e1day' and date_format == 'YYYYMMDD':
         regex = dataset.fullpath + filedate+'*'+'.tif'
         filename = glob.glob(regex)
         productfile = filename[0]
@@ -2497,11 +2519,11 @@ def getProductLayer(getparams):
     inputparams = getparams
 
     filenamenoextention = functions.set_path_filename(filedate,
-                                           getparams['productcode'],
-                                           getparams['subproductcode'],
-                                           getparams['mapsetcode'],
-                                           getparams['productversion'],
-                                           '')
+                                                      getparams['productcode'],
+                                                      getparams['subproductcode'],
+                                                      getparams['mapsetcode'],
+                                                      getparams['productversion'],
+                                                      '')
     # owsrequest.setParameter("LAYERS", filenamenoextention)
     # owsrequest.setParameter("UNIT", mapscript.MS_METERS)
 
@@ -2510,14 +2532,20 @@ def getProductLayer(getparams):
     productmap.setConfigOption("MS_ERRORFILE", errorfile)
     productmap.maxsize = 4096
 
+    outputformat_jpg = mapscript.outputFormatObj('AGG/JPEG', 'jpg')
+    outputformat_jpg.setOption("INTERLACE", "OFF")
+    productmap.appendOutputFormat(outputformat_jpg)
+
     outputformat_png = mapscript.outputFormatObj('GD/PNG', 'png')
     outputformat_png.setOption("INTERLACE", "OFF")
     productmap.appendOutputFormat(outputformat_png)
+
     # outputformat_gd = mapscript.outputFormatObj('GD/GIF', 'gif')
     # productmap.appendOutputFormat(outputformat_gd)
-    productmap.selectOutputFormat('png')
+
+    productmap.selectOutputFormat('jpg')
     # productmap.debug = mapscript.MS_TRUE
-    productmap.debug = 5
+    productmap.debug = mapscript.MS_OFF
     productmap.status = mapscript.MS_ON
     productmap.units = mapscript.MS_DD
 
@@ -2559,20 +2587,25 @@ def getProductLayer(getparams):
     legend_info = querydb.get_legend_info(legendid=inputparams['legendid'])
     if hasattr(legend_info, "__len__") and legend_info.__len__() > 0:
         for row in legend_info:
-            minstep = float((row.min_value - scale_offset)/scale_factor)    #int(row.min_value*scale_factor+scale_offset)
+            totwidth = float((row.totwidth - scale_offset)/scale_factor)
+            minstep = float((row.min_value - scale_offset)/scale_factor)    # int(row.min_value*scale_factor+scale_offset)
             maxstep = float((row.max_value - scale_offset)/scale_factor)    # int(row.max_value*scale_factor+scale_offset)
-            realminstep = float((row.realminstep - scale_offset)/scale_factor)
-            realmaxstep = float((row.realmaxstep - scale_offset)/scale_factor)
             minstepwidth = float((row.minstepwidth - scale_offset)/scale_factor)
             maxstepwidth = float((row.maxstepwidth - scale_offset)/scale_factor)
-            totwidth = float((row.totwidth - scale_offset)/scale_factor)
+            realminstep = float((row.realminstep - scale_offset)/scale_factor)
+            realmaxstep = float((row.realmaxstep - scale_offset)/scale_factor)
             totsteps = row.totsteps
+            step_type = row.step_type
 
-        # maxstep = 255
         processing_scale = 'SCALE='+str(minstep)+','+str(maxstep)  # min(legend_step.from_step) max(legend_step.to_step) example: 'SCALE=-7000,10000'
 
-        minbuckets = 256
-        maxbuckets = 5000
+        if step_type == 'logarithmic':
+            minbuckets = 32  # 256
+            maxbuckets = 256  # 5000
+        else:
+            minbuckets = 32    # 256
+            maxbuckets = 1024   # 5000
+
         num_buckets = maxbuckets
         if minstepwidth > 0:
             num_buckets = round(totwidth / minstepwidth, 0)
@@ -2582,11 +2615,10 @@ def getProductLayer(getparams):
         elif num_buckets > maxbuckets:
             num_buckets = maxbuckets
 
-        # num_buckets = 10000
+        processing_buckets = ''
         if num_buckets > 0:
             processing_buckets = 'SCALE_BUCKETS='+str(num_buckets)
 
-        # nodata = -32768     # get this value from the table products.product
         processing_novalue = ''
         if nodata is not None and minstep <= nodata < maxstep:
             processing_novalue = 'NODATA='+str(nodata)
@@ -2611,6 +2643,9 @@ def getProductLayer(getparams):
 
         resample_processing = "RESAMPLE=AVERAGE"
         layer.setProcessing(resample_processing)
+
+        closeconnection = "CLOSE_CONNECTION=DEFER"
+        layer.setProcessing(closeconnection)
 
         legend_steps = querydb.get_legend_steps(legendid=inputparams['legendid'])
         if hasattr(legend_steps, "__len__") and legend_steps.__len__() > 0:
@@ -2640,7 +2675,7 @@ def getProductLayer(getparams):
     # productmap.save(result_map_file)
 
     image = productmap.draw()
-    filename_png = es_constants.base_tmp_dir+filenamenoextention+str(llx)+'_'+str(lly)+'_'+str(urx)+'_'+str(ury)+'.png'
+    filename_png = es_constants.base_tmp_dir+'/'+filenamenoextention+str(llx)+'_'+str(lly)+'_'+str(urx)+'_'+str(ury)+'.jpg'
     image.save(filename_png)
 
     return filename_png
@@ -2810,8 +2845,8 @@ def SaveLegend(params):
                 message = '{"success":true, "legendid": ' + str(newlegendid) + ',"message":"Legend created!"}'
                 for legendstep in legendClasses:
                     legendstep_dict = {'legend_id': newlegendid,
-                                       'from_step': float(legendstep['from_step']),
-                                       'to_step': float(legendstep['to_step']),
+                                       'from_step': legendstep['from_step'],
+                                       'to_step': legendstep['to_step'],
                                        'color_rgb': legendstep['color_rgb'],
                                        'color_label': legendstep['color_label'],
                                        'group_label': legendstep['group_label']
@@ -2828,8 +2863,8 @@ def SaveLegend(params):
                     message = '{"success":true, "legendid": ' + params['legendid'] + ',"message":"Legend updated!"}'
                     for legendstep in legendClasses:
                         legendstep_dict = {'legend_id': int(params['legendid']),
-                                           'from_step': float(legendstep['from_step']),
-                                           'to_step': float(legendstep['to_step']),
+                                           'from_step': legendstep['from_step'],
+                                           'to_step': legendstep['to_step'],
                                            'color_rgb': legendstep['color_rgb'],
                                            'color_label': legendstep['color_label'],
                                            'group_label': legendstep['group_label']
@@ -2853,8 +2888,8 @@ def GetLegendClasses(legendid):
 
     if hasattr(legend_steps, "__len__") and legend_steps.__len__() > 0:
         for legendstep in legend_steps:
-            row_dict = functions.row2dict(legendstep)
-            # row_dict = legendstep
+            # row_dict = functions.row2dict(legendstep)
+            row_dict = legendstep
 
             legendstep_dict = {'legend_id': row_dict['legend_id'],
                                'from_step': row_dict['from_step'],
@@ -2862,7 +2897,7 @@ def GetLegendClasses(legendid):
                                'color_rgb': row_dict['color_rgb'],
                                'color_label': row_dict['color_label'],
                                'group_label': row_dict['group_label']
-                              }
+                               }
 
             legendsteps_dict_all.append(legendstep_dict)
 
@@ -3290,9 +3325,14 @@ def DataSets():
                                     #     dataset_dict['nodisplay'] = 'no_minutes_display'
                                     # else:
                                     #     dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+
                                     dataset = p.get_dataset(**kwargs)
-                                    completeness = dataset.get_dataset_normalized_info()
-                                    dataset_dict['datasetcompleteness'] = completeness
+                                    completeness = getDatasetCompleteness(dataset)
+
+                                    # completeness = dataset.get_dataset_normalized_info()
+                                    dataset_dict['datasetcompleteness'] = completeness['datasetcompleteness']
+                                    dataset_dict['datasetcompletenessimage'] = completeness['datasetcompletenessimage']
+                                    # dataset_dict['datasetcompletenessimage'] = createDatasetCompletenessImage(completeness, dataset_info.frequency_id)
                                     dataset_dict['nodisplay'] = 'false'
 
                                     dataset_dict['mapsetcode'] = mapset_dict['mapsetcode']
@@ -3321,6 +3361,157 @@ def DataSets():
     datamanagement_json = datamanagement_json.replace("'", "\'")
     datamanagement_json = datamanagement_json.replace(', ', ',')
     return datamanagement_json
+
+
+def getDatasetCompleteness(dataset):
+    completeness_dict = {}
+    output_dir = es_constants.base_local_dir + os.path.sep + 'completeness_bars/'
+    functions.check_output_dir(output_dir)      # if not exists output_dir -> create output_dir
+
+    prod_ident = functions.set_path_filename_no_date(dataset._db_product.productcode,
+                                                     dataset._db_product.subproductcode,
+                                                     dataset.mapset,
+                                                     dataset._db_product.version, '')
+    completeness_file_json = output_dir + os.path.sep + 'Dataset_' + prod_ident + '.json'
+    completeness_file_png = output_dir + os.path.sep + 'Dataset_' + prod_ident + '.png'
+
+    if os.path.isfile(completeness_file_json) and os.path.isdir(dataset.fullpath):   # if completeness_file_json exists in path dataset
+        # command = 'find ' + dataset.fullpath + ' -newer ' + output_dir + completeness_file_json
+        # list = os.popen(command).read()
+        # if list != '':
+        if os.lstat(dataset.fullpath).st_mtime > os.lstat(completeness_file_json).st_mtime:
+            completeness = dataset.get_dataset_normalized_info()
+            completeness_dict['datasetcompleteness'] = completeness
+            completeness_dict['datasetcompletenessimage'] = createDatasetCompletenessImage(completeness,
+                                                                                           dataset.frequency_id,
+                                                                                           completeness_file_png)
+            with open(completeness_file_json, 'w') as fp:
+                json.dump(completeness_dict, fp)
+        else:
+            with open(completeness_file_json) as f:
+                completeness_dict = json.load(f)
+    else:
+        completeness = dataset.get_dataset_normalized_info()
+        completeness_dict['datasetcompleteness'] = completeness
+        completeness_dict['datasetcompletenessimage'] = createDatasetCompletenessImage(completeness,
+                                                                                       dataset.frequency_id,
+                                                                                       completeness_file_png)
+        with open(completeness_file_json, 'w') as fp:
+            json.dump(completeness_dict, fp)
+    return completeness_dict
+
+
+def createDatasetCompletenessImage(datasetcompleteness, frequency_id, completeness_file_png):
+    # TODO: IMPORTANT to set FONTCONFIG_FILE and FONTCONFIG_PATH for matplotlib
+    # ToDo:   export FONTCONFIG_PATH=/etc/fonts
+    # ToDO:   export FONTCONFIG_FILE=/etc/fonts/fonts.conf
+    # import io
+    # import StringIO
+
+    totfiles = None
+    missingfiles = None
+    firstdate = ''
+    lastdate = ''
+    intervals = []
+
+    mpl.rcParams['savefig.pad_inches'] = 0
+    plt.autoscale(tight=True)
+
+    yinch = 0.38
+    fig, ax = plt.subplots(figsize=(3.4, yinch), frameon=False, facecolor='w', dpi=128)
+
+    for attr, value in datasetcompleteness.iteritems():
+        if attr == 'missingfiles':
+            missingfiles = value
+        if attr == 'totfiles':
+            totfiles = value
+        if attr == 'firstdate':
+            if len(value) > 10:
+                firstdate = value[:10]
+            else:
+                firstdate = value
+        if attr == 'lastdate':
+            if len(value) > 10:
+                lastdate = value[:10]
+            else:
+                lastdate = value
+        if attr == 'intervals':
+            intervals = value
+
+    if frequency_id == 'singlefile' and totfiles == 1 and missingfiles == 0:
+        d = 100
+        color = '#81AF34'
+        plt.barh(0, d, color=color, height=5, linewidth=0, align='center')
+        totfiles = 'Files: ' + str(totfiles)
+        missingfiles = 'Missing: ' + str(missingfiles)
+        firstdate = ''
+        lastdate = ''
+
+    elif totfiles < 2 and missingfiles < 2:
+        d = 100
+        color = '#808080'
+        plt.barh(0, d, color=color, height=5, linewidth=0, align='center')
+        totfiles = 'Not any data'
+        missingfiles = ''
+        firstdate = ''
+        lastdate = ''
+
+    else:
+        left = NP.zeros(1)  # left alignment of data starts at zero
+        for interval in intervals:
+            d = interval['intervalpercentage']
+            if interval['missing']:
+                color = '#FF0000'
+            else:
+                color = '#81AF34'
+
+            if interval['intervaltype'] == 'permanent-missing':
+                color = '#808080'
+
+            plt.barh(0, d, color=color, height=5, linewidth=0, align='center', left=left)
+            # accumulate the left-hand offsets
+            left += d
+        totfiles = 'Files: ' + str(totfiles)
+        missingfiles = 'Missing: ' + str(missingfiles)
+
+    font1 = {  # 'family': 'sans-serif',
+        'color': 'black',
+        'weight': 'bold',
+        'size': 6}
+
+    font2 = {  # 'family': 'sans-serif',
+        'color': 'black',
+        'weight': 'bold',
+        'size': 6.5}
+
+    font3 = {  # 'family': 'sans-serif',
+        'color': '#FF0000',
+        'weight': 'bold',
+        'size': 6.5}
+
+    plt.gcf().text(0.02, 0.7, firstdate, fontdict=font1)
+    plt.gcf().text(0.3, 0.72, totfiles, fontdict=font2)
+    plt.gcf().text(0.55, 0.72, missingfiles, fontdict=font3)
+    if len(lastdate) < 6:
+        plt.gcf().text(0.9, 0.7, lastdate, fontdict=font1)
+    else:
+        plt.gcf().text(0.83, 0.7, lastdate, fontdict=font1)
+
+    plt.axis('off')
+    plt.margins(0)
+    fig.subplots_adjust(left=0.07, right=0.95, bottom=0.15, top=0.9)  # , wspace=0.2, hspace=0.2
+    ax.set_ylim(0, 4)
+    plt.draw()
+    # buf = StringIO.StringIO()
+    # plt.savefig(buf, format='png', bbox_inches=0, pad_inches=0)
+    plt.savefig(completeness_file_png, bbox_inches=0, pad_inches=0)
+    # encoded = base64.b64encode(str(buf))
+    encoded = base64.b64encode(open(completeness_file_png, "rb").read())
+    datasetcompletenessimage = "data:image/png;base64," + encoded
+    # buf.close()
+    plt.close('all')
+
+    return datasetcompletenessimage
 
 
 def getTimeseriesProducts(forse):
@@ -3857,10 +4048,15 @@ def Ingestion():
                               'mapset': row.mapsetcode}
                 # print kwargs
                 dataset = Dataset(**kwargs)
-                completeness = dataset.get_dataset_normalized_info()
-                ingest_dict['completeness'] = completeness
+
+                completeness = getDatasetCompleteness(dataset)
+                ingest_dict['completeness'] = completeness['datasetcompleteness']
+                ingest_dict['datasetcompletenessimage'] = completeness['datasetcompletenessimage']
+                # completeness = dataset.get_dataset_normalized_info()
+                # ingest_dict['completeness'] = completeness
                 ingest_dict['nodisplay'] = 'false'
             else:
+                ingest_dict['datasetcompletenessimage'] = ''
                 ingest_dict['completeness'] = {}
                 ingest_dict['nodisplay'] = 'false'
 

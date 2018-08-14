@@ -26,6 +26,8 @@ import gzip
 import psutil
 import csv
 import sys
+import tarfile
+
 # import h5py
 
 from multiprocessing import *
@@ -813,7 +815,6 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger, out_qu
     out_queue.put(pre_processed_files)
     return 0
 
-
 def pre_process_pml_netcdf(subproducts, tmpdir , input_files, my_logger):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process PML NETCDF files
@@ -1030,6 +1031,34 @@ def pre_process_unzip(subproducts, tmpdir , input_files, my_logger):
 
     return out_tmp_gtiff_file
 
+def pre_process_tarzip(subproducts, tmpdir , input_files, my_logger):
+# -------------------------------------------------------------------------------------------------------
+#   Pre-process .tgz files (e.g. WD-GEE)
+#
+    out_tmp_gtiff_file = []
+    #  should be a single file
+    if isinstance(input_files, list):
+        if len(input_files) > 1:
+            logger.error('Only 1 file expected. Exit')
+            raise Exception("Only 1 file expected. Exit")
+        else:
+            input_file = input_files[0]
+
+    logger.debug('Extracting from .tgz: .tarzip case')
+    if tarfile.is_tarfile(input_file):
+        tar_file = tarfile.open(input_file,'r:*')           # Open the .tgz
+        tar_file.extractall(path=tmpdir)
+        out_tmp_gtiff_file=glob.glob(tmpdir+os.path.sep+'*.tif')
+
+        tar_file.close()
+
+    else:
+        my_logger.error("File %s is not a valid .tgz. Exit", input_files)
+        raise Exception("File %s is not a valid .tgz. Exit", input_files)
+
+        # TODO-M.C.:Check all datasets have been found (len(intermFile) ==len(subprods)))
+
+    return out_tmp_gtiff_file
 
 def pre_process_bzip2 (subproducts, tmpdir, input_files, my_logger):
 # -------------------------------------------------------------------------------------------------------
@@ -2488,6 +2517,10 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
         elif preproc_type == 'NETCDF_S3_WST':
             interm_files = pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
 
+        elif preproc_type == 'TARZIP':
+            interm_files = pre_process_tarzip(subproducts, tmpdir, input_files, my_logger)
+
+
         # elif preproc_type == 'GSOD':
         #     interm_files = pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
 
@@ -2557,11 +2590,11 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 #       echo_query[option]: force print-out from query_db functions
 #
 #   NOTE: mapset management: mapset is the geo-reference information associated to datasets
-#         There is an 'native_mapset' - associated to the input product and
+#         There is a  'native_mapset' - associated to the input product and
 #                     'target_mapset' - defined (optionally) by the user
 #
 #         'native_mapset': comes from the table -> 'datasource_description'
-#                          if it is 'native', they georeferencing is read directly from input file
+#                          if it is 'default', they georeferencing is read directly from input file
 #
 #         'target_mapset": comes from table 'ingestion' ('mapsetcode')
 #                          MUST be specified.
@@ -2762,7 +2795,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             except:
                 my_logger.debug('Cannot read geo-reference from file .. Continue')
 
-        # TODO-M.C.: add a test on the mapset id in DB table !
+        # TODO-M.C.: add a test on the mapset_id in DB table !
         trg_mapset = mapset.MapSet()
         trg_mapset.assigndb(mapset_id)
         logger.debug('Target Mapset is: %s' % mapset_id)
@@ -2864,9 +2897,9 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             orig_ds = None
 
         else:
-            # Do only renaming
+            # Do only renaming (and exit)
             shutil.copy(intermFile,output_filename)
-
+            return 0
         # -------------------------------------------------------------------------
         # Assign Metadata to the ingested file
         # -------------------------------------------------------------------------

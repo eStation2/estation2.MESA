@@ -10,12 +10,513 @@ import datetime
 import webpy_esapp_helpers
 import webpy_esapp
 from database import crud
+
+import plotly.plotly as py
+from plotly.graph_objs import *
+
+import StringIO
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+import base64
+
 from lib.python import es_logging as log
 logger = log.my_logger(__name__)
 
 
 class TestWebpy(unittest.TestCase):
 
+    def testMatplotlib(self):
+        # from PIL import Image
+
+        # datasetcompleteness = {
+        #     "firstdate": "",
+        #     "intervals": "",
+        #     "lastdate": "",
+        #     "missingfiles": 0,
+        #     "totfiles": 1
+        # }
+        #
+        # datasetcompleteness = {
+        #     "firstdate": "01-01",
+        #     "intervals": [
+        #                      {
+        #                          "fromdate": "01-01",
+        #                          "intervalpercentage": 100.0,
+        #                          "intervaltype": "present",
+        #                          "missing": False,
+        #                          "todate": "12-21",
+        #                          "totfiles": 36
+        #                      }
+        #                  ],
+        #     "lastdate": "12-21",
+        #     "missingfiles": 0,
+        #     "totfiles": 36
+        #
+        # }
+
+        # datasetcompleteness = {
+        #     "firstdate": "1999-01-01",
+        #     "intervals": [
+        #         {
+        #             "fromdate": "1999-01-01",
+        #             "intervalpercentage": 99.57386363636364,
+        #             "intervaltype": "present",
+        #             "missing": False,
+        #             "todate": "2018-06-11",
+        #             "totfiles": 701
+        #         },
+        #         {
+        #             "fromdate": "2018-06-21",
+        #             "intervalpercentage": 0.42613636363636365,
+        #             "intervaltype": "missing",
+        #             "missing": True,
+        #             "todate": "2018-07-11",
+        #             "totfiles": 3
+        #         }
+        #     ],
+        #     "lastdate": "2018-07-11",
+        #     "missingfiles": 3,
+        #     "totfiles": 704
+        # }
+
+        datasetcompleteness = {
+            "firstdate": "1984-01-01",
+            "intervals": [
+                {
+                    "fromdate": "1984-01-01",
+                    "intervalpercentage": 2.891566265060241,
+                    "intervaltype": "present",
+                    "missing": False,
+                    "todate": "1984-12-01",
+                    "totfiles": 12
+                },
+                {
+                    "fromdate": "1985-01-01",
+                    "intervalpercentage": 3.1325301204819276,
+                    "intervaltype": "missing",
+                    "missing": True,
+                    "todate": "1986-01-01",
+                    "totfiles": 13
+                },
+                {
+                    "fromdate": "1986-02-01",
+                    "intervalpercentage": 8.19277108433735,
+                    "intervaltype": "present",
+                    "missing": False,
+                    "todate": "1988-11-01",
+                    "totfiles": 34
+                },
+                {
+                    "fromdate": "1988-12-01",
+                    "intervalpercentage": 2.891566265060241,
+                    "intervaltype": "missing",
+                    "missing": True,
+                    "todate": "1989-11-01",
+                    "totfiles": 12
+                },
+                {
+                    "fromdate": "1989-12-01",
+                    "intervalpercentage": 1.0,
+                    "intervaltype": "present",
+                    "missing": False,
+                    "todate": "1990-01-01",
+                    "totfiles": 2
+                },
+                {
+                    "fromdate": "1990-02-01",
+                    "intervalpercentage": 2.1686746987951806,
+                    "intervaltype": "missing",
+                    "missing": True,
+                    "todate": "1990-10-01",
+                    "totfiles": 9
+                },
+                {
+                    "fromdate": "1990-11-01",
+                    "intervalpercentage": 80.0,
+                    "intervaltype": "present",
+                    "missing": False,
+                    "todate": "2018-06-01",
+                    "totfiles": 332
+                },
+                {
+                    "fromdate": "2018-07-01",
+                    "intervalpercentage": -0.27710843373493965,
+                    "intervaltype": "missing",
+                    "missing": True,
+                    "todate": "2018-07-01",
+                    "totfiles": 1
+                }
+            ],
+            "lastdate": "2018-07-01",
+            "missingfiles": 35,
+            "totfiles": 415
+        }
+
+        totfiles = None
+        missingfiles = None
+        firstdate = ''
+        lastdate = ''
+        intervals = []
+
+        # mpl.use('agg')
+        mpl.rcParams['savefig.pad_inches'] = 0
+        plt.autoscale(tight=True)
+
+        yinch = 0.38
+        fig, ax = plt.subplots(figsize=(3.4, yinch), frameon=False, facecolor='w', dpi=128)
+
+        for attr, value in datasetcompleteness.iteritems():
+            if attr == 'missingfiles':
+                missingfiles = value
+            if attr == 'totfiles':
+                totfiles = value
+            if attr == 'firstdate':
+                firstdate = value
+            if attr == 'lastdate':
+                lastdate = value
+            if attr == 'intervals':
+                intervals = value
+
+        left = np.zeros(1)  # left alignment of data starts at zero
+        for interval in intervals:
+            d = interval['intervalpercentage']
+            if interval['missing']:
+                color = '#FF0000'
+            else:
+                color = '#81AF34'
+
+            plt.barh(0, d, color=color, height=5, linewidth=0, align='center', left=left)
+            # accumulate the left-hand offsets
+            left += d
+
+        # completeness = ('A')
+        # segments = 5
+        # # generate some multi-dimensional data & arbitrary labels
+        # data = 3 + 10 * np.random.rand(segments, len(completeness))
+        # y_pos = np.arange(len(completeness))
+        #
+        # # fig = plt.figure(figsize=(3.4, 0.38), frameon=False)   # dpi=80,
+        # yinch = 0.38
+        # fig, ax = plt.subplots(figsize=(3.4, yinch), frameon=False, facecolor='w', dpi=128)
+        # # ax = fig.add_subplot(111)
+        # # ax.axis('off')
+        #
+        # colors = 'rg'
+        # left = np.zeros(len(completeness))  # left alignment of data starts at zero
+        # for i, d in enumerate(data):
+        #     color = '#81AF34'
+        #     plt.barh(y_pos, d, color=color, height=5, linewidth=0, align='center', left=left)
+        #     # plt.barh(y_pos, d, color=colors[i % len(colors)], height=5, linewidth=0, align='center', left=left)
+        #     # accumulate the left-hand offsets
+        #     left += d
+
+        font1 = {  # 'family': 'sans-serif',
+                 'color': 'black',
+                 'weight': 'bold',
+                 'size': 6}
+
+        font2 = {  # 'family': 'sans-serif',
+                 'color': 'black',
+                 'weight': 'bold',
+                 'size': 6.5}
+
+        font3 = {  # 'family': 'sans-serif',
+                 'color': '#FF0000',
+                 'weight': 'bold',
+                 'size': 6.5}
+
+        plt.gcf().text(0.02, 0.7, firstdate, fontdict=font1)
+        plt.gcf().text(0.3, 0.72, 'Files: ' + str(totfiles), fontdict=font2)
+        plt.gcf().text(0.55, 0.72, 'Missing: ' + str(missingfiles), fontdict=font3)
+        plt.gcf().text(0.83, 0.7, lastdate, fontdict=font1)
+
+        # left, width = .15, 1
+        # bottom, height = .15, 1
+        # right = left + width
+        # top = bottom + height
+        #
+        # ax.text(right, top, '01-01-2017',
+        #         horizontalalignment='left',
+        #         verticalalignment='top',
+        #         # transform=fig.transAxes,
+        #         fontdict=font1)
+
+        # fig.text(right, top, 'Files: 148',
+        #         horizontalalignment='left',
+        #         verticalalignment='bottom',
+        #         # transform=fig.transAxes,
+        #         fontdict=font2)
+
+        # ax.text(right, 0.5 * (bottom + top), 'Missing: 2',
+        #         horizontalalignment='center',
+        #         verticalalignment='center',
+        #         transform=ax.transAxes,
+        #         fontdict=font3)
+
+        # ax.text(left, top, '01-07-2018',
+        #         horizontalalignment='right',
+        #         verticalalignment='top',
+        #         # transform=fig.transAxes,
+        #         fontdict=font1)
+
+        # plt.text(.01, .025, '2014-06-01', fontdict=font1)
+        # plt.text(0, 2, 'Files: 148', fontdict=font2)
+        # plt.text(0, 3, 'Missing: 2', fontdict=font3)
+        # plt.text(0, 4, '2018-07-01', fontdict=font1)
+
+        # plt.text(2, 0.65, r'$\cos(2 \pi t) \exp(-t)$', fontdict=font)
+        # plt.text(0.6, 0.5, "test", size=50, rotation=30.,
+        #          ha="center", va="center",
+        #          bbox=dict(boxstyle="round",
+        #                    ec=(1., 0.5, 0.5),
+        #                    fc=(1., 0.8, 0.8),
+        #                    )
+        #          )
+        # plt.tight_layout()
+
+        # plt.gca().axes.get_xaxis().set_visible(False)
+        plt.axis('off')
+        plt.margins(0)
+        fig.subplots_adjust(left=0.07, right=0.95, bottom=0.15, top=0.9)    # , wspace=0.2, hspace=0.2
+        # ypixels = int(yinch * fig.get_dpi())
+        ax.set_ylim(0, 4)
+        # plt.box(on=None)
+        plt.draw()
+        # buf = io.BytesIO()
+        buf = StringIO.StringIO()
+        plt.savefig(buf, format='png', bbox_inches=0, pad_inches=0)
+        plt.savefig('/srv/www/eStation2/testmatlibplot.png', bbox_inches=0, pad_inches=0)     # bbox_inches='tight'
+        # buf.seek(0)
+        # img = Image.open(buf)
+        encoded = base64.b64encode(str(buf))
+        # buf.close()
+        # encoded = base64.b64encode(open("/var/www/eStation2/completeness.png", "rb").read())
+        datasetcompletenessimage = "data:image/png;base64," + encoded
+        print(datasetcompletenessimage)
+
+    def testPlotly(self):
+
+        trace1 = {
+            "x": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            "y": [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, 11842, None,
+                  None, None, None, None, None, None, None, None],
+            "name": "Building/Use",
+            "type": "bar",
+            "uid": "e59e0e",
+            "visible": True
+        }
+        trace2 = {
+            "x": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            "y": [None, 6630, 4328, 2771, 2788, 2665, 4755, 7716, None, None, None, None, None, None, None, None, None,
+                  None, None, None, 8724, 10291, 12345, 11874, None],
+            "name": "Noise",
+            "type": "bar",
+            "uid": "b46848"
+        }
+        trace3 = {
+            "x": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            "y": [None, None, None, None, None, None, None, None, None, None, None, None, None, 24481, None, None, None,
+                  None, 12348, 10532, None, None, None, None, None],
+            "name": "Dirty Conditions",
+            "type": "bar",
+            "uid": "67c879",
+            "visible": True
+        }
+        trace4 = {
+            "x": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            "y": [None, None, 5948, None, None, None, 6576, None, None, 15232, 16196, 16178, 14256, 13486, 13213, 12761,
+                  11141, None, None, 10061, None, None, None, None, None],
+            "name": "Sewer",
+            "type": "bar",
+            "uid": "da3ac3",
+            "visible": True
+        }
+        trace5 = {
+            "x": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            "y": [None, None, None, 1490, 1676, None, None, None, None, None, None, None, None, None, None, None, None,
+                  None, None, None, None, None, None, None, None],
+            "name": "Taxi Complaint",
+            "type": "bar",
+            "uid": "0f18f1",
+            "visible": True
+        }
+        trace6 = {
+            "x": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            "y": [None, None, None, None, None, None, None, None, None, None, 14899, 15691, 14542, None, 12927, 13667,
+                  11387, None, None, None, None, None, None, None, None],
+            "name": "General Construction/Plumbing",
+            "type": "bar",
+            "uid": "c695f5",
+            "visible": True
+        }
+        trace7 = {
+            "x": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            "y": [None, None, None, None, None, None, None, None, 12845, 44009, 76667, 82382, 21828, 52730, 51453,
+                  40379, 24158, 9904, 9186, 9380, 10945, 12526, 9097, None, None],
+            "name": "Street Light Condition",
+            "type": "bar",
+            "uid": "9fa287",
+            "visible": True
+        }
+        trace8 = {
+            "x": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            "y": [None, None, None, None, None, None, None, None, 17009, 13963, None, None, None, None, None, None,
+                  None, None, None, None, None, None, None, None, None],
+            "name": "Missed Collection (All Materials)",
+            "type": "bar",
+            "uid": "603090",
+            "visible": True
+        }
+        trace9 = {
+            "x": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            "y": [None, None, 4035, None, None, 1945, 5427, 9257, 14605, 18638, 19246, 19358, 19221, 18068, 19030,
+                  20480, 21078, 20400, 17487, 15718, 13349, 11109, 8615, None, None],
+            "name": "Water System",
+            "type": "bar",
+            "uid": "8c5771",
+            "visible": True
+        }
+        trace10 = {
+            "x": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            "y": [None, None, None, None, None, 1802, 3517, 7463, 11370, None, None, None, None, None, None, None, None,
+                  8769, None, 8703, 9188, 10986, 8838, 7195, None],
+            "name": "Illegal Parking",
+            "type": "bar",
+            "uid": "ddf793",
+            "visible": True
+        }
+        trace11 = {
+            "x": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            "y": [None, 2736, None, None, None, 2346, 6899, 35215, 29454, 34193, 34529, 29504, 25923, 39173, 52609,
+                  37891, 24564, 17117, 26067, 29566, 9260, 8062, None, 6596, None],
+            "name": "Street Condition",
+            "type": "bar",
+            "uid": "628823",
+            "visible": True
+        }
+        trace12 = {
+            "x": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            "y": [None, 24963, 20001, 12133, 11277, 15430, 30329, 60150, 143260, 222263, 242672, 244957, 225790, 227665,
+                  218406, 216547, 194797, 151869, 133464, 104735, 94243, 83764, 74412, 57444, None],
+            "name": "Other",
+            "type": "bar",
+            "uid": "99c04f",
+            "visible": True
+        }
+        trace13 = {
+            "x": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            "y": [None, 3749, None, 2010, 2284, 1705, None, None, None, None, None, None, None, None, None, None, None,
+                  None, None, None, None, None, None, None, None],
+            "name": "Noise - Vehicle",
+            "type": "bar",
+            "uid": "10597d",
+            "visible": True
+        }
+        trace14 = {
+            "x": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            "y": [None, 5471, 3416, 2816, 2875, 4095, 7652, 13432, 17141, 17593, 15573, 14515, 13872, None, 11899, None,
+                  12145, 13125, 14664, 15488, 16770, 17193, 15296, 11664, None],
+            "name": "Blocked Driveway",
+            "type": "bar",
+            "uid": "fd2e1a",
+            "visible": True
+        }
+        trace15 = {
+            "x": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            "y": [None, 8485, 5796, 3797, 3289, None, None, None, None, None, None, None, None, None, None, None, None,
+                  None, None, None, 6897, 8956, 12070, 13982, None],
+            "name": "Noise - Street/Sidewalk",
+            "type": "bar",
+            "uid": "c2a24f",
+            "visible": True
+        }
+        trace16 = {
+            "x": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            "y": [None, None, None, None, None, None, None, 6707, None, None, None, None, None, None, None, None, None,
+                  None, None, None, None, None, None, None, None],
+            "name": "Sanitation Condition",
+            "type": "bar",
+            "uid": "fded78",
+            "visible": True
+        }
+        trace17 = {
+            "x": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            "y": [None, 14817, 9553, 5097, 2458, None, None, None, None, None, None, None, None, None, None, None, None,
+                  None, None, None, None, None, 13290, 18779, None],
+            "name": "Noise - Commercial",
+            "type": "bar",
+            "uid": "395ea3",
+            "visible": True
+        }
+        trace18 = {
+            "x": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            "y": [None, None, None, None, None, None, None, None, None, None, 14250, 13382, 12287, None, None, None,
+                  None, None, None, None, None, None, None, None, None],
+            "name": "Damaged Tree",
+            "type": "bar",
+            "uid": "7c28f0",
+            "visible": True
+        }
+        trace19 = {
+            "x": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            "y": [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None,
+                  9712, 9076, None, None, None, None, None, None],
+            "name": "Broken Muni Meter",
+            "type": "bar",
+            "uid": "703c33",
+            "visible": True
+        }
+        trace20 = {
+            "x": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            "y": [None, 5142, 3285, 3282, 3787, 3234, 4863, 8932, 14104, 13382, None, None, None, 14962, 33431, 17646,
+                  12326, 10232, None, None, None, None, None, 6165, None],
+            "name": "Traffic Signal Condition",
+            "type": "bar",
+            "uid": "a29d51",
+            "visible": True
+        }
+        trace21 = {
+            "x": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            "y": [None, None, None, None, None, None, None, None, None, None, None, None, None, 15577, None, None, None,
+                  None, 11916, None, None, None, None, None, None],
+            "name": "Graffiti",
+            "type": "bar",
+            "uid": "1f5a32",
+            "visible": True
+        }
+        data = Data(
+            [trace1, trace2, trace3, trace4, trace5, trace6, trace7, trace8, trace9, trace10, trace11, trace12, trace13,
+             trace14, trace15, trace16, trace17, trace18, trace19, trace20, trace21])
+        layout = {
+            "autosize": True,
+            "barmode": "stack",
+            "height": 472,
+            "legend": {
+                "x": 1.02045209903,
+                "y": 0.00968523002421
+            },
+            "showlegend": True,
+            "title": "The 6 Most Common 311 Complaints",
+            "width": 1152,
+            "xaxis": {
+                "autorange": True,
+                "range": [0.5, 23.5],
+                "title": "Hour in Day",
+                "type": "linear"
+            },
+            "yaxis": {
+                "autorange": True,
+                "exponentformat": "SI",
+                "range": [0, 458912.631579],
+                "showexponent": "last",
+                "title": "Number of Complaints",
+                "type": "linear"
+            }
+        }
+        fig = Figure(data=data, layout=layout)
+        plot_url = py.plot(fig)
 
     def test_SaveWorkspace(self):
         params = {
@@ -159,7 +660,6 @@ class TestWebpy(unittest.TestCase):
         print maptemplates
         self.assertEqual(1, 1)
 
-
     def test_Workspace(self):
         crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
         userinfo = {'userid': 'jurvtk', 'isdefault': True}
@@ -209,14 +709,17 @@ class TestWebpy(unittest.TestCase):
         print ts
         self.assertEqual(1, 1)
 
-
     def test_ProductNavigatorDataSets(self):
         products = webpy_esapp_helpers.ProductNavigatorDataSets()
         print products
         self.assertEqual(1, 1)
 
-    def test_DataSets(self):
+    def test_getDataSets(self):
         datasets = webpy_esapp_helpers.getDataSets(True)
+        self.assertEqual(1, 1)
+
+    def test_DataSets(self):
+        datasets = webpy_esapp_helpers.DataSets()
         print datasets
         self.assertEqual(1, 1)
 
@@ -229,16 +732,13 @@ class TestWebpy(unittest.TestCase):
         result = webpy_esapp_helpers.getAllColorSchemes()
         self.assertEqual(1, 1)
 
-
     def test_getProcessing(self):
         result = webpy_esapp_helpers.getProcessing(False)
         self.assertEqual(1, 1)
 
-
     def test_GetLegends(self):
         result = webpy_esapp_helpers.GetLegends()
         self.assertEqual(1, 1)
-
 
     def test_SaveLegend(self):
         params = {
@@ -253,7 +753,6 @@ class TestWebpy(unittest.TestCase):
         }
         result = webpy_esapp_helpers.SaveLegend(params)
         self.assertEqual(1, 1)
-
 
     def test_DeleteLegend(self):
         params = {
@@ -270,7 +769,6 @@ class TestWebpy(unittest.TestCase):
         result = webpy_esapp_helpers.DeleteLegend(params)
         self.assertEqual(1, 1)
 
-
     def test_CopyLegend(self):
         params = {
             'legendid': 237,
@@ -278,7 +776,6 @@ class TestWebpy(unittest.TestCase):
         }
         result = webpy_esapp_helpers.copyLegend(params)
         self.assertEqual(1, 1)
-
 
     def test_AssignLegends(self):
         params = {
@@ -290,7 +787,6 @@ class TestWebpy(unittest.TestCase):
         result = webpy_esapp_helpers.AssignLegends(params)
         self.assertEqual(1, 1)
 
-
     def test_GetAssignedDatasets(self):
         params = {
             'legendid': 111
@@ -299,51 +795,79 @@ class TestWebpy(unittest.TestCase):
         self.assertEqual(1, 1)
 
     def test_GetProductLayer(self):
-        import os
+
+        # date = '20180625'  # uncompressed with piramid (adds .ovr file)
+        date = '20180701'
+        params = {
+            'productcode': 'chirps-dekad',
+            'productversion': '2.0',
+            'subproductcode': '1moncum',
+            'mapsetcode': 'CHIRP-Africa-5km',
+            'date': date,
+            'WIDTH': '0',
+            'HEIGHT': '1024',
+            'BBOX': "-40, -30, 40, 75",
+            'CRS': "EPSG:4326",
+            'legendid': "67"
+        }
+        # params = {
+        #     'productcode': 'modis-chla',
+        #     'productversion': 'v2013.1',
+        #     'subproductcode': 'chla-day',
+        #     'mapsetcode': 'MODIS-Africa-4km',
+        #     'date': date,
+        #     'WIDTH': '256',
+        #     'HEIGHT': '256',
+        #     'BBOX': "-45,-22.5,-22.5,0",
+        #     'CRS': "EPSG:4326",
+        #     'legendid': "211"
+        # }
+        #
+        # params = {
+        #     'productcode': 'modis-chla',
+        #     'productversion': 'v2013.1',
+        #     'subproductcode': 'chla-day',
+        #     'mapsetcode': 'MODIS-Africa-4km',
+        #     'date': date,
+        #     'WIDTH': '0',
+        #     'HEIGHT': '1024',
+        #     'BBOX': "-40, -30, 40, 75",  # "-30, -40, 40, 75", Lat min, Lon min , Lat max, Lon max, (llx, lly, urx, ury)
+        #     'CRS': "EPSG:4326",
+        #     'legendid': "211"
+        # }
+        # params = {
+        #     'productcode': 'vgt-ndvi',
+        #     'productversion': 'sv2-pv2.2',
+        #     'subproductcode': 'ndv',
+        #     'mapsetcode': 'SPOTV-Africa-1km',
+        #     'date': date,
+        #     'WIDTH': '1024',
+        #     'HEIGHT': '1024',
+        #     'BBOX': "-30, -40, 75, 40",  # Lon min , Lat min, Lon max, Lat max (llx, lly, urx, ury)
+        #     'CRS': "EPSG:4326",
+        #     'legendid': "9"
+        # }
+        #
         # params = {
         #     'productcode': 'pml-modis-sst',
         #     'productversion': '3.0',
         #     'subproductcode': 'sst-fronts',
-        #     'mapsetcode':'SPOTV-IOC-1km',
+        #     'mapsetcode': 'SPOTV-IOC-1km',
         #     'date': '20150517',
         #     'WIDTH': '256',
         #     'HEIGHT': '256',
-        #     'BBOX':"-22.5,36.5625,-19.6875,39.375",
-        #     'CRS':"EPSG:4326",
-        #     'legendid':"136"
+        #     'BBOX': "-22.5,36.5625,-19.6875,39.375",
+        #     'CRS': "EPSG:4326",
+        #     'legendid': "136"
         # }
-        params = {
-            'productcode': 'vgt-ndvi',
-            'productversion': 'sv2-pv2.2',
-            'subproductcode': 'ndv',
-            'mapsetcode':'SPOTV-Africa-1km',
-            'date': '20180301',
-            'WIDTH': '0',
-            'HEIGHT': '1024',
-            'BBOX':"0,0,35,60",     # Lat min, Lon min, Lat max, Lon max)
-            'CRS':"EPSG:4326",
-            'legendid':"9"
-        }
-        params = {
-            'productcode': 'olci-wrr',
-            'productversion': 'V02.0',
-            'subproductcode': 'chl-oc4me',
-            'mapsetcode':'SPOTV-Africa-1km',
-            'date': '20180724',
-            'WIDTH': '0',
-            'HEIGHT': '1024',
-            'BBOX':"-35.0,-26,38.0,60",
-            'CRS':"EPSG:4326",
-            'legendid':"211"
-        }
 
-        # Adjust height by using image ratio
-        vals=params['BBOX'].split(',')
-        ratio=(float(vals[3])-float(vals[1]))/(float(vals[2])-float(vals[0]))       # ratio width/height (X/Y)
+        vals = params['BBOX'].split(',')
+        ratio = (float(vals[3]) - float(vals[1])) / (float(vals[2]) - float(vals[0]))  # ratio width/height (X/Y)
         params['WIDTH'] = str(int(float(params['HEIGHT']) * ratio))
-        # result = webpy_esapp_helpers.getProductLayer(params)
 
-        # # Copy the file for analysis in Windows
-        # command='cp '+result+' /data/processing/exchange/Tests/mapscript/'
-        # os.system(command)
+        result = webpy_esapp_helpers.getProductLayer(params)
+        # print(result)
+        # Copy the file for analysis in Windows
+        command = 'cp '+result+' /srv/www/eStation2/Tests/mapscript/'
+        os.system(command)
         self.assertEqual(1, 1)

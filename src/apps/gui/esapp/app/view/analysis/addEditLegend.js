@@ -26,7 +26,8 @@ Ext.define("esapp.view.analysis.addEditLegend",{
     title: '',
     header: {
         titlePosition: 0,
-        titleAlign: 'center'
+        titleAlign: 'center',
+        focusable: true
     },
 
     constrainHeader: true,
@@ -110,6 +111,10 @@ Ext.define("esapp.view.analysis.addEditLegend",{
         }
 
         me.listeners = {
+            beforedestroy: function(){
+                var btn = me.lookupReference('legend_generate_log_values_btn');
+                btn.generateLogValuesPanel.destroy();
+            },
             afterrender: function(){
                 if (me.params.edit || me.params.view) {
                     me.lookupReference('legenddescriptivename').setValue(me.params.legendrecord.get('legend_descriptive_name'));
@@ -346,9 +351,12 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                 reference: 'legendclassesGrid',
                 width: 600,
                 bind: '{legendClassesStore}',
-                autoScroll: true,
+                autoScroll: false,
+                scrollable: true,
+                currScrollX: 0,
+                cuurScrollY: 0,
                 maxHeight: 555,
-                // bufferedRenderer: false,
+                bufferedRenderer: false,
                 cls: 'newpanelstyle',
                 viewConfig: {
                     stripeRows: false,
@@ -357,15 +365,26 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                     markDirty: false,
                     trackOver: false,
                     preserveScrollOnRefresh: true,
-                    forceFit: true
+                    preserveScrollOnReload: true,
+                    forceFit: true,
+                    scrollable: true,
+                    listeners: {
+                        scroll: function (tableview) {
+                            var legendclassesGrid = me.lookupReference('legendclassesGrid');
+                            if (tableview.getScrollX() == 0 && tableview.getScrollY() != 0){
+                                legendclassesGrid.currScrollX = tableview.getScrollX();
+                                legendclassesGrid.cuurScrollY = tableview.getScrollY();
+                            }
+                        }
+                    }
                 },
 
                 // disabled: me.params.view ? true : false,
                 selModel: {
                     type: 'cellmodel'
                 },
-                syncRowHeight: true,
-                shrinkWrap: true,
+                // syncRowHeight: true,
+                // shrinkWrap: true,
 
                 plugins: {
                     ptype: 'cellediting',
@@ -397,8 +416,26 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                             });
                         }
                     },
-                    edit: function () {
-                        me.getController().setLegendPreview();
+                    edit: function (editor,cell) {
+                        var legendclassesGrid = me.lookupReference('legendclassesGrid');
+                        if (cell.field == 'color_label' || cell.field == 'color_rgb' || cell.field == 'group_label')
+                            if (cell.originalValue != cell.value){
+                                me.getController().setLegendPreview();
+                                var task = new Ext.util.DelayedTask(function() {
+                                    legendclassesGrid.getView().scrollTo(legendclassesGrid.currScrollX, legendclassesGrid.cuurScrollY);
+                                    // legendclassesGrid.fireEvent('scrolltoselection');
+                                });
+                                task.delay(250);
+                            }
+                            // else {
+                            //     legendclassesGrid.currScrollX = legendclassesGrid.getView().getScrollX();
+                            //     legendclassesGrid.cuurScrollY = legendclassesGrid.getView().getScrollY();
+                            // }
+                    }
+                    ,scrolltoselection: function (events) {
+                        var record = this.getSelection();
+                        if (record.length > 0)
+                            this.ensureVisible(record[0], {focus: true});
                     }
                 },
 
@@ -412,17 +449,30 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                     items: [{
                         xtype: 'button',
                         text: esapp.Utils.getTranslation('legend_newclass'),    // 'New class',
-                        name: 'legend_newclass',
+                        reference: 'legend_newclass_btn',
                         iconCls: 'fa fa-plus-circle fa-2x',
                         style: {color: 'green'},
                         handler: 'newClass'
                     }, {
                         xtype: 'button',
                         text: esapp.Utils.getTranslation('legend_generate_classes'),    // 'Generate classes',
-                        name: 'legend_generate_classes',
+                        reference: 'legend_generate_classes_btn',
                         iconCls: 'fa fa-cogs fa-2x',
                         style: {color: 'gray'},
                         handler: 'generateClasses'
+                    }, {
+                        xtype: 'button',
+                        text: esapp.Utils.getTranslation('log_values'),  // log(x) values
+                        reference: 'legend_generate_log_values_btn',
+                        tooltip: esapp.Utils.getTranslation('logarithmic_values_tooltip'), // 'Create logarithmic values for existing classes',
+                        iconCls: 'logarithm_icon',
+                        style: {color: 'gray'},
+                        handler: 'showGenerateLogValuesPanel'
+                        ,listeners: {
+                            afterrender: function (btn) {
+                                btn.generateLogValuesPanel = me.getController().generateLogValuesPanel(btn);
+                            }
+                        }
                     }, '->'
                         , {
                             xtype: 'button',
@@ -474,7 +524,7 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                     }, {
                         header: esapp.Utils.getTranslation('colour'), // 'Colour',
                         dataIndex: 'color_rgb',
-                        flex: 1,
+                        // flex: 1,
                         width: 100,
                         renderer: colorCellRenderer,
                         editor: {
@@ -493,7 +543,7 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                         header: esapp.Utils.getTranslation('from'), // 'From',
                         dataIndex: 'from_step',
                         sortable: true,
-                        width: 80,
+                        width: 100,
                         editor: {
                             xtype: 'numberfield',
                             decimalPrecision: 8
@@ -501,7 +551,7 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                     }, {
                         header: esapp.Utils.getTranslation('To'), // 'To',
                         dataIndex: 'to_step',
-                        width: 80,
+                        width: 100,
                         editor: {
                             xtype: 'numberfield',
                             decimalPrecision: 8
@@ -509,12 +559,12 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                     }, {
                         header: esapp.Utils.getTranslation('legendclass_label'), // 'Class label',
                         dataIndex: 'color_label',
-                        width: 80,
+                        width: 100,
                         editor: 'textfield'
                     }, {
                         header: esapp.Utils.getTranslation('legendclass_group_label'), // 'Group label',
                         dataIndex: 'group_label',
-                        width: 105,
+                        width: 95,
                         editor: 'textfield'
                     }, {
                         xtype: 'actioncolumn',
@@ -551,12 +601,16 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                 defaults: {
                     margin:'15 5 5 5'
                 },
+                focusable: false,
+                // focusOnToFront: false,
                 // minHeight: 550,
                 maxHeight: 750,
                 items: [{
                     xtype: 'container',
                     id: 'legendpreview',
                     scrollable: 'vertical',
+                    focusable: false,
+                    // focusOnToFront: false,
                     html: ''
                 }]
             }]

@@ -86,11 +86,9 @@ Ext.define("esapp.view.analysis.layerAdmin",{
         me.items = [{
             xtype : 'grid',
             reference: 'layersGrid',
-            //region: 'center',
-            //width: 465,
-            // store: 'layers',
             bind: '{layers}',
-            // session:true,
+
+            bufferedRenderer: false,
 
             viewConfig: {
                 stripeRows: false,
@@ -100,7 +98,8 @@ Ext.define("esapp.view.analysis.layerAdmin",{
                 resizable: false,
                 disableSelection: false,
                 trackOver: true,
-                forceFit:true
+                forceFit:true,
+                preserveScrollOnRefresh: true
             },
 
             selModel : {

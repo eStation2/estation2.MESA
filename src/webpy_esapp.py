@@ -3472,7 +3472,7 @@ class GetProductLayer:
         # filename_png = self.getProductLayer(getparams)
         filename_png = webpy_esapp_helpers.getProductLayer(getparams)
 
-        web.header('Content-type', 'image/png')
+        web.header('Content-type', 'image/jpg')
         f = open(filename_png, 'rb')
         while 1:
             buf = f.read(1024 * 8)
@@ -3486,7 +3486,7 @@ class GetProductLayer:
         getparams = web.input()
         filename_png = webpy_esapp_helpers.getProductLayer(getparams)
 
-        web.header('Content-type', 'image/png')
+        web.header('Content-type', 'image/jpg')
         f = open(filename_png, 'rb')
         while 1:
             buf = f.read(1024 * 8)

@@ -219,15 +219,8 @@ ALTER TABLE analysis.layers ADD COLUMN provider character varying;
 
 
 /**********************************************************
-  For version 2.1.2
+  BEGIN - For version 2.1.2
  *********************************************************/
-
-ALTER TABLE products.sub_datasource_description
-  ADD COLUMN scale_type character varying DEFAULT 'linear';
-
-
-ALTER TABLE analysis.users
-  ADD COLUMN prefered_language character varying DEFAULT 'eng';
 
 
 /**********************************************************
@@ -307,7 +300,6 @@ WITH (
 );
 ALTER TABLE analysis.user_map_templates
   OWNER TO estation;
-
 
 
 
@@ -529,7 +521,25 @@ ALTER TABLE analysis.user_graph_tpl_timeseries_drawproperties
  *********************************************************/
 
 
+ALTER TABLE products.sub_datasource_description
+  ADD COLUMN scale_type character varying DEFAULT 'linear';
 
+
+ALTER TABLE analysis.users
+  ADD COLUMN prefered_language character varying DEFAULT 'eng';
+
+ALTER TABLE analysis.user_map_templates ADD COLUMN productdate character varying;
+
+
+/**********************************************************
+  END - For version 2.1.2
+ *********************************************************/
+
+
+
+/**********************************************************
+  BEGIN update insert all functions
+ *********************************************************/
 
 CREATE OR REPLACE FUNCTION analysis.update_insert_legend(
     legend_id integer,
@@ -2052,6 +2062,7 @@ BEGIN
 	RETURN QUERY SELECT 'SELECT products.update_insert_thema('
 		|| 'thema_id := ''' || thema_id || ''''
 		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', activated := FALSE'
 		|| ' );'  as inserts
 	FROM products.thema;
 
@@ -3196,3 +3207,8 @@ $BODY$
   ROWS 1000;
 ALTER FUNCTION products.export_product_data(character varying, boolean)
   OWNER TO estation;
+
+
+/**********************************************************
+  END update insert all functions
+ *********************************************************/

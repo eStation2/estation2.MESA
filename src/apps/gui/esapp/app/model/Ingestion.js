@@ -11,6 +11,7 @@ Ext.define('esapp.model.Ingestion', {
        {name: 'defined_by'},
        {name: 'activated', type: 'boolean'},
        {name: 'mapsetname'},
+       {name: 'datasetcompletenessimage'},
        {name: 'completeness_id', mapping:'productid'}
     ]
     ,associations:[
@@ -30,7 +31,8 @@ Ext.define('esapp.model.Completeness', {
        {name: 'firstdate'},
        {name: 'lastdate'},
        {name: 'totfiles'},
-       {name: 'missingfiles'}
+       {name: 'missingfiles'},
+       {name: 'interval_id', mapping:'productid'}
     ]
     ,hasMany:[
         { model: 'esapp.model.Intervals', name: 'intervals'}
@@ -41,6 +43,7 @@ Ext.define('esapp.model.Intervals', {
     extend : 'esapp.model.Base',
 
     fields: [
+       {name: 'id', mapping:'productid'},
        {name: 'fromdate'},
        {name: 'todate'},
        {name: 'intervaltype'},

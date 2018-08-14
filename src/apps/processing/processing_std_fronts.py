@@ -192,7 +192,7 @@ def processing_std_fronts(res_queue, pipeline_run_level=0, pipeline_printout_lev
         fwrite_id=None
 
     if pipeline_run_level > 0:
-        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, history_file='/eStation2/log/.ruffus_history_std_fronts.sqlite',touch_files_only=touch_files_only,
+        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, history_file=os.path.join(es_constants.log_dir,'.ruffus_history_std_fronts.sqlite'),touch_files_only=touch_files_only,
                      checksum_level=0)
 
     if pipeline_printout_level > 0:
