@@ -2305,7 +2305,25 @@ def createTimeseriesDrawProperties(params):
 
     createstatus = '{"success":"false", "message":"An error occured while creating the Timeseries Draw Properties!"}'
 
-    # if hasattr(getparams['tsdrawproperties'], "yaxes_id"):
+    if "yaxe_id" in params['tsdrawproperties']:
+        yaxe_id = {'yaxe_id': params['tsdrawproperties']['yaxe_id']}
+        yaxe = crud_db.read('graph_yaxes', **yaxe_id)
+        if hasattr(yaxe, "__len__") and yaxe.__len__() == 0:
+            new_yaxe = {
+                'yaxe_id': params['tsdrawproperties']['yaxe_id'],
+                'title': 'TITLE',
+                'title_color': '#000000',
+                'title_font_size': 26,
+                'min': None,
+                'max': None,
+                'unit': '',
+                'opposite': False,
+                'aggregation_type': 'mean',
+                'aggregation_min': None,
+                'aggregation_max': None
+            }
+            crud_db.create('graph_yaxes', new_yaxe)
+
     if 'tsdrawproperties' in params:
         tsdrawproperties = params['tsdrawproperties']
 

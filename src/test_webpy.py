@@ -27,6 +27,24 @@ logger = log.my_logger(__name__)
 
 class TestWebpy(unittest.TestCase):
 
+    def testCreateTimeseriesDrawProperties(self):
+
+        params = {'tsdrawproperties':
+                    {
+                        'charttype': "line",
+                        'color': "#000000",
+                        'linestyle': "Solid",
+                        'linewidth': 2,
+                        'productcode': "olci-wrr",
+                        'subproductcode': "chl-oc4me",
+                        'tsname_in_legend': "olci-wrr - V02.0 - chl-oc4me",
+                        'version': "V02.0",
+                        'yaxe_id': "olci-wrr - V02.0"
+                    }
+                  }
+        answer = webpy_esapp_helpers.createTimeseriesDrawProperties(params)
+
+
     def testMatplotlib(self):
         # from PIL import Image
 

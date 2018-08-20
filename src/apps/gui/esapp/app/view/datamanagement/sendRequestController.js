@@ -41,7 +41,7 @@ Ext.define('esapp.view.datamanagement.sendRequestController', {
             loadMask: esapp.Utils.getTranslation('loading'),    // 'Loading...',
             callback:function(callinfo,responseOK,response ){
                 var request = Ext.JSON.decode(response.responseText.trim());
-                console.info(request.request);
+                // console.info(request.request);
                 request = request.request;
 
                 var requestHTML = '<h3><b style="word-wrap: break-word;">' + esapp.Utils.getTranslation('generate_request_text') + '</b></h3>';

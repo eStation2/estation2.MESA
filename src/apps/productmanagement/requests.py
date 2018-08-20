@@ -121,7 +121,15 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
                             except NoProductFound:
                                 pass
 
+                        # Remove the processing dir from file path because this can be different for each
+                        # installation (especially the windows version) than on the cloud service processing dir
+                        filenames[:] = [os.path.relpath(filename, es_constants.es2globals['processing_dir']) for
+                                        filename in filenames]
+                        # for filename in filenames:
+                        #     print filename
+
                         dataset_dict = {'subproductcode': subproductcode,
+                                        "allfiles": False,
                                         'missingfiles': filenames}
                         mapset_dict['mapsetdatasets'].append(dataset_dict)
 
@@ -156,7 +164,16 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
                                                                        for_request_creation=True))
                     except NoProductFound:
                         pass
+
+                # Remove the processing dir from file path because this can be different for each
+                # installation (especially the windows version) than on the cloud service processing dir
+                filenames[:] = [os.path.relpath(filename, es_constants.es2globals['processing_dir']) for filename in
+                                filenames]
+                # for filename in filenames:
+                #     print filename
+
                 dataset_dict = {'subproductcode': subproductcode,
+                                "allfiles": False,
                                 'missingfiles': filenames}
                 mapset_dict['mapsetdatasets'].append(dataset_dict)
 
@@ -188,11 +205,20 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
                                                                    for_request_creation=True))
                 except NoProductFound:
                     pass
-            dataset_dict = {'subproductcode': subproductcode, 'missingfiles': filenames}
+
+            # Remove the processing dir from file path because this can be different for each
+            # installation (especially the windows version) than on the cloud service processing dir
+            filenames[:] = [os.path.relpath(filename, es_constants.es2globals['processing_dir']) for filename in
+                            filenames]
+            # for filename in filenames:
+            #     print filename
+
+            dataset_dict = {'subproductcode': subproductcode, "allfiles": False, 'missingfiles': filenames}
             mapset_dict['mapsetdatasets'].append(dataset_dict)
             request['productmapsets'].append(mapset_dict)
     return request
     # Dump the request object to JSON
+
 
 def __create_request(productcode, version, mapsetcode=None, subproductcode=None):
 
