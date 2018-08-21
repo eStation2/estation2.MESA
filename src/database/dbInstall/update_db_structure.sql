@@ -2173,7 +2173,7 @@ $BODY$
 			UPDATE analysis.graph_yaxes gy
 			SET title = TRIM(_title),
 			    title_color = TRIM(_title_color),
-				title_font_size = TRIM(_title_font_size),
+				title_font_size = _title_font_size,
 			    min = _min,
 			    max = _max,
 			    unit = TRIM(_unit),
@@ -2200,7 +2200,7 @@ $BODY$
 				TRIM(_yaxe_id),
 				TRIM(_title),
 				TRIM(_title_color),
-				TRIM(_title_font_size),
+				_title_font_size,
 				_min,
 				_max,
 				TRIM(_unit),
@@ -2681,7 +2681,7 @@ BEGIN
 		|| ' yaxe_id := ' || COALESCE('''' || yaxe_id || '''', 'NULL')
 		|| ', title := ' || COALESCE('''' || title || '''', 'NULL')
 		|| ', title_color := ' || COALESCE('''' || title_color || '''', 'NULL')
-		|| ', title_font_size := ' || COALESCE(TRIM(to_char(title_font_size, '99999999D999999')), 'NULL')
+		|| ', title_font_size := ' || COALESCE(TRIM(to_char(title_font_size, '99999999')), 'NULL')
 		|| ', min := ' || COALESCE(TRIM(to_char(min, '99999999D999999')), 'NULL')
 		|| ', max := ' || COALESCE(TRIM(to_char(max, '99999999D999999')), 'NULL')
 		|| ', unit := ' || COALESCE('''' || unit || '''', 'NULL')
@@ -3300,7 +3300,7 @@ BEGIN
 		|| ' yaxe_id := ' || COALESCE('''' || yaxe_id || '''', 'NULL')
 		|| ', title := ' || COALESCE('''' || title || '''', 'NULL')
 		|| ', title_color := ' || COALESCE('''' || title_color || '''', 'NULL')
-		|| ', title_font_size := ' || COALESCE(TRIM(to_char(title_font_size, '99999999D999999')), 'NULL')
+		|| ', title_font_size := ' || COALESCE(TRIM(to_char(title_font_size, '99999999')), 'NULL')
 		|| ', min := ' || COALESCE(TRIM(to_char(min, '99999999D999999')), 'NULL')
 		|| ', max := ' || COALESCE(TRIM(to_char(max, '99999999D999999')), 'NULL')
 		|| ', unit := ' || COALESCE('''' || unit || '''', 'NULL')
