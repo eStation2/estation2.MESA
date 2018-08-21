@@ -2766,17 +2766,17 @@ BEGIN
 	RETURN QUERY SELECT chr(10);
 
 
-	RETURN QUERY SELECT 'SELECT analysis.update_insert_graph_drawproperties('
+  RETURN QUERY SELECT 'SELECT analysis.update_insert_graph_drawproperties('
 		|| ' graph_type := ' || COALESCE('''' || graph_type || '''', 'NULL')
 		|| ', graph_width := ' || graph_width
 		|| ', graph_height := ' || graph_height
-		|| ', graph_title := ' || graph_title
+		|| ', graph_title := ' || COALESCE('''' || graph_title || '''', 'NULL')
 		|| ', graph_title_font_size := ' || graph_title_font_size
 		|| ', graph_title_font_color := ' || COALESCE('''' || graph_title_font_color || '''', 'NULL')
-		|| ', graph_subtitle := ' || graph_subtitle
+		|| ', graph_subtitle := ' || COALESCE('''' || graph_subtitle || '''', 'NULL')
 		|| ', graph_subtitle_font_size := ' || graph_subtitle_font_size
 		|| ', graph_subtitle_font_color := ' || COALESCE('''' || graph_subtitle_font_color || '''', 'NULL')
-		|| ', legend_position := ' || legend_position
+		|| ', legend_position := ' || COALESCE('''' || legend_position || '''', 'NULL')
 		|| ', legend_font_size := ' || legend_font_size
 		|| ', legend_font_color := ' || COALESCE('''' || legend_font_color || '''', 'NULL')
 		|| ', xaxe_font_size := ' || xaxe_font_size
@@ -3385,23 +3385,25 @@ BEGIN
 	RETURN QUERY SELECT chr(10);
 
 
-	RETURN QUERY SELECT 'SELECT analysis.update_insert_graph_drawproperties('
+
+  RETURN QUERY SELECT 'SELECT analysis.update_insert_graph_drawproperties('
 		|| ' graph_type := ' || COALESCE('''' || graph_type || '''', 'NULL')
 		|| ', graph_width := ' || graph_width
 		|| ', graph_height := ' || graph_height
-		|| ', graph_title := ' || graph_title
+		|| ', graph_title := ' || COALESCE('''' || graph_title || '''', 'NULL')
 		|| ', graph_title_font_size := ' || graph_title_font_size
 		|| ', graph_title_font_color := ' || COALESCE('''' || graph_title_font_color || '''', 'NULL')
-		|| ', graph_subtitle := ' || graph_subtitle
+		|| ', graph_subtitle := ' || COALESCE('''' || graph_subtitle || '''', 'NULL')
 		|| ', graph_subtitle_font_size := ' || graph_subtitle_font_size
 		|| ', graph_subtitle_font_color := ' || COALESCE('''' || graph_subtitle_font_color || '''', 'NULL')
-		|| ', legend_position := ' || legend_position
+		|| ', legend_position := ' || COALESCE('''' || legend_position || '''', 'NULL')
 		|| ', legend_font_size := ' || legend_font_size
 		|| ', legend_font_color := ' || COALESCE('''' || legend_font_color || '''', 'NULL')
 		|| ', xaxe_font_size := ' || xaxe_font_size
 		|| ', xaxe_font_color := ' || COALESCE('''' || xaxe_font_color || '''', 'NULL')
 		|| ' );'  as inserts
 	FROM analysis.graph_drawproperties;
+
 
 
 	RETURN QUERY SELECT chr(10);
