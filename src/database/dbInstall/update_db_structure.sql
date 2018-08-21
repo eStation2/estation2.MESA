@@ -2004,7 +2004,7 @@ $BODY$
 			    yaxe_id = TRIM(_yaxe_id)
 			WHERE tsdp.productcode = TRIM(_productcode) AND tsdp.subproductcode = TRIM(_subproductcode) AND tsdp.version = TRIM(_version);
 		ELSE
-			INSERT INTO analysis.timeseries_drawproperties (productcode,
+			INSERT INTO analysis.timeseries_drawproperties_new (productcode,
 									subproductcode,
 									version,
 									tsname_in_legend,
@@ -2075,11 +2075,11 @@ $BODY$
 
 
 	BEGIN
-		PERFORM * FROM analysis.graph_drawproperties cd WHERE cd.chart_type = _chart_type;
+		PERFORM * FROM analysis.graph_drawproperties gd WHERE gd.graph_type = _graph_type;
 		IF FOUND THEN
 			UPDATE analysis.graph_drawproperties cd
-			SET graph_width = _chart_width,
-			    graph_height = _chart_height,
+			SET graph_width = _graph_width,
+			    graph_height = _graph_height,
 				graph_title = TRIM(_graph_title),
 			    graph_title_font_size = _graph_title_font_size,
 			    graph_title_font_color = TRIM(_graph_title_font_color),
@@ -2678,7 +2678,7 @@ BEGIN
 
 
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_graph_yaxes('
-		|| ', yaxe_id := ' || COALESCE('''' || yaxe_id || '''', 'NULL')
+		|| ' yaxe_id := ' || COALESCE('''' || yaxe_id || '''', 'NULL')
 		|| ', title := ' || COALESCE('''' || title || '''', 'NULL')
 		|| ', title_color := ' || COALESCE('''' || title_color || '''', 'NULL')
 		|| ', title_font_size := ' || COALESCE(TRIM(to_char(title_font_size, '99999999D999999')), 'NULL')
@@ -3297,7 +3297,7 @@ BEGIN
 
 
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_graph_yaxes('
-		|| ', yaxe_id := ' || COALESCE('''' || yaxe_id || '''', 'NULL')
+		|| ' yaxe_id := ' || COALESCE('''' || yaxe_id || '''', 'NULL')
 		|| ', title := ' || COALESCE('''' || title || '''', 'NULL')
 		|| ', title_color := ' || COALESCE('''' || title_color || '''', 'NULL')
 		|| ', title_font_size := ' || COALESCE(TRIM(to_char(title_font_size, '99999999D999999')), 'NULL')
