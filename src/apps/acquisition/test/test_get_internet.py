@@ -854,7 +854,7 @@ class TestGetInternet(unittest.TestCase):
 
     def TestRemoteHttps_DMP_2(self):
 
-        internet_id='PDF:GLS:PROBA-V2.0:DMP'
+        internet_id='PDF:GLS:PROBA-V2.0:DMP_RT0'
 
         # Direct test !
         if False:
@@ -875,8 +875,8 @@ class TestGetInternet(unittest.TestCase):
                          'pull_frequency': internet_source.pull_frequency,
                          'user_name':internet_source.user_name,
                          'password':internet_source.password,
-                         'start_date':20180101,
-                         'end_date': None,
+                         'start_date':20180610,
+                         'end_date': 20180820,
                          'frequency_id': internet_source.frequency_id,
                          'type':internet_source.type}
 

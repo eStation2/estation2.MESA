@@ -607,7 +607,7 @@ def test_proc_vgt_dmp(pipe_run=0, pipe_print=3, start_date=None, end_date=None, 
 
 
 #test_proc_chirps_dekad(pipe_run=4, pipe_print=0, start_date='19810101', end_date='20171231', touch_files_only=False)
-test_proc_std_ndvi(pipe_run=4, pipe_print=0, touch_files_only=False)
+#test_proc_std_ndvi(pipe_run=4, pipe_print=0, touch_files_only=False)
 #test_proc_vgt_dmp(pipe_run=4, pipe_print=0, start_date='19990101', end_date='20171231', touch_files_only=False)
 # my_starting_dates_stats = proc_functions.get_list_dates_for_dataset('modis-firms', '10dcount', 'v6.0', start_date='20020701', end_date='20170821')
 # for date in my_starting_dates_stats:
@@ -616,6 +616,6 @@ test_proc_std_ndvi(pipe_run=4, pipe_print=0, touch_files_only=False)
 
 #test_proc_olci_wrr(pipe_run=4, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
 # test_proc_completeness()
-#test_proc_modis_pp(pipe_run=4, pipe_print=0, touch_files_only=False)
+test_proc_modis_pp(pipe_run=4, pipe_print=0, touch_files_only=False)
 #test_proc_tamsat_rfe(pipe_run=4, pipe_print=0, start_date='19830101', end_date='20171231', touch_files_only=False)
 #test_proc_modis_firms(pipe_run=4, pipe_print=0, touch_files_only=False)

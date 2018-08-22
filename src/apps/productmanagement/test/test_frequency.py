@@ -97,6 +97,16 @@ class TestFrequency(unittest.TestCase):
         self.assertEqual(templates[0], '/Modis_1_20140101/mcd14dl.2014-01-01.tif')
         self.assertEqual(templates[1], '/Modis_2_20140111/mcd14dl.2014-01-11.tif')
 
+    def test_get_internet_dates_cgl_dekad(self):
+        #%{dkm}
+        frequency =  Frequency(1, Frequency.UNIT.CGL_DEKAD, Frequency.TYPE.PER, dateformat=Frequency.DATEFORMAT.DATE)
+        from_date = datetime.date(2014, 1, 1)
+        to_date = datetime.date(2014, 12, 31)
+        dates = frequency.get_dates(from_date, to_date)
+        templates = frequency.get_internet_dates(dates, "/%Y/%m/%d/DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0/c_gls_DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1.nc")
+        self.assertEqual(templates[0], '/%Y/%m/%d/DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0/c_gls_DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1.nc')
+        self.assertEqual(templates[1], '/%Y/%m/%d/DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0/c_gls_DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1.nc')
+
     def test_get_internet_dates_add_days(self):
         #%{+/-<Nt><strftime>} = +/- N delta days/hours/
         frequency =  Frequency(1, Frequency.UNIT.DAY, Frequency.TYPE.PER, dateformat=Frequency.DATEFORMAT.DATE)
