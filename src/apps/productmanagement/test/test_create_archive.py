@@ -468,3 +468,32 @@ class TestCreate(unittest.TestCase):
         functions.check_output_dir(target_dir)
         create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
+    def TestCreateArchive_olci_wrr(self):
+
+        base_target_dir='/data/archives/'
+        mapset='SPOTV-Africa-1km'
+        product='olci-wrr'
+        version='V02.0'
+        start_date=datetime.date(2018, 3, 1)
+        end_date=None
+
+        # Only chl-oc4me subproduct
+        subproduct='chl-oc4me'
+        target_dir = base_target_dir + product+ os.path.sep + subproduct
+        functions.check_output_dir(target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+    def TestCreateArchive_slstr_sst(self):
+
+        base_target_dir='/data/archives/'
+        mapset='SPOTV-Africa-1km'
+        product='slstr-sst'
+        version='1.0'
+        start_date=datetime.date(2018, 3, 1)
+        end_date=None
+
+        # Only chl-oc4me subproduct
+        subproduct='wst'
+        target_dir = base_target_dir + product+ os.path.sep + subproduct
+        functions.check_output_dir(target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
