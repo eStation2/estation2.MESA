@@ -69,10 +69,10 @@ def loop_ingestion(dry_run=False, test_one_product=None):
     while True:
 
         # Manage the ingestion of Historical Archives (e.g. eStation prods disseminated via EUMETCast - MESA_JRC_*.tif)
-        # try:
-        #     status = ingest_archives_eumetcast(dry_run=dry_run)
-        # except:
-        #     logger.error("Error in executing ingest_archives_eumetcast")
+        try:
+            status = ingest_archives_eumetcast(dry_run=dry_run)
+        except:
+            logger.error("Error in executing ingest_archives_eumetcast")
 
         # Get all active product ingestion records with a subproduct count.
         active_product_ingestions = querydb.get_ingestion_product(allrecs=True)
