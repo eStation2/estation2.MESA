@@ -438,21 +438,6 @@ class TestCreate(unittest.TestCase):
             functions.check_output_dir(target_dir)
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
-    def TestCreateArchive_all(self):
-
-        self.TestCreateArchive_vgt_ndvi()
-        self.TestCreateArchive_vgt_fapar()
-        self.TestCreateArchive_vgt_fcover()
-        self.TestCreateArchive_vgt_lai()
-        self.TestCreateArchive_vgt_dmp()
-        self.TestCreateArchive_chirps_dekad()
-        self.TestCreateArchive_fewsnet_rfe()
-        self.TestCreateArchive_tamsat_rfe()
-        self.TestCreateArchive_modis_chla()
-        self.TestCreateArchive_modis_sst()
-        self.TestCreateArchive_modis_par()
-        self.TestCreateArchive_modis_kd490()
-        self.TestCreateArchive_modis_firms()
 
     def TestCreateArchive_vgt_ndvi_2_2(self):
 
@@ -468,3 +453,108 @@ class TestCreate(unittest.TestCase):
         functions.check_output_dir(target_dir)
         create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
+    def TestCreateArchive_olci_wrr(self):
+
+        base_target_dir='/data/archives/'
+        mapset='SPOTV-Africa-1km'
+        product='olci-wrr'
+        version='V02.0'
+        start_date=datetime.date(2018, 3, 1)
+        end_date=None
+
+        # Only chl-oc4me subproduct
+        subproduct='chl-oc4me'
+        target_dir = base_target_dir + product+ os.path.sep + subproduct
+        functions.check_output_dir(target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+    def TestCreateArchive_slstr_sst(self):
+
+        base_target_dir='/data/archives/'
+        mapset='SPOTV-Africa-1km'
+        product='slstr-sst'
+        version='1.0'
+        start_date=datetime.date(2018, 3, 1)
+        end_date=None
+
+        # Only wst subproduct
+        subproduct='wst'
+        target_dir = base_target_dir + product+ os.path.sep + subproduct
+        functions.check_output_dir(target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+    def TestCreateArchive_pml_modis_sst(self):
+
+        base_target_dir='/data/archives/'
+        mapset='SPOTV-IOC-1km'
+        product='pml-modis-sst'
+        version='3.0'
+        start_date=datetime.date(2015, 4, 18)
+        end_date=None
+
+        subproducts= ['sst-3day','sst-fronts']
+        for subproduct in subproducts:
+            target_dir = base_target_dir + product+ os.path.sep + subproduct
+            functions.check_output_dir(target_dir)
+            create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+    def TestCreateArchive_pml_modis_chl(self):
+
+        base_target_dir='/data/archives/'
+        mapset='SPOTV-IOC-1km'
+        product='pml-modis-chl'
+        version='3.0'
+        start_date=datetime.date(2015, 4, 18)
+        end_date=None
+
+        # Only chl-3day subproduct
+        subproduct= 'chl-3day'
+        target_dir = base_target_dir + product + os.path.sep + subproduct
+        functions.check_output_dir(target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date,
+                                 target_dir=target_dir)
+
+
+    def TestCreateArchive_modis_pp(self):
+
+        base_target_dir='/data/archives/'
+        mapset='MODIS-Africa-4km'
+        product='modis-pp'
+        version='v2013.1'
+        start_date=datetime.date(2002, 7, 1)
+        end_date=None
+
+        subproducts= ['monavg','8daysavg']
+        for subproduct in subproducts:
+            target_dir = base_target_dir + product+ os.path.sep + subproduct
+            functions.check_output_dir(target_dir)
+            create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+
+        subproducts=['1monavg', '1monmax','1monmin']
+        for subproduct in subproducts:
+            target_dir = base_target_dir + product + os.path.sep + subproduct
+            functions.check_output_dir(target_dir)
+            create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
+
+
+    def TestCreateArchive_all(self):
+
+        self.TestCreateArchive_vgt_ndvi()
+        self.TestCreateArchive_vgt_fapar()
+        self.TestCreateArchive_vgt_fcover()
+        self.TestCreateArchive_vgt_lai()
+        self.TestCreateArchive_vgt_dmp()
+        self.TestCreateArchive_chirps_dekad()
+        self.TestCreateArchive_fewsnet_rfe()
+        self.TestCreateArchive_tamsat_rfe()
+        self.TestCreateArchive_modis_chla()
+        self.TestCreateArchive_modis_sst()
+        self.TestCreateArchive_modis_par()
+        self.TestCreateArchive_modis_kd490()
+        self.TestCreateArchive_modis_firms()
+        self.TestCreateArchive_olci_wrr()
+        self.TestCreateArchive_pml_modis_sst()
+        self.TestCreateArchive_slstr_sst()
+        self.TestCreateArchive_pml_modis_chl()
+        self.TestCreateArchive_modis_pp()
