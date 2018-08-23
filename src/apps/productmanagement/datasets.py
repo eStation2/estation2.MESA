@@ -23,7 +23,7 @@ from .exceptions import (WrongFrequencyValue, WrongFrequencyUnit,
                          NoProductFound, NoFrequencyFound,
                          WrongDateType)
 from .helpers import (add_years, add_months, add_dekads, add_pentads, add_days, manage_date,
-                      find_gaps, cast_to_int, INTERVAL_TYPE, FILE_EXTENSIONS)
+                      find_gaps, cast_to_int, INTERVAL_TYPE, FILE_EXTENSIONS, add_cgl_dekads)
 
 
 def _check_constant(class_, constant_name, value):
@@ -46,6 +46,7 @@ class Frequency(object):
         YEAR = 'year'
         MONTH = 'month'
         DEKAD = 'dekad'
+        CGL_DEKAD = 'cgl_dekad'
         DAYS8 = '8days'
         DAYS16 = '16days'
         PENTAD = 'pentad'
@@ -118,6 +119,8 @@ class Frequency(object):
             return add_days(date, value, 16)
         elif unit == self.UNIT.DEKAD:
             return add_dekads(date, value)
+        elif unit == self.UNIT.CGL_DEKAD:
+            return add_cgl_dekads(date, value)
         elif unit == self.UNIT.PENTAD:
             return add_pentads(date, value)
         elif unit == self.UNIT.DAY:
