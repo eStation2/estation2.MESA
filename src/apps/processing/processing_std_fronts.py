@@ -63,7 +63,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   ---------------------------------------------------------------------
 
     # Default values are from the routine are used if None is passed
-    parameters = None
+    parameters = {'histogramWindowStride': 16,
+                  'histogramWindowSize': 32,
+                  'minTheta': 0.76,
+                  'minPopProp': 0.25,
+                  'minPopMeanDifference': 20,  # Temperature: 0.45 deg (multiply by 100 !!)
+                  'minSinglePopCohesion': 0.60,
+                  'minImageValue': 1,
+                  'minThreshold': 1}
 
     if prod == 'modis-sst':
         parameters = {  'histogramWindowStride': None,

@@ -535,46 +535,46 @@ def test_proc_msg_mpe(start_date=None, end_date=None, pipe_run=0, pipe_print=3, 
 #
 #   Test Ruffus for completeness bars
 #
-from apps.processing.processing_completeness import *
-def test_proc_completeness():
-
-    args = {'prod': 'modis-firms',\
-            'subprod':'1day',\
-            'starting_dates': None,\
-            'mapset': 'SPOTV-Africa-1km',\
-            'version':'v6.0',
-            'product_type':"Ingest",
-            'touch_only':False,
-            'logfile':"apps.processing.test_completeness"}
-
-    status=processing_completeness(**args)
+# from apps.processing.processing_completeness import *
+# def test_proc_completeness():
+#
+#     args = {'prod': 'modis-firms',\
+#             'subprod':'1day',\
+#             'starting_dates': None,\
+#             'mapset': 'SPOTV-Africa-1km',\
+#             'version':'v6.0',
+#             'product_type':"Ingest",
+#             'touch_only':False,
+#             'logfile':"apps.processing.test_completeness"}
+#
+#     status=processing_completeness(**args)
 
 #   ---------------------------------------------------------------------
 #   Calls
 #   ---------------------------------------------------------------------
-# from apps.processing.processing_olci_wrr import *
-# def test_proc_olci_wrr(start_date=None, end_date=None, pipe_run=0, pipe_print=3, start_date_stats=None, end_date_stats=None, touch_files_only=False):
-#
-#     # Create the list of dates -> returns empty if start==end==None
-#     if start_date is not None and end_date is not None:
-#         #starting_dates = proc_functions.get_list_dates_for_dataset('olci-wrr', 'chl-nn', 'V02.0', start_date=start_date, end_date=end_date)
-#         starting_dates = proc_functions.get_list_dates_for_dataset('olci-wrr', 'chl-oc4me', 'V02.0', start_date=start_date, end_date=end_date)
-#     else:
-#         starting_dates = None
-#
-#     args = {'pipeline_run_level':pipe_run, \
-#             'pipeline_printout_level':pipe_print, \
-#             'pipeline_printout_graph_level': 0, \
-#             'prod': 'olci-wrr',\
-#             'starting_sprod':'chl-oc4me',\
-#             'starting_dates': starting_dates,\
-#             'mapset': 'SPOTV-Africa-1km',\
-#             'version':'V02.0',
-#             'logfile':'ruffus-chirps'}
-#
-#     res_queue = None
-#     proc_lists=processing_olci_wrr(res_queue,**args)
-#     print(proc_lists)
+from apps.processing.processing_olci_wrr import *
+def test_proc_olci_wrr(start_date=None, end_date=None, pipe_run=0, pipe_print=3, start_date_stats=None, end_date_stats=None, touch_files_only=False):
+
+    # Create the list of dates -> returns empty if start==end==None
+    if start_date is not None and end_date is not None:
+        #starting_dates = proc_functions.get_list_dates_for_dataset('olci-wrr', 'chl-nn', 'V02.0', start_date=start_date, end_date=end_date)
+        starting_dates = proc_functions.get_list_dates_for_dataset('olci-wrr', 'chl-oc4me', 'V02.0', start_date=start_date, end_date=end_date)
+    else:
+        starting_dates = None
+
+    args = {'pipeline_run_level':pipe_run, \
+            'pipeline_printout_level':pipe_print, \
+            'pipeline_printout_graph_level': 0, \
+            'prod': 'olci-wrr',\
+            'starting_sprod':'chl-oc4me',\
+            'starting_dates': starting_dates,\
+            'mapset': 'SPOTV-Africa-1km',\
+            'version':'V02.0',
+            'logfile':'ruffus-chirps'}
+
+    res_queue = None
+    proc_lists=processing_olci_wrr(res_queue,**args)
+    print(proc_lists)
 #test_proc_pml_modis_fronts(pipe_run=4, pipe_print=0, touch_files_only=False)
 
 #test_proc_modis_firms(pipe_run=4, pipe_print=0, start_date_stats='20030101', end_date_stats='20161221', touch_files_only=True)
@@ -614,8 +614,8 @@ def test_proc_vgt_dmp(pipe_run=0, pipe_print=3, start_date=None, end_date=None, 
 #     filename='/data/processing/modis-firms/v6.0/SPOTV-Africa-10km/derived/10dcount10k/'+date+'_modis-firms_10dcount10k_SPOTV-Africa-10km_v6.0.tif'
 #     st=os.system('touch '+filename)
 
-#test_proc_olci_wrr(pipe_run=4, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
+test_proc_olci_wrr(pipe_run=4, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
 # test_proc_completeness()
-test_proc_modis_pp(pipe_run=4, pipe_print=0, touch_files_only=False)
+#test_proc_modis_pp(pipe_run=4, pipe_print=0, touch_files_only=False)
 #test_proc_tamsat_rfe(pipe_run=4, pipe_print=0, start_date='19830101', end_date='20171231', touch_files_only=False)
 #test_proc_modis_firms(pipe_run=4, pipe_print=0, touch_files_only=False)

@@ -151,7 +151,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "", "input_nodata":255, "output_nodata":255}
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "", "input_nodata":1000, "output_nodata":1000}
         raster_image_math.do_avg_image(**args)
 
 
