@@ -125,14 +125,14 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
                     if (me.tpl.html != '' && (me.changesmade || me.title_ImageObj.src == '')){
                         task.delay(20);
                     }
-                    else {
-                        me.title_ImageObj = new Image();
-                    }
+                    // else {
+                    //     me.title_ImageObj = new Image();
+                    // }
                 }
             },
             show: function(){
                 me.setPosition(me.titlePosition);
-                // me.fireEvent('refreshimage');
+                me.fireEvent('refreshimage');
             }
             // ,move: function(){
             //     console.info('moving title object');
