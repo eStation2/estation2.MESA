@@ -106,6 +106,8 @@ def loop_ingestion(dry_run=False, test_one_product=None):
 
             logger.debug("For product [%s] N. %s  source is/are found" % (productcode,len(sources_list)))
 
+            systemsettings = functions.getSystemSettings()
+
             if do_ingest_source:
                 for source in sources_list:
 
@@ -249,7 +251,8 @@ def loop_ingestion(dry_run=False, test_one_product=None):
                                     # Result is None means we are still waiting for some files to be received. Keep files in /data/ingest
                                     # dates_not_in_filename means the input files contains many dates (e.g. GSOD precip)
                                     if result is not None and not dates_not_in_filename:
-                                        if source.store_original_data:
+                                        if source.store_original_data or systemsettings['type_installation'] == 'Server':
+                                        # Special case for mesa-proc @ JRC
                                         # Copy to 'Archive' directory
                                             output_directory = data_dir_out + functions.set_path_sub_directory(product['productcode'],
                                                                                                            sprod['subproduct'],
