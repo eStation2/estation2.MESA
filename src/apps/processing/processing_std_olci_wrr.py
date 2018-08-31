@@ -151,7 +151,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "", "input_nodata":255, "output_nodata":255}
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "", "input_nodata":1000, "output_nodata":1000}
         raster_image_math.do_avg_image(**args)
 
 
@@ -159,12 +159,12 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 #   ---------------------------------------------------------------------
 #   Run the pipeline
 
-def processing_olci_wrr(res_queue, pipeline_run_level=0, pipeline_printout_level=0, pipeline_printout_graph_level=0,
+def processing_std_olci_wrr(res_queue, pipeline_run_level=0, pipeline_printout_level=0, pipeline_printout_graph_level=0,
                         prod='', starting_sprod='', mapset='', version='', starting_dates=None,
                         nrt_products=True, write2file=None, logfile=None, touch_files_only=False):
 
     spec_logger = log.my_logger(logfile)
-    spec_logger.info("Entering routine %s" % 'processing_olci_wrr')
+    spec_logger.info("Entering routine %s" % 'processing_std_olci_wrr')
 
     proc_lists = None
     proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version, starting_dates=starting_dates,
