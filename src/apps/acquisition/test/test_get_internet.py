@@ -4,6 +4,7 @@ from apps.acquisition.get_internet import *
 from apps.acquisition.get_eumetcast import *
 
 import unittest
+import shutil
 
 logger = log.my_logger(__name__)
 
@@ -105,6 +106,15 @@ def get_one_source(internet_source, target_dir=None):
             elif internet_type == 'offline':
                      logger.info("This internet source is meant to work offline (GoogleDrive)")
                      current_list = []
+
+            elif internet_type == 'local':
+                logger.info("This internet source is meant to copy data on local filesystem")
+                try:
+                    current_list = get_list_matching_files_dir_local(str(internet_source['url']),
+                                                                     str(internet_source['include_files_expression']))
+                except:
+                    logger.error("Error in creating date lists. Continue")
+                    current_list = []
             else:
                      logger.error("No correct type for this internet source type: %s" %internet_type)
                      current_list = []
@@ -124,7 +134,11 @@ def get_one_source(internet_source, target_dir=None):
                      for filename in list(listtoprocess):
                          logger_spec.debug("Processing file: "+str(internet_source['url'])+os.path.sep+filename)
                          try:
-                            result = get_file_from_url(str(internet_source['url'])+os.path.sep+filename, target_file=os.path.basename(filename), target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
+                            if internet_type == 'local':
+                                shutil.copyfile(str(internet_source['url'])+os.path.sep+filename,es_constants.ingest_dir+os.path.basename(filename))
+                                result = 0
+                            else:
+                                result = get_file_from_url(str(internet_source['url'])+os.path.sep+filename, target_file=os.path.basename(filename), target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
                             if not result:
                                 logger_spec.info("File %s copied.", filename)
                                 processed_list.append(filename)
@@ -143,6 +157,13 @@ class TestGetInternet(unittest.TestCase):
 
         eum_id = 'EO:EUM:DAT:MSG:LST-SEVIRI'
         info = get_eumetcast_info(eum_id)
+
+    def TestLocalDir(self):
+        local_dir='/data/eumetcast_S3/'
+        regex='S3A*'
+        list = get_list_matching_files_dir_local(local_dir, regex)
+        self.assertTrue(1)
+
 
     #   ---------------------------------------------------------------------------
     #   Get contents of a remote MODIS BA  (id: UMD:MCD45A1:TIF:51)
@@ -229,7 +250,7 @@ class TestGetInternet(unittest.TestCase):
         list = get_list_matching_files(remote_url, usr_pwd, full_regex,internet_type)
         self.assertTrue(file_to_check in list)
 
-     #   ---------------------------------------------------------------------------
+    #   ---------------------------------------------------------------------------
     #   Test remote ftp NOAA GSOD (id: NOAA:GSOD)
     #   ---------------------------------------------------------------------------
     def TestRemoteFtp_NOAA_GSOD(self):
@@ -240,6 +261,23 @@ class TestGetInternet(unittest.TestCase):
         full_regex   ='2011/997...-99999-2011.op.gz'
         file_to_check='2011/997286-99999-2011.op.gz'
         internet_type = 'ftp'
+
+        list = get_list_matching_files(remote_url, usr_pwd, full_regex,internet_type)
+        print(list)
+        self.assertTrue(file_to_check in list)
+
+    #   ---------------------------------------------------------------------------
+    #   Test JRC sftp : does not work !!!
+    #   ---------------------------------------------------------------------------
+
+    def TestRemoteFtp_JRC_S3A_WRR(self):
+
+        # Retrieve the S3A OLCI WRR products from JRC sftp site
+        remote_url='sftp://srv-ies-ftp.jrc.it/'
+        usr_pwd='narmauser:JRCkOq7478'
+        full_regex   ='narma/eumetcast/S3A/S3A_OL_2_WRR_*'
+        file_to_check='narma/eumetcast/S3A/S3A_OL_2_WRR____20180819T124041_20180819T132454_20180819T152131_2653_034_366______MAR_O_NR_002.SEN3.tar'
+        internet_type = 'sftp'
 
         list = get_list_matching_files(remote_url, usr_pwd, full_regex,internet_type)
         print(list)
@@ -861,6 +899,62 @@ class TestGetInternet(unittest.TestCase):
             filename='c_gls_DMP-RT6_201801100000_GLOBE_PROBAV_V2.0.1.nc'
             remote_url = 'https://land.copernicus.vgt.vito.be/PDF/datapool/Vegetation/Dry_Matter_Productivity/DMP_1km_V2/2018/1/10/DMP-RT6_201801100000_GLOBE_PROBAV_V2.0/'+filename
             status = get_file_from_url(remote_url,  '/tmp/', target_file=filename, userpwd='estation:estation2018')
+            return
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':20180610,
+                         'end_date': 20180820,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type}
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
+
+    def TestLocal_S3A_WRR(self):
+
+        internet_id='JRC:S3A:WRR'
+
+        # Direct test !
+        if False:
+            return
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':20180610,
+                         'end_date': 20180820,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type}
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
+
+    def TestLocal_S3A_WST(self):
+
+        internet_id='JRC:S3A:WST'
+
+        # Direct test !
+        if False:
             return
 
         internet_sources = querydb.get_active_internet_sources()
