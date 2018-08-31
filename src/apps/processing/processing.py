@@ -40,7 +40,7 @@ from apps.processing import processing_std_msg_mpe
 from apps.processing import processing_std_rain_onset
 from apps.processing import processing_std_seas_cum
 from apps.processing import processing_std_precip_1day
-
+from apps.processing import processing_std_olci_wrr
 
 from lib.python.daemon import DaemonDryRunnable
 
@@ -69,7 +69,7 @@ def upsert_database(process_id, productcode, version, mapset, proc_lists, input_
             logger.error("Error in upsert_database")
 
 
-def loop_processing(dry_run=False, serialize=False):
+def loop_processing(dry_run=False, serialize=False, test_one_product=None):
 
 #    Driver of the process service
 #    Reads configuration from the database
@@ -113,6 +113,14 @@ def loop_processing(dry_run=False, serialize=False):
             algorithm = chain.algorithm                             # name of the .py module
             mapset = chain.output_mapsetcode
             process_id = chain.process_id
+
+            do_processing_singleproduct = False
+            if test_one_product:
+                if process_id != test_one_product:
+                    do_processing_singleproduct = True
+
+            if do_processing_singleproduct:
+                continue
 
             # Get input products
             input_products = querydb.get_processing_chain_products(chain.process_id,type='input')
