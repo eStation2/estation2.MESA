@@ -2191,7 +2191,7 @@ $BODY$
 				min,
 				max,
 				unit,
-				oposite,
+				opposite,
 				aggregation_type,
 				aggregation_min,
 				aggregation_max
@@ -2204,7 +2204,7 @@ $BODY$
 				_min,
 				_max,
 				TRIM(_unit),
-				_oposite,
+				_opposite,
 				TRIM(_aggregation_type),
 				_aggregation_min,
 				_aggregation_max

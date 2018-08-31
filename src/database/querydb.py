@@ -2028,7 +2028,8 @@ def get_all_legends():
                 "       legend.min_value, " + \
                 "       legend.max_value, " + \
                 "       legend.colorbar, " + \
-                "       legend.defined_by " + \
+                "       legend.defined_by, " + \
+                "       legend.step_type " + \
                 " FROM analysis.legend "
 
         result = dbschema_analysis.execute(query)

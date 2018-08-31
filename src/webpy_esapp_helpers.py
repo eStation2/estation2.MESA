@@ -2852,7 +2852,8 @@ def SaveLegend(params):
             'colorbar': params['legend_descriptive_name'],
             'legend_name': params['title_in_legend'],
             'min_value': params['minvalue'],
-            'max_value': params['maxvalue']
+            'max_value': params['maxvalue'],
+            'step_type': params['legend_type']
         }
         legendClasses = json.loads(params['legendClasses'])
 
@@ -2976,7 +2977,8 @@ def GetLegends():
                            'minvalue': row_dict['min_value'],
                            'maxvalue': row_dict['max_value'],
                            'legend_descriptive_name': row_dict['colorbar'],
-                           'defined_by': row_dict['defined_by']
+                           'defined_by': row_dict['defined_by'],
+                           'legend_type': row_dict['step_type']
                            }
 
             legends_dict_all.append(legend_dict)

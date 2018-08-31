@@ -59,6 +59,7 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
                                legendid: legendid,
                                minvalue: legendminvalue.getValue(),
                                maxvalue: legendmaxvalue.getValue(),
+                               legend_type: me.legend_type,
                                legendClasses:esapp.Utils.makeGridJSON(legendClassesStore)
                            },
                            method: 'POST',
@@ -581,8 +582,13 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
                 afterrender: function(){
                     var legendminvalue = me.lookupReference('legend_minvalue');
                     var legendmaxvalue = me.lookupReference('legend_maxvalue');
-                    this.lookupReference('minvalue').setValue(legendminvalue.getValue())
-                    this.lookupReference('maxvalue').setValue(legendmaxvalue.getValue())
+                    if (legendminvalue.getValue() == 0){
+                        this.lookupReference('minvalue').setValue(0.000001)
+                    }
+                    else {
+                        this.lookupReference('minvalue').setValue(legendminvalue.getValue());
+                    }
+                    this.lookupReference('maxvalue').setValue(legendmaxvalue.getValue());
                     this.alignTarget = this.owner;
                 },
                 focusleave: function(){
@@ -603,6 +609,8 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
                     var generateLogValuesWindow = this.up().up();
                     var minvalue = generateLogValuesWindow.lookupReference('minvalue').getValue();
                     var maxvalue = generateLogValuesWindow.lookupReference('maxvalue').getValue();
+                    var legendminvalue = me.lookupReference('legend_minvalue');
+                    var legendmaxvalue = me.lookupReference('legend_maxvalue');
                     var logminvalue = parseFloat(Math.log10(minvalue).toFixed(precision));
                     var logmaxvalue = parseFloat(Math.log10(maxvalue).toFixed(precision));
                     var maxmindiff = logmaxvalue-logminvalue;
@@ -625,6 +633,11 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
                     },this);
                     legendClassesStore.resumeEvents();
 
+                    legendminvalue.setValue(0);
+                    legendmaxvalue.setValue(maxvalue);
+                    me.legend_type = 'logarithmic';
+                    // me.params.legendrecord.set('legend_type', 'logarithmic');
+
                     me.getController().setLegendPreview();
                     generateLogValuesWindow.close();
                 }
@@ -640,14 +653,16 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
                     xtype:'numberfield',
                     reference:'minvalue',
                     fieldLabel: esapp.Utils.getTranslation('minvalue'), // 'Min value',
-                    width:90+90,
-                    minValue: 0
+                    width:200,
+                    minValue: 0.000001,
+                    decimalPrecision:6
                 },{
                     xtype:'numberfield',
                     reference:'maxvalue',
                     fieldLabel: esapp.Utils.getTranslation('maxvalue'), // 'MAx value',
-                    width:90+90,
-                    minValue: 0
+                    width:200,
+                    minValue: 0.000001,
+                    decimalPrecision:6
                 }]
             }]
         });
@@ -661,7 +676,7 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
         var legendClassesStore = me.getViewModel().getStore('legendClassesStore');
         var TotClasses = parseInt(legendClassesStore.getCount());
         var legendname = me.lookupReference('title_in_legend').getValue();
-        var fontSizeLabels = 20;
+        var fontSizeLabels = 16;
         var legendHTMLVertical = '';
         var TotColorLabels = 0;
         var TotGroupLabels = 0;
@@ -678,18 +693,21 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
         });
         legendClassesStore.sort('from_step', 'asc');
 
-        if (TotClasses >= 35){
-            var fontSizeTitle = 20;
+        if (TotClasses >= 25){
+            var fontSizeTitle = 18;
             var stepWidth = 28;
             var stepHeight = 1;
-            if (TotClasses <= 60)
-                stepHeight = 3;
+
+            if (TotClasses <= 35)
+                stepHeight = 15;
+            else if (TotClasses <= 65)
+                stepHeight = 5;
             else if (TotClasses <= 115)
-                stepHeight = 2;
+                stepHeight = 3;
 
             var mainTableBegin = '<table style="border-spacing:0px; background:white; padding:0;"> ';
             var mainTableEnd = '</table>';
-            var legendHeaderRow = '<tr><td style="background:white; padding: 5px; font-size:' + fontSizeTitle.toString() + 'px;">' + legendname + '</td></tr>';
+            var legendHeaderRow = '<tr><td style="font-weight: bold; background:white; padding: 5px; font-size:' + fontSizeTitle.toString() + 'px;">' + legendname + '</td></tr>';
             var legendTableBegin = '<table style="border-spacing:0px; background:white; padding: 5px 5px 15px 10px;"> ';
             var legendTableEnd = '</table>';
 
@@ -708,7 +726,7 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
                 var color_html = 'rgb(' + r + ',' + g + ',' + b + ')';
 
                 var border = "";
-                if (TotClasses <= 30)
+                if (TotClasses <= 24)
                     border = "border:1px solid black; ";
 
                 var legendColorColumn = '<td width=' + stepWidth.toString() + 'px; height=' + stepHeight.toString() + 'px; style="' + border + ' background-color: ' + color_html + '"></td>';
@@ -718,11 +736,11 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
                 var legendColorLabelColumn = '<td height="1px;"></td>';
                 if (ColumnSpan > 1) {
                     if (record.get('color_label') != null && record.get('color_label').trim() != '') {
-                        legendColorLabelColumn = '<td rowspan=5 style="font-size:' + fontSizeLabels.toString() + 'px; line-height:10px; " valign="top" align="left">' + record.get('color_label') + '</td>'
+                        legendColorLabelColumn = '<td rowspan=5 style="font-weight: bold; font-size:' + fontSizeLabels.toString() + 'px; line-height:10px; " valign="top" align="left">' + record.get('color_label') + '</td>'
                     }
                 }
                 else if (record.get('color_label') != null && record.get('color_label').trim() != '') {
-                    legendColorLabelColumn = '<td rowspan="' + ColumnSpan.toString() + '" style="font-size:' + fontSizeLabels.toString() + 'px; line-height:10px; " align="left">' + record.get('color_label') + '</td>';
+                    legendColorLabelColumn = '<td rowspan="' + ColumnSpan.toString() + '" style="font-weight: bold; font-size:' + fontSizeLabels.toString() + 'px; line-height:10px; " align="left">' + record.get('color_label') + '</td>';
                 }
                 legendHTMLVertical += '<tr>' + legendColorColumn + legendColorLabelColumn + '</tr>';
 
@@ -733,21 +751,21 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
         else {
 
             var mainTableBackgroundColor = 'transparent',
-                fontSizeHeader = 20,
+                fontSizeHeader = 18,
                 firstColumnWidth = 35,
                 legendColorTableBackgroundColor = 'white',
                 legendLabelTableBackgroundColor = 'white',
                 extraFirstRowHeight = 14,
                 absoluteMaxRowColorTableHeight = 18,
                 colorColumnWidth = 35,
-                colorColumnHeight = 26,
+                colorColumnHeight = 20,
                 tickColumnWidth = 8,
-                tickColumnHeight = 26,
-                labelColumnHeight = 26,
+                tickColumnHeight = 20,
+                labelColumnHeight = 20,
                 bordertop = ' ';
 
             var mainTableBegin = '<table style="background: ' + mainTableBackgroundColor + '; border:0px solid black; border-spacing:0px; border-padding:0px; cellspacing=0px; cellpadding=0px; margin: 0px; padding: 0px; ">';
-            var legendHeaderRow = '<tr><td colspan=2 style="background: white; padding:3px;"><span style=" font-size:' + fontSizeHeader.toString() + 'px;">' + legendname + '</span></td></tr>';     // line-height: 24px;
+            var legendHeaderRow = '<tr><td colspan=2 style="background: white; padding:3px;"><span style="font-weight: bold; font-size:' + fontSizeHeader.toString() + 'px;">' + legendname + '</span></td></tr>';     // line-height: 24px;
             var legendRowBegin = '<tr>'
             var firstColumnBegin = '<td width=' + firstColumnWidth.toString() + 'px; style="border:0px solid black; border-spacing:0px; border-padding:0px; cellspacing=0px; cellpadding=0px; margin: 0px; padding: 0px;">';
             var secondColumnBegin = '<td valign="top" align="left" style="border:0px solid black; border-spacing:0px; border-padding:0px; cellspacing=0px; cellpadding=0px; margin: 0px; padding: 0px;" >';
@@ -773,7 +791,7 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
                     if (record.get('group_label') != null && record.get('group_label').trim() != '') {
                         borderbottomtick = ' border-bottom:1px solid black; ';
                         absoluteMaxRowColorTable = '<tr><td colspan=2 height=' + absoluteMaxRowColorTableHeight.toString() + 'px; style=""></td></tr>';
-                        absoluteMaxRowLegendLabelTable = '<tr><td height=' + labelColumnHeight.toString() + 'px; style="font-size:' + fontSizeLabels.toString() + 'px;  padding:0px; margin: 0px; padding-left:5px;" valign="middle" align="left">' + record.get('group_label') + '</td></tr>';
+                        absoluteMaxRowLegendLabelTable = '<tr><td height=' + labelColumnHeight.toString() + 'px; style="font-weight: bold; font-size:' + fontSizeLabels.toString() + 'px;  padding:0px; margin: 0px; padding-left:5px;" valign="middle" align="left">' + record.get('group_label') + '</td></tr>';
                     }
                 }
                 // Add color column
@@ -794,7 +812,7 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
                 var color_label = '';
                 if (record.get('color_label') != null && record.get('color_label') != '')
                     color_label = record.get('color_label').trim();
-                legendLabelTable += '<tr><td height=' + labelColumnHeight.toString() + 'px; style="font-size:' + fontSizeLabels.toString() + 'px;  padding:0px; margin: 0px; padding-left:5px;" valign="middle" align="left">' + color_label + '</td></tr>';
+                legendLabelTable += '<tr><td height=' + labelColumnHeight.toString() + 'px; style="font-weight: bold; font-size:' + fontSizeLabels.toString() + 'px;  padding:0px; margin: 0px; padding-left:5px;" valign="middle" align="left">' + color_label + '</td></tr>';
 
                 legendLabelTable += absoluteMaxRowLegendLabelTable;
             });

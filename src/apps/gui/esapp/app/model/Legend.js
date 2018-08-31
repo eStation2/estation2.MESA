@@ -8,6 +8,7 @@ Ext.define('esapp.model.Legend', {
         {name: 'minvalue', type:'number'},
         {name: 'maxvalue', type:'number'},
         {name: 'legend_descriptive_name', type:'string'},
-        {name: 'defined_by', type:'string'}
+        {name: 'defined_by', type:'string'},
+        {name: 'legend_type', type:'string'}
     ]
 });
