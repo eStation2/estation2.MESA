@@ -13,7 +13,7 @@ do_start = True
 dry_run = False
 service = False
 serialize = False                   # for debug
-test_one_product = 77               # process_id
+test_one_product = 62               # MODIS_PP on 8daysavg
 
 
 if service:
