@@ -12,8 +12,8 @@ start = time.clock()
 do_start = True
 dry_run = False
 service = False
-serialize = False    # for debug
-test_one_product = 78
+serialize = False                   # for debug
+test_one_product = 62               # MODIS_PP on 8daysavg
 
 
 if service:
