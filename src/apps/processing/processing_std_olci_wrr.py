@@ -159,12 +159,12 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 #   ---------------------------------------------------------------------
 #   Run the pipeline
 
-def processing_olci_wrr(res_queue, pipeline_run_level=0, pipeline_printout_level=0, pipeline_printout_graph_level=0,
+def processing_std_olci_wrr(res_queue, pipeline_run_level=0, pipeline_printout_level=0, pipeline_printout_graph_level=0,
                         prod='', starting_sprod='', mapset='', version='', starting_dates=None,
                         nrt_products=True, write2file=None, logfile=None, touch_files_only=False):
 
     spec_logger = log.my_logger(logfile)
-    spec_logger.info("Entering routine %s" % 'processing_olci_wrr')
+    spec_logger.info("Entering routine %s" % 'processing_std_olci_wrr')
 
     proc_lists = None
     proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version, starting_dates=starting_dates,

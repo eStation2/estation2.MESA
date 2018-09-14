@@ -170,7 +170,11 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         command=es_constants.es2globals['gdal_polygonize']+' '+ input_file+' '+ tmp_output_file+' -nomask -f "ESRI Shapefile"'
         p = os.system(command)
 
+        # Check output dir exists (see ES2-285)
+        functions.check_output_dir(os.path.dirname(output_file))
+
         # Move and remove tmpdir
+
         files=glob.glob(tmp_output_file.replace('.shp','.*'))
         for my_file in files:
             os.rename(my_file, os.path.dirname(output_file)+os.path.sep+os.path.basename(my_file))

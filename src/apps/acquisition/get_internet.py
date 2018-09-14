@@ -361,7 +361,7 @@ def get_file_from_url(remote_url_file,  target_dir, target_file=None,userpwd='')
 #   Date: 2014/09/01
 #   Inputs: none
 #   Arguments: dry_run -> if set, read tables and report activity ONLY
-def loop_get_internet(dry_run=False):
+def loop_get_internet(dry_run=False, test_one_source=False):
 
     global processed_list_filename, processed_list
     global processed_info_filename, processed_info
@@ -404,6 +404,9 @@ def loop_get_internet(dry_run=False):
                     for internet_source in internet_sources_list:
                       try:
 
+                        if test_one_source and (internet_source.internet_id != test_one_source):
+                            logger.info("Running in test mode, and source is not %s. Continue.", test_one_source)
+                            continue
                         execute_trigger = True
                         # Get this from the pads database table (move from internet_source 'pull_frequency' to the pads table,
                         # so that it can be exploited by eumetcast triggers as well). It is in minute
@@ -493,6 +496,14 @@ def loop_get_internet(dry_run=False):
                                     logger.error("Error in creating date lists. Continue")
                                     continue
 
+                            elif internet_type == 'local':
+                                logger.info("This internet source is meant to copy data on local filesystem")
+                                try:
+                                    current_list = get_list_matching_files_dir_local(str(internet_source.url),str(internet_source.include_files_expression))
+                                except:
+                                    logger.error("Error in creating date lists. Continue")
+                                    continue
+
                             elif internet_type == 'offline':
                                      logger.info("This internet source is meant to work offline (GoogleDrive)")
                                      current_list = []
@@ -525,7 +536,13 @@ def loop_get_internet(dry_run=False):
                                          for filename in list(listtoprocess):
                                              logger_spec.debug("Processing file: "+str(internet_source.url)+os.path.sep+filename)
                                              try:
-                                                result = get_file_from_url(str(internet_source.url)+os.path.sep+filename, target_file=os.path.basename(filename), target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
+                                                if internet_type == 'local':
+                                                     shutil.copyfile(
+                                                         str(internet_source['url']) + os.path.sep + filename,
+                                                         es_constants.ingest_dir + os.path.basename(filename))
+                                                     result = 0
+                                                else:
+                                                    result = get_file_from_url(str(internet_source.url)+os.path.sep+filename, target_file=os.path.basename(filename), target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
                                                 if not result:
                                                     logger_spec.info("File %s copied.", filename)
                                                     processed_list.append(filename)
@@ -568,6 +585,7 @@ def get_list_matching_files_dir_local(local_dir, full_regex):
     for elem in list_matches:
         toprint+=elem+','
     logger.info(toprint)
+    return list_matches
 
 ######################################################################################
 #   get_list_matching_files_subdir_local

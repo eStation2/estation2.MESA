@@ -63,6 +63,7 @@ Ext.define("esapp.view.analysis.addEditLegend",{
     initComponent: function () {
         var me = this;
         me.changedsaved = false;
+        me.legend_type = me.params.legendrecord.get('legend_type');
 
         var colorrenderer = function(color) {
             var renderTpl = color;

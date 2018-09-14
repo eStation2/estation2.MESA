@@ -40,7 +40,7 @@ from apps.processing import processing_std_msg_mpe
 from apps.processing import processing_std_rain_onset
 from apps.processing import processing_std_seas_cum
 from apps.processing import processing_std_precip_1day
-from apps.processing import processing_olci_wrr
+from apps.processing import processing_std_olci_wrr
 
 from lib.python.daemon import DaemonDryRunnable
 

@@ -79,7 +79,7 @@ if __name__=='__main__':
     # create_archive_from_file(req_file)
     # req_directory = '/home/esuser/Jur/requests/'
     # req_directory = '/home/analyst/requests/'
-    req_directory = '/data/processing/exchange/Requests_Daniel/'
+    req_directory = '/data/processing/exchange/requests/Seychelles/'
     create_archives_from_dir(req_directory)
 
 

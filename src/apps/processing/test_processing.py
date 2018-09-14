@@ -171,7 +171,7 @@ def test_proc_modis_pp(pipe_run=0, pipe_print=3, touch_files_only=False):
     derivation_method = 'modis_pp'
     algorithm = 'modis_pp'
     mapset = 'MODIS-Africa-4km'
-    process_id = 63
+    process_id = 62
 
     # Get input products
     input_products = querydb.get_processing_chain_products(process_id,type='input')
@@ -187,7 +187,7 @@ def test_proc_modis_pp(pipe_run=0, pipe_print=3, touch_files_only=False):
             'logfile': 'test_processing.log'}
 
     res_queue = None
-    processing_modis_pp_stats_only(res_queue, **args)
+    processing_modis_pp_only(res_queue, **args)
 
 # #
 #   ---------------------------------------------------------------------
@@ -552,7 +552,7 @@ def test_proc_msg_mpe(start_date=None, end_date=None, pipe_run=0, pipe_print=3, 
 #   ---------------------------------------------------------------------
 #   Calls
 #   ---------------------------------------------------------------------
-from apps.processing.processing_olci_wrr import *
+from apps.processing.processing_std_olci_wrr import *
 def test_proc_olci_wrr(start_date=None, end_date=None, pipe_run=0, pipe_print=3, start_date_stats=None, end_date_stats=None, touch_files_only=False):
 
     # Create the list of dates -> returns empty if start==end==None
@@ -573,7 +573,7 @@ def test_proc_olci_wrr(start_date=None, end_date=None, pipe_run=0, pipe_print=3,
             'logfile':'ruffus-chirps'}
 
     res_queue = None
-    proc_lists=processing_olci_wrr(res_queue,**args)
+    proc_lists=processing_std_olci_wrr(res_queue,**args)
     print(proc_lists)
 #test_proc_pml_modis_fronts(pipe_run=4, pipe_print=0, touch_files_only=False)
 
@@ -614,8 +614,8 @@ def test_proc_vgt_dmp(pipe_run=0, pipe_print=3, start_date=None, end_date=None, 
 #     filename='/data/processing/modis-firms/v6.0/SPOTV-Africa-10km/derived/10dcount10k/'+date+'_modis-firms_10dcount10k_SPOTV-Africa-10km_v6.0.tif'
 #     st=os.system('touch '+filename)
 
-test_proc_olci_wrr(pipe_run=4, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
+#test_proc_olci_wrr(pipe_run=0, pipe_print=5, start_date=None, end_date=None, touch_files_only=False)
 # test_proc_completeness()
-#test_proc_modis_pp(pipe_run=4, pipe_print=0, touch_files_only=False)
+test_proc_modis_pp(pipe_run=0, pipe_print=3, touch_files_only=False)
 #test_proc_tamsat_rfe(pipe_run=4, pipe_print=0, start_date='19830101', end_date='20171231', touch_files_only=False)
 #test_proc_modis_firms(pipe_run=4, pipe_print=0, touch_files_only=False)

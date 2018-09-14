@@ -1890,7 +1890,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
         status = os.system(command)
         # ToDo : check the status or use try/except
 
-    # Loop over subproducts and extract associated files
+    # Loop over subproducts and extract associated files. In case of more Mapsets, more sprods exist
     for sprod in subproducts:
         interm_files_list = []
         # In each unzipped folder pre-process the dataset and store the list of files to be merged
@@ -1912,7 +1912,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
                 os.makedirs(tmpdir_untar_band)
 
             # ------------------------------------------------------------------------------------------
-            # Write a graph xml and subset the product for specific band
+            # Write a graph xml and subset the product for specific band, also applying flags
             # ------------------------------------------------------------------------------------------
             #functions.write_graph_xml_subset(output_dir=tmpdir_untar, band_name=re_process)
             expression='(WQSF_lsb_CLOUD or WQSF_lsb_CLOUD_AMBIGUOUS or WQSF_lsb_CLOUD_MARGIN or WQSF_lsb_INVALID or WQSF_lsb_COSMETIC or WQSF_lsb_SATURATED or WQSF_lsb_SUSPECT or WQSF_lsb_HISOLZEN or WQSF_lsb_HIGHGLINT or WQSF_lsb_SNOW_ICE) ? NaN : CHL_OC4ME'
@@ -1926,7 +1926,6 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             command = es_constants.gpt_exec+' '+ graph_xml_subset
             status=os.system(command)
             # ToDo : check the status or use try/except
-
             if os.path.exists(output_subset_tif):
                 functions.write_graph_xml_reproject(output_dir=tmpdir_untar_band, nodata_value=scaled_no_data)
 
