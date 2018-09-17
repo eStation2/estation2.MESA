@@ -49,10 +49,10 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
     spec_logger.info("Entering routine %s" % 'processing_modis_pp')
 
     # Set DEFAULTS: all off
-    activate_pp_comput = 0          # PP from Chla, SST, Kd490 and PAR
+    activate_pp_comput = 0              # PP from Chla, SST, Kd490 and PAR
 
-    activate_stats_comput = 0       # Stats computation (inter-annual clim, min, max)
-    activate_anomalies_comput = 0   # Anomalies computation (not yet done!!)
+    activate_stats_comput = 0           # Stats computation (inter-annual clim, min, max)
+    activate_anomalies_comput = 0       # Anomalies computation (not yet done!!)
 
     #   switch wrt groups - according to options
     if nrt_products:
@@ -63,9 +63,9 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
         activate_anomalies_comput = 1
 
     activate_pp_prod_comput = 1
-    activate_pp_stats_clim_comput = 1
-    activate_pp_stats_min_comput = 1
-    activate_pp_stats_max_comput = 1
+    activate_pp_stats_clim_comput = 0
+    activate_pp_stats_min_comput = 0
+    activate_pp_stats_max_comput = 0
 
     #   ---------------------------------------------------------------------
     #   Create lists
@@ -172,6 +172,7 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
 
     output_nodata = -32767
 
+    # Get the first output -> PP subproduct generated (8daysavg or monavg)
     output_prod = output_product[0].productcode
     output_sprod = output_product[0].subproductcode
     output_version = output_product[0].version
@@ -226,98 +227,98 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
     #   ---------------------------------------------------------------------
     #   Climatology (inter-annual average)
 
-    prod = output_prod
-    mapset = output_mapset
-    new_input_subprod = output_sprod
-    version = output_version
-    in_prod_ident = functions.set_path_filename_no_date(prod, new_input_subprod, mapset, version, ext)
-    in_prod_subdir = functions.set_path_sub_directory(prod, new_input_subprod, 'Derived', version, mapset)
-    starting_files = es2_data_dir + in_prod_subdir + "*" + in_prod_ident
-
-    output_sprod_group = proc_lists.proc_add_subprod_group("monstat")
-    output_sprod = proc_lists.proc_add_subprod("1monavg", "monstat", final=False,
-                                               descriptive_name='1 Month PP_LTA',
-                                               description='Long Term Average for 1 Month MODIS Primary Production',
-                                               frequency_id='e1month',
-                                               date_format='MMDD',
-                                               masked=False,
-                                               timeseries_role='',
-                                               active_default=True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    output_subdir = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
-
-    formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})" + in_prod_ident
-    formatter_out = ["{subpath[0][5]}" + os.path.sep + output_subdir + "{MMDD[0]}" + out_prod_ident]
-
-    @follows(modis_pp_comp)
-    @active_if(activate_stats_comput, activate_pp_stats_clim_comput)
-    @collate(starting_files, formatter(formatter_in), formatter_out)
-    def std_precip_1monavg(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        reduced_list = exclude_current_year(input_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF',
-                "options": "compress=lzw"}
-        raster_image_math.do_avg_image(**args)
-
-    #   ---------------------------------------------------------------------
-    #   Minimum
-    output_sprod = proc_lists.proc_add_subprod("1monmin", "monstat", final=False,
-                                               descriptive_name='1 Month PP_LT Min',
-                                               description='Long Term Minimum for 1 Month MODIS Primary Production',
-                                               frequency_id='e1month',
-                                               date_format='MMDD',
-                                               masked=False,
-                                               timeseries_role='',
-                                               active_default=True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    output_subdir = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
-
-    formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})" + in_prod_ident
-    formatter_out = ["{subpath[0][5]}" + os.path.sep + output_subdir + "{MMDD[0]}" + out_prod_ident]
-
-    @follows(modis_pp_comp)
-    @active_if(activate_stats_comput, activate_pp_stats_min_comput)
-    @collate(starting_files, formatter(formatter_in), formatter_out)
-    def std_precip_1monmin(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        reduced_list = exclude_current_year(input_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF',
-                "options": "compress=lzw"}
-        raster_image_math.do_min_image(**args)
-
-    #   ---------------------------------------------------------------------
-    #   Monthly Maximum
-    output_sprod = proc_lists.proc_add_subprod("1monmax", "monstat", final=False,
-                                               descriptive_name='1 Month PP_LT Max',
-                                               description='Long Term Maximun for 1 Month MODIS Primary Production',
-                                               frequency_id='e1month',
-                                               date_format='MMDD',
-                                               masked=False,
-                                               timeseries_role='',
-                                               active_default=True)
-    out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    output_subdir = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
-
-    reg_ex_in = "[0-9]{4}([0-9]{4})" + in_prod_ident
-
-    formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})" + in_prod_ident
-    formatter_out = ["{subpath[0][5]}" + os.path.sep + output_subdir + "{MMDD[0]}" + out_prod_ident]
-
-    @follows(modis_pp_comp)
-    @active_if(activate_stats_comput, activate_pp_stats_max_comput)
-    @collate(starting_files, formatter(formatter_in), formatter_out)
-    def std_precip_1monmax(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        reduced_list = exclude_current_year(input_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF',
-                "options": "compress=lzw"}
-        raster_image_math.do_max_image(**args)
+    # prod = output_prod
+    # mapset = output_mapset
+    # new_input_subprod = output_sprod
+    # version = output_version
+    # in_prod_ident = functions.set_path_filename_no_date(prod, new_input_subprod, mapset, version, ext)
+    # in_prod_subdir = functions.set_path_sub_directory(prod, new_input_subprod, 'Derived', version, mapset)
+    # starting_files = es2_data_dir + in_prod_subdir + "*" + in_prod_ident
+    #
+    # output_sprod_group = proc_lists.proc_add_subprod_group("monstat")
+    # output_sprod = proc_lists.proc_add_subprod("1monavg", "monstat", final=False,
+    #                                            descriptive_name='1 Month PP_LTA',
+    #                                            description='Long Term Average for 1 Month MODIS Primary Production',
+    #                                            frequency_id='e1month',
+    #                                            date_format='MMDD',
+    #                                            masked=False,
+    #                                            timeseries_role='',
+    #                                            active_default=True)
+    # out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
+    # output_subdir = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
+    #
+    # formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})" + in_prod_ident
+    # formatter_out = ["{subpath[0][5]}" + os.path.sep + output_subdir + "{MMDD[0]}" + out_prod_ident]
+    #
+    # @follows(modis_pp_comp)
+    # @active_if(activate_stats_comput, activate_pp_stats_clim_comput)
+    # @collate(starting_files, formatter(formatter_in), formatter_out)
+    # def std_precip_1monavg(input_file, output_file):
+    #
+    #     output_file = functions.list_to_element(output_file)
+    #     reduced_list = exclude_current_year(input_file)
+    #     functions.check_output_dir(os.path.dirname(output_file))
+    #     args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF',
+    #             "options": "compress=lzw"}
+    #     raster_image_math.do_avg_image(**args)
+    #
+    # #   ---------------------------------------------------------------------
+    # #   Minimum
+    # output_sprod = proc_lists.proc_add_subprod("1monmin", "monstat", final=False,
+    #                                            descriptive_name='1 Month PP_LT Min',
+    #                                            description='Long Term Minimum for 1 Month MODIS Primary Production',
+    #                                            frequency_id='e1month',
+    #                                            date_format='MMDD',
+    #                                            masked=False,
+    #                                            timeseries_role='',
+    #                                            active_default=True)
+    # out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
+    # output_subdir = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
+    #
+    # formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})" + in_prod_ident
+    # formatter_out = ["{subpath[0][5]}" + os.path.sep + output_subdir + "{MMDD[0]}" + out_prod_ident]
+    #
+    # @follows(modis_pp_comp)
+    # @active_if(activate_stats_comput, activate_pp_stats_min_comput)
+    # @collate(starting_files, formatter(formatter_in), formatter_out)
+    # def std_precip_1monmin(input_file, output_file):
+    #
+    #     output_file = functions.list_to_element(output_file)
+    #     reduced_list = exclude_current_year(input_file)
+    #     functions.check_output_dir(os.path.dirname(output_file))
+    #     args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF',
+    #             "options": "compress=lzw"}
+    #     raster_image_math.do_min_image(**args)
+    #
+    # #   ---------------------------------------------------------------------
+    # #   Monthly Maximum
+    # output_sprod = proc_lists.proc_add_subprod("1monmax", "monstat", final=False,
+    #                                            descriptive_name='1 Month PP_LT Max',
+    #                                            description='Long Term Maximun for 1 Month MODIS Primary Production',
+    #                                            frequency_id='e1month',
+    #                                            date_format='MMDD',
+    #                                            masked=False,
+    #                                            timeseries_role='',
+    #                                            active_default=True)
+    # out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
+    # output_subdir = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
+    #
+    # reg_ex_in = "[0-9]{4}([0-9]{4})" + in_prod_ident
+    #
+    # formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})" + in_prod_ident
+    # formatter_out = ["{subpath[0][5]}" + os.path.sep + output_subdir + "{MMDD[0]}" + out_prod_ident]
+    #
+    # @follows(modis_pp_comp)
+    # @active_if(activate_stats_comput, activate_pp_stats_max_comput)
+    # @collate(starting_files, formatter(formatter_in), formatter_out)
+    # def std_precip_1monmax(input_file, output_file):
+    #
+    #     output_file = functions.list_to_element(output_file)
+    #     reduced_list = exclude_current_year(input_file)
+    #     functions.check_output_dir(os.path.dirname(output_file))
+    #     args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF',
+    #             "options": "compress=lzw"}
+    #     raster_image_math.do_max_image(**args)
 
 
 #   ---------------------------------------------------------------------
@@ -344,53 +345,53 @@ def processing_modis_pp(res_queue, pipeline_run_level=0, pipeline_printout_level
         pipeline_printout_graph('flowchart.jpg')
 
 
-def processing_modis_pp_stats_only(res_queue, pipeline_run_level=0, pipeline_printout_level=0,
-                                   pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                                   starting_dates=None, write2file=None, logfile=None, input_products='',
-                                   output_product=''):
-    result = processing_modis_pp(res_queue, pipeline_run_level=pipeline_run_level,
-                                 pipeline_printout_level=pipeline_printout_level,
-                                 pipeline_printout_graph_level=pipeline_printout_graph_level,
-                                 write2file=write2file,
-                                 logfile=logfile,
-                                 nrt_products=False,
-                                 update_stats=True,
-                                 input_products=input_products,
-                                 output_product=output_product
-                                 )
-
-    return result
-
-
-def processing_modis_pp_only(res_queue, pipeline_run_level=0, pipeline_printout_level=0,
-                             pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                             starting_dates=None, write2file=None, logfile=None, input_products='', output_product=''):
-    result = processing_modis_pp(res_queue, pipeline_run_level=pipeline_run_level,
-                                 pipeline_printout_level=pipeline_printout_level,
-                                 pipeline_printout_graph_level=pipeline_printout_graph_level,
-                                 write2file=write2file,
-                                 logfile=logfile,
-                                 nrt_products=True,
-                                 update_stats=False,
-                                 input_products=input_products,
-                                 output_product=output_product
-                                 )
-
-    return result
-
-
-def processing_modis_pp_all(res_queue, pipeline_run_level=0, pipeline_printout_level=0, pipeline_printout_graph_level=0,
-                            prod='', starting_sprod='', mapset='', version='', starting_dates=None, write2file=None,
-                            logfile=None, input_products='', output_product=''):
-    result = processing_modis_pp(res_queue, pipeline_run_level=pipeline_run_level,
-                                 pipeline_printout_level=pipeline_printout_level,
-                                 pipeline_printout_graph_level=pipeline_printout_graph_level,
-                                 write2file=write2file,
-                                 logfile=logfile,
-                                 nrt_products=True,
-                                 update_stats=True,
-                                 input_products=input_products,
-                                 output_product=output_product
-                                 )
-
-    return result
+# def processing_modis_pp_stats_only(res_queue, pipeline_run_level=0, pipeline_printout_level=0,
+#                                    pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
+#                                    starting_dates=None, write2file=None, logfile=None, input_products='',
+#                                    output_product=''):
+#     result = processing_modis_pp(res_queue, pipeline_run_level=pipeline_run_level,
+#                                  pipeline_printout_level=pipeline_printout_level,
+#                                  pipeline_printout_graph_level=pipeline_printout_graph_level,
+#                                  write2file=write2file,
+#                                  logfile=logfile,
+#                                  nrt_products=False,
+#                                  update_stats=True,
+#                                  input_products=input_products,
+#                                  output_product=output_product
+#                                  )
+#
+#     return result
+#
+#
+# def processing_modis_pp_only(res_queue, pipeline_run_level=0, pipeline_printout_level=0,
+#                              pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
+#                              starting_dates=None, write2file=None, logfile=None, input_products='', output_product=''):
+#     result = processing_modis_pp(res_queue, pipeline_run_level=pipeline_run_level,
+#                                  pipeline_printout_level=pipeline_printout_level,
+#                                  pipeline_printout_graph_level=pipeline_printout_graph_level,
+#                                  write2file=write2file,
+#                                  logfile=logfile,
+#                                  nrt_products=True,
+#                                  update_stats=False,
+#                                  input_products=input_products,
+#                                  output_product=output_product
+#                                  )
+#
+#     return result
+#
+#
+# def processing_modis_pp_all(res_queue, pipeline_run_level=0, pipeline_printout_level=0, pipeline_printout_graph_level=0,
+#                             prod='', starting_sprod='', mapset='', version='', starting_dates=None, write2file=None,
+#                             logfile=None, input_products='', output_product=''):
+#     result = processing_modis_pp(res_queue, pipeline_run_level=pipeline_run_level,
+#                                  pipeline_printout_level=pipeline_printout_level,
+#                                  pipeline_printout_graph_level=pipeline_printout_graph_level,
+#                                  write2file=write2file,
+#                                  logfile=logfile,
+#                                  nrt_products=True,
+#                                  update_stats=True,
+#                                  input_products=input_products,
+#                                  output_product=output_product
+#                                  )
+#
+#     return result

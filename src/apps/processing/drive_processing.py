@@ -12,7 +12,9 @@ start = time.clock()
 do_start = True
 dry_run = False
 service = False
-serialize = False    # for debug
+serialize = False                   # for debug
+test_one_product = 62               # MODIS_PP on 8daysavg
+
 
 if service:
     # Make sure the pid dir exists
@@ -39,4 +41,4 @@ if service:
             logger.info('Processing service is running: Stop it.')
             daemon.stop()
 else:
-    processing.loop_processing(dry_run=dry_run, serialize=serialize)
+    processing.loop_processing(dry_run=dry_run, serialize=serialize, test_one_product=test_one_product)
