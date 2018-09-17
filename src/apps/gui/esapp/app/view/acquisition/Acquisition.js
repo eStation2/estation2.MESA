@@ -26,11 +26,8 @@ Ext.define('esapp.view.acquisition.Acquisition',{
 
         'Ext.window.Toast',
         'Ext.layout.container.Center',
-        //'Ext.grid.plugin.CellEditing',
         'Ext.grid.column.Widget',
-        //'Ext.grid.column.Boolean',
         'Ext.grid.column.Template',
-        //'Ext.grid.column.Check',
         'Ext.button.Split',
         'Ext.menu.Menu',
         'Ext.XTemplate',
@@ -48,10 +45,10 @@ Ext.define('esapp.view.acquisition.Acquisition',{
         markDirty: false,
         resizable:false,
         trackOver:true,
-        scrollable: true
+        scrollable: true,
+        focusable: false
         //focusOnToFront: false,
         //preserveScrollOnRefresh: false,
-        //focusable: false
         //focusRow: Ext.emptyFn
     },
 
@@ -73,7 +70,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
     forceFit: false,
     focusable: false,
     margin: '0 0 10 0',    // (top, right, bottom, left).
-    session:true,
+    session: true,
 
     // listeners: {
         // groupclick: function( view, node, group, eOpts ) {
@@ -442,16 +439,18 @@ Ext.define('esapp.view.acquisition.Acquisition',{
         });
 
         me.listeners = {
+            groupcollapse: function(view, node, group) {
+                me.hideCompletenessTooltip();
+            },
             groupexpand: function(view, node, group){
-                // var groupFeature = view.getFeature('prodcat');
-                //
-                // var task = new Ext.util.DelayedTask(function() {
-                //     view.refresh();
-                // });
-                // task.delay(5);
+                me.hideCompletenessTooltip();
+
+                var taskRefresh = new Ext.util.DelayedTask(function() {
+                    view.refresh();
+                });
+                taskRefresh.delay(10);
             },
             afterrender: function(){
-                // console.info(me.view.getScrollable());
                 var scroller = me.view.getScrollable();
 
                 scroller.on('scroll', function(){
@@ -461,22 +460,9 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                        // item.hide();
                     });
                 }, scroller, {single: false});
+
             }
         }
-
-        //me.listeners = {
-        //    viewready: function(gridpanel,func){
-        //        //Ext.toast({ html: 'viewready', title: 'viewready', width: 200, align: 't' });
-        //
-        //        var task = new Ext.util.DelayedTask(function() {
-        //            var view = gridpanel.getView();
-        //            view.getFeature('productcategories').expandAll();
-        //            view.refresh();
-        //        });
-        //
-        //        task.delay(500);
-        //    }
-        //};
 
         me.defaults = {
             variableRowHeight: true,
@@ -758,12 +744,6 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                 tooltip: esapp.Utils.getTranslation('showingestionlog'),     // 'Show log of this Ingestion',
                 scope: me,
                 handler: function (grid, rowIndex, colIndex, icon, e, record) {
-                    //console.info(record);
-                    //var recIndex = grid.getStore().indexOf(record);
-                    //console.info(recIndex);
-                    //console.info(rowIndex);
-                    //var rec = grid.getStore().getAt(rowIndex);
-                    //console.info(rec);
                     var logViewWin = new esapp.view.acquisition.logviewer.LogView({
                         params: {
                             logtype: 'ingest',
@@ -775,8 +755,13 @@ Ext.define('esapp.view.acquisition.Acquisition',{
             }]
         }];
 
-        //Ext.resumeLayouts(true);
-
         me.callParent();
+    }
+    ,hideCompletenessTooltip: function(){
+        // Hide the visible completness tooltips
+        var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
+        Ext.each(completenessTooltips, function(item) {
+           item.hide();
+        });
     }
 });
