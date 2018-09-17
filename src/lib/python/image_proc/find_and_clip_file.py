@@ -295,7 +295,7 @@ def set_path_filename(date_str, product_code, sub_product_code, mapset_id, versi
     filename = date_str + set_path_filename_no_date(product_code, sub_product_code, mapset_id, version, extension)
     return filename
 
-def prodidedo_find_larger(requested_file, trg_mapset):
+def do_find_larger(requested_file, trg_mapset):
 
     # Look for another file (i.e. another mapset)
     [product_code, sub_product_code, version, mapset, type_subdir] = get_all_from_path_dir(os.path.dirname(requested_file))
