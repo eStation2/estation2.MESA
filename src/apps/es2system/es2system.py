@@ -945,8 +945,8 @@ def push_data_ftp(dry_run=False, user=None, psw=None, url=None, trg_dir=None):
                     # Get info - and ONLY for NOT masked products
                     dataset_info = querydb.get_subproduct(productcode=productcode,
                                                           version=version,
-                                                          subproductcode=subproductcode,
-                                                          masked=True)  # -> this means sprod NOT masked
+                                                          subproductcode=subproductcode) #,
+                                                          # masked=True)  # -> this means sprod NOT masked
 
                     if dataset_info is not None:
                         dataset_dict = functions.row2dict(dataset_info)
