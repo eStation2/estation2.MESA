@@ -35,7 +35,8 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
         resizable: false,
         disableSelection: true,
         trackOver: true,
-        forceFit:true
+        forceFit:true,
+        focusable: false,
         //focusOnToFront: false,
         //preserveScrollOnRefresh: false,
         //focusable: false
@@ -65,7 +66,8 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
     rowLines: false,
     collapsible: false,
     variableRowHeight : true,
-    bufferedRenderer: true,
+    bufferedRenderer: false,
+    focusable: false,
 
 
     //listeners: {

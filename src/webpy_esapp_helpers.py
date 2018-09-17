@@ -22,10 +22,11 @@ import calendar
 import numpy as NP
 
 import base64
+
 import matplotlib as mpl
 mpl.use('agg')
-import matplotlib.pyplot as plt
-
+mpl.rcParams['savefig.pad_inches'] = 0
+from matplotlib import pyplot as plt
 
 from config import es_constants
 from database import querydb
@@ -3261,6 +3262,7 @@ def getDataSets(forse):
 
 def DataSets():
     from dateutil.relativedelta import relativedelta
+    systemsettings = functions.getSystemSettings()
 
     db_products = querydb.get_products(activated=True)
 
@@ -3347,11 +3349,16 @@ def DataSets():
                                     #     dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
 
                                     dataset = p.get_dataset(**kwargs)
-                                    completeness = getDatasetCompleteness(dataset)
 
-                                    # completeness = dataset.get_dataset_normalized_info()
-                                    dataset_dict['datasetcompleteness'] = completeness['datasetcompleteness']
-                                    dataset_dict['datasetcompletenessimage'] = completeness['datasetcompletenessimage']
+                                    if systemsettings['type_installation'].lower() == 'jrc_online':
+                                        # completeness = dataset.get_dataset_normalized_info()
+                                        dataset_dict['datasetcompleteness'] = ''    # completeness['datasetcompleteness']
+                                        dataset_dict['datasetcompletenessimage'] = ''
+                                    else:
+                                        completeness = getDatasetCompleteness(dataset, True)
+                                        dataset_dict['datasetcompleteness'] = completeness['datasetcompleteness']
+                                        dataset_dict['datasetcompletenessimage'] = completeness['datasetcompletenessimage']
+
                                     # dataset_dict['datasetcompletenessimage'] = createDatasetCompletenessImage(completeness, dataset_info.frequency_id)
                                     dataset_dict['nodisplay'] = 'false'
 
@@ -3383,7 +3390,7 @@ def DataSets():
     return datamanagement_json
 
 
-def getDatasetCompleteness(dataset):
+def getDatasetCompleteness(dataset, fordatamanagement):
     completeness_dict = {}
     output_dir = es_constants.base_local_dir + os.path.sep + 'completeness_bars/'
     functions.check_output_dir(output_dir)      # if not exists output_dir -> create output_dir
@@ -3392,53 +3399,86 @@ def getDatasetCompleteness(dataset):
                                                      dataset._db_product.subproductcode,
                                                      dataset.mapset,
                                                      dataset._db_product.version, '')
-    completeness_file_json = output_dir + os.path.sep + 'Dataset_' + prod_ident + '.json'
-    completeness_file_png = output_dir + os.path.sep + 'Dataset_' + prod_ident + '.png'
 
-    if os.path.isfile(completeness_file_json) and os.path.isdir(dataset.fullpath):   # if completeness_file_json exists in path dataset
+    if fordatamanagement:
+        filePrefix = 'Dataset_'
+    else:
+        filePrefix = 'Ingestion_'
+
+    completeness_file_json = output_dir + os.path.sep + filePrefix + prod_ident + '.json'
+    completeness_file_png = output_dir + os.path.sep + filePrefix + prod_ident + '.png'
+
+    # Check if completeness_file_json exists in path dataset
+    if os.path.isfile(completeness_file_json) and os.path.isdir(dataset.fullpath):
         # command = 'find ' + dataset.fullpath + ' -newer ' + output_dir + completeness_file_json
         # list = os.popen(command).read()
         # if list != '':
+
+        # Is NOT .json up-to-date with dir contents -> re-create .json
         if os.lstat(dataset.fullpath).st_mtime > os.lstat(completeness_file_json).st_mtime:
             completeness = dataset.get_dataset_normalized_info()
             completeness_dict['datasetcompleteness'] = completeness
             completeness_dict['datasetcompletenessimage'] = createDatasetCompletenessImage(completeness,
                                                                                            dataset.frequency_id,
-                                                                                           completeness_file_png)
-            with open(completeness_file_json, 'w') as fp:
-                json.dump(completeness_dict, fp)
+                                                                                           completeness_file_png,
+                                                                                           fordatamanagement)
+            with open(completeness_file_json, 'w') as f:
+                json.dump(completeness_dict, f)
+        # ... else read it
         else:
             with open(completeness_file_json) as f:
                 completeness_dict = json.load(f)
+    # Create .json
     else:
         completeness = dataset.get_dataset_normalized_info()
         completeness_dict['datasetcompleteness'] = completeness
         completeness_dict['datasetcompletenessimage'] = createDatasetCompletenessImage(completeness,
                                                                                        dataset.frequency_id,
-                                                                                       completeness_file_png)
-        with open(completeness_file_json, 'w') as fp:
-            json.dump(completeness_dict, fp)
+                                                                                       completeness_file_png,
+                                                                                       fordatamanagement)
+        with open(completeness_file_json, 'w') as f:
+            json.dump(completeness_dict, f)
+
     return completeness_dict
 
 
-def createDatasetCompletenessImage(datasetcompleteness, frequency_id, completeness_file_png):
+def createDatasetCompletenessImage(datasetcompleteness, frequency_id, completeness_file_png, fordatamanagement):
     # TODO: IMPORTANT to set FONTCONFIG_FILE and FONTCONFIG_PATH for matplotlib
     # ToDo:   export FONTCONFIG_PATH=/etc/fonts
     # ToDO:   export FONTCONFIG_FILE=/etc/fonts/fonts.conf
     # import io
     # import StringIO
 
+    # import matplotlib as mpl
+    # mpl.use('agg')
+    # mpl.rcParams['savefig.pad_inches'] = 0
+    # from matplotlib import pyplot as plt
+    # plt.autoscale(tight=True)
+
     totfiles = None
     missingfiles = None
     firstdate = ''
     lastdate = ''
     intervals = []
+    fignum = 1
+    if fordatamanagement:
+        fignum = 500
 
-    mpl.rcParams['savefig.pad_inches'] = 0
-    plt.autoscale(tight=True)
-
+    # create a figure with size height = yinch and width = xinch (in inches)
+    # set the backgound color to white and resolution to dpi=128
+    xinch = 3.4
     yinch = 0.38
-    fig, ax = plt.subplots(figsize=(3.4, yinch), frameon=False, facecolor='w', dpi=128)
+    fig, ax = plt.subplots(num=fignum, figsize=(xinch, yinch), frameon=False, facecolor='w', dpi=128, tight_layout=True)
+    # fignumber = fig.number
+    # print fignumber
+    fig.subplots_adjust(left=0.07,
+                        right=0.95,
+                        bottom=0.15,
+                        top=0.9,
+                        wspace=0,
+                        hspace=0)  # Set padding around graph to create space for lables
+    ax.set_ylim(0, 4)   # set the min and max of the yaxe to regulate the height of the horizonal bar
+    ax.set_xlim(0, 100)  # set the min and max of the xaxe to regulate the width of the horizonal bar
 
     for attr, value in datasetcompleteness.iteritems():
         if attr == 'missingfiles':
@@ -3461,7 +3501,7 @@ def createDatasetCompletenessImage(datasetcompleteness, frequency_id, completene
     if frequency_id == 'singlefile' and totfiles == 1 and missingfiles == 0:
         d = 100
         color = '#81AF34'
-        plt.barh(0, d, color=color, height=5, linewidth=0, align='center')
+        ax.barh(0, d, color=color, height=5, linewidth=0, align='center')
         totfiles = 'Files: ' + str(totfiles)
         missingfiles = 'Missing: ' + str(missingfiles)
         firstdate = ''
@@ -3470,7 +3510,7 @@ def createDatasetCompletenessImage(datasetcompleteness, frequency_id, completene
     elif totfiles < 2 and missingfiles < 2:
         d = 100
         color = '#808080'
-        plt.barh(0, d, color=color, height=5, linewidth=0, align='center')
+        ax.barh(0, d, color=color, height=5, linewidth=0, align='center')
         totfiles = 'Not any data'
         missingfiles = ''
         firstdate = ''
@@ -3488,7 +3528,7 @@ def createDatasetCompletenessImage(datasetcompleteness, frequency_id, completene
             if interval['intervaltype'] == 'permanent-missing':
                 color = '#808080'
 
-            plt.barh(0, d, color=color, height=5, linewidth=0, align='center', left=left)
+            ax.barh(0, d, color=color, height=5, linewidth=0, align='center', left=left)
             # accumulate the left-hand offsets
             left += d
         totfiles = 'Files: ' + str(totfiles)
@@ -3509,27 +3549,29 @@ def createDatasetCompletenessImage(datasetcompleteness, frequency_id, completene
         'weight': 'bold',
         'size': 6.5}
 
-    plt.gcf().text(0.02, 0.7, firstdate, fontdict=font1)
-    plt.gcf().text(0.3, 0.72, totfiles, fontdict=font2)
-    plt.gcf().text(0.55, 0.72, missingfiles, fontdict=font3)
+    # Add and position labels to graph (startdate, files, missing and enddate labels)
+    fig.text(0.02, 0.7, firstdate, fontdict=font1)
+    fig.text(0.3, 0.72, totfiles, fontdict=font2)
+    fig.text(0.55, 0.72, missingfiles, fontdict=font3)
     if len(lastdate) < 6:
-        plt.gcf().text(0.9, 0.7, lastdate, fontdict=font1)
+        fig.text(0.9, 0.7, lastdate, fontdict=font1)
     else:
-        plt.gcf().text(0.83, 0.7, lastdate, fontdict=font1)
+        fig.text(0.83, 0.7, lastdate, fontdict=font1)
 
-    plt.axis('off')
-    plt.margins(0)
-    fig.subplots_adjust(left=0.07, right=0.95, bottom=0.15, top=0.9)  # , wspace=0.2, hspace=0.2
-    ax.set_ylim(0, 4)
-    plt.draw()
-    # buf = StringIO.StringIO()
-    # plt.savefig(buf, format='png', bbox_inches=0, pad_inches=0)
-    plt.savefig(completeness_file_png, bbox_inches=0, pad_inches=0)
-    # encoded = base64.b64encode(str(buf))
+    ax.axis('off')  # do not show the axes
+    # plt.margins(0)  # remove the margins -> creates conflict, replaced with: see above ax.set_xlim(0, 100)
+    # plt.draw()    # not needed because fig.savefig() draws also
+    fig.savefig(completeness_file_png, bbox_inches=0, pad_inches=0)
+    plt.close(fig)
+    # plt.close('all')
+
     encoded = base64.b64encode(open(completeness_file_png, "rb").read())
     datasetcompletenessimage = "data:image/png;base64," + encoded
+
+    # buf = StringIO.StringIO()
+    # plt.savefig(buf, format='png', bbox_inches=0, pad_inches=0)
+    # encoded = base64.b64encode(str(buf))
     # buf.close()
-    plt.close('all')
 
     return datasetcompletenessimage
 
@@ -4069,7 +4111,7 @@ def Ingestion():
                 # print kwargs
                 dataset = Dataset(**kwargs)
 
-                completeness = getDatasetCompleteness(dataset)
+                completeness = getDatasetCompleteness(dataset, False)
                 ingest_dict['completeness'] = completeness['datasetcompleteness']
                 ingest_dict['datasetcompletenessimage'] = completeness['datasetcompletenessimage']
                 # completeness = dataset.get_dataset_normalized_info()

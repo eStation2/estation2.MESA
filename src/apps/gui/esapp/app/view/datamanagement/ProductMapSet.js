@@ -31,20 +31,14 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
         disableSelection: true,
         trackOver: false,
         preserveScrollOnRefresh: false,
-        variableRowHeight : true
+        variableRowHeight : true,
+        focusable: false
     },
 
     layout: 'fit',
 
-    //selType: 'cellmodel',
-    //selModel: {listeners:{}},
-
-    //listeners: {
-    //    cellclick : function(view, cell, cellIndex, record, row, rowIndex, e) {
-    //        //e.stopPropagation();
-    //        return false;
-    //    }
-    //},
+    selType: 'cellmodel',
+    selModel: {listeners:{}},
 
     bufferedRenderer: true,
 
@@ -53,7 +47,14 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
     rowLines: false,
     minHeight: 60,
     focusable: false,
+    margin: '0 0 10 0',    // (top, right, bottom, left).
 
+    //listeners: {
+    //    cellclick : function(view, cell, cellIndex, record, row, rowIndex, e) {
+    //        //e.stopPropagation();
+    //        return false;
+    //    }
+    //},
     //listeners: {
     //    beforerender:  function () {
     //        //console.info('ProductMapSet: beforerender event called');
@@ -76,9 +77,13 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
         var me = this;
 
         // me.listeners = {
-        //     beforerender: function () {
-        //         Ext.util.Observable.capture(me, function (e) { console.log('productmapsetgrid - ' + e);});
-        //         // me.ownerGrid.updateLayout();
+        //     // beforerender: function () {
+        //     //     Ext.util.Observable.capture(me, function (e) { console.log('productmapsetgrid - ' + e);});
+        //     //     // me.ownerGrid.updateLayout();
+        //     // },
+        //     afterrender: function (grid) {
+        //         console.info('afterrender productmapset');
+        //         me.updateLayout();
         //     }
         // };
 
@@ -134,9 +139,6 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
                     widget.widgetattached = true;
                     Ext.resumeLayouts(true);
                 }
-                // else {
-                //     me.ownerGrid.updateLayout();
-                // }
 
                 //var mapsetdatasets = record.getData().mapsetdatasets;
                 //var newstore = Ext.create('Ext.data.JsonStore', {

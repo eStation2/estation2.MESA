@@ -33,12 +33,11 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         disableSelection: true,
         trackOver: false,
         preserveScrollOnRefresh: true,
-        variableRowHeight : true
+        variableRowHeight : true,
+        focusable: false
     },
-    //selType: 'cellmodel',
-    //selModel: {
-    //    listeners:{}
-    //},
+    selType: 'cellmodel',
+    selModel: {listeners:{}},
 
     bufferedRenderer: true,
 
@@ -103,20 +102,68 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
     initComponent: function () {
         var me = this;
 
+        me.listeners = {
+            groupcollapse: function(view, node, group) {
+                me.hideCompletenessTooltip();
+            },
+            groupexpand: function(view, node, group){
+                me.hideCompletenessTooltip();
+
+                var taskRefresh = new Ext.util.DelayedTask(function() {
+                    view.refresh();
+                });
+                taskRefresh.delay(50);
+
+                // var groupFeature = view.getFeature('prodcat');
+                // Ext.util.Observable.capture(view, function (e) { console.log('groupexpand - ' + e);});
+                // groupFeature.expand(group, true);
+                // groupFeature.expand(group, true);
+                // view.ownerCt.updateLayout();
+                // groupFeature.fireEvent('expand', group, true);
+            },
+            afterrender: function(){
+                var scroller = me.view.getScrollable();
+
+                scroller.on('scroll', function(){
+                    var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
+                    Ext.each(completenessTooltips, function(item) {
+                       // item.disable();
+                       item.hide();
+                    });
+                }, scroller, {single: false});
+            }
+        }
+        //me.listeners = {
+        //    viewready: function(gridpanel,func){
+        //        //Ext.toast({ html: 'viewready', title: 'viewready', width: 200, align: 't' });
+        //
+        //        var task = new Ext.util.DelayedTask(function() {
+        //            var view = gridpanel.getView();
+        //            view.getFeature('prodcat').expandAll();
+        //            view.refresh();
+        //        });
+        //
+        //        task.delay(1000);
+        //    }
+        //};
+
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             items: [{
-                text: esapp.Utils.getTranslation('expandall'),    // 'Expand All',
-                handler: function(btn) {
-                    var view = btn.up().up().getView();
-                    view.getFeature('prodcat').expandAll();
-                    view.refresh();
-                }
-            }, {
+            //     text: esapp.Utils.getTranslation('expandall'),    // 'Expand All',
+            //     handler: function(btn) {
+            //         var view = btn.up().up().getView();
+            //         view.getFeature('prodcat').expandAll();
+            //         view.refresh();
+            //     }
+            // }, {
                 text: esapp.Utils.getTranslation('collapseall'),    // 'Collapse All',
                 handler: function(btn) {
                     var view = btn.up().up().getView();
                     view.getFeature('prodcat').collapseAll();
-                    view.refresh();
+
+                    me.hideCompletenessTooltip();
+
+                    // view.refresh();
                 }
             //}, {
             //    text: esapp.Utils.getTranslation('myrequests'),    // 'My requests',
@@ -148,49 +195,6 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                 }
             }]
         });
-
-        me.listeners = {
-            groupexpand: function(view, node, group){
-                // var groupFeature = view.getFeature('prodcat');
-                //
-                var task = new Ext.util.DelayedTask(function() {
-                    view.refresh();
-                });
-                task.delay(300);
-
-                // Ext.util.Observable.capture(view, function (e) { console.log('groupexpand - ' + e);});
-                // view.refresh();
-                // groupFeature.expand(group, true);
-                // groupFeature.expand(group, true);
-                // view.ownerCt.updateLayout();
-                // groupFeature.fireEvent('expand', group, true);
-            },
-            afterrender: function(){
-                // console.info(me.view.getScrollable());
-                var scroller = me.view.getScrollable();
-
-                scroller.on('scroll', function(){
-                    var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
-                    Ext.each(completenessTooltips, function(item) {
-                       // item.disable();
-                       item.hide();
-                    });
-                }, scroller, {single: false});
-            }
-        }
-        //me.listeners = {
-        //    viewready: function(gridpanel,func){
-        //        //Ext.toast({ html: 'viewready', title: 'viewready', width: 200, align: 't' });
-        //
-        //        var task = new Ext.util.DelayedTask(function() {
-        //            var view = gridpanel.getView();
-        //            view.getFeature('prodcat').expandAll();
-        //            view.refresh();
-        //        });
-        //
-        //        task.delay(1000);
-        //    }
-        //};
 
         me.defaults = {
             variableRowHeight : true,
@@ -339,10 +343,16 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         me.callParent();
 
         //me.groupingFeature = me.view.getFeature('prodcat');
-        //
         //me.mon(me, 'afterrender', me.onAfterRender, me);
     }
 
+    ,hideCompletenessTooltip: function(){
+        // Hide the visible completness tooltips
+        var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
+        Ext.each(completenessTooltips, function(item) {
+           item.hide();
+        });
+    }
     //,onAfterRender: function() {
     //    var me = this;
     //    me.getStore().load({
