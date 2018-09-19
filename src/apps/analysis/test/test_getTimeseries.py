@@ -10,13 +10,18 @@ from multiprocessing import *
 
 class TestTS(unittest.TestCase):
 
-    # ES2-105
-    x_min = ' 0.0'
-    x_max = ' 1.0'
-    y_max = ' -39.0'
-    y_min = ' -40.5'
+    # ES2-271/288
+    x_min = ' -1.875'
+    x_max = ' -1.865'
+    y_max = ' 12.19'
+    y_min = ' 12.18'
+    #
+    # x_min = ' -2.095'
+    # x_max = ' -2.092'
+    # y_max = ' 12.04'
+    # y_min = ' 12.03'
 
-    wkt_test_ES2_105 = 'POLYGON(('+x_min+y_min+','+x_min+y_max+','+x_max+y_max+','+x_max+y_min+','+x_min+y_min+'))'
+    wkt_test_ES2_271 = 'POLYGON(('+x_min+y_min+','+x_min+y_max+','+x_max+y_max+','+x_max+y_min+','+x_min+y_min+'))'
 
     # Democratic Republic of the Congo
     wkt_simple = 'POLYGON((30.0  -15.0, 34.0  -19.0, 38.0 -15.0 , 34.0 -11.0, 30.0  -15.0))'
@@ -30,7 +35,7 @@ class TestTS(unittest.TestCase):
     wkt_line = 'LINESTRING(21.466286229428963 -0.6593739797435525, 23.883990821821985 0.8791653063247331, 25.78884898552558 -0.5128464286894285)'
 
 
-    wkt = wkt_test_point
+    wkt = wkt_test_ES2_271
 
 
     aggregate = {'aggregation_type': 'mean',
@@ -219,8 +224,8 @@ class TestTS(unittest.TestCase):
         subproductcode="occurr"
         version="1.0"
         mapsetcode="WD-GEE-ECOWAS-AVG"
-        from_date=date(2015,01,01)
-        to_date=date(2015,12,21)
+        from_date=date(2018,01,01)
+        to_date=date(2018,01,01)
         aggregate = {'aggregation_type': 'surface',
                      'aggregation_min': 1,
                      'aggregation_max': 100}

@@ -29,19 +29,13 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
     selType: 'cellmodel',
     selModel: {listeners:{}},
 
-    //listeners: {
-    //    cellclick : function(view, cell, cellIndex, record, row, rowIndex, e) {
-    //        //e.stopPropagation();
-    //        return false;
-    //    }
-    //},
-
-    bufferedRenderer: false,
+    bufferedRenderer: true,
 
     hideHeaders: true,
     columnLines: false,
     rowLines:false,
     focusable: false,
+    margin: '0 0 10 0',    // (top, right, bottom, left).
 
     initComponent: function () {
         var me = this;
@@ -63,8 +57,9 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
             disableSelection: true,
             trackOver: false,
             preserveScrollOnRefresh: false,
-            variableRowHeight : true
-            ,listeners: {
+            variableRowHeight : true,
+            focusable: false,
+            listeners: {
                 render: function(view){
                     createTooltip(view);
                     // Ext.util.Observable.capture(view, function(e){console.log(view.id + ': ' + e);});
@@ -80,11 +75,16 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
             }
         };
 
+
         // me.listeners = {
         //     beforerender: function () {
         //         Ext.util.Observable.capture(me, function (e) { console.log('mapsetdatasetgrid - ' + e);});
         //         // me.ownerGrid.updateLayout();
         //     }
+        //    cellclick : function(view, cell, cellIndex, record, row, rowIndex, e) {
+        //        //e.stopPropagation();
+        //        return false;
+        //    }
         // };
         //
         // function renderTip(val, meta, rec, rowIndex, colIndex, store) {
@@ -112,7 +112,7 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
                 // autoRender: true,
                 hidden: false,
                 disabled: true,
-                trackMouse: true,
+                trackMouse: false,
                 // mouseOffset : [0,-5],
                 autoHide: false,
                 showDelay: 100,

@@ -677,8 +677,8 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_chirps_tif(self):
 
-        date_fileslist = ['/data/ingest/chirps-v2.0.2017.02.1.tif']
-        in_date = '2017.02.1'
+        date_fileslist = ['/home/adminuser/Tests/chirps-v2.0.2018.08.3.tif']
+        in_date = '2018.08.3'
         productcode = 'chirps-dekad'
         productversion = '2.0'
         subproductcode = '10d'
@@ -705,12 +705,12 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
-                                                                              source_id=datasource_descrID):
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                        source_id=datasource_descrID)
 
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-            #self.assertEqual(1, 1)
+        self.assertEqual(1, 1)
 
     def test_ingest_fewsnet_rfe(self):
 
@@ -755,14 +755,14 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_jrc_wbd(self):
 
-        date_fileslist = glob.glob('/data/processing/wd-gee/1.0/for_ingest/JRC-WBD_20161101*')
+        date_fileslist = glob.glob('/data/ingest/JRC-WBD-AVG*')
         #date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
-        in_date = '20161101'
+        in_date = '1201'
         productcode = 'wd-gee'
         productversion = '1.0'
-        subproductcode = 'occurr'
+        subproductcode = 'avg'
         mapsetcode = 'WD-GEE-ECOWAS-AVG'
-        datasource_descrID='JRC:WBD:GEE'
+        datasource_descrID='JRC:WBD:GEE:AVG'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -784,12 +784,11 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
-                                                                              source_id=datasource_descrID):
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
-
-            self.assertEqual(1, 1)
+        self.assertEqual(1, 1)
 
     def test_preprocess_ecmwf_mars(self):
 

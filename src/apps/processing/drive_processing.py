@@ -14,6 +14,7 @@ dry_run = False
 service = False
 serialize = False                   # for debug
 test_one_product = 62               # MODIS_PP on 8daysavg
+test_one_product = 63               # MODIS_PP on monavg
 
 
 if service:

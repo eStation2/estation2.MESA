@@ -86,8 +86,8 @@ Ext.define("esapp.view.acquisition.Ingestion", {
 
     initComponent: function () {
         var me = this;
-
         //Ext.util.Observable.capture(this, function(e){console.log('Ingestion - ' + this.id + ': ' + e);});
+
         me.viewConfig = {
             stripeRows: false,
             enableTextSelection: true,
@@ -99,6 +99,7 @@ Ext.define("esapp.view.acquisition.Ingestion", {
             forceFit:true,
             preserveScrollOnRefresh: false,
             variableRowHeight : true,
+            focusable: false,
             getRowClass: function(record) {
                 return 'wordwrap';
             }
@@ -377,6 +378,7 @@ Ext.define("esapp.view.acquisition.Ingestion", {
                 ),
             listeners: {
                 click: function(view){
+                    console.info(view);
                     var widgettooltip = Ext.getCmp(view.getId() + '_completness_tooltip');
                     var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
                     Ext.each(completenessTooltips, function(item) {

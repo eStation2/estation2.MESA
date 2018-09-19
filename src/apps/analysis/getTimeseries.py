@@ -21,7 +21,7 @@ logger = log.my_logger(__name__)
 
 # import numpy as np
 import numpy.ma as ma
-
+import math
 from greenwich import Raster, Geometry
 
 try:
@@ -293,9 +293,10 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
     # Get Mapset Info
     mapset_info = querydb.get_mapset(mapsetcode=mapsetcode)
 
-    # Compute pixel area by converting degree to km
-    # pixelArea = abs(mapset_info.pixel_shift_lat)*abs(mapset_info.pixel_shift_lat)*12544.0
-    pixelArea = abs(mapset_info.pixel_shift_lat) * abs(mapset_info.pixel_shift_long) * 12544.0
+    # Prepare for computing conversion to area: the pixel size at Lat=0 is computed
+    # The correction to the actual latitude (on AVERAGE value - will be computed below)
+    const_d2km = 12364.35
+    area_km_equator =  abs(mapset_info.pixel_shift_lat) * abs(mapset_info.pixel_shift_long) *const_d2km
 
     # Get Product Info
     product_info = querydb.get_product_out_info(productcode=productcode,
@@ -424,8 +425,8 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
                     masked_data = ma.masked_equal(data, nodata)
 
                     # Apply on top of it the geo mask
-                    # mxnodata = ma.masked_where(geo_mask, masked_data)
-                    mxnodata = masked_data  # TEMP !!!!
+                    mxnodata = ma.masked_where(geo_mask, masked_data)
+                    # mxnodata = masked_data  # TEMP !!!!
 
                     # Test ONLY
                     # write_ds_to_geotiff(mem_ds, '/data/processing/exchange/Tests/mem_ds.tif')
@@ -442,7 +443,14 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
                             if min_val is not None:
                                 min_val_scaled = (min_val - scale_offset) / scale_factor
                                 mxrange = ma.masked_less(mxnodata, min_val_scaled)
-                            if max_val is not None:
+
+                                # See ES2-271
+                                if max_val is not None:
+                                    # Scale threshold from physical to digital value
+                                    max_val_scaled = (max_val - scale_offset) / scale_factor
+                                    mxrange = ma.masked_greater(mxrange, max_val_scaled)
+
+                            elif max_val is not None:
                                 # Scale threshold from physical to digital value
                                 max_val_scaled = (max_val - scale_offset) / scale_factor
                                 mxrange = ma.masked_greater(mxnodata, max_val_scaled)
@@ -453,7 +461,10 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
 
                             elif aggregate['aggregation_type'] == 'surface':
                                 # 'surface'
-                                meanResult = float(mxrange.count()) * pixelArea
+                                # Estimate 'average' Latitude
+                                y_avg = (y_min + y_max)/2.0
+                                pixelAvgArea = area_km_equator * math.cos(y_avg / 180 * math.pi)
+                                meanResult = float(mxrange.count()) * pixelAvgArea
                             else:
                                 # 'count'
                                 meanResult = float(mxrange.count())

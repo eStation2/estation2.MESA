@@ -1,8 +1,12 @@
 #
-#	purpose: Define the primary production processing chain (by using ruffus)
-#	author:  B. Motah [& E. Martial]
-#	date:	 25.03.2015
-#   descr:	 Generate additional derived products / implements processing chains
+#	purpose: Define a 'generic' chain for computing yearly stats (LTS) and anomalies (?)
+#	author:  M. Clerici
+#	date:	 07.09.2018
+#   descr:	 It will be used in a first place for the MODIS PP (see ES2-291, ES2-45), which is computed both
+#            at 8days and 1mon frequency.
+#            The approach is that the 'frequency' will be detected from the INPUT product, and the OUTPUT subproducts
+#            named accordingly.
+#            The currently computed products are: yearly-min, yearly-max, yearly-avg
 #	history: 1.0 - Initial Version
 #
 
@@ -21,9 +25,6 @@ from config import es_constants
 # Import third-party modules
 from ruffus import *
 
-# Primary Production Monthly
-activate_pp_comput = 1
-
 #   General definitions for this processing chain
 ext = es_constants.ES2_OUTFILE_EXTENSION
 
@@ -39,7 +40,8 @@ def exclude_current_year(input_list):
     return output_list
 
 
-def create_pipeline(input_products, output_product, logfile=None, nrt_products=True, update_stats=False):
+def create_pipeline(input_product, logfile=None, nrt_products=True, update_stats=False):
+
     proc_lists = None
 
     if proc_lists is None:
@@ -63,9 +65,9 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
         activate_anomalies_comput = 1
 
     activate_pp_prod_comput = 1
-    activate_pp_stats_clim_comput = 1
-    activate_pp_stats_min_comput = 1
-    activate_pp_stats_max_comput = 1
+    activate_pp_stats_clim_comput = 0
+    activate_pp_stats_min_comput = 0
+    activate_pp_stats_max_comput = 0
 
     #   ---------------------------------------------------------------------
     #   Create lists
@@ -146,7 +148,6 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
                                                   version=chla_version)
     chla_product_info = functions.list_to_element(chla_prod_info)
     chla_nodata = chla_product_info.nodata
-    chla_frequency = chla_product_info.frequency_id
 
     sst_prod_info = querydb.get_product_out_info(productcode=sst_prod, subproductcode=sst_sprod, version=sst_version)
     sst_product_info = functions.list_to_element(sst_prod_info)
@@ -173,37 +174,11 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
 
     output_nodata = -32767
 
-    old = False
-
-    # NOTE: the prod/mapset/version are taken from the FIRST OUTPUT passed
-    #       subprod defined according to the frequency
-
+    # Get the first output -> PP subproduct generated (8daysavg or monavg)
     output_prod = output_product[0].productcode
+    output_sprod = output_product[0].subproductcode
     output_version = output_product[0].version
     output_mapset = output_product[0].mapsetcode
-
-    if old:
-        # Get the first output -> PP subproduct generated (8daysavg or monavg)
-        output_sprod = output_product[0].subproductcode
-    else:
-        # Define the outputs according to the frequency (method in 'functions' to be created !!)
-        if chla_frequency == 'e1month':
-            frequency_string = 'monthly'
-            output_sprod = 'monavg'
-            output_sprod_clim = '1monclim'
-            output_sprod_min = '1monmin'
-            output_sprod_max = '1monmax'
-            sub_product_group = '1monstat'
-        elif chla_frequency == 'e1modis8day':
-            frequency_string = '8 days'
-            output_sprod = '8daysavg'
-            output_sprod_clim = '8daysclim'
-            output_sprod_min = '8daysmin'
-            output_sprod_max = '8daysmax'
-            sub_product_group = '8daysstat'
-        else:
-            spec_logger.error('Frequency not recognized: %s. Exit!', chla_frequency)
-            return
 
     out_prod_ident = functions.set_path_filename_no_date(output_prod, output_sprod, output_mapset, output_version, ext)
     output_subdir = functions.set_path_sub_directory(output_prod, output_sprod, 'Derived', output_version,
@@ -254,98 +229,98 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
     #   ---------------------------------------------------------------------
     #   Climatology (inter-annual average)
 
-    prod = output_prod
-    mapset = output_mapset
-    new_input_subprod = output_sprod
-    version = output_version
-    in_prod_ident = functions.set_path_filename_no_date(prod, new_input_subprod, mapset, version, ext)
-    in_prod_subdir = functions.set_path_sub_directory(prod, new_input_subprod, 'Derived', version, mapset)
-    starting_files = es2_data_dir + in_prod_subdir + "*" + in_prod_ident
-
-    output_sprod_group = proc_lists.proc_add_subprod_group(sub_product_group)
-    output_sprod = proc_lists.proc_add_subprod(output_sprod_clim, sub_product_group, final=False,
-                                               descriptive_name='Inter-annual Climatology at '+frequency_string+' frequency',
-                                               description='Inter-annual Climatology at '+frequency_string+' frequency',
-                                               frequency_id=chla_frequency,
-                                               date_format='MMDD',
-                                               masked=False,
-                                               timeseries_role='',
-                                               active_default=True)
-    out_prod_ident_clim = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
-    output_subdir_clim = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
-
-    formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})" + in_prod_ident
-    formatter_out = ["{subpath[0][5]}" + os.path.sep + output_subdir_clim + "{MMDD[0]}" + out_prod_ident_clim]
-
-    @follows(modis_pp_comp)
-    @active_if(activate_stats_comput, activate_pp_stats_clim_comput)
-    @collate(starting_files, formatter(formatter_in), formatter_out)
-    def std_yearly_clim(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        reduced_list = exclude_current_year(input_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF',
-                "options": "compress=lzw"}
-        raster_image_math.do_avg_image(**args)
-
+    # prod = output_prod
+    # mapset = output_mapset
+    # new_input_subprod = output_sprod
+    # version = output_version
+    # in_prod_ident = functions.set_path_filename_no_date(prod, new_input_subprod, mapset, version, ext)
+    # in_prod_subdir = functions.set_path_sub_directory(prod, new_input_subprod, 'Derived', version, mapset)
+    # starting_files = es2_data_dir + in_prod_subdir + "*" + in_prod_ident
+    #
+    # output_sprod_group = proc_lists.proc_add_subprod_group("monstat")
+    # output_sprod = proc_lists.proc_add_subprod("1monavg", "monstat", final=False,
+    #                                            descriptive_name='1 Month PP_LTA',
+    #                                            description='Long Term Average for 1 Month MODIS Primary Production',
+    #                                            frequency_id='e1month',
+    #                                            date_format='MMDD',
+    #                                            masked=False,
+    #                                            timeseries_role='',
+    #                                            active_default=True)
+    # out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
+    # output_subdir = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
+    #
+    # formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})" + in_prod_ident
+    # formatter_out = ["{subpath[0][5]}" + os.path.sep + output_subdir + "{MMDD[0]}" + out_prod_ident]
+    #
+    # @follows(modis_pp_comp)
+    # @active_if(activate_stats_comput, activate_pp_stats_clim_comput)
+    # @collate(starting_files, formatter(formatter_in), formatter_out)
+    # def std_precip_1monavg(input_file, output_file):
+    #
+    #     output_file = functions.list_to_element(output_file)
+    #     reduced_list = exclude_current_year(input_file)
+    #     functions.check_output_dir(os.path.dirname(output_file))
+    #     args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF',
+    #             "options": "compress=lzw"}
+    #     raster_image_math.do_avg_image(**args)
+    #
     # #   ---------------------------------------------------------------------
     # #   Minimum
-    output_sprod = proc_lists.proc_add_subprod(output_sprod_min, sub_product_group, final=False,
-                                               descriptive_name='Inter-annual Minimum at '+frequency_string+' frequency',
-                                               description='Inter-annual Minimum at '+frequency_string+' frequency',
-                                               frequency_id=chla_frequency,
-                                               date_format='MMDD',
-                                               masked=False,
-                                               timeseries_role='',
-                                               active_default=True)
-
-    out_prod_ident_min = functions.set_path_filename_no_date(prod, output_sprod_min, mapset, version, ext)
-    output_subdir_min = functions.set_path_sub_directory(prod, output_sprod_min, 'Derived', version, mapset)
-
-    formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})" + in_prod_ident
-    formatter_out = ["{subpath[0][5]}" + os.path.sep + output_subdir_min + "{MMDD[0]}" + out_prod_ident_min]
-
-    @follows(modis_pp_comp)
-    @active_if(activate_stats_comput, activate_pp_stats_min_comput)
-    @collate(starting_files, formatter(formatter_in), formatter_out)
-    def std_yearly_min(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        reduced_list = exclude_current_year(input_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF',
-                "options": "compress=lzw"}
-        raster_image_math.do_min_image(**args)
-
+    # output_sprod = proc_lists.proc_add_subprod("1monmin", "monstat", final=False,
+    #                                            descriptive_name='1 Month PP_LT Min',
+    #                                            description='Long Term Minimum for 1 Month MODIS Primary Production',
+    #                                            frequency_id='e1month',
+    #                                            date_format='MMDD',
+    #                                            masked=False,
+    #                                            timeseries_role='',
+    #                                            active_default=True)
+    # out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
+    # output_subdir = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
+    #
+    # formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})" + in_prod_ident
+    # formatter_out = ["{subpath[0][5]}" + os.path.sep + output_subdir + "{MMDD[0]}" + out_prod_ident]
+    #
+    # @follows(modis_pp_comp)
+    # @active_if(activate_stats_comput, activate_pp_stats_min_comput)
+    # @collate(starting_files, formatter(formatter_in), formatter_out)
+    # def std_precip_1monmin(input_file, output_file):
+    #
+    #     output_file = functions.list_to_element(output_file)
+    #     reduced_list = exclude_current_year(input_file)
+    #     functions.check_output_dir(os.path.dirname(output_file))
+    #     args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF',
+    #             "options": "compress=lzw"}
+    #     raster_image_math.do_min_image(**args)
+    #
     # #   ---------------------------------------------------------------------
     # #   Monthly Maximum
-    output_sprod = proc_lists.proc_add_subprod(output_sprod_max, sub_product_group, final=False,
-                                               descriptive_name='Inter-annual Maximum at ' + frequency_string + ' frequency',
-                                               description='Inter-annual Maximum at ' + frequency_string + ' frequency',
-                                               frequency_id=chla_frequency,
-                                               date_format='MMDD',
-                                               masked=False,
-                                               timeseries_role='',
-                                               active_default=True)
-
-    out_prod_ident_max = functions.set_path_filename_no_date(prod, output_sprod_max, mapset, version, ext)
-    output_subdir_max = functions.set_path_sub_directory(prod, output_sprod_max, 'Derived', version, mapset)
-
-    formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})" + in_prod_ident
-    formatter_out = ["{subpath[0][5]}" + os.path.sep + output_subdir_max + "{MMDD[0]}" + out_prod_ident_max]
-
-    @follows(modis_pp_comp)
-    @active_if(activate_stats_comput, activate_pp_stats_max_comput)
-    @collate(starting_files, formatter(formatter_in), formatter_out)
-    def std_yearly_max(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        reduced_list = exclude_current_year(input_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF',
-                "options": "compress=lzw"}
-        raster_image_math.do_max_image(**args)
+    # output_sprod = proc_lists.proc_add_subprod("1monmax", "monstat", final=False,
+    #                                            descriptive_name='1 Month PP_LT Max',
+    #                                            description='Long Term Maximun for 1 Month MODIS Primary Production',
+    #                                            frequency_id='e1month',
+    #                                            date_format='MMDD',
+    #                                            masked=False,
+    #                                            timeseries_role='',
+    #                                            active_default=True)
+    # out_prod_ident = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
+    # output_subdir = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
+    #
+    # reg_ex_in = "[0-9]{4}([0-9]{4})" + in_prod_ident
+    #
+    # formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})" + in_prod_ident
+    # formatter_out = ["{subpath[0][5]}" + os.path.sep + output_subdir + "{MMDD[0]}" + out_prod_ident]
+    #
+    # @follows(modis_pp_comp)
+    # @active_if(activate_stats_comput, activate_pp_stats_max_comput)
+    # @collate(starting_files, formatter(formatter_in), formatter_out)
+    # def std_precip_1monmax(input_file, output_file):
+    #
+    #     output_file = functions.list_to_element(output_file)
+    #     reduced_list = exclude_current_year(input_file)
+    #     functions.check_output_dir(os.path.dirname(output_file))
+    #     args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF',
+    #             "options": "compress=lzw"}
+    #     raster_image_math.do_max_image(**args)
 
 
 #   ---------------------------------------------------------------------
@@ -353,7 +328,7 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
 
 def processing_modis_pp(res_queue, pipeline_run_level=0, pipeline_printout_level=0, pipeline_printout_graph_level=0,
                         input_products='', output_product='', write2file=None, logfile=None, nrt_products=True,
-                        update_stats=True):
+                        update_stats=False):
     spec_logger = log.my_logger(logfile)
     spec_logger.info("Entering routine %s" % 'processing_modis_pp')
 
