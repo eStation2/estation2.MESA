@@ -15,6 +15,37 @@ SET client_min_messages = warning;
   FIRST TABLE CREATION, then alter table adding columns
  *********************************************************/
 
+-- Table: products.ecoagris
+
+-- DROP TABLE products.ecoagris;
+
+CREATE TABLE IF NOT EXISTS products.ecoagris
+(
+  recordid serial NOT NULL,
+  productcode character varying NOT NULL,
+  subproductcode character varying NOT NULL,
+  version character varying NOT NULL,
+  mapsetcode character varying NOT NULL,
+  product_descriptive_name character varying(255),
+  product_description character varying,
+  provider character varying,
+  regionid character varying,
+  regionlevel character varying,
+  aggregation_type character varying DEFAULT 'mean'::character varying,
+  aggregation_min double precision,
+  aggregation_max double precision,
+  product_dateformat character varying NOT NULL,
+  product_date character varying,
+  tsvalue double precision,
+  CONSTRAINT ecoagris_pk PRIMARY KEY (recordid)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE products.ecoagris
+  OWNER TO estation;
+
+
 -- Table: analysis.users
 -- DROP TABLE analysis.users;
 
