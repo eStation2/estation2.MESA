@@ -857,7 +857,7 @@ def get_status_PC1():
 
     return status_PC1
 
-def push_data_ftp(dry_run=False, user=None, psw=None, url=None, trg_dir=None):
+def push_data_ftp(dry_run=False, user=None, psw=None, url=None, trg_dir=None, masked=True):
 
 #   Synchronized data towards an ftp server (only for JRC)
 #   It replaces, since the new srv-ies-ftp.jrc.it ftp is set, the bash script: mirror_to_ftp.sh
@@ -902,6 +902,9 @@ def push_data_ftp(dry_run=False, user=None, psw=None, url=None, trg_dir=None):
         version = prod_dict['version']
         spec_logger.info('Working on product {}/{}'.format(productcode,version))
 
+        # TEMP - For testing only
+        # if productcode!='vgt-ndvi' or version !='sv2-pv2.2':
+        #     continue
 
         # Check it if is in the list of 'exclusions' defined in ./config/server_ftp.py
         key ='{}/{}'.format(productcode,version)
@@ -945,8 +948,8 @@ def push_data_ftp(dry_run=False, user=None, psw=None, url=None, trg_dir=None):
                     # Get info - and ONLY for NOT masked products
                     dataset_info = querydb.get_subproduct(productcode=productcode,
                                                           version=version,
-                                                          subproductcode=subproductcode) #,
-                                                          # masked=True)  # -> this means sprod NOT masked
+                                                          subproductcode=subproductcode,
+                                                          masked=masked)  # -> TRUE means only NOT masked sprods
 
                     if dataset_info is not None:
                         dataset_dict = functions.row2dict(dataset_info)
@@ -961,7 +964,7 @@ def push_data_ftp(dry_run=False, user=None, psw=None, url=None, trg_dir=None):
                         # command = 'lftp -e "mirror -RLe {} {};exit" -u {}:{} {}"" >> {}'.format(source,target,user,psw,url,logfile)
                         command = 'lftp -e "mirror -RLe {} {};exit" -u {}:{} {}"" >> /dev/null'.format(source,target,user,psw,url)
                         logger.debug("Executing %s" % command)
-                        spec_logger.info('Working on mapset/subproduct {}/{}'.format(mapset, subproductcode))
+                        spec_logger.info('Working on mapset/subproduct {}/{} \n'.format(mapset, subproductcode))
 
                         # return
                         try:
