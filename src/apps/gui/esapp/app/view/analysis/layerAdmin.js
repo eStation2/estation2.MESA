@@ -30,10 +30,10 @@ Ext.define("esapp.view.analysis.layerAdmin",{
     resizable: true,
     //resizeHandles: 'n,s',
     autoScroll: false,
-    height: Ext.getBody().getViewSize().height < 830 ? Ext.getBody().getViewSize().height-130 : 830,  // 600,
+    height: Ext.getBody().getViewSize().height < 700 ? Ext.getBody().getViewSize().height-130 : 700,  // 600,
     minHeight: 500,
-    maxHeight: 830,
-    width: 1275,
+    maxHeight: 700,
+    width: 1000, // 1275,
 
     border:false,
     frame: false,
@@ -167,7 +167,7 @@ Ext.define("esapp.view.analysis.layerAdmin",{
                 }]
             }, {
                 text: esapp.Utils.getTranslation('layername'),  // 'Layer name',
-                width: 250,
+                width: 200,
                 dataIndex: 'layername',
                 cellWrap:true,
                 menuDisabled: true,
@@ -188,7 +188,7 @@ Ext.define("esapp.view.analysis.layerAdmin",{
             //    hidden: false
             }, {
                 text: esapp.Utils.getTranslation('layerfilename'),  // 'File name',
-                width: 275,
+                width: 250,
                 dataIndex: 'filename',
                 hidden: false,
                 menuDisabled: true,
@@ -199,7 +199,7 @@ Ext.define("esapp.view.analysis.layerAdmin",{
                 hideable: false
             }, {
                 text: esapp.Utils.getTranslation('layerorderindex'),  // 'Order index',
-                width: 70,
+                width: 100,
                 dataIndex: 'layerorderidx',
                 hidden: false,
                 menuDisabled: true,
@@ -226,7 +226,7 @@ Ext.define("esapp.view.analysis.layerAdmin",{
             //    hidden: false
             }, {
                 text: esapp.Utils.getTranslation('layermenu'),  // 'Menu',
-                width: 170,
+                width: 120,
                 dataIndex: 'menu',
                 hidden: false,
                 menuDisabled: true,
@@ -249,79 +249,79 @@ Ext.define("esapp.view.analysis.layerAdmin",{
                 draggable:false,
                 groupable:false,
                 hideable: false
-            }, {
-                xtype: 'actioncolumn',
-                header: esapp.Utils.getTranslation('layeractive'),  // 'Active',
-                menuDisabled: true,
-                sortable: true,
-                variableRowHeight : true,
-                draggable:false,
-                groupable:false,
-                hideable: false,
-                width: 100,
-                align: 'center',
-                stopSelection: false,
-                items: [{
-                    // scope: me,
-                    disabled: false,
-                    style: {"line-height": "70px"},
-                    getClass: function(v, meta, rec) {
-                        if (rec.get('enabled')) {
-                            return 'activated';
-                        } else {
-                            return 'deactivated';
-                        }
-                    },
-                    getTip: function(v, meta, rec) {
-                        if (rec.get('enabled')) {
-                            return esapp.Utils.getTranslation('tipdisablelayerinmenu');     // 'Disable layer to be visible in layer menu';
-                        } else {
-                            return esapp.Utils.getTranslation('tipenablelayerinmenu');     // 'Enable layer to be visible in layer menu';
-                        }
-                    },
-                    handler: function(grid, rowIndex, colIndex) {
-                        var rec = grid.getStore().getAt(rowIndex),
-                            action = (rec.get('enabled') ? 'deactivated' : 'activated');
-                        // Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
-                        rec.get('enabled') ? rec.set('enabled', false) : rec.set('enabled', true);
-                    }
-                }]
-            }, {
-                xtype: 'actioncolumn',
-                header: esapp.Utils.getTranslation('autoloadinmapview'),  // 'Auto load in Mapview',
-                menuDisabled: true,
-                sortable: true,
-                variableRowHeight : true,
-                draggable:false,
-                groupable:false,
-                hideable: false,
-                width: 100,
-                align: 'center',
-                stopSelection: false,
-                items: [{
-                    // scope: me,
-                    disabled: false,
-                    style: {"line-height": "70px"},
-                    getClass: function(v, meta, rec) {
-                        if (rec.get('open_in_mapview')) {
-                            return 'activated';
-                        } else {
-                            return 'deactivated';
-                        }
-                    },
-                    getTip: function(v, meta, rec) {
-                        if (rec.get('open_in_mapview')) {
-                            return esapp.Utils.getTranslation('tipnotautoloadinmapview');     // 'Do not auto load in new opened Mapviews';
-                        } else {
-                            return esapp.Utils.getTranslation('tipautoloadinmapview');     // 'Auto load in new opened Mapviews';
-                        }
-                    },
-                    handler: function(grid, rowIndex, colIndex) {
-                        var rec = grid.getStore().getAt(rowIndex),
-                            action = (rec.get('open_in_mapview') ? 'deactivated' : 'activated');
-                        rec.get('open_in_mapview') ? rec.set('open_in_mapview', false) : rec.set('open_in_mapview', true);
-                    }
-                }]
+            // }, {
+            //     xtype: 'actioncolumn',
+            //     header: esapp.Utils.getTranslation('layeractive'),  // 'Active',
+            //     menuDisabled: true,
+            //     sortable: true,
+            //     variableRowHeight : true,
+            //     draggable:false,
+            //     groupable:false,
+            //     hideable: false,
+            //     width: 100,
+            //     align: 'center',
+            //     stopSelection: false,
+            //     items: [{
+            //         // scope: me,
+            //         disabled: false,
+            //         style: {"line-height": "70px"},
+            //         getClass: function(v, meta, rec) {
+            //             if (rec.get('enabled')) {
+            //                 return 'activated';
+            //             } else {
+            //                 return 'deactivated';
+            //             }
+            //         },
+            //         getTip: function(v, meta, rec) {
+            //             if (rec.get('enabled')) {
+            //                 return esapp.Utils.getTranslation('tipdisablelayerinmenu');     // 'Disable layer to be visible in layer menu';
+            //             } else {
+            //                 return esapp.Utils.getTranslation('tipenablelayerinmenu');     // 'Enable layer to be visible in layer menu';
+            //             }
+            //         },
+            //         handler: function(grid, rowIndex, colIndex) {
+            //             var rec = grid.getStore().getAt(rowIndex),
+            //                 action = (rec.get('enabled') ? 'deactivated' : 'activated');
+            //             // Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
+            //             rec.get('enabled') ? rec.set('enabled', false) : rec.set('enabled', true);
+            //         }
+            //     }]
+            // }, {
+            //     xtype: 'actioncolumn',
+            //     header: esapp.Utils.getTranslation('autoloadinmapview'),  // 'Auto load in Mapview',
+            //     menuDisabled: true,
+            //     sortable: true,
+            //     variableRowHeight : true,
+            //     draggable:false,
+            //     groupable:false,
+            //     hideable: false,
+            //     width: 100,
+            //     align: 'center',
+            //     stopSelection: false,
+            //     items: [{
+            //         // scope: me,
+            //         disabled: false,
+            //         style: {"line-height": "70px"},
+            //         getClass: function(v, meta, rec) {
+            //             if (rec.get('open_in_mapview')) {
+            //                 return 'activated';
+            //             } else {
+            //                 return 'deactivated';
+            //             }
+            //         },
+            //         getTip: function(v, meta, rec) {
+            //             if (rec.get('open_in_mapview')) {
+            //                 return esapp.Utils.getTranslation('tipnotautoloadinmapview');     // 'Do not auto load in new opened Mapviews';
+            //             } else {
+            //                 return esapp.Utils.getTranslation('tipautoloadinmapview');     // 'Auto load in new opened Mapviews';
+            //             }
+            //         },
+            //         handler: function(grid, rowIndex, colIndex) {
+            //             var rec = grid.getStore().getAt(rowIndex),
+            //                 action = (rec.get('open_in_mapview') ? 'deactivated' : 'activated');
+            //             rec.get('open_in_mapview') ? rec.set('open_in_mapview', false) : rec.set('open_in_mapview', true);
+            //         }
+            //     }]
             }]
         }];
 
