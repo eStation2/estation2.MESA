@@ -19,9 +19,9 @@
 Ext.application({
     name: 'esapp',
 
-    //requires: [
-    //    'esapp.Utils'
-    //],
+    requires: [
+       'esapp.Application'
+    ],
 
     extend: 'esapp.Application'
 

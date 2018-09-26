@@ -347,10 +347,10 @@
 
 
 .red {
-    color: red;
+    color: red !important;
 }
 .lightblue {
-    color: lightblue;
+    color: lightblue !important;
 }
 .gray {
     color: gray;
@@ -889,19 +889,19 @@ p {
 
 
 .menu-glyph-color-green .x-menu-item-glyph {
-    color: green;
+    color: green !important;
 }
 .menu-glyph-color-red .x-menu-item-glyph {
-    color: red;
+    color: red !important;
 }
 .menu-glyph-color-orange .x-menu-item-glyph {
-    color: orange;
+    color: orange !important;
 }
 .glyph-color-green {
-    color: green;
+    color: green !important;
 }
 .glyph-color-red {
-    color: red;
+    color: red !important;
 }
 .arrow-left-style {
     left: -3px !important;
@@ -924,7 +924,7 @@ p {
 }
 
 .dashboard-header-style {
-    background-color: #fff;
+    background-color: #fff !important;
 }
 
 .dashboard-header-title-style {
@@ -1058,7 +1058,7 @@ p {
 /* .x-panel-header-text-default .x-panel-header-text  "border","1px solid #333"*/
 
 .newpanelstyle {
-    border: 1px solid #BABABA;
+    border: 1px solid #BABABA !important;
     border-radius: 4px;
 }
 
@@ -1072,16 +1072,16 @@ p {
 }
 
 .newpanelstyle .x-panel-header-title-default {
-    font-weight:bold;
-    color:#000;
-    font-size:13px;
+    font-weight:bold !important;
+    color:#000 !important;
+    font-size:13px !important;
 }
 
 .newpanelstyle .x-panel-header-default {
     background-color: #A9DEEC !important;
-    font-weight:bold;
-    color:#000;
-    font-size:13px;
+    font-weight:bold !important;
+    color:#000 !important;
+    font-size:13px !important;
 }
 
 .newpanelstyle .x-tool-img {
@@ -1194,11 +1194,11 @@ p {
 ***********************************************/
 
 .help-main {
-    background-color: #ececec
+    background-color: #ececec !important;
 }
 
 .help-main .help-dataview {
-    padding: 10px 15px 15px
+    padding: 10px 15px 15px;
 }
 
 .help-main .statement-type {
@@ -1207,23 +1207,23 @@ p {
     color: #878ea2;
     font-weight: bold;
     font-size: 14px;
-    margin: 20px 5px 0
+    margin: 20px 5px 0;
 }
 
 .help-main .thumb-title-container {
     float: left;
-    padding-top: 4px
+    padding-top: 4px;
 }
 
 .help-main .thumb-title {
     color: #3e4752;
-    font-weight: 800
+    font-weight: 800;
 }
 
 .help-main .thumb-title-small {
     color: #878ea2;
     font-size: 10px;
-    font-weight: 500
+    font-weight: 500;
 }
 
 .help-main .thumb-pdf {
@@ -1233,11 +1233,11 @@ p {
     background-size: contain;
     background-repeat: no-repeat;
     float: left;
-    margin-right: 5px
+    margin-right: 5px;
 }
 
 .x-ie8 .help-main .thumb-pdf {
-    background-image: url(../img/pdf-small.png)
+    background-image: url(../img/pdf-small.png);
 }
 
 .help-main .thumb-word {
@@ -1247,11 +1247,11 @@ p {
     background-size: contain;
     background-repeat: no-repeat;
     float: left;
-    margin-right: 5px
+    margin-right: 5px;
 }
 
 .x-ie8 .help-main .thumb-word {
-    background-image: url(../img/32px-word.png)
+    background-image: url(../img/32px-word.png);
 }
 
 .help-main .thumb-mesa {
@@ -1261,11 +1261,11 @@ p {
     background-size: contain;
     background-repeat: no-repeat;
     float: left;
-    margin-right: 5px
+    margin-right: 5px;
 }
 
 .x-ie8 .help-main .thumb-mesa {
-    background-image: url(../img/logo/MESA_h110.jpg)
+    background-image: url(../img/logo/MESA_h110.jpg);
 }
 
 .help-main .thumb-copernicus {
@@ -1275,11 +1275,11 @@ p {
     background-size: contain;
     background-repeat: no-repeat;
     float: left;
-    margin-right: 5px
+    margin-right: 5px;
 }
 
 .x-ie8 .help-main .thumb-copernicus {
-    background-image: url(../img/logo/copernicus-logo.png)
+    background-image: url(../img/logo/copernicus-logo.png);
 }
 
 .help-main .thumb-eumetsat {
@@ -1289,11 +1289,11 @@ p {
     background-size: contain;
     background-repeat: no-repeat;
     float: left;
-    margin-right: 5px
+    margin-right: 5px;
 }
 
 .x-ie8 .help-main .thumb-eumetsat {
-    background-image: url(../img/logo/EUMETSAT_h110.jpg)
+    background-image: url(../img/logo/EUMETSAT_h110.jpg);
 }
 
 .help-main .thumb-estation2 {
@@ -1303,11 +1303,11 @@ p {
     background-size: contain;
     background-repeat: no-repeat;
     float: left;
-    margin-right: 5px
+    margin-right: 5px;
 }
 
 .x-ie8 .help-main .thumb-estation2 {
-    background-image: url(../img/logo/estation2-logo.png)
+    background-image: url(../img/logo/estation2-logo.png);
 }
 
 .help-main .thumb-download {
@@ -1318,7 +1318,7 @@ p {
     background-repeat: no-repeat;
     background-size: 50%;
     opacity: .5;
-    float: right
+    float: right;
 }
 
 .help-main .thumb-gotolink {
@@ -1329,7 +1329,7 @@ p {
     background-repeat: no-repeat;
     background-size: 50%;
     opacity: .5;
-    float: right
+    float: right;
 }
 
 .help-main .thumb {
@@ -1339,29 +1339,29 @@ p {
     border-radius: 3px;
     -webkit-box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.25);
     -moz-box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.25);
-    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.25)
+    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.25);
 }
 
 .help-main .thumb:hover .thumb-download {
-    opacity: 1
+    opacity: 1;
 }
 
 .help-main .thumb:hover .thumb-gotolink {
-    opacity: 1
+    opacity: 1;
 }
 
 .help-main .thumb-wrap {
     display: table;
     float: left;
     width: 50%;
-    padding: 10px
+    padding: 10px;
 }
 
 @media screen and (max-width: 980px) and (orientation: landscape), screen and (max-width: 760px) and (orientation: portrait) {
     .help-main .thumb-wrap {
         float: none;
         width: 100%;
-        padding: 5px 0
+        padding: 5px 0;
     }
 }
 

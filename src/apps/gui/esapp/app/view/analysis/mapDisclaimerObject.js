@@ -108,7 +108,7 @@ Ext.define("esapp.view.analysis.mapDisclaimerObject",{
 
                     if ( me.getContent().trim() != '' || me.changesmade ){
                         // console.info('refresh the disclaimer image');
-                        task.delay(20);
+                        task.delay(50);
                     }
                     // if ( (me.disclaimer_ImageObj.src == '' && me.getContent().trim() != '') || (me.getContent().trim() != '' && me.changesmade) ){
                     //     task.delay(250);
@@ -120,7 +120,7 @@ Ext.define("esapp.view.analysis.mapDisclaimerObject",{
             },
             show: function(){
                 me.setPosition(me.disclaimerPosition);
-                me.fireEvent('refreshimage');
+                // me.fireEvent('refreshimage');
             }
         };
 

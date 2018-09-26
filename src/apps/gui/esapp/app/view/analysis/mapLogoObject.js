@@ -138,7 +138,7 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                     // if ((me.getViewModel().data.logoData != null && me.getViewModel().data.logoData.length > 0) && (me.changesmade || me.logos_ImageObj.src == '')){
                     if ((me.getViewModel().data.logoData != null && me.getViewModel().data.logoData.length > 0)){
                         // console.info('refresh the logo image');
-                        task.delay(0);
+                        task.delay(50);
                     }
                     // else {
                     //     me.logos_ImageObj = new Image();
@@ -147,7 +147,7 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
             },
             show: function(){
                 me.setPosition(me.logoPosition);
-                me.fireEvent('refreshimage');
+                // me.fireEvent('refreshimage');
             }
             // ,move: function(){
             //     me.logoPosition = me.getPosition();

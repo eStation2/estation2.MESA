@@ -448,7 +448,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                 var taskRefresh = new Ext.util.DelayedTask(function() {
                     view.refresh();
                 });
-                taskRefresh.delay(10);
+                taskRefresh.delay(100);
             },
             afterrender: function(){
                 var scroller = me.view.getScrollable();

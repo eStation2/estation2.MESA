@@ -2,15 +2,15 @@
 Ext.define("esapp.view.help.help",{
     "extend": "Ext.panel.Panel",
     "controller": "help-help",
-    //"viewModel": {
-    //    "type": "help-help"
-    //},
+    "viewModel": {
+       "type": "help-help"
+    },
 
     xtype  : 'help',
 
     requires: [
         'esapp.view.help.helpController',
-        //'esapp.view.help.helpModel',
+        'esapp.view.help.helpModel',
 
         'Ext.layout.container.HBox',
         'Ext.layout.container.VBox',
@@ -41,9 +41,29 @@ Ext.define("esapp.view.help.help",{
     initComponent: function () {
         var me = this;
 
-        me.setViewModel({
-            "type": "help-help"
-        });
+        me.listeners = {
+            beforerender: function(){
+                var documentationstore  = me.getViewModel().getStore('documentation');
+                if (documentationstore.isStore) {
+                    documentationstore.proxy.extraParams = {type: 'docs', lang : esapp.globals['selectedLanguage']};
+                    documentationstore.load();
+                }
+                var weblinksstore  = me.getViewModel().getStore('weblinks');
+                if (weblinksstore.isStore) {
+                    weblinksstore.proxy.extraParams = {type: 'links', lang : esapp.globals['selectedLanguage']};
+                    weblinksstore.load();
+                }
+                var notesstore  = me.getViewModel().getStore('notes');
+                if (notesstore.isStore) {
+                    notesstore.proxy.extraParams = {type: 'notes', lang : esapp.globals['selectedLanguage']};
+                    notesstore.load();
+                }
+            }
+        };
+
+        // me.setViewModel({
+        //     "type": "help-help"
+        // });
 
         me.title = '<span class="dashboard-header-title-style">'+esapp.Utils.getTranslation('helptitle')+'</span>';
 

@@ -38,7 +38,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
     autoWidth:  true,
     minWidth: 340,
     width: 340,
-    height: 660,
+    height: 610,
     // height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-10 : 750,  // 600,
     // autoHeight:  true,
     // minHeight: 550,
