@@ -2593,7 +2593,9 @@ Ext.define('esapp.view.analysis.mapViewController', {
                     items: [{
                             //xtype: 'button',
                             text: esapp.Utils.getTranslation('save_as'),    // 'Save as...',
-                            iconCls: 'fa fa-save fa-lg lightblue',
+                            glyph: 'xf0c7@FontAwesome',
+                            cls:'lightblue',
+                            // iconCls: 'fa fa-save fa-lg lightblue',
                             style: { color: 'lightblue' },
                             //cls: 'x-menu-no-icon button-gray',
                             width: 165,
@@ -2678,9 +2680,11 @@ Ext.define('esapp.view.analysis.mapViewController', {
                         {
                             //xtype: 'button',
                             text: esapp.Utils.getTranslation('save_as_layer'),    // 'Save as layer...',
-                            iconCls: 'fa fa-save fa-lg lightblue',
+                            glyph: 'xf0c7@FontAwesome',
+                            cls:'lightblue',
+                            // iconCls: 'fa fa-save fa-lg lightblue',
                             style: { color: 'lightblue' },
-                            //cls: 'x-menu-no-icon button-gray',
+                            // cls: 'x-menu-no-icon button-gray',
                             width: 60,
                             handler: function(){
                                 // Open a small modal panel asking to name the layer file
@@ -2774,8 +2778,10 @@ Ext.define('esapp.view.analysis.mapViewController', {
                         },{
                             //xtype: 'button',
                             text: esapp.Utils.getTranslation('reset'),   // 'Reset',
-                            iconCls: 'fa fa-undo fa-lg red',
-                            //style: { color: 'red' },
+                            glyph: 'xf0e2@FontAwesome',
+                            cls:'red',
+                            // iconCls: 'fa fa-undo',
+                            style: { color: 'red' },
                             //cls: 'x-menu-no-icon button-gray',
                             width: 60,
                             handler: function(){

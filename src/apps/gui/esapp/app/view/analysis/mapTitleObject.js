@@ -123,7 +123,7 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
                     // console.info('refreshimage titleObj');
                     // console.info(me.getContent());
                     if (me.tpl.html != '' && (me.changesmade || me.title_ImageObj.src == '')){
-                        task.delay(20);
+                        task.delay(50);
                     }
                     // else {
                     //     me.title_ImageObj = new Image();
@@ -132,7 +132,7 @@ Ext.define("esapp.view.analysis.mapTitleObject",{
             },
             show: function(){
                 me.setPosition(me.titlePosition);
-                me.fireEvent('refreshimage');
+                // me.fireEvent('refreshimage');
             }
             // ,move: function(){
             //     console.info('moving title object');

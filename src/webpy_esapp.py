@@ -204,8 +204,8 @@ class EsApp:
                              'prefered_language': getparams['lang']}
                 crud_db.update('users', user_info)
 
-        render = web.template.render(es_constants.es2globals['base_dir']+'/apps/gui/esapp')
-        # render = web.template.render(es_constants.es2globals['base_dir'] + '/apps/gui/esapp/build/production/esapp')
+        # render = web.template.render(es_constants.es2globals['base_dir']+'/apps/gui/esapp')
+        render = web.template.render(es_constants.es2globals['base_dir'] + '/apps/gui/esapp/build/production/esapp')
 
         return render.index()
 

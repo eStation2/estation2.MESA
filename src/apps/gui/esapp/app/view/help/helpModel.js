@@ -9,16 +9,16 @@ Ext.define('esapp.view.help.helpModel', {
                 type: 'ajax',
                 //url: 'resources/data/docs_data_'+esapp.globals['selectedLanguage']+'.json',
                 url: 'help',
-                extraParams: {
-                    type: 'docs',
-                    lang : esapp.globals['selectedLanguage']
-                },
+                // extraParams: {
+                //     type: 'docs',
+                //     lang : 'eng'    // esapp.globals['selectedLanguage']
+                // },
                 reader: {
                     type: 'json'
                 }
             },
 
-            autoLoad: true
+            autoLoad: false
         },
         weblinks: {
             fields: ['name', 'thumb', 'url', 'type'],
@@ -27,16 +27,16 @@ Ext.define('esapp.view.help.helpModel', {
                 type: 'ajax',
                 //url: 'resources/data/links_data_'+esapp.globals['selectedLanguage']+'.json',
                 url: 'help',
-                extraParams: {
-                    type: 'links',
-                    lang:  esapp.globals['selectedLanguage']
-                },
+                // extraParams: {
+                //     type: 'links',
+                //     lang:  'eng'    // esapp.globals['selectedLanguage']
+                // },
                 reader: {
                     type: 'json'
                 }
             },
 
-            autoLoad: true
+            autoLoad: false
         },
         notes: {
             fields: ['name', 'thumb', 'url', 'type'],
@@ -44,16 +44,16 @@ Ext.define('esapp.view.help.helpModel', {
             proxy: {
                 type: 'ajax',
                 url: 'help',
-                extraParams: {
-                    type: 'notes',
-                    lang:  esapp.globals['selectedLanguage']
-                },
+                // extraParams: {
+                //     type: 'notes',
+                //     lang:  'eng'    // esapp.globals['selectedLanguage']
+                // },
                 reader: {
                     type: 'json'
                 }
             },
 
-            autoLoad: true
+            autoLoad: false
         }
     }
 

@@ -1,63 +1,23 @@
-//Ext.Loader.setPath({
-//    'Ext.ux.upload' : '/eStation2/lib/js/Ext.ux/extjs-upload-widget-master/lib/upload/'
-//});
-
-
-//Ext.override(Ext.selection.RowModel, {
-//    onRowMouseDown: function(view, record, item, index, e) {
-//        console.info('Ext.selection.RowModel - onRowMouseDown');
-//
-//        //IE fix: set focus to the first DIV in selected row
-//        Ext.get(item).down('div').focus();
-//
-//        if (!this.allowRightMouseSelection(e)) {
-//            return;
-//        }
-//        view.el.focus(200); // Focus the element in 0.2 seconds - time for the click to happen...
-//        this.selectWithEvent(record, e);
-//    }
-//});
-
-Ext.define('ExtOverrides.grid.NavigationModel', {
-   override: 'Ext.grid.NavigationModel',
-
-   onCellMouseDown: function(view, cell, cellIndex, record, row, recordIndex, mousedownEvent) {
-      var targetComponent = Ext.Component.fromElement(mousedownEvent.target, cell),
-         ac;
-
-      if (view.actionableMode && (mousedownEvent.getTarget(null, null, true).isTabbable() || ((ac = Ext.ComponentManager.getActiveComponent()) && ac.owns(mousedownEvent)))) {
-         return;
-      }
-
-      if (mousedownEvent.pointerType !== 'touch') {
-         // mousedownEvent.preventDefault(); // commented for text selection
-         this.setPosition(mousedownEvent.position, null, mousedownEvent);
-      }
-
-      if (targetComponent && targetComponent.isFocusable && targetComponent.isFocusable()) {
-         view.setActionableMode(true, mousedownEvent.position);
-
-         targetComponent.focus();
-      }
-   }
-});
 
 /**
  * The main application class. An instance of this class is created by app.js when it calls
  * Ext.application(). This is the ideal place to handle application launch and initialization
  * details.
+ * DO NOT PUT ANY CODE ABOVE, OTHERWISE THE PRODUCTION BUILD WILL NOT LAUNCH APP.JS
  */
 Ext.define('esapp.Application', {
     extend: 'Ext.app.Application',
 
     name: 'esapp',
 
+    // appFolder: Ext.manifest.paths['esapp'],
+
     requires: [
+        'esapp.view.*',
         'esapp.Utils',
         'Ext.window.Toast',
         'Ext.state.CookieProvider',
         'Ext.tip.QuickTipManager'
-        //,'esapp.view.main.Main'
     ],
 
     //controllers: [
@@ -179,7 +139,7 @@ Ext.define('esapp.Application', {
                         var splashscreen = Ext.getBody().mask(esapp.Utils.getTranslation('splashscreenmessage'), 'splashscreen');
                         // fade out the body mask
                         splashscreen.fadeOut({
-                            duration: 4000,
+                            duration: 1000,
                             remove: true
                         });
 
@@ -270,6 +230,11 @@ Ext.define('esapp.Application', {
         link.sizes = '16x16';
         document.getElementsByTagName('head')[0].appendChild(link);
 
+        var taskMain = new Ext.util.DelayedTask(function() {
+            Ext.create('esapp.view.main.Main');
+        });
+        taskMain.delay(50);
+
         if (esapp.globals['typeinstallation'] == 'windows' || esapp.globals['typeinstallation'] == 'jrc_online'){
             var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
 
@@ -298,11 +263,6 @@ Ext.define('esapp.Application', {
         // if (!Ext.data.StoreManager.lookup('TimeseriesProductsStore').isLoaded()){
         //     delay = 2000;
         // }
-
-        var taskMain = new Ext.util.DelayedTask(function() {
-            Ext.create('esapp.view.main.Main');
-        });
-        taskMain.delay(500);
 
         this.callParent();
     }
