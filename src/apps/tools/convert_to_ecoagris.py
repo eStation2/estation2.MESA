@@ -44,6 +44,7 @@ logger = log.my_logger(__name__)
 
 
 def convert_to_ecoargis(productinfo, startdate, enddate, aggregateinfo, vectorlayer, regionidattr, regionlevel):
+
     crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
 
     productcode = productinfo['productcode']
@@ -98,7 +99,7 @@ def convert_to_ecoargis(productinfo, startdate, enddate, aggregateinfo, vectorla
 
     if not idattr_exists:
         logger.error('ID Attribute does not exist in vector layer: %s' % regionidattr)
-        exit()
+        return
 
     for feature in layer:
         geom = feature.GetGeometryRef()
@@ -158,6 +159,9 @@ def convert_to_ecoargis(productinfo, startdate, enddate, aggregateinfo, vectorla
                     logger.info('ecoagris record created')
                 else:
                     logger.error('Error creating ecoagris record')
+
+        # Return the latest computed record (M.C.)
+        return ecoagris_record
 
 
 def getFilesList(productcode, subproductcode, version, mapsetcode, date_format, start_date, end_date):
@@ -258,6 +262,7 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, geom, start_
     #       count:      N(Xi where min < Xi < max)                              e.g. Vegetation anomalies
     #       surface:    count * PixelArea                                       e.g. Water Bodies
     #       percent:    count/Ntot                                              e.g. Vegetation anomalies
+    #       precip:     compute the precipitation volume in m3*1E6              Rain (only)
     #
     #   History: 1.0 :  Initial release - since 2.0.1 -> now renamed '_green' from greenwich package
     #            1.1 :  Since Feb. 2017, it is based on a different approach (gdal.RasterizeLayer instead of greenwich)
@@ -315,6 +320,7 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, geom, start_
         featureDefn = outLayer.GetLayerDefn()
         feature = ogr.Feature(featureDefn)
         feature.SetGeometry(geom)
+        # area = geom.GetArea()
         feature.SetField("id", 1)
         outLayer.CreateFeature(feature)
         feature = None
@@ -402,12 +408,11 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, geom, start_
 
                     # Apply on top of it the geo mask
                     mxnodata = ma.masked_where(geo_mask, masked_data)
-                    # mxnodata = masked_data  # TEMP !!!!
 
                     # Test ONLY
                     # write_ds_to_geotiff(mem_ds, '/data/processing/exchange/Tests/mem_ds.tif')
 
-                    if aggregate['aggregation_type'] == 'count' or aggregate['aggregation_type'] == 'percent' or aggregate['aggregation_type'] == 'surface':
+                    if aggregate['aggregation_type'] == 'count' or aggregate['aggregation_type'] == 'percent' or aggregate['aggregation_type'] == 'surface' or aggregate['aggregation_type'] == 'precip':
 
                         if mxnodata.count() == 0:
                             meanResult = None
@@ -441,6 +446,15 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, geom, start_
                                 y_avg = (y_min + y_max)/2.0
                                 pixelAvgArea = area_km_equator * math.cos(y_avg / 180 * math.pi)
                                 meanResult = float(mxrange.count()) * pixelAvgArea
+                            elif aggregate['aggregation_type'] == 'precip':
+                                # 'surface'
+                                # Estimate 'average' Latitude
+                                y_avg = (y_min + y_max) / 2.0
+                                pixelAvgArea = area_km_equator * math.cos(y_avg / 180 * math.pi)
+                                n_pixels = mxnodata.count()
+                                avg_precip = mxnodata.mean()
+                                # Result is in km * km * mmm i.e. 1E3 m*m*m -> we divide by 1E3 to get 1E6 m*m*m
+                                meanResult = float(n_pixels) * pixelAvgArea* avg_precip * 0.001
                             else:
                                 # 'count'
                                 meanResult = float(mxrange.count())
@@ -530,6 +544,9 @@ if __name__ == '__main__':
 
     vectorlayer = '/eStation2/layers/BEN_adm/BEN_adm1.shp'
     regionidattr = 'HASC_1'
+
+    # vectorlayer = '/eStation2/layers/sst_boxes.geojson'
+    # regionidattr = 'NAME'
     # vectorlayer_file = '/eStation2/layers/RIC_CRA_0_g2015_2014.geojson'
     # regionidattr = 'ADM0_NAME'
 
