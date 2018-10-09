@@ -207,7 +207,9 @@ Ext.define("esapp.view.widgets.LoginViewECAS",{
         }
 
         var strPathRedirect=window.location.href;
-        var strEcasCall="https://ecas.cc.cec.eu.int:7002/cas/login?" +
+        // var strEcasCall="https://ecas.cc.cec.eu.int:7002/cas/login?" +
+        //                 "service="+encodeURIComponent(strPathRedirect +'?')+"strCall"+encodeURIComponent('='+strPathRedirect)+"&userDetails=FLAG_USER_DETAILS";
+        var strEcasCall="https://webgate.ec.europa.eu/cas/login?" +
                         "service="+encodeURIComponent(strPathRedirect +'?')+"strCall"+encodeURIComponent('='+strPathRedirect)+"&userDetails=FLAG_USER_DETAILS";
         window.location.href = strEcasCall;
 
@@ -266,7 +268,8 @@ Ext.define("esapp.view.widgets.LoginViewECAS",{
      * @private
      */
     ,onRegisterClick:function() {
-        var ECASRegisterURL = 'https://ecas.cc.cec.eu.int:7002/cas/login?';
+        // var ECASRegisterURL = 'https://ecas.cc.cec.eu.int:7002/cas/login?';
+        var ECASRegisterURL = 'https://webgate.ec.europa.eu/cas/login?';
         var win = window.open(ECASRegisterURL, '_blank');
         win.focus();
         // new esapp.view.widgets.Register();

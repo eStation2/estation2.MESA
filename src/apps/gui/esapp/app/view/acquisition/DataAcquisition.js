@@ -36,7 +36,7 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
         disableSelection: true,
         trackOver: true,
         forceFit:true,
-        focusable: false,
+        focusable: false
         //focusOnToFront: false,
         //preserveScrollOnRefresh: false,
         //focusable: false

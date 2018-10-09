@@ -119,7 +119,7 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
                         });
                     });
                     // console.info('refreshimage legendObj');
-                    task.delay(20);
+                    task.delay(50);
                 }
             }
             ,show: function(){
@@ -136,7 +136,7 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
                 }
                 else {
                     me.setPosition(me.legendPosition);
-                    me.fireEvent('refreshimage');
+                    // me.fireEvent('refreshimage');
                 }
             }
             // ,move: function(){

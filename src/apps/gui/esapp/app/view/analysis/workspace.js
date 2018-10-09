@@ -269,7 +269,9 @@ Ext.define("esapp.view.analysis.workspace",{
                     items: [{
                             //xtype: 'button',
                             text: esapp.Utils.getTranslation('save_as'),    // 'Save as...',
-                            iconCls: 'fa fa-save fa-lg lightblue',
+                            glyph: 'xf0c7@FontAwesome',
+                            cls:'lightblue',
+                            // iconCls: 'fa fa-save fa-lg lightblue',
                             style: { color: 'lightblue' },
                             width: 165,
                             handler: 'setWorkspaceName'

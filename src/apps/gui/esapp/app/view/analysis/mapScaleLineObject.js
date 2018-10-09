@@ -96,14 +96,14 @@ Ext.define("esapp.view.analysis.mapScaleLineObject",{
                         });
                     });
                     // console.info('refreshimage scalelineObj');
-                    task.delay(20);
+                    task.delay(50);
                 }
             },
             show: function(){
                 if (me.scalelinePosition != null){
                     me.setPosition(me.scalelinePosition);
                 }
-                me.fireEvent('refreshimage');
+                // me.fireEvent('refreshimage');
             }
             // ,move: function(){
             //     me.scalelinePosition = me.getPosition();
