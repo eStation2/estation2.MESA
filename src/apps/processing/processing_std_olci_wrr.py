@@ -46,7 +46,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     # Set DEFAULTS: all ON
     activate_3davg_comput=1
-    #activate_10dcum_comput=1
+    activate_1monavg_comput=1
 
 
     sds_meta = metadata.SdsMetadata()
@@ -56,10 +56,10 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   Define input files (chl)
     in_prod_ident = functions.set_path_filename_no_date(prod, starting_sprod,mapset, version, ext)
     input_dir = es2_data_dir+ functions.set_path_sub_directory(prod, starting_sprod, 'Ingest', version, mapset)
-    #starting_files = input_dir+"*"+in_prod_ident
+    starting_files = input_dir+"*"+in_prod_ident
 
     # ----------------------------------------------------------------------------------------------------------------
-    # 3davg
+    # 1 . 3davg
     # 3 Day average of the 1 day Chl, re-projected on target mapset
     output_sprod=proc_lists.proc_add_subprod("3daysavg", "olci-wrr", final=False,
                                              descriptive_name='3day chl-oc4me',
@@ -154,6 +154,32 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "", "input_nodata":1000, "output_nodata":1000}
         raster_image_math.do_avg_image(**args)
 
+    # ----------------------------------------------------------------------------------------------------------------
+    #  2. Chla Monthly product (avg)
+    # 3 Day average of the 1 day Chl, re-projected on target mapset
+    output_sprod=proc_lists.proc_add_subprod("monchla", "olci-wrr", final=False,
+                                             descriptive_name='Monthly chl-oc4me',
+                                             description='Mean 1 month composite',
+                                             frequency_id='e1month',
+                                             date_format='YYYYMMDD',
+                                             masked=False,
+                                             timeseries_role='',
+                                             active_default=True)
+
+    prod_ident_mon_chla = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
+    subdir_mon_chla = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
+
+    formatter_in = "(?P<YYYYMM>[0-9]{6})(?P<DD>[0-9]{2})"+in_prod_ident
+    formatter_out = "{subpath[0][5]}"+os.path.sep+subdir_mon_chla+"{YYYYMM[0]}"+'01'+prod_ident_mon_chla
+
+    @active_if(activate_1monavg_comput)
+    @collate(starting_files, formatter(formatter_in), formatter_out)
+    def olci_wrr_monchla(input_file, output_file):
+
+        output_file = functions.list_to_element(output_file)
+        functions.check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+        raster_image_math.do_avg_image(**args)
 
     return proc_lists
 #   ---------------------------------------------------------------------
