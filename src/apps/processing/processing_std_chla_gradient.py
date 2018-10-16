@@ -17,6 +17,7 @@ from lib.python import functions
 from lib.python.image_proc import raster_image_math
 from lib.python import es_logging as log
 from config import es_constants
+from lib.python import metadata
 
 # Import third-party modules
 from ruffus import *
@@ -45,6 +46,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     activate_gradient_computation = 1
     #activate_shapefile_conversion = 1
 
+    sds_meta = metadata.SdsMetadata()
     es2_data_dir = es_constants.es2globals['processing_dir']+os.path.sep
 
     #   ---------------------------------------------------------------------
@@ -113,9 +115,10 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     @transform(starting_files, formatter(formatter_in),formatter_out)
     def chla_gradient_computation(input_file, output_file):
 
+        no_data = int(sds_meta.get_nodata_value(input_file))
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+        args = {"input_file": input_file, "output_file": output_file, "nodata": no_data,  "output_format": 'GTIFF', "options": "compress = lzw"}
 
         raster_image_math.do_compute_chla_gradient(**args)
         print 'Done with raster'

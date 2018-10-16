@@ -641,11 +641,33 @@ def test_proc_ba(start_date=None, end_date=None, pipe_run=0, pipe_print=3, start
     proc_lists=processing_std_ba_stats_only(res_queue,**args)
     print(proc_lists)
 
+#   ---------------------------------------------------------------------
+#    chla gradient
+#   ---------------------------------------------------------------------
+from apps.processing.processing_std_chla_gradient import *
+def test_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=False):
+
+    args = {'pipeline_run_level':pipe_run, \
+            'pipeline_printout_level':pipe_print, \
+            'pipeline_printout_graph_level': 0, \
+            'prod': 'olci-wrr',\
+            'starting_sprod':'chl-oc4me',\
+            'mapset': 'SPOTV-Africa-1km',\
+            'version':'V02.0',
+            'logfile':'olci-wrr',
+            'touch_files_only':touch_files_only
+            }
+    res_queue = None
+
+    processing_std_chla_gradient(res_queue, **args)
+
+
+test_proc_olci_wrr_chla_gradient(pipe_run=3, pipe_print=0, touch_files_only=False)
 
 #test_proc_chirps_dekad(pipe_run=4, pipe_print=0, start_date='19810101', end_date='20171231', touch_files_only=False)
 #test_proc_std_ndvi(pipe_run=4, pipe_print=0, touch_files_only=False)
 #test_proc_vgt_dmp(pipe_run=4, pipe_print=0, start_date='19990101', end_date='20171231', touch_files_only=False)
-my_starting_dates_stats = proc_functions.get_list_dates_for_dataset('modis-firms', '10dcount', 'v6.0', start_date='20020701', end_date='20180621')
+#my_starting_dates_stats = proc_functions.get_list_dates_for_dataset('modis-firms', '10dcount', 'v6.0', start_date='20020701', end_date='20180621')
 # for date in my_starting_dates_stats:
 #     filename='/data/processing/modis-firms/v6.0/SPOTV-Africa-10km/derived/10dcount10k/'+date+'_modis-firms_10dcount10k_SPOTV-Africa-10km_v6.0.tif'
 #     st=os.system('touch '+filename)
@@ -654,5 +676,5 @@ my_starting_dates_stats = proc_functions.get_list_dates_for_dataset('modis-firms
 # test_proc_completeness()
 #test_proc_modis_pp(pipe_run=3, pipe_print=0, touch_files_only=False)
 #test_proc_tamsat_rfe(pipe_run=4, pipe_print=0, start_date='19830101', end_date='20171231', touch_files_only=False)
-test_proc_modis_firms(pipe_run=4, pipe_print=0, start_date='20020701', end_date='20180630',touch_files_only=False)
+#test_proc_modis_firms(pipe_run=4, pipe_print=0, start_date='20020701', end_date='20180630',touch_files_only=False)
 #test_proc_ba(pipe_run=4, pipe_print=0, start_date='20140701', end_date='20180630',touch_files_only=False)

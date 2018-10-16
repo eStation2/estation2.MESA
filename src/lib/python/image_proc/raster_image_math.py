@@ -2952,9 +2952,8 @@ def do_compute_chla_gradient(input_file='', nodata=None, output_file='', output_
 
         data_chla = chl_band.ReadAsArray(0, 0, ns, nl).astype(float)
 
-        # TODO Manage this part by taking nodata from the method parameter
         # Replace the nodata value with Nan
-        data_chla[data_chla < -32760] = N.nan
+        data_chla[data_chla==nodata] = N.nan
 
         # Data smoothing (median filter)
 
