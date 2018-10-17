@@ -2984,8 +2984,8 @@ def do_compute_chla_gradient(input_file='', nodata=None, output_file='', output_
         # #   Close outputs
         outDrv = None
         outDS = None
-        logger.warning('Writing MetaData not done yet ! To be implemented ...')
-        # assign_metadata_processing(input_list, output_file)
+        #logger.warning('Writing MetaData not done yet ! To be implemented ...')
+        assign_metadata_processing(input_list, output_file)
 
     except:
         logger.warning('Error in do_compute_chla_gradient. Remove outputs')
