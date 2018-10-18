@@ -61,9 +61,9 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     # ----------------------------------------------------------------------------------------------------------------
     # 1 . 3davg
     # 3 Day average of the 1 day Chl, re-projected on target mapset
-    output_sprod=proc_lists.proc_add_subprod("3daysavg", "olci-wrr", final=False,
-                                             descriptive_name='3day chl-oc4me',
-                                             description='mean 3 day composite',
+    output_sprod=proc_lists.proc_add_subprod("3dayavg", prod, final=False,
+                                             descriptive_name='3day Avg',
+                                             description='3 day Average',
                                              frequency_id='e1day',
                                              date_format='YYYYMMDD',
                                              masked=False,
@@ -147,50 +147,25 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     @active_if(activate_3davg_comput)
     @files(generate_parameters_3davg)
-    def olci_wrr_3dcum(input_file, output_file):
+    def compute_3dayavg(input_file, output_file):
 
+        no_data = int(sds_meta.get_nodata_value(input_file[0]))
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "", "input_nodata":1000, "output_nodata":1000}
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "", "input_nodata":no_data, "output_nodata":no_data}
         raster_image_math.do_avg_image(**args)
 
-    # ----------------------------------------------------------------------------------------------------------------
-    #  2. Chla Monthly product (avg)
-    # 3 Day average of the 1 day Chl, re-projected on target mapset
-    output_sprod=proc_lists.proc_add_subprod("monchla", "olci-wrr", final=False,
-                                             descriptive_name='Monthly chl-oc4me',
-                                             description='Mean 1 month composite',
-                                             frequency_id='e1month',
-                                             date_format='YYYYMMDD',
-                                             masked=False,
-                                             timeseries_role='',
-                                             active_default=True)
-
-    prod_ident_mon_chla = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
-    subdir_mon_chla = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
-
-    formatter_in = "(?P<YYYYMM>[0-9]{6})(?P<DD>[0-9]{2})"+in_prod_ident
-    formatter_out = "{subpath[0][5]}"+os.path.sep+subdir_mon_chla+"{YYYYMM[0]}"+'01'+prod_ident_mon_chla
-
-    @active_if(activate_1monavg_comput)
-    @collate(starting_files, formatter(formatter_in), formatter_out)
-    def olci_wrr_monchla(input_file, output_file):
-
-        output_file = functions.list_to_element(output_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
-        raster_image_math.do_avg_image(**args)
 
     return proc_lists
 #   ---------------------------------------------------------------------
 #   Run the pipeline
 
-def processing_std_olci_wrr(res_queue, pipeline_run_level=0, pipeline_printout_level=0, pipeline_printout_graph_level=0,
+def processing_std_3dayavg(res_queue, pipeline_run_level=0, pipeline_printout_level=0, pipeline_printout_graph_level=0,
                         prod='', starting_sprod='', mapset='', version='', starting_dates=None,
                         nrt_products=True, write2file=None, logfile=None, touch_files_only=False):
 
     spec_logger = log.my_logger(logfile)
-    spec_logger.info("Entering routine %s" % 'processing_std_olci_wrr')
+    spec_logger.info("Entering routine %s" % 'processing_std_3dayavg')
 
     proc_lists = None
     proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version, starting_dates=starting_dates,
@@ -217,62 +192,3 @@ def processing_std_olci_wrr(res_queue, pipeline_run_level=0, pipeline_printout_l
     #res_queue.put(proc_lists)
     return True
 
-
-# def processing_olci_wrr_stats_only(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
-#                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-#                           starting_dates=None, write2file=None,logfile=None,touch_files_only=False):
-#
-#     result = processing_olci_wrr(res_queue, pipeline_run_level=pipeline_run_level,
-#                                  pipeline_printout_level=pipeline_printout_level,
-#                                  pipeline_printout_graph_level=pipeline_printout_graph_level,
-#                                  prod=prod,
-#                                  starting_sprod=starting_sprod,
-#                                  mapset=mapset,
-#                                  version=version,
-#                                  starting_dates_linearx2=starting_dates,
-#                                  nrt_products=False,
-#                                  update_stats=True,
-#                                  write2file=write2file,
-#                                  logfile=logfile,
-#                                  touch_files_only=touch_files_only)
-#
-#     return result
-#
-# def processing_olci_wrr_prods_only(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
-#                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-#                           starting_dates=None,write2file=None, logfile=None,touch_files_only=False):
-#
-#     result = processing_olci_wrr(res_queue, pipeline_run_level=pipeline_run_level,
-#                                  pipeline_printout_level=pipeline_printout_level,
-#                                  pipeline_printout_graph_level=pipeline_printout_graph_level,
-#                                  prod=prod,
-#                                  starting_sprod=starting_sprod,
-#                                  mapset=mapset,
-#                                  version=version,
-#                                  starting_dates_linearx2=starting_dates,
-#                                  nrt_products=True,
-#                                  update_stats=False,
-#                                  write2file=write2file,
-#                                  logfile=logfile,
-#                                  touch_files_only=touch_files_only)
-#
-#     return result
-#
-# def processing_olci_wrr_all(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
-#                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-#                           starting_dates=None, logfile=None,touch_files_only=False):
-#
-#     result = processing_olci_wrr(res_queue, pipeline_run_level=pipeline_run_level,
-#                                  pipeline_printout_level=pipeline_printout_level,
-#                                  pipeline_printout_graph_level=pipeline_printout_graph_level,
-#                                  prod=prod,
-#                                  starting_sprod=starting_sprod,
-#                                  mapset=mapset,
-#                                  version=version,
-#                                  starting_dates_linearx2=starting_dates,
-#                                  nrt_products=True,
-#                                  update_stats=True,
-#                                  logfile=logfile,
-#                                  touch_files_only=touch_files_only)
-#
-#     return result
