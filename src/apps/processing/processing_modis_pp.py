@@ -197,10 +197,10 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
         elif chla_frequency == 'e1modis8day':
             frequency_string = '8 days'
             output_sprod = '8daysavg'
-            output_sprod_clim = '8daysclim'
-            output_sprod_min = '8daysmin'
-            output_sprod_max = '8daysmax'
-            sub_product_group = '8daysstat'
+            activate_pp_stats_clim_comput = 0
+            activate_pp_stats_min_comput = 0
+            activate_pp_stats_max_comput = 0
+            # sub_product_group = '8daysstat'
         else:
             spec_logger.error('Frequency not recognized: %s. Exit!', chla_frequency)
             return
