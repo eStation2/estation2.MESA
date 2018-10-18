@@ -1,0 +1,123 @@
+#
+#   Release Note for 2.1.2
+#   Changes are with respect to 2.1.1
+#   Unless specification, they refer to Apps.rpm package.
+#   The references ES2-NNN reports the number of the corresponding ticket opened in YouTrack (https://estation2.myjetbrains.com/youtrack/)
+#   Date: October 2018
+
+1. BUG FIXING
+-------------
+
+1.1 Dashboard
+
+-  DB sync log file not displayed (see ES2-28).
+
+1.2 Acquisition
+
+- LSASAF-LST: correct a bug on ingestion of LSASAF-LST (corrupted .bz2 files block the ingestion service).
+- RFEs: update source for FEWSNET-2.0 and TAMSAT-2.0 (2.1.0-15).
+- General: exclude from the get services products that are not activated (see ES2-4).
+- GUI: correct a bug to enable the correct editing of internet sources, when more than 1 is defined (see ES2-73).
+- Get Internet: improve the checks in file downloading (manage more HTTP codes - see ES2-67).
+- Get Internet source editing from the GUI - Start/End date lost when saving (see ES2-29).
+
+1.3 Processing
+
+- Primary Production: correct the algorithm (28.5 Celsius threshold for PbOpt computation - see ES2-49) and check all files present (see ES2-36).
+- MODIS Monthly Marine prods: correct std_modis_monavg computation, in order to account for possible missing files at begin of following year (see ES2-35).
+- VGT-NDVI: Correct flags for the activation of a couple of filtered anomalies (see ES2-87).
+
+1.4 DataManagement
+
+- Add checks on the file extensions, not to have the visualization blocked by unexpected files (see ES2-3).
+- Correct the cases where the requests are generated in a wrong way (see ES2-64).
+
+1.5 Visualization
+
+- Timeseries: correction is done on the value returned for a polygon filled by Nodata: 'None' rather than '0' (see ES2-47).
+- Outmask: do not reload the product layer when 'Outmask' function is de-activated, so to save time (see ES2-7).
+- FCOVER: Correct the FCOVER legend (see ES2-11).
+- Map Viewer: correct the End-date entry in Map viewer's timeline (see ES2-20).
+- Shift: changed mapserver parameters to avoid shift of low-resolution products (RESAMPLE=AVERAGE, see ES2-58).
+- Open new Mapview sometimes has an empty vector layer menu because the layer store was not loaded yet (see ES2-42).
+- Layer admin: Upload vector layer with size > 50Mb not working due to Apache LimitRequestBody directive (see ES2-41).
+- Open Map Template (MY MAPS): the product name is not shown in the 'Title' object (see ES2-30).
+- Analysis: Timeline in Mapview does not accept end date changes (see ES2-20).
+- Analysis: in the layer administration importing a vector layer generates wrong path to the layer (see ES2-19).
+- Timeseries draw-properties - missing records lead to failure (see ES2-17).
+- Timeseries draw-properties - wrong color code (e.g. double space rather than single in RGB values), fails graph generation (see ES2-15).
+- Timeseries 'Profile' years selection wrong (see ES2-14).
+
+1.6 System Service
+
+1.7 Help
+
+- Correct the link to the Product Report in English (was going to the French version - see ES2-24).
+- Under the Help Tab, the doc icons are shifted when clicked (see ES2-25).
+
+1.8 Configuration/DB
+
+- TAMSAT: internet source for TAMSAT updated (see ES2-48).
+- GUI Analysis: EEZ marine layer not visualized (see ES2-1).
+
+
+2. NEW FEATURES
+---------------
+
+2.0 General
+
+- Login from GUI now writes a cookie when logged in so that the user remains logged in when coming back to the GUI (see ES2-79).
+- GUI: Changed store loading sequence for performance gain (see ES2-68).
+
+2.1 Dashboard
+
+2.2.1 Acquisition
+
+- MODIS Marine 4km: define additional sources for the MODIS marine 4km global products (see ES2-23).
+- WD-GEE: ingestion of the WD-GEE product, disseminated as .gz.tif file (see ES2-96).
+
+2.2.2 Processing
+
+- Primary Production: fully implement the modis-pp processing chain, as a non-standard chain (~ merge). Define two chains for 8daysavg and monavg products.
+- Remove tmpdir used in modis-firms 10km re-projection.
+- MODIS-SST: implement the SST Fronts detection.
+- Primary Production: correct the No-data value in Primary Production files, from -9999 to -32768 (see ES2-16).
+
+2.2.3 Data Management
+
+- Implement functions to generate .bsx archives for a single datasets (e.g. NDVI 2.2 yearly datasets). No GUI, only from pycharm/python.
+
+2.3.1 Visualization/General
+
+- Legend administration tool placed in the Analysis toolbar (see ES2-95).
+- VGT-NDVI: change settings in DB in order to have NDVI sv2-pv2.1 not masked.
+- MSG-MPE: change settings in DB in order not to get (via eumetcast) MSG-MPE product.
+
+2.3.2 Visualization/Maps
+
+- Adapt the length of the 'Timeline' period in Map Viewer, in order to display always around 30/40 steps (see ES2-21).
+- Maintain map size on timeline collapse and expand (see ES2-91).
+- Empty disclaimer was shown white when saved as PNG (see ES2-81).
+- Save Map template, proposes as template name the product name and version (see ES2-80).
+- Select/check in vector layer menu, loaded layers for a Mapview template (see ES2-78).
+- Hide selected geometry when outmasking (see ES2-77).
+- Toggle "Draw geometry" extra functionality (see ES2-75):
+    (1) On mouse over show menu.
+    (2) Save drawn layer -> add layer to layer menu, add layer to Map and empty drawn vector layer.
+- Added to the saving and opening of a Mapview template the loaded vector layers and the zoom extent (see ES2-69).
+- Vector layer draw properties are now taken in consideration when changed (see ES2-43).
+- The 'Timeline' in a Mapview is adapted to the product's frequency, e.g. 2 months for daily products (see ES2-21).
+
+2.3.3 Visualization/Graphs
+
+- De-activated series in a graph are presented in very light grey in the legend. Changed to a darker gray color (see ES2-92).
+- Better visualization of missing (zero or nodata) values in profile graph (see ES2-50).
+- Profile timeseries implemented support for 4 Y-axes (see ES2-44).
+
+2.4 Configuration/DB
+
+- Change/make uniform the description of products/subproducts (see ES2-82).
+
+2.5 Other packages
+
+- Upgrade the version of Firefox (31.1.0 -> 52.4.0) since the original stopped working - on machines connected to the internet - in September 2017 (see ES2-83).
