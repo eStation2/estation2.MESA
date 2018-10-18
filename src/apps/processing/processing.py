@@ -41,7 +41,7 @@ from apps.processing import processing_std_rain_onset
 from apps.processing import processing_std_seas_cum
 from apps.processing import processing_std_precip_1day
 from apps.processing import processing_std_olci_wrr
-from apps.processing import processing_std_chla_gradient
+from apps.processing import processing_std_gradient
 from apps.processing import processing_std_monavg
 from apps.processing import processing_std_3dayavg
 

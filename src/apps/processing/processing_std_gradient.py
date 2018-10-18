@@ -96,9 +96,9 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   ---------------------------------------------------------------------
     #   Chal Gradient (raster)
     output_sprod_group=proc_lists.proc_add_subprod_group("gradient")
-    output_sprod=proc_lists.proc_add_subprod("chla-gradient", "gradient", final=False,
-                                             descriptive_name='Chla Gradient',
-                                             description='Chla Gradient',
+    output_sprod=proc_lists.proc_add_subprod("gradient", "gradient", final=False,
+                                             descriptive_name='Gradient',
+                                             description='Gradient',
                                              frequency_id='',
                                              date_format='YYYYMMDD',
                                              masked=False,
@@ -113,7 +113,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     @active_if(activate_gradient_computation)
     @transform(starting_files, formatter(formatter_in),formatter_out)
-    def chla_gradient_computation(input_file, output_file):
+    def gradient_computation(input_file, output_file):
 
         no_data = int(sds_meta.get_nodata_value(input_file))
         output_file = functions.list_to_element(output_file)
@@ -128,13 +128,13 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
 #   ---------------------------------------------------------------------
 #   Run the pipeline
-def processing_std_chla_gradient(res_queue, pipeline_run_level=0, pipeline_printout_level=0,
+def processing_std_gradient(res_queue, pipeline_run_level=0, pipeline_printout_level=0,
                                  pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                                  starting_dates=None, write2file=None, logfile=None,
                                  touch_files_only=False):
 
     spec_logger = log.my_logger(logfile)
-    spec_logger.info("Entering routine %s" % 'processing_std_chla_gradient')
+    spec_logger.info("Entering routine %s" % 'processing_std_gradient')
 
     proc_lists = None
     proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
