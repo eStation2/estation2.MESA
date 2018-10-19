@@ -2260,6 +2260,10 @@ ALTER FUNCTION analysis.update_insert_graph_yaxes(character varying, character v
 
 -- DROP FUNCTION products.export_jrc_data(boolean);
 
+-- Function: products.export_jrc_data(boolean)
+
+-- DROP FUNCTION products.export_jrc_data(boolean);
+
 CREATE OR REPLACE FUNCTION products.export_jrc_data(full_copy boolean DEFAULT false)
   RETURNS SETOF text AS
 $BODY$
@@ -2708,26 +2712,6 @@ BEGIN
 	RETURN QUERY SELECT chr(10);
 
 
-	RETURN QUERY SELECT 'SELECT analysis.update_insert_graph_yaxes('
-		|| ' yaxe_id := ' || COALESCE('''' || yaxe_id || '''', 'NULL')
-		|| ', title := ' || COALESCE('''' || title || '''', 'NULL')
-		|| ', title_color := ' || COALESCE('''' || title_color || '''', 'NULL')
-		|| ', title_font_size := ' || COALESCE(TRIM(to_char(title_font_size, '99999999')), 'NULL')
-		|| ', min := ' || COALESCE(TRIM(to_char(min, '99999999D999999')), 'NULL')
-		|| ', max := ' || COALESCE(TRIM(to_char(max, '99999999D999999')), 'NULL')
-		|| ', unit := ' || COALESCE('''' || unit || '''', 'NULL')
-		|| ', opposite := ' || opposite
-		|| ', aggregation_type := ' || COALESCE('''' || aggregation_type || '''', 'NULL')
-		|| ', aggregation_min := ' || COALESCE(TRIM(to_char(aggregation_min, '99999999D999999')), 'NULL')
-		|| ', aggregation_max := ' || COALESCE(TRIM(to_char(aggregation_max, '99999999D999999')), 'NULL')
-		|| ' );'  as inserts
-	FROM analysis.graph_yaxes;
-
-
-	RETURN QUERY SELECT chr(10);
-	RETURN QUERY SELECT chr(10);
-
-
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_timeseries_drawproperties('
 		|| ' productcode := ' || COALESCE('''' || productcode || '''', 'NULL')
 		|| ', subproductcode := ' || COALESCE('''' || subproductcode || '''', 'NULL')
@@ -2755,24 +2739,6 @@ BEGIN
 	RETURN QUERY SELECT chr(10);
 
 
-	RETURN QUERY SELECT 'SELECT analysis.update_insert_timeseries_drawproperties_new('
-		|| ' productcode := ' || COALESCE('''' || productcode || '''', 'NULL')
-		|| ', subproductcode := ' || COALESCE('''' || subproductcode || '''', 'NULL')
-		|| ', version := ' || COALESCE('''' || version || '''', 'NULL')
-		|| ', tsname_in_legend := ' || COALESCE('''' || tsname_in_legend || '''', 'NULL')
-		|| ', charttype := ' || COALESCE('''' || charttype || '''', 'NULL')
-		|| ', linestyle := ' || COALESCE('''' || linestyle || '''', 'NULL')
-		|| ', linewidth := ' || COALESCE(TRIM(to_char(linewidth, '99999999')), 'NULL')
-		|| ', color := ' || COALESCE('''' || color || '''', 'NULL')
-		|| ', yaxe_id := ' || COALESCE('''' || yaxe_id || '''', 'NULL')
-		|| ' );'  as inserts
-	FROM analysis.timeseries_drawproperties_new;
-
-
-	RETURN QUERY SELECT chr(10);
-	RETURN QUERY SELECT chr(10);
-
-
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_chart_drawproperties('
 		|| ' chart_type := ' || COALESCE('''' || chart_type || '''', 'NULL')
 		|| ', chart_width := ' || chart_width
@@ -2791,29 +2757,6 @@ BEGIN
 		|| ', yaxe4_font_size := ' || yaxe4_font_size
 		|| ' );'  as inserts
 	FROM analysis.chart_drawproperties;
-
-
-	RETURN QUERY SELECT chr(10);
-	RETURN QUERY SELECT chr(10);
-
-
-  RETURN QUERY SELECT 'SELECT analysis.update_insert_graph_drawproperties('
-		|| ' graph_type := ' || COALESCE('''' || graph_type || '''', 'NULL')
-		|| ', graph_width := ' || graph_width
-		|| ', graph_height := ' || graph_height
-		|| ', graph_title := ' || COALESCE('''' || graph_title || '''', 'NULL')
-		|| ', graph_title_font_size := ' || graph_title_font_size
-		|| ', graph_title_font_color := ' || COALESCE('''' || graph_title_font_color || '''', 'NULL')
-		|| ', graph_subtitle := ' || COALESCE('''' || graph_subtitle || '''', 'NULL')
-		|| ', graph_subtitle_font_size := ' || graph_subtitle_font_size
-		|| ', graph_subtitle_font_color := ' || COALESCE('''' || graph_subtitle_font_color || '''', 'NULL')
-		|| ', legend_position := ' || COALESCE('''' || legend_position || '''', 'NULL')
-		|| ', legend_font_size := ' || legend_font_size
-		|| ', legend_font_color := ' || COALESCE('''' || legend_font_color || '''', 'NULL')
-		|| ', xaxe_font_size := ' || xaxe_font_size
-		|| ', xaxe_font_color := ' || COALESCE('''' || xaxe_font_color || '''', 'NULL')
-		|| ' );'  as inserts
-	FROM analysis.graph_drawproperties;
 
 
 	RETURN QUERY SELECT chr(10);
@@ -2880,6 +2823,71 @@ BEGIN
 	ORDER BY layerid;
 
 
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
+	RETURN QUERY SELECT 'SELECT analysis.update_insert_graph_yaxes('
+		|| ' yaxe_id := ' || COALESCE('''' || yaxe_id || '''', 'NULL')
+		|| ', title := ' || COALESCE('''' || title || '''', 'NULL')
+		|| ', title_color := ' || COALESCE('''' || title_color || '''', 'NULL')
+		|| ', title_font_size := ' || COALESCE(TRIM(to_char(title_font_size, '99999999')), 'NULL')
+		|| ', min := ' || COALESCE(TRIM(to_char(min, '99999999D999999')), 'NULL')
+		|| ', max := ' || COALESCE(TRIM(to_char(max, '99999999D999999')), 'NULL')
+		|| ', unit := ' || COALESCE('''' || unit || '''', 'NULL')
+		|| ', opposite := ' || opposite
+		|| ', aggregation_type := ' || COALESCE('''' || aggregation_type || '''', 'NULL')
+		|| ', aggregation_min := ' || COALESCE(TRIM(to_char(aggregation_min, '99999999D999999')), 'NULL')
+		|| ', aggregation_max := ' || COALESCE(TRIM(to_char(aggregation_max, '99999999D999999')), 'NULL')
+		|| ' );'  as inserts
+	FROM analysis.graph_yaxes;
+
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
+	RETURN QUERY SELECT 'SELECT analysis.update_insert_timeseries_drawproperties_new('
+		|| ' productcode := ' || COALESCE('''' || productcode || '''', 'NULL')
+		|| ', subproductcode := ' || COALESCE('''' || subproductcode || '''', 'NULL')
+		|| ', version := ' || COALESCE('''' || version || '''', 'NULL')
+		|| ', tsname_in_legend := ' || COALESCE('''' || tsname_in_legend || '''', 'NULL')
+		|| ', charttype := ' || COALESCE('''' || charttype || '''', 'NULL')
+		|| ', linestyle := ' || COALESCE('''' || linestyle || '''', 'NULL')
+		|| ', linewidth := ' || COALESCE(TRIM(to_char(linewidth, '99999999')), 'NULL')
+		|| ', color := ' || COALESCE('''' || color || '''', 'NULL')
+		|| ', yaxe_id := ' || COALESCE('''' || yaxe_id || '''', 'NULL')
+		|| ' );'  as inserts
+	FROM analysis.timeseries_drawproperties_new;
+
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
+	RETURN QUERY SELECT 'SELECT analysis.update_insert_graph_drawproperties('
+		|| ' graph_type := ' || COALESCE('''' || graph_type || '''', 'NULL')
+		|| ', graph_width := ' || graph_width
+		|| ', graph_height := ' || graph_height
+		|| ', graph_title := ' || COALESCE('''' || graph_title || '''', 'NULL')
+		|| ', graph_title_font_size := ' || graph_title_font_size
+		|| ', graph_title_font_color := ' || COALESCE('''' || graph_title_font_color || '''', 'NULL')
+		|| ', graph_subtitle := ' || COALESCE('''' || graph_subtitle || '''', 'NULL')
+		|| ', graph_subtitle_font_size := ' || graph_subtitle_font_size
+		|| ', graph_subtitle_font_color := ' || COALESCE('''' || graph_subtitle_font_color || '''', 'NULL')
+		|| ', legend_position := ' || COALESCE('''' || legend_position || '''', 'NULL')
+		|| ', legend_font_size := ' || legend_font_size
+		|| ', legend_font_color := ' || COALESCE('''' || legend_font_color || '''', 'NULL')
+		|| ', xaxe_font_size := ' || xaxe_font_size
+		|| ', xaxe_font_color := ' || COALESCE('''' || xaxe_font_color || '''', 'NULL')
+		|| ' );'  as inserts
+	FROM analysis.graph_drawproperties;
+
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
 END;
 $BODY$
   LANGUAGE plpgsql VOLATILE
@@ -2887,8 +2895,6 @@ $BODY$
   ROWS 1000;
 ALTER FUNCTION products.export_jrc_data(boolean)
   OWNER TO estation;
-
-
 
 
 

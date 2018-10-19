@@ -486,12 +486,14 @@ Ext.define("esapp.view.system.systemsettings",{
                             //scale: 'medium',
                             scope:me,
                             handler: function(){
-                                var PCVersionAdminWin = new esapp.view.system.PCVersionAdmin({
-                                    params: {
-                                        currentversion: Ext.getCmp('active_version').getValue()
-                                    }
-                                });
-                                PCVersionAdminWin.show();
+                                Ext.Msg.alert('Active version change disabled', 'The active version change has been disabled<BR>because of tecnical issues.');
+
+                                // var PCVersionAdminWin = new esapp.view.system.PCVersionAdmin({
+                                //     params: {
+                                //         currentversion: Ext.getCmp('active_version').getValue()
+                                //     }
+                                // });
+                                // PCVersionAdminWin.show();
                             }
                         }]
                     },{

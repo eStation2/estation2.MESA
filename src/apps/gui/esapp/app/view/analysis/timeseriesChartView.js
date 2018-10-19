@@ -74,11 +74,14 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
 
     listeners: {
         beforerender: function () {
-            var me = this,
-                selectedProductsAndTimeFramePanel = me.getController().createSelectedProductsAndTimeFramePanel();
-            me.add(selectedProductsAndTimeFramePanel);
+            var me = this;
 
-            selectedProductsAndTimeFramePanel.down('timeseriesproductselection').fireEvent('beforerender');
+            if (me.graphtype != 'scatter'){
+                var selectedProductsAndTimeFramePanel = me.getController().createSelectedProductsAndTimeFramePanel();
+                me.add(selectedProductsAndTimeFramePanel);
+
+                selectedProductsAndTimeFramePanel.down('timeseriesproductselection').fireEvent('beforerender');
+            }
         },
         afterrender: function () {
             var me = this,
@@ -209,6 +212,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                 iconCls: 'fa fa-calendar fa-2x',
                 style: {color: '#748FFC'},
                 scale: 'medium',
+                disabled: (me.graphtype == 'scatter'),
                 // hidden:  ((esapp.getUser() == 'undefined' || esapp.getUser() == null) || !me.isTemplate ? true : false),
                 handler: 'changeSelectedProductsAndTimeFrame'
             // }, {
@@ -224,8 +228,9 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                 // text: esapp.Utils.getTranslation('properties'),    // 'Graph properties',
                 tooltip: esapp.Utils.getTranslation('graph_edit_properties'), //  'Edit graph properties',
                 iconCls: 'chart-curve_edit',
-                scale: 'medium'
-                ,handler: 'openChartProperties'
+                scale: 'medium',
+                disabled: (me.graphtype == 'scatter'),
+                handler: 'openChartProperties'
             }, {
                 xtype: 'tbseparator'
             }, ' ', {

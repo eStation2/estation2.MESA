@@ -4,15 +4,15 @@
 	# WEB.PY SETUP 
 	##############################
 
-	WSGIScriptAlias / /srv/www/eStation2/webpy_esapp.py
+    WSGIScriptAlias /esapp /srv/www/eStation2/webpy_esapp.py
 
-	Alias /lib/ /srv/www/eStation2/lib/
-	Alias /app/ /srv/www/eStation2/apps/gui/esapp/app/
-	Alias /resources/ /srv/www/eStation2/apps/gui/esapp/build/production/esapp/resources/
-	Alias /microloader.js /srv/www/eStation2/apps/gui/esapp/build/production/esapp/microloader.js
-	Alias /app.json /srv/www/eStation2/apps/gui/esapp/build/production/esapp/app.json
-	Alias /app.js /srv/www/eStation2/apps/gui/esapp/build/production/esapp/app.js
-	Alias /static /srv/www/eStation2/apps/gui/esapp/build/production/esapp
+    Alias /lib/ /var/www/eStation2/lib/
+    Alias /app/ /var/www/eStation2/apps/gui/esapp/app/
+    Alias /resources/ /var/www/eStation2/apps/gui/esapp/build/production/esapp/resources/
+    Alias /microloader.js /var/www/eStation2/apps/gui/esapp/build/production/esapp/microloader.js
+    Alias /app.json /var/www/eStation2/apps/gui/esapp/build/production/esapp/app.json
+    Alias /app.js /var/www/eStation2/apps/gui/esapp/build/production/esapp/app.js
+    Alias /static /var/www/eStation2/apps/gui/esapp/build/production/esapp
 
 </VirtualHost>
 
