@@ -64,11 +64,32 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
                     createTooltip(view);
                     // Ext.util.Observable.capture(view, function(e){console.log(view.id + ': ' + e);});
                 },
-                rowmouseover: function(view){
-                    // console.info('rowmouseover');
+                rowclick: function(view){
+                    // console.info('rowclick');
                     var widgettooltip = Ext.getCmp(view.getId() + '_completness_tooltip');
+                    var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
+                    Ext.each(completenessTooltips, function(item) {
+                        if (item != widgettooltip){
+                            item.hide();
+                        }
+                    });
+                    if (esapp.Utils.objectExists(widgettooltip)){
+                        widgettooltip.trackMouse = false;
+                    }
+                },
+                itemmouseenter: function(view){
+                    // console.info('itemmouseenter');
+                    var widgettooltip = Ext.getCmp(view.getId() + '_completness_tooltip');
+                    widgettooltip.trackMouse = true;
                     if (widgettooltip.disabled){
                         widgettooltip.enable();
+                    }
+                },
+                itemmouseleave: function(view){
+                    // console.info('itemmouseleave');
+                    var widgettooltip = Ext.getCmp(view.getId() + '_completness_tooltip');
+                    if (!widgettooltip.disabled && widgettooltip.trackMouse){
+                        widgettooltip.disable();
                     }
                 },
                 rowfocus: {}
@@ -112,8 +133,8 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
                 // autoRender: true,
                 hidden: false,
                 disabled: true,
-                trackMouse: false,
-                // mouseOffset : [0,-5],
+                trackMouse: true,
+                mouseOffset : [-5,0],
                 autoHide: false,
                 showDelay: 100,
                 // hideDelay: 5000,

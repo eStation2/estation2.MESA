@@ -108,11 +108,35 @@ Ext.define("esapp.view.acquisition.Ingestion", {
                     createTooltip(view);
                     // Ext.util.Observable.capture(view, function(e){console.log(view.id + ': ' + e);});
                 },
-                rowmouseover: function(view){
-                    // console.info('rowmouseover');
+                rowclick: function(view){
+                    // console.info('rowclick');
                     var widgettooltip = Ext.getCmp(view.getId() + '_completness_tooltip');
+                    var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
+                    Ext.each(completenessTooltips, function(item) {
+                       // item.disable();
+                        if (item != widgettooltip){
+                            item.hide();
+                        }
+                    });
+                    if (esapp.Utils.objectExists(widgettooltip)){
+                        widgettooltip.trackMouse = false;
+                        // widgettooltip.enable();
+                        // widgettooltip.show();
+                    }
+                },
+                itemmouseenter: function(view){
+                    // console.info('itemmouseenter');
+                    var widgettooltip = Ext.getCmp(view.getId() + '_completness_tooltip');
+                    widgettooltip.trackMouse = true;
                     if (widgettooltip.disabled){
                         widgettooltip.enable();
+                    }
+                },
+                itemmouseleave: function(view){
+                    // console.info('itemmouseleave');
+                    var widgettooltip = Ext.getCmp(view.getId() + '_completness_tooltip');
+                    if (!widgettooltip.disabled && widgettooltip.trackMouse){
+                        widgettooltip.disable();
                     }
                 },
                 rowfocus: {}
@@ -137,7 +161,7 @@ Ext.define("esapp.view.acquisition.Ingestion", {
                 hidden: false,
                 disabled: true,
                 trackMouse: true,
-                // mouseOffset : [-5,0],
+                mouseOffset : [-5,0],
                 autoHide: false,
                 showDelay: 100,
                 // hideDelay: 5000,
@@ -378,7 +402,7 @@ Ext.define("esapp.view.acquisition.Ingestion", {
                 ),
             listeners: {
                 click: function(view){
-                    console.info(view);
+                    // console.info(view);
                     var widgettooltip = Ext.getCmp(view.getId() + '_completness_tooltip');
                     var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
                     Ext.each(completenessTooltips, function(item) {
