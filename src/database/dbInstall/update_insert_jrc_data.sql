@@ -739,20 +739,20 @@ SELECT products.update_insert_thema_product(thema_id := 'CICOS', productcode := 
 SELECT products.update_insert_thema_product(thema_id := 'CICOS', productcode := 'vgt-ndvi', version := 'proba-v2.2', mapsetcode := 'SPOTV-CEMAC-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'CICOS', productcode := 'vgt-ndvi', version := 'sv2-pv2.2', mapsetcode := 'SPOTV-CEMAC-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'CICOS', productcode := 'arc2-rain', version := '2.0', mapsetcode := 'ARC2-Africa-11km', activated := false );
-SELECT products.update_insert_thema_product(thema_id := 'CICOS', productcode := 'lsasaf-et', version := 'undefined', mapsetcode := 'SPOTV-CEMAC-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'CICOS', productcode := 'msg-mpe', version := 'undefined', mapsetcode := 'SPOTV-CEMAC-1km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'CICOS', productcode := 'lsasaf-lst', version := 'undefined', mapsetcode := 'SPOTV-CEMAC-1km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'CICOS', productcode := 'lsasaf-et', version := 'undefined', mapsetcode := 'SPOTV-CEMAC-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'CICOS', productcode := 'msg-mpe', version := 'undefined', mapsetcode := 'MSG-satellite-3km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'CICOS', productcode := 'cpc-sm', version := '1.0', mapsetcode := 'CPC-Africa-50km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'CICOS', productcode := 'ecmwf-rain', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'CICOS', productcode := 'fewsnet-rfe', version := '2.0', mapsetcode := 'FEWSNET-Africa-8km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'CICOS', productcode := 'vgt-fapar', version := 'V1.4', mapsetcode := 'SPOTV-CEMAC-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'CICOS', productcode := 'vgt-ndvi', version := 'proba-v2.1', mapsetcode := 'SPOTV-CEMAC-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'vgt-ndvi', version := 'proba-v2.1', mapsetcode := 'SPOTV-IGAD-1km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'vgt-ndvi', version := 'sv2-pv2.1', mapsetcode := 'SPOTV-IGAD-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'msg-mpe', version := 'undefined', mapsetcode := 'MSG-satellite-3km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'vgt-ndvi', version := 'proba-v2.2', mapsetcode := 'SPOTV-IGAD-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'vgt-ndvi', version := 'sv2-pv2.2', mapsetcode := 'SPOTV-IGAD-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'vgt-dmp', version := 'V1.0', mapsetcode := 'SPOTV-IGAD-1km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'vgt-ndvi', version := 'sv2-pv2.2', mapsetcode := 'SPOTV-IGAD-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'lsasaf-lst', version := 'undefined', mapsetcode := 'MSG-satellite-3km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'lsasaf-lst', version := 'undefined', mapsetcode := 'SPOTV-IGAD-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'vgt-ndvi', version := 'spot-v1', mapsetcode := 'SPOTV-IGAD-1km', activated := false );
@@ -764,7 +764,7 @@ SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 
 SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'ecmwf-evpt', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'modis-firms', version := 'v5.0', mapsetcode := 'SPOTV-IGAD-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'cpc-sm', version := '1.0', mapsetcode := 'CPC-Africa-50km', activated := false );
-SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'vgt-ndvi', version := 'sv2-pv2.1', mapsetcode := 'SPOTV-IGAD-1km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'vgt-ndvi', version := 'proba-v2.1', mapsetcode := 'SPOTV-IGAD-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'arc2-rain', version := '2.0', mapsetcode := 'ARC2-Africa-11km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'vgt-lai', version := 'V1.4', mapsetcode := 'SPOTV-IGAD-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 'chirps-dekad', version := '2.0', mapsetcode := 'CHIRP-Africa-5km', activated := true );
@@ -776,43 +776,43 @@ SELECT products.update_insert_thema_product(thema_id := 'ICPAC', productcode := 
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'vgt-ndvi', version := 'proba-v2.1', mapsetcode := 'SPOTV-Africa-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'vgt-ndvi', version := 'spot-v1', mapsetcode := 'SPOTV-Africa-1km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'vgt-ndvi', version := 'sv2-pv2.1', mapsetcode := 'SPOTV-Africa-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'vgt-ba', version := 'V1.5', mapsetcode := 'SPOTV-Africa-1km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'vgt-dmp', version := 'V2.0', mapsetcode := 'SPOTV-Africa-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'vgt-ndvi', version := 'spot-v2', mapsetcode := 'SPOTV-Africa-1km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'lsasaf-et', version := 'undefined', mapsetcode := 'MSG-satellite-3km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'lsasaf-et', version := 'undefined', mapsetcode := 'SPOTV-Africa-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'lsasaf-lst', version := 'undefined', mapsetcode := 'MSG-satellite-3km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'lsasaf-lst', version := 'undefined', mapsetcode := 'SPOTV-Africa-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-par', version := 'v2012.0', mapsetcode := 'MODIS-UoG-4km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-par', version := 'v2012.0', mapsetcode := 'MODIS-Africa-4km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-kd490', version := 'v2012.0', mapsetcode := 'MODIS-Africa-4km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-chla', version := 'v2013.1', mapsetcode := 'MODIS-Africa-4km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-firms', version := 'v6.0', mapsetcode := 'SPOTV-Africa-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'aviso-wind', version := '1.0', mapsetcode := 'default', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'ecmwf-evpt', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'aviso-wave', version := '1.0', mapsetcode := 'default', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'vgt-ba', version := 'V1.5', mapsetcode := 'SPOTV-Africa-1km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-pp', version := 'v2013.1', mapsetcode := 'MODIS-IOC-4km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-pp', version := 'v2013.1', mapsetcode := 'MODIS-UoG-4km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-chla', version := 'v2013.1', mapsetcode := 'MODIS-IOC-4km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-sst', version := 'v2013.1', mapsetcode := 'MODIS-Africa-4km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'ecmwf-evpt', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'cpc-sm', version := '1.0', mapsetcode := 'CPC-Africa-50km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-chla', version := 'v2013.1', mapsetcode := 'MODIS-UoG-4km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'olci-wrr', version := 'V02.0', mapsetcode := 'SPOTV-Africa-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-chla', version := 'v2013.1', mapsetcode := 'MODIS-IOC-4km', activated := false );
-SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'cpc-sm', version := '1.0', mapsetcode := 'CPC-Africa-50km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-kd490', version := 'v2012.0', mapsetcode := 'MODIS-IOC-4km', activated := false );
-SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'slstr-sst', version := '1.0', mapsetcode := 'SPOTV-Africa-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'aviso-wave', version := '1.0', mapsetcode := 'default', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-par', version := 'v2012.0', mapsetcode := 'MODIS-IOC-4km', activated := false );
-SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'ecmwf-rain', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'vgt-ndvi', version := 'sv2-pv2.2', mapsetcode := 'SPOTV-Africa-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'vgt-ndvi', version := 'proba-v2.2', mapsetcode := 'SPOTV-Africa-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-kd490', version := 'v2012.0', mapsetcode := 'MODIS-UoG-4km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'slstr-sst', version := '1.0', mapsetcode := 'SPOTV-Africa-1km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'vgt-ndvi', version := 'sv2-pv2.2', mapsetcode := 'SPOTV-Africa-1km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'ecmwf-rain', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-kd490', version := 'v2012.0', mapsetcode := 'MODIS-IOC-4km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'vgt-ndvi', version := 'proba-v2.2', mapsetcode := 'SPOTV-Africa-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'arc2-rain', version := '2.0', mapsetcode := 'ARC2-Africa-11km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-sst', version := 'v2013.1', mapsetcode := 'MODIS-UoG-4km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-sst', version := 'v2013.1', mapsetcode := 'MODIS-IOC-4km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-par', version := 'v2012.0', mapsetcode := 'MODIS-IOC-4km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'wd-gee', version := '1.0', mapsetcode := 'WD-GEE-ECOWAS-AVG', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'fewsnet-rfe', version := '2.0', mapsetcode := 'FEWSNET-Africa-8km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'chirps-dekad', version := '2.0', mapsetcode := 'CHIRP-Africa-5km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-firms', version := 'v5.0', mapsetcode := 'SPOTV-Africa-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'vgt-dmp', version := 'V2.0', mapsetcode := 'SPOTV-Africa-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-pp', version := 'v2013.1', mapsetcode := 'MODIS-IOC-4km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'aviso-wind', version := '1.0', mapsetcode := 'default', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-pp', version := 'v2013.1', mapsetcode := 'MODIS-Africa-4km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'modis-par', version := 'v2012.0', mapsetcode := 'MODIS-UoG-4km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'pml-modis-chl', version := '3.0', mapsetcode := 'SPOTV-IOC-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'pml-modis-chl', version := '3.0', mapsetcode := 'SPOTV-UoG-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'JRC', productcode := 'pml-modis-sst', version := '3.0', mapsetcode := 'SPOTV-UoG-1km', activated := true );
@@ -836,90 +836,89 @@ SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'f
 SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'modis-par', version := 'v2012.0', mapsetcode := 'MODIS-IOC-4km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'modis-sst', version := 'v2013.1', mapsetcode := 'MODIS-IOC-4km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'modis-chla', version := 'v2013.1', mapsetcode := 'MODIS-IOC-4km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'aviso-wave', version := '1.0', mapsetcode := 'default', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'olci-wrr', version := 'V02.0', mapsetcode := 'SPOTV-IOC-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'ecmwf-rain', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := false );
-SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'aviso-wind', version := '1.0', mapsetcode := 'default', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'slstr-sst', version := '1.0', mapsetcode := 'SPOTV-IOC-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'vgt-ndvi', version := 'proba-v2.2', mapsetcode := 'SPOTV-IOC-1km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'vgt-ba', version := 'V1.5', mapsetcode := 'SPOTV-IOC-1km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'vgt-ndvi', version := 'sv2-pv2.2', mapsetcode := 'SPOTV-IOC-1km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'pml-modis-chl', version := '3.0', mapsetcode := 'SPOTV-IOC-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'modis-firms', version := 'v5.0', mapsetcode := 'SPOTV-IOC-1km', activated := false );
-SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'olci-wrr', version := 'V02.0', mapsetcode := 'SPOTV-IOC-1km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'vgt-dmp', version := 'V2.0', mapsetcode := 'SPOTV-IOC-1km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'arc2-rain', version := '2.0', mapsetcode := 'ARC2-Africa-11km', activated := false );
-SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'slstr-sst', version := '1.0', mapsetcode := 'SPOTV-IOC-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'vgt-dmp', version := 'V2.0', mapsetcode := 'SPOTV-IOC-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'ecmwf-evpt', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'modis-pp', version := 'v2013.1', mapsetcode := 'MODIS-IOC-4km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'vgt-ba', version := 'V1.5', mapsetcode := 'SPOTV-IOC-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'modis-firms', version := 'v6.0', mapsetcode := 'SPOTV-IOC-1km', activated := false );
-SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'pml-modis-chl', version := '3.0', mapsetcode := 'SPOTV-IOC-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'modis-kd490', version := 'v2012.0', mapsetcode := 'MODIS-Africa-4km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'aviso-wave', version := '1.0', mapsetcode := 'default', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'MOI', productcode := 'aviso-wind', version := '1.0', mapsetcode := 'default', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'lsasaf-lst', version := 'undefined', mapsetcode := 'MSG-satellite-3km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'vgt-ba', version := 'V1.5', mapsetcode := 'SPOTV-Africa-1km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'modis-firms', version := 'v5.0', mapsetcode := 'SPOTV-Africa-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'fewsnet-rfe', version := '2.0', mapsetcode := 'FEWSNET-Africa-8km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'chirps-dekad', version := '2.0', mapsetcode := 'CHIRP-Africa-5km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'lsasaf-et', version := 'undefined', mapsetcode := 'MSG-satellite-3km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'vgt-ndvi', version := 'spot-v2', mapsetcode := 'SPOTV-Africa-1km', activated := false );
-SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'cpc-sm', version := '1.0', mapsetcode := 'CPC-Africa-50km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'vgt-ndvi', version := 'sv2-pv2.1', mapsetcode := 'SPOTV-Africa-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'modis-sst', version := 'v2013.1', mapsetcode := 'MODIS-Africa-4km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'cpc-sm', version := '1.0', mapsetcode := 'CPC-Africa-50km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'vgt-ndvi', version := 'spot-v1', mapsetcode := 'SPOTV-Africa-1km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'olci-wrr', version := 'V02.0', mapsetcode := 'SPOTV-Africa-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'slstr-sst', version := '1.0', mapsetcode := 'SPOTV-Africa-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'aviso-wave', version := '1.0', mapsetcode := 'default', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'aviso-wind', version := '1.0', mapsetcode := 'default', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'vgt-dmp', version := 'V2.0', mapsetcode := 'SPOTV-Africa-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'vgt-ndvi', version := 'spot-v1', mapsetcode := 'SPOTV-Africa-1km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'arc2-rain', version := '2.0', mapsetcode := 'ARC2-Africa-11km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'vgt-ndvi', version := 'proba-v2.1', mapsetcode := 'SPOTV-Africa-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'msg-mpe', version := 'undefined', mapsetcode := 'MSG-satellite-3km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'vgt-lai', version := 'V1.4', mapsetcode := 'SPOTV-Africa-1km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'modis-chla', version := 'v2013.1', mapsetcode := 'MODIS-Africa-4km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'vgt-ndvi', version := 'proba-v2.2', mapsetcode := 'SPOTV-Africa-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'vgt-ndvi', version := 'sv2-pv2.2', mapsetcode := 'SPOTV-Africa-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'vgt-ba', version := 'V1.5', mapsetcode := 'SPOTV-Africa-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'modis-chla', version := 'v2013.1', mapsetcode := 'MODIS-Africa-4km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'modis-sst', version := 'v2013.1', mapsetcode := 'MODIS-Africa-4km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'wd-gee', version := '1.0', mapsetcode := 'WD-GEE-ECOWAS-AVG', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'ecmwf-evpt', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'modis-pp', version := 'v2013.1', mapsetcode := 'MODIS-Africa-4km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'wd-gee', version := '1.0', mapsetcode := 'WD-GEE-ECOWAS-AVG', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'msg-mpe', version := 'undefined', mapsetcode := 'SPOTV-CEMAC-1km', activated := false );
-SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'modis-par', version := 'v2012.0', mapsetcode := 'MODIS-Africa-4km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'arc2-rain', version := '2.0', mapsetcode := 'ARC2-Africa-11km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'vgt-lai', version := 'V1.4', mapsetcode := 'SPOTV-Africa-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'vgt-fcover', version := 'V1.4', mapsetcode := 'SPOTV-Africa-1km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'msg-mpe', version := 'undefined', mapsetcode := 'MSG-satellite-3km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'ecmwf-rain', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'modis-kd490', version := 'v2012.0', mapsetcode := 'MODIS-Africa-4km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'vgt-fcover', version := 'V1.4', mapsetcode := 'SPOTV-Africa-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'vgt-fapar', version := 'V1.4', mapsetcode := 'SPOTV-Africa-1km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'modis-par', version := 'v2012.0', mapsetcode := 'MODIS-Africa-4km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'vgt-dmp', version := 'V1.0', mapsetcode := 'SPOTV-Africa-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'lsasaf-lst', version := 'undefined', mapsetcode := 'SPOTV-CEMAC-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'lsasaf-et', version := 'undefined', mapsetcode := 'SPOTV-CEMAC-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'vgt-dmp', version := 'V1.0', mapsetcode := 'SPOTV-Africa-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'modis-firms', version := 'v6.0', mapsetcode := 'SPOTV-Africa-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'tamsat-rfe', version := '2.0', mapsetcode := 'TAMSAT-Africa-4km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'modis-firms', version := 'v6.0', mapsetcode := 'SPOTV-Africa-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'pml-modis-sst', version := '3.0', mapsetcode := 'SPOTV-IOC-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'pml-modis-sst', version := '3.0', mapsetcode := 'SPOTV-UoG-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'pml-modis-chl', version := '3.0', mapsetcode := 'SPOTV-UoG-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'vgt-ndvi', version := 'proba-v2.1', mapsetcode := 'SPOTV-UoG-1km', activated := false );
-SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'lsasaf-lst', version := 'undefined', mapsetcode := 'SPOTV-UoG-1km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'Training', productcode := 'pml-modis-chl', version := '3.0', mapsetcode := 'SPOTV-IOC-1km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'tamsat-rfe', version := '2.0', mapsetcode := 'TAMSAT-Africa-4km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'ecmwf-rain', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := false );
-SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'vgt-ndvi', version := 'spot-v2', mapsetcode := 'SPOTV-UoG-1km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'vgt-ndvi', version := 'sv2-pv2.1', mapsetcode := 'SPOTV-UoG-1km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'pml-modis-sst', version := '3.0', mapsetcode := 'SPOTV-UoG-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'arc2-rain', version := '2.0', mapsetcode := 'ARC2-Africa-11km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'pml-modis-chl', version := '3.0', mapsetcode := 'SPOTV-UoG-1km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'arc2-rain', version := '2.0', mapsetcode := 'ARC2-Africa-11km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'aviso-wave', version := '1.0', mapsetcode := 'default', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'modis-sst', version := 'v2013.1', mapsetcode := 'MODIS-UoG-4km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'ecmwf-evpt', version := 'OPE', mapsetcode := 'ECMWF-Africa-25km', activated := false );
-SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'chirps-dekad', version := '2.0', mapsetcode := 'CHIRP-Africa-5km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'slstr-sst', version := '1.0', mapsetcode := 'SPOTV-UoG-1km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'modis-pp', version := 'v2013.1', mapsetcode := 'MODIS-UoG-4km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'aviso-wind', version := '1.0', mapsetcode := 'default', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'aviso-wave', version := '1.0', mapsetcode := 'default', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'chirps-dekad', version := '2.0', mapsetcode := 'CHIRP-Africa-5km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'modis-firms', version := 'v6.0', mapsetcode := 'SPOTV-UoG-1km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'fewsnet-rfe', version := '2.0', mapsetcode := 'FEWSNET-Africa-8km', activated := false );
-SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'tamsat-rfe', version := '2.0', mapsetcode := 'TAMSAT-Africa-4km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'lsasaf-lst', version := 'undefined', mapsetcode := 'SPOTV-UoG-1km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'modis-par', version := 'v2012.0', mapsetcode := 'MODIS-UoG-4km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'modis-kd490', version := 'v2012.0', mapsetcode := 'MODIS-UoG-4km', activated := true );
 SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'lsasaf-et', version := 'undefined', mapsetcode := 'MSG-satellite-3km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'modis-firms', version := 'v5.0', mapsetcode := 'SPOTV-UoG-1km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'modis-chla', version := 'v2013.1', mapsetcode := 'MODIS-UoG-4km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'vgt-ndvi', version := 'sv2-pv2.2', mapsetcode := 'SPOTV-UoG-1km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'olci-wrr', version := 'V02.0', mapsetcode := 'SPOTV-UoG-1km', activated := true );
-SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'vgt-ndvi', version := 'proba-v2.2', mapsetcode := 'SPOTV-UoG-1km', activated := false );
-SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'slstr-sst', version := '1.0', mapsetcode := 'SPOTV-UoG-1km', activated := true );
+SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'vgt-ndvi', version := 'proba-v2.1', mapsetcode := 'SPOTV-UoG-1km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'vgt-ndvi', version := 'sv2-pv2.2', mapsetcode := 'SPOTV-UoG-1km', activated := false );
 SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'vgt-ndvi', version := 'spot-v1', mapsetcode := 'SPOTV-UoG-1km', activated := false );
-
+SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'vgt-ndvi', version := 'proba-v2.2', mapsetcode := 'SPOTV-UoG-1km', activated := false );
+SELECT products.update_insert_thema_product(thema_id := 'UOG', productcode := 'vgt-ndvi', version := 'spot-v2', mapsetcode := 'SPOTV-UoG-1km', activated := false );
 
 
 
@@ -1423,7 +1422,6 @@ SELECT products.update_insert_processing( process_id := 89, defined_by := 'JRC',
 SELECT products.update_insert_processing( process_id := 90, defined_by := 'JRC', output_mapsetcode := 'MODIS-MOI-4km', activated := false, derivation_method := 'modis_pp', algorithm := 'modis_pp', priority := '1', enabled := false, full_copy := false );
 SELECT products.update_insert_processing( process_id := 92, defined_by := 'JRC', output_mapsetcode := 'SPOTV-MOI-1km', activated := false, derivation_method := 'std_fronts', algorithm := 'std_fronts', priority := '1', enabled := false, full_copy := false );
 SELECT products.update_insert_processing( process_id := 38, defined_by := 'JRC', output_mapsetcode := 'SPOTV-Africa-1km', activated := false, derivation_method := 'std_modis_firms_all', algorithm := 'std_modis_firms', priority := '1', enabled := true, full_copy := false );
-SELECT products.update_insert_processing( process_id := 79, defined_by := 'JRC', output_mapsetcode := 'SPOTV-Africa-1km', activated := false, derivation_method := 'std_ba_prods_only', algorithm := 'std_ba', priority := '1', enabled := true, full_copy := false );
 SELECT products.update_insert_processing( process_id := 62, defined_by := 'JRC', output_mapsetcode := 'MODIS-Africa-4km', activated := true, derivation_method := 'modis_pp', algorithm := 'modis_pp', priority := '1', enabled := true, full_copy := false );
 SELECT products.update_insert_processing( process_id := 67, defined_by := 'JRC', output_mapsetcode := 'MODIS-UoG-4km', activated := false, derivation_method := 'modis_pp', algorithm := 'modis_pp', priority := '1', enabled := false, full_copy := false );
 SELECT products.update_insert_processing( process_id := 66, defined_by := 'JRC', output_mapsetcode := 'MODIS-UoG-4km', activated := false, derivation_method := 'modis_pp', algorithm := 'modis_pp', priority := '1', enabled := false, full_copy := false );
@@ -1491,6 +1489,7 @@ SELECT products.update_insert_processing( process_id := 51, defined_by := 'JRC',
 SELECT products.update_insert_processing( process_id := 112, defined_by := 'JRC', output_mapsetcode := 'SPOTV-UoG2-1km', activated := false, derivation_method := 'std_monavg', algorithm := 'std_monavg', priority := '1', enabled := false, full_copy := false );
 SELECT products.update_insert_processing( process_id := 113, defined_by := 'JRC', output_mapsetcode := 'SPOTV-UoG2-1km', activated := false, derivation_method := 'std_3dayavg', algorithm := 'std_3dayavg', priority := '1', enabled := false, full_copy := false );
 SELECT products.update_insert_processing( process_id := 114, defined_by := 'JRC', output_mapsetcode := 'SPOTV-UoG2-1km', activated := false, derivation_method := 'std_gradient', algorithm := 'std_gradient', priority := '1', enabled := false, full_copy := false );
+SELECT products.update_insert_processing( process_id := 79, defined_by := 'JRC', output_mapsetcode := 'SPOTV-Africa-1km', activated := false, derivation_method := 'std_ba_prods_only', algorithm := 'std_ba', priority := '1', enabled := false, full_copy := false );
 SELECT products.update_insert_processing( process_id := 24, defined_by := 'JRC', output_mapsetcode := 'MODIS-IOC-4km', activated := false, derivation_method := 'std_modis_monavg', algorithm := 'std_modis_monavg', priority := '1', enabled := false, full_copy := false );
 SELECT products.update_insert_processing( process_id := 25, defined_by := 'JRC', output_mapsetcode := 'MODIS-IOC-4km', activated := false, derivation_method := 'std_modis_monavg', algorithm := 'std_modis_monavg', priority := '1', enabled := false, full_copy := false );
 SELECT products.update_insert_processing( process_id := 26, defined_by := 'JRC', output_mapsetcode := 'MODIS-IOC-4km', activated := false, derivation_method := 'std_modis_monavg', algorithm := 'std_modis_monavg', priority := '1', enabled := false, full_copy := false );
@@ -10273,7 +10272,12 @@ FROM (VALUES
   ('vgt-ndvi','proba-v2.2'),
   ('vgt-ndvi','spot-v2.2'),
   ('vgt-ndvi','sv2-pv2.2'),
-  ('wd-gee', '1.0')
+  ('wd-gee', '1.0'),
+  ('olci-wrr', 'V02.0'),
+  ('slstr-sst', '1.0'),
+  ('aviso-wave', '1.0'),
+  ('aviso-wind', '1.0'),
+  ('vgt-dmp','V2.0')
   ) AS tmp (productcode,version)
 WHERE p.product_type = 'Native'
 AND tmp.productcode = p.productcode AND tmp.version = p.version;
@@ -10294,7 +10298,12 @@ FROM (VALUES
   ('vgt-ndvi','proba-v2.2'),
   ('vgt-ndvi','spot-v2.2'),
   ('vgt-ndvi','sv2-pv2.2'),
-  ('wd-gee', '1.0')
+  ('wd-gee', '1.0'),
+  ('olci-wrr', 'V02.0'),
+  ('slstr-sst', '1.0'),
+  ('aviso-wave', '1.0'),
+  ('aviso-wind', '1.0'),
+  ('vgt-dmp','V2.0')
   ) AS tmp (productcode,version)
 WHERE tmp.productcode = i.productcode AND tmp.version = i.version;
 
@@ -10313,7 +10322,12 @@ FROM (VALUES
   ('vgt-ndvi','proba-v2.2'),
   ('vgt-ndvi','spot-v2.2'),
   ('vgt-ndvi','sv2-pv2.2'),
-  ('wd-gee', '1.0')
+  ('wd-gee', '1.0'),
+  ('olci-wrr', 'V02.0'),
+  ('slstr-sst', '1.0'),
+  ('aviso-wave', '1.0'),
+  ('aviso-wind', '1.0'),
+  ('vgt-dmp','V2.0')
   ) AS tmp (productcode,version)
 WHERE tmp.productcode = pp.productcode AND tmp.version = pp.version;
 
@@ -10335,7 +10349,12 @@ WHERE (p.process_id) in (SELECT process_id
                           ('vgt-ndvi','proba-v2.2'),
                           ('vgt-ndvi','spot-v2.2'),
                           ('vgt-ndvi','sv2-pv2.2'),
-                          ('wd-gee', '1.0')
+                          ('wd-gee', '1.0'),
+                          ('olci-wrr', 'V02.0'),
+                          ('slstr-sst', '1.0'),
+                          ('aviso-wave', '1.0'),
+                          ('aviso-wind', '1.0'),
+                          ('vgt-dmp','V2.0')
                         ) AS tmp (productcode,version)
                          WHERE tmp.productcode = pp.productcode AND tmp.version = pp.version);
 
@@ -10354,7 +10373,12 @@ FROM (VALUES
   ('vgt-ndvi','proba-v2.2'),
   ('vgt-ndvi','spot-v2.2'),
   ('vgt-ndvi','sv2-pv2.2'),
-  ('wd-gee', '1.0')
+  ('wd-gee', '1.0'),
+  ('olci-wrr', 'V02.0'),
+  ('slstr-sst', '1.0'),
+  ('aviso-wave', '1.0'),
+  ('aviso-wind', '1.0'),
+  ('vgt-dmp','V2.0')
   ) AS tmp (productcode,version)
 WHERE tmp.productcode = pads.productcode AND tmp.version = pads.version;
 
@@ -10372,8 +10396,11 @@ SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('vg
 SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('vgt-ndvi','spot-v2.2', TRUE, FALSE);
 SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('vgt-ndvi','sv2-pv2.2', TRUE, FALSE);
 SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('wd-gee', '1.0', TRUE, FALSE);
-
-
+SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('olci-wrr', 'V02.0', TRUE, FALSE);
+SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('slstr-sst', '1.0', TRUE, FALSE);
+SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('aviso-wave', '1.0', TRUE, FALSE);
+SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('aviso-wind', '1.0', TRUE, FALSE);
+SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('vgt-dmp','V2.0', TRUE, FALSE);
 
 -- Disable the following list of products by deactivating them and
 -- put defined_by on JRC_test so that they will not appear in the GUI
