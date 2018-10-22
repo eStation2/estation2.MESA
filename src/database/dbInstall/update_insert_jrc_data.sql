@@ -10277,7 +10277,11 @@ FROM (VALUES
   ('slstr-sst', '1.0'),
   ('aviso-wave', '1.0'),
   ('aviso-wind', '1.0'),
-  ('vgt-dmp','V2.0')
+  ('vgt-dmp','V2.0'),
+  ('modis-kd490','v2012.0'),
+  ('modis-par','v2012.0'),
+  ('modis-pp','v2013.1'),
+  ('modis-sst','v2013.1')
   ) AS tmp (productcode,version)
 WHERE p.product_type = 'Native'
 AND tmp.productcode = p.productcode AND tmp.version = p.version;
@@ -10303,7 +10307,11 @@ FROM (VALUES
   ('slstr-sst', '1.0'),
   ('aviso-wave', '1.0'),
   ('aviso-wind', '1.0'),
-  ('vgt-dmp','V2.0')
+  ('vgt-dmp','V2.0'),
+  ('modis-kd490','v2012.0'),
+  ('modis-par','v2012.0'),
+  ('modis-pp','v2013.1'),
+  ('modis-sst','v2013.1')
   ) AS tmp (productcode,version)
 WHERE tmp.productcode = i.productcode AND tmp.version = i.version;
 
@@ -10327,7 +10335,11 @@ FROM (VALUES
   ('slstr-sst', '1.0'),
   ('aviso-wave', '1.0'),
   ('aviso-wind', '1.0'),
-  ('vgt-dmp','V2.0')
+  ('vgt-dmp','V2.0'),
+  ('modis-kd490','v2012.0'),
+  ('modis-par','v2012.0'),
+  ('modis-pp','v2013.1'),
+  ('modis-sst','v2013.1')
   ) AS tmp (productcode,version)
 WHERE tmp.productcode = pp.productcode AND tmp.version = pp.version;
 
@@ -10354,7 +10366,11 @@ WHERE (p.process_id) in (SELECT process_id
                           ('slstr-sst', '1.0'),
                           ('aviso-wave', '1.0'),
                           ('aviso-wind', '1.0'),
-                          ('vgt-dmp','V2.0')
+                          ('vgt-dmp','V2.0'),
+                          ('modis-kd490','v2012.0'),
+                          ('modis-par','v2012.0'),
+                          ('modis-pp','v2013.1'),
+                          ('modis-sst','v2013.1')
                         ) AS tmp (productcode,version)
                          WHERE tmp.productcode = pp.productcode AND tmp.version = pp.version);
 
@@ -10378,7 +10394,11 @@ FROM (VALUES
   ('slstr-sst', '1.0'),
   ('aviso-wave', '1.0'),
   ('aviso-wind', '1.0'),
-  ('vgt-dmp','V2.0')
+  ('vgt-dmp','V2.0'),
+  ('modis-kd490','v2012.0'),
+  ('modis-par','v2012.0'),
+  ('modis-pp','v2013.1'),
+  ('modis-sst','v2013.1')
   ) AS tmp (productcode,version)
 WHERE tmp.productcode = pads.productcode AND tmp.version = pads.version;
 
@@ -10401,6 +10421,11 @@ SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('sl
 SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('aviso-wave', '1.0', TRUE, FALSE);
 SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('aviso-wind', '1.0', TRUE, FALSE);
 SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('vgt-dmp','V2.0', TRUE, FALSE);
+SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('modis-kd490','v2012.0', TRUE, FALSE);
+SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('modis-par','v2012.0', TRUE, FALSE);
+SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('modis-pp','v2013.1', TRUE, FALSE);
+SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('modis-sst','v2013.1', TRUE, FALSE);
+
 
 -- Disable the following list of products by deactivating them and
 -- put defined_by on JRC_test so that they will not appear in the GUI
