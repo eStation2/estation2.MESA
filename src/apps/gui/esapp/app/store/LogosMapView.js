@@ -29,34 +29,13 @@ Ext.define('esapp.store.LogosMapView', {
         { src:'resources/img/logo/logo_en.gif', width:'20%', height:'50px' },
         { src:'resources/img/logo/logo_fr.gif', width:'20%', height:'50px' },
         { src:'resources/img/logo/GMES.png', width:'20%', height:'50px' },
-        { src:'resources/img/logo/ECOAGRIS.jpg', width:'20%', height:'50px' }
-        // { src:'resources/img/logo/TAFIRI_logo_H110.png', width:'20%', height:'50px' },
+        { src:'resources/img/logo/ECOAGRIS.jpg', width:'20%', height:'50px' },
+        { src:'resources/img/logo/TAFIRI_logo.png', width:'20%', height:'50px' },
+        { src:'resources/img/logo/CSIR.jpg', width:'20%', height:'50px' },
+        { src:'resources/img/logo/NARSS.png', width:'20%', height:'50px' }
+
         // { src:'resources/img/logo/IOTC-logo_110.PNG', width:'20%', height:'50px' },
         // { src:'resources/img/logo/DSFA-logo_90.png', width:'20%', height:'33px' },
         // { src:'resources/img/logo/MNRT_110.PNG', width:'20%', height:'50px' }
-
-
-
-        //
-        // { src:'resources/img/logo/MESA Logo big.jpg', width:'20%', height:'20%' },
-        // // { src:'resources/img/logo/MESA_logo.png', width:'20%', height:'20%' },
-        // { src:'resources/img/logo/AUC Logo.jpg', width:'20%', height:'20%' },
-        // { src:'resources/img/logo/ACP_logo.jpg', width:'20%', height:'20%' },
-        // { src:'resources/img/logo/ACMAD Logo.jpg', width:'20%', height:'20%' },
-        // { src:'resources/img/logo/AGRHYMET Logo.jpg', width:'20%', height:'20%' },
-        // { src:'resources/img/logo/CEMAC Logo.jpg', width:'20%', height:'20%' },
-        // { src:'resources/img/logo/CICOS Logo.jpg', width:'20%', height:'20%' },
-        // { src:'resources/img/logo/ECOWAS Logo.jpg', width:'20%', height:'20%' },
-        // { src:'resources/img/logo/ICPAC Logo.jpg', width:'20%', height:'20%' },
-        // { src:'resources/img/logo/IGAD Logo.jpg', width:'20%', height:'20%' },
-        // { src:'resources/img/logo/IOC logo2.jpg', width:'20%', height:'20%' },
-        // { src:'resources/img/logo/MOI Logo.jpg', width:'20%', height:'20%' },
-        // { src:'resources/img/logo/SADC Logo.jpg', width:'20%', height:'20%' },
-        // { src:'resources/img/logo/UoG Logo.jpg', width:'20%', height:'20%' },
-        // { src:'resources/img/logo/RCMRD_logo.jpg', width:'20%', height:'20%' },
-        // { src:'resources/img/logo/JRC Logo.jpg', width:'20%', height:'20%' },
-        // { src:'resources/img/logo/logo_en.gif', width:'20%', height:'20%' },
-        // { src:'resources/img/logo/logo_fr.gif', width:'20%', height:'20%' }
-        // // { src:'resources/img/logo/logo_es.gif', width:'20%', height:'20%' }
     ]
 });

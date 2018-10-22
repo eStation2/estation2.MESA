@@ -160,6 +160,14 @@ apache_config='/usr/local/src/tas/eStation_wsgi_srv/httpd.conf'
 sed -i "s|.*LimitRequestBody.*|LimitRequestBody 314572800|" ${apache_config}
 fi
 
+# Change settings of apache for pointing to apps/gui/esapp/build/production (2.1.2)
+if [[ ${is_an_upgrade} == 1 ]]; then
+echo "`date +'%Y-%m-%d %H:%M '` Change apache config file"
+apache_config='/usr/local/src/tas/eStation_wsgi_srv/httpd.conf'
+mv /usr/local/src/tas/eStation_wsgi_srv/httpd.conf /usr/local/src/tas/eStation_wsgi_srv/httpd_old.conf
+cp /var/www/eStation2/config/install/httpd.conf /usr/local/src/tas/eStation_wsgi_srv/
+fi
+
 # Stop Bucardo to prevent sync during DB update - see also ES2-112
 bucardo stop
 
@@ -301,6 +309,11 @@ sed -i "s|.*active_version.=.*|active_version = %{version}|" /eStation2/settings
 # thema=`grep -i thema /eStation2/settings/system_settings.ini | sed 's/thema =//'| sed 's/ //g'`
 # psql -U estation -d estationdb -c "select products.set_thema('$thema')"
 # echo "`date +'%Y-%m-%d %H:%M '` Set again the Thema to $thema"
+
+# Specific to upgrade from 2.1.2 -> set the activated THEMA in the table products.thema
+thema=`grep -i thema /eStation2/settings/system_settings.ini | sed 's/thema =//'| sed 's/ //g'`
+psql -U estation -d estationdb -c "UPDATE products.thema SET activated = TRUE WHERE thema_id = '$thema'"
+echo "`date +'%Y-%m-%d %H:%M '` Set the activated Thema to $thema in the table products.thema"
 
 # Run the patch to install Firefox 52.4.0
 # echo "`date +'%Y-%m-%d %H:%M '` Run Firefox Upgrader"

@@ -833,8 +833,490 @@ def getGraphTimeseries(params):
         return rankTimeseries(params)
     if params['graphtype'] == 'matrix':
         return matrixTimeseries(params)
+    # if params['graphtype'] == 'scatter':
+    #     return scatterTimeseries(params)
     else:
         return classicTimeseries(params)
+
+
+# def plot_1o1(data_1, data_2, x_label=None, y_label=None, figure_title=None):
+#     from scipy import stats  # , interpolate
+#
+#     """
+#     :param data_1:              -> np.array dataset 1
+#     :param data_2:              -> np.array dataset 2
+#     :param x_label:             -> STRING; label for x-axis (typically: Name of dataset-1)
+#     :param y_label:             -> STRING; label for y-axis (typically: Name of dataset-2)
+#     :param figure_title:        -> STRING; title to be printed on the canvas
+#     """
+#     '''
+#     ************************************************************
+#     # Replace no data to nan
+#     ************************************************************
+#     '''
+#
+#     if NP.shape(data_1) != NP.shape(data_2):
+#         raise Exception('Dataset must have te same dimensions')
+#
+#     '''
+#     ************************************************************
+#     # Check the labels (if assigned)
+#     ************************************************************
+#     '''
+#     if x_label is None:
+#         x_label = 'dataset(1)'
+#
+#     if y_label is None:
+#         y_label = 'dataset(2)'
+#
+#     if figure_title is None:
+#         figure_title = 'Density Scatter Plot'
+#
+#     '''
+#     ***************  SPATIAL CONSISTENCY! **********************
+#     '''
+#     sz = data_1.shape
+#     if len(sz) == 2:
+#         n_plots = 1
+#         data_1 = [data_1]
+#         data_2 = [data_2]
+#         figure_title = [figure_title]
+#     else:
+#         n_plots = sz[0]
+#
+#     for sp in range(n_plots):
+#         d1 = data_1[sp]
+#         d2 = data_2[sp]
+#         # max_v = 900
+#         max_v = NP.ceil(min(NP.nanmax(d1), NP.nanmax(d2)))
+#         min_v = NP.round(min(NP.nanmin(d1), NP.nanmin(d2)))
+#         # min_v = -100
+#
+#         mask = d1 + d2
+#         x_line = d1[~NP.isnan(mask)]
+#         y_line = d2[~NP.isnan(mask)]
+#         xx = NP.linspace(min_v, max_v, 10)
+#         slope, intercept, r_value, p_value, std_err = stats.linregress(x_line, y_line)
+#
+#         slp = NP.full_like(xx, fill_value=slope)
+#         itc = NP.full_like(xx, fill_value=intercept)
+#
+#         line = slp * xx + itc
+#
+#         rmsd = NP.sqrt(NP.nansum(NP.square(NP.array(data_1).flatten() - NP.array(data_2).flatten())) /
+#                        NP.count_nonzero(~NP.isnan((NP.array(data_1) - NP.array(data_2)))))
+#
+#         h, x_edges, y_edges = NP.histogram2d(x_line, y_line, bins=150)
+#         h = NP.rot90(h)
+#         h = NP.flipud(h)
+#
+#         h_mask = NP.ma.masked_where(h < 1, h)  # Mask pixels with a value of zero
+#         # Log
+#         h_mask = NP.log10(h_mask)
+#
+#         txt_1 = 'Slope=' + str("{:.3f}".format(slope)) + '\n'
+#         txt_2 = 'Intercept=' + str("{:.3f}".format(intercept)) + '\n'
+#         txt_3 = 'R$^{2 }$=' + str("{:.3f}".format(r_value ** 2)) + '\n'
+#         txt_4 = 'RMSD=' + str("{:.3f}".format(rmsd))
+#         lbl = txt_1 + txt_2 + txt_3 + txt_4
+#
+#         # color_map = cm.get_cmap('jet')
+#         plt.figure(figsize=(7, 6), facecolor='w', edgecolor='k')
+#         plt.grid()
+#
+#         color_map = plt.cm.get_cmap('jet')
+#
+#         plt.pcolormesh(x_edges, y_edges, h_mask, cmap=color_map)
+#
+#         cb = plt.colorbar(aspect=30)  # , ticks=cb_ticks)
+#         cb.ax.set_ylabel('log$_{10}$(N)', fontsize=12)
+#         plt.plot(xx, xx, color=[0, 0, 0], ls='-', lw=2, label=None)
+#         plt.plot(xx, line, color=[1, 0, 1], ls='-', lw=3, label=lbl)
+#         plt.xlim([min_v, max_v])
+#         plt.ylim([min_v, max_v])
+#         cb.ax.tick_params(labelsize=12)
+#         plt.xticks(fontsize=12)
+#         plt.yticks(fontsize=12)
+#         plt.minorticks_on()
+#         plt.xlabel(x_label, fontsize=12)
+#         plt.ylabel(y_label, fontsize=12)
+#         plt.title(figure_title[sp] + '\n', fontsize=14, fontweight='bold')
+#         plt.legend(loc=2, fontsize=10, numpoints=1, shadow=True)
+#         plt.grid()
+#         plt.tight_layout()
+#
+#         plt.savefig("/data/processing/scatter_test/test.png")
+#
+#         plt.show()
+#
+#
+# def clipOverWKT(productcode, subproductcode, version, mapsetcode, wkt, file):
+#     from greenwich import Raster, Geometry
+#     try:
+#         from osgeo import gdal
+#         from osgeo import gdal_array
+#         from osgeo import ogr, osr
+#         from osgeo import gdalconst
+#     except ImportError:
+#         import gdal
+#         import gdal_array
+#         import ogr
+#         import osr
+#         import gdalconst
+#
+#     #    Extract timeseries from a list of files and return as JSON object
+#     #    It applies to a single dataset (prod/sprod/version/mapset) and between 2 dates
+#     #    Several types of aggregation foreseen:
+#     #
+#     #       mean :      Sum(Xi)/N(Xi)        -> min/max not considered          e.g. Rain
+#     #       cumulate:   Sum(Xi)              -> min/max not considered          e.g. Fire
+#     #
+#     #       count:      N(Xi where min < Xi < max)                              e.g. Vegetation anomalies
+#     #       surface:    count * PixelArea                                       e.g. Water Bodies
+#     #       percent:    count/Ntot                                              e.g. Vegetation anomalies
+#     #
+#     #   History: 1.0 :  Initial release - since 2.0.1 -> now renamed '_green' from greenwich package
+#     #            1.1 :  Since Feb. 2017, it is based on a different approach (gdal.RasterizeLayer instead of greenwich)
+#     #                   in order to solve the issue with MULTIPOLYGON
+#     #
+#
+#     # Convert the wkt into a geometry
+#     ogr.UseExceptions()
+#     theGeomWkt = ' '.join(wkt.strip().split())
+#     geom = Geometry(wkt=str(theGeomWkt), srs=4326)
+#
+#     # Get Mapset Info
+#     mapset_info = querydb.get_mapset(mapsetcode=mapsetcode)
+#
+#     # Prepare for computing conversion to area: the pixel size at Lat=0 is computed
+#     # The correction to the actual latitude (on AVERAGE value - will be computed below)
+#     const_d2km = 12364.35
+#     area_km_equator =  abs(mapset_info.pixel_shift_lat) * abs(mapset_info.pixel_shift_long) *const_d2km
+#
+#     # Get Product Info
+#     product_info = querydb.get_product_out_info(productcode=productcode,
+#                                                 subproductcode=subproductcode,
+#                                                 version=version)
+#     if product_info.__len__() > 0:
+#         # Get info from product_info
+#         scale_factor = 0
+#         scale_offset = 0
+#         nodata = 0
+#         date_format = ''
+#         for row in product_info:
+#             scale_factor = row.scale_factor
+#             scale_offset = row.scale_offset
+#             nodata = row.nodata
+#             date_format = row.date_format
+#             date_type = row.data_type_id
+#
+#         # Create an output/temp shapefile, for managing the output layer (really mandatory ?? Can be simplified ???)
+#         try:
+#             tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_getTimeseries',
+#                                       dir=es_constants.base_tmp_dir)
+#         except:
+#             logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
+#             raise NameError('Error in creating tmpdir')
+#
+#         out_shape = tmpdir+os.path.sep+"output_shape.shp"
+#         outDriver = ogr.GetDriverByName('ESRI Shapefile')
+#
+#         # Create the output shapefile
+#         outDataSource = outDriver.CreateDataSource(out_shape)
+#         dest_srs = ogr.osr.SpatialReference()
+#         dest_srs.ImportFromEPSG(4326)
+#
+#         outLayer = outDataSource.CreateLayer("Layer", dest_srs)
+#         # outLayer = outDataSource.CreateLayer("Layer")
+#         idField = ogr.FieldDefn("id", ogr.OFTInteger)
+#         outLayer.CreateField(idField)
+#
+#         featureDefn = outLayer.GetLayerDefn()
+#         feature = ogr.Feature(featureDefn)
+#         feature.SetGeometry(geom)
+#         feature.SetField("id", 1)
+#         outLayer.CreateFeature(feature)
+#         feature = None
+#
+#         [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, start_date, end_date)
+#
+#         # Built a dictionary with filenames/dates
+#         dates_to_files_dict = dict(zip(dates_list, list_files))
+#
+#         # Generate unique list of files
+#         unique_list = set(list_files)
+#         uniqueFilesValues = []
+#
+#         geo_mask_created = False
+#         for infile in unique_list:
+#             single_result = {'filename': '', 'meanvalue_noscaling': nodata, 'meanvalue': None}
+#
+#             if infile.strip() != '' and os.path.isfile(infile):
+#                 # try:
+#
+#                     # Open input file
+#                     orig_ds = gdal.Open(infile, gdal.GA_ReadOnly)
+#                     orig_cs = osr.SpatialReference()
+#                     orig_cs.ImportFromWkt(orig_ds.GetProjectionRef())
+#                     orig_geoT = orig_ds.GetGeoTransform()
+#                     x_origin = orig_geoT[0]
+#                     y_origin = orig_geoT[3]
+#                     pixel_size_x = orig_geoT[1]
+#                     pixel_size_y = -orig_geoT[5]
+#
+#                     in_data_type_gdal = conv_data_type_to_gdal(date_type)
+#
+#                     # Create a mask from the geometry, with the same georef as the input file[s]
+#                     if not geo_mask_created:
+#
+#                         # Read polygon extent and round to raster resolution
+#                         x_min, x_max, y_min, y_max = outLayer.GetExtent()
+#                         x_min_round = int((x_min-x_origin)/pixel_size_x)*pixel_size_x+x_origin
+#                         x_max_round = (int((x_max-x_origin)/(pixel_size_x))+1)*pixel_size_x+x_origin
+#                         y_min_round = (int((y_min-y_origin)/(pixel_size_y))-1)*pixel_size_y+y_origin
+#                         y_max_round = int((y_max-y_origin)/(pixel_size_y))*pixel_size_y+y_origin
+#                     #
+#                     #     # Create the destination data source
+#                         x_res = int(round((x_max_round - x_min_round) / pixel_size_x))
+#                         y_res = int(round((y_max_round - y_min_round) / pixel_size_y))
+#                     #
+#                     #     # Create mask in memory
+#                         mem_driver = gdal.GetDriverByName('MEM')
+#                         mem_ds = mem_driver.Create('', x_res, y_res, 1, in_data_type_gdal)
+#                         mask_geoT = [x_min_round, pixel_size_x, 0, y_max_round, 0, -pixel_size_y]
+#                         mem_ds.SetGeoTransform(mask_geoT)
+#                         mem_ds.SetProjection(orig_cs.ExportToWkt())
+#                     #
+#                     #     # Create a Layer with '1' for the pixels to be selected
+#                         gdal.RasterizeLayer(mem_ds, [1], outLayer, burn_values=[1])
+#                         # gdal.RasterizeLayer(mem_ds, [1], outLayer, None, None, [1])
+#
+#                         # Read the polygon-mask
+#                         band = mem_ds.GetRasterBand(1)
+#                         geo_values = mem_ds.ReadAsArray()
+#
+#                         # Create a mask from geo_values (mask-out the '0's)
+#                         geo_mask = ma.make_mask(geo_values == 0)
+#                         geo_mask_created = True
+#                     #
+#                     #     # Clean/Close objects
+#                         mem_ds = None
+#                         mem_driver = None
+#                         outDriver = None
+#                         outLayer = None
+#
+#                     # Read data from input file
+#                     x_offset = int((x_min-x_origin)/pixel_size_x)
+#                     y_offset = int((y_origin-y_max)/pixel_size_y)
+#
+#                     band_in = orig_ds.GetRasterBand(1)
+#                     data = band_in.ReadAsArray(x_offset, y_offset, x_res, y_res)
+#                     #   Catch the Error ES2-105 (polygon not included in Mapset)
+#                     if data is None:
+#                         logger.error('ERROR: polygon extends out of file mapset for file: %s' % infile)
+#                         return []
+#
+#                     # Create a masked array from the data (considering Nodata)
+#                     masked_data = ma.masked_equal(data, nodata)
+#
+#                     # Apply on top of it the geo mask
+#                     mxnodata = ma.masked_where(geo_mask, masked_data)
+#                     # mxnodata = masked_data  # TEMP !!!!
+#
+#                     # Test ONLY
+#                     # write_ds_to_geotiff(mem_ds, '/data/processing/exchange/Tests/mem_ds.tif')
+#
+#                     if aggregate['aggregation_type'] == 'count' or aggregate['aggregation_type'] == 'percent' or aggregate['aggregation_type'] == 'surface':
+#
+#                         if mxnodata.count() == 0:
+#                             meanResult = None
+#                         else:
+#                             mxrange = mxnodata
+#                             min_val = aggregate['aggregation_min']
+#                             max_val = aggregate['aggregation_max']
+#
+#                             if min_val is not None:
+#                                 min_val_scaled = (min_val - scale_offset) / scale_factor
+#                                 mxrange = ma.masked_less(mxnodata, min_val_scaled)
+#
+#                                 # See ES2-271
+#                                 if max_val is not None:
+#                                     # Scale threshold from physical to digital value
+#                                     max_val_scaled = (max_val - scale_offset) / scale_factor
+#                                     mxrange = ma.masked_greater(mxrange, max_val_scaled)
+#
+#                             elif max_val is not None:
+#                                 # Scale threshold from physical to digital value
+#                                 max_val_scaled = (max_val - scale_offset) / scale_factor
+#                                 mxrange = ma.masked_greater(mxnodata, max_val_scaled)
+#
+#                             if aggregate['aggregation_type'] == 'percent':
+#                                 # 'percent'
+#                                 meanResult = float(mxrange.count())/float(mxnodata.count()) * 100
+#
+#                             elif aggregate['aggregation_type'] == 'surface':
+#                                 # 'surface'
+#                                 # Estimate 'average' Latitude
+#                                 y_avg = (y_min + y_max)/2.0
+#                                 pixelAvgArea = area_km_equator * math.cos(y_avg / 180 * math.pi)
+#                                 meanResult = float(mxrange.count()) * pixelAvgArea
+#                             else:
+#                                 # 'count'
+#                                 meanResult = float(mxrange.count())
+#
+#                         # Both results are equal
+#                         finalvalue = meanResult
+#
+#                     else:   # if aggregate['type'] == 'mean' or if aggregate['type'] == 'cumulate':
+#                         if mxnodata.count() == 0:
+#                             finalvalue = None
+#                             meanResult = None
+#                         else:
+#                             if aggregate['aggregation_type'] == 'mean':
+#                                 # 'mean'
+#                                 meanResult = mxnodata.mean()
+#                             else:
+#                                 # 'cumulate'
+#                                 meanResult = mxnodata.sum()
+#
+#                             finalvalue = (meanResult*scale_factor+scale_offset)
+#
+#                     # Assign results
+#                     single_result['filename'] = infile
+#                     single_result['meanvalue_noscaling'] = meanResult
+#                     single_result['meanvalue'] = finalvalue
+#
+#             else:
+#                 logger.debug('ERROR: raster file does not exist - %s' % infile)
+#
+#             uniqueFilesValues.append(single_result)
+#
+#         # Define a dictionary to associate filenames/values
+#         files_to_values_dict = dict((x['filename'], x['meanvalue']) for x in uniqueFilesValues)
+#
+#         # Prepare array for result
+#         resultDatesValues = []
+#
+#         # Returns a list of 'filenames', 'dates', 'values'
+#         for mydate in dates_list:
+#
+#             my_result = {'date': datetime.date.today(), 'meanvalue':nodata}
+#
+#             # Assign the date
+#             my_result['date'] = mydate
+#             # Assign the filename
+#             my_filename = dates_to_files_dict[mydate]
+#
+#             # Map from array of Values
+#             my_result['meanvalue'] = files_to_values_dict[my_filename]
+#
+#             # Map from array of dates
+#             resultDatesValues.append(my_result)
+#
+#         try:
+#             shutil.rmtree(tmpdir)
+#         except:
+#             logger.debug('ERROR: Error in deleting tmpdir. Exit')
+#
+#         # Return result
+#         return resultDatesValues
+#     else:
+#         logger.debug('ERROR: product not registered in the products table! - %s %s %s' % (productcode, subproductcode, version))
+#         return []
+#
+#
+# def scatterTimeseries(params):
+#     from osgeo import gdal
+#
+#     date1 = params['tsFromPeriod']
+#     date2 = params['tsToPeriod']
+#
+#     wkt = params['WKT']
+#     requestedtimeseries = json.loads(params['selectedTimeseries'])
+#
+#     userid = params['userid']
+#     istemplate = params['istemplate']
+#     graphtype = params['graphtype']
+#     graph_tpl_id = params['graph_tpl_id']
+#     graph_tpl_name = params['graph_tpl_name']
+#
+#     timeseries = []
+#     for timeserie in requestedtimeseries:
+#         productcode = timeserie['productcode']
+#         subproductcode = timeserie['subproductcode']
+#         version = timeserie['version']
+#         mapsetcode = timeserie['mapsetcode']
+#         date_format = timeserie['date_format']
+#         frequency_id = timeserie['frequency_id']
+#
+#         product = {"productcode": productcode,
+#                    "subproductcode": subproductcode,
+#                    "version": version}
+#
+#         nodata = None
+#         subproductinfo = querydb.get_subproduct(productcode, version, subproductcode)
+#         if subproductinfo != []:
+#             subproductinfo_rec = functions.row2dict(subproductinfo)
+#             nodata = subproductinfo_rec['nodata']
+#
+#         p = Product(product_code=productcode, version=version)
+#         dataset = p.get_dataset(mapset=mapsetcode, sub_product_code=subproductcode)
+#         # print dataset.fullpath
+#
+#         # Check the case of daily product, with time/minutes
+#         frequency_id = dataset._db_product.frequency_id
+#         date_format = dataset._db_product.date_format
+#
+#         filedate = date1
+#         if dataset.no_year():
+#             filedate = dataset.strip_year(filedate)
+#
+#         if frequency_id == 'e1day' and date_format == 'YYYYMMDD':
+#             regex = dataset.fullpath + filedate+'*'+'.tif'
+#             filename = glob.glob(regex)
+#             productfile_date1 = filename[0]
+#         else:
+#             filename = functions.set_path_filename(filedate,
+#                                                    productcode,
+#                                                    subproductcode,
+#                                                    mapsetcode,
+#                                                    version,
+#                                                    '.tif')
+#             productfile_date1 = dataset.fullpath + filename
+#
+#         filedate = date2
+#         if dataset.no_year():
+#             filedate = dataset.strip_year(filedate)
+#
+#         if frequency_id == 'e1day' and date_format == 'YYYYMMDD':
+#             regex = dataset.fullpath + filedate+'*'+'.tif'
+#             filename = glob.glob(regex)
+#             productfile_date2 = filename[0]
+#         else:
+#             filename = functions.set_path_filename(filedate,
+#                                                    productcode,
+#                                                    subproductcode,
+#                                                    mapsetcode,
+#                                                    version,
+#                                                    '.tif')
+#             productfile_date2 = dataset.fullpath + filename
+#
+#
+#         ds_1 = gdal.Open(productfile_date1)
+#         data_1 = NP.array(ds_1.GetRasterBand(1).ReadAsArray())
+#
+#         ds_2 = gdal.Open(productfile_date2)
+#         data_2 = NP.array(ds_2.GetRasterBand(1).ReadAsArray())
+#
+#         data_1 = data_1.astype('float')
+#         data_2 = data_2.astype('float')
+#         #
+#         data_1[data_1 == nodata] = NP.nan
+#         data_2[data_2 == nodata] = NP.nan
+#
+#         plot_1o1(data_1, data_2, date1, date2, filename)
+#
+#     return timeseries
 
 
 def matrixTimeseries(params):

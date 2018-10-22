@@ -32,10 +32,9 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
     collapsed: false,
     resizable: false,
     floating: true,
-    // floatable: true,
     alwaysOnTop: false,
     shrinkWrap: 3, // both width and height depend on content (shrink wrap).
-    width:455,
+    width:420,
     // maxWidth:500,
     // autoWidth: true,
     // autoHeight: true,
@@ -75,21 +74,21 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
             },
             show: function(){
                 me.hidden = false;
-                // me.fireEvent('align');
+                me.fireEvent('align');
                 me.height = Ext.getCmp(me.workspace.id).body.getHeight()-3;
                 me.updateLayout();
                 me.expand();
+            },
+            align: function() {
+                var task = new Ext.util.DelayedTask(function() {
+                    me.alignTo(Ext.getCmp(me.workspace.id).body, 'tr-tr');
+                    me.height = Ext.getCmp(me.workspace.id).body.getHeight()-3;
+                    me.updateLayout();
+                });
+                if (!me.hidden) {
+                    task.delay(50);
+                }
             }
-            // align: function() {
-            //     var task = new Ext.util.DelayedTask(function() {
-            //         me.alignTo(Ext.getCmp(me.workspace.id).body, 'tr-tr');
-            //         me.height = Ext.getCmp(me.workspace.id).body.getHeight()-3;
-            //         me.updateLayout();
-            //     });
-            //     if (!me.hidden) {
-            //         task.delay(50);
-            //     }
-            // }
         };
 
         me.title = esapp.Utils.getTranslation('TIME_SERIES_GRAPHS');  // 'TIME SERIES GRAPHS',
@@ -280,6 +279,34 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                     // compareyears: false,
                     multipleyears: true
                 }]
+            // }, {
+            //     title: esapp.Utils.getTranslation('SCATTER'),  // 'CUMULATIVE',
+            //     // id: 'ts_cumulative_graph_tab_' + me.id,
+            //     tbar: {
+            //         padding: '0 0 0 0',
+            //         items: [{
+            //             xtype: 'button',
+            //             text: esapp.Utils.getTranslation('gettimeseries'),    // 'Get timeseries',
+            //             reference: 'gettimeseries_btn_scatter',
+            //             iconCls: 'chart-curve_medium',
+            //             scale: 'medium',
+            //             disabled: false,
+            //             autoWidth: true,
+            //             margin: '0 0 5 0',
+            //             graphtype: 'scatter',
+            //             handler: 'generateTimeseriesChart'
+            //         }]
+            //     },
+            //     items: [{
+            //         xtype: 'timeseriesproductselection',
+            //         graphtype: 'scatter',
+            //         cumulative: false,
+            //         multiplevariables: true,
+            //         fromto: true,
+            //         year: false,
+            //         // compareyears: false,
+            //         multipleyears: false
+            //     }]
             }, {
                 title: 'Debug info',
                 // id: 'debug_info_tab_' + me.id,
@@ -292,27 +319,6 @@ Ext.define("esapp.view.analysis.timeseriesChartSelection",{
                     labelAlign: 'top',
                     value: '<span style="color:green;">value</span>'
                 }, {
-                //     xtype: 'displayfield',
-                //     // id: 'admin0name',
-                //     reference: 'admin0name',
-                //     fieldLabel: 'Admin level 0 country name',
-                //     labelAlign: 'top',
-                //     value: '<span style="color:green;">value</span>'
-                // }, {
-                //     xtype: 'displayfield',
-                //     // id: 'admin1name',
-                //     reference: 'admin1name',
-                //     fieldLabel: 'Admin level 1 region name',
-                //     labelAlign: 'top',
-                //     value: '<span style="color:green;">value</span>'
-                // }, {
-                //     xtype: 'displayfield',
-                //     // id: 'admin2name',
-                //     reference: 'admin2name',
-                //     fieldLabel: 'Admin level 2 region name',
-                //     labelAlign: 'top',
-                //     value: '<span style="color:green;">value</span>'
-                // }, {
                     title: 'WKT of Polygon',
                     xtype: 'displayfield',
                     // id: 'wkt_polygon_'+ me.workspace.id,

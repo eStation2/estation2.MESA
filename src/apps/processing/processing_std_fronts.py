@@ -62,6 +62,16 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   1. Define and customize parameters
     #   ---------------------------------------------------------------------
 
+    # Parameters concluded during the Marine Workshop Oct 2018
+    parameters = {'histogramWindowStride': 8,   # smaller window detects more fronts
+                  'histogramWindowSize': 32,
+                  'minTheta': 0.76,
+                  #'minPopProp': 0.25,
+                  'minPopMeanDifference': 25,  # Temperature: 0.45 deg (multiply by 100 !!)
+                  'minSinglePopCohesion': 0.60,
+                  'minImageValue': 1,
+                  'minThreshold': 1}
+
     # Default values are from the routine are used if None is passed
     parameters = {'histogramWindowStride': 16,
                   'histogramWindowSize': 32,
@@ -73,14 +83,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
                   'minThreshold': 1}
 
     if prod == 'modis-sst':
-        parameters = {  'histogramWindowStride': None,
-                        'minTheta' : None,
-                        'minPopProp' : None,
-                        'minPopMeanDifference' : None,
-                        'minSinglePopCohesion' : None,
-                        'histogramWindowSize' : None,
-                        'minImageValue' : None,
-                        'minThreshold' : None }
+        parameters = {'histogramWindowStride': 8,  # smaller window detects more fronts
+                      'histogramWindowSize': 32,
+                      'minTheta': 0.76,
+                      # 'minPopProp': 0.25,
+                      'minPopMeanDifference': 25,  # Temperature: 0.45 deg (multiply by 100 !!)
+                      'minSinglePopCohesion': 0.60,
+                      'minImageValue': 1,
+                      'minThreshold': 1}
 
     if prod == 'pml-modis-sst':
         parameters = {  'histogramWindowSize' : 32,
@@ -91,6 +101,16 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
                         'minSinglePopCohesion' : 0.60,
                         'minImageValue' : 1,
                         'minThreshold' : 1 }
+
+    if prod == 'slstr-sst':
+        parameters = {'histogramWindowStride': 8,  # smaller window detects more fronts
+                      'histogramWindowSize': 32,
+                      'minTheta': 0.76,
+                      # 'minPopProp': 0.25,
+                      'minPopMeanDifference': 25,  # Temperature: 0.45 deg (multiply by 100 !!)
+                      'minSinglePopCohesion': 0.60,
+                      'minImageValue': 1,
+                      'minThreshold': 1}
 
     #   ---------------------------------------------------------------------
     #   SST Fronts (raster)

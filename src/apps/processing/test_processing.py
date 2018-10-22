@@ -644,7 +644,7 @@ def test_proc_ba(start_date=None, end_date=None, pipe_run=0, pipe_print=3, start
 #   ---------------------------------------------------------------------
 #    chla gradient
 #   ---------------------------------------------------------------------
-from apps.processing.processing_std_chla_gradient import *
+from apps.processing.processing_std_gradient import *
 def test_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=False):
 
     # args = {'pipeline_run_level':pipe_run, \
@@ -669,7 +669,7 @@ def test_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=
             }
     res_queue = None
 
-    processing_std_chla_gradient(res_queue, **args)
+    processing_std_gradient(res_queue, **args)
 
 
 #test_proc_olci_wrr_chla_gradient(pipe_run=3, pipe_print=0, touch_files_only=False)

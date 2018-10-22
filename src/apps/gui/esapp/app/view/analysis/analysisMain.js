@@ -102,6 +102,18 @@ Ext.define("esapp.view.analysis.analysisMain",{
                     }]
                 }]);
 
+                // When the browser window is resized
+                Ext.on('resize', function() {
+                    // console.log('browser window resized');
+                    var tschartselectionpanels = Ext.ComponentQuery.query('timeserieschartselection');
+                    // console.info(tschartselectionpanels);
+
+                    Ext.Object.each(tschartselectionpanels, function(id, tschartselectionpanel, thisObj) {
+                        tschartselectionpanel.fireEvent('align');
+                    });
+
+                });
+
                 // if (this.items.length == 1) {
                 //     this.getTabBar().hide();
                 // }

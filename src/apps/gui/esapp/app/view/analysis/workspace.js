@@ -4,9 +4,9 @@ Ext.define("esapp.view.analysis.workspace",{
  
     requires: [
         "esapp.view.analysis.workspaceController",
-        "esapp.view.analysis.workspaceModel",
+        "esapp.view.analysis.workspaceModel"
 
-        'esapp.view.analysis.timeseriesChartSelection'
+        // 'esapp.view.analysis.timeseriesChartSelection'
     ],
     
     controller: "analysis-workspace",
@@ -26,8 +26,8 @@ Ext.define("esapp.view.analysis.workspace",{
     frame: false,
     border: false,
     bodyPadding: '1 0 0 0',
-    // autoScroll: true,
-    // scrollable: 'vertical',
+    autoScroll: true,
+    scrollable: 'vertical',
     closeAction: 'destroy',
     plugins: ['tabtitleedit'],
 
@@ -309,13 +309,26 @@ Ext.define("esapp.view.analysis.workspace",{
             xtype: 'container',
             id: 'backgroundmap_'+me.id,
             reference: 'backgroundmap_'+me.id,
-            autoScroll:true,
+            autoScroll: true,
+            scrollable: 'vertical',
             closable: false,
+            autoWidth: true,
+            height: 2000,
+            // flex: 1,
             layout: {
                 type: 'fit'
             }
             // style: { "background-color": 'white' },
             // html : '<div id="backgroundmap_' + me.id + '" style="width: 100%; height: 100%;"></div>'
+        // }, {
+        //     // region: 'center',
+        //     xtype: 'container',
+        //     id: 'wsscrollarea_'+me.id,
+        //     reference: 'wsscrollarea_'+me.id,
+        //     flex: 1,
+        //     layout: {
+        //         type: 'fit'
+        //     }
         }];
 
         me.commonMapView = new ol.View({
@@ -365,8 +378,8 @@ Ext.define("esapp.view.analysis.workspace",{
                       units: 'metric'       // 'degrees'  'nautical mile'
                     });
 
-                    var timeseriesChartSelectionWindow = me.lookupReference('timeserieschartselection'+me.id);
-                    timeseriesChartSelectionWindow.hide();
+                    // var timeseriesChartSelectionWindow = me.lookupReference('timeserieschartselection'+me.id);
+                    // timeseriesChartSelectionWindow.hide();
 
                     var task = new Ext.util.DelayedTask(function() {
                         if (me.maps.length > 0) {
@@ -486,8 +499,8 @@ Ext.define("esapp.view.analysis.workspace",{
                     me.map.setSize(size);
                 }
                 // console.info('analysis tab resized!');
-                var timeseriesChartSelectionWindow = this.lookupReference('timeserieschartselection'+me.id);
-                timeseriesChartSelectionWindow.fireEvent('align');
+                // var timeseriesChartSelectionWindow = this.lookupReference('timeserieschartselection'+me.id);
+                // timeseriesChartSelectionWindow.fireEvent('align');
             },
             close: function(){
                 // console.info('closing and destroying workspace');
