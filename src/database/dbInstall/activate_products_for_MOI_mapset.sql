@@ -27,26 +27,26 @@ UPDATE products.ingestion i
 SET activated = TRUE,
 enabled = TRUE
 WHERE (i.productcode, i.version, i.mapsetcode) in (
-	('modis-par', 'v2012.0', 'MODIS-MOI-4km'),
-	('modis-kd490', 'v2012.0', 'MODIS-MOI-4km'),
-	('pml-modis-chl', '3.0', 'SPOTV-MOI-1km'),
-	('modis-sst', 'v2013.1', 'MODIS-MOI-4km'),
-	('modis-chla', 'v2013.1', 'MODIS-MOI-4km'),
-	('pml-modis-sst', '3.0', 'SPOTV-MOI-1km'),
-	('olci-wrr', 'V02.0', 'SPOTV-MOI-1km'),
-	('slstr-sst', '1.0', 'SPOTV-MOI-1km'));
+	('modis-par', 'v2012.0', 'MODIS-IOC2-4km'),
+	('modis-kd490', 'v2012.0', 'MODIS-IOC2-4km'),
+	('pml-modis-chl', '3.0', 'SPOTV-IOC2-1km'),
+	('modis-sst', 'v2013.1', 'MODIS-IOC2-4km'),
+	('modis-chla', 'v2013.1', 'MODIS-IOC2-4km'),
+	('pml-modis-sst', '3.0', 'SPOTV-IOC2-1km'),
+	('olci-wrr', 'V02.0', 'SPOTV-IOC2-1km'),
+	('slstr-sst', '1.0', 'SPOTV-IOC2-1km'));
 
 UPDATE products.process_product pp
 SET activated = TRUE
 WHERE (pp.productcode, pp.version, pp.mapsetcode) in (
-	('modis-par', 'v2012.0', 'MODIS-MOI-4km'),
-	('modis-kd490', 'v2012.0', 'MODIS-MOI-4km'),
-	('pml-modis-chl', '3.0', 'SPOTV-MOI-1km'),
-	('modis-sst', 'v2013.1', 'MODIS-MOI-4km'),
-	('modis-chla', 'v2013.1', 'MODIS-MOI-4km'),
-	('pml-modis-sst', '3.0', 'SPOTV-MOI-1km'),
-	('olci-wrr', 'V02.0', 'SPOTV-MOI-1km'),
-	('slstr-sst', '1.0', 'SPOTV-MOI-1km'));
+	('modis-par', 'v2012.0', 'MODIS-IOC2-4km'),
+	('modis-kd490', 'v2012.0', 'MODIS-IOC2-4km'),
+	('pml-modis-chl', '3.0', 'SPOTV-IOC2-1km'),
+	('modis-sst', 'v2013.1', 'MODIS-IOC2-4km'),
+	('modis-chla', 'v2013.1', 'MODIS-IOC2-4km'),
+	('pml-modis-sst', '3.0', 'SPOTV-IOC2-1km'),
+	('olci-wrr', 'V02.0', 'SPOTV-IOC2-1km'),
+	('slstr-sst', '1.0', 'SPOTV-IOC2-1km'));
 
 UPDATE products.processing p
 SET activated = TRUE,
@@ -55,14 +55,14 @@ WHERE (p.process_id) in (SELECT process_id
 			 FROM products.process_product pp
 			 WHERE pp.type = 'INPUT'
 			 AND (pp.productcode, pp.version, pp.mapsetcode) in (
-				('modis-par', 'v2012.0', 'MODIS-MOI-4km'),
-				('modis-kd490', 'v2012.0', 'MODIS-MOI-4km'),
-				('pml-modis-chl', '3.0', 'SPOTV-MOI-1km'),
-				('modis-sst', 'v2013.1', 'MODIS-MOI-4km'),
-				('modis-chla', 'v2013.1', 'MODIS-MOI-4km'),
-				('pml-modis-sst', '3.0', 'SPOTV-MOI-1km'),
-				('olci-wrr', 'V02.0', 'SPOTV-MOI-1km'),
-				('slstr-sst', '1.0', 'SPOTV-MOI-1km'));
+				('modis-par', 'v2012.0', 'MODIS-IOC2-4km'),
+				('modis-kd490', 'v2012.0', 'MODIS-IOC2-4km'),
+				('pml-modis-chl', '3.0', 'SPOTV-IOC2-1km'),
+				('modis-sst', 'v2013.1', 'MODIS-IOC2-4km'),
+				('modis-chla', 'v2013.1', 'MODIS-IOC2-4km'),
+				('pml-modis-sst', '3.0', 'SPOTV-IOC2-1km'),
+				('olci-wrr', 'V02.0', 'SPOTV-IOC2-1km'),
+				('slstr-sst', '1.0', 'SPOTV-IOC2-1km'));
 
 UPDATE products.product_acquisition_data_source pads
 SET activated = TRUE
