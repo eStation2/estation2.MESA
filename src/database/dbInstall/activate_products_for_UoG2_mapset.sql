@@ -51,17 +51,19 @@ UPDATE products.processing p
 SET activated = TRUE,
     enabled = TRUE
 WHERE (p.process_id) in (SELECT process_id
-			 FROM products.process_product pp
-			 WHERE pp.type = 'INPUT'
-			 AND (pp.productcode, pp.version, pp.mapsetcode) in (
-				('modis-par', 'v2012.0', 'MODIS-UoG2-4km'),
-				('modis-kd490', 'v2012.0', 'MODIS-UoG2-4km'),
-				('pml-modis-chl', '3.0', 'SPOTV-UoG2-1km'),
-				('modis-sst', 'v2013.1', 'MODIS-UoG2-4km'),
-				('modis-chla', 'v2013.1', 'MODIS-UoG2-4km'),
-				('pml-modis-sst', '3.0', 'SPOTV-UoG2-1km'),
-				('olci-wrr', 'V02.0', 'SPOTV-UoG2-1km'),
-				('slstr-sst', '1.0', 'SPOTV-UoG2-1km'));
+                         FROM products.process_product pp
+                         WHERE pp.type = 'INPUT'
+                         AND (pp.productcode, pp.version, pp.mapsetcode) in (
+                                ('modis-par', 'v2012.0', 'MODIS-UoG2-4km'),
+                                ('modis-kd490', 'v2012.0', 'MODIS-UoG2-4km'),
+                                ('pml-modis-chl', '3.0', 'SPOTV-UoG2-1km'),
+                                ('modis-sst', 'v2013.1', 'MODIS-UoG2-4km'),
+                                ('modis-chla', 'v2013.1', 'MODIS-UoG2-4km'),
+                                ('pml-modis-sst', '3.0', 'SPOTV-UoG2-1km'),
+                                ('olci-wrr', 'V02.0', 'SPOTV-UoG2-1km'),
+                                ('slstr-sst', '1.0', 'SPOTV-UoG2-1km')
+                              )
+                          );
 
 UPDATE products.product_acquisition_data_source pads
 SET activated = TRUE
