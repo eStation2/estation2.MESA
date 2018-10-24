@@ -77,6 +77,8 @@ def get_archives_eumetcast_ftp():
     logger_spec = log.my_logger('apps.get_archives_eumetcast')
     logger.info("Retrieving MESA_JRC files from PC1.")
 
+    if sys.platform == 'win32':
+        source_id=source_id.replace(':','_') #Pierluigi
     processed_list_filename = es_constants.get_eumetcast_processed_list_prefix+str(source_id)+'.list'
     processed_info_filename = es_constants.get_eumetcast_processed_list_prefix+str(source_id)+'.info'
 
@@ -281,8 +283,14 @@ def loop_eumetcast_ftp(dry_run=False):
                 logger_spec = log.my_logger('apps.get_eumetcast.'+eumetcast_source.eumetcast_id)
                 logger.info("Processing eumetcast source  %s.", eumetcast_source.eumetcast_id)
 
-                processed_list_filename = es_constants.get_eumetcast_processed_list_prefix+str(eumetcast_source.eumetcast_id)+'.list'
-                processed_info_filename = es_constants.get_eumetcast_processed_list_prefix+str(eumetcast_source.eumetcast_id)+'.info'
+                if sys.platform == 'win32': #Pierluigi
+                    processed_list_filename = es_constants.get_eumetcast_processed_list_prefix + str(
+                        eumetcast_source.eumetcast_id).replace(':','_') + '.list'
+                    processed_info_filename = es_constants.get_eumetcast_processed_list_prefix + str(
+                        eumetcast_source.eumetcast_id).replace(':','_') + '.info'
+                else:
+                    processed_list_filename = es_constants.get_eumetcast_processed_list_prefix+str(eumetcast_source.eumetcast_id)+'.list'
+                    processed_info_filename = es_constants.get_eumetcast_processed_list_prefix+str(eumetcast_source.eumetcast_id)+'.info'
 
                 # Create objects for list and info
                 processed_list = []
@@ -402,8 +410,15 @@ def loop_eumetcast(dry_run=False):
                 logger_spec = log.my_logger('apps.get_eumetcast.'+eumetcast_source.eumetcast_id)
                 logger.info("Processing eumetcast source  %s.", eumetcast_source.eumetcast_id)
 
-                processed_list_filename = es_constants.get_eumetcast_processed_list_prefix+str(eumetcast_source.eumetcast_id)+'.list'
-                processed_info_filename = es_constants.get_eumetcast_processed_list_prefix+str(eumetcast_source.eumetcast_id)+'.info'
+                if sys.platform == 'win32': # Pierluigi
+                    processed_list_filename = es_constants.get_eumetcast_processed_list_prefix + str(
+                        eumetcast_source.eumetcast_id).replace(':','_') + '.list'
+                    processed_info_filename = es_constants.get_eumetcast_processed_list_prefix + str(
+                        eumetcast_source.eumetcast_id).replace(':','_') + '.info'
+
+                else:
+                    processed_list_filename = es_constants.get_eumetcast_processed_list_prefix+str(eumetcast_source.eumetcast_id)+'.list'
+                    processed_info_filename = es_constants.get_eumetcast_processed_list_prefix+str(eumetcast_source.eumetcast_id)+'.info'
 
                 # Create objects for list and info
                 processed_list = []

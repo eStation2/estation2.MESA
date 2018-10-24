@@ -298,3 +298,25 @@ def loop_processing(dry_run=False, serialize=False, test_one_product=None):
 
         logger.info("End of the loop ... wait a while")
         time.sleep(1)
+
+
+def worker(num):
+    """thread worker function"""
+    #print 'Worker:', num
+    name = current_process().name
+    print name, 'Starting'
+    time.sleep(2)
+    print name, 'Exiting'
+
+
+if __name__ == '__OLDmain__':
+    freeze_support()
+    jobs = []
+    for i in range(5):
+        p = Process(target=worker, args=(i,))
+        jobs.append(p)
+        p.start()
+
+if __name__ == '__main__':
+    freeze_support()
+    loop_processing(False,False)

@@ -1,6 +1,6 @@
 __author__ = "Marco Clerici & Jurriann van't Klooster"
 
-import os, time
+import os, time, sys
 from config import es_constants
 from lib.python import es_logging as log
 logger = log.my_logger(__name__)
@@ -42,4 +42,22 @@ if service:
             logger.info('Processing service is running: Stop it.')
             daemon.stop()
 else:
-    processing.loop_processing(dry_run=dry_run, serialize=serialize, test_one_product=test_one_product)
+    if sys.platform.startswith('win'):
+        # get the root and the path for the python script
+        root_dir = es_constants.es2globals['www_root_dir']
+        parent_dir = os.path.split(root_dir)[0]
+        app_dir = es_constants.es2globals['apps_dir']
+        python_script_path = os.path.join(app_dir,'processing\processing.py')
+        from subprocess import Popen
+        p = Popen(["OSGeo4W_python.bat",python_script_path], cwd=parent_dir,shell=True)
+        stdout, stderr = p.communicate()
+        # TODO delete the 2 lines below...
+        print 'return code'
+        print p.returncode  # is 0 if success
+        if p.returncode == 0:
+            print "Success!!"
+        else:
+            print "Failure"
+
+    else:
+        processing.loop_processing(dry_run=dry_run, serialize=serialize, test_one_product=test_one_product)
