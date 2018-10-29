@@ -455,8 +455,7 @@ Ext.Boot = Ext.Boot || function (j) {
                     b !== this.prop && (a[b] = null), delete a[b]
                 } catch (c) {
                 }
-                a.onload = a.onerror = a.onreadystatechange =
-                    j
+                a.onload = a.onerror = a.onreadystatechange = j
             }
         }, notifyRequests: function () {
             var a = this.requests, b = a.length, c, d;

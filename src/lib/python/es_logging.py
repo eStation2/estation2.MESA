@@ -8,6 +8,7 @@
 #	history: 1.0 
 #
 from config import es_constants
+from sys import platform
 
 try:
     import os, stat, glob, logging, logging.handlers
@@ -70,6 +71,10 @@ def my_logger(name):
     null_handler = logging.NullHandler()
     logger.addHandler(null_handler)
     console_handler = logging.StreamHandler()
+
+    if platform == 'win32':
+        # TODO: Pierluigi select the correct replacment
+        name=name.replace(':','_')
 
     file_handler = logging.handlers.RotatingFileHandler(log_dir+name+'.log', maxBytes=50000, backupCount=3)
 

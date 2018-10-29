@@ -141,8 +141,8 @@ for file in os.listdir(input_directory):
         data_1 = data_1.astype('float')
         data_2 = data_2.astype('float')
         #
-        data_1[data_1==-32768]=np.nan
-        data_2[data_2==-32768]=np.nan
+        data_1[data_1 == -32768] = np.nan
+        data_2[data_2 == -32768] = np.nan
         
         plot_1o1(data_1, data_2, "1999-2017", "1999-2014", filename)
         

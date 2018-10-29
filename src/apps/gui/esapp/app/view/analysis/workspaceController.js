@@ -314,6 +314,23 @@ Ext.define('esapp.view.analysis.workspaceController', {
     ,showTimeseriesChartSelection: function(){
         var timeseriesChartSelectionWindow = this.getView().lookupReference('timeserieschartselection'+this.getView().id);
         timeseriesChartSelectionWindow.show();
+
+        // if (!esapp.Utils.objectExists(timeseriesChartSelectionWindow)) {
+        //     this.getView().add({
+        //         xtype: 'timeserieschartselection',
+        //         reference: 'timeserieschartselection' + this.getView().id,
+        //         workspace: this.getView()
+        //     });
+        //     timeseriesChartSelectionWindow = this.getView().lookupReference('timeserieschartselection'+this.getView().id);
+        //     timeseriesChartSelectionWindow.show();
+        //     // this.getView().add(new esapp.view.analysis.timeseriesChartSelection({
+        //     //     reference: 'timeserieschartselection' + this.getView().id,
+        //     //     workspace: this.getView()
+        //     // }).show());
+        // }
+        // else{
+        //     timeseriesChartSelectionWindow.show();
+        // }
     }
 
     ,toggleBackgroundlayer: function(btn, event) {

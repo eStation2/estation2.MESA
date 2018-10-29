@@ -450,6 +450,12 @@ Ext.define('esapp.view.main.Main', {
         });
 
         if (esapp.globals['typeinstallation'] == 'windows'){
+            // Pierluigi
+            me.maintabpanel.add(me.dashboard);
+            me.maintabpanel.add(me.acquisition);
+            me.maintabpanel.add(me.processing);
+            me.maintabpanel.add(me.datamanagement);
+            // End
             me.maintabpanel.add(me.analysis);
             me.maintabpanel.add(me.system);
             me.maintabpanel.add(me.help);
@@ -479,7 +485,7 @@ Ext.define('esapp.view.main.Main', {
         me.callParent();
 
         if (esapp.globals['typeinstallation'] == 'windows'){
-            me.maintabpanel.setActiveTab('analysistab');
+            me.maintabpanel.setActiveTab('dashboardtab');
         }
         else if (esapp.globals['typeinstallation'] == 'jrc_online'){
             me.maintabpanel.setActiveTab('analysistab');
