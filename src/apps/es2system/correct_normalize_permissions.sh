@@ -4,16 +4,16 @@
 
 #chmod 755 -R /var/www/eStation2-%{version}
 
-chown -R analyst:estation /tmp/eStation2/
-chmod 775 -R /tmp/eStation2/
+sudo chown -R analyst:estation /tmp/eStation2/
+sudo chmod 775 -R /tmp/eStation2/
 
-chown -R analyst:estation /eStation2/
-chmod 775 -R /eStation2/
+sudo chown -R analyst:estation /eStation2/
+sudo chmod 775 -R /eStation2/
 
 # Change owner of /data/
 # echo "`date +'%Y-%m-%d %H:%M '` Assign /data to analyst User"
-chown -R analyst:estation /data/
-chmod 775 -R /data/
+sudo chown -R analyst:estation /data/
+sudo chmod 775 -R /data/
 
 # Change permissions /var/www (for allowing analyst to change version)
 # chmod 777 /var/www
