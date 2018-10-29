@@ -1,0 +1,118 @@
+#
+#	purpose: Define the get CMEMS data routine
+#	author:  M.Clerici
+#	date:	 08.10.2018
+#   descr:	 Gets data from CMEMS
+#	history: 2.0
+
+# Import standard modules
+# import pycurl
+# import signal
+# import StringIO
+# import cStringIO
+# import tempfile
+import sys
+import os
+# import re
+import datetime
+#
+# # Import eStation2 modules
+from lib.python import es_logging as log
+from config import es_constants
+logger = log.my_logger(__name__)
+
+# from database import querydb
+from lib.python import functions
+# from apps.productmanagement import datasets
+# motu_path='/usr/local/src/tas/anaconda/lib/python2.7/site-packages/motu-client.py'
+
+# # Date definition
+# # requested_day= datetime.datetime.now() + datetime.timedelta(days=6)
+# # str_day=requested_day.strftime("%Y-%m-%d 12:00:00")
+# # filename_date=requested_day.strftime("%Y%m%d")
+# datetime_start = datetime.datetime.now() + datetime.timedelta(days=6)
+# logger.info('I am executing now the script')
+# # Variable definition for Motu-client
+# user = 'vvenkatachalam'
+# pwd = 'VijaycharanCMEMS2018'
+# # user = 'bfoli'
+# # pwd = 'He0feYqn'
+# mercator_motu_web = 'http://nrt.cmems-du.eu/motu-web/Motu'
+# service_ID = 'GLOBAL_ANALYSIS_FORECAST_PHY_001_024-TDS'
+# product_ID = 'global-analysis-forecast-phy-001-024'
+# lon_lat = '-x -35 -X 15 -y -10 -Y 30'
+# depth = '-z 0.494 -Z 0.4942'
+# variables = '-v vo -v uo -v so -v zos -v thetao'
+# out_path = '/data/processing/test_OTJT/motu/'
+#out_filename = filename_date+'_'+product_ID+'.nc'
+#datetime_start =
+
+motu_client_dic = {
+    'motu_path' :  '/home/webvenkavi/.local/lib/python2.7/site-packages/motu-client.py',
+    'user' : 'vvenkatachalam',
+    'pwd' : 'VijaycharanCMEMS2018',
+    'mercator_motu_web' : 'http://nrt.cmems-du.eu/motu-web/Motu',
+    'service_ID' : 'GLOBAL_ANALYSIS_FORECAST_PHY_001_024-TDS',
+    'product_ID' : 'global-analysis-forecast-phy-001-024',
+    'lon_lat' : '-x -35 -X 15 -y -10 -Y 30',
+    'depth' : '-z 0.494 -Z 0.4942',
+    'variables' : '-v vo -v uo -v so -v zos -v thetao',
+    'out_path' : '/data/processing/motu/'
+}
+
+motu_product_dic = {
+    'service_ID' : 'GLOBAL_ANALYSIS_FORECAST_PHY_001_024-TDS',
+    'product_ID' : 'global-analysis-forecast-phy-001-024',
+    'lon_lat' : '-x -35 -X 15 -y -10 -Y 30',
+    'depth' : '-z 0.494 -Z 0.4942',
+    'variables' : '-v vo -v uo -v so -v zos -v thetao',
+}
+
+
+def motu_getlists(datetime_start=None, motu_client_dic='', motu_product_dic=''):
+    try:
+
+        if motu_client_dic is not None:
+            motu_path = motu_client_dic.get('motu_path')
+            user = motu_client_dic.get('user')
+            pwd = motu_client_dic.get('pwd')
+            mercator_motu_web = motu_client_dic.get('mercator_motu_web')
+            out_path = motu_client_dic.get('out_path')
+
+        if motu_product_dic is not None:
+            service_ID = motu_product_dic.get('service_ID')
+            product_ID = motu_product_dic.get('product_ID')
+            lon_lat = motu_product_dic.get('lon_lat')
+            depth = motu_product_dic.get('depth')
+            variables = motu_product_dic.get('variables')
+
+        if datetime_start is None:
+            # Forecasted date
+            str_day = datetime.datetime.now() + datetime.timedelta(days=6)
+            filename_date = str_day.strftime("%Y%m%d")
+            str_day = str_day.strftime("%Y-%m-%d 12:00:00")
+            out_filename = filename_date + '_' + product_ID + '.nc'
+        else:
+            str_day = datetime_start.strftime("%Y-%m-%d 12:00:00")
+            filename_date = datetime_start.strftime("%Y%m%d")
+            out_filename = filename_date + '_' + product_ID + '.nc'
+
+        #command = 'python ' + motu_path + ' -u ' + user + ' -p ' + pwd + ' -m ' + mercator_motu_web + 's ' + service_ID + ' -d ' + product_ID + ' ' + lon_lat + ' -t ' + str_day + ' -T ' + str_day + ' ' + depth + ' ' + variables + ' -o ' + out_path + ' -f ' + out_filename
+
+        command = 'python ' + motu_path + ' -u ' + user + ' -p ' + pwd + ' -m ' + mercator_motu_web + \
+                  ' -s ' + service_ID + ' -d ' + product_ID + ' ' + lon_lat + \
+                  ' -t ' + str_day + ' -T ' + str_day + ' ' + depth + ' ' + variables + \
+                  ' -o ' + out_path + ' -f ' + out_filename
+
+        print(command)
+        logger.info('Command is: ' + command)
+
+        os.system(command)
+
+    except:
+        logger.error("Error in Motu-client")
+
+    return None
+
+
+motu_getlists(None, motu_client_dic, motu_product_dic)
