@@ -1,6 +1,7 @@
 from sentinelsat import SentinelAPI, read_geojson, geojson_to_wkt
 from datetime import date
 from lib.python import es_logging as log
+import json
 logger = log.my_logger(__name__)
 import re
 # connect to the API
@@ -27,7 +28,7 @@ platformname = 'Sentinel-1'
 #
 # # Get the product's full metadata available on the server
 # api.get_product_odata(<product_id>, full=True)
-def sentinelsat_getlists(datetime_start, datetime_end, platformname, producttype=None, cloudcoverpercentage=(0, 100) ):
+def sentinelsat_getlists(base_url, template, datetime_start, datetime_end):
     try:
         if datetime_start is None:
             datetime_start = date
@@ -38,21 +39,24 @@ def sentinelsat_getlists(datetime_start, datetime_end, platformname, producttype
             datetime_end = date(2015, 12, 29)
 
 
-        if platformname is None:
-            platformname = 'Sentinel-1'
+        if template is not None:
+            sentinelsat_obj = json.loads(template)
+            platformname = sentinelsat_obj.get('platformname')#'Sentinel-1'
+            producttype = sentinelsat_obj.get('producttype')
 
         #Search by polygon, time, and Hub query keywords
         footprint = geojson_to_wkt(read_geojson(geojson_roi))
         products = api.query(footprint,
-                             date=(datetime_start, datetime_end),
-                             #producttype = producttype,
+                             date=(datetime_start.date(), datetime_end.date()),
+                             producttype = producttype,
                              #cloudcoverpercentage = None,
                              platformname=platformname)
 
         list_links = []
         for value in products.itervalues():
             # get the link from each dictionary
-            link = value.get("link")
+            #link = value.get("link")
+            link = value.get("uuid")
             #
             #line = re.sub('\\', '', link)
             list_links.append(link)
@@ -64,11 +68,19 @@ def sentinelsat_getlists(datetime_start, datetime_end, platformname, producttype
 
     return list_links
 
+def download_sentinelsat_getlists(uuid, target_dir):
 
-sentinelsat_getlists(datetime_start, datetime_end, platformname)
+    try:
+        api.download(uuid, target_dir)
+        return 0
+    except:
+        return 1
 
 
-#############################################
+#sentinelsat_getlists(datetime_start, datetime_end, platformname)
+
+
+#############################
 #GET INTERNET
 #############################
 
@@ -76,7 +88,7 @@ sentinelsat_getlists(datetime_start, datetime_end, platformname)
 #   build_list_matching_files_sentinel_sat
 #   Purpose: return the list of file names matching a 'template' with 'date' placeholders
 #            It is the entry point for the 'http_templ' source type
-#   Author: Marco Clerici, JRC, European Commission
+#   Author: Vijay Charan Venkatachalam, JRC, European Commission
 #   Date: 2015/02/18
 #   Inputs: template: regex including subdirs (e.g. 'Collection51/TIFF/Win1[01]/201[1-3]/MCD45monthly.A20.*burndate.tif.gz'
 #           from_date: start date for the dataset (datetime.datetime object)

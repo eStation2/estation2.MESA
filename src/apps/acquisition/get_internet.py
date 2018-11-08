@@ -21,6 +21,7 @@ import re
 import datetime
 import shutil
 import time
+import subprocess
 
 from time import sleep
 
@@ -30,6 +31,8 @@ from config import es_constants
 from database import querydb
 from lib.python import functions
 from apps.productmanagement import datasets
+from apps.tools import motu_api
+from apps.tools import sentinelsat_api
 
 logger = log.my_logger(__name__)
 
@@ -294,12 +297,228 @@ def build_list_matching_files_tmpl(base_url, template, from_date, to_date, frequ
         raise
 
     try:
+        if sys.platform == 'win32':
+            template.replace("-","#")
         list_filenames = frequency.get_internet_dates(dates, template)
     except Exception as inst:
         logger.debug("Error in frequency.get_internet_dates: %s" %inst.args[0])
         raise
 
     return list_filenames
+
+
+######################################################################################
+#   build_list_matching_files_sentinel_sat
+#   Purpose: return the list of file names matching a 'template' with 'date' placeholders
+#            It is the entry point for the 'http_templ' source type
+#   Author: Vijay Charan Venkatachalam, JRC, European Commission
+#   Date: 2015/02/18
+#   Inputs: template: regex including subdirs (e.g. 'Collection51/TIFF/Win1[01]/201[1-3]/MCD45monthly.A20.*burndate.tif.gz'
+#           from_date: start date for the dataset (datetime.datetime object)
+#           to_date: end date for the dataset (datetime.datetime object)
+#           frequency: dataset 'frequency' (see DB 'frequency' table)
+
+def build_list_matching_files_sentinel_sat(base_url, template, from_date, to_date, frequency_id,  username, password):
+
+    # Add a check on frequency
+    try:
+        frequency = datasets.Dataset.get_frequency(frequency_id, datasets.Frequency.DATEFORMAT.DATETIME)
+    except Exception as inst:
+        logger.debug("Error in datasets.Dataset.get_frequency: %s" %inst.args[0])
+        raise
+
+    # Manage the start_date (mandatory).
+    try:
+        # If it is a date, convert to datetime
+        if functions.is_date_yyyymmdd(str(from_date), silent=True):
+            datetime_start=datetime.datetime.strptime(str(from_date),'%Y%m%d')
+        else:
+            # If it is a negative number, subtract from current date
+            if isinstance(from_date,int) or isinstance(from_date,long):
+                if from_date < 0:
+                    datetime_start=datetime.datetime.today() - datetime.timedelta(days=-from_date)
+            else:
+                logger.debug("Error in Start Date: must be YYYYMMDD or -Ndays")
+                raise Exception("Start Date not valid")
+    except:
+        raise Exception("Start Date not valid")
+
+    # Manage the end_date (mandatory).
+    try:
+        if functions.is_date_yyyymmdd(str(to_date), silent=True):
+            datetime_end=datetime.datetime.strptime(str(to_date),'%Y%m%d')
+        # If it is a negative number, subtract from current date
+        elif isinstance(to_date,int) or isinstance(to_date,long):
+            if to_date < 0:
+                datetime_end=datetime.datetime.today() - datetime.timedelta(days=-to_date)
+        else:
+            datetime_end=datetime.datetime.today()
+    except:
+        pass
+
+    try:
+        list_filenames = sentinelsat_api.sentinelsat_getlists(base_url, template, datetime_start, datetime_end)#frequency.get_dates(datetime_start, datetime_end)
+    except Exception as inst:
+        logger.debug("Error in sentinelsat.get_lists: %s" %inst.args[0])
+        raise
+
+
+    # try:
+    #     dates = frequency.get_dates(datetime_start, datetime_end)
+    # except Exception as inst:
+    #     logger.debug("Error in frequency.get_dates: %s" %inst.args[0])
+    #     raise
+    #
+    # try:
+    #     list_filenames = frequency.get_internet_dates(dates, template)
+    # except Exception as inst:
+    #     logger.debug("Error in frequency.get_internet_dates: %s" %inst.args[0])
+    #     raise
+
+    return list_filenames
+
+
+######################################################################################
+#   build_list_matching_files_motu
+#   Purpose: return the list of file names matching a motu template with 'date' placeholders
+#            It is the entry point for the 'motu_client' source type
+#   Author: Vijay Charan, JRC, European Commission
+#   Date: 2018/11/05
+#   Inputs: base_url: base url of motu client
+#   `       template: regex including subdirs (e.g. 'Collection51/TIFF/Win1[01]/201[1-3]/MCD45monthly.A20.*burndate.tif.gz'
+#           from_date: start date for the dataset (datetime.datetime object)
+#           to_date: end date for the dataset (datetime.datetime object)
+#           frequency: dataset 'frequency' (see DB 'frequency' table)
+#           username: username of motu client
+#           password: password of motu client
+#           files_filter_expression: output name template of motu client
+#
+def build_list_matching_files_motu(base_url, template, from_date, to_date, frequency_id, username, password, files_filter_expression):
+
+    # Add a check on frequency
+    try:
+        frequency = datasets.Dataset.get_frequency(frequency_id, datasets.Frequency.DATEFORMAT.DATETIME)
+    except Exception as inst:
+        logger.debug("Error in datasets.Dataset.get_frequency: %s" %inst.args[0])
+        raise
+
+    # Manage the start_date (mandatory).
+    try:
+        # If it is a date, convert to datetime
+        if functions.is_date_yyyymmdd(str(from_date), silent=True):
+            datetime_start=datetime.datetime.strptime(str(from_date),'%Y%m%d')
+        else:
+            # If it is a negative number, subtract from current date
+            if isinstance(from_date,int) or isinstance(from_date,long):
+                if from_date < 0:
+                    datetime_start=datetime.datetime.today() - datetime.timedelta(days=-from_date)
+            else:
+                logger.debug("Error in Start Date: must be YYYYMMDD or -Ndays")
+                raise Exception("Start Date not valid")
+    except:
+        raise Exception("Start Date not valid")
+
+    # Manage the end_date (mandatory).
+    try:
+        if functions.is_date_yyyymmdd(str(to_date), silent=True):
+            datetime_end=datetime.datetime.strptime(str(to_date),'%Y%m%d')
+        # If it is a negative number, subtract from current date
+        elif isinstance(to_date,int) or isinstance(to_date,long):
+            if to_date < 0:
+                datetime_end=datetime.datetime.today() - datetime.timedelta(days=-to_date)
+            elif from_date > 0:
+                datetime_end = datetime.datetime.today() + datetime.timedelta(days=to_date)
+        else:
+            datetime_end=datetime.datetime.today()
+    except:
+        pass
+
+    try:
+        dates = frequency.get_dates(datetime_start, datetime_end)
+    except Exception as inst:
+        logger.debug("Error in frequency.get_dates: %s" %inst.args[0])
+        raise
+
+    try:
+        list_filenames = motu_api.motu_4_dates(dates, template, base_url, username, password, files_filter_expression)
+        #list_filenames = frequency.get_internet_dates(dates, template)
+    except Exception as inst:
+        logger.debug("Error in motu_api.motu_getlists: %s" %inst.args[0])
+        raise
+
+    return list_filenames
+
+######################################################################################
+#   get_file_from_motu_command
+#   Purpose: download and save motu file
+#   Author: Vijay Charan Venkatachalam, JRC, European Commission
+#   Date: 2018/11/05
+#   Inputs: motu_command: full motu command
+#           target_file: target file name (by default 'test_output_file')
+#           target_dir: target directory (by default a tmp dir is created)
+#   Output: full pathname is returned (or positive number for error)
+#
+def get_file_from_motu_command(motu_command,  target_dir, target_file=None,userpwd=''):
+
+    # Create a tmp directory for download
+    tmpdir = es_constants.es2globals['base_tmp_dir']
+
+    if target_file is None:
+        target_file='test_output_file'
+
+    target_fullpath=tmpdir+os.sep+target_file
+    target_final=target_dir+os.sep
+
+    #c = pycurl.Curl()
+
+    try:
+        #subprocess.call([motu_command])
+        os.system(motu_command)
+        mv_cmd = "mv "+target_fullpath+' '+target_final
+        os.system(mv_cmd)
+        #shutil.move(target_fullpath, target_final)
+        return 0
+    except OSError:
+        logger.warning('Output NOT downloaded: %s - error : %i' %(motu_command))
+        return 1
+    # finally:
+        # c = None
+        # shutil.rmtree(tmpdir)
+
+######################################################################################
+#   get_file_from_sentinelsat_url
+#   Purpose: download and save locally a file
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/09/01
+#   Inputs: remote_url_file: full file path
+#           target_file: target file name (by default 'test_output_file')
+#           target_dir: target directory (by default a tmp dir is created)
+#   Output: full pathname is returned (or positive number for error)
+#
+def get_file_from_sentinelsat_url(uuid,  target_dir, target_file=None,userpwd=''):
+
+    # Create a tmp directory for download
+    tmpdir = tempfile.mkdtemp(prefix=__name__, dir=es_constants.es2globals['base_tmp_dir'])
+
+    # if target_file is None:
+    #     target_file='test_output_file'
+    #
+    target_fullpath=tmpdir+os.sep
+    target_final=target_dir+os.sep
+
+    try:
+        sentinelsat_api.download_sentinelsat_getlists(uuid, target_fullpath )
+        mv_cmd = "mv "+target_fullpath+'* '+target_final
+        os.system(mv_cmd)
+        #outputfile.close()
+        #shutil.move(target_fullpath, target_final)
+
+        return 0
+    except:
+        logger.warning('Output NOT downloaded: %s - error : %i' %(uuid))
+        return 1
+    finally:
+        shutil.rmtree(tmpdir)
 
 
 ######################################################################################
@@ -499,6 +718,40 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                     logger.error("Error in creating date lists. Continue")
                                     continue
 
+                            elif internet_type == 'motu_client':
+                                # Create the full filename from a 'template' which contains
+                                try:
+                                    current_list = build_list_matching_files_motu(str(internet_source.url),
+                                                                                str(internet_source.include_files_expression),
+                                                                                internet_source.start_date,
+                                                                                internet_source.end_date,
+                                                                                str(internet_source.frequency_id),
+                                                                                str(internet_source.user_name),
+                                                                                str(internet_source.password),
+                                                                                str(internet_source.files_filter_expression),
+                                                                                  )
+
+                                except:
+                                    logger.error("Error in creating motu_client lists. Continue")
+                                    continue
+
+                            elif internet_type == 'sentinel_sat':
+                                # Create the full filename from a 'template' which contains
+                                try:
+                                    current_list = build_list_matching_files_sentinel_sat(str(internet_source.url),
+                                                                                str(internet_source.include_files_expression),
+                                                                                internet_source.start_date,
+                                                                                internet_source.end_date,
+                                                                                str(internet_source.frequency_id),
+                                                                                str(internet_source.user_name),
+                                                                                str(internet_source.password),
+                                                                                #str(internet_source.files_filter_expression),
+                                                                                  )
+
+                                except:
+                                    logger.error("Error in creating sentinel_sat lists. Continue")
+                                    continue
+
                             elif internet_type == 'local':
                                 logger.info("This internet source is meant to copy data on local filesystem")
                                 try:
@@ -544,6 +797,15 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                          str(internet_source['url']) + os.path.sep + filename,
                                                          es_constants.ingest_dir + os.path.basename(filename))
                                                      result = 0
+                                                elif internet_type == 'motu_client':
+                                                    result = get_file_from_motu_command(str(filename),
+                                                                                        target_file=internet_source.files_filter_expression,
+                                                                                        target_dir=es_constants.ingest_dir,
+                                                                                        userpwd=str(usr_pwd))
+
+                                                elif internet_type == 'sentinel_sat':
+                                                    result = get_file_from_sentinelsat_url(str(filename),
+                                                                                           target_dir=es_constants.ingest_dir)
                                                 else:
                                                     result = get_file_from_url(str(internet_source.url)+os.path.sep+filename, target_file=os.path.basename(filename), target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
                                                 if not result:
