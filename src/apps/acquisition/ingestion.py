@@ -2442,6 +2442,105 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
     # return interm_files_list
 
 
+def pre_process_aviso_mwind(subproducts, tmpdir, input_files, my_logger, in_date=None):
+# -------------------------------------------------------------------------------------------------------
+#   Pre-process the Aviso Mwind
+#
+    interm_files_list = []
+
+    # Make sure it is a list (if only a string is returned, it loops over chars)
+    if isinstance(input_files, list):
+        list_input_files = input_files
+    else:
+        list_input_files=[]
+        list_input_files.append(input_files)
+
+    if isinstance(list_input_files, list):
+        if len(list_input_files) > 1:
+            raise Exception('More than 1 file passed: %i ' % len(list_input_files))
+    input_file = list_input_files[0]
+
+    #for input_file in list_input_files:
+    my_logger.info('Unzipping/processing: .gzip case')
+    gzipfile = gzip.open(input_file)                 # Create ZipFile object
+    data = gzipfile.read()                           # Get the list of its contents
+    filename = os.path.basename(input_file)
+    filename = filename.replace('.gz', '')
+    myfile_path = os.path.join(tmpdir, filename)
+    myfile = open(myfile_path, "wb")
+    myfile.write(data)
+    myfile.close()
+    gzipfile.close()
+
+    input_file = myfile.name
+    # # Create a coherent intermediate file list
+    # for subproduct in subproducts:
+    #     interm_files_list.append(myfile_path)
+    #
+    #     # Prepare the output file list
+    #
+    #
+    # pre_processed_list = []
+    #
+
+    # # Build a list of subdatasets to be extracted
+    list_to_extr = []
+    geotiff_files = []
+    previous_id_subdataset = ''
+
+    for sprod in subproducts:
+        if sprod != 0:
+            subprod_to_extr = sprod['re_extract']
+
+            # Test the. nc file and read list of datasets
+            netcdf = gdal.Open(input_file)
+            sdslist = netcdf.GetSubDatasets()
+
+            if len(sdslist) >= 1:
+                # Loop over datasets and extract the one from each unzipped
+                for subdataset in sdslist:
+                    netcdf_subdataset = subdataset[0]
+                    id_subdataset = netcdf_subdataset.split(':')[-1]
+
+                    if id_subdataset == subprod_to_extr:
+                        if id_subdataset == previous_id_subdataset:
+                            # Just append the last filename once again
+                            geotiff_files.append(myfile_path)
+                        else:
+                            selected_sds = 'NETCDF:' + input_file + ':' + id_subdataset
+                            sds_tmp = gdal.Open(selected_sds)
+                            filename = os.path.basename(input_file) + '.geotiff'
+                            myfile_path = os.path.join(tmpdir, filename)
+                            write_ds_to_geotiff(sds_tmp, myfile_path)
+                            sds_tmp = None
+                            geotiff_files.append(myfile_path)
+                            previous_id_subdataset = id_subdataset
+                            # MC 26.07.2016: read/store scaling
+                            try:
+                                status = functions.save_netcdf_scaling(selected_sds, myfile_path)
+                            except:
+                                logger.debug('Error in reading scaling')
+            else:
+                # if id_subdataset == previous_id_subdataset:
+                #     # Just append the last filename once again
+                #     geotiff_files.append(myfile_path)
+                # else:
+                    # No subdatasets: e.g. SST -> read directly the .nc
+                filename = os.path.basename(input_file) + '.geotiff'
+                myfile_path = os.path.join(tmpdir, filename)
+                write_ds_to_geotiff(netcdf, myfile_path)
+                geotiff_files.append(myfile_path)
+                # previous_id_subdataset = id_subdataset
+                    # MC 26.07.2016: read/store scaling
+                    # try:
+                    #     status = functions.save_netcdf_scaling(sds_tmp, myfile_path)
+                    # except:
+                    #     logger.warning('Error in reading scaling')
+
+            netcdf = None
+
+    return geotiff_files
+
 def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files, tmpdir, my_logger, in_date=None):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process one or more input files by:
@@ -2554,7 +2653,8 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
         elif preproc_type == 'TARZIP':
             interm_files = pre_process_tarzip(subproducts, tmpdir, input_files, my_logger)
 
-
+        elif preproc_type == 'NETCDF_AVISO':
+            interm_files = pre_process_aviso_mwind(subproducts, tmpdir, input_files, my_logger)
         # elif preproc_type == 'GSOD':
         #     interm_files = pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
 

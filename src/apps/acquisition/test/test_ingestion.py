@@ -1585,4 +1585,43 @@ class TestIngestion(unittest.TestCase):
         #                                                                       source_id=datasource_descrID):
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
+    def test_ingest_aviso_mwind(self):
+
+        date_fileslist = glob.glob('/data/ingest/nrt_merged_mwind_20140427_20140427_20140504.nc.gz')
+        in_date = '20140427'
+
+        productcode = 'aviso-wind'
+        productversion = '1.0'
+        subproductcode = 'mwind'
+        mapsetcode = 'SPOTV-Africa-1km'
+        datasource_descrID = 'AVISO:WIND:1D:1.0'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(**args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+        no_data = product_in_info.no_data
+
+        sprod = {'subproduct': subproductcode,
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process,
+                 'nodata': no_data}
+
+        subproducts = []
+        subproducts.append(sprod)
+
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                        source_id=datasource_descrID)
+        # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
+        #                                                                       source_id=datasource_descrID):
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+
 
