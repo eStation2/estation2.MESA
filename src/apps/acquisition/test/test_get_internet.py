@@ -955,7 +955,7 @@ class TestGetInternet(unittest.TestCase):
                          'user_name':internet_source.user_name,
                          'password':internet_source.password,
                          'start_date':20180610,
-                         'end_date': 20180820,
+                         'end_date': 20181130,
                          'frequency_id': internet_source.frequency_id,
                          'type':internet_source.type}
 

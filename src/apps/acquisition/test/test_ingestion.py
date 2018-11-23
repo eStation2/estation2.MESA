@@ -1258,9 +1258,9 @@ class TestIngestion(unittest.TestCase):
         # Similar to the test above, but specific to the products made available for Long Term Statistics by T. Jacobs
         # Products released from VITO in March 2017
 
-        date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_201706*_GLOBE_PROBAV_V2.2.1.nc')
+        #date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_201706*_GLOBE_PROBAV_V2.2.1.nc')
         # date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_19*_GLOBE_VGT_V2.2.1.nc')
-        date_fileslist = glob.glob('/data/ingest/c_gls_NDVI_201706*_GLOBE_PROBAV_V2.2.1.*')
+        date_fileslist = glob.glob('/data/processing/exchange/c_gls_NDVI_201811010000_GLOBE_PROBAV_V2.2.1.nc')
 
         for one_file in date_fileslist:
 
@@ -1292,10 +1292,13 @@ class TestIngestion(unittest.TestCase):
 
             subproducts=[]
             subproducts.append(sprod)
-
-            for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
-                                                                                  source_id=datasource_descrID):
-                ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+            datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                            source_id=datasource_descrID)
+            # ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger,
+            #                     echo_query=1)
+            # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
+            #                                                                       source_id=datasource_descrID):
+            ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
     def test_ingest_g_cls_fapar_2_0_1(self):
 
