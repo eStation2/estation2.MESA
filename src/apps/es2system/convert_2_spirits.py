@@ -116,33 +116,6 @@ def convert_geotiff_datatype_rescaled(input_file, output_dir, str_date, naming_s
                                       in_scale_factor, in_offset, in_nodata, out_scale_factor, out_offset, out_nodata,
                                       out_data_type=None, mask_min=None, mask_max=None, overwrite=False):
 
-
-    f1Fid = gdal.Open(input_file, gdal.GA_ReadOnly)
-    nb = f1Fid.RasterCount
-    orig_size_x = f1Fid.RasterXSize
-    orig_size_y = f1Fid.RasterYSize
-    dataType = f1Fid.GetRasterBand(1).DataType
-    geoTransform = f1Fid.GetGeoTransform()
-    projection = f1Fid.GetProjection()
-    driver_type = f1Fid.GetDriver().ShortName
-
-    # Translate data type for gdal and numpy
-    out_data_type_gdal = conv_data_type_to_gdal(out_data_type)
-    out_data_type_numpy = conv_data_type_to_numpy(out_data_type)
-
-    # Read from input file
-    band = f1Fid.GetRasterBand(1)
-    #my_logger.debug('Band Type=' + gdal.GetDataTypeName(band.DataType))
-    in_data = band.ReadAsArray(0, 0, orig_size_x, orig_size_y)
-    # rescale the data
-    # Apply rescale to data
-    scaled_data = rescale_data(in_data, in_scale_factor,in_offset, in_nodata, mask_min,
-                               mask_max,
-                               out_data_type_numpy, out_scale_factor, out_offset, out_nodata,
-                               logger,
-                               None)
-
-
     extension_bin = '.img'
     extension_hdr = '.hdr'
     status = 0
@@ -153,20 +126,95 @@ def convert_geotiff_datatype_rescaled(input_file, output_dir, str_date, naming_s
                   naming_spirits['pa_filename_prefix']
 
     output_file = output_dir+os.path.sep+output_base_name+extension_bin
-    #outType = conv_data_type_to_gdal('Byte')
-    out_driver = gdal.GetDriverByName('ENVI')
-    out_driver = out_driver.Create(output_file, orig_size_x, orig_size_y, nb, out_data_type_gdal)
-    out_driver.SetGeoTransform(geoTransform)
-    out_driver.SetProjection(projection)
-    # Create a copy to output_file
-    # trg_ds = out_driver.CreateCopy(my_output_filename, out_ds, 0,
-    #                                [es_constants.ES2_OUTFILE_OPTIONS])
-    out_driver.GetRasterBand(1).WriteArray(scaled_data)
 
-    out_driver = None
-    # Modify the header
-    header_file_name = output_dir+os.path.sep+output_base_name+extension_hdr
-    status = append_to_header_file(header_file_name, metadata_spirits)
+    # Check output file exist
+    if not os.path.isfile(output_file) and not overwrite:
+
+        f1Fid = gdal.Open(input_file, gdal.GA_ReadOnly)
+        nb = f1Fid.RasterCount
+        orig_size_x = f1Fid.RasterXSize
+        orig_size_y = f1Fid.RasterYSize
+        dataType = f1Fid.GetRasterBand(1).DataType
+        geoTransform = f1Fid.GetGeoTransform()
+        projection = f1Fid.GetProjection()
+        driver_type = f1Fid.GetDriver().ShortName
+
+        # Translate data type for gdal and numpy
+        out_data_type_gdal = conv_data_type_to_gdal(out_data_type)
+        out_data_type_numpy = conv_data_type_to_numpy(out_data_type)
+
+        # Read from input file
+        band = f1Fid.GetRasterBand(1)
+        #my_logger.debug('Band Type=' + gdal.GetDataTypeName(band.DataType))
+        in_data = band.ReadAsArray(0, 0, orig_size_x, orig_size_y)
+        # rescale the data
+        # Apply rescale to data
+        scaled_data = rescale_data(in_data, in_scale_factor,in_offset, in_nodata, mask_min,
+                                   mask_max,
+                                   out_data_type_numpy, out_scale_factor, out_offset, out_nodata,
+                                   logger,
+                                   None)
+
+        #outType = conv_data_type_to_gdal('Byte')
+        out_driver = gdal.GetDriverByName('ENVI')
+        out_driver = out_driver.Create(output_file, orig_size_x, orig_size_y, nb, out_data_type_gdal)
+        out_driver.SetGeoTransform(geoTransform)
+        out_driver.SetProjection(projection)
+        # Create a copy to output_file
+        # trg_ds = out_driver.CreateCopy(my_output_filename, out_ds, 0,
+        #                                [es_constants.ES2_OUTFILE_OPTIONS])
+        out_driver.GetRasterBand(1).WriteArray(scaled_data)
+
+        out_driver = None
+        # Modify the header
+        header_file_name = output_dir+os.path.sep+output_base_name+extension_hdr
+        status = append_to_header_file(header_file_name, metadata_spirits)
+
+
+    elif os.path.isfile(output_file):
+
+        input_file_time = functions.get_modified_time_from_file(input_file)
+        output_file_time = functions.get_modified_time_from_file(output_file)
+        if input_file_time > output_file_time:
+            f1Fid = gdal.Open(input_file, gdal.GA_ReadOnly)
+            nb = f1Fid.RasterCount
+            orig_size_x = f1Fid.RasterXSize
+            orig_size_y = f1Fid.RasterYSize
+            dataType = f1Fid.GetRasterBand(1).DataType
+            geoTransform = f1Fid.GetGeoTransform()
+            projection = f1Fid.GetProjection()
+            driver_type = f1Fid.GetDriver().ShortName
+
+            # Translate data type for gdal and numpy
+            out_data_type_gdal = conv_data_type_to_gdal(out_data_type)
+            out_data_type_numpy = conv_data_type_to_numpy(out_data_type)
+
+            # Read from input file
+            band = f1Fid.GetRasterBand(1)
+            # my_logger.debug('Band Type=' + gdal.GetDataTypeName(band.DataType))
+            in_data = band.ReadAsArray(0, 0, orig_size_x, orig_size_y)
+            # rescale the data
+            # Apply rescale to data
+            scaled_data = rescale_data(in_data, in_scale_factor, in_offset, in_nodata, mask_min,
+                                       mask_max,
+                                       out_data_type_numpy, out_scale_factor, out_offset, out_nodata,
+                                       logger,
+                                       None)
+
+            # outType = conv_data_type_to_gdal('Byte')
+            out_driver = gdal.GetDriverByName('ENVI')
+            out_driver = out_driver.Create(output_file, orig_size_x, orig_size_y, nb, out_data_type_gdal)
+            out_driver.SetGeoTransform(geoTransform)
+            out_driver.SetProjection(projection)
+            # Create a copy to output_file
+            # trg_ds = out_driver.CreateCopy(my_output_filename, out_ds, 0,
+            #                                [es_constants.ES2_OUTFILE_OPTIONS])
+            out_driver.GetRasterBand(1).WriteArray(scaled_data)
+
+            out_driver = None
+            # Modify the header
+            header_file_name = output_dir + os.path.sep + output_base_name + extension_hdr
+            status = append_to_header_file(header_file_name, metadata_spirits)
 
     if status:
          logger.error('Error in modifying SPIRITS header: %s' % header_file_name)

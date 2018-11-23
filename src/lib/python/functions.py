@@ -19,6 +19,7 @@ import os
 import math
 import calendar
 import datetime
+import time
 import re
 # import resource
 from datetime import date
@@ -1099,6 +1100,19 @@ def extract_from_date(str_date):
         str_hour=str_date[8:12]
 
     return [str_year, str_month, str_day, str_hour]
+
+######################################################################################
+#
+#   Purpose: Get the last modified time from the file
+#   Author: Vijay Charan Venkatachalam
+#   Date: 2018/11/23
+#   Input: file_path(('/data/processing/chirps-dekad/2.0/CHIRP-Africa-5km/tif/10d/20180101_chirps-dekad_10d_CHIRP-Africa-5km_2.0.tif')
+#   Output: modified_time ('Fri Feb 16 03:06:50 2018')
+#
+def get_modified_time_from_file(file_path):
+    modified_time_sec = os.path.getmtime(file_path)
+    #modified_time = time.ctime(modified_time_sec)
+    return modified_time_sec
 
 
 ######################################################################################
