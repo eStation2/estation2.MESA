@@ -121,21 +121,21 @@ def get_one_source(internet_source, target_dir=None):
                 except:
                     logger.error("Error in creating date lists. Continue")
 
-            elif internet_type == 'sentinel_sat':
-                # Create the motu command which contains
-                try:
-                    current_list = build_list_matching_files_sentinel_sat(str(internet_source['url']),
-                                                                  str(internet_source['include_files_expression']),
-                                                                  internet_source['start_date'],
-                                                                  internet_source['end_date'],
-                                                                  str(internet_source['frequency_id']),
-                                                                  str(internet_source['user_name']),
-                                                                  str(internet_source['password'])
-                                                                  #str(internet_source['files_filter_expression'])
-                                                                  )
-
-                except:
-                    logger.error("Error in creating date lists. Continue")
+            # elif internet_type == 'sentinel_sat':
+            #     # Create the motu command which contains
+            #     try:
+            #         current_list = build_list_matching_files_sentinel_sat(str(internet_source['url']),
+            #                                                       str(internet_source['include_files_expression']),
+            #                                                       internet_source['start_date'],
+            #                                                       internet_source['end_date'],
+            #                                                       str(internet_source['frequency_id']),
+            #                                                       str(internet_source['user_name']),
+            #                                                       str(internet_source['password'])
+            #                                                       #str(internet_source['files_filter_expression'])
+            #                                                       )
+            #
+            #     except:
+            #         logger.error("Error in creating date lists. Continue")
 
             elif internet_type == 'offline':
                      logger.info("This internet source is meant to work offline (GoogleDrive)")
@@ -176,8 +176,8 @@ def get_one_source(internet_source, target_dir=None):
                                                            target_file=internet_source['files_filter_expression'],
                                                            target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
 
-                            elif internet_type == 'sentinel_sat':
-                                result = get_file_from_sentinelsat_url(str(filename), target_dir=es_constants.ingest_dir)
+                            # elif internet_type == 'sentinel_sat':
+                            #     result = get_file_from_sentinelsat_url(str(filename), target_dir=es_constants.ingest_dir)
                             else:
                                 result = get_file_from_url(str(internet_source['url'])+os.path.sep+filename, target_file=os.path.basename(filename), target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
                             if not result:

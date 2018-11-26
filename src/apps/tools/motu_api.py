@@ -47,31 +47,31 @@ from lib.python import functions
 #out_filename = filename_date+'_'+product_ID+'.nc'
 #datetime_start =
 
-motu_client_dic = {
-    'motu_path' :  '/home/webvenkavi/.local/lib/python2.7/site-packages/motu-client.py',
-    'user' : 'vvenkatachalam',
-    'pwd' : 'VijaycharanCMEMS2018',
-    'mercator_motu_web' : 'http://nrt.cmems-du.eu/motu-web/Motu',
-    'service_ID' : 'GLOBAL_ANALYSIS_FORECAST_PHY_001_024-TDS',
-    'product_ID' : 'global-analysis-forecast-phy-001-024',
-    'lon_lat' : '-x -35 -X 15 -y -10 -Y 30',
-    'depth' : '-z 0.494 -Z 0.4942',
-    'variables' : '-v vo -v uo -v so -v zos -v thetao',
-    'out_path' : '/data/processing/motu/'
-}
-
-motu_product_dic = {
-    'service_ID' : 'GLOBAL_ANALYSIS_FORECAST_PHY_001_024-TDS',
-    'product_ID' : 'global-analysis-forecast-phy-001-024',
-    'lon_lat' : '-x -35 -X 15 -y -10 -Y 30',
-    'depth' : '-z 0.494 -Z 0.4942',
-    'variables' : '-v vo -v uo -v so -v zos -v thetao',
-}
+# motu_client_dic = {
+#     'motu_path' :  '/home/webvenkavi/.local/lib/python2.7/site-packages/motu-client.py',
+#     'user' : 'vvenkatachalam',
+#     'pwd' : 'VijaycharanCMEMS2018',
+#     'mercator_motu_web' : 'http://nrt.cmems-du.eu/motu-web/Motu',
+#     'service_ID' : 'GLOBAL_ANALYSIS_FORECAST_PHY_001_024-TDS',
+#     'product_ID' : 'global-analysis-forecast-phy-001-024',
+#     'lon_lat' : '-x -35 -X 15 -y -10 -Y 30',
+#     'depth' : '-z 0.494 -Z 0.4942',
+#     'variables' : '-v vo -v uo -v so -v zos -v thetao',
+#     'out_path' : '/data/processing/motu/'
+# }
+#
+# motu_product_dic = {
+#     'service_ID' : 'GLOBAL_ANALYSIS_FORECAST_PHY_001_024-TDS',
+#     'product_ID' : 'global-analysis-forecast-phy-001-024',
+#     'lon_lat' : '-x -35 -X 15 -y -10 -Y 30',
+#     'depth' : '-z 0.494 -Z 0.4942',
+#     'variables' : '-v vo -v uo -v so -v zos -v thetao',
+# }
 
 def motu_4_dates(dates, template, base_url, username, password, files_filter_expression):
 
     motu_client_dic = {
-        'motu_path': '/home/webvenkavi/.local/lib/python2.7/site-packages/motu-client.py',
+        'motu_path': es_constants.es2globals['motu_path'],
         'user': username,
         'pwd': password,
         'mercator_motu_web': base_url,
