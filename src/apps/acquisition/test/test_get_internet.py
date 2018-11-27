@@ -173,7 +173,7 @@ def get_one_source(internet_source, target_dir=None):
                                 result = 0
                             elif internet_type == 'motu_client':
                                 result = get_file_from_motu_command(str(filename),
-                                                           target_file=internet_source['files_filter_expression'],
+                                                           #target_file=internet_source['files_filter_expression'],
                                                            target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
 
                             # elif internet_type == 'sentinel_sat':

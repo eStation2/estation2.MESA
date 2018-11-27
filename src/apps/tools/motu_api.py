@@ -69,7 +69,8 @@ from lib.python import functions
 # }
 
 def motu_4_dates(dates, template, base_url, username, password, files_filter_expression):
-
+    product_ID_star = files_filter_expression.replace("*", "")
+    product_ID = product_ID_star.replace(".", "")
     motu_client_dic = {
         'motu_path': es_constants.es2globals['motu_path'],
         'user': username,
@@ -78,7 +79,7 @@ def motu_4_dates(dates, template, base_url, username, password, files_filter_exp
         'lon_lat': '-x -35 -X 15 -y -10 -Y 30',
         'depth': '-z 0.494 -Z 0.4942',
         'out_path': es_constants.es2globals['base_tmp_dir'],
-        'product_ID' : files_filter_expression.replace("*", "")
+        'product_ID' : product_ID
     }
 
     list_motu_command = []

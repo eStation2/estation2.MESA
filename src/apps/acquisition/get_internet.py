@@ -458,13 +458,17 @@ def build_list_matching_files_motu(base_url, template, from_date, to_date, frequ
 #           target_dir: target directory (by default a tmp dir is created)
 #   Output: full pathname is returned (or positive number for error)
 #
-def get_file_from_motu_command(motu_command,  target_dir, target_file=None,userpwd=''):
+def get_file_from_motu_command(motu_command,  target_dir,userpwd=''):
 
     # Create a tmp directory for download
     tmpdir = es_constants.es2globals['base_tmp_dir']
+    result = 1
 
-    if target_file is None:
-        target_file='test_output_file'
+    # if target_file is None:
+    #     target_file='test_output_file'
+
+    list_motu_cmd = motu_command.split()
+    target_file = list_motu_cmd[-1]
 
     target_fullpath=tmpdir+os.sep+target_file
     target_final=target_dir+os.sep
@@ -474,16 +478,23 @@ def get_file_from_motu_command(motu_command,  target_dir, target_file=None,userp
     try:
         #subprocess.call([motu_command])
         os.system(motu_command)
-        mv_cmd = "mv "+target_fullpath+' '+target_final
-        os.system(mv_cmd)
+        #Check file exist in the path
+        if functions.is_file_exists_in_path(target_fullpath):
+            shutil.move(target_fullpath, target_final)
+            result = 0
+        else:
+            result = 1
+
+        # mv_cmd = "mv "+target_fullpath+' '+target_final
+        # os.system(mv_cmd)
         #shutil.move(target_fullpath, target_final)
-        return 0
+        return result
     except OSError:
         logger.warning('Output NOT downloaded: %s - error : %i' %(motu_command))
         return 1
     # finally:
-        # c = None
-        # shutil.rmtree(tmpdir)
+    #     c = None
+    #     shutil.rmtree(tmpdir)
 
 ######################################################################################
 #   get_file_from_sentinelsat_url
@@ -799,7 +810,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                      result = 0
                                                 elif internet_type == 'motu_client':
                                                     result = get_file_from_motu_command(str(filename),
-                                                                                        target_file=internet_source.files_filter_expression,
+                                                                                        #target_file=internet_source.files_filter_expression,
                                                                                         target_dir=es_constants.ingest_dir,
                                                                                         userpwd=str(usr_pwd))
 
