@@ -11,7 +11,7 @@ logger = log.my_logger(__name__)
 do_start = True
 dry_run  = False
 service  = False
-only_source = 'JRC:S3A:WRR'
+only_source = 'MOTU:PHY:TDS'
 
 if service:
     # Make sure the pid dir exists

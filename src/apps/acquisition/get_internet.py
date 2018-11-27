@@ -32,7 +32,7 @@ from database import querydb
 from lib.python import functions
 from apps.productmanagement import datasets
 from apps.tools import motu_api
-from apps.tools import sentinelsat_api
+#from apps.tools import sentinelsat_api
 
 logger = log.my_logger(__name__)
 
@@ -426,7 +426,7 @@ def build_list_matching_files_motu(base_url, template, from_date, to_date, frequ
         elif isinstance(to_date,int) or isinstance(to_date,long):
             if to_date < 0:
                 datetime_end=datetime.datetime.today() - datetime.timedelta(days=-to_date)
-            elif from_date > 0:
+            elif to_date > 0:
                 datetime_end = datetime.datetime.today() + datetime.timedelta(days=to_date)
         else:
             datetime_end=datetime.datetime.today()
