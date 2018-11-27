@@ -1548,16 +1548,16 @@ class TestIngestion(unittest.TestCase):
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
 
-    def test_ingest_motu_thetao(self):
+    def test_ingest_motu_chl(self):
 
-        date_fileslist = glob.glob('/data/ingest/20181105_GLOBAL_ANALYSIS_FORECAST_PHY_001_024-TDS.nc')
-        in_date = '20181105'
+        date_fileslist = glob.glob('/data/ingest/20181124_GLOBAL_ANALYSIS_FORECAST_BIO_001_014-TDS.nc')
+        in_date = '20181124'
 
-        productcode = 'motu'
+        productcode = 'motu-bio'
         productversion = '1.0'
-        subproductcode = 'thetao'
-        mapsetcode = 'SPOTV-Africa-10km'
-        datasource_descrID = 'MOTU:PHY:TDS'
+        subproductcode = 'chl'
+        mapsetcode = 'CPC-Africa-50km'
+        datasource_descrID = 'MOTU:BIO:TDS'
 
         product = {"productcode": productcode,
                    "version": productversion}
