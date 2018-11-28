@@ -118,6 +118,10 @@ def motu_getlists(datetime_start=None, motu_client_dic='', template=''):
     else:
         str_day = datetime_start.strftime("%Y-%m-%d 12:00:00")
         filename_date = datetime_start.strftime("%Y%m%d")
+        if product_ID == 'GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS' :
+            str_day = datetime_start.strftime("%Y-%m-%d %H:%M:%S")
+            filename_date = datetime_start.strftime("%Y%m%d%H%M%S")
+
         out_filename = filename_date + '_' + product_ID + '.nc'
 
     # python /home/webvenkavi/.local/lib/python2.7/site-packages/motu-client.py -u vvenkatachalam -p VijaycharanCMEMS2018 -m http://nrt.cmems-du.eu/motu-web/Motu -s GLOBAL_ANALYSIS_FORECAST_PHY_001_024-TDS -d global-analysis-forecast-phy-001-024 -x -35 -X 15 -y -10 -Y 30 -t 2018-11-05 12:00:00 -T 2018-11-05 12:00:00 -z 0.494 -Z 0.4942 -v vo -v uo -v so -v zos -v thetao -o /data/processing/motu/ -f 20181105_global-analysis-forecast-phy-001-024.nc
@@ -127,10 +131,10 @@ def motu_getlists(datetime_start=None, motu_client_dic='', template=''):
     #           ' -s ' + service_ID + ' -d ' + product_ID + ' ' + lon_lat + \
     #           ' -t ' + str_day + ' -T ' + str_day + ' ' + depth + ' ' + variables + \
     #           ' -o ' + out_path + ' -f ' + out_filename
-    command = 'python ' + motu_path + ' -u ' + user + ' -p ' + pwd + ' -m ' + mercator_motu_web + ' ' \
+    command = 'python ' + motu_path + ' --user ' + user + ' --pwd ' + pwd + ' --motu ' + mercator_motu_web + ' ' \
                + template + \
-              ' -t ' + str_day + ' -T ' + str_day + \
-              ' -o ' + out_path + ' -f ' + out_filename
+              ' --date-min "' + str_day + '" --date-max "' + str_day + \
+              '" --out-dir ' + out_path + ' --out-name ' + out_filename
 
 
     print(command)

@@ -1020,7 +1020,7 @@ class TestGetInternet(unittest.TestCase):
 
     def TestLocal_MOTU(self):
 
-        internet_id='MOTU:BIO:TDS'
+        internet_id='MOTU:WAV:TDS'
 
         # Direct test !
         if False:
@@ -1038,8 +1038,8 @@ class TestGetInternet(unittest.TestCase):
                          'pull_frequency': internet_source.pull_frequency,
                          'user_name':internet_source.user_name,
                          'password':internet_source.password,
-                         'start_date':20180901,
-                         'end_date': +8,
+                         'start_date':20181128,
+                         'end_date': +2,
                          'frequency_id': internet_source.frequency_id,
                          'type':internet_source.type,
                          'files_filter_expression':internet_source.files_filter_expression,
