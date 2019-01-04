@@ -531,7 +531,7 @@ class TestCreate(unittest.TestCase):
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
 
-        subproducts=['1monavg', '1monmax','1monmin']
+        subproducts=['1monclim', '1monmax','1monmin']
         for subproduct in subproducts:
             target_dir = base_target_dir + product + os.path.sep + subproduct
             functions.check_output_dir(target_dir)
@@ -555,6 +555,6 @@ class TestCreate(unittest.TestCase):
         self.TestCreateArchive_modis_firms()
         self.TestCreateArchive_olci_wrr()
         self.TestCreateArchive_pml_modis_sst()
-        self.TestCreateArchive_slstr_sst()
+        #self.TestCreateArchive_slstr_sst()
         self.TestCreateArchive_pml_modis_chl()
         self.TestCreateArchive_modis_pp()

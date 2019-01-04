@@ -699,7 +699,7 @@ def test_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=
 #test_proc_olci_wrr_chla_gradient(pipe_run=3, pipe_print=0, touch_files_only=False)
 
 #test_proc_chirps_dekad(pipe_run=4, pipe_print=0, start_date='19810101', end_date='20171231', touch_files_only=False)
-#test_proc_std_ndvi(pipe_run=0, pipe_print=3, touch_files_only=False)
+#test_proc_std_ndvi(pipe_run=4, pipe_print=0, touch_files_only=False)
 #test_proc_vgt_dmp(pipe_run=4, pipe_print=0, start_date='19990101', end_date='20171231', touch_files_only=False)
 #my_starting_dates_stats = proc_functions.get_list_dates_for_dataset('modis-firms', '10dcount', 'v6.0', start_date='20020701', end_date='20180621')
 # for date in my_starting_dates_stats:
