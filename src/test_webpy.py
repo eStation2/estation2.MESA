@@ -11,9 +11,6 @@ import webpy_esapp_helpers
 import webpy_esapp
 from database import crud
 
-import plotly.plotly as py
-from plotly.graph_objs import *
-
 import StringIO
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -843,19 +840,19 @@ class TestWebpy(unittest.TestCase):
     def test_GetProductLayer(self):
 
         # date = '20180625'  # uncompressed with piramid (adds .ovr file)
-        date = '20180701'
-        params = {
-            'productcode': 'chirps-dekad',
-            'productversion': '2.0',
-            'subproductcode': '1moncum',
-            'mapsetcode': 'CHIRP-Africa-5km',
-            'date': date,
-            'WIDTH': '0',
-            'HEIGHT': '1024',
-            'BBOX': "-40, -30, 40, 75",
-            'CRS': "EPSG:4326",
-            'legendid': "67"
-        }
+        date = '20171231'
+        # params = {
+        #     'productcode': 'chirps-dekad',
+        #     'productversion': '2.0',
+        #     'subproductcode': '1moncum',
+        #     'mapsetcode': 'CHIRP-Africa-5km',
+        #     'date': date,
+        #     'WIDTH': '0',
+        #     'HEIGHT': '1024',
+        #     'BBOX': "-40, -30, 40, 75",
+        #     'CRS': "EPSG:4326",
+        #     'legendid': "67"
+        # }
         # params = {
         #     'productcode': 'modis-chla',
         #     'productversion': 'v2013.1',
@@ -906,6 +903,18 @@ class TestWebpy(unittest.TestCase):
         #     'CRS': "EPSG:4326",
         #     'legendid': "136"
         # }
+        params = {
+            'productcode': 'modis-firms',
+            'productversion': 'v6.0',
+            'subproductcode': '1day',
+            'mapsetcode': 'SPOTV-Africa-1km',
+            'date': '20171231',
+            'WIDTH': '256',
+            'HEIGHT': '256',
+            'BBOX': "-3,7,0,9",
+            'CRS': "EPSG:4326",
+            'legendid': "236"
+        }
 
         vals = params['BBOX'].split(',')
         ratio = (float(vals[3]) - float(vals[1])) / (float(vals[2]) - float(vals[0]))  # ratio width/height (X/Y)

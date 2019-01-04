@@ -849,9 +849,9 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_jrc_wbd(self):
 
-        date_fileslist = glob.glob('/data/ingest/JRC-WBD_20180701*')
+        date_fileslist = glob.glob('/data/ingest/JRC-WBD_20180801_*')
         #date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
-        in_date = '20180701'
+        in_date = '20180801'
         productcode = 'wd-gee'
         productversion = '1.0'
         subproductcode = 'occurr'
@@ -1457,7 +1457,7 @@ class TestIngestion(unittest.TestCase):
     def test_ingest_s3_olci_wrr_chl_oc4me(self):
 
         # Test the ingestion of the Sentinel-3/OLCI Level-2 WRR product (on d6-dev-vm19 !!!!!)
-        date_fileslist = glob.glob('/data/processing/ingest/S3A_OL_2_WRR____20180719*.SEN3.tar')
+        date_fileslist = glob.glob('/spatial_data//data/processing/olci-wrr/V02.0/archive/S3A_OL_2_WRR____20181201*.SEN3.tar')
         single_date =  os.path.basename(date_fileslist[0])
         in_date = single_date.split('_')[7]
         in_date = in_date.split('T')[0] #+ '0000'
@@ -1500,7 +1500,7 @@ class TestIngestion(unittest.TestCase):
 
         # Test the ingestion of the Sentinel-3/SLSTR Level-2 WST product (on d6-dev-vm19 !!!!!)
         #date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/S3A_SL_2_WST____20180306T095629_20180306T095929_20180306T114727_0179_028_307_3420_MAR_O_NR_002.SEN3.tar')
-        date_fileslist = glob.glob('/data/ingest/S3A_SL_2_WST____20180306T0*.SEN3.tar')
+        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/slstr/S3A_SL_2_WST____20180*.SEN3.tar')
         single_date =  os.path.basename(date_fileslist[0])
         in_date = single_date.split('_')[7]
         in_date = in_date.split('T')[0] #+ '0000'
