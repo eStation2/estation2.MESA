@@ -905,7 +905,7 @@ class TestGetInternet(unittest.TestCase):
         # Check last 90 days (check list length = 9)
         result = get_one_source(my_source)
 
-    def TestRemoteFtp_MODIS_FIRMS_6(self):
+    def Test_RemoteFtp_MODIS_FIRMS_6(self):
 
         internet_id='MODAPS:EOSDIS:FIRMS:NASA'
 
@@ -930,6 +930,30 @@ class TestGetInternet(unittest.TestCase):
         # Check last 90 days (check list length = 9)
         result = get_one_source(my_source)
 
+    def test_RemoteHttps_MODIS_FIRMS_6(self):
+
+        internet_id='MODAPS:EOSDIS:FIRMS:NASA:HTTP'
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':  '20181215',
+                         'end_date':None,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type}
+
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
 
     def TestRemoteHttps_DMP_2(self):
 
@@ -1080,3 +1104,7 @@ class TestGetInternet(unittest.TestCase):
 
         # Check last 90 days (check list length = 9)
         result = get_one_source(my_source)
+
+
+if __name__ == '__main__':
+        unittest.main()
