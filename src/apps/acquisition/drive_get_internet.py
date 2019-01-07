@@ -11,8 +11,10 @@ logger = log.my_logger(__name__)
 do_start = True
 dry_run  = False
 service  = False
-only_source = 'JRC:S3A:WRR'
+only_source = None  # 'JRC:S3A:WRR'
 
+# service is always False because this module is used by the windows version or for testing
+# ToDo: The code under the if statement can be deleted, service_get_internet.py is now used by non windows versions
 if service:
     # Make sure the pid dir exists
     if not os.path.isdir(es_constants.pid_file_dir):
@@ -37,6 +39,10 @@ if service:
         else:
             logger.info('GetInternet process is running: Stop it.')
             daemon.stop()
-else:
-    get_internet.loop_get_internet(dry_run=dry_run, test_one_source=only_source)
+else:   # For windows version and for testing
+    if only_source is not None:
+        get_internet.loop_get_internet(dry_run=dry_run, test_one_source=only_source)
+        logger.warning('Get internet running for a single source: %s', only_source)
+    else:
+        get_internet.loop_get_internet(dry_run=dry_run)
 

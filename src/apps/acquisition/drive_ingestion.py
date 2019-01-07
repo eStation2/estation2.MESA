@@ -11,9 +11,10 @@ logger = log.my_logger(__name__)
 do_start = True
 dry_run  = False
 service  = False
-only_prod='wd-gee'
-# only_prod='wd-gee'
+only_prod = None    # 'wd-gee'
 
+# service is always False because this module is used by the windows version or for testing
+# ToDo: The code under the if statement can be deleted, service_ingestion.py is now used by non windows versions
 if service:
     # Make sure the pid dir exists
     if not os.path.isdir(es_constants.pid_file_dir):

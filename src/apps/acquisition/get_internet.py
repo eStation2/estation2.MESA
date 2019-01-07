@@ -379,6 +379,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
         output_dir = es_constants.get_internet_output_dir
         logger.debug("Check if the Ingest Server input directory : %s exists.", output_dir)
         if not os.path.exists(output_dir):
+            # ToDo: create output_dir - ingest directory
             logger.fatal("The Ingest Server input directory : %s doesn't exists.", output_dir)
             exit(1)
 
@@ -423,11 +424,16 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                             do_not_consider_processed_list = False
                             delay_time_source_minutes = pull_frequency
 
-                        logger_spec = log.my_logger('apps.get_internet.'+internet_source.internet_id)
+                        if sys.platform == 'win32':
+                            internet_id = str(internet_source.internet_id).replace(':', '_')
+                        else:
+                            internet_id = str(internet_source.internet_id)
+
+                        logger_spec = log.my_logger('apps.get_internet.'+internet_id)
                         logger.info("Processing internet source  %s.", internet_source.descriptive_name)
 
                         # Create objects for list and info
-                        processed_info_filename = es_constants.get_internet_processed_list_prefix+str(internet_source.internet_id)+'.info'
+                        processed_info_filename = es_constants.get_internet_processed_list_prefix+str(internet_id)+'.info'
 
                         # Restore/Create Info
                         processed_info = None
@@ -450,7 +456,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                             # Restore/Create List
                             processed_list = []
                             if not do_not_consider_processed_list:
-                                processed_list_filename = es_constants.get_internet_processed_list_prefix+str(internet_source.internet_id)+'.list'
+                                processed_list_filename = es_constants.get_internet_processed_list_prefix+internet_id+'.list'
                                 processed_list=functions.restore_obj_from_pickle(processed_list, processed_list_filename)
 
                             processed_info['time_latest_exec']=datetime.datetime.now()
@@ -513,10 +519,10 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                             else:
                                      logger.error("No correct type for this internet source type: %s" %internet_type)
                                      current_list = []
-                            logger_spec.debug("Number of files currently available for source %s is %i", internet_source.internet_id, len(current_list))
+                            logger_spec.debug("Number of files currently available for source %s is %i", internet_id, len(current_list))
 
                             if len(current_list) > 0:
-                                logger_spec.debug("Number of files already copied for trigger %s is %i", internet_source.internet_id, len(processed_list))
+                                logger_spec.debug("Number of files already copied for trigger %s is %i",internet_id, len(processed_list))
                                 listtoprocess = []
                                 for current_file in current_list:
                                     if len(processed_list) == 0:
@@ -526,7 +532,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                         if current_file not in processed_list:
                                             listtoprocess.append(current_file)
 
-                                logger_spec.debug("Number of files to be copied for trigger %s is %i", internet_source.internet_id, len(listtoprocess))
+                                logger_spec.debug("Number of files to be copied for trigger %s is %i", internet_id, len(listtoprocess))
                                 if listtoprocess != set([]):
                                      # # Debug
                                      # toprint=''

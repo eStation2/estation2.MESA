@@ -363,7 +363,7 @@
      * Redirect build JS output into .js file, which has to be includes (with <source>) in the HTML
      * Add <script src="microloader.js"></script> in the esap template index.html,
      * which will still be overwritten on every build
-     *
+     **/
     ,"output": {
         "base": "${workspace.build.dir}/${build.environment}/${app.name}",
         "microloader": {
@@ -372,6 +372,6 @@
             "enable": true
         }
     }
-    */
+
 
 }

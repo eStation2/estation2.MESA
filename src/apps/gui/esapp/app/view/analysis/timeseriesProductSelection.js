@@ -858,7 +858,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                     //var timeseriesProductsStore = me.getViewModel().getStore('products');
                     //console.info(timeseriesProductsStore);
                     if (timeseriesProductsStore.isStore) {
-                        timeseriesProductsStore.proxy.extraParams = {forse: true};
+                        timeseriesProductsStore.proxy.extraParams = {force: true};
                         timeseriesProductsStore.reload({
                             callback: function (records, options, success) {
                                 var productpanelitems = me.lookupReference('productcategories');
@@ -885,7 +885,7 @@ Ext.define("esapp.view.analysis.timeseriesProductSelection",{
                         // myLoadMask.show();
                     }
                     else if (timeseriesProductsStore.count() < 1){
-                        timeseriesProductsStore.proxy.extraParams = {forse: true};
+                        timeseriesProductsStore.proxy.extraParams = {force: true};
                         timeseriesProductsStore.reload({
                             callback: function (records, options, success) {
                             }

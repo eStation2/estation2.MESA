@@ -75,14 +75,18 @@ Ext.define("esapp.view.processing.Processing",{
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             items: [{
-                text: esapp.Utils.getTranslation('expandall'),    // 'Expand All',
+                tooltip: esapp.Utils.getTranslation('expandall'),    // 'Expand All',
+                iconCls: 'expand',
+                scale: 'medium',
                 handler: function(btn) {
                     var view = btn.up().up().getView();
                     view.getFeature('processprodcat').expandAll();
                     view.refresh();
                 }
             }, {
-                text: esapp.Utils.getTranslation('collapseall'),    // 'Collapse All',
+                tooltip: esapp.Utils.getTranslation('collapseall'),    // 'Collapse All',
+                iconCls: 'collapse',
+                scale: 'medium',
                 handler: function(btn) {
                     var view = btn.up().up().getView();
                     view.getFeature('processprodcat').collapseAll();
@@ -109,7 +113,7 @@ Ext.define("esapp.view.processing.Processing",{
                     var processingstore  = Ext.data.StoreManager.lookup('ProcessingStore');
 
                     if (processingstore.isStore) {
-                        processingstore.proxy.extraParams = {forse: true};
+                        processingstore.proxy.extraParams = {force: true};
                         processingstore.load();
                     }
                 }

@@ -353,15 +353,23 @@ Ext.define("esapp.view.system.systemsettings",{
                 disabled: false,
                 handler: function(){
                     // me.onHandleAction('Save','save');
-                    if (me.getSession().getChanges() != null){
+                    var SystemSettingChanges = me.getSession().getChanges();
+                    if (SystemSettingChanges != null){
+                        // console.info(me.getSession().getChanges());
                         me.getSession().getSaveBatch().start();
                         Ext.toast({ html: esapp.Utils.getTranslation('systemsettingssaved'), title: esapp.Utils.getTranslation('systemsettingssaved'), width: 200, align: 't' });
 
-                        var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
-                        if (datasetsstore.isStore) {
-                            datasetsstore.proxy.extraParams = {forse: true};
-                            datasetsstore.load();
+                        // console.info(SystemSettingChanges.SystemSetting.U[0].hasOwnProperty('data_dir'));
+                        if (SystemSettingChanges.SystemSetting.U[0].hasOwnProperty('data_dir')){
+                            Ext.getCmp('datamanagementmain').setDirtyStore(true);
+                            Ext.getCmp('acquisitionmain').setDirtyStore(true);
                         }
+
+                        // var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
+                        // if (datasetsstore.isStore) {
+                        //     // datasetsstore.proxy.extraParams = {force: true};
+                        //     // datasetsstore.load();
+                        // }
                     }
                 }
             }]

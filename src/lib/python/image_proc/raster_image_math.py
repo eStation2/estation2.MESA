@@ -48,7 +48,11 @@ import copy
 import os, re, os.path, time, sys
 import pymorph
 # scipy for chla gradient computation
-from scipy import ndimage
+# from scipy import ndimage
+import scipy
+# Jur: not working in windows version. Conflict with scipy version 1.1.0 and its ndimage functionality.
+# I tried to install scipy version 0.15.1 but need older numpy version 1.19.2 (numpy 1.11.0 is installed)
+# installing numpy 1.19.2 gives problems with installed gdal version 2.1.2)
 
 logger = log.my_logger(__name__)
 
@@ -2957,15 +2961,15 @@ def do_compute_chla_gradient(input_file='', nodata=None, output_file='', output_
 
         # Data smoothing (median filter)
 
-        smooth_data_chla = ndimage.median_filter(data_chla, 3)
-        #smooth_data_chla = ndimage.gaussian_filter(data_chla, 3)
+        smooth_data_chla = scipy.ndimage.median_filter(data_chla, 3)
+        #smooth_data_chla = scipy.ndimage.gaussian_filter(data_chla, 3)
 
         # Gradient derivation
 
         #Sobel (X direction)
-        sx = ndimage.sobel(smooth_data_chla, axis=0, mode='nearest')
+        sx = scipy.ndimage.sobel(smooth_data_chla, axis=0, mode='nearest')
         # Sobel (Y direction)
-        sy = ndimage.sobel(smooth_data_chla, axis=1, mode='nearest')
+        sy = scipy.ndimage.sobel(smooth_data_chla, axis=1, mode='nearest')
 
         #Sobel
         chla_gradient = N.hypot(sx, sy)

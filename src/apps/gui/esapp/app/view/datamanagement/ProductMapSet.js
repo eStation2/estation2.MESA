@@ -31,65 +31,62 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
         disableSelection: true,
         trackOver: false,
         preserveScrollOnRefresh: false,
-        variableRowHeight : true,
-        focusable: false
+        focusable: false,
+        forceFit: true
     },
 
-    layout: 'fit',
+    // selType: 'cellmodel',
+    // selModel: {listeners:{}},
 
-    selType: 'cellmodel',
-    selModel: {listeners:{}},
-
-    bufferedRenderer: true,
+    bufferedRenderer: false,
 
     hideHeaders: true,
     columnLines: false,
     rowLines: false,
-    minHeight: 60,
+    minHeight: 65,
     focusable: false,
-    margin: '0 0 10 0',    // (top, right, bottom, left).
+    forceFit: true,
 
-    //listeners: {
-    //    cellclick : function(view, cell, cellIndex, record, row, rowIndex, e) {
-    //        //e.stopPropagation();
-    //        return false;
-    //    }
-    //},
-    //listeners: {
-    //    beforerender:  function () {
-    //        //console.info('ProductMapSet: beforerender event called');
-    //        var me = this,
-    //            record = me.getWidgetRecord();
-    //        Ext.suspendLayouts();
-    //        if (record.getData() != null && record.getData().hasOwnProperty('productmapsets')) {
-    //            var productmapsets = record.getData().productmapsets;
-    //            var newstore = Ext.create('Ext.data.JsonStore', {
-    //                model: 'ProductMapSet',
-    //                data: productmapsets
-    //            });
-    //            me.setStore(newstore);
-    //        }
-    //        Ext.resumeLayouts(true);
-    //    }
-    //},
+    layout: 'fit',
+
+    // margin: '0 0 10 0',    // (top, right, bottom, left).
+
+
 
     initComponent: function () {
         var me = this;
 
         // me.listeners = {
-        //     // beforerender: function () {
-        //     //     Ext.util.Observable.capture(me, function (e) { console.log('productmapsetgrid - ' + e);});
-        //     //     // me.ownerGrid.updateLayout();
-        //     // },
-        //     afterrender: function (grid) {
-        //         console.info('afterrender productmapset');
-        //         me.updateLayout();
-        //     }
+            // cellclick : function(view, cell, cellIndex, record, row, rowIndex, e) {
+            //    //e.stopPropagation();
+            //    return false;
+            // },
+            // beforerender: function () {
+            //    Ext.util.Observable.capture(me, function (e) { console.log('productmapsetgrid - ' + e);});
+            //    // me.ownerGrid.updateLayout();
+            //    //console.info('ProductMapSet: beforerender event called');
+            //    var me = this,
+            //        record = me.getWidgetRecord();
+            //    Ext.suspendLayouts();
+            //    if (record.getData() != null && record.getData().hasOwnProperty('productmapsets')) {
+            //        var productmapsets = record.getData().productmapsets;
+            //        var newstore = Ext.create('Ext.data.JsonStore', {
+            //            model: 'ProductMapSet',
+            //            data: productmapsets
+            //        });
+            //        me.setStore(newstore);
+            //    }
+            //    Ext.resumeLayouts(true);
+            // },
+            // afterrender: function (view) {
+            //     console.info('afterrender productmapset');
+            //     console.info(view);
+            //     view.updateLayout();
+            // }
         // };
 
         me.defaults = {
             menuDisabled: true,
-            variableRowHeight : true,
             draggable:false,
             groupable:false,
             hideable: false
@@ -103,7 +100,6 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
             xtype: 'actioncolumn',
             width: 65,
             align:'center',
-            menuDisabled: true,
             stopSelection: false,
             items: [{
                 icon: 'resources/img/icons/download.png',
@@ -124,20 +120,20 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
         }, {
             header: '',
             xtype: 'widgetcolumn',
-            width: 725,
+            width: 755,
             widget: {
                 xtype: 'mapsetdatasetgrid',
                 widgetattached: false
             },
             onWidgetAttach: function(col, widget, record) {
                 if (!widget.widgetattached) {
-                    Ext.suspendLayouts();
+                    // Ext.suspendLayouts();
                     widget.getStore().setData(record.getData().mapsetdatasets);
                     var sorters = widget.getStore().getSorters();
                     sorters.add('display_index');
 
                     widget.widgetattached = true;
-                    Ext.resumeLayouts(true);
+                    // Ext.resumeLayouts(true);
                 }
 
                 //var mapsetdatasets = record.getData().mapsetdatasets;

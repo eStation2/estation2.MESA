@@ -1,8 +1,8 @@
 Ext.define('esapp.model.Product', {
     extend : 'esapp.model.Base',
-//    extend: 'Ext.data.Model',
 
     idProperty : 'productid',
+
     fields: [
         {name: 'productid'},
         {name: 'productcode'},
@@ -19,53 +19,48 @@ Ext.define('esapp.model.Product', {
         {name: 'order_index'}
     ]
 
-//    ,grouper:{
-//             // property: 'cat_descr_name',
-//             groupFn : function (item) {
-//                 return "<span style='display: none;'>" + item.get('order_index') + "</span>" + item.get('cat_descr_name')
-//                        // "</span><span class='group-header-style'>" + item.get('cat_descr_name') + "</span>"
-//             },
-//             sortProperty: 'order_index'
-//    }
+    // ,autoLoad: true
+    ,autoSync: true
+    ,remoteSort: false
+    ,remoteGroup: false
 
-//    ,proxy: {
-//        type: 'ajax',
-//        url: 'pa',
-////        extraParams:{
-////            activated:'True'
-////        },
-//        reader: {
-//            type: 'json'
-//            ,rootProperty: 'products'
-//        }
-//    }
+    ,proxy: {
+        type: 'rest',
+        // url: 'pa',
+        appendId: false,
+        extraParams:{
+            activated:'False'
+        },
+        api: {
+            read: 'pa',
+            create: 'product/create',
+            update: 'product/update',
+            destroy: 'product/delete'
+        },
+        reader: {
+             type: 'json'
+            ,successProperty: 'success'
+            ,rootProperty: 'products'
+            ,messageProperty: 'message'
+        },
+        writer: {
+            type: 'json',
+            writeAllFields: true,
+            rootProperty: 'products'
+        },
+        listeners: {
+            exception: function(proxy, response, operation){
+                // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
+                console.info('PRODUCTS ACTIVE STORE - REMOTE EXCEPTION - Reload or reopen Activate product window!');
 
-//    ,hasMany: [{
-//        model: 'DataAcquisition'
-//        ,storeConfig: {
-//            type: 'dataacquisitions'
-//        }
-//	}]
+                //Ext.Msg.show({
+                //    title: 'PRODUCTS INACTIVE STORE - REMOTE EXCEPTION',
+                //    msg: operation.getError(),
+                //    icon: Ext.Msg.ERROR,
+                //    buttons: Ext.Msg.OK
+                //});
+            }
+        }
+    }
 
-//    ,oneToMany: 'DataAcquisition'
-
-//    requires:[
-//        'esapp.model.DataAcquisition'
-//    ],
-//
-//    hasMany:[
-//        {
-//            foreignKey: 'productid',
-//            associationKey: 'dataacquisitions',
-//            name: 'dataacquisitions',
-//            model: 'esapp.model.DataAcquisition'
-//        }
-//    ]
-
-//    associations: [{
-//        model: 'DataAcquisition',
-//        type: 'hasMany',
-//        autoLoad: true
-//    }]
-//    ,hasMany: 'DataAcquisition'
 });

@@ -15,7 +15,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
         'esapp.view.acquisition.AcquisitionController',
         //'esapp.view.acquisition.DataAcquisition',
         //'esapp.view.acquisition.Ingestion',
-        //'esapp.view.acquisition.product.selectProduct',
+        // 'esapp.view.acquisition.product.selectProduct',
         //
         //'esapp.view.acquisition.editEumetcastSource',
         //'esapp.view.acquisition.editInternetSource',
@@ -52,25 +52,30 @@ Ext.define('esapp.view.acquisition.Acquisition',{
         //focusRow: Ext.emptyFn
     },
 
-    //selModel: {listeners:{}},
+    // selModel: {listeners:{}},
     //selModel: Ext.create('Ext.selection.Model', { listeners: {} }),
 
     collapsible: false,
-    suspendLayout:false,
+    suspendLayout: false,
     disableSelection: true,
-    enableColumnMove:false,
-    enableColumnResize:false,
+    enableColumnMove: false,
+    enableColumnResize: false,
     multiColumnSort: false,
     columnLines: false,
     rowLines: true,
     frame: false,
     border: false,
     bufferedRenderer: false,
-    variableRowHeight:true,
-    forceFit: false,
     focusable: false,
     margin: '0 0 10 0',    // (top, right, bottom, left).
     session: true,
+
+    layout: 'fit',
+
+    config: {
+        forceStoreLoad: false,
+        dirtyStore: false
+    },
 
     // listeners: {
         // groupclick: function( view, node, group, eOpts ) {
@@ -105,6 +110,78 @@ Ext.define('esapp.view.acquisition.Acquisition',{
 
         // Ext.util.Observable.capture(this, function(e){console.log('Acquisition - ' + this.id + ': ' + e);});
 
+        me.mon(me, {
+            loadstore: function() {
+                var productgridstore  = Ext.data.StoreManager.lookup('ProductsActiveStore');
+                var acqgridsstore = Ext.data.StoreManager.lookup('DataAcquisitionsStore');
+                var ingestiongridstore = Ext.data.StoreManager.lookup('IngestionsStore');
+                var eumetcastsourcestore = Ext.data.StoreManager.lookup('EumetcastSourceStore');
+                var internetsourcestore = Ext.data.StoreManager.lookup('InternetSourceStore');
+
+                if (me.forceStoreLoad || me.dirtyStore || !productgridstore.isLoaded() || !acqgridsstore.isLoaded() || !ingestiongridstore.isLoaded()) {
+                    var myLoadMask = new Ext.LoadMask({
+                        msg    : esapp.Utils.getTranslation('loading'), // 'Loading...',
+                        target : me
+                    });
+                    myLoadMask.show();
+
+                    me.getView().getFeature('productcategories').collapseAll();
+                    if (productgridstore.isStore) {
+                        productgridstore.load({
+                            callback: function(records, options, success) {
+                                if (acqgridsstore.isStore) {
+                                    acqgridsstore.load({
+                                        callback: function(records, options, success) {
+                                            if (ingestiongridstore.isStore) {
+                                                ingestiongridstore.proxy.extraParams = {force: true};
+                                                ingestiongridstore.load({
+                                                    callback: function(records, options, success){
+                                                        myLoadMask.hide();
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+
+                    eumetcastsourcestore.load();
+                    internetsourcestore.load();
+
+                    me.forceStoreLoad = false;
+                    me.dirtyStore = false;
+                }
+            }
+        });
+
+        me.listeners = {
+            groupcollapse: function(view, node, group) {
+                me.hideCompletenessTooltip();
+            },
+            groupexpand: function(view, node, group){
+                me.hideCompletenessTooltip();
+
+                // var taskRefresh = new Ext.util.DelayedTask(function() {
+                //     view.refresh();
+                // });
+                // taskRefresh.delay(50);
+            },
+            afterrender: function(){
+                var scroller = me.view.getScrollable();
+
+                scroller.on('scroll', function(){
+                    var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
+                    Ext.each(completenessTooltips, function(item) {
+                       item.disable();
+                       // item.hide();
+                    });
+                }, scroller, {single: false});
+
+            }
+        }
+
         me.features = [{
             id: 'productcategories',
             ftype: 'grouping',
@@ -120,9 +197,8 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                 xtype: 'button',
                 id: 'lockunlock',
                 name: 'lockunlock',
+                // hidden: ((esapp.getUser() != 'undefined' || esapp.getUser() != null) ? false : true),   // && esapp.getUser().userlevel == 0
                 iconCls: 'fa fa-lock fa-2x',  // 'fa-unlock' = xf09c  'fa-lock' = xf023
-                // style: { color: 'gray' },
-                // glyph: 'xf023@FontAwesome',
                 enableToggle: true,
                 scale: 'medium',
                 handler:  function(btn) {
@@ -201,33 +277,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                         //'           </div>' +
                         '       </div>');
 
-
-                        //Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
-                        //    dataacquisitiongrid.columns[1].show();      // Edit Data Source
-                        //    dataacquisitiongrid.columns[1].updateLayout();
-                        //    dataacquisitiongrid.columns[2].show();      // Store Native
-                        //    dataacquisitiongrid.columns[2].updateLayout();
-                        //    //dataacquisitiongrid.columns[2].show();   // Last executed
-                        //    //dataacquisitiongrid.columns[3].show();   // Store Native
-                        //});
-                        //
-                        //Ext.Object.each(ingestiongrids, function(id, ingestiongrid, myself) {
-                        //    ingestiongrid.columns[0].show();    // Add Mapset
-                        //    ingestiongrid.columns[0].updateLayout();
-                        //    ingestiongrid.columns[3].show();    // Delete Mapset
-                        //    ingestiongrid.columns[3].updateLayout();
-                        //});
-
-                        //Ext.Object.each(checkColumns, function(id, chkCol, myself) {
-                        //    chkCol.enable();
-                        //});
-                        // Enable action columns
-                        //Ext.Object.each(actionColumns, function(id, actionCol, myself) {
-                        //    actionCol.enable();
-                        //    actionCol.items[0].disabled = false;
-                        //    actionCol.enableAction(0);
-                        //    actionCol.updateLayout();
-                        //})
+                        me.getView().refresh();
                     }
                     else {
                         btn.setIconCls('fa fa-lock fa-2x');
@@ -280,6 +330,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                                 //'           </div>' +
                                 '       </div>');
 
+                        me.getView().refresh();
 
                         //Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
                         //    dataacquisitiongrid.columns[1].hide();  // Edit Data Source
@@ -294,7 +345,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                         //});
                     }
 
-                    me.updateLayout();
+
                     //me.getController().renderHiddenColumnsWhenUnlocked();
 
                     //Ext.resumeLayouts(true);
@@ -304,7 +355,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                     //    item[toggleFn]();
                     //});
                 }
-            }, {
+            }, ' ', ' ', {
                 xtype: 'button',
                 text: esapp.Utils.getTranslation('addproduct'),    // 'Add Product',
                 id: 'addproduct',
@@ -316,7 +367,9 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                 scale: 'medium',
                 handler: 'selectProduct'
             },{
-                text:  esapp.Utils.getTranslation('expandall'),    // 'Expand All',
+                tooltip:  esapp.Utils.getTranslation('expandall'),    // 'Expand All',
+                iconCls: 'expand',
+                scale: 'medium',
                 handler: function(btn) {
                     var view = btn.up().up().getView();
                     //Ext.suspendLayouts();
@@ -327,22 +380,18 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                     //view.updateLayout();
                 }
             }, {
-                text:  esapp.Utils.getTranslation('collapseall'),    // 'Collapse All',
+                tooltip:  esapp.Utils.getTranslation('collapseall'),    // 'Collapse All',
+                iconCls: 'collapse',
+                scale: 'medium',
                 handler: function(btn) {
                     var view = btn.up().up().getView();
                     view.getFeature('productcategories').collapseAll();
-                    //me.getController().renderHiddenColumnsWhenUnlocked();
-                    //view.refresh();
-                    //view.updateLayout();
                 }
             }, '->',
             {
                 xtype: 'servicemenubutton',
                 service: 'eumetcast',
                 text:  esapp.Utils.getTranslation('eumetcast'),    // 'Eumetcast',
-                //listeners : {
-                //    afterrender: 'checkStatusServices'
-                //},
                 handler: 'checkStatusServices'
             },
             // add a vertical separator bar between toolbar items
@@ -379,11 +428,11 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                 enableToggle: false,
                 scale: 'medium',
                 handler:  function(btn) {
-                    var productgridstore  = Ext.data.StoreManager.lookup('ProductsActiveStore');
-                    var acqgridsstore = Ext.data.StoreManager.lookup('DataAcquisitionsStore');
-                    var ingestiongridstore = Ext.data.StoreManager.lookup('IngestionsStore');
-                    var eumetcastsourcestore = Ext.data.StoreManager.lookup('EumetcastSourceStore');
-                    var internetsourcestore = Ext.data.StoreManager.lookup('InternetSourceStore');
+                    // var productgridstore  = Ext.data.StoreManager.lookup('ProductsActiveStore');
+                    // var acqgridsstore = Ext.data.StoreManager.lookup('DataAcquisitionsStore');
+                    // var ingestiongridstore = Ext.data.StoreManager.lookup('IngestionsStore');
+                    // var eumetcastsourcestore = Ext.data.StoreManager.lookup('EumetcastSourceStore');
+                    // var internetsourcestore = Ext.data.StoreManager.lookup('InternetSourceStore');
                     //var view = btn.up().up().getView();
                     var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
 
@@ -391,46 +440,49 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                         item.hide();
                     });
 
-                    var myLoadMask = new Ext.LoadMask({
-                        msg    : esapp.Utils.getTranslation('loading'), // 'Loading...',
-                        target : me
-                    });
-                    myLoadMask.show();
+                    me.forceStoreLoad = true;
+                    me.fireEvent('loadstore');
 
-                    me.getView().getFeature('productcategories').collapseAll();
-                    if (productgridstore.isStore) {
-                        //Ext.suspendLayouts();
-                        productgridstore.load({
-                            callback: function(records, options, success) {
-                                if (acqgridsstore.isStore) {
-                                    acqgridsstore.load({
-                                        callback: function(records, options, success) {
-                                            //me.getController().renderHiddenColumnsWhenUnlocked();
-
-                                            if (ingestiongridstore.isStore) {
-                                                ingestiongridstore.proxy.extraParams = {forse: true};
-                                                ingestiongridstore.load({
-                                                    callback: function(records, options, success){
-                                                        myLoadMask.hide();
-
-                                                        //Ext.resumeLayouts(true);
-                                                        //var view = btn.up().up().getView();
-                                                        ////view.getFeature('productcategories').expandAll();
-                                                        //view.refresh();
-                                                    }
-                                                });
-                                            }
-                                        }
-                                    });
-                                }
-                            }
-                        });
-                    }
-
-                    //Ext.resumeLayouts(true);
-
-                    eumetcastsourcestore.load();
-                    internetsourcestore.load();
+                    // var myLoadMask = new Ext.LoadMask({
+                    //     msg    : esapp.Utils.getTranslation('loading'), // 'Loading...',
+                    //     target : me
+                    // });
+                    // myLoadMask.show();
+                    //
+                    // me.getView().getFeature('productcategories').collapseAll();
+                    // if (productgridstore.isStore) {
+                    //     //Ext.suspendLayouts();
+                    //     productgridstore.load({
+                    //         callback: function(records, options, success) {
+                    //             if (acqgridsstore.isStore) {
+                    //                 acqgridsstore.load({
+                    //                     callback: function(records, options, success) {
+                    //                         //me.getController().renderHiddenColumnsWhenUnlocked();
+                    //
+                    //                         if (ingestiongridstore.isStore) {
+                    //                             ingestiongridstore.proxy.extraParams = {force: true};
+                    //                             ingestiongridstore.load({
+                    //                                 callback: function(records, options, success){
+                    //                                     myLoadMask.hide();
+                    //
+                    //                                     //Ext.resumeLayouts(true);
+                    //                                     //var view = btn.up().up().getView();
+                    //                                     ////view.getFeature('productcategories').expandAll();
+                    //                                     //view.refresh();
+                    //                                 }
+                    //                             });
+                    //                         }
+                    //                     }
+                    //                 });
+                    //             }
+                    //         }
+                    //     });
+                    // }
+                    //
+                    // //Ext.resumeLayouts(true);
+                    //
+                    // eumetcastsourcestore.load();
+                    // internetsourcestore.load();
 
                     me.getController().checkStatusServices();
                     //me.getController().renderHiddenColumnsWhenUnlocked();
@@ -438,34 +490,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
             }]
         });
 
-        me.listeners = {
-            groupcollapse: function(view, node, group) {
-                me.hideCompletenessTooltip();
-            },
-            groupexpand: function(view, node, group){
-                me.hideCompletenessTooltip();
-
-                var taskRefresh = new Ext.util.DelayedTask(function() {
-                    view.refresh();
-                });
-                taskRefresh.delay(50);
-            },
-            afterrender: function(){
-                var scroller = me.view.getScrollable();
-
-                scroller.on('scroll', function(){
-                    var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
-                    Ext.each(completenessTooltips, function(item) {
-                       item.disable();
-                       // item.hide();
-                    });
-                }, scroller, {single: false});
-
-            }
-        }
-
         me.defaults = {
-            variableRowHeight: true,
             menuDisabled: true,
             sortable: false,
             groupable:true,
@@ -477,10 +502,8 @@ Ext.define('esapp.view.acquisition.Acquisition',{
         {
             header: '<div class="grid-header-style">' + esapp.Utils.getTranslation('productcategories') + '</div>',
             menuDisabled: true,
-            variableRowHeight : true,
             defaults: {
                 menuDisabled: true,
-                variableRowHeight : true,
                 sortable: false,
                 groupable:true,
                 draggable:false,
@@ -530,7 +553,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                     ),
                 width: 330,
                 cellWrap:true,
-                variableRowHeight:true
+                variableRowHeight:false
             },{
                 xtype: 'actioncolumn',
                 header: esapp.Utils.getTranslation('active'),   // 'Active',
@@ -538,9 +561,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                 hidden: Ext.getCmp('lockunlock').pressed ? false : true,
                 width: 65,
                 align: 'center',
-                //stopSelection: false,
                 shrinkWrap: 0,
-                variableRowHeight:true,
                 items: [{
                     getClass: function(v, meta, rec) {
                         if (rec.get('activated')) {
@@ -556,53 +577,27 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                             return esapp.Utils.getTranslation('activateproduct');   // 'Activate Product';
                         }
                     },
-                    isDisabled: function(view, rowIndex, colIndex, item, record) {
-                        // Returns true if 'editable' is false (, null, or undefined)
-                        return false // !record.get('editable');
-                    },
+                    // isDisabled: function(view, rowIndex, colIndex, item, record) {
+                    //     // Returns true if 'editable' is false (, null, or undefined)
+                    //     return false // !record.get('editable');
+                    // },
                     handler: function(grid, rowIndex, colIndex, icon, e, record) {
-                        var rec = record,   // grid.getStore().getAt(rowIndex),
-                            action = (rec.get('activated') ? 'deactivated' : 'activated');
+                        var rec = record;
+                        // var action = (rec.get('activated') ? 'deactivated' : 'activated');
                         // Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
                         rec.get('activated') ? rec.set('activated', false) : rec.set('activated', true);
-                        //me.getController().renderHiddenColumnsWhenUnlocked();
+
+                        // Ext.data.StoreManager.lookup('ProductsInactiveStore').reload();
+                        // me.getController().renderHiddenColumnsWhenUnlocked();
                     }
                 }]
-//            }, {
-//                xtype: 'checkcolumn',
-//                header: 'Active',
-//                width: 65,
-//                dataIndex: 'activated',
-//                stopSelection: false,
-//                hideable: true,
-//                hidden:true,
-//                disabled: true,
-//                listeners: {
-//                  checkchange: function(chkBox, rowIndex, checked, eOpts){
-////                      var myTitle = ""
-////                      if (checked)  myTitle = "Activate Product";
-////                      else myTitle = "De-activate Product";
-////                      Ext.toast({ html: 'Checkbox clicked!', title: myTitle, width: 200, align: 't' });
-//                  }
-//                }
-//                xtype: 'booleancolumn',
-//                header: 'Active',
-//                width: 80,
-//                sortable: true,
-//                dataIndex: 'activated',
-//                stopSelection: false,
-//                trueText: '&#x2713;',
-//                falseText: '-',
-//                align: 'center'
             }]
         }, {
             header:  '<div class="grid-header-style">' + esapp.Utils.getTranslation('get') + '</div>',
             id:'acquisitioncolumn',
             menuDisabled: true,
-            variableRowHeight : true,
             defaults: {
                 menuDisabled: true,
-                variableRowHeight : true,
                 sortable: false,
                 groupable:true,
                 draggable:false,
@@ -611,7 +606,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
             columns: [{
                 xtype: 'widgetcolumn',
                 width: Ext.getCmp('lockunlock').pressed ? 500 : 360,
-                variableRowHeight:true,
+                variableRowHeight:false,
 
                 header: ' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 230px; left: 0px; tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
@@ -629,11 +624,11 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                 '           </div>' +
                 '       </div>',
 
-                listeners: {
-                    render: function(column){
-                        //column.titleEl.removeCls('x-column-header-inner');
-                    }
-                },
+                // listeners: {
+                //     render: function(column){
+                //         //column.titleEl.removeCls('x-column-header-inner');
+                //     }
+                // },
                 widget: {
                     xtype: 'dataacquisitiongrid',
                     widgetattached: false
@@ -658,10 +653,8 @@ Ext.define('esapp.view.acquisition.Acquisition',{
         }, {
             header:  '<div class="grid-header-style">' + esapp.Utils.getTranslation('ingestion') + '</div>',
             menuDisabled: true,
-            variableRowHeight : true,
             defaults: {
                 menuDisabled: true,
-                variableRowHeight : true,
                 sortable: false,
                 groupable:false,
                 draggable:false,
@@ -671,7 +664,6 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                 xtype: 'widgetcolumn',
                 width: Ext.getCmp('lockunlock').pressed ? 785+70 : 785,
                 bodyPadding:5,
-                variableRowHeight:true,
 
                 header:
                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 160px; right: auto; left: 0px; margin: 0px; top: 0px;" tabindex="-1">' +
@@ -699,18 +691,18 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                 //'               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('log') + '</span>' +
                 //'           </div>' +
                 '       </div>',
-                listeners: {
-                    render: function(column){
-                        //column.titleEl.removeCls('x-column-header-inner');
-                    }
-                },
+                // listeners: {
+                //     render: function(column){
+                //         //column.titleEl.removeCls('x-column-header-inner');
+                //     }
+                // },
                 widget: {
                     xtype: 'ingestiongrid',
                     widgetattached: false
                 },
                 onWidgetAttach: function(col, widget, record) {
                     var daStore = widget.getViewModel().get('productingestions');
-                    Ext.suspendLayouts();
+                    // Ext.suspendLayouts();
                     if (!widget.widgetattached) {
                         //if (daStore.getFilters().items.length == 0) {
                         daStore.setFilters({
@@ -722,22 +714,17 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                         //}
                         widget.widgetattached = true;
                     }
-                    Ext.resumeLayouts(true);
+                    // Ext.resumeLayouts(true);
                 }
             }]
         },{
             xtype: 'actioncolumn',
             text: esapp.Utils.getTranslation('log'),    // 'Log',
-            //id: 'ingestionlogcolumn',
             width: 70,
-            //height:40,
             menuDisabled: true,
             align:'center',
             stopSelection: false,
-            variableRowHeight:true,
-            //cls:'x-grid3-td-ingestionlogcolumn',
             items: [{
-                //icon: 'resources/img/icons/file-extension-log-icon-32x32.png',
                 iconCls:'log-icon',
                 width:32,
                 height:32,

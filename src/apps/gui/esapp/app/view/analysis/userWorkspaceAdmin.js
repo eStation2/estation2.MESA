@@ -64,7 +64,7 @@ Ext.define("esapp.view.analysis.userWorkspaceAdmin",{
     cls: 'newpanelstyle',
 
     config: {
-        forseStoreLoad: false,
+        forceStoreLoad: false,
         dirtyStore: false
     },
 
@@ -90,13 +90,13 @@ Ext.define("esapp.view.analysis.userWorkspaceAdmin",{
 
         me.mon(me, {
             loadstore: function() {
-                if (me.forseStoreLoad || !me.getViewModel().getStore('userworkspaces').getSource().isLoaded() || me.dirtyStore) {
+                if (me.forceStoreLoad || !me.getViewModel().getStore('userworkspaces').getSource().isLoaded() || me.dirtyStore) {
                     me.getViewModel().getStore('userworkspaces').getSource().proxy.extraParams = {userid: esapp.getUser().userid};
                     me.getViewModel().getStore('userworkspaces').getSource().load({
                         callback: function (records, options, success) {
                         }
                     });
-                    me.forseStoreLoad = false;
+                    me.forceStoreLoad = false;
                     me.dirtyStore = false;
                 }
             }
@@ -122,7 +122,7 @@ Ext.define("esapp.view.analysis.userWorkspaceAdmin",{
             align: 'c-c',
             tooltip: esapp.Utils.getTranslation('refreshworkspaceslist'),    // 'Refresh workspaces list',
             callback: function() {
-                me.forseStoreLoad = true;
+                me.forceStoreLoad = true;
                 me.fireEvent('loadstore');
             }
         }];

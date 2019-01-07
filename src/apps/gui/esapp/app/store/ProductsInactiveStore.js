@@ -63,9 +63,9 @@ Ext.define('esapp.store.ProductsInactiveStore', {
     }
 
     ,listeners: {
-        update: function(store, record, operation, modifiedFieldNames, details, eOpts  ){
-
-        },
+        // update: function(store, record, operation, modifiedFieldNames, details, eOpts  ){
+        //
+        // },
         write: function(store, operation){
             if (operation.action == 'update' && operation.success) {
                 var records = operation.getRecords();
@@ -73,7 +73,7 @@ Ext.define('esapp.store.ProductsInactiveStore', {
                 store.remove(records[0], true);
                 store.resumeAutoSync();
             }
-//            Ext.toast({ html: operation.getResultSet().message, title: operation.action, width: 200, align: 't' });
+           // Ext.toast({ html: operation.getResultSet().message, title: operation.action, width: 200, align: 't' });
         }
     }
 

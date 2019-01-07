@@ -38,10 +38,16 @@ class TestCreateRequests(unittest.TestCase):
         # productcode = 'lsasaf-lst'
         # version = 'undefined'
 
-        productcode = 'vgt-ndvi'
-        version = 'sv2-pv2.2'
-        mapsetcode = 'SPOTV-IGAD-1km'
-        subproductcode = 'ndvi-linearx2'
+        # productcode = 'vgt-ndvi'
+        # version = 'sv2-pv2.2'
+        # mapsetcode = 'SPOTV-Africa-1km'
+        # # mapsetcode = 'SPOTV-IGAD-1km'
+        # # subproductcode = 'ndvi-linearx2'
+
+        productcode = 'arc2-rain'
+        version = '2.0'
+        mapsetcode = 'ARC2-Africa-11km'
+        subproductcode = '1day'
 
         request = requests.create_request(productcode, version, mapsetcode=mapsetcode, subproductcode=subproductcode)
         request_json = json.dumps(request,

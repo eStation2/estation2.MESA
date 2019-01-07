@@ -25,7 +25,7 @@ Ext.define("esapp.view.header.Header",{
         var logoImagesStore = Ext.data.StoreManager.lookup('LogoImages');
         var data = [];
 
-        if (esapp.globals['typeinstallation'] == 'jrc_online'){
+        if (esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online'){
             data = [
                 { src:'resources/img/logo/logo_en.gif', caption:'European Commission logo' }
             ];
@@ -41,7 +41,7 @@ Ext.define("esapp.view.header.Header",{
 
         logoImagesStore.setData(data);
 
-        if (esapp.globals['typeinstallation'] == 'jrc_online') {
+        if (esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online') {
             imageTpl = new Ext.XTemplate(
                 //'<div id="top">',
                 '   <div class="lang-en" id="header-jrc">',

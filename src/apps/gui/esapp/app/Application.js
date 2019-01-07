@@ -39,7 +39,7 @@ Ext.define('esapp.Application', {
         ,'LegendsStore'
         ,'EumetcastSourceStore'
         ,'InternetSourceStore'
-        ,'ProductsInactiveStore'
+        // ,'ProductsInactiveStore' // Not used anymore, instead esapp.model.Product is used.
         ,'ProductsActiveStore'      // no autoload
         ,'DataAcquisitionsStore'    // no autoload
         ,'IngestionsStore'          // no autoload
@@ -235,11 +235,11 @@ Ext.define('esapp.Application', {
         });
         taskMain.delay(50);
 
-        if (esapp.globals['typeinstallation'] == 'windows' || esapp.globals['typeinstallation'] == 'jrc_online'){
+        if (esapp.globals['typeinstallation'] == 'windows' || esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online'){
             var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
 
             if (datasetsstore.isStore) {
-                // datasetsstore.proxy.extraParams = {forse: true};
+                // datasetsstore.proxy.extraParams = {force: true};
                 datasetsstore.load();
             }
             // Ext.data.StoreManager.lookup('DataSetsStore').load();

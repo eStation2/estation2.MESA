@@ -50,11 +50,15 @@ Ext.define("esapp.view.widgets.LoginView",{
                         userid: Ext.util.Cookies.get('estation2_userid'),
                         username: Ext.util.Cookies.get('estation2_username'),
                         email: Ext.util.Cookies.get('estation2_useremail'),
+                        userlevel: Ext.util.Cookies.get('estation2_userlevel'),
                         prefered_language: Ext.util.Cookies.get('estation2_userlanguage')
                     };
 
                     esapp.setUser(userinfo);
                     me.setupLogout();
+                }
+                else{
+                    me.toggleUserFunctionality();
                 }
             }
         };
@@ -255,6 +259,7 @@ Ext.define("esapp.view.widgets.LoginView",{
         var mapViewWindows = Ext.ComponentQuery.query('mapview-window');
         var tsChartWindows = Ext.ComponentQuery.query('timeserieschart-window');
         var addWorkspaceBtn = Ext.getCmp('analysismain').lookupReference('analysismain_addworkspacebtn');
+        var acquisitionLockBtn = Ext.getCmp('lockunlock');
         // var mapTemplateBtn = Ext.getCmp('analysismain').lookupReference('analysismain_maptemplatebtn');
         // var tsChartTemplateBtn = Ext.getCmp('analysismain').lookupReference('analysismain_graph_templatebtn');
         // var tsDrawPropertiesStore  = Ext.data.StoreManager.lookup('TSDrawPropertiesStore');
@@ -262,6 +267,13 @@ Ext.define("esapp.view.widgets.LoginView",{
         if (user != null && user != 'undefined'){
             // tsDrawPropertiesStore.proxy.extraParams = {userid: user.userid, graph_tpl_name: 'default'};
             // tsDrawPropertiesStore.load();
+
+            // if (user.userlevel == 0){
+            //     if (acquisitionLockBtn != null){
+            //         acquisitionLockBtn.show();
+            //     }
+            // }
+
             if (addWorkspaceBtn != null){
                 addWorkspaceBtn.show();
             }
@@ -323,6 +335,18 @@ Ext.define("esapp.view.widgets.LoginView",{
         else {
             // tsDrawPropertiesStore.proxy.extraParams = {};
             // tsDrawPropertiesStore.load();
+
+            if (acquisitionLockBtn != null){
+                if (acquisitionLockBtn.pressed){
+                    acquisitionLockBtn.toggle();
+                    acquisitionLockBtn.handler(acquisitionLockBtn);
+                    acquisitionLockBtn.hide();
+                }
+                else {
+                    acquisitionLockBtn.hide();
+                }
+            }
+
             if (addWorkspaceBtn != null){
                 addWorkspaceBtn.hide();
             }
