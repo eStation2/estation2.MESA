@@ -1,9 +1,9 @@
 Ext.define("esapp.view.datamanagement.DataManagement",{
     "extend": "Ext.grid.Panel",
-    //"controller": "datamanagement-datamanagement",
-    //"viewModel": {
-    //    "type": "datamanagement-datamanagement"
-    //},
+    "controller": "datamanagement-datamanagement",
+    "viewModel": {
+       "type": "datamanagement-datamanagement"
+    },
     xtype  : 'datamanagement-main',
 
     name:'datamanagementmain',
@@ -13,7 +13,7 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         //'esapp.view.datamanagement.DataManagementController',
         //'esapp.view.datamanagement.ProductMapSet',
         //'esapp.view.datamanagement.MapSetDataSet',
-        //'esapp.view.datamanagement.sendRequest',
+        'esapp.view.datamanagement.requestsAdmin',
 
         'Ext.grid.column.Widget',
         'Ext.grid.column.Action',
@@ -33,13 +33,12 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         disableSelection: true,
         trackOver: false,
         preserveScrollOnRefresh: true,
-        variableRowHeight : true,
         focusable: false
     },
-    selType: 'cellmodel',
-    selModel: {listeners:{}},
+    // selType: 'cellmodel',
+    // selModel: {listeners:{}},
 
-    bufferedRenderer: true,
+    bufferedRenderer: false,
 
     collapsible: false,
     enableColumnMove: false,
@@ -64,6 +63,11 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         focusable: false,
         groupByText: esapp.Utils.getTranslation('productcategories')  // 'Product category'
     }],
+
+    config: {
+        forceStoreLoad: false,
+        dirtyStore: false
+    },
 
     //listeners: {
     //    cellclick : function(view, cell, cellIndex, record, row, rowIndex, e) {
@@ -102,6 +106,23 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
     initComponent: function () {
         var me = this;
 
+        me.mon(me, {
+            loadstore: function() {
+                var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
+                // console.info('DM loadstore');
+
+                if (me.forceStoreLoad || !datasetsstore.isLoaded() || me.dirtyStore) {
+                    if (datasetsstore.isStore) {
+                        // console.info('DM reload store');
+                        datasetsstore.proxy.extraParams = {force: true};
+                        datasetsstore.load();
+                    }
+                    me.forceStoreLoad = false;
+                    me.dirtyStore = false;
+                }
+            }
+        });
+
         me.listeners = {
             groupcollapse: function(view, node, group) {
                 me.hideCompletenessTooltip();
@@ -121,7 +142,7 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                 // view.ownerCt.updateLayout();
                 // groupFeature.fireEvent('expand', group, true);
             },
-            afterrender: function(){
+            afterrender: function(view){
                 var scroller = me.view.getScrollable();
 
                 scroller.on('scroll', function(){
@@ -156,20 +177,31 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
             //         view.refresh();
             //     }
             // }, {
-                text: esapp.Utils.getTranslation('collapseall'),    // 'Collapse All',
+                tooltip: esapp.Utils.getTranslation('collapseall'),    // 'Collapse All',
+                iconCls: 'collapse',
+                scale: 'medium',
                 handler: function(btn) {
                     var view = btn.up().up().getView();
                     view.getFeature('prodcat').collapseAll();
 
                     me.hideCompletenessTooltip();
-
-                    // view.refresh();
                 }
-            //}, {
-            //    text: esapp.Utils.getTranslation('myrequests'),    // 'My requests',
-            //    handler: function(btn) {
-            //
-            //    }
+            }, ' ', ' ', ' ', {
+
+                xtype: 'button',
+                name: 'datamanagement-requests-btn',
+                id: 'datamanagement-requests-btn',
+                reference: 'datamanagement-requests-btn',
+                text: esapp.Utils.getTranslation('myrequests'),    // 'My requests',
+                iconCls: 'fa fa-cloud-download fa-2x',
+                style: {color: 'gray'},
+                scale: 'medium',
+                handler: 'showRequestsAdmin',
+                listeners: {
+                    afterrender: function (btn) {
+                        btn.requestsAdminPanel = new esapp.view.datamanagement.requestsAdmin({owner:btn});
+                    }
+                }
             },
             // add a vertical separator bar between toolbar items
             //'-', // same as {xtype: 'tbseparator'} to create Ext.toolbar.Separator
@@ -181,23 +213,24 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                 enableToggle: false,
                 scale: 'medium',
                 handler:  function(btn) {
-                    var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
+                    // var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
                     var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
 
                     Ext.each(completenessTooltips, function(item) {
                         item.hide();
                     });
 
-                    if (datasetsstore.isStore) {
-                        datasetsstore.proxy.extraParams = {forse: true};
-                        datasetsstore.load();
-                    }
+                    me.forceStoreLoad = true;
+                    me.fireEvent('loadstore');
+                    // if (datasetsstore.isStore) {
+                    //     datasetsstore.proxy.extraParams = {force: true};
+                    //     datasetsstore.load();
+                    // }
                 }
             }]
         });
 
         me.defaults = {
-            variableRowHeight : true,
             menuDisabled: true,
             sortable: false,
             groupable:true,
@@ -209,10 +242,8 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         {
             header: '<div class="grid-header-style">' + esapp.Utils.getTranslation('productcategories') + '</div>',
             menuDisabled: true,
-            variableRowHeight : true,
             defaults: {
                 menuDisabled: true,
-                variableRowHeight : true,
                 sortable: false,
                 groupable:true,
                 draggable:false,
@@ -269,10 +300,8 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         }, {
             header:  '<div class="grid-header-style">' + esapp.Utils.getTranslation('datasetcompleteness') + '</div>',
             menuDisabled: true,
-            variableRowHeight : true,
             defaults: {
                 menuDisabled: true,
-                variableRowHeight : true,
                 sortable: false,
                 groupable:true,
                 draggable:false,

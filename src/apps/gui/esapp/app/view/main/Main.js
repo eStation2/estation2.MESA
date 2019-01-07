@@ -91,48 +91,50 @@ Ext.define('esapp.view.main.Main', {
                     var acquisitionmain = acquisitiontab.down('panel[name=acquisitionmain]');
                     acquisitionmain.getController().checkStatusServices();
 
-                    var productgridstore  = Ext.data.StoreManager.lookup('ProductsActiveStore');
-                    var acqgridsstore = Ext.data.StoreManager.lookup('DataAcquisitionsStore');
-                    var ingestiongridstore = Ext.data.StoreManager.lookup('IngestionsStore');
-                    var eumetcastsourcestore = Ext.data.StoreManager.lookup('EumetcastSourceStore');
-                    var internetsourcestore = Ext.data.StoreManager.lookup('InternetSourceStore');
+                    acquisitionmain.fireEvent('loadstore');
 
-                    var myLoadMask = new Ext.LoadMask({
-                        msg    : esapp.Utils.getTranslation('loading'), // 'Loading...',
-                        target : this
-                    });
-
-                    if (eumetcastsourcestore.isStore && !eumetcastsourcestore.isLoaded()) {
-                        eumetcastsourcestore.load();
-                    }
-                    if (internetsourcestore.isStore && !internetsourcestore.isLoaded()) {
-                        internetsourcestore.load();
-                    }
-
-                    if (ingestiongridstore.isStore && !ingestiongridstore.isLoaded() ){
-                        myLoadMask.show();
-                        ingestiongridstore.load({
-                            callback: function(records, options, success){
-                                myLoadMask.hide();
-                                if (acqgridsstore.isStore && !acqgridsstore.isLoaded()) {
-                                    myLoadMask.show();
-                                    acqgridsstore.load({
-                                        callback: function(records, options, success) {
-                                            myLoadMask.hide();
-                                            if (productgridstore.isStore && !productgridstore.isLoaded()) {
-                                                myLoadMask.show();
-                                                productgridstore.load({
-                                                    callback: function(records, options, success){
-                                                        myLoadMask.hide();
-                                                    }
-                                                });
-                                            }
-                                        }
-                                    });
-                                }
-                            }
-                        });
-                    }
+                    // var productgridstore  = Ext.data.StoreManager.lookup('ProductsActiveStore');
+                    // var acqgridsstore = Ext.data.StoreManager.lookup('DataAcquisitionsStore');
+                    // var ingestiongridstore = Ext.data.StoreManager.lookup('IngestionsStore');
+                    // var eumetcastsourcestore = Ext.data.StoreManager.lookup('EumetcastSourceStore');
+                    // var internetsourcestore = Ext.data.StoreManager.lookup('InternetSourceStore');
+                    //
+                    // var myLoadMask = new Ext.LoadMask({
+                    //     msg    : esapp.Utils.getTranslation('loading'), // 'Loading...',
+                    //     target : this
+                    // });
+                    //
+                    // if (eumetcastsourcestore.isStore && !eumetcastsourcestore.isLoaded()) {
+                    //     eumetcastsourcestore.load();
+                    // }
+                    // if (internetsourcestore.isStore && !internetsourcestore.isLoaded()) {
+                    //     internetsourcestore.load();
+                    // }
+                    //
+                    // if (ingestiongridstore.isStore && !ingestiongridstore.isLoaded() ){
+                    //     myLoadMask.show();
+                    //     ingestiongridstore.load({
+                    //         callback: function(records, options, success){
+                    //             myLoadMask.hide();
+                    //             if (acqgridsstore.isStore && !acqgridsstore.isLoaded()) {
+                    //                 myLoadMask.show();
+                    //                 acqgridsstore.load({
+                    //                     callback: function(records, options, success) {
+                    //                         myLoadMask.hide();
+                    //                         if (productgridstore.isStore && !productgridstore.isLoaded()) {
+                    //                             myLoadMask.show();
+                    //                             productgridstore.load({
+                    //                                 callback: function(records, options, success){
+                    //                                     myLoadMask.hide();
+                    //                                 }
+                    //                             });
+                    //                         }
+                    //                     }
+                    //                 });
+                    //             }
+                    //         }
+                    //     });
+                    // }
 
                    //Ext.util.Observable.capture(acquisitionmain, function(e){console.log(e);});
                    //acquisitionmain.getView().getFeature('productcategories').expandAll();
@@ -184,12 +186,13 @@ Ext.define('esapp.view.main.Main', {
                     var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
                     headerlogos.setHidden(false);
 
-                    var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
-                    if (datasetsstore.isStore && !datasetsstore.isLoaded()) {
-                        datasetsstore.load();
-                    }
+                    // var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
+                    // if (datasetsstore.isStore && !datasetsstore.isLoaded()) {
+                    //     datasetsstore.load();
+                    // }
 
-                   //var datamanagementmain = datamanagementtab.down('panel[name=datamanagementmain]');
+                   var datamanagementmain = datamanagementtab.down('panel[name=datamanagementmain]');
+                   datamanagementmain.fireEvent('loadstore');
                    //
                    ////datamanagementmain.getView().getFeature('prodcat').expandAll();
                    //datamanagementmain.getView().refresh();
@@ -221,7 +224,7 @@ Ext.define('esapp.view.main.Main', {
             listeners: {
                 activate: function (analysistab) {
                     // Ext.util.Observable.capture(analysistab, function(e){console.log(analysistab.id + ': ' + e);});
-                    if (esapp.globals['typeinstallation'] == 'jrc_online'){
+                    if (esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online'){
                         if (analysistab.layoutCounter > 0){
                             // Ext.getCmp('headerlogos').collapse();
                         }
@@ -233,7 +236,7 @@ Ext.define('esapp.view.main.Main', {
 
                     var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
                     if (datasetsstore.isStore && (!datasetsstore.isLoaded() || datasetsstore.count() < 1)) {
-                        datasetsstore.proxy.extraParams = {forse: true};
+                        datasetsstore.proxy.extraParams = {force: true};
                         datasetsstore.load();
                     }
                     // console.info('analysis tab activated!');
@@ -290,7 +293,7 @@ Ext.define('esapp.view.main.Main', {
             }],
             listeners: {
                 activate: function (helptab) {
-                    if (esapp.globals['typeinstallation'] == 'jrc_online'){
+                    if (esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online'){
                         Ext.getCmp('headerlogos').expand();
                     }
                     else {
@@ -302,7 +305,7 @@ Ext.define('esapp.view.main.Main', {
         };
 
 
-        if (esapp.globals['typeinstallation'] == 'jrc_online'){
+        if (esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online'){
             me.loginview = 'loginviewECAS';
 
             me.northheader = {
@@ -461,7 +464,7 @@ Ext.define('esapp.view.main.Main', {
             me.maintabpanel.add(me.help);
             // me.maintabpanel.setActiveTab('analysistab');
         }
-        else if (esapp.globals['typeinstallation'] == 'jrc_online'){
+        else if (esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online'){
             me.maintabpanel.add(me.analysis);
             // me.maintabpanel.add(me.system);
             me.maintabpanel.add(me.help);
@@ -487,7 +490,7 @@ Ext.define('esapp.view.main.Main', {
         if (esapp.globals['typeinstallation'] == 'windows'){
             me.maintabpanel.setActiveTab('dashboardtab');
         }
-        else if (esapp.globals['typeinstallation'] == 'jrc_online'){
+        else if (esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online'){
             me.maintabpanel.setActiveTab('analysistab');
         }
         else {

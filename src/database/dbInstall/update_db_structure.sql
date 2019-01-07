@@ -7,9 +7,12 @@ SET client_min_messages = warning;
 
 
 /**********************************************************
-  For version 2.1.0-11
+  For version 2.1.2
  *********************************************************/
 
+ALTER TABLE products.spirits ADD COLUMN out_data_type character varying;
+ALTER TABLE products.spirits ADD COLUMN out_scale_factor double precision;
+ALTER TABLE products.spirits ADD COLUMN out_offset double precision;
 
 /**********************************************************
   FIRST TABLE CREATION, then alter table adding columns
@@ -573,6 +576,115 @@ ALTER TABLE analysis.user_map_templates ADD COLUMN productdate character varying
   BEGIN update insert all functions
  *********************************************************/
 
+
+CREATE OR REPLACE FUNCTION products.update_insert_spirits(
+    productcode character varying,
+    subproductcode character varying,
+    version character varying,
+    mapsetcode character varying,
+    prod_values character varying,
+    flags character varying,
+    data_ignore_value integer,
+    days integer,
+    start_date integer,
+    end_date integer,
+    sensor_type character varying,
+    comment character varying,
+    sensor_filename_prefix character varying,
+    frequency_filename_prefix character varying,
+    product_anomaly_filename_prefix character varying,
+    activated boolean,
+	  out_data_type character varying,
+	  out_scale_factor double precision,
+	  out_offset double precision
+	)
+  RETURNS boolean AS
+$BODY$
+	DECLARE
+		_productcode					ALIAS FOR  $1;
+		_subproductcode					ALIAS FOR  $2;
+		_version						ALIAS FOR  $3;
+		_mapsetcode						ALIAS FOR  $4;
+		_prod_values					ALIAS FOR  $5;
+		_flags							ALIAS FOR  $6;
+		_data_ignore_value				ALIAS FOR  $7;
+		_days							ALIAS FOR  $8;
+		_start_date						ALIAS FOR  $9;
+		_end_date						ALIAS FOR  $10;
+		_sensor_type					ALIAS FOR  $11;
+		_comment						ALIAS FOR  $12;
+		_sensor_filename_prefix			ALIAS FOR  $13;
+		_frequency_filename_prefix		ALIAS FOR  $14;
+		_product_anomaly_filename_prefix	ALIAS FOR  $15;
+		_activated						ALIAS FOR  $16;
+		_out_data_type					ALIAS FOR  $17;
+		_out_scale_factor				ALIAS FOR  $18;
+		_out_offset						ALIAS FOR  $19;
+
+	BEGIN
+		PERFORM * FROM products.spirits s
+		WHERE s.productcode = TRIM(_productcode)
+		  AND s.subproductcode = TRIM(_subproductcode)
+		  AND s.version = TRIM(_version);
+
+		IF FOUND THEN
+			UPDATE products.spirits s
+			SET mapsetcode = TRIM(_mapsetcode),
+				prod_values = TRIM(_prod_values),
+				flags = TRIM(_flags),
+				data_ignore_value = _data_ignore_value,
+				days = _days,
+				start_date = _start_date,
+				end_date = _end_date,
+				sensor_type = TRIM(_sensor_type),
+				comment = TRIM(_comment),
+				sensor_filename_prefix = TRIM(_sensor_filename_prefix),
+				frequency_filename_prefix = TRIM(_frequency_filename_prefix),
+				product_anomaly_filename_prefix = TRIM(_product_anomaly_filename_prefix),
+				activated = _activated,
+				out_data_type = TRIM(_out_data_type),
+				out_scale_factor = _out_scale_factor,
+				out_offset = _out_offset
+			WHERE s.productcode = TRIM(_productcode)
+			  AND s.subproductcode = TRIM(_subproductcode)
+			  AND s.version = TRIM(_version);
+		ELSE
+			INSERT INTO products.spirits (
+										productcode,
+										subproductcode,
+										version,
+										mapsetcode,
+										prod_values,
+										flags,
+										data_ignore_value,
+										days,
+										start_date,
+										end_date,
+										sensor_type,
+										comment,
+										sensor_filename_prefix,
+										frequency_filename_prefix,
+										product_anomaly_filename_prefix,
+										activated,
+										out_data_type,
+										out_scale_factor,
+										out_offset
+										)
+			VALUES (TRIM(_productcode), TRIM(_subproductcode), TRIM(_version), TRIM(_mapsetcode), TRIM(_prod_values), TRIM(_flags), _data_ignore_value, _days, _start_date, _end_date, TRIM(_sensor_type),
+					TRIM(_comment), TRIM(_sensor_filename_prefix), TRIM(_frequency_filename_prefix), TRIM(_product_anomaly_filename_prefix), _activated, TRIM(_out_data_type), _out_scale_factor, _out_offset);
+		END IF;
+		RETURN TRUE;
+	END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION products.update_insert_spirits(character varying, character varying, character varying, character varying, character varying, character varying,
+											  integer, integer, integer, integer, character varying, character varying, character varying, character varying,
+											  character varying, boolean, character varying, double precision, double precision)
+  OWNER TO estation;
+
+
+
 CREATE OR REPLACE FUNCTION analysis.update_insert_legend(
     legend_id integer,
     legend_name character varying,
@@ -842,130 +954,130 @@ DROP TRIGGER IF EXISTS update_product ON products.product;
 -- 	EXECUTE PROCEDURE products.activate_deactivate_ingestion_pads_processing();
 
 
-
+DROP FUNCTION products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean);
 
 CREATE OR REPLACE FUNCTION products.activate_deactivate_product_ingestion_pads_processing(
     productcode character varying,
     version character varying,
     activate boolean DEFAULT false,
-    forse boolean DEFAULT false)
+    force boolean DEFAULT false)
   RETURNS boolean AS
 $BODY$
 DECLARE
     _productcode  ALIAS FOR  $1;
     _version  ALIAS FOR  $2;
     _activate  ALIAS FOR  $3;
-    _forse  ALIAS FOR  $4;
+    _force  ALIAS FOR  $4;
 BEGIN
     IF TRIM(_productcode) != '' AND TRIM(_version) != '' THEN
         -- BEGIN
-      IF _forse = TRUE THEN
-	UPDATE products.product p
-	SET activated = _activate
-	WHERE p.product_type = 'Native'
-	AND p.productcode = _productcode
-	AND p.version = _version
-	AND (p.productcode, p.version) IN (SELECT DISTINCT tp.productcode, tp.version FROM products.thema_product tp
-			     WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-			     -- AND activated = TRUE
-			     AND tp.productcode = _productcode
-			     AND tp.version = _version);
+      IF _force = TRUE THEN
+        UPDATE products.product p
+        SET activated = _activate
+        WHERE p.product_type = 'Native'
+        AND p.productcode = _productcode
+        AND p.version = _version
+        AND (p.productcode, p.version) IN (SELECT DISTINCT tp.productcode, tp.version FROM products.thema_product tp
+                 WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                 -- AND activated = TRUE
+                 AND tp.productcode = _productcode
+                 AND tp.version = _version);
 
-	UPDATE products.ingestion i
-	SET activated = _activate,
-	    enabled = _activate
-	WHERE i.productcode = _productcode
-	AND i.version = _version
-	AND i.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
-			     WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-			     -- AND activated = TRUE
-			     AND tp.productcode = _productcode
-			     AND tp.version = _version);
+        UPDATE products.ingestion i
+        SET activated = _activate,
+            enabled = _activate
+        WHERE i.productcode = _productcode
+        AND i.version = _version
+        AND i.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
+                 WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                 -- AND activated = TRUE
+                 AND tp.productcode = _productcode
+                 AND tp.version = _version);
 
-	UPDATE products.process_product pp
-	SET activated = _activate
-	WHERE pp.productcode = _productcode
-	AND pp.version = _version
-	AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
-			      WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-			      -- AND activated = TRUE
-			      AND tp.productcode = _productcode
-			      AND tp.version = _productcode);
+        UPDATE products.process_product pp
+        SET activated = _activate
+        WHERE pp.productcode = _productcode
+        AND pp.version = _version
+        AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
+                  WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                  -- AND activated = TRUE
+                  AND tp.productcode = _productcode
+                  AND tp.version = _productcode);
 
-	UPDATE products.processing p
-	SET activated = _activate,
-	    enabled = _activate
-	WHERE (p.process_id) in (SELECT process_id
-	       FROM products.process_product pp
-	       WHERE pp.productcode = _productcode
-		 AND pp.version = _version
-		 AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
-				       WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-					 -- AND activated = TRUE
-					 AND tp.productcode = _productcode
-					 AND tp.version = _version));
+        UPDATE products.processing p
+        SET activated = _activate,
+            enabled = _activate
+        WHERE (p.process_id) in (SELECT process_id
+               FROM products.process_product pp
+               WHERE pp.productcode = _productcode
+           AND pp.version = _version
+           AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
+                     WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                 -- AND activated = TRUE
+                 AND tp.productcode = _productcode
+                 AND tp.version = _version));
 
-	UPDATE products.product_acquisition_data_source pads
-	SET activated = _activate
-	WHERE pads.productcode = _productcode AND pads.version = _version
-	AND (pads.productcode, pads.version) in (SELECT tp.productcode, tp.version
-						 FROM products.thema_product tp
-						 WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE));
+        UPDATE products.product_acquisition_data_source pads
+        SET activated = _activate
+        WHERE pads.productcode = _productcode AND pads.version = _version
+        AND (pads.productcode, pads.version) in (SELECT tp.productcode, tp.version
+                   FROM products.thema_product tp
+                   WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE));
 
 
       ELSE
-	UPDATE products.product p
-	SET activated = _activate
-	WHERE p.product_type = 'Native'
-	AND p.productcode = _productcode
-	AND p.version = _version
-	AND (p.productcode, p.version) IN (SELECT DISTINCT tp.productcode, tp.version FROM products.thema_product tp
-			     WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-			     AND activated = TRUE
-			     AND tp.productcode = _productcode
-			     AND tp.version = _version);
+        UPDATE products.product p
+        SET activated = _activate
+        WHERE p.product_type = 'Native'
+        AND p.productcode = _productcode
+        AND p.version = _version
+        AND (p.productcode, p.version) IN (SELECT DISTINCT tp.productcode, tp.version FROM products.thema_product tp
+                 WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                 AND activated = TRUE
+                 AND tp.productcode = _productcode
+                 AND tp.version = _version);
 
-	UPDATE products.ingestion i
-	SET activated = _activate,
-	    enabled = _activate
-	WHERE i.productcode = _productcode
-	AND i.version = _version
-	AND i.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
-			     WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-			     AND tp.activated = TRUE
-			     AND tp.productcode = _productcode
-			     AND tp.version = _version);
+        UPDATE products.ingestion i
+        SET activated = _activate,
+            enabled = _activate
+        WHERE i.productcode = _productcode
+        AND i.version = _version
+        AND i.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
+                 WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                 AND tp.activated = TRUE
+                 AND tp.productcode = _productcode
+                 AND tp.version = _version);
 
-	UPDATE products.process_product pp
-	SET activated = _activate
-	WHERE pp.productcode = _productcode
-	AND pp.version = _version
-	AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
-			      WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-			      AND tp.activated = TRUE
-			      AND tp.productcode = _productcode
-			      AND tp.version = _productcode);
+        UPDATE products.process_product pp
+        SET activated = _activate
+        WHERE pp.productcode = _productcode
+        AND pp.version = _version
+        AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
+                  WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                  AND tp.activated = TRUE
+                  AND tp.productcode = _productcode
+                  AND tp.version = _productcode);
 
-	UPDATE products.processing p
-	SET activated = _activate,
-	    enabled = _activate
-	WHERE (p.process_id) in (SELECT process_id
-	       FROM products.process_product pp
-	       WHERE pp.productcode = _productcode
-		 AND pp.version = _version
-		 AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
-				       WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-					 AND tp.activated = TRUE
-					 AND tp.productcode = _productcode
-					 AND tp.version = _version));
+        UPDATE products.processing p
+        SET activated = _activate,
+            enabled = _activate
+        WHERE (p.process_id) in (SELECT process_id
+               FROM products.process_product pp
+               WHERE pp.productcode = _productcode
+           AND pp.version = _version
+           AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
+                     WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                 AND tp.activated = TRUE
+                 AND tp.productcode = _productcode
+                 AND tp.version = _version));
 
-	UPDATE products.product_acquisition_data_source pads
-	SET activated = _activate
-	WHERE pads.productcode = _productcode AND pads.version = _version
-	AND (pads.productcode, pads.version) in (SELECT tp.productcode, tp.version
-						 FROM products.thema_product tp
-						 WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-						 AND tp.activated = TRUE);
+        UPDATE products.product_acquisition_data_source pads
+        SET activated = _activate
+        WHERE pads.productcode = _productcode AND pads.version = _version
+        AND (pads.productcode, pads.version) in (SELECT tp.productcode, tp.version
+                   FROM products.thema_product tp
+                   WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                   AND tp.activated = TRUE);
 
       END IF;
 
@@ -982,6 +1094,59 @@ $BODY$
 ALTER FUNCTION products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean)
   OWNER TO estation;
 
+
+
+
+CREATE OR REPLACE FUNCTION products.activate_deactivate_product(productcode character varying, version character varying, activate boolean DEFAULT false)
+  RETURNS boolean AS
+$BODY$
+DECLARE
+    _productcode  ALIAS FOR  $1;
+    _version  ALIAS FOR  $2;
+    _activate  ALIAS FOR  $3;
+BEGIN
+    IF TRIM(_productcode) != '' AND TRIM(_version) != '' THEN
+        UPDATE products.product p
+        SET activated = _activate
+        WHERE p.product_type = 'Native'
+        AND p.productcode = _productcode
+        AND p.version = _version;
+
+        UPDATE products.ingestion i
+        SET activated = _activate,
+            enabled = _activate
+        WHERE i.productcode = _productcode
+        AND i.version = _version;
+
+        UPDATE products.process_product pp
+        SET activated = _activate
+        WHERE pp.productcode = _productcode
+        AND pp.version = _version;
+
+        UPDATE products.processing p
+        SET activated = _activate,
+            enabled = _activate
+        WHERE (p.process_id) in (SELECT process_id
+			         FROM products.process_product pp
+			         WHERE pp.productcode = _productcode
+				   AND pp.version = _version);
+
+        UPDATE products.product_acquisition_data_source pads
+        SET activated = _activate
+        WHERE pads.productcode = _productcode AND pads.version = _version;
+
+      RETURN TRUE;
+
+    ELSE
+        RETURN FALSE;
+    END IF;
+
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE STRICT
+  COST 100;
+ALTER FUNCTION products.activate_deactivate_product(character varying, character varying, boolean)
+  OWNER TO estation;
 
 
 
@@ -2260,10 +2425,6 @@ ALTER FUNCTION analysis.update_insert_graph_yaxes(character varying, character v
 
 -- DROP FUNCTION products.export_jrc_data(boolean);
 
--- Function: products.export_jrc_data(boolean)
-
--- DROP FUNCTION products.export_jrc_data(boolean);
-
 CREATE OR REPLACE FUNCTION products.export_jrc_data(full_copy boolean DEFAULT false)
   RETURNS SETOF text AS
 $BODY$
@@ -2780,6 +2941,9 @@ BEGIN
 		|| ', frequency_filename_prefix := ' || COALESCE('''' || frequency_filename_prefix || '''', 'NULL')
 		|| ', product_anomaly_filename_prefix := ' || COALESCE('''' || product_anomaly_filename_prefix || '''', 'NULL')
 		|| ', activated := ' || activated
+		|| ', out_data_type := ' || COALESCE('''' || out_data_type || '''', 'NULL')
+		|| ', out_scale_factor := ' || COALESCE(TRIM(to_char(out_scale_factor, '99999999D999999')), 'NULL')
+		|| ', out_offset := ' || COALESCE(TRIM(to_char(out_offset, '99999999D999999')), 'NULL')
 		|| ' );'  as inserts
 	FROM products.spirits;
 
@@ -2899,7 +3063,6 @@ ALTER FUNCTION products.export_jrc_data(boolean)
 
 
 
-
 -- Function: products.export_all_data(boolean)
 
 -- DROP FUNCTION products.export_all_data(boolean);
@@ -2955,7 +3118,6 @@ BEGIN
 	FROM products.data_type;
 
 
-
 	RETURN QUERY SELECT chr(10);
 	RETURN QUERY SELECT chr(10);
 
@@ -2987,7 +3149,6 @@ BEGIN
 	RETURN QUERY SELECT 'SELECT products.update_insert_thema('
 		|| 'thema_id := ''' || thema_id || ''''
 		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
-		|| ', activated := ' || activated
 		|| ' );'  as inserts
 	FROM products.thema;
 
@@ -3021,7 +3182,8 @@ BEGIN
 		|| ', display_index := ' || COALESCE(TRIM(to_char(display_index, '99999999')), 'NULL')
 		|| ', full_copy := ' || FALSE
 		|| ' );'  as inserts
-	FROM products.product;
+	FROM products.product
+	ORDER BY productcode, version;
 
 
 	RETURN QUERY SELECT chr(10);
@@ -3035,12 +3197,15 @@ BEGIN
 		|| ', mapsetcode := ''' || mapsetcode || ''''
 		|| ', activated := ' || activated
 		|| ' );'  as inserts
-	FROM products.thema_product;
+	FROM products.thema_product tp
+	ORDER BY thema_id;
 
 
 	RETURN QUERY SELECT chr(10);
 	RETURN QUERY SELECT chr(10);
 
+
+	-- insert into products.datasource_description (datasource_descr_id) select internet_id from products.internet_source where internet_id not in (select datasource_descr_id from products.datasource_description)
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_internet_source('
 		|| 'internet_id := ''' || internet_id || ''''
@@ -3066,11 +3231,11 @@ BEGIN
 	FROM products.internet_source;
 
 
-
 	RETURN QUERY SELECT chr(10);
 	RETURN QUERY SELECT chr(10);
 
 
+	-- insert into products.datasource_description (datasource_descr_id) select eumetcast_id from products.eumetcast_source where eumetcast_id not in (select datasource_descr_id from products.datasource_description)
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_eumetcast_source('
 		|| '  eumetcast_id := ' || COALESCE('''' || eumetcast_id || '''', 'NULL')
@@ -3144,7 +3309,9 @@ BEGIN
 		|| ', native_mapset := ' || COALESCE('''' || native_mapset || '''', 'NULL')
 		|| ', full_copy := ' || _full_copy
 		|| ' );'  as inserts
-	FROM products.datasource_description dd;
+	FROM products.datasource_description dd
+	WHERE dd.datasource_descr_id in (SELECT eumetcast_id FROM products.eumetcast_source)
+	  OR dd.datasource_descr_id in (SELECT internet_id FROM products.internet_source);
 
 
 	RETURN QUERY SELECT chr(10);
@@ -3162,7 +3329,8 @@ BEGIN
 		|| ', store_original_data := ' || store_original_data
 		|| ', full_copy := ' || FALSE
 		|| ' );'  as inserts
-	FROM products.product_acquisition_data_source;
+	FROM products.product_acquisition_data_source pads
+	WHERE (pads.productcode, pads.version, pads.subproductcode) in (SELECT productcode, version, subproductcode FROM products.product);
 
 
 	RETURN QUERY SELECT chr(10);
@@ -3185,7 +3353,10 @@ BEGIN
 		|| ', scale_type := ' || COALESCE('''' || scale_type || '''', 'NULL')
 		|| ', full_copy := ' || _full_copy
 		|| ' );'  as inserts
-	FROM products.sub_datasource_description;
+	FROM products.sub_datasource_description sdd
+	WHERE (sdd.productcode, sdd.version, sdd.subproductcode) in (SELECT productcode, version, subproductcode FROM products.product)
+	  AND (sdd.datasource_descr_id in (SELECT eumetcast_id FROM products.eumetcast_source)
+	       OR sdd.datasource_descr_id in (SELECT internet_id FROM products.internet_source));
 
 
 	RETURN QUERY SELECT chr(10);
@@ -3204,7 +3375,8 @@ BEGIN
 		|| ', enabled := ' || enabled
 		|| ', full_copy := ' || FALSE
 		|| ' );'  as inserts
-	FROM products.ingestion;
+	FROM products.ingestion i
+	WHERE (i.productcode, i.version, i.subproductcode) in (SELECT productcode, version, subproductcode FROM products.product);
 
 
 	RETURN QUERY SELECT chr(10);
@@ -3243,7 +3415,9 @@ BEGIN
 		|| ', end_date:= ' || COALESCE(TRIM(to_char(end_date, '999999999999')), 'NULL')
 		|| ', full_copy := ' || FALSE
 		|| ' );'  as inserts
-	FROM products.process_product;
+	FROM products.process_product pp
+	WHERE process_id IN (SELECT process_id FROM products.processing)
+	AND (pp.productcode, pp.version, pp.subproductcode) in (SELECT productcode, version, subproductcode FROM products.product);
 
 
 	RETURN QUERY SELECT chr(10);
@@ -3295,9 +3469,7 @@ BEGIN
 		|| ' );'  as inserts
 	FROM analysis.legend
 	WHERE legend_id < 400
-	-- AND defined_by = 'JRC'
 	ORDER BY legend_id;
-
 
 	RETURN QUERY SELECT chr(10);
 	RETURN QUERY SELECT chr(10);
@@ -3326,27 +3498,8 @@ BEGIN
 		|| ', legend_id := ' || legend_id
 		|| ', default_legend := ' || default_legend
 		|| ' );'  as inserts
-	FROM analysis.product_legend;
-
-
-	RETURN QUERY SELECT chr(10);
-	RETURN QUERY SELECT chr(10);
-
-
-	RETURN QUERY SELECT 'SELECT analysis.update_insert_graph_yaxes('
-		|| ' yaxe_id := ' || COALESCE('''' || yaxe_id || '''', 'NULL')
-		|| ', title := ' || COALESCE('''' || title || '''', 'NULL')
-		|| ', title_color := ' || COALESCE('''' || title_color || '''', 'NULL')
-		|| ', title_font_size := ' || COALESCE(TRIM(to_char(title_font_size, '99999999')), 'NULL')
-		|| ', min := ' || COALESCE(TRIM(to_char(min, '99999999D999999')), 'NULL')
-		|| ', max := ' || COALESCE(TRIM(to_char(max, '99999999D999999')), 'NULL')
-		|| ', unit := ' || COALESCE('''' || unit || '''', 'NULL')
-		|| ', opposite := ' || opposite
-		|| ', aggregation_type := ' || COALESCE('''' || aggregation_type || '''', 'NULL')
-		|| ', aggregation_min := ' || COALESCE(TRIM(to_char(aggregation_min, '99999999D999999')), 'NULL')
-		|| ', aggregation_max := ' || COALESCE(TRIM(to_char(aggregation_max, '99999999D999999')), 'NULL')
-		|| ' );'  as inserts
-	FROM analysis.graph_yaxes;
+	FROM analysis.product_legend pl
+	WHERE (pl.productcode, pl.version, pl.subproductcode) in (SELECT productcode, version, subproductcode FROM products.product);
 
 
 	RETURN QUERY SELECT chr(10);
@@ -3380,24 +3533,6 @@ BEGIN
 	RETURN QUERY SELECT chr(10);
 
 
-	RETURN QUERY SELECT 'SELECT analysis.update_insert_timeseries_drawproperties_new('
-		|| ' productcode := ' || COALESCE('''' || productcode || '''', 'NULL')
-		|| ', subproductcode := ' || COALESCE('''' || subproductcode || '''', 'NULL')
-		|| ', version := ' || COALESCE('''' || version || '''', 'NULL')
-		|| ', tsname_in_legend := ' || COALESCE('''' || tsname_in_legend || '''', 'NULL')
-		|| ', charttype := ' || COALESCE('''' || charttype || '''', 'NULL')
-		|| ', linestyle := ' || COALESCE('''' || linestyle || '''', 'NULL')
-		|| ', linewidth := ' || COALESCE(TRIM(to_char(linewidth, '99999999')), 'NULL')
-		|| ', color := ' || COALESCE('''' || color || '''', 'NULL')
-		|| ', yaxe_id := ' || COALESCE('''' || yaxe_id || '''', 'NULL')
-		|| ' );'  as inserts
-	FROM analysis.timeseries_drawproperties_new;
-
-
-	RETURN QUERY SELECT chr(10);
-	RETURN QUERY SELECT chr(10);
-
-
 	RETURN QUERY SELECT 'SELECT analysis.update_insert_chart_drawproperties('
 		|| ' chart_type := ' || COALESCE('''' || chart_type || '''', 'NULL')
 		|| ', chart_width := ' || chart_width
@@ -3422,31 +3557,6 @@ BEGIN
 	RETURN QUERY SELECT chr(10);
 
 
-
-  RETURN QUERY SELECT 'SELECT analysis.update_insert_graph_drawproperties('
-		|| ' graph_type := ' || COALESCE('''' || graph_type || '''', 'NULL')
-		|| ', graph_width := ' || graph_width
-		|| ', graph_height := ' || graph_height
-		|| ', graph_title := ' || COALESCE('''' || graph_title || '''', 'NULL')
-		|| ', graph_title_font_size := ' || graph_title_font_size
-		|| ', graph_title_font_color := ' || COALESCE('''' || graph_title_font_color || '''', 'NULL')
-		|| ', graph_subtitle := ' || COALESCE('''' || graph_subtitle || '''', 'NULL')
-		|| ', graph_subtitle_font_size := ' || graph_subtitle_font_size
-		|| ', graph_subtitle_font_color := ' || COALESCE('''' || graph_subtitle_font_color || '''', 'NULL')
-		|| ', legend_position := ' || COALESCE('''' || legend_position || '''', 'NULL')
-		|| ', legend_font_size := ' || legend_font_size
-		|| ', legend_font_color := ' || COALESCE('''' || legend_font_color || '''', 'NULL')
-		|| ', xaxe_font_size := ' || xaxe_font_size
-		|| ', xaxe_font_color := ' || COALESCE('''' || xaxe_font_color || '''', 'NULL')
-		|| ' );'  as inserts
-	FROM analysis.graph_drawproperties;
-
-
-
-	RETURN QUERY SELECT chr(10);
-	RETURN QUERY SELECT chr(10);
-
-
 	RETURN QUERY SELECT 'SELECT products.update_insert_spirits('
 		|| '  productcode := ' || COALESCE('''' || productcode || '''', 'NULL')
 		|| ', subproductcode := ' || COALESCE('''' || subproductcode || '''', 'NULL')
@@ -3464,6 +3574,9 @@ BEGIN
 		|| ', frequency_filename_prefix := ' || COALESCE('''' || frequency_filename_prefix || '''', 'NULL')
 		|| ', product_anomaly_filename_prefix := ' || COALESCE('''' || product_anomaly_filename_prefix || '''', 'NULL')
 		|| ', activated := ' || activated
+		|| ', out_data_type := ' || COALESCE('''' || out_data_type || '''', 'NULL')
+		|| ', out_scale_factor := ' || COALESCE(TRIM(to_char(out_scale_factor, '99999999D999999')), 'NULL')
+		|| ', out_offset := ' || COALESCE(TRIM(to_char(out_offset, '99999999D999999')), 'NULL')
 		|| ' );'  as inserts
 	FROM products.spirits;
 
@@ -3505,6 +3618,72 @@ BEGIN
 	FROM analysis.layers
 	WHERE layerid < 100
 	ORDER BY layerid;
+
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
+	RETURN QUERY SELECT 'SELECT analysis.update_insert_graph_yaxes('
+		|| ' yaxe_id := ' || COALESCE('''' || yaxe_id || '''', 'NULL')
+		|| ', title := ' || COALESCE('''' || title || '''', 'NULL')
+		|| ', title_color := ' || COALESCE('''' || title_color || '''', 'NULL')
+		|| ', title_font_size := ' || COALESCE(TRIM(to_char(title_font_size, '99999999')), 'NULL')
+		|| ', min := ' || COALESCE(TRIM(to_char(min, '99999999D999999')), 'NULL')
+		|| ', max := ' || COALESCE(TRIM(to_char(max, '99999999D999999')), 'NULL')
+		|| ', unit := ' || COALESCE('''' || unit || '''', 'NULL')
+		|| ', opposite := ' || opposite
+		|| ', aggregation_type := ' || COALESCE('''' || aggregation_type || '''', 'NULL')
+		|| ', aggregation_min := ' || COALESCE(TRIM(to_char(aggregation_min, '99999999D999999')), 'NULL')
+		|| ', aggregation_max := ' || COALESCE(TRIM(to_char(aggregation_max, '99999999D999999')), 'NULL')
+		|| ' );'  as inserts
+	FROM analysis.graph_yaxes;
+
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
+	RETURN QUERY SELECT 'SELECT analysis.update_insert_timeseries_drawproperties_new('
+		|| ' productcode := ' || COALESCE('''' || productcode || '''', 'NULL')
+		|| ', subproductcode := ' || COALESCE('''' || subproductcode || '''', 'NULL')
+		|| ', version := ' || COALESCE('''' || version || '''', 'NULL')
+		|| ', tsname_in_legend := ' || COALESCE('''' || tsname_in_legend || '''', 'NULL')
+		|| ', charttype := ' || COALESCE('''' || charttype || '''', 'NULL')
+		|| ', linestyle := ' || COALESCE('''' || linestyle || '''', 'NULL')
+		|| ', linewidth := ' || COALESCE(TRIM(to_char(linewidth, '99999999')), 'NULL')
+		|| ', color := ' || COALESCE('''' || color || '''', 'NULL')
+		|| ', yaxe_id := ' || COALESCE('''' || yaxe_id || '''', 'NULL')
+		|| ' );'  as inserts
+	FROM analysis.timeseries_drawproperties_new;
+
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
+	RETURN QUERY SELECT 'SELECT analysis.update_insert_graph_drawproperties('
+		|| ' graph_type := ' || COALESCE('''' || graph_type || '''', 'NULL')
+		|| ', graph_width := ' || graph_width
+		|| ', graph_height := ' || graph_height
+		|| ', graph_title := ' || COALESCE('''' || graph_title || '''', 'NULL')
+		|| ', graph_title_font_size := ' || graph_title_font_size
+		|| ', graph_title_font_color := ' || COALESCE('''' || graph_title_font_color || '''', 'NULL')
+		|| ', graph_subtitle := ' || COALESCE('''' || graph_subtitle || '''', 'NULL')
+		|| ', graph_subtitle_font_size := ' || graph_subtitle_font_size
+		|| ', graph_subtitle_font_color := ' || COALESCE('''' || graph_subtitle_font_color || '''', 'NULL')
+		|| ', legend_position := ' || COALESCE('''' || legend_position || '''', 'NULL')
+		|| ', legend_font_size := ' || legend_font_size
+		|| ', legend_font_color := ' || COALESCE('''' || legend_font_color || '''', 'NULL')
+		|| ', xaxe_font_size := ' || xaxe_font_size
+		|| ', xaxe_font_color := ' || COALESCE('''' || xaxe_font_color || '''', 'NULL')
+		|| ' );'  as inserts
+	FROM analysis.graph_drawproperties;
+
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
 
 END;
 $BODY$

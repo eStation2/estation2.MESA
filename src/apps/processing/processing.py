@@ -301,6 +301,7 @@ def loop_processing(dry_run=False, serialize=False, test_one_product=None):
         time.sleep(1)
 
 
+# Pierluigi
 def worker(num):
     """thread worker function"""
     #print 'Worker:', num

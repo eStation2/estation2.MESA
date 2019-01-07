@@ -11,6 +11,8 @@ do_start = True
 dry_run  = False
 service  = False
 
+# service is always False because this module is used by the windows version or for testing
+# ToDo: The code under the if statement can be deleted, service_system.py is now used by non windows versions
 if service:
     # Make sure the pid dir exists
     if not os.path.isdir(es_constants.pid_file_dir):

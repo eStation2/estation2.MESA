@@ -27,14 +27,14 @@ from database import querydb
 from database import crud
 
 from apps.acquisition import get_eumetcast
-from apps.acquisition import acquisition
-from apps.processing import processing      # Comment in WINDOWS version!
+# from apps.acquisition import acquisition
+# from apps.processing import processing      # Comment in WINDOWS version!
 from apps.productmanagement.datasets import Dataset
 from apps.es2system import es2system
 # from apps.productmanagement.datasets import Frequency
 from apps.productmanagement.products import Product
 from apps.analysis import generateLegendHTML
-from apps.analysis.getTimeseries import (getTimeseries, getFilesList)
+# from apps.analysis.getTimeseries import (getTimeseries, getFilesList)
 from multiprocessing import (Process, Queue)
 
 from lib.python import functions
@@ -120,6 +120,10 @@ urls = (
     "/datasets", "DataSets",
     "/datamanagement/getrequest", "GetRequest",
     "/datamanagement/saverequest", "SaveRequest",
+    "/datamanagement/createrequestjob", "createRequestJob",
+    "/datamanagement/deleterequestjob", "deleteRequestJob",
+    "/datamanagement/requests", "getRequestsList",
+    "/datamanagement/runpauserequest", "runPauseRequest",
 
     "/analysis/getproductlayer", "GetProductLayer",
     "/analysis/getvectorlayer", "GetVectorLayer",
@@ -305,7 +309,7 @@ class Login:
                             'username': row_dict['username'],
                             'password': row_dict['password'],
                             'userid': row_dict['userid'],
-                            # 'userlevel': row_dict['userlevel'],
+                            'userlevel': row_dict['userlevel'],
                             'email': row_dict['email'],
                             'prefered_language': row_dict['prefered_language']
                             # 'timestamp': row_dict['timestamp']
@@ -533,10 +537,10 @@ class TimeseriesProducts:
 
     def GET(self):
         getparams = web.input()
-        forse = False
-        if 'forse' in getparams:
-            forse = getparams.forse
-        return webpy_esapp_helpers.getTimeseriesProducts(forse)
+        force = False
+        if 'force' in getparams:
+            force = getparams.force
+        return webpy_esapp_helpers.getTimeseriesProducts(force)
 
 
 class getUserWorkspaces:
@@ -988,6 +992,60 @@ class GetRequest:
             request_json = '{"success":false, "error":"No parameters passed for request!"}'
 
         return request_json
+
+
+class getRequestsList:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        response_json = webpy_esapp_helpers.getRunningRequestJobs()
+        return response_json
+
+
+class runPauseRequest:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        getparams = web.input()
+        if hasattr(getparams, "requestid") and getparams['requestid'] != '':
+            if getparams['task'] == 'pause':
+                response_json = webpy_esapp_helpers.pauseRequestJob(getparams)
+            else:
+                response_json = webpy_esapp_helpers.restartRequestJob(getparams)
+        else:
+            response_json = '{"success":false, "error":"No request info passed!"}'
+
+        return response_json
+
+
+class createRequestJob:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        getparams = web.input()
+        if hasattr(getparams, "productcode") and getparams['productcode'] != '':
+            response_json = webpy_esapp_helpers.createRequestJob(getparams)
+        else:
+            response_json = '{"success":false, "error":"No request info passed!"}'
+
+        return response_json
+
+
+class deleteRequestJob:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        getparams = web.input()
+        if hasattr(getparams, "requestid") and getparams['requestid'] != '':
+            response_json = webpy_esapp_helpers.deleteRequestJob(getparams)
+        else:
+            response_json = '{"success":false, "error":"No request info passed!"}'
+
+        return response_json
 
 
 class SaveRequest:
@@ -2268,10 +2326,10 @@ class ProductNavigatorDataSets:
 
     def GET(self):
         getparams = web.input()
-        forse = False
-        if 'forse' in getparams:
-            forse = getparams.forse
-        return webpy_esapp_helpers.getProductNavigatorDataSets(forse)
+        force = False
+        if 'force' in getparams:
+            force = getparams.force
+        return webpy_esapp_helpers.getProductNavigatorDataSets(force)
 
 
 class GetLogFile:
@@ -2282,6 +2340,9 @@ class GetLogFile:
         getparams = web.input()
         logfilename = ''
         if getparams['logtype'] == 'get':
+            if sys.platform == 'win32':
+                getparams['data_source_id'] = getparams['data_source_id'].replace(':', '_')
+
             if getparams['gettype'] == 'EUMETCAST':
                 logfilename = es_constants.es2globals['log_dir']+'apps.get_eumetcast.' + getparams['data_source_id'] + '.log'
             else:
@@ -3226,46 +3287,8 @@ class UpdateUserSettings:
         self.lang = "eng"
 
     def PUT(self):
-        import ConfigParser
-
-        systemsettings = functions.getSystemSettings()
-
-        if sys.platform != 'win32':
-            if systemsettings['type_installation'] == 'jrc_online':
-                factory_settings_filename = 'factory_settings_jrc_online.ini'
-            else:
-                factory_settings_filename = 'factory_settings.ini'
-        else:
-            factory_settings_filename = 'factory_settings_windows.ini'
-
-        config_factorysettings = ConfigParser.ConfigParser()
-        config_factorysettings.read([factory_settings_filename,
-                                     es_constants.es2globals['config_dir'] + '/' + factory_settings_filename])
-
-        usersettingsfilepath = es_constants.es2globals['settings_dir']+'/user_settings.ini'
-        # usersettingsfilepath = '/eStation2/settings/user_settings.ini'
-        config_usersettings = ConfigParser.ConfigParser()
-        config_usersettings.read(['user_settings.ini', usersettingsfilepath])
-
-        getparams = json.loads(web.data())
-        for setting in getparams['systemsettings']:
-            if setting not in ('log_general_level', 'active_version', 'current_mode', 'thema', 'role', 'type_installation', 'default_language'):
-                if config_factorysettings.has_option('FACTORY_SETTINGS', setting) \
-                   and config_factorysettings.get('FACTORY_SETTINGS', setting, 0) == getparams['systemsettings'][setting]:
-                    config_usersettings.set('USER_SETTINGS', setting, '')
-                elif config_usersettings.has_option('USER_SETTINGS', setting):
-                    config_usersettings.set('USER_SETTINGS', setting, getparams['systemsettings'][setting])
-
-        # Writing our configuration file to 'example.cfg' - COMMENTS ARE NOT PRESERVED!
-        with open(usersettingsfilepath, 'wb') as configfile:
-            config_usersettings.write(configfile)
-            configfile.close()
-
-        # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
-        from lib.python import reloadmodules
-        reloadmodules.reloadallmodules()
-
-        updatestatus = '{"success":"true", "message":"System settings updated!"}'
+        params = json.loads(web.data())
+        updatestatus = webpy_esapp_helpers.UpdateUserSettings(params)
 
         return updatestatus
 
@@ -3280,7 +3303,7 @@ class UserSettings:
         systemsettings = functions.getSystemSettings()
 
         if sys.platform != 'win32':
-            if systemsettings['type_installation'] == 'jrc_online':
+            if systemsettings['type_installation'].lower() == 'jrc_online':
                 factory_settings_filename = 'factory_settings_jrc_online.ini'
             else:
                 factory_settings_filename = 'factory_settings.ini'
@@ -3595,10 +3618,10 @@ class Processing:
 
     def GET(self):
         getparams = web.input()
-        forse = False
-        if 'forse' in getparams:
-            forse = getparams.forse
-        return webpy_esapp_helpers.getProcessing(forse)
+        force = False
+        if 'force' in getparams:
+            force = getparams.force
+        return webpy_esapp_helpers.getProcessing(force)
 
 
 class UpdateProcessing:
@@ -3651,10 +3674,10 @@ class DataSets:
 
     def GET(self):
         getparams = web.input()
-        forse = False
-        if 'forse' in getparams:
-            forse = getparams.forse
-        return webpy_esapp_helpers.getDataSets(forse)
+        force = False
+        if 'force' in getparams:
+            force = getparams.force
+        return webpy_esapp_helpers.getDataSets(force)
 
 
 class CheckStatusAllServices:
@@ -3662,8 +3685,10 @@ class CheckStatusAllServices:
         self.lang = "eng"
 
     def POST(self):
-
-        status_services = functions.getStatusAllServices()
+        if sys.platform == 'win32':
+            status_services = functions.getStatusAllServicesWin()
+        else:
+            status_services = functions.getStatusAllServices()
 
         systemsettings = functions.getSystemSettings()
 
@@ -3682,142 +3707,13 @@ class ExecuteServiceTask:
         self.lang = "eng"
 
     def POST(self):
-        # return web.ctx
-        # from apps.acquisition import acquisition
         message = ''
-        dryrun = False
         getparams = web.input()
 
-        if getparams.service == 'eumetcast':
-            # Define pid file and create daemon
-            pid_file = es_constants.get_eumetcast_pid_filename
-            eumetcast_daemon = acquisition.GetEumetcastDaemon(pid_file, dry_run=dryrun)
-            eumetcast_service_script = es_constants.es2globals['acq_service_dir']+os.sep+'service_get_eumetcast.py'
-            status = eumetcast_daemon.status()
-
-            logger.info(getparams.service)
-            logger.info('status: ' + str(status))
-
-            if getparams.task == 'stop':
-                if status:
-                    os.system("python " + eumetcast_service_script + " stop")
-                    message = 'Get_eumetcast service stopped'
-                else:
-                    message = 'Get_eumetcast service is already down'
-
-            elif getparams.task == 'run':
-                if not status:
-                    os.system("python " + eumetcast_service_script + " start")
-                    message = 'Get_eumetcast service started'
-                else:
-                    message = 'Get_eumetcast service was already up'
-
-            elif getparams.task == 'restart':
-                os.system("python " + eumetcast_service_script + " stop")
-                os.system("python " + eumetcast_service_script + " start")
-                message = 'Get_eumetcast service restarted'
-
-        if getparams.service == 'internet':
-            # Define pid file and create daemon
-            pid_file = es_constants.get_internet_pid_filename
-            internet_daemon = acquisition.GetInternetDaemon(pid_file, dry_run=dryrun)
-            internet_service_script = es_constants.es2globals['acq_service_dir']+os.sep+'service_get_internet.py'
-            status = internet_daemon.status()
-
-            if getparams.task == 'stop':
-                if status:
-                    os.system("python " + internet_service_script + " stop")
-                    message = 'Get_internet service stopped'
-                else:
-                    message = 'Get_internet service is already down'
-            elif getparams.task == 'run':
-                if not status:
-                    os.system("python " + internet_service_script + " start")
-                    message = 'Get_internet service started'
-                else:
-                    message = 'Get_internet service was already up'
-
-            elif getparams.task == 'restart':
-                os.system("python " + internet_service_script + " stop")
-                os.system("python " + internet_service_script + " start")
-                message = 'Get_internet service restarted'
-
-        if getparams.service == 'ingest':
-            # Define pid file and create daemon
-            pid_file = es_constants.ingestion_pid_filename
-            ingest_daemon = acquisition.IngestionDaemon(pid_file, dry_run=dryrun)
-            status = ingest_daemon.status()
-            ingest_service_script = es_constants.es2globals['acq_service_dir']+os.sep+'service_ingestion.py'
-            if getparams.task == 'stop':
-                if status:
-                    os.system("python " + ingest_service_script + " stop")
-                    message = 'Ingestion service stopped'
-                else:
-                    message = 'Ingestion service is already down'
-
-            elif getparams.task == 'run':
-                if not status:
-                    os.system("python " + ingest_service_script + " start")
-                    message = 'Ingestion service started'
-                else:
-                    message = 'Ingestion service was already up'
-
-            elif getparams.task == 'restart':
-                os.system("python " + ingest_service_script + " stop")
-                os.system("python " + ingest_service_script + " start")
-                message = 'ingest service restarted'
-
-        if getparams.service == 'processing':
-            # Define pid file and create daemon
-            pid_file = es_constants.processing_pid_filename
-            processing_daemon = processing.ProcessingDaemon(pid_file, dry_run=dryrun)
-
-            status = processing_daemon.status()
-            processing_service_script = es_constants.es2globals['proc_service_dir']+os.sep+'service_processing.py'
-            if getparams.task == 'stop':
-                if status:
-                    os.system("python " + processing_service_script + " stop")
-                    message = 'Processing service stopped'
-                else:
-                    message = 'Processing service is already down'
-
-            elif getparams.task == 'run':
-                if not status:
-                    os.system("python " + processing_service_script + " start")
-                    message = 'Processing service started'
-                else:
-                    message = 'Processing service was already up'
-
-            elif getparams.task == 'restart':
-                os.system("python " + processing_service_script + " stop")
-                os.system("python " + processing_service_script + " start")
-                message = 'Processing service restarted'
-
-        if getparams.service == 'system':
-            # Define pid file and create daemon
-            pid_file = es_constants.system_pid_filename
-            system_daemon = es2system.SystemDaemon(pid_file, dry_run=dryrun)
-            #
-            status = system_daemon.status()
-            system_service_script = es_constants.es2globals['system_service_dir']+os.sep+'service_system.py'
-            if getparams.task == 'stop':
-                if status:
-                    os.system("python " + system_service_script + " stop")
-                    message = 'System service stopped'
-                else:
-                    message = 'System service is already down'
-            #
-            elif getparams.task == 'run':
-                if not status:
-                    os.system("python " + system_service_script + " start")
-                    message = 'System service started'
-                else:
-                    message = 'System service was already up'
-
-            elif getparams.task == 'restart':
-                os.system("python " + system_service_script + " stop")
-                os.system("python " + system_service_script + " start")
-                message = 'System service restarted'
+        if sys.platform == 'win32':
+            message = webpy_esapp_helpers.execServiceTaskWin(getparams)
+        else:
+            message = webpy_esapp_helpers.execServiceTask(getparams)
 
         logger.info(message)
         servicesstatus_json = '{"success": true, "message": "' + message + '"}'
@@ -3903,7 +3799,7 @@ class UpdateProduct:
         #                'defined_by': getparams['products']['defined_by'],
         #                'activated': getparams['products']['activated']}
 
-        result = querydb.activate_deactivate_product(productcode=getparams['products']['productcode'], version=getparams['products']['version'], activate=getparams['products']['activated'], forse=True)
+        result = querydb.activate_deactivate_product(productcode=getparams['products']['productcode'], version=getparams['products']['version'], activate=getparams['products']['activated'], force=True)
         # if self.crud_db.update('product', productinfo):
         if result:
             updatestatus = '{"success":"true", "message":"Product updated!"}'
@@ -3988,10 +3884,10 @@ class Ingestion:
 
     def GET(self):
         getparams = web.input()
-        forse = False
-        if 'forse' in getparams:
-            forse = getparams.forse
-        return webpy_esapp_helpers.getIngestion(forse)
+        force = False
+        if 'force' in getparams:
+            force = getparams.force
+        return webpy_esapp_helpers.getIngestion(force)
 
 
 class DataAcquisition:
@@ -4047,7 +3943,8 @@ class ProductAcquisition:
     def GET(self, params):
         # return web.ctx
         getparams = web.input()
-        products = querydb.get_products_acquisition(activated=getparams.activated)
+        # products = querydb.get_products_acquisition(activated=getparams.activated)
+        products = querydb.get_products(activated=getparams.activated)
         products_json = functions.tojson(products)
         products_json = '{"success":"true", "total":'+str(products.__len__())+',"products":['+products_json+']}'
         return products_json

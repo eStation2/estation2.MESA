@@ -100,10 +100,46 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
 
                     all_mapset_datasets = product.get_subproducts(mapset=mapset)
                     for subproductcode in all_mapset_datasets:
-                        dataset = product.get_dataset(mapset=mapset, sub_product_code=subproductcode,
-                                                      from_date=None, to_date=None)
                         from_date = None
                         to_date = None
+
+                        dataset_dbinfo = querydb.get_subproduct(productcode=productcode,
+                                                              version=version,
+                                                              subproductcode=subproductcode)
+                        kwargs = {'mapset': mapset,
+                                  'sub_product_code': subproductcode}
+                        if dataset_dbinfo is not None:
+                            if hasattr(dataset_dbinfo, 'frequency_id'):
+                                if dataset_dbinfo.frequency_id == 'e15minute':
+                                    today = datetime.date.today()
+                                    from_date = today - datetime.timedelta(days=3)
+                                    kwargs = {'mapset': mapset,
+                                              'sub_product_code': subproductcode,
+                                              'from_date': from_date}
+                                elif dataset_dbinfo.frequency_id == 'e30minute':
+                                    today = datetime.date.today()
+                                    from_date = today - datetime.timedelta(days=6)
+                                    kwargs = {'mapset': mapset,
+                                              'sub_product_code': subproductcode,
+                                              'from_date': from_date}
+                                elif dataset_dbinfo.frequency_id == 'e1day':
+                                    today = datetime.date.today()
+                                    from_date = today - relativedelta(years=1)
+                                    # if sys.platform != 'win32':
+                                    #     from_date = today - relativedelta(years=1)
+                                    # else:
+                                    #     from_date = today - datetime.timedelta(days=365)
+                                    kwargs = {'mapset': mapset,
+                                              'sub_product_code': subproductcode,
+                                              'from_date': from_date}
+                                else:
+                                    kwargs = {'mapset': mapset,
+                                              'sub_product_code': subproductcode}
+
+                        dataset = product.get_dataset(**kwargs)
+                        # dataset = product.get_dataset(mapset=mapset, sub_product_code=subproductcode,
+                        #                               from_date=None, to_date=None)
+
                         dataset_info = dataset.get_dataset_normalized_info()
                         tot_files = dataset_info['totfiles']
                         if tot_files == 0:
@@ -123,7 +159,7 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
 
                         # Remove the processing dir from file path because this can be different for each
                         # installation (especially the windows version) than on the cloud service processing dir
-                        filenames[:] = [os.path.relpath(filename, es_constants.es2globals['processing_dir']) for
+                        filenames[:] = [os.path.join(os.path.sep, os.path.relpath(filename, es_constants.es2globals['processing_dir'])) for
                                         filename in filenames]
                         # for filename in filenames:
                         #     print filename
@@ -144,10 +180,45 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
 
             all_mapset_datasets = product.get_subproducts(mapset=mapsetcode)
             for subproductcode in all_mapset_datasets:
-                dataset = product.get_dataset(mapset=mapsetcode, sub_product_code=subproductcode,
-                                              from_date=None, to_date=None)
                 from_date = None
                 to_date = None
+                dataset_dbinfo = querydb.get_subproduct(productcode=productcode,
+                                                        version=version,
+                                                        subproductcode=subproductcode)
+                kwargs = {'mapset': mapsetcode,
+                          'sub_product_code': subproductcode}
+                if dataset_dbinfo is not None:
+                    if hasattr(dataset_dbinfo, 'frequency_id'):
+                        if dataset_dbinfo.frequency_id == 'e15minute':
+                            today = datetime.date.today()
+                            from_date = today - datetime.timedelta(days=3)
+                            kwargs = {'mapset': mapsetcode,
+                                      'sub_product_code': subproductcode,
+                                      'from_date': from_date}
+                        elif dataset_dbinfo.frequency_id == 'e30minute':
+                            today = datetime.date.today()
+                            from_date = today - datetime.timedelta(days=6)
+                            kwargs = {'mapset': mapsetcode,
+                                      'sub_product_code': subproductcode,
+                                      'from_date': from_date}
+                        elif dataset_dbinfo.frequency_id == 'e1day':
+                            today = datetime.date.today()
+                            from_date = today - relativedelta(years=1)
+                            # if sys.platform != 'win32':
+                            #     from_date = today - relativedelta(years=1)
+                            # else:
+                            #     from_date = today - datetime.timedelta(days=365)
+                            kwargs = {'mapset': mapsetcode,
+                                      'sub_product_code': subproductcode,
+                                      'from_date': from_date}
+                        else:
+                            kwargs = {'mapset': mapsetcode,
+                                      'sub_product_code': subproductcode}
+
+                dataset = product.get_dataset(**kwargs)
+                # dataset = product.get_dataset(mapset=mapsetcode, sub_product_code=subproductcode,
+                #                               from_date=None, to_date=None)
+
                 dataset_info = dataset.get_dataset_normalized_info()
                 tot_files = dataset_info['totfiles']
                 if tot_files == 0:
@@ -167,7 +238,7 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
 
                 # Remove the processing dir from file path because this can be different for each
                 # installation (especially the windows version) than on the cloud service processing dir
-                filenames[:] = [os.path.relpath(filename, es_constants.es2globals['processing_dir']) for filename in
+                filenames[:] = [os.path.join(os.path.sep, os.path.relpath(filename, es_constants.es2globals['processing_dir'])) for filename in
                                 filenames]
                 # for filename in filenames:
                 #     print filename
@@ -180,12 +251,46 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
             request['productmapsets'].append(mapset_dict)
 
         else:
-            # All variable defined -> get missing object
-            dataset = product.get_dataset(mapset=mapsetcode, sub_product_code=subproductcode, from_date=None,
-                                          to_date=None)
-
             from_date = None
             to_date = None
+            # All variable defined -> get missing object
+            dataset_dbinfo = querydb.get_subproduct(productcode=productcode,
+                                                  version=version,
+                                                  subproductcode=subproductcode)
+            kwargs = {'mapset': mapsetcode,
+                      'sub_product_code': subproductcode}
+            if dataset_dbinfo is not None:
+                if hasattr(dataset_dbinfo, 'frequency_id'):
+                    if dataset_dbinfo.frequency_id == 'e15minute':
+                        today = datetime.date.today()
+                        from_date = today - datetime.timedelta(days=3)
+                        kwargs = {'mapset': mapsetcode,
+                                  'sub_product_code': subproductcode,
+                                  'from_date': from_date}
+                    elif dataset_dbinfo.frequency_id == 'e30minute':
+                        today = datetime.date.today()
+                        from_date = today - datetime.timedelta(days=6)
+                        kwargs = {'mapset': mapsetcode,
+                                  'sub_product_code': subproductcode,
+                                  'from_date': from_date}
+                    elif dataset_dbinfo.frequency_id == 'e1day':
+                        today = datetime.date.today()
+                        from_date = today - relativedelta(years=1)
+                        # if sys.platform != 'win32':
+                        #     from_date = today - relativedelta(years=1)
+                        # else:
+                        #     from_date = today - datetime.timedelta(days=365)
+                        kwargs = {'mapset': mapsetcode,
+                                  'sub_product_code': subproductcode,
+                                  'from_date': from_date}
+                    else:
+                        kwargs = {'mapset': mapsetcode,
+                                  'sub_product_code': subproductcode}
+
+            dataset = product.get_dataset(**kwargs)
+            # dataset = product.get_dataset(mapset=mapsetcode, sub_product_code=subproductcode, from_date=None,
+            #                               to_date=None)
+
             dataset_info = dataset.get_dataset_normalized_info()
             tot_files = dataset_info['totfiles']
             if tot_files == 0:
@@ -208,7 +313,7 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
 
             # Remove the processing dir from file path because this can be different for each
             # installation (especially the windows version) than on the cloud service processing dir
-            filenames[:] = [os.path.relpath(filename, es_constants.es2globals['processing_dir']) for filename in
+            filenames[:] = [os.path.join(os.path.sep, os.path.relpath(filename, es_constants.es2globals['processing_dir'])) for filename in
                             filenames]
             # for filename in filenames:
             #     print filename

@@ -345,6 +345,13 @@
     color:#1A4D8F;
 }
 
+.green {
+    color: green !important;
+}
+
+.orange {
+    color: orange !important;
+}
 
 .red {
     color: red !important;
@@ -451,6 +458,28 @@ p {
 .chartfitlayout{width:100% !important; height:100% !important;}
 
 
+.expand {
+    background-image:url(../img/icons/expand.png);
+    background-repeat: no-repeat;
+}
+
+.collapse {
+    background-image:url(../img/icons/collapse.png);
+    background-repeat: no-repeat;
+}
+
+.exclamation {
+    background-image:url(../img/icons/exclamation.png);
+    background-repeat: no-repeat;
+}
+.play {
+    background-image:url(../img/icons/play.png);
+    background-repeat: no-repeat;
+}
+.pause {
+    background-image:url(../img/icons/pause.png);
+    background-repeat: no-repeat;
+}
 
 .logarithm_icon {
     background-image:url(../img/logarithm.png);

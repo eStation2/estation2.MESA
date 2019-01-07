@@ -50,19 +50,26 @@ Ext.define("esapp.view.datamanagement.sendRequest",{
     initComponent: function () {
         var me = this;
 
-        me.title = esapp.Utils.getTranslation('getrequestfile');     // 'Send request',
+        me.title = esapp.Utils.getTranslation('getmissingfiles');     // 'Get request file',
 
         me.bbar = ['->', {
             text: esapp.Utils.getTranslation('cancel'),    // 'Cancel',
             scale: 'medium',
             handler: 'onCancelClick'
+        // },{
+        //     text: esapp.Utils.getTranslation('saverequestfile'),    //'Save Request file',
+        //     iconCls: 'fa fa-floppy-o fa-2x',
+        //     style: { color: 'lightblue' },
+        //     scale: 'medium',
+        //     disabled: false,
+        //     handler: 'onSaveClick'
         },{
-            text: esapp.Utils.getTranslation('saverequestfile'),    // 'Save Request file',
-            iconCls: 'fa fa-floppy-o fa-2x',
+            text: esapp.Utils.getTranslation('getmissingfiles'),
+            iconCls: 'fa fa-cloud-download fa-2x',
             style: { color: 'lightblue' },
             scale: 'medium',
             disabled: false,
-            handler: 'onSaveClick'
+            handler: 'createRequestJob'
         }];
 
         me.items = [{
