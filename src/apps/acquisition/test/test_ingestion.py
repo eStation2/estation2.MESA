@@ -1343,17 +1343,18 @@ class TestIngestion(unittest.TestCase):
         # Test Copernicus Products version 2.0.1 (for DMP)
         # Products released from VITO in March 2017
 
-        date_fileslist = glob.glob('/data/TestIngestion/c_gls_DMP-RT6_201804100000_GLOBE_PROBAV_V2.0.1.nc')
-        in_date = '201704100000'
-        productcode = 'vgt-fapar'
+        date_fileslist = glob.glob('/data/TestIngestion/c_gls_DMP-RT0_201812310000_GLOBE_PROBAV_V2.0.1.nc')
+        in_date = '20181221'
+        productcode = 'vgt-dmp'
         productversion = 'V2.0'
-        subproductcode = 'fapar'
+        subproductcode = 'dmp'
         mapsetcode = 'SPOTV-Africa-1km'
-        datasource_descrID='EO:EUM:DAT:PROBA-V2.0:FAPAR'
+        datasource_descrID='PDF:GLS:PROBA-V2.0:DMP_RT0'
 
 
         product = {"productcode": productcode,
                    "version": productversion}
+
         args = {"productcode": productcode,
                 "subproductcode": subproductcode,
                 "datasource_descr_id": datasource_descrID,
@@ -1372,9 +1373,9 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                                              source_id=datasource_descrID):
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                        source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
     def test_ingest_sadc_vci_v1(self):
 
