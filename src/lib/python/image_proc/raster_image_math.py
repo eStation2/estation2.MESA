@@ -3059,7 +3059,7 @@ def compute_median_filter(input_file='', nodata=None, output_file='', output_nod
 
         # Data smoothing (median filter)
 
-        smooth_data_chla = ndimage.median_filter(data_chla, 3)
+        smooth_data_chla = scipy.ndimage.median_filter(data_chla, 3)
 
         # Write out the full matrix N.array(outData)
         outband.WriteArray(smooth_data_chla, 0, 0)
@@ -3140,7 +3140,7 @@ def extrapolate_edge(input_file='', nodata=None, output_file='', output_nodata=N
 
         data = chl_band.ReadAsArray(0, 0, ns, nl).astype(float)
         #
-        # extraploted_data = ndimage.grey_dilation(data, size=(2,2))
+        # extraploted_data = scipy.ndimage.grey_dilation(data, size=(2,2))
 
         filtData = chl_band.ReadAsArray(0, 0, ns, nl).astype(float)
 
@@ -3168,8 +3168,8 @@ def extrapolate_edge(input_file='', nodata=None, output_file='', output_nodata=N
         for i in range(10):
             #  replaces each element in A by the orderth element in the sorted set of neighbors specified by the nonzero elements in domain.
             filtData = ordfilt2(filtData, order, szOrd)
-            #filtData = ndimage.median_filter(filtData, footprint=N.ones((szOrd,szOrd)))
-            #filtData = ndimage.generic_filter(filtData,)
+            #filtData = scipy.ndimage.median_filter(filtData, footprint=N.ones((szOrd,szOrd)))
+            #filtData = scipy.ndimage.generic_filter(filtData,)
             # re-put measured values where there were some.
             filtData[ifinite] = data[ifinite]
 
@@ -3181,7 +3181,7 @@ def extrapolate_edge(input_file='', nodata=None, output_file='', output_nodata=N
         filtData[ifinite_edge] = data[ifinite_edge]
         outband1.WriteArray(filtData, 0, 0)
         # apply gaussian filter
-        filtData = ndimage.gaussian_filter(filtData, 2)  #,truncate=1.25
+        filtData = scipy.ndimage.gaussian_filter(filtData, 2)  #,truncate=1.25
 
         # re-put original measured values on the edges
         ifinite_edge = [data != N.nan] and [filtData == N.nan]
@@ -3206,7 +3206,7 @@ def local_filter(x, order):
     return x[order]
 
 def ordfilt2(A, order, mask_size):
-    return ndimage.generic_filter(A, lambda x, ord=order: local_filter(x, ord), size=(mask_size, mask_size))
+    return scipy.ndimage.generic_filter(A, lambda x, ord=order: local_filter(x, ord), size=(mask_size, mask_size))
 
 
 # _____________________________
