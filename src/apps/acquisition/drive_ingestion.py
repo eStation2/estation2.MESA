@@ -11,7 +11,7 @@ logger = log.my_logger(__name__)
 do_start = True
 dry_run  = False
 service  = False
-only_prod='wd-gee'
+only_prod='olci-wrr'
 # only_prod='wd-gee'
 
 if service:

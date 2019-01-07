@@ -1478,8 +1478,8 @@ def pre_process_nasa_firms(subproducts, tmpdir, input_files, my_logger):
     return interm_files_list
 
 def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Merges the various tiles of the .tif files retrieved from GEE application
+# --------------------------PROCESS IS DONE ONLY IN DEVELOPEMENT MACHINE CANT BE USED IN MESA-PROC-------------------
+#   Merges the various tiles of the .tif files retrieved from GEE application and remove the bigtif tag.
 #   Additionally, writes to the 'standard' mapset 'WD-GEE-ECOWAS-AVG', which MUST be indicated as
 #   'native-mapset' for the datasource
 #   Here below gdal options used for testing (they refer to ECOWAS-AVG mapset):
@@ -1517,6 +1517,7 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         return []
     # Does check the number of files ?
     output_file         = tmpdir+os.path.sep + 'merge_output.tif'
+    output_file_vrt = tmpdir + os.path.sep + 'merge_output_rescaled.vrt'
     output_file_mapset  = tmpdir+os.path.sep + 'merge_output_WD-GEE-ECOWAS-AVG.tif'
 
     # -------------------------------------------------------------------------
@@ -1537,14 +1538,19 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
     except:
         pass
 
+    rescale_func = "\"A * 100\""
+    # Rescale the data using gdal_calc
+    rescale_command = "gdal_calc.py -A "+ output_file +" --co \"compress=lzw\" --type=Int16 --outfile="+output_file_vrt+" --calc="+rescale_func
+    os.system(rescale_command)
     # M.C. 30.10.17 (see ES2-96)
     # Do gdal_translate, in order to better compress the file
 
     try:
         command = es_constants.gdal_translate
         command += ' -co \"compress=lzw\"'
+        command += ' -co \"BIGTIFF=No\"'
         command += ' -ot BYTE '
-        command += ' '+output_file
+        command += ' '+output_file_vrt
         command += ' '+output_file_mapset
 
         my_logger.debug('Command for re-project is: ' + command)
@@ -1554,6 +1560,10 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
     except:
         pass
 
+    #Manually save tar file in the /data/ingest and send it to mesa-proc for the processing
+    command = 'tar -cvzf /data/ingest/MESA_JRC_wd-gee_occurr_20180801_WD-GEE-ECOWAS-AVG_1.0.tgz -C ' + os.path.dirname(output_file_mapset) + ' ' + os.path.basename(output_file_mapset)
+    my_logger.debug('Command for tar the file is: ' + command)
+    os.system(command)
     # Assign output file
     # interm_files_list.append(output_file_mapset)
 
@@ -1900,6 +1910,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             bandname = sprod['re_extract']
             re_process = sprod['re_process']
             no_data = sprod['nodata']
+            subproductcode = sprod['subproduct']
             # TODO scale nodata value from GPT has to be computed based on the product
             scaled_no_data = "103.69266"
             # ------------------------------------------------------------------------------------------
@@ -1915,7 +1926,11 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             # Write a graph xml and subset the product for specific band, also applying flags
             # ------------------------------------------------------------------------------------------
             #functions.write_graph_xml_subset(output_dir=tmpdir_untar, band_name=re_process)
-            expression='(WQSF_lsb_CLOUD or WQSF_lsb_CLOUD_AMBIGUOUS or WQSF_lsb_CLOUD_MARGIN or WQSF_lsb_INVALID or WQSF_lsb_COSMETIC or WQSF_lsb_SATURATED or WQSF_lsb_SUSPECT or WQSF_lsb_HISOLZEN or WQSF_lsb_HIGHGLINT or WQSF_lsb_SNOW_ICE) ? NaN : CHL_OC4ME'
+            # if subproductcode == 'chl-oc4me-filtered':
+            #     expression = '(WQSF_lsb_CLOUD or WQSF_lsb_CLOUD_AMBIGUOUS or WQSF_lsb_CLOUD_MARGIN or WQSF_lsb_INVALID or WQSF_lsb_COSMETIC or WQSF_lsb_SATURATED or WQSF_lsb_SUSPECT or WQSF_lsb_HISOLZEN or WQSF_lsb_HIGHGLINT or WQSF_lsb_SNOW_ICE or WQSF_msb_ANNOT_ABSO_D or WQSF_lsb_OC4ME_FAIL or WQSF_msb_ANNOT_MIXR1 or WQSF_msb_ANNOT_DROUT or WQSF_msb_ANNOT_TAU06 or WQSF_msb_RWNEG_O2 or WQSF_msb_RWNEG_O3 or WQSF_msb_RWNEG_O4 or WQSF_msb_RWNEG_O5 or WQSF_msb_RWNEG_O6 or WQSF_msb_RWNEG_O7 or WQSF_msb_RWNEG_O8 or WQSF_lsb_AC_FAIL or WQSF_lsb_WHITECAPS) ? NaN : CHL_OC4ME'
+            # else:
+            #     expression='(WQSF_lsb_CLOUD or WQSF_lsb_CLOUD_AMBIGUOUS or WQSF_lsb_CLOUD_MARGIN or WQSF_lsb_INVALID or WQSF_lsb_COSMETIC or WQSF_lsb_SATURATED or WQSF_lsb_SUSPECT or WQSF_lsb_HISOLZEN or WQSF_lsb_HIGHGLINT or WQSF_lsb_SNOW_ICE) ? NaN : CHL_OC4ME'
+            expression = '(WQSF_lsb_CLOUD or WQSF_lsb_CLOUD_AMBIGUOUS or WQSF_lsb_CLOUD_MARGIN or WQSF_lsb_INVALID or WQSF_lsb_COSMETIC or WQSF_lsb_SATURATED or WQSF_lsb_SUSPECT or WQSF_lsb_HISOLZEN or WQSF_lsb_HIGHGLINT or WQSF_lsb_SNOW_ICE or WQSF_msb_ANNOT_ABSO_D or WQSF_lsb_OC4ME_FAIL or WQSF_msb_ANNOT_MIXR1 or WQSF_msb_ANNOT_DROUT or WQSF_msb_ANNOT_TAU06 or WQSF_msb_RWNEG_O2 or WQSF_msb_RWNEG_O3 or WQSF_msb_RWNEG_O4 or WQSF_msb_RWNEG_O5 or WQSF_msb_RWNEG_O6 or WQSF_msb_RWNEG_O7 or WQSF_msb_RWNEG_O8 or WQSF_lsb_AC_FAIL or WQSF_lsb_WHITECAPS) ? NaN : CHL_OC4ME'
             functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process, expression= expression)     #'l2p_flags_cloud ? NaN : sea_surface_temperature')
             #functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process)
 
@@ -2250,8 +2265,8 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
             # Write a graph xml and subset the product for specific band
             # ------------------------------------------------------------------------------------------
             #functions.write_graph_xml_subset(output_dir=tmpdir_untar, band_name=re_process)
-            functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process, expression='l2p_flags_cloud ? NaN : sea_surface_temperature')
-
+            #functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process, expression='l2p_flags_cloud ? NaN : sea_surface_temperature')
+            functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process, expression='(quality_level_acceptable_quality or quality_level_best_quality) ? sea_surface_temperature : NaN')
             graph_xml_subset = tmpdir_untar_band + os.path.sep + 'graph_xml_subset.xml'
             output_subset_tif = tmpdir_untar_band + os.path.sep + 'band_subset.tif'
 
@@ -2440,6 +2455,67 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
     # interm_files_list.append(output_tif)
     #
     # return interm_files_list
+
+def pre_process_oilspill_detection_sentinel1(subproducts, tmpdir, input_files, my_logger, in_date=None):
+# -------------------------------------------------------------------------------------------------------
+#   Pre-process the Sentinel 1 GRD product IW VV
+#   Returns -1 if nothing has to be done on the passed files
+#
+
+    # Prepare the output file list
+    pre_processed_list = []
+
+    # Loop over subproducts and extract associated files. In case of more Mapsets, more sprods exist
+    for sprod in subproducts:
+        interm_files_list = []
+
+        for input_file in input_files:
+
+            # In each unzipped folder pre-process the dataset and store the list of files to be merged
+
+            # Define the re_expr for extracting files
+            bandname = sprod['re_extract']  #Amplitude_VV,Intensity_VV
+            re_process = sprod['re_process']
+            no_data = sprod['nodata']
+            # TODO scale nodata value from GPT has to be computed based on the product
+            scaled_no_data = "0"
+
+            # ------------------------------------------------------------------------------------------
+            # Write a graph xml and subset the product for specific band, also applying flags
+            # ------------------------------------------------------------------------------------------
+            graph_xml_terrain_correction_oilspill = tmpdir + os.path.sep + 'graph_xml_terrain_correction_oilspill.xml'
+            output_tif = tmpdir + os.path.sep + 'band_subset.tif'
+
+            functions.write_graph_xml_terrain_correction_oilspill(tmpdir, input_file, re_process, output_tif)
+            #functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process)
+
+            command = es_constants.gpt_exec+' '+ graph_xml_terrain_correction_oilspill
+            status=os.system(command)
+            # ToDo : check the status or use try/except
+            interm_files_list.append(output_tif)
+
+        # Check at least 1 file is reprojected file is there
+        if len(interm_files_list) == 0:
+            my_logger.debug('No any file overlapping the ROI. Return')
+            return -1
+
+        if len(interm_files_list) > 1 :
+            out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
+            input_files_str = ''
+            for file_add in interm_files_list:
+                input_files_str += ' '
+                input_files_str += file_add
+            command = 'gdalwarp -srcnodata "{}" -dstnodata "{}" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(scaled_no_data, int(no_data),
+                 input_files_str, out_tmp_file_gtiff)
+            # command = 'gdalwarp -srcnodata "103.69266" -dstnodata "1000" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
+            #     input_files_str, out_tmp_file_gtiff)
+            my_logger.info('Command for merging is: ' + command)
+            os.system(command)
+            pre_processed_list.append(out_tmp_file_gtiff)
+        else:
+            pre_processed_list.append(interm_files_list[0])
+
+    return pre_processed_list
 
 
 def pre_process_aviso_mwind(subproducts, tmpdir, input_files, my_logger, in_date=None):

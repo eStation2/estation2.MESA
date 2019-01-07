@@ -38,19 +38,36 @@ def sentinelsat_getlists(base_url, template, datetime_start, datetime_end):
             datetime_end = date
             datetime_end = date(2015, 12, 29)
 
-
+        str_temp = ''
+        platformname = "Sentinel-1"
+        producttype = "GRD"
+        polarisationmode = "VV"
+        sensoroperationalmode = "IW"
         if template is not None:
             sentinelsat_obj = json.loads(template)
             platformname = sentinelsat_obj.get('platformname')#'Sentinel-1'
             producttype = sentinelsat_obj.get('producttype')
+            polarisationmode = sentinelsat_obj.get('polarisationmode')
+            sensoroperationalmode = sentinelsat_obj.get('sensoroperationalmode')
+            # for key, value in sorted(sentinelsat_obj.items()):
+            #     str_temp += ' , '
+            #     str_temp += key + ' = ' +value
+                # platformname = sentinelsat_obj.get('platformname')#'Sentinel-1'
+                # producttype = sentinelsat_obj.get('producttype')
 
         #Search by polygon, time, and Hub query keywords
         footprint = geojson_to_wkt(read_geojson(geojson_roi))
-        products = api.query(footprint,
-                             date=(datetime_start.date(), datetime_end.date()),
-                             producttype = producttype,
-                             #cloudcoverpercentage = None,
-                             platformname=platformname)
+
+        if platformname != None and producttype != None and polarisationmode != None and sensoroperationalmode != None:
+
+            products = api.query(footprint, date=(datetime_start.date(), datetime_end.date()), platformname = platformname, producttype =producttype, polarisationmode=polarisationmode,sensoroperationalmode =sensoroperationalmode )
+
+        else:
+            products = api.query(footprint,
+                                 date=(datetime_start.date(), datetime_end.date()),
+                                 producttype = producttype,
+                                 #cloudcoverpercentage = None,
+                                 platformname=platformname)
 
         list_links = []
         for value in products.itervalues():
