@@ -150,9 +150,9 @@ class TestCreateArchives(unittest.TestCase):
         productcode='vgt-ndvi'
         subproductcode = 'ndv'
         version = 'sv2-pv2.2'
-        mapsetcode = 'SPOTV-ECOWAS-1km'
-        from_date='2011-01-01'
-        to_date='2011-12-31'
+        mapsetcode = 'SPOTV-SADC-1km'
+        from_date='2018-12-11'
+        to_date='2018-12-21'
         output_dir='/eStation2/archives/bsx/'
 
         bsx_archive = requests.create_archive_vars(productcode, version, mapsetcode, subproductcode, from_date, to_date,
@@ -240,3 +240,31 @@ class TestCreateArchives(unittest.TestCase):
                                                            from_date=from_date, to_date=to_date, time_suffix='2010-2017', output_dir=output_subdir)
 
                 logger.info('Archive created as {0}'.format(bsx_archive))
+
+    def test_achive_creation_ndvi_bdms(self):
+
+        #   General definitions
+        productcode='vgt-ndvi'
+        version = 'sv2-pv2.2'
+        output_dir='/data/bsx_archives/'
+
+        #   ================================================================
+        #   10d linearx2 LTA
+        #   ================================================================
+
+        subproductcodes = ['ndv']
+        regions=['SADC']
+        from_date = '2018-12-11'
+        to_date = '2018-12-21'
+        for subproductcode in subproductcodes:
+            for region in regions:
+
+                mapsetcode='SPOTV-{0}-1km'.format(region)
+                output_subdir='/data/bsx_archives/{0}'.format(region)
+
+                bsx_archive = requests.create_archive_vars(productcode, version, mapsetcode, subproductcode,
+                                                           from_date=from_date, to_date=to_date, time_suffix='36-dekads', output_dir=output_subdir)
+
+                logger.info('Archive created as {0}'.format(bsx_archive))
+
+
