@@ -54,6 +54,7 @@ class Frequency(object):
         HOUR = 'hour'
         MINUTE = 'minute'
         NONE = 'none'
+        DAYS7 = '7days'
 
     class TYPE:
         PER = 'p'
@@ -117,6 +118,8 @@ class Frequency(object):
             return add_days(date, value, 8)
         elif unit == self.UNIT.DAYS16:
             return add_days(date, value, 16)
+        elif unit == self.UNIT.DAYS7:
+            return add_days(date, value, 7)
         elif unit == self.UNIT.DEKAD:
             return add_dekads(date, value)
         elif unit == self.UNIT.CGL_DEKAD:

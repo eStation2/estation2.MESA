@@ -18,7 +18,7 @@ logger = log.my_logger(__name__)
 
 if __name__=='__main__':
 
-    files_dir = '/data/processing/modis-firms/v6.0/SPOTV-Africa-10km/derived/10dcount10k/'
+    files_dir = '/data/processing/modis-sst/v2013.1/MODIS-Africa-4km/derived/monavg/'
     files = glob(files_dir+'*.tif')
 
     input_file_dir='/data/processing/modis-firms/v6.0/SPOTV-Africa-1km/derived/10dcount/'
@@ -27,8 +27,8 @@ if __name__=='__main__':
         print 'Working on file: '+myfile
         try:
             date = functions.get_date_from_path_full(myfile)
-            input_file = glob(input_file_dir+date+'*.tif')
-
+            # input_file = glob(input_file_dir+date+'*.tif')
+            input_file = ["/data/processing/modis-sst/v2013.1/MODIS-Africa-4km/derived/monavg/20181101_modis-sst_monavg_MODIS-Africa-4km_v2013.1.tif"]
             if not os.path.isfile(input_file[0]):
                 print 'No input file found for: '+myfile
             else:

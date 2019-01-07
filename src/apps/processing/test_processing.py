@@ -47,9 +47,9 @@ def test_proc_std_ndvi(pipe_run=0, pipe_print=3, touch_files_only=False):
 
     #res_queue = Queue()
     res_queue = None
-    #proc_lists = processing_std_ndvi_prods_only(res_queue,**args)
+    proc_lists = processing_std_ndvi_prods_only(res_queue,**args)
     #proc_lists = processing_std_ndvi_stats_only(res_queue,**args)
-    proc_lists = processing_std_ndvi_all(res_queue,**args)
+    #proc_lists = processing_std_ndvi_all(res_queue,**args)
 #   ---------------------------------------------------------------------
 # vgt-ndvi merge (for sv2-pv2.2)
 #   ---------------------------------------------------------------------
@@ -187,6 +187,30 @@ def test_proc_modis_pp(pipe_run=0, pipe_print=3, touch_files_only=False):
     res_queue = None
     processing_modis_pp(res_queue, **args)
 
+
+#   ---------------------------------------------------------------------
+# modis-pp computation - NON standard
+#   ---------------------------------------------------------------------
+from apps.processing.processing_std_median_filter import *
+
+def test_proc_std_median_filter(pipe_run=0, pipe_print=3, touch_files_only=False):
+    start_date = '20181125'
+    end_date = '20181201'
+    starting_dates = proc_functions.get_list_dates_for_dataset('olci-wrr', 'chl-oc4me', 'V02.0',
+                                                               start_date=start_date, end_date=end_date)
+
+    args = {'pipeline_run_level':3, \
+            'pipeline_printout_level':0, \
+            'pipeline_printout_graph_level': 0, \
+            'prod': 'olci-wrr',\
+            'starting_sprod':'chl-oc4me',\
+            'mapset': 'SPOTV-Africa-1km',\
+            'version':'V02.0',
+            'logfile':'olci-wrr',
+            'starting_dates':starting_dates
+            }
+    res_queue = None
+    processing_std_median_filter(res_queue, **args)
 # #
 #   ---------------------------------------------------------------------
 # tamsat-rfe
@@ -607,39 +631,39 @@ from apps.processing.processing_std_dmp import *
 #   ---------------------------------------------------------------------
 # modis-firms
 #   ---------------------------------------------------------------------
-from apps.processing.processing_std_ba import *
-def test_proc_ba(start_date=None, end_date=None, pipe_run=0, pipe_print=3, start_date_stats=None, end_date_stats=None, touch_files_only=False):
-
-    # Create the list of dates -> returns empty if start==end==None
-    if start_date is not None and end_date is not None:
-        starting_dates = proc_functions.get_list_dates_for_dataset('vgt-ba', 'ba', 'V1.5', start_date=start_date, end_date=end_date)
-    else:
-        starting_dates = None
-
-    if start_date_stats is not None and end_date_stats is not None:
-        starting_dates_stats = proc_functions.get_list_dates_for_dataset('vgt-ba', 'ba', 'V1.5', start_date=start_date_stats, end_date=end_date_stats)
-    else:
-        starting_dates_stats = None
-
-    target_mapset='SPOTV-Africa-1km'
-
-    touch_files_only=False
-
-    args = {'pipeline_run_level':pipe_run,
-            'pipeline_printout_level':pipe_print,
-            'pipeline_printout_graph_level': 0,
-            'prod': 'vgt-ba',
-            'starting_sprod':'ba',
-            'starting_dates': starting_dates,
-            'starting_dates_stats': starting_dates_stats,
-            'mapset': target_mapset,
-            'version':'V1.5',
-            'logfile':'log-modis-firms.log',
-            'touch_files_only':touch_files_only}
-
-    res_queue = None
-    proc_lists=processing_std_ba_stats_only(res_queue,**args)
-    print(proc_lists)
+# from apps.processing.processing_std_ba import *
+# def test_proc_ba(start_date=None, end_date=None, pipe_run=0, pipe_print=3, start_date_stats=None, end_date_stats=None, touch_files_only=False):
+#
+#     # Create the list of dates -> returns empty if start==end==None
+#     if start_date is not None and end_date is not None:
+#         starting_dates = proc_functions.get_list_dates_for_dataset('vgt-ba', 'ba', 'V1.5', start_date=start_date, end_date=end_date)
+#     else:
+#         starting_dates = None
+#
+#     if start_date_stats is not None and end_date_stats is not None:
+#         starting_dates_stats = proc_functions.get_list_dates_for_dataset('vgt-ba', 'ba', 'V1.5', start_date=start_date_stats, end_date=end_date_stats)
+#     else:
+#         starting_dates_stats = None
+#
+#     target_mapset='SPOTV-Africa-1km'
+#
+#     touch_files_only=False
+#
+#     args = {'pipeline_run_level':pipe_run,
+#             'pipeline_printout_level':pipe_print,
+#             'pipeline_printout_graph_level': 0,
+#             'prod': 'vgt-ba',
+#             'starting_sprod':'ba',
+#             'starting_dates': starting_dates,
+#             'starting_dates_stats': starting_dates_stats,
+#             'mapset': target_mapset,
+#             'version':'V1.5',
+#             'logfile':'log-modis-firms.log',
+#             'touch_files_only':touch_files_only}
+#
+#     res_queue = None
+#     proc_lists=processing_std_ba_stats_only(res_queue,**args)
+#     print(proc_lists)
 
 #   ---------------------------------------------------------------------
 #    chla gradient
@@ -684,7 +708,19 @@ def test_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=
 
 #test_proc_olci_wrr(pipe_run=0, pipe_print=5, start_date=None, end_date=None, touch_files_only=False)
 # test_proc_completeness()
-test_proc_modis_pp(pipe_run=0, pipe_print=4, touch_files_only=False)
+#test_proc_modis_pp(pipe_run=0, pipe_print=4, touch_files_only=False)
 #test_proc_tamsat_rfe(pipe_run=4, pipe_print=0, start_date='19830101', end_date='20171231', touch_files_only=False)
 #test_proc_modis_firms(pipe_run=4, pipe_print=0, start_date='20020701', end_date='20180630',touch_files_only=False)
 #test_proc_ba(pipe_run=4, pipe_print=0, start_date='20140701', end_date='20180630',touch_files_only=False)
+#test_proc_std_median_filter()
+import numpy
+# args = {"input_file": '/data/processing/exchange/Sentinel-3/gradient/20180202_olci-wrr_median-filter_SPOTV-Africa-1km_V02.0.tif', "output_file": '/data/processing/exchange/Sentinel-3/gradient/20180202_olci-wrr_extrapolated5_SPOTV-Africa-1km_V02.0.tif', "nodata": 1000,"output_format": 'GTIFF',
+#         "options": "compress = lzw"}
+args = {"input_file": '/data/processing/exchange/Sentinel-3/gradient/CHL_orig_10-12-2018.tif', "output_file": '/data/processing/exchange/Sentinel-3/gradient/CHL_ord_1IT_10_sd_2_10-12-2018.tif', "nodata": numpy.nan,"output_format": 'GTIFF',
+        "options": "compress = lzw"}
+# args = {"input_file": '/data/processing/exchange/Sentinel-3/gradient/20180202_olci-wrr_extrapolated5_SPOTV-Africa-1km_V02.0.tif', "output_file": '/data/processing/exchange/Sentinel-3/gradient/20180202_olci-wrr_gradient5_SPOTV-Africa-1km_V02.0.tif', "nodata": 1000,"output_format": 'GTIFF',
+#         "options": "compress = lzw"}
+
+
+raster_image_math.extrapolate_edge(**args)
+#raster_image_math.compute_median_filter(**args)

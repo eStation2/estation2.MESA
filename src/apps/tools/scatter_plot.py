@@ -110,7 +110,7 @@ def plot_1o1(data_1, data_2, x_label=None, y_label=None, figure_title=None):
         plt.grid()
         plt.tight_layout()
 
-        plt.savefig("E:\\dev\\Mapplot\\Scatterplot\\chirps\\10dprec\\"+filename+".png")
+        plt.savefig("/data/processing/exchange/"+filename+".png")
         
         #plt.show()
 
@@ -126,16 +126,16 @@ def plot_1o1(data_1, data_2, x_label=None, y_label=None, figure_title=None):
 #data_2[data_2==-32768]=np.nan
 #data_1 = np.random.sample((10, 10))
 #data_2 = np.random.sample((10, 10))
-input_directory = os.fsencode("E:\\dev\\Mapplot\\1999-2017\\chirps\\10dprec\\")
+input_directory = os.fsencode("/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10davg-linearx2/")
 filename = "test"
 #
 for file in os.listdir(input_directory):
     filename = os.fsdecode(file)
     if filename.endswith(".tif") or filename.endswith(".py"): 
-        ds_1 = gdal.Open("E:\\dev\\Mapplot\\1999-2017\\chirps\\10dprec\\"+filename)
+        ds_1 = gdal.Open("/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10davg-linearx2/"+filename)
         data_1 = np.array(ds_1.GetRasterBand(1).ReadAsArray())
 
-        ds_2 = gdal.Open("E:\\dev\\Mapplot\\1999-2014\\chirps\\10dprec\\"+filename)
+        ds_2 = gdal.Open("/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10dmax-linearx2/"+filename)
         data_2 = np.array(ds_2.GetRasterBand(1).ReadAsArray())
         
         data_1 = data_1.astype('float')

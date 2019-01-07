@@ -12,8 +12,16 @@ class TestSpirits(TestCase):
     def test_spirits_modify_header(self):
 
         # Should get here the role of my machine ...
-        header_file = '/data/temp/spirits/20100101_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0_SPIRITS.hdr'
-        conv.append_to_header_file(header_file, cv.metadata_spirits)
+        header_file = '/data/processing/exchange/spirits/SPOTV-Africa-1km/vgt-ndvi/it10/vt20180101i.hdr'
+
+        metadata_spirits= {'description': 'NDVI v2.2'}
+                           # 'flags': '{-32768=missing}', \
+                           # 'data_ignore_value':'-32768', \
+                           # 'days': 10, \
+                           # 'sensor_type':'SPOT VGT-PROBA V', \
+                           # 'comment':'Smoothed NDVI v2.1, JRC eStation2.0',
+                           # 'date':''}
+        conv.append_to_header_file(header_file, metadata_spirits)
 
     def test_convert_1_file(self):
 
@@ -36,5 +44,5 @@ class TestSpirits(TestCase):
         conv.convert_geotiff_file(input_file, output_dir, str_date, naming_spirits, metadata_spirits)
 
     def test_driver(self):
-        output_dir = '/data/spirits/'
+        output_dir = '/data/processing/exchange/spirits/'
         conv.convert_driver(output_dir)

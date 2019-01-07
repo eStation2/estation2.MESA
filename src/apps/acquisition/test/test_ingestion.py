@@ -847,43 +847,44 @@ class TestIngestion(unittest.TestCase):
 
         ingestion.ingest_archives_eumetcast()
 
-    # def test_ingest_jrc_wbd(self):
-    #
-    #     date_fileslist = glob.glob('/data/ingest/JRC-WBD_*')
-    #     #date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
-    #     in_date = '20160101'
-    #     productcode = 'wd-gee'
-    #     productversion = '1.0'
-    #     subproductcode = 'occurr'
-    #     mapsetcode = 'WD-GEE-ECOWAS-AVG'
-    #     datasource_descrID='JRC:WBD:GEE'
-    #
-    #     product = {"productcode": productcode,
-    #                "version": productversion}
-    #     args = {"productcode": productcode,
-    #             "subproductcode": subproductcode,
-    #             "datasource_descr_id": datasource_descrID,
-    #             "version": productversion}
-    #
-    #     product_in_info = querydb.get_product_in_info(**args)
-    #
-    #     re_process = product_in_info.re_process
-    #     re_extract = product_in_info.re_extract
-    #
-    #     sprod = {'subproduct': subproductcode,
-    #                          'mapsetcode': mapsetcode,
-    #                          're_extract': re_extract,
-    #                          're_process': re_process}
-    #
-    #     subproducts=[]
-    #     subproducts.append(sprod)
-    #
-    #     for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
-    #                                                                           source_id=datasource_descrID):
-    #
-    #         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
-    #
-            #self.assertEqual(1, 1)
+    def test_ingest_jrc_wbd(self):
+
+        date_fileslist = glob.glob('/data/ingest/JRC-WBD_20180801_*')
+        #date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
+        in_date = '20180801'
+        productcode = 'wd-gee'
+        productversion = '1.0'
+        subproductcode = 'occurr'
+        mapsetcode = 'WD-GEE-ECOWAS-AVG'
+        datasource_descrID='JRC:WBD:GEE'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(**args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                         source_id=datasource_descrID)
+        #for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',  source_id=datasource_descrID):
+
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+
+        self.assertEqual(1, 1)
 
     def test_ingest_ecmwf_evtp(self):
 
@@ -1257,9 +1258,9 @@ class TestIngestion(unittest.TestCase):
         # Similar to the test above, but specific to the products made available for Long Term Statistics by T. Jacobs
         # Products released from VITO in March 2017
 
-        date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_201706*_GLOBE_PROBAV_V2.2.1.nc')
+        #date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_201706*_GLOBE_PROBAV_V2.2.1.nc')
         # date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_19*_GLOBE_VGT_V2.2.1.nc')
-        date_fileslist = glob.glob('/data/ingest/c_gls_NDVI_201706*_GLOBE_PROBAV_V2.2.1.*')
+        date_fileslist = glob.glob('/data/processing/exchange/c_gls_NDVI_201811010000_GLOBE_PROBAV_V2.2.1.nc')
 
         for one_file in date_fileslist:
 
@@ -1291,10 +1292,13 @@ class TestIngestion(unittest.TestCase):
 
             subproducts=[]
             subproducts.append(sprod)
-
-            for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
-                                                                                  source_id=datasource_descrID):
-                ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+            datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                            source_id=datasource_descrID)
+            # ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger,
+            #                     echo_query=1)
+            # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
+            #                                                                       source_id=datasource_descrID):
+            ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
     def test_ingest_g_cls_fapar_2_0_1(self):
 
@@ -1453,7 +1457,7 @@ class TestIngestion(unittest.TestCase):
     def test_ingest_s3_olci_wrr_chl_oc4me(self):
 
         # Test the ingestion of the Sentinel-3/OLCI Level-2 WRR product (on d6-dev-vm19 !!!!!)
-        date_fileslist = glob.glob('/data/processing/ingest/S3A_OL_2_WRR____20180719*.SEN3.tar')
+        date_fileslist = glob.glob('/spatial_data//data/processing/olci-wrr/V02.0/archive/S3A_OL_2_WRR____20181201*.SEN3.tar')
         single_date =  os.path.basename(date_fileslist[0])
         in_date = single_date.split('_')[7]
         in_date = in_date.split('T')[0] #+ '0000'
@@ -1496,7 +1500,7 @@ class TestIngestion(unittest.TestCase):
 
         # Test the ingestion of the Sentinel-3/SLSTR Level-2 WST product (on d6-dev-vm19 !!!!!)
         #date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/S3A_SL_2_WST____20180306T095629_20180306T095929_20180306T114727_0179_028_307_3420_MAR_O_NR_002.SEN3.tar')
-        date_fileslist = glob.glob('/data/ingest/S3A_SL_2_WST____20180306T0*.SEN3.tar')
+        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/slstr/S3A_SL_2_WST____20180*.SEN3.tar')
         single_date =  os.path.basename(date_fileslist[0])
         in_date = single_date.split('_')[7]
         in_date = in_date.split('T')[0] #+ '0000'
@@ -1543,5 +1547,84 @@ class TestIngestion(unittest.TestCase):
         #                                                                       source_id=datasource_descrID):
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
+
+    def test_ingest_motu_chl(self):
+
+        date_fileslist = glob.glob('/data/ingest/20181124_GLOBAL_ANALYSIS_FORECAST_BIO_001_014-TDS.nc')
+        in_date = '20181124'
+
+        productcode = 'motu-bio'
+        productversion = '1.0'
+        subproductcode = 'chl'
+        mapsetcode = 'CPC-Africa-50km'
+        datasource_descrID = 'MOTU:BIO:TDS'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(**args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+        no_data = product_in_info.no_data
+
+        sprod = {'subproduct': subproductcode,
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process,
+                 'nodata': no_data}
+
+        subproducts = []
+        subproducts.append(sprod)
+
+
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                         source_id=datasource_descrID)
+        # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
+        #                                                                       source_id=datasource_descrID):
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+
+    def test_ingest_aviso_mwind(self):
+
+        date_fileslist = glob.glob('/data/ingest/nrt_merged_mwind_20140427_20140427_20140504.nc.gz')
+        in_date = '20140427'
+
+        productcode = 'aviso-wind'
+        productversion = '1.0'
+        subproductcode = 'mwind'
+        mapsetcode = 'SPOTV-Africa-1km'
+        datasource_descrID = 'AVISO:WIND:1D:1.0'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(**args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+        no_data = product_in_info.no_data
+
+        sprod = {'subproduct': subproductcode,
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process,
+                 'nodata': no_data}
+
+        subproducts = []
+        subproducts.append(sprod)
+
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                        source_id=datasource_descrID)
+        # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
+        #                                                                       source_id=datasource_descrID):
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
 

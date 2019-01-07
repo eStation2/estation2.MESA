@@ -404,7 +404,7 @@ class Create():
         functions.check_output_dir(target_dir)
         create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
-    def CreateArchive_wbd_gee(self):
+    def CreateArchive_wbd_gee(self, overwrite=True):
 
         base_target_dir='/data/archives/'
         mapset='WD-GEE-ECOWAS-AVG'
@@ -414,16 +414,16 @@ class Create():
         end_date=datetime.date(2018, 6, 1)
 
         # occurr: since 01.01.2014
-        subproduct='occurr'
-        target_dir = base_target_dir + product+ os.path.sep + subproduct
-        functions.check_output_dir(target_dir)
-        create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir, tgz=True)
-
-        # LTA
-        # subproduct='avg'
+        # subproduct='occurr'
         # target_dir = base_target_dir + product+ os.path.sep + subproduct
         # functions.check_output_dir(target_dir)
-        # create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir, tgz=True)
+        # create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir, tgz=True, overwrite=overwrite)
+
+        # LTA
+        subproduct='avg'
+        target_dir = base_target_dir + product+ os.path.sep + subproduct
+        functions.check_output_dir(target_dir)
+        create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir, tgz=True, overwrite=overwrite)
 
     def CreateArchive_all(self):
 
@@ -445,4 +445,4 @@ class Create():
 if __name__=='__main__':
 
     tc = Create()
-    tc.CreateArchive_wbd_gee()
+    tc.CreateArchive_wbd_gee(overwrite=True)

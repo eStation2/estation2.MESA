@@ -133,7 +133,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     @active_if(activate_10dstats_comput, activate_10davg_comput)
     @collate(starting_files, formatter(formatter_in),formatter_out)
-    def std_precip_10davg(input_file, output_file):
+    def std_dmp_10davg(input_file, output_file):
 
         reduced_list = exclude_current_year(input_file)
         output_file = functions.list_to_element(output_file)
@@ -160,7 +160,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     @active_if(activate_10dstats_comput, activate_10dmin_comput)
     @collate(starting_files, formatter(formatter_in),formatter_out)
-    def std_precip_10dmin(input_file, output_file):
+    def std_dmp_10dmin(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         reduced_list = exclude_current_year(input_file)
@@ -186,7 +186,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     @active_if(activate_10dstats_comput, activate_10dmax_comput)
     @collate(starting_files, formatter(formatter_in),formatter_out)
-    def std_precip_10dmax(input_file, output_file):
+    def std_dmp_10dmax(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         reduced_list = exclude_current_year(input_file)
@@ -217,10 +217,9 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     ancillary_subdir      = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived',version, mapset)
     ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
 
-    @follows(std_precip_10davg)
     @active_if(activate_10danomalies_comput, activate_10ddiff_comput)
     @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
-    def std_precip_10ddiff(input_file, output_file):
+    def std_dmp_10ddiff(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
@@ -249,10 +248,10 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     ancillary_subdir      = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived', version, mapset)
     ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{MMDD[0]}"+ancillary_sprod_ident
 
-    @follows(std_precip_10davg)
+    @follows(std_dmp_10davg)
     @active_if(activate_10danomalies_comput, activate_10dperc_comput)
     @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
-    def std_precip_10dperc(input_file, output_file):
+    def std_dmp_10dperc(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
@@ -286,10 +285,9 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     ancillary_subdir_2      = functions.set_path_sub_directory(prod, ancillary_sprod_2, 'Derived',version, mapset)
     ancillary_input_2="{subpath[0][5]}"+os.path.sep+ancillary_subdir_2+"{MMDD[0]}"+ancillary_sprod_ident_2
 
-    @follows(std_precip_10dmin, std_precip_10dmax)
     @active_if(activate_10danomalies_comput, activate_10dnp_comput)
     @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input_1, ancillary_input_2), formatter_out)
-    def std_precip_10dnp(input_file, output_file):
+    def std_dmp_10dnp(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
@@ -318,10 +316,9 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     ancillary_subdir_1      = functions.set_path_sub_directory(prod, ancillary_sprod_1, 'Derived',version, mapset)
     ancillary_input_1="{subpath[0][5]}"+os.path.sep+ancillary_subdir_1+"{MMDD[0]}"+ancillary_sprod_ident_1
 
-    @follows(std_precip_10dmin, std_precip_10dmax)
     @active_if(activate_10danomalies_comput, activate_10dratio_comput)
     @transform(starting_files, formatter(formatter_in), add_inputs(ancillary_input_1), formatter_out)
-    def std_precip_10dratio(input_file, output_file):
+    def std_dmp_10dratio(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
@@ -339,7 +336,7 @@ def processing_std_dmp(res_queue, pipeline_run_level=0,pipeline_printout_level=0
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None, update_stats=False, nrt_products=True, write2file=None, logfile=None, touch_only=False):
     spec_logger = log.my_logger(logfile)
-    spec_logger.info("Entering routine %s" % 'processing_std_precip')
+    spec_logger.info("Entering routine %s" % 'processing_std_dmp')
 
     proc_lists = None
     proc_lists = create_pipeline(prod=prod, starting_sprod=starting_sprod, mapset=mapset, version=version,
@@ -352,13 +349,13 @@ def processing_std_dmp(res_queue, pipeline_run_level=0,pipeline_printout_level=0
         fwrite_id = None
 
     if pipeline_run_level > 0:
-        spec_logger.info("Run the pipeline %s" % 'processing_std_precip')
+        spec_logger.info("Run the pipeline %s" % 'processing_std_dmp')
         pipeline_run(touch_files_only=touch_only, verbose=pipeline_run_level, logger=spec_logger,
                      log_exceptions=spec_logger,
                      history_file='/eStation2/log/.ruffus_history_{0}_{1}.sqlite'.format(prod, starting_sprod))
         tasks = pipeline_get_task_names()
         spec_logger.info("Run the pipeline %s" % tasks[0])
-        spec_logger.info("After running the pipeline %s" % 'processing_std_precip')
+        spec_logger.info("After running the pipeline %s" % 'processing_std_dmp')
 
     if pipeline_printout_level > 0:
         pipeline_printout(verbose=pipeline_printout_level, output_stream=fwrite_id,

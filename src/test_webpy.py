@@ -123,6 +123,7 @@ class TestWebpy(unittest.TestCase):
                   }
         answer = webpy_esapp_helpers.createTimeseriesDrawProperties(params)
 
+
     def testMatplotlib(self):
         # from PIL import Image
 

@@ -455,8 +455,9 @@ def create_archive_from_request(request_file):
                 # Increase the counter
                 incresing_number+=1
 
-            # Remove .tgz file
-            os.remove(archive_name)
+                # Remove .tgz file
+                os.remove(archive_name)
+
             product = None
     return 0
 

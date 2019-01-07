@@ -103,6 +103,40 @@ def get_one_source(internet_source, target_dir=None):
                                                                 str(internet_source['frequency_id']))
                 except:
                     logger.error("Error in creating date lists. Continue")
+
+
+            elif internet_type == 'motu_client':
+                # Create the motu command which contains
+                try:
+                    current_list = build_list_matching_files_motu(str(internet_source['url']),
+                                                                  str(internet_source['include_files_expression']),
+                                                                  internet_source['start_date'],
+                                                                  internet_source['end_date'],
+                                                                  str(internet_source['frequency_id']),
+                                                                  str(internet_source['user_name']),
+                                                                  str(internet_source['password']),
+                                                                  str(internet_source['files_filter_expression'])
+                                                                  )
+
+                except:
+                    logger.error("Error in creating date lists. Continue")
+
+            # elif internet_type == 'sentinel_sat':
+            #     # Create the motu command which contains
+            #     try:
+            #         current_list = build_list_matching_files_sentinel_sat(str(internet_source['url']),
+            #                                                       str(internet_source['include_files_expression']),
+            #                                                       internet_source['start_date'],
+            #                                                       internet_source['end_date'],
+            #                                                       str(internet_source['frequency_id']),
+            #                                                       str(internet_source['user_name']),
+            #                                                       str(internet_source['password'])
+            #                                                       #str(internet_source['files_filter_expression'])
+            #                                                       )
+            #
+            #     except:
+            #         logger.error("Error in creating date lists. Continue")
+
             elif internet_type == 'offline':
                      logger.info("This internet source is meant to work offline (GoogleDrive)")
                      current_list = []
@@ -137,6 +171,13 @@ def get_one_source(internet_source, target_dir=None):
                             if internet_type == 'local':
                                 shutil.copyfile(str(internet_source['url'])+os.path.sep+filename,es_constants.ingest_dir+os.path.basename(filename))
                                 result = 0
+                            elif internet_type == 'motu_client':
+                                result = get_file_from_motu_command(str(filename),
+                                                           #target_file=internet_source['files_filter_expression'],
+                                                           target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
+
+                            # elif internet_type == 'sentinel_sat':
+                            #     result = get_file_from_sentinelsat_url(str(filename), target_dir=es_constants.ingest_dir)
                             else:
                                 result = get_file_from_url(str(internet_source['url'])+os.path.sep+filename, target_file=os.path.basename(filename), target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
                             if not result:
@@ -914,7 +955,7 @@ class TestGetInternet(unittest.TestCase):
                          'user_name':internet_source.user_name,
                          'password':internet_source.password,
                          'start_date':20180610,
-                         'end_date': 20180820,
+                         'end_date': 20181130,
                          'frequency_id': internet_source.frequency_id,
                          'type':internet_source.type}
 
@@ -973,6 +1014,69 @@ class TestGetInternet(unittest.TestCase):
                          'end_date': 20180820,
                          'frequency_id': internet_source.frequency_id,
                          'type':internet_source.type}
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
+
+    def TestLocal_MOTU(self):
+
+        internet_id='MOTU:WAV:TDS'
+
+        # Direct test !
+        if False:
+            return
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':20181128,
+                         'end_date': +2,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type,
+                         'files_filter_expression':internet_source.files_filter_expression,
+
+        }
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
+
+
+    def TestLocal_SENTINELSAT(self):
+
+        internet_id='SENTINEL2:S2MSI1C:XYZ'
+
+        # Direct test !
+        if False:
+            return
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':20181102,
+                         'end_date': -3,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type,
+                         'files_filter_expression':internet_source.files_filter_expression,
+
+        }
 
         # Check last 90 days (check list length = 9)
         result = get_one_source(my_source)
