@@ -2992,6 +2992,86 @@ def do_compute_chla_gradient(input_file='', nodata=None, output_file='', output_
         if os.path.isfile(output_file):
             os.remove(output_file)
 
+# ##########################
+#   Compute chla gradient  #
+#                          #
+############################
+
+def compute_median_filter(input_file='', nodata=None, output_file='', output_nodata=None, output_format=None,
+                             output_type=None, options=''):
+
+
+    try:
+        # Manage options
+        options_list = [es_constants.ES2_OUTFILE_OPTIONS]
+        options_list.append(options)
+
+        # open file
+        data_fileID = gdal.Open(input_file, GA_ReadOnly)
+
+        functions.check_output_dir(os.path.dirname(output_file))
+
+        # Read info from file, size are equal for all input files eg. sst, par
+        nb = data_fileID.RasterCount
+        ns = data_fileID.RasterXSize
+        nl = data_fileID.RasterYSize
+
+        dataType = data_fileID.GetRasterBand(1).DataType
+
+        geoTransform = data_fileID.GetGeoTransform()
+        projection = data_fileID.GetProjection()
+        driver_type=data_fileID.GetDriver().ShortName
+
+        # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
+        if output_nodata is None and nodata is not None:
+            output_nodata = nodata
+
+        # Manage out_type (take the input one as default)
+        if output_type is None:
+            outType=dataType
+        else:
+            outType=ParseType(output_type)
+
+        # manage out_format (take the input one as default)
+        if output_format is None:
+            outFormat=driver_type
+        else:
+            outFormat=output_format
+
+        # instantiate output
+        outDrv = gdal.GetDriverByName(outFormat)
+        outDS = outDrv.Create(output_file, ns, nl, 1, outType, options_list)
+        outDS.SetGeoTransform(geoTransform)
+        outDS.SetProjection(projection)
+        #
+        # assume only 1 band
+        outband = outDS.GetRasterBand(1)
+        chl_band = data_fileID.GetRasterBand(1)
+
+        data_chla = chl_band.ReadAsArray(0, 0, ns, nl).astype(float)
+
+        # Replace the nodata value with Nan
+        data_chla[data_chla==nodata] = N.nan
+
+        # Data smoothing (median filter)
+
+        smooth_data_chla = ndimage.median_filter(data_chla, 3)
+
+        # Write out the full matrix N.array(outData)
+        outband.WriteArray(smooth_data_chla, 0, 0)
+        input_list = []
+        input_list.append(input_file)
+
+        # #   Close outputs
+        outDrv = None
+        outDS = None
+        #logger.warning('Writing MetaData not done yet ! To be implemented ...')
+        assign_metadata_processing(input_list, output_file)
+
+    except:
+        logger.warning('Error in compute_median_filter. Remove outputs')
+        if os.path.isfile(output_file):
+            os.remove(output_file)
 
 
 # _____________________________
