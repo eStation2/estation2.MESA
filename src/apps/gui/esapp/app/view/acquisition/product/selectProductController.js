@@ -2,9 +2,13 @@ Ext.define('esapp.view.acquisition.product.selectProductController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.acquisition-product-selectproduct',
 
+    loadInactiveProductsGrid: function(grid){
+        grid.getStore().load();
+    },
+
     editProduct: function(grid, rowIndex, colIndex){
         var record = grid.getStore().getAt(rowIndex);
-        if (record.get('defined_by') != 'JRC') {
+        // if (record.get('defined_by') != 'JRC') {
             var editProductWin = new esapp.view.acquisition.product.editProduct({
                 params: {
                     edit: true,
@@ -14,6 +18,6 @@ Ext.define('esapp.view.acquisition.product.selectProductController', {
                 }
             });
             editProductWin.show();
-        }
+        // }
     }
 });

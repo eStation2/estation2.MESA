@@ -11,6 +11,9 @@ import webpy_esapp_helpers
 import webpy_esapp
 from database import crud
 
+import plotly.plotly as py
+from plotly.graph_objs import *
+
 import StringIO
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -24,6 +27,57 @@ logger = log.my_logger(__name__)
 
 class TestWebpy(unittest.TestCase):
 
+    def test_UpdateUserSettings(self):
+
+        params = {
+            'systemsettings' : {
+                'active_version': "2.1.2",
+                'archive_dir': "/data/archives/",
+                'base_dir': "/srv/www/eStation2",
+                'base_tmp_dir': "/tmp/eStation2",
+                'current_mode': "Recovery",
+                'data_dir': "/dataxxx",
+                'dbname': "d6estation2",
+                'dbpass': "Mk44t*Gw!FJP",
+                'dbuser': "d6estation2",
+                'default_language': "eng",
+                'eumetcast_files_dir': "/eumetcast/",
+                'get_eumetcast_output_dir': "/data/ingest/",
+                'get_internet_output_dir': "/data/ingest/",
+                'host': "pgsql96-srv1.jrc.org",
+                'id': 0,
+                'ingest_dir': "/data/ingest/",
+                'log_general_level': "INFO",
+                'loglevel': "INFO",
+                'port': "5432",
+                'processing_dir': "/data/processing/",
+                'proxy': "http://10.168.209.73:8012",
+                'role': "PC2",
+                'static_data_dir': "/data/static_data/",
+                'thema': "JRC",
+                'type_installation': "Full"
+            }
+        }
+
+        updatestatus = webpy_esapp_helpers.UpdateUserSettings(params)
+        self.assertEqual(1, 1)
+
+    def test_getRunningRequestJobs(self):
+        response_json = webpy_esapp_helpers.getRunningRequestJobs()
+        self.assertEqual(1, 1)
+
+    def test_createRequestJob(self):
+        params = {
+            'level': 'dataset',
+            'productcode': 'vgt-ndvi',
+            'version': 'sv2-pv2.2',
+            'subproductcode': '1monmin',
+            'mapsetcode': 'SPOTV-IGAD-1km'
+        }
+
+        result = webpy_esapp_helpers.createRequestJob(params)
+
+        self.assertEqual(1, 1)
 
     def test_scatterTimeseries(self):
 
@@ -776,7 +830,7 @@ class TestWebpy(unittest.TestCase):
         self.assertEqual(1, 1)
 
     def test_getProcessing(self):
-        result = webpy_esapp_helpers.getProcessing(False)
+        result = webpy_esapp_helpers.getProcessing(True)
         self.assertEqual(1, 1)
 
     def test_GetLegends(self):
@@ -839,8 +893,22 @@ class TestWebpy(unittest.TestCase):
 
     def test_GetProductLayer(self):
 
+        date = '20181112'
+        params = {
+            'productcode': 'pml-modis-sst',
+            'productversion': '3.0',
+            'subproductcode': 'sst-fronts',
+            'mapsetcode': 'SPOTV-IOC-1km',
+            'date': date,
+            'WIDTH': '256',
+            'HEIGHT': '256',
+            'BBOX': "-11.25, 53.4375, -8.4375, 56.25",
+            'CRS': "EPSG:4326",
+            'legendid': "136"
+        }
+
         # date = '20180625'  # uncompressed with piramid (adds .ovr file)
-        date = '20171231'
+        # date = '20180701'
         # params = {
         #     'productcode': 'chirps-dekad',
         #     'productversion': '2.0',
@@ -903,22 +971,10 @@ class TestWebpy(unittest.TestCase):
         #     'CRS': "EPSG:4326",
         #     'legendid': "136"
         # }
-        params = {
-            'productcode': 'modis-firms',
-            'productversion': 'v6.0',
-            'subproductcode': '1day',
-            'mapsetcode': 'SPOTV-Africa-1km',
-            'date': '20171231',
-            'WIDTH': '256',
-            'HEIGHT': '256',
-            'BBOX': "-3,7,0,9",
-            'CRS': "EPSG:4326",
-            'legendid': "236"
-        }
 
-        vals = params['BBOX'].split(',')
-        ratio = (float(vals[3]) - float(vals[1])) / (float(vals[2]) - float(vals[0]))  # ratio width/height (X/Y)
-        params['WIDTH'] = str(int(float(params['HEIGHT']) * ratio))
+        # vals = params['BBOX'].split(',')
+        # ratio = (float(vals[3]) - float(vals[1])) / (float(vals[2]) - float(vals[0]))  # ratio width/height (X/Y)
+        # params['WIDTH'] = str(int(float(params['HEIGHT']) * ratio))
 
         result = webpy_esapp_helpers.getProductLayer(params)
         # print(result)

@@ -78,7 +78,7 @@ Ext.define("esapp.view.analysis.graphTemplateAdmin",{
     cls: 'newpanelstyle',
 
     config: {
-        forseStoreLoad: false,
+        forceStoreLoad: false,
         dirtyStore: false
     },
 
@@ -105,13 +105,13 @@ Ext.define("esapp.view.analysis.graphTemplateAdmin",{
 
         me.mon(me, {
             loadstore: function() {
-                if (me.forseStoreLoad || !me.getViewModel().getStore('usergraphtemplates').isLoaded() || me.dirtyStore) {
+                if (me.forceStoreLoad || !me.getViewModel().getStore('usergraphtemplates').isLoaded() || me.dirtyStore) {
                     me.getViewModel().getStore('usergraphtemplates').proxy.extraParams = {userid: esapp.getUser().userid};
                     me.getViewModel().getStore('usergraphtemplates').load({
                         callback: function (records, options, success) {
                         }
                     });
-                    me.forseStoreLoad = false;
+                    me.forceStoreLoad = false;
                     me.dirtyStore = false;
                 }
             }
@@ -146,7 +146,7 @@ Ext.define("esapp.view.analysis.graphTemplateAdmin",{
             align: 'c-c',
             tooltip: esapp.Utils.getTranslation('refreshgraphtpllist'),    // 'Refresh graph template list',
             callback: function() {
-                me.forseStoreLoad = true;
+                me.forceStoreLoad = true;
                 me.fireEvent('loadstore');
             }
         }];

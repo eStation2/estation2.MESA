@@ -13,32 +13,39 @@ cur_dir = os.path.dirname(__file__)
 if cur_dir not in sys.path:
     sys.path.append(cur_dir)
 
-# import web
+import shutil
 import datetime
 import json
 import glob
-# import time
+import time
 import calendar
 import numpy as NP
-
 import base64
+import ConfigParser
+import subprocess
+from subprocess import *
+from multiprocessing import *
+from apps.tools.createSyncJob import createSyncJob
 
 import matplotlib as mpl
-mpl.use('agg')
+mpl.use('Agg')
 mpl.rcParams['savefig.pad_inches'] = 0
+
 from matplotlib import pyplot as plt
 
+from lib.python import reloadmodules
 from config import es_constants
 from database import querydb
 from database import crud
 
 # from apps.acquisition import get_eumetcast
-# from apps.acquisition import acquisition
-# from apps.processing import processing      # Comment in WINDOWS version!
+from apps.acquisition import acquisition
+from apps.processing import processing      # Comment in WINDOWS version!
 from apps.productmanagement.datasets import Dataset
-# from apps.es2system import es2system
+from apps.es2system import es2system
 # from apps.productmanagement.datasets import Frequency
 from apps.productmanagement.products import Product
+from apps.productmanagement import requests
 from apps.analysis import generateLegendHTML
 from apps.analysis.getTimeseries import (getTimeseries, getFilesList)
 # from multiprocessing import (Process, Queue)
@@ -50,6 +57,784 @@ logger = log.my_logger(__name__)
 
 
 WEBPY_COOKIE_NAME = "webpy_session_id"
+
+
+def UpdateUserSettings(params):
+
+    systemsettings = functions.getSystemSettings()
+
+    if sys.platform != 'win32':
+        if systemsettings['type_installation'].lower() == 'jrc_online':
+            factory_settings_filename = 'factory_settings_jrc_online.ini'
+        else:
+            factory_settings_filename = 'factory_settings.ini'
+    else:
+        factory_settings_filename = 'factory_settings_windows.ini'
+
+    config_factorysettings = ConfigParser.ConfigParser()
+    config_factorysettings.read([factory_settings_filename,
+                                 es_constants.es2globals['config_dir'] + '/' + factory_settings_filename])
+
+    usersettingsfilepath = es_constants.es2globals['settings_dir'] + '/user_settings.ini'
+    # usersettingsfilepath = '/eStation2/settings/user_settings.ini'
+    config_usersettings = ConfigParser.ConfigParser()
+    config_usersettings.read(['user_settings.ini', usersettingsfilepath])
+
+    for setting in params['systemsettings']:
+        if setting in ('data_dir', 'ingest_dir', 'static_data_dir', 'archive_dir', 'eumetcast_files_dir',
+                       'get_eumetcast_output_dir', 'get_internet_output_dir'):
+            if setting == 'data_dir' and (
+                    (( config_usersettings.get('USER_SETTINGS', setting, 0) == '' and params['systemsettings'][setting] != config_factorysettings.get('FACTORY_SETTINGS', setting, 0))
+                    or (config_usersettings.get('USER_SETTINGS', setting, 0) != '' and params['systemsettings'][setting] != config_usersettings.get('USER_SETTINGS', setting, 0)
+                    ))):
+                # The data_dir has been changed, delete all completeness_bars
+                completeness_bars_dir = es_constants.base_local_dir + os.path.sep + 'completeness_bars/'
+                for the_file in os.listdir(completeness_bars_dir):
+                    file_path = os.path.join(completeness_bars_dir, the_file)
+                    try:
+                        if os.path.isfile(file_path):
+                            os.unlink(file_path)
+                    except Exception as e:
+                        logger.error('UpdateUserSettings - could not delete completeness_bars file: ' + e )
+
+            if config_factorysettings.has_option('FACTORY_SETTINGS', setting) \
+                    and config_factorysettings.get('FACTORY_SETTINGS', setting, 0) == params['systemsettings'][setting]:
+                config_usersettings.set('USER_SETTINGS', setting, '')
+            elif config_usersettings.has_option('USER_SETTINGS', setting):
+                config_usersettings.set('USER_SETTINGS', setting, params['systemsettings'][setting])
+
+    # Writing our configuration file to 'example.cfg' - COMMENTS ARE NOT PRESERVED!
+    with open(usersettingsfilepath, 'wb') as configfile:
+        config_usersettings.write(configfile)
+        configfile.close()
+
+    # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
+    reloadmodules.reloadallmodules()
+
+    updatestatus = '{"success":"true", "message":"System settings updated!"}'
+
+    return updatestatus
+
+
+def getRunningRequestJobs():
+    list_of_jobs = []
+    dirnames = os.listdir(es_constants.es2globals['request_jobs_dir'])
+    # dirnames = glob.glob(os.path.join(es_constants.es2globals['request_jobs_dir'], "*"))
+    for dirname in dirnames:
+        dirpath = os.path.join(es_constants.es2globals['request_jobs_dir'], dirname)
+        if os.path.isdir(dirpath):
+            requestid = dirname
+            jobstatus = statusRequestJob(requestid)
+            if jobstatus['status'].lower() in ['finished']:  # 'stopped', 'error'
+                archiveRequestJob(requestid)
+            else:
+                list_of_jobs.append(jobstatus)
+
+    response = {'success': True,
+                'requests': list_of_jobs
+                }
+
+    response_json = json.dumps(response,
+                               ensure_ascii=False,
+                               sort_keys=True,
+                               indent=4,
+                               separators=(', ', ': '))
+    return response_json
+
+
+def archiveRequestJob(requestid):
+    functions.check_output_dir(es_constants.es2globals['request_job_archive_dir'])
+    # TODO: set permissions to 777 on request_job_archive_dir
+
+    # Move request job directory to archive directory
+    ts = time.time()
+    st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H%M')
+    shutil.move(es_constants.es2globals['request_jobs_dir'] + os.path.sep + requestid,
+                es_constants.es2globals['request_job_archive_dir'] + os.path.sep + requestid + '_' + st)
+    # Move request file to archive directory
+    shutil.move(es_constants.es2globals['requests_dir'] + os.path.sep + requestid + '.req',
+                es_constants.es2globals['request_job_archive_dir'] + os.path.sep + requestid + '_' + st + '.req')
+
+
+
+def statusRequestJob(requestid):
+    message = 'Missing requestid.'
+    jobstatus = 'error'
+    totfiles = 0
+    totok = 0
+    totko = 0
+    mapsetcode = ''
+    subproductcode = ''
+
+    requestinfo = requestid.split('_')
+    level = requestinfo[len(requestinfo)-1]
+    productcode = requestinfo[0]
+    version = requestinfo[1]
+    if level == 'mapset':
+        mapsetcode = requestinfo[2]
+    elif level == 'dataset':
+        mapsetcode = requestinfo[2]
+        subproductcode = requestinfo[3]
+
+    if requestid != '':
+        p1_jobid = requestid
+        p2_action = 'status'
+        p3_datapath = '/home/webtklooju/mydata/processing/'     # es_constants.es2globals['processing_dir']
+        p4_jobspath = es_constants.es2globals['request_jobs_dir']
+        p5_requestfile = ''
+        try:
+            command = 'java -jar ' + es_constants.es2globals['estation_sync_file'] \
+                      + ' ' + '"' + p1_jobid + '"' \
+                      + ' ' + '"' + p2_action + '"' \
+                      + ' ' + '"' + p3_datapath + '"' \
+                      + ' ' + '"' + p4_jobspath + '"' \
+                      + ' ' + '"' + p5_requestfile + '"'
+            # print command
+            status = os.popen(command).readlines()  # returns a ';' delimited string with format "<jobstatus> <totfiles> <ok> <ko>"
+            # status = os.system(command)
+            status = status[0].split(';')
+            jobstatus = status[0].split(':')[0]
+            totfiles = status[1].split(':')[1]
+            totok = status[2].split(':')[1]
+            totko = status[3].split(':')[1]
+
+            message = 'Status info request: ' + requestid
+        except:
+            message = 'Error getting the status of the request: ' + requestid
+
+    response = {'requestid': requestid,
+                'productcode': productcode,
+                'version': version,
+                'mapsetcode': mapsetcode,
+                'subproductcode': subproductcode,
+                'level': level,
+                'status': jobstatus,     # 'Running' 'Paused' 'Finished' 'Stopped'
+                'totfiles': totfiles,
+                'totok': totok,
+                'totko': totko,
+                'message': message
+                }
+
+    return response
+
+
+def pauseRequestJob(params):
+    requestid = params['requestid']
+    message = 'Missing requestid.'
+    success = False
+
+    if "requestid" in params:
+        p1_jobid = requestid
+        p2_action = 'pause'
+        p3_datapath = ''
+        p4_jobspath = es_constants.es2globals['request_jobs_dir']
+        p5_requestfile = ''
+        try:
+            command = 'java -jar ' + es_constants.es2globals['estation_sync_file'] \
+                      + ' ' + '"' + p1_jobid + '"' \
+                      + ' ' + '"' + p2_action + '"' \
+                      + ' ' + '"' + p3_datapath + '"' \
+                      + ' ' + '"' + p4_jobspath + '"' \
+                      + ' ' + '"' + p5_requestfile + '"'
+            # print command
+            os.system(command)
+
+            message = 'Paused request: ' + requestid
+            success = True
+        except:
+            message = 'Error pausing request: ' + requestid
+
+    response = {'success': success,
+                'message': message,
+                'requestid': requestid}
+
+    response_json = json.dumps(response,
+                               ensure_ascii=False,
+                               sort_keys=True,
+                               indent=4,
+                               separators=(', ', ': '))
+    return response_json
+
+
+def restartRequestJob(params):
+    requestid = params['requestid']
+    message = 'Missing requestid.'
+    success = False
+
+    if "requestid" in params:
+        p1_jobid = requestid
+        p2_action = 'restart'
+        p3_datapath = ''    # es_constants.es2globals['processing_dir']
+        p4_jobspath = es_constants.es2globals['request_jobs_dir']
+        p5_requestfile = ''
+        try:
+            command = 'java -jar ' + es_constants.es2globals['estation_sync_file'] \
+                      + ' ' + '"' + p1_jobid + '"' \
+                      + ' ' + '"' + p2_action + '"' \
+                      + ' ' + '"' + p3_datapath + '"' \
+                      + ' ' + '"' + p4_jobspath + '"' \
+                      + ' ' + '"' + p5_requestfile + '"'
+            # print command
+            os.system(command)
+
+            message = 'Restarted request: ' + requestid
+            success = True
+        except:
+            message = 'Error restarting request: ' + requestid
+
+    response = {'success': success,
+                'message': message,
+                'requestid': requestid}
+
+    response_json = json.dumps(response,
+                               ensure_ascii=False,
+                               sort_keys=True,
+                               indent=4,
+                               separators=(', ', ': '))
+    return response_json
+
+
+def deleteRequestJob(params):
+    requestid = params['requestid']
+    message = 'Missing requestid.'
+    success = False
+
+    if "requestid" in params:
+        p1_jobid = requestid
+        p2_action = 'stop'
+        p3_datapath = ''
+        p4_jobspath = es_constants.es2globals['request_jobs_dir']
+        p5_requestfile = ''
+        try:
+            command = 'java -jar ' + es_constants.es2globals['estation_sync_file'] \
+                      + ' ' + '"' + p1_jobid + '"' \
+                      + ' ' + '"' + p2_action + '"' \
+                      + ' ' + '"' + p3_datapath + '"' \
+                      + ' ' + '"' + p4_jobspath + '"' \
+                      + ' ' + '"' + p5_requestfile + '"'
+            # print command
+            os.system(command)
+
+            archiveRequestJob(requestid)
+
+            message = 'Deleted request: ' + requestid
+            success = True
+        except:
+            message = 'Error deleting request: ' + requestid
+
+    response = {'success': success,
+                'message': message,
+                'requestid': requestid}
+
+    response_json = json.dumps(response,
+                               ensure_ascii=False,
+                               sort_keys=True,
+                               indent=4,
+                               separators=(', ', ': '))
+    return response_json
+
+
+def createRequestJob(params):
+    productcode = None
+    version = None
+    mapsetcode = None
+    subproductcode = None
+    requestid = None
+    requestfilename = None
+    createnewrequest = False
+    proxy_host = es_constants.es2globals['proxy_host']
+    proxy_port = es_constants.es2globals['proxy_port']
+    proxy_user = es_constants.es2globals['proxy_user']
+    proxy_userpwd = es_constants.es2globals['proxy_userpwd']
+
+    message = 'Missing request parameters.'
+
+    functions.check_output_dir(es_constants.es2globals['request_jobs_dir'])
+    # TODO: set permissions to 777 on request_jobs_dir
+
+    if "level" in params:   # hasattr(params, "level"):
+        if params['level'] == 'product':
+            productcode = params['productcode']
+            version = params['version']
+            requestid = params['productcode'] + '_' + params['version'] + '_' + params['level']
+        elif params['level'] == 'mapset':
+            productcode = params['productcode']
+            version = params['version']
+            mapsetcode = params['mapsetcode']
+            requestid = params['productcode'] + '_' + params['version'] + '_' + params[
+                'mapsetcode'] + '_' + params['level']
+        elif params['level'] == 'dataset':
+            productcode = params['productcode']
+            version = params['version']
+            mapsetcode = params['mapsetcode']
+            subproductcode = params['subproductcode']
+            requestid = params['productcode'] + '_' + params['version'] + '_' + params['mapsetcode'] + '_' + \
+                        params['subproductcode'] + '_' + params['level']
+
+        # Check if same request exists and has not finished
+        # In the es_constants.es2globals['request_jobs_dir'] check first if a directory exists
+        # with the same name as requestid and check the job status in 'finished' or 'stopped'
+        # if true then move the existing and finished job to the jobarchive directory and create a new request
+        # else don't create a new request and send a message to the user that the request is already existing
+        # and is still running.
+        if os.path.isdir(es_constants.es2globals['request_jobs_dir'] + os.path.sep + requestid):
+            jobstatus = statusRequestJob(requestid)
+            if jobstatus['status'].lower() in ['finished']:     # 'stopped', 'error'
+                message = 'Request already exists and has finished. Existing request is archived. New request created.'
+                createnewrequest = True
+                archiveRequestJob(requestid)
+            else:
+                message = 'Request already exists and has not finished yet. No new request created.'
+        else:
+            message = 'Request does not exists. New request created.'
+            createnewrequest = True
+
+        if createnewrequest:
+            request = requests.create_request(productcode, version, mapsetcode=mapsetcode, subproductcode=subproductcode)
+            request_json = json.dumps(request,
+                                      ensure_ascii=False,
+                                      sort_keys=True,
+                                      indent=4,
+                                      separators=(', ', ': '))
+
+            # ts = time.time()
+            # st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H%M')
+            # requestfilename = requestid + '_' + st + '.req'
+            requestfilename = requestid + '.req'
+            with open(es_constants.es2globals['requests_dir'] + os.path.sep + requestfilename, 'w+') as f:
+                f.write(request_json)
+            f.close()
+
+            p1_jobid = requestid
+            p2_action = 'start'
+            p3_datapath = '/home/webtklooju/mydata/processing/'     # es_constants.es2globals['processing_dir']
+            p4_jobspath = es_constants.es2globals['request_jobs_dir']
+            p5_requestfile = es_constants.es2globals['requests_dir'] + os.path.sep + requestfilename
+
+            command = 'python ./apps/tools/createSyncJob.py '
+            job = os.system(command)
+
+            # *****************************************
+            # DIRECT JAVA CALL
+            # *****************************************
+
+            # # Command as string - creates job but waits until finished! NOT WORKING PROPERLY!
+            # command = 'java -jar ' + es_constants.es2globals['estation_sync_file'] \
+            #           + ' ' + '"' + p1_jobid + '"' \
+            #           + ' ' + '"' + p2_action + '"' \
+            #           + ' ' + '"' + p3_datapath + '"' \
+            #           + ' ' + '"' + p4_jobspath + '"' \
+            #           + ' ' + '"' + p5_requestfile + '"' \
+            #           + ' ' + '"' + proxy_host + '"' \
+            #           + ' ' + '"' + proxy_port + '"' \
+            #           + ' ' + '"' + proxy_user + '"' \
+            #           + ' ' + '"' + proxy_userpwd + '"'
+            #
+            # # job = os.system(command)    # os.system waits until the job finishes and does not read response of job!
+            # job = os.popen(command).readlines()  # Should return 'Job created' but waits until the job finishes.
+
+            # Command as list
+            # Creates job and reads response but when finishing this function call createRequestJob,
+            # all PIDs of subprocess are killed! NOT WORKING PROPERLY!
+
+            # command = ['java', '-jar', es_constants.es2globals['estation_sync_file'],
+            #            '"' + p1_jobid + '"',
+            #            '"' + p2_action + '"',
+            #            '"' + p3_datapath + '"',
+            #            '"' + p4_jobspath + '"',
+            #            '"' + p5_requestfile + '"',
+            #            '"' + proxy_host + '"',
+            #            '"' + proxy_port + '"',
+            #            '"' + proxy_user + '"',
+            #            '"' + proxy_userpwd + '"'
+            #            ]
+            #
+
+            # args = [es_constants.es2globals['estation_sync_file'],
+            #         p1_jobid,
+            #         p2_action,
+            #         p3_datapath,
+            #         p4_jobspath,
+            #         p5_requestfile,
+            #         proxy_host,
+            #         proxy_port,
+            #         proxy_user,
+            #         proxy_userpwd
+            #         ]
+            #
+            # job = subprocess.Popen(['java', '-jar'] + list(args),
+            #                        # close_fds=True,
+            #                        # shell=True,    # pass args as string
+            #                        stdout=subprocess.PIPE,
+            #                        stderr=subprocess.STDOUT)    # .pid
+            # job.poll()
+            # line = job.stdout.readline()  # Returns 'Job created'
+
+
+            # *************************************************************************************************
+            # CALL python script createSyncJob.py which creates another process that creates the request job
+            # *************************************************************************************************
+
+            # command = 'python ./apps/tools/createSyncJob.py ' + es_constants.es2globals['estation_sync_file'] \
+            #           + ' ' + '"' + p1_jobid + '"' \
+            #           + ' ' + '"' + p2_action + '"' \
+            #           + ' ' + '"' + p3_datapath + '"' \
+            #           + ' ' + '"' + p4_jobspath + '"' \
+            #           + ' ' + '"' + p5_requestfile + '"' \
+            #           + ' ' + '"' + proxy_host + '"' \
+            #           + ' ' + '"' + proxy_port + '"' \
+            #           + ' ' + '"' + proxy_user + '"' \
+            #           + ' ' + '"' + proxy_userpwd + '"'
+            #
+
+            # args = ['-p0 ' + es_constants.es2globals['estation_sync_file'],
+            #         '-p1 ' + p1_jobid,
+            #         '-p2 ' + p2_action,
+            #         '-p3 ' + p3_datapath,
+            #         '-p4 ' + '"' + p4_jobspath + '"',
+            #         '-p5 ' + '"' + p5_requestfile + '"',
+            #         '-p6 ' + '"' + proxy_host + '"',
+            #         '-p7 ' + '"' + proxy_port + '"',
+            #         '-p8 ' + '"' + proxy_user + '"',
+            #         '-p9 ' + '"' + proxy_userpwd + '"'
+            #         ]
+
+            # args = [es_constants.es2globals['estation_sync_file'],
+            #         p1_jobid,
+            #         p2_action,
+            #         p3_datapath,
+            #         p4_jobspath,
+            #         p5_requestfile,
+            #         proxy_host,
+            #         proxy_port,
+            #         proxy_user,
+            #         proxy_userpwd
+            #         ]
+            # job = subprocess.check_call([sys.executable, './apps/tools/createSyncJob.py'] + list(args))
+            # job = subprocess.call([sys.executable, './apps/tools/createSyncJob.py'] + list(args))
+            # job = subprocess.Popen([sys.executable, './apps/tools/createSyncJob.py'] + args,
+            #                        stdout=subprocess.PIPE,
+            #                        stderr=subprocess.STDOUT)
+            # job.poll()
+            # line = job.stdout.readline()  # Returns 'Job created'
+
+            #
+            # DIRECT JAVA CALL - NOT WORKING
+            #
+            # command = ['java -jar', es_constants.es2globals['estation_sync_file']]
+            #
+            # stdin = ' ' + '"' + p1_jobid + '"' \
+            #         + ' ' + '"' + p2_action + '"' \
+            #         + ' ' + '"' + p3_datapath + '"' \
+            #         + ' ' + '"' + p4_jobspath + '"' \
+            #         + ' ' + '"' + p5_requestfile + '"' \
+            #         + ' ' + '"' + proxy_host + '"' \
+            #         + ' ' + '"' + proxy_port + '"' \
+            #         + ' ' + '"' + proxy_user + '"' \
+            #         + ' ' + '"' + proxy_userpwd + '"'
+            #
+            # print command
+            # os.system(command)
+            # os.spawnl(os.P_NOWAIT, command)  # run in the background
+            #
+            # subprocess.call(command)
+            # from subprocess import STDOUT, PIPE
+            # proc = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            # stdout, stderr = proc.communicate(stdin)
+            # print ('Job start: "' + stdout + '"')
+            # print ('Job start error: "' + stderr + '"')
+
+    response = {'success': createnewrequest,
+                'message': message,
+                'requestid': requestid,
+                'requestfile': requestfilename}
+
+    response_json = json.dumps(response,
+                               ensure_ascii=False,
+                               sort_keys=True,
+                               indent=4,
+                               separators=(', ', ': '))
+    return response_json
+
+
+def execServiceTaskWin(getparams):
+    message = ''
+
+    if getparams.service == 'eumetcast':
+        command = 'NET START | find "estation2 - eumetcast"'
+        status = os.system(command) # is 0 if success
+        if not status:
+            status = True
+        else:
+            status = False
+
+        # logger.info(getparams.service)
+        # logger.info('status: ' + str(status))
+
+        if getparams.task == 'stop':
+            if status:
+                os.system('NET STOP "estation2 - eumetcast"')
+                message = 'Get_eumetcast service stopped'
+            else:
+                message = 'Get_eumetcast service is already down'
+
+        elif getparams.task == 'run':
+            if not status:
+                os.system('NET START "estation2 - eumetcast"')
+                message = 'Get_eumetcast service started'
+            else:
+                message = 'Get_eumetcast service was already up'
+
+        elif getparams.task == 'restart':
+            os.system('NET STOP "estation2 - eumetcast"')
+            os.system('NET START "estation2 - eumetcast"')
+            message = 'Get_eumetcast service restarted'
+
+    if getparams.service == 'internet':
+        command = 'NET START | find "estation2 - get internet"'
+        status = os.system(command) # is 0 if success
+        if not status:
+            status = True
+        else:
+            status = False
+
+        if getparams.task == 'stop':
+            if status:
+                os.system('NET STOP "estation2 - get internet"')
+                message = 'Get_internet service stopped'
+            else:
+                message = 'Get_internet service is already down'
+        elif getparams.task == 'run':
+            if not status:
+                os.system('NET START "estation2 - get internet"')
+                message = 'Get_internet service started'
+            else:
+                message = 'Get_internet service was already up'
+
+        elif getparams.task == 'restart':
+            os.system('NET STOP "estation2 - get internet"')
+            os.system('NET START "estation2 - get internet"')
+            message = 'Get_internet service restarted'
+
+    if getparams.service == 'ingest':
+        command = 'NET START | find "estation2 - ingestion"'
+        status = os.system(command) # is 0 if success
+        if not status:
+            status = True
+        else:
+            status = False
+
+        if getparams.task == 'stop':
+            if status:
+                os.system('NET STOP "estation2 - ingestion"')
+                message = 'Ingestion service stopped'
+            else:
+                message = 'Ingestion service is already down'
+
+        elif getparams.task == 'run':
+            if not status:
+                os.system('NET START "estation2 - ingestion"')
+                message = 'Ingestion service started'
+            else:
+                message = 'Ingestion service was already up'
+
+        elif getparams.task == 'restart':
+            os.system('NET STOP "estation2 - ingestion"')
+            os.system('NET START "estation2 - ingestion"')
+            message = 'ingest service restarted'
+
+    if getparams.service == 'processing':
+        command = 'NET START | find "estation2 - processing"'
+        status = os.system(command) # is 0 if success
+        if not status:
+            status = True
+        else:
+            status = False
+
+        if getparams.task == 'stop':
+            if status:
+                os.system('NET STOP "estation2 - processing"')
+                message = 'Processing service stopped'
+            else:
+                message = 'Processing service is already down'
+
+        elif getparams.task == 'run':
+            if not status:
+                os.system('NET START "estation2 - processing"')
+                message = 'Processing service started'
+            else:
+                message = 'Processing service was already up'
+
+        elif getparams.task == 'restart':
+            os.system('NET STOP "estation2 - processing"')
+            os.system('NET START "estation2 - processing"')
+            message = 'Processing service restarted'
+
+    if getparams.service == 'system':
+        command = 'NET START | find "estation2 - es2system"'
+        status = os.system(command) # is 0 if success
+        if not status:
+            status = True
+        else:
+            status = False
+
+        if getparams.task == 'stop':
+            if status:
+                os.system('NET STOP "estation2 - es2system"')
+                message = 'System service stopped'
+            else:
+                message = 'System service is already down'
+        #
+        elif getparams.task == 'run':
+            if not status:
+                os.system('NET START "estation2 - es2system"')
+                message = 'System service started'
+            else:
+                message = 'System service was already up'
+
+        elif getparams.task == 'restart':
+            os.system('NET STOP "estation2 - es2system"')
+            os.system('NET START "estation2 - es2system"')
+            message = 'System service restarted'
+
+    return message
+
+
+def execServiceTask(getparams):
+    message = ''
+    dryrun = False
+    if getparams.service == 'eumetcast':
+        # Define pid file and create daemon
+        pid_file = es_constants.get_eumetcast_pid_filename
+        eumetcast_daemon = acquisition.GetEumetcastDaemon(pid_file, dry_run=dryrun)
+        eumetcast_service_script = es_constants.es2globals['acq_service_dir'] + os.sep + 'service_get_eumetcast.py'
+        status = eumetcast_daemon.status()
+
+        logger.info(getparams.service)
+        logger.info('status: ' + str(status))
+
+        if getparams.task == 'stop':
+            if status:
+                os.system("python " + eumetcast_service_script + " stop")
+                message = 'Get_eumetcast service stopped'
+            else:
+                message = 'Get_eumetcast service is already down'
+
+        elif getparams.task == 'run':
+            if not status:
+                os.system("python " + eumetcast_service_script + " start")
+                message = 'Get_eumetcast service started'
+            else:
+                message = 'Get_eumetcast service was already up'
+
+        elif getparams.task == 'restart':
+            os.system("python " + eumetcast_service_script + " stop")
+            os.system("python " + eumetcast_service_script + " start")
+            message = 'Get_eumetcast service restarted'
+
+    if getparams.service == 'internet':
+        # Define pid file and create daemon
+        pid_file = es_constants.get_internet_pid_filename
+        internet_daemon = acquisition.GetInternetDaemon(pid_file, dry_run=dryrun)
+        internet_service_script = es_constants.es2globals['acq_service_dir'] + os.sep + 'service_get_internet.py'
+        status = internet_daemon.status()
+
+        if getparams.task == 'stop':
+            if status:
+                os.system("python " + internet_service_script + " stop")
+                message = 'Get_internet service stopped'
+            else:
+                message = 'Get_internet service is already down'
+        elif getparams.task == 'run':
+            if not status:
+                os.system("python " + internet_service_script + " start")
+                message = 'Get_internet service started'
+            else:
+                message = 'Get_internet service was already up'
+
+        elif getparams.task == 'restart':
+            os.system("python " + internet_service_script + " stop")
+            os.system("python " + internet_service_script + " start")
+            message = 'Get_internet service restarted'
+
+    if getparams.service == 'ingest':
+        # Define pid file and create daemon
+        pid_file = es_constants.ingestion_pid_filename
+        ingest_daemon = acquisition.IngestionDaemon(pid_file, dry_run=dryrun)
+        status = ingest_daemon.status()
+        ingest_service_script = es_constants.es2globals['acq_service_dir'] + os.sep + 'service_ingestion.py'
+        if getparams.task == 'stop':
+            if status:
+                os.system("python " + ingest_service_script + " stop")
+                message = 'Ingestion service stopped'
+            else:
+                message = 'Ingestion service is already down'
+
+        elif getparams.task == 'run':
+            if not status:
+                os.system("python " + ingest_service_script + " start")
+                message = 'Ingestion service started'
+            else:
+                message = 'Ingestion service was already up'
+
+        elif getparams.task == 'restart':
+            os.system("python " + ingest_service_script + " stop")
+            os.system("python " + ingest_service_script + " start")
+            message = 'ingest service restarted'
+
+    if getparams.service == 'processing':
+        # Define pid file and create daemon
+        pid_file = es_constants.processing_pid_filename
+        processing_daemon = processing.ProcessingDaemon(pid_file, dry_run=dryrun)
+
+        status = processing_daemon.status()
+        processing_service_script = es_constants.es2globals['proc_service_dir'] + os.sep + 'service_processing.py'
+        if getparams.task == 'stop':
+            if status:
+                os.system("python " + processing_service_script + " stop")
+                message = 'Processing service stopped'
+            else:
+                message = 'Processing service is already down'
+
+        elif getparams.task == 'run':
+            if not status:
+                os.system("python " + processing_service_script + " start")
+                message = 'Processing service started'
+            else:
+                message = 'Processing service was already up'
+
+        elif getparams.task == 'restart':
+            os.system("python " + processing_service_script + " stop")
+            os.system("python " + processing_service_script + " start")
+            message = 'Processing service restarted'
+
+    if getparams.service == 'system':
+        # Define pid file and create daemon
+        pid_file = es_constants.system_pid_filename
+        system_daemon = es2system.SystemDaemon(pid_file, dry_run=dryrun)
+        #
+        status = system_daemon.status()
+        system_service_script = es_constants.es2globals['system_service_dir'] + os.sep + 'service_system.py'
+        if getparams.task == 'stop':
+            if status:
+                os.system("python " + system_service_script + " stop")
+                message = 'System service stopped'
+            else:
+                message = 'System service is already down'
+        #
+        elif getparams.task == 'run':
+            if not status:
+                os.system("python " + system_service_script + " start")
+                message = 'System service started'
+            else:
+                message = 'System service was already up'
+
+        elif getparams.task == 'restart':
+            os.system("python " + system_service_script + " stop")
+            os.system("python " + system_service_script + " start")
+            message = 'System service restarted'
+
+    return message
 
 
 def getWorkspaceMaps(workspaceid):
@@ -2934,9 +3719,18 @@ def getProductLayer(getparams):
     if frequency_id == 'e1day' and date_format == 'YYYYMMDD':
         regex = dataset.fullpath + filedate+'*'+'.tif'
         filename = glob.glob(regex)
-        productfile = filename[0]
-    # lastdate = lastdate.replace("-", "")
-    # mydate=lastdate.strftime("%Y%m%d")
+        if len(filename) > 0:
+            productfile = filename[0]
+        else:
+            filename = functions.set_path_filename(filedate,
+                                                   getparams['productcode'],
+                                                   getparams['subproductcode'],
+                                                   getparams['mapsetcode'],
+                                                   getparams['productversion'],
+                                                   '.tif')
+            productfile = dataset.fullpath + filename
+        # lastdate = lastdate.replace("-", "")
+        # mydate=lastdate.strftime("%Y%m%d")
     else:
         filename = functions.set_path_filename(filedate,
                                                getparams['productcode'],
@@ -3576,10 +4370,10 @@ def ColorSchemes():
     return colorschemes
 
 
-def getProductNavigatorDataSets(forse):
+def getProductNavigatorDataSets(force):
     # import time
     datasetsinfo_file = es_constants.base_tmp_dir + os.path.sep + 'product_navigator_datasets_info.json'
-    if forse:
+    if force:
         dataset_json = ProductNavigatorDataSets().encode('utf-8')
         try:
             with open(datasetsinfo_file, "w") as text_file:
@@ -3630,7 +4424,7 @@ def getProductNavigatorDataSets(forse):
 
 
 def ProductNavigatorDataSets():
-    db_products = querydb.get_products(activated=None, masked=False)
+    db_products = querydb.get_products(activated=True, masked=None)
 
     if hasattr(db_products, "__len__") and db_products.__len__() > 0:
         products_dict_all = []
@@ -3689,10 +4483,10 @@ def ProductNavigatorDataSets():
     return dataset_json
 
 
-def getDataSets(forse):
+def getDataSets(force):
     # import time
     datasetsinfo_file = es_constants.base_tmp_dir + os.path.sep + 'datasets_info.json'
-    if forse:
+    if force:
         datamanagement_json = DataSets().encode('utf-8')
         try:
             with open(datasetsinfo_file, "w") as text_file:
@@ -4058,11 +4852,11 @@ def createDatasetCompletenessImage(datasetcompleteness, frequency_id, completene
     return datasetcompletenessimage
 
 
-def getTimeseriesProducts(forse):
+def getTimeseriesProducts(force):
     # import time
     timeseriesproducts_file = es_constants.base_tmp_dir + os.path.sep + 'timeseries_products.json'
 
-    if forse:
+    if force:
         timeseriesproducts_json = TimeseriesProducts().encode('utf-8')
         try:
             with open(timeseriesproducts_file, "w") as text_file:
@@ -4119,6 +4913,7 @@ def TimeseriesProducts():
     # t0 = time.time()
     # print 'START: ' + str(t0)
 
+    # Get all subproducts with timeseries_role = 'Initial'
     db_products = querydb.get_timeseries_products()
     if hasattr(db_products, "__len__") and db_products.__len__() > 0:
         products_dict_all = []
@@ -4191,6 +4986,7 @@ def TimeseriesProducts():
                                 distinctyears.append(product_date.year)
                         tmp_prod_dict['years'] = distinctyears
 
+                        # If there is data available on disk, include the subproduct with timeseries_role='Initial' in the list!
                         if tmp_prod_dict['years'].__len__() > 0:
                             products_dict_all.append(tmp_prod_dict)
                             # tmp_prod_dict = copy.deepcopy(prod_dict)
@@ -4202,6 +4998,7 @@ def TimeseriesProducts():
                         # total = t6-t5
                         # print 'after getting years: ' + str(total)
 
+                        # Get all subproducts which have as timeseries_role = subproductcode ('Initial')
                         timeseries_mapset_datasets = querydb.get_timeseries_subproducts(productcode=productcode,
                                                                                         version=version,
                                                                                         subproductcode=subproductcode)
@@ -4250,6 +5047,7 @@ def TimeseriesProducts():
                                 dataset_dict['difference'] = False
                                 dataset_dict['reference'] = False
 
+                                # If there is data available on disk, include the subproduct in the list!
                                 if dataset_dict['years'].__len__() > 0:
                                     products_dict_all.append(dataset_dict)
                                     # # tmp_prod_dict = prod_dict.copy()
@@ -4485,18 +5283,22 @@ def __TimeseriesProductsTree():
     return datamanagement_json
 
 
-def getIngestion(forse):
+def getIngestion(force):
     # import time
     ingestioninfo_file = es_constants.base_tmp_dir + os.path.sep + 'ingestion_info.json'
-    if forse:
+    if force:
         ingestions_json = Ingestion().encode('utf-8')
         try:
             with open(ingestioninfo_file, "w") as text_file:
                 text_file.write(ingestions_json)
+            # logger.info("getIngestion: FORCE writing ingestion_info.json!")
+            # logger.info(ingestioninfo_file)
         except IOError:
             try:
+                logger.error("getIngestion: Error writing ingestion_info.json!\n -> {}".format(IOError))
                 os.remove(ingestioninfo_file)  # remove file and recreate next call
             except OSError:
+                logger.error("getIngestion: Error removing ingestion_info.json!\n -> {}".format(IOError))
                 pass
 
     elif os.path.isfile(ingestioninfo_file):
@@ -4509,20 +5311,26 @@ def getIngestion(forse):
             try:
                 with open(ingestioninfo_file, "w") as text_file:
                     text_file.write(ingestions_json)
+                # logger.info("getIngestion: writing ingestion_info.json!")
             except IOError:
                 try:
+                    logger.error("getIngestion: Error writing ingestion_info.json!\n -> {}".format(IOError))
                     os.remove(ingestioninfo_file)  # remove file and recreate next call
                 except OSError:
+                    logger.error("getIngestion: Error removing ingestion_info.json!\n -> {}".format(IOError))
                     pass
         else:
             try:
                 with open(ingestioninfo_file) as text_file:
                     ingestions_json = text_file.read()
+                # logger.info("getIngestion: writing ingestion_info.json!")
             except IOError:
                 ingestions_json = Ingestion().encode('utf-8')
                 try:
+                    logger.error("getIngestion: Error writing ingestion_info.json!\n -> {}".format(IOError))
                     os.remove(ingestioninfo_file)  # remove file and recreate next call
                 except OSError:
+                    logger.error("getIngestion: Error removing ingestion_info.json!\n -> {}".format(IOError))
                     pass
 
     else:
@@ -4530,10 +5338,13 @@ def getIngestion(forse):
         try:
             with open(ingestioninfo_file, "w") as text_file:
                 text_file.write(ingestions_json)
+            # logger.info("getIngestion: writing ingestion_info.json!")
         except IOError:
             try:
+                logger.error("getIngestion: Error writing ingestion_info.json!\n -> {}".format(IOError))
                 os.remove(ingestioninfo_file)  # remove file and recreate next call
             except OSError:
+                logger.error("getIngestion: Error removing ingestion_info.json!\n -> {}".format(IOError))
                 pass
     return ingestions_json
 
@@ -4623,11 +5434,11 @@ def Ingestion():
     return ingestions_json
 
 
-def getProcessing(forse):
+def getProcessing(force):
     # import time
-    # forse = True
+    # force = True
     processinginfo_file = es_constants.base_tmp_dir + os.path.sep + 'processing_info.json'
-    if forse:
+    if force:
         processing_chains_json = Processing().encode('utf-8')
         try:
             with open(processinginfo_file, "w") as text_file:

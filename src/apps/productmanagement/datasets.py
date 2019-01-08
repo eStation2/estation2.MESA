@@ -282,6 +282,8 @@ class Dataset(object):
             self._check_date(to_date)
         self._db_product = querydb.get_product_out_info(**kwargs)
         if self._db_product is None or self._db_product == []:
+            # Todo: raising and error crashes the system. Log the error and create an empty Dataset instance
+            # Todo: set all values of self._db_product to 'undefined'?
             raise NoProductFound(kwargs)
         if isinstance(self._db_product, list):
             self._db_product = self._db_product[0]

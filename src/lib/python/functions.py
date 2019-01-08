@@ -212,6 +212,57 @@ def getStatusAllServices():
 
     return services_status
 
+def getStatusAllServicesWin():
+
+    # Get status of the ingestion service
+    command = 'NET START | find "estation2 - ingestion"'
+    ingest = os.system(command)
+    # print 'ingest: '
+    # print ingest
+    if not ingest:
+        ingest = True
+    else:
+        ingest = False
+
+    # Get status of the get_internet service
+    command = 'NET START | find "estation2 - get internet"'
+    internet = os.system(command)
+    if not internet:
+        internet = True
+    else:
+        internet = False
+
+    # Get status of the get_eumetcast service
+    command = 'NET START | find "estation2 - eumetcast"'
+    eumetcast = os.system(command)
+    if not eumetcast:
+        eumetcast = True
+    else:
+        eumetcast = False
+
+    # Get status of the processing service
+    command = 'NET START | find "estation2 - processing"'
+    process = os.system(command)
+    if not process:
+        process = True
+    else:
+        process = False
+
+    # Get status of system service
+    command = 'NET START | find "estation2 - es2system"'
+    system = os.system(command)
+    if not system:
+        system = True
+    else:
+        system = False
+
+    services_status = {'eumetcast': str(eumetcast).lower(),
+                       'internet': str(internet).lower(),
+                       'ingest': str(ingest).lower(),
+                       'process': str(process).lower(),
+                       'system': str(system).lower()}
+
+    return services_status
 
 def getListVersions():
     # Return the list of installed versions as a dictionary, by looking at versioned dirs

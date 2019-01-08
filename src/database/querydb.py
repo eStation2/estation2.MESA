@@ -212,14 +212,19 @@ def copylegend(legendid=-1, legend_descriptive_name=''):
             dbschema_analysis.session.close()
 
 
-def activate_deactivate_product(productcode='', version='', activate=False, forse=False):
+def activate_deactivate_product(productcode='', version='', activate=False, force=False):
     global db
     try:
-        query = "SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('" + productcode + "', '" + version + "', " + str(
-            activate).upper() + ", " + str(forse).upper() + "); COMMIT;"
-        product_updated = db.execute(query)
+        # query = "SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('" + productcode + "', '" + version + "', " + str(
+        #     activate).upper() + ", " + str(force).upper() + "); COMMIT;"
+
+        query = "SELECT * FROM products.activate_deactivate_product('" + productcode + "', '" \
+                + version + "', " + str(activate).upper() + "); COMMIT;"
+
+        db.execute(query)
 
         return True
+
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
@@ -2558,12 +2563,12 @@ def get_products_acquisition(activated=None):
                          db.pl.c.activated,
                          db.pa.c.totgets > 0)
         elif activated is False or activated in ['False', 'false', '0', 'f', 'n', 'N', 'no', 'No']:
-            # where = and_(db.pl.c.product_type == 'Native',
-            #              db.pl.c.activated != 't',
-            #              db.pa.c.totgets > 0)
             where = and_(db.pl.c.product_type == 'Native',
-                         db.pl.c.defined_by != 'JRC-Test',
-                         db.pl.c.activated != 't')
+                         db.pl.c.activated != 't',
+                         db.pa.c.totgets > 0)
+            # where = and_(db.pl.c.product_type == 'Native',
+            #              db.pl.c.defined_by != 'JRC-Test',
+            #              db.pl.c.activated != 't')
         else:
             where = and_(db.pl.c.product_type == 'Native', db.pa.c.totgets > 0)
 
@@ -2617,8 +2622,11 @@ def get_products(activated=None, masked=None):
                     p.c.defined_by,
                     p.c.activated,
                     p.c.product_type,
-                    p.c.descriptive_name.label('prod_descriptive_name'),
-                    p.c.description,
+                    # p.c.descriptive_name.label('prod_descriptive_name'),
+                    # p.c.description,
+                    func.coalesce(p.c.descriptive_name, '').label('prod_descriptive_name'),
+                    func.coalesce(p.c.description, '').label('description'),
+                    func.coalesce(p.c.provider, '').label('provider'),
                     p.c.masked,
                     pc.c.category_id,
                     pc.c.descriptive_name.label('cat_descr_name'),
@@ -2629,11 +2637,11 @@ def get_products(activated=None, masked=None):
 
         if masked is None:
             if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
-                where = and_(pl.c.product_type == 'Native', pl.c.activated == 't', pl.c.defined_by != 'JRC-Test')
+                where = and_(pl.c.product_type == 'Native', pl.c.activated == 't', pl.c.defined_by != '')   # 'JRC-Test'
             elif activated is False or activated in ['False', 'false', '0', 'f', 'n', 'N', 'no', 'No']:
-                where = and_(pl.c.product_type == 'Native', pl.c.activated == 'f', pl.c.defined_by != 'JRC-Test')
+                where = and_(pl.c.product_type == 'Native', pl.c.activated == 'f', pl.c.defined_by != '')   # 'JRC-Test'
             else:
-                where = and_(pl.c.product_type == 'Native', pl.c.defined_by != 'JRC-Test')
+                where = and_(pl.c.product_type == 'Native', pl.c.defined_by != '')  # 'JRC-Test'
         else:
             if not masked:
                 where = and_(pl.c.product_type == 'Native', pl.c.masked == 'f')

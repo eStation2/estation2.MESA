@@ -75,7 +75,7 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
     cls: 'newpanelstyle',
 
     config: {
-        forseStoreLoad: false,
+        forceStoreLoad: false,
         dirtyStore: false
     },
 
@@ -102,13 +102,13 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
 
         me.mon(me, {
             loadstore: function() {
-                if (me.forseStoreLoad || !me.getViewModel().getStore('usermaptemplates').isLoaded() || me.dirtyStore) {
+                if (me.forceStoreLoad || !me.getViewModel().getStore('usermaptemplates').isLoaded() || me.dirtyStore) {
                     me.getViewModel().getStore('usermaptemplates').proxy.extraParams = {userid: esapp.getUser().userid};
                     me.getViewModel().getStore('usermaptemplates').load({
                         callback: function (records, options, success) {
                         }
                     });
-                    me.forseStoreLoad = false;
+                    me.forceStoreLoad = false;
                     me.dirtyStore = false;
                 }
             }
@@ -138,7 +138,7 @@ Ext.define("esapp.view.analysis.mapTemplateAdmin",{
             align: 'c-c',
             tooltip: esapp.Utils.getTranslation('refreshmaptpllist'),    // 'Refresh map template list',
             callback: function() {
-                me.forseStoreLoad = true;
+                me.forceStoreLoad = true;
                 me.fireEvent('loadstore');
             }
         }];

@@ -16,7 +16,8 @@ serialize = False                   # for debug
 test_one_product = 62               # MODIS_PP on 8daysavg
 test_one_product = 83               # OLCI-WRR CHLA-GRADIENT
 
-
+# service is always False because this module is used by the windows version or for testing
+# ToDo: The code under the if statement can be deleted, service_processing.py is now used by non windows versions
 if service:
     # Make sure the pid dir exists
     if not os.path.isdir(es_constants.es2globals['pid_file_dir']):
@@ -49,15 +50,15 @@ else:
         app_dir = es_constants.es2globals['apps_dir']
         python_script_path = os.path.join(app_dir,'processing\processing.py')
         from subprocess import Popen
-        p = Popen(["OSGeo4W_python.bat",python_script_path], cwd=parent_dir,shell=True)
+        p = Popen(["OSGeo4W_python.bat",python_script_path], cwd=parent_dir, shell=True)
         stdout, stderr = p.communicate()
         # TODO delete the 2 lines below...
-        print 'return code'
-        print p.returncode  # is 0 if success
+        # print 'return code'
+        # print p.returncode  # is 0 if success
         if p.returncode == 0:
-            print "Success!!"
+            logger.info("Processing service is running: Success!!")
         else:
-            print "Failure"
+            logger.info("Processing service is NOT running: Failure!!")
 
     else:
         processing.loop_processing(dry_run=dry_run, serialize=serialize, test_one_product=test_one_product)

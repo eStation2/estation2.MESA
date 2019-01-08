@@ -35,7 +35,7 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
         resizable: false,
         disableSelection: true,
         trackOver: true,
-        forceFit:true,
+        forceFit: true,
         focusable: false
         //focusOnToFront: false,
         //preserveScrollOnRefresh: false,
@@ -56,8 +56,8 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
         //}
     },
 
-    //selModel: {listeners:{}},
-    //selModel: Ext.create('Ext.selection.Model', { listeners: {} }),
+    // selModel: {listeners:{}},
+    // selModel: Ext.create('Ext.selection.Model', { listeners: {} }),
 
     cls: 'grid-color-yellow',
 
@@ -65,10 +65,10 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
     columnLines: false,
     rowLines: false,
     collapsible: false,
-    variableRowHeight : true,
+    variableRowHeight : false,
     bufferedRenderer: false,
     focusable: false,
-
+    layout: 'fit',
 
     //listeners: {
         //cellclick: function (x, y) {
@@ -204,7 +204,6 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
 
         me.defaults = {
             menuDisabled: true,
-            variableRowHeight : true,
             draggable:false,
             groupable:false,
             hideable: false
@@ -213,7 +212,6 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
         me.columns = [{
             // text: '', // 'Type',
             width: 220,
-            variableRowHeight:true,
             //dataIndex: 'type'
             xtype:'templatecolumn',
             tpl: new Ext.XTemplate(
@@ -240,7 +238,6 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
             width: 35,
             align: 'center',
             stopSelection: false,
-            variableRowHeight:true,
             items: [{
                 // scope: me,
                 disabled: false,
@@ -296,7 +293,6 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
             width: 100,
             align: 'center',
             stopSelection: false,
-            variableRowHeight: true,
             items: [{
                 // scope: me,
                 disabled: false,
@@ -331,7 +327,6 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
             width: 65,
             align: 'center',
             stopSelection: false,
-            variableRowHeight: true,
             items: [{
                 // scope: me,
                 disabled: false,
@@ -362,7 +357,6 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
             //height:40,
             align:'center',
             stopSelection: false,
-            variableRowHeight:true,
             items: [{
                 //icon: 'resources/img/icons/file-extension-log-icon-32x32.png',
                 iconCls:'log-icon',

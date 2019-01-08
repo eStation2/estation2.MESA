@@ -598,7 +598,7 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
         var me = this.getView();
         var timeseriesProductsStore = Ext.getStore('TimeseriesProductsStore');
 		if (!timeseriesProductsStore.isLoaded() || timeseriesProductsStore.count() < 1) {
-			timeseriesProductsStore.proxy.extraParams = {forse: true};
+			timeseriesProductsStore.proxy.extraParams = {force: true};
 			timeseriesProductsStore.reload({
 				callback: function (records, options, success) {
 					setSelections(me);

@@ -24,29 +24,23 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
         model: 'MapSetDataSet'
     },
 
-    layout: 'fit',
+    // selType: 'cellmodel',
+    // selModel: {listeners:{}},
 
-    selType: 'cellmodel',
-    selModel: {listeners:{}},
-
-    bufferedRenderer: true,
+    bufferedRenderer: false,
 
     hideHeaders: true,
     columnLines: false,
     rowLines:false,
     focusable: false,
+    forceFit: true,
     margin: '0 0 10 0',    // (top, right, bottom, left).
+    // minHeight: 55,
+
+    layout: 'fit',
 
     initComponent: function () {
         var me = this;
-
-        me.defaults = {
-            menuDisabled: true,
-            variableRowHeight : true,
-            draggable:false,
-            groupable:false,
-            hideable: false
-        };
 
         me.viewConfig = {
             stripeRows: false,
@@ -57,8 +51,8 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
             disableSelection: true,
             trackOver: false,
             preserveScrollOnRefresh: false,
-            variableRowHeight : true,
             focusable: false,
+            forceFit: true,
             listeners: {
                 render: function(view){
                     createTooltip(view);
@@ -91,22 +85,26 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
                     if (!widgettooltip.disabled && widgettooltip.trackMouse){
                         widgettooltip.disable();
                     }
-                },
-                rowfocus: {}
+                }
+                // ,rowfocus: {}
             }
         };
 
 
         // me.listeners = {
-        //     beforerender: function () {
-        //         Ext.util.Observable.capture(me, function (e) { console.log('mapsetdatasetgrid - ' + e);});
-        //         // me.ownerGrid.updateLayout();
-        //     }
-        //    cellclick : function(view, cell, cellIndex, record, row, rowIndex, e) {
-        //        //e.stopPropagation();
-        //        return false;
-        //    }
+            // afterrender: function(view){
+            //     view.updateLayout();
+            // }
+            // ,beforerender: function () {
+            //     Ext.util.Observable.capture(me, function (e) { console.log('mapsetdatasetgrid - ' + e);});
+            //     // me.ownerGrid.updateLayout();
+            // }
+            // ,cellclick : function(view, cell, cellIndex, record, row, rowIndex, e) {
+            //    //e.stopPropagation();
+            //    return false;
+            // }
         // };
+        //
         //
         // function renderTip(val, meta, rec, rowIndex, colIndex, store) {
         //     console.info(meta);
@@ -212,6 +210,13 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
             });
         }
 
+        me.defaults = {
+            menuDisabled: true,
+            draggable:false,
+            groupable:false,
+            hideable: false
+        };
+
         me.columns = [{
             // header: '', // 'Sub Product Code',
             // dataIndex: 'subproductcode',
@@ -272,7 +277,6 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
             xtype: 'actioncolumn',
             width: 65,
             align:'center',
-            menuDisabled: true,
             stopSelection: false,
             items: [{
                 icon: 'resources/img/icons/download.png',

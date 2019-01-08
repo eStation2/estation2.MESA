@@ -26,13 +26,37 @@ activate_pp_1mon_comput=1
 #   General definitions for this processing chain
 ext=es_constants.ES2_OUTFILE_EXTENSION
 
-def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, proc_lists=None):
+def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, proc_lists=None, nrt_products=True,
+                    update_stats=False):
 
     #   ---------------------------------------------------------------------
     #   Create lists
 
     if proc_lists is None:
         proc_lists = functions.ProcLists()
+
+    # Set DEFAULTS: all off
+    activate_pp_1mon_comput = 0  # 10d stats
+    activate_10danomalies_comput = 0  # 10d anomalies
+
+    activate_monthly_comput = 0  # monthly cumulation
+    activate_monstats_comput = 0  # monthly stats
+    activate_monanomalies_comput = 0  # monthly anomalies
+
+    #   switch wrt groups - according to options
+    if nrt_products:
+        activate_pp_1mon_comput = 1  # Primary Production Monthly
+
+        activate_monthly_comput = 1  # monthly cumulation
+        activate_monanomalies_comput = 1  # monthly anomalies
+
+    if update_stats:
+        activate_pp_8dstats_comput = 1  # 10d stats
+        activate_pp_monstats_comput = 1  # monthly stats
+
+    # Primary Production Monthly
+    # Always true
+    #activate_pp_1mon_comput = 1
 
     #my_date='20160601'
     my_date = ''
@@ -121,14 +145,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 #   ---------------------------------------------------------------------
 #   Run the pipeline
 
-def processing_std_modis_pp(res_queue, pipeline_run_level=0, pipeline_printout_level=0,
-                        pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                        starting_dates=None, write2file=None, logfile=None):
+def processing_std_modis_pp(res_queue, pipeline_run_level=0, pipeline_printout_level=0, pipeline_printout_graph_level=0,
+                            prod='', starting_sprod='', mapset='', version='', starting_dates=None, write2file=None,
+                            logfile=None, nrt_products=True, update_stats=False):
 
     spec_logger = log.my_logger(logfile)
     spec_logger.info("Entering routine %s" % 'processing_std_msg_mpe')
 
-    create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, proc_lists=None)
+    create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, proc_lists=None, nrt_products=nrt_products, update_stats=update_stats)
 
     spec_logger.info("Entering routine %s" % 'processing modis - Primary Production')
     if pipeline_run_level > 0:
@@ -140,3 +164,18 @@ def processing_std_modis_pp(res_queue, pipeline_run_level=0, pipeline_printout_l
     
     if pipeline_printout_graph_level > 0:
         pipeline_printout_graph('flowchart.jpg')
+
+    return True
+
+
+def processing_std_modis_pp_stats_only(res_queue, pipeline_run_level=0, pipeline_printout_level=0,
+                            pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
+                            starting_dates=None, write2file=None, logfile=None):
+
+    result = processing_std_modis_pp(res_queue, pipeline_run_level=pipeline_run_level,
+                                     pipeline_printout_level=pipeline_printout_level,
+                                     pipeline_printout_graph_level=pipeline_printout_graph_level, prod=prod,
+                                     starting_sprod=starting_sprod, mapset=mapset, version=version,
+                                     starting_dates=starting_dates, write2file=write2file, logfile=logfile, nrt_products=False,update_stats=True)
+
+    return result

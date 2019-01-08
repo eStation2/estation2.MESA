@@ -1,6 +1,6 @@
 _author__ = "Marco Clerici"
 
-import os, time
+import sys, os, time
 from config import es_constants
 from apps.acquisition import get_eumetcast
 from apps.acquisition import acquisition
@@ -13,6 +13,11 @@ dry_run = False
 service  = False
 use_ftp  = False
 
+if sys.platform == 'win32':
+    use_ftp  = True
+
+# service is always False because this module is used by the windows version or for testing
+# ToDo: The code under the if statement can be deleted, service_get_eumetcast.py is now used by non windows versions
 if service:
     # Make sure the pid dir exists
     if not os.path.isdir(es_constants.pid_file_dir):

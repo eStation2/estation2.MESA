@@ -34,59 +34,24 @@ Ext.define("esapp.view.acquisition.Ingestion", {
     rowLines: false,
     collapsible: false,
     bufferedRenderer: false,
-    variableRowHeight : true,
     forceFit: true,
     focusable: false,
+    minHeight: 55,
 
     layout: 'fit',
 
-    selType: 'cellmodel',
-    selModel: {listeners:{}},
-
-    //selModel: Ext.create('Ext.selection.Model', { listeners: {} }),
-    //
-    //mixins: [],
-    //events: ['my_event_name'],
-    //register handler for 'my_event_name' event
-    //    component.on('my_event_name', function(cmp, btn) {
-    //            alert(this.getString()); // invoke miixin  method
-    //        }, frm);
-    //    store: 'IngestionsStore',
-    //    bind: '{ProductAcquisitionsGrid.selection.Ingestions}',
-    //    bind: '{ingestions}',
-    //bufferedRenderer: true,
-    //autoHeight: false,
-    //plugins: [{
-    //    ptype: 'bufferedrenderer',
-    //    trailingBufferZone: 20,  // Keep 20 rows rendered in the table behind scroll
-    //    leadingBufferZone: 50   // Keep 50 rows rendered in the table ahead of scroll
-    //}],
-    //listeners: {
-        //rowclick:  function (gridview, record) {
-            //console.info('row clicked');
-            //console.info(gridview);
-            //console.info(gridview.grid.getWidgetColumn());
-            //console.info(Ext.getCmp(gridview.grid.getWidgetColumn().getWidget().getId()+ '_tooltip'));
-        //}
-        //beforerender:  function () {
-        //    var me = this,
-        //        record = me.getWidgetRecord();
-        //    Ext.suspendLayouts();
-        //    var daStore = me.getViewModel().get('productingestions');
-        //    if (daStore) {
-        //        daStore.setFilters({
-        //            property: 'productid'
-        //            , value: record.id
-        //            , anyMatch: true
-        //        });
-        //    }
-        //    Ext.resumeLayouts(true);
-        //}
-    //},
+    // selType: 'cellmodel',
+    // selModel: {listeners:{}},
 
     initComponent: function () {
         var me = this;
         //Ext.util.Observable.capture(this, function(e){console.log('Ingestion - ' + this.id + ': ' + e);});
+
+        // me.listeners = {
+        //     afterrender: function(){
+        //         me.view.refresh();
+        //     }
+        // };
 
         me.viewConfig = {
             stripeRows: false,
@@ -96,9 +61,8 @@ Ext.define("esapp.view.acquisition.Ingestion", {
             resizable: false,
             disableSelection: true,
             trackOver: false,
-            forceFit:true,
+            forceFit: true,
             preserveScrollOnRefresh: false,
-            variableRowHeight : true,
             focusable: false,
             getRowClass: function(record) {
                 return 'wordwrap';
@@ -251,7 +215,6 @@ Ext.define("esapp.view.acquisition.Ingestion", {
 
         me.defaults = {
             menuDisabled: true,
-            variableRowHeight : true,
             draggable:false,
             groupable:false,
             hideable: false
@@ -267,7 +230,6 @@ Ext.define("esapp.view.acquisition.Ingestion", {
             maxWidth: 35,
             align: 'center',
             stopSelection: false,
-            variableRowHeight:true,
             items: [{
                 // scope: me,
                 disabled: false,
@@ -299,15 +261,13 @@ Ext.define("esapp.view.acquisition.Ingestion", {
             dataIndex: 'subproductcode',
             //bind: '{ingestions.subproductcode}',
             width: 150,
-            minWidth: 150,
-            variableRowHeight:true
+            minWidth: 150
         }, {
             header: '', // 'Mapset',
             dataIndex: 'mapsetname',
             //bind: '{ingestions.mapset}',
             width: 200,
             minWidth: 200,
-            variableRowHeight:true,
             cellWrap:true
         },{
             xtype: 'actioncolumn',
@@ -319,7 +279,6 @@ Ext.define("esapp.view.acquisition.Ingestion", {
             maxWidth: 35,
             align: 'center',
             stopSelection: false,
-            variableRowHeight:true,
             items: [{
                 // scope: me,
                 disabled: false,
@@ -455,7 +414,6 @@ Ext.define("esapp.view.acquisition.Ingestion", {
             width: 55,
             align: 'center',
             stopSelection: false,
-            variableRowHeight: true,
             items: [{
                 // scope: me,
                 disabled: false,
