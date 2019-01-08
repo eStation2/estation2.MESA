@@ -1284,7 +1284,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     ancillary_sprod = "10dstd-linearx2"
     ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, version, ext)
     ancillary_subdir = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived', version, mapset)
-    ancillary_input = "{subpath[0][5]}" + os.path.sep + ancillary_subdir + "{YYYY[0]}{MMDD[0]}" + ancillary_sprod_ident
+    ancillary_input = "{subpath[0][5]}" + os.path.sep + ancillary_subdir +"{MMDD[0]}"+ ancillary_sprod_ident
 
     @active_if(group_filtered_anomalies, activate_10dsndvi_linearx2)
     #@follows(vgt_ndvi_10ddiff_linearx2, vgt_ndvi_10dstddev)
@@ -1784,7 +1784,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     ancillary_sprod = "1monstd"
     ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, version, ext)
     ancillary_subdir      = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived',version, mapset)
-    ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{YYYY[0]}{MMDD[0]}"+ancillary_sprod_ident
+    ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir++ "{MMDD[0]}" +ancillary_sprod_ident
 
     @active_if(group_monthly_anomalies, activate_1monsndvi)
     #@follows(vgt_ndvi_1mondiff, vgt_ndvi_1monstddev)
