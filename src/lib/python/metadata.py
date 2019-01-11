@@ -90,10 +90,10 @@ class SdsMetadata:
 
         sds_metadata['eStation2_date'] = 'my_date'
         sds_metadata['eStation2_input_files'] = '/my/path/to/file/and/filename1'
-        sds_metadata['eStation2_comp_time'] = 'my_comp_time'
+        sds_metadata['eStation2_comp_time'] = 'Undefined'
         sds_metadata['eStation2_mac_address'] = get_machine_mac_address()
 
-        sds_metadata['eStation2_parameters'] = 'my_processing_parameters'
+        sds_metadata['eStation2_parameters'] = 'None'
 
     def write_to_ds(self, dataset):
     #
@@ -277,6 +277,11 @@ class SdsMetadata:
     #
     #   Assign scaling
         sds_metadata['eStation2_nodata'] = str(nodata)
+
+    def assign_single_paramater(self, parameter_key, parameter_value):
+    # ES2-293 ES2-292
+    #   Assign Single Parameter
+        sds_metadata[parameter_key] = str(parameter_value)
 
     def assign_scl_factor(self, scl_factor):
     #
