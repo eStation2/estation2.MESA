@@ -1538,19 +1538,20 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
     except:
         pass
 
-    rescale_func = "\"A * 100\""
-    # Rescale the data using gdal_calc
-    rescale_command = "gdal_calc.py -A "+ output_file +" --co \"compress=lzw\" --type=Int16 --outfile="+output_file_vrt+" --calc="+rescale_func
-    os.system(rescale_command)
-    # M.C. 30.10.17 (see ES2-96)
-    # Do gdal_translate, in order to better compress the file
+    # # Rescale the data using gdal_calc (need only if the value of the data is binary)
+    # rescale_func = "\"A * 100\""
+    # rescale_command = "gdal_calc.py -A "+ output_file +" --co \"compress=lzw\" --type=Int16 --outfile="+output_file_vrt+" --calc="+rescale_func
+    # os.system(rescale_command)
+    # # M.C. 30.10.17 (see ES2-96)
+    # # Do gdal_translate, in order to better compress the file
 
     try:
         command = es_constants.gdal_translate
         command += ' -co \"compress=lzw\"'
         command += ' -co \"BIGTIFF=No\"'
         command += ' -ot BYTE '
-        command += ' '+output_file_vrt
+        command += ' '+output_file
+        # command += ' ' + output_file_vrt #To be changed if rescaling is done
         command += ' '+output_file_mapset
 
         my_logger.debug('Command for re-project is: ' + command)
@@ -1561,7 +1562,7 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         pass
 
     #Manually save tar file in the /data/ingest and send it to mesa-proc for the processing
-    command = 'tar -cvzf /data/ingest/MESA_JRC_wd-gee_occurr_20180801_WD-GEE-ECOWAS-AVG_1.0.tgz -C ' + os.path.dirname(output_file_mapset) + ' ' + os.path.basename(output_file_mapset)
+    command = 'tar -cvzf /data/ingest/MESA_JRC_wd-gee_occurr_20181201_WD-GEE-ECOWAS-AVG_1.0.tgz -C ' + os.path.dirname(output_file_mapset) + ' ' + os.path.basename(output_file_mapset)
     my_logger.debug('Command for tar the file is: ' + command)
     os.system(command)
     # Assign output file
@@ -1920,7 +1921,12 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             tmpdir_untar_band = tmpdir + os.path.sep + untar_file + os.path.sep + re_process
 
             if not os.path.exists(tmpdir_untar_band):
-                os.makedirs(tmpdir_untar_band)
+                # ES2-284 fix
+                # path = os.path.join(tmpdir, untar_file)
+                if os.path.isdir(tmpdir_untar):
+                    os.makedirs(tmpdir_untar_band)
+                else:
+                    continue
 
             # ------------------------------------------------------------------------------------------
             # Write a graph xml and subset the product for specific band, also applying flags
@@ -1963,7 +1969,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             return -1
 
         if len(interm_files_list) > 1 :
-            out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
+            out_tmp_file_gtiff = tmpdir + os.path.sep + re_process+'_merged.tif'
             input_files_str = ''
             for file_add in interm_files_list:
                 input_files_str += ' '
@@ -3111,10 +3117,10 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
             orig_ds = None
 
-        else:
-            # Do only renaming (and exit)
-            shutil.copy(intermFile,output_filename)
-            return 0
+        # else:
+        #     # Do only renaming (and exit)
+        #     shutil.copy(intermFile,output_filename)
+        #     return 0
         # -------------------------------------------------------------------------
         # Assign Metadata to the ingested file
         # -------------------------------------------------------------------------
@@ -3171,7 +3177,8 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # WD-GEE case
         else:
             sds_meta.assign_input_files(in_files)
-            sds_meta.write_to_file(output_filename)
+            sds_meta.write_to_file(intermFile)
+            shutil.copy(intermFile,output_filename)
 
         # -------------------------------------------------------------------------
         # Upsert into DB table 'products_data'
