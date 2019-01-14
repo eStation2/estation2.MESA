@@ -2266,7 +2266,12 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
             tmpdir_untar_band = tmpdir + os.path.sep + untar_file + os.path.sep + re_process
 
             if not os.path.exists(tmpdir_untar_band):
-                os.makedirs(tmpdir_untar_band)
+                # ES2-284 fix
+                # path = os.path.join(tmpdir, untar_file)
+                if os.path.isdir(tmpdir_untar):
+                    os.makedirs(tmpdir_untar_band)
+                else:
+                    continue
             # ------------------------------------------------------------------------------------------
             # Write a graph xml and subset the product for specific band
             # ------------------------------------------------------------------------------------------
