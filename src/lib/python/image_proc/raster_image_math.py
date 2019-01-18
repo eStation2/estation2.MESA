@@ -213,7 +213,7 @@ def do_stddev_image(input_file='', output_file='', input_nodata=None, output_nod
     # In this method make sure you pass the output_file as avg_file and output_stddev as output file to ease calculation
     try:
         # Force input to be a list
-        #input_list = return_as_list(input_file)
+        input_list = return_as_list(input_file)
 
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
@@ -222,8 +222,8 @@ def do_stddev_image(input_file='', output_file='', input_nodata=None, output_nod
         # Try and assign input_nodata if it is UNDEF
         if input_nodata is None:
             sds_meta = metadata.SdsMetadata()
-            if os.path.exists(input_file):
-                input_nodata=float(sds_meta.get_nodata_value(input_file))
+            if os.path.exists(input_file[0]):
+                input_nodata=float(sds_meta.get_nodata_value(input_file[0]))
             else:
                 logger.info('Test file not existing: do not assign metadata')
 
@@ -231,8 +231,9 @@ def do_stddev_image(input_file='', output_file='', input_nodata=None, output_nod
         if output_nodata is None and input_nodata is not None:
             output_nodata = input_nodata
 
-        # Get info from first file
-        fidT=gdal.Open(input_file, GA_ReadOnly)
+        # get infos from the last file (to manage case of 'upgraded' DataType - e.g. FEWSNET).
+        nFiles=len(input_list)
+        fidT = gdal.Open(input_list[nFiles-1], GA_ReadOnly)
         nb=fidT.RasterCount
         ns=fidT.RasterXSize
         nl=fidT.RasterYSize
@@ -268,12 +269,13 @@ def do_stddev_image(input_file='', output_file='', input_nodata=None, output_nod
         stdDs.SetProjection(projection)
         stdDs.SetGeoTransform(geotransform)
 
+        # pre-open files, to speed up processing
+        fid=[]
+        for ii in range(len(input_file)):
+            fid.append(gdal.Open(input_file[ii], GA_ReadOnly))
         # pre-open input files
         rangenl = range(nl)
-        rangeFile = range(1)
-        fid = []
-        for ifid in rangeFile:
-            fid.append(gdal.Open(input_file, GA_ReadOnly))
+        rangeFile = range(len(input_file))
 
         # Loop over bands
         for ib in range(nb):
