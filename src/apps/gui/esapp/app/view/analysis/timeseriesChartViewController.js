@@ -498,17 +498,21 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             method: 'POST',
             success: function ( result, request ) {
                 myLoadMask.hide();
-                me.timeseriesGraph = Ext.util.JSON.decode(result.responseText);
-                me.lookupReference('tbar_'+me.id).enable();
+                if (esapp.Utils.objectExists(me)){
+                    me.timeseriesGraph = Ext.util.JSON.decode(result.responseText);
+                    if (esapp.Utils.objectExists(me.lookupReference('tbar_' + me.id))){
+                         me.lookupReference('tbar_' + me.id).enable();
 
-                // GENERATE REQUESTED GRAPH IN HIGHCHARTS
-                callback(me);
-
-
+                        // GENERATE REQUESTED GRAPH IN HIGHCHARTS
+                        callback(me);
+                    }
+                }
             },
             failure: function ( result, request) {
-               myLoadMask.hide();
-               me.lookupReference('tbar_'+me.id).enable();
+                myLoadMask.hide();
+                if (esapp.Utils.objectExists(me.lookupReference('tbar_' + me.id))) {
+                    me.lookupReference('tbar_' + me.id).enable();
+                }
             }
         });
         // Ext.Ajax.abort(requestId);
@@ -605,7 +609,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
         }
 
         var xAxisLabels = {};
-        if (me.timeseriesGraph.showYearInTicks) {      //  === 'true'
+        if (me.timeseriesGraph.showYearInTicks) {
             xAxisLabels = {
                 enabled: 1,
                 autoRotationLimit: -40,
@@ -627,7 +631,21 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                     return Highcharts.dateFormat('%b', this.value) + '<br/>' + Highcharts.dateFormat('\'%y', this.value);
                 }
             };
-        } else {
+        }
+        else if (me.timeseriesGraph.moreThenTwoYears){
+            xAxisLabels = {
+                enabled: 1,
+                y: 25,
+                style: {
+                    color: me.graphProperties.xaxe_font_color,
+                    "font-family": 'Arial, Verdana, Helvetica, sans-serif',
+                    "fontWeight": 'bold',
+                    "fontSize": me.graphProperties.xaxe_font_size + 'px',
+                    margin: '0 0 0 0'
+                }
+            }
+        }
+        else {
             xAxisLabels = {
                 enabled: 1,
                 y: 25,

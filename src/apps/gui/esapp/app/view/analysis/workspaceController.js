@@ -4,6 +4,7 @@ Ext.define('esapp.view.analysis.workspaceController', {
 
     ,openWorkspaceGraphs: function(graphs){
         var me = this.getView();
+        me.allGraphsLoaded = false;
 
         for (var i = 0; i < graphs.length; i++) {
            // console.info(graphs[i]);
@@ -41,11 +42,16 @@ Ext.define('esapp.view.analysis.workspaceController', {
 
             me.add(newGraphViewWin);
             newGraphViewWin.show();
+
+            if (i==graphs.length-1){
+                me.allGraphsLoaded = true;
+            }
         }
     }
 
     ,openWorkspaceMaps: function(maps){
         var me = this.getView();
+        me.allMapsLoaded = false;
 
         for (var i = 0; i < maps.length; i++) {
             var wsmap = {
@@ -90,6 +96,9 @@ Ext.define('esapp.view.analysis.workspaceController', {
 
             me.add(newMapViewWin);
             newMapViewWin.show();
+            if (i==maps.length-1){
+                me.allMapsLoaded = true;
+            }
         }
     }
 

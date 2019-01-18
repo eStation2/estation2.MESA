@@ -25,7 +25,6 @@ import ConfigParser
 import subprocess
 from subprocess import *
 from multiprocessing import *
-from apps.tools.createSyncJob import createSyncJob
 
 import matplotlib as mpl
 mpl.use('Agg')
@@ -59,6 +58,40 @@ logger = log.my_logger(__name__)
 WEBPY_COOKIE_NAME = "webpy_session_id"
 
 
+def ResetUserSettings():
+    usersettingsinifile = es_constants.es2globals['settings_dir'] + '/user_settings.ini'
+    # usersettingsinifile = '/eStation2/settings/user_settings.ini'
+
+    config_usersettings = ConfigParser.ConfigParser()
+    config_usersettings.read(['user_settings.ini', usersettingsinifile])
+
+    for option in config_usersettings.options('USER_SETTINGS'):
+        config_usersettings.set('USER_SETTINGS', option, '')
+
+    # Writing our configuration file to 'example.cfg' - COMMENTS ARE NOT PRESERVED!
+    with open(usersettingsinifile, 'wb') as configfile:
+        config_usersettings.write(configfile)
+        configfile.close()
+
+    # The data_dir has been changed, delete all completeness_bars
+    completeness_bars_dir = es_constants.base_local_dir + os.path.sep + 'completeness_bars/'
+    for the_file in os.listdir(completeness_bars_dir):
+        file_path = os.path.join(completeness_bars_dir, the_file)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            logger.error('UpdateUserSettings - could not delete completeness_bars file: ' + e)
+
+    # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
+    reloadmodules.reloadallmodules()
+
+    # from config import es_constants as constantsreloaded
+    updatestatus = '{"success":"true", "message":"System settings reset to factory settings!"}'
+
+    return updatestatus
+
+
 def UpdateUserSettings(params):
 
     systemsettings = functions.getSystemSettings()
@@ -82,7 +115,7 @@ def UpdateUserSettings(params):
 
     for setting in params['systemsettings']:
         if setting in ('data_dir', 'ingest_dir', 'static_data_dir', 'archive_dir', 'eumetcast_files_dir',
-                       'get_eumetcast_output_dir', 'get_internet_output_dir'):
+                       'get_eumetcast_output_dir', 'get_internet_output_dir', 'proxy_host', 'proxy_port', 'proxy_user', 'proxy_userpwd'):
             if setting == 'data_dir' and (
                     (( config_usersettings.get('USER_SETTINGS', setting, 0) == '' and params['systemsettings'][setting] != config_factorysettings.get('FACTORY_SETTINGS', setting, 0))
                     or (config_usersettings.get('USER_SETTINGS', setting, 0) != '' and params['systemsettings'][setting] != config_usersettings.get('USER_SETTINGS', setting, 0)
@@ -108,7 +141,6 @@ def UpdateUserSettings(params):
         config_usersettings.write(configfile)
         configfile.close()
 
-    # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
     reloadmodules.reloadallmodules()
 
     updatestatus = '{"success":"true", "message":"System settings updated!"}'
@@ -117,6 +149,8 @@ def UpdateUserSettings(params):
 
 
 def getRunningRequestJobs():
+    success = True
+    message = ''
     list_of_jobs = []
     dirnames = os.listdir(es_constants.es2globals['request_jobs_dir'])
     # dirnames = glob.glob(os.path.join(es_constants.es2globals['request_jobs_dir'], "*"))
@@ -125,13 +159,26 @@ def getRunningRequestJobs():
         if os.path.isdir(dirpath):
             requestid = dirname
             jobstatus = statusRequestJob(requestid)
-            if jobstatus['status'].lower() in ['finished']:  # 'stopped', 'error'
-                archiveRequestJob(requestid)
+            if jobstatus['status'].lower() in ['stopped']:  # 'finished', 'stopped', 'error', 'running'
+                deleteJobDir(requestid)
+            # elif jobstatus['status'].lower() in ['error']:
+            #     # No internet connection or proxy settings missing!
+            #     # Putting the job on Paused is not possible, so delete the job and send a message to the user!
+            #     # resp = json.loads(pauseRequestJob(requestid))
+            #     # if resp['success']:
+            #     #     jobstatus = statusRequestJob(requestid)
+            #     #     list_of_jobs.append(jobstatus)
+            #     # else:
+            #     #     list_of_jobs.append(jobstatus)
+            #     # deleteJobDir(requestid)
+            #     success = False
+            #     message = 'Error connecting to the server, please check if your network is connected to the internet or uses a proxy. Set your proxy settings under the system tab!'
             else:
                 list_of_jobs.append(jobstatus)
 
-    response = {'success': True,
-                'requests': list_of_jobs
+    response = {'success': success,
+                'requests': list_of_jobs,
+                'message': message
                 }
 
     response_json = json.dumps(response,
@@ -156,6 +203,10 @@ def archiveRequestJob(requestid):
                 es_constants.es2globals['request_job_archive_dir'] + os.path.sep + requestid + '_' + st + '.req')
 
 
+def deleteJobDir(requestid):
+    shutil.rmtree(es_constants.es2globals['request_jobs_dir'] + os.path.sep + requestid, ignore_errors=True)
+    os.remove(es_constants.es2globals['requests_dir'] + os.path.sep + requestid + '.req')
+
 
 def statusRequestJob(requestid):
     message = 'Missing requestid.'
@@ -179,30 +230,53 @@ def statusRequestJob(requestid):
     if requestid != '':
         p1_jobid = requestid
         p2_action = 'status'
-        p3_datapath = '/home/webtklooju/mydata/processing/'     # es_constants.es2globals['processing_dir']
+        p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing/'     #
         p4_jobspath = es_constants.es2globals['request_jobs_dir']
-        p5_requestfile = ''
+        p5_requestfile = ''     # mandatory but empty for status action
+
+        db_product_info = querydb.get_product_native(productcode=productcode, version=version)
+        descriptive_name = ''
+        if hasattr(db_product_info, "__len__") and db_product_info.__len__() > 0:
+            for row in db_product_info:
+                prod_dict = functions.row2dict(row)
+                descriptive_name = prod_dict['descriptive_name']
+
         try:
-            command = 'java -jar ' + es_constants.es2globals['estation_sync_file'] \
-                      + ' ' + '"' + p1_jobid + '"' \
-                      + ' ' + '"' + p2_action + '"' \
-                      + ' ' + '"' + p3_datapath + '"' \
-                      + ' ' + '"' + p4_jobspath + '"' \
-                      + ' ' + '"' + p5_requestfile + '"'
+            # command = 'java -jar ' + es_constants.es2globals['estation_sync_file'] \
+            #           + ' ' + '"' + p1_jobid + '"' \
+            #           + ' ' + '"' + p2_action + '"' \
+            #           + ' ' + '"' + p3_datapath + '"' \
+            #           + ' ' + '"' + p4_jobspath + '"' \
+            #           + ' ' + '"' + p5_requestfile + '"'
             # print command
-            status = os.popen(command).readlines()  # returns a ';' delimited string with format "<jobstatus> <totfiles> <ok> <ko>"
+            # status = os.popen(command).readlines()  # returns a ';' delimited string with format "<jobstatus> <totfiles> <ok> <ko>"
             # status = os.system(command)
-            status = status[0].split(';')
+
+            args = [es_constants.es2globals['estation_sync_file'],
+                    p1_jobid,
+                    p2_action,
+                    p3_datapath,
+                    p4_jobspath,
+                    p5_requestfile
+                    ]
+
+            job = Popen(['java', '-jar'] + args, stdout=PIPE, stderr=STDOUT)  # .pid
+            # jobstatus = job.poll()
+            statusresult = job.stdout.readline().rstrip("\n\r")
+
+            status = statusresult.split(';')
             jobstatus = status[0].split(':')[0]
-            totfiles = status[1].split(':')[1]
-            totok = status[2].split(':')[1]
-            totko = status[3].split(':')[1]
+            datestatus = status[2]
+            totfiles = status[2].split(':')[1]
+            totok = status[3].split(':')[1]
+            totko = status[4].split(':')[1]
 
             message = 'Status info request: ' + requestid
         except:
             message = 'Error getting the status of the request: ' + requestid
 
     response = {'requestid': requestid,
+                'prod_descriptive_name': descriptive_name,
                 'productcode': productcode,
                 'version': version,
                 'mapsetcode': mapsetcode,
@@ -218,33 +292,51 @@ def statusRequestJob(requestid):
     return response
 
 
-def pauseRequestJob(params):
-    requestid = params['requestid']
+def pauseRequestJob(requestid):
+    # requestid = params['requestid']
     message = 'Missing requestid.'
     success = False
+    status = 'running'
 
-    if "requestid" in params:
+    if requestid != '':
+        requestfilename = requestid + '.req'
         p1_jobid = requestid
         p2_action = 'pause'
-        p3_datapath = ''
+        p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing'    #
         p4_jobspath = es_constants.es2globals['request_jobs_dir']
-        p5_requestfile = ''
+        p5_requestfile = es_constants.es2globals['requests_dir'] + os.path.sep + requestfilename
         try:
-            command = 'java -jar ' + es_constants.es2globals['estation_sync_file'] \
-                      + ' ' + '"' + p1_jobid + '"' \
-                      + ' ' + '"' + p2_action + '"' \
-                      + ' ' + '"' + p3_datapath + '"' \
-                      + ' ' + '"' + p4_jobspath + '"' \
-                      + ' ' + '"' + p5_requestfile + '"'
-            # print command
-            os.system(command)
+            # command = 'java -jar ' + es_constants.es2globals['estation_sync_file'] \
+            #           + ' ' + '"' + p1_jobid + '"' \
+            #           + ' ' + '"' + p2_action + '"' \
+            #           + ' ' + '"' + p3_datapath + '"' \
+            #           + ' ' + '"' + p4_jobspath + '"' \
+            #           + ' ' + '"' + p5_requestfile + '"'
+            # # print command
+            # os.system(command)
 
-            message = 'Paused request: ' + requestid
-            success = True
+            args = [es_constants.es2globals['estation_sync_file'],
+                    p1_jobid,
+                    p2_action,
+                    p3_datapath,
+                    p4_jobspath,
+                    p5_requestfile
+                    ]
+
+            job = Popen(['nohup', 'java', '-jar'] + args)
+            time.sleep(10)
+            jobstatus = statusRequestJob(requestid)
+            status = jobstatus['status'].lower()
+            if jobstatus['status'].lower() in ['paused', 'defunct']:  # 'finished', 'stopped', 'error', 'running'
+                success = True
+                message = 'Paused request: ' + requestid
+            else:
+                message = 'Error pausing request: ' + requestid + ' job status: ' + jobstatus['status'].lower()
         except:
-            message = 'Error pausing request: ' + requestid
+            message = 'Exception error pausing request: ' + requestid + ' job status: ' + jobstatus['status'].lower()
 
     response = {'success': success,
+                'status': status,
                 'message': message,
                 'requestid': requestid}
 
@@ -256,33 +348,61 @@ def pauseRequestJob(params):
     return response_json
 
 
-def restartRequestJob(params):
-    requestid = params['requestid']
+def restartRequestJob(requestid):
+    # requestid = params['requestid']
     message = 'Missing requestid.'
     success = False
+    status = 'paused'
+    proxy_host = es_constants.es2globals['proxy_host']
+    proxy_port = es_constants.es2globals['proxy_port']
+    proxy_user = es_constants.es2globals['proxy_user']
+    proxy_userpwd = es_constants.es2globals['proxy_userpwd']
+    requestfilename = requestid + '.req'
 
-    if "requestid" in params:
+    if requestid != '':
         p1_jobid = requestid
         p2_action = 'restart'
-        p3_datapath = ''    # es_constants.es2globals['processing_dir']
+        p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing'  #
         p4_jobspath = es_constants.es2globals['request_jobs_dir']
-        p5_requestfile = ''
+        p5_requestfile = es_constants.es2globals['requests_dir'] + os.path.sep + requestfilename
         try:
-            command = 'java -jar ' + es_constants.es2globals['estation_sync_file'] \
-                      + ' ' + '"' + p1_jobid + '"' \
-                      + ' ' + '"' + p2_action + '"' \
-                      + ' ' + '"' + p3_datapath + '"' \
-                      + ' ' + '"' + p4_jobspath + '"' \
-                      + ' ' + '"' + p5_requestfile + '"'
-            # print command
-            os.system(command)
+            # command = 'java -jar ' + es_constants.es2globals['estation_sync_file'] \
+            #           + ' ' + '"' + p1_jobid + '"' \
+            #           + ' ' + '"' + p2_action + '"' \
+            #           + ' ' + '"' + p3_datapath + '"' \
+            #           + ' ' + '"' + p4_jobspath + '"' \
+            #           + ' ' + '"' + p5_requestfile + '"'
+            # # print command
+            # os.system(command)
 
-            message = 'Restarted request: ' + requestid
-            success = True
+            args = [es_constants.es2globals['estation_sync_file'],
+                    p1_jobid,
+                    p2_action,
+                    p3_datapath,
+                    p4_jobspath,
+                    p5_requestfile,
+                    proxy_host,
+                    proxy_port,
+                    proxy_user,
+                    proxy_userpwd
+                    ]
+
+            job = Popen(['nohup', 'java', '-jar'] + args)
+            time.sleep(10)
+            jobstatus = statusRequestJob(requestid)
+            status = jobstatus['status'].lower()
+            if jobstatus['status'].lower() in ['running']:  # 'finished', 'stopped', 'error', 'running'
+                success = True
+                message = 'Restarted request: ' + requestid
+            elif jobstatus['status'].lower() in ['error']:
+                message = 'Error connecting to the server, please check if your network is connected to the internet or uses a proxy. Set your proxy settings under the system tab!'
+            else:
+                message = 'Error restarting request: ' + requestid + ' job status: ' + jobstatus['status'].lower()
         except:
-            message = 'Error restarting request: ' + requestid
+            message = 'Exception error restarting request: ' + requestid + ' job status: ' + jobstatus['status'].lower()
 
     response = {'success': success,
+                'status': status,
                 'message': message,
                 'requestid': requestid}
 
@@ -294,33 +414,62 @@ def restartRequestJob(params):
     return response_json
 
 
-def deleteRequestJob(params):
-    requestid = params['requestid']
+def deleteRequestJob(requestid):
+    # requestid = params['requestid']
     message = 'Missing requestid.'
     success = False
 
-    if "requestid" in params:
+    if requestid != '':
         p1_jobid = requestid
         p2_action = 'stop'
-        p3_datapath = ''
+        p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing' #
         p4_jobspath = es_constants.es2globals['request_jobs_dir']
         p5_requestfile = ''
         try:
-            command = 'java -jar ' + es_constants.es2globals['estation_sync_file'] \
-                      + ' ' + '"' + p1_jobid + '"' \
-                      + ' ' + '"' + p2_action + '"' \
-                      + ' ' + '"' + p3_datapath + '"' \
-                      + ' ' + '"' + p4_jobspath + '"' \
-                      + ' ' + '"' + p5_requestfile + '"'
-            # print command
-            os.system(command)
+            jobstatus = statusRequestJob(requestid)
+            if jobstatus['status'].lower() in ['finished']:  # 'finished', 'stopped', 'error', 'running'
+                success = True
+                message = 'Request deleted: ' + requestid
+                deleteJobDir(requestid)
+            else:
+                # command = 'java -jar ' + es_constants.es2globals['estation_sync_file'] \
+                #           + ' ' + '"' + p1_jobid + '"' \
+                #           + ' ' + '"' + p2_action + '"' \
+                #           + ' ' + '"' + p3_datapath + '"' \
+                #           + ' ' + '"' + p4_jobspath + '"' \
+                #           + ' ' + '"' + p5_requestfile + '"'
+                # print command
+                # os.system(command)
 
-            archiveRequestJob(requestid)
+                args = [es_constants.es2globals['estation_sync_file'],
+                        p1_jobid,
+                        p2_action,
+                        p3_datapath,
+                        p4_jobspath,
+                        p5_requestfile
+                        ]
 
-            message = 'Deleted request: ' + requestid
-            success = True
+                job = Popen(['nohup', 'java', '-jar'] + args)
+
+                stoppingjob = True
+                counter = 0
+                while stoppingjob and counter <= 3:
+                    counter += 1
+                    time.sleep(5)
+                    jobstatus = statusRequestJob(requestid)
+                    if jobstatus['status'].lower() in ['stopped']:  # 'finished', 'stopped', 'error', 'running'
+                        success = True
+                        stoppingjob = False
+                        message = 'Request stopped and deleted: ' + requestid
+                        deleteJobDir(requestid)
+                    elif jobstatus['status'].lower() in ['error']:
+                        success = False
+                        stoppingjob = False
+                        message = 'Error stopping request: ' + requestid + ' job status: ' + jobstatus['status'].lower()
+                    else:
+                        message = 'Stopping request: ' + requestid + ' job status: ' + jobstatus['status'].lower()
         except:
-            message = 'Error deleting request: ' + requestid
+            message = 'Error stopping and deleting request: ' + requestid
 
     response = {'success': success,
                 'message': message,
@@ -379,10 +528,10 @@ def createRequestJob(params):
         # and is still running.
         if os.path.isdir(es_constants.es2globals['request_jobs_dir'] + os.path.sep + requestid):
             jobstatus = statusRequestJob(requestid)
-            if jobstatus['status'].lower() in ['finished']:     # 'stopped', 'error'
-                message = 'Request already exists and has finished. Existing request is archived. New request created.'
+            if jobstatus['status'].lower() in ['finished', 'stopped']:     # 'finished', 'stopped', 'error', 'running'
+                message = 'Request already exists and has finished. Existing request is deleted. New request created.'
                 createnewrequest = True
-                archiveRequestJob(requestid)
+                deleteJobDir(requestid)
             else:
                 message = 'Request already exists and has not finished yet. No new request created.'
         else:
@@ -407,17 +556,59 @@ def createRequestJob(params):
 
             p1_jobid = requestid
             p2_action = 'start'
-            p3_datapath = '/home/webtklooju/mydata/processing/'     # es_constants.es2globals['processing_dir']
+            p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing' #
             p4_jobspath = es_constants.es2globals['request_jobs_dir']
             p5_requestfile = es_constants.es2globals['requests_dir'] + os.path.sep + requestfilename
 
-            command = 'python ./apps/tools/createSyncJob.py '
-            job = os.system(command)
+            args = [es_constants.es2globals['estation_sync_file'],
+                    p1_jobid,
+                    p2_action,
+                    p3_datapath,
+                    p4_jobspath,
+                    p5_requestfile,
+                    proxy_host,
+                    proxy_port,
+                    proxy_user,
+                    proxy_userpwd
+                    ]
 
+            job = Popen(['nohup', 'java', '-jar'] + args,
+                        # close_fds=True,
+                        # shell=True,    # pass args as string
+                        stdout=PIPE,
+                        stderr=STDOUT)  # .pid
+
+            time.sleep(3)
+            jobstatus = statusRequestJob(requestid)
+            if jobstatus['status'].lower() in ['running']:  # 'finished', 'stopped', 'error', 'running'
+                message = 'Created request: ' + requestid
+            elif jobstatus['status'].lower() in ['error']:
+                # No internet connection or proxy settings missing!
+                # Putting the job on Paused is not possible, so delete the job and send a message to the user!
+                # resp = json.loads(pauseRequestJob(requestid))
+                # if resp['success']:
+                #     jobstatus = statusRequestJob(requestid)
+                #     list_of_jobs.append(jobstatus)
+                # else:
+                #     list_of_jobs.append(jobstatus)
+                deleteJobDir(requestid)
+                createnewrequest = False
+                message = 'Error connecting to the server, please check if your network is connected to the internet or uses a proxy. Set your proxy settings under the system tab!'
+            else:
+                createnewrequest = False
+                # todo: Delete job dir?
+                message = 'Error creating request!'
+
+            # jobstatus = job.poll()
+            # answer = job.stdout.readline()
+
+            # command = 'python -u ./apps/tools/createSyncJob.py '
+            # job = os.system(command)
+            #
             # *****************************************
             # DIRECT JAVA CALL
             # *****************************************
-
+            #
             # # Command as string - creates job but waits until finished! NOT WORKING PROPERLY!
             # command = 'java -jar ' + es_constants.es2globals['estation_sync_file'] \
             #           + ' ' + '"' + p1_jobid + '"' \
@@ -432,11 +623,11 @@ def createRequestJob(params):
             #
             # # job = os.system(command)    # os.system waits until the job finishes and does not read response of job!
             # job = os.popen(command).readlines()  # Should return 'Job created' but waits until the job finishes.
-
+            #
             # Command as list
             # Creates job and reads response but when finishing this function call createRequestJob,
             # all PIDs of subprocess are killed! NOT WORKING PROPERLY!
-
+            #
             # command = ['java', '-jar', es_constants.es2globals['estation_sync_file'],
             #            '"' + p1_jobid + '"',
             #            '"' + p2_action + '"',
@@ -449,7 +640,7 @@ def createRequestJob(params):
             #            '"' + proxy_userpwd + '"'
             #            ]
             #
-
+            #
             # args = [es_constants.es2globals['estation_sync_file'],
             #         p1_jobid,
             #         p2_action,
@@ -469,12 +660,12 @@ def createRequestJob(params):
             #                        stderr=subprocess.STDOUT)    # .pid
             # job.poll()
             # line = job.stdout.readline()  # Returns 'Job created'
-
-
+            #
+            #
             # *************************************************************************************************
             # CALL python script createSyncJob.py which creates another process that creates the request job
             # *************************************************************************************************
-
+            #
             # command = 'python ./apps/tools/createSyncJob.py ' + es_constants.es2globals['estation_sync_file'] \
             #           + ' ' + '"' + p1_jobid + '"' \
             #           + ' ' + '"' + p2_action + '"' \
@@ -486,7 +677,7 @@ def createRequestJob(params):
             #           + ' ' + '"' + proxy_user + '"' \
             #           + ' ' + '"' + proxy_userpwd + '"'
             #
-
+            #
             # args = ['-p0 ' + es_constants.es2globals['estation_sync_file'],
             #         '-p1 ' + p1_jobid,
             #         '-p2 ' + p2_action,
@@ -498,26 +689,27 @@ def createRequestJob(params):
             #         '-p8 ' + '"' + proxy_user + '"',
             #         '-p9 ' + '"' + proxy_userpwd + '"'
             #         ]
-
-            # args = [es_constants.es2globals['estation_sync_file'],
-            #         p1_jobid,
-            #         p2_action,
-            #         p3_datapath,
-            #         p4_jobspath,
-            #         p5_requestfile,
-            #         proxy_host,
-            #         proxy_port,
-            #         proxy_user,
-            #         proxy_userpwd
-            #         ]
+            #
+            # argslist = ['/srv/www/eStation2/apps/tools/eStationSync.jar',
+            #             "vgt-ndvi_sv2-pv2.2_SPOTV-IGAD-1km_1monmin_dataset",
+            #             "start",
+            #             "/home/webtklooju/mydata/processing/",
+            #             "/eStation2/requests/requestjobs",
+            #             "/eStation2/requests/vgt-ndvi_sv2-pv2.2_SPOTV-IGAD-1km_1monmin_dataset.req",
+            #             "10.168.209.72",
+            #             "8012"]
+            #
+            # job_pid = subprocess.Popen([sys.executable, './apps/tools/createSyncJob.py']).pid
+            #
             # job = subprocess.check_call([sys.executable, './apps/tools/createSyncJob.py'] + list(args))
-            # job = subprocess.call([sys.executable, './apps/tools/createSyncJob.py'] + list(args))
-            # job = subprocess.Popen([sys.executable, './apps/tools/createSyncJob.py'] + args,
+            # job = subprocess.call([sys.executable, '-u ', './apps/tools/createSyncJob.py'] + args)
+            # job = subprocess.Popen([sys.executable, '-u ', './apps/tools/createSyncJob.py'] + args,
             #                        stdout=subprocess.PIPE,
             #                        stderr=subprocess.STDOUT)
+            # # job.wait()
             # job.poll()
             # line = job.stdout.readline()  # Returns 'Job created'
-
+            #
             #
             # DIRECT JAVA CALL - NOT WORKING
             #
@@ -2702,15 +2894,16 @@ def classicTimeseries(params):
     tsFromSeason = params['tsFromSeason']
     tsToSeason = params['tsToSeason']
     showYearInTicks = True
+    moreThenTwoYears = False
     data_available = False
     cumulative = False
     if params['graphtype'] == 'cumulative':
         cumulative = True
-    userid = params.userid
-    istemplate = params.istemplate
-    graphtype = params.graphtype
-    graph_tpl_id = params.graph_tpl_id
-    graph_tpl_name = params.graph_tpl_name
+    userid = params['userid']
+    istemplate = params['istemplate']
+    graphtype = params['graphtype']
+    graph_tpl_id = params['graph_tpl_id']
+    graph_tpl_name = params['graph_tpl_name']
 
     # if hasattr(params, "userid") and params.userid != '':
     #     userid = params.userid
@@ -2752,6 +2945,11 @@ def classicTimeseries(params):
     elif tsFromPeriod != '' and tsToPeriod != '':
         from_date = datetime.datetime.strptime(tsFromPeriod, '%Y-%m-%d').date()
         to_date = datetime.datetime.strptime(tsToPeriod, '%Y-%m-%d').date()
+        tsFromYear = tsFromPeriod[:4]
+        tsToYear = tsToPeriod[:4]
+        if (int(tsToYear) - int(tsFromYear)) > 2:
+            moreThenTwoYears = True
+            showYearInTicks = False
 
     cum_yaxe = []
     timeseries = []
@@ -3055,7 +3253,8 @@ def classicTimeseries(params):
 
     ts_json = {"data_available": data_available,
                "showYearInTicks": showYearInTicks,
-               "showYearInToolTip": "true",
+               "moreThenTwoYears": moreThenTwoYears,
+               "showYearInToolTip": True,
                "yaxes": yaxes,
                "timeseries": timeseries}
 
@@ -4982,7 +5181,7 @@ def TimeseriesProducts():
 
                         distinctyears = []
                         for product_date in all_present_product_dates:
-                            if product_date.year not in distinctyears:
+                            if product_date is not None and product_date.year not in distinctyears:
                                 distinctyears.append(product_date.year)
                         tmp_prod_dict['years'] = distinctyears
 
@@ -5016,11 +5215,12 @@ def TimeseriesProducts():
                                 # print 'after getting subproduct dataset: ' + str(totals_subproduct)
 
                                 # dataset.get_filenames()
+
                                 all_present_product_dates = dataset.get_dates()
 
                                 distinctyears = []
                                 for product_date in all_present_product_dates:
-                                    if product_date.year not in distinctyears:
+                                    if product_date is not None and product_date.year not in distinctyears:
                                         distinctyears.append(product_date.year)
 
                                 dataset_dict = {}

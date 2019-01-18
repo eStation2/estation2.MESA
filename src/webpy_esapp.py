@@ -39,7 +39,7 @@ from multiprocessing import (Process, Queue)
 
 from lib.python import functions
 from lib.python import es_logging as log
-
+from lib.python import reloadmodules
 
 logger = log.my_logger(__name__)
 
@@ -1010,12 +1010,18 @@ class runPauseRequest:
     def GET(self):
         getparams = web.input()
         if hasattr(getparams, "requestid") and getparams['requestid'] != '':
+            requestid = getparams['requestid']
             if getparams['task'] == 'pause':
-                response_json = webpy_esapp_helpers.pauseRequestJob(getparams)
+                response_json = webpy_esapp_helpers.pauseRequestJob(requestid)
             else:
-                response_json = webpy_esapp_helpers.restartRequestJob(getparams)
+                response_json = webpy_esapp_helpers.restartRequestJob(requestid)
         else:
-            response_json = '{"success":false, "error":"No request info passed!"}'
+            response = {"success":False, "error":"No request info passed!"}
+            response_json = json.dumps(response,
+                                       ensure_ascii=False,
+                                       sort_keys=True,
+                                       indent=4,
+                                       separators=(', ', ': '))
 
         return response_json
 
@@ -1041,7 +1047,8 @@ class deleteRequestJob:
     def GET(self):
         getparams = web.input()
         if hasattr(getparams, "requestid") and getparams['requestid'] != '':
-            response_json = webpy_esapp_helpers.deleteRequestJob(getparams)
+            requestid = getparams['requestid']
+            response_json = webpy_esapp_helpers.deleteRequestJob(requestid)
         else:
             response_json = '{"success":false, "error":"No request info passed!"}'
 
@@ -1959,7 +1966,6 @@ class SetDataAutoSync:
             functions.setSystemSetting('data_sync', getparams['dataautosync'])
 
             # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
-            from lib.python import reloadmodules
             reloadmodules.reloadallmodules()
             # Reloading the settings does not work well so set manually
 
@@ -1981,7 +1987,6 @@ class SetDBAutoSync:
             functions.setSystemSetting('db_sync', getparams['dbautosync'])
 
             # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
-            from lib.python import reloadmodules
             reloadmodules.reloadallmodules()
             # Reloading the settings does not work well so set manually
 
@@ -2442,7 +2447,6 @@ class setIngestArchives:
             # Todo: call system service to change the mode
 
             # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
-            from lib.python import reloadmodules
             reloadmodules.reloadallmodules()
             # Reloading the settings does not work well so set manually
 
@@ -2466,7 +2470,6 @@ class ChangeRole:
             # Todo: call system service to change the mode
 
             # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
-            from lib.python import reloadmodules
             reloadmodules.reloadallmodules()
             # Reloading the settings does not work well so set manually
 
@@ -2600,7 +2603,6 @@ class ChangeMode:
                     message = 'Data and Settings Synchronized to the other PC. You must now put the other PC in Nominal mode!'
 
                 # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
-                from lib.python import reloadmodules
                 reloadmodules.reloadallmodules()
                 # Reloading the settings does not work well so set manually
 
@@ -2779,7 +2781,6 @@ class ChangeLogLevel:
             functions.setUserSetting('log_general_level', getparams['loglevel'])
 
             # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
-            from lib.python import reloadmodules
             reloadmodules.reloadallmodules()
 
             # ToDo: Query thema products and activate them.
@@ -3257,27 +3258,11 @@ class ResetUserSettings:
         self.lang = "eng"
 
     def GET(self):
-        import ConfigParser
-        usersettingsinifile = es_constants.es2globals['settings_dir']+'/user_settings.ini'
-        # usersettingsinifile = '/eStation2/settings/user_settings.ini'
-
-        config_usersettings = ConfigParser.ConfigParser()
-        config_usersettings.read(['user_settings.ini', usersettingsinifile])
-
-        for option in config_usersettings.options('USER_SETTINGS'):
-            config_usersettings.set('USER_SETTINGS', option, '')
-
-        # Writing our configuration file to 'example.cfg' - COMMENTS ARE NOT PRESERVED!
-        with open(usersettingsinifile, 'wb') as configfile:
-            config_usersettings.write(configfile)
-            configfile.close()
+        updatestatus = webpy_esapp_helpers.ResetUserSettings()
 
         # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
-        from lib.python import reloadmodules
-        reloadmodules.reloadallmodules()
-
-        # from config import es_constants as constantsreloaded
-        updatestatus = '{"success":"true", "message":"System settings reset to factory settings!"}'
+        import imp
+        imp.reload(webpy_esapp_helpers)
 
         return updatestatus
 
@@ -3289,6 +3274,10 @@ class UpdateUserSettings:
     def PUT(self):
         params = json.loads(web.data())
         updatestatus = webpy_esapp_helpers.UpdateUserSettings(params)
+
+        # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
+        import imp
+        imp.reload(webpy_esapp_helpers)
 
         return updatestatus
 

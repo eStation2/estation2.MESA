@@ -78,6 +78,8 @@ Ext.define('esapp.Application', {
 
         Ext.Ajax.timeout = 300000; // 300 seconds
         Ext.override(Ext.data.proxy.Server, { timeout: Ext.Ajax.timeout });
+        Ext.override(Ext.data.proxy.Rest, { timeout: Ext.Ajax.timeout });
+        Ext.override(Ext.data.proxy.Ajax, { timeout: Ext.Ajax.timeout });
         Ext.override(Ext.data.Connection, { timeout: Ext.Ajax.timeout });
 
         esapp.globals = [];

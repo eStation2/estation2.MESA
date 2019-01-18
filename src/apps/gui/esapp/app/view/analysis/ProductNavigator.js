@@ -82,7 +82,14 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
             productversion: null,
             mapsetcode: null,
             subproductcode: null,
-            legendid: null
+            productdate: null,
+            legendid: null,
+            legendHTML: null,
+            legendHTMLVertical: null,
+            productname: null,
+            date_format: null,
+            frequency_id: null,
+            productsensor: null
         }
     },
 
@@ -267,18 +274,20 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                             }
                         },this);
 
-                        Ext.getCmp(me.mapviewid).getController().addProductLayer(me.selectedproduct.productcode,
-                                                                                 me.selectedproduct.productversion,
-                                                                                 me.selectedproduct.mapsetcode,
-                                                                                 me.selectedproduct.subproductcode,
-                                                                                 productdate,
-                                                                                 me.selectedproduct.legendid,
-                                                                                 //me.selectedproduct.colorschemeHTML,
-                                                                                 me.selectedproduct.legendHTML,
-                                                                                 me.selectedproduct.legendHTMLVertical,
-                                                                                 me.selectedproduct.productname,
-                                                                                 me.selectedproduct.date_format,
-                                                                                 me.selectedproduct.frequency_id
+                        Ext.getCmp(me.mapviewid).getController().addProductLayer(
+                            me.selectedproduct.productcode,
+                            me.selectedproduct.productversion,
+                            me.selectedproduct.mapsetcode,
+                            me.selectedproduct.subproductcode,
+                            productdate,
+                            me.selectedproduct.legendid,
+                            //me.selectedproduct.colorschemeHTML,
+                            me.selectedproduct.legendHTML,
+                            me.selectedproduct.legendHTMLVertical,
+                            me.selectedproduct.productname,
+                            me.selectedproduct.date_format,
+                            me.selectedproduct.frequency_id,
+                            me.selectedproduct.productsensor
                         );
                         me.close();
                     }

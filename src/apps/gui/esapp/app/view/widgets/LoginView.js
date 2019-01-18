@@ -336,16 +336,16 @@ Ext.define("esapp.view.widgets.LoginView",{
             // tsDrawPropertiesStore.proxy.extraParams = {};
             // tsDrawPropertiesStore.load();
 
-            if (acquisitionLockBtn != null){
-                if (acquisitionLockBtn.pressed){
-                    acquisitionLockBtn.toggle();
-                    acquisitionLockBtn.handler(acquisitionLockBtn);
-                    acquisitionLockBtn.hide();
-                }
-                else {
-                    acquisitionLockBtn.hide();
-                }
-            }
+            // if (acquisitionLockBtn != null){
+            //     if (acquisitionLockBtn.pressed){
+            //         acquisitionLockBtn.toggle();
+            //         acquisitionLockBtn.handler(acquisitionLockBtn);
+            //         acquisitionLockBtn.hide();
+            //     }
+            //     else {
+            //         acquisitionLockBtn.hide();
+            //     }
+            // }
 
             if (addWorkspaceBtn != null){
                 addWorkspaceBtn.hide();

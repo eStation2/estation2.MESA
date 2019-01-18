@@ -316,7 +316,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
         me.setTitleData({
             'selected_area': me.selectedarea,
-            'product_name': me.productname,
+            'product_name': me.productsensor + ' - ' + me.productname,
             'product_date': mydate
         });
 
@@ -324,7 +324,8 @@ Ext.define('esapp.view.analysis.mapViewController', {
         // mapTitleObj.fireEvent('refreshimage');
     }
 
-    ,addProductLayer: function(productcode, productversion, mapsetcode, subproductcode, tpl_productdate, legendid, legendHTML, legendHTMLVertical, productname, date_format, frequency_id) {
+    ,addProductLayer: function(productcode, productversion, mapsetcode, subproductcode, tpl_productdate, legendid,
+                               legendHTML, legendHTMLVertical, productname, date_format, frequency_id, productsensor) {
         var me = this.getView();
         var params = {
                productcode:productcode,
@@ -342,6 +343,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
         //me.legendHTMLVertical = legendHTMLVertical;
         me.date_format = date_format;
         me.frequency_id = frequency_id;
+        me.productsensor = productsensor;
 
         Ext.Ajax.request({
             method: 'GET',
@@ -419,11 +421,10 @@ Ext.define('esapp.view.analysis.mapViewController', {
                     mydate.setHours(mydate.getHours()+5);   // add some hours so otherwise Highcharts.dateFormat assigns a day before if the hour is 00:00.
                     productdateHTML = '<b class="" style="color: #ffffff; font-size: 20px;">' + Highcharts.dateFormat('%d %b', mydate, true) + '</b>';
                 }
-                var mapviewTitle = productdateHTML + ' - ' + productname + versiontitle;    // + mapsetcodeHTML
+                var mapviewTitle = productdateHTML + ' - ' + me.productsensor + ' ' + productname + versiontitle;    // + mapsetcodeHTML
 
                 Ext.fly('mapview_title_productname_' + me.id).dom.innerHTML = mapviewTitle;
                 //me.setTitle(mapviewTitle);
-                me.getController().refreshTitleData();
 
 
                 // Set the timeline data, its rangeselector selected button and show product time line
@@ -525,6 +526,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 //}
                 //else outmask_togglebtn.hide();
 
+                me.getController().refreshTitleData();
             },
             //callback: function ( callinfo,responseOK,response ) {},
             failure: function ( result, request) {}
