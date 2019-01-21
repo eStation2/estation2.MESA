@@ -77,7 +77,7 @@ class TestWebpy(unittest.TestCase):
         self.assertEqual(1, 1)
 
     def test_restartRequestJob(self):
-        requestid = 'vgt-ndvi_sv2-pv2.2_SPOTV-IGAD-1km_vci-linearx2_dataset'
+        # requestid = 'vgt-ndvi_sv2-pv2.2_SPOTV-IGAD-1km_vci-linearx2_dataset'
         requestid = 'vgt-ndvi_sv2-pv2.2_SPOTV-IGAD-1km_linearx2diff-linearx2_dataset'
 
         result = webpy_esapp_helpers.restartRequestJob(requestid)
@@ -86,8 +86,9 @@ class TestWebpy(unittest.TestCase):
         self.assertEqual(1, 1)
 
     def test_statusRequestJob(self):
-        requestid = 'vgt-ndvi_sv2-pv2.2_SPOTV-IGAD-1km_vci-linearx2_dataset'
-        requestid = 'vgt-ndvi_sv2-pv2.2_SPOTV-IGAD-1km_10davg-linearx2_dataset'
+        # requestid = 'vgt-ndvi_sv2-pv2.2_SPOTV-IGAD-1km_vci-linearx2_dataset'
+        # requestid = 'vgt-ndvi_sv2-pv2.2_SPOTV-IGAD-1km_10davg-linearx2_dataset'
+        requestid = 'vgt-ndvi_sv2-pv2.2_SPOTV-IGAD-1km_mapset'
 
         result = webpy_esapp_helpers.statusRequestJob(requestid)
 

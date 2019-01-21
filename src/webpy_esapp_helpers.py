@@ -230,7 +230,7 @@ def statusRequestJob(requestid):
     if requestid != '':
         p1_jobid = requestid
         p2_action = 'status'
-        p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing/'     #
+        p3_datapath = '/eStation2/mydata/processing/'     # es_constants.es2globals['processing_dir']     #
         p4_jobspath = es_constants.es2globals['request_jobs_dir']
         p5_requestfile = ''     # mandatory but empty for status action
 
@@ -261,10 +261,13 @@ def statusRequestJob(requestid):
                     ]
 
             job = Popen(['java', '-jar'] + args, stdout=PIPE, stderr=STDOUT)  # .pid
-            # jobstatus = job.poll()
-            statusresult = job.stdout.readline().rstrip("\n\r")
+            # job.poll()
+            statusresult = job.communicate()
+            # statusresult = job.stdout.readline().rstrip("\n\r")   # Not good, creates defunct process with no kill
+            # job.terminate()
+            # job.kill()
 
-            status = statusresult.split(';')
+            status = statusresult[0].split(';')
             jobstatus = status[0].split(':')[0]
             datestatus = status[2]
             totfiles = status[2].split(':')[1]
@@ -272,8 +275,12 @@ def statusRequestJob(requestid):
             totko = status[4].split(':')[1]
 
             message = 'Status info request: ' + requestid
-        except:
+
+        except subprocess.CalledProcessError:
             message = 'Error getting the status of the request: ' + requestid
+        # finally:
+        #     job.terminate()
+            # job.kill()
 
     response = {'requestid': requestid,
                 'prod_descriptive_name': descriptive_name,
@@ -302,7 +309,7 @@ def pauseRequestJob(requestid):
         requestfilename = requestid + '.req'
         p1_jobid = requestid
         p2_action = 'pause'
-        p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing'    #
+        p3_datapath = '/eStation2/mydata/processing'    #es_constants.es2globals['processing_dir']     #
         p4_jobspath = es_constants.es2globals['request_jobs_dir']
         p5_requestfile = es_constants.es2globals['requests_dir'] + os.path.sep + requestfilename
         try:
@@ -362,7 +369,7 @@ def restartRequestJob(requestid):
     if requestid != '':
         p1_jobid = requestid
         p2_action = 'restart'
-        p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing'  #
+        p3_datapath = '/eStation2/mydata/processing'  # es_constants.es2globals['processing_dir']     #
         p4_jobspath = es_constants.es2globals['request_jobs_dir']
         p5_requestfile = es_constants.es2globals['requests_dir'] + os.path.sep + requestfilename
         try:
@@ -422,7 +429,7 @@ def deleteRequestJob(requestid):
     if requestid != '':
         p1_jobid = requestid
         p2_action = 'stop'
-        p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing' #
+        p3_datapath = '/eStation2/mydata/processing' # es_constants.es2globals['processing_dir']     #
         p4_jobspath = es_constants.es2globals['request_jobs_dir']
         p5_requestfile = ''
         try:
@@ -556,7 +563,7 @@ def createRequestJob(params):
 
             p1_jobid = requestid
             p2_action = 'start'
-            p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing' #
+            p3_datapath = '/eStation2/mydata/processing' # es_constants.es2globals['processing_dir']     #
             p4_jobspath = es_constants.es2globals['request_jobs_dir']
             p5_requestfile = es_constants.es2globals['requests_dir'] + os.path.sep + requestfilename
 
