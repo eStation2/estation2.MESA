@@ -230,7 +230,7 @@ def statusRequestJob(requestid):
     if requestid != '':
         p1_jobid = requestid
         p2_action = 'status'
-        p3_datapath = '/eStation2/mydata/processing/'     # es_constants.es2globals['processing_dir']     #
+        p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing/'     #
         p4_jobspath = es_constants.es2globals['request_jobs_dir']
         p5_requestfile = ''     # mandatory but empty for status action
 
@@ -309,7 +309,7 @@ def pauseRequestJob(requestid):
         requestfilename = requestid + '.req'
         p1_jobid = requestid
         p2_action = 'pause'
-        p3_datapath = '/eStation2/mydata/processing'    #es_constants.es2globals['processing_dir']     #
+        p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing'    #
         p4_jobspath = es_constants.es2globals['request_jobs_dir']
         p5_requestfile = es_constants.es2globals['requests_dir'] + os.path.sep + requestfilename
         try:
@@ -369,7 +369,7 @@ def restartRequestJob(requestid):
     if requestid != '':
         p1_jobid = requestid
         p2_action = 'restart'
-        p3_datapath = '/eStation2/mydata/processing'  # es_constants.es2globals['processing_dir']     #
+        p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing'  #
         p4_jobspath = es_constants.es2globals['request_jobs_dir']
         p5_requestfile = es_constants.es2globals['requests_dir'] + os.path.sep + requestfilename
         try:
@@ -429,7 +429,7 @@ def deleteRequestJob(requestid):
     if requestid != '':
         p1_jobid = requestid
         p2_action = 'stop'
-        p3_datapath = '/eStation2/mydata/processing' # es_constants.es2globals['processing_dir']     #
+        p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing' #
         p4_jobspath = es_constants.es2globals['request_jobs_dir']
         p5_requestfile = ''
         try:
@@ -563,7 +563,7 @@ def createRequestJob(params):
 
             p1_jobid = requestid
             p2_action = 'start'
-            p3_datapath = '/eStation2/mydata/processing' # es_constants.es2globals['processing_dir']     #
+            p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing' #
             p4_jobspath = es_constants.es2globals['request_jobs_dir']
             p5_requestfile = es_constants.es2globals['requests_dir'] + os.path.sep + requestfilename
 
