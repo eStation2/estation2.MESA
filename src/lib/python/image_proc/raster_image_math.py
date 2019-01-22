@@ -47,12 +47,15 @@ import numpy as N
 import copy
 import os, re, os.path, time, sys
 import pymorph
-# scipy for chla gradient computation
-# from scipy import ndimage
-import scipy
+
 # Jur: not working in windows version. Conflict with scipy version 1.1.0 and its ndimage functionality.
 # I tried to install scipy version 0.15.1 but need older numpy version 1.19.2 (numpy 1.11.0 is installed)
 # installing numpy 1.19.2 gives problems with installed gdal version 2.1.2)
+# scipy for chla gradient computation
+if sys.platform == 'win32':
+    import scipy
+else:
+    from scipy import ndimage
 
 logger = log.my_logger(__name__)
 
@@ -2962,16 +2965,24 @@ def do_compute_chla_gradient(input_file='', nodata=None, output_file='', output_
         data_chla[data_chla==nodata] = N.nan
 
         # Data smoothing (median filter)
+        if sys.platform == 'win32':
+            smooth_data_chla = scipy.ndimage.median_filter(data_chla, 3)
+            #smooth_data_chla = scipy.ndimage.gaussian_filter(data_chla, 3)
 
-        smooth_data_chla = scipy.ndimage.median_filter(data_chla, 3)
-        #smooth_data_chla = scipy.ndimage.gaussian_filter(data_chla, 3)
+            # Gradient derivation
 
-        # Gradient derivation
+            # Sobel (X direction)
+            sx = scipy.ndimage.sobel(smooth_data_chla, axis=0, mode='nearest')
+            # Sobel (Y direction)
+            sy = scipy.ndimage.sobel(smooth_data_chla, axis=1, mode='nearest')
+        else:
+            smooth_data_chla = ndimage.median_filter(data_chla, 3)
+            # Gradient derivation
 
-        #Sobel (X direction)
-        sx = scipy.ndimage.sobel(smooth_data_chla, axis=0, mode='nearest')
-        # Sobel (Y direction)
-        sy = scipy.ndimage.sobel(smooth_data_chla, axis=1, mode='nearest')
+            # Sobel (X direction)
+            sx = ndimage.sobel(smooth_data_chla, axis=0, mode='nearest')
+            # Sobel (Y direction)
+            sy = ndimage.sobel(smooth_data_chla, axis=1, mode='nearest')
 
         #Sobel
         chla_gradient = N.hypot(sx, sy)
@@ -3060,8 +3071,10 @@ def compute_median_filter(input_file='', nodata=None, output_file='', output_nod
         data_chla[data_chla==nodata] = N.nan
 
         # Data smoothing (median filter)
-
-        smooth_data_chla = scipy.ndimage.median_filter(data_chla, 3)
+        if sys.platform == 'win32':
+            smooth_data_chla = scipy.ndimage.median_filter(data_chla, 3)
+        else:
+            smooth_data_chla = ndimage.median_filter(data_chla, 3)
 
         # Write out the full matrix N.array(outData)
         outband.WriteArray(smooth_data_chla, 0, 0)
@@ -3183,7 +3196,10 @@ def extrapolate_edge(input_file='', nodata=None, output_file='', output_nodata=N
         filtData[ifinite_edge] = data[ifinite_edge]
         outband1.WriteArray(filtData, 0, 0)
         # apply gaussian filter
-        filtData = scipy.ndimage.gaussian_filter(filtData, 2)  #,truncate=1.25
+        if sys.platform == 'win32':
+            filtData = scipy.ndimage.gaussian_filter(filtData, 2)  #,truncate=1.25
+        else:
+            filtData = ndimage.gaussian_filter(filtData, 2)  # ,truncate=1.25
 
         # re-put original measured values on the edges
         ifinite_edge = [data != N.nan] and [filtData == N.nan]
@@ -3208,7 +3224,10 @@ def local_filter(x, order):
     return x[order]
 
 def ordfilt2(A, order, mask_size):
-    return scipy.ndimage.generic_filter(A, lambda x, ord=order: local_filter(x, ord), size=(mask_size, mask_size))
+    if sys.platform == 'win32':
+        return scipy.ndimage.generic_filter(A, lambda x, ord=order: local_filter(x, ord), size=(mask_size, mask_size))
+    else:
+        return ndimage.generic_filter(A, lambda x, ord=order: local_filter(x, ord), size=(mask_size, mask_size))
 
 
 # _____________________________
