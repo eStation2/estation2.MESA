@@ -10638,7 +10638,7 @@ SET
   -- masked = FALSE,
   timeseries_role = NULL,
   display_index = NULL
-WHERE product_type='Native'
+WHERE product_type='Native';
 
 
 -- De-activate 'new' products (i.e. products defined after 2.0.4): they are activated afterwards - according to thema_product
