@@ -83,6 +83,8 @@ Ext.define("esapp.view.datamanagement.requestsAdmin",{
 
         me.mon(me, {
             loadstore: function() {
+                me.focus();
+
                 if (me.forceStoreLoad || !me.getViewModel().getStore('requests').isLoaded() || me.dirtyStore) {
                     // me.getViewModel().getStore('requests').proxy.extraParams = {userid: esapp.getUser().userid};
                     // var myMask = new Ext.LoadMask({
@@ -104,7 +106,7 @@ Ext.define("esapp.view.datamanagement.requestsAdmin",{
                                     }
                                 });
                             }
-                            me.updateLayout();
+                            // me.updateLayout();
                             // myMask.hide();
                         }
                     });
@@ -112,7 +114,6 @@ Ext.define("esapp.view.datamanagement.requestsAdmin",{
                     me.dirtyStore = false;
                     // console.info(me.getViewModel().getStore('requests'));
                 }
-                me.focus();
             }
         });
 
@@ -124,7 +125,7 @@ Ext.define("esapp.view.datamanagement.requestsAdmin",{
             show: function(){
                 me.dirtyStore = true;
                 me.fireEvent('loadstore');
-                me.focus();
+                // me.focus();
             },
             focusleave: function(){
                 me.hide();

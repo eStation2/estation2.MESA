@@ -38,12 +38,12 @@ Ext.define('esapp.view.datamanagement.sendRequestController', {
             msg    : esapp.Utils.getTranslation('loading'),
             target : me.lookupReference('requestcontent'),
             alwaysOnTop: true,
-            maxHeight: 300
+            maxHeight: 200,
+            border : false,
+            frame : false
             // constrain: true,
             // autoRender: true,
             // autoShow: true
-            // border : false,
-            // frame : false,
             // shadow : false
         });
 
@@ -125,10 +125,10 @@ Ext.define('esapp.view.datamanagement.sendRequestController', {
             msg    : esapp.Utils.getTranslation('creating_requestjob'),
             target : me,    // me.lookupReference('requestcontent'),
             alwaysOnTop: true,
-            maxHeight: 300
+            maxHeight: 200,
+            border : false,
+            frame : false
             // constrain: true
-            // border : false,
-            // frame : false,
             // shadow : false
         });
 
