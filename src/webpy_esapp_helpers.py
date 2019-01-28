@@ -268,11 +268,18 @@ def statusRequestJob(requestid):
             # job.kill()
 
             status = statusresult[0].split(';')
-            jobstatus = status[0].split(':')[0]
-            datestatus = status[2]
-            totfiles = status[2].split(':')[1]
-            totok = status[3].split(':')[1]
-            totko = status[4].split(':')[1]
+            if len(status)>=3:
+                jobstatus = status[0].split(':')[0]
+                datestatus = status[1]
+                totfiles = status[2].split(':')[1]
+                totok = status[3].split(':')[1]
+                totko = status[4].split(':')[1]
+            else:
+                jobstatus = status[0].split(':')[0]
+                datestatus = status[1]
+                totfiles = None
+                totok = None
+                totko = None
 
             message = 'Status info request: ' + requestid
 
@@ -331,14 +338,24 @@ def pauseRequestJob(requestid):
                     ]
 
             job = Popen(['nohup', 'java', '-jar'] + args)
-            time.sleep(10)
-            jobstatus = statusRequestJob(requestid)
-            status = jobstatus['status'].lower()
-            if jobstatus['status'].lower() in ['paused', 'defunct']:  # 'finished', 'stopped', 'error', 'running'
-                success = True
-                message = 'Paused request: ' + requestid
-            else:
-                message = 'Error pausing request: ' + requestid + ' job status: ' + jobstatus['status'].lower()
+
+            # time.sleep(6)
+            pausingjob = True
+            counter = 0
+            while pausingjob and counter <= 3:
+                counter += 1
+                time.sleep(4)
+                jobstatus = statusRequestJob(requestid)
+                status = jobstatus['status'].lower()
+                if jobstatus['status'].lower() in ['paused', 'defunct']:  # 'finished', 'stopped', 'error', 'running'
+                    success = True
+                    pausingjob = False
+                    message = 'Paused request: ' + requestid
+                # elif jobstatus['status'].lower() in ['error']:
+                #     pausingjob = False
+                #     message = 'Error pausing request: ' + requestid + ' job status: ' + jobstatus['status'].lower()
+                else:
+                    message = 'Error pausing request: ' + requestid + ' job status: ' + jobstatus['status'].lower()
         except:
             message = 'Exception error pausing request: ' + requestid + ' job status: ' + jobstatus['status'].lower()
 
@@ -395,16 +412,24 @@ def restartRequestJob(requestid):
                     ]
 
             job = Popen(['nohup', 'java', '-jar'] + args)
-            time.sleep(10)
-            jobstatus = statusRequestJob(requestid)
-            status = jobstatus['status'].lower()
-            if jobstatus['status'].lower() in ['running']:  # 'finished', 'stopped', 'error', 'running'
-                success = True
-                message = 'Restarted request: ' + requestid
-            elif jobstatus['status'].lower() in ['error']:
-                message = 'Error connecting to the server, please check if your network is connected to the internet or uses a proxy. Set your proxy settings under the system tab!'
-            else:
-                message = 'Error restarting request: ' + requestid + ' job status: ' + jobstatus['status'].lower()
+
+            # time.sleep(6)
+            restartingjob = True
+            counter = 0
+            while restartingjob and counter <= 3:
+                counter += 1
+                time.sleep(4)
+                jobstatus = statusRequestJob(requestid)
+                status = jobstatus['status'].lower()
+                if jobstatus['status'].lower() in ['running']:  # 'finished', 'stopped', 'error', 'running'
+                    success = True
+                    restartingjob = False
+                    message = 'Restarted request: ' + requestid
+                elif jobstatus['status'].lower() in ['error']:
+                    restartingjob = False
+                    message = 'Error connecting to the server, please check if your network is connected to the internet or uses a proxy. Set your proxy settings under the system tab!'
+                else:
+                    message = 'Error restarting request: ' + requestid + ' job status: ' + jobstatus['status'].lower()
         except:
             message = 'Exception error restarting request: ' + requestid + ' job status: ' + jobstatus['status'].lower()
 
@@ -563,7 +588,7 @@ def createRequestJob(params):
 
             p1_jobid = requestid
             p2_action = 'start'
-            p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing' #
+            p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing'    #
             p4_jobspath = es_constants.es2globals['request_jobs_dir']
             p5_requestfile = es_constants.es2globals['requests_dir'] + os.path.sep + requestfilename
 
@@ -585,26 +610,33 @@ def createRequestJob(params):
                         stdout=PIPE,
                         stderr=STDOUT)  # .pid
 
-            time.sleep(3)
-            jobstatus = statusRequestJob(requestid)
-            if jobstatus['status'].lower() in ['running']:  # 'finished', 'stopped', 'error', 'running'
-                message = 'Created request: ' + requestid
-            elif jobstatus['status'].lower() in ['error']:
-                # No internet connection or proxy settings missing!
-                # Putting the job on Paused is not possible, so delete the job and send a message to the user!
-                # resp = json.loads(pauseRequestJob(requestid))
-                # if resp['success']:
-                #     jobstatus = statusRequestJob(requestid)
-                #     list_of_jobs.append(jobstatus)
-                # else:
-                #     list_of_jobs.append(jobstatus)
-                deleteJobDir(requestid)
-                createnewrequest = False
-                message = 'Error connecting to the server, please check if your network is connected to the internet or uses a proxy. Set your proxy settings under the system tab!'
-            else:
-                createnewrequest = False
-                # todo: Delete job dir?
-                message = 'Error creating request!'
+            # time.sleep(6)
+            creatingjob = True
+            counter = 0
+            while creatingjob and counter <= 3:
+                counter += 1
+                time.sleep(4)
+                jobstatus = statusRequestJob(requestid)
+                if jobstatus['status'].lower() in ['running']:  # 'finished', 'stopped', 'error', 'running'
+                    creatingjob = False
+                    message = 'Created request: ' + requestid
+                elif jobstatus['status'].lower() in ['error']:
+                    # No internet connection or proxy settings missing!
+                    # Putting the job on Paused is not possible, so delete the job and send a message to the user!
+                    # resp = json.loads(pauseRequestJob(requestid))
+                    # if resp['success']:
+                    #     jobstatus = statusRequestJob(requestid)
+                    #     list_of_jobs.append(jobstatus)
+                    # else:
+                    #     list_of_jobs.append(jobstatus)
+                    deleteJobDir(requestid)
+                    createnewrequest = False
+                    creatingjob = False
+                    message = 'Error connecting to the server, please check if your network is connected to the internet or uses a proxy. Set your proxy settings under the system tab!'
+                else:
+                    createnewrequest = False
+                    # todo: Delete job dir?
+                    message = 'Error creating request!'
 
             # jobstatus = job.poll()
             # answer = job.stdout.readline()
