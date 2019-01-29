@@ -399,17 +399,26 @@ def restartRequestJob(requestid):
             # # print command
             # os.system(command)
 
-            args = [es_constants.es2globals['estation_sync_file'],
-                    p1_jobid,
-                    p2_action,
-                    p3_datapath,
-                    p4_jobspath,
-                    p5_requestfile,
-                    proxy_host,
-                    proxy_port,
-                    proxy_user,
-                    proxy_userpwd
-                    ]
+            if proxy_host.strip() != '' and proxy_port.strip() != '':
+                args = [es_constants.es2globals['estation_sync_file'],
+                        p1_jobid,
+                        p2_action,
+                        p3_datapath,
+                        p4_jobspath,
+                        p5_requestfile,
+                        proxy_host,
+                        proxy_port,
+                        proxy_user,
+                        proxy_userpwd
+                        ]
+            else:
+                args = [es_constants.es2globals['estation_sync_file'],
+                        p1_jobid,
+                        p2_action,
+                        p3_datapath,
+                        p4_jobspath,
+                        p5_requestfile
+                        ]
 
             job = Popen(['nohup', 'java', '-jar'] + args)
 
@@ -592,17 +601,26 @@ def createRequestJob(params):
             p4_jobspath = es_constants.es2globals['request_jobs_dir']
             p5_requestfile = es_constants.es2globals['requests_dir'] + os.path.sep + requestfilename
 
-            args = [es_constants.es2globals['estation_sync_file'],
-                    p1_jobid,
-                    p2_action,
-                    p3_datapath,
-                    p4_jobspath,
-                    p5_requestfile,
-                    proxy_host,
-                    proxy_port,
-                    proxy_user,
-                    proxy_userpwd
-                    ]
+            if proxy_host.strip() != '' and proxy_port.strip() != '':
+                args = [es_constants.es2globals['estation_sync_file'],
+                        p1_jobid,
+                        p2_action,
+                        p3_datapath,
+                        p4_jobspath,
+                        p5_requestfile,
+                        proxy_host,
+                        proxy_port,
+                        proxy_user,
+                        proxy_userpwd
+                        ]
+            else:
+                args = [es_constants.es2globals['estation_sync_file'],
+                        p1_jobid,
+                        p2_action,
+                        p3_datapath,
+                        p4_jobspath,
+                        p5_requestfile
+                        ]
 
             job = Popen(['nohup', 'java', '-jar'] + args,
                         # close_fds=True,
