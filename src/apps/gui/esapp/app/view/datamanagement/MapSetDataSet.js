@@ -24,20 +24,43 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
         model: 'MapSetDataSet'
     },
 
-    // selType: 'cellmodel',
     // selModel: {listeners:{}},
+    // selModel: {
+    //    selType: 'rowmodel',
+    //    mode: 'SINGLE'
+    // },
+    // selModel: null,
+    // bufferedRenderer: true,
 
-    bufferedRenderer: false,
+    // viewConfig: {
+    //     stripeRows: false,
+    //     enableTextSelection: true,
+    //     draggable: false,
+    //     markDirty: false,
+    //     resizable: false,
+    //     disableSelection: true,
+    //     trackOver: false,
+    //     preserveScrollOnRefresh: false,
+    //     preserveScrollOnReload: false,
+    //     focusable: false,
+    //     forceFit: true
+    // },
 
     hideHeaders: true,
     columnLines: false,
     rowLines:false,
-    focusable: false,
-    forceFit: true,
+    // focusable: false,
+    // forceFit: true,
+    scrollToTop: false,
+    alwaysOnTop: true,
+    focusOnToFront: false,
+    // maxHeight: 360,
+    // scrollable: 'vertical',
+
     margin: '0 0 10 0',    // (top, right, bottom, left).
     // minHeight: 55,
 
-    layout: 'fit',
+    // layout: 'fit',
 
     initComponent: function () {
         var me = this;
@@ -50,171 +73,364 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
             resizable: false,
             disableSelection: true,
             trackOver: false,
-            preserveScrollOnRefresh: false,
-            focusable: false,
+            preserveScrollOnRefresh: true,
+            preserveScrollOnReload: true,
+            focusable: true,
             forceFit: true,
             listeners: {
-                render: function(view){
-                    createTooltip(view);
-                    // Ext.util.Observable.capture(view, function(e){console.log(view.id + ': ' + e);});
-                },
-                rowclick: function(view){
-                    // console.info('rowclick');
-                    var widgettooltip = Ext.getCmp(view.getId() + '_completness_tooltip');
-                    var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
-                    Ext.each(completenessTooltips, function(item) {
-                        if (item != widgettooltip){
-                            item.hide();
+                render: function (view) {
+                    // console.info(view);
+                    view.tooltip = Ext.create('Ext.tip.ToolTip', {
+                        id: view.getId() + '_completness_tooltip',
+                        // The overall target element.
+                        target: view.getEl(),
+                        // triggerElement: view.getEl(),
+                        // Each grid row causes its own seperate show and hide.
+                        delegate: view.itemSelector,
+                        // Render immediately so that tip.body can be referenced prior to the first show.
+                        // renderTo: Ext.getBody(),
+                        maxHeight: 350,
+                        autoScroll: true,
+                        // autoRender: true,
+                        hidden: false,
+                        disabled: true,
+                        trackMouse: true,
+                        mouseOffset: [-5, 0],
+                        autoHide: false,
+                        showDelay: 100,
+                        // hideDelay: 5000,
+                        // dismissDelay: 5000, // auto hide after 5 seconds
+                        closable: true,
+                        anchorToTarget: false,
+                        // anchor: 'left',
+                        padding: 5,
+                        listeners: {
+                            close: function (tip) {
+                                // tip.disable();
+                                tip.hide();
+                            },
+                            // Change content dynamically depending on which element triggered the show.
+                            beforeshow: function (tip) {
+                                // console.info(tip.triggerElement);
+                                if (esapp.Utils.objectExists(tip.triggerElement)) {
+                                    var datasetinterval = '',
+                                        datasetForTipText,
+                                        tooltipintervals,
+                                        mapsetdatasetrecord = view.getRecord(tip.triggerElement),   // view.dataSource.getData().items[0],   //  view.dataSource.data.items[0], //
+                                        completeness = mapsetdatasetrecord.get('datasetcompleteness');
+
+                                    var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
+                                    Ext.each(completenessTooltips, function (item) {
+                                        // item.disable();
+                                        if (item != tip) {
+                                            item.hide();
+                                        }
+                                    });
+
+                                    datasetForTipText = '<b>' + esapp.Utils.getTranslation('dataset_intervals_for') + ':</br>' +
+                                        mapsetdatasetrecord.get('productcode') + ' - ' +
+                                        mapsetdatasetrecord.get('version') + ' - ' +
+                                        (mapsetdatasetrecord.get('mapset_descriptive_name') || mapsetdatasetrecord.get('mapsetname')) + ' - ' +
+                                        mapsetdatasetrecord.get('subproductcode') + '</b></br></br>';
+
+                                    tooltipintervals = datasetForTipText;
+                                    if (mapsetdatasetrecord.get('frequency_id') == 'singlefile' && completeness.totfiles == 1 && completeness.missingfiles == 0) {
+                                        datasetinterval = '<span style="color:#81AF34">' + esapp.Utils.getTranslation('singlefile') + '</span>';
+                                        tooltipintervals += datasetinterval;
+                                    }
+                                    else if (completeness.totfiles < 2 && completeness.missingfiles < 2) {
+                                        datasetinterval = '<span style="color:#808080">' + esapp.Utils.getTranslation('notanydata') + '</span>';
+                                        tooltipintervals += datasetinterval;
+                                    }
+                                    else {
+                                        completeness.intervals.forEach(function (interval) {
+                                            var color, intervaltype = '';
+                                            if (interval.intervaltype == 'present') {
+                                                color = '#81AF34'; // green
+                                                intervaltype = esapp.Utils.getTranslation('present');
+                                            }
+                                            if (interval.intervaltype == 'missing') {
+                                                color = '#FF0000'; // red
+                                                intervaltype = esapp.Utils.getTranslation('missing');
+                                            }
+                                            if (interval.intervaltype == 'permanent-missing') {
+                                                color = '#808080'; // gray
+                                                intervaltype = esapp.Utils.getTranslation('permanent-missing');
+                                            }
+                                            datasetinterval = '<span style="color:' + color + '">' + esapp.Utils.getTranslation('from') + ' ' + interval.fromdate + ' ' + esapp.Utils.getTranslation('to') + ' ' + interval.todate + ' - ' + intervaltype + '</span></br>';
+                                            tooltipintervals += datasetinterval;
+                                        });
+                                    }
+
+                                    tip.update(tooltipintervals);
+                                }
+
+                                // tip.on('show', function(){
+                                //     Ext.defer(tip.hide, 20000, tip);
+                                // }, tip, {single: true});
+                            }
                         }
                     });
-                    if (esapp.Utils.objectExists(widgettooltip)){
-                        widgettooltip.trackMouse = false;
-                    }
-                },
-                itemmouseenter: function(view){
-                    // console.info('itemmouseenter');
-                    var widgettooltip = Ext.getCmp(view.getId() + '_completness_tooltip');
-                    widgettooltip.trackMouse = true;
-                    if (widgettooltip.disabled){
-                        widgettooltip.enable();
-                    }
-                },
-                itemmouseleave: function(view){
-                    // console.info('itemmouseleave');
-                    var widgettooltip = Ext.getCmp(view.getId() + '_completness_tooltip');
-                    if (!widgettooltip.disabled && widgettooltip.trackMouse){
-                        widgettooltip.disable();
-                    }
+                    // createTooltip(grid.getView());
+                    // Ext.util.Observable.capture(view, function(e){console.log(view.id + ': ' + e);});
                 }
-                // ,rowfocus: {}
             }
         };
 
+        me.listeners = {
+            // render: function(grid){
+            //     console.info(grid.getView());
+            //     view.tooltip = Ext.create('Ext.tip.ToolTip', {
+            //         id: view.getId() + '_completness_tooltip',
+            //         // The overall target element.
+            //         target: view.getEl(),
+            //         // triggerElement: view.getEl(),
+            //         // Each grid row causes its own seperate show and hide.
+            //         delegate: view.itemSelector,
+            //         // Render immediately so that tip.body can be referenced prior to the first show.
+            //         // renderTo: Ext.getBody(),
+            //         maxHeight: 350,
+            //         autoScroll: true,
+            //         // autoRender: true,
+            //         hidden: false,
+            //         disabled: true,
+            //         trackMouse: true,
+            //         mouseOffset : [-5,0],
+            //         autoHide: false,
+            //         showDelay: 100,
+            //         // hideDelay: 5000,
+            //         // dismissDelay: 5000, // auto hide after 5 seconds
+            //         closable: true,
+            //         anchorToTarget: false,
+            //         // anchor: 'left',
+            //         padding: 5,
+            //         listeners: {
+            //             close: function(tip) {
+            //                 // tip.disable();
+            //                 tip.hide();
+            //             },
+            //             // Change content dynamically depending on which element triggered the show.
+            //             beforeshow: function (tip) {
+            //                 // console.info(tip.triggerElement);
+            //                 if (esapp.Utils.objectExists(tip.triggerElement)){
+            //                     var datasetinterval = '',
+            //                         datasetForTipText,
+            //                         tooltipintervals,
+            //                         mapsetdatasetrecord = view.getRecord(tip.triggerElement),   // view.dataSource.getData().items[0],   //  view.dataSource.data.items[0], //
+            //                         completeness = mapsetdatasetrecord.get('datasetcompleteness');
+            //
+            //                     var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
+            //                     Ext.each(completenessTooltips, function(item) {
+            //                        // item.disable();
+            //                         if (item != tip){
+            //                             item.hide();
+            //                         }
+            //                     });
+            //
+            //                     datasetForTipText = '<b>' + esapp.Utils.getTranslation('dataset_intervals_for') + ':</br>' +
+            //                         mapsetdatasetrecord.get('productcode') + ' - ' +
+            //                         mapsetdatasetrecord.get('version') + ' - ' +
+            //                         (mapsetdatasetrecord.get('mapset_descriptive_name') || mapsetdatasetrecord.get('mapsetname')) + ' - ' +
+            //                         mapsetdatasetrecord.get('subproductcode') + '</b></br></br>';
+            //
+            //                     tooltipintervals = datasetForTipText;
+            //                     if (mapsetdatasetrecord.get('frequency_id')=='singlefile' && completeness.totfiles == 1 && completeness.missingfiles == 0){
+            //                         datasetinterval = '<span style="color:#81AF34">'+ esapp.Utils.getTranslation('singlefile') + '</span>';
+            //                         tooltipintervals += datasetinterval;
+            //                     }
+            //                     else if (completeness.totfiles < 2 && completeness.missingfiles < 2) {
+            //                         datasetinterval = '<span style="color:#808080">'+ esapp.Utils.getTranslation('notanydata') + '</span>';
+            //                         tooltipintervals += datasetinterval;
+            //                     }
+            //                     else {
+            //                         completeness.intervals.forEach(function (interval) {
+            //                             var color, intervaltype = '';
+            //                             if (interval.intervaltype == 'present') {
+            //                                 color = '#81AF34'; // green
+            //                                 intervaltype = esapp.Utils.getTranslation('present');
+            //                             }
+            //                             if (interval.intervaltype == 'missing') {
+            //                                 color = '#FF0000'; // red
+            //                                 intervaltype = esapp.Utils.getTranslation('missing');
+            //                             }
+            //                             if (interval.intervaltype == 'permanent-missing') {
+            //                                 color = '#808080'; // gray
+            //                                 intervaltype = esapp.Utils.getTranslation('permanent-missing');
+            //                             }
+            //                             datasetinterval = '<span style="color:'+color+'">' + esapp.Utils.getTranslation('from') + ' ' + interval.fromdate + ' ' + esapp.Utils.getTranslation('to') + ' ' + interval.todate + ' - ' + intervaltype + '</span></br>';
+            //                             tooltipintervals += datasetinterval;
+            //                         });
+            //                     }
+            //
+            //                     tip.update(tooltipintervals);
+            //                 }
+            //
+            //                 // tip.on('show', function(){
+            //                 //     Ext.defer(tip.hide, 20000, tip);
+            //                 // }, tip, {single: true});
+            //             }
+            //         }
+            //     });
+            //     // createTooltip(grid.getView());
+            //     // Ext.util.Observable.capture(view, function(e){console.log(view.id + ': ' + e);});
+            // },
+            rowmousedown: function(view, record, element, rowIndex, e, eOpts){
+                // console.info('rowclick');
+                // console.info(view);
+                // // view.fireEvent('scrolltoselection');
+                //
+                // console.info('scrolltoselection');
+                // // var record = view.getSelection();
+                // console.info(record);
+                // if (record.length > 0)
+                //     view.ensureVisible(record[0], {focus: true});
+                // view.focusRow(record);
 
-        // me.listeners = {
-            // afterrender: function(view){
-            //     view.updateLayout();
-            // }
-            // ,beforerender: function () {
-            //     Ext.util.Observable.capture(me, function (e) { console.log('mapsetdatasetgrid - ' + e);});
-            //     // me.ownerGrid.updateLayout();
-            // }
-            // ,cellclick : function(view, cell, cellIndex, record, row, rowIndex, e) {
-            //    //e.stopPropagation();
-            //    return false;
-            // }
-        // };
-        //
-        //
-        // function renderTip(val, meta, rec, rowIndex, colIndex, store) {
-        //     console.info(meta);
-        //     console.info(rec);
-        //     console.info(rowIndex);
-        //     console.info(colIndex);
-        //     meta.tdAttr = 'data-qtip="Icon Tip"';
-        //     return val;
-        // }
-
-        function createTooltip(view) {
-
-            view.tooltip = Ext.create('Ext.tip.ToolTip', {
-                id: view.getId() + '_completness_tooltip',
-                // The overall target element.
-                target: view.getEl(),
-                // triggerElement: view.getEl(),
-                // Each grid row causes its own seperate show and hide.
-                delegate: view.itemSelector,
-                // Render immediately so that tip.body can be referenced prior to the first show.
-                // renderTo: Ext.getBody(),
-                maxHeight: 350,
-                autoScroll: true,
-                // autoRender: true,
-                hidden: false,
-                disabled: true,
-                trackMouse: true,
-                mouseOffset : [-5,0],
-                autoHide: false,
-                showDelay: 100,
-                // hideDelay: 5000,
-                // dismissDelay: 5000, // auto hide after 5 seconds
-                closable: true,
-                anchorToTarget: false,
-                // anchor: 'left',
-                padding: 5,
-                listeners: {
-                    close: function(tip) {
-                        // tip.disable();
-                        tip.hide();
-                    },
-                    // Change content dynamically depending on which element triggered the show.
-                    beforeshow: function (tip) {
-                        // console.info(tip.triggerElement);
-                        if (esapp.Utils.objectExists(tip.triggerElement)){
-                            var datasetinterval = '',
-                                datasetForTipText,
-                                tooltipintervals,
-                                mapsetdatasetrecord = view.getRecord(tip.triggerElement),   // view.dataSource.getData().items[0],   //  view.dataSource.data.items[0], //
-                                completeness = mapsetdatasetrecord.get('datasetcompleteness');
-
-                            var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
-                            Ext.each(completenessTooltips, function(item) {
-                               // item.disable();
-                                if (item != tip){
-                                    item.hide();
-                                }
-                            });
-
-                            datasetForTipText = '<b>' + esapp.Utils.getTranslation('dataset_intervals_for') + ':</br>' +
-                                mapsetdatasetrecord.get('productcode') + ' - ' +
-                                mapsetdatasetrecord.get('version') + ' - ' +
-                                (mapsetdatasetrecord.get('mapset_descriptive_name') || mapsetdatasetrecord.get('mapsetname')) + ' - ' +
-                                mapsetdatasetrecord.get('subproductcode') + '</b></br></br>';
-
-                            tooltipintervals = datasetForTipText;
-                            if (mapsetdatasetrecord.get('frequency_id')=='singlefile' && completeness.totfiles == 1 && completeness.missingfiles == 0){
-                                datasetinterval = '<span style="color:#81AF34">'+ esapp.Utils.getTranslation('singlefile') + '</span>';
-                                tooltipintervals += datasetinterval;
-                            }
-                            else if (completeness.totfiles < 2 && completeness.missingfiles < 2) {
-                                datasetinterval = '<span style="color:#808080">'+ esapp.Utils.getTranslation('notanydata') + '</span>';
-                                tooltipintervals += datasetinterval;
-                            }
-                            else {
-                                completeness.intervals.forEach(function (interval) {
-                                    var color, intervaltype = '';
-                                    if (interval.intervaltype == 'present') {
-                                        color = '#81AF34'; // green
-                                        intervaltype = esapp.Utils.getTranslation('present');
-                                    }
-                                    if (interval.intervaltype == 'missing') {
-                                        color = '#FF0000'; // red
-                                        intervaltype = esapp.Utils.getTranslation('missing');
-                                    }
-                                    if (interval.intervaltype == 'permanent-missing') {
-                                        color = '#808080'; // gray
-                                        intervaltype = esapp.Utils.getTranslation('permanent-missing');
-                                    }
-                                    datasetinterval = '<span style="color:'+color+'">' + esapp.Utils.getTranslation('from') + ' ' + interval.fromdate + ' ' + esapp.Utils.getTranslation('to') + ' ' + interval.todate + ' - ' + intervaltype + '</span></br>';
-                                    tooltipintervals += datasetinterval;
-                                });
-                            }
-
-                            tip.update(tooltipintervals);
-                        }
-
-                        // tip.on('show', function(){
-                        //     Ext.defer(tip.hide, 20000, tip);
-                        // }, tip, {single: true});
+                var widgettooltip = Ext.getCmp(view.getId() + '_completness_tooltip');
+                var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
+                Ext.each(completenessTooltips, function(item) {
+                    if (item != widgettooltip){
+                        item.hide();
                     }
+                });
+                if (esapp.Utils.objectExists(widgettooltip)){
+                    widgettooltip.trackMouse = false;
                 }
-            });
-        }
+
+            },
+            // scrolltoselection: function (view) {
+            //     console.info('scrolltoselection');
+            //
+            //     var record = view.getSelection();
+            //     console.info(record);
+            //     if (record.length > 0)
+            //         view.ensureVisible(record[0], {focus: true});
+            // },
+            itemmouseenter: function(view, record, el, rowidx){
+                var widgettooltip = Ext.getCmp(view.getId() + '_completness_tooltip');
+                // console.info('itemmouseenter');
+                // console.info(view);
+                // console.info(record);
+                // console.info(el);
+                // console.info(rowidx);
+                // console.info(widgettooltip);
+                // view.focusRow(rowidx);
+                // view.getRow(rowidx).scrollIntoView();
+                widgettooltip.trackMouse = true;
+                if (widgettooltip.disabled){
+                    widgettooltip.enable();
+                }
+            },
+            itemmouseleave: function(view){
+                // console.info('itemmouseleave');
+                var widgettooltip = Ext.getCmp(view.getId() + '_completness_tooltip');
+                if (!widgettooltip.disabled && widgettooltip.trackMouse){
+                    widgettooltip.disable();
+                }
+            }
+            // ,rowfocus: {}
+        };
+
+        // function createTooltip(view) {
+        //     view.tooltip = Ext.create('Ext.tip.ToolTip', {
+        //         id: view.getId() + '_completness_tooltip',
+        //         // The overall target element.
+        //         target: view.getEl(),
+        //         // triggerElement: view.getEl(),
+        //         // Each grid row causes its own seperate show and hide.
+        //         delegate: view.itemSelector,
+        //         // Render immediately so that tip.body can be referenced prior to the first show.
+        //         // renderTo: Ext.getBody(),
+        //         maxHeight: 350,
+        //         autoScroll: true,
+        //         // autoRender: true,
+        //         hidden: false,
+        //         disabled: true,
+        //         trackMouse: true,
+        //         mouseOffset : [-5,0],
+        //         autoHide: false,
+        //         showDelay: 100,
+        //         // hideDelay: 5000,
+        //         // dismissDelay: 5000, // auto hide after 5 seconds
+        //         closable: true,
+        //         anchorToTarget: false,
+        //         // anchor: 'left',
+        //         padding: 5,
+        //         listeners: {
+        //             close: function(tip) {
+        //                 // tip.disable();
+        //                 tip.hide();
+        //             },
+        //             // Change content dynamically depending on which element triggered the show.
+        //             beforeshow: function (tip) {
+        //                 // console.info(tip.triggerElement);
+        //                 if (esapp.Utils.objectExists(tip.triggerElement)){
+        //                     var datasetinterval = '',
+        //                         datasetForTipText,
+        //                         tooltipintervals,
+        //                         mapsetdatasetrecord = view.getRecord(tip.triggerElement),   // view.dataSource.getData().items[0],   //  view.dataSource.data.items[0], //
+        //                         completeness = mapsetdatasetrecord.get('datasetcompleteness');
+        //
+        //                     var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
+        //                     Ext.each(completenessTooltips, function(item) {
+        //                        // item.disable();
+        //                         if (item != tip){
+        //                             item.hide();
+        //                         }
+        //                     });
+        //
+        //                     datasetForTipText = '<b>' + esapp.Utils.getTranslation('dataset_intervals_for') + ':</br>' +
+        //                         mapsetdatasetrecord.get('productcode') + ' - ' +
+        //                         mapsetdatasetrecord.get('version') + ' - ' +
+        //                         (mapsetdatasetrecord.get('mapset_descriptive_name') || mapsetdatasetrecord.get('mapsetname')) + ' - ' +
+        //                         mapsetdatasetrecord.get('subproductcode') + '</b></br></br>';
+        //
+        //                     tooltipintervals = datasetForTipText;
+        //                     if (mapsetdatasetrecord.get('frequency_id')=='singlefile' && completeness.totfiles == 1 && completeness.missingfiles == 0){
+        //                         datasetinterval = '<span style="color:#81AF34">'+ esapp.Utils.getTranslation('singlefile') + '</span>';
+        //                         tooltipintervals += datasetinterval;
+        //                     }
+        //                     else if (completeness.totfiles < 2 && completeness.missingfiles < 2) {
+        //                         datasetinterval = '<span style="color:#808080">'+ esapp.Utils.getTranslation('notanydata') + '</span>';
+        //                         tooltipintervals += datasetinterval;
+        //                     }
+        //                     else {
+        //                         completeness.intervals.forEach(function (interval) {
+        //                             var color, intervaltype = '';
+        //                             if (interval.intervaltype == 'present') {
+        //                                 color = '#81AF34'; // green
+        //                                 intervaltype = esapp.Utils.getTranslation('present');
+        //                             }
+        //                             if (interval.intervaltype == 'missing') {
+        //                                 color = '#FF0000'; // red
+        //                                 intervaltype = esapp.Utils.getTranslation('missing');
+        //                             }
+        //                             if (interval.intervaltype == 'permanent-missing') {
+        //                                 color = '#808080'; // gray
+        //                                 intervaltype = esapp.Utils.getTranslation('permanent-missing');
+        //                             }
+        //                             datasetinterval = '<span style="color:'+color+'">' + esapp.Utils.getTranslation('from') + ' ' + interval.fromdate + ' ' + esapp.Utils.getTranslation('to') + ' ' + interval.todate + ' - ' + intervaltype + '</span></br>';
+        //                             tooltipintervals += datasetinterval;
+        //                         });
+        //                     }
+        //
+        //                     tip.update(tooltipintervals);
+        //                 }
+        //
+        //                 // tip.on('show', function(){
+        //                 //     Ext.defer(tip.hide, 20000, tip);
+        //                 // }, tip, {single: true});
+        //             }
+        //         }
+        //     });
+        // }
 
         me.defaults = {
             menuDisabled: true,
             draggable:false,
             groupable:false,
-            hideable: false
+            hideable: false,
+            variableRowHeight: true
         };
 
         me.columns = [{

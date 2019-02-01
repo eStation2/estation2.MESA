@@ -52,7 +52,7 @@ import pymorph
 # I tried to install scipy version 0.15.1 but need older numpy version 1.19.2 (numpy 1.11.0 is installed)
 # installing numpy 1.19.2 gives problems with installed gdal version 2.1.2)
 # scipy for chla gradient computation
-if sys.platform == 'win32':
+if sys.platform != 'win32':
     import scipy
 else:
     from scipy import ndimage
@@ -2965,12 +2965,10 @@ def do_compute_chla_gradient(input_file='', nodata=None, output_file='', output_
         data_chla[data_chla==nodata] = N.nan
 
         # Data smoothing (median filter)
-        if sys.platform == 'win32':
+        if sys.platform != 'win32':
             smooth_data_chla = scipy.ndimage.median_filter(data_chla, 3)
             #smooth_data_chla = scipy.ndimage.gaussian_filter(data_chla, 3)
-
             # Gradient derivation
-
             # Sobel (X direction)
             sx = scipy.ndimage.sobel(smooth_data_chla, axis=0, mode='nearest')
             # Sobel (Y direction)
@@ -2978,7 +2976,6 @@ def do_compute_chla_gradient(input_file='', nodata=None, output_file='', output_
         else:
             smooth_data_chla = ndimage.median_filter(data_chla, 3)
             # Gradient derivation
-
             # Sobel (X direction)
             sx = ndimage.sobel(smooth_data_chla, axis=0, mode='nearest')
             # Sobel (Y direction)
@@ -3071,7 +3068,7 @@ def compute_median_filter(input_file='', nodata=None, output_file='', output_nod
         data_chla[data_chla==nodata] = N.nan
 
         # Data smoothing (median filter)
-        if sys.platform == 'win32':
+        if sys.platform != 'win32':
             smooth_data_chla = scipy.ndimage.median_filter(data_chla, 3)
         else:
             smooth_data_chla = ndimage.median_filter(data_chla, 3)
@@ -3196,7 +3193,7 @@ def extrapolate_edge(input_file='', nodata=None, output_file='', output_nodata=N
         filtData[ifinite_edge] = data[ifinite_edge]
         outband1.WriteArray(filtData, 0, 0)
         # apply gaussian filter
-        if sys.platform == 'win32':
+        if sys.platform != 'win32':
             filtData = scipy.ndimage.gaussian_filter(filtData, 2)  #,truncate=1.25
         else:
             filtData = ndimage.gaussian_filter(filtData, 2)  # ,truncate=1.25
@@ -3224,7 +3221,7 @@ def local_filter(x, order):
     return x[order]
 
 def ordfilt2(A, order, mask_size):
-    if sys.platform == 'win32':
+    if sys.platform != 'win32':
         return scipy.ndimage.generic_filter(A, lambda x, ord=order: local_filter(x, ord), size=(mask_size, mask_size))
     else:
         return ndimage.generic_filter(A, lambda x, ord=order: local_filter(x, ord), size=(mask_size, mask_size))
