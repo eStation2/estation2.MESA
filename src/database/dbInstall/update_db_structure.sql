@@ -2425,6 +2425,10 @@ ALTER FUNCTION analysis.update_insert_graph_yaxes(character varying, character v
 
 -- DROP FUNCTION products.export_jrc_data(boolean);
 
+-- Function: products.export_jrc_data(boolean)
+
+-- DROP FUNCTION products.export_jrc_data(boolean);
+
 CREATE OR REPLACE FUNCTION products.export_jrc_data(full_copy boolean DEFAULT false)
   RETURNS SETOF text AS
 $BODY$
@@ -2779,7 +2783,7 @@ BEGIN
 		|| ', date_format := ' || COALESCE('''' || date_format || '''', '''undefined''')
 		|| ', start_date:=   ' || COALESCE(TRIM(to_char(start_date, '999999999999')), 'NULL')
 		|| ', end_date:= ' || COALESCE(TRIM(to_char(end_date, '999999999999')), 'NULL')
-		|| ', full_copy := ' || FALSE
+		|| ', full_copy := ' || _full_copy
 		|| ' );'  as inserts
 	FROM products.process_product pp
 	WHERE process_id IN (SELECT process_id FROM products.processing WHERE defined_by = 'JRC')
@@ -3059,6 +3063,7 @@ $BODY$
   ROWS 1000;
 ALTER FUNCTION products.export_jrc_data(boolean)
   OWNER TO estation;
+
 
 
 
