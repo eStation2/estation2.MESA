@@ -20,8 +20,8 @@ psql -h localhost -d estationdb -U postgres -c 'drop schema bucardo cascade'
 bucardo remove tables all 
 bucardo remove sync sync_thispc
 bucardo remove dbgroup group_thispc
-bucardo remove db mesa_otherpc
-bucardo remove db mesa_thispc
+bucardo remove db mesa_otherpc --force
+bucardo remove db mesa_thispc --force
 
 relgroups=($(bucardo list relgroup | grep 'Relgroup' | awk   '{print $2}'))
 for rel in  ${relgroups[@]}; do bucardo remove relgroup $rel; done
