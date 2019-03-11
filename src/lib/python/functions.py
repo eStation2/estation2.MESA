@@ -2278,7 +2278,7 @@ def write_graph_xml_band_math_subset(output_dir, band_name, expression):
 #   Inputs: output_dir and bandname
 #   Output: none
 #
-def write_graph_xml_subset(output_dir, band_name):
+def write_graph_xml_subset(input_file, output_dir, band_name):
 
     # Check/complete arguments
     if band_name is None:
@@ -2293,7 +2293,7 @@ def write_graph_xml_subset(output_dir, band_name):
         outFile.write('    <operator>Read</operator>\n')
         outFile.write('    <sources/>\n')
         outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
-        outFile.write('      <file>'+output_dir+ os.path.sep+'xfdumanifest.xml</file>\n')
+        outFile.write('      <file>'+input_file+'</file>\n')
         outFile.write('    </parameters>\n')
         outFile.write('  </node>\n')
         outFile.write('  <node id="Subset">\n')
@@ -2305,10 +2305,10 @@ def write_graph_xml_subset(output_dir, band_name):
         outFile.write('      <sourceBands>'+band_name+'</sourceBands>\n')
         # outFile.write('      <region>0,0,1217,15037</region>\n')
         outFile.write('      <region>0,0,1217,14952</region>\n')
-        # outFile.write(
-        #     '      <geoRegion>POLYGON ((-22.15353012084961 42.92298126220703, 63.69279479980469 42.92298126220703, 63.69279479980469 -41.53872299194336, -22.15353012084961 -41.53872299194336, -22.15353012084961 42.92298126220703, -22.15353012084961 42.92298126220703))</geoRegion>\n')
         outFile.write(
-            '     <geoRegion>POLYGON ((-33.23047637939453 41.53836441040039, 65.0774154663086 41.53836441040039, 65.0774154663086 -42.923343658447266, -33.23047637939453 -42.923343658447266, -33.23047637939453 41.53836441040039, -33.23047637939453 41.53836441040039))</geoRegion>\n')
+            '            <geoRegion/>\n')
+        # outFile.write(
+        #     '     <geoRegion>POLYGON ((-33.23047637939453 41.53836441040039, 65.0774154663086 41.53836441040039, 65.0774154663086 -42.923343658447266, -33.23047637939453 -42.923343658447266, -33.23047637939453 41.53836441040039, -33.23047637939453 41.53836441040039))</geoRegion>\n')
 
         outFile.write('      <subSamplingX>1</subSamplingX>\n')
         outFile.write('      <subSamplingY>1</subSamplingY>\n')

@@ -1321,7 +1321,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_monthly_prods, activate_monndvi)
     @collate(starting_files_linearx2_all, formatter(formatter_in), formatter_out)
-    @follows(vgt_ndvi_ratio_linearx2)
+    # @follows(vgt_ndvi_ratio_linearx2)
     def vgt_ndvi_monndvi(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -1784,7 +1784,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     ancillary_sprod = "1monstd"
     ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, version, ext)
     ancillary_subdir      = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived',version, mapset)
-    ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir++ "{MMDD[0]}" +ancillary_sprod_ident
+    ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+ "{MMDD[0]}" +ancillary_sprod_ident
 
     @active_if(group_monthly_anomalies, activate_1monsndvi)
     #@follows(vgt_ndvi_1mondiff, vgt_ndvi_1monstddev)
