@@ -99,7 +99,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   ---------------------------------------------------------------------
 
     grid_mapset_name='SPOTV-Africa-1km'
-    grid_file='/eStation2/layers/Mask_Africa_SPOTV_10km.tif'
+    # grid_file='/eStation2/layers/Mask_Africa_SPOTV_10km.tif'
+    grid_file = es_constants.es2globals['estation2_layers_dir']+os.path.sep+'Mask_Africa_SPOTV_10km.tif'
 
     if not os.path.isfile(grid_file):
         activate_10d_10k_comput=0           # 10d on 10km

@@ -3932,8 +3932,8 @@ class ProductAcquisition:
     def GET(self, params):
         # return web.ctx
         getparams = web.input()
-        # products = querydb.get_products_acquisition(activated=getparams.activated)
-        products = querydb.get_products(activated=getparams.activated)
+        products = querydb.get_products_acquisition(activated=getparams.activated)
+        # products = querydb.get_products(activated=getparams.activated)
         products_json = functions.tojson(products)
         products_json = '{"success":"true", "total":'+str(products.__len__())+',"products":['+products_json+']}'
         return products_json

@@ -84,9 +84,9 @@ Ext.define('esapp.Application', {
 
         esapp.globals = [];
 
-        esapp.globals['typeinstallation'] = 'full';
-        esapp.globals['role'] = 'pc2';
-        esapp.globals['mode'] = 'nominal';
+        // esapp.globals['typeinstallation'] = 'full';
+        // esapp.globals['role'] = 'pc2';
+        // esapp.globals['mode'] = 'nominal';
         Ext.Ajax.request({
             method: 'POST',
             url: 'typeinstallation',
