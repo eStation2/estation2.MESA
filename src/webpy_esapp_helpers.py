@@ -58,6 +58,82 @@ logger = log.my_logger(__name__)
 WEBPY_COOKIE_NAME = "webpy_session_id"
 
 
+def ChangeThema(thema):
+    functions.setSystemSetting('thema', thema)
+
+    # Set thema in database by activating the thema products, ingestion and processes.
+    themaset = querydb.set_thema(thema)
+
+    if themaset:
+        themaproducts = querydb.get_thema_products(thema=thema)
+        if hasattr(themaproducts, "__len__") and themaproducts.__len__() > 0:
+            for themaproduct in themaproducts:
+                productcode = themaproduct['productcode']
+                version = themaproduct['version']
+                checkCreateSubproductDir(productcode, version)
+
+    message = 'Thema changed also on other pc!'
+    setThemaOtherPC = False
+    systemsettings = functions.getSystemSettings()
+    if systemsettings['type_installation'].lower() == 'full':
+        if systemsettings['role'].lower() == 'pc2':
+            otherPC = 'mesa-pc3'
+        elif systemsettings['role'].lower() == 'pc3':
+            otherPC = 'mesa-pc2'
+        else:
+            otherPC = 'mesa-pc1'
+
+        PC23_connection = functions.check_connection(otherPC)
+        if PC23_connection:
+            setThemaOtherPC = functions.setThemaOtherPC(otherPC, thema)
+            if not setThemaOtherPC:
+                message = '<B>Thema NOT set on other pc</B>, ' + otherPC + ' because of an error on the other pc. Please set the Thema manually on the other pc!'
+        else:
+            message = '<B>Thema NOT set on other pc</B>, ' + otherPC + ' because there is no connection. Please set the Thema manually on the other pc!'
+
+    if themaset:
+        changethema_json = '{"success":"true", "message":"Thema changed on this PC!</BR>' + message + '"}'
+    else:
+        changethema_json = '{"success":false, "error":"Changing thema in database error!"}'
+
+    return changethema_json
+
+def checkCreateSubproductDir(productcode, version):
+    subproducts = querydb.get_product_subproducts(productcode=productcode, version=version)
+    mapsets = querydb.get_product_active_mapsets(productcode=productcode, version=version)
+    if hasattr(subproducts, "__len__") and subproducts.__len__() > 0:
+        if hasattr(mapsets, "__len__") and mapsets.__len__() > 0:
+            for subproduct in subproducts:
+                # subproduct = functions.row2dict(subproduct)
+                subproductcode = subproduct['subproductcode']
+                product_type = subproduct['product_type']
+                for mapset in mapsets:
+                    mapsetcode = mapset['mapsetcode']
+                    subproductdir = functions.set_path_sub_directory(productcode,
+                                                                     subproductcode,
+                                                                     product_type,
+                                                                     version,
+                                                                     mapsetcode)
+                    subproductdir = es_constants.es2globals['processing_dir'] + os.path.sep + subproductdir
+                    functions.check_output_dir(subproductdir)
+
+
+def UpdateProduct(productcode, version, activate):
+    result = querydb.activate_deactivate_product(productcode=productcode,
+                                                 version=version,
+                                                 activate=activate, force=True)
+
+    if result:
+        if activate:
+            checkCreateSubproductDir(productcode, version)
+
+        updatestatus = '{"success":"true", "message":"Product updated!"}'
+    else:
+        updatestatus = '{"success":false, "message":"An error occured while updating the product!"}'
+
+    return updatestatus
+
+
 def ResetUserSettings():
     usersettingsinifile = es_constants.es2globals['settings_dir'] + '/user_settings.ini'
     # usersettingsinifile = '/eStation2/settings/user_settings.ini'
@@ -1272,9 +1348,25 @@ def saveWorkspaceMaps(wsmaps, workspaceid):
     crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
 
     for wsmap in wsmaps:
-        legendid = wsmap['legendid']
-        if wsmap['legendid'] == '':
-            legendid = None
+        productcode = ''
+        if 'productcode' in wsmap:
+            productcode = wsmap['productcode']
+
+        subproductcode = ''
+        if 'subproductcode' in wsmap:
+            subproductcode = wsmap['subproductcode']
+
+        productversion = ''
+        if 'productversion' in wsmap:
+            productversion = wsmap['productversion']
+
+        mapsetcode = ''
+        if 'mapsetcode' in wsmap:
+            mapsetcode = wsmap['mapsetcode']
+
+        legendid = None
+        if 'legendid' in wsmap and wsmap['legendid'] != '':
+            legendid = wsmap['legendid']
 
         wsmapSettings = {
             'userid': wsmap['userid'],
@@ -1285,10 +1377,10 @@ def saveWorkspaceMaps(wsmaps, workspaceid):
             'istemplate': wsmap['istemplate'],
             'mapviewposition': wsmap['mapviewPosition'],
             'mapviewsize': wsmap['mapviewSize'],
-            'productcode': wsmap['productcode'],
-            'subproductcode': wsmap['subproductcode'],
-            'productversion': wsmap['productversion'],
-            'mapsetcode': wsmap['mapsetcode'],
+            'productcode': productcode,
+            'subproductcode': subproductcode,
+            'productversion': productversion,
+            'mapsetcode': mapsetcode,
             'productdate': wsmap['productdate'],
             'legendid': legendid,
             'legendlayout': wsmap['legendlayout'],

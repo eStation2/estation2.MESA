@@ -2710,37 +2710,7 @@ class ChangeThema:
     def GET(self):
         getparams = web.input()
         if hasattr(getparams, "thema"):
-
-            functions.setSystemSetting('thema', getparams['thema'])
-
-            # Set thema in database by activating the thema products, ingestion and processes.
-            themaset = querydb.set_thema(getparams['thema'])
-
-            message = 'Thema changed also on other pc!'
-            setThemaOtherPC = False
-            systemsettings = functions.getSystemSettings()
-            if systemsettings['type_installation'].lower() == 'full':
-                if systemsettings['role'].lower() == 'pc2':
-                    otherPC = 'mesa-pc3'
-                elif systemsettings['role'].lower() == 'pc3':
-                    otherPC = 'mesa-pc2'
-                else:
-                    otherPC = 'mesa-pc1'
-
-                PC23_connection = functions.check_connection(otherPC)
-                if PC23_connection:
-                    setThemaOtherPC = functions.setThemaOtherPC(otherPC, getparams['thema'])
-                    if not setThemaOtherPC:
-                        message = '<B>Thema NOT set on other pc</B>, ' + otherPC + ' because of an error on the other pc. Please set the Thema manually on the other pc!'
-                else:
-                    message = '<B>Thema NOT set on other pc</B>, ' + otherPC + ' because there is no connection. Please set the Thema manually on the other pc!'
-
-            # print 'setThemaOtherPC: ' + str(setThemaOtherPC)
-            if themaset:
-                # print "thema changed"
-                changethema_json = '{"success":"true", "message":"Thema changed on this PC!</BR>' + message + '"}'
-            else:
-                changethema_json = '{"success":false, "error":"Changing thema in database error!"}'
+            changethema_json = webpy_esapp_helpers.ChangeThema(getparams['thema'])
         else:
             changethema_json = '{"success":false, "error":"No thema given!"}'
 
@@ -3787,13 +3757,9 @@ class UpdateProduct:
         #                'product_type': getparams['products']['product_type'],
         #                'defined_by': getparams['products']['defined_by'],
         #                'activated': getparams['products']['activated']}
-
-        result = querydb.activate_deactivate_product(productcode=getparams['products']['productcode'], version=getparams['products']['version'], activate=getparams['products']['activated'], force=True)
         # if self.crud_db.update('product', productinfo):
-        if result:
-            updatestatus = '{"success":"true", "message":"Product updated!"}'
-        else:
-            updatestatus = '{"success":false, "message":"An error occured while updating the product!"}'
+
+        updatestatus = webpy_esapp_helpers.UpdateProduct(productcode=getparams['products']['productcode'], version=getparams['products']['version'], activate=getparams['products']['activated'])
 
         return updatestatus
 

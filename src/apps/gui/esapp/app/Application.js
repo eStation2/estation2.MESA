@@ -237,7 +237,10 @@ Ext.define('esapp.Application', {
         });
         taskMain.delay(50);
 
-        if (esapp.globals['typeinstallation'] == 'windows' || esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online'){
+        if (esapp.globals['typeinstallation'].toLowerCase() == 'windows' ||
+            esapp.globals['typeinstallation'].toLowerCase() == 'online' ||
+            esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online')
+        {
             var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
 
             if (datasetsstore.isStore) {

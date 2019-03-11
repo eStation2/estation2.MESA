@@ -27,6 +27,13 @@ logger = log.my_logger(__name__)
 
 class TestWebpy(unittest.TestCase):
 
+    def test_UpdateProduct(self):
+        productcode = 'vgt-lai'
+        version = 'V2.0'
+        updatestatus = webpy_esapp_helpers.UpdateProduct(productcode=productcode, version=version, activate=True)
+
+        return updatestatus
+
     def test_UpdateUserSettings(self):
 
         params = {

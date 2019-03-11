@@ -47,6 +47,7 @@ dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'der
 #     def default(self, o):
 #         return o.__dict__
 
+
 def setThemaOtherPC(server_address, thema):
     from urllib2 import Request, urlopen, URLError
     thema_is_changed = False
@@ -138,6 +139,7 @@ def _check_connection(server_info):
     except:
         return False
 
+
 def check_connection(server_info):
     try:
         # response = os.system("ping -c 1 " + hostname)
@@ -166,6 +168,7 @@ def getStatusPostgreSQL():
         return psql_status
     except:
         return False
+
 
 def system_status_filename():
     check_output_dir(es_constants.es2globals['status_system_dir'])
@@ -211,6 +214,7 @@ def getStatusAllServices():
                        'system': str(system).lower()}
 
     return services_status
+
 
 def getStatusAllServicesWin():
 
@@ -263,6 +267,7 @@ def getStatusAllServicesWin():
                        'system': str(system).lower()}
 
     return services_status
+
 
 def getListVersions():
     # Return the list of installed versions as a dictionary, by looking at versioned dirs
@@ -480,6 +485,7 @@ def tojson(queryresult):
     jsonresult = jsonresult[:-2]
     return jsonresult
 
+
 def _proxy_defined():
 
     proxy_def = True
@@ -495,6 +501,7 @@ def _proxy_defined():
             proxy_def = False
 
     return proxy_def
+
 
 def _proxy_internet_on():
     import urllib2
@@ -521,6 +528,7 @@ def _proxy_internet_on():
             pass
 
     return False
+
 
 def internet_on():     # is_connected():
 
@@ -552,6 +560,7 @@ def internet_on():     # is_connected():
 def checkDateFormat(myString):
     isDate = re.match('[0-1][0-9]\/[0-3][0-9]\/[1-2][0-9]{3}', myString)
     return isDate
+
 
 ######################################################################################
 #   is_date_yyyymmdd
@@ -623,6 +632,7 @@ def is_date_mmdd(string_date, silent=False):
         logger.warning('Invalid Date Format   %s' % string_date)
 
     return isdate_mmdd
+
 
 ######################################################################################
 #   is_date_yyyymmddhhmm
@@ -701,6 +711,7 @@ def is_date_yyyydoy(string_date, silent=False):
 
     return isdate_yyyydoy
 
+
 ######################################################################################
 #   conv_date_2_dekad
 #   Purpose: Function returns a dekad by using a date (YYYYMMDD) as input.
@@ -729,6 +740,7 @@ def conv_date_2_dekad(year_month_day):
 
     return dekad_no
 
+
 ######################################################################################
 #   conv_date_2_8days
 #   Purpose: Function that returns the first day of an 8day 'MODIS-like' period.
@@ -751,6 +763,7 @@ def conv_date_2_8days(year_month_day):
         period_no = 1 + int(delta_days/8)
 
     return period_no
+
 
 ######################################################################################
 #   conv_date_2_month
@@ -800,6 +813,7 @@ def conv_dekad_2_date(dekad):
 
     return str(dekad_date)
 
+
 ######################################################################################
 #   dekad_nbr_in_season
 #   Purpose: Returns the position of a dekad_date after start_season
@@ -821,6 +835,7 @@ def dekad_nbr_in_season(dekad, start_season):
     dekad_curr = conv_date_2_dekad(year2+dekad)
 
     return dekad_curr-dekad_start+1
+
 
 ######################################################################################
 #   conv_month_2_date
@@ -1001,6 +1016,7 @@ def conv_yyyydmmdk_2_yyyymmdd(yymmk):
     date_yyyymmdd = str(year)+month+day
     return date_yyyymmdd
 
+
 ######################################################################################
 #   conv_yyyymmdd_g2_2_yyyymmdd
 #   Purpose: Function returns a date (YYYYMMDD) with YYYYdMMdK as input.
@@ -1024,6 +1040,7 @@ def conv_yyyymmdd_g2_2_yyyymmdd(yymmk):
     date_yyyymmdd = str(year)+month+day
     return date_yyyymmdd
 
+
 ######################################################################################
 #   conv_date_2_quarter
 #   Purpose: Convert a date YYYYMMDD to quarter-date (i.e. YYYY0101/YYYY0401/YYYY0701/YYYY1001)
@@ -1042,6 +1059,7 @@ def conv_date_2_quarter(date):
         quarter_date = '{0}'.format(year)+'{:02d}'.format(quarter)+'01'
     return str(quarter_date)
 
+
 ######################################################################################
 #   conv_date_2_semester
 #   Purpose: Convert a date YYYYMMDD to semester-date (i.e. YYYY0101 or YYYY0701)
@@ -1059,6 +1077,7 @@ def conv_date_2_semester(date):
         semester = '01' if int(month) <= 6 else '07'
         semester_date = '{0}'.format(year)+semester+'01'
     return str(semester_date)
+
 
 ######################################################################################
 #   day_per_dekad
@@ -1082,6 +1101,7 @@ def day_per_dekad(yyyymmdd):
 
     return days
 
+
 ######################################################################################
 #   day_per_dekad
 #   Purpose: Function returns the number of days per dekad (from 8 to 11)
@@ -1098,6 +1118,7 @@ def get_number_days_month(yyyymmdd):
     tot_days = monthrange(year,month)[1]
 
     return tot_days
+
 
 ######################################################################################
 #   conv_list_2_string
@@ -1118,6 +1139,7 @@ def conv_list_2_string(inlist):
     except:
         pass
     return file_string
+
 
 ######################################################################################
 #   extract_from_date
@@ -1151,6 +1173,7 @@ def extract_from_date(str_date):
         str_hour=str_date[8:12]
 
     return [str_year, str_month, str_day, str_hour]
+
 
 ######################################################################################
 #
@@ -1199,6 +1222,7 @@ def set_path_filename_no_date(product_code, sub_product_code, mapset_id, version
 
     return filename_nodate
 
+
 ######################################################################################
 #   set_path_filename
 #   Purpose: From date, product_code, sub_product_code, mapset, extension -> filename
@@ -1242,6 +1266,7 @@ def set_path_sub_directory(product_code, sub_product_code, product_type, version
 
     return sub_directory
 
+
 ######################################################################################
 #   set_path_filename_eumetcast
 #   Purpose: From date, product_code, sub_product_code, mapset, extension -> filename
@@ -1264,6 +1289,7 @@ def set_path_filename_eumetcast(date_str, product_code, sub_product_code, mapset
 
     return filename
 
+
 ######################################################################################
 #   is_file_exists_in_path
 #   Purpose: Check whether file exists in the path
@@ -1278,6 +1304,7 @@ def is_file_exists_in_path(file_path):
         is_file_exists = True
 
     return is_file_exists
+
 
 ######################################################################################
 #   get_from_path_dir
@@ -1355,6 +1382,7 @@ def get_subdir_from_path_full(full_path):
 
     return str_subdir
 
+
 ######################################################################################
 #   get_all_from_path_full
 #   Purpose: From full_path -> product_code, sub_product_code, date, mapset, (version)
@@ -1423,6 +1451,7 @@ def get_all_from_filename(filename):
 
     return [str_date, product_code, sub_product_code, mapset, version]
 
+
 ######################################################################################
 #   get_all_from_filename_eumetcast
 #   Purpose: Extract all components from filename_eumetcast (no full_path)
@@ -1446,6 +1475,8 @@ def get_all_from_filename_eumetcast(filename):
     version =  tokens[6].strip(extension)
 
     return [str_date, product_code, sub_product_code, mapset, version]
+
+
 ######################################################################################
 #   get_product_type_from_subdir
 #   Purpose: get the product type (Ingest/Derived) from subdir
@@ -1463,6 +1494,7 @@ def get_product_type_from_subdir(subdir):
         if name == product_subdir:
             product_type = type
     return product_type
+
 
 ######################################################################################
 #   convert_name_to_eumetcast
@@ -1488,6 +1520,7 @@ def convert_name_to_eumetcast(filename, tgz=False):
 
     return filename_eumetcast
 
+
 ######################################################################################
 #   convert_name_from_eumetcast
 #   Purpose: Convert filename from the EUMETCast transmission format to the internal eStation
@@ -1511,6 +1544,7 @@ def convert_name_from_eumetcast(filename, product_type, with_dir=False, new_maps
         subdir=set_path_sub_directory(product_code, sub_product_code, product_type, version, mapset)
         filename = subdir+filename
     return filename
+
 
 ######################################################################################
 #   check_output_dir
@@ -1664,6 +1698,7 @@ def load_obj_from_pickle(filename):
 
     return obj
 
+
 ######################################################################################
 #   is_S3data_captured_during_day()
 #   Purpose: Check whether Sentinel 3 OL sensor data captured during day time and return Boolean value
@@ -1699,6 +1734,7 @@ def is_data_captured_during_day(in_date):
         day_data = True
 
     return day_data
+
 
 ######################################################################################
 #   check_polygons_intersects()
@@ -1815,6 +1851,7 @@ def modis_latlon_to_hv_tile(latitude, longitude):
 
     return h1, v1
 
+
 ######################################################################################
 #   get_modis_tiles_list
 #   Purpose: Given a mapset, returns list of MODIS tiles it overlaps
@@ -1922,6 +1959,7 @@ def files_temp_ajacent(file_t0, step='dekad', extension='.tif'):
         logger.warning('Time step (%s) not yet foreseen. Exit. ' % step)
         return None
 
+
 ######################################################################################
 #
 #   Purpose: given a file (t0), returns the two previous ones (if they exist) or at least the
@@ -1972,6 +2010,7 @@ def previous_files(file_t0, step='dekad', extension='.tif'):
         logger.warning('Time step (%s) not yet foreseen. Exit. ' % step)
         return None
 
+
 ######################################################################################
 #
 #   Purpose: return the machine address
@@ -1990,6 +2029,7 @@ def get_eumetcast_info(eumetcast_id):
     filename = es_constants.es2globals.get_eumetcast_processed_list_prefix+str(eumetcast_id)+'.info'
     info = load_obj_from_pickle(filename)
     return info
+
 
 ######################################################################################
 #
@@ -2039,6 +2079,7 @@ def save_netcdf_scaling(sds, preproc_file):
         raise Exception('Error in writing metadata')
 
     return False
+
 
 ######################################################################################
 #
@@ -2130,6 +2171,7 @@ def write_vrt_georef(output_dir, band_file, n_lines=None, n_cols=None, lat_file=
     # except:
     #     logger.debug('Error in reading scaling')
     #     raise Exception('Error in reading scaling')
+
 
 #####################################################################################
 #   Purpose: write a graph file for S3 Level 2 products ingestion
@@ -2229,7 +2271,6 @@ def write_graph_xml_band_math_subset(output_dir, band_name, expression):
         outFile.write('</graph>\n')
 
 
-
 ######################################################################################
 #   Purpose: write a graph file for S3 Level 2 products ingestion
 #   Author: Vijay Charan Venkatachalam, JRC, European Commission
@@ -2299,6 +2340,7 @@ def write_graph_xml_subset(output_dir, band_name):
         outFile.write('    </node>\n')
         outFile.write('  </applicationData>\n')
         outFile.write('</graph>\n')
+
 
 ######################################################################################
 #   Purpose: write a graph file for S3 Level 2 products ingestion
@@ -2557,7 +2599,6 @@ def write_graph_xml_terrain_correction_oilspill(output_dir, input_file, band_nam
         outFile.write('    </node>\n')
         outFile.write('  </applicationData>\n')
         outFile.write('</graph>\n')
-
 
 
 #####################################################################################

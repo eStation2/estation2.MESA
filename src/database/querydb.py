@@ -3769,3 +3769,103 @@ def update_processing_chain_products(process_id, productcode, version, mapsetcod
     finally:
         if crud_db:
             crud_db = None
+
+
+######################################################################################
+#   get_product_subproducts(productcode='', version='undefined')
+#   Purpose: Query the database to get the records of all subproducts of a specific product
+#            with product_type !='Native' from the table product.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2019/03/11
+#   Input: productcode      - The productcode of the specific product info requested. Default=''
+#          version          - The product version
+#
+#   Output: Return the fields of all or a specific product record with product_type='Native' from the table product.
+def get_product_subproducts(productcode='', version='undefined'):
+    global db
+    try:
+
+        query = " SELECT * FROM products.product " \
+                " WHERE product_type != 'Native' " \
+                "   AND productcode = '" + productcode + "'" \
+                "   AND version = '" + version + "'" \
+                "   AND defined_by != 'JRC-Test' "\
+                " ORDER BY productcode, version, product_type DESC, subproductcode"
+        subproducts = db.execute(query)
+        subproducts = subproducts.fetchall()
+
+        return subproducts
+
+    except exc.NoResultFound:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_product_subproducts : Database query error!\n -> {}".format(exceptionvalue))
+        subproducts = []
+        return subproducts
+    finally:
+        if db.session:
+            db.session.close()
+
+
+######################################################################################
+#   get_product_active_mapsets(productcode='', version='undefined')
+#   Purpose: Query the database to get the mapsetcodes of the active and enabled ingestions of a specific product.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2019/03/11
+#   Input: productcode      - The productcode of the specific product info requested. Default=''
+#          version          - The product version
+#
+#   Output: Return the mapsetcodes of the active and enabled ingestions of a specific product record.
+def get_product_active_mapsets(productcode='', version='undefined'):
+    global db
+    try:
+
+        query = " SELECT DISTINCT mapsetcode FROM products.ingestion " \
+                " WHERE productcode = '" + productcode + "'" \
+                "   AND version = '" + version + "'" \
+                "   AND activated = TRUE " \
+                "   AND enabled = TRUE;"
+        productmapsets = db.execute(query)
+        productmapsets = productmapsets.fetchall()
+
+        return productmapsets
+
+    except exc.NoResultFound:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_product_active_mapsets : Database query error!\n -> {}".format(exceptionvalue))
+        productmapsets = []
+        return productmapsets
+    finally:
+        if db.session:
+            db.session.close()
+
+
+######################################################################################
+#   get_thema_products(thema='')
+#   Purpose: Query the database to get the product list activated by the specific thema.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2019/03/11
+#   Input: thema      - The thema_id of the specific thema.
+#
+#   Output: Return the product list activated by the specific thema, from the thema_product table.
+def get_thema_products(thema):
+    global db
+    try:
+
+        query = " SELECT productcode, version FROM products.thema_product WHERE thema_id = '" + thema + "' AND activated = TRUE"
+
+        themaproducts = db.execute(query)
+        themaproducts = themaproducts.fetchall()
+
+        return themaproducts
+
+    except exc.NoResultFound:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_thema_products : Database query error!\n -> {}".format(exceptionvalue))
+        themaproducts = []
+        return themaproducts
+    finally:
+        if db.session:
+            db.session.close()
