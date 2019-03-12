@@ -52,7 +52,7 @@ import pymorph
 # I tried to install scipy version 0.15.1 but need older numpy version 1.19.2 (numpy 1.11.0 is installed)
 # installing numpy 1.19.2 gives problems with installed gdal version 2.1.2)
 # scipy for chla gradient computation
-if sys.platform != 'win32':
+if sys.platform == 'win32':
     import scipy
 else:
     from scipy import ndimage
@@ -3020,7 +3020,7 @@ def do_compute_chla_gradient(input_file='', nodata=None, output_file='', output_
         data_chla[data_chla == nodata] = N.nan
 
         # Data smoothing (median filter)
-        if sys.platform != 'win32':
+        if sys.platform == 'win32':
             smooth_data_chla = scipy.ndimage.median_filter(data_chla, 3)
             # smooth_data_chla = scipy.ndimage.gaussian_filter(data_chla, 3)
             # Gradient derivation
@@ -3162,7 +3162,7 @@ def compute_extrapolated_chla_gradient(input_file='', nodata=None, output_file='
         for i in range(10):
             #  replaces each element in A by the orderth element in the sorted set of neighbors specified by the nonzero elements in domain.
             # filtData = ordfilt2(filtData, order, szOrd)
-            if sys.platform != 'win32':
+            if sys.platform == 'win32':
                 filtData = scipy.ndimage.median_filter(filtData, footprint=N.ones((szOrd, szOrd)))
             else:
                 filtData = ndimage.median_filter(filtData, footprint=N.ones((szOrd, szOrd)))
@@ -3179,7 +3179,7 @@ def compute_extrapolated_chla_gradient(input_file='', nodata=None, output_file='
         filtData[ifinite_edge] = data_chla[ifinite_edge]
 
         # apply gaussian filter
-        if sys.platform != 'win32':
+        if sys.platform == 'win32':
             filtData = scipy.ndimage.gaussian_filter(filtData, 2, truncate=1)  # ,truncate=1.25
         else:
             filtData = ndimage.gaussian_filter(filtData, 2, truncate=1)  # ,truncate=1.25
@@ -3217,7 +3217,7 @@ def compute_extrapolated_chla_gradient(input_file='', nodata=None, output_file='
         # Canny filter - 1st Gaussian derivative
         # from scipy.ndimage.filters import gaussian_filter1d
         # gauss_x = gaussian_filter1d(filtData, sigma_x1, axis=0, order=1, truncate=1)
-        if sys.platform != 'win32':
+        if sys.platform == 'win32':
             gauss_x = scipy.ndimage.convolve(filtData, filter_x)
         else:
             gauss_x = ndimage.convolve(filtData, filter_x)
@@ -3229,7 +3229,7 @@ def compute_extrapolated_chla_gradient(input_file='', nodata=None, output_file='
         # canny_x = canny_x / N.sum(N.absolute(filter_x))
         canny_x = N.divide(canny_x, divisor)
 
-        if sys.platform != 'win32':
+        if sys.platform == 'win32':
             gauss_y = scipy.ndimage.convolve(filtData, filter_y)
         else:
             gauss_y = ndimage.convolve(filtData, filter_y)
@@ -3392,7 +3392,7 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
         for i in range(10):
             #  replaces each element in A by the orderth element in the sorted set of neighbors specified by the nonzero elements in domain.
             # filtData = ordfilt2(filtData, order, szOrd)
-            if sys.platform != 'win32':
+            if sys.platform == 'win32':
                 filtData = scipy.ndimage.median_filter(filtData, footprint=N.ones((szOrd, szOrd)))
             else:
                 filtData = ndimage.median_filter(filtData, footprint=N.ones((szOrd, szOrd)))
@@ -3408,7 +3408,7 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
         filtData[ifinite_edge] = data_chla[ifinite_edge]
 
         # apply gaussian filter
-        if sys.platform != 'win32':
+        if sys.platform == 'win32':
             filtData = scipy.ndimage.gaussian_filter(filtData, 2, truncate=1)  # ,truncate=1.25
         else:
             filtData = ndimage.gaussian_filter(filtData, 2, truncate=1)
@@ -3446,7 +3446,7 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
         # Canny filter - 1st Gaussian derivative
         # from scipy.ndimage.filters import gaussian_filter1d
         # gauss_x = gaussian_filter1d(filtData, sigma_x1, axis=0, order=1, truncate=1)
-        if sys.platform != 'win32':
+        if sys.platform == 'win32':
             gauss_x = scipy.ndimage.convolve(filtData, filter_x)
         else:
             gauss_x = ndimage.convolve(filtData, filter_x)
@@ -3457,7 +3457,7 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
         # canny_x = canny_x / N.sum(N.absolute(filter_x))
         canny_x = N.divide(canny_x, divisor)
 
-        if sys.platform != 'win32':
+        if sys.platform == 'win32':
             gauss_y = scipy.ndimage.convolve(filtData, filter_y)
         else:
             gauss_y = ndimage.convolve(filtData, filter_y)
